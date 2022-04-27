@@ -21,7 +21,7 @@
 
 #### 开发者说
 PS：请预先安装好最新版Nodejs  
-为保证界面样式，请先检查和安装字体 
+为保证界面样式，请先检查和安装字体  
 macOS字体：STHeitiSC-Medium.ttc  
 Windows字体：STHeitiSC-Medium.ttf  
 
