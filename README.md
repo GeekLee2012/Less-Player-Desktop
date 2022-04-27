@@ -15,14 +15,13 @@
 * 支持本地歌曲播放  
 
 #### 界面预览  
-![snap 01.png](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/snapshots/snap%2001.png)  
-![snap 02.png](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/snapshots/snap%2002.png)  
-![snap 03.png](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/snapshots/snap%2003.png)  
+![snap 01.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2008.png)  
+![snap 02.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2009.png)  
+![snap 03.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2010.png)  
 
 #### 开发者说
 PS：请预先安装好最新版Nodejs  
-为保证界面样式，请先检查和安装字体  
-字体资源文件放在源码fonts目录  
+为保证界面样式，请先检查和安装字体 
 macOS字体：STHeitiSC-Medium.ttc  
 Windows字体：STHeitiSC-Medium.ttf  
 
