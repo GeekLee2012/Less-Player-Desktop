@@ -15,7 +15,9 @@
 * 支持本地歌曲播放  
 
 #### 界面预览  
-
+![snap 01.png](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/snapshots/snap%2001.png)  
+![snap 02.png](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/snapshots/snap%2002.png)  
+![snap 03.png](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/snapshots/snap%2003.png)  
 
 #### 开发者说
 PS：请预先安装好最新版Nodejs  
