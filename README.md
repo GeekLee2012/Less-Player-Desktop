@@ -1,7 +1,7 @@
 ## Less Player 是一款基于Electron + Vue3开发的音乐播放器
 ### 欢迎喜欢GUI开发的朋友一起学习和交流
 
-#### 
+#### 本项目仅供学习交流，禁止非法商业用途，请支持正版音乐
 
 #### 开发测试环境
 * OS: macOS Big Sur、Windows 10（虚拟机）  
@@ -31,8 +31,8 @@ Windows字体：STHeitiSC-Medium.ttf
   `npm run dev`
 
 * 编译打包  
-  `npm run build`
-  `npm run dist`
+  `npm run build`  
+  `npm run dist`  
   
   注意事项：编译前必须修改 /src/main/main.js 中变量  
   `isDevEnv = false` //是否为开发模式  
