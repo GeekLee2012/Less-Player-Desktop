@@ -16,11 +16,13 @@ const { playbackQueueViewShow, playingViewShow } = storeToRefs(useMainViewStore(
     <transition name="fade-y">
       <PlayingView id="playing-view" v-show="playingViewShow"></PlayingView>
     </transition>
-
+    
+    <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow"></PlaybackQueueView>
+    <!--
     <transition name="fade-x">
       <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow"></PlaybackQueueView> 
     </transition>
-  
+    -->
 </template>
 
 <style>
