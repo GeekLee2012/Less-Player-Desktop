@@ -1,0 +1,56 @@
+{
+  "name": "less-player",
+  "private": true,
+  "version": "0.1.0",
+  "main": "src/main/main.js",
+  "scripts": {
+    "dev": "concurrently vite \"electron .\"",
+    "dev:vite": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "axios": "^0.26.1",
+    "crypto-js": "^4.1.1",
+    "howler": "^2.2.3",
+    "iconv-lite": "^0.6.3",
+    "jschardet": "^3.0.0",
+    "mitt": "^3.0.0",
+    "music-metadata": "^7.12.3",
+    "node-forge": "^1.3.1",
+    "pinia": "^2.0.13",
+    "qs": "^6.10.3",
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.14",
+    "vue3-lazyload": "^0.2.5-beta"
+  },
+  "devDependencies": {
+    "@types/node-forge": "^1.0.1",
+    "@vitejs/plugin-vue": "^2.3.0",
+    "concurrently": "^7.1.0",
+    "electron": "^18.0.1",
+    "electron-builder": "^22.14.13",
+    "vite": "^2.9.0",
+    "wait-on": "^6.0.1"
+  },
+  "build": {
+    "appId": "xyz.rive.less-player",
+    "productName": "Less Player",
+    "copyright": "Copyright © RIVE2012",
+    "directories": {
+      "output": "output"
+    },
+    "mac": {
+      "icon": "dist/icon.icns"
+    },
+    "win": {
+      "icon": "dist/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true
+    }
+  }
+}
