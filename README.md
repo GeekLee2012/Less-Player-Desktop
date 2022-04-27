@@ -1,4 +1,4 @@
-## Less Player 是一款基于Electron + Vue3 + Vite开发的音乐播放器
+## Less Player 是一款基于Electron + Vue3开发的音乐播放器
 ### 欢迎喜欢GUI开发的朋友一起学习和交流
 
 #### 
