@@ -6,12 +6,13 @@
 #### 开发测试环境
 * OS: macOS Big Sur、Windows 10（虚拟机）  
 * IDE: Visual Studio Code v1.66.2  
+* Electron: v18.0.0及以上  
 * 其他: 详见package.json  
 
 #### 主要功能
 * 播放器基本功能: 播放/暂停、上/下一首、进度条/播放时间、播放模式、音量控制等  
 * 支持音频类型: mp3、flac、ogg、wav、aac、m4a  
-* 支持在线音乐平台：QQ音乐（目前暂未支持，后期会加入支持）、网易云音乐、酷我音乐、酷狗音乐、豆瓣FM  
+* 支持在线音乐平台：QQ音乐、网易云音乐、酷我音乐、酷狗音乐、豆瓣FM  
 * 支持本地歌曲播放  
 
 #### 界面预览  
@@ -20,11 +21,11 @@
 ![snap 03.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2010.png)  
 
 #### 开发者说
-PS：请预先安装好最新版Nodejs  
-为保证界面样式，请先检查和安装字体  
-macOS字体：STHeitiSC-Medium.ttc  
-Windows字体：STHeitiSC-Medium.ttf  
-
+* 请预先安装好最新版Nodejs  
+* 为保证界面样式，请先检查和安装字体  
+  macOS字体：STHeitiSC-Medium.ttc  
+  Windows字体：STHeitiSC-Medium.ttf  
+  
 * 初始化项目  
   `npm install`
 
