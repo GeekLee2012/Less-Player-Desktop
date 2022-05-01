@@ -5,7 +5,7 @@ export class Album {
         this.title = title
         this.cover = cover
         //[ {id, name} ]
-        this.artist = artist
+        this.artist = artist ? artist : ([ {id: '', name: '趁青春'}])
         //发行公司
         this.company = company
         //发行时间
@@ -16,7 +16,7 @@ export class Album {
         this.language = ''
         //简介
         this.about = about
-        this.data = data
+        this.data = data ? data : []
     }
 
     addTrack(track) {
@@ -24,5 +24,9 @@ export class Album {
             this.data = []
         }
         this.data.push(track)
+    }
+
+    hasTracks() {
+        return this.data && this.data.length > 0
     }
 }

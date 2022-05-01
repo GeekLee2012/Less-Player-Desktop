@@ -14,7 +14,7 @@ const TAB_LIST = [
 
 export const useAlbumDetailStore = defineStore('albumDetail', {
     state: () => ({
-        albumId: 0,
+        albumId: '',
         platform: '',
         albumName: '山川湖海，日月星辰',
         albumCover: 'default_cover.png',
@@ -44,8 +44,11 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         resetAbout() {
             this.about = ''
         },
-        resetAll() {
+        resetAlbumDetail() {
             this.updateAlbum('山川湖海，日月星辰', 'default_cover.png', '趁青春', '', '')
+        },
+        resetAll() {
+            this.resetAlbumDetail()
             this.resetAllSongs()
             this.resetAbout()
             this.setActiveTab(-1)
@@ -54,6 +57,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         updateAlbumDetailKeys(platform, id) {
             this.platform = platform
             this.albumId = id
+            this.resetAlbumDetail()
         },
         updateAlbum(title, cover, artistName, company, publishTime) {
             this.albumName = title
@@ -69,6 +73,11 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         updateAbout(about) {
             this.resetAbout()
             this.about = about
+        },
+        isAlbumDetailLoaded() {
+            return this.albumName != '山川湖海，日月星辰' 
+                && this.cover != 'default_cover.png'
+                && this.artistName != '趁青春'
         },
         isAllSongsTabLoaded() {
             return this.allSongs.length > 0

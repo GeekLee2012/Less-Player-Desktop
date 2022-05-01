@@ -26,6 +26,9 @@ const { setActiveTab,
 
 const currentTabView = shallowRef(null)
 const tabData = ref([])
+const offset = 0
+const limit = 50
+const page = 1
 
 const visitTab = (index) => {
     if(index < 0 || activeTab.value == index) return
@@ -42,7 +45,7 @@ const updateTabData = (data) => {
 const loadSongs = ()=> {
     const vender = currentVender()
     if(!vender) return 
-    vender.searchSongs(props.keyword, 0, 50, 1).then(result => {
+    vender.searchSongs(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
         currentTabView.value = SongListControl
     })
@@ -51,7 +54,7 @@ const loadSongs = ()=> {
 const loadPlaylists = ()=> {
     const vender = currentVender()
     if(!vender) return
-    vender.searchPlaylists(props.keyword, 0, 50, 1).then(result => {
+    vender.searchPlaylists(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
         currentTabView.value = PlaylistsControl
     })
@@ -60,7 +63,7 @@ const loadPlaylists = ()=> {
 const loadAlbums = ()=> {
     const vender = currentVender()
     if(!vender) return
-    vender.searchAlbums(props.keyword, 0, 50, 1).then(result => {
+    vender.searchAlbums(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
         currentTabView.value = AlbumListControl
     })
@@ -69,7 +72,7 @@ const loadAlbums = ()=> {
 const loadArtists = ()=> {
    const vender = currentVender()
     if(!vender) return
-    vender.searchArtists(props.keyword, 0, 50, 1).then(result => {
+    vender.searchArtists(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
         currentTabView.value = ArtistListControl
     })
@@ -96,10 +99,7 @@ const byPlatform = (index) => {
     setCurrentPlatformIndex(index)
 }
 
-onActivated(() => { 
-    setCurrentPlatformIndex(1)
-    visitTab(0)
-})
+onActivated(() => visitTab(0))
 watch(currentPlatformIndex, (nv, ov) => loadTab())
 watch(activeTab, (nv, ov) => visitTab(nv))
 watch(() => props.keyword, (nv,ov) => loadTab())

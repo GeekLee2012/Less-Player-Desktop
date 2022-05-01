@@ -207,6 +207,15 @@ const overrideRequest = (details) => {
   if(url.includes("qq.com")) {
     orgin = "https://y.qq.com/"
     referer = orgin
+    /*
+    cookie = 	"fqm_pvqid=336b8c0b-9988-4607-a98e-9242dcd55f0e"
+      + "&fqm_sessionid=0fd12ef8-5cd6-409c-8ef0-b5b601e99737"
+      + "&pac_uid=0_32f39be6c9607"
+      + "&pgv_info=ssid=s7351377509"
+      + "&pgv_pvid=357794096"
+      + "&ts_last=y.qq.com/n/ryqq/player"
+      + "&ts_uid=2524044556"
+    */
   } else if(url.includes("music.163.com")) {
     orgin = "https://music.163.com/"
     referer = orgin

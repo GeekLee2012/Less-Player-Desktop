@@ -13,16 +13,13 @@ const { playbackQueueViewShow, playingViewShow } = storeToRefs(useMainViewStore(
 <template>
     <MainLeft></MainLeft> 
     <MainCenter></MainCenter>
+    
+    <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
       <PlayingView id="playing-view" v-show="playingViewShow"></PlayingView>
     </transition>
-    
+
     <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow"></PlaybackQueueView>
-    <!--
-    <transition name="fade-x">
-      <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow"></PlaybackQueueView> 
-    </transition>
-    -->
 </template>
 
 <style>
@@ -75,7 +72,6 @@ img {
 
 ::-webkit-scrollbar {
   width: 5px;
-  height: 99px;
 }
 
 ::-webkit-scrollbar-track {
@@ -97,7 +93,7 @@ img {
     width: 335px;
     height: 100%;
     z-index: 99;
-    background-color: #373737;
+    background-color: var(--bg-color);
     box-shadow: 0px 0px 10px #161616;
     visibility: visible;
 }
@@ -109,7 +105,7 @@ img {
     width: 100%;
     height: 100%;
     z-index: 88;
-    background-color: #373737;
+    background-color: var(--bg-color);
 }
 
 /* fade-y */

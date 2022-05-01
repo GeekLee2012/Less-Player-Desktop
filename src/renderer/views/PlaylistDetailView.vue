@@ -116,6 +116,9 @@ const addAll = () => {
     line-height: 20px;
     color: #bababa;
     overflow: hidden;
+    word-wrap: break-all;
+    white-space:pre-wrap;
+    line-break: anywhere;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;

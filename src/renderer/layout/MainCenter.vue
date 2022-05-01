@@ -6,6 +6,7 @@ import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore'
 import { storeToRefs } from 'pinia';
 import CategoryView from '../views/CategoryView.vue';
+import EventBus from '../../common/EventBus';
 
 const { categoryViewShow } = storeToRefs(useMainViewStore())
 const { hideCategoryView, hidePlaybackQueueView } = useMainViewStore()
@@ -22,10 +23,22 @@ onMounted (() => {
         hideCategoryView()
     })
 
+    document.addEventListener('keydown', e => {
+        handleKeys(e)
+    })
+
     const bindCategoryHeight = () => {
         const mainContent = document.getElementById('main-content')
         const categoryView = document.getElementById('category-view')
         categoryView.style.height = (mainContent.clientHeight - 37) + "px"
+    }
+
+    //应用级别按键监听
+    const handleKeys = (e) => {
+        //空格键
+        if(e.keyCode == 32 || e.code.toLowerCase() === 'space') {
+            EventBus.emit('key-togglePlay')
+        }
     }
 
     bindCategoryHeight()

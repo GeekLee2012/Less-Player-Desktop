@@ -64,6 +64,7 @@ export const usePlayStore = defineStore('play', {
             this.playing = value
         },
         togglePlay() {
+            if(this.queueTracksSize < 1) return
             if(this.currentTrack && NO_TRACK != this.currentTrack) {
                 this.setPlaying(!this.playing)
                 EventBus.emit('track-togglePlay')
@@ -100,10 +101,18 @@ export const usePlayStore = defineStore('play', {
         resetQueue() {
             this.queueTracks.length = 0
             this.playingIndex = -1
+            this.__resetPlayState()
+            EventBus.emit('queue-empty')
+        },
+        __resetPlayState() {
             this.playing = false
             this.currentTime = 0
             this.progress = 0.0
-            EventBus.emit('queue-empty')
+        },
+        __changeTrack(track) {
+            EventBus.emit('track-stop')
+            EventBus.emit('track-changed', track)
+            this.__resetPlayState()
         },
         playTrack(track) {
             let index = this.indexOf(track)
@@ -115,7 +124,8 @@ export const usePlayStore = defineStore('play', {
             if(track.url && track.url.trim().length > 0) {
                 EventBus.emit('track-play', track)
             } else {
-                EventBus.emit('track-changed', track)
+                //EventBus.emit('track-changed', track)
+                this.__changeTrack(track)
             }
         },
         playPrevTrack() {
@@ -131,7 +141,7 @@ export const usePlayStore = defineStore('play', {
                 case PLAY_MODE.RANDOM:
                     break
             }
-            EventBus.emit('track-changed', this.currentTrack)
+            this.__changeTrack(this.currentTrack)
         },
         playNextTrack() {
             //TODO
@@ -146,7 +156,7 @@ export const usePlayStore = defineStore('play', {
                     this.playingIndex = Math.ceil(Math.random() * maxSize)
                     break
             }
-            EventBus.emit('track-changed', this.currentTrack)
+            this.__changeTrack(this.currentTrack)
         },
         updateCurrentTime(secs) {
             this.currentTime = secs * 1000
@@ -197,3 +207,9 @@ EventBus.on('track-volume', value => {
     const { updateVolume } = usePlayStore();
     updateVolume(value)
 })
+
+EventBus.on('key-togglePlay', () => {
+    const { togglePlay } = usePlayStore();
+    togglePlay()
+})
+

@@ -159,7 +159,7 @@ const deleteItem = () => {
 }
 
 .playlist-item .action svg {
-    fill: #eee;
+    fill: var(--svg-color);
     cursor: pointer;
 }
 

@@ -52,7 +52,6 @@ const removeItem = () => {
 
 <style scoped>
 .playback-queue-item {
-    border-left: 2px solid transparent;
     border-bottom: 1px solid #464646;
 }
 
@@ -180,7 +179,7 @@ const removeItem = () => {
 }
 
 .playback-queue-item .action svg {
-    fill: #eee;
+    fill: var(--svg-color);
     cursor: pointer;
 }
 

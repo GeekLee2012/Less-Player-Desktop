@@ -112,6 +112,10 @@ EventBus.on('suspend', () => {
     player.pause()
 })
 
+EventBus.on('track-stop', track => {
+    player.stop()
+})
+
 EventBus.on('track-play', track => {
     player.setCurrent(track)
     console.log(track)
@@ -126,7 +130,7 @@ EventBus.on('track-seek', data => {
     player.seek(data)
 })
 
-EventBus.on("volume-changed", volume => {
+EventBus.on("volume-set", volume => {
     player.volume(volume)
 })
 

@@ -57,7 +57,7 @@ const visitCateItem = (item, row, col) => {
 }
 
 .category-bar svg {
-    fill: #eee;
+    fill: var(--svg-color);
     margin-right: 15px;
     cursor: pointer;
     transform: translateY(3px);

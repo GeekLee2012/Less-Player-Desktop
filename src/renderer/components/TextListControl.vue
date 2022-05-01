@@ -1,12 +1,13 @@
 <!-- 比较鸡肋糟糕的组件设计，后期改掉 -->
 <script setup>
 const props = defineProps({
+    platform: String,
     data: Array
 })
 </script>
 
 <template>
-    <div class="textlist-ctl">
+    <div class="textlist-ctl" :class="platform">
         <div v-for="item in data" v-html="item">
         </div>
     </div>
@@ -37,5 +38,10 @@ const props = defineProps({
 .textlist-ctl p {
     font-size: 14px;
     margin-bottom: 36px;
+}
+
+.qq p {
+    margin-top: 15px;
+    margin-bottom: 0px;
 }
 </style>

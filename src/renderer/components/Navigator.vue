@@ -33,7 +33,7 @@ const forward = () => {
 }
 
 .navigator svg {
-    fill: #eee;
+    fill: var(--svg-color);
     cursor: pointer;
     margin-right: 10px;
     -webkit-app-region: none;

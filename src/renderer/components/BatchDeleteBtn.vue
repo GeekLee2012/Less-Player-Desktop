@@ -16,6 +16,6 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 
 <style>
 .batch-delete-btn svg {
-    fill: #eee;
+    fill: var(--svg-color);
 }
 </style>

@@ -13,8 +13,8 @@ export const useSquareViewStore = defineStore('squareView', {
     }),
     getters: {
         currentPlatformCode(state) {
-            const platform = usePlatformStore()
-            return platform.currentPlatformCode
+            const { currentPlatformCode } = usePlatformStore()
+            return currentPlatformCode
         },
         currentCategoryCode(state) {
             return state.currentCategoryItem.data.value

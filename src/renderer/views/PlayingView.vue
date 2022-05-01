@@ -78,7 +78,7 @@ watch(progress, (nv, ov) => {
 }
 
 .playing-view .header svg {
-    fill: #eee;
+    fill: var(--svg-color);
     -webkit-app-region: none;
 }
 

@@ -64,7 +64,7 @@ async function parseTracks(audioFiles) {
                     title = decodeText(metadata.common.title.trim())
                 }
                 if(metadata.common.artists) {
-                    metadata.common.artists.forEach(ar => artist.push({ id: 0, name: decodeText(ar) }))
+                    metadata.common.artists.forEach(ar => artist.push({ id: '', name: decodeText(ar) }))
                 }
                 if(metadata.common.album) {
                     album.name = decodeText(metadata.common.album)

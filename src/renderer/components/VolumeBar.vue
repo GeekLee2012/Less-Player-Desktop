@@ -25,7 +25,7 @@ const emitUpdate = (value) => {
     //更新Store
     updateVolume(value)
     //通知Player
-    EventBus.emit("volume-changed", value)
+    EventBus.emit("volume-set", value)
 }
 
 const toggleMute = ()=> {
@@ -71,7 +71,7 @@ defineExpose({
 }
 
 .volume-bar .volume-status svg {
-    fill: #eee;
+    fill: var(--svg-color);
 }
 
 .volume-bar .st-slient,

@@ -21,7 +21,7 @@ const props = defineProps({
 
 <style>
 .play-add-all-btn svg {
-    fill: #d6d6d6;
+    fill: var(--svg-color);
 }
 
 .play-add-all-btn .right-btn svg {

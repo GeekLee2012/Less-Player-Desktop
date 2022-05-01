@@ -106,7 +106,7 @@ const searchParam = (keyword, type) => {
 }
 
 const DEFAULT_CATE = new Category("默认")
-DEFAULT_CATE.add("全部分类", '')
+DEFAULT_CATE.add("全部", '')
 
 export class NetEase {
     static CODE = 'netease'
@@ -379,7 +379,8 @@ export class NetEase {
             const param = searchParam(keyword, 1)
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
-                const data = json.result.songs.map(item => {
+                const list = json.result.songs
+                const data = list.map(item => {
                     const artist = item.ar.map(e => ({ id: e.id, name: e.name }))
                     const album = { id: item.al.id, name : item.al.name }
                     const track = new Track(item.id, NetEase.CODE, item.name, artist, album, item.dt, item.al.picUrl)
@@ -399,7 +400,8 @@ export class NetEase {
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
                 console.log(json)
-                const data = json.result.playlists.map(item => {
+                const list = json.result.playlists
+                const data = list.map(item => {
                     const playlist = new Playlist(item.id, NetEase.CODE, item.coverImgUrl, item.name)
                     return playlist
                 })
@@ -417,7 +419,8 @@ export class NetEase {
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
                 console.log(json)
-                const data = json.result.albums.map(item => {
+                const list = json.result.albums
+                const data = list.map(item => {
                     const album = new Album(item.id, NetEase.CODE, item.name, item.picUrl)
                     album.publishTime = toYmd(item.publishTime)
                     return album
@@ -436,13 +439,16 @@ export class NetEase {
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
                 console.log(json)
-                const data = json.result.artists.map(item => ({
-                    id: item.id,
-                    platform: NetEase.CODE,
-                    title: item.name,
-                    cover: item.picUrl
-                }))
-                const result = { offset, limit, page, data }
+                const list = json.result.artists
+                const result = { offset, limit, page, data: [] }
+                if(list) {
+                    result.data = list.map(item => ({
+                        id: item.id,
+                        platform: NetEase.CODE,
+                        title: item.name,
+                        cover: item.picUrl
+                    }))
+                }
                 resolve(result)
             })
         }) 

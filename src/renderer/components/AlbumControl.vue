@@ -17,7 +17,7 @@ const props = defineProps({
 
 const visitAlbumDetail = (platform, id) => {
     const platformValid = isAlbumDetailVisitable(platform)
-    const idValid = (id > 0)
+    const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = props.visitable && platformValid && idValid 
     if(visitable) {
         router.push('/album/' + platform + "/" + id)

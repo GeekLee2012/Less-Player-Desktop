@@ -33,10 +33,11 @@ const { setActiveTab, updateArtist,
         isHotSongsTabLoaded,
         isAllSongsTabLoaded,
         isAlbumsTabLoaded,
-        isAboutTabLoaded
+        isAboutTabLoaded,
+        isArtistDetailLoaded
     } = useArtistDetailStore()
 
-const { getVender, isKuWo } = usePlatformStore()
+const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
 
 const artistDetailRef = ref(null)
@@ -82,6 +83,22 @@ const updateTabData = (data) => {
     }
 }
 
+const getArtistDetail = () => {
+    if(isArtistDetailLoaded()) {
+        return 
+    }
+    const vender = getVender(props.platform)
+    if(!vender) return
+    const id = artistId.value
+    vender.artistDetail(id).then(result => {
+        console.log(result)
+        updateArtist(result.name, result.cover)
+        if(result.about) {
+            updateAbout(result.about)
+        }
+    })
+}
+
 const loadHotSongs = () => {
     if(isHotSongsTabLoaded()) {
         updateTabData(hotSongs.value)
@@ -121,13 +138,6 @@ const loadAllSongs = () => {
     const vender = getVender(props.platform)
     if(!vender) return
     const id = artistId.value
-    vender.artistDetail(id).then(result => {
-        console.log(result)
-        updateArtist(result.name, result.cover)
-        if(result.about) {
-            updateAbout(result.about)
-        }
-    })
     vender.artistDetailAllSongs(id, offset, limit, page).then(result => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
@@ -197,6 +207,7 @@ const bindScrollListener = () => {
 
 const switchTab = () => {
     resetTabView()
+    getArtistDetail()
     if(isHotSongsTab()) {
         loadHotSongs()
     } else if(isAllSongsTab()) {
@@ -244,7 +255,9 @@ watch(activeTab, (nv,ov) => loadTab())
                 </span>
                 <span class="tab-tip">{{ tabTipText }}</span>
             </div>
-            <component :is="currentTabView" :data="tabData" 
+            <component :is="currentTabView" 
+                :data="tabData"
+                :platform="platform"
                 :artistVisitable="true" 
                 :albumVisitable="true">
             </component>

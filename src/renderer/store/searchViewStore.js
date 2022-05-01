@@ -23,7 +23,7 @@ const ALL_TABS = [ {
 export const useSearchViewStore = defineStore('searchView', {
     state: () => ({
         keyword: '',
-        currentPlatformIndex: 1,
+        currentPlatformIndex: 0,
         tabs: ALL_TABS,
         activeTab: -1,
         tabTipText: '',

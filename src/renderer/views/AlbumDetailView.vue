@@ -27,7 +27,7 @@ const { albumId, albumName, albumCover,
     } = storeToRefs(useAlbumDetailStore())
 const { setActiveTab, updateTabTipText, 
         isAllSongsTab, isAboutTab,
-        isAllSongsTabLoaded, isAboutTabLoaded,
+        isAllSongsTabLoaded, isAlbumDetailLoaded,
         updateAllSongs, updateAlbum, 
         updateAbout, resetAll
     } = useAlbumDetailStore()
@@ -64,10 +64,8 @@ const updateTabData = (data) => {
     }
 }
 
-const loadAllSongs = ()=> {
-    if(isAllSongsTabLoaded()) {
-        updateTabData(allSongs.value)
-        currentTabView.value = SongListControl
+const getAlbumDetail = () => {
+    if(isAlbumDetailLoaded()) {
         return 
     }
     const vender = getVender(props.platform)
@@ -78,6 +76,26 @@ const loadAllSongs = ()=> {
         const artistName = result.artist[0].name
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
         updateAbout(result.about)
+        if(result.hasTracks()) {
+            updateAllSongs(result.data)
+            updateTabData(allSongs.value)
+            currentTabView.value = SongListControl
+            return 
+        }
+    })
+}
+
+const loadAllSongs = ()=> {
+    if(isAllSongsTabLoaded()) {
+        updateTabData(allSongs.value)
+        currentTabView.value = SongListControl
+        return 
+    }
+    const vender = getVender(props.platform)
+    if(!vender) return
+    const id = albumId.value
+    vender.albumDetailAllSongs(id, 0, 100).then(result => {
+        console.log(result)
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         currentTabView.value = SongListControl
@@ -102,6 +120,7 @@ const reloadAll = () =>  {
 
 const switchTab = () => {
     currentTabView.value = null
+    getAlbumDetail()
     if(isAllSongsTab()) {
         loadAllSongs()
     } else if(isAboutTab()) {

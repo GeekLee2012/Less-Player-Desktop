@@ -24,7 +24,7 @@ const TAB_LIST = [ {
 
 export const useArtistDetailStore = defineStore('artistDetail', {
     state: () => ({
-        artistId: 0,
+        artistId: '',
         platform: '',
         artistName: '趁青春',
         artistAlias: '',
@@ -60,8 +60,11 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         resetAbout() {
             this.about = ''
         },
-        resetAll() {
+        resetArtistDetail() {
             this.updateArtist('趁青春', 'default_cover.png', '')
+        },
+        resetAll() {
+            this.resetArtistDetail()
             this.resetHotSongs()
             this.resetAllSongs()
             this.resetAlbums()
@@ -72,6 +75,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         updateArtistDetailKeys(platform, id) {
             this.artistId = id
             this.platform = platform
+            this.resetArtistDetail()
             this.updateTabs()
         },
         updateArtist(name, cover, alias) {
@@ -98,6 +102,9 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             this.resetAbout()
             this.about = about
         },
+        isArtistDetailLoaded() {
+            return this.artistId != '' && this.artistName != '趁青春' 
+        },
         isHotSongsTabLoaded() {
             return this.hotSongs.length > 0
         },
@@ -118,8 +125,8 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             }
         },
         updateTabs() {
-            const { isNetEase, isKuWo, isKuGou, isDouBan } = usePlatformStore()
-            if(isNetEase(this.platform)) {
+            const { isQQ, isNetEase, isKuWo, isKuGou, isDouBan } = usePlatformStore()
+            if(isQQ(this.platform) || isNetEase(this.platform)) {
                 this.tabs = [ TAB_LIST[0], TAB_LIST[2], TAB_LIST[3] ]
             } else if (isKuWo(this.platform) || isKuGou(this.platform)){
                 this.tabs = [ TAB_LIST[1], TAB_LIST[2], TAB_LIST[3] ]

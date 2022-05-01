@@ -17,7 +17,7 @@ const { isArtistDetailVisitable } = usePlatformStore()
 
 const visitArtistDetail = (platform, id) => {
     const platformValid = isArtistDetailVisitable(platform)
-    const idValid = (id > 0)
+    const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = props.visitable && platformValid && idValid
     platform = platform.trim()
     if(visitable) {

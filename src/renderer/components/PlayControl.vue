@@ -53,7 +53,7 @@ const togglePlaybackQueue = () => {
 }
 
 .play-ctl svg {
-    fill: #eee;
+    fill: var(--svg-color);
     cursor: pointer;
     -webkit-app-region: no-drag;
 }
@@ -79,12 +79,12 @@ const togglePlaybackQueue = () => {
 .play-ctl .play-btn svg {
     margin-top: 9px;
     margin-left: 2px;
-    fill: #eee !important;
+    fill: var(--svg-color) !important;
 }
 
 .play-ctl .play-btn .paused {
     margin-top: 6px;
     margin-left: 0px;
-    fill: #eee !important;
+    fill: var(--svg-color) !important;
 }
 </style>

@@ -43,7 +43,8 @@ const initAndPlayTrack = (track) => {
         console.log(result)
         if(!track.hasUrl()) track.url = result.url
         if(!track.hasUrl()) {
-            if(queueTracksSize > 1) playNextTrack()
+            //TODO 频繁切换下一曲，对音乐平台不友好
+            //if(queueTracksSize.value > 1) playNextTrack()
             return 
         }
         if(!track.hasLyric()) track.lyric = result.lyric
@@ -124,7 +125,7 @@ EventBus.on('track-changed', track => initAndPlayTrack(track))
 
 .playback-queue .text-btn svg {
     margin-right: 3px;
-    fill: #eee;
+    fill: var(--svg-color);
 }
 
 .playback-queue .text-btn:hover,

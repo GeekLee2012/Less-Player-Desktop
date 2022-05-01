@@ -77,7 +77,7 @@ const { showPlayingView, toggleCoverMask } = useMainViewStore()
 }
 
 .play-meta .cover-mask .down-btn svg {
-    fill: #ccc;
+    fill: var(--svg-color);
     width: 20px;
     height: 20px;
 }
