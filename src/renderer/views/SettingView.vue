@@ -1,5 +1,5 @@
 <script setup>
-const ipcRenderer = electronApi.ipcRenderer
+const ipcRenderer = electronAPI.ipcRenderer
 
 const visitAuthor = () => {
     const url = 'https://github.com/GeekLee2012/'

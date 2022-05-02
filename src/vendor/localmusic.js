@@ -1,6 +1,6 @@
 import { Lyric } from "../common/Lyric"
 
-const ipcRenderer = electronApi.ipcRenderer
+const ipcRenderer = electronAPI.ipcRenderer
 
 const FILE_PREFIX = 'file:///'
 

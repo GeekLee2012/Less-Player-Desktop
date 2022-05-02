@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import EventBus from '../../common/EventBus';
 
-const ipcRenderer = electronApi.ipcRenderer
+const ipcRenderer = electronAPI.ipcRenderer
 
 export const useMainViewStore = defineStore('mainView', {
     state: () => ({

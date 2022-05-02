@@ -13,21 +13,12 @@ window.addEventListener('DOMContentLoaded', () => {
       replaceText(`${dependency}-version`, process.versions[dependency])
     }
   })
-  */
- const { contextBridge, ipcRenderer } = require('electron')
+*/
 
- /*
- contextBridge.exposeInMainWorld('ipcRenderer', {
-    send: (channel, data) => {
-        ipcRenderer.send(channel, data);
-    },
-    receive: (channel, func) => {
-        ipcRenderer.on(channel, (event, ...args) =>  func(...args));
-    }
- })
- */
+const { contextBridge, ipcRenderer } = require('electron')
+const isMacOS = (process.platform === 'darwin')
 
- contextBridge.exposeInMainWorld('electronApi', {
+contextBridge.exposeInMainWorld('electronAPI', {
   ipcRenderer,
-  isMacOS: (process.platform === 'darwin')
+  isMacOS
 })

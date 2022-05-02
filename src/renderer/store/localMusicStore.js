@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { Track } from "../../common/Track";
 
-const ipcRenderer = electronApi.ipcRenderer
+const ipcRenderer = electronAPI.ipcRenderer
 
 export const useLocalMusicStore = defineStore('localMusic', {
     state: () => ({

@@ -66,7 +66,7 @@ export const usePlayStore = defineStore('play', {
         togglePlay() {
             if(this.queueTracksSize < 1) return
             if(this.currentTrack && NO_TRACK != this.currentTrack) {
-                this.setPlaying(!this.playing)
+                //this.setPlaying(!this.playing)
                 EventBus.emit('track-togglePlay')
             } else {
                 this.playNextTrack()   

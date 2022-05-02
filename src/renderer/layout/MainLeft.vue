@@ -5,7 +5,7 @@ import { usePlatformStore } from '../store/platformStore';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 
 //是否为macOS
-const isMacOS = electronApi.isMacOS
+const isMacOS = electronAPI.isMacOS
 const router = useRouter()
 
 const { platforms, currentPlatformIndex, currentPlatformCode, isLocal } = storeToRefs(usePlatformStore())

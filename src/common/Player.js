@@ -113,7 +113,7 @@ EventBus.on('suspend', () => {
 })
 
 EventBus.on('track-stop', track => {
-    player.stop()
+    player.setCurrent(null)
 })
 
 EventBus.on('track-play', track => {
