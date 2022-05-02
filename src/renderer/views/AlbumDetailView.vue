@@ -73,7 +73,7 @@ const getAlbumDetail = () => {
     const id = albumId.value
     vender.albumDetail(id).then(result => {
         console.log(result)
-        const artistName = result.artist[0].name
+        const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
         updateAbout(result.about)
         if(result.hasTracks()) {

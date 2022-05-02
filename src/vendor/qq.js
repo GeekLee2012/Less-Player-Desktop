@@ -6,8 +6,10 @@ import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
 import CryptoJS from 'crypto-js';
 
-const escapeHtml = (text) => {
-    return text.replace(/[&]#\d+;/g, '')
+//@param ignore 是否忽略&字符
+const escapeHtml = (text, ignore) => {
+    const regex = ignore ? (/#\d+;/g) : (/[&]#\d+;/g)
+    return text.replace(regex, '')
             .replace(/&apos;/g, "'")
 }
 
@@ -182,7 +184,7 @@ export class QQ {
                     const category = new Category(cateName)
                     const items = cate.items
                     items.forEach(item => {
-                        const name = escapeHtml(item.categoryName)
+                        const name = escapeHtml(item.categoryName, true)
                         const id = item.categoryId
                         category.add(name, id);
                     })
@@ -542,7 +544,7 @@ export class QQ {
                 console.log(json)
                 const list = json.data.album.list
                 const data = list.map(item => {
-                    const album = new Album(item.albumMid, QQ.CODE, item.albumName, item.albumPic)
+                    const album = new Album(item.albumMID, QQ.CODE, item.albumName, item.albumPic)
                     album.publishTime = item.publicTime
                     return album
                 })
