@@ -21,8 +21,12 @@ const visitArtistDetail = (platform, id) => {
     const visitable = props.visitable && platformValid && idValid
     platform = platform.trim()
     if(visitable) {
-        router.push('/artist/' + platform + "/" + id)
-        updateArtistDetailKeys(platform, id)
+        const fromPath = router.currentRoute.value.path
+        const toPath = '/artist/' + platform + "/" + id
+        if(fromPath != toPath) {
+            router.push(toPath)
+            updateArtistDetailKeys(platform, id)
+        }
         hidePlayingView()
     }
 }

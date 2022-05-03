@@ -34,22 +34,26 @@ export class KuGou {
     static categories() {
         return new Promise((resolve, reject) => {
             const defaultCategory = new Category("默认")
-            defaultCategory.add("推荐", '5')
+            defaultCategory.add("推荐", '1-5-0')
 
             const otherCategory = new Category("其他")
-            otherCategory.add("最热", '6')
-            otherCategory.add("热藏", '3')
-            otherCategory.add("飙升", '8')
+            otherCategory.add("最热", '1-6-0')
+            otherCategory.add("最新", '1-7-0')
+            otherCategory.add("热藏", '1-3-0')
+            otherCategory.add("飙升", '1-8-0')
+
+            otherCategory.add("未知1", '1-9-0')
+            otherCategory.add("未知2", '1-0-0')
 
             const result = [ defaultCategory, otherCategory ]
-            resolve(result)
+            resolve({ platform: KuGou.CODE, data: result })
         })
     }
 
     //歌单(列表)广场
     static square(cate, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            let url = "https://www.kugou.com/yy/special/index/1-" + cate + "-0.html"
+            let url = "https://www.kugou.com/yy/special/index/" + cate + ".html"
             //TODO
             const result = { offset, limit, page, data: [] }
             if(offset > 0) {

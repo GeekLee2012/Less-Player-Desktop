@@ -42,7 +42,7 @@ export class KuWo {
                         result.push(category)
                     }
                 })
-                resolve(result)
+                resolve({ platform: KuWo.CODE, data: result })
             })
         })
     }

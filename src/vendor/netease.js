@@ -128,7 +128,7 @@ export class NetEase {
                     })
                     result.push(category)
                 });
-                resolve(result)
+                resolve({ platform: NetEase.CODE, data: result })
             })
         })
     }
@@ -379,6 +379,7 @@ export class NetEase {
             const param = searchParam(keyword, 1)
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
+                console.log(json)
                 const list = json.result.songs
                 const data = list.map(item => {
                     const artist = item.ar.map(e => ({ id: e.id, name: e.name }))

@@ -39,7 +39,7 @@ export class DouBan {
                     })
                     result.push(category)
                 })
-                resolve(result)
+                resolve({ platform: DouBan.CODE, data: result })
             })
         })
     }

@@ -16,7 +16,7 @@ let markScrollTop = 0
 
 const { currentPlatformCode, currentCategoryCode } = storeToRefs(useSquareViewStore())
 const { currentVender, currentCategory, 
-        putCurrentCategory, resetCurrentCategoryItem 
+        putCategory, resetCurrentCategoryItem 
     } = useSquareViewStore()
 
 const resetPagination = () => {
@@ -36,10 +36,10 @@ const loadCategories = () => {
     if(!cached) {
         const vender = currentVender()
         if(!vender) return 
-        vender.categories().then((result) => {
-            putCurrentCategory(result)
+        vender.categories().then(result => {
+            putCategory(result.platform, result.data)
             //TODO
-            categories.push(...result)
+            categories.push(...result.data)
             EventBus.emit('category-update')
         })
     } else {

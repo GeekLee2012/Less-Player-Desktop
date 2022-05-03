@@ -77,7 +77,7 @@ export class QQ {
                         cateNameCached.push(cateName)
                     })
                 }
-                resolve(result)
+                resolve({ platform: QQ.CODE, data: result })
             })
         })
     }

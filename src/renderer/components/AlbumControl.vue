@@ -19,9 +19,14 @@ const visitAlbumDetail = (platform, id) => {
     const platformValid = isAlbumDetailVisitable(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = props.visitable && platformValid && idValid 
+    platform = platform.trim()
     if(visitable) {
-        router.push('/album/' + platform + "/" + id)
-        updateAlbumDetailKeys(platform, id)
+        const fromPath = router.currentRoute.value.path
+        const toPath = '/album/' + platform + "/" + id
+        if(fromPath != toPath) {
+            router.push(toPath)
+            updateAlbumDetailKeys(platform, id)
+        }
         hidePlayingView()
     }
 }
