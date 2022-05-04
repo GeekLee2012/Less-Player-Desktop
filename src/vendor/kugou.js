@@ -42,8 +42,8 @@ export class KuGou {
             otherCategory.add("热藏", '1-3-0')
             otherCategory.add("飙升", '1-8-0')
 
-            otherCategory.add("未知1", '1-9-0')
-            otherCategory.add("未知2", '1-0-0')
+            otherCategory.add("未知", '1-0-0')
+            //otherCategory.add("未知2", '1-9-0')
 
             const result = [ defaultCategory, otherCategory ]
             resolve({ platform: KuGou.CODE, data: result })

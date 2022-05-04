@@ -18,6 +18,10 @@ const escapseHtml = (text) => {
 
 export class KuWo {
     static CODE = 'kuwo'
+    static TOPLIST_CODE  = 'KW_RANKLIST'
+    static TOPLIST_PREFIX  = 'TOP_'
+    static cacheToplists = new Map()
+
     //全部分类
     static categories() {
         return new Promise((resolve, reject) => {
@@ -42,6 +46,8 @@ export class KuWo {
                         result.push(category)
                     }
                 })
+                const firstCate = result[0]
+                firstCate.data.splice(2, 0, { key: '排行榜', value: KuWo.TOPLIST_CODE })
                 resolve({ platform: KuWo.CODE, data: result })
             })
         })
@@ -49,6 +55,7 @@ export class KuWo {
 
     //歌单(列表)广场
     static square(cate, offset, limit, page) {
+        if(cate == KuWo.TOPLIST_CODE) return KuWo.toplist(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
             let url = null
             //TODO
@@ -88,8 +95,81 @@ export class KuWo {
         })
     }
 
+    //排行榜列表
+    static toplist(cate, offset, limit, page) {
+        return new Promise((resolve) => {
+            let result = { offset: 0, limit: 100, page: 1, data: [] }
+            if(page > 1) {
+                resolve(result)
+                return
+            }
+            const url = "https://www.kuwo.cn/rankList"
+            KuWo.cacheToplists.clear()
+            getDoc(url).then(doc => {
+                let scriptText = doc.querySelector('script').textContent
+                let key = 'window.__NUXT__='
+                if(scriptText.indexOf(key) != -1) {
+                    scriptText = scriptText.split(key)[1]
+                    const json = eval(scriptText)
+                    console.log(json)
+
+                    //参考官方页面
+                    const bangList = json.data[0].bangMenu
+                    for(var i = 0; i < 3; i++) {
+                        const bang = bangList[i]
+                        bang.list.forEach(item => {
+                            const id = KuWo.TOPLIST_PREFIX + item.sourceid
+                            const detail = new Playlist(id, KuWo.CODE , item.pic, item.name)
+                            detail.about = item.intro
+                            result.data.push(detail)
+
+                            KuWo.cacheToplists.set(id, detail)
+                        })
+                    }
+                }
+                resolve(result)
+            })
+        })
+    }
+
+    //排行榜详情
+    static toplistDetail(id, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            const bangId = id.replace(KuWo.TOPLIST_PREFIX, '').trim()
+            const url = "https://www.kuwo.cn/api/www/bang/bang/musicList"
+            const reqBody = {
+                bangId,
+                pn: page,
+                rn: 300,
+                httpsStatus: 1,
+                reqId: REQ_ID
+            }
+            getJson(url, reqBody, CONFIG).then(json => {
+                console.log(json)
+                const cache = KuWo.cacheToplists.get(id)
+                const result = new Playlist(id, KuWo.CODE)
+                if(cache) {
+                    result.cover = cache.cover
+                    result.title = cache.title
+                    result.about = cache.about
+                }
+                const playlist = json.data.musicList
+                playlist.forEach(item => {
+                    const artist = [ { id: item.artistid, name: item.artist } ]
+                    const album = { id: item.albumid, name: item.album }
+                    const duration = item.duration * 1000
+                    const cover = item.pic
+                    const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
+                    result.addTrack(track)
+                })
+                resolve(result)
+            })
+        })
+    }
+
     //歌单详情
     static playlistDetail(id, offset, limit, page) {
+        if(id.startsWith(KuWo.TOPLIST_PREFIX)) return this.toplistDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo" 
                     + "?pid=" + id + "&pn=" + page + "&rn=" + limit + "&httpsStatus=1&reqId=" + REQ_ID

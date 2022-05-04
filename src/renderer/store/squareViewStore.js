@@ -34,8 +34,8 @@ export const useSquareViewStore = defineStore('squareView', {
            return this.getCategory(this.currentPlatformCode) 
         },
         currentVender() {
-            const platform = usePlatformStore()
-            return platform.currentVender()
+            const { currentVender } = usePlatformStore()
+            return currentVender()
         },
         updateCurrentCategoryItem(data, row, col) {
             this.currentCategoryItem.data = data

@@ -60,8 +60,7 @@ const addAll = () => {
             </div>
             <div class="right">
                 <div class="title">{{ detail.title }}</div>
-                <div class="about">
-                    {{ detail.about }}
+                <div class="about" v-html="detail.about">
                 </div>
                 <div class="action">
                     <PlayAddAllBtn :playAction="playAll" 

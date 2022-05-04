@@ -110,6 +110,8 @@ DEFAULT_CATE.add("全部", '')
 
 export class NetEase {
     static CODE = 'netease'
+    static TOPLIST_CODE = '排行榜'
+
     //全部分类
     static categories() {
         return new Promise((resolve) => {
@@ -127,18 +129,21 @@ export class NetEase {
                         category.add(text, text)
                     })
                     result.push(category)
-                });
+                })
+                const firstCate = result[0]
+                firstCate.data.splice(1, 0, { key: '排行榜', value: NetEase.TOPLIST_CODE })
                 resolve({ platform: NetEase.CODE, data: result })
             })
         })
     }
-
+    
     //歌单(列表)广场
     static square (cate, offset, limit, page) {
+        if(cate == NetEase.TOPLIST_CODE) return NetEase.toplist(cate, offset, limit, page)
         return new Promise((resolve) => {
             const url = "https://music.163.com/discover/playlist"
                 + "?cat=" + cate + "&order=hot"
-                + "&limit=" + limit + "&offset=" + offset;
+                + "&limit=" + limit + "&offset=" + offset
             getDoc(url).then(doc => {
                 const result = { offset, limit, page, data: [] }
                 const listEl = doc.querySelectorAll("#m-pl-container li")
@@ -150,6 +155,44 @@ export class NetEase {
 
                     if(coverEl) {
                         cover = coverEl.getAttribute("src").replace("140y140", "500y500")
+                    }
+
+                    if(titleEl) {
+                        title = titleEl.textContent
+                        itemUrl = BASE_URL + titleEl.getAttribute('href')
+                        id = itemUrl.split('=')[1]
+                    }
+
+                    if(id && itemUrl) {
+                        const detail = new Playlist(id, NetEase.CODE , cover, title, itemUrl)
+                        result.data.push(detail)
+                    }
+                });
+                //console.log(result)
+                resolve(result)
+            })
+        })
+    }
+
+    //排行榜列表
+    static toplist(cate, offset, limit, page) {
+        return new Promise((resolve) => {
+            let result = { offset: 0, limit: 100, page: 1, data: [] }
+            if(page > 1) {
+                resolve(result)
+                return
+            }
+            const url = "https://music.163.com/discover/toplist"
+            getDoc(url).then(doc => {
+                const listEl = doc.querySelectorAll("#toplist li")
+                listEl.forEach(el => {
+                    let id = null, cover = null, title = null, itemUrl = null
+
+                    const coverEl = el.querySelector(".mine .left img")
+                    const titleEl = el.querySelector(".mine .name a")
+
+                    if(coverEl) {
+                        cover = coverEl.getAttribute("src").replace("40y40", "500y500")
                     }
 
                     if(titleEl) {

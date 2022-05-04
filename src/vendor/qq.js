@@ -101,7 +101,6 @@ const artistHotSongReqBody = (id, offset, limit) => {
     }
 }
 
-
 const artistAlbumReqBody = (id, offset, limit) => {
     return {
         data: JSON.stringify({
@@ -161,10 +160,107 @@ const searchParam = (keyword, type, offset, limit, page) => {
     }
 }
 
+const topListReqBody = () => {
+    return {
+        _: Date.now(),
+        uin: 0,
+        format: 'json',
+        inCharset: "utf8",
+        outCharset: "utf8",
+        notice: 0,
+        platform: "yqq.json",
+        needNewCode: 1,
+        g_tk: 5381,
+        data: JSON.stringify({
+            comm: {
+                ct: 24,
+                cv: 0
+            },
+            req_1: moduleReq('musicToplist.ToplistInfoServer', 'GetAll', {})
+        })
+    }
+}
+
+const topListDetailReqBody = (id, offset, limit, page) => {
+    return {
+        g_tk: 5381,
+        data: JSON.stringify({
+            comm: {
+                ct: 24,
+                cv: 0
+            },
+            req_1: moduleReq('musicToplist.ToplistInfoServer', 'GetDetail',
+            {
+                topid: id,
+                offset,
+                num: 100,
+                period: getPerid(id)
+            })
+        })
+    }
+}
+
+//TODO 目前部分周期计算不准确
+/* 获取更新周期 */
+const getPerid = (id) => {
+    const date = new Date()
+    const yyyy = date.getFullYear()
+    let mm = date.getMonth() + 1
+    let dd = date.getDate()
+    const day = date.getDay()
+    mm = mm < 10 ? ('0' + mm) : mm
+    const d0 = dd < 10 ? ('0' + dd) : dd
+    let period = yyyy + "-" + mm + "-" + d0
+    let week = 1
+    //默认每天
+    switch (id) {
+        //每天
+        case 27:
+        case 62:
+            break
+        //每周几?
+        case 4:
+        case 52:
+        case 67:
+            let d2 = day < 6 ? (dd - day + 1): dd
+            d2 = d2 < 10 ? ('0' + d2) : d2
+            period = yyyy + "-" + mm + "-" + d2
+            break
+        //
+        case 130:
+            break
+        //每n周?
+        case 131:
+            week = getWeek(period) - 8
+            week = week < 10 ? ('0' + week) : week
+            period = date.getFullYear() + "_" + week;
+            break
+        //每周
+        default:
+            week = getWeek(period) - 1
+            week = week < 10 ? ('0' + week) : week
+            period = date.getFullYear() + "_" + week;
+            break
+    }
+    return period
+}
+
+const getWeek = (dt) => {
+    let d1 = new Date(dt)
+    let d2 = new Date(d1.getFullYear() + "-" + "01-01")
+    let millis = d1 - d2
+    let days = Math.ceil(millis / (24 * 60 * 60 * 1000))
+    let num = Math.ceil(days / 7)
+    return num
+}
+
 /* 旧版API */
 //参考： https://github.com/jsososo/QQMusicApi/
 export class QQ {
     static CODE = "qq"
+    static TOPLIST_CODE= 99999999
+    static TOPLIST_PREFIX = "TOP_"
+    
     //全部分类
     static categories() {
         return new Promise((resolve, reject) => {
@@ -192,18 +288,84 @@ export class QQ {
                     result.push(category)
                     cateNameCached.push(cateName)
                 })
+                const firstCate = result[0]
+                firstCate.data.splice(1, 0, { key: '排行榜', value: QQ.TOPLIST_CODE })
                 resolve({ platform: QQ.CODE, data: result })
+            })
+        })
+    }
+
+    //排行榜列表
+    static toplist(cate, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            let result = { offset: 0, limit: 100, page: 1, data: [] }
+            if(page > 1) {
+                resolve(result)
+                return
+            }
+            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            const reqBody = topListReqBody()
+            getJson(url, reqBody).then(json => {
+                console.log(json)
+                
+                const groupList = json.req_1.data.group
+                groupList.forEach(group => {
+                    group.toplist.forEach(item => {
+                        const id = QQ.TOPLIST_PREFIX + item.topId
+                        const cover = item.frontPicUrl || item.headPicUrl
+                        const detail = new Playlist(id, QQ.CODE, cover, item.title) 
+                        detail.about = item.intro
+                        result.data.push(detail)
+                    })
+                })
+                resolve(result)
+            })
+        })
+    }
+
+    //排行榜详情
+    static toplistDetail(id, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            const result = new Playlist()
+            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            const topid = parseInt(id.replace(QQ.TOPLIST_PREFIX, ''))
+            const reqBody = topListDetailReqBody(topid, offset, limit, page)
+            getJson(url, reqBody).then(json => {
+                console.log(json)
+                const playlist = json.req_1.data.data
+
+                result.id = playlist.topId
+                result.platform = QQ.CODE
+                result.title = playlist.title
+                result.cover = playlist.frontPicUrl || playlist.headPicUrl
+                result.about = playlist.intro
+
+                const songs = json.req_1.data.songInfoList
+                songs.forEach(song => {
+                    const artist = song.singer.map(ar => ({id: ar.mid, name: ar.name }))
+                    const album = { id: song.album.mid, name: song.album.name }
+                    const duration = song.interval * 1000
+                    const cover = getAlbumCover(song.album.mid)
+                    const track = new Track(song.mid, QQ.CODE, song.name, artist, album, duration, cover)
+                    result.addTrack(track)
+                })
+                resolve(result)
             })
         })
     }
 
     //歌单广场(列表)
     static square (cate, offset, limit, page) {
+        if(typeof(cate) == 'string') {
+            cate = parseInt(cate.trim())
+        }
+        cate = cate > 0 ? cate : 10000000
+        //榜单
+        if(cate == QQ.TOPLIST_CODE) { 
+            return QQ.toplist(cate, offset, limit, page)
+        }
+        //普通歌单
         return new Promise((resolve, reject) => {
-            if(typeof(cate) == 'string') {
-                cate = parseInt(cate.trim())
-            }
-            cate = cate > 0 ? cate : 10000000
             const url = "https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg"
             const reqBody = {
                 format: 'json',
@@ -232,9 +394,11 @@ export class QQ {
 
     //歌单详情
     static playlistDetail(id, offset, limit, page) {
+        if(id.startsWith(QQ.TOPLIST_PREFIX)) {
+            return QQ.toplistDetail(id, offset, limit, page)
+        }
         return new Promise((resolve, reject) => {
             const result = new Playlist()
-
             const url = "http://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg"
             const reqBody = { 
                 format: 'json',
