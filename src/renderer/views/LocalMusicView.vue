@@ -35,7 +35,7 @@ const batchDelete = () => {
             <div class="right">
                 <div class="title">本地歌曲</div>
                 <div class="action">
-                    <PlayAddAllBtn :playAction="playAll" :addAction="addAll" ></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playAll" :rightAction="addAll" ></PlayAddAllBtn>
                     <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="spacing"></AddFolderFileBtn>
                     <BatchDeleteBtn :leftAction="batchDelete" :rightAction="resetAll" class="spacing"></BatchDeleteBtn>
                 </div>

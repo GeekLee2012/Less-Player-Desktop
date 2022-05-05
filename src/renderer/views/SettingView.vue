@@ -33,7 +33,7 @@ const visitAuthor = () => {
             </div>
             <div class="row">
                 <b>版本</b>
-                <div>v 0.1.0</div>
+                <div>v 0.1.2</div>
             </div>
             <div class="row">
                 <b>关于</b>

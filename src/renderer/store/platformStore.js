@@ -73,13 +73,13 @@ export const usePlatformStore = defineStore('platform', {
             return state.platforms[state.currentPlatformIndex]
         },
         currentPlatformCode(state) {
-            return state.currentPlatform ? state.currentPlatform.code : ''
+            return this.currentPlatform ? this.currentPlatform.code : ''
         },
         onlinePlatformsFilter() {
             return onlinePlatformFilter
         },
         isLocal(state) {
-            return state.currentPlatformIndex == platforms.length - 2;
+            return this.currentPlatformCode === 'local';
         }
     }, 
     //Actions

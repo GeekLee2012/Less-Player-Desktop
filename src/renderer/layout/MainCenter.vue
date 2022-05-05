@@ -2,7 +2,6 @@
 import { onMounted } from 'vue';
 import MainTop from './MainTop.vue';
 import MainContent from './MainContent.vue';
-import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore'
 import { storeToRefs } from 'pinia';
 import CategoryView from '../views/CategoryView.vue';
@@ -52,8 +51,6 @@ onMounted (() => {
         <div id="main-bottom"></div>
 
         <!-- 浮层(Component、View)-->
-        <Back2TopBtn id="back2top-btn"></Back2TopBtn>
-        
         <transition name="fade-ex">
             <CategoryView id="category-view" v-show="categoryViewShow"></CategoryView> 
         </transition>
@@ -90,14 +87,6 @@ onMounted (() => {
     background-color: royalblue;
     background-color: #373737;
     box-shadow: 0px 0px 10px #161616;
-}
-
-#back2top-btn {
-    position: fixed;
-    bottom: 36px;
-    right: 25px;
-    z-index: 66;
-    visibility: hidden;
 }
 
 /* 可以为进入和离开动画设置不同的持续时间和动画函数 */

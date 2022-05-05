@@ -114,6 +114,11 @@ export const usePlayStore = defineStore('play', {
             EventBus.emit('track-changed', track)
             this.__resetPlayState()
         },
+        validPlayingIndex() {
+            const maxSize = this.queueTracksSize
+            this.playingIndex = this.playingIndex > 0 ? this.playingIndex : 0
+            this.playingIndex = this.playingIndex < maxSize ? this.playingIndex : (maxSize - 1)
+        },
         playTrack(track) {
             let index = this.indexOf(track)
             if(index == -1) {
@@ -141,6 +146,7 @@ export const usePlayStore = defineStore('play', {
                 case PLAY_MODE.RANDOM:
                     break
             }
+            this.validPlayingIndex()
             this.__changeTrack(this.currentTrack)
         },
         playNextTrack() {
@@ -156,6 +162,7 @@ export const usePlayStore = defineStore('play', {
                     this.playingIndex = Math.ceil(Math.random() * maxSize)
                     break
             }
+            this.validPlayingIndex()
             this.__changeTrack(this.currentTrack)
         },
         updateCurrentTime(secs) {

@@ -5,8 +5,10 @@ import EventBus from '../../common/EventBus';
 import { useSquareViewStore } from '../store/squareViewStore';
 import CategoryBar from '../components/CategoryBar.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
 
 const squareContentRef = ref(null)
+const back2TopBtnRef = ref(null)
 
 //全部分类
 const categories = reactive([])
@@ -20,6 +22,7 @@ const { currentVender, currentCategory,
     } = useSquareViewStore()
 
 const resetPagination = () => {
+    playlists.length = 0
     pagination.offset = 0
     pagination.page = 1
 }
@@ -100,27 +103,29 @@ const restoreScrollState = () => {
     squareContentRef.value.scrollTop = markScrollTop
 }
 
+const resetBack2TopBtn = () => {
+    back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
+}
+
 /*-------------- 各种监听 --------------*/
 onMounted(() => {
     resetPagination()
     loadData()
     bindScrollListener()
+    resetBack2TopBtn()
 })
 
-onActivated(() => {
-    restoreScrollState()
-})
+onActivated(() => restoreScrollState())
 
 watch(currentPlatformCode, (nv, ov) => {
-    playlists.length = 0
     resetCurrentCategoryItem()
     resetPagination()
     resetScrollState()
+    resetBack2TopBtn()
     loadData()
 })
 
 watch(currentCategoryCode, (nv, ov) => {
-    playlists.length = 0
     resetPagination()
     loadContent()
 })
@@ -130,6 +135,7 @@ watch(currentCategoryCode, (nv, ov) => {
     <div id="square-content" ref="squareContentRef">
         <CategoryBar :data="categories" v-show="categories.length > 0"></CategoryBar>
         <PlaylistsControl :data="playlists"></PlaylistsControl>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 

@@ -152,7 +152,7 @@ watch(albumId, (nv, ov) => reloadAll())
                     </div>
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn :playAction="playAll" :addAction="addAll"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playAll" :rightAction="addAll"></PlayAddAllBtn>
                 </div>
             </div>
         </div>

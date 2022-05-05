@@ -242,8 +242,8 @@ watch(activeTab, (nv,ov) => loadTab())
                 <div class="title">{{ artistName }}</div>
                 <div class="alias">{{ artistAlias }}</div>
                 <div class="action">
-                    <PlayAddAllBtn :playAction="playHotSongs" :addAction="addHotSongs" v-show="isHotSongsTab()" text="播放热门歌曲"></PlayAddAllBtn>
-                    <PlayAddAllBtn :playAction="playAllSongs" :addAction="addAllSongs" v-show="isAllSongsTab()" text="播放全部"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="addHotSongs" v-show="isHotSongsTab()" text="播放热门歌曲"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playAllSongs" :rightAction="addAllSongs" v-show="isAllSongsTab()"></PlayAddAllBtn>
                 </div>
             </div>
         </div>

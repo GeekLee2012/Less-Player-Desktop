@@ -6,11 +6,12 @@ export default {
 </script>
 
 <script setup>
-import { onBeforeMount, reactive, ref } from 'vue';
+import { onBeforeMount, onMounted, reactive, ref } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
 
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
@@ -22,6 +23,8 @@ const props = defineProps({
 
 const detail = reactive({})
 const listSize = ref(0)
+const playlistDetailRef = ref(null)
+const back2TopBtnRef = ref(null)
 let offset = 0
 let page = 1
 let limit = 1000
@@ -37,10 +40,6 @@ const loadContent = () => {
     }
 }
 
-onBeforeMount(() => {
-    loadContent()
-})
-
 const playAll = () => {
     resetQueue()
     addAll()
@@ -50,10 +49,15 @@ const playAll = () => {
 const addAll = () => {
     addTracks(detail.data)
 }
+
+onBeforeMount(() => loadContent())
+onMounted(() => {
+    back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
+})
 </script>
 
 <template>
-    <div id="playlist-detail">
+    <div id="playlist-detail" ref="playlistDetailRef">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="detail.cover" />
@@ -63,8 +67,7 @@ const addAll = () => {
                 <div class="about" v-html="detail.about">
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn :playAction="playAll" 
-                        :addAction="addAll">
+                    <PlayAddAllBtn :leftAction="playAll"  :rightAction="addAll">
                     </PlayAddAllBtn>
                 </div>
             </div>
@@ -76,6 +79,7 @@ const addAll = () => {
                 :albumVisitable="true" >
             </SongListControl>
         </div>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 

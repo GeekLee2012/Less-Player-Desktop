@@ -1,13 +1,94 @@
 <script setup>
+import { ref } from 'vue';
+
+const props = defineProps({
+    threshold: Number,
+    //maxScrollTopThreshold: Number,
+    target: Object 
+})
+
+let threshold = props.threshold || 1024 * 2.33
+let scrollTarget = props.target
+const btnShow = ref(false)
+const maxScrollTopThreshold = 1024 * 5.20
+
+const setScrollTarget = (target) => {
+    scrollTarget = target
+    btnShow.value = false
+    bindScrollListener()
+}
+
+const showAsNeeded = () => {
+    const scrollTop = scrollTarget.scrollTop
+    const scrollHeight = scrollTarget.scrollHeight
+    const clientHeight = scrollTarget.clientHeight
+    const maxScrollTop = scrollHeight - clientHeight
+
+    if(maxScrollTop < maxScrollTopThreshold) return 
+    btnShow.value = (scrollTop >= threshold)
+}
+
+const bindScrollListener = () => {
+    if(!scrollTarget) return 
+    scrollTarget.removeEventListener('scroll', showAsNeeded)
+    scrollTarget.addEventListener('scroll', showAsNeeded)
+}
+
+//参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
+function easeInOutQuad(currentTime, startValue, changeValue, duration) {
+    currentTime /= duration / 2;
+    if (currentTime < 1) return changeValue / 2 * currentTime * currentTime + startValue;
+    currentTime--;
+    return -changeValue / 2 * (currentTime * (currentTime - 2) - 1) + startValue;
+}
+
+let rafId = null
+
+//TODO
+function smoothScroll(target, duration, destScrollTop) {
+    let currentTime = 0, step = 5
+    const currentScrollTop = target.scrollTop
+    const distance = destScrollTop - currentScrollTop
+
+    const easeInOutScroll = () => {
+        if(currentTime >= duration) {
+            target.scrollTop = destScrollTop
+            cancelAnimationFrame(rafId)
+            return 
+        }
+        const calcScrollTop = easeInOutQuad(currentTime, currentScrollTop, distance, duration)
+        currentTime += step
+        target.scrollTop = calcScrollTop
+        rafId = requestAnimationFrame(easeInOutScroll)
+    }
+    easeInOutScroll()
+}
+
+const scrollToTop = () => {
+    if(!scrollTarget) return 
+    //scrollTarget.scrollTop = 0
+    smoothScroll(scrollTarget, 300, 0)
+}
+
+
+defineExpose({
+    setScrollTarget
+})
 </script>
 
 <template>
-    <div class="back2top-btn">
+    <div class="back2top-btn" @click="scrollToTop" v-show="btnShow">
         <svg width="20" height="21" viewBox="0 0 597.39 511.99" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M298.63,272.34a68.71,68.71,0,0,1-4.56,5.9Q184.34,388,74.54,497.79c-15.65,15.64-36.81,18.59-54.24,7.73A42.55,42.55,0,0,1,9.92,442c1.69-2.05,3.6-3.93,5.48-5.82l250.29-250.3c20.61-20.6,45.42-20.64,66-.08q124.8,124.78,249.64,249.55c8,8,14.17,16.69,15.62,28.23a42.59,42.59,0,0,1-69.19,38.62c-2.57-2.1-4.9-4.51-7.26-6.86Q411.94,386.85,303.42,278.3C302,276.89,300.91,275.19,298.63,272.34Z"/><path d="M299.26,0Q426,0,552.69,0c21.93,0,38.44,12.47,43.46,32.61,6.46,25.9-13.1,51.75-39.8,52.59-1.16,0-2.33,0-3.5,0q-254.19,0-508.37,0c-21.54,0-38.41-12.88-43.3-32.92C-5,26.79,14.06,1.27,40.32.11,44.15-.06,48,0,51.82,0Z"/></g></g></svg>
     </div>
 </template>
 
 <style scoped>
+.back2top-btn {
+    position: fixed;
+    bottom: 36px;
+    right: 15px;
+    z-index: 66;
+}
 .back2top-btn {
     border: 0.1px solid #666;
     background-color: #666666cc;
