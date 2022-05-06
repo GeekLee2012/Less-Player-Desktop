@@ -617,7 +617,7 @@ export class QQ {
                     
                     const detail = json.detail
                     result.title = detail.albumName
-                    result.cover = detail.picurl
+                    result.cover = detail.picurl.startsWith("//") ? ("https:" + detail.picurl) : detail.picurl
                     result.artist = detail.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     result.publishTime = detail.ctime
                     result.company = detail.company

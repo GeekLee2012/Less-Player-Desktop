@@ -24,7 +24,7 @@ export class Player {
         if(!sound) {
             sound = this.currentTrack.howl = new Howl({
                 src: [ this.currentTrack.url ],
-                html5: true,
+                html5: false, //媒体文件基本不大，暂时取消设置
                 onplay: function() {
                     requestAnimationFrame(self.step.bind(self));
                     EventBus.emit('track-state', PLAY_STATE.PLAYING)

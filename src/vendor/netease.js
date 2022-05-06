@@ -490,7 +490,7 @@ export class NetEase {
                         id: item.id,
                         platform: NetEase.CODE,
                         title: item.name,
-                        cover: item.picUrl
+                        cover: (item.picUrl + "?param=500y500")
                     }))
                 }
                 resolve(result)

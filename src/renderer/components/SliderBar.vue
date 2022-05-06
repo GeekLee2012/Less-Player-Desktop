@@ -1,9 +1,12 @@
 <script setup>
 import { ref } from 'vue';
+//TODO 拖动滑块,改变进度条暂不支持
+//组件代码写得乱，后期再梳理
 
 const props = defineProps({
-    initValue: Number,
-    onseek: Function
+    initValue: Number, //0.0 - 1.0
+    onseek: Function,
+    onscroll: Function
 })
 
 const sliderRef = ref(null)
@@ -11,16 +14,32 @@ const progressRef = ref(null)
 const thumbRef = ref(null)
 let onDrag = false
 let fromX = -1
-let value = props.initValue
+let value = parseFloat(props.initValue).toFixed(2)
 
+//点击改变进度
 const seekProgress = (e)=> {
     if(thumbRef.value.contains(e.target)) {
-        updateProgressByDelta(e.offsetX)
+        updateProgressByDeltaWidth(e.offsetX)
     } else {
         updateProgressByWidth(e.offsetX)
     }
     if(props.onseek) {
         props.onseek(value)
+    }
+}
+
+//滚轮改变进度
+const scrollProgress = (e) => {
+    if(e.deltaY == 0) return 
+    const direction = e.deltaY > 0 ? -1 : 1
+    const step = 1 * direction
+    let tmp = value * 100
+    tmp += step
+    const percent = (tmp / 100).toFixed(2)
+    //console.log(direction + ":"+ step + " : " + tmp)
+    updateProgress(percent)
+    if(props.onscroll) {
+        props.onscroll(value)
     }
 }
 
@@ -34,6 +53,7 @@ const updateProgress = (percent) => {
     value = (percent / 100).toFixed(2)
 }
 
+//快捷操作
 const toggleProgress = () => {
     updateProgress(value > 0 ? 0 : 1)
     return value
@@ -46,7 +66,7 @@ const updateProgressByWidth = (width) => {
     updateProgress(percent)
 }
 
-const updateProgressByDelta = (delta) => {
+const updateProgressByDeltaWidth = (delta) => {
     if(delta == 0) return 
     const totalWidth = sliderRef.value.offsetWidth
     const oPercent = parseFloat(progressRef.value.style.width.replace('%', '')) / 100
@@ -63,6 +83,7 @@ const startDrag = (e)=> {
     console.log("->")
 }
 
+/* 以下为拖动滑块改变进度相关 */
 const endDrag = (e)=> {
     onDrag = false
     fromX = -1
@@ -77,20 +98,20 @@ const dragProgress = (e)=> {
         //console.log(e)
         const deltaX = e.screenX - fromX
         console.log(deltaX)
-        updateProgressByDelta(deltaX)
+        updateProgressByDeltaWidth(deltaX)
         fromX = e.screenX
     }
 }
 
+//对外提供API
 defineExpose({
     updateProgress,
     toggleProgress
 })
-
 </script>
 
 <template>
-    <div class="slider-bar" ref="sliderRef" @click="seekProgress">
+    <div class="slider-bar" ref="sliderRef" @click="seekProgress" @mousewheel="scrollProgress">
         <div class="progress" ref="progressRef"></div>
         <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>
     </div>

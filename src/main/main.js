@@ -19,6 +19,7 @@ const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
 //TODO 是否为开发环境
 const isDevEnv = true
 
+
 //创建浏览窗口
 const createWindow = () => {
   // Create the browser window.
@@ -199,14 +200,14 @@ const randomText = (src, len) => {
 
 //覆盖(包装)请求
 const overrideRequest = (details) => {
-  let orgin = null
+  let origin = null
   let referer = null
   let cookie = null
 
   const url = details.url
   if(url.includes("qq.com")) {
-    orgin = "https://y.qq.com/"
-    referer = orgin
+    origin = "https://y.qq.com/"
+    referer = origin
     /*
     cookie = 	"fqm_pvqid=336b8c0b-9988-4607-a98e-9242dcd55f0e"
       + "&fqm_sessionid=0fd12ef8-5cd6-409c-8ef0-b5b601e99737"
@@ -217,24 +218,29 @@ const overrideRequest = (details) => {
       + "&ts_uid=2524044556"
     */
   } else if(url.includes("music.163.com")) {
-    orgin = "https://music.163.com/"
-    referer = orgin
+    origin = "https://music.163.com/"
+    referer = origin
   } else if(url.includes("kuwo")) {
     const choice = 'ABCDEFGHIJKLMNOPQRSTUVWSYZ01234567890'
     const CSRF = randomText(choice, 11)
-    orgin = "https://www.kuwo.cn/"
-    referer = orgin
+    origin = "https://www.kuwo.cn/"
+    referer = origin
     cookie = "kw_token=" + CSRF
     details.requestHeaders['CSRF'] = CSRF
   } else if(url.includes("kugou")) {
-    orgin = "https://www.kugou.com/"
-    referer = orgin
+    origin = "https://www.kugou.com/"
+    referer = origin
   }  else if(url.includes("douban")) {
-    orgin = "https://fm.douban.com/"
-    referer = orgin
+    origin = "https://fm.douban.com/"
+    referer = origin
   } 
 
-  if(orgin) details.requestHeaders['Orgin'] = orgin
+  /*
+  details.requestHeaders['Access-Control-Allow-Headers'] = "Origin, X-Requested-With, Content-Type, Accept"
+  details.requestHeaders['Access-Control-Allow-Origin'] = "*"
+  */
+
+  //if(origin) details.requestHeaders['Origin'] = origin
   if(referer) details.requestHeaders['Referer'] = referer
   if(cookie) details.requestHeaders['Cookie'] = cookie
 }
