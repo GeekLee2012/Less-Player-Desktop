@@ -22,14 +22,14 @@ const highlightPlatform = (to) => {
     updateCurrentPlatformByCode(code)
 }
 
-const excludes = ['PlaylistDetailView', 'ArtistDetailView', 'AlbumDetailView']
-
+//const excludes = ['PlaylistDetailView', 'ArtistDetailView', 'AlbumDetailView']
+const excludes = []
 </script>
 
 <template>
     <div id="main-content">
         <router-view v-slot="{ Component }">
-            <keep-alive :exclude="excludes" :max="8">
+            <keep-alive :exclude="excludes" :max="10">
                 <component :is="Component" />
             </keep-alive>
         </router-view>

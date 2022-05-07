@@ -1,12 +1,14 @@
+<!--
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
     name: 'PlaylistDetailView'
 }
 </script>
+-->
 
 <script setup>
-import { onBeforeMount, onMounted, reactive, ref } from 'vue';
+import { onMounted, onActivated, reactive, ref, watch } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';
@@ -28,6 +30,7 @@ const back2TopBtnRef = ref(null)
 let offset = 0
 let page = 1
 let limit = 1000
+let markScrollTop = 0
 
 const loadContent = () => {
     const vender = getVender(props.platform)
@@ -50,9 +53,40 @@ const addAll = () => {
     addTracks(detail.data)
 }
 
-onBeforeMount(() => loadContent())
-onMounted(() => {
+const markScrollState = () => {
+    markScrollTop = playlistDetailRef.value.scrollTop
+}
+
+const resetScrollState = () => {
+    markScrollTop = 0
+}
+
+const restoreScrollState = () => {
+    if(markScrollTop < 1) return 
+    playlistDetailRef.value.scrollTop = markScrollTop
+}
+
+const bindScrollListener = () => {
+    playlistDetailRef.value.removeEventListener('scroll', markScrollState)
+    playlistDetailRef.value.addEventListener('scroll', markScrollState)
+}
+
+const resetBack2TopBtn = () => {
     back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
+}
+
+onActivated(() => restoreScrollState())
+
+watch(() => props.id, () => {
+    resetScrollState()
+    resetBack2TopBtn()
+    loadContent()
+})
+
+onMounted(() => {
+    resetBack2TopBtn()
+    loadContent()
+    bindScrollListener()
 })
 </script>
 

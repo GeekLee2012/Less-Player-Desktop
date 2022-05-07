@@ -1,13 +1,15 @@
+<!--
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
     name: 'AlbumDetailView'
 }
 </script>
+-->
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, shallowRef, watch } from 'vue';
+import { onMounted, onActivated, ref, shallowRef, watch } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
@@ -129,9 +131,10 @@ const switchTab = () => {
 }
 
 onMounted(() => reloadAll())
+onActivated(() => reloadAll())
 watch(activeTab, (nv,ov) => switchTab())
-watch(albumId, (nv, ov) => reloadAll())
-
+//watch(albumId, (nv, ov) => reloadAll())
+watch(()=> props.id, (nv, ov) => reloadAll())
 </script>
 
 <template>

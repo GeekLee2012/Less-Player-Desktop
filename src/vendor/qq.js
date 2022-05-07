@@ -22,6 +22,7 @@ const moduleReq = (module, method, param) => {
 }
 
 const getAlbumCover = (albummid) => {
+    if(!albummid) return null
     return "https://y.qq.com/music/photo_new/T002R500x500M000" 
         + albummid + ".jpg?max_age=2592000"
 }

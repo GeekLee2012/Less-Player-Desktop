@@ -1,13 +1,15 @@
+<!--
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
     name: 'ArtistDetailView'
 }
 </script>
+-->
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, shallowRef, watch } from 'vue';
+import { onMounted, onActivated ,ref, shallowRef, watch } from 'vue';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
@@ -228,7 +230,9 @@ const reloadAll = () =>  {
 
 /*-------------- 各种监听 --------------*/
 onMounted(() => reloadAll())
-watch(artistId, (nv, ov) => reloadAll())
+onActivated(() => reloadAll())
+watch(() => props.id , (nv, ov) => reloadAll())
+//watch(artistId, (nv, ov) => reloadAll())
 watch(activeTab, (nv,ov) => loadTab())
 </script>
 
@@ -288,9 +292,10 @@ watch(activeTab, (nv,ov) => loadTab())
 #artist-detail .header .title{
     text-align: left;
     margin-top: 5px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     font-size: 25px;
     font-weight: bold;
+    height: 39px;
 }
 
 #artist-detail .header .cover {

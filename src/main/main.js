@@ -57,9 +57,9 @@ const createWindow = () => {
   //TODO
   const filter = { 
     urls: [ 
-        "https://y.qq.com/*",
+        "*://y.qq.com/*",
         "*://*.y.qq.com/*", 
-        "https://music.163.com/*" ,
+        "*://music.163.com/*" ,
         "*://*.kuwo.cn/*", 
         "*://*.kugou.com/*",
         "*://*.douban.com/*",
@@ -233,7 +233,7 @@ const overrideRequest = (details) => {
   }  else if(url.includes("douban")) {
     origin = "https://fm.douban.com/"
     referer = origin
-  } 
+  }
 
   /*
   details.requestHeaders['Access-Control-Allow-Headers'] = "Origin, X-Requested-With, Content-Type, Accept"
@@ -243,4 +243,5 @@ const overrideRequest = (details) => {
   //if(origin) details.requestHeaders['Origin'] = origin
   if(referer) details.requestHeaders['Referer'] = referer
   if(cookie) details.requestHeaders['Cookie'] = cookie
+
 }
