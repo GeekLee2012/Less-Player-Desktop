@@ -1,29 +1,65 @@
 <script setup>
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
+import { onMounted } from 'vue';
 import MainLeft from './layout/MainLeft.vue';
 import MainCenter from './layout/MainCenter.vue';
 import { useMainViewStore } from './store/mainViewStore';
 import { storeToRefs } from 'pinia';
+import EventBus from '../common/EventBus';
 
 const { playbackQueueViewShow, playingViewShow } = storeToRefs(useMainViewStore())
 
+//TODO 设置主题
+/*
+const setupAppTheme = (themeName) => {
+  const defaultThemeName = 'dark'
+  themeName = themeName || defaultThemeName
+  themeName = themeName.trim()
+  switch(themeName) {
+    case 'light':
+      break
+    default:
+      themeName = defaultThemeName
+  }
+  const themeUrl = './assets/styles/' + themeName + '-theme.css'
+  import(themeUrl)
+  document.documentElement.setAttribute('theme', themeName)
+}
+*/
+
+/* @vite-ignore */
+
+//setupAppTheme()
+
+onMounted(() => EventBus.emit('radio-init', document.querySelector('.radio-holder')))
 </script>
 
 <template>
     <MainLeft></MainLeft> 
     <MainCenter></MainCenter>
+    <!-- FM广播audio -->
+    <audio class="radio-holder"></audio>
     
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
-      <PlayingView id="playing-view" v-show="playingViewShow"></PlayingView>
+      <PlayingView id="playing-view" v-show="playingViewShow">
+      </PlayingView>
     </transition>
 
-    <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow"></PlaybackQueueView>
+    <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow">
+    </PlaybackQueueView>
 </template>
 
 <style>
-:root {
+* {
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+:root, 
+:root[theme='dark'] {
   /* 全局背景 */
   --bg-color: #313131;
   /* 文本 */
@@ -43,12 +79,6 @@ const { playbackQueueViewShow, playingViewShow } = storeToRefs(useMainViewStore(
   --scrollbar-thumb-bg: #666;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  user-select: none;
-}
-
 html, body, #app {
   background-color: var(--bg-color);
   margin: 0 auto;
@@ -60,6 +90,8 @@ html, body, #app {
 
 img {
   -webkit-user-drag: none;
+  background-size: cover;
+  object-fit: cover;
 }
 
 #app {
@@ -86,6 +118,10 @@ img {
   border-radius: 8px;
 }
 
+.radio-holder {
+  visibility: visible;
+}
+
 #playback-queue {
     position: absolute;
     top: 0;
@@ -95,7 +131,6 @@ img {
     z-index: 99;
     background-color: var(--bg-color);
     box-shadow: 0px 0px 10px #161616;
-    visibility: visible;
 }
 
 #playing-view {

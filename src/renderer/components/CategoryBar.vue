@@ -28,8 +28,8 @@ const visitCateItem = (item, row, col) => {
                 <span v-for="(item, col) in cate.data"
                     @click="visitCateItem(item, row, col)"
                     :class="{ active: (row == currentCategoryItem.row 
-                        && col == currentCategoryItem.col )}">
-                    {{ item.key }}
+                        && col == currentCategoryItem.col )}"
+                    v-html="item.key" >
                 </span>
             </template>
         </div>

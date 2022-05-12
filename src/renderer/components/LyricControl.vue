@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import { watch, ref, reactive } from 'vue';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { toMMssSSS } from '../../common/Times';
@@ -13,7 +13,9 @@ const props = defineProps({
 })
 
 const currentIndex = ref(-1)
-const { hasLyric } = storeToRefs(usePlayStore())
+//const { hasLyric } = storeToRefs(usePlayStore())
+const hasLyric = ref(false)
+const lyricData = ref(props.track.lyricData())
 
 let destScrollTop = -1
 let rafId = null
@@ -77,6 +79,19 @@ EventBus.on('track-pos', secs => {
     }
 })
 
+const reloadLyricData = (track) => {
+    hasLyric.value = track.hasLyric()
+    lyricData.value = track.lyricData()
+}
+
+const toString = (id) => {
+    if(typeof(id) == 'string') return id
+    return id ? (id + '') : ''
+}
+
+watch(() => props.track, (nv, ov) => reloadLyricData(nv))
+
+EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
 </script>
 
 <template>
@@ -89,6 +104,7 @@ EventBus.on('track-pos', secs => {
                     <ArtistControl :visitable="true" 
                         :platform="track.platform" 
                         :data="track.artist"
+                        :trackId="toString(track.id)"
                         class="ar-ctl">
                     </ArtistControl>
                 </span>
@@ -108,13 +124,13 @@ EventBus.on('track-pos', secs => {
             <div v-show="!hasLyric" class="no-lyric">
                  <label>暂无歌词，请继续欣赏音乐吧~</label>
             </div>
-            <div v-show="hasLyric" v-for="(item, index) in track.lyricData()"
+            <div v-show="hasLyric" v-for="(item, index) in lyricData"
                 class="line" :time-key="item[0]"
                 :class="{ first: index == 0, 
-                    last: index == (track.lyricData().size - 1),
+                    last: index == (lyricData.size - 1),
                     current: index == currentIndex
-                }">
-                {{ item[1] }}
+                }"
+                v-html="item[1]" >
             </div>
         </div>
     </div>

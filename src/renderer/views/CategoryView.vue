@@ -49,8 +49,8 @@ EventBus.on('category-resetScroll', ()=> {
                         class="fl-item" 
                         :class="{ current : (row == currentCategoryItem.row 
                             && col == currentCategoryItem.col )}"
-                        @click="visitCateItem(item, row, col)">
-                        {{ item.key }}
+                        @click="visitCateItem(item, row, col)"
+                        v-html="item.key" >
                     </div>
                 </div>
             </div>

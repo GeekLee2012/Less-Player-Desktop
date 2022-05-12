@@ -114,8 +114,13 @@ const scrollToTop = () => {
     view.scrollTop = 0
 }
 
+
 const reloadAll = () =>  {
     resetAll()
+    loadAll()
+}
+
+const loadAll = () =>  {
     scrollToTop()
     visitTab(0)
 }
@@ -130,8 +135,8 @@ const switchTab = () => {
     }
 }
 
-onMounted(() => reloadAll())
-onActivated(() => reloadAll())
+onMounted(() => loadAll())
+onActivated(() => loadAll())
 watch(activeTab, (nv,ov) => switchTab())
 //watch(albumId, (nv, ov) => reloadAll())
 watch(()=> props.id, (nv, ov) => reloadAll())
@@ -144,7 +149,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
                 <img class="cover" v-lazy="albumCover" />
             </div>
             <div class="right">
-                <div class="title">{{ albumName }}</div>
+                <div class="title" v-html="albumName"></div>
                 <div class="info">
                     <div class="info-row">
                         <span><b>歌手:</b> {{ artistName }} </span>
@@ -162,14 +167,15 @@ watch(()=> props.id, (nv, ov) => reloadAll())
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index }"
-                    v-for="(tab,index) in tabs" @click="visitTab(index)">
-                    {{ tab.name }}
+                    v-for="(tab,index) in tabs" 
+                    @click="visitTab(index)"
+                    v-html="tab.name" >
                 </span>
-                <span class="tab-tip">{{ tabTipText }}</span>
+                <span class="tab-tip" v-html="tabTipText" ></span>
             </div>
             <component :is="currentTabView" :data="tabData" 
                 :artistVisitable="true" 
-                :albumVisitable="true">
+                :albumVisitable="true" >
             </component>
         </div>
     </div>

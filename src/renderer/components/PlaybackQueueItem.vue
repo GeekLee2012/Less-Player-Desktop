@@ -34,7 +34,8 @@ const removeItem = () => {
                         <div class="artist">
                             <ArtistControl :visitable="true" 
                                 :platform="data.platform" 
-                                :data="data.artist">
+                                :data="data.artist"
+                                :trackId="data.id" >
                             </ArtistControl>
                         </div>
                         <span class="duration">{{ data.mmssDuration() }}</span>

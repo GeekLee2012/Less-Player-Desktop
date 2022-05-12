@@ -114,18 +114,18 @@ watch(() => props.keyword, (nv,ov) => loadTab())
             <div class="platform">
                 <span class="item" :class="{ active: currentPlatformIndex == index }" 
                     v-for="(item, index) in platforms"
-                    @click="byPlatform(index)" >
-                    {{ item.name }}
+                    @click="byPlatform(index)" 
+                    v-html="item.name" >
                 </span>
             </div>
         </div>
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index }"
-                    v-for="(tab,index) in tabs" @click="visitTab(index)">
-                    {{ tab.name }}
+                    v-for="(tab,index) in tabs" @click="visitTab(index)"
+                    v-html="tab.name" >
                 </span>
-                <span class="tip">{{ tabTipText }}</span>
+                <span class="tip" v-html="tabTipText" ></span>
             </div>
             <component :is="currentTabView" :data="tabData" 
                 :artistVisitable="true" 

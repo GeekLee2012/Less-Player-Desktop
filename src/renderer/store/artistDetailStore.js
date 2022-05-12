@@ -69,7 +69,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             this.resetAllSongs()
             this.resetAlbums()
             this.resetAbout()
-            this.setActiveTab(-1)
+            this.setActiveTab(0)
             this.updateTabTipText(0)
         },
         updateArtistDetailKeys(platform, id) {
@@ -103,7 +103,16 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             this.about = about
         },
         isArtistDetailLoaded() {
-            return this.artistId != '' && this.artistName != '趁青春' 
+            if(!this.artistId) return false
+            if(!this.artistName) return false
+            if(typeof(this.artistId) != 'string') this.artistId += ''
+            this.artistId = this.artistId.trim()
+            if(this.artistId.length < 1) return false
+
+            this.artistName = this.artistName.trim()
+            if(this.artistName.length < 1) return false
+            if(this.artistName == '趁青春' ) return false
+            return true
         },
         isHotSongsTabLoaded() {
             return this.hotSongs.length > 0
@@ -126,10 +135,14 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         },
         updateTabs() {
             const { isQQ, isNetEase, isKuWo, isKuGou, isDouBan } = usePlatformStore()
-            if(isQQ(this.platform) || isNetEase(this.platform)) {
+            if(isQQ(this.platform) 
+                || isNetEase(this.platform)) {
                 this.tabs = [ TAB_LIST[0], TAB_LIST[2], TAB_LIST[3] ]
-            } else if (isKuWo(this.platform) || isKuGou(this.platform)){
+            } else if (isKuWo(this.platform) 
+                || isKuGou(this.platform) ){
                 this.tabs = [ TAB_LIST[1], TAB_LIST[2], TAB_LIST[3] ]
+            }  else if (isDouBan(this.platform)){
+                this.tabs = [ TAB_LIST[1], TAB_LIST[3] ]
             } else {
                 this.tabs = TAB_LIST
             }

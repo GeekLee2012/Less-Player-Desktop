@@ -9,14 +9,16 @@ export class Track {
         this.platform = platform
         this.title = title
         //[ {id, name} ]
-        this.artist = artist
+        this.artist = artist ? artist : []
+        this.artistNotCompleted = false
         //{id, name}
         this.album = album
         //millis
-        this.duration = duration
+        this.duration = duration ? duration : 0
         this.cover = cover ? cover : DEFAULT_COVER
         this.url = ''
         this.lyric = new Lyric()
+        this.isRadioType = false //是否为电台歌曲
     }
 
     mmssDuration() {
@@ -29,10 +31,20 @@ export class Track {
         if(this.artist) {
             const names = []
             this.artist.forEach(e => names.push(e.name));
-            artistName = names.join("、")
+            artistName = names.join('、')
             artistName = artistName.slice(0, artistName.length)
         }
         return artistName
+    }
+
+    firstArtistName() {
+        return this.artistName().split('、')[0]
+    }
+
+    hasId() {
+        if(!this.id) return false
+        if(typeof(this.id) == 'number') return this.id > 0
+        if(typeof(this.id) == 'string') return this.id.trim().length > 0
     }
 
     hasUrl() {

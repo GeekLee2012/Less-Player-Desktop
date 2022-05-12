@@ -6,9 +6,10 @@ import { createPinia } from 'pinia';
 //Route
 import { router } from './route/Router';
 //LazyLoad
-import VueLazyLoad from 'vue3-lazyload'
-//TODO Player 不能删除!!!
+import VueLazyLoad from 'vue3-lazyload';
+//播放器
 import { Player } from '../common/Player';
+import { RadioPlayer } from '../common/RadioPlayer';
 
 //Components
 import ProgressBar from './components/ProgressBar.vue';
@@ -22,6 +23,9 @@ import SongItem from './components/SongItem.vue';
 import PlayingView from './views/PlayingView.vue';
 import PlaybackQueueView from './views/PlaybackQueueView.vue';
 
+//初始化并配置播放器
+Player.initAndSetup()
+RadioPlayer.initAndSetup()
 
 const app = createApp(App);
 

@@ -52,7 +52,8 @@ onMounted (() => {
 
         <!-- 浮层(Component、View)-->
         <transition name="fade-ex">
-            <CategoryView id="category-view" v-show="categoryViewShow"></CategoryView> 
+            <CategoryView id="category-view" v-show="categoryViewShow">
+            </CategoryView> 
         </transition>
     </div>
 </template>

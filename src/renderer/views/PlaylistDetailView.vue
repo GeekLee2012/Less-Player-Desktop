@@ -32,6 +32,11 @@ let page = 1
 let limit = 1000
 let markScrollTop = 0
 
+const resetView = () => {
+    Object.assign(detail, { cover: 'default_cover.png', title: '', about: '',data: [] })
+    listSize.value = detail.data.length
+}
+
 const loadContent = () => {
     const vender = getVender(props.platform)
     if(vender) {
@@ -78,12 +83,14 @@ const resetBack2TopBtn = () => {
 onActivated(() => restoreScrollState())
 
 watch(() => props.id, () => {
+    resetView()
     resetScrollState()
     resetBack2TopBtn()
     loadContent()
 })
 
 onMounted(() => {
+    resetView()
     resetBack2TopBtn()
     loadContent()
     bindScrollListener()
@@ -97,9 +104,8 @@ onMounted(() => {
                 <img class="cover" v-lazy="detail.cover" />
             </div>
             <div class="right">
-                <div class="title">{{ detail.title }}</div>
-                <div class="about" v-html="detail.about">
-                </div>
+                <div class="title" v-html="detail.title"></div>
+                <div class="about" v-html="detail.about"></div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll"  :rightAction="addAll">
                     </PlayAddAllBtn>

@@ -8,9 +8,15 @@ const props = defineProps({
 
 <template>
     <div class="image-text-tile">
-        <img class="cover" v-lazy="cover" />
-        <div class="title">{{ title }}</div>
-        <div class="subtitle" v-show="subtitle">{{ subtitle }}</div>
+        <img class="cover" v-lazy="cover" /> 
+        <!-- 目前体验不好
+        <picture>
+            <source type="image/webp" :srcset="cover">
+            <img class="cover" v-lazy="cover" /> 
+        </picture>
+        -->
+        <div class="title" v-html="title"></div>
+        <div class="subtitle" v-show="subtitle" v-html="subtitle"></div>
     </div>
 </template>
 
@@ -21,9 +27,11 @@ const props = defineProps({
 .image-text-tile .cover {
     width: 165px;
     height: 165px;
+    line-height: 165px;
     border-radius: 6px;
     cursor: pointer;
     box-shadow: 0px 0px 10px #161616;
+    background-color: var(--text-color);
 }
 
 .image-text-tile .cover:hover {

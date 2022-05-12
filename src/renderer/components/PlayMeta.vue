@@ -9,6 +9,11 @@ const { currentTrack, mmssCurrentTime } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useMainViewStore())
 const { showPlayingView, toggleCoverMask } = useMainViewStore()
 
+const trackMeta = (track) => {
+    let artistName = track.artistName()
+    if(artistName.length > 0) artistName = ' - ' + artistName
+    return track.title + artistName
+} 
 </script>
 
 <template>
@@ -22,9 +27,7 @@ const { showPlayingView, toggleCoverMask } = useMainViewStore()
                 </div>
             </div>
             <div class="title-wrap">
-                <div class="audio-title">
-                   {{ currentTrack.title }} - {{ currentTrack.artistName() }}
-                </div>
+                <div class="audio-title" v-html="trackMeta(currentTrack)"></div>
                 <div class="time-volume-wrap">
                     <AudioTime :current="mmssCurrentTime" :duration="currentTrack.mmssDuration()"></AudioTime>
                     <VolumeBar class="volume-bar"></VolumeBar>
@@ -63,6 +66,10 @@ const { showPlayingView, toggleCoverMask } = useMainViewStore()
     top: 0px;
     left: 0px;
     z-index: 1;
+}
+
+.play-meta .audio-cover {
+    background-color: var(--text-color);
 }
 
 .play-meta .cover-mask {

@@ -34,7 +34,9 @@ const visitAlbumDetail = (platform, id) => {
 </script>
 
 <template>
-    <span @click="visitAlbumDetail(platform, data.id)" class="album-ctl">{{ data.name }}</span>
+    <span @click="visitAlbumDetail(platform, data.id)" 
+        class="album-ctl" v-html="data.name" > 
+    </span>
 </template>
 
 <style>

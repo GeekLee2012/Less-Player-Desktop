@@ -1,0 +1,19 @@
+:root[theme='light'] {
+    /* 全局背景 */
+    --bg-color: #eaeaea;
+    /* 文本 */
+    --text-family: STHeitiSC-Medium, "Heiti SC Medium";
+    --text-size: 15px;
+    --text-color: #313131;
+    --text-sub-color: #989898;
+    /* 按钮 */
+    --svg-color: #eaeaea;
+    --svg-text-color: #eaeaea;
+    --btn-bg: linear-gradient(to right, #1ca388, #28c83f);
+    --btn-hover-bg: linear-gradient(to top right, #2edfa3, #28c83f) !important;
+    /* 进度条 */
+    --progress-track-bg: linear-gradient(to right, #464646, #666) !important;
+    --progress-bg: linear-gradient(to top right, #2edfa3, #28c83f);
+    /*滚动条*/
+    --scrollbar-thumb-bg: #666;
+  }

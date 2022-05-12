@@ -4,6 +4,7 @@ import { NetEase } from '../../vendor/netease';
 import { KuWo } from '../../vendor/kuwo';
 import { KuGou } from '../../vendor/kugou';
 import { DouBan } from '../../vendor/douban';
+import { RadioCN } from '../../vendor/radiocn';
 import { LocalMusic } from '../../vendor/localmusic';
 
 //音乐平台
@@ -39,6 +40,11 @@ const platforms = [
         online: true
     },
     { 
+        code: RadioCN.CODE,
+        name: '央广云听',
+        online: true
+    },
+    { 
         code: LocalMusic.CODE,
         name: '本地歌曲',
         online: false
@@ -54,6 +60,7 @@ const venders = {
     kuwo: KuWo,
     kugou: KuGou,
     douban: DouBan,
+    radiocn: RadioCN,
     local: LocalMusic
 }
 
@@ -122,7 +129,7 @@ export const usePlatformStore = defineStore('platform', {
             return this.isPlatformValid(platform) && platform.trim() == DouBan.CODE
         },
         isArtistDetailVisitable(platform) {
-            return !this.isDouBan(platform)
+            return this.isPlatformValid(platform) 
         },
         isAlbumDetailVisitable(platform) {
             return !this.isDouBan(platform)

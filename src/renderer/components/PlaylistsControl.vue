@@ -1,22 +1,46 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import PaginationTiles from './PaginationTiles.vue';
+import { usePlatformStore } from '../store/platformStore';
+import { usePlayStore } from '../store/playStore';
+import EventBus from '../../common/EventBus';
 
 const props = defineProps({
     data: Array
 })
 
 const router = useRouter()
+const { getVender, isPlatformValid } = usePlatformStore()
+const { addTrack, playTrack, resetQueue } = usePlayStore()
 
-const visitItem = (platform, id) => {
-    const platformValid = platform && (platform.trim().length > 0)
-    const idValid = (id != 0)
+const visitItem = (item) => {
+    const platform = item.platform
+    const id = item.id
+    const platformValid = isPlatformValid(platform)
+    const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
-    if(visitable) {
+    if(item.isRadioType) { //电台歌单
+        if(item.isFMRadio) { //FM广播
+            EventBus.emit('radio-play', item.channel)
+            return
+        }
+        //音乐电台
+        nextRadioTrack(platform, id)
+    } else if(visitable) { //普通歌单
         router.push('/playlist/' + platform + "/" + id)
     }
 }
 
+const nextRadioTrack = (platform, channel, track) => {
+    if(!track || !track.hasId()) resetQueue()
+    getVender(platform).nextRadioTrack(channel, track).then(result => {
+        if(!result || !result.hasId()) return 
+        addTrack(result)
+        playTrack(result)
+    })
+}
+
+EventBus.on('radio-nextTrack', track => nextRadioTrack(track.platform, track.channel, track))
 </script>
 
 <template>
@@ -26,7 +50,7 @@ const visitItem = (platform, id) => {
                 <ImageTextTile v-for="item in data" 
                     :cover="item.cover" 
                     :title="item.title"
-                    @click="visitItem(item.platform, item.id)" >
+                    @click="visitItem(item)" >
                 </ImageTextTile>
             </template>
         </PaginationTiles>

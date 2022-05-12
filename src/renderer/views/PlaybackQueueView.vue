@@ -3,11 +3,12 @@ import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
 import { usePlatformStore } from '../store/platformStore';
+import { United } from '../../vendor/united';
 import EventBus from '../../common/EventBus';
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
-const { resetQueue, playTrack, playNextTrack } = usePlayStore()
-const { getVender, isKuGou } = usePlatformStore()
+const { resetQueue, playTrack } = usePlayStore()
+const { getVender } = usePlatformStore()
 
 const targetPlaying = () => {
     if(queueTracksSize < 1) return 
@@ -23,15 +24,23 @@ const clearAll = () => {
 }
 
 const loadLyric = (track) => {
+    if(!track) return 
+    if(track.hasLyric()) {
+        EventBus.emit('track-lyricLoaded', track)
+        return 
+    }
     const platform = track.platform
     const vender = getVender(platform);
     if(!vender) return 
-    vender.lyric(track.id, track).then(result => {
-        //console.log(result)
-        if(result) {
-            track.lyric = result
-        }
-    })
+    vender.lyric(track.id, track).then(result => assignLyric(track, result))
+}
+
+const assignLyric = (track, lyric) => {
+    //track.lyric = result
+    if(!track) return
+    if(!lyric) return
+    Object.assign(track, { lyric })
+    EventBus.emit('track-lyricLoaded', track)
 }
 
 const initAndPlayTrack = (track) => {
@@ -39,23 +48,28 @@ const initAndPlayTrack = (track) => {
     const platform = track.platform
     const vender = getVender(platform);
     if(!vender) return
-    vender.playDetail(track.id, track).then(result => {
+    vender.playDetail(track.id, track).then(async result => {
         console.log(result)
         if(!track.hasUrl()) track.url = result.url
+        //if(!track.hasUrl()) track = await United.transferTrack(track) 
         if(!track.hasUrl()) {
             //TODO 频繁切换下一曲，对音乐平台不友好
             //if(queueTracksSize.value > 1) playNextTrack()
-            return 
+            return
         }
-        if(!track.hasLyric()) track.lyric = result.lyric
-        if(!track.hasCover()) track.cover = result.cover
+        if(!track.hasLyric()) assignLyric(track, result.lyric)
+        if(!track.hasCover()) Object.assign(track, { cover: result.cover })
+        if(track.artistNotCompleted && result.artist) {
+            Object.assign(track, { artist: result.artist })
+            EventBus.emit('track-artistUpdated', { trackId: track.id, artist: track.artist })
+        }
         playTrack(track)
-        //if(!track.hasLyric()) EventBus.emit('lyric-load', track)
-        if(!track.hasLyric()) loadLyric(track)
+        loadLyric(track)
     })
 }
 
 EventBus.on('track-changed', track => initAndPlayTrack(track))
+EventBus.on('track-loadLyric', track => loadLyric(track))
 </script>
 
 <template>

@@ -117,6 +117,7 @@ onMounted(() => {
 
 onActivated(() => restoreScrollState())
 
+//TODO
 watch(currentPlatformCode, (nv, ov) => {
     resetCurrentCategoryItem()
     resetPagination()

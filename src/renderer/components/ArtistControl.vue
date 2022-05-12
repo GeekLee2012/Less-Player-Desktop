@@ -1,5 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
+import EventBus from '../../common/EventBus';
+import { Track } from '../../common/Track';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { useMainViewStore } from '../store/mainViewStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -7,17 +9,25 @@ import { usePlatformStore } from '../store/platformStore';
 const props = defineProps({
     visitable: Boolean,
     platform: String,
-    data: Array
+    data: Array,
+    trackId: String
 })
 
 const router = useRouter()
 const { hidePlayingView } = useMainViewStore()
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { isArtistDetailVisitable } = usePlatformStore()
+let updatedArtist = { trackId: '', artist: [] }
 
-const visitArtistDetail = (platform, id) => {
+const visitArtistDetail = (platform, id, index) => {
     const platformValid = isArtistDetailVisitable(platform)
-    const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
+    let idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
+    if(!idValid) { // 二次确认数据
+        if(updatedArtist.trackId == props.trackId) {
+            id = updatedArtist.artist[index].id
+            idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
+        }
+    }
     const visitable = props.visitable && platformValid && idValid
     platform = platform.trim()
     if(visitable) {
@@ -31,12 +41,19 @@ const visitArtistDetail = (platform, id) => {
     }
 }
 
+//前期接口未能提供完整数据，后期某个接口更新补全数据
+EventBus.on('track-artistUpdated', data => {
+    if(!data) return
+    updatedArtist = data
+})
 </script>
 
 <template>
     <div class="artist-ctl" v-show="data.length > 0" @click.stop="">
         <template v-for="(item, index) in data">
-            <span class="artist-item" @click="visitArtistDetail(platform, item.id)">{{ item.name }}</span>
+            <span @click="visitArtistDetail(platform, item.id, index)"
+                class="artist-item" v-html="item.name" >
+            </span>
             <template v-if="index < (data.length - 1)">、</template>
         </template>
     </div>

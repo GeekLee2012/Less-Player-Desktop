@@ -418,6 +418,7 @@ export class NetEase {
     //搜索: 歌曲
     static searchSongs(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
+            keyword = keyword.trim()
             const url = "https://music.163.com/weapi/cloudsearch/get/web"
             const param = searchParam(keyword, 1)
             const reqBody = weapi(param)

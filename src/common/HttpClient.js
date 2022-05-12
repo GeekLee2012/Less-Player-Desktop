@@ -19,7 +19,7 @@ const __get = (url, data, config, parseContentType) => {
             } catch(err) {
                 resolve(resp.data)
             }
-        }).catch(err => reject(err))
+        }).catch(error => reject(error))
     })
 }
 
@@ -35,7 +35,7 @@ const __post = (url, data, config, parseContentType) => {
             } catch(err) {
                 resolve(resp.data)
             }
-        }).catch(err => reject(err))
+        }).catch(error => reject(error))
     })
 }
 

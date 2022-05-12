@@ -6,7 +6,7 @@
 #### 开发测试环境
 * OS: macOS Big Sur、Windows 10（虚拟机）  
 * IDE: Visual Studio Code v1.66.2  
-* Electron: v18.0.0及以上  
+* Nodejs: v16.15.0 LTS  
 * 其他: 详见package.json  
 
 #### 主要功能
@@ -22,7 +22,7 @@
 
 #### 开发者说
 * 请预先安装好最新版Nodejs  
-* 为保证界面样式，请先检查和安装字体(Release版中有提供下载)  
+* 为保证界面样式，请先检查和安装字体(Release发行版中有提供下载)  
   macOS字体：STHeiti-Medium.ttc  
   Windows字体：STHeitiSC-Medium.ttf  
   

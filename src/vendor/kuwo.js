@@ -20,7 +20,7 @@ export class KuWo {
     static CODE = 'kuwo'
     static TOPLIST_CODE  = 'KW_RANKLIST'
     static TOPLIST_PREFIX  = 'TOP_'
-    static cacheToplists = new Map()
+    static CACHE_TOPLISTS = new Map()
 
     //全部分类
     static categories() {
@@ -30,7 +30,7 @@ export class KuWo {
             
             getJson(url, null, CONFIG).then(json => {
                 //console.log(json)
-                const defaultCategory = new Category("精选歌单")
+                const defaultCategory = new Category("精选")
                 defaultCategory.add("最新", '#new')
                 defaultCategory.add("最热", '#hot')
 
@@ -104,7 +104,7 @@ export class KuWo {
                 return
             }
             const url = "https://www.kuwo.cn/rankList"
-            KuWo.cacheToplists.clear()
+            KuWo.CACHE_TOPLISTS.clear()
             getDoc(url).then(doc => {
                 let scriptText = doc.querySelector('script').textContent
                 let key = 'window.__NUXT__='
@@ -123,7 +123,7 @@ export class KuWo {
                             detail.about = item.intro
                             result.data.push(detail)
 
-                            KuWo.cacheToplists.set(id, detail)
+                            KuWo.CACHE_TOPLISTS.set(id, detail)
                         })
                     }
                 }
@@ -146,7 +146,7 @@ export class KuWo {
             }
             getJson(url, reqBody, CONFIG).then(json => {
                 console.log(json)
-                const cache = KuWo.cacheToplists.get(id)
+                const cache = KuWo.CACHE_TOPLISTS.get(id)
                 const result = new Playlist(id, KuWo.CODE)
                 if(cache) {
                     result.cover = cache.cover
@@ -197,12 +197,14 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/v1/www/music/playUrl"
                 + "?mid=" + id + "&type=music" + "&httpsStatus=1&reqId=" + REQ_ID
+            const result = new Track(id, KuWo.CODE)
             getJson(url, null, CONFIG).then(json => {
                 console.log(json)
-                const result = new Track(id, KuWo.CODE)
                 if(json.data) {
                     result.url = json.data.url
                 }
+                resolve(result)
+            }).catch(error => {
                 resolve(result)
             })
         })
@@ -341,18 +343,22 @@ export class KuWo {
     //搜索: 歌曲
     static searchSongs(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
+            keyword = keyword.trim()
             const url = "https://www.kuwo.cn/api/www/search/searchMusicBykeyWord"
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
                 console.log(json)
-                const data = json.data.list.map(item => {
-                    const artist = [ { id: item.artistid, name: item.artist } ]
-                    const album = { id: item.albumid, name: item.album }
-                    const duration = item.duration * 1000
-                    const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, item.pic)
-                    return track
-                })
+                let data = []
+                if(json.code == 200) {
+                    data = json.data.list.map(item => {
+                        const artist = [ { id: item.artistid, name: item.artist } ]
+                        const album = { id: item.albumid, name: item.album }
+                        const duration = item.duration * 1000
+                        const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, item.pic)
+                        return track
+                    })
+                } 
                 const result = { offset, limit, page, data }
                 resolve(result)
             })

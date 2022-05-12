@@ -222,18 +222,28 @@ const switchTab = () => {
     }
 }
 
+const resetPagination = () => {
+    offset = 0
+    page = 1
+}
+
 const reloadAll = () =>  {
     resetAll()
+    loadAll()
+}
+
+const loadAll = () => {
     scrollToTop()
+    resetPagination()
     visitTab(0)
 }
 
 /*-------------- 各种监听 --------------*/
-onMounted(() => reloadAll())
-onActivated(() => reloadAll())
+onMounted(() => loadAll())
+onActivated(() => loadAll())
 watch(() => props.id , (nv, ov) => reloadAll())
 //watch(artistId, (nv, ov) => reloadAll())
-watch(activeTab, (nv,ov) => loadTab())
+watch(activeTab, (nv,ov) => switchTab())
 </script>
 
 <template>
@@ -243,8 +253,8 @@ watch(activeTab, (nv,ov) => loadTab())
                 <img class="cover" v-lazy="artistCover" />
             </div>
             <div class="right">
-                <div class="title">{{ artistName }}</div>
-                <div class="alias">{{ artistAlias }}</div>
+                <div class="title" v-html="artistName" ></div>
+                <div class="alias" v-html="artistAlias" ></div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="addHotSongs" v-show="isHotSongsTab()" text="播放热门歌曲"></PlayAddAllBtn>
                     <PlayAddAllBtn :leftAction="playAllSongs" :rightAction="addAllSongs" v-show="isAllSongsTab()"></PlayAddAllBtn>
@@ -254,16 +264,17 @@ watch(activeTab, (nv,ov) => loadTab())
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index }"
-                    v-for="(tab,index) in tabs" @click="visitTab(index)">
-                    {{ tab.name }}
+                    v-for="(tab,index) in tabs" 
+                    @click="visitTab(index)"
+                    v-html="tab.name" >
                 </span>
-                <span class="tab-tip">{{ tabTipText }}</span>
+                <span class="tab-tip" v-html="tabTipText" ></span>
             </div>
             <component :is="currentTabView" 
                 :data="tabData"
                 :platform="platform"
                 :artistVisitable="true" 
-                :albumVisitable="true">
+                :albumVisitable="true" >
             </component>
         </div>
     </div>

@@ -1,5 +1,3 @@
-// main.js
-
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain, Menu, dialog, powerMonitor, shell } = require('electron')
 const path = require('path')
@@ -20,77 +18,6 @@ const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
 const isDevEnv = true
 
 
-//创建浏览窗口
-const createWindow = () => {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 999,
-    height: 666,
-    minWidth: 999,
-    minHeight: 666,
-    titleBarStyle: 'hidden',
-    trafficLightPosition: { x: 15, y: 15 },
-    transparent: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      webSecurity: false  //TODO 有风险，暂时保留此方案，留待后期调整
-    }
-  })
-  
-  if(isDevEnv) {
-    mainWindow.loadURL("http://localhost:3000")
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools()
-  } else {
-    // Load the index.html of the app.
-    mainWindow.loadFile('dist/index.html')
-  }
-  //TODO
-  Menu.setApplicationMenu(Menu.buildFromTemplate(initMenuTemplate()))
-
-  mainWindow.once('ready-to-show', () => {
-    setWindowButtonVisibility(showSysTrafficLight)
-    mainWindow.show()
-  })
-
-  //TODO
-  const filter = { 
-    urls: [ 
-        "*://y.qq.com/*",
-        "*://*.y.qq.com/*", 
-        "*://music.163.com/*" ,
-        "*://*.kuwo.cn/*", 
-        "*://*.kugou.com/*",
-        "*://*.douban.com/*",
-        "*://*.doubanio.com/*"
-      ]
-  }
-  const webSession = mainWindow.webContents.session
-  webSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    overrideRequest(details)
-    callback({ requestHeaders: details.requestHeaders })
-  })
-
-  return mainWindow
-}
-
-//菜单
-const initMenuTemplate = () => {
-  let menuItems = [ { role: 'about' },
-    { role: 'toggleDevTools' },
-    { role: 'quit' } ]
-  if(!isDevEnv) menuItems = [ { role: 'quit' } ]
-  const appName = app.name.replace('-', '')
-  const template = [
-      ...[{
-        label: appName,
-        submenu: menuItems
-      }],
-  ]
-  return template
-}
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -106,7 +33,6 @@ app.whenReady().then(() => {
   })
 })
 
-
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
@@ -115,9 +41,7 @@ app.on('window-all-closed', () => {
   if(!isMacOS) app.quit()
 })
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
-
+//主进程事件监听
 ipcMain.on('app-quit', ()=> {
   app.quit()
 })
@@ -138,15 +62,6 @@ ipcMain.on('app-max', ()=> {
     //win.setFullScreen(true)
   }
 })
-
-const setWindowButtonVisibility = (visible) => {
-  if(!isMacOS) return
-  try {
-    app.mainWin.setWindowButtonVisibility(showSysTrafficLight && visible)
-  } catch (error) {
-    console.log(error)
-  }
-}
 
 ipcMain.on('show-winBtn', ()=> {
   setWindowButtonVisibility(true)
@@ -188,7 +103,90 @@ ipcMain.handle('lyric-load', async (e, ...args)=> {
   return readText(lyricFile)
 })
 
+/* 自定义函数 */
+//创建浏览窗口
+const createWindow = () => {
+  // Create the browser window.
+  const mainWindow = new BrowserWindow({
+    width: 999,
+    height: 666,
+    minWidth: 999,
+    minHeight: 666,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 15, y: 15 },
+    transparent: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      webSecurity: false  //TODO 有风险，暂时保留此方案，留待后期调整
+    }
+  })
+  
+  if(isDevEnv) {
+    mainWindow.loadURL("http://localhost:3000")
+    // Open the DevTools.
+    mainWindow.webContents.openDevTools()
+  } else {
+    // Load the index.html of the app.
+    mainWindow.loadFile('dist/index.html')
+  }
+  //菜单
+  Menu.setApplicationMenu(Menu.buildFromTemplate(initMenuTemplate()))
 
+  mainWindow.once('ready-to-show', () => {
+    setWindowButtonVisibility(showSysTrafficLight)
+    mainWindow.show()
+  })
+
+  //配置请求过滤
+  const filter = { 
+    urls: [ 
+        "*://*.qq.com/*",
+        "*://music.163.com/*" ,
+        "*://*.kuwo.cn/*", 
+        "*://*.kugou.com/*",
+        "*://*.douban.com/*",
+        "*://*.doubanio.com/*",
+        "*://*.ridio.cn/*",
+        "*://*.cnr.cn/*"
+      ]
+  }
+  const webSession = mainWindow.webContents.session
+  webSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    overrideRequest(details)
+    callback({ requestHeaders: details.requestHeaders })
+  })
+
+  return mainWindow
+}
+
+//菜单模板
+const initMenuTemplate = () => {
+  let menuItems = [ { role: 'about' },
+    { role: 'toggleDevTools' },
+    { role: 'quit' } ]
+  if(!isDevEnv) menuItems = [ { role: 'quit' } ]
+  const appName = app.name.replace('-', '')
+  const template = [
+      ...[{
+        label: appName,
+        submenu: menuItems
+      }],
+  ]
+  return template
+}
+
+//设置交通灯按钮可见性
+const setWindowButtonVisibility = (visible) => {
+  if(!isMacOS) return
+  try {
+    app.mainWin.setWindowButtonVisibility(showSysTrafficLight && visible)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+//随机字符串
 const randomText = (src, len) => {
   let result = []
   for (let i = 0; i < len; i++) {
@@ -230,8 +228,14 @@ const overrideRequest = (details) => {
   } else if(url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
-  }  else if(url.includes("douban")) {
+  } else if(url.includes("douban")) {
+    const choice = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz01234567890'
+    const bid = randomText(choice, 11)
     origin = "https://fm.douban.com/"
+    referer = origin
+    cookie = 'bid=' + bid + '; __utma=30149280.1685369897.1647928743.1648005141.1648614477.3; __utmz=30149280.1648005141.2.2.utmcsr=cn.bing.com|utmccn=(referral)|utmcmd=referral|utmcct=/; _pk_ref.100001.f71f=%5B%22%22%2C%22%22%2C1650723346%2C%22https%3A%2F%2Fmusic.douban.com%2Ftag%2F%22%5D; _pk_id.100001.f71f=5c371c0960a75aeb.1647928769.4.1650723346.1648618102.; ll="118306"; _ga=GA1.2.1685369897.1647928743; douban-fav-remind=1; viewed="2995812"; ap_v=0,6.0'
+  } else if(url.includes("radio.cn") || url.includes("cnr.cn")) {
+    origin = "http://www.radio.cn/"
     referer = origin
   }
 

@@ -24,7 +24,7 @@ const updateNavIndex = (index) => {
         <div id="drag-zone">
             <WinTrafficLightBtn v-show="!isMacOS"></WinTrafficLightBtn>
         </div>
-        <div id="platform">
+        <div id="platform-list">
             <ul>
                 <li v-for="(nav,index) in platforms" 
                     :class="{ active: currentPlatformIndex == index }"
@@ -53,14 +53,14 @@ const updateNavIndex = (index) => {
     margin-bottom: 6px;
 }
 
-#platform ul {
+#platform-list ul {
     list-style: none;
     text-align: left;
     line-height: 32px;
     padding-left: 10%;
 }
 
-#platform li {
+#platform-list li {
     text-decoration: none;
     width: 75%;
     margin-bottom: 10.5px;
@@ -69,11 +69,11 @@ const updateNavIndex = (index) => {
     border-radius: 5px;
 }
 
-#platform li:hover {
+#platform-list li:hover {
     background-color: #464646 !important;
 }
 
-#platform .active {
+#platform-list .active {
     background: linear-gradient(to top right, #28c83f, #1ca388);
 }
 

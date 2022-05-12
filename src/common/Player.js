@@ -4,6 +4,7 @@ import EventBus from '../common/EventBus';
 
 let singleton = null
 
+//追求简洁、组合式API
 export class Player {
     
     constructor(track) {
@@ -11,10 +12,21 @@ export class Player {
     }
 
     static get() {
-        if(!singleton) {
-            singleton = new Player()
-        }
+        if(!singleton) singleton = new Player()
         return singleton
+    }
+
+    /* 初始化并配置播放器 */
+    static initAndSetup() {
+        const player = Player.get()
+        player.on('suspend', () => player.pause())
+            .on('track-play', track => player.playTrack(track))
+            .on('track-togglePlay', () => player.togglePlay())
+            .on('track-seek', percent => player.seek(percent))
+            .on('volume-set', volume => player.volume(volume))
+            .on('track-stop', () => player.setCurrent(null))
+            .on('queue-empty', () => player.setCurrent(null))
+        return player
     }
 
     //播放
@@ -24,9 +36,9 @@ export class Player {
         if(!sound) {
             sound = this.currentTrack.howl = new Howl({
                 src: [ this.currentTrack.url ],
-                html5: false, //媒体文件基本不大，暂时取消设置
+                html5: true,
                 onplay: function() {
-                    requestAnimationFrame(self.step.bind(self));
+                    requestAnimationFrame(self.__step.bind(self))
                     EventBus.emit('track-state', PLAY_STATE.PLAYING)
                 },
                 onpause: function() {
@@ -36,31 +48,28 @@ export class Player {
                     EventBus.emit('track-state', PLAY_STATE.END)
                 },
                 onseek: function() {
-                    requestAnimationFrame(self.step.bind(self));
+                    requestAnimationFrame(self.__step.bind(self))
                 }
             })
         } 
-        sound.play();
+        sound.play()
     }
 
     //暂停
     pause() {
         if(!this.currentTrack) return 
         const sound = this.currentTrack.howl
-        if(sound) {
-            sound.pause();
-        }
+        if(sound) sound.pause()
     }
 
     togglePlay() {
         if(!this.currentTrack) return 
         const sound = this.currentTrack.howl
-        if(sound) {
-            if(sound.playing()) {
-                sound.pause()
-            } else {
-                sound.play()
-            }
+        if(!sound) return 
+        if(sound.playing()) {
+            sound.pause()
+        } else {
+            sound.play()
         }
     }
 
@@ -68,14 +77,18 @@ export class Player {
     stop() {
         if(!this.currentTrack) return 
         const sound = this.currentTrack.howl
-        if(sound) {
-            sound.stop();
-        }
+        if(sound) sound.stop()
     }
 
     setCurrent(track) {
         this.stop()
         this.currentTrack = track
+    }
+
+    playTrack(track) {
+        this.setCurrent(track)
+        console.log(track)
+        this.play()
     }
 
     volume(value) {
@@ -85,55 +98,24 @@ export class Player {
     seek(percent) {
         if(!this.currentTrack) return 
         const sound = this.currentTrack.howl
-        if(sound.playing()) {
-            sound.seek(sound.duration() * percent);
-        }
+        if(sound.playing()) sound.seek(sound.duration() * percent)
     }
-
-    step() {
+    
+    __step() {
         if(!this.currentTrack) return 
         // Get the Howl we want to manipulate.
-        const sound = this.currentTrack.howl;
+        const sound = this.currentTrack.howl
         // Determine our current seek position.
-        const seek = sound.seek() || 0;
+        const seek = sound.seek() || 0
         //console.log("seek: " + seek)
         EventBus.emit('track-pos', seek)
         // If the sound is still playing, continue stepping.
-        if (sound.playing()) {
-            requestAnimationFrame(this.step.bind(this));
-        }
+        if (sound.playing()) requestAnimationFrame(this.__step.bind(this))
     }
+    
+    on(event, handler) {
+        EventBus.on(event, handler)
+        return this
+    }
+
 }
-
-const player = Player.get()
-
-//TODO
-EventBus.on('suspend', () => {
-    player.pause()
-})
-
-EventBus.on('track-stop', track => {
-    player.setCurrent(null)
-})
-
-EventBus.on('track-play', track => {
-    player.setCurrent(track)
-    console.log(track)
-    player.play()
-})
-
-EventBus.on('track-togglePlay', () => {
-    player.togglePlay()
-})
-
-EventBus.on('track-seek', data => {
-    player.seek(data)
-})
-
-EventBus.on("volume-set", volume => {
-    player.volume(volume)
-})
-
-EventBus.on("queue-empty", volume => {
-    player.stop()
-})
