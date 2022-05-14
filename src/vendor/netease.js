@@ -168,7 +168,6 @@ export class NetEase {
                         result.data.push(detail)
                     }
                 });
-                //console.log(result)
                 resolve(result)
             })
         })
@@ -206,7 +205,6 @@ export class NetEase {
                         result.data.push(detail)
                     }
                 });
-                //console.log(result)
                 resolve(result)
             })
         })
@@ -236,7 +234,6 @@ export class NetEase {
 
                 url = "https://music.163.com/weapi/v3/song/detail"
                 param = trackIdsParam(ids.slice(offset, limit))
-                //console.log(param)
                 reqBody = weapi(param)
                 postJson(url, reqBody).then(json => {
                     const songs = json.songs
@@ -277,7 +274,6 @@ export class NetEase {
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
                 const lyric = json.lrc.lyric
-                //console.log(lyric)
                 if(lyric) {
                     const result = Lyric.parseFromText(lyric)
                     resolve(result)
@@ -381,7 +377,6 @@ export class NetEase {
                 let company = ''
                 let about = ''
                 if(introEl.length > 1) {
-                    console.log(introEl[1])
                     publishTime = introEl[1].lastChild.textContent
                 }
                 if(introEl.length > 2) {
@@ -423,7 +418,6 @@ export class NetEase {
             const param = searchParam(keyword, 1)
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
-                console.log(json)
                 const list = json.result.songs
                 const data = list.map(item => {
                     const artist = item.ar.map(e => ({ id: e.id, name: e.name }))
@@ -444,7 +438,6 @@ export class NetEase {
             const param = searchParam(keyword, 1000)
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
-                console.log(json)
                 const list = json.result.playlists
                 const data = list.map(item => {
                     const playlist = new Playlist(item.id, NetEase.CODE, item.coverImgUrl, item.name)
@@ -463,7 +456,6 @@ export class NetEase {
             const param = searchParam(keyword, 10)
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
-                console.log(json)
                 const list = json.result.albums
                 const data = list.map(item => {
                     const album = new Album(item.id, NetEase.CODE, item.name, item.picUrl)
@@ -483,7 +475,6 @@ export class NetEase {
             const param = searchParam(keyword, 100)
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
-                console.log(json)
                 const list = json.result.artists
                 const result = { offset, limit, page, data: [] }
                 if(list) {

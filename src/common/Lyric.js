@@ -45,7 +45,6 @@ export class Lyric {
                 line = line.trim()
                 if(line.length < 1) return 
                 if(!line.startsWith(TAG_BEGIN) || !line.includes(TAG_END)) return
-                //console.log("-->" + line)
                 if(Lyric.__isTimeDataLine(line)) {
                     Lyric.__parseTimeData(lyric, line)
                 } else {

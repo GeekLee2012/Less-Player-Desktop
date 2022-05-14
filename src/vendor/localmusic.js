@@ -26,7 +26,6 @@ export class LocalMusic {
                 if(url.includes(FILE_PREFIX)) {
                     url = url.replace(FILE_PREFIX, '')
                 }
-                console.log('load-lyric: ' + url)
                 const text = await ipcRenderer.invoke('lyric-load', url)
                 const result = Lyric.parseFromText(text)
                 resolve(result)

@@ -5,7 +5,7 @@ const DEFAULT_COVER = 'default_cover.png'
 
 export class Track {
     constructor(id, platform, title, artist, album, duration, cover) {
-        this.id = id
+        this.id = id ? (id + '') : ''
         this.platform = platform
         this.title = title
         //[ {id, name} ]

@@ -35,7 +35,6 @@ const nextPage = () =>  {
 const loadCategories = () => {
     categories.length = 0
     let cached = currentCategory()
-    //console.log("cached: " + cached)
     if(!cached) {
         const vender = currentVender()
         if(!vender) return 
@@ -59,7 +58,6 @@ const loadContent = () => {
     const limit = pagination.limit
     const page = pagination.page
     vender.square(cate, offset, limit, page).then(result => {
-        console.log(result)
         playlists.push(...result.data)
     })
 }
@@ -91,7 +89,6 @@ const bindScrollListener = () => {
 
 const markScrollState = () => {
     markScrollTop = squareContentRef.value.scrollTop
-    //console.log("markScrollState: " + markScrollTop)
 }
 
 const resetScrollState = () => {

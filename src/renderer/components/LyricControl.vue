@@ -24,7 +24,6 @@ const renderAndScrollLyric = (secs) => {
     const MMssSSS = toMMssSSS(secs * 1000)
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     const lines = lyricWrap.querySelectorAll('.line')
-    //console.log(secs + ", " + MMssSSS + "," + lines.length)
     //hightlight
     for(var i = 0; i < lines.length; i++) {
         const time = lines[i].getAttribute('time-key')
@@ -84,11 +83,6 @@ const reloadLyricData = (track) => {
     lyricData.value = track.lyricData()
 }
 
-const toString = (id) => {
-    if(typeof(id) == 'string') return id
-    return id ? (id + '') : ''
-}
-
 watch(() => props.track, (nv, ov) => reloadLyricData(nv))
 
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
@@ -104,7 +98,7 @@ EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
                     <ArtistControl :visitable="true" 
                         :platform="track.platform" 
                         :data="track.artist"
-                        :trackId="toString(track.id)"
+                        :trackId="track.id"
                         class="ar-ctl">
                     </ArtistControl>
                 </span>

@@ -72,7 +72,6 @@ export class RadioPlayer {
     }
 
     setChannel(channel) {
-        console.log(channel)
         this.pause()
         this.channel = channel
         this.channelChanged = true

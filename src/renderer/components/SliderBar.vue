@@ -36,7 +36,6 @@ const scrollProgress = (e) => {
     let tmp = value * 100
     tmp += step
     const percent = (tmp / 100).toFixed(2)
-    //console.log(direction + ":"+ step + " : " + tmp)
     updateProgress(percent)
     if(props.onscroll) {
         props.onscroll(value)
@@ -47,7 +46,6 @@ const updateProgress = (percent) => {
     percent = percent * 100
     percent = percent > 0 ? percent : 0
     percent = percent < 100 ? percent : 100
-    //console.log("adjust percent: " + percent)
     progressRef.value.style.width = percent + "%"
     thumbRef.value.style.left = percent + "%"
     value = (percent / 100).toFixed(2)
@@ -72,7 +70,6 @@ const updateProgressByDeltaWidth = (delta) => {
     const oPercent = parseFloat(progressRef.value.style.width.replace('%', '')) / 100
     if(isNaN(oPercent)) return 
     let oWidth = totalWidth * oPercent
-    //console.log("old: " + oPercent + ", width: " + oWidth + ", delta: " + delta)
     updateProgressByWidth(oWidth + delta)
 }
 
@@ -97,7 +94,6 @@ const dragProgress = (e)=> {
     if(onDrag) {
         //console.log(e)
         const deltaX = e.screenX - fromX
-        console.log(deltaX)
         updateProgressByDeltaWidth(deltaX)
         fromX = e.screenX
     }

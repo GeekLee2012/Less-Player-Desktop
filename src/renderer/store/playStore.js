@@ -141,11 +141,11 @@ export const usePlayStore = defineStore('play', {
             } else {
                 this.__changeTrack(track)
             }
-            console.log(this.currentTrack)
         },
         playPrevTrack() {
             //TODO
             const maxSize = this.queueTracksSize
+            if(this.isFmMode && (maxSize > 0)) this.setFmMode(false)
             if(maxSize < 1) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
@@ -161,14 +161,14 @@ export const usePlayStore = defineStore('play', {
             this.__changeTrack(this.currentTrack)
         },
         playNextTrack() {
-            if(this.isFmMode) this.setFmMode(false)
+            const maxSize = this.queueTracksSize
+            if(this.isFmMode && (maxSize > 0)) this.setFmMode(false)
 
             //TODO
             if(this.currentTrack.isRadioType) {
                 EventBus.emit('radio-nextTrack', this.currentTrack)
                 return 
             }
-            const maxSize = this.queueTracksSize
             if(maxSize < 1) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:

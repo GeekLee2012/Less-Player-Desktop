@@ -51,10 +51,8 @@ async function parseTracks(audioFiles) {
     const tracks = []
     for(const audioFile of audioFiles) {
         const metadata = await mm.parseFile(audioFile, { duration: true })
-        //console.log(metadata)
         const artist = []
         let title = getSimpleFileName(audioFile)
-        console.log(audioFile)
         const album = { id: 0, name: '' }
         let coverData = 'default_cover.png'
         let duration = 0
@@ -123,7 +121,6 @@ function decodeText(text) {
 function readText(file) {
     try {
         const data = readFileSync(file)
-        console.log('读取歌词')
         return decodeText(data.toString())
     } catch(error) {
         console.log(error)

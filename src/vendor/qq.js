@@ -323,7 +323,7 @@ export class QQ {
             }
             getJson(url, reqBody).then(json => {
                 const result = []
-                //console.log(json)
+                //
                 const cateNameCached = []
                 const list = json.data.categories
                 list.forEach(cate => {
@@ -358,7 +358,7 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = topListReqBody()
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 
                 const groupList = json.req_1.data.group
                 groupList.forEach(group => {
@@ -383,7 +383,7 @@ export class QQ {
             const topid = parseInt(id.replace(QQ.TOPLIST_PREFIX, ''))
             const reqBody = topListDetailReqBody(topid, offset, limit, page)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const playlist = json.req_1.data.data
 
                 result.id = playlist.topId
@@ -457,7 +457,7 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = radioListReqBody()
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const radioList = json.req_1.data.radio_list
                 radioList.forEach(group => {
                     group.list.forEach(item => {
@@ -496,7 +496,7 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = radioSonglistReqBody(channel, firstplay)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const list = json.req_1.data.track_list
                 list.forEach(item => {
                     const artist = item.singer.map(ar => ({id: ar.mid, name: ar.name }))
@@ -509,7 +509,6 @@ export class QQ {
                     QQ.RADIO_CACHE.data.push(cache)
                 })
                 result = QQ.RADIO_CACHE.data[0]
-                //console.log(QQ.RADIO_CACHE)
                 resolve(result)
             })
         })
@@ -536,7 +535,7 @@ export class QQ {
                 ein: (offset + limit - 1)
             }
             getJson(url, reqBody).then(json => {
-                //console.log(json)
+                //
                 const result = { offset, limit, page, total: 0, data: [] }
                 const list = json.data.list
                 list.forEach(item => {
@@ -567,7 +566,7 @@ export class QQ {
                 loginUin: 0,
             }
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const playlist = json.cdlist[0]
 
                 result.id = playlist.dissid
@@ -604,10 +603,10 @@ export class QQ {
                 })
             }
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const trackInfo = json.songinfo.data.track_info
                 QQ.getVKeyJson(trackInfo).then(json => {
-                    //console.log(json)
+                    //
                     const data = json.req_1.data;
                     const urlInfo = data.midurlinfo[0]
                     const vkey = urlInfo.vkey.trim()
@@ -627,7 +626,7 @@ export class QQ {
             let url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = vkeyReqBody(trackInfo)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 resolve(json)
             })
         })
@@ -639,13 +638,11 @@ export class QQ {
             const url = "http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg"
             const reqBody = lyricReqBody(id) 
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 let lyric = json.lyric
-                //console.log(lyric)
                 if(lyric) {
                     lyric = CryptoJS.enc.Base64.parse(lyric).toString(CryptoJS.enc.Utf8)
                     lyric = escapeHtml(lyric)
-                    //console.log(lyric)
                     const result = Lyric.parseFromText(lyric)
                     resolve(result)
                 } else {
@@ -697,7 +694,6 @@ export class QQ {
                 outCharset: 'utf8'
             }
             getRaw(url, reqBody).then(xml => {
-                console.log(xml)
                 const result = { id, name:'', cover:'', data:[] }
                 resolve(result)
             })
@@ -713,7 +709,7 @@ export class QQ {
             const page = 1
             const reqBody = artistHotSongReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const result = { id, offset, limit, page, data: [] }
                 const songList = json.req_1.data.songlist
                 songList.forEach(item => {
@@ -737,7 +733,7 @@ export class QQ {
             const url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = artistAlbumReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const result = { id, offset, limit, page, data: [] }
                 const albumList = json.req_1.data.list
                 albumList.forEach(item => {
@@ -772,7 +768,7 @@ export class QQ {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')
                     const json = JSON.parse(scriptText)
-                    console.log(json)
+                    
                     
                     const detail = json.detail
                     result.title = detail.albumName
@@ -793,7 +789,7 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&format=json&inCharset=utf8&outCharset=utf8"
             const reqBody = albumAllSongsReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const result = new Album(id)
                 const songList = json.req_1.data.songList
                 songList.forEach(item => {
@@ -817,7 +813,7 @@ export class QQ {
             const url = "http://c.y.qq.com/soso/fcgi-bin/client_search_cp"
             const reqBody = searchParam(keyword, 0, offset, limit, page)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const list = json.data.song.list
                 const data = list.map(item => {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
@@ -847,7 +843,7 @@ export class QQ {
                 query: keyword
             }
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const list = json.data.list
                 const data = list.map(item => {
                     const playlist = new Playlist(item.dissid, QQ.CODE, item.imgurl, escapeHtml(item.dissname))
@@ -865,7 +861,7 @@ export class QQ {
             const url = "http://c.y.qq.com/soso/fcgi-bin/client_search_cp"
             const reqBody = searchParam(keyword, 8, offset, limit, page)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const list = json.data.album.list
                 const data = list.map(item => {
                     const album = new Album(item.albumMID, QQ.CODE, item.albumName, item.albumPic)
@@ -884,7 +880,7 @@ export class QQ {
             const url = "http://c.y.qq.com/soso/fcgi-bin/client_search_cp"
             const reqBody = searchParam(keyword, 9, offset, limit, page)
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const list = json.data.singer.list
                 const result = { offset, limit, page, data: [] }
                 if(list) {

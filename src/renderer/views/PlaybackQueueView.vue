@@ -49,7 +49,6 @@ const initAndPlayTrack = (track) => {
     const vender = getVender(platform);
     if(!vender) return
     vender.playDetail(track.id, track).then(async result => {
-        console.log(result)
         if(!track.hasUrl()) track.url = result.url
         //if(!track.hasUrl()) track = await United.transferTrack(track) 
         if(!track.hasUrl()) {

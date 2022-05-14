@@ -87,7 +87,6 @@ export class Player {
 
     playTrack(track) {
         this.setCurrent(track)
-        console.log(track)
         this.play()
     }
 
@@ -107,7 +106,6 @@ export class Player {
         const sound = this.currentTrack.howl
         // Determine our current seek position.
         const seek = sound.seek() || 0
-        //console.log("seek: " + seek)
         EventBus.emit('track-pos', seek)
         // If the sound is still playing, continue stepping.
         if (sound.playing()) requestAnimationFrame(this.__step.bind(this))

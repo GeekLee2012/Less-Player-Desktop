@@ -134,10 +134,9 @@ export class KuGou {
                     key = '(function()'
                     scriptText = scriptText.split(key)[0].trim()
                     scriptText = scriptText.substring(0, scriptText.length - 1)
-                    //console.log(scriptText)
                     const json = JSON.parse(scriptText)
 
-                    console.log(json)
+                    
                     json.forEach(item => {
                         const artist = [ { id: '', name: item.author_name } ]
                         const album = { id: item.album_id, name: '' }
@@ -177,9 +176,8 @@ export class KuGou {
                     key = 'var tempArr ='
                     scriptText = scriptText.split(key)[0].trim()
                     scriptText = scriptText.substring(0, scriptText.length - 1)
-                    //console.log(scriptText)
                     const json = JSON.parse(scriptText)
-                    console.log(json)
+                    
 
                     json.forEach(item => {
                         if(item.songs.length < 1) return 
@@ -241,7 +239,7 @@ export class KuGou {
                 pagesize: limit
             }
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const list = json.data.songlist
                 list.forEach(item => {
                     if(!item.audio_info) return
@@ -257,7 +255,6 @@ export class KuGou {
                     KuGou.RADIO_CACHE.data.push(cache)
                 })
                 result = KuGou.RADIO_CACHE.data[0]
-                //console.log(QQ.RADIO_CACHE)
                 resolve(result)
             })
         })
@@ -305,7 +302,6 @@ export class KuGou {
         return new Promise((resolve, reject) => {
             const url = "https://www.kugou.com/yy/special/single/" + id + ".html"
             getDoc(url).then(doc => {
-                //console.log(doc)
                 let cover = doc.querySelector('.specialPage .pic img').getAttribute('_src')
                 cover = getCustomCover(cover)
                 const title = doc.querySelector('.specialPage .pic img').getAttribute('alt')
@@ -328,10 +324,8 @@ export class KuGou {
                     key = 'specialData ='
                     scriptText = scriptText.split(key)[0].trim()
                     scriptText = scriptText.substring(0, scriptText.length - 1)
-                    //console.log(scriptText)
                     const json = JSON.parse(scriptText)
-
-                    //console.log(json)
+                    
                     json.forEach(item => {
                         const artist = []
                         const album = { id: item.album_id, name: item.album_name }
@@ -360,12 +354,11 @@ export class KuGou {
         return new Promise((resolve, reject) => {
             const url = getDataUrl(track.hash, track.album.id)
             getJson(url).then(json => {
-                console.log(json)
+                
                 const result = new Track(id, KuGou.CODE)
                 result.url = json.data.play_url
                 result.cover = json.data.img
                 const lyricText = json.data.lyrics
-                //console.log(lyricText)
                 result.lyric = Lyric.parseFromText(lyricText)
                 result.artist = json.data.authors.map(ar => ({ id: ar.author_id, name: ar.author_name}))
                 resolve(result)
@@ -407,7 +400,7 @@ export class KuGou {
                 + "?r=singer/song&sid=" + id 
                 + "&p=" + page + "&t=" + Date.now()
             postJson(url).then(json => {
-                console.log(json)
+                
                 const total = json.total
                 const data = []
                 const list = json.data
@@ -432,7 +425,7 @@ export class KuGou {
                 + "?r=singer/album&sid=" + id 
                 + "&p=" + page + "&t=" + Date.now()
             postJson(url).then(json => {
-                console.log(json)
+                
                 const total = json.total
                 const data = []
                 const list = json.data
@@ -452,10 +445,8 @@ export class KuGou {
         return new Promise((resolve, reject) => {
             const url = "https://www.kugou.com/album/" + id + ".html"
             getDoc(url).then(doc => {
-                //console.log(doc)
                 const cover = doc.querySelector('.pic img').getAttribute('_src')
                 const detailItems = doc.querySelector('.detail').childNodes
-                //detailItems.forEach(i => console.log(i))
                 const title = detailItems.item(2).textContent
                 const artistName = detailItems.item(6).textContent
                 const publishTime = detailItems.item(12).textContent
@@ -480,9 +471,8 @@ export class KuGou {
                     key = '];'
                     scriptText = scriptText.split(key)[0].trim()
                     scriptText = scriptText + "]"
-                    //console.log(scriptText)
                     const json = JSON.parse(scriptText)
-                    //console.log(json)    
+                        
                     json.forEach(item => {
                         const artist = []
                         const album = { id: item.album_id, name: item.album_name }
@@ -523,11 +513,10 @@ export class KuGou {
             const url = "https://complexsearch.kugou.com/v2/search/song" + "?" + param + "&signature=" + signature
             
             getJson(url).then(jsonp => {
-                //console.log(jsonp)
                 let jsonText = jsonp.split(callbackFn + "(")[1].trim()
                 jsonText = jsonText.substring(0, jsonText.length - 1)
                 const json = JSON.parse(jsonText)
-                console.log(json)
+                
 
                 const data = json.data.lists.map(item => {
                     const artist = item.Singers
@@ -557,11 +546,10 @@ export class KuGou {
             const url = "https://complexsearch.kugou.com/v1/search/special" + "?" + param + "&signature=" + signature
             
             getJson(url).then(jsonp => {
-                //console.log(jsonp)
                 let jsonText = jsonp.split(callbackFn + "(")[1].trim()
                 jsonText = jsonText.substring(0, jsonText.length - 1)
                 const json = JSON.parse(jsonText)
-                console.log(json)
+                
 
                 const data = json.data.lists.map(item => {
                     const track = new Playlist(item.specialid, KuGou.CODE, getCustomCover(item.img), item.specialname, item.intro)

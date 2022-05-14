@@ -28,12 +28,10 @@ export class United {
                 const songs = await vendor.searchSongs(keyword)
                 candidates = songs.data
                 //candidates = United.matchAndSort(track, candidates)
-                //console.log(candidates)
                 if(candidates.length < 1) continue
                 for(var j = 0; j < top; j++) {
                     const candidate = candidates[j]
                     result = await vendor.playDetail(candidate.id, candidate)
-                    //console.log(result)
                     if(!result.hasUrl()) continue
 
                     const lyric = await vendor.lyric(candidate.id, candidate)
@@ -44,7 +42,6 @@ export class United {
                     break whereDreamBegins
                 }
             }
-            console.log(track)
             console.log('<------ Transfer End ------>')
             resolve(track)
         })

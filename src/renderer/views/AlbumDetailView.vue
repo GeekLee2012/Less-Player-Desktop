@@ -74,7 +74,6 @@ const getAlbumDetail = () => {
     if(!vender) return
     const id = albumId.value
     vender.albumDetail(id).then(result => {
-        console.log(result)
         const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
         updateAbout(result.about)
@@ -97,7 +96,6 @@ const loadAllSongs = ()=> {
     if(!vender) return
     const id = albumId.value
     vender.albumDetailAllSongs(id, 0, 100).then(result => {
-        console.log(result)
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         currentTabView.value = SongListControl

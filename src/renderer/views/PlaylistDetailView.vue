@@ -41,7 +41,6 @@ const loadContent = () => {
     const vender = getVender(props.platform)
     if(vender) {
         vender.playlistDetail(props.id, offset, limit, page).then(result => {
-            console.log(result)
             Object.assign(detail, result)
             listSize.value = detail.data.length
         })

@@ -100,7 +100,6 @@ export class RadioCN {
             }
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
-                console.log(json)
                 
                 const list = json.data.top
                 list.forEach(item => {
@@ -147,7 +146,6 @@ export class RadioCN {
             const result = { offset, limit, page, total: 0, data: [] }
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
-                console.log(json)
                 
                 const list = json.data.odchannel
                 list.forEach(item => {
@@ -171,14 +169,12 @@ export class RadioCN {
             const reqBody = {
                 callback,
                 od_id: parseInt(id),
-                start: offset + 1,
+                start: page,
                 rows: limit,
                 _: ts
             }
             getJson(url, reqBody).then(jsonp => {
-                //console.log(jsonp)
                 const json = parseJson(jsonp, callback)
-                console.log(json)
                 const playlist = json.data.odchannel
 
                 result.id = playlist.id

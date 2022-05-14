@@ -6,7 +6,7 @@ const router = useRouter()
 const { updateCurrentPlatformByCode } = usePlatformStore()
 
 router.beforeResolve((to, from) => {
-    console.log("当前路由:" + to.path)
+    console.log("[ ROUTE ] ==>>> " + to.path)
     highlightPlatform(to)
 })
 

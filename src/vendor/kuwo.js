@@ -29,7 +29,7 @@ export class KuWo {
                     + "?httpsStatus=1&reqId=" + REQ_ID
             
             getJson(url, null, CONFIG).then(json => {
-                //console.log(json)
+                
                 const defaultCategory = new Category("精选")
                 defaultCategory.add("最新", '#new')
                 defaultCategory.add("最热", '#hot')
@@ -72,7 +72,6 @@ export class KuWo {
                     + "&id=" + cate + "&httpsStatus=1&reqId=" + REQ_ID
             }
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
                 const pagination = json.data
                 //const page = pagination.pn
                 const total = pagination.total
@@ -111,7 +110,7 @@ export class KuWo {
                 if(scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
                     const json = eval(scriptText)
-                    console.log(json)
+                    
 
                     //参考官方页面
                     const bangList = json.data[0].bangMenu
@@ -145,7 +144,7 @@ export class KuWo {
                 reqId: REQ_ID
             }
             getJson(url, reqBody, CONFIG).then(json => {
-                console.log(json)
+                
                 const cache = KuWo.CACHE_TOPLISTS.get(id)
                 const result = new Playlist(id, KuWo.CODE)
                 if(cache) {
@@ -174,7 +173,7 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo" 
                     + "?pid=" + id + "&pn=" + page + "&rn=" + limit + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
+                
                 const result = new Playlist(id, KuWo.CODE, json.data.img500, json.data.name)
                 result.about = json.data.info
                 result.total = json.data.total
@@ -199,7 +198,7 @@ export class KuWo {
                 + "?mid=" + id + "&type=music" + "&httpsStatus=1&reqId=" + REQ_ID
             const result = new Track(id, KuWo.CODE)
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
+                
                 if(json.data) {
                     result.url = json.data.url
                 }
@@ -216,7 +215,7 @@ export class KuWo {
             const url = "http://m.kuwo.cn/newh5/singles/songinfoandlrc"
                 + "?musicId=" + id + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
+                
                 const result = new Lyric()
                 const lrclist = json.data.lrclist
                 if(lrclist) {
@@ -243,7 +242,7 @@ export class KuWo {
                 if(scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
                     const json = eval(scriptText)
-                    //console.log(json)
+                    
 
                     const singerInfo = json.data[0].singerInfo
                     name = escapseHtml(singerInfo.name)
@@ -314,7 +313,7 @@ export class KuWo {
                 if(scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
                     const json = eval(scriptText)
-                    console.log(json)
+                    
                     
                     const pageData = json.data[0].pageData
                     const albumInfo = json.data[0].albumInfo
@@ -348,7 +347,7 @@ export class KuWo {
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
+                
                 let data = []
                 if(json.code == 200) {
                     data = json.data.list.map(item => {
@@ -372,7 +371,7 @@ export class KuWo {
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
+                
                 const data = json.data.list.map(item => {
                     const playlist = new Playlist(item.id, KuWo.CODE, item.img, escapseHtml(item.name))
                     return playlist
@@ -390,7 +389,7 @@ export class KuWo {
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
+                
                 const data = json.data.albumList.map(item => {
                     const artist = [ { id: item.artistid, name: item.artist } ]
                     const albumName = escapseHtml(item.album)
@@ -411,7 +410,7 @@ export class KuWo {
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
+                
                 const data = json.data.artistList.map(item => {
                     return {
                         id: item.id,

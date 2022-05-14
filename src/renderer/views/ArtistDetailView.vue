@@ -93,7 +93,7 @@ const getArtistDetail = () => {
     if(!vender) return
     const id = artistId.value
     vender.artistDetail(id).then(result => {
-        console.log(result)
+        
         updateArtist(result.name, result.cover)
         if(result.about) {
             updateAbout(result.about)
@@ -111,7 +111,7 @@ const loadHotSongs = () => {
     if(!vender) return
     const id = artistId.value
     vender.artistDetailHotSongs(id).then(result => {
-        console.log(result)
+        
         updateArtist(result.name, result.cover)
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
@@ -159,7 +159,6 @@ const loadAlbums = () => {
     const id = artistId.value
     //TODO
     vender.artistDetailAlbums(id, 0, 365, 1).then(result => {
-        console.log(result)
         updateAlbums(result.data)
         updateTabData(albums.value)
         currentTabView.value = AlbumListControl
@@ -177,7 +176,6 @@ const loadAbout = () => {
     if(!vender) return
     const id = artistId.value
     vender.artistDetailAbout(id).then(result => {
-        //console.log(result)
         updateAbout(result)
         updateTabData(result)
         updateTabTipText(0)

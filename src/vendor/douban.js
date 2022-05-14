@@ -49,8 +49,6 @@ export class DouBan {
             }
             const url = "https://fm.douban.com/j/v2/songlist/explore?type=hot&genre=" + cate + "&start=" + offset +"&limit=" + limit + "&sample_cnt=5"
             getJson(url).then(json => {
-                console.log(json)
-
                 const result = { offset, limit, page, total: 0, data: [] }
                 json.forEach(item => {
                     const cover = item.covers.large
@@ -69,9 +67,9 @@ export class DouBan {
             const result = { offset, limit, page, total: 0, data: [] }
             const url = "https://fm.douban.com/j/v2/rec_channels?specific=all"
             getJson(url).then(json => {
-                console.log(json)
+                
                 const channels = json.data.channels
-                //console.log(channels)
+                
                 //豆瓣精选兆赫
                 const recmmCover = "https://img2.doubanio.com/img/site/large/23424ce960155c2"
                 const recmmChannel = new Playlist(DouBan.MHZ_PREFIX + '-10', DouBan.CODE , recmmCover, '豆瓣精选')
@@ -79,7 +77,6 @@ export class DouBan {
                 result.data.push(recmmChannel)
                 //其他兆赫
                 Object.keys(channels).forEach(key => {
-                    //console.log(key + ": " + channels[key])
                     const cateName = CATEGORY_GROUP[key]
                     if(!cateName) return
                     const chnnItems = channels[key].map(item => {
@@ -102,12 +99,10 @@ export class DouBan {
             const result = { offset, limit, page, total: 0, data: [] }
             const url = "https://fm.douban.com/j/v2/artist/guess?limit=10&is_new_user=true"
             getJson(url).then(json => {
-                console.log(json)
                 const channels = json.artists
-                //console.log(channels)
+                
                 //其他兆赫
                 channels.forEach(item => {
-                    //console.log(key + ": " + channels[key])
                     const cover = item.avatar
                     const title = '艺术家| ' + item.name_usual + ' 系'
                     const playlist = new Playlist(DouBan.MHZ_PREFIX + item.channel, DouBan.CODE , cover, title)
@@ -124,7 +119,7 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/songlist/" + id + "?kbps=192"
             getJson(url).then(json => {
-                console.log(json)
+                
                 const result = new Playlist(id, DouBan.CODE, json.cover, json.title, url, json.intro)
                 const list = json.songs
                 list.forEach(item => {
@@ -147,7 +142,7 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/lyric" + "?sid=" + id + "&ssid=" + track.ssid
             getJson(url).then(json => {
-                console.log(json)
+                
                 const lyricText = json.lyric
                 track.lyric = Lyric.parseFromText(lyricText)
                 resolve(track)
@@ -164,12 +159,10 @@ export class DouBan {
                 ssid: track.ssid
             }
             getJson(url, reqBody).then(json => {
-                console.log(json)
                 let lyric = json.lyric
-                //console.log(lyric)
+                
                 const result = new Lyric()
                 if(lyric) {
-                    //console.log(lyric)
                     const result = Lyric.parseFromText(lyric)
                     resolve(result)
                 } else {
@@ -184,7 +177,7 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/artist/" + id + "/"
             getJson(url).then(json => {
-                console.log(json)
+                
                 const cover = json.avatar
                 const about = ''
                 
@@ -243,7 +236,7 @@ export class DouBan {
                 reqBody.apikey = ""
             }
             getJson(url, reqBody).then(json => {
-                console.log(json)
+                
                 const song = json.song[0]
                 const artist = song.singers.map(ar => ({ id: ar.id, name: ar.name }))
                 const album = { id: '', name: song.albumtitle }
@@ -265,7 +258,7 @@ export class DouBan {
             keyword = keyword.trim()
             const url = "https://fm.douban.com/j/v2/query/song?q=" + keyword + "&limit=" + limit
             getJson(url).then(json => {
-                console.log(json)
+                
                 const list = json.items
                 const data = list.map(item => {
                     const artist = item.singers.map(ar => ({ id: ar.id, name: ar.name }))
@@ -288,7 +281,7 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/query/songlist?q=" + keyword + "&limit=" + limit
             getJson(url).then(json => {
-                console.log(json)
+                
                 const list = json.items
                 const data = list.map(item => {
                     const playlist = new Playlist(item.id, DouBan.CODE, item.cover, item.title)
@@ -313,7 +306,7 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/query/artist?q=" + keyword + "&limit=" + limit
             getJson(url).then(json => {
-                console.log(json)
+                
                 const list = json.items
                 const data = list.map(item => ({
                     id: item.id,
