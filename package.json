@@ -30,7 +30,7 @@
     "@types/node-forge": "^1.0.1",
     "@vitejs/plugin-vue": "^2.3.0",
     "concurrently": "^7.1.0",
-    "electron": "^18.0.1",
+    "electron": ">= 18.0.0",
     "electron-builder": "^22.14.13",
     "vite": "^2.9.0",
     "wait-on": "^6.0.1"
