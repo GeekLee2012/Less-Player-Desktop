@@ -34,16 +34,36 @@ let markScrollTop = 0
 
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', about: '',data: [] })
+    offset = 0
+    page = 1
+    detail.total = 0
     listSize.value = detail.data.length
+}
+
+const nextPage = () =>  {
+    if(detail.data.length >= detail.total) return false
+    offset = page * limit
+    page = page + 1
+    return true
 }
 
 const loadContent = () => {
     const vender = getVender(props.platform)
     if(vender) {
-        vender.playlistDetail(props.id, offset, limit, page).then(result => {
+        vender.playlistDetail(props.id, offset, limit, page)
+            .then(result => {
+            if(page > 1) {
+                result.data.unshift(...detail.data)
+            }
             Object.assign(detail, result)
             listSize.value = detail.data.length
         })
+    }
+}
+
+const loadMoreContent = () => {
+    if(nextPage()) {
+        loadContent()
     }
 }
 
@@ -70,9 +90,19 @@ const restoreScrollState = () => {
     playlistDetailRef.value.scrollTop = markScrollTop
 }
 
+const scrollToLoad = () => {
+    const scrollTop = playlistDetailRef.value.scrollTop
+    const scrollHeight = playlistDetailRef.value.scrollHeight
+    const clientHeight = playlistDetailRef.value.clientHeight
+    markScrollState()
+    if((scrollTop + clientHeight) >= scrollHeight) {
+       loadMoreContent()
+    }
+}
+
 const bindScrollListener = () => {
-    playlistDetailRef.value.removeEventListener('scroll', markScrollState)
-    playlistDetailRef.value.addEventListener('scroll', markScrollState)
+    playlistDetailRef.value.removeEventListener('scroll', scrollToLoad)
+    playlistDetailRef.value.addEventListener('scroll', scrollToLoad)
 }
 
 const resetBack2TopBtn = () => {

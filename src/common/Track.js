@@ -10,7 +10,7 @@ export class Track {
         this.title = title
         //[ {id, name} ]
         this.artist = artist ? artist : []
-        this.artistNotCompleted = false
+        this.artistNotCompleted = false //数据是否不完整
         //{id, name}
         this.album = album
         //millis

@@ -144,7 +144,6 @@ export class KuWo {
                 reqId: REQ_ID
             }
             getJson(url, reqBody, CONFIG).then(json => {
-                
                 const cache = KuWo.CACHE_TOPLISTS.get(id)
                 const result = new Playlist(id, KuWo.CODE)
                 if(cache) {

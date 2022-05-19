@@ -25,8 +25,11 @@ const visitArtistDetail = (platform, item, index) => {
     let idValid = valiadateArtistId(id)
     if(!idValid) { // 二次确认数据
         if(updatedArtist.trackId == props.trackId) {
-            id = updatedArtist.artist[index].id
-            idValid = valiadateArtistId(id)
+            const name = updatedArtist.artist[index].name
+            if(item.name == name) {
+                id = updatedArtist.artist[index].id
+                idValid = valiadateArtistId(id)
+            } 
         }
     }
     const visitable = props.visitable && platformValid && idValid

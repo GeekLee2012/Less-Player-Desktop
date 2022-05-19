@@ -47,6 +47,19 @@ const getCustomCover = (origin) => {
     return origin
 }
 
+const jsonify = (text) => {
+    text = text.replace(/\/\/ \S*/g, '') //注释
+        .replace(/\s/g, '') //空白符
+        .replace(/'/g, '"')
+        .replace('{', '{"')
+        .replace('}', '"}')
+        .replace(/,/g, '","')
+        .replace(/:/g, '":"')
+        .replace(/""/g, '"')
+        .replace('https":"', 'https:')
+    return JSON.parse(text)
+}
+
 //TODO 平台自身原因，体验不好
 export class KuGou {
     static CODE = 'kugou'
@@ -110,7 +123,7 @@ export class KuGou {
         id = id.replace(KuGou.TOPLIST_PREFIX, '')
         return new Promise((resolve, reject) => {
             const result = new Playlist()
-            const url = "https://www.kugou.com/yy/rank/home/1-" + id + ".html?from=rank"
+            const url = "https://www.kugou.com/yy/rank/home/" + page + "-" + id + ".html?from=rank"
             getDoc(url).then(doc => {
                 const title = doc.querySelector('#pc_temp_title h3').textContent
                 const about = doc.querySelector('#pc_temp_title .rank_update').textContent
@@ -120,7 +133,7 @@ export class KuGou {
                 
                 //Tracks
                 const scripts = doc.body.getElementsByTagName('script')
-                let key = 'global.features ='
+                let key = 'var global ='
                 let scriptText = null
                 for(var i = 0; i < scripts.length; i++) {
                     const scriptCon = scripts[i].innerHTML
@@ -131,11 +144,19 @@ export class KuGou {
                 }
                 if(scriptText) {
                     scriptText = scriptText.split(key)[1]
+                    key = 'global.features ='
+                    
+                    let paginationText = scriptText.split(key)[0]
+                    paginationText = paginationText.split(';')[0].trim()
+                    
+                    const pagination = jsonify(paginationText)
+                    result.total = parseInt(pagination.total)
+
+                    scriptText = scriptText.split(key)[1]
                     key = '(function()'
                     scriptText = scriptText.split(key)[0].trim()
                     scriptText = scriptText.substring(0, scriptText.length - 1)
                     const json = JSON.parse(scriptText)
-
                     
                     json.forEach(item => {
                         const artist = [ { id: '', name: item.author_name } ]
@@ -143,6 +164,7 @@ export class KuGou {
                         const duration = item.timeLen * 1000
                         const track = new Track(item.audio_id, KuGou.CODE, item.FileName, artist, album, duration)
                         track.hash = item.Hash
+                        track.artistNotCompleted = true
                         result.addTrack(track)
                     })
                 }
@@ -178,21 +200,10 @@ export class KuGou {
                     scriptText = scriptText.substring(0, scriptText.length - 1)
                     const json = JSON.parse(scriptText)
                     
-
                     json.forEach(item => {
                         if(item.songs.length < 1) return 
                         const playlist = new Playlist(item.fmid, KuGou.CODE, getCustomCover(item.imgurl32), item.fmname, null, item.description)
                         playlist.isRadioType = true
-
-                        //TODO
-                        /*
-                        item.songs.forEach(song => {
-                            const track = new Track(song.sid, KuGou.CODE, song.name)
-                            track.duration = song.time
-                            track.hash = song.hash
-                            playlist.addTrack(track)
-                        })
-                        */
                         result.data.push(playlist)
                     })
                 }
@@ -228,7 +239,6 @@ export class KuGou {
 
     //电台：下一首歌曲
     static nextRadioTrack(channel, track) {
-       
         return new Promise((resolve, reject) => {
             //TODO
             let result = null
@@ -378,7 +388,6 @@ export class KuGou {
         return new Promise((resolve, reject) => {
             const url = getDataUrl(track.hash, track.album.id)
             getJson(url).then(json => {
-                
                 const result = new Track(id, KuGou.CODE)
                 result.url = json.data.play_url
                 result.cover = json.data.img

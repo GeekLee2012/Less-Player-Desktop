@@ -120,8 +120,8 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/songlist/" + id + "?kbps=192"
             getJson(url).then(json => {
-                
                 const result = new Playlist(id, DouBan.CODE, json.cover, json.title, url, json.intro)
+                result.total = json.count
                 const list = json.songs
                 list.forEach(item => {
                     const artist = item.singers.map(ar => ({ id: ar.id, name: ar.name }))
