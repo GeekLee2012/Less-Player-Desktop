@@ -145,7 +145,7 @@ export class NetEase {
                 + "?cat=" + cate + "&order=hot"
                 + "&limit=" + limit + "&offset=" + offset
             getDoc(url).then(doc => {
-                const result = { offset, limit, page, data: [] }
+                const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
                 const listEl = doc.querySelectorAll("#m-pl-container li")
                 listEl.forEach(el => {
                     let id = null, cover = null, title = null, itemUrl = null
@@ -176,7 +176,7 @@ export class NetEase {
     //排行榜列表
     static toplist(cate, offset, limit, page) {
         return new Promise((resolve) => {
-            let result = { offset: 0, limit: 100, page: 1, data: [] }
+            const result = { platform: NetEase.CODE, cate, offset: 0, limit: 100, page: 1, total: 0, data: [] }
             if(page > 1) {
                 resolve(result)
                 return

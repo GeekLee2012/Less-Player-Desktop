@@ -19,13 +19,14 @@ const { updateArtistDetailKeys } = useArtistDetailStore()
 const { isArtistDetailVisitable } = usePlatformStore()
 let updatedArtist = { trackId: '', artist: [] }
 
-const visitArtistDetail = (platform, id, index) => {
+const visitArtistDetail = (platform, item, index) => {
+    let id = item.id
     const platformValid = isArtistDetailVisitable(platform)
-    let idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
+    let idValid = valiadateArtistId(id)
     if(!idValid) { // 二次确认数据
         if(updatedArtist.trackId == props.trackId) {
             id = updatedArtist.artist[index].id
-            idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
+            idValid = valiadateArtistId(id)
         }
     }
     const visitable = props.visitable && platformValid && idValid
@@ -41,6 +42,10 @@ const visitArtistDetail = (platform, id, index) => {
     }
 }
 
+const valiadateArtistId = (id) => {
+    return (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
+}
+
 //前期接口未能提供完整数据，后期某个接口更新补全数据
 EventBus.on('track-artistUpdated', data => {
     if(!data) return
@@ -51,7 +56,7 @@ EventBus.on('track-artistUpdated', data => {
 <template>
     <div class="artist-ctl" v-show="data.length > 0" @click.stop="">
         <template v-for="(item, index) in data">
-            <span @click="visitArtistDetail(platform, item.id, index)"
+            <span @click="visitArtistDetail(platform, item, index)"
                 class="artist-item" v-html="item.name" >
             </span>
             <template v-if="index < (data.length - 1)">、</template>

@@ -104,11 +104,12 @@ export class Player {
         if(!this.currentTrack) return 
         // Get the Howl we want to manipulate.
         const sound = this.currentTrack.howl
+        if(!sound.playing()) return 
         // Determine our current seek position.
         const seek = sound.seek() || 0
         EventBus.emit('track-pos', seek)
         // If the sound is still playing, continue stepping.
-        if (sound.playing()) requestAnimationFrame(this.__step.bind(this))
+        requestAnimationFrame(this.__step.bind(this))
     }
     
     on(event, handler) {

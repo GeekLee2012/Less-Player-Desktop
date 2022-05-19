@@ -92,10 +92,11 @@ export class RadioPlayer {
 
     __step() {
         if(!this.channel) return 
+        if(!this.playing) return
         const currentTime = (Date.now() - lastPlayTime) || 0
         const currentSecs = currentTime / 1000
         EventBus.emit('track-pos', currentSecs)
-        if (this.playing) requestAnimationFrame(this.__step.bind(this))
+        requestAnimationFrame(this.__step.bind(this))
     }
 
     on(event, handler) {

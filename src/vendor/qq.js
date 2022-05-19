@@ -350,7 +350,7 @@ export class QQ {
     //排行榜列表
     static toplist(cate, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            let result = { offset: 0, limit: 100, page: 1, data: [] }
+            let result = { platform: QQ.CODE, cate, offset: 0, limit: 100, page: 1, total: 0, data: [] }
             if(page > 1) {
                 resolve(result)
                 return
@@ -449,7 +449,7 @@ export class QQ {
     //电台列表
     static radioList(cate, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const result = { offset, limit, page, total: 0, data:[] }
+            const result = { platform: QQ.CODE, cate, offset, limit, page, total: 0, data:[] }
             if(page > 1) {
                 resolve(result)
                 return
@@ -516,27 +516,28 @@ export class QQ {
 
     //歌单广场(列表)
     static square (cate, offset, limit, page) {
-        if(typeof(cate) == 'string') cate = parseInt(cate.trim())
-        cate = cate > 0 ? cate : 10000000
+        const originCate = cate
+        let resolvedCate = cate
+        if(typeof(resolvedCate) == 'string') resolvedCate = parseInt(resolvedCate.trim())
+        resolvedCate = resolvedCate > 0 ? resolvedCate : 10000000
         //榜单
-        if(cate == QQ.TOPLIST_CODE) return QQ.toplist(cate, offset, limit, page)
+        if(resolvedCate == QQ.TOPLIST_CODE) return QQ.toplist(cate, offset, limit, page)
         //电台
-        if(cate == QQ.RADIO_CODE) return QQ.radioList(cate, offset, limit, page)
+        if(resolvedCate == QQ.RADIO_CODE) return QQ.radioList(cate, offset, limit, page)
         //普通歌单
         return new Promise((resolve, reject) => {
+            const result = { platform: QQ.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             const url = "https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg"
             const reqBody = {
                 format: 'json',
                 inCharset: 'utf8',
                 outCharset: 'utf8',
                 sortId: 5,
-                categoryId: cate,
+                categoryId: resolvedCate,
                 sin: offset,
                 ein: (offset + limit - 1)
             }
             getJson(url, reqBody).then(json => {
-                //
-                const result = { offset, limit, page, total: 0, data: [] }
                 const list = json.data.list
                 list.forEach(item => {
                     const cover = item.imgurl

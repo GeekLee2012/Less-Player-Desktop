@@ -39,17 +39,18 @@ export class DouBan {
 
     //歌单(列表)广场
     static square(cate, offset, limit, page) {
-        cate = cate.trim()
-        cate = cate.length > 0  ? cate : '0'
-        if(cate == '兆赫') return DouBan.mhzChannels(cate, offset, limit, page)
+        const originCate = cate
+        let resolvedCate = cate.trim()
+        resolvedCate = resolvedCate.length > 0  ? cate : '0'
+        if(resolvedCate == '兆赫') return DouBan.mhzChannels(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
+            const result = { platform: DouBan.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             if(page > 1) {
-                resolve(new Playlist())
+                resolve(result)
                 return
             }
-            const url = "https://fm.douban.com/j/v2/songlist/explore?type=hot&genre=" + cate + "&start=" + offset +"&limit=" + limit + "&sample_cnt=5"
+            const url = "https://fm.douban.com/j/v2/songlist/explore?type=hot&genre=" + resolvedCate + "&start=" + offset +"&limit=" + limit + "&sample_cnt=5"
             getJson(url).then(json => {
-                const result = { offset, limit, page, total: 0, data: [] }
                 json.forEach(item => {
                     const cover = item.covers.large
                     const playlist = new Playlist(item.id, DouBan.CODE , cover, item.title)
@@ -64,10 +65,10 @@ export class DouBan {
     static mhzChannels(cate, offset, limit, page) {
         if(page > 1) return DouBan.guessMhzChannels(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
-            const result = { offset, limit, page, total: 0, data: [] }
+            const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 0, data: [] }
             const url = "https://fm.douban.com/j/v2/rec_channels?specific=all"
             getJson(url).then(json => {
-                
+
                 const channels = json.data.channels
                 
                 //豆瓣精选兆赫

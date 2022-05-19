@@ -16,6 +16,7 @@ const parseJson = (jsonp, callbackName) => {
 export class RadioCN {
     static CODE = 'radiocn'
     static RADIO_PREFIX = 'FM_'
+    static CNR_CODE = RadioCN.RADIO_PREFIX + '3225'
 
     //全部分类
     static categories() {
@@ -32,6 +33,10 @@ export class RadioCN {
                 _: ts
             }
             const result = []
+            const defaultCategory = new Category("默认")
+            defaultCategory.add('国家电台', RadioCN.CNR_CODE)
+            result.push(defaultCategory)
+
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
                 const category = new Category("分类")
@@ -81,9 +86,10 @@ export class RadioCN {
 
     //电台分类
     static radioChannelList(cate, offset, limit, page) {
+        const result = { platform: RadioCN.CODE, cate, offset, limit, page, total: 0, data: [] }
         cate = cate.replace(RadioCN.RADIO_PREFIX, '')
         return new Promise((resolve, reject) => {
-            const result = { offset, limit, page, total: 0, data: [] }
+            
             if(page > 1) {
                 resolve(result)
                 return 
@@ -128,10 +134,14 @@ export class RadioCN {
 
     //歌单广场
     static square(cate, offset, limit, page) {
+        const originCate = cate
+        let resolvedCate = cate.trim()
+        resolvedCate = resolvedCate.length < 1 ? RadioCN.CNR_CODE : resolvedCate
         //电台
-        if(cate.startsWith(RadioCN.RADIO_PREFIX)) return RadioCN.radioChannelList(cate, offset, limit, page)
+        if(resolvedCate.startsWith(RadioCN.RADIO_PREFIX)) return RadioCN.radioChannelList(cate, offset, limit, page)
         //分类歌单
         return new Promise((resolve, reject) => {
+            const result = { platform: RadioCN.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             const url = "http://tacc.radio.cn/pcpages/categorypages"
             const ts = Date.now()
             const callback = 'jQuery19109854783215852262_' + ts
@@ -143,7 +153,7 @@ export class RadioCN {
                 cate_id: cate,
                 _: ts
             }
-            const result = { offset, limit, page, total: 0, data: [] }
+            
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
                 

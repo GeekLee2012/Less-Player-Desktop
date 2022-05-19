@@ -57,7 +57,10 @@ const loadContent = () => {
     const offset = pagination.offset
     const limit = pagination.limit
     const page = pagination.page
+    const platform = currentPlatformCode.value
     vender.square(cate, offset, limit, page).then(result => {
+        if(platform != result.platform) return 
+        if(cate != result.cate) return 
         playlists.push(...result.data)
     })
 }
@@ -114,17 +117,21 @@ onMounted(() => {
 
 onActivated(() => restoreScrollState())
 
-//TODO
-watch(currentPlatformCode, (nv, ov) => {
-    resetCurrentCategoryItem()
+const resetCommom = ()=> {
     resetPagination()
     resetScrollState()
     resetBack2TopBtn()
+}
+
+//TODO
+watch(currentPlatformCode, (nv, ov) => {
+    resetCurrentCategoryItem()
+    resetCommom()
     loadData()
 })
 
 watch(currentCategoryCode, (nv, ov) => {
-    resetPagination()
+    resetCommom()
     loadContent()
 })
 </script>

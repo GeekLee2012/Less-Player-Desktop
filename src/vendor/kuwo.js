@@ -55,29 +55,29 @@ export class KuWo {
 
     //歌单(列表)广场
     static square(cate, offset, limit, page) {
-        if(cate == KuWo.TOPLIST_CODE) return KuWo.toplist(cate, offset, limit, page)
+        const originCate = cate
+        let resolvedCate = cate.trim()
+        resolvedCate = resolvedCate.length > 0 ? resolvedCate : "#new"
+        if(resolvedCate == KuWo.TOPLIST_CODE) return KuWo.toplist(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
+            const result = { platform: KuWo.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             let url = null
-            //TODO
-            cate = cate.trim()
-            cate = cate.length > 0 ? cate : "#new"
-            if(cate.startsWith('#')) {
-                cate = cate.substring(1)
+            if(resolvedCate.startsWith('#')) {
+                resolvedCate = resolvedCate.substring(1)
                 url = "https://www.kuwo.cn/api/www/classify/playlist/getRcmPlayList"
                     + "?pn=" + page + "&rn=" + limit 
-                    + "&order=" + cate +"&httpsStatus=1&reqId=" + REQ_ID
+                    + "&order=" + resolvedCate +"&httpsStatus=1&reqId=" + REQ_ID
             } else {
                 url = "https://www.kuwo.cn/api/www/classify/playlist/getTagPlayList" 
                     + "?pn=" + page + "&rn=" + limit 
-                    + "&id=" + cate + "&httpsStatus=1&reqId=" + REQ_ID
+                    + "&id=" + resolvedCate + "&httpsStatus=1&reqId=" + REQ_ID
             }
             getJson(url, null, CONFIG).then(json => {
                 const pagination = json.data
                 //const page = pagination.pn
-                const total = pagination.total
                 const data = pagination.data
+                result.total = pagination.total
 
-                const result = { offset, limit, page, total, data: [] }
                 data.forEach(item => {
                     const id = item.id
                     const cover = item.img
@@ -97,7 +97,7 @@ export class KuWo {
     //排行榜列表
     static toplist(cate, offset, limit, page) {
         return new Promise((resolve) => {
-            let result = { offset: 0, limit: 100, page: 1, data: [] }
+            let result = { platform: KuWo.CODE, cate, offset: 0, limit: 100, page: 1, data: [] }
             if(page > 1) {
                 resolve(result)
                 return

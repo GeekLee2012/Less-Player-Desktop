@@ -237,7 +237,9 @@ EventBus.on('track-state', state => {
 })
 
 EventBus.on('track-pos', secs => {
-    const { updateCurrentTime } = usePlayStore()
+    const { updateCurrentTime, setPlaying } = usePlayStore()
+    //进度在更新，状态必为plyaing
+    setPlaying(true)
     updateCurrentTime(secs)
 })
 
