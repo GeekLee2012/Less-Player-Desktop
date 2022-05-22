@@ -97,7 +97,7 @@ export class DouBan {
     //猜你喜欢兆赫
     static guessMhzChannels(cate, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const result = { offset, limit, page, total: 0, data: [] }
+            const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 0, data: [] }
             const url = "https://fm.douban.com/j/v2/artist/guess?limit=10&is_new_user=true"
             getJson(url).then(json => {
                 const channels = json.artists
