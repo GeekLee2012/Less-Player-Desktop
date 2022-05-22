@@ -108,7 +108,7 @@ EventBus.on('track-loadLyric', track => loadLyric(track))
 
 .playback-queue .header {
     padding: 20px 15px 10px 10px;
-    border-bottom: 0.1px solid #464646;
+    border-bottom: 0.1px solid var(--border-color);
 }
 
 .playback-queue .detail {

@@ -53,7 +53,13 @@ const visitCateItem = (item, row, col) => {
     font-size: 16px;
     cursor: pointer;
     white-space: nowrap;
+    border-radius: 10rem;
     border: 0.1px solid transparent;
+}
+
+.category-bar span:hover {
+    background-color: var(--list-item-hover);
+    color: var(--text-color);
 }
 
 .category-bar svg {
@@ -68,7 +74,6 @@ const visitCateItem = (item, row, col) => {
 }
 
 .category-bar .active {
-    border-radius: 10rem;
     border-color: #28c83f;
     background: linear-gradient(to right, #1ca388, #28c83f);
     color: var(--text-color);

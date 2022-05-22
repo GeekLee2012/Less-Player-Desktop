@@ -4,7 +4,7 @@ import EventBus from '../common/EventBus';
 
 let singleton = null
 
-//追求简洁、组合式API
+//追求简洁、组合式API、单一责任
 export class Player {
     
     constructor(track) {
@@ -19,14 +19,13 @@ export class Player {
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = Player.get()
-        player.on('suspend', () => player.pause())
+        return player.on('suspend', () => player.pause())
             .on('track-play', track => player.playTrack(track))
             .on('track-togglePlay', () => player.togglePlay())
             .on('track-seek', percent => player.seek(percent))
             .on('volume-set', volume => player.volume(volume))
             .on('track-stop', () => player.setCurrent(null))
             .on('queue-empty', () => player.setCurrent(null))
-        return player
     }
 
     //播放

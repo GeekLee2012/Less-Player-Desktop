@@ -126,7 +126,14 @@ EventBus.on('category-resetScroll', ()=> {
     float: left;
     cursor: pointer;
     color: #bcbcbc;
+    border-radius: 10rem;
 }
+
+.category-view .fl-item:hover {
+    background-color: var(--list-item-hover);
+    color: var(--text-color);
+}
+    
 
 .category-view .current {
     border-radius: 10rem;

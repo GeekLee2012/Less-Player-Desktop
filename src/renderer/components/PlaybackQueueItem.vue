@@ -53,7 +53,7 @@ const removeItem = () => {
 
 <style scoped>
 .playback-queue-item {
-    border-bottom: 1px solid #464646;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .playback-queue-item .item-wrap {
@@ -67,7 +67,7 @@ const removeItem = () => {
 }
 
 .playback-queue-item:hover {
-    background-color: #464646;
+    background-color: var(--list-item-hover);
 }
 
 .playback-queue-item .spacing {
@@ -175,7 +175,7 @@ const removeItem = () => {
     padding-left: 15px;
     padding-right: 15px;
     
-    background-color: #464646;
+    background-color: var(--list-item-hover);
     visibility: hidden;
 }
 

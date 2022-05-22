@@ -22,12 +22,11 @@ export class RadioPlayer {
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = RadioPlayer.get()
-        player.on('radio-init', radioHolder => (gRadioHolder = radioHolder))
+        return player.on('radio-init', radioHolder => (gRadioHolder = radioHolder))
             .on('radio-play', channel => player.playChannel(channel))
             .on('radio-togglePlay', () => player.togglePlay())
             .on('volume-set', volume => player.volume(volume))
             .on('radio-stop', () => player.setChannel(null))
-        return player
     }
 
     //播放

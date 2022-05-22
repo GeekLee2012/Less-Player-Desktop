@@ -33,8 +33,7 @@ const excludes = []
                 <component :is="Component" />
             </keep-alive>
         </router-view>
-    </div>
-    
+    </div>  
 </template>
 
 <style>

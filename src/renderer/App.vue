@@ -67,6 +67,7 @@ onMounted(() => EventBus.emit('radio-init', document.querySelector('.radio-holde
   --text-size: 15px;
   --text-color: #eaeaea;
   --text-sub-color: #989898;
+  --hl-color: #28c83f;
   /* 按钮 */
   --svg-color: #eaeaea;
   --svg-text-color: #eaeaea;
@@ -77,6 +78,11 @@ onMounted(() => EventBus.emit('radio-init', document.querySelector('.radio-holde
   --progress-bg: linear-gradient(to top right, #2edfa3, #28c83f);
   /*滚动条*/
   --scrollbar-thumb-bg: #666;
+  /* 列表项Hover */
+  --list-item-hover: #464646 !important;
+  /* 边框 */
+  --main-left-border-color: #181818;
+  --border-color: #464646;
 }
 
 html, body, #app {

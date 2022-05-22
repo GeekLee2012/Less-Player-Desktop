@@ -250,7 +250,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
     display: flex;
     height: 30px;
     margin-bottom: 3px;
-    border-bottom: 1px solid #464646;
+    border-bottom: 1px solid var(--border-color);
 }
 
 #album-detail .tab {

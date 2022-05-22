@@ -319,7 +319,7 @@ watch(activeTab, (nv,ov) => switchTab())
     display: flex;
     height: 30px;
     margin-bottom: 3px;
-    border-bottom: 1px solid #464646;
+    border-bottom: 1px solid var(--border-color);
 }
 
 #artist-detail .tab {

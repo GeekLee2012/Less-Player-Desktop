@@ -7,7 +7,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="svgTextButton">
+    <div class="svg-text-btn">
         <div class="left-btn" @click="leftAction">
             <div class="img">
                 <slot name="left-img"></slot>
@@ -23,7 +23,7 @@ const props = defineProps({
 </template>
 
 <style scoped>
-.svgTextButton {
+.svg-text-btn {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -33,8 +33,8 @@ const props = defineProps({
     color: var(--svg-text-color);
 }
 
-.left-btn,
-.right-btn {
+.svg-text-btn .left-btn,
+.svg-text-btn .right-btn {
     height: 100%;
     display: flex;
     justify-content: center;
@@ -42,29 +42,29 @@ const props = defineProps({
     background: var(--btn-bg);
 }
 
-.left-btn:hover,
-.right-btn:hover {
+.svg-text-btn .left-btn:hover,
+.svg-text-btn .right-btn:hover {
     background: var(--btn-hover-bg);
 }
 
-.left-btn {
+.svg-text-btn .left-btn {
     /*width: 103px;*/
     border-radius: 10rem 0 0 10rem;
 }
 
-.left-btn .img {
+.svg-text-btn .left-btn .img {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-left: 12px;
 }
 
-.left-btn .text {
+.svg-text-btn .left-btn .text {
     margin-left: 5px;
     margin-right: 8px;
 }
 
-.right-btn {
+.svg-text-btn .right-btn {
     border-radius: 0 10rem 10rem 0;
     padding-left: 8px;
     padding-right: 10px;

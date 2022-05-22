@@ -201,6 +201,7 @@ const overrideRequest = (details) => {
   let origin = null
   let referer = null
   let cookie = null
+  let userAgent = null
 
   const url = details.url
   if(url.includes("qq.com")) {
@@ -228,6 +229,7 @@ const overrideRequest = (details) => {
   } else if(url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
+    if(url.includes("mac.kugou.com/")) userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16) AppleWebKit/605.1.15 (KHTML, like Gecko)'
   } else if(url.includes("douban")) {
     const choice = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz01234567890'
     const bid = randomText(choice, 11)
@@ -245,6 +247,7 @@ const overrideRequest = (details) => {
   */
 
   //if(origin) details.requestHeaders['Origin'] = origin
+  if(userAgent) details.requestHeaders['UserAgent'] = userAgent
   if(referer) details.requestHeaders['Referer'] = referer
   if(cookie) details.requestHeaders['Cookie'] = cookie
 

@@ -142,7 +142,7 @@ export class NetEase {
         if(cate == NetEase.TOPLIST_CODE) return NetEase.toplist(cate, offset, limit, page)
         return new Promise((resolve) => {
             const url = "https://music.163.com/discover/playlist"
-                + "?cat=" + cate + "&order=hot"
+                + "?cat=" + encodeURIComponent(cate) + "&order=hot"
                 + "&limit=" + limit + "&offset=" + offset
             getDoc(url).then(doc => {
                 const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }

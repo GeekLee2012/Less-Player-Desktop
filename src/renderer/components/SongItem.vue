@@ -67,7 +67,7 @@ const deleteItem = () => {
 }
 
 .playlist-item:hover {
-    background-color: #464646;
+    background-color: var(--list-item-hover);
 }
 
 .playlist-item > div {
@@ -151,7 +151,7 @@ const deleteItem = () => {
     padding-left: 10px;
     padding-right: 10px;
     
-    background-color: #464646;
+    background-color: var(--list-item-hover);
     visibility: hidden;
 }
 

@@ -80,6 +80,7 @@ const loadArtists = ()=> {
 
 const resetTabView = () => {
     currentTabView.value = null
+    updateTabTipText(0)
 }
 
 const loadTab = () => {
@@ -184,8 +185,13 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     margin-right: 20px;
     border-radius: 10rem;
     padding: 6px 15px;
-    border: 1px solid #464646;
+    border: 1px solid var(--border-color);
     cursor: pointer;
+}
+
+#search-view .platform .item:hover {
+    color: var(--text-color);
+    background-color: var(--list-item-hover); 
 }
 
 #search-view .platform .active {
@@ -198,7 +204,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     position: relative;
     height: 30px;
     margin-bottom: 3px;
-    border-bottom: 1px solid #464646;
+    border-bottom: 1px solid var(--border-color);
 }
 
 #search-view .tab {

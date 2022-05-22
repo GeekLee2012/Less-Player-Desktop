@@ -44,7 +44,7 @@ const updateNavIndex = (index) => {
 #main-left {
     width: 16.5%;
     height: 100%;
-    box-shadow: 0px 0px 3px #181818;
+    box-shadow: 0px 0px 3px var(--main-left-border-color);
 }
 
 #drag-zone {
@@ -70,7 +70,7 @@ const updateNavIndex = (index) => {
 }
 
 #platform-list li:hover {
-    background-color: #464646 !important;
+    background-color: var(--list-item-hover);
 }
 
 #platform-list .active {

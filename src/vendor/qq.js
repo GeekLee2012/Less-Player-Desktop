@@ -27,10 +27,40 @@ const getAlbumCover = (albummid) => {
         + albummid + ".jpg?max_age=2592000"
 }
 
+const getTrackTypeMeta = (typeName) => {
+    return {
+        m4a: {
+            prefix: 'C400',
+            ext: '.m4a',
+        },
+        128: {
+            prefix: 'M500',
+            ext: '.mp3',
+        },
+        320: {
+            prefix: 'M800',
+            ext: '.mp3',
+        },
+        ape: {
+            prefix: 'A000',
+            ext: '.ape',
+        },
+        flac: {
+            prefix: 'F000',
+            ext: '.flac',
+        }
+     }[typeName]
+}
+
 const vkeyReqData = (trackInfo) => {
     //TODO
     const mediaId = trackInfo.mid
-    const filename = 'C400' + mediaId + mediaId + '.m4a'
+    const songtype = [ trackInfo.type ]
+    const filename = ['m4a'].map(typeName => {
+        const typeMeta = getTrackTypeMeta(typeName)
+        return typeMeta.prefix + mediaId + mediaId + typeMeta.ext
+    })
+
     const guid = (Math.random() * 10000000).toFixed(0);
     const uin = "0"
     return {
@@ -42,10 +72,10 @@ const vkeyReqData = (trackInfo) => {
         },
         req_1: moduleReq('vkey.GetVkeyServer', 'CgiGetVkey', 
         {
-            filename: [ filename ],
+            filename,
             guid,
             songmid: [ mediaId ],
-            songtype: [ trackInfo.type ],
+            songtype,
             uin,
             loginflag: 1,
             platform: "20"
@@ -604,10 +634,8 @@ export class QQ {
                 })
             }
             getJson(url, reqBody).then(json => {
-                
                 const trackInfo = json.songinfo.data.track_info
                 QQ.getVKeyJson(trackInfo).then(json => {
-                    //
                     const data = json.req_1.data;
                     const urlInfo = data.midurlinfo[0]
                     const vkey = urlInfo.vkey.trim()
@@ -627,7 +655,7 @@ export class QQ {
             let url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = vkeyReqBody(trackInfo)
             getJson(url, reqBody).then(json => {
-                
+                console.log(json)
                 resolve(json)
             })
         })
