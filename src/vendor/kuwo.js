@@ -490,7 +490,6 @@ export class KuWo {
                 reqId: REQ_ID
             }
             getJson(url, reqBody).then(json => {
-                console.log(json)
                 const list = json.data.artistList
                 list.forEach(item => {
                     const id = item.id

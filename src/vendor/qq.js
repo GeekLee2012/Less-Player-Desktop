@@ -651,7 +651,6 @@ export class QQ {
             let url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = vkeyReqBody(trackInfo)
             getJson(url, reqBody).then(json => {
-                console.log(json)
                 resolve(json)
             })
         })
