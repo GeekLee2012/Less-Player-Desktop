@@ -1,13 +1,13 @@
 <script setup>
-import { useSquareViewStore } from '../store/squareViewStore';
+import { usePlaylistSquareViewStore } from '../store/playlistSquareViewStore';
 import { useMainViewStore } from '../store/mainViewStore';
 import EventBus from '../../common/EventBus';
 import { reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 
-const { currentCategoryItem } = storeToRefs(useSquareViewStore())
-const { currentCategory, updateCurrentCategoryItem } = useSquareViewStore()
-const { hideCategoryView } = useMainViewStore()
+const { currentCategoryItem } = storeToRefs(usePlaylistSquareViewStore())
+const { currentCategory, updateCurrentCategoryItem } = usePlaylistSquareViewStore()
+const { hidePlaylistCategoryView } = useMainViewStore()
 const category = reactive([])
 
 const updateCategory = () => {
@@ -17,26 +17,26 @@ const updateCategory = () => {
 }
 
 const resetScroll = () => {
-    const view = document.querySelector(".category-view")
+    const view = document.querySelector(".playlist-category-view")
     view.scrollTop = 0
 }
 
 const visitCateItem = (item, row, col) => {
     updateCurrentCategoryItem(item, row, col)
-    hideCategoryView()
+    hidePlaylistCategoryView()
 }
 
-EventBus.on('category-update', ()=> {
+EventBus.on('playlistCategory-update', ()=> {
     updateCategory()
 })
 
-EventBus.on('category-resetScroll', ()=> {
+EventBus.on('playlistCategory-resetScroll', ()=> {
     resetScroll()
 })
 </script>
 
 <template>
-    <div class="category-view" @click.stop="">
+    <div class="playlist-category-view" @click.stop="">
         <div class="header">
             <div class="cate-title">当前分类</div>
             <div class="fl-item">{{ currentCategoryItem.data.key }}</div>
@@ -59,18 +59,18 @@ EventBus.on('category-resetScroll', ()=> {
 </template>
 
 <style scoped>
-.category-view {
+.playlist-category-view {
     overflow: auto;
 }
 
-.category-view .header,
-.category-view .center {
+.playlist-category-view .header,
+.playlist-category-view .center {
     display: flex;
     flex-direction: row;
     text-align: left;
 }
 
-.category-view .header {
+.playlist-category-view .header {
     margin-top: 5px;
     margin-bottom: 5px;
     padding-bottom: 10px;
@@ -79,11 +79,11 @@ EventBus.on('category-resetScroll', ()=> {
     border-bottom: 0.5px solid #565656;
 }
 
-.category-view .header .cate-title {
+.playlist-category-view .header .cate-title {
     margin-right: 1px;
 }
 
-.category-view .header .fl-item {
+.playlist-category-view .header .fl-item {
     cursor: default;
     font-size: 18px;
     background: linear-gradient(to top right, #28c83f, #1ca388);
@@ -91,20 +91,20 @@ EventBus.on('category-resetScroll', ()=> {
     color: transparent;
 }
 
-.category-view .center {
+.playlist-category-view .center {
     flex-direction: column;
     margin-left: 25px;
     margin-right: 25px;
 }
 
-.category-view .fl-row {
+.playlist-category-view .fl-row {
     display: flex;
     flex-direction: row;
     margin-bottom: 10px;
     text-align: left;
 }
 
-.category-view .cate-title {
+.playlist-category-view .cate-title {
     font-size: 18px;
     font-weight: bold;
     /*
@@ -118,7 +118,7 @@ EventBus.on('category-resetScroll', ()=> {
     margin-right: 15px;
 }
 
-.category-view .fl-item {
+.playlist-category-view .fl-item {
     font-size: 15px;
     padding: 6px 16px;
     margin-top: 10px;
@@ -129,13 +129,13 @@ EventBus.on('category-resetScroll', ()=> {
     border-radius: 10rem;
 }
 
-.category-view .fl-item:hover {
+.playlist-category-view .fl-item:hover {
     background-color: var(--list-item-hover);
     color: var(--text-color);
 }
     
 
-.category-view .current {
+.playlist-category-view .current {
     border-radius: 10rem;
     background: linear-gradient(to top right, #1ca388, #28c83f);
     color: var(--text-color);

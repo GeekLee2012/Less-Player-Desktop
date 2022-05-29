@@ -199,6 +199,7 @@ const scrollToLoad = () => {
 const resetTabView = () => {
     currentTabView.value = null
     artistDetailRef.value.removeEventListener('scroll', scrollToLoad)
+    updateTabTipText(0)
 }
 
 const bindScrollListener = () => {

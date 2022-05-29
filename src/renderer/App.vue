@@ -68,6 +68,7 @@ onMounted(() => EventBus.emit('radio-init', document.querySelector('.radio-holde
   --text-color: #eaeaea;
   --text-sub-color: #989898;
   --hl-color: #28c83f;
+  --hl-text-bg: linear-gradient(to top right, #28c83f, #1ca388);
   /* 按钮 */
   --svg-color: #eaeaea;
   --svg-text-color: #eaeaea;

@@ -1,5 +1,6 @@
 import { createRouter,  createWebHashHistory } from 'vue-router';
-import SquareView from '../views/SquareView.vue';
+import PlaylistSquareView from '../views/PlaylistSquareView.vue';
+import ArtistSquareView from '../views/ArtistSquareView.vue';
 import LocalMusicView from '../views/LocalMusicView.vue';
 import SettingView from '../views/SettingView.vue';
 import SearchView from '../views/SearchView.vue';
@@ -8,12 +9,15 @@ import ArtistDetailView from '../views/ArtistDetailView.vue';
 import AlbumDetailView from '../views/AlbumDetailView.vue';
 
 const routes = [ 
-    { //默认，歌单广场
+    { //默认
         path: '/', 
-        redirect: '/square/qq'
+        redirect: '/playlists/square/qq'
     },{ //歌单广场
-        path: '/square/:platform', 
-        component: SquareView 
+        path: '/playlists/square/:platform', 
+        component: PlaylistSquareView 
+    },{ //歌手广场
+        path: '/artists/square/:platform', 
+        component: ArtistSquareView 
     },
     {  //本地歌曲
         path: '/local', 
@@ -29,20 +33,20 @@ const routes = [
         component:  SearchView 
     },
     {  //歌单详情
-        path: '/playlist/:platform/:id',
+        path: '/:exploreMode/playlist/:platform/:id',
         props: true, 
         component:  PlaylistDetailView 
     },
     {  //歌手详情
-        path: '/artist/:platform/:id',
+        path: '/:exploreMode/artist/:platform/:id',
         props: true, 
         component:  ArtistDetailView 
     },
     {  //专辑详情
-        path: '/album/:platform/:id',
+        path: '/:exploreMode/album/:platform/:id',
         props: true, 
         component:  AlbumDetailView 
-    }
+    },
 ]
 
 export const router = createRouter({

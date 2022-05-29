@@ -3,7 +3,8 @@ import { useRouter } from 'vue-router';
 import PaginationTiles from './PaginationTiles.vue';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
-import EventBus from '../../common/EventBus';
+import { useMainViewStore } from '../store/mainViewStore';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps({
     data: Array
@@ -12,13 +13,15 @@ const props = defineProps({
 const router = useRouter()
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { updateCurrentPlatformByCode, isPlatformValid } = usePlatformStore()
+const { exploreModeCode } = storeToRefs(useMainViewStore())
 
 const visitItem = (platform, id) => {
     const platformValid = isPlatformValid(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
     if(visitable) {
-        router.push('/artist/' + platform + "/" + id)
+        const url = '/' + exploreModeCode.value + '/artist/' + platform + "/" + id
+        router.push(url)
         updateArtistDetailKeys(platform, id)
         updateCurrentPlatformByCode(platform)
     }

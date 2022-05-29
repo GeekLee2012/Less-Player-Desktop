@@ -5,10 +5,11 @@ import { useMainViewStore } from '../store/mainViewStore';
 
 const { playing, playMode } = storeToRefs(usePlayStore())
 const { playPrevTrack, togglePlay, playNextTrack, switchPlayMode } = usePlayStore()
-const { togglePlaybackQueueView, hideCategoryView } = useMainViewStore()
+const { togglePlaybackQueueView, hidePlaylistCategoryView, hideArtistCategoryView } = useMainViewStore()
 
 const togglePlaybackQueue = () => {
-    hideCategoryView()
+    hidePlaylistCategoryView()
+    hideArtistCategoryView()
     togglePlaybackQueueView()
 }
 

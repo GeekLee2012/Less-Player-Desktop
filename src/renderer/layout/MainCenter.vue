@@ -4,32 +4,40 @@ import MainTop from './MainTop.vue';
 import MainContent from './MainContent.vue';
 import { useMainViewStore } from '../store/mainViewStore'
 import { storeToRefs } from 'pinia';
-import CategoryView from '../views/CategoryView.vue';
+import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
+import ArtistCategoryView from '../views/ArtistCategoryView.vue';
 import EventBus from '../../common/EventBus';
 
-const { categoryViewShow } = storeToRefs(useMainViewStore())
-const { hideCategoryView, hidePlaybackQueueView } = useMainViewStore()
+const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useMainViewStore())
+const { hidePlaylistCategoryView, hideArtistCategoryView, hidePlaybackQueueView } = useMainViewStore()
 
 onMounted (() => {
     window.addEventListener('resize', e => {
-        bindCategoryHeight()
+        setCategoryHeight()
     })
     
     document.addEventListener('click', e => {
         //隐藏当前播放列表
         hidePlaybackQueueView()
-        //隐藏全部分类
-        hideCategoryView()
+        //强制重置高度
+        setCategoryHeight()
+        //隐藏歌单分类列表
+        hidePlaylistCategoryView()
+        //隐藏歌手分类列表
+        hideArtistCategoryView()
     })
 
     document.addEventListener('keydown', e => {
         handleKeys(e)
     })
 
-    const bindCategoryHeight = () => {
+    const setCategoryHeight = () => {
         const mainContent = document.getElementById('main-content')
-        const categoryView = document.getElementById('category-view')
-        categoryView.style.height = (mainContent.clientHeight - 37) + "px"
+        const playlistCategory = document.querySelector('#playlist-category-view')
+        const artistCategory = document.querySelector('#artist-category-view')
+        const viewHeight = (mainContent.clientHeight - 37) + "px"
+        if(playlistCategory) playlistCategory.style.height = viewHeight
+        if(artistCategory) artistCategory.style.height = viewHeight
     }
 
     //应用级别按键监听
@@ -40,7 +48,6 @@ onMounted (() => {
         }
     }
 
-    bindCategoryHeight()
 })
 </script>
 
@@ -52,8 +59,13 @@ onMounted (() => {
 
         <!-- 浮层(Component、View)-->
         <transition name="fade-ex">
-            <CategoryView id="category-view" v-show="categoryViewShow">
-            </CategoryView> 
+            <PlaylistCategoryView id="playlist-category-view" v-show="playlistCategoryViewShow">
+            </PlaylistCategoryView> 
+        </transition>
+
+        <transition name="fade-ex">
+            <ArtistCategoryView id="artist-category-view" v-show="artistCategoryViewShow">
+            </ArtistCategoryView> 
         </transition>
     </div>
 </template>
@@ -78,7 +90,8 @@ onMounted (() => {
     height: 30px;
 }
 
-#category-view {
+#playlist-category-view,
+#artist-category-view {
     position: fixed;
     top: 75px;
     right: 0px;

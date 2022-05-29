@@ -2,8 +2,8 @@
 import { onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
-import { useSquareViewStore } from '../store/squareViewStore';
-import CategoryBar from '../components/CategoryBar.vue';
+import { usePlaylistSquareViewStore } from '../store/playlistSquareViewStore';
+import PlaylistCategoryBar from '../components/PlaylistCategoryBar.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 
@@ -16,10 +16,10 @@ const playlists = reactive([])
 const pagination = { offset: 0, limit: 35, page: 1 }
 let markScrollTop = 0
 
-const { currentPlatformCode, currentCategoryCode } = storeToRefs(useSquareViewStore())
+const { currentPlatformCode, currentCategoryCode } = storeToRefs(usePlaylistSquareViewStore())
 const { currentVender, currentCategory, 
         putCategory, resetCurrentCategoryItem 
-    } = useSquareViewStore()
+    } = usePlaylistSquareViewStore()
 
 const resetPagination = () => {
     playlists.length = 0
@@ -42,11 +42,11 @@ const loadCategories = () => {
             putCategory(result.platform, result.data)
             //TODO
             categories.push(...result.data)
-            EventBus.emit('category-update')
+            EventBus.emit('playlistCategory-update')
         })
     } else {
         categories.push(...cached)
-        EventBus.emit('category-update')
+        EventBus.emit('playlistCategory-update')
     }
 }
 
@@ -137,15 +137,17 @@ watch(currentCategoryCode, (nv, ov) => {
 </script>
 
 <template>
-    <div id="square-content" ref="squareContentRef">
-        <CategoryBar :data="categories" v-show="categories.length > 0"></CategoryBar>
+    <div class="playlist-square-view" ref="squareContentRef">
+        <PlaylistCategoryBar :data="categories" 
+            v-show="categories.length > 0" >
+        </PlaylistCategoryBar>
         <PlaylistsControl :data="playlists"></PlaylistsControl>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 
 <style scoped>
-#square-content {
+.playlist-square-view {
     padding: 25px 33px 15px 33px;
     overflow: auto;
 }

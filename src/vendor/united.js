@@ -27,6 +27,7 @@ export class United {
                 const vendor = vendors[i]
                 const songs = await vendor.searchSongs(keyword)
                 candidates = songs.data
+                //TODO 匹配算法才是关键
                 //candidates = United.matchAndSort(track, candidates)
                 if(candidates.length < 1) continue
                 for(var j = 0; j < top; j++) {

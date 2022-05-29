@@ -38,13 +38,13 @@ export class Player {
                 html5: true,
                 onplay: function() {
                     requestAnimationFrame(self.__step.bind(self))
-                    EventBus.emit('track-state', PLAY_STATE.PLAYING)
+                    self.notifyStateChanged(PLAY_STATE.PLAYING)
                 },
                 onpause: function() {
-                    EventBus.emit('track-state', PLAY_STATE.PAUSE)
+                    self.notifyStateChanged(PLAY_STATE.PAUSE)
                 },
                 onend: function() {
-                    EventBus.emit('track-state', PLAY_STATE.END)
+                    self.notifyStateChanged(PLAY_STATE.END)
                 },
                 onseek: function() {
                     requestAnimationFrame(self.__step.bind(self))
@@ -116,4 +116,8 @@ export class Player {
         return this
     }
 
+    notifyStateChanged(state) {
+        EventBus.emit('track-state', state)
+    }
+    
 }

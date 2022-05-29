@@ -68,7 +68,7 @@ export class KuGou {
     static TOPLIST_PREFIX = "TOP_"
     static RADIO_CACHE = { channel: 0, data: [], index: 0, page: 1 }
 
-    //全部分类
+    //全部歌单分类
     static categories() {
         return new Promise((resolve, reject) => {
             const result = { platform: KuGou.CODE, data: [] }
@@ -582,6 +582,95 @@ export class KuGou {
         return new Promise((resolve, reject) => {
             const result = { offset, limit, page, data: [] }
             resolve(result)
+        })
+    }
+
+    //歌手分类
+    static artistCategories() {
+        return new Promise((resolve, reject) => {
+            const alphabet = KuGou.getAlphabetCategory()
+            const result = { platform: KuGou.CODE, data: [], alphabet }
+            const url = 'https://www.kugou.com/yy/html/singer.html'
+            getDoc(url).then(doc => {
+                const list = doc.querySelectorAll('.sng .l li')
+                const category = new Category("默认")
+                result.data.push(category)
+                const key = '/index/'
+                list.forEach(item => {
+                    const aEl = item.querySelector('a')
+                    const name = aEl.textContent
+                    const href = aEl.getAttribute('href')
+                    let value = '1-all-1'
+                    if(href.includes(key)) {
+                        value = href.split(key)[1].split(".html")[0]
+                    }
+                    category.add(name, value)
+                })
+                resolve(result)
+            })
+        })
+    }
+
+    //字母表分类
+    static getAlphabetCategory() {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        const category = new Category("字母")
+        category.add('全部', 'all')
+        category.add('其他', 'null')
+        const array = alphabet.split('')
+        for(var i = 0; i < array.length; i++) {
+            category.add(array[i], array[i].toLowerCase())
+        }
+        return  category
+    }
+    
+    //TODO 格式：page-filter-id
+    static parseCate(cate, offset, limit, page) {
+        try {
+            const source = cate['默认'].item.value.split('-')
+            source[0] = page
+            source[1] = cate['字母'].item.value
+            return source.join('-')
+        } catch(e) {
+            console.log(e)
+        }
+        return '1-all-1'
+    }
+
+    //歌手(列表)广场
+    static artistSquare(cate, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            const result = { platform: KuGou.CODE, cate, offset, limit, page, total: 0, data: [] }
+            if(page > 5) { //TODO
+                result.page = 5
+                resolve(result)
+                return 
+            }
+            //const url = 'https://www.kugou.com/yy/html/singer.html'
+            const url = 'https://www.kugou.com/yy/singer/index/' + KuGou.parseCate(cate, offset, limit, page) + '.html'
+            getDoc(url).then(doc => {
+                let els = doc.querySelectorAll('.sng .r #list_head li')
+                els.forEach(el => {
+                    const aEl = el.querySelector('.pic')
+                    const id = aEl.getAttribute('href').split('/singer/home/')[1].split('.html')[0]
+                    const title = aEl.getAttribute('title')
+                    let cover = aEl.querySelector('img').getAttribute('_src')
+                    cover = cover.replace('/100/', '/240/')
+                    const artist = { id,  platform: KuGou.CODE, title, cover }
+                    result.data.push(artist)
+                })
+                els = doc.querySelectorAll('.sng .r .list1 li')
+                els.forEach(el => {
+                    const aEl = el.querySelector('.text')
+                    const id = aEl.getAttribute('href').split('/singer/home/')[1].split('.html')[0]
+                    const title = aEl.getAttribute('title')
+                    //TODO
+                    const cover = null
+                    const artist = { id,  platform: KuGou.CODE, title, cover }
+                    result.data.push(artist)
+                })
+                resolve(result)
+            })
         })
     }
 

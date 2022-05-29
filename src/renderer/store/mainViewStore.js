@@ -6,10 +6,25 @@ const ipcRenderer = electronAPI.ipcRenderer
 export const useMainViewStore = defineStore('mainView', {
     state: () => ({
         coverMaskShow: false,
-        categoryViewShow: false,
+        playlistCategoryViewShow: false,
+        artistCategoryViewShow: false,
         playbackQueueViewShow: false,
-        playingViewShow: false
+        playingViewShow: false,
+        //探索模式，歌单、歌手
+        exploreModes: [ 'playlists', 'artists' ], 
+        exploreModeIndex: 0, 
     }),
+    getters: {
+        isPlaylistMode() {
+            return this.exploreModeIndex == 0
+        },
+        isArtistMode() {
+            return this.exploreModeIndex == 1
+        },
+        exploreModeCode() {
+            return this.exploreModes[this.exploreModeIndex]
+        }
+    },
     actions: {
         hidePlaybackQueueView() {
             this.playbackQueueViewShow = false
@@ -17,15 +32,25 @@ export const useMainViewStore = defineStore('mainView', {
         togglePlaybackQueueView() {
             this.playbackQueueViewShow = !this.playbackQueueViewShow
         },
-        toggleCategoryView() {
-            this.categoryViewShow = !this.categoryViewShow
-            if(!this.categoryViewShow) {
-                EventBus.emit("category-resetScroll")
+        togglePlaylistCategoryView() {
+            this.playlistCategoryViewShow = !this.playlistCategoryViewShow
+            if(!this.playlistCategoryViewShow) {
+                EventBus.emit("playlistCategory-resetScroll")
             }
         },
-        hideCategoryView() {
-            this.categoryViewShow = false
-            EventBus.emit("category-resetScroll")
+        hidePlaylistCategoryView() {
+            this.playlistCategoryViewShow = false
+            EventBus.emit("playlistCategory-resetScroll")
+        },
+        toggleArtistCategoryView() {
+            this.artistCategoryViewShow = !this.artistCategoryViewShow
+            if(!this.artistCategoryViewShow) {
+                EventBus.emit("artistCategory-resetScroll")
+            }
+        },
+        hideArtistCategoryView() {
+            this.artistCategoryViewShow = false
+            EventBus.emit("artistCategory-resetScroll")
         },
         showPlayingView() {
             this.playingViewShow = true
@@ -46,6 +71,13 @@ export const useMainViewStore = defineStore('mainView', {
         },
         maximize() {
             ipcRenderer.send('app-max')
+        },
+        setExploreMode(index) {
+            if(index != 0 && index != 1) index = 0
+            this.exploreModeIndex = index
+        },
+        setArtistExploreMode(mode) {
+            this.setExploreMode(1)
         }
     }
 })

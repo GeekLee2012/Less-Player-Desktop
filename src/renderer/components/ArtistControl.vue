@@ -1,4 +1,5 @@
 <script setup>
+import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
@@ -15,6 +16,7 @@ const props = defineProps({
 
 const router = useRouter()
 const { hidePlayingView } = useMainViewStore()
+const { exploreModeCode } = storeToRefs(useMainViewStore())
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { isArtistDetailVisitable } = usePlatformStore()
 let updatedArtist = { trackId: '', artist: [] }
@@ -36,7 +38,7 @@ const visitArtistDetail = (platform, item, index) => {
     platform = platform.trim()
     if(visitable) {
         const fromPath = router.currentRoute.value.path
-        const toPath = '/artist/' + platform + "/" + id
+        const toPath = '/' + exploreModeCode.value + '/artist/' + platform + "/" + id
         if(fromPath != toPath) {
             router.push(toPath)
             updateArtistDetailKeys(platform, id)

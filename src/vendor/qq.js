@@ -13,10 +13,6 @@ const escapeHtml = (text, ignore) => {
             .replace(/&apos;/g, "'")
 }
 
-const CONFIG = {
-    withCredentials: true
-}
-
 const moduleReq = (module, method, param) => {
     return { module,  method, param }
 }
@@ -818,7 +814,6 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&format=json&inCharset=utf8&outCharset=utf8"
             const reqBody = albumAllSongsReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
-                
                 const result = new Album(id)
                 const songList = json.req_1.data.songList
                 songList.forEach(item => {
@@ -842,7 +837,6 @@ export class QQ {
             const url = "http://c.y.qq.com/soso/fcgi-bin/client_search_cp"
             const reqBody = searchParam(keyword, 0, offset, limit, page)
             getJson(url, reqBody).then(json => {
-                
                 const list = json.data.song.list
                 const data = list.map(item => {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
@@ -890,7 +884,6 @@ export class QQ {
             const url = "http://c.y.qq.com/soso/fcgi-bin/client_search_cp"
             const reqBody = searchParam(keyword, 8, offset, limit, page)
             getJson(url, reqBody).then(json => {
-                
                 const list = json.data.album.list
                 const data = list.map(item => {
                     const album = new Album(item.albumMID, QQ.CODE, item.albumName, item.albumPic)
@@ -925,4 +918,109 @@ export class QQ {
         }) 
     }
 
+    //歌手分类名称映射
+    static tagsMap() {
+        return {
+            index: '字母',
+            area: '地区',
+            sex: '性别',
+            genre: '流派',
+        }
+    }
+    
+    //歌手分类
+    static artistCategories() {
+        return new Promise((resolve, reject) => {
+            const result = { platform: QQ.CODE, data: [], alphabet: new Category('字母') }
+            const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+            const reqBody = {
+                data: JSON.stringify({
+                    comm: { 
+                        ct: 24, 
+                        cv: 0
+                    },
+                    req_1: moduleReq('Music.SingerListServer', 'get_singer_list', { 
+                        area: -100, 
+                        sex: -100,
+                        genre: -100, 
+                        index: -100, 
+                        sin: 0, 
+                        cur_page: 1
+                    })
+                })
+            }
+            getJson(url, reqBody).then(json => {
+                const tags = json.req_1.data.tags
+                const tagsMap = QQ.tagsMap()
+                const keys = [ 'area', 'sex', 'genre' ]
+                keys.forEach(key => {
+                    const category = new Category(tagsMap[key])
+                    const list = tags[key]
+                    list.forEach(item => {
+                        category.add(item.name, item.id)
+                    })
+                    result.data.push(category)
+                })
+                //字母表
+                tags.index.forEach(item => {
+                    result.alphabet.add(item.name, item.id)
+                })
+                resolve(result)
+            })
+        })
+    }
+
+    //提取分类
+    static parseCate(cate) {
+        const result = { area: -100, sex: -100, genre: -100, index: -100 }
+        const source = {}
+        const tagsMap = QQ.tagsMap()
+        for(var key in cate) {
+            for(var tag in tagsMap) {
+                if(key == tagsMap[tag]) {
+                    source[tag] = cate[key].item.value
+                }
+            }
+        }
+        return Object.assign(result, source)
+    }
+
+    //歌手(列表)广场
+    static artistSquare(cate, offset, limit, page) {
+        limit = 80
+        offset = (page - 1) * limit
+        return new Promise((resolve, reject) => {
+            const result = { platform: QQ.CODE, cate, offset, limit, page, total: 0, data: [] }
+            const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+            const resolvedCate = QQ.parseCate(cate)
+            const reqBody = {
+                data: JSON.stringify({
+                    comm: { 
+                        ct: 24, 
+                        cv: 0
+                    },
+                    req_1: moduleReq('Music.SingerListServer', 'get_singer_list', { 
+                        area: resolvedCate.area, 
+                        sex: resolvedCate.sex,
+                        genre: resolvedCate.genre, 
+                        index: resolvedCate.index, 
+                        sin: offset, 
+                        cur_page: page
+                    })
+                })
+            }
+            getJson(url, reqBody).then(json => {
+                const list = json.req_1.data.singerlist
+                list.forEach(item => {
+                    const id = item.singer_mid
+                    const title = item.singer_name
+                    const cover = item.singer_pic
+                    const artist = { id,  platform: QQ.CODE, title, cover }
+                    result.data.push(artist)
+                })
+                resolve(result)
+            })
+        })
+    }
+    
 }

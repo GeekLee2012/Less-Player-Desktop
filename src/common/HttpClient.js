@@ -12,7 +12,7 @@ const __get = (url, data, config, parseContentType) => {
             url = url.includes('?') ? url : url + '?'
             url = url.endsWith('?') ? (url + data) : (url + "&" + data)
         }
-        axios.get(url, config).then((resp) => {
+        axios.get(url, config).then(resp => {
             try {
                 const result = parseContentType(resp)
                 resolve(result)
@@ -28,7 +28,7 @@ const __post = (url, data, config, parseContentType) => {
         if(data && (typeof(data) === 'object')) {
             data = qs.stringify(data)
         }
-        axios.post(url, data, config).then((resp) => {
+        axios.post(url, data, config).then(resp => {
             try {
                 const result = parseContentType(resp)
                 resolve(result)
@@ -40,21 +40,21 @@ const __post = (url, data, config, parseContentType) => {
 }
 
 export const getRaw = (url, data, config) => {
-    return __get(url, data, config, (resp) => resp.data)
+    return __get(url, data, config, resp => resp.data)
 }
 
 export const getDoc = (url, data, config) => {
-    return __get(url, data, config, (resp) => DOM_PARSER.parseFromString(resp.data, "text/html"))
+    return __get(url, data, config, resp => DOM_PARSER.parseFromString(resp.data, "text/html"))
 }
 
 export const getJson = (url, data, config) => {
-    return __get(url, data, config, (resp) => JSON.parse(resp.data))
+    return __get(url, data, config, resp => JSON.parse(resp.data))
 }
 
 export const postRaw = (url, data, config) => {
-    return __post(url, data, config, (resp) => resp.data)
+    return __post(url, data, config, resp => resp.data)
 }
 
 export const postJson = (url, data, config) => {
-    return __post(url, data, config, (resp) => JSON.parse(resp.data))
+    return __post(url, data, config, resp => JSON.parse(resp.data))
 }

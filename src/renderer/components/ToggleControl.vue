@@ -23,7 +23,6 @@ const toggle = () => {
     height: 20px;
     border-radius: 10rem;
     border: 1px solid var(--border-color);
-    background-color: #eaeaea;
     display: flex;
     flex-direction: column;
     justify-content: center;

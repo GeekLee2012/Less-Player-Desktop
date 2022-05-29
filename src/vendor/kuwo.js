@@ -6,7 +6,24 @@ import { Lyric } from "../common/Lyric";
 import { toMMssSSS } from "../common/Times";
 import { Album } from "../common/Album";
 
-const REQ_ID = 'e2db8a61-afdb-11ec-9d7b-c9324a8678ec'
+const randomText = (src, len) => {
+    let result = []
+    for (let i = 0; i < len; i++) {
+        const index = Math.floor(Math.random() * (src.length - 1))
+        result.push(src.charAt(index))
+    }
+    return result.join('')
+}
+
+const CHOICE = 'abcedfghijklmnopqrstuvwxyz1234567890'
+//e2db8a61-afdb-11ec-9d7b-c9324a8678ec
+//efe8c650-de5c-11ec-9d92-a133baea2d31
+//8-4-4-4-12
+const REQ_ID = randomText(CHOICE, 8) 
+    + '-' + randomText(CHOICE, 4) 
+    + '-' + randomText(CHOICE, 4) 
+    + '-' + randomText(CHOICE, 4) 
+    + '-' + randomText(CHOICE, 12)
 
 const CONFIG = {
     withCredentials: true
@@ -27,9 +44,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
            const url = "https://www.kuwo.cn/api/www/playlist/getTagList" 
                     + "?httpsStatus=1&reqId=" + REQ_ID
-            
             getJson(url, null, CONFIG).then(json => {
-                
                 const defaultCategory = new Category("精选")
                 defaultCategory.add("最新", '#new')
                 defaultCategory.add("最热", '#hot')
@@ -197,7 +212,6 @@ export class KuWo {
                 + "?mid=" + id + "&type=music" + "&httpsStatus=1&reqId=" + REQ_ID
             const result = new Track(id, KuWo.CODE)
             getJson(url, null, CONFIG).then(json => {
-                
                 if(json.data) {
                     result.url = json.data.url
                 }
@@ -214,7 +228,6 @@ export class KuWo {
             const url = "http://m.kuwo.cn/newh5/singles/songinfoandlrc"
                 + "?musicId=" + id + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                
                 const result = new Lyric()
                 const lrclist = json.data.lrclist
                 if(lrclist) {
@@ -346,7 +359,6 @@ export class KuWo {
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                
                 let data = []
                 if(json.code == 200) {
                     data = json.data.list.map(item => {
@@ -370,7 +382,6 @@ export class KuWo {
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                
                 const data = json.data.list.map(item => {
                     const playlist = new Playlist(item.id, KuWo.CODE, item.img, escapseHtml(item.name))
                     return playlist
@@ -388,7 +399,6 @@ export class KuWo {
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                
                 const data = json.data.albumList.map(item => {
                     const artist = [ { id: item.artistid, name: item.artist } ]
                     const albumName = escapseHtml(item.album)
@@ -419,6 +429,76 @@ export class KuWo {
                     }
                 })
                 const result = { offset, limit, page, data }
+                resolve(result)
+            })
+        })
+    }
+
+    //歌手分类
+    static artistCategories() {
+        return new Promise((resolve, reject) => {
+            const result = { platform: KuWo.CODE, data: [], alphabet: new Category('字母') }
+            const url = "https://www.kuwo.cn/singers"
+            getDoc(url).then(doc => {
+                let els =doc.querySelectorAll(".main_con .tag_en li")
+                els.forEach(el => {
+                    const key = el.textContent.trim()
+                    const value = key.replace('热门', '')
+                    result.alphabet.add(key, value)
+                })
+
+                const category = new Category('默认')
+                result.data.push(category)
+                els = doc.querySelectorAll(".main_con .tag_kind li")
+                for(var i = 0; i < els.length; i++) {
+                    const key = els[i].textContent.trim()
+                    const value = i
+                    category.add(key, value)
+                }
+                resolve(result)
+            })
+        })
+    }
+
+    //提取分类
+    static parseCate(cate) {
+        const result = { category: 0, prefix: '' }
+        try {
+            const source = {
+                category: cate['默认'].item.value,
+                prefix: encodeURIComponent(cate['字母'].item.value)
+            }
+            return Object.assign(result, source)
+        } catch (e) {
+            console.log(e)
+        }
+        return result
+    }
+
+    //歌手(列表)广场
+    static artistSquare(cate, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            const result = { platform: KuWo.CODE, cate, offset, limit, page, total: 0, data: [] }
+            const url = 'https://www.kuwo.cn/api/www/artist/artistInfo'
+            const resolvedCate = KuWo.parseCate(cate)
+            const reqBody = {
+                category: resolvedCate.category,
+                prefix: '' + resolvedCate.prefix,
+                pn: page,
+                rn: 102,
+                httpsStatus: 1,
+                reqId: REQ_ID
+            }
+            getJson(url, reqBody).then(json => {
+                console.log(json)
+                const list = json.data.artistList
+                list.forEach(item => {
+                    const id = item.id
+                    const title = item.name
+                    const cover = item.pic300 || item.pic || item.pic120 || item.pic70
+                    const artist = { id,  platform: KuWo.CODE, title, cover }
+                    result.data.push(artist)
+                })
                 resolve(result)
             })
         })

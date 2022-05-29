@@ -4,6 +4,8 @@ import PaginationTiles from './PaginationTiles.vue';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import EventBus from '../../common/EventBus';
+import { useMainViewStore } from '../store/mainViewStore';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps({
     data: Array
@@ -12,6 +14,7 @@ const props = defineProps({
 const router = useRouter()
 const { getVender, isPlatformValid } = usePlatformStore()
 const { addTrack, playTrack, resetQueue } = usePlayStore()
+const { exploreModeCode } = storeToRefs(useMainViewStore())
 
 const visitItem = (item) => {
     const platform = item.platform
@@ -27,7 +30,8 @@ const visitItem = (item) => {
         //音乐电台
         nextRadioTrack(platform, id)
     } else if(visitable) { //普通歌单
-        router.push('/playlist/' + platform + "/" + id)
+        const url = '/' + exploreModeCode.value + '/playlist/' + platform + "/" + id
+        router.push(url)
     }
 }
 

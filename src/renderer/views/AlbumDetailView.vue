@@ -123,8 +123,13 @@ const loadAll = () =>  {
     visitTab(0)
 }
 
-const switchTab = () => {
+const resetView = () => {
     currentTabView.value = null
+    updateTabTipText(0)
+}
+
+const switchTab = () => {
+    resetView()
     getAlbumDetail()
     if(isAllSongsTab()) {
         loadAllSongs()

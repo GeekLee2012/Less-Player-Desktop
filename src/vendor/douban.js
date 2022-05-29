@@ -54,6 +54,7 @@ export class DouBan {
                 json.forEach(item => {
                     const cover = item.covers.large
                     const playlist = new Playlist(item.id, DouBan.CODE , cover, item.title)
+                    //if(JSON.stringify(result.data).indexOf(JSON.stringify(playlist)) !=-1) return
                     result.data.push(playlist)
                 })
                 resolve(result)

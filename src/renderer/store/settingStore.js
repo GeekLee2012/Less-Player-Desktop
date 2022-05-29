@@ -137,7 +137,7 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 其他 */
         other: {
-            appVersion: 'v0.1.4'
+            appVersion: 'v0.1.5'
         }
     }),
     getters: {

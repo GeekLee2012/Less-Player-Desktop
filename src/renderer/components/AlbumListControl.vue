@@ -2,6 +2,8 @@
 import { useRouter } from 'vue-router';
 import PaginationTiles from './PaginationTiles.vue';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
+import { storeToRefs } from 'pinia';
+import { useMainViewStore } from '../store/mainViewStore';
 
 const props = defineProps({
     data: Array
@@ -9,13 +11,15 @@ const props = defineProps({
 
 const router = useRouter()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
+const { exploreModeCode } = storeToRefs(useMainViewStore())
 
 const visitItem = (platform, id) => {
     const platformValid = platform && (platform.trim().length > 0)
     const idValid = (id != 0)
     const visitable = platformValid && idValid
     if(visitable) {
-        router.push('/album/' + platform + "/" + id)
+        const url = '/' + exploreModeCode.value + '/album/' + platform + "/" + id
+        router.push(url)
         updateAlbumDetailKeys(platform, id)
     }
 }

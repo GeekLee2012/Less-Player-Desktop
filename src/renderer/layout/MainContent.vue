@@ -1,28 +1,41 @@
 <script setup>
 import { useRouter } from 'vue-router';
+import { useMainViewStore } from '../store/mainViewStore';
 import { usePlatformStore } from '../store/platformStore';
 
 const router = useRouter()
 const { updateCurrentPlatformByCode } = usePlatformStore()
+const { setExploreMode, setArtistExploreMode } = useMainViewStore()
 
 router.beforeResolve((to, from) => {
     console.log("[ ROUTE ] ==>>> " + to.path)
+    autoSwitchExploreMode(to)
     highlightPlatform(to)
 })
 
 const highlightPlatform = (to) => {
     const path = to.path
     let code = ''
-    if(path.startsWith('/square') || path.startsWith('/playlist')
-         || path.startsWith('/artist')  || path.startsWith('/album')) {
-        code = path.split('/')[2]
-    } else if(path.startsWith('/local')) {
+    if(path.includes('/square') || path.includes('/playlist')
+         || path.includes('/artist')  || path.includes('/album')) {
+        code = path.split('/')[3]
+    } else if(path.includes('/local')) {
         code = 'local'
     } 
     updateCurrentPlatformByCode(code)
 }
 
-//const excludes = ['PlaylistDetailView', 'ArtistDetailView', 'AlbumDetailView']
+const autoSwitchExploreMode = (to) => {
+    const path = to.path
+    if(path.includes('/playlists/')) {
+        setExploreMode(null)
+    } else if(path.includes('/artists/')) {
+        setArtistExploreMode()
+    } else if(!path.startsWith('/setting')) {
+        setExploreMode(null)
+    }
+}
+
 const excludes = []
 </script>
 

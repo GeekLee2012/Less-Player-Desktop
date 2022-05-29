@@ -1,4 +1,4 @@
-import { getDoc, postJson } from "../common/HttpClient";
+import { getDoc, getJson, postJson } from "../common/HttpClient";
 import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
@@ -77,9 +77,9 @@ const trackIdsParam = (ids) => {
 const playParam = (id) => {
     return {
         ids: [ id ], 
-        level: "standard",
-        encodeType: "aac",
-        csrf_token: ""
+        level: 'standard',
+        encodeType: 'aac',
+        csrf_token: ''
     }
 }
 
@@ -88,7 +88,7 @@ const lyricParam = (id) => {
         id, 
         lv: -1,
         tv: -1,
-        csrf_token: ""
+        csrf_token: ''
     }
 }
 
@@ -214,7 +214,6 @@ export class NetEase {
     static playlistDetail(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
             const result = new Playlist()
-
             let url = "https://music.163.com/weapi/v3/playlist/detail"
             let param = playlistParam(id)
             let reqBody = weapi(param)
@@ -488,6 +487,184 @@ export class NetEase {
                 resolve(result)
             })
         }) 
+    }
+
+    //歌手分类
+    static artistCategories() {
+        return new Promise((resolve, reject) => {
+            const result = { platform: NetEase.CODE, data: [], alphabet: NetEase.getAlphabetCategory() }
+            const url = 'https://music.163.com/discover/artist'
+            getDoc(url).then(doc => {
+                const els = doc.querySelectorAll('#singer-cat-nav li')
+                const category = new Category('默认')
+                result.data.push(category)
+                els.forEach(el => {
+                    const aEl = el.querySelector('a')
+                    const href = aEl.getAttribute('href').trim()
+                    const dataAttr = aEl.getAttribute('data-cat')
+                    const name = aEl.textContent.trim()
+                    let value = dataAttr ? dataAttr.trim() : '0'
+                    category.add(name, value)
+                })
+                resolve(result)
+            })
+        })
+    }
+
+    //字母表分类
+    static getAlphabetCategory() {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        const category = new Category("字母")
+        category.add('全部', '-1')
+        category.add('其他', '0')
+        const array = alphabet.split('')
+        for(var i = 0; i < array.length; i++) {
+            category.add(array[i], array[i].charCodeAt(0))
+        }
+        return  category
+    }
+
+    //提取分类
+    static parseCate(cate) {
+        const result = { id: -1, initial: -1 }
+        try {
+            const source = {
+                id: cate['默认'].item.value,
+                initial: cate['字母'].item.value
+            }
+            return Object.assign(result, source)
+        } catch (e) {
+            console.log(e)
+        }
+        return result
+    }
+
+    //歌手(列表)广场
+    static artistSquare(cate, offset, limit, page) {
+        //提取分类
+        const resolvedCate = NetEase.parseCate(cate)
+        //分类ID
+        const cateId = parseInt(resolvedCate.id)
+        //推荐歌手
+        if(cateId < 1) return NetEase.recommandArtists(cate, offset, limit, page)
+        //入驻歌手
+        else if(cateId == 5001) return NetEase.signedArtists(cate, offset, limit, page)
+        //其他歌手分类
+        return new Promise((resolve, reject) => {
+            const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
+            const url = 'https://music.163.com/discover/artist/cat'
+            const reqBody = {
+                id: cateId,
+                initial: resolvedCate.initial
+            }
+            getDoc(url, reqBody).then(doc => {
+                const els = doc.querySelectorAll('.m-sgerlist li')
+                els.forEach(el => {
+                    let cover = null
+                    const coverEl = el.querySelector('.u-cover')
+                    if(coverEl) {
+                        cover = coverEl.querySelector('img').getAttribute('src')
+                            .replace("130y130", "500y500")
+                    }
+                    const aEl = el.querySelector('.nm')
+                    const id = aEl.getAttribute('href').split('?id=')[1]
+                    const title = aEl.textContent
+                    const artist = { id,  platform: NetEase.CODE, title, cover }
+                    result.data.push(artist)
+                })
+                resolve(result)
+            })
+        })
+    }
+
+    //热门歌手
+    static topArtists() {
+        return new Promise((resolve, reject) => {
+            const url = 'https://music.163.com/weapi/artist/top'
+            const param = { 
+                offset: 0,
+                total: true,
+                limit: 100,
+                csrf_token: ''
+            }
+            const reqBody = weapi(param)
+            const result = []
+            postJson(url, reqBody).then(json => {
+                const list = json.artists
+                list.forEach(item => {
+                    const id = item.id
+                    const title = item.name
+                    const cover = item.picUrl
+                    const artist = { id,  platform: NetEase.CODE, title, cover }
+                    result.push(artist)
+                    resolve(result)
+                }) 
+            })
+        })
+    }
+
+    //推荐歌手
+    static recommandArtists(cate, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
+            if(page > 1) { //TODO
+                resolve(result)
+                return 
+            }
+            const url = 'https://music.163.com/discover/artist/'
+            getDoc(url).then(doc => {
+                const els = doc.querySelectorAll('.m-sgerlist li')
+                els.forEach(el => {
+                    let cover = null
+                    const coverEl = el.querySelector('.u-cover')
+                    if(coverEl) {
+                        cover = coverEl.querySelector('img').getAttribute('src')
+                            .replace("130y130", "500y500")
+                    }
+                    const aEl = el.querySelector('.nm')
+                    const id = aEl.getAttribute('href').split('?id=')[1]
+                    const title = aEl.textContent
+                    const artist = { id,  platform: NetEase.CODE, title, cover }
+                    result.data.push(artist)
+                })
+                return result
+            }).then(result => {
+                NetEase.topArtists().then(data => {
+                    result.data.push(...data)
+                    resolve(result)
+                })
+            })
+        })
+    }
+
+    //入驻歌手
+    static signedArtists(cate, offset, limit, page) {
+        limit = 60
+        offset = (page - 1) * limit
+        return new Promise((resolve, reject) => {
+            const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
+            //const url = 'https://music.163.com/discover/artist/signed'
+            const url = 'https://music.163.com/weapi/artist/list'
+            const param = { 
+                categoryCode: '5001',
+                offset,
+                total: false,
+                limit,
+                csrf_token: ''
+            }
+            const reqBody = weapi(param)
+            postJson(url, reqBody).then(json => {
+                const list = json.artists
+                list.forEach(item => {
+                    const id = item.id
+                    const title = item.name
+                    const cover = item.picUrl
+                    const artist = { id,  platform: NetEase.CODE, title, cover }
+                    result.data.push(artist)
+                })
+                resolve(result)
+            })
+        })
     }
 
 }

@@ -1,7 +1,8 @@
 export class Category {
-    // { name, data }
-    constructor(name) {
+    // { name, code, data }
+    constructor(name, code) {
         this.name = name
+        this.code = code ? code : name
         this.data = []
     }
 

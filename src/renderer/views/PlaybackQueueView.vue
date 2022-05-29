@@ -51,8 +51,8 @@ const initAndPlayTrack = (track) => {
     vender.playDetail(track.id, track).then(async result => {
         if(!track.hasUrl()) track.url = result.url
         //if(!track.hasUrl()) track = await United.transferTrack(track) 
-        if(!track.hasUrl()) {
-            //TODO 频繁切换下一曲，对音乐平台不友好
+        if(!track.hasUrl()) { //VIP收费歌曲或其他
+            //TODO 频繁切换下一曲，对音乐平台不友好，那...先暂停算了
             //if(queueTracksSize.value > 1) playNextTrack()
             return
         }
@@ -143,8 +143,8 @@ EventBus.on('track-loadLyric', track => loadLyric(track))
 
 .playback-queue .text-btn:hover,
 .playback-queue .text-btn:hover svg {
-    color: #28c83f;
-    fill: #28c83f;
+    color: var(--hl-color);
+    fill: var(--hl-color);
 }
 
 /*
@@ -162,7 +162,7 @@ EventBus.on('track-loadLyric', track => loadLyric(track))
     text-align: left;
     font-size: 21px;
     font-weight: bold;
-    background: linear-gradient(to top right, #28c83f, #1ca388);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }

@@ -6,9 +6,10 @@ import { KuGou } from '../../vendor/kugou';
 import { DouBan } from '../../vendor/douban';
 import { RadioCN } from '../../vendor/radiocn';
 import { LocalMusic } from '../../vendor/localmusic';
+import { useMainViewStore } from './mainViewStore';
 
 //音乐平台
-const platforms = [
+const allPlatforms = [
     { 
         code: 'all',
         name: '全部平台',
@@ -51,8 +52,9 @@ const platforms = [
     }
 ]
 
-const navPlatforms = platforms.slice(1)
-const onlinePlatformFilter = platforms.slice(0, platforms.length - 2)
+const playlistPlatforms = allPlatforms.slice(1)
+const artistPlatforms = allPlatforms.slice(1, 5)
+const onlinePlatformFilter = allPlatforms.slice(0, allPlatforms.length - 2)
 
 const venders = {
     qq: QQ, 
@@ -74,10 +76,15 @@ export const usePlatformStore = defineStore('platform', {
     //Getters
     getters: {
         platforms() {
-            return navPlatforms
+            return () => {
+                const { isArtistMode } = useMainViewStore()
+                if(isArtistMode) return artistPlatforms
+                return playlistPlatforms
+            }
         },
         currentPlatform(state) {
-            return state.platforms[state.currentPlatformIndex]
+            const { exploreMode } = useMainViewStore()
+            return state.platforms(exploreMode)[state.currentPlatformIndex]
         },
         currentPlatformCode(state) {
             return this.currentPlatform ? this.currentPlatform.code : ''
@@ -99,8 +106,10 @@ export const usePlatformStore = defineStore('platform', {
                 this.updateCurrentPlatform(-1)
                 return
             }
-            for(var i = 0; i < this.platforms.length; i++) {
-                if(code === this.platforms[i].code) {
+            const { exploreMode } = useMainViewStore()
+            const pms = this.platforms(exploreMode)
+            for(var i = 0; i < pms.length; i++) {
+                if(code === pms[i].code) {
                     this.updateCurrentPlatform(i)
                     break
                 }
