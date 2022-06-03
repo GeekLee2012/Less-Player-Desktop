@@ -2,6 +2,9 @@
   "name": "less-player",
   "private": true,
   "version": "0.1.5",
+  "author": {
+    "name": "RIVE2012"
+  },
   "main": "src/main/main.js",
   "scripts": {
     "dev": "concurrently vite \"electron .\"",

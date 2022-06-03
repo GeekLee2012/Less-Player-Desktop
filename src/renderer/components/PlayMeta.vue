@@ -43,7 +43,7 @@ const trackMeta = (track) => {
 }
 
 .play-meta .title-wrap {
-    width: 208px;
+    width: 205px;
     margin-left: 10px;
 }
 
@@ -95,15 +95,15 @@ const trackMeta = (track) => {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    padding-top: 15px;
+    margin-top: 15px;
+    height: 20px;
 }
 
 .play-meta .time-volume-wrap {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    margin-top: 6px;
+    /* justify-content: center; */
 }
 
 .play-meta .audio-time,

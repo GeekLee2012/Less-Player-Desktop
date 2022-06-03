@@ -89,7 +89,6 @@ export class RadioCN {
         const result = { platform: RadioCN.CODE, cate, offset, limit, page, total: 0, data: [] }
         cate = cate.replace(RadioCN.RADIO_PREFIX, '')
         return new Promise((resolve, reject) => {
-            
             if(page > 1) {
                 resolve(result)
                 return 
