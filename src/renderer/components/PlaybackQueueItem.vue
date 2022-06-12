@@ -111,6 +111,8 @@ const removeItem = () => {
 .playback-queue-item .right .data {
     height: 41px;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .playback-queue-item .title,
@@ -124,19 +126,23 @@ const removeItem = () => {
 }
 
 .playback-queue-item .title {
+    /*
     margin-top: 2px;
     margin-bottom: 6px;
+    */
     width: 258px;
+    top: 2px;
 }
 
 .playback-queue-item .bottom {
-    position: relative;
+    /*position: relative;*/
 }
 
 .playback-queue-item .artist,
 .playback-queue-item .duration {
     color: #989898;
     font-size: 14px;
+    bottom: 10px;
 }
 
 .playback-queue-item .artist {

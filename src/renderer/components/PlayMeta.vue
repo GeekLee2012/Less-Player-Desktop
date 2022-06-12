@@ -103,22 +103,24 @@ const trackMeta = (track) => {
     display: flex;
     flex-direction: row;
     align-items: center;
+    width: 205px;
     /* justify-content: center; */
 }
 
 .play-meta .audio-time,
 .play-meta .volume-bar {
-    flex: 1;
     line-height: 25px;
 }
 
 .play-meta .audio-time {
     color: #989898;
     font-size: 14px;
+    text-align: left;
+    flex: 1;
 }
 
 .play-meta .volume-bar {
-    margin-left: 20px;
+    margin-left: 10px;
 }
 
 .play-meta .volume-status {

@@ -158,7 +158,7 @@ const switchExploreMode = () => {
     align-items: center;
     justify-content: center;
     margin-left: 8px;
-    font-size: 18px;
+    font-size: 17.1px;
     font-weight: bold;
     background: var(--btn-bg);
     -webkit-background-clip: text;
