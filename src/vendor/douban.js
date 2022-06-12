@@ -238,7 +238,7 @@ export class DouBan {
                 reqBody.apikey = ""
             }
             getJson(url, reqBody).then(json => {
-                
+                if(json.song.length < 1) return 
                 const song = json.song[0]
                 const artist = song.singers.map(ar => ({ id: ar.id, name: ar.name }))
                 const album = { id: '', name: song.albumtitle }

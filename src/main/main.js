@@ -2,6 +2,7 @@
 const { app, BrowserWindow, ipcMain, Menu, dialog, powerMonitor, shell } = require('electron')
 const path = require('path')
 const { scanDir, parseTracks, readText } = require('./fileio') 
+
 //关闭警告提示
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 //浏览器UserAgent
@@ -44,15 +45,11 @@ app.on('window-all-closed', () => {
 //主进程事件监听
 ipcMain.on('app-quit', ()=> {
   app.quit()
-})
-
-ipcMain.on('app-min', ()=> {
+}).on('app-min', ()=> {
   const win = app.mainWin
   //win.setFullScreen(false)
   win.minimize()
-})
-
-ipcMain.on('app-max', ()=> {
+}).on('app-max', ()=> {
   const win = app.mainWin
   if(win.isMaximized()) {
     win.unmaximize()
@@ -61,17 +58,11 @@ ipcMain.on('app-max', ()=> {
     win.maximize()
     //win.setFullScreen(true)
   }
-})
-
-ipcMain.on('show-winBtn', ()=> {
+}).on('show-winBtn', ()=> {
   setWindowButtonVisibility(true)
-})
-
-ipcMain.on('hide-winBtn', ()=> {
+}).on('hide-winBtn', ()=> {
   setWindowButtonVisibility(false)
-})
-
-ipcMain.on('visit-link', (e, data)=> {
+}).on('visit-link', (e, data)=> {
   shell.openExternal(data)
 })
 

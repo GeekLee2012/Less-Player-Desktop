@@ -30,7 +30,7 @@ const deleteItem = () => {
 </script>
 
 <template>
-    <div class="playlist-item">
+    <div class="song-item">
         <div class="sqno">{{ index + 1 }}</div>
         <div class="title spacing">
             <span v-html="data.title" ></span>
@@ -58,7 +58,7 @@ const deleteItem = () => {
 </template>
 
 <style scoped>
-.playlist-item {
+.song-item {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -66,27 +66,27 @@ const deleteItem = () => {
     margin-bottom: 3px;
 }
 
-.playlist-item:hover {
+.song-item:hover {
     background-color: var(--list-item-hover);
 }
 
-.playlist-item > div {
+.song-item > div {
     line-height: 50px;
     vertical-align: middle;
     font-size: 16px;
 }
 
-.playlist-item .spacing {
+.song-item .spacing {
     margin-left: 12px;
 }
 
-.playlist-item .spacing1 {
+.song-item .spacing1 {
     margin-left: 8px;
 }
 
-.playlist-item .title,
-.playlist-item .artist,
-.playlist-item .album {
+.song-item .title,
+.song-item .artist,
+.song-item .album {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -95,49 +95,49 @@ const deleteItem = () => {
     text-align: left;
 }
 
-.playlist-item .artist span,
-.playlist-item .album span {
+.song-item .artist span,
+.song-item .album span {
     cursor: pointer;
 }
 
-.playlist-item .artist span:hover,
-.playlist-item .album span:hover {
+.song-item .artist span:hover,
+.song-item .album span:hover {
     background: linear-gradient(to top right, #1ca388, #28c83f);
     -webkit-background-clip: text;
     color: transparent;
 }
 
-.playlist-item .sqno {
+.song-item .sqno {
     width: 35px;
     padding-left: 8px;
     text-align: left;
 }
 
-.playlist-item .title {
+.song-item .title {
     flex: 1;
     position: relative;
     text-align: left;
 }
 
-.playlist-item .title span {
+.song-item .title span {
     z-index: 1;
 }
 
-.playlist-item .artist {
+.song-item .artist {
     width: 25%;
 }
 
-.playlist-item .album {
+.song-item .album {
     width: 25%;
 }
 
-.playlist-item .duration {
+.song-item .duration {
     width: 53px;
     padding-right: 8px;
     text-align: right;
 }
 
-.playlist-item .action {
+.song-item .action {
     z-index: 2;
     height: 100%;
 
@@ -155,24 +155,24 @@ const deleteItem = () => {
     visibility: hidden;
 }
 
-.playlist-item .action .delete-btn {
+.song-item .action .delete-btn {
     visibility: hidden;
 }
 
-.playlist-item .action svg {
+.song-item .action svg {
     fill: var(--svg-color);
     cursor: pointer;
 }
 
-.playlist-item .action svg:hover {
+.song-item .action svg:hover {
     fill: #28c83f;
 }
 
-.playlist-item .title:hover .action {
+.song-item .title:hover .action {
     visibility: visible;
 }
 
-.playlist-item .title:hover span{
+.song-item .title:hover span{
     width: 158px;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -178,6 +178,7 @@ const visitAuthor = () => {
     font-size: 16.5px;
     font-weight: bold;
     width: 125px;
+    font-weight: normal;
 }
 
 #setting-view .content > div {
@@ -189,6 +190,7 @@ const visitAuthor = () => {
 
 #setting-view .content > div b {
     width: 215px;
+    font-weight: normal;
 }
 
 #setting-view .content .last {
