@@ -13,7 +13,8 @@
 * 播放器基本功能: 播放/暂停、上/下一首、进度条/播放时间、播放模式、音量控制等  
 * 支持在线音乐平台：QQ音乐、网易云音乐、酷我音乐、酷狗音乐、豆瓣FM  
 * 支持在线广播平台：央广云听  
-* 支持本地歌曲播放, 支持音频类型: mp3、flac、ogg、wav、aac、m4a    
+* 支持本地歌曲播放, 支持音频类型: mp3、flac、ogg、wav、aac、m4a  
+* 支持2种探索（浏览）模式：歌单模式、歌手模式  
 
 #### 界面预览  
 ![snap 01.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2008.png)  
