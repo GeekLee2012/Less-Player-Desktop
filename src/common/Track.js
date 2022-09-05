@@ -19,51 +19,103 @@ export class Track {
         this.url = ''
         this.lyric = new Lyric()
         this.isRadioType = false //是否为电台歌曲
+        //当歌单类型为电台时，是否为广播电台
+        this.isFMRadio = false
+        this.channel = '' //channelId
     }
 
     mmssDuration() {
-        return toMmss(this.duration)
+        return Track.mmssDuration(this)
     }
 
     //所有歌手名字
     artistName() {
+        return Track.artistName(this)
+    }
+
+    firstArtistName() {
+        return Track.firstArtistName(this)
+    }
+
+    hasId() {
+        return Track.hasId(this)
+    }
+
+    hasUrl() {
+        return Track.hasUrl(this)
+    }
+
+    hasCover() {
+        return Track.hasCover(this)
+    }
+
+    hasLyric() {
+        return Track.hasLyric(this)
+    }
+
+    lyricData() {
+        return Track.lyricData(this)
+    }
+
+    static mmssDuration(track) {
+        return toMmss(track.duration)
+    }
+
+    static artistName(track) {
         let artistName = ''
-        if(this.artist) {
+        if(track && track.artist) {
             const names = []
-            this.artist.forEach(e => names.push(e.name));
+            track.artist.forEach(e => names.push(e.name));
             artistName = names.join('、')
             artistName = artistName.slice(0, artistName.length)
         }
         return artistName
     }
 
-    firstArtistName() {
-        return this.artistName().split('、')[0]
+    static hasLyric(track) {
+        return track && track.lyric && Lyric.hasData(track.lyric)
     }
 
-    hasId() {
-        if(!this.id) return false
-        if(typeof(this.id) == 'number') return this.id > 0
-        if(typeof(this.id) == 'string') return this.id.trim().length > 0
+    static hasUrl(track) {
+        return track.url && track.url.trim().length > 0
     }
 
-    hasUrl() {
-        return this.url && this.url.trim().length > 0
+    static hasCover(track) {
+        if(!track || !track.cover) return false
+        track.cover = track.cover.trim()
+        if(track.cover.length < 1) return false
+        return track.cover != DEFAULT_COVER
     }
 
-    hasCover() {
-        if(!this.cover) return false
-        this.cover = this.cover.trim()
-        if(this.cover.length < 1) return false
-        return this.cover != DEFAULT_COVER
+    static hasId(track) {
+        if(!track || !track.id) return false
+        if(typeof(track.id) == 'number') return track.id > 0
+        if(typeof(track.id) == 'string') return track.id.trim().length > 0
     }
 
-    hasLyric() {
-        return this.lyric && this.lyric.hasData()
+    static firstArtistName(track) {
+        return track ? track.artistName().split('、')[0] : ""
     }
 
-    lyricData() {
-        return this.lyric.data
+    static lyricData(track) {
+        return track ? track.lyric.data : []
     }
 
+    static fromChannel(channelTrack, isFM) {
+        const track = new Track()
+        if(channelTrack) {
+            Object.assign(track, channelTrack)
+            track.artist.push(channelTrack.radio)
+            track.channel = channelTrack.channel
+        }
+        track.isRadioType = true
+        track.isFMRadio = isFM
+        return track
+    }
+
+    static isEquals(t1, t2) {
+        if(!t1 || !t2) return false
+        return t1.id == t2.id
+            && t1.platform == t2.platform
+    }
 }

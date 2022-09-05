@@ -115,7 +115,7 @@ export class RadioCN {
                     playlist.channel = {
                         id: item.id,
                         cover,
-                        name: item.name,
+                        title: item.name,
                         radio: {
                             id: '',
                             rid: item.radio_id,
@@ -123,7 +123,6 @@ export class RadioCN {
                         },
                         url: item.streams[0].url
                     }
-                    
                     result.data.push(playlist)
                 })
                 resolve(result)

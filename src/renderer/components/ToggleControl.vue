@@ -28,6 +28,7 @@ const toggle = () => {
     justify-content: center;
     cursor: pointer;
     background-color: #a0a0a0;
+    background-color: var(--toggle-btn-bg);
 }
 
 .toggle-ctl .thumb {
@@ -36,11 +37,11 @@ const toggle = () => {
     height: 16px;
     border-radius: 10rem;
     border: 1px solid transparent;
-    background-color: var(--text-color);
+    background-color: var(--toggle-btn-color);
 }
 
 .toggle-ctl-active {
-    background-color: var(--text-color);
+    background-color: var(--toggle-btn-color);
     align-items: flex-end;
 }
 

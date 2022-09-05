@@ -5,6 +5,7 @@ import { usePlayStore } from '../store/playStore';
 import { useMainViewStore } from '../store/mainViewStore';
 import LyricControl from '../components/LyricControl.vue';
 import EventBus from '../../common/EventBus';
+import { Track } from '../../common/Track';
 
 const { hidePlayingView, minimize } = useMainViewStore()
 const { currentTrack, mmssCurrentTime, progress } = storeToRefs(usePlayStore())
@@ -40,7 +41,7 @@ watch(progress, (nv, ov) => {
         <div class="bottom">
             <ProgressBar ref="progressBarRef" :onseek="seekTrack"></ProgressBar>
             <div class="action">
-                <AudioTime :current="mmssCurrentTime" :duration="currentTrack.mmssDuration()"></AudioTime>
+                <AudioTime :current="mmssCurrentTime" :duration="Track.mmssDuration(currentTrack)"></AudioTime>
                 <PlayControl class="spacing"></PlayControl>
                 <VolumeBar class="spacing" ></VolumeBar>
             </div>
@@ -84,6 +85,7 @@ watch(progress, (nv, ov) => {
 
 .playing-view .header svg:hover {
     fill: #28c83f;
+    fill: var(--hl-color);
 }
 
 .playing-view .center {

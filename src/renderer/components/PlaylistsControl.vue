@@ -6,6 +6,7 @@ import { usePlayStore } from '../store/playStore';
 import EventBus from '../../common/EventBus';
 import { useMainViewStore } from '../store/mainViewStore';
 import { storeToRefs } from 'pinia';
+import { Track } from '../../common/Track';
 
 const props = defineProps({
     data: Array
@@ -22,12 +23,11 @@ const visitItem = (item) => {
     const platformValid = isPlatformValid(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
-    if(item.isRadioType) { //电台歌单
-        if(item.isFMRadio) { //FM广播
-            EventBus.emit('radio-play', item.channel)
-            return
-        }
-        //音乐电台
+    if(item.isFMRadio) { //FM广播
+        const track = Track.fromChannel(item.channel, true)
+        addTrack(track)
+        playTrack(track)
+    } else if(item.isRadioType) { //音乐电台歌单
         nextRadioTrack(platform, id)
     } else if(visitable) { //普通歌单
         const url = '/' + exploreModeCode.value + '/playlist/' + platform + "/" + id

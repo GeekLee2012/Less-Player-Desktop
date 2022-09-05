@@ -16,7 +16,7 @@ const props = defineProps({
 <style>
 .textlist-ctl {
     text-align: left;
-    color: #ccc;
+    color: var(--text-sub-text);
     line-height: 30px;
     word-wrap: break-word;
     word-break: normal;

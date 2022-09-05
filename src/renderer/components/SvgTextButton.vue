@@ -29,7 +29,6 @@ const props = defineProps({
     align-items: center;
     border-radius: 10rem;
     height: 32px;
-    cursor: pointer;
     color: var(--svg-text-color);
 }
 
@@ -40,6 +39,7 @@ const props = defineProps({
     justify-content: center;
     align-items: center;
     background: var(--btn-bg);
+    cursor: pointer;
 }
 
 .svg-text-btn .left-btn:hover,

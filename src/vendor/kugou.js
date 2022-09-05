@@ -89,7 +89,12 @@ export class KuGou {
                     })
                     result.data.push(category)
                 })
-                result.data[0].add("榜单", KuGou.TOPLIST_CODE).add("电台", KuGou.RADIO_CODE)
+                result.data[0].add("榜单", KuGou.TOPLIST_CODE)
+                    .add("电台", KuGou.RADIO_CODE)
+                    .add("最热", "#6")
+                    .add("最新", "#7")
+                    .add("热藏", "#3")
+                    .add("飙升", "#8")
                 resolve(result)
             })
         })
@@ -263,15 +268,20 @@ export class KuGou {
 
     //歌单(列表)广场
     static square(cate, offset, limit, page) {
-        const originCate = cate
-        let resolvedCate = cate.trim()
+        const originCate = cate ? (cate + "") : "";
+        let resolvedCate = originCate.trim()
         //榜单
         if(resolvedCate === KuGou.TOPLIST_CODE) return KuGou.toplist(cate, offset, limit, page)
         //电台
         if(resolvedCate === KuGou.RADIO_CODE) return KuGou.radioList(cate, offset, limit, page)
         //普通歌单
         return new Promise((resolve, reject) => {
-            const type = 5 || 6 || 7 || 3 || 8 //推荐、最热、最新、热藏、飙升
+            let type = 5 || 6 || 7 || 3 || 8 //推荐、最热、最新、热藏、飙升
+            //TODO 暂时全部排序
+            if(resolvedCate.startsWith("#")) {
+                type = parseInt(resolvedCate.substring(1))
+                resolvedCate = ""
+            }
             const result = { platform: KuGou.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             const url = 'http://mac.kugou.com/v2/musicol/yueku/v1/special/index/getData/getData.html&cdn=cdn&p=' 
                 + page + '&pagesize=20&t=' + type + '&c=' + resolvedCate
@@ -427,7 +437,7 @@ export class KuGou {
     }
     
     //歌手详情: 专辑
-    static artistDetailAlbums(id, offet, limit, page) {
+    static artistDetailAlbums(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
             const url = "https://www.kugou.com/yy/"
                 + "?r=singer/album&sid=" + id 
@@ -442,7 +452,7 @@ export class KuGou {
                     const track = new Album(item.albumid, KuGou.CODE, item.albumname, item.img, artist)
                     data.push(track)
                 })
-                const result = { offet, limit, page, total, data }
+                const result = { offset, limit, page, total, data }
                 resolve(result)
             })
         })
@@ -524,8 +534,6 @@ export class KuGou {
                 let jsonText = jsonp.split(callbackFn + "(")[1].trim()
                 jsonText = jsonText.substring(0, jsonText.length - 1)
                 const json = JSON.parse(jsonText)
-                
-
                 const data = json.data.lists.map(item => {
                     const artist = item.Singers
                     const album = { id: item.AlbumID, name: item.AlbumName }

@@ -19,11 +19,11 @@ const props = defineProps({
 
 .keys-input-ctl input {
     border: 0px solid transparent;
-    border-bottom: 1px solid #eee;
-    background-color: var(--text-color);
+    /*border-bottom: 1px solid #eee;*/
+    background-color: var(--keyinput-ctl-bg);
     border-radius: 3px;
     padding: 5px;
     outline: 0;
-    color: var(--bg-color);
+    color: var(--searchbar-text-color);
 }
 </style>

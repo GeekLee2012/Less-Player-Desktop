@@ -269,6 +269,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
 
 #album-detail .tab-nav .active {
     border-color: #28c83f;
+    border-color: var(--hl-color);
 }
 
 #album-detail .tab-tip {
@@ -276,6 +277,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
     right: 10px;
     font-size: 16px;
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }

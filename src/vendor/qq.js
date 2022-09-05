@@ -17,9 +17,20 @@ const moduleReq = (module, method, param) => {
     return { module,  method, param }
 }
 
+const getPlaylistCover = (originUrl) => {
+    if(!originUrl) return null
+    return originUrl.replace("/300?n=1", "/600?n=1")
+}
+
+const getArtistCover = (artistmid) => {
+    if(!artistmid) return null
+    return "http://y.gtimg.cn/music/photo_new/T001R500x500M000"
+        + artistmid + ".jpg"
+}
+
 const getAlbumCover = (albummid) => {
     if(!albummid) return null
-    return "https://y.qq.com/music/photo_new/T002R500x500M000" 
+    return "https://y.qq.com/music/photo_new/T002R500x500M000"
         + albummid + ".jpg?max_age=2592000"
 }
 
@@ -333,8 +344,10 @@ const getWeek = (dt) => {
 //参考： https://github.com/jsososo/QQMusicApi/
 export class QQ {
     static CODE = "qq"
+    static DEFAULT_CATE= 10000000
     static TOPLIST_CODE= 99999999
     static RADIO_CODE= 88888888
+    static NEW_CODE= 22222222
     static TOPLIST_PREFIX = "TOP_"
     static RADIO_CACHE = { channel: 0, data: [], index: 0 }
     
@@ -366,8 +379,9 @@ export class QQ {
                     cateNameCached.push(cateName)
                 })
                 const firstCate = result[0]
-                firstCate.data.splice(1, 0, { key: '排行榜', value: QQ.TOPLIST_CODE })
-                firstCate.data.splice(2, 0, { key: '电台', value: QQ.RADIO_CODE })
+                firstCate.data.splice(1, 0, { key: '最新', value: QQ.NEW_CODE })
+                firstCate.data.splice(2, 0, { key: '排行榜', value: QQ.TOPLIST_CODE })
+                firstCate.data.splice(3, 0, { key: '电台', value: QQ.RADIO_CODE })        
                 resolve({ platform: QQ.CODE, data: result })
             })
         })
@@ -542,15 +556,20 @@ export class QQ {
 
     //歌单广场(列表)
     static square (cate, offset, limit, page) {
-        const originCate = cate
+        const originCate = cate || 0
         let resolvedCate = cate
         if(typeof(resolvedCate) == 'string') resolvedCate = parseInt(resolvedCate.trim())
-        resolvedCate = resolvedCate > 0 ? resolvedCate : 10000000
+        resolvedCate = resolvedCate > 0 ? resolvedCate : QQ.DEFAULT_CATE
         //榜单
         if(resolvedCate == QQ.TOPLIST_CODE) return QQ.toplist(cate, offset, limit, page)
         //电台
         if(resolvedCate == QQ.RADIO_CODE) return QQ.radioList(cate, offset, limit, page)
         //普通歌单
+        let sortId = 5 //最热
+        if(resolvedCate == QQ.NEW_CODE) {
+            sortId = 2 //最新
+            resolvedCate = QQ.DEFAULT_CATE
+        }
         return new Promise((resolve, reject) => {
             const result = { platform: QQ.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             const url = "https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg"
@@ -558,7 +577,7 @@ export class QQ {
                 format: 'json',
                 inCharset: 'utf8',
                 outCharset: 'utf8',
-                sortId: 5,
+                sortId: sortId, //5 => 最热, 2 => 最新
                 categoryId: resolvedCate,
                 sin: offset,
                 ein: (offset + limit - 1)
@@ -593,13 +612,12 @@ export class QQ {
                 loginUin: 0,
             }
             getJson(url, reqBody).then(json => {
-                
                 const playlist = json.cdlist[0]
-
+                
                 result.id = playlist.dissid
                 result.platform = QQ.CODE
                 result.title = playlist.dissname
-                result.cover = playlist.logo
+                result.cover = getPlaylistCover(playlist.logo)
                 result.about = playlist.desc
 
                 const songs = playlist.songlist
@@ -617,7 +635,7 @@ export class QQ {
     }
 
     //歌曲播放详情：url、cover、lyric等
-    static playDetail(id) {
+    static playDetail(id, track) {
         return new Promise((resolve, reject) => {
             let url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = {
@@ -696,10 +714,10 @@ export class QQ {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')
                     const json = JSON.parse(scriptText)
-                    
+                    console.log(json)
                     const detail = json.singerDetail
                     result.name = detail.basic_info.name
-                    result.cover = detail.pic.pic
+                    result.cover = getArtistCover(detail.basic_info.singer_mid) || detail.pic.pic
                     result.about = detail.descstr
                 }
                 resolve(result)
@@ -865,7 +883,6 @@ export class QQ {
                 query: keyword
             }
             getJson(url, reqBody).then(json => {
-                
                 const list = json.data.list
                 const data = list.map(item => {
                     const playlist = new Playlist(item.dissid, QQ.CODE, item.imgurl, escapeHtml(item.dissname))

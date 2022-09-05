@@ -53,6 +53,7 @@ const props = defineProps({
 }
 .image-text-tile .title:hover {
     background: linear-gradient(to right, #1ca388, #28c83f);
+    background: var(--btn-bg);
     -webkit-background-clip: text;
     color: transparent;
 }

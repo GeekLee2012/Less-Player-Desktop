@@ -13,6 +13,7 @@ export const useMainViewStore = defineStore('mainView', {
         //探索模式，歌单、歌手
         exploreModes: [ 'playlists', 'artists' ], 
         exploreModeIndex: 0, 
+        playNotificationShow: false
     }),
     getters: {
         isPlaylistMode() {
@@ -78,6 +79,12 @@ export const useMainViewStore = defineStore('mainView', {
         },
         setArtistExploreMode(mode) {
             this.setExploreMode(1)
+        },
+        showPlayNotification() {
+            this.playNotificationShow = true
+        },
+        hidePlayNotification() {
+            this.playNotificationShow = false
         }
     }
 })

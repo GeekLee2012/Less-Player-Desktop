@@ -11,18 +11,22 @@ const { localDirs, localTracks, isLoading } = storeToRefs(useLocalMusicStore())
 const { addFolders, addFiles, resetAll, removeItem } = useLocalMusicStore()
 
 const playAll = () => {
+    if(noTracks()) return
     resetQueue()
     addAll()
     playNextTrack()
 }
 
 const addAll = () => {
+    if(noTracks()) return
     addTracks(localTracks.value)
 }
 
 const batchDelete = () => {
    //TODO
 }
+
+const noTracks = () => (localTracks.value.length < 1)
 
 </script>
 
@@ -108,6 +112,7 @@ const batchDelete = () => {
     text-align: left;
     font-size: 18px;
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }

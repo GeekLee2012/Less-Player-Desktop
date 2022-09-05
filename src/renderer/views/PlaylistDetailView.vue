@@ -187,6 +187,7 @@ onMounted(() => {
     height: 119px;
     line-height: 20px;
     color: #bababa;
+    color: var(--text-sub-color);
     overflow: hidden;
     word-wrap: break-all;
     white-space:pre-wrap;
@@ -209,6 +210,7 @@ onMounted(() => {
     text-align: left;
     font-size: 18px;
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }

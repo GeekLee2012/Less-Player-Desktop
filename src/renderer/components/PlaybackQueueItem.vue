@@ -6,7 +6,7 @@ import { usePlayStore } from '../store/playStore';
 const { playTrack, removeTrack, isCurrentTrack } = usePlayStore()
 
 const props = defineProps({
-    data: Track,
+    data: Object, //Track
     active: Boolean
 })
 
@@ -38,7 +38,7 @@ const removeItem = () => {
                                 :trackId="data.id" >
                             </ArtistControl>
                         </div>
-                        <span class="duration">{{ data.mmssDuration() }}</span>
+                        <span class="duration">{{ Track.mmssDuration(data) }}</span>
                     </div>
                 </div>
                 <div class="action">
@@ -75,13 +75,14 @@ const removeItem = () => {
 }
 
 .current .item-wrap {
-    border-image: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
+    border-image: var(--pbq-hl-border)
 }
 
 .current .title, 
 .current .artist,
 .current .duration {
     background: linear-gradient(to top right, #28c83f, #1ca388);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent !important;
 }
@@ -141,6 +142,7 @@ const removeItem = () => {
 .playback-queue-item .artist,
 .playback-queue-item .duration {
     color: #989898;
+    color: var(--text-sub-color);
     font-size: 14px;
     bottom: 10px;
 }
@@ -158,6 +160,7 @@ const removeItem = () => {
 
 .playback-queue-item .artist span:hover {
     background: linear-gradient(to top right, #28c83f, #1ca388);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }
@@ -192,6 +195,7 @@ const removeItem = () => {
 
 .playback-queue-item .action svg:hover {
     fill: #28c83f;
+    fill: var(--hl-color);
 }
 
 .playback-queue-item:hover .title, 

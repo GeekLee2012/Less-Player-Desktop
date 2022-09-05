@@ -5,14 +5,14 @@ import { useMainViewStore } from '../store/mainViewStore';
 
 const { playing, playMode } = storeToRefs(usePlayStore())
 const { playPrevTrack, togglePlay, playNextTrack, switchPlayMode } = usePlayStore()
-const { togglePlaybackQueueView, hidePlaylistCategoryView, hideArtistCategoryView } = useMainViewStore()
+const { togglePlaybackQueueView, hidePlaylistCategoryView, 
+    hideArtistCategoryView } = useMainViewStore()
 
 const togglePlaybackQueue = () => {
     hidePlaylistCategoryView()
     hideArtistCategoryView()
     togglePlaybackQueueView()
 }
-
 </script>
 
 <template>
@@ -62,6 +62,7 @@ const togglePlaybackQueue = () => {
 .play-ctl svg:hover {
     fill: linear-gradient(to top right, #28c83f, #1ca388) !important;
     fill: #28c83f;
+    fill: var(--hl-color);
 }
 
 .play-ctl .play-btn {
@@ -70,11 +71,13 @@ const togglePlaybackQueue = () => {
     width: 35px;
     height: 35px;
     background: linear-gradient(to top right, #28c83f, #1ca388);
+    background: var(--btn-bg);
     cursor: pointer;
 }
 
 .play-ctl .play-btn:hover {
-    background: linear-gradient(to top right, #2edfa3, #28c83f) !important;
+    /*background: linear-gradient(to top right, #2edfa3, #28c83f) !important;*/
+    background: var(--btn-hover-bg);
 }
 
 .play-ctl .play-btn svg {

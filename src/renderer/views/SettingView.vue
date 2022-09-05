@@ -153,7 +153,7 @@ const visitAuthor = () => {
     font-size: 25px;
     font-weight: bold;
     padding-bottom: 20px;
-    border-bottom: 2px solid #3a3a3a;
+    border-bottom: 2px solid var(--setting-bottom-border-color);
 }
 
 #setting-view .center {
@@ -167,7 +167,7 @@ const visitAuthor = () => {
     flex-direction: row;
     padding-top: 35px;
     padding-bottom: 35px;
-    border-bottom: 2px solid #3a3a3a;
+    border-bottom: 2px solid var(--setting-bottom-border-color);
 }
 
 #setting-view .center .last-row {

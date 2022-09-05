@@ -93,7 +93,6 @@ const getArtistDetail = () => {
     if(!vender) return
     const id = artistId.value
     vender.artistDetail(id).then(result => {
-        
         updateArtist(result.name, result.cover)
         if(result.about) {
             updateAbout(result.about)
@@ -111,8 +110,7 @@ const loadHotSongs = () => {
     if(!vender) return
     const id = artistId.value
     vender.artistDetailHotSongs(id).then(result => {
-        
-        updateArtist(result.name, result.cover)
+        updateArtist(result.name || artistName, result.cover)
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
         currentTabView.value = SongListControl
@@ -337,12 +335,14 @@ watch(activeTab, (nv,ov) => switchTab())
     right: 10px;
     font-size: 16px;
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }
 
 #artist-detail .tab-nav .active {
     border-color: #28c83f;
+    border-color: var(--hl-color);
 }
 
 #artist-detail  .songlist {

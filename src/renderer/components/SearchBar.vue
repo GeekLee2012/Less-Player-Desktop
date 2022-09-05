@@ -49,18 +49,20 @@ const clear = () => {
 .search-bar .search-btn, 
 .search-bar .keyword, 
 .search-bar .clear-btn {
-    border: 0px solid #eee;
+    border: 0px solid var(--searchbar-border-color);
 }
 
 .search-bar .search-btn {
     border-radius: 10rem 0 0 10rem;
     width: 28px;
     background: linear-gradient(to top right, #28c83f, #1ca388);
+    background: var(--btn-bg);
     cursor: pointer;
 }
 
 .search-bar .search-btn:hover {
-    background: linear-gradient(to top right, #2edfa3, #28c83f) !important;
+    /*background: linear-gradient(to top right, #2edfa3, #28c83f) !important; */
+    background: var(--btn-hover-bg);
 }
 
 .search-bar .search-btn svg {
@@ -74,17 +76,16 @@ const clear = () => {
     height: 28px;
     padding-left: 5px;
     padding-right: 6px;
-    background-color: #eee;
+    background-color: var(--searchbar-bg);
     outline: 0;
     width: 115px;
-    color: #555;
+    color: var(--searchbar-text-color);
 }
 
 .search-bar .clear-btn {
     border-radius: 0 10rem 10rem 0;
     width: 18px;
-    background: #eee;
-    cursor: pointer;
+    background: var(--searchbar-bg);
 }
 
 .search-bar .clear-btn svg {

@@ -28,7 +28,7 @@ export class Lyric {
     }
 
     hasData() {
-        return this.data.size > 0
+        return Lyric.hasData(this)
     }
 
     static parseFromText(text, seperator) {
@@ -106,4 +106,7 @@ export class Lyric {
 		return (time.indexOf('.') != -1) ? time : (time + '.000')
     }
 
+    static hasData(lyric) {
+        return lyric && lyric.data.size > 0
+    }
 }

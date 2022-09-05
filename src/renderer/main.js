@@ -3,6 +3,7 @@ import App from './App.vue';
 
 //Pinia
 import { createPinia } from 'pinia';
+import piniaPersist from 'pinia-plugin-persist'
 //Route
 import { router } from './route/Router';
 //LazyLoad
@@ -35,7 +36,10 @@ app.config.errorHandler = (err, vm, info) => {
     // `info` 是 Vue 特定的错误信息，比如错误所在的生命周期钩子
 }
 
-app.use(createPinia())
+const pinia = createPinia()
+pinia.use(piniaPersist)
+
+app.use(pinia)
     .use(router)
     .use(VueLazyLoad, {
         loading: 'default_cover.png',

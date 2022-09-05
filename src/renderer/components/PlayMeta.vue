@@ -4,16 +4,23 @@ import AudioTime from './AudioTime.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
+import { Track } from '../../common/Track';
+import { onMounted } from 'vue';
+import EventBus from '../../common/EventBus';
 
 const { currentTrack, mmssCurrentTime } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useMainViewStore())
 const { showPlayingView, toggleCoverMask } = useMainViewStore()
 
 const trackMeta = (track) => {
-    let artistName = track.artistName()
+    let artistName = Track.artistName(track)
     if(artistName.length > 0) artistName = ' - ' + artistName
     return track.title + artistName
-} 
+}
+
+onMounted(() => {
+    EventBus.emit("track-init", currentTrack.value)
+})
 </script>
 
 <template>
@@ -29,7 +36,7 @@ const trackMeta = (track) => {
             <div class="title-wrap">
                 <div class="audio-title" v-html="trackMeta(currentTrack)"></div>
                 <div class="time-volume-wrap">
-                    <AudioTime :current="mmssCurrentTime" :duration="currentTrack.mmssDuration()"></AudioTime>
+                    <AudioTime :current="mmssCurrentTime" :duration="Track.mmssDuration(currentTrack)"></AudioTime>
                     <VolumeBar class="volume-bar"></VolumeBar>
                 </div>
             </div>

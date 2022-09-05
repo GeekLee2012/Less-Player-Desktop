@@ -1,9 +1,8 @@
-import { defineStore } from 'pinia';
+import { defineStore, storeToRefs } from 'pinia';
 import { PLAY_STATE, PLAY_MODE } from '../../common/Constants';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { toMmss } from '../../common/Times';
-import { RadioCN } from '../../vendor/radiocn';
 
 const NO_TRACK = new Track(0, '', '听你想听，爱你所爱', 
                     [ { id: 0, name: '趁青春' }], 
@@ -21,14 +20,10 @@ export const usePlayStore = defineStore('play', {
         //0.0 - 1.0
         progress: 0.0,
         //0.0 - 1.0
-        volume: 1,
-        //是否为FM广播
-        isFmMode: false,
-        channelTrack: null
+        volume: 0.5,
     }),
     getters: {
         currentTrack(state) {
-            if(this.isFmMode) return this.channelTrack
             if(this.playingIndex < 0) return NO_TRACK
             return this.track(this.playingIndex)
         },
@@ -65,17 +60,18 @@ export const usePlayStore = defineStore('play', {
         },
         togglePlay() {
             //FM广播
-            if(this.isFmMode) {
+            if(this.currentTrack.isFMRadio) {
                 EventBus.emit('radio-togglePlay')
                 return 
             }
-
+            //播放列表为空
             if(this.queueTracksSize < 1) return
+            //当前歌曲存在
             if(this.currentTrack && (NO_TRACK != this.currentTrack)) {
                 EventBus.emit('track-togglePlay')
                 return 
             }
-            this.playNextTrack()   
+            this.playNextTrack()
         },
         addTrack(track) {
             //TODO 超级列表如何保证时效
@@ -87,10 +83,11 @@ export const usePlayStore = defineStore('play', {
             this.queueTracks.push(...tracks)
         },
         removeTrack(track) {
-            const index = this.queueTracks.indexOf(track)
+            const index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
             if(index > -1) {
                 this.queueTracks.splice(index, 1)
                 const isCurrent = (index == this.playingIndex)
+                console.log(index, ": ", this.playingIndex, " = ", isCurrent)
                 if(index <= this.playingIndex) {
                     --this.playingIndex
                 }
@@ -101,7 +98,9 @@ export const usePlayStore = defineStore('play', {
                 }
                 if(isCurrent && this.playing) {
                     this.playNextTrack()
-                } 
+                } else {
+                    this.playingIndex++
+                }
             }
         },
         resetQueue() {
@@ -116,9 +115,14 @@ export const usePlayStore = defineStore('play', {
             this.progress = 0.0
         },
         __changeTrack(track) {
-            EventBus.emit('track-stop')
-            EventBus.emit('track-changed', track)
-            this.__resetPlayState()
+            if(track.isFMRadio) {
+                this.__resetPlayState()
+                EventBus.emit('radio-play', track)
+            } else {
+                EventBus.emit('track-stop')
+                EventBus.emit('track-changed', track)
+                this.__resetPlayState()
+            }
         },
         __validPlayingIndex() {
             const maxSize = this.queueTracksSize
@@ -126,18 +130,23 @@ export const usePlayStore = defineStore('play', {
             this.playingIndex = this.playingIndex < maxSize ? this.playingIndex : (maxSize - 1)
         },
         playTrack(track) {
-            if(this.isFmMode) this.setFmMode(false)
-            
             //TODO
-            let index = this.queueTracks.indexOf(track)
+            //let index = this.queueTracks.indexOf(track)
+            let index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
             if(index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
             }
             this.playingIndex = index
-            if(track.hasUrl()) {
+            //FM广播
+            if(track.isFMRadio) {
+                EventBus.emit('radio-play', track)
+                return
+            }
+            // 普通歌曲
+            if(Track.hasUrl(track)) {
                 EventBus.emit('track-play', track)
-                if(!track.hasLyric()) EventBus.emit('track-loadLyric', track)
+                if(!Track.hasLyric(track)) EventBus.emit('track-loadLyric', track)
             } else {
                 this.__changeTrack(track)
             }
@@ -145,7 +154,6 @@ export const usePlayStore = defineStore('play', {
         playPrevTrack() {
             //TODO
             const maxSize = this.queueTracksSize
-            if(this.isFmMode && (maxSize > 0)) this.setFmMode(false)
             if(maxSize < 1) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
@@ -161,14 +169,12 @@ export const usePlayStore = defineStore('play', {
             this.__changeTrack(this.currentTrack)
         },
         playNextTrack() {
-            const maxSize = this.queueTracksSize
-            if(this.isFmMode && (maxSize > 0)) this.setFmMode(false)
-
             //TODO
             if(this.currentTrack.isRadioType) {
                 EventBus.emit('radio-nextTrack', this.currentTrack)
                 return 
             }
+            const maxSize = this.queueTracksSize
             if(maxSize < 1) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
@@ -203,19 +209,16 @@ export const usePlayStore = defineStore('play', {
             this.playMode = ++this.playMode % 3
             //TODO
         },
-        setFmMode(isFmMode) {
-            this.isFmMode = isFmMode
-            if(this.isFmMode) {
-                this.resetQueue()
-            } else {
-                EventBus.emit('radio-stop')
+    },
+    persist: {
+        enabled: true,
+        strategies: [
+            {
+                key: "player",
+                storage: localStorage,
+                paths: [ 'playingIndex', 'playMode', 'queueTracks', 'volume' ]
             }
-        },
-        setFmChannel(channel) {
-            if(!channel) return
-            this.channelTrack = new Track(channel.id, RadioCN.CODE, channel.name, [ channel.radio ], null, 0, channel.cover)
-            this.setFmMode(true)
-        }
+        ]
     }
 })
 
@@ -255,11 +258,6 @@ EventBus.on('key-togglePlay', () => {
 
 //FM广播
 EventBus.on('radio-state', state => {
-    const { setPlaying, isFmMode } = usePlayStore()
-    if(isFmMode) setPlaying(state)
-})
-
-EventBus.on('radio-channelChanged', channel => {
-    const { setFmChannel  } = usePlayStore()
-    setFmChannel(channel)
+    const { setPlaying } = usePlayStore()
+    setPlaying(state)
 })

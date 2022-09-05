@@ -5,14 +5,20 @@
 1. 请尝试修改配置package.json中Electron、Electron Builder的版本  
 【原因分析】这些版本对应的文件，在国内网络环境下，无法正常下载  
 【解决】修改配置package.json中内容  
-  `"electron": ">= 18.0.0" 修改为"18.0.0"`  
-  `"electron-builder": "^22.14.13" 修改为"22.14.13"`  
+```
+  "electron": "18.0.0"  
+  "electron-builder": "22.14.13" 
+```
 
 2. 请尝试切换npm下载源：(如国内阿里镜像)  
-【原因分析】国内网络环境不稳定  
-`npm config set registry http://registry.npmmirror.com`    
+【原因分析】国内网络环境不稳定 
+```
+npm config set registry http://registry.npmmirror.com
+```     
 恢复默认下载源命令  
-`npm config delete registry`
+```
+npm config delete registry
+```
 
 3. 其他问题：请尝试以下命令         
   npm检查命令： `npm doctor`  

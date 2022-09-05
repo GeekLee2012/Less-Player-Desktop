@@ -3,12 +3,15 @@ import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
 import { usePlatformStore } from '../store/platformStore';
+import { useMainViewStore } from '../store/mainViewStore';
 import { United } from '../../vendor/united';
 import EventBus from '../../common/EventBus';
+import { Track } from '../../common/Track';
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
-const { resetQueue, playTrack } = usePlayStore()
+const { resetQueue, playTrack, playNextTrack } = usePlayStore()
 const { getVender } = usePlatformStore()
+const { showPlayNotification, hidePlayNotification } = useMainViewStore()
 
 const targetPlaying = () => {
     if(queueTracksSize < 1) return 
@@ -23,9 +26,10 @@ const clearAll = () => {
     resetQueue()
 }
 
+/*
 const loadLyric = (track) => {
     if(!track) return 
-    if(track.hasLyric()) {
+    if(Track.hasLyric(track)) {
         EventBus.emit('track-lyricLoaded', track)
         return 
     }
@@ -43,32 +47,63 @@ const assignLyric = (track, lyric) => {
     EventBus.emit('track-lyricLoaded', track)
 }
 
-const initAndPlayTrack = (track) => {
+let playNextTimer = null
+const toastNotification = (callback) => {
+    showPlayNotification()
+    playNextTimer = setTimeout(() => {
+        hidePlayNotification()
+        if(callback) callback()
+    }, 2000)
+}
+
+const tryCancelPlayNextTimer = () => {
+    try {
+        if(playNextTimer) clearTimeout(playNextTimer)
+    } catch(e) {
+        //Do nothing
+    } finally {
+        hidePlayNotification()
+    }
+}
+
+const initTrack = (track, callback) => {
     if(!track) return 
     const platform = track.platform
     const vender = getVender(platform);
     if(!vender) return
     vender.playDetail(track.id, track).then(async result => {
-        if(!track.hasUrl()) track.url = result.url
-        //if(!track.hasUrl()) track = await United.transferTrack(track) 
-        if(!track.hasUrl()) { //VIP收费歌曲或其他
-            //TODO 频繁切换下一曲，对音乐平台不友好，那...先暂停算了
-            //if(queueTracksSize.value > 1) playNextTrack()
+        if(!Track.hasUrl(track)) track.url = result.url
+        tryCancelPlayNextTimer()
+        //if(!track.hasUrl()) track = await United.transferTrack(track)
+        if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
+            //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
+            toastNotification(playNextTrack)
             return
         }
-        if(!track.hasLyric()) assignLyric(track, result.lyric)
-        if(!track.hasCover()) Object.assign(track, { cover: result.cover })
+        if(!Track.hasLyric(track)) assignLyric(track, result.lyric)
+        if(!Track.hasCover(track)) Object.assign(track, { cover: result.cover })
         if(track.artistNotCompleted && result.artist) {
             Object.assign(track, { artist: result.artist })
             EventBus.emit('track-artistUpdated', { trackId: track.id, artist: track.artist })
         }
-        playTrack(track)
-        loadLyric(track)
+        if(callback) callback(track)
+    }).catch(e => {
+        console.log(e)
+        //toastNotification(playNextTrack)
+    })
+}
+
+const initAndPlayTrack = (track) => {
+    initTrack(track, result => {
+        playTrack(result)
+        loadLyric(result)
     })
 }
 
 EventBus.on('track-changed', track => initAndPlayTrack(track))
+EventBus.on('track-restore', track => initTrack(track))
 EventBus.on('track-loadLyric', track => loadLyric(track))
+*/
 </script>
 
 <template>

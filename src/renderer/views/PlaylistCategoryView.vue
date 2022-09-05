@@ -12,7 +12,7 @@ const category = reactive([])
 
 const updateCategory = () => {
     category.length = 0
-    const cached = currentCategory()
+    const cached = currentCategory() || []
     category.push(...cached)
 }
 
@@ -87,6 +87,7 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     cursor: default;
     font-size: 18px;
     background: linear-gradient(to top right, #28c83f, #1ca388);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }
@@ -113,6 +114,7 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     color: transparent;
     */
     color: #ddd;
+    color: var(--text-sub-color);
     min-width: 36px;
     margin-top: 15px;
     margin-right: 15px;
@@ -126,6 +128,7 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     float: left;
     cursor: pointer;
     color: #bcbcbc;
+    color: var(--text-color);
     border-radius: 10rem;
 }
 
@@ -138,6 +141,7 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
 .playlist-category-view .current {
     border-radius: 10rem;
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     color: var(--text-color);
 }
 </style>

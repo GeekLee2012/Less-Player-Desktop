@@ -117,7 +117,8 @@ defineExpose({
 .slider-bar {
     height: 10px;
     border-radius: 10rem;
-    background: linear-gradient(to right, #464646, #666) !important;
+    /*background: linear-gradient(to right, #464646, #666) !important;*/
+    background: var(--progress-track-bg);
     cursor: pointer;
     display: flex;
     flex-direction: row;
@@ -136,6 +137,7 @@ defineExpose({
     height: 3px;
     border-radius: 10rem;
     background: linear-gradient(to top right, #28c83f, #1ca388);
+    background: var(--hl-text-bg);
     z-index: 1;
     position: absolute;
 }

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import EventBus from '../../common/EventBus';
 
 //TODO 或许可能大概会实现吧......
 export const useSettingStore = defineStore('setting', {
@@ -15,9 +16,13 @@ export const useSettingStore = defineStore('setting', {
                 name: '浅色',
                 bg: '#fafafa'
             }, {
+                id: 'pink',
+                name: '粉色',
+                bg: '#e667af'
+            }, {
                 id: 'red',
                 name: '红色',
-                bg: '#ef5350'
+                bg: '#ef5350',
             }, {
                 id: 'green',
                 name: '绿色',
@@ -137,7 +142,8 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 其他 */
         other: {
-            appVersion: 'v0.1.5'
+            //TODO
+            appVersion: 'v0.1.6'
         }
     }),
     getters: {
@@ -146,6 +152,13 @@ export const useSettingStore = defineStore('setting', {
     actions: {
         setThemeIndex(index) {
             this.theme.index = index
+            const themeName = this.theme.data[index].id
+            EventBus.emit("switchTheme", themeName)
+        },
+        getCurrentThemeName() {
+            let index = this.theme.index
+            index = index > 0 ? index : 0
+            return this.theme.data[index].id
         },
         setTrackQualityIndex(index) {
             this.track.quality.index = index
@@ -173,6 +186,15 @@ export const useSettingStore = defineStore('setting', {
         },
         resetKeys() {
             
-        }
-    }
+        },
+    },
+    persist: {
+        enabled: true,
+        strategies: [
+            {
+                key: 'settings',
+                storage: localStorage,
+            },
+        ],
+    },
 })

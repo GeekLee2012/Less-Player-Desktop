@@ -85,6 +85,7 @@ EventBus.on('track-artistUpdated', data => {
 
 .artist-ctl .artist-item:hover {
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }

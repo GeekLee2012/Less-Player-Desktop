@@ -79,7 +79,7 @@ const filterData = (data) => {
     vertical-align: middle;
     text-align: center;
     line-height: 36px;
-    color: #ccc;
+    color: var(--text-color);
     font-size: 16px;
     cursor: pointer;
     border-radius: 10rem;
@@ -101,11 +101,14 @@ const filterData = (data) => {
 
 .artist-category-bar svg:hover {
     fill: #28c83f;
+    fill: var(--hl-color);
 }
 
 .artist-category-bar .active {
     border-color: #28c83f;
+    border-color: var(--hl-color);
     background: linear-gradient(to right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     color: var(--text-color);
 }
 </style>

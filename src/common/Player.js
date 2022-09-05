@@ -6,9 +6,9 @@ let singleton = null
 
 //追求简洁、组合式API、单一责任
 export class Player {
-    
     constructor(track) {
         this.currentTrack = track
+        this.sound = null
     }
 
     static get() {
@@ -21,49 +21,59 @@ export class Player {
         const player = Player.get()
         return player.on('suspend', () => player.pause())
             .on('track-play', track => player.playTrack(track))
+            .on('track-restore', track => player.restore(track))
             .on('track-togglePlay', () => player.togglePlay())
             .on('track-seek', percent => player.seek(percent))
             .on('volume-set', volume => player.volume(volume))
             .on('track-stop', () => player.setCurrent(null))
+            .on('radio-play', () => player.setCurrent(null))
             .on('queue-empty', () => player.setCurrent(null))
+    }
+
+    createSound() {
+        if(!this.currentTrack) return null
+        var self = this
+        //释放资源
+        if(this.sound) this.sound.unload()
+        this.sound = new Howl({
+            src: [ this.currentTrack.url ],
+            html5: true,
+            onplay: function() {
+                requestAnimationFrame(self.__step.bind(self))
+                self.notifyStateChanged(PLAY_STATE.PLAYING)
+            },
+            onpause: function() {
+                self.notifyStateChanged(PLAY_STATE.PAUSE)
+            },
+            onend: function() {
+                self.notifyStateChanged(PLAY_STATE.END)
+            },
+            onseek: function() {
+                requestAnimationFrame(self.__step.bind(self))
+            }
+        })
+        return this.sound
+    }
+
+    getSound() {
+        if(!this.currentTrack) return null
+        return this.sound
     }
 
     //播放
     play() {
-        let sound = this.currentTrack.howl
-        var self = this
-        if(!sound) {
-            sound = this.currentTrack.howl = new Howl({
-                src: [ this.currentTrack.url ],
-                html5: true,
-                onplay: function() {
-                    requestAnimationFrame(self.__step.bind(self))
-                    self.notifyStateChanged(PLAY_STATE.PLAYING)
-                },
-                onpause: function() {
-                    self.notifyStateChanged(PLAY_STATE.PAUSE)
-                },
-                onend: function() {
-                    self.notifyStateChanged(PLAY_STATE.END)
-                },
-                onseek: function() {
-                    requestAnimationFrame(self.__step.bind(self))
-                }
-            })
-        } 
-        sound.play()
+        let sound = this.getSound()
+        if(sound) sound.play()
     }
 
     //暂停
     pause() {
-        if(!this.currentTrack) return 
-        const sound = this.currentTrack.howl
+        const sound = this.getSound()
         if(sound) sound.pause()
     }
 
     togglePlay() {
-        if(!this.currentTrack) return 
-        const sound = this.currentTrack.howl
+        const sound = this.getSound()
         if(!sound) return 
         if(sound.playing()) {
             sound.pause()
@@ -74,14 +84,14 @@ export class Player {
 
     //暂停
     stop() {
-        if(!this.currentTrack) return 
-        const sound = this.currentTrack.howl
+        const sound = this.getSound()
         if(sound) sound.stop()
     }
 
     setCurrent(track) {
         this.stop()
         this.currentTrack = track
+        this.createSound()
     }
 
     playTrack(track) {
@@ -89,20 +99,25 @@ export class Player {
         this.play()
     }
 
+    restore(track) {
+        this.setCurrent(track)
+        //this.createSound()
+    }
+
     volume(value) {
         Howler.volume(value)
     }
 
     seek(percent) {
-        if(!this.currentTrack) return 
-        const sound = this.currentTrack.howl
+        const sound = this.getSound()
+        if(!sound) return 
         if(sound.playing()) sound.seek(sound.duration() * percent)
     }
     
     __step() {
-        if(!this.currentTrack) return 
         // Get the Howl we want to manipulate.
-        const sound = this.currentTrack.howl
+        const sound = this.getSound()
+        if(!sound) return
         if(!sound.playing()) return 
         // Determine our current seek position.
         const seek = sound.seek() || 0

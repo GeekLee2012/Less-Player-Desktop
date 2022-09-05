@@ -165,6 +165,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
 
 #search-view .keyword .text{
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 
@@ -196,7 +197,9 @@ watch(() => props.keyword, (nv,ov) => loadTab())
 
 #search-view .platform .active {
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     border-color: #28c83f;
+    border-color: var(--hl-color);
 }
 
 #search-view .tab-nav {
@@ -218,6 +221,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
 
 #search-view .tab-nav .active {
     border-color: #28c83f;
+    border-color: var(--hl-color);
 }
 
 #search-view .tab-nav .tip {
@@ -225,7 +229,9 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     position: absolute;
     right: 10px;
 
-    background: linear-gradient(to top right, #1ca388, #28c83f);
+    /*background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);*/
+    background: var(--btn-bg);
     -webkit-background-clip: text;
     color: transparent;
 }

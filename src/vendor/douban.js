@@ -1,4 +1,4 @@
-import { getDoc, getJson ,postJson } from "../common/HttpClient";
+import { getDoc, getJson, postJson } from "../common/HttpClient";
 import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
@@ -20,17 +20,15 @@ export class DouBan {
     static categories() {
         return new Promise((resolve, reject) => {
             const defaultCategory = new Category("默认")
-            defaultCategory.add("为你推荐", '0')
-            defaultCategory.add("兆赫MHz", "兆赫")
+            defaultCategory.add("兆赫MHz", "MHz")
+            //defaultCategory.add("为你推荐", '1')
             const songlistCategory = new Category('歌单')
             const result = [ defaultCategory, songlistCategory ]
             
             const url = "https://fm.douban.com/j/v2/songlist/explore/genres"
             getJson(url).then(json => {
                 json.forEach(item => {
-                    if(item.id != 0) {
-                        songlistCategory.add(item.name, item.id + '')
-                    }
+                    songlistCategory.add(item.name, item.id + '')
                 })
                 resolve({ platform: DouBan.CODE, data: result })
             })
@@ -41,8 +39,8 @@ export class DouBan {
     static square(cate, offset, limit, page) {
         const originCate = cate
         let resolvedCate = cate.trim()
-        resolvedCate = resolvedCate.length > 0  ? cate : '0'
-        if(resolvedCate == '兆赫') return DouBan.mhzChannels(cate, offset, limit, page)
+        resolvedCate = resolvedCate.length > 0  ? cate : 'MHz'
+        if(resolvedCate == 'MHz') return DouBan.mhzChannels(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
             const result = { platform: DouBan.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             if(page > 1) {
@@ -69,7 +67,6 @@ export class DouBan {
             const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 0, data: [] }
             const url = "https://fm.douban.com/j/v2/rec_channels?specific=all"
             getJson(url).then(json => {
-
                 const channels = json.data.channels
                 
                 //豆瓣精选兆赫
@@ -231,11 +228,13 @@ export class DouBan {
                 type: "n"
             }
             if(track && track.id) {
-                reqBody.type = "s"
-                reqBody.sid = track.id
-                reqBody.pt = ""
-                reqBody.pb = 128
-                reqBody.apikey = ""
+                Object.assign(reqBody, {
+                    type: "s",
+                    sid: track.id,
+                    pt: "",
+                    pb: 128,
+                    apikey: ""
+                })
             }
             getJson(url, reqBody).then(json => {
                 if(json.song.length < 1) return 

@@ -41,5 +41,6 @@ const forward = () => {
 
 .navigator svg:hover {
     fill: #28c83f;
+    fill: var(--hl-color);
 }
 </style>

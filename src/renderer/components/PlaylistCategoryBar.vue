@@ -49,7 +49,7 @@ const visitCateItem = (item, row, col) => {
     vertical-align: middle;
     text-align: center;
     line-height: 36px;
-    color: #ccc;
+    color: var(--text-color);
     font-size: 16px;
     cursor: pointer;
     white-space: nowrap;
@@ -71,11 +71,14 @@ const visitCateItem = (item, row, col) => {
 
 .playlist-category-bar svg:hover {
     fill: #28c83f;
+    fill: var(--hl-color);
 }
 
 .playlist-category-bar .active {
     border-color: #28c83f;
+    border-color: var(--hl-color);
     background: linear-gradient(to right, #1ca388, #28c83f);
+    background: var(--btn-bg);
     color: var(--text-color);
 }
 </style>

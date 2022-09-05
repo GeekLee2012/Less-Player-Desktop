@@ -187,7 +187,6 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo" 
                     + "?pid=" + id + "&pn=" + page + "&rn=" + limit + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                
                 const result = new Playlist(id, KuWo.CODE, json.data.img500, json.data.name)
                 result.about = json.data.info
                 result.total = json.data.total
@@ -254,7 +253,6 @@ export class KuWo {
                 if(scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
                     const json = eval(scriptText)
-                    
 
                     const singerInfo = json.data[0].singerInfo
                     name = escapseHtml(singerInfo.name)

@@ -7,8 +7,9 @@ import { storeToRefs } from 'pinia';
 import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
 import ArtistCategoryView from '../views/ArtistCategoryView.vue';
 import EventBus from '../../common/EventBus';
+import Notification from '../components/Notification.vue';
 
-const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useMainViewStore())
+const { playlistCategoryViewShow, artistCategoryViewShow, playNotificationShow } = storeToRefs(useMainViewStore())
 const { hidePlaylistCategoryView, hideArtistCategoryView, hidePlaybackQueueView } = useMainViewStore()
 
 onMounted (() => {

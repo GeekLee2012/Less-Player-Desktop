@@ -103,6 +103,7 @@ const deleteItem = () => {
 .song-item .artist span:hover,
 .song-item .album span:hover {
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
 }
@@ -166,6 +167,7 @@ const deleteItem = () => {
 
 .song-item .action svg:hover {
     fill: #28c83f;
+    fill: var(--hl-color);
 }
 
 .song-item .title:hover .action {

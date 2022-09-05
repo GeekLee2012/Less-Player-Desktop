@@ -10,7 +10,7 @@ export const useLocalMusicStore = defineStore('localMusic', {
         isLoading: false
     }),
     getters: {
-
+        
     },
     actions: {
         async addFolders() {

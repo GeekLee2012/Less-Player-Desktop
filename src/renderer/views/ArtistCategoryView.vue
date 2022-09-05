@@ -149,6 +149,7 @@ EventBus.on('exploreMode-changed', mode => {
     color: transparent;
     */
     color: #ddd;
+    color: var(--text-sub-color);
     min-width: 36px;
     margin-top: 15px;
     margin-right: 15px;
@@ -162,6 +163,7 @@ EventBus.on('exploreMode-changed', mode => {
     float: left;
     cursor: pointer;
     color: #bcbcbc;
+    color: var(--text-color);
     border-radius: 10rem;
 }
 
@@ -174,6 +176,7 @@ EventBus.on('exploreMode-changed', mode => {
 .artist-category-view .current {
     border-radius: 10rem;
     background: linear-gradient(to top right, #1ca388, #28c83f);
+    background: var(--hl-text-bg);
     color: var(--text-color);
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref, reactive } from 'vue';
+import { watch, ref, onMounted } from 'vue';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { toMMssSSS } from '../../common/Times';
@@ -9,13 +9,13 @@ import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
 
 const props = defineProps({
-    track: Track
+    track: Object //Track
 })
 
 const currentIndex = ref(-1)
 //const { hasLyric } = storeToRefs(usePlayStore())
 const hasLyric = ref(false)
-const lyricData = ref(props.track.lyricData())
+const lyricData = ref(Track.lyricData(props.track))
 
 let destScrollTop = -1
 let rafId = null
@@ -24,7 +24,7 @@ const renderAndScrollLyric = (secs) => {
     const MMssSSS = toMMssSSS(secs * 1000)
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     const lines = lyricWrap.querySelectorAll('.line')
-    //hightlight
+    //TODO hightlight 算法存在Bug
     for(var i = 0; i < lines.length; i++) {
         const time = lines[i].getAttribute('time-key')
         if(time > MMssSSS) {
@@ -79,13 +79,16 @@ EventBus.on('track-pos', secs => {
 })
 
 const reloadLyricData = (track) => {
-    hasLyric.value = track.hasLyric()
-    lyricData.value = track.lyricData()
+    hasLyric.value = Track.hasLyric(track)
+    lyricData.value = Track.lyricData(track)
 }
 
 watch(() => props.track, (nv, ov) => reloadLyricData(nv))
-
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
+
+onMounted(() => {
+    EventBus.emit('track-loadLyric', props.track)
+})
 </script>
 
 <template>
@@ -169,6 +172,7 @@ EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
     font-size: 17px;
     font-weight: bold;
     color: #ababab;
+    color: var(--text-sub-color);
     display: flex;
 }
 
@@ -199,10 +203,12 @@ EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
     line-height: 28px;
     margin-top: 26px;
     color: #ccc;
+    color: var(--text-lyric-color);
 }
 
 .lyric-ctl .center .current {
     background: linear-gradient(to top right, #28c83f, #1ca388);
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
     font-size: 19px;
@@ -223,5 +229,6 @@ EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
     align-items: center;
     font-size: 19px;
     color: #989898;
+    color: var(--text-lyric-color);
 }
 </style>
