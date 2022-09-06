@@ -17,9 +17,9 @@
 * 支持2种探索（浏览）模式：歌单模式、歌手模式  
 
 #### 界面预览  
-![snap 01.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2008.png)  
-![snap 02.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2009.png)  
-![snap 03.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2010.png)  
+![snap 01.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2001.png)  
+![snap 02.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2002.png)  
+![snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2003.png)  
 
 #### 开发者说
 * 请预先安装好最新版Nodejs  
