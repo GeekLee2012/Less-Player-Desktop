@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "axios": "^0.26.1",
-    "cross-env": "^7.0.3",
     "crypto-js": "^4.1.1",
     "hls.js": "^1.1.5",
     "howler": "^2.2.3",
@@ -36,6 +35,7 @@
     "@types/node-forge": "^1.0.1",
     "@vitejs/plugin-vue": "^2.3.0",
     "concurrently": "^7.1.0",
+    "cross-env": "^7.0.3",
     "electron": ">= 18.0.0",
     "electron-builder": "^22.14.13",
     "vite": "^2.9.0",
