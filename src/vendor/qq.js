@@ -714,7 +714,6 @@ export class QQ {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')
                     const json = JSON.parse(scriptText)
-                    console.log(json)
                     const detail = json.singerDetail
                     result.name = detail.basic_info.name
                     result.cover = getArtistCover(detail.basic_info.singer_mid) || detail.pic.pic

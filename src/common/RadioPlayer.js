@@ -30,6 +30,7 @@ export class RadioPlayer {
             .on('radio-stop', () => player.setChannel(null))
             .on('queue-empty', () => player.setChannel(null))
             .on('track-play', () => player.setChannel(null))
+            .on('track-restoreInit', channel => player.setChannel(channel))
     }
 
     //播放
@@ -47,6 +48,7 @@ export class RadioPlayer {
             gRadioHolder.play()
             self.setState(true)
             self.channelChanged = false
+            lastPlayTime = Date.now()
             requestAnimationFrame(self.__step.bind(self))
         })
     }
@@ -77,12 +79,10 @@ export class RadioPlayer {
         this.pause()
         this.channel = channel
         this.channelChanged = true
-        
     }
 
     playChannel(channel) {
         this.setChannel(channel)
-        lastPlayTime = Date.now()
         this.play()
     }
 
@@ -95,7 +95,8 @@ export class RadioPlayer {
     __step() {
         if(!this.channel) return 
         if(!this.playing) return
-        const currentTime = (Date.now() - lastPlayTime) || 0
+        const nowTime = Date.now()
+        const currentTime = (nowTime - lastPlayTime) || 0
         const currentSecs = currentTime / 1000
         EventBus.emit('track-pos', currentSecs)
         requestAnimationFrame(this.__step.bind(this))

@@ -36,9 +36,9 @@ const visitItem = (item) => {
 }
 
 const nextRadioTrack = (platform, channel, track) => {
-    if(!track || !track.hasId()) resetQueue()
+    if(!track || !Track.hasId(track)) resetQueue()
     getVender(platform).nextRadioTrack(channel, track).then(result => {
-        if(!result || !result.hasId()) return 
+        if(!result || !Track.hasId(result)) return 
         addTrack(result)
         playTrack(result)
     })

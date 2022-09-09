@@ -82,12 +82,26 @@ export const usePlayStore = defineStore('play', {
             //TODO 暂时不去重, 超级列表如何保证时效
             this.queueTracks.push(...tracks)
         },
+        playTrackLater(track) {
+            let index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
+            if(index == -1) {
+                index = this.playingIndex + 1
+                this.queueTracks.splice(index, 0, track)
+            } else if(index < this.playingIndex) {
+                this.queueTracks.splice(this.playingIndex + 1, 0, track)
+                this.queueTracks.splice(index, 1)
+                --this.playingIndex
+            } else if(index > this.playingIndex 
+                && (index != this.playingIndex + 1)) {
+                this.queueTracks.splice(this.playingIndex + 1, 0, track)
+                this.queueTracks.splice(index + 1, 1)
+            }
+        },
         removeTrack(track) {
             const index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
             if(index > -1) {
                 this.queueTracks.splice(index, 1)
                 const isCurrent = (index == this.playingIndex)
-                console.log(index, ": ", this.playingIndex, " = ", isCurrent)
                 if(index <= this.playingIndex) {
                     --this.playingIndex
                 }
@@ -96,11 +110,13 @@ export const usePlayStore = defineStore('play', {
                     this.resetQueue()
                     return 
                 }
-                if(isCurrent && this.playing) {
-                    this.playNextTrack()
-                } else {
-                    this.playingIndex++
-                }
+                if(isCurrent) {
+                    if(this.playing) {
+                        this.playNextTrack()
+                    } else {
+                        this.playingIndex++
+                    } 
+                } 
             }
         },
         resetQueue() {
@@ -154,7 +170,7 @@ export const usePlayStore = defineStore('play', {
         playPrevTrack() {
             //TODO
             const maxSize = this.queueTracksSize
-            if(maxSize < 1) return
+            if(maxSize < 2) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     --this.playingIndex
@@ -170,12 +186,13 @@ export const usePlayStore = defineStore('play', {
         },
         playNextTrack() {
             //TODO
-            if(this.currentTrack.isRadioType) {
+            if(this.currentTrack.isRadioType 
+                && !this.currentTrack.isFMRadio) {
                 EventBus.emit('radio-nextTrack', this.currentTrack)
                 return 
             }
             const maxSize = this.queueTracksSize
-            if(maxSize < 1) return
+            if(maxSize < 2) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     this.playingIndex = ++this.playingIndex % maxSize

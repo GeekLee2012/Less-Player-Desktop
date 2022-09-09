@@ -15,9 +15,8 @@ const isMacOS = (process.platform === 'darwin')
 const showSysTrafficLight = isMacOS
 //支持的音频文件扩展名（本地文件）
 const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'] 
-//TODO 是否为开发环境
-const isDevEnv = true
-
+//TODO 是否为开发环境, NODE_ENV取值：dev、proc
+const isDevEnv = (process.env['NODE_ENV'] === 'dev')
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

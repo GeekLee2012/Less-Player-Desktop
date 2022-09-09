@@ -135,15 +135,13 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 缓存 */
         cache: {
-            storePlayState: false,  //退出后保存播放状态：包括当前歌曲、播放列表等
+            storePlayState: true,  //退出后保存播放状态：包括当前歌曲、播放列表等
             storeLocalMusic: false, //退出后记录已经添加的本地歌曲
-            storeRoot: '',  //缓存根路径
-            //size: 256,    //缓存大小，单位MB
         },
         /* 其他 */
         other: {
             //TODO
-            appVersion: 'v0.1.6'
+            appVersion: 'v0.1.7'
         }
     }),
     getters: {
@@ -194,6 +192,7 @@ export const useSettingStore = defineStore('setting', {
             {
                 key: 'settings',
                 storage: localStorage,
+                paths: [ 'theme', 'track', 'keys', 'tray', 'cache' ]
             },
         ],
     },

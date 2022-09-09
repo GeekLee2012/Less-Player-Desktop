@@ -7,16 +7,35 @@ import { storeToRefs } from 'pinia';
 import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
 import ArtistCategoryView from '../views/ArtistCategoryView.vue';
 import EventBus from '../../common/EventBus';
-import Notification from '../components/Notification.vue';
 
-const { playlistCategoryViewShow, artistCategoryViewShow, playNotificationShow } = storeToRefs(useMainViewStore())
-const { hidePlaylistCategoryView, hideArtistCategoryView, hidePlaybackQueueView } = useMainViewStore()
+const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useMainViewStore())
+const { hidePlaylistCategoryView, hideArtistCategoryView, 
+    hidePlaybackQueueView, hideSongItemCtxMenu, 
+    hidePlaybackQueueItemCtxMenu } = useMainViewStore()
+
+//隐藏上下文菜单
+const hideCtxMenu = () => {
+    hideSongItemCtxMenu()
+    hidePlaybackQueueItemCtxMenu()
+}
+
+//应用级别按键监听
+const handleKeys = (e) => {
+    //空格键
+    if(e.keyCode == 32 || e.code.toLowerCase() === 'space') {
+        EventBus.emit('key-togglePlay')
+    }
+}
 
 onMounted (() => {
+    //窗口大小变化事件监听
     window.addEventListener('resize', e => {
         setCategoryHeight()
+        //隐藏上下文菜单
+        hideCtxMenu()
     })
     
+    //点击事件监听
     document.addEventListener('click', e => {
         //隐藏当前播放列表
         hidePlaybackQueueView()
@@ -26,8 +45,11 @@ onMounted (() => {
         hidePlaylistCategoryView()
         //隐藏歌手分类列表
         hideArtistCategoryView()
+        //隐藏上下文菜单
+        hideCtxMenu()
     })
 
+    //按键事件监听
     document.addEventListener('keydown', e => {
         handleKeys(e)
     })
@@ -39,14 +61,6 @@ onMounted (() => {
         const viewHeight = (mainContent.clientHeight - 37) + "px"
         if(playlistCategory) playlistCategory.style.height = viewHeight
         if(artistCategory) artistCategory.style.height = viewHeight
-    }
-
-    //应用级别按键监听
-    const handleKeys = (e) => {
-        //空格键
-        if(e.keyCode == 32 || e.code.toLowerCase() === 'space') {
-            EventBus.emit('key-togglePlay')
-        }
     }
 
 })

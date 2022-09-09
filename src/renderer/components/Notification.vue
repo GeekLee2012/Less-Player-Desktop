@@ -49,4 +49,8 @@
 .ntf-text p {
     line-height: 30px;
 }
+
+.ntf-text svg {
+    fill: var(--ntf-text-color);
+}
 </style>

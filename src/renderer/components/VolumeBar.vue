@@ -58,11 +58,13 @@ defineExpose({
     display: flex;
     flex-direction: row;
     -webkit-app-region: none;
+    justify-content: center;
+    align-items: center;
 }
 
 .volume-bar .volume-status, 
 .volume-bar .volume-value {
-    margin: auto;
+    /* margin: auto; */
 }
 
 .volume-bar .volume-status {

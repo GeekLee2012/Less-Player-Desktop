@@ -19,13 +19,13 @@
 #### 界面预览  
 ![snap 01.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2008.png)  
 ![snap 02.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2009.png)  
-![snap 03.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2010.png) 
+![snap 03.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2010.png)  
 
 #### 开发者说
 * 请预先安装好最新版Nodejs  
 * 为保证界面样式，请先检查和安装字体(Release发行版中有提供下载)  
   macOS字体：STHeiti-Medium.ttc  
-  Windows字体：STHeitiSC-Medium.ttf  
+  Windows字体：STHeitiSC-Light.ttf  
   
 * 初始化项目  
   `npm install`
@@ -37,9 +37,7 @@
   `npm run build`  
   `npm run dist`  
   
-  注意事项：编译前必须修改 /src/main/main.js 中变量  
-  `isDevEnv = false` //是否为开发模式  
-  同时，删除编译打包历史目录（2个目录）:  dist、output  
+  注意事项：编译前，请同时删除编译打包历史目录（2个目录）:  dist、output  
 
 #### FAQ常见问题
 请参考文件：[FAQ.md](FAQ.md)
@@ -48,4 +46,3 @@
 * 本人为后端开发者，同时也比较爱好前端
 * 本项目开发为渐进模式，边学习边开发
 * 项目中一些常用组件没做封装: 如Tab组件、分页组件等
-

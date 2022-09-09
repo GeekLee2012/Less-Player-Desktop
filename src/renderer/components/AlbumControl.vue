@@ -12,7 +12,6 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const { hidePlayingView } = useMainViewStore()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { isAlbumDetailVisitable } = usePlatformStore()
 const { exploreModeCode } = storeToRefs(useMainViewStore())
@@ -29,7 +28,6 @@ const visitAlbumDetail = (platform, id) => {
             router.push(toPath)
             updateAlbumDetailKeys(platform, id)
         }
-        hidePlayingView()
     }
 }
 

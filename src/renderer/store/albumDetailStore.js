@@ -75,8 +75,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
             this.about = about
         },
         isAlbumDetailLoaded() {
-            return this.albumName != '山川湖海，日月星辰' 
-                && this.cover != 'default_cover.png'
+            return this.albumName != '山川湖海，日月星辰'
                 && this.artistName != '趁青春'
         },
         isAllSongsTabLoaded() {
@@ -98,5 +97,8 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         isAboutTab() {
             return this.activeTabCode == 'about'
         }
+    },
+    persist: {
+        enabled: true,
     }
 })

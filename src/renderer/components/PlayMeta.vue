@@ -5,10 +5,10 @@ import { useMainViewStore } from '../store/mainViewStore';
 import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import EventBus from '../../common/EventBus';
 
-const { currentTrack, mmssCurrentTime } = storeToRefs(usePlayStore())
+const { currentTrack, mmssCurrentTime, volume } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useMainViewStore())
 const { showPlayingView, toggleCoverMask } = useMainViewStore()
 
@@ -18,8 +18,11 @@ const trackMeta = (track) => {
     return track.title + artistName
 }
 
+const volumeBar = ref(null)
+
 onMounted(() => {
-    EventBus.emit("track-init", currentTrack.value)
+    EventBus.emit("track-restoreInit", currentTrack.value)
+    if(volumeBar) volumeBar.value.setVolume(volume.value)
 })
 </script>
 
@@ -37,7 +40,7 @@ onMounted(() => {
                 <div class="audio-title" v-html="trackMeta(currentTrack)"></div>
                 <div class="time-volume-wrap">
                     <AudioTime :current="mmssCurrentTime" :duration="Track.mmssDuration(currentTrack)"></AudioTime>
-                    <VolumeBar class="volume-bar"></VolumeBar>
+                    <VolumeBar class="volume-bar" ref="volumeBar"></VolumeBar>
                 </div>
             </div>
         </div>

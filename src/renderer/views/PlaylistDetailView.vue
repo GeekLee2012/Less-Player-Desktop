@@ -14,9 +14,22 @@ import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { useMainViewStore } from '../store/mainViewStore';
+import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
+const { showPlaybackQueueNotification, hidePlaybackQueueNotification, 
+    hideSongItemCtxMenu } = useMainViewStore()
+
+//TODO
+const toastNotification = (text, callback) => {
+    showPlaybackQueueNotification(text)
+    setTimeout(() => {
+        hidePlaybackQueueNotification()
+        if(callback) callback()
+    }, 1500)
+}
 
 const props = defineProps({
     platform: String,
@@ -31,6 +44,7 @@ let offset = 0
 let page = 1
 let limit = 1000
 let markScrollTop = 0
+const loading = ref(true)
 
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', about: '',data: [] })
@@ -48,6 +62,8 @@ const nextPage = () =>  {
 }
 
 const loadContent = () => {
+    loading.value = true
+
     const vender = getVender(props.platform)
     if(vender) {
         vender.playlistDetail(props.id, offset, limit, page)
@@ -57,6 +73,8 @@ const loadContent = () => {
             }
             Object.assign(detail, result)
             listSize.value = detail.data.length
+            
+            loading.value = false
         })
     }
 }
@@ -69,12 +87,19 @@ const loadMoreContent = () => {
 
 const playAll = () => {
     resetQueue()
-    addAll()
+    addAll("即将为您播放全部！")
     playNextTrack()
 }
 
-const addAll = () => {
+const addAll = (text) => {
     addTracks(detail.data)
+    toastNotification(text || "歌曲已全部添加！")
+}
+
+//TODO
+const favourited = ref(false)
+const toggleFovourite = () => {
+    favourited.value = !favourited.value
 }
 
 const markScrollState = () => {
@@ -98,9 +123,12 @@ const scrollToLoad = () => {
     if((scrollTop + clientHeight) >= scrollHeight) {
        loadMoreContent()
     }
+    //TODO
+    hideSongItemCtxMenu()
 }
 
 const bindScrollListener = () => {
+    if(!playlistDetailRef.value) return 
     playlistDetailRef.value.removeEventListener('scroll', scrollToLoad)
     playlistDetailRef.value.addEventListener('scroll', scrollToLoad)
 }
@@ -132,12 +160,25 @@ onMounted(() => {
             <div>
                 <img class="cover" v-lazy="detail.cover" />
             </div>
-            <div class="right">
+            <div class="right" v-show="!loading">
                 <div class="title" v-html="detail.title"></div>
                 <div class="about" v-html="detail.about"></div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playAll"  :rightAction="addAll">
+                    <PlayAddAllBtn :leftAction="playAll"  :rightAction="() => addAll()" class="btn-spacing">
                     </PlayAddAllBtn>
+                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFovourite">
+                    </FavouriteShareBtn>
+                </div>
+            </div>
+            <div class="right" v-show="loading">
+                <div class="title">
+                    <div class="loading-mask" style="width: 66%; height: 36px; display: inline-block;"></div>
+                </div>
+                <div class="about">
+                    <div class="loading-mask" v-for="i in 3" style="width: 95%; height: 20px; display: inline-block;"></div>
+                </div>
+                <div class="action">
+                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 168px; height: 30px; display: inline-block;"></div>
                 </div>
             </div>
         </div>
@@ -145,8 +186,12 @@ onMounted(() => {
             <div class="list-title">歌曲({{ listSize }})</div>
             <SongListControl :data="detail.data" 
                 :artistVisitable="true" 
-                :albumVisitable="true" >
+                :albumVisitable="true" 
+                v-show="!loading" >
             </SongListControl>
+            <div v-show="loading">
+                <div class="loading-mask" v-for="i in 12" style="width: 100%; height: 36px; margin-bottom: 5px; display: inline-block;"></div>
+            </div>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
@@ -205,7 +250,16 @@ onMounted(() => {
     box-shadow: 0px 0px 10px #161616;
 }
 
-#playlist-detail  .list-title {
+#playlist-detail .action {
+    display: flex;
+    flex-direction: row;
+}
+
+#playlist-detail .btn-spacing {
+    margin-right: 20px;
+}
+
+#playlist-detail .list-title {
     margin-bottom: 15px;
     text-align: left;
     font-size: 18px;

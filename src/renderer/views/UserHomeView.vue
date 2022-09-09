@@ -1,46 +1,115 @@
 <script setup>
-import { useSettingStore } from '../store/settingStore';
-import ToggleControl from '../components/ToggleControl.vue';
-import { storeToRefs } from 'pinia';
-import KeysInputControl from '../components/KeysInputControl.vue';
-import SvgTextButton from '../components/SvgTextButton.vue';
 
-const { theme, track, keys, tray, cache, other } = storeToRefs(useSettingStore())
-const { setThemeIndex, 
-    setTrackQualityIndex, 
-    toggleVipTransfer,
-    toggleCategoryBarRandom,
-    togglePlayingWithoutSleeping,
-    toggleStorePlayState,
-    toggleStoreLocalMusic,
-    toggleTrayMenu,
-    toggleKeysGlobal,
-    resetKeys
-} = useSettingStore()
-
-const ipcRenderer = electronAPI.ipcRenderer
-
-const visitAuthor = () => {
-    const url = 'https://github.com/GeekLee2012/'
-    ipcRenderer.send('visit-link', url)
-}
 </script>
 
 <template>
     <div id="userhome-view">
-        <div class="title">我的主页Dashboard</div>
         <div class="center">
-            <div class="row">
-                收藏：歌单、歌手、电台、歌曲（自建歌单）
+            <div class="subtitle">页面开发测试中，近期将大刀阔斧修改，最终效果将......</div>
+            <div class="subtitle">
+                我的收藏
             </div>
             <div class="row">
-                备份（导出）、导入
+                <div class="card-ctl">
+                    <div>
+                        <b>1000个</b>
+                        <span>歌单</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <b>0个</b>
+                        <span>专辑</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <b>0个</b>
+                        <span>歌手</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <b>0个</b>
+                        <span>FM电台</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subtitle">
+                最近播放
             </div>
             <div class="row">
-                听歌报告：引入DB
+                <div class="card-ctl">
+                    <div>
+                        <b>1000个</b>
+                        <span>歌单</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <b>0个</b>
+                        <span>专辑</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <b>0个</b>
+                        <span>歌手</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <b>0个</b>
+                        <span>FM电台</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subtitle">
+                听歌报告（是否实现？待定）
             </div>
             <div class="row">
-                大饼暂时就这么画吧~
+                <div class="card-ctl">
+                    <div>
+                        <span>今日</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <span>昨天</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <span>最近三天</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <span>本周</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <span>上周</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <span>本月</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <span>上个月</span>
+                    </div>
+                </div>
+                <div class="card-ctl card-ctl-spacing">
+                    <div>
+                        <span>...</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -62,7 +131,7 @@ const visitAuthor = () => {
     font-size: 25px;
     font-weight: bold;
     padding-bottom: 20px;
-    border-bottom: 2px solid var(--setting-bottom-border-color);
+    /*border-bottom: 2px solid var(--setting-bottom-border-color);*/
 }
 
 #userhome-view .center {
@@ -74,9 +143,11 @@ const visitAuthor = () => {
 #userhome-view .center .row {
     display: flex;
     flex-direction: row;
-    padding-top: 35px;
     padding-bottom: 35px;
+    /*
+    padding-top: 15px;
     border-bottom: 2px solid var(--setting-bottom-border-color);
+    */
 }
 
 #userhome-view .center .last-row {
@@ -88,5 +159,32 @@ const visitAuthor = () => {
     font-weight: bold;
     width: 125px;
     font-weight: normal;
+}
+
+#userhome-view .subtitle {
+    padding-top: 25px;
+    padding-bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.card-ctl-spacing {
+    margin-left: 20px;
+}
+
+.card-ctl {
+    border: 1px solid #555;
+    border-radius: 15px;
+    width: 128px;
+    height: 68px;
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    box-shadow: 0px 1px 3px var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
 }
 </style>

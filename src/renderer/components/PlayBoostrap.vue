@@ -29,6 +29,7 @@ const assignLyric = (track, lyric) => {
     EventBus.emit('track-lyricLoaded', track)
 }
 
+//TODO 用户手动干预，即主动点击上/下一曲时，产生体验上的Bug
 let playNextTimer = null
 const toastNotification = (callback) => {
     showPlayNotification()
@@ -79,13 +80,14 @@ EventBus.on('track-changed', track => bootstrapTrack(track, track => {
         playTrack(track)
         loadLyric(track)
     }))
-EventBus.on('track-init', track => bootstrapTrack(track, track => {
+EventBus.on('track-restoreInit', track => bootstrapTrack(track, track => {
         EventBus.emit("track-restore", track)
     }))
 EventBus.on('track-loadLyric', track => loadLyric(track))
 </script>
 <template>
-
+    <!-- FM广播audio -->
+    <audio class="radio-holder"></audio>
 </template>
 <style>
 

@@ -2,6 +2,8 @@
 import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
 import { usePlayStore } from '../store/playStore';
+import { onMounted, ref } from 'vue';
+import EventBus from '../../common/EventBus';
 
 const { playTrack, removeTrack, isCurrentTrack } = usePlayStore()
 
@@ -19,10 +21,20 @@ const playItem = () => {
 const removeItem = () => {
     removeTrack(props.data)
 }
+
+const pbqItemRef = ref(null)
+onMounted(() => {
+    if(pbqItemRef.value) {
+        pbqItemRef.value.addEventListener("contextmenu", e => {
+            e.preventDefault()
+            EventBus.emit("pbqItem-showMenu", { event: e, value: props.data })
+        })
+    }
+})
 </script>
 
 <template>
-    <div class="playback-queue-item" @dblclick="playItem" :class="{ current: active }">
+    <div class="playback-queue-item" @dblclick="" :class="{ current: active }" ref="pbqItemRef">
         <div class="item-wrap">
             <div class="left">
                 <img class="cover" v-lazy="data.cover" />

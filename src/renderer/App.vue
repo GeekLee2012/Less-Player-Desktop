@@ -1,7 +1,7 @@
 <script setup>
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import { onMounted } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import MainLeft from './layout/MainLeft.vue';
 import MainCenter from './layout/MainCenter.vue';
 import Notification from './components/Notification.vue';
@@ -10,8 +10,11 @@ import { useSettingStore } from './store/settingStore';
 import { storeToRefs } from 'pinia';
 import EventBus from '../common/EventBus';
 import PlayBoostrap from './components/PlayBoostrap.vue';
+import PlaybackQueueItemContextMenu from './components/PlaybackQueueItemContextMenu.vue';
 
-const { playbackQueueViewShow, playingViewShow, playNotificationShow } = storeToRefs(useMainViewStore())
+const { playbackQueueViewShow, playingViewShow, 
+  playNotificationShow, playbackQueueNotificationShow, 
+  playbackQueueNotificationText, playbackQueueItemCtxMenuShow } = storeToRefs(useMainViewStore())
 const { getCurrentThemeName } = useSettingStore()
 
 //TODO 设置主题
@@ -29,14 +32,52 @@ const setupAppTheme = (themeName) => {
 setupAppTheme(getCurrentThemeName())
 onMounted(() => EventBus.emit('radio-init', document.querySelector('.radio-holder')))
 EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
+
+const { showPlaybackQueueItemCtxMenu, hidePlaybackQueueItemCtxMenu } = useMainViewStore()
+const menuPos = reactive({ left: -999, top: -999})
+
+const adjustPosition = (event) => {
+  const { x, y, clientX, clientY } = event
+  const pos = { x, y }
+  const { clientWidth, clientHeight } = document.documentElement
+  //TODO 菜单大小待改为自动获取
+  const menuWidth = 179, menuHeight = 288, padding = 10 
+  const gapX = clientX + menuWidth - clientWidth
+  const gapY = clientY + menuHeight - clientHeight
+  //右边界
+  if(gapX > 0) {
+    pos.x = pos.x - gapX - padding
+  }
+  //底部边界
+  if(gapY > 0) {
+    //pos.y = pos.y - gapY - padding
+    pos.y = pos.y - menuHeight + padding
+  }
+  return pos
+}
+
+const setMenuPosition = (event) => {
+  const pos = adjustPosition(event)
+  menuPos.left = pos.x + "px !important"
+  menuPos.top = pos.y + "px !important"
+}
+
+EventBus.on("pbqItem-showMenu", e => {
+  hidePlaybackQueueItemCtxMenu() //强制取消上次的显示
+  setMenuPosition(e.event)
+  showPlaybackQueueItemCtxMenu(e.value)
+})
+
+//TODO
+watch(playbackQueueViewShow, () => {
+    hidePlaybackQueueItemCtxMenu()
+})
 </script>
 
 <template>
     <PlayBoostrap></PlayBoostrap>
     <MainLeft></MainLeft> 
     <MainCenter></MainCenter>
-    <!-- FM广播audio -->
-    <audio class="radio-holder"></audio>
     
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
@@ -46,11 +87,23 @@ EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
 
     <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow">
     </PlaybackQueueView>
+    
+    <PlaybackQueueItemContextMenu v-show="playbackQueueItemCtxMenuShow" :pos="menuPos">
+    </PlaybackQueueItemContextMenu>
 
+    <!-- 播放失败通知 -->
     <Notification class="playing-ntf" v-show="playNotificationShow">
         <template #text>
             <p>当前歌曲无法播放！</p>
             <p>将为您播放下一曲~</p>
+        </template>
+    </Notification>
+
+    <!-- 当前播放列表成功通知 -->
+    <Notification class="pbq-ntf" v-show="playbackQueueNotificationShow">
+        <template #text>
+          <svg width="25" height="25" viewBox="0 0 938.64 938.69" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M938.46,466.59C937,602.08,888.74,717.76,790.36,811.31,722.44,875.92,641.39,915.54,549,931.7,306.41,974.12,70.65,819.29,13.17,579.86-38.14,366.13,63.88,146.91,260.42,49A462.65,462.65,0,0,1,435.07,1.28Q552.46-7.2,660,40.58c15.8,7,24.57,19.69,25.33,37.09s-6.88,30.65-22,39.18C651,123.88,638,124,625,118.26a376.21,376.21,0,0,0-96.43-28.41c-69.72-10.57-137.89-4-202.85,23.59C197.76,167.71,119,263.69,91.84,399.89s26.83,280,135.37,367.47q85.32,68.79,194,82.94c192.43,25.2,376.66-101.94,421.23-290.4a408.28,408.28,0,0,0,10.9-96.56c-.08-13.64-.79-27.46,1-40.89,2.93-21.41,23-36.29,44.43-34.79A42.34,42.34,0,0,1,938.4,428.6C938.75,441.26,938.46,453.93,938.46,466.59Z"/><path d="M470.19,495.64c1.38-2,2.4-3.95,3.9-5.45Q668.36,295.61,862.65,101.05c8.69-8.71,18.42-14.78,30.91-15.44A42.62,42.62,0,0,1,926.39,158c-19.87,20.19-40,40.14-60,60.18Q683.73,401,501.09,583.9C490.92,594.08,479,599,464.58,597.61A41.12,41.12,0,0,1,439,585.32q-64-63.95-127.93-128a42.29,42.29,0,0,1,.12-60.22c16.85-16.81,43.36-16.72,60.59.42q46.78,46.56,93.36,93.3C466.4,492.08,467.73,493.29,470.19,495.64Z"/></g></g></svg>
+          <p>{{ playbackQueueNotificationText }}</p>
         </template>
     </Notification>
 </template>
@@ -64,7 +117,7 @@ EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
 
 :root {
   /* 文本 */
-  --text-family: STHeitiSC-Medium, "Heiti SC Medium";
+  --text-family: STHeitiSC-Medium, "Heiti SC Light";
   --text-size: 15px;
 }
 
@@ -107,8 +160,10 @@ EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
-  --ntf-bg: #eaeaeaea;
-  --ntf-text-color: var(--bg-color);
+  --ntf-bg: #555;
+  --ntf-text-color: var(--text-color);
+  /* 加载中遮盖 */
+  --loading-mask-bg: linear-gradient(90deg, #414141 8%,#515151 18%,#414141 33%);
 }
 
 :root[theme='light'] {
@@ -149,8 +204,10 @@ EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
-  --ntf-bg: #464646ea;
-  --ntf-text-color: var(--bg-color);
+  --ntf-bg: #ccc;
+  --ntf-text-color: var(--text-color);
+  /* 加载中遮盖 */
+  --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
 }
 
 :root[theme='pink'] {
@@ -193,8 +250,10 @@ EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
-  --ntf-bg: #eaeaeaea;
-  --ntf-text-color: var(--bg-color);
+  --ntf-bg: #555;
+  --ntf-text-color: var(--text-color);
+  /* 加载中遮盖 */
+  --loading-mask-bg: linear-gradient(90deg, #494949 8%,#595959 18%,#494949 33%);
 }
 
 :root[theme='red'] {
@@ -237,12 +296,21 @@ EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
-  --ntf-bg: #464646ea;
-  --ntf-text-color: var(--bg-color);
+  --ntf-bg: #ccc;
+  --ntf-text-color: var(--text-color);
+  /* 加载中遮盖 */
+  --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
 }
 
 html, body, #app {
   background-color: var(--bg-color);
+  /*
+  background-image: linear-gradient(rgba(0, 0, 255, 0.5), rgba(0, 0, 0, 0.68)), 
+      url("../renderer/assets/images/clean-sky.jpg");
+  background-image: var(--bg-img);
+  background-position: center;
+  background-size: cover;
+  */
   margin: 0 auto;
   height: 100%;
   font-size: var(--text-size);
@@ -335,5 +403,23 @@ img {
 .fade-x-enter-to,
 .fade-x-leave-from {
     transform: translateX(0);
+}
+
+/*TODO 试验性CSS */
+.loading-mask {
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: forwards;
+    animation-timing-function: linear;
+    background: var(--loading-mask-bg);
+    background-size: 100% auto;
+    height: 66px;
+    position: relative;
+}
+
+@keyframes forwards {
+    from { background-position: -360px 0 }
+    to { background-position: 360px 0 }
 }
 </style>

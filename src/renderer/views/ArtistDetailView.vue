@@ -17,14 +17,18 @@ import SongListControl from '../components/SongListControl.vue';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
+import { useMainViewStore } from '../store/mainViewStore';
+import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 
 const props = defineProps({
     platform: String,
     id: String
 })
 
-const { artistId, artistName, artistCover, artistAlias, tabTipText,
-        activeTab, tabs, hotSongs, allSongs, albums, about
+const { artistId, artistName, artistCover, 
+        artistAlias, tabTipText, activeTab, 
+        tabs, hotSongs, allSongs, 
+        albums, about
     } = storeToRefs(useArtistDetailStore())
 const { setActiveTab, updateArtist,
         updateHotSongs, updateAllSongs, appendAllSongs, 
@@ -41,6 +45,16 @@ const { setActiveTab, updateArtist,
 
 const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
+const { showPlaybackQueueNotification, hidePlaybackQueueNotification } = useMainViewStore()
+
+//TODO
+const toastNotification = (text, callback) => {
+    showPlaybackQueueNotification(text)
+    setTimeout(() => {
+        hidePlaybackQueueNotification()
+        if(callback) callback()
+    }, 1500)
+}
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
@@ -48,30 +62,41 @@ const tabData = ref([])
 let offset = 0
 let page = 1
 let limit = 30
+const loadingDetail = ref(false)
+const loading = ref(false)
 
 const visitTab = (index) => {
+    if(loading.value) return
     setActiveTab(index)
     switchTab()
 }
 
 const playHotSongs = () => {
     resetQueue()
-    addHotSongs()
+    addHotSongs("即将为您播放全部！")
     playNextTrack()
 }
 
-const addHotSongs = () => {
+const addHotSongs = (text) => {
     addTracks(hotSongs.value)
+    toastNotification(text || "歌曲已全部添加！")
 }
 
 const playAllSongs = () => {
     resetQueue()
-    addAllSongs()
+    addAllSongs("即将为您播放全部！")
     playNextTrack()
 }
 
-const addAllSongs = () => {
+const addAllSongs = (text) => {
     addTracks(allSongs.value)
+    toastNotification(text || "歌曲已全部添加！")
+}
+
+//TODO
+const favourited = ref(false)
+const toggleFovourite = () => {
+    favourited.value = !favourited.value
 }
 
 const updateTabData = (data) => {
@@ -91,12 +116,14 @@ const getArtistDetail = () => {
     }
     const vender = getVender(props.platform)
     if(!vender) return
+    loadingDetail.value = true
     const id = artistId.value
     vender.artistDetail(id).then(result => {
         updateArtist(result.name, result.cover)
         if(result.about) {
             updateAbout(result.about)
         }
+        loadingDetail.value = false
     })
 }
 
@@ -104,8 +131,11 @@ const loadHotSongs = () => {
     if(isHotSongsTabLoaded()) {
         updateTabData(hotSongs.value)
         currentTabView.value = SongListControl
+
+        loading.value = false
         return 
     }
+    loading.value = true
     const vender = getVender(props.platform)
     if(!vender) return
     const id = artistId.value
@@ -114,6 +144,8 @@ const loadHotSongs = () => {
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
         currentTabView.value = SongListControl
+
+        loading.value = false
     })
 }
 
@@ -133,20 +165,27 @@ const loadAllSongs = () => {
     if(isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
         currentTabView.value = SongListControl
+
+        loading.value = false
         return 
     }
     const vender = getVender(props.platform)
     if(!vender) return
+    loading.value = true
     const id = artistId.value
     vender.artistDetailAllSongs(id, offset, limit, page).then(result => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         currentTabView.value = SongListControl
+
+        loading.value = false
     })
     offset = page++ * limit
 }
 
 const loadAlbums = () => {
+    loadingDetail.value = false
+    loading.value = false
     if(isAlbumsTabLoaded()) {
         updateTabData(albums.value)
         currentTabView.value = AlbumListControl
@@ -164,6 +203,8 @@ const loadAlbums = () => {
 }
 
 const loadAbout = () => {
+    loadingDetail.value = false
+    loading.value = false
     if(isAboutTabLoaded()) {
         updateTabData(about.value)
         updateTabTipText(0)
@@ -206,6 +247,7 @@ const bindScrollListener = () => {
 
 const switchTab = () => {
     resetTabView()
+    loading.value = true
     getArtistDetail()
     if(isHotSongsTab()) {
         loadHotSongs()
@@ -235,12 +277,13 @@ const loadAll = () => {
     visitTab(0)
 }
 
+//TODO 容易出现重复加载Bug
 /*-------------- 各种监听 --------------*/
 onMounted(() => loadAll())
 onActivated(() => loadAll())
-watch(() => props.id , (nv, ov) => reloadAll())
 //watch(artistId, (nv, ov) => reloadAll())
 watch(activeTab, (nv,ov) => switchTab())
+watch(() => props.id , (nv, ov) => reloadAll())
 </script>
 
 <template>
@@ -249,12 +292,23 @@ watch(activeTab, (nv,ov) => switchTab())
             <div>
                 <img class="cover" v-lazy="artistCover" />
             </div>
-            <div class="right">
+            <div class="right" v-show="!loading">
                 <div class="title" v-html="artistName" ></div>
                 <div class="alias" v-html="artistAlias" ></div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="addHotSongs" v-show="isHotSongsTab()" text="播放热门歌曲"></PlayAddAllBtn>
-                    <PlayAddAllBtn :leftAction="playAllSongs" :rightAction="addAllSongs" v-show="isAllSongsTab()"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isHotSongsTab()" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAllSongsTab()" class="spacing"></PlayAddAllBtn>
+                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFovourite" class="spacing">
+                    </FavouriteShareBtn>
+                </div>
+            </div>
+            <div class="right" v-show="loading">
+                <div class="title" v-show="loadingDetail">
+                    <div class="loading-mask" style="width: 36%; height: 36px; display: inline-block;"></div>
+                </div>
+                <div class="title" v-html="artistName" v-show="!loadingDetail"></div>
+                <div class="action">
+                    <div class="loading-mask spacing" v-for="i in 2" style="width: 168px; height: 30px; display: inline-block;"></div>
                 </div>
             </div>
         </div>
@@ -273,6 +327,9 @@ watch(activeTab, (nv,ov) => switchTab())
                 :artistVisitable="true" 
                 :albumVisitable="true" >
             </component>
+            <div v-show="loading">
+                <div class="loading-mask" v-for="i in 12" style="width: 100%;  height: 36px; margin-bottom: 5px; display: inline-block;"></div>
+            </div>
         </div>
     </div>
 </template>
@@ -303,7 +360,7 @@ watch(activeTab, (nv,ov) => switchTab())
     margin-bottom: 20px;
     font-size: 25px;
     font-weight: bold;
-    height: 39px;
+    /*height: 39px;*/
 }
 
 #artist-detail .header .cover {
@@ -311,6 +368,15 @@ watch(activeTab, (nv,ov) => switchTab())
     height: 168px;
     border-radius: 10rem;
     box-shadow: 0px 0px 10px #161616;
+}
+
+#artist-detail .action {
+    display: flex;
+    flex-direction: row;
+}
+
+#artist-detail .spacing {
+    margin-right: 20px;
 }
 
 #artist-detail .tab-nav {
@@ -345,7 +411,7 @@ watch(activeTab, (nv,ov) => switchTab())
     border-color: var(--hl-color);
 }
 
-#artist-detail  .songlist {
+#artist-detail .songlist {
     display: flex;
     flex-direction: column;
 }

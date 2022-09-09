@@ -5,12 +5,15 @@ import { usePlatformStore } from '../store/platformStore';
 
 const router = useRouter()
 const { updateCurrentPlatformByCode } = usePlatformStore()
-const { setExploreMode, setArtistExploreMode } = useMainViewStore()
+const { setExploreMode, setArtistExploreMode, 
+    hideSongItemCtxMenu, hidePlaybackQueueItemCtxMenu,
+    hidePlayingView } = useMainViewStore()
 
 router.beforeResolve((to, from) => {
     console.log("[ ROUTE ] ==>>> " + to.path)
     autoSwitchExploreMode(to)
     highlightPlatform(to)
+    hideRelativeComponents(to)
 })
 
 const highlightPlatform = (to) => {
@@ -34,6 +37,16 @@ const autoSwitchExploreMode = (to) => {
     } else if(!path.startsWith('/setting')) {
         setExploreMode(null)
     }
+}
+
+const hideRelativeComponents = (to) => {
+    const path = to.path
+    if(path.includes('/artist')  || path.includes('/album')) {
+        hidePlayingView()
+    }
+    //TODO
+    hideSongItemCtxMenu()
+    hidePlaybackQueueItemCtxMenu()
 }
 
 const excludes = []

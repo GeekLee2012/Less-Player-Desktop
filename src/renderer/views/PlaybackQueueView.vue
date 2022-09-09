@@ -1,17 +1,16 @@
 <script setup>
+import { onMounted, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
-import { usePlatformStore } from '../store/platformStore';
 import { useMainViewStore } from '../store/mainViewStore';
 import { United } from '../../vendor/united';
+import PlaybackQueueItemContextMenu from '../components/PlaybackQueueItemContextMenu.vue';
 import EventBus from '../../common/EventBus';
-import { Track } from '../../common/Track';
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
-const { resetQueue, playTrack, playNextTrack } = usePlayStore()
-const { getVender } = usePlatformStore()
-const { showPlayNotification, hidePlayNotification } = useMainViewStore()
+const { resetQueue } = usePlayStore()
+const { hidePlaybackQueueView, hidePlayingView } = useMainViewStore()
 
 const targetPlaying = () => {
     if(queueTracksSize < 1) return 
@@ -24,91 +23,27 @@ const targetPlaying = () => {
 
 const clearAll = () => {
     resetQueue()
+    setTimeout(() => {
+        hidePlaybackQueueView()
+        hidePlayingView()
+    }, 300)
 }
 
-/*
-const loadLyric = (track) => {
-    if(!track) return 
-    if(Track.hasLyric(track)) {
-        EventBus.emit('track-lyricLoaded', track)
-        return 
+const { playbackQueueItemCtxMenuShow } = storeToRefs(useMainViewStore())
+const { showPlaybackQueueItemCtxMenu, hidePlaybackQueueItemCtxMenu } = useMainViewStore()
+
+const pbqRef = ref(null)
+onMounted(() => {
+    if(pbqRef.value) {
+        pbqRef.value.addEventListener('scroll', hidePlaybackQueueItemCtxMenu)
+        pbqRef.value.addEventListener('click', hidePlaybackQueueItemCtxMenu)
     }
-    const platform = track.platform
-    const vender = getVender(platform);
-    if(!vender) return 
-    vender.lyric(track.id, track).then(result => assignLyric(track, result))
-}
-
-const assignLyric = (track, lyric) => {
-    //track.lyric = result
-    if(!track) return
-    if(!lyric) return
-    Object.assign(track, { lyric })
-    EventBus.emit('track-lyricLoaded', track)
-}
-
-let playNextTimer = null
-const toastNotification = (callback) => {
-    showPlayNotification()
-    playNextTimer = setTimeout(() => {
-        hidePlayNotification()
-        if(callback) callback()
-    }, 2000)
-}
-
-const tryCancelPlayNextTimer = () => {
-    try {
-        if(playNextTimer) clearTimeout(playNextTimer)
-    } catch(e) {
-        //Do nothing
-    } finally {
-        hidePlayNotification()
-    }
-}
-
-const initTrack = (track, callback) => {
-    if(!track) return 
-    const platform = track.platform
-    const vender = getVender(platform);
-    if(!vender) return
-    vender.playDetail(track.id, track).then(async result => {
-        if(!Track.hasUrl(track)) track.url = result.url
-        tryCancelPlayNextTimer()
-        //if(!track.hasUrl()) track = await United.transferTrack(track)
-        if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
-            //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
-            toastNotification(playNextTrack)
-            return
-        }
-        if(!Track.hasLyric(track)) assignLyric(track, result.lyric)
-        if(!Track.hasCover(track)) Object.assign(track, { cover: result.cover })
-        if(track.artistNotCompleted && result.artist) {
-            Object.assign(track, { artist: result.artist })
-            EventBus.emit('track-artistUpdated', { trackId: track.id, artist: track.artist })
-        }
-        if(callback) callback(track)
-    }).catch(e => {
-        console.log(e)
-        //toastNotification(playNextTrack)
-    })
-}
-
-const initAndPlayTrack = (track) => {
-    initTrack(track, result => {
-        playTrack(result)
-        loadLyric(result)
-    })
-}
-
-EventBus.on('track-changed', track => initAndPlayTrack(track))
-EventBus.on('track-restore', track => initTrack(track))
-EventBus.on('track-loadLyric', track => loadLyric(track))
-*/
+})
 </script>
 
 <template>
     <!-- click事件: 必须阻止冒泡，因为document全局监听click事件 -->
-    <div class="playback-queue" @click.stop="">
+    <div class="playback-queue" @click.stop="hidePlaybackQueueItemCtxMenu">
         <div class="header">
             <div class="title">当前播放</div>
             <div class="detail">
@@ -125,7 +60,7 @@ EventBus.on('track-loadLyric', track => loadLyric(track))
                 </div>
             </div>
         </div>
-        <div class="center">
+        <div class="center" ref="pbqRef">
             <div v-for="(item, index) in queueTracks">
                 <PlaybackQueueItem :data="item" :active="playingIndex == index">
                 </PlaybackQueueItem>

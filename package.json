@@ -1,21 +1,22 @@
 {
   "name": "less-player",
   "private": true,
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Less Player, Less is More ! All for One, One for All ~",
   "author": {
     "name": "RIVE2012"
   },
   "main": "src/main/main.js",
   "scripts": {
-    "dev": "concurrently vite \"electron .\"",
+    "dev": "cross-env NODE_ENV=dev concurrently vite \"electron .\"",
     "dev:vite": "vite",
-    "build": "vite build",
+    "build": "cross-env NODE_ENV=proc vite build",
     "preview": "vite preview",
-    "dist": "electron-builder"
+    "dist": "cross-env NODE_ENV=proc electron-builder"
   },
   "dependencies": {
     "axios": "^0.26.1",
+    "cross-env": "^7.0.3",
     "crypto-js": "^4.1.1",
     "hls.js": "^1.1.5",
     "howler": "^2.2.3",
@@ -29,7 +30,7 @@
     "qs": "^6.10.3",
     "vue": "^3.2.25",
     "vue-router": "^4.0.14",
-    "vue3-lazyload": "^0.3.0"
+    "vue3-lazyload": "^0.3.6"
   },
   "devDependencies": {
     "@types/node-forge": "^1.0.1",

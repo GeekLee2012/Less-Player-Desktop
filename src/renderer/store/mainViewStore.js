@@ -13,7 +13,17 @@ export const useMainViewStore = defineStore('mainView', {
         //探索模式，歌单、歌手
         exploreModes: [ 'playlists', 'artists' ], 
         exploreModeIndex: 0, 
-        playNotificationShow: false
+        //播放状态通知
+        playNotificationShow: false,
+        //当前播放列表操作通知
+        playbackQueueNotificationShow: false,
+        playbackQueueNotificationText: null,
+        //歌曲列表
+        ctxMenuSongItem: null,  
+        songItemCtxMenuShow: false,
+        //当前播放列表
+        ctxMenuTrackItem: null, 
+        playbackQueueItemCtxMenuShow: false
     }),
     getters: {
         isPlaylistMode() {
@@ -55,11 +65,11 @@ export const useMainViewStore = defineStore('mainView', {
         },
         showPlayingView() {
             this.playingViewShow = true
-            ipcRenderer.send('hide-winBtn')
+            //ipcRenderer.send('hide-winBtn')
         },
         hidePlayingView() {
             this.playingViewShow = false
-            ipcRenderer.send('show-winBtn')
+            //ipcRenderer.send('show-winBtn')
         },
         toggleCoverMask() {
             this.coverMaskShow = !this.coverMaskShow
@@ -85,6 +95,36 @@ export const useMainViewStore = defineStore('mainView', {
         },
         hidePlayNotification() {
             this.playNotificationShow = false
+        },
+        showPlaybackQueueNotification(text) {
+            this.playbackQueueNotificationShow = true
+            this.playbackQueueNotificationText = text || "歌曲添加成功！"
+        },
+        hidePlaybackQueueNotification() {
+            this.playbackQueueNotificationShow = false
+            this.playbackQueueNotificationText = null
+        },
+        updateCtxMenuSongItem(value) {
+            this.ctxMenuSongItem = value
+        },
+        showSongItemCtxMenu(value) {
+            this.songItemCtxMenuShow = true
+            this.updateCtxMenuSongItem(value)
+        },
+        hideSongItemCtxMenu() {
+            this.songItemCtxMenuShow = false
+            this.updateCtxMenuSongItem(null)
+        },
+        updateCtxMenuTrackItem(value) {
+            this.ctxMenuTrackItem = value
+        },
+        showPlaybackQueueItemCtxMenu(value) {
+            this.playbackQueueItemCtxMenuShow = true
+            this.updateCtxMenuTrackItem(value)
+        },
+        hidePlaybackQueueItemCtxMenu() {
+            this.playbackQueueItemCtxMenuShow = false
+            this.updateCtxMenuTrackItem(null)
         }
     }
 })

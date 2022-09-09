@@ -16,6 +16,18 @@ import TextListControl from '../components/TextListControl.vue';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
+import { useMainViewStore } from '../store/mainViewStore';
+import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
+
+const { showPlaybackQueueNotification, hidePlaybackQueueNotification } = useMainViewStore()
+
+const toastNotification = (text, callback) => {
+    showPlaybackQueueNotification(text)
+    setTimeout(() => {
+        hidePlaybackQueueNotification()
+        if(callback) callback()
+    }, 1500)
+}
 
 const props = defineProps({
     platform: String,
@@ -47,13 +59,20 @@ const visitTab = (index) => {
 
 const playAll = () => {
     resetQueue()
-    addAll()
+    addAll("即将为您播放全部！")
     playNextTrack()
 }
 
-const addAll = () => {
+const addAll = (text) => {
     addTracks(allSongs.value)
+    toastNotification(text || "歌曲已全部添加！")
 } 
+
+//TODO
+const favourited = ref(false)
+const toggleFovourite = () => {
+    favourited.value = !favourited.value
+}
 
 const updateTabData = (data) => {
     tabData.value.length = 0
@@ -72,7 +91,7 @@ const getAlbumDetail = () => {
     }
     const vender = getVender(props.platform)
     if(!vender) return
-    const id = albumId.value
+    const id = props.id || albumId.value
     vender.albumDetail(id).then(result => {
         const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
@@ -94,7 +113,7 @@ const loadAllSongs = ()=> {
     }
     const vender = getVender(props.platform)
     if(!vender) return
-    const id = albumId.value
+    const id = props.id || albumId.value
     vender.albumDetailAllSongs(id, 0, 100).then(result => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
@@ -111,7 +130,6 @@ const scrollToTop = () => {
     const view = document.querySelector('#album-detail')
     view.scrollTop = 0
 }
-
 
 const reloadAll = () =>  {
     resetAll()
@@ -138,10 +156,10 @@ const switchTab = () => {
     }
 }
 
+//TODO 容易出现重复加载Bug
 onMounted(() => loadAll())
 onActivated(() => loadAll())
 watch(activeTab, (nv,ov) => switchTab())
-//watch(albumId, (nv, ov) => reloadAll())
 watch(()=> props.id, (nv, ov) => reloadAll())
 </script>
 
@@ -163,7 +181,9 @@ watch(()=> props.id, (nv, ov) => reloadAll())
                     </div>
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playAll" :rightAction="addAll"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()"></PlayAddAllBtn>
+                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFovourite" class="spacing">
+                    </FavouriteShareBtn>
                 </div>
             </div>
         </div>
@@ -248,6 +268,15 @@ watch(()=> props.id, (nv, ov) => reloadAll())
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
+}
+
+#album-detail .action {
+    display: flex;
+    flex-direction: row;
+}
+
+#album-detail .spacing {
+    margin-left: 20px;
 }
 
 #album-detail .tab-nav {
