@@ -170,7 +170,7 @@ export const usePlayStore = defineStore('play', {
         playPrevTrack() {
             //TODO
             const maxSize = this.queueTracksSize
-            if(maxSize < 2) return
+            if(maxSize < 1) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     --this.playingIndex
@@ -192,7 +192,7 @@ export const usePlayStore = defineStore('play', {
                 return 
             }
             const maxSize = this.queueTracksSize
-            if(maxSize < 2) return
+            if(maxSize < 1) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     this.playingIndex = ++this.playingIndex % maxSize
