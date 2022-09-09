@@ -97,8 +97,5 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         isAboutTab() {
             return this.activeTabCode == 'about'
         }
-    },
-    persist: {
-        enabled: true,
     }
 })
