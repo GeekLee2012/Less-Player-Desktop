@@ -80,5 +80,6 @@ const visitCateItem = (item, row, col) => {
     background: linear-gradient(to right, #1ca388, #28c83f);
     background: var(--btn-bg);
     color: var(--text-color);
+    color: var(--svg-btn-color) !important;
 }
 </style>

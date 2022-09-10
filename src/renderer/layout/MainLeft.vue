@@ -130,6 +130,7 @@ const switchExploreMode = () => {
 
 #platform-list .active {
     background: var(--btn-bg);
+    color: var(--svg-btn-color);
 }
 
 #app-mark {
@@ -151,6 +152,7 @@ const switchExploreMode = () => {
     border: 0px solid;
     font-weight: bold;
     background: var(--btn-bg);
+    color: var(--svg-btn-color);
 }
 
 #app-title {

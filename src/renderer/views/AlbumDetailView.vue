@@ -16,18 +16,8 @@ import TextListControl from '../components/TextListControl.vue';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
-import { useMainViewStore } from '../store/mainViewStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
-
-const { showPlaybackQueueNotification, hidePlaybackQueueNotification } = useMainViewStore()
-
-const toastNotification = (text, callback) => {
-    showPlaybackQueueNotification(text)
-    setTimeout(() => {
-        hidePlaybackQueueNotification()
-        if(callback) callback()
-    }, 1500)
-}
+import { useMainViewStore } from '../store/mainViewStore';
 
 const props = defineProps({
     platform: String,
@@ -48,6 +38,7 @@ const { setActiveTab, updateTabTipText,
 
 const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
+const { showToast } = useMainViewStore()
 
 let currentTabView = shallowRef(null)
 const tabData = ref([])
@@ -65,7 +56,7 @@ const playAll = () => {
 
 const addAll = (text) => {
     addTracks(allSongs.value)
-    toastNotification(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加！")
 } 
 
 //TODO
@@ -251,6 +242,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
 
 #album-detail .header .info-row span {
     color: #ababab;
+    color: var(--text-sub-color);
 }
 
 #album-detail .header .info-row b {

@@ -24,10 +24,15 @@ import SongItem from './components/SongItem.vue';
 import PlayingView from './views/PlayingView.vue';
 import PlaybackQueueView from './views/PlaybackQueueView.vue';
 
-//初始化并配置播放器
+//状态管理
+const pinia = createPinia()
+pinia.use(piniaPersist)
+
+//播放器：初始化并配置
 Player.initAndSetup()
 RadioPlayer.initAndSetup()
 
+//应用：创建、配置
 const app = createApp(App);
 
 //全局异常处理器
@@ -35,9 +40,6 @@ app.config.errorHandler = (err, vm, info) => {
     // 处理错误
     // `info` 是 Vue 特定的错误信息，比如错误所在的生命周期钩子
 }
-
-const pinia = createPinia()
-pinia.use(piniaPersist)
 
 app.use(pinia)
     .use(router)

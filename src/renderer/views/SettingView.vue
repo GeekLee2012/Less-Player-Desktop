@@ -4,6 +4,10 @@ import ToggleControl from '../components/ToggleControl.vue';
 import { storeToRefs } from 'pinia';
 import KeysInputControl from '../components/KeysInputControl.vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
+import packageCfg from '../../../package.json';
+import { useMainViewStore } from '../store/mainViewStore';
+
+const ipcRenderer = electronAPI.ipcRenderer
 
 const { theme, track, keys, tray, cache, other } = storeToRefs(useSettingStore())
 const { setThemeIndex, 
@@ -18,11 +22,18 @@ const { setThemeIndex,
     resetKeys
 } = useSettingStore()
 
-const ipcRenderer = electronAPI.ipcRenderer
+const { showToast } = useMainViewStore()
 
 const visitAuthor = () => {
     const url = 'https://github.com/GeekLee2012/'
     ipcRenderer.send('visit-link', url)
+}
+
+const clearSettingsCache = () => {
+    ["setting", "settings"].forEach(key => {
+        localStorage.removeItem(key)
+    })
+    showToast("当前设置缓存已清空！")
 }
 </script>
 
@@ -81,11 +92,15 @@ const visitAuthor = () => {
                             :value="cache.storePlayState">
                         </ToggleControl>
                     </div>
-                    <div class="last">
+                    <div>
                         <b>应用退出前，保存本地歌曲：</b>
                         <ToggleControl @click="toggleStoreLocalMusic"
                             :value="cache.storeLocalMusic">
                         </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <SvgTextButton text="清空设置缓存" :left-action="clearSettingsCache">
+                    </SvgTextButton>
                     </div>
                     <!--
                     <div class="last">
@@ -126,7 +141,7 @@ const visitAuthor = () => {
             <div class="row">
                 <b>版本</b>
                 <div class="content">
-                    {{ other.appVersion }}
+                    {{ packageCfg.version }}
                 </div>
             </div>
             <div class="row last-row">
@@ -231,7 +246,7 @@ const visitAuthor = () => {
 }
 
 #setting-view .theme .content .active {
-    border-image: var(--btn-hover-bg) 3;
+    border-color: #ffd700;
 }
 
 #setting-view .track .content span {
@@ -250,7 +265,8 @@ const visitAuthor = () => {
 
 #setting-view .track .content .active {
     background: var(--btn-bg);
-    border: 1px solid transparent;
+    color: var(--svg-btn-color);
+    /*border: 1px solid var(--border-color);*/
 }
 
 #setting-view .keys .global-keys-ctrl {

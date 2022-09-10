@@ -15,9 +15,9 @@ export const useMainViewStore = defineStore('mainView', {
         exploreModeIndex: 0, 
         //播放状态通知
         playNotificationShow: false,
-        //当前播放列表操作通知
-        playbackQueueNotificationShow: false,
-        playbackQueueNotificationText: null,
+        //通用通知
+        commonNotificationShow: false,
+        commonNotificationText: null,
         //歌曲列表
         ctxMenuSongItem: null,  
         songItemCtxMenuShow: false,
@@ -96,13 +96,17 @@ export const useMainViewStore = defineStore('mainView', {
         hidePlayNotification() {
             this.playNotificationShow = false
         },
-        showPlaybackQueueNotification(text) {
-            this.playbackQueueNotificationShow = true
-            this.playbackQueueNotificationText = text || "歌曲添加成功！"
+        showCommonNotification(text) {
+            this.commonNotificationShow = true
+            this.commonNotificationText = text || "操作成功！"
         },
-        hidePlaybackQueueNotification() {
-            this.playbackQueueNotificationShow = false
-            this.playbackQueueNotificationText = null
+        hideCommonNotification() {
+            this.commonNotificationShow = false
+            this.commonNotificationText = null
+        },
+        showToast(text, callback, delay) {
+            text = text || "操作成功！"
+            EventBus.emit("toast", { text, callback, delay })
         },
         updateCtxMenuSongItem(value) {
             this.ctxMenuSongItem = value

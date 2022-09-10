@@ -1,20 +1,12 @@
 <script setup>
 import { storeToRefs } from 'pinia';
+import EventBus from '../../common/EventBus';
 import { useMainViewStore } from '../store/mainViewStore';
 import { usePlayStore } from '../store/playStore';
 
 const { ctxMenuSongItem } = storeToRefs(useMainViewStore())
-const { showPlaybackQueueNotification, hidePlaybackQueueNotification,
-    hideSongItemCtxMenu } = useMainViewStore()
+const { showToast, hideSongItemCtxMenu } = useMainViewStore()
 const { playTrack, addTrack, playTrackLater } = usePlayStore()
-
-const toastNotification = (text, callback) => {
-    showPlaybackQueueNotification(text)
-    setTimeout(() => {
-        hidePlaybackQueueNotification()
-        if(callback) callback()
-    }, 1500)
-}
 
 const props = defineProps({
     pos: Object
@@ -27,13 +19,13 @@ const playItem = () => {
 
 const addItem = () => {
     addTrack(ctxMenuSongItem.value)
-    toastNotification()
+    showToast("歌曲已添加成功！")
     hideSongItemCtxMenu()
 }
 
 const playItemLater = () => {
     playTrackLater(ctxMenuSongItem.value)
-    toastNotification("下一曲将为您播放！")
+    showToast("下一曲将为您播放！")
     hideSongItemCtxMenu()
 }
 </script>
@@ -82,7 +74,7 @@ const playItemLater = () => {
     border-radius: 8px;
     padding: 15px 0px;
     border: 0.1px solid var(--border-color);
-    box-shadow: 0px 0px 1px var(--main-left-border-color);
+    box-shadow: 0px 0px 1px var(--ctx-menu-border-color);
 }
 
 .song-item-ctx-menu .menuItem {
@@ -97,6 +89,11 @@ const playItemLater = () => {
 .song-item-ctx-menu .menuItem:hover {
     background-color: var(--text-sub-color);
     background: var(--btn-bg);
+    color: var(--svg-btn-color);
+}
+
+.song-item-ctx-menu .menuItem:hover svg {
+    fill: var(--svg-btn-color); 
 }
 
 .song-item-ctx-menu .menuItem svg {

@@ -5,36 +5,42 @@ import { Track } from '../../common/Track';
 import { toMMssSSS } from '../../common/Times';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
-import { usePlayStore } from '../store/playStore';
-import { storeToRefs } from 'pinia';
 
 const props = defineProps({
     track: Object //Track
 })
 
 const currentIndex = ref(-1)
-//const { hasLyric } = storeToRefs(usePlayStore())
 const hasLyric = ref(false)
 const lyricData = ref(Track.lyricData(props.track))
 
 let destScrollTop = -1
 let rafId = null
 
+let isUserMouseWheel = false
+let userMouseWheelCancelTimer = null
+
 const renderAndScrollLyric = (secs) => {
     const MMssSSS = toMMssSSS(secs * 1000)
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     const lines = lyricWrap.querySelectorAll('.line')
-    //TODO hightlight 算法存在Bug
+    //Hightlight 
+    //TODO算法存在Bug
+    let index = -1
     for(var i = 0; i < lines.length; i++) {
         const time = lines[i].getAttribute('time-key')
-        if(time > MMssSSS) {
-            currentIndex.value = (i > 0 ? i - 1: 0)
+        if(MMssSSS >= time) {
+            index = i
+        } else if(MMssSSS < time) {
             break
         }
     }
-    if(currentIndex.value < 0) return
-    //scroll
-    const scrollIndex = currentIndex.value > 1 ? (currentIndex.value - 1) : 0
+    if(index < 0) return
+    currentIndex.value = index
+
+    //Scroll
+    if(isUserMouseWheel) return 
+    const scrollIndex = index > 1 ? (index - 1) : 0
     const scrollHeight = lyricWrap.scrollHeight
     const clientHeight = lyricWrap.clientHeight
     const maxScrollTop = scrollHeight - clientHeight
@@ -83,6 +89,15 @@ const reloadLyricData = (track) => {
     lyricData.value = Track.lyricData(track)
 }
 
+const onUserMouseWheel = (e) => {
+    //e.preventDefault()
+    isUserMouseWheel = true
+    if(userMouseWheelCancelTimer) clearTimeout(userMouseWheelCancelTimer)
+    userMouseWheelCancelTimer = setTimeout(() => {
+        isUserMouseWheel = false
+    }, 3000)
+}
+
 watch(() => props.track, (nv, ov) => reloadLyricData(nv))
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
 
@@ -92,7 +107,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="lyric-ctl">
+    <div class="lyric-ctl" @mousewheel="onUserMouseWheel">
         <div class="header">
             <div class="audio-title">{{ track.title }}</div>
             <div class="audio-artist spacing">
@@ -187,6 +202,7 @@ onMounted(() => {
     margin-top: 15px;
     padding-right: 6px;
     padding-bottom: 15px;
+    -webkit-mask-image: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
 }
 
 .lyric-ctl .lyric-content {

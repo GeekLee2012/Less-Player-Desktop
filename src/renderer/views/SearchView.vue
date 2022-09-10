@@ -200,6 +200,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     background: var(--hl-text-bg);
     border-color: #28c83f;
     border-color: var(--hl-color);
+    color: var(--svg-btn-color) !important;
 }
 
 #search-view .tab-nav {

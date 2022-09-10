@@ -84,12 +84,12 @@ const togglePlaybackQueue = () => {
 .play-ctl .play-btn svg {
     margin-top: 9px;
     margin-left: 2px;
-    fill: var(--svg-color) !important;
+    fill: var(--svg-btn-color) !important;
 }
 
 .play-ctl .play-btn .paused {
     margin-top: 6px;
     margin-left: 0px;
-    fill: var(--svg-color) !important;
+    fill: var(--svg-btn-color) !important;
 }
 </style>

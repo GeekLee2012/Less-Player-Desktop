@@ -29,6 +29,6 @@ const getTextByStatus = () => {
 }
 
 .favourite-share-btn svg {
-    fill: var(--svg-color);
+    fill: var(--svg-btn-color);
 }
 </style>

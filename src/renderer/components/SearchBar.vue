@@ -68,7 +68,7 @@ const clear = () => {
 .search-bar .search-btn svg {
     margin-top: 7px;
     margin-left: 3px;
-    fill: var(--svg-color);
+    fill: var(--svg-btn-color);
 }
 
 .search-bar .keyword {

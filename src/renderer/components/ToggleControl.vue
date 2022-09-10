@@ -36,7 +36,6 @@ const toggle = () => {
     width: 16px;
     height: 16px;
     border-radius: 10rem;
-    border: 1px solid transparent;
     background-color: var(--toggle-btn-color);
 }
 

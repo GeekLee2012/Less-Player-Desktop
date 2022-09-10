@@ -16,20 +16,11 @@ import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
+import EventBus from '../../common/EventBus';
 
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showPlaybackQueueNotification, hidePlaybackQueueNotification, 
-    hideSongItemCtxMenu } = useMainViewStore()
-
-//TODO
-const toastNotification = (text, callback) => {
-    showPlaybackQueueNotification(text)
-    setTimeout(() => {
-        hidePlaybackQueueNotification()
-        if(callback) callback()
-    }, 1500)
-}
+const { showToast, hideSongItemCtxMenu } = useMainViewStore()
 
 const props = defineProps({
     platform: String,
@@ -93,7 +84,7 @@ const playAll = () => {
 
 const addAll = (text) => {
     addTracks(detail.data)
-    toastNotification(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加！")
 }
 
 //TODO

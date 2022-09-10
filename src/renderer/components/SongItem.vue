@@ -8,17 +8,7 @@ import EventBus from '../../common/EventBus';
 import { onMounted, ref } from 'vue';
 
 const { addTrack, playTrack } = usePlayStore()
-const { showPlaybackQueueNotification, hidePlaybackQueueNotification, 
-    showSongItemCtxMenu } = useMainViewStore()
-
-//TODO
-const toastNotification = (text, callback) => {
-    showPlaybackQueueNotification(text)
-    setTimeout(() => {
-        hidePlaybackQueueNotification()
-        if(callback) callback()
-    }, 1500)
-}
+const { showToast } = useMainViewStore()
 
 const props = defineProps({
     index: Number,
@@ -34,7 +24,7 @@ const playItem = () => {
 
 const addItem = () => {
     addTrack(props.data)
-    toastNotification()
+    showToast("歌曲已添加成功！")
 }
 
 const deleteItem = () => {

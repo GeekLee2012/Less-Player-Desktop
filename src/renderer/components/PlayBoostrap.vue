@@ -31,7 +31,7 @@ const assignLyric = (track, lyric) => {
 
 //TODO 用户手动干预，即主动点击上/下一曲时，产生体验上的Bug
 let playNextTimer = null
-const toastNotification = (callback) => {
+const showToast = (callback) => {
     showPlayNotification()
     playNextTimer = setTimeout(() => {
         hidePlayNotification()
@@ -60,7 +60,7 @@ const bootstrapTrack = (track, callback) => {
         //if(!track.hasUrl()) track = await United.transferTrack(track)
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
             //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
-            toastNotification(playNextTrack)
+            showToast(playNextTrack)
             return
         }
         if(!Track.hasLyric(track)) assignLyric(track, result.lyric)
@@ -72,7 +72,7 @@ const bootstrapTrack = (track, callback) => {
         if(callback) callback(track)
     }).catch(e => {
         console.log(e)
-        //toastNotification(playNextTrack)
+        //showToast(playNextTrack)
     })
 }
 

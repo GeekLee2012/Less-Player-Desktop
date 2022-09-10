@@ -48,7 +48,8 @@ defineExpose({
         </div>
         <SliderBar class="volume-value" ref="sliderRef" :initValue="0.5"
             :onseek="emitUpdate" 
-            :onscroll="emitUpdate" >
+            :onscroll="emitUpdate"
+            :ondrag="emitUpdate" >
         </SliderBar>
     </div>
 </template>

@@ -13,7 +13,7 @@ export const useSettingStore = defineStore('setting', {
                 bg: '#464646'
             }, {
                 id: 'light',
-                name: '浅色',
+                name: '白色',
                 bg: '#fafafa'
             }, {
                 id: 'pink',
@@ -30,7 +30,7 @@ export const useSettingStore = defineStore('setting', {
             }, {
                 id: 'blue',
                 name: '蓝色',
-                bg: 'royalblue'
+                bg: '#56ccf2'
             }, {
                 id: 'yellow',
                 name: '黄色',
@@ -141,7 +141,6 @@ export const useSettingStore = defineStore('setting', {
         /* 其他 */
         other: {
             //TODO
-            appVersion: 'v0.1.7'
         }
     }),
     getters: {
@@ -190,9 +189,9 @@ export const useSettingStore = defineStore('setting', {
         enabled: true,
         strategies: [
             {
-                key: 'settings',
+                //key: 'setting',
                 storage: localStorage,
-                paths: [ 'theme', 'track', 'keys', 'tray', 'cache' ]
+                //paths: [ 'theme', 'track', 'keys', 'tray', 'cache' ]
             },
         ],
     },

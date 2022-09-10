@@ -1,19 +1,19 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 //TODO 拖动滑块,改变进度条暂不支持
 //组件代码写得乱，后期再梳理
 
 const props = defineProps({
     initValue: Number, //0.0 - 1.0
     onseek: Function,
-    onscroll: Function
+    onscroll: Function,
+    ondrag: Function
 })
 
-const sliderRef = ref(null)
+const sliderCtlRef = ref(null)
 const progressRef = ref(null)
 const thumbRef = ref(null)
 let onDrag = false
-let fromX = -1
 let value = parseFloat(props.initValue).toFixed(2)
 
 //点击改变进度
@@ -58,7 +58,7 @@ const toggleProgress = () => {
 }
 
 const updateProgressByWidth = (width) => {
-    const totalWidth = sliderRef.value.offsetWidth
+    const totalWidth = sliderCtlRef.value.offsetWidth
     let percent = width / totalWidth
     //console.log("percent: " + percent)
     updateProgress(percent)
@@ -66,7 +66,7 @@ const updateProgressByWidth = (width) => {
 
 const updateProgressByDeltaWidth = (delta) => {
     if(delta == 0) return 
-    const totalWidth = sliderRef.value.offsetWidth
+    const totalWidth = sliderCtlRef.value.offsetWidth
     const oPercent = parseFloat(progressRef.value.style.width.replace('%', '')) / 100
     if(isNaN(oPercent)) return 
     let oWidth = totalWidth * oPercent
@@ -75,28 +75,21 @@ const updateProgressByDeltaWidth = (delta) => {
 
 const startDrag = (e)=> {
     onDrag = true
-    fromX = e.screenX
+}
 
-    console.log("->")
+const dragMove = (e) => {
+    if(!onDrag) return 
+    const progress = e.clientX - sliderCtlRef.value.offsetLeft
+    const width = sliderCtlRef.value.clientWidth
+    updateProgress(progress/width)
+    if(props.ondrag) {
+        props.onseek(value)
+    }
 }
 
 /* 以下为拖动滑块改变进度相关 */
 const endDrag = (e)=> {
     onDrag = false
-    fromX = -1
-
-    console.log("[-")
-}
-
-const dragProgress = (e)=> {
-    //e.preventDefault()
-    //e.stopPropagation()
-    if(onDrag) {
-        //console.log(e)
-        const deltaX = e.screenX - fromX
-        updateProgressByDeltaWidth(deltaX)
-        fromX = e.screenX
-    }
 }
 
 //对外提供API
@@ -104,18 +97,29 @@ defineExpose({
     updateProgress,
     toggleProgress
 })
+
+onMounted(() => {
+    document.addEventListener("mousemove", dragMove)
+    document.addEventListener("mouseup", endDrag)
+})
 </script>
 
 <template>
-    <div class="slider-bar" ref="sliderRef" @click="seekProgress" @mousewheel="scrollProgress">
-        <div class="progress" ref="progressRef"></div>
-        <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>
+    <div class="slider-bar" @mousewheel="scrollProgress"> 
+        <div class="slider-bar-ctl" ref="sliderCtlRef" @click="seekProgress">
+            <div class="progress" ref="progressRef"></div>
+            <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>
+        </div>
     </div>
 </template>
 
 <style scoped>
 .slider-bar {
     height: 10px;
+    background: transparent;
+}
+.slider-bar .slider-bar-ctl{
+    height: 3px;
     border-radius: 10rem;
     /*background: linear-gradient(to right, #464646, #666) !important;*/
     background: var(--progress-track-bg);
@@ -126,7 +130,7 @@ defineExpose({
     position: relative;
 }
 
-.slider-bar, 
+.slider-bar-ctl, 
 .slider-bar .progress, 
 .slider-bar .thumb {
     -webkit-app-region: none;

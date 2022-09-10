@@ -75,8 +75,8 @@ export const usePlayStore = defineStore('play', {
         },
         addTrack(track) {
             //TODO 超级列表如何保证时效
-            if(this.queueTracks.indexOf(track) > -1) return
-            this.queueTracks.push(track)
+            const index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
+            if(index == -1) this.queueTracks.push(track)
         },
         addTracks(tracks) {
             //TODO 暂时不去重, 超级列表如何保证时效
@@ -171,6 +171,7 @@ export const usePlayStore = defineStore('play', {
             //TODO
             const maxSize = this.queueTracksSize
             if(maxSize < 1) return
+            if(maxSize == 1 && this.playingIndex == 0) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     --this.playingIndex
@@ -193,6 +194,7 @@ export const usePlayStore = defineStore('play', {
             }
             const maxSize = this.queueTracksSize
             if(maxSize < 1) return
+            if(maxSize == 1 && this.playingIndex == 0) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     this.playingIndex = ++this.playingIndex % maxSize

@@ -7,19 +7,11 @@ import { useMainViewStore } from '../store/mainViewStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { onMounted, ref, watch } from 'vue';
+import EventBus from '../../common/EventBus';
 
-const { ctxMenuTrackItem, playbackQueueItemCtxMenuShow } = storeToRefs(useMainViewStore())
-const { showPlaybackQueueNotification, hidePlaybackQueueNotification, 
-    hidePlaybackQueueItemCtxMenu } = useMainViewStore()
+const { ctxMenuTrackItem } = storeToRefs(useMainViewStore())
+const { showToast, hidePlaybackQueueItemCtxMenu } = useMainViewStore()
 const { playTrack, addTrack, playTrackLater, removeTrack } = usePlayStore()
-
-const toastNotification = (text, callback) => {
-    showPlaybackQueueNotification(text)
-    setTimeout(() => {
-        hidePlaybackQueueNotification()
-        if(callback) callback()
-    }, 1500)
-}
 
 const props = defineProps({
     pos: Object
@@ -32,13 +24,13 @@ const playItem = () => {
 
 const addItem = () => {
     addTrack(ctxMenuTrackItem.value)
-    toastNotification()
+    showToast("歌曲已添加成功！")
     hidePlaybackQueueItemCtxMenu()
 }
 
 const playItemLater = () => {
     playTrackLater(ctxMenuTrackItem.value)
-    toastNotification("下一曲将为您播放！")
+    showToast("下一曲将为您播放！")
     hidePlaybackQueueItemCtxMenu()
 }
 
@@ -170,7 +162,7 @@ watch(playbackQueueItemCtxMenuShow, (ov, nv)=> {
     border-radius: 8px;
     padding: 15px 0px;
     border: 0.1px solid var(--border-color);
-    box-shadow: 0px 0px 1px var(--main-left-border-color);
+    box-shadow: 0px 0px 1px var(--ctx-menu-border-color);
 }
 
 .pbq-item-ctx-menu .menuItem {
@@ -185,6 +177,11 @@ watch(playbackQueueItemCtxMenuShow, (ov, nv)=> {
 .pbq-item-ctx-menu .menuItem:hover {
     background-color: var(--text-sub-color);
     background: var(--btn-bg);
+    color: var(--svg-btn-color);
+}
+
+.pbq-item-ctx-menu .menuItem:hover svg {
+    fill: var(--svg-btn-color);
 }
 
 .pbq-item-ctx-menu .menuItem svg {

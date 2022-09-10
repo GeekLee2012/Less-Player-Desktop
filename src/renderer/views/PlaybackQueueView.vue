@@ -5,12 +5,10 @@ import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
 import { useMainViewStore } from '../store/mainViewStore';
 import { United } from '../../vendor/united';
-import PlaybackQueueItemContextMenu from '../components/PlaybackQueueItemContextMenu.vue';
-import EventBus from '../../common/EventBus';
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue } = usePlayStore()
-const { hidePlaybackQueueView, hidePlayingView } = useMainViewStore()
+const { showToast, hidePlaybackQueueView, hidePlayingView } = useMainViewStore()
 
 const targetPlaying = () => {
     if(queueTracksSize < 1) return 
@@ -23,10 +21,10 @@ const targetPlaying = () => {
 
 const clearAll = () => {
     resetQueue()
-    setTimeout(() => {
+    showToast("当前播放列表已清空！", ()=> {
         hidePlaybackQueueView()
         hidePlayingView()
-    }, 300)
+    }, 666)
 }
 
 const { playbackQueueItemCtxMenuShow } = storeToRefs(useMainViewStore())

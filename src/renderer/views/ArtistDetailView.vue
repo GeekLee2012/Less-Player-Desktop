@@ -19,6 +19,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useMainViewStore } from '../store/mainViewStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
+import EventBus from '../../common/EventBus';
 
 const props = defineProps({
     platform: String,
@@ -45,16 +46,7 @@ const { setActiveTab, updateArtist,
 
 const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
-const { showPlaybackQueueNotification, hidePlaybackQueueNotification } = useMainViewStore()
-
-//TODO
-const toastNotification = (text, callback) => {
-    showPlaybackQueueNotification(text)
-    setTimeout(() => {
-        hidePlaybackQueueNotification()
-        if(callback) callback()
-    }, 1500)
-}
+const { showToast } = useMainViewStore() 
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
@@ -79,7 +71,7 @@ const playHotSongs = () => {
 
 const addHotSongs = (text) => {
     addTracks(hotSongs.value)
-    toastNotification(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加！")
 }
 
 const playAllSongs = () => {
@@ -90,7 +82,7 @@ const playAllSongs = () => {
 
 const addAllSongs = (text) => {
     addTracks(allSongs.value)
-    toastNotification(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加！")
 }
 
 //TODO
