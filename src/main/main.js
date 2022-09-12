@@ -1,22 +1,15 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, Menu, dialog, powerMonitor, shell } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, dialog, powerMonitor, shell, powerSaveBlocker } = require('electron')
+const { isMacOS, useCustomTrafficLight, isDevEnv, USER_AGENT, AUDIO_EXTS } = require('./env')
 const path = require('path')
 const { scanDir, parseTracks, readText } = require('./fileio') 
 
 //关闭警告提示
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
-//浏览器UserAgent
-const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:97.0) Gecko/20100101 Firefox/97.0"
 //全局UserAgent
 app.userAgentFallback = USER_AGENT
-//是否为macOS
-const isMacOS = (process.platform === 'darwin')
-//macOS下是否显示交通灯
-const showSysTrafficLight = isMacOS
-//支持的音频文件扩展名（本地文件）
-const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'] 
-//TODO 是否为开发环境, NODE_ENV取值：dev、proc
-const isDevEnv = (process.env['NODE_ENV'] === 'dev')
+//电源模式
+let powerSaveBlockerId = -1
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -56,6 +49,13 @@ ipcMain.on('app-quit', ()=> {
   } else {
     win.maximize()
     //win.setFullScreen(true)
+  }
+}).on('app-suspension', (e, data)=> {
+  if(data === true) {
+    powerSaveBlockerId = powerSaveBlocker.start('prevent-app-suspension')
+  } else if(powerSaveBlockerId != -1) {
+    powerSaveBlocker.stop(powerSaveBlockerId)
+    powerSaveBlockerId = -1
   }
 }).on('show-winBtn', ()=> {
   setWindowButtonVisibility(true)
@@ -124,7 +124,7 @@ const createWindow = () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(initMenuTemplate()))
 
   mainWindow.once('ready-to-show', () => {
-    setWindowButtonVisibility(showSysTrafficLight)
+    setWindowButtonVisibility(!useCustomTrafficLight)
     mainWindow.show()
   })
 
@@ -166,11 +166,11 @@ const initMenuTemplate = () => {
   return template
 }
 
-//设置交通灯按钮可见性
+//设置系统交通灯按钮可见性
 const setWindowButtonVisibility = (visible) => {
   if(!isMacOS) return
   try {
-    app.mainWin.setWindowButtonVisibility(showSysTrafficLight && visible)
+    app.mainWin.setWindowButtonVisibility(visible)
   } catch (error) {
     console.log(error)
   }

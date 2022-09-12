@@ -90,9 +90,9 @@ defineExpose({
     z-index: 66;
 }
 .back2top-btn {
-    border: 0.1px solid #666;
-    box-shadow: 0px 0px 2px #212121;
-    background-color: #666666cc;
+    border: 0.1px solid var(--border-color);
+    /* box-shadow: 0px 0px 2px #212121; */
+    background: var(--btn-bg);
     border-radius: 6px;
     width: 36px;
     height: 39px;
@@ -104,15 +104,14 @@ defineExpose({
 }
 
 .back2top-btn:hover {
-    background-color: #555;
+    background: var(--btn-hover-bg);
 }
 
 .back2top-btn svg {
-    fill: #eee;
+    fill: #fff;
 }
 
 .back2top-btn svg:hover {
-    fill: #28c83f;
-    fill: var(--hl-color);
+    fill: #fff;
 }
 </style>

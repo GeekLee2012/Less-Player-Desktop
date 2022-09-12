@@ -45,7 +45,7 @@ const clearSettingsCache = () => {
                 <b>主题</b>
                 <div class="content">
                     <div class="last" v-for="(item,index) in theme.data" 
-                        :class="{ active: index == theme.index }"
+                        :class="{ active: index == theme.index, lightText: item.dark }"
                         :style="{ background: item.bg }" 
                         @click="setThemeIndex(index)" >
                         <b>{{ item.name }}</b>
@@ -64,7 +64,7 @@ const clearSettingsCache = () => {
                         </span>
                     </div>
                     <div>
-                        <b>VIP歌曲自动尝试切换：</b>
+                        <b>VIP歌曲尝试切换为免费版本：</b>
                         <ToggleControl @click="toggleVipTransfer" 
                             :value="track.vipTransfer">
                         </ToggleControl>
@@ -99,8 +99,9 @@ const clearSettingsCache = () => {
                         </ToggleControl>
                     </div>
                     <div class="last">
-                        <SvgTextButton text="清空设置缓存" :left-action="clearSettingsCache">
-                    </SvgTextButton>
+                        <SvgTextButton text="清空设置页缓存" :left-action="clearSettingsCache">
+                        </SvgTextButton>
+                        <span class="tip-text">（提示：清空缓存，不影响当前设置；主要解决新版本设置不起作用问题）</span>
                     </div>
                     <!--
                     <div class="last">
@@ -159,6 +160,12 @@ const clearSettingsCache = () => {
     flex-direction: column;
     text-align: left;
     overflow: auto;
+}
+
+#setting-view .tip-text {
+    font-size: 14px;
+    margin-left: 15px;
+    color: var(--text-sub-color);
 }
 
 #setting-view .title {
@@ -247,6 +254,10 @@ const clearSettingsCache = () => {
 
 #setting-view .theme .content .active {
     border-color: #ffd700;
+}
+
+#setting-view .theme .content .lightText {
+    color: #fff !important;
 }
 
 #setting-view .track .content span {

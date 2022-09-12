@@ -9,7 +9,8 @@ export const usePlaylistSquareViewStore = defineStore('playlistSquareView', {
             data: { key: '默认', value: ''},
             row: 0, 
             col: 0
-        }
+        },
+        needRefresh: false
     }),
     getters: {
         currentPlatformCode(state) {
@@ -41,9 +42,10 @@ export const usePlaylistSquareViewStore = defineStore('playlistSquareView', {
             this.currentCategoryItem.data = data
             this.currentCategoryItem.row = row
             this.currentCategoryItem.col = col
+            //Object.assign(this.currentCategory, { data, row, col })
         },
-        resetCurrentCategoryItem() {
-            this.updateCurrentCategoryItem({ key: '默认', value: ''}, 0, 0)
+        resetCurrentCategoryItem() { //TODO
+            this.updateCurrentCategoryItem({ key: '默认', value: ''}, -1, -1)
         }
     }
 })

@@ -18,7 +18,8 @@ let markScrollTop = 0
 
 const { currentPlatformCode, currentCategoryCode } = storeToRefs(usePlaylistSquareViewStore())
 const { currentVender, currentCategory, 
-        putCategory, resetCurrentCategoryItem 
+        putCategory, resetCurrentCategoryItem, 
+        setNeedRefresh
     } = usePlaylistSquareViewStore()
 
 const resetPagination = () => {
@@ -65,10 +66,6 @@ const loadContent = () => {
     })
 }
 
-const loadData = () => {
-    loadCategories()
-    loadContent()
-}
 
 const loadMoreContent = () => {
     nextPage()
@@ -107,10 +104,11 @@ const resetBack2TopBtn = () => {
     back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
 }
 
+//TODO 后期需要梳理优化
 /*-------------- 各种监听 --------------*/
 onMounted(() => {
     resetPagination()
-    loadData()
+    loadCategories()
     bindScrollListener()
     resetBack2TopBtn()
 })
@@ -123,17 +121,17 @@ const resetCommom = ()=> {
     resetBack2TopBtn()
 }
 
-//TODO
-watch(currentPlatformCode, (nv, ov) => {
-    resetCurrentCategoryItem()
-    resetCommom()
-    loadData()
-})
-
-watch(currentCategoryCode, (nv, ov) => {
+const refreshData = () => {
     resetCommom()
     loadContent()
+}
+
+watch(currentPlatformCode, (nv, ov) => {
+    resetCommom()
+    loadCategories()
 })
+
+EventBus.on("playlistSquare-refresh", () => refreshData())
 </script>
 
 <template>

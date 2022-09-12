@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import EventBus from '../../common/EventBus';
 
+const ipcRenderer = electronAPI.ipcRenderer
+
 //TODO 或许可能大概会实现吧......
 export const useSettingStore = defineStore('setting', {
     state: ()=> ({
@@ -10,35 +12,43 @@ export const useSettingStore = defineStore('setting', {
             data: [{
                 id: 'dark',
                 name: '默认',
-                bg: '#464646'
+                bg: '#464646',
+                dark: true
             }, {
                 id: 'light',
                 name: '白色',
-                bg: '#fafafa'
+                bg: '#fafafa',
+                dark: false
             }, {
                 id: 'pink',
                 name: '粉色',
-                bg: '#e667af'
+                bg: '#e667af',
+                dark: false
             }, {
                 id: 'red',
                 name: '红色',
                 bg: '#ef5350',
+                dark: false
             }, {
                 id: 'green',
                 name: '绿色',
-                bg: '#1ca288'
+                bg: '#1ca288',
+                dark: false
             }, {
                 id: 'blue',
                 name: '蓝色',
-                bg: '#56ccf2'
+                bg: '#56ccf2',
+                dark: false
             }, {
                 id: 'yellow',
                 name: '黄色',
-                bg: '#ffb300'
+                bg: '#ffb300',
+                dark: false
             }, {
                 id: 'purple',
                 name: '紫色',
-                bg: '#9c27b0'
+                bg: '#9c27b0',
+                dark: true
             }]   
         },
         /* 播放歌曲 */
@@ -144,7 +154,9 @@ export const useSettingStore = defineStore('setting', {
         }
     }),
     getters: {
-
+        isPlaylistCategoryBarRandom(state) {
+            return this.track.categoryBarRandom
+        }
     },
     actions: {
         setThemeIndex(index) {
@@ -168,6 +180,7 @@ export const useSettingStore = defineStore('setting', {
         },
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping
+            ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
         },
         toggleTrayMenu() {
             this.tray.showMenu = !this.tray.showMenu

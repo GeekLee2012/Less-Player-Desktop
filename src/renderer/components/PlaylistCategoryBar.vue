@@ -1,37 +1,91 @@
 <script setup>
 import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
+import EventBus from '../../common/EventBus';
 import { useMainViewStore } from '../store/mainViewStore';
 import { usePlaylistSquareViewStore } from '../store/playlistSquareViewStore';
+import { useSettingStore } from '../store/settingStore';
 
 const { currentCategoryItem } = storeToRefs(usePlaylistSquareViewStore())
-const { updateCurrentCategoryItem } = usePlaylistSquareViewStore()
+const { updateCurrentCategoryItem, setNeedRefresh } = usePlaylistSquareViewStore()
 const { togglePlaylistCategoryView, hidePlaybackQueueView } = useMainViewStore()
+const { isPlaylistCategoryBarRandom } = storeToRefs(useSettingStore())
 
 const props = defineProps({
     data: Array
 })
 
+let prevCate = null
 const toggleCategory = () => {
     hidePlaybackQueueView()
     togglePlaylistCategoryView()
 }
 
+const isDiffCate = (item, row, col) => {
+    return prevCate ? (
+        prevCate.item.value != item.value
+        || prevCate.row != row 
+        || prevCate.col != col) : true
+}
+
 const visitCateItem = (item, row, col) => {
     updateCurrentCategoryItem(item, row, col)
+    if(isDiffCate(item, row, col)) {
+        EventBus.emit("playlistSquare-refresh")
+        prevCate = { item, row, col }
+    }
 }
+
+const flatData = []
+//TODO 随机打乱数据
+const shuffle = (arr) => {
+    let i = arr.length;
+    while (i) {
+        let j = Math.floor(Math.random() * i--);
+        [arr[j], arr[i]] = [arr[i], arr[j]];
+    }
+}
+
+const getFlatData = () => {
+    if(flatData.length <= 0) {
+        //记录源数组原始坐标
+        props.data.forEach((cate, row) => {
+            cate.data.forEach((item, col) => {
+                item.row = row
+                item.col = col
+                flatData.push(item)
+            })
+        })
+        if(isPlaylistCategoryBarRandom.value) shuffle(flatData)
+    }
+    return flatData
+}
+
+const loadFirstCateData = () => {
+    const firstItem = getFlatData()[0]
+    visitCateItem(firstItem, firstItem.row, firstItem.col)
+}
+
+//TODO 实现方式很别扭
+EventBus.on('playlistCategory-update', () => {
+    flatData.length = 0
+    prevCate = null
+    loadFirstCateData()
+})
 </script>
 
 <template>
-    <div class="playlist-category-bar" >
-        <svg @click.stop="toggleCategory" width="15" height="15" viewBox="0 0 29.3 29.3"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z"/></g></g></svg>
-        <template v-for="(cate, row) in data" v-show="data.length > 0">
-            <span v-for="(item, col) in cate.data"
-                @click="visitCateItem(item, row, col)"
-                :class="{ active: (row == currentCategoryItem.row 
-                    && col == currentCategoryItem.col )}"
-                v-html="item.key" >
-            </span>
-        </template>
+    <div class="playlist-category-bar">
+        <div>
+            <svg @click.stop="toggleCategory" width="15" height="15" viewBox="0 0 29.3 29.3"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z"/></g></g></svg>
+            <template v-for="item in getFlatData()" v-show="data.length > 0">
+                <span @click="visitCateItem(item, item.row, item.col)"
+                    :class="{ active: (item.row == currentCategoryItem.row 
+                        && item.col == currentCategoryItem.col )}"
+                    v-html="item.key" >
+                </span>
+            </template>
+        </div>
     </div>
 </template>
 

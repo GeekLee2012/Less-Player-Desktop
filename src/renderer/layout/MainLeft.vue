@@ -6,8 +6,8 @@ import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import EventBus from '../../common/EventBus';
 
-//是否为macOS
-const isMacOS = electronAPI.isMacOS
+//是否使用自定义交通灯控件
+const useCustomTrafficLight = electronAPI.useCustomTrafficLight
 const router = useRouter()
 
 const { platforms, currentPlatformIndex, currentPlatformCode, isLocal } = storeToRefs(usePlatformStore())
@@ -34,7 +34,7 @@ const switchExploreMode = () => {
 <template>
     <div id="main-left">
         <div id="drag-zone">
-            <WinTrafficLightBtn v-show="!isMacOS"></WinTrafficLightBtn>
+            <WinTrafficLightBtn v-show="useCustomTrafficLight"></WinTrafficLightBtn>
         </div>
         <div id="explore-mode">
             <div class="mode-item" v-show="isPlaylistMode" @click="switchExploreMode">

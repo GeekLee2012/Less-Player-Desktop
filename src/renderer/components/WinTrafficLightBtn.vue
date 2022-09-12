@@ -27,11 +27,9 @@ const { quit, minimize, maximize } = useMainViewStore()
 }
 
 .win-traffic-light-btn div {
-    width: 12px;
-    height: 12px;
+    width: 12.5px;
+    height: 12.5px;
     border-radius: 10rem;
-    /* TODO */
-    border: 0.1px solid #565656;
     margin-right: 8px;
     -webkit-app-region: none;
     cursor: pointer;
@@ -48,9 +46,9 @@ const { quit, minimize, maximize } = useMainViewStore()
 }
 
 .win-traffic-light-btn svg {
-    fill: #212121;
+    fill: #464646;
     stroke-width: 5px;
-    stroke: #212121;
+    stroke: #464646;
     padding: 1px;
     visibility: hidden;
 }

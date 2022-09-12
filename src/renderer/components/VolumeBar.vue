@@ -5,7 +5,7 @@ import SliderBar from './SliderBar.vue';
 import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
 
-const status = ref(2)
+const status = ref(1)
 const sliderRef = ref(null)
 const { updateVolume } = usePlayStore()
 const { volume } = storeToRefs(usePlayStore())
