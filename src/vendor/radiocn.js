@@ -84,7 +84,7 @@ export class RadioCN {
         })
     }
 
-    //电台分类
+    //电台列表
     static radioChannelList(cate, offset, limit, page) {
         const result = { platform: RadioCN.CODE, cate, offset, limit, page, total: 0, data: [] }
         cate = cate.replace(RadioCN.RADIO_PREFIX, '')
@@ -114,6 +114,7 @@ export class RadioCN {
                     playlist.isFMRadio = true
                     playlist.channel = {
                         id: item.id,
+                        platform: playlist.platform,
                         cover,
                         title: item.name,
                         radio: {

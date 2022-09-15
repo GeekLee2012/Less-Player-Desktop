@@ -78,8 +78,8 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             this.resetArtistDetail()
             this.updateTabs()
         },
-        updateArtist(name, cover, alias) {
-            this.artistName = name
+        updateArtist(title, cover, alias) {
+            this.artistName = title
             this.artistCover = cover
             this.artistAlias = alias ? alias : ''
         },

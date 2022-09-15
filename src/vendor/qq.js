@@ -709,13 +709,13 @@ export class QQ {
                     scriptText = scriptText.trim()
                     if(scriptText.includes(key)) break
                 }
-                const result = { id, name: '趁青春', cover: 'default_cover.png', data:[], about: '' }
+                const result = { id, title: '趁青春', cover: 'default_cover.png', data:[], about: '' }
                 if(scriptText) {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')
                     const json = JSON.parse(scriptText)
                     const detail = json.singerDetail
-                    result.name = detail.basic_info.name
+                    result.title = detail.basic_info.name
                     result.cover = getArtistCover(detail.basic_info.singer_mid) || detail.pic.pic
                     result.about = detail.descstr
                 }
@@ -750,7 +750,6 @@ export class QQ {
             const page = 1
             const reqBody = artistHotSongReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
-                
                 const result = { id, offset, limit, page, data: [] }
                 const songList = json.req_1.data.songlist
                 songList.forEach(item => {

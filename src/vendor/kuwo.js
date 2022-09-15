@@ -246,7 +246,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             let url = "http://www.kuwo.cn/singer_detail/" + id
             getDoc(url).then(doc => {
-                let name = '', cover = '', about = ''
+                let title = '', cover = '', about = ''
 
                 let scriptText = doc.querySelector('script').textContent
                 let key = 'window.__NUXT__='
@@ -255,11 +255,11 @@ export class KuWo {
                     const json = eval(scriptText)
 
                     const singerInfo = json.data[0].singerInfo
-                    name = escapseHtml(singerInfo.name)
+                    title = escapseHtml(singerInfo.name)
                     cover = singerInfo.pic300
                     about = singerInfo.info 
                 }
-                const result = { id, name, cover, about }
+                const result = { id, title, cover, about }
                 resolve(result)
             })
         })

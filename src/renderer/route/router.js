@@ -8,6 +8,9 @@ import SearchView from '../views/SearchView.vue';
 import PlaylistDetailView from '../views/PlaylistDetailView.vue';
 import ArtistDetailView from '../views/ArtistDetailView.vue';
 import AlbumDetailView from '../views/AlbumDetailView.vue';
+import CustomPlaylistEditView from '../views/CustomPlaylistEditView.vue';
+import CustomPlaylistDetailView from '../views/CustomPlaylistDetailView.vue';
+
 
 const routes = [ 
     { //默认
@@ -52,6 +55,22 @@ const routes = [
         props: true, 
         component:  AlbumDetailView 
     },
+    {  //自建歌单
+        path: '/userhome/customPlaylist/create',
+        //props: true, 
+        component:  CustomPlaylistEditView 
+    },
+    {  //自建歌单 - 编辑
+        path: '/userhome/customPlaylist/edit/:id',
+        props: true, 
+        component:  CustomPlaylistEditView 
+    },
+    {  //自建歌单 - 编辑
+        path: '/userhome/customPlaylist/:id',
+        props: true, 
+        component:  CustomPlaylistDetailView 
+    },
+    
 ]
 
 export const router = createRouter({

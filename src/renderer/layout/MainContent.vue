@@ -41,7 +41,7 @@ const autoSwitchExploreMode = (to) => {
 
 const hideRelativeComponents = (to) => {
     const path = to.path
-    if(path.includes('/artist')  || path.includes('/album')) {
+    if(path.includes('/artist') || path.includes('/album')) {
         hidePlayingView()
     }
     //TODO
@@ -49,7 +49,7 @@ const hideRelativeComponents = (to) => {
     hidePlaybackQueueItemCtxMenu()
 }
 
-const excludes = []
+const excludes = ['CustomPlaylistEditView']
 </script>
 
 <template>

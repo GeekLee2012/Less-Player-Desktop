@@ -1,12 +1,3 @@
-<!--
-<script>
-//定义名称，方便用于<keep-alive>
-export default {
-    name: 'PlaylistDetailView'
-}
-</script>
--->
-
 <script setup>
 import { onMounted, onActivated, reactive, ref, watch } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
@@ -18,13 +9,15 @@ import { useMainViewStore } from '../store/mainViewStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { toYyyymmddHhMmSs } from '../../common/Times';
+import BatchDeleteBtn from '../components/BatchDeleteBtn.vue';
 
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, hideSongItemCtxMenu } = useMainViewStore()
+const { getCustomPlaylist } = useUserProfileStore()
 
 const props = defineProps({
-    platform: String,
     id: String
 })
 
@@ -54,22 +47,8 @@ const nextPage = () =>  {
 }
 
 const loadContent = () => {
-    loading.value = true
-    checkFavourite()
-    
-    const vender = getVender(props.platform)
-    if(vender) {
-        vender.playlistDetail(props.id, offset, limit, page)
-            .then(result => {
-            if(page > 1) {
-                result.data.unshift(...detail.data)
-            }
-            Object.assign(detail, result)
-            listSize.value = detail.data.length
-            
-            loading.value = false
-        })
-    }
+    const result = getCustomPlaylist(props.id)
+    Object.assign(detail, {...result})
 }
 
 const loadMoreContent = () => {
@@ -78,13 +57,20 @@ const loadMoreContent = () => {
     }
 }
 
+const getAbout = () => {
+    return (detail.about && detail.about.trim().length > 0) ? 
+        detail.about.trim() : "这个人很懒，什么也没留下~"
+}
+
 const playAll = () => {
+    if(detail.data.length < 1) return 
     resetQueue()
     addAll("即将为您播放全部！")
     playNextTrack()
 }
 
 const addAll = (text) => {
+    if(detail.data.length < 1) return 
     addTracks(detail.data)
     showToast(text || "歌曲已全部添加！")
 }
@@ -92,7 +78,7 @@ const addAll = (text) => {
 //TODO
 const { addFavouritePlaylist, removeFavouritePlaylist, isFavouritePlaylist } = useUserProfileStore()
 const favourited = ref(false)
-const toggleFavourite = () => {
+const toggleFovourite = () => {
     favourited.value = !favourited.value
     let text = "歌单收藏成功！"
     if(favourited.value) {
@@ -163,30 +149,25 @@ onMounted(() => {
 </script>
 
 <template>
-    <div id="playlist-detail" ref="playlistDetailRef">
+    <div id="custom-playlist-detail" ref="playlistDetailRef">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="detail.cover" />
             </div>
-            <div class="right" v-show="!loading">
+            <div class="right">
                 <div class="title" v-html="detail.title"></div>
-                <div class="about" v-html="detail.about"></div>
+                <div class="about" v-html="getAbout()"></div>
+                <div class="time">
+                    <span>最后更新：{{ toYyyymmddHhMmSs(detail.updated) }}</span>
+                </div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll"  :rightAction="() => addAll()" class="btn-spacing">
                     </PlayAddAllBtn>
-                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFavourite">
+                    <!--
+                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFovourite">
                     </FavouriteShareBtn>
-                </div>
-            </div>
-            <div class="right" v-show="loading">
-                <div class="title">
-                    <div class="loading-mask" style="width: 66%; height: 36px; display: inline-block;"></div>
-                </div>
-                <div class="about">
-                    <div class="loading-mask" v-for="i in 3" style="width: 95%; height: 20px; display: inline-block;"></div>
-                </div>
-                <div class="action">
-                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 168px; height: 30px; display: inline-block;"></div>
+                    -->
+                    <BatchDeleteBtn></BatchDeleteBtn>
                 </div>
             </div>
         </div>
@@ -194,19 +175,15 @@ onMounted(() => {
             <div class="list-title">歌曲({{ listSize }})</div>
             <SongListControl :data="detail.data" 
                 :artistVisitable="true" 
-                :albumVisitable="true" 
-                v-show="!loading" >
+                :albumVisitable="true" >
             </SongListControl>
-            <div v-show="loading">
-                <div class="loading-mask" v-for="i in 12" style="width: 100%; height: 36px; margin-bottom: 5px; display: inline-block;"></div>
-            </div>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 
 <style>
-#playlist-detail {
+#custom-playlist-detail {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -214,32 +191,31 @@ onMounted(() => {
     overflow: auto;
 }
 
-#playlist-detail .header {
+#custom-playlist-detail .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
 }
 
-#playlist-detail .header .right {
+#custom-playlist-detail .header .right {
     flex: 1;
     margin-left: 20px;
 }
 
-#playlist-detail .header .title, 
-#playlist-detail .header .about {
+#custom-playlist-detail .header .title, 
+#custom-playlist-detail .header .about {
     text-align: left;
     margin-bottom: 13px;
 }
 
-#playlist-detail .header .title {
+#custom-playlist-detail .header .title {
     font-size: 21px;
     font-weight: bold;
 }
 
-#playlist-detail .header .about {
-    height: 119px;
+#custom-playlist-detail .header .about {
+    height: 88px;
     line-height: 20px;
-    color: #bababa;
     color: var(--text-sub-color);
     overflow: hidden;
     word-wrap: break-all;
@@ -248,26 +224,34 @@ onMounted(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 6;
+    -webkit-line-clamp: 5;
+    margin-bottom: 8px;
 }
 
-#playlist-detail .header .cover {
+#custom-playlist-detail .time {
+    font-size: 14px;
+    color: var(--text-sub-color);
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+#custom-playlist-detail .header .cover {
     width: 202px;
     height: 202px;
     border-radius: 6px;
     box-shadow: 0px 0px 10px #161616;
 }
 
-#playlist-detail .action {
+#custom-playlist-detail .action {
     display: flex;
     flex-direction: row;
 }
 
-#playlist-detail .btn-spacing {
+#custom-playlist-detail .btn-spacing {
     margin-right: 20px;
 }
 
-#playlist-detail .list-title {
+#custom-playlist-detail .list-title {
     margin-bottom: 15px;
     text-align: left;
     font-size: 18px;

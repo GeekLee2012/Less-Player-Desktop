@@ -399,10 +399,10 @@ export class KuGou {
             const url = "https://www.kugou.com/singer/" + id + ".html"
             getDoc(url).then(doc => {
                 const cover = doc.querySelector('.sng_ins_1 .top img').getAttribute('_src')
-                const name = doc.querySelector('.sng_ins_1 .top .intro strong').textContent
+                const title = doc.querySelector('.sng_ins_1 .top .intro strong').textContent
                 const about = doc.querySelector('.sng_ins_1 #singer_content').textContent
 
-                const result = { id, name, cover, about }
+                const result = { id, title, cover, about }
                 resolve(result)
             })
         })

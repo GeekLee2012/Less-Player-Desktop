@@ -22,7 +22,7 @@ const { quit, minimize, maximize } = useMainViewStore()
 .win-traffic-light-btn {
     display: flex;
     width: 56px;
-    margin-top: 16px;
+    margin-top: 18px;
     margin-left: 15px;
 }
 

@@ -9,7 +9,7 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted, onActivated ,ref, shallowRef, watch } from 'vue';
+import { onMounted, onActivated ,ref, shallowRef, watch, reactive } from 'vue';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
@@ -20,6 +20,7 @@ import { usePlayStore } from '../store/playStore';
 import { useMainViewStore } from '../store/mainViewStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 import EventBus from '../../common/EventBus';
+import { useUserProfileStore } from '../store/userProfileStore';
 
 const props = defineProps({
     platform: String,
@@ -51,6 +52,7 @@ const { showToast } = useMainViewStore()
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
 const tabData = ref([])
+const detail = reactive({})
 let offset = 0
 let page = 1
 let limit = 30
@@ -86,11 +88,24 @@ const addAllSongs = (text) => {
 }
 
 //TODO
-const favourited = ref(false)
-const toggleFovourite = () => {
-    favourited.value = !favourited.value
+const { addFollowArtist, removeFollowArtist, isFollowArtist } = useUserProfileStore()
+const follow = ref(false)
+const toggleFollow = () => {
+    follow.value = !follow.value
+    let text = "歌手关注成功！"
+    if(follow.value) {
+        const { title, cover } = detail
+        addFollowArtist(props.id, props.platform, title, cover)
+    } else {
+        removeFollowArtist(props.id, props.platform)
+        text = "歌手已被取消关注！"
+    }
+    showToast(text)
 }
 
+const checkFollow = () => {
+    follow.value = isFollowArtist(props.id, props.platform)
+}
 const updateTabData = (data) => {
     tabData.value.length = 0
     if(typeof(data) == 'string') {
@@ -103,6 +118,7 @@ const updateTabData = (data) => {
 }
 
 const getArtistDetail = () => {
+    checkFollow()
     if(isArtistDetailLoaded()) {
         return 
     }
@@ -111,10 +127,11 @@ const getArtistDetail = () => {
     loadingDetail.value = true
     const id = artistId.value
     vender.artistDetail(id).then(result => {
-        updateArtist(result.name, result.cover)
+        updateArtist(result.title, result.cover)
         if(result.about) {
             updateAbout(result.about)
         }
+        Object.assign(detail, result)
         loadingDetail.value = false
     })
 }
@@ -132,7 +149,7 @@ const loadHotSongs = () => {
     if(!vender) return
     const id = artistId.value
     vender.artistDetailHotSongs(id).then(result => {
-        updateArtist(result.name || artistName, result.cover)
+        if(result.name && result.cover) updateArtist(result.name, result.cover)
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
         currentTabView.value = SongListControl
@@ -290,7 +307,7 @@ watch(() => props.id , (nv, ov) => reloadAll())
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isHotSongsTab()" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
                     <PlayAddAllBtn :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAllSongsTab()" class="spacing"></PlayAddAllBtn>
-                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFovourite" class="spacing">
+                    <FavouriteShareBtn :favourited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
                     </FavouriteShareBtn>
                 </div>
             </div>

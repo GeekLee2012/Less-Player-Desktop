@@ -9,7 +9,7 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted, onActivated, ref, shallowRef, watch } from 'vue';
+import { onMounted, onActivated, ref, reactive, shallowRef, watch } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
@@ -18,6 +18,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
+import { useUserProfileStore } from '../store/userProfileStore';
 
 const props = defineProps({
     platform: String,
@@ -42,6 +43,7 @@ const { showToast } = useMainViewStore()
 
 let currentTabView = shallowRef(null)
 const tabData = ref([])
+const detail = reactive({})
 
 const visitTab = (index) => {
     setActiveTab(index)
@@ -60,9 +62,23 @@ const addAll = (text) => {
 } 
 
 //TODO
+const { addFavouriteAlbum, removeFavouriteAlbum, isFavouriteAlbum } = useUserProfileStore()
 const favourited = ref(false)
-const toggleFovourite = () => {
+const toggleFavourite = () => {
     favourited.value = !favourited.value
+    let text = "专辑收藏成功！"
+    if(favourited.value) {
+        const { title, cover, publishTime } = detail
+        addFavouriteAlbum(props.id, props.platform, title, cover, publishTime)
+    } else {
+        removeFavouriteAlbum(props.id, props.platform)
+        text = "专辑已取消收藏！"
+    }
+    showToast(text)
+}
+
+const checkFavourite = () => {
+    favourited.value = isFavouriteAlbum(props.id, props.platform)
 }
 
 const updateTabData = (data) => {
@@ -87,6 +103,7 @@ const getAlbumDetail = () => {
         const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
         updateAbout(result.about)
+        Object.assign(detail, result)
         if(result.hasTracks()) {
             updateAllSongs(result.data)
             updateTabData(allSongs.value)
@@ -135,6 +152,7 @@ const loadAll = () =>  {
 const resetView = () => {
     currentTabView.value = null
     updateTabTipText(0)
+    checkFavourite()
 }
 
 const switchTab = () => {
@@ -173,7 +191,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
                 </div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()"></PlayAddAllBtn>
-                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFovourite" class="spacing">
+                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFavourite" class="spacing">
                     </FavouriteShareBtn>
                 </div>
             </div>

@@ -21,6 +21,10 @@
 * 支持本地歌曲播放, 支持音频类型: mp3、flac、ogg、wav、aac、m4a  
 * 支持2种探索（浏览）模式：歌单模式、歌手模式  
   
+#### UI参考
+* 目前部分UI参考借鉴腾讯QQ音乐Mac版  
+* App Logo参考借鉴Dopamine  
+  
 #### 界面预览  
 ##### 预览图（Github）  
 ![snap 01.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2008.png)  

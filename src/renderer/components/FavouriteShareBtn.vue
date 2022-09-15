@@ -2,11 +2,13 @@
 import SvgTextButton from '../components/SvgTextButton.vue';
 
 const props = defineProps({
-    favourited: Boolean
+    favourited: Boolean,
+    actionText: String
 })
 
 const getTextByStatus = () => {
-    return props.favourited ? "已收藏" : "收藏"
+    const text = props.actionText || "收藏"
+    return props.favourited ? ("取消" + text) : text
 }
 </script>
 
@@ -24,8 +26,8 @@ const getTextByStatus = () => {
 
 <style>
 .favourite-share-btn .left-btn {
-    width: 88px;
-    /* justify-content: flex-start !important; */
+    width: 108px;
+    /*justify-content: flex-start !important;*/
 }
 
 .favourite-share-btn svg {

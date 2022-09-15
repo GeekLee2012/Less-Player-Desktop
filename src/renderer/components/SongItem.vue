@@ -14,7 +14,7 @@ const props = defineProps({
     index: Number,
     artistVisitable: Boolean,
     albumVisitable: Boolean,
-    data: Track,
+    data: Object, //Track
     deleteFn: Function
 })
 

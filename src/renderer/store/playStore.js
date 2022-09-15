@@ -100,8 +100,8 @@ export const usePlayStore = defineStore('play', {
         removeTrack(track) {
             const index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
             if(index > -1) {
-                this.queueTracks.splice(index, 1)
                 const isCurrent = (index == this.playingIndex)
+                this.queueTracks.splice(index, 1)
                 if(index <= this.playingIndex) {
                     --this.playingIndex
                 }
@@ -109,13 +109,11 @@ export const usePlayStore = defineStore('play', {
                 if(maxSize < 1){
                     this.resetQueue()
                     return 
-                }
+                }        
                 if(isCurrent) {
                     if(this.playing) {
                         this.playNextTrack()
-                    } else {
-                        this.playingIndex++
-                    } 
+                    }
                 } 
             }
         },
@@ -171,7 +169,6 @@ export const usePlayStore = defineStore('play', {
             //TODO
             const maxSize = this.queueTracksSize
             if(maxSize < 1) return
-            if(maxSize == 1 && this.playingIndex == 0) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     --this.playingIndex
@@ -194,7 +191,6 @@ export const usePlayStore = defineStore('play', {
             }
             const maxSize = this.queueTracksSize
             if(maxSize < 1) return
-            if(maxSize == 1 && this.playingIndex == 0) return
             switch(this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     this.playingIndex = ++this.playingIndex % maxSize

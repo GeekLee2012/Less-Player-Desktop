@@ -49,22 +49,30 @@ const tryCancelPlayNextTimer = () => {
     }
 }
 
+
+let toastCnt = 0 //连跳计数器
 const bootstrapTrack = (track, callback) => {
     if(!track) return 
     const platform = track.platform
     const vender = getVender(platform);
     if(!vender || track.isFMRadio) return
-    vender.playDetail(track.id, track).then(async result => {
-        if(!Track.hasUrl(track)) Object.assign(track, { url: result.url })
+    vender.playDetail(track.id, track).then(result => {
+        if(Track.hasUrl(result)) Object.assign(track, { url: result.url })
         tryCancelPlayNextTimer()
         //if(!track.hasUrl()) track = await United.transferTrack(track)
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
             //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
+            if(toastCnt >= 10) { //10连跳啦，暂停一下吧
+                toastCnt = 0 //重置连跳计数
+                return 
+            }
             showToast(playNextTrack)
+            ++toastCnt
             return
         }
-        if(!Track.hasLyric(track)) assignLyric(track, result.lyric)
-        if(!Track.hasCover(track)) Object.assign(track, { cover: result.cover })
+        toastCnt =0 //重置连跳计数
+        if(Track.hasLyric(result)) assignLyric(track, result.lyric)
+        if(Track.hasCover(result)) Object.assign(track, { cover: result.cover })
         if(track.artistNotCompleted && result.artist) {
             Object.assign(track, { artist: result.artist })
             EventBus.emit('track-artistUpdated', { trackId: track.id, artist: track.artist })

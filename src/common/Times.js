@@ -41,3 +41,21 @@ export const toYmd = (timestamp, sp) => {
     let d = date.getDate()
     return yyyy + sp + m + sp + d
 }
+
+export const toYyyymmddHhMmSs = (timestamp, sp) => {
+    sp = sp || '-'
+    const date = new Date(timestamp)
+    const yyyy = date.getFullYear()
+    let mm = (date.getMonth() + 1)
+    mm = mm < 10 ? ('0' + mm) : mm
+    let dd = date.getDate()
+    dd = dd < 10 ? ('0' + dd) : dd
+    let Hh = date.getHours()
+    Hh = Hh < 10 ? ('0' + Hh) : Hh
+    let Mm = date.getMinutes()
+    Mm = Mm < 10 ? ('0' + Mm) : Mm
+    let Ss = date.getSeconds()
+    Ss = Ss < 10 ? ('0' + Ss) : Ss
+    return yyyy + sp + mm + sp + dd + " " 
+        + Hh + ":" + Mm + ":" + Ss
+}

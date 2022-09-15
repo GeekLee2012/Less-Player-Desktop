@@ -101,15 +101,15 @@ export class Track {
         return track ? track.lyric.data : []
     }
 
-    static fromChannel(channelTrack, isFM) {
+    static fromChannel(channelTrack, isFMRadio) {
         const track = new Track()
         if(channelTrack) {
             Object.assign(track, channelTrack)
             track.artist.push(channelTrack.radio)
-            track.channel = channelTrack.channel
+            track.channel = channelTrack
         }
         track.isRadioType = true
-        track.isFMRadio = isFM
+        track.isFMRadio = isFMRadio
         return track
     }
 

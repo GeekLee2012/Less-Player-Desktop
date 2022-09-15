@@ -137,9 +137,13 @@ watch(playbackQueueViewShow, () => {
   user-select: none;
 }
 
+textarea {
+  resize: none;
+}
+
 :root {
   /* 文本 */
-  --text-family: STHeitiSC-Medium, "Heiti SC Light";
+  --text-family: "PingFang SC", STHeitiSC-Medium, "Heiti SC Medium", "Heiti SC Light", "Microsoft YaHei", sans-serif;
   --text-size: 15px;
 }
 
@@ -188,6 +192,7 @@ watch(playbackQueueViewShow, () => {
   --ntf-text-color: var(--text-color);
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg, #414141 8%,#515151 18%,#414141 33%);
+  --error-color: red;
 }
 
 :root[theme='light'] {
@@ -236,6 +241,7 @@ watch(playbackQueueViewShow, () => {
   --ntf-text-color: var(--text-color);
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
+  --error-color: red;
 }
 
 :root[theme='pink'] {
@@ -284,6 +290,7 @@ watch(playbackQueueViewShow, () => {
   --ntf-text-color: var(--text-color);
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg, #494949 8%,#595959 18%,#494949 33%);
+  --error-color: red;
 }
 
 :root[theme='red'] {
@@ -331,6 +338,7 @@ watch(playbackQueueViewShow, () => {
   --ntf-text-color: var(--text-color);
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
+  --error-color: red;
 }
 
 :root[theme='blue'] {
@@ -377,6 +385,7 @@ watch(playbackQueueViewShow, () => {
   --ntf-text-color: var(--text-color);
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
+  --error-color: red;
 }
 
 html, body, #app {

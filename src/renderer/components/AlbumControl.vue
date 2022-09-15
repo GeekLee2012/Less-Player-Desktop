@@ -15,6 +15,7 @@ const router = useRouter()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { isAlbumDetailVisitable } = usePlatformStore()
 const { exploreModeCode } = storeToRefs(useMainViewStore())
+const { hidePlayingView } = useMainViewStore()
 
 const visitAlbumDetail = (platform, id) => {
     const platformValid = isAlbumDetailVisitable(platform)
@@ -28,6 +29,7 @@ const visitAlbumDetail = (platform, id) => {
             router.push(toPath)
             updateAlbumDetailKeys(platform, id)
         }
+        hidePlayingView()
     }
 }
 

@@ -288,7 +288,7 @@ export class NetEase {
         return new Promise((resolve, reject) => {
             const url = "https://music.163.com/artist" + "?id=" + id
             getDoc(url).then(doc => {
-                const name = doc.querySelector("#artist-name").textContent
+                const title = doc.querySelector("#artist-name").textContent
                 let cover = doc.querySelector(".n-artist img").getAttribute('src')
                 cover = cover.replace('640y300', '500y500')
 
@@ -311,7 +311,7 @@ export class NetEase {
                         data.push(track)
                 })
 
-                const result = { id, name, cover, data }
+                const result = { id, title, cover, data }
                 resolve(result)
             })
         })

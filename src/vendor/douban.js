@@ -176,12 +176,9 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/artist/" + id + "/"
             getJson(url).then(json => {
-                
                 const cover = json.avatar
                 const about = ''
-                
-                const result = { id, name: json.name, cover, data:[], about }
-
+                const result = { id, title: json.name, cover, data:[], about }
                 const list = json.songlist.songs
                 list.forEach(item => {
                     const artist = item.singers.map(ar => ({ id: ar.id, name: ar.name }))
