@@ -132,6 +132,19 @@ export const useUserProfileStore = defineStore("userProfile", {
         isFavouriteRadio(id, platform) {
             return this.findItemIndex(this.favorites.radios, { id, platform}) != -1
         },
+        //清理
+        cleanUpAllSongs(currentTrack) {
+            const states = [ this.favorites.songs, this.recents.songs ]
+            const props = ['url', 'lyric']
+            const { id, platform } = currentTrack
+            states.forEach(state => {
+                state.forEach(item => {
+                    props.forEach(p => {
+                        Reflect.deleteProperty(item, p)
+                    })
+                })
+            })
+        },
         //自建歌单
         addCustomPlaylist(title, about, cover){
             const id = randomText(choice, 16)

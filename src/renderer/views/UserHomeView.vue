@@ -64,12 +64,13 @@ const typeTabs = [ {
 
 const route = useRouter()
 const { getVender } = usePlatformStore()
-const { addTracks, playNextTrack, resetQueue } = usePlayStore()
+const { addTracks, playNextTrack, resetQueue, currentTrack } = usePlayStore()
 const { playingViewShow } = storeToRefs(useMainViewStore() )
 const { showToast } = useMainViewStore() 
 const { user, getFavouriteSongs, getFavouritePlaylilsts, 
     getFavouriteAlbums, getFavouriteRadios,
     getCustomPlaylists, getFollowArtists } = storeToRefs(useUserProfileStore())
+const { cleanUpAllSongs } = useUserProfileStore()
 const { nickname, about } = user.value
 
 const currentTabView = shallowRef(null)
@@ -172,7 +173,11 @@ const clearAll = () => {
     showToast("全部数据已被清空！")
 }
 
-onActivated(() => visitTab(activeTab.value))
+onActivated(() => {
+    visitTab(activeTab.value)
+    //TODO
+    cleanUpAllSongs(currentTrack)
+})
 watch(playingViewShow, (nv, ov) => {
     if(!nv) visitTab(activeTab.value)
 })
