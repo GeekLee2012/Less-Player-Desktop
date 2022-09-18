@@ -143,7 +143,7 @@ textarea {
 
 :root {
   /* 文本 */
-  --text-family: "PingFang SC", STHeitiSC-Medium, "Heiti SC Medium", "Heiti SC Light", "Microsoft YaHei", sans-serif;
+  --text-family: system-ui, "PingFang SC", STHeitiSC-Medium, "Heiti SC Medium", "Heiti SC Light", "Microsoft YaHei", sans-serif;
   --text-size: 15px;
 }
 

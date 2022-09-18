@@ -75,6 +75,7 @@ onMounted(() => {
     width: 68px;
     height: 68px;
     box-shadow: 0px 0px 1px #161616;
+    box-shadow: 0px 0px 1px var(--main-left-border-color);
 }
 
 .play-meta .audio-cover, .play-meta .cover-mask  {
@@ -100,6 +101,8 @@ onMounted(() => {
     display: flex;
     align-items: center;
     background-color: #373737ab;
+    background-color: var(--ntf-bg);
+    opacity: 0.68;
 }
 
 .play-meta .cover-mask .down-btn {
