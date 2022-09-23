@@ -98,7 +98,7 @@ export class Track {
     }
 
     static lyricData(track) {
-        return track ? track.lyric.data : []
+        return track && track.lyric ? track.lyric.data : []
     }
 
     static fromChannel(channelTrack, isFMRadio) {

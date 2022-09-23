@@ -1,14 +1,13 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
 import { useMainViewStore } from '../store/mainViewStore';
-import { United } from '../../vendor/united';
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue } = usePlayStore()
-const { showToast, hidePlaybackQueueView, hidePlayingView } = useMainViewStore()
+const { showToast, hidePlaybackQueueView, hidePlayingView, hideCommonCtxMenu } = useMainViewStore()
 
 const targetPlaying = () => {
     if(queueTracksSize < 1) return 
@@ -27,21 +26,18 @@ const clearAll = () => {
     }, 666)
 }
 
-const { playbackQueueItemCtxMenuShow } = storeToRefs(useMainViewStore())
-const { showPlaybackQueueItemCtxMenu, hidePlaybackQueueItemCtxMenu } = useMainViewStore()
-
 const pbqRef = ref(null)
 onMounted(() => {
     if(pbqRef.value) {
-        pbqRef.value.addEventListener('scroll', hidePlaybackQueueItemCtxMenu)
-        pbqRef.value.addEventListener('click', hidePlaybackQueueItemCtxMenu)
+        pbqRef.value.addEventListener('scroll', hideCommonCtxMenu)
+        pbqRef.value.addEventListener('click', hideCommonCtxMenu)
     }
 })
 </script>
 
 <template>
     <!-- click事件: 必须阻止冒泡，因为document全局监听click事件 -->
-    <div class="playback-queue" @click.stop="hidePlaybackQueueItemCtxMenu">
+    <div class="playback-queue" @click.stop="hidePlaybackQueueItemCtxMenu" >
         <div class="header">
             <div class="title">当前播放</div>
             <div class="detail">

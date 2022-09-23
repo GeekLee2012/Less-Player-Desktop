@@ -101,7 +101,7 @@ const clearSettingsCache = () => {
                     <div class="last">
                         <SvgTextButton text="清空设置页缓存" :left-action="clearSettingsCache">
                         </SvgTextButton>
-                        <span class="tip-text">（提示：清空缓存，不影响当前设置；主要解决新版本设置不起作用问题）</span>
+                        <span class="tip-text">（提示：清空缓存，可能会重置当前设置；修改任何设置时会重新缓存）</span>
                     </div>
                     <!--
                     <div class="last">

@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'CustomPlaylistEditView'
+    name: 'UserInfoEditView'
 }
 </script>
 
@@ -25,23 +25,10 @@ const titleRef = ref(null)
 const aboutRef = ref(null)
 const coverRef = ref(null)
 const invalid = ref(false)
-const detail = reactive({ title: null, about: null, cover: null })
 
 //TODO
-const { addCustomPlaylist, updateCustomPlaylist, getCustomPlaylist } = useUserProfileStore()
-
-const loadCustomPlaylist = () => {
-    if(!props.id) return 
-    const id = props.id.trim()
-    if(id.length < 1) return
-    const playlist = getCustomPlaylist(id)
-    if(!playlist) return 
-    const { title, about, cover } = playlist
-    Object.assign(detail, { id })
-    if(cover) Object.assign(detail, { cover })
-    if(title) Object.assign(detail, { title })
-    if(about) Object.assign(detail, { about })
-}
+const { user } = storeToRefs(useUserProfileStore())
+const { updateUser } = useUserProfileStore()
 
 const checkValid = () => {
     let title = titleRef.value.value
@@ -49,68 +36,55 @@ const checkValid = () => {
 }
 
 const submit = () => {
-    let title = titleRef.value.value.trim()
+    let nickname = titleRef.value.value.trim()
     let about = aboutRef.value.value.trim()
     let cover = coverRef.value.src
-    if(title.length < 1) {
-        invalid.value = true
+    checkValid()
+    if(invalid.value) {
         return 
     }
-    let text = "歌单已创建成功!"
-    if(!props.id) {
-        addCustomPlaylist(title, about, cover)
-    } else {
-        updateCustomPlaylist(props.id, title, about, cover)
-        text = "歌单已保存!"
-    }
-    showToast(text, () => route.push("/userhome"))
+    updateUser(nickname, about, cover)
+    showToast("用户信息已更新", () => route.push("/userhome"))
 }
 
 const cancel = () => {
     route.push("/userhome")
 }
 
+//TODO 使用本地文件图片，不利于迁移共享
 const updateCover = async () => {
     const result = await ipcRenderer.invoke('open-image')
-    if(result.length > 0) {
-        const title = titleRef.value.value.trim()
-        const about = aboutRef.value.value.trim()
+    if(result.length > 0) { 
         const cover = "file:///" + result[0]
-        Object.assign(detail, { title, about, cover })
+        coverRef.value.src = cover
     }
 }
-
-onMounted(() => loadCustomPlaylist())
 </script>
 
 <template>
-    <div id="custom-playlist-edit">
+    <div id="user-info-edit">
         <div class="header">
-            <span class="title" v-show="!id">创建歌单</span>
-            <span class="title" v-show="id">编辑歌单</span>
+            <span class="title">编辑用户信息</span>
         </div>
         <div class="center">
             <div>
-                <img class="cover" v-lazy="detail.cover" ref="coverRef"/>
+                <img class="cover" v-lazy="user.cover" ref="coverRef"/>
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
             </div>
             <div class="right">
                 <div class="form-row">
                     <div>
-                        <span>歌单名</span>
+                        <span>用户昵称</span>
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" 
-                            maxlength="25" placeholder="请输入歌单名称，最多允许输入25个字符哦" />
+                        <input type="text" :value="user.nickname" ref="titleRef" :class="{ invalid }" maxlength="20" placeholder="请输入用户昵称，最多允许输入20个字符哦">
                     </div>
                 </div>
                 <div class="form-row">
-                    <div><span>简介</span></div>
+                    <div><span>简介 / 说说</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="detail.about" ref="aboutRef" 
-                            maxlength="520" placeholder="你想用歌单诉说什么，一起分享一下吧~ 最多允许输入520个字符哦">
-                        </textarea>
+                        <textarea :value="user.about" ref="aboutRef" maxlength="99" placeholder="今天想要对自己说些什么呀~ 最多允许输入99个字符哦"></textarea>
                     </div>
                 </div>
                 <div class="action">
@@ -123,7 +97,7 @@ onMounted(() => loadCustomPlaylist())
 </template>
 
 <style>
-#custom-playlist-edit {
+#user-info-edit {
     display: flex;
     flex-direction: column;
     padding: 25px 33px 15px 33px;
@@ -131,66 +105,65 @@ onMounted(() => loadCustomPlaylist())
     overflow: auto;
 }
 
-#custom-playlist-edit .header {
+#user-info-edit .header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 20px;
 }
 
-#custom-playlist-edit .header .title {
+#user-info-edit .header .title {
     text-align: left;
     margin-top: 5px;
     font-size: 25px;
     font-weight: bold;
 }
 
-#custom-playlist-edit .center {
+#user-info-edit .center {
     display: flex;
     flex-direction: row;
     flex: 1;
 }
 
-#custom-playlist-edit .center .cover {
+#user-info-edit .center .cover {
     width: 175px;
     height: 175px;
     border-radius: 6px;
     border: 1px solid var(--main-left-border-color);
 }
 
-#custom-playlist-edit .center .cover-eidt-btn {
+#user-info-edit .center .cover-eidt-btn {
     background-color: var(--main-left-border-color);
     padding: 5px;
     border-radius: 3px;
     cursor: pointer;
 }
 
-
-#custom-playlist-edit .center .right {
+#user-info-edit .center .right {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-left: 20px;
 }
 
-#custom-playlist-edit .center .form-row {
+#user-info-edit .center .form-row {
     margin-bottom: 15px;
 }
 
-#custom-playlist-edit .center .form-row div {
+#user-info-edit .center .form-row div {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#custom-playlist-edit .center .form-row span {
+#user-info-edit .center .form-row span {
     font-size: 16px;
     color: var(--text-color);
     margin-bottom: 8px;
 }
 
-#custom-playlist-edit .center .form-row input,
-#custom-playlist-edit .center .form-row textarea {
+#user-info-edit .center .form-row input,
+#user-info-edit .center .form-row textarea {
     flex: 1;
     border: 1px solid var(--main-left-border-color);
     outline: none;
@@ -201,31 +174,31 @@ onMounted(() => loadCustomPlaylist())
     font-size: 15px;
 }
 
-#custom-playlist-edit .center .form-row input {
+#user-info-edit .center .form-row input {
     height: 25px;
 }
 
-#custom-playlist-edit .center .form-row textarea {
+#user-info-edit .center .form-row textarea {
     height: 256px;
     padding: 8px;
 }
 
-#custom-playlist-edit .center .action {
+#user-info-edit .center .action {
     display: flex;
     flex-direction: row;
 }
 
-#custom-playlist-edit .spacing {
+#user-info-edit .spacing {
     margin-left: 20px;
 }
 
-#custom-playlist-edit .required {
+#user-info-edit .required {
     color: var(--hl-color) !important;
     font-weight: bold;
     font-size: 20px;
 }
 
-#custom-playlist-edit .invalid {
+#user-info-edit .invalid {
     border-color: var(--error-color) !important;
     border-width: 3px;
 }

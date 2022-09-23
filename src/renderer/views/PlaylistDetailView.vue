@@ -21,7 +21,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showToast, hideSongItemCtxMenu } = useMainViewStore()
+const { showToast, hideCommonCtxMenu, hideAddToListSubmenu } = useMainViewStore()
 
 const props = defineProps({
     platform: String,
@@ -66,7 +66,6 @@ const loadContent = () => {
             }
             Object.assign(detail, result)
             listSize.value = detail.data.length
-            
             loading.value = false
         })
     }
@@ -132,7 +131,8 @@ const scrollToLoad = () => {
        loadMoreContent()
     }
     //TODO
-    hideSongItemCtxMenu()
+    hideCommonCtxMenu()
+    hideAddToListSubmenu()
 }
 
 const bindScrollListener = () => {

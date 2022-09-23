@@ -4,6 +4,9 @@
 const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:97.0) Gecko/20100101 Firefox/97.0"
 //支持的音频文件扩展名（本地文件）
 const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'] 
+//支持的图片文件扩展名（本地文件）
+const IMAGE_EXTS = ['jpg', 'jpeg', 'png'] 
+//是否为macOS
 //是否为macOS
 const isMacOS = (process.platform === 'darwin');
 //是否使用自定义交通灯控件
@@ -18,4 +21,5 @@ module.exports = {
     isDevEnv,
     USER_AGENT,
     AUDIO_EXTS,
+    IMAGE_EXTS,
 }

@@ -54,6 +54,7 @@ const allPlatforms = [
 
 const playlistPlatforms = allPlatforms.slice(1)
 const artistPlatforms = allPlatforms.slice(1, 5)
+const userhomePlatforms = allPlatforms.slice(0, 7)
 const onlinePlatformFilter = allPlatforms.slice(0, allPlatforms.length - 2)
 
 const venders = {
@@ -71,14 +72,15 @@ export const usePlatformStore = defineStore('platform', {
     //State
     state: () => ({
         currentPlatformIndex: 0,
-        venders
+        venders,
     }),
     //Getters
     getters: {
         platforms() {
             return () => {
-                const { isArtistMode } = useMainViewStore()
+                const { isArtistMode, isUserHomeMode } = useMainViewStore()
                 if(isArtistMode) return artistPlatforms
+                if(isUserHomeMode) return userhomePlatforms
                 return playlistPlatforms
             }
         },
@@ -94,6 +96,9 @@ export const usePlatformStore = defineStore('platform', {
         },
         isLocal(state) {
             return this.currentPlatformCode === 'local';
+        },
+        isAll(state) {
+            return this.currentPlatformCode === 'all';
         }
     }, 
     //Actions

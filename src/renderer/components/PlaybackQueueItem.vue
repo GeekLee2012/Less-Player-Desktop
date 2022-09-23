@@ -4,8 +4,10 @@ import ArtistControl from './ArtistControl.vue';
 import { usePlayStore } from '../store/playStore';
 import { onMounted, ref } from 'vue';
 import EventBus from '../../common/EventBus';
+import { useMainViewStore } from '../store/mainViewStore';
 
 const { playTrack, removeTrack, isCurrentTrack } = usePlayStore()
+const { showToast } = useMainViewStore()
 
 const props = defineProps({
     data: Object, //Track
@@ -20,6 +22,7 @@ const playItem = () => {
 
 const removeItem = () => {
     removeTrack(props.data)
+    showToast("歌曲已删除！")
 }
 
 const pbqItemRef = ref(null)
@@ -27,7 +30,8 @@ onMounted(() => {
     if(pbqItemRef.value) {
         pbqItemRef.value.addEventListener("contextmenu", e => {
             e.preventDefault()
-            EventBus.emit("pbqItem-showMenu", { event: e, value: props.data })
+            EventBus.emit("commonCtxMenu-init", 9)
+            EventBus.emit("commonCtxMenu-show", { event: e, value: props.data })
         })
     }
 })

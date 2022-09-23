@@ -28,8 +28,6 @@ const toggleFavourite = () => {
     if(playingIndex.value < 0) return 
     favourited.value = !favourited.value
     const { id, platform, isFMRadio } = currentTrack.value
-    console.log(id, " : ", platform, " : ", isFMRadio)
-    console.log(currentTrack)
     let text = "歌曲收藏成功！"
     if(favourited.value) {
         if(isFMRadio) {

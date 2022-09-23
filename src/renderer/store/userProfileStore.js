@@ -11,11 +11,18 @@ const randomText = (src, len) => {
     return result.join('')
 }
 
+const filterByPlatform = (state, platform) => {
+    if(!platform || platform.trim() == 'all') {
+        return state
+    }
+    return state.filter(item => (item.platform == platform.trim()))
+}
+
 export const useUserProfileStore = defineStore("userProfile", {
     state: () => ({
         user: {
             id: 0,
-            nickname: "我的主页",
+            nickname: "我的主页(测试阶段)",
             cover: "",
             about: "这个人很懒，什么也没留下~"
         },
@@ -39,13 +46,13 @@ export const useUserProfileStore = defineStore("userProfile", {
     }),
     getters: {
         getFavouriteSongs() {
-            return this.favorites.songs
+            return (platform) => filterByPlatform(this.favorites.songs, platform)
         },
         getFavouritePlaylilsts() {
-            return this.favorites.playlists
+            return (platform) => filterByPlatform(this.favorites.playlists, platform)
         },
         getFavouriteAlbums() {
-            return this.favorites.albums
+            return (platform) => filterByPlatform(this.favorites.albums, platform)
         },
         getFavouriteRadios() {
             return this.favorites.radios
@@ -54,10 +61,13 @@ export const useUserProfileStore = defineStore("userProfile", {
             return this.customPlaylists
         },
         getFollowArtists() {
-            return this.follows.artists
+            return (platform) => filterByPlatform(this.follows.artists, platform)
         },
     },
     actions: {
+        updateUser(nickname, about, cover) {
+            Object.assign(this.user, { nickname, about, cover })
+        },
         //TODO state合法性待校验
         findItemIndex(state, item, compareFn) {
             if(!state) return -1
@@ -133,10 +143,9 @@ export const useUserProfileStore = defineStore("userProfile", {
             return this.findItemIndex(this.favorites.radios, { id, platform}) != -1
         },
         //清理
-        cleanUpAllSongs(currentTrack) {
-            const states = [ this.favorites.songs, this.recents.songs ]
+        cleanUpAllSongs(states) {
+            states = states || [ this.favorites.songs, this.recents.songs ]
             const props = ['url', 'lyric']
-            const { id, platform } = currentTrack
             states.forEach(state => {
                 state.forEach(item => {
                     props.forEach(p => {
@@ -157,13 +166,42 @@ export const useUserProfileStore = defineStore("userProfile", {
             const index = this.findItemIndex(this.customPlaylists, { id }, 
                 (e1, e2) => e1.id === e2.id)
             if(index < 0) return 
-            Object.assign(this.customPlaylists[index], { title, about, cover })
+            const updated = Date.now()
+            Object.assign(this.customPlaylists[index], { title, about, cover, updated })
         },
         getCustomPlaylist(id){
             if(this.customPlaylists.length < 1) return 
             const index = this.findItemIndex(this.customPlaylists, { id }, 
                 (e1, e2) => e1.id === e2.id)
             return index < 0 ? { id } : this.customPlaylists[index]
+        },
+        removeCustomPlaylist(id) {
+            this.removeItem(this.customPlaylists, { id }, (e1, e2) => e1.id === e2.id)
+        },
+        addToCustomPlaylist(id, track) {
+            const playlist = this.getCustomPlaylist(id)
+            if(!playlist) return
+            const index = this.findItemIndex(playlist.data, track)
+            if(index > -1) return
+            track.playlistId = id
+            playlist.data.push(track)
+            const updated = Date.now()
+            Object.assign(playlist, { updated })
+        },
+        removeTrackFromCustomPlaylist(id, track) {
+            const playlist = this.getCustomPlaylist(id)
+            if(!playlist) return
+            const index = this.findItemIndex(playlist.data, track)
+            if(index > -1) playlist.data.splice(index, 1)
+            const updated = Date.now()
+            Object.assign(playlist, { updated })
+        },
+        removeAllTracksFromCustomPlaylist(id) {
+            const playlist = this.getCustomPlaylist(id)
+            if(!playlist) return
+            playlist.data.length = 0
+            const updated = Date.now()
+            Object.assign(playlist, { updated })
         },
         //关注的歌手
         addFollowArtist(id, platform, title, cover) {

@@ -6,6 +6,7 @@ import { usePlaylistSquareViewStore } from '../store/playlistSquareViewStore';
 import PlaylistCategoryBar from '../components/PlaylistCategoryBar.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { useMainViewStore } from '../store/mainViewStore';
 
 const squareContentRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -17,10 +18,8 @@ const pagination = { offset: 0, limit: 35, page: 1 }
 let markScrollTop = 0
 
 const { currentPlatformCode, currentCategoryCode } = storeToRefs(usePlaylistSquareViewStore())
-const { currentVender, currentCategory, 
-        putCategory, resetCurrentCategoryItem, 
-        setNeedRefresh
-    } = usePlaylistSquareViewStore()
+const { currentVender, currentCategory, putCategory, } = usePlaylistSquareViewStore()
+const { isPlaylistMode } = storeToRefs(useMainViewStore())
 
 const resetPagination = () => {
     playlists.length = 0
@@ -127,6 +126,7 @@ const refreshData = () => {
 }
 
 watch(currentPlatformCode, (nv, ov) => {
+    if(!isPlaylistMode.value) return
     resetCommom()
     loadCategories()
 })

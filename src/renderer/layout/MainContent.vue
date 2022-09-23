@@ -5,9 +5,8 @@ import { usePlatformStore } from '../store/platformStore';
 
 const router = useRouter()
 const { updateCurrentPlatformByCode } = usePlatformStore()
-const { setExploreMode, setArtistExploreMode, 
-    hideSongItemCtxMenu, hidePlaybackQueueItemCtxMenu,
-    hidePlayingView } = useMainViewStore()
+const { setExploreMode, setArtistExploreMode, setUserExploreMode,
+    hideCommonCtxMenu, hidePlayingView, hideAddToListSubmenu } = useMainViewStore()
 
 router.beforeResolve((to, from) => {
     console.log("[ ROUTE ] ==>>> " + to.path)
@@ -24,6 +23,8 @@ const highlightPlatform = (to) => {
         code = path.split('/')[3]
     } else if(path.includes('/local')) {
         code = 'local'
+    }  else if(path.includes('/userhome')) {
+        code = 'all'
     } 
     updateCurrentPlatformByCode(code)
 }
@@ -31,25 +32,25 @@ const highlightPlatform = (to) => {
 const autoSwitchExploreMode = (to) => {
     const path = to.path
     if(path.includes('/playlists/')) {
-        setExploreMode(null)
+        setExploreMode(0)
     } else if(path.includes('/artists/')) {
         setArtistExploreMode()
-    } else if(!path.startsWith('/setting')) {
-        setExploreMode(null)
+    } else if(path.includes('/userhome')) {
+        setUserExploreMode()
+    } else {
+        setExploreMode(0)
     }
 }
 
 const hideRelativeComponents = (to) => {
-    const path = to.path
-    if(path.includes('/artist') || path.includes('/album')) {
-        hidePlayingView()
-    }
+    //const path = to.path
     //TODO
-    hideSongItemCtxMenu()
-    hidePlaybackQueueItemCtxMenu()
+    hidePlayingView()
+    hideCommonCtxMenu()
+    hideAddToListSubmenu()
 }
 
-const excludes = ['CustomPlaylistEditView']
+const excludes = [ 'CustomPlaylistEditView', 'UserInfoEditView' ]
 </script>
 
 <template>

@@ -6,6 +6,7 @@ import { useArtistSquareViewStore } from '../store/artistSquareViewStore';
 import ArtistCategoryBar from '../components/ArtistCategoryBar.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
+import { useMainViewStore } from '../store/mainViewStore';
 
 const squareRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -22,6 +23,7 @@ const { currentVender, currentCategory,
         putCategory, resetCurrentCategoryItems,
         putAlphabet
     } = useArtistSquareViewStore()
+const { isArtistMode } = storeToRefs(useMainViewStore())
 
 const resetPagination = () => {
     artists.length = 0
@@ -145,12 +147,14 @@ const resetCommom = ()=> {
 
 //TODO
 watch(currentPlatformCode, (nv, ov) => {
+    if(!isArtistMode.value) return
     resetCurrentCategoryItems()
     resetCommom()
     loadData()
 })
 
 watch(currentCategoryItems, (nv, ov) => {
+    if(!isArtistMode.value) return
     resetCommom()
     loadContent()
 }, { deep: true })

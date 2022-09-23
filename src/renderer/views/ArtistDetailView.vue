@@ -315,7 +315,9 @@ watch(() => props.id , (nv, ov) => reloadAll())
                 <div class="title" v-show="loadingDetail">
                     <div class="loading-mask" style="width: 36%; height: 36px; display: inline-block;"></div>
                 </div>
-                <div class="title" v-html="artistName" v-show="!loadingDetail"></div>
+                <div class="title" v-show="!loadingDetail">
+                    <div class="loading-mask" style="width: 36%; height: 36px; display: inline-block;"></div>
+                </div>
                 <div class="action">
                     <div class="loading-mask spacing" v-for="i in 2" style="width: 168px; height: 30px; display: inline-block;"></div>
                 </div>
@@ -369,7 +371,11 @@ watch(() => props.id , (nv, ov) => reloadAll())
     margin-bottom: 20px;
     font-size: 25px;
     font-weight: bold;
-    /*height: 39px;*/
+    height: 39px;
+}
+
+#artist-detail .header .alias{
+    display: none;
 }
 
 #artist-detail .header .cover {

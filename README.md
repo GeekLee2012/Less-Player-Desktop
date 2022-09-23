@@ -1,12 +1,14 @@
 ## Less Player 是一款基于Electron + Vue3开发的音乐播放器  
 ### 欢迎喜欢GUI开发的朋友一起学习、交流和参与开发  
+### 本项目仅供学习交流，禁止非法商业用途，请支持正版音乐 
 
 ### Git源码  
 [https://gitee.com/rive08/less-player-desktop/](https://gitee.com/rive08/less-player-desktop/)  
-[https://github.com/GeekLee2012/Less-Player-Desktop/](https://github.com/GeekLee2012/Less-Player-Desktop/)  
-    
+[https://github.com/GeekLee2012/Less-Player-Desktop/](https://github.com/GeekLee2012/Less-Player-Desktop/)   
 
-### 本项目仅供学习交流，禁止非法商业用途，请支持正版音乐  
+#### 前言
+* 项目名字：源于Less is More（少即是多）
+* 项目口号Slogan：Less Player，Less is More ~ All for One, One for All ！（人人为我，我为人人~）
 
 #### 开发测试环境
 * OS: macOS Big Sur、Windows 10（虚拟机）  
@@ -27,20 +29,26 @@
   
 #### 界面预览  
 ##### 预览图（Github）  
+旧版（默认主题）  
 ![snap 01.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2008.png)  
 ![snap 02.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2009.png)  
 ![snap 03.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2010.png)   
     
 ##### 预览图（Gitee）  
+旧版（默认主题）  
 ![snap 01.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2001.png)  
 ![snap 02.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2002.png)  
 ![snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2003.png)  
-    
+新版（白色主题）  
+![snap 04.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2004.png)  
+![snap 05.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2005.png)  
+![snap 06.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2006.png)  
+![snap 07.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2007.png)  
+![snap 08.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2008.png)  
+![snap 09.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/snapshots/snap%2009.png)  
+  
 #### 开发者说
 * 请预先安装好最新版Nodejs  
-* 为保证界面样式，请先检查和安装字体(Release发行版中有提供下载)  
-  macOS字体：STHeiti-Medium.ttc  
-  Windows字体：STHeitiSC-Light.ttf  
   
 * 初始化项目  
   `npm install`

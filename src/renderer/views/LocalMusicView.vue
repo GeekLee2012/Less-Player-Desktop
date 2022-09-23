@@ -56,7 +56,8 @@ const noTracks = () => (localTracks.value.length < 1)
                     <SongItem :index="index" :data="item"
                         :artistVisiable="false"
                         :albumVisiable="false" 
-                        :deleteFn="removeItem">
+                        :deleteFn="removeItem"
+                        dataType="1" >
                     </SongItem>
                 </div>
             </div>

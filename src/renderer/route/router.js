@@ -10,7 +10,7 @@ import ArtistDetailView from '../views/ArtistDetailView.vue';
 import AlbumDetailView from '../views/AlbumDetailView.vue';
 import CustomPlaylistEditView from '../views/CustomPlaylistEditView.vue';
 import CustomPlaylistDetailView from '../views/CustomPlaylistDetailView.vue';
-
+import UserInfoEditView from '../views/UserInfoEditView.vue'; 
 
 const routes = [ 
     { //默认
@@ -55,17 +55,21 @@ const routes = [
         props: true, 
         component:  AlbumDetailView 
     },
-    {  //自建歌单
+    {  //我的主页 - 用户信息 - 编辑
+        path: '/userhome/user/edit', 
+        component:  UserInfoEditView 
+    },
+    {  //我的主页 - 自建歌单
         path: '/userhome/customPlaylist/create',
         //props: true, 
         component:  CustomPlaylistEditView 
     },
-    {  //自建歌单 - 编辑
+    {  //我的主页 - 自建歌单 - 编辑
         path: '/userhome/customPlaylist/edit/:id',
         props: true, 
         component:  CustomPlaylistEditView 
     },
-    {  //自建歌单 - 编辑
+    {  //我的主页 - 自建歌单 - 详情
         path: '/userhome/customPlaylist/:id',
         props: true, 
         component:  CustomPlaylistDetailView 

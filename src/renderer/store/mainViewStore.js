@@ -11,19 +11,19 @@ export const useMainViewStore = defineStore('mainView', {
         playbackQueueViewShow: false,
         playingViewShow: false,
         //探索模式，歌单、歌手
-        exploreModes: [ 'playlists', 'artists' ], 
+        exploreModes: [ 'playlists', 'artists', 'userhome' ], 
         exploreModeIndex: 0, 
         //播放状态通知
         playNotificationShow: false,
         //通用通知
         commonNotificationShow: false,
         commonNotificationText: null,
-        //歌曲列表
-        ctxMenuSongItem: null,  
-        songItemCtxMenuShow: false,
-        //当前播放列表
-        ctxMenuTrackItem: null, 
-        playbackQueueItemCtxMenuShow: false
+        //通用上下文菜单
+        commonCtxMenuShow: false,
+        commonCtxMenuData: [],
+        commonCtxMenuCacheItem: [],
+        commonCtxMenuSeparatorNums: 0,
+        addToListSubmenuShow: false,
     }),
     getters: {
         isPlaylistMode() {
@@ -31,6 +31,9 @@ export const useMainViewStore = defineStore('mainView', {
         },
         isArtistMode() {
             return this.exploreModeIndex == 1
+        },
+        isUserHomeMode() {
+            return this.exploreModeIndex == 2
         },
         exploreModeCode() {
             return this.exploreModes[this.exploreModeIndex]
@@ -65,11 +68,9 @@ export const useMainViewStore = defineStore('mainView', {
         },
         showPlayingView() {
             this.playingViewShow = true
-            //ipcRenderer.send('hide-winBtn')
         },
         hidePlayingView() {
             this.playingViewShow = false
-            //ipcRenderer.send('show-winBtn')
         },
         toggleCoverMask() {
             this.coverMaskShow = !this.coverMaskShow
@@ -84,11 +85,14 @@ export const useMainViewStore = defineStore('mainView', {
             ipcRenderer.send('app-max')
         },
         setExploreMode(index) {
-            if(index != 0 && index != 1) index = 0
+            if(!index || index < 0  || index > 2) index = 0
             this.exploreModeIndex = index
         },
-        setArtistExploreMode(mode) {
+        setArtistExploreMode() {
             this.setExploreMode(1)
+        },
+        setUserExploreMode() {
+            this.setExploreMode(2)
         },
         showPlayNotification() {
             this.playNotificationShow = true
@@ -108,27 +112,33 @@ export const useMainViewStore = defineStore('mainView', {
             text = text || "操作成功！"
             EventBus.emit("toast", { text, callback, delay })
         },
-        updateCtxMenuSongItem(value) {
-            this.ctxMenuSongItem = value
+        updateCommonCtxMenuCacheItem(value) {
+            this.commonCtxMenuCacheItem = value
         },
-        showSongItemCtxMenu(value) {
-            this.songItemCtxMenuShow = true
-            this.updateCtxMenuSongItem(value)
+        showCommonCtxMenu(value) {
+            this.commonCtxMenuShow = true
+            this.updateCommonCtxMenuCacheItem(value)
+        }, 
+        hideCommonCtxMenu(clearCache) {
+            this.commonCtxMenuShow = false
+            if(clearCache) this.updateCommonCtxMenuCacheItem(null)
         },
-        hideSongItemCtxMenu() {
-            this.songItemCtxMenuShow = false
-            this.updateCtxMenuSongItem(null)
+        setCommonCtxMenuData(data) {
+            this.commonCtxMenuData.length = 0
+            if(data) {
+                let spCnt = 0
+                data.forEach(item => {
+                    this.commonCtxMenuData.push(item)
+                    if(item.separator) ++spCnt
+                });
+                this.commonCtxMenuSeparatorNums = spCnt
+            }
         },
-        updateCtxMenuTrackItem(value) {
-            this.ctxMenuTrackItem = value
+        showAddToListSubmenu() {
+            this.addToListSubmenuShow = true
         },
-        showPlaybackQueueItemCtxMenu(value) {
-            this.playbackQueueItemCtxMenuShow = true
-            this.updateCtxMenuTrackItem(value)
-        },
-        hidePlaybackQueueItemCtxMenu() {
-            this.playbackQueueItemCtxMenuShow = false
-            this.updateCtxMenuTrackItem(null)
+        hideAddToListSubmenu() {
+            this.addToListSubmenuShow = false
         }
     }
 })

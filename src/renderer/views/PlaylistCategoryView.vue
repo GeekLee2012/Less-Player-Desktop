@@ -21,9 +21,22 @@ const resetScroll = () => {
     view.scrollTop = 0
 }
 
+let prevCate = null
+const isDiffCate = (item, row, col) => {
+    return prevCate ? (
+        prevCate.item.value != item.value
+        || prevCate.row != row 
+        || prevCate.col != col) : true
+}
+
 const visitCateItem = (item, row, col) => {
     updateCurrentCategoryItem(item, row, col)
-    hidePlaylistCategoryView()
+    if(isDiffCate(item, row, col)) {
+        EventBus.emit("playlistSquare-refresh")
+        prevCate = { item, row, col }
+        hidePlaylistCategoryView()
+    }
+    
 }
 
 EventBus.on('playlistCategory-update', ()=> {
@@ -39,14 +52,13 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     <div class="playlist-category-view" @click.stop="">
         <div class="header">
             <div class="cate-title">当前分类</div>
-            <div class="fl-item">{{ currentCategoryItem.data.key }}</div>
+            <div class="fl-item" v-html="currentCategoryItem.data.key"></div>
         </div>
         <div class="center">
             <div v-for="(cate, row) in category" class="fl-row">
                 <div class="cate-title">{{ cate.name }}</div>
-                <div>
-                    <div v-for="(item, col) in cate.data" 
-                        class="fl-item" 
+                <div class="cate-item-wrap">
+                    <div v-for="(item, col) in cate.data" class="fl-item" 
                         :class="{ current : (row == currentCategoryItem.row 
                             && col == currentCategoryItem.col )}"
                         @click="visitCateItem(item, row, col)"
@@ -66,7 +78,6 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
 .playlist-category-view .header,
 .playlist-category-view .center {
     display: flex;
-    flex-direction: row;
     text-align: left;
 }
 
@@ -86,7 +97,6 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
 .playlist-category-view .header .fl-item {
     cursor: default;
     font-size: 18px;
-    background: linear-gradient(to top right, #28c83f, #1ca388);
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
@@ -105,6 +115,11 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     text-align: left;
 }
 
+.playlist-category-view .cate-item-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .playlist-category-view .cate-title {
     font-size: 18px;
     font-weight: bold;
@@ -121,11 +136,11 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
 }
 
 .playlist-category-view .fl-item {
+    /*float: left;*/
     font-size: 15px;
     padding: 6px 16px;
     margin-top: 10px;
     margin-right: 10px;
-    float: left;
     cursor: pointer;
     color: #bcbcbc;
     color: var(--text-color);

@@ -4,7 +4,9 @@ import { useMainViewStore } from '../store/mainViewStore';
 import { usePlatformStore } from '../store/platformStore';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
+import { storeToRefs } from 'pinia';
 
+const { queueTracksSize } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack } = usePlayStore()
 const { getVender } = usePlatformStore()
 const { showPlayNotification, hidePlayNotification } = useMainViewStore()
@@ -51,7 +53,7 @@ const tryCancelPlayNextTimer = () => {
 
 
 let toastCnt = 0 //连跳计数器
-const bootstrapTrack = (track, callback) => {
+const bootstrapTrack = (track, callback, noToast) => {
     if(!track) return 
     const platform = track.platform
     const vender = getVender(platform);
@@ -61,13 +63,15 @@ const bootstrapTrack = (track, callback) => {
         tryCancelPlayNextTimer()
         //if(!track.hasUrl()) track = await United.transferTrack(track)
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
-            //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
-            if(toastCnt >= 10) { //10连跳啦，暂停一下吧
+            if(queueTracksSize.value < 2) { //没有下一曲
+                if(!noToast) showToast()
+            } else if(toastCnt < 10) { 
+                //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
+                if(!noToast) showToast(playNextTrack)
+                ++toastCnt
+            } else { //10连跳啦，暂停一下吧
                 toastCnt = 0 //重置连跳计数
-                return 
             }
-            showToast(playNextTrack)
-            ++toastCnt
             return
         }
         toastCnt =0 //重置连跳计数
@@ -90,7 +94,7 @@ EventBus.on('track-changed', track => bootstrapTrack(track, track => {
     }))
 EventBus.on('track-restoreInit', track => bootstrapTrack(track, track => {
         EventBus.emit("track-restore", track)
-    }))
+    }, true))
 EventBus.on('track-loadLyric', track => loadLyric(track))
 </script>
 <template>

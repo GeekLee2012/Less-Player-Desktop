@@ -1,6 +1,6 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain, Menu, dialog, powerMonitor, shell, powerSaveBlocker } = require('electron')
-const { isMacOS, useCustomTrafficLight, isDevEnv, USER_AGENT, AUDIO_EXTS } = require('./env')
+const { isMacOS, useCustomTrafficLight, isDevEnv, USER_AGENT, AUDIO_EXTS, IMAGE_EXTS } = require('./env')
 const path = require('path')
 const { scanDir, parseTracks, readText } = require('./fileio') 
 
@@ -84,6 +84,17 @@ ipcMain.handle('open-files', async (e, ...args)=> {
   })
   if(result.canceled) return null
   return parseTracks(result.filePaths)
+})
+
+ipcMain.handle('open-image', async (e, ...args)=> {
+  const result = await dialog.showOpenDialog(app.mainWin, {
+    title: '请选择文件',
+    filters: [
+      { name: 'Image', extensions: IMAGE_EXTS}
+    ],
+    properties: [ 'openFile']
+  })
+  return result.filePaths
 })
 
 ipcMain.handle('lyric-load', async (e, ...args)=> {

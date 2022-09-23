@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import MainTop from './MainTop.vue';
 import MainContent from './MainContent.vue';
 import { useMainViewStore } from '../store/mainViewStore'
@@ -10,14 +10,8 @@ import EventBus from '../../common/EventBus';
 
 const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useMainViewStore())
 const { hidePlaylistCategoryView, hideArtistCategoryView, 
-    hidePlaybackQueueView, hideSongItemCtxMenu, 
-    hidePlaybackQueueItemCtxMenu } = useMainViewStore()
+    hidePlaybackQueueView, hideCommonCtxMenu, hideAddToListSubmenu } = useMainViewStore()
 
-//隐藏上下文菜单
-const hideCtxMenu = () => {
-    hideSongItemCtxMenu()
-    hidePlaybackQueueItemCtxMenu()
-}
 
 //应用级别按键监听
 const handleKeys = (e) => {
@@ -27,12 +21,22 @@ const handleKeys = (e) => {
     }
 }
 
+const setCategoryHeight = () => {
+    const mainContent = document.getElementById('main-content')
+    const playlistCategory = document.querySelector('#playlist-category-view')
+    const artistCategory = document.querySelector('#artist-category-view')
+    const viewHeight = (mainContent.clientHeight - 37) + "px"
+    if(playlistCategory) playlistCategory.style.height = viewHeight
+    if(artistCategory) artistCategory.style.height = viewHeight
+}
+
 onMounted (() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', e => {
         setCategoryHeight()
         //隐藏上下文菜单
-        hideCtxMenu()
+        hideCommonCtxMenu()
+        hideAddToListSubmenu()
     })
     
     //点击事件监听
@@ -46,24 +50,17 @@ onMounted (() => {
         //隐藏歌手分类列表
         hideArtistCategoryView()
         //隐藏上下文菜单
-        hideCtxMenu()
+        hideCommonCtxMenu()
+        hideAddToListSubmenu()
     })
 
     //按键事件监听
     document.addEventListener('keydown', e => {
         handleKeys(e)
     })
-
-    const setCategoryHeight = () => {
-        const mainContent = document.getElementById('main-content')
-        const playlistCategory = document.querySelector('#playlist-category-view')
-        const artistCategory = document.querySelector('#artist-category-view')
-        const viewHeight = (mainContent.clientHeight - 37) + "px"
-        if(playlistCategory) playlistCategory.style.height = viewHeight
-        if(artistCategory) artistCategory.style.height = viewHeight
-    }
-
 })
+
+watch([playlistCategoryViewShow, artistCategoryViewShow], setCategoryHeight)
 </script>
 
 <template>

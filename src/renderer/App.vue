@@ -10,11 +10,9 @@ import { useSettingStore } from './store/settingStore';
 import { storeToRefs } from 'pinia';
 import EventBus from '../common/EventBus';
 import PlayBoostrap from './components/PlayBoostrap.vue';
-import PlaybackQueueItemContextMenu from './components/PlaybackQueueItemContextMenu.vue';
+import CommonContextMenu from './components/CommonContextMenu.vue';
+import AddToListSubmenu from './components/addToListSubmenu.vue';
 
-const { playbackQueueViewShow, playingViewShow, 
-  playNotificationShow, playbackQueueItemCtxMenuShow, 
-  commonNotificationShow, commonNotificationText } = storeToRefs(useMainViewStore())
 const { getCurrentThemeName } = useSettingStore()
 
 //TODO 设置主题
@@ -33,40 +31,76 @@ setupAppTheme(getCurrentThemeName())
 onMounted(() => EventBus.emit('radio-init', document.querySelector('.radio-holder')))
 EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
 
-const { showPlaybackQueueItemCtxMenu, hidePlaybackQueueItemCtxMenu } = useMainViewStore()
-const menuPos = reactive({ left: -999, top: -999})
+const ctxMenuPosStyle = reactive({ left: -999, top: -999})
+const ctxSubmenuPosStyle = reactive({ left: -999, top: -999})
+let ctxMenuPos = null
+
+const { playbackQueueViewShow, playingViewShow, 
+  playNotificationShow, commonNotificationShow, 
+  commonNotificationText, commonCtxMenuShow, 
+  commonCtxMenuData, commonCtxMenuSeparatorNums,
+  addToListSubmenuShow } = storeToRefs(useMainViewStore())
+const { hideCommonCtxMenu, showCommonCtxMenu,
+  showAddToListSubmenu, hideAddToListSubmenu,
+  setHoverSubmenu } = useMainViewStore()
+
+const getCtxMenuAutoHeight = () => {
+  const total = commonCtxMenuData.value.length || 1
+  const spNums = commonCtxMenuSeparatorNums.value
+  const itemHeight = 38, padding = 15
+  return itemHeight * (total - spNums) + 7.5 * spNums + 2 * padding
+}
 
 const adjustPosition = (event) => {
   const { x, y, clientX, clientY } = event
   const pos = { x, y }
   const { clientWidth, clientHeight } = document.documentElement
-  //TODO 菜单大小待改为自动获取
-  const menuWidth = 179, menuHeight = 288, padding = 10 
+  //const menuWidth = 179, menuHeight = 288, padding = 10 
+  const menuWidth = 179, menuHeight = getCtxMenuAutoHeight(), padding = 10 
   const gapX = clientX + menuWidth - clientWidth
-  const gapY = clientY + menuHeight - clientHeight
+  const tGapY = clientY - menuHeight
+  const bGapY = clientY + menuHeight - clientHeight
   //右边界
   if(gapX > 0) {
     pos.x = pos.x - gapX - padding
   }
-  //底部边界
-  if(gapY > 0) {
-    //pos.y = pos.y - gapY - padding
-    pos.y = pos.y - menuHeight + padding / 2
+  //TODO 菜单有可能溢出顶部边界
+  if(bGapY > 0) { //溢出底部边界
+    pos.y = pos.y - menuHeight + padding / 2    
   }
   return pos
 }
 
 const setMenuPosition = (event) => {
-  const pos = adjustPosition(event)
-  menuPos.left = pos.x + "px !important"
-  menuPos.top = pos.y + "px !important"
+  ctxMenuPos = adjustPosition(event)
+  ctxMenuPosStyle.left = ctxMenuPos.x + "px !important"
+  ctxMenuPosStyle.top = ctxMenuPos.y + "px !important"
 }
 
-EventBus.on("pbqItem-showMenu", e => {
-  hidePlaybackQueueItemCtxMenu() //强制取消上次的显示
+const setSubmenuPosition = (event) => {
+  ctxSubmenuPosStyle.left = ctxMenuPos.x -  178 + "px !important"
+  ctxSubmenuPosStyle.top = event.y - 50 + "px !important"
+}
+
+EventBus.on("commonCtxMenu-show", e => {
+  hideCommonCtxMenu(true) //强制取消上次的显示
+  hideAddToListSubmenu()
   setMenuPosition(e.event)
-  showPlaybackQueueItemCtxMenu(e.value)
+  showCommonCtxMenu(e.value)
 })
+
+EventBus.on("addToListSubmenu-show", e => {
+  //hideCommonCtxMenu(true) //强制取消上次的显示
+  setSubmenuPosition(e)
+  showAddToListSubmenu()
+  EventBus.emit("addToListSubmenu-init")
+  setHoverSubmenu(true)
+})
+
+EventBus.on("addToListSubmenu-hide", () => {
+  hideAddToListSubmenu()
+})
+
 
 //TODO 还可以进一步封装，但是......
 const { showCommonNotification, hideCommonNotification } = useMainViewStore()
@@ -85,8 +119,9 @@ EventBus.on("toast", o => {
 })
 
 //TODO
-watch(playbackQueueViewShow, () => {
-    hidePlaybackQueueItemCtxMenu()
+watch(playbackQueueViewShow, (nv, ov) => {
+    hideCommonCtxMenu()
+    hideAddToListSubmenu()
 })
 </script>
 
@@ -104,10 +139,14 @@ watch(playbackQueueViewShow, () => {
     <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow">
     </PlaybackQueueView>
     
-    <transition>
-      <PlaybackQueueItemContextMenu v-show="playbackQueueItemCtxMenuShow" :pos="menuPos">
-      </PlaybackQueueItemContextMenu>
-    </transition>
+    <CommonContextMenu v-show="commonCtxMenuShow" 
+      :posStyle="ctxMenuPosStyle" 
+      :data="commonCtxMenuData">
+    </CommonContextMenu>
+
+    <AddToListSubmenu v-show="addToListSubmenuShow"
+      :posStyle="ctxSubmenuPosStyle">
+    </AddToListSubmenu>
 
     <!-- 播放失败通知 -->
     <transition>

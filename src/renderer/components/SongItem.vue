@@ -8,14 +8,15 @@ import EventBus from '../../common/EventBus';
 import { onMounted, ref } from 'vue';
 
 const { addTrack, playTrack } = usePlayStore()
-const { showToast } = useMainViewStore()
+const { showToast, hidePlaybackQueueView } = useMainViewStore()
 
 const props = defineProps({
     index: Number,
     artistVisitable: Boolean,
     albumVisitable: Boolean,
     data: Object, //Track
-    deleteFn: Function
+    deleteFn: Function,
+    dataType: Number
 })
 
 const playItem = () => {
@@ -30,6 +31,7 @@ const addItem = () => {
 const deleteItem = () => {
     if(props.deleteFn) {
         props.deleteFn(props.index)
+        showToast("歌曲已删除！")
     }
 }
 
@@ -38,7 +40,11 @@ onMounted(() => {
     if(songItemRef.value) {
         songItemRef.value.addEventListener("contextmenu", e => {
             e.preventDefault()
-            EventBus.emit("songItem-showMenu", { event: e, value: props.data })
+            hidePlaybackQueueView()
+            setTimeout(() => {
+                EventBus.emit("commonCtxMenu-init", props.dataType || 0)
+                EventBus.emit("commonCtxMenu-show", { event: e, value: props.data })
+            }, 99)
         })
     }
 })

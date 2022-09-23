@@ -4,12 +4,11 @@ import { useMainViewStore } from '../store/mainViewStore';
 import EventBus from '../../common/EventBus';
 import { reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import SvgTextButton from '../components/SvgTextButton.vue';
 
 const artistCategoryViewRef = ref(null)
 const { currentCategoryItems } = storeToRefs(useArtistSquareViewStore())
 const { currentCategory, updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareViewStore()
-const { hideArtistCategoryView } = useMainViewStore()
+const { isArtistMode } = storeToRefs(useMainViewStore())
 const category = reactive([])
 
 const updateCategory = () => {
@@ -38,6 +37,7 @@ EventBus.on('artistCategory-resetScroll', ()=> {
 })
 
 EventBus.on('exploreMode-changed', mode => {
+    if(!isArtistMode.value) return
     resetCurrentCategoryItems()
 })
 </script>
