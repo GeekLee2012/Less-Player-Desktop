@@ -47,7 +47,7 @@ const { setActiveTab, updateArtist,
 
 const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
-const { showToast } = useMainViewStore() 
+const { showToast, hideAllCtxMenus } = useMainViewStore() 
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
@@ -140,7 +140,6 @@ const loadHotSongs = () => {
     if(isHotSongsTabLoaded()) {
         updateTabData(hotSongs.value)
         currentTabView.value = SongListControl
-
         loading.value = false
         return 
     }
@@ -174,7 +173,6 @@ const loadAllSongs = () => {
     if(isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
         currentTabView.value = SongListControl
-
         loading.value = false
         return 
     }
@@ -186,7 +184,6 @@ const loadAllSongs = () => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         currentTabView.value = SongListControl
-
         loading.value = false
     })
     offset = page++ * limit
@@ -242,6 +239,8 @@ const scrollToLoad = () => {
     if((scrollTop + clientHeight) >= scrollHeight) {
        loadMoreSongs()
     }
+    //TODO
+    hideAllCtxMenus()
 }
 
 const resetTabView = () => {
@@ -250,8 +249,10 @@ const resetTabView = () => {
     updateTabTipText(0)
 }
 
-const bindScrollListener = () => {
-    artistDetailRef.value.addEventListener('scroll', scrollToLoad)
+const bindScrollListener = (handle) => {
+    if(!artistDetailRef.value) return 
+    artistDetailRef.value.removeEventListener('scroll', handle)
+    artistDetailRef.value.addEventListener('scroll', handle)
 }
 
 const switchTab = () => {
@@ -260,9 +261,10 @@ const switchTab = () => {
     getArtistDetail()
     if(isHotSongsTab()) {
         loadHotSongs()
+        bindScrollListener(hideAllCtxMenus)
     } else if(isAllSongsTab()) {
         loadAllSongs()
-        bindScrollListener()
+        bindScrollListener(scrollToLoad)
     } else if(isAlbumsTab()) {
         loadAlbums()
     } else if(isAboutTab()) {

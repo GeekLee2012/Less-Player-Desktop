@@ -209,9 +209,10 @@ const isAvailableSongTab = () => {
 
 onActivated(() => {
     refresh()
+    //TODO
     if(userProfileRef.value) {
+        userProfileRef.value.removeEventListener('scroll', hideAllCtxMenus)
         userProfileRef.value.addEventListener('scroll', hideAllCtxMenus)
-        userProfileRef.value.addEventListener('click', hideAllCtxMenus)
     }
 })
 watch(playingViewShow, (nv, ov) => {

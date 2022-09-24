@@ -39,7 +39,7 @@ const { setActiveTab, updateTabTipText,
 
 const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
-const { showToast } = useMainViewStore()
+const { showToast, hideAllCtxMenus } = useMainViewStore()
 const { addRecentAlbum } = useUserProfileStore()
 
 let currentTabView = shallowRef(null)
@@ -142,9 +142,17 @@ const loadAbout = () => {
     currentTabView.value = TextListControl
 }
 
+const detailRef = ref(null)
+const bindScrollListener = () => {
+    if(!detailRef.value) return
+    detailRef.value.removeEventListener('scroll', hideAllCtxMenus)
+    detailRef.value.addEventListener('scroll', hideAllCtxMenus)
+}
+
 const scrollToTop = () => {
     const view = document.querySelector('#album-detail')
     view.scrollTop = 0
+    bindScrollListener()
 }
 
 const reloadAll = () =>  {
@@ -181,7 +189,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
 </script>
 
 <template>
-    <div id="album-detail">
+    <div id="album-detail" ref="detailRef">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="albumCover" />
