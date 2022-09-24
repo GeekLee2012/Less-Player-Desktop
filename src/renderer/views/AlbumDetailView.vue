@@ -40,6 +40,7 @@ const { setActiveTab, updateTabTipText,
 const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
 const { showToast } = useMainViewStore()
+const { addRecentAlbum } = useUserProfileStore()
 
 let currentTabView = shallowRef(null)
 const tabData = ref([])
@@ -48,6 +49,12 @@ const detail = reactive({})
 const visitTab = (index) => {
     setActiveTab(index)
     switchTab()
+}
+
+//目前以加入当前播放列表为参考标准
+const traceRecentPlay = () => {
+    const { id, platform, title, cover, publishTime } = detail
+    addRecentAlbum(id, platform, title, cover, publishTime)
 }
 
 const playAll = () => {
@@ -59,6 +66,7 @@ const playAll = () => {
 const addAll = (text) => {
     addTracks(allSongs.value)
     showToast(text || "歌曲已全部添加！")
+    traceRecentPlay()
 } 
 
 //TODO

@@ -66,12 +66,14 @@ const typeTabs = [ {
 const router = useRouter()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
-const { addTracks, playNextTrack, resetQueue, currentTrack } = usePlayStore()
+const { addTracks, playNextTrack, resetQueue } = usePlayStore()
 const { playingViewShow, isUserHomeMode } = storeToRefs(useMainViewStore() )
-const { showToast } = useMainViewStore() 
+const { showToast, hideAllCtxMenus } = useMainViewStore() 
 const { user, getFavouriteSongs, getFavouritePlaylilsts, 
     getFavouriteAlbums, getFavouriteRadios,
-    getCustomPlaylists, getFollowArtists } = storeToRefs(useUserProfileStore())
+    getCustomPlaylists, getFollowArtists,
+    getRecentSongs, getRecentPlaylilsts,
+    getRecentAlbums, getRecentRadios } = storeToRefs(useUserProfileStore())
 const { cleanUpAllSongs } = useUserProfileStore()
 
 const currentTabView = shallowRef(null)
@@ -87,6 +89,7 @@ const subTabShow = ref(true)
 const subTabTipText = ref("")
 let isDiffTab = true
 const dataType = ref(2)
+const userProfileRef = ref(null)
 
 const visitUserInfo = () => {
     router.push("/userhome/user/edit")
@@ -139,6 +142,7 @@ const setActiveTab = (index) => {
     activeTab.value = index
     subTabShow.value = tabs[activeTab.value].hasSubTabs
     if(isDiffTab) activeSubTab.value = 0
+    dataType.value = (index == 3) ? 5 : 2
 }
 
 const visitSubTab = (index) => {
@@ -158,15 +162,19 @@ const switchSubTab = () => {
     const platform = currentPlatformCode.value
     if(activeSubTab.value == 0) {
         if(activeTab.value == 0) tabData.push(...getFavouriteSongs.value(platform))
+        if(activeTab.value == 3) tabData.push(...getRecentSongs.value(platform))
         currentTabView.value = SongListControl
     } else if(activeSubTab.value == 1) {
         if(activeTab.value == 0) tabData.push(...getFavouritePlaylilsts.value(platform))
+        if(activeTab.value == 3) tabData.push(...getRecentPlaylilsts.value(platform))
         currentTabView.value = PlaylistsControl
     } else if(activeSubTab.value == 2) {
         if(activeTab.value == 0) tabData.push(...getFavouriteAlbums.value(platform))
+        if(activeTab.value == 3) tabData.push(...getRecentAlbums.value(platform))
         currentTabView.value = AlbumListControl
     } else if(activeSubTab.value == 3) {
         if(activeTab.value == 0) tabData.push(...getFavouriteRadios.value)
+        if(activeTab.value == 3) tabData.push(...getRecentRadios.value)
         currentTabView.value = PlaylistsControl
     }
     subTabTipText.value = typeTabs[activeSubTab.value].text.replace('0', tabData.length)
@@ -189,7 +197,7 @@ const clearAll = () => {
 const refresh = () => {
     visitTab(activeTab.value)
     //TODO
-    cleanUpAllSongs(currentTrack)
+    cleanUpAllSongs()
 }
 
 const isAvailableSongTab = () => {
@@ -201,6 +209,10 @@ const isAvailableSongTab = () => {
 
 onActivated(() => {
     refresh()
+    if(userProfileRef.value) {
+        userProfileRef.value.addEventListener('scroll', hideAllCtxMenus)
+        userProfileRef.value.addEventListener('click', hideAllCtxMenus)
+    }
 })
 watch(playingViewShow, (nv, ov) => {
     if(!nv) refresh()

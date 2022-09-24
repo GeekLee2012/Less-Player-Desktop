@@ -18,12 +18,15 @@ export const useMainViewStore = defineStore('mainView', {
         //通用通知
         commonNotificationShow: false,
         commonNotificationText: null,
+        commonNotificationType: 0, //类型，0 - 普通成功消息，1-失败消息
         //通用上下文菜单
         commonCtxMenuShow: false,
         commonCtxMenuData: [],
-        commonCtxMenuCacheItem: [],
+        commonCtxItem: {},  //菜单的上下文对象，用于公共参数传递
+        commonCtxMenuCacheItem: {}, //菜单缓存对象，与具体点击的菜单项相关
         commonCtxMenuSeparatorNums: 0,
         addToListSubmenuShow: false,
+        artistListSubmenuShow: false,
     }),
     getters: {
         isPlaylistMode() {
@@ -104,13 +107,20 @@ export const useMainViewStore = defineStore('mainView', {
             this.commonNotificationShow = true
             this.commonNotificationText = text || "操作成功！"
         },
+        setCommonNotificationType(type) {
+            this.commonNotificationType = type || 0
+        },
         hideCommonNotification() {
             this.commonNotificationShow = false
             this.commonNotificationText = null
+            this.commonNotificationType = 0
         },
         showToast(text, callback, delay) {
             text = text || "操作成功！"
             EventBus.emit("toast", { text, callback, delay })
+        },
+        updateCommonCtxItem(value) {
+            this.commonCtxItem = value
         },
         updateCommonCtxMenuCacheItem(value) {
             this.commonCtxMenuCacheItem = value
@@ -139,6 +149,17 @@ export const useMainViewStore = defineStore('mainView', {
         },
         hideAddToListSubmenu() {
             this.addToListSubmenuShow = false
+        },
+        showArtistListSubmenu() {
+            this.artistListSubmenuShow = true
+        },
+        hideArtistListSubmenu() {
+            this.artistListSubmenuShow = false
+        },
+        hideAllCtxMenus() {
+            this.hideCommonCtxMenu()
+            this.hideAddToListSubmenu()
+            this.hideArtistListSubmenu()
         }
     }
 })

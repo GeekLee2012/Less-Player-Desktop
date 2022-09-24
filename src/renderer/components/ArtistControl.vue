@@ -59,7 +59,7 @@ EventBus.on('track-artistUpdated', data => {
 </script>
 
 <template>
-    <div class="artist-ctl" v-show="data.length > 0" @click.stop="">
+    <div class="artist-ctl" v-show="data.length > 0">
         <template v-for="(item, index) in data">
             <span @click="visitArtistDetail(platform, item, index)"
                 class="artist-item" v-html="item.name" >

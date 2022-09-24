@@ -18,7 +18,7 @@ const props = defineProps({
 })
 
 const ipcRenderer = electronAPI.ipcRenderer
-const route = useRouter()
+const router = useRouter()
 
 const { showToast } = useMainViewStore()
 const titleRef = ref(null)
@@ -63,13 +63,14 @@ const submit = () => {
         updateCustomPlaylist(props.id, title, about, cover)
         text = "歌单已保存!"
     }
-    showToast(text, () => route.push("/userhome"))
+    showToast(text, () => router.back())
 }
 
 const cancel = () => {
-    route.push("/userhome")
+    router.back()
 }
 
+//TODO
 const updateCover = async () => {
     const result = await ipcRenderer.invoke('open-image')
     if(result.length > 0) {

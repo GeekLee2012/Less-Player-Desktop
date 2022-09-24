@@ -10,7 +10,7 @@ import EventBus from '../../common/EventBus';
 
 const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useMainViewStore())
 const { hidePlaylistCategoryView, hideArtistCategoryView, 
-    hidePlaybackQueueView, hideCommonCtxMenu, hideAddToListSubmenu } = useMainViewStore()
+    hidePlaybackQueueView, hideAllCtxMenus } = useMainViewStore()
 
 
 //应用级别按键监听
@@ -35,8 +35,7 @@ onMounted (() => {
     window.addEventListener('resize', e => {
         setCategoryHeight()
         //隐藏上下文菜单
-        hideCommonCtxMenu()
-        hideAddToListSubmenu()
+        hideAllCtxMenus()
     })
     
     //点击事件监听
@@ -50,8 +49,7 @@ onMounted (() => {
         //隐藏歌手分类列表
         hideArtistCategoryView()
         //隐藏上下文菜单
-        hideCommonCtxMenu()
-        hideAddToListSubmenu()
+        hideAllCtxMenus()
     })
 
     //按键事件监听

@@ -45,7 +45,7 @@ onMounted(() => {
             </div>
             <div class="right">
                 <div class="data">
-                    <div class="title">{{ data.title }}</div>
+                    <div class="title" v-html="data.title"></div>
                     <div class="bottom">
                         <div class="artist">
                             <ArtistControl :visitable="true" 

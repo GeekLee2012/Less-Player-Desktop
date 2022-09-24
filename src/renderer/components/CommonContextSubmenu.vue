@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
 import { useMainViewStore } from '../store/mainViewStore';
 
-const { hideAddToListSubmenu, showToast, hideCommonCtxMenu } = useMainViewStore()
+const { showToast, hideAllCtxMenus, hideAddToListSubmenu, hideArtistListSubmenu } = useMainViewStore()
 
 const props = defineProps({
     posStyle: Object,
@@ -15,16 +15,21 @@ const props = defineProps({
 const handleMenuItem = (item, index, event) => {
     if(!item.action) return
     item.action(item, index, event)
-    showToast("歌曲已添加成功！")
+    hideAllCtxMenus()
+}
+
+//TODO
+const hideAllSubmenus = () => {
     hideAddToListSubmenu()
-    hideCommonCtxMenu()
+    hideArtistListSubmenu()
 }
 
 </script>
 
 <template>
     <div class="common-ctx-submenu" :style="posStyle" 
-        @click.stop="">
+        @click.stop="" @mouseleave="hideAllSubmenus">
+        <div class="padding"></div>
         <div class="center">
             <template v-for="(item, index) in data">
                 <div class="menuItem" @click="(event) => handleMenuItem(item, index, event)" v-show="!item.separator">
@@ -34,6 +39,7 @@ const handleMenuItem = (item, index, event) => {
                 <div class="separator" v-show="item.separator"></div>
             </template>
         </div>
+        <div class="padding"></div>
     </div>
 </template>
 
@@ -47,12 +53,19 @@ const handleMenuItem = (item, index, event) => {
     /*justify-content: center;*/
     background: var(--ntf-bg);
     border-radius: 8px;
-    padding: 15px 0px;
+    /*padding: 15px 0px;*/
     border: 0.1px solid var(--border-color);
-    box-shadow: 0px 0px 1px var(--ctx-menu-border-color);
+    box-shadow: 0px 0px 1.5px var(--ctx-menu-border-color);
     max-height: 297px;
-    overflow: auto;
 }
+
+.common-ctx-submenu .padding {
+    height: 15px;
+}
+
+.common-ctx-submenu .center {
+    overflow: auto;
+} 
 
 .common-ctx-submenu .menuItem {
     width: 139px;

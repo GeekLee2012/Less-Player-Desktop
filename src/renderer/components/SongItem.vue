@@ -16,7 +16,7 @@ const props = defineProps({
     albumVisitable: Boolean,
     data: Object, //Track
     deleteFn: Function,
-    dataType: Number
+    dataType: Number,
 })
 
 const playItem = () => {

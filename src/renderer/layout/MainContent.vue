@@ -6,7 +6,7 @@ import { usePlatformStore } from '../store/platformStore';
 const router = useRouter()
 const { updateCurrentPlatformByCode } = usePlatformStore()
 const { setExploreMode, setArtistExploreMode, setUserExploreMode,
-    hideCommonCtxMenu, hidePlayingView, hideAddToListSubmenu } = useMainViewStore()
+    hideAllCtxMenus, hidePlayingView, updateCommonCtxItem } = useMainViewStore()
 
 router.beforeResolve((to, from) => {
     console.log("[ ROUTE ] ==>>> " + to.path)
@@ -46,8 +46,8 @@ const hideRelativeComponents = (to) => {
     //const path = to.path
     //TODO
     hidePlayingView()
-    hideCommonCtxMenu()
-    hideAddToListSubmenu()
+    hideAllCtxMenus()
+    updateCommonCtxItem(null)
 }
 
 const excludes = [ 'CustomPlaylistEditView', 'UserInfoEditView' ]

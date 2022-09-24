@@ -5,11 +5,13 @@ import { usePlatformStore } from '../store/platformStore';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { storeToRefs } from 'pinia';
+import { useUserProfileStore } from '../store/userProfileStore';
 
 const { queueTracksSize } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack } = usePlayStore()
 const { getVender } = usePlatformStore()
 const { showPlayNotification, hidePlayNotification } = useMainViewStore()
+const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
 
 const loadLyric = (track) => {
     if(!track) return 
@@ -88,10 +90,25 @@ const bootstrapTrack = (track, callback, noToast) => {
     })
 }
 
-EventBus.on('track-changed', track => bootstrapTrack(track, track => {
+const traceRecentPlay = (track) => {
+    const { isFMRadio } = track
+    if(isFMRadio) {
+        addRecentRadio(track)
+    } else {
+        addRecentSong(track)
+    }
+    EventBus.emit("userHome-refresh")
+}
+
+EventBus.on('radio-play', track => traceRecentPlay(track))
+
+EventBus.on('track-changed', track => {
+    traceRecentPlay(track)
+    bootstrapTrack(track, track => {
         playTrack(track)
         loadLyric(track)
-    }))
+    })
+})
 EventBus.on('track-restoreInit', track => bootstrapTrack(track, track => {
         EventBus.emit("track-restore", track)
     }, true))

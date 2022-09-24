@@ -13,19 +13,13 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const { hideAddToListSubmenu, hideCommonCtxMenu, showToast } = useMainViewStore()
+const { hideAllCtxMenus, showToast } = useMainViewStore()
 const { getCustomPlaylist, removeCustomPlaylist } = useUserProfileStore()
 const { resetQueue, playNextTrack, addTracks } = usePlayStore()
 
 const toastAndHideMenu = (text) => {
     showToast(text)
-    hideCommonCtxMenu()
-    //TODO
-    hideAddToListSubmenu()
-}
-
-const refreshUserHome = () => {
-    EventBus.emit("userHome-refresh")
+    hideAllCtxMenus()
 }
 
 const playItem = () => {
@@ -47,7 +41,6 @@ const removeItem = () => {
     const { id } = props.data
     removeCustomPlaylist(id)
     toastAndHideMenu("歌单已删除！")
-    refreshUserHome()
 }
 
 const itemRef = ref(null)

@@ -7,7 +7,7 @@ import { useMainViewStore } from '../store/mainViewStore';
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue } = usePlayStore()
-const { showToast, hidePlaybackQueueView, hidePlayingView, hideCommonCtxMenu } = useMainViewStore()
+const { showToast, hidePlaybackQueueView, hidePlayingView, hideAllCtxMenus } = useMainViewStore()
 
 const targetPlaying = () => {
     if(queueTracksSize < 1) return 
@@ -20,24 +20,23 @@ const targetPlaying = () => {
 
 const clearAll = () => {
     resetQueue()
-    showToast("当前播放列表已清空！", ()=> {
+    showToast("当前播放已清空！", ()=> {
         hidePlaybackQueueView()
         hidePlayingView()
     }, 666)
 }
 
 const pbqRef = ref(null)
+const listRef = ref(null)
 onMounted(() => {
-    if(pbqRef.value) {
-        pbqRef.value.addEventListener('scroll', hideCommonCtxMenu)
-        pbqRef.value.addEventListener('click', hideCommonCtxMenu)
-    }
+    if(pbqRef.value) pbqRef.value.addEventListener('click', hideAllCtxMenus)
+    if(listRef.value) listRef.value.addEventListener('scroll', hideAllCtxMenus)
 })
 </script>
 
 <template>
     <!-- click事件: 必须阻止冒泡，因为document全局监听click事件 -->
-    <div class="playback-queue" @click.stop="hidePlaybackQueueItemCtxMenu" >
+    <div class="playback-queue" @click.stop="hidePlaybackQueueItemCtxMenu" ref="pbqRef">
         <div class="header">
             <div class="title">当前播放</div>
             <div class="detail">
@@ -54,7 +53,7 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div class="center" ref="pbqRef">
+        <div class="center" ref="listRef">
             <div v-for="(item, index) in queueTracks">
                 <PlaybackQueueItem :data="item" :active="playingIndex == index">
                 </PlaybackQueueItem>

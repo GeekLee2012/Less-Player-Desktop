@@ -15,8 +15,9 @@ import { useRouter } from 'vue-router';
 const router = useRouter()
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showToast } = useMainViewStore()
-const { getCustomPlaylist, removeAllTracksFromCustomPlaylist, cleanUpAllSongs } = useUserProfileStore()
+const { showToast, updateCommonCtxItem } = useMainViewStore()
+const { getCustomPlaylist, removeAllTracksFromCustomPlaylist, 
+    cleanUpAllSongs, } = useUserProfileStore()
 
 const props = defineProps({
     id: String
@@ -49,6 +50,7 @@ const loadContent = () => {
     const playlist = getCustomPlaylist(props.id)
     if(playlist.data) cleanUpAllSongs([ playlist.data ])
     Object.assign(detail, {...playlist})
+    updateCommonCtxItem(playlist)
 }
 
 const loadMoreContent = () => {
@@ -170,7 +172,8 @@ onMounted(() => {
             <SongListControl :data="detail.data" 
                 :artistVisitable="true" 
                 :albumVisitable="true"
-                :dataType="4" >
+                :dataType="4"
+                :id="id" >
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

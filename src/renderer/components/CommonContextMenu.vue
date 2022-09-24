@@ -17,26 +17,23 @@ const props = defineProps({
 })
 let currentDataType = -1
 
-const { commonCtxMenuCacheItem } = storeToRefs(useMainViewStore())
-const { showToast, setCommonCtxMenuData, hideCommonCtxMenu, hideAddToListSubmenu } = useMainViewStore()
+const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useMainViewStore())
+const { showToast, setCommonCtxMenuData, hideAllCtxMenus } = useMainViewStore()
 const { playTrack, playTrackLater, addTrack, removeTrack, resetQueue, addTracks, playNextTrack } = usePlayStore()
-const { addFavouriteTrack, removeFavouriteSong,
+const { addFavouriteTrack, removeFavouriteSong, addFavouriteRadio,
     removeCustomPlaylist, removeTrackFromCustomPlaylist,
-    getCustomPlaylist } = useUserProfileStore()
+    getCustomPlaylist, removeRecentSong } = useUserProfileStore()
 const { removeItem } = useLocalMusicStore()
 const router = useRouter()
 
 const toastAndHideMenu = (text) => {
     showToast(text)
-    hideCommonCtxMenu()
-    //TODO
-    hideAddToListSubmenu()
+    hideAllCtxMenus()
 }
 
 const playItem = () => {
     playTrack(commonCtxMenuCacheItem.value)
-    hideCommonCtxMenu()
-    hideAddToListSubmenu()
+    hideAllCtxMenus()
 }
 
 const addItemToQueue = () => {
@@ -49,14 +46,22 @@ const playItemLater = () => {
     toastAndHideMenu("下一曲将为您播放！")
 }
 
-const refreshUserHome = () => {
-    EventBus.emit("userHome-refresh")
+const refreshFavourite = () => {
+    EventBus.emit("refreshFavourite")
 }
 
 const addFavouriteItem = () => {
-    addFavouriteTrack(commonCtxMenuCacheItem.value)
-    toastAndHideMenu("歌曲收藏成功！")
-    refreshUserHome()
+    const track = commonCtxMenuCacheItem.value
+    const { isFMRadio } = track
+    let text = "歌曲收藏成功！"
+    if(isFMRadio) {
+        addFavouriteRadio(track)
+        text = "FM电台收藏成功！"
+    } else {
+        addFavouriteTrack(track)
+    }
+    toastAndHideMenu(text)
+    refreshFavourite()
 }
 
 //TODO
@@ -78,6 +83,7 @@ const visitArtistDetail = (platform, item, index) => {
             router.push(toPath)
             updateArtistDetailKeys(platform, id)
         }
+        hideAllCtxMenus()
     }
 }
 
@@ -97,23 +103,31 @@ const visitAlbumDetail = (platform, id) => {
             router.push(toPath)
             updateAlbumDetailKeys(platform, id)
         }
+        hideAllCtxMenus()
     }
 }
 
-const visitItemArtist = ()=> {
+const isMenu = () => true
+
+const isMultiArtists = () => {
+    const { artist } = commonCtxMenuCacheItem.value
+    return artist.length > 1
+}
+
+const visitItemArtist = (event)=> {
     const { platform, artist } = commonCtxMenuCacheItem.value
     if(artist.length == 1) {
         visitArtistDetail(platform, artist[0])
-        hideCommonCtxMenu()
-        hideAddToListSubmenu()
+    } else {
+        EventBus.emit("artistListSubmenu-init")    
+        EventBus.emit("artistListSubmenu-show", event)
     }
 }
 
 const visitItemAlbum = ()=> {
     const { platform, album } = commonCtxMenuCacheItem.value
     visitAlbumDetail(platform, album.id)
-    hideCommonCtxMenu()
-    hideAddToListSubmenu()
+    hideAllCtxMenus()
 }
 
 const removeQueueItem = ()=> {
@@ -130,7 +144,6 @@ const removeFavouriteItem = ()=> {
     const { id, platform } = commonCtxMenuCacheItem.value
     removeFavouriteSong(id, platform)
     toastAndHideMenu("歌曲已取消收藏！")
-    refreshUserHome()
 }
 
 const playCustom = () => {
@@ -152,18 +165,24 @@ const removeCustom = () => {
     const { id } = commonCtxMenuCacheItem.value
     removeCustomPlaylist(id)
     toastAndHideMenu("歌单已删除！")
-    refreshUserHome()
 }
 
+//TODO
 const removeFromCustom = () => {
+    const { id } = commonCtxItem.value // Playlist
     const track = commonCtxMenuCacheItem.value
-    const { playlistId } = track
-    removeTrackFromCustomPlaylist(playlistId, track)
+    removeTrackFromCustomPlaylist(id, track)
     toastAndHideMenu("歌曲已删除！")
 }
 
-const showAddToList = (event) => {
-    //TODO
+const removeSongFromRecent = () => {
+    removeRecentSong(commonCtxMenuCacheItem.value)
+    toastAndHideMenu("歌曲记录已删除！")
+}
+
+//TODO
+const showAddToList = (event, mode) => {
+    EventBus.emit("addToListSubmenu-init", mode)
     EventBus.emit("addToListSubmenu-show", event)
 }
 
@@ -189,8 +208,14 @@ const MenuItems = {
         addToList: {
             name: '添加到',
             icon: '<svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>',
-            menu: true,
+            menu: isMenu,
             action: showAddToList,
+        },
+        moveToList: {
+            name: '移动到',
+            icon: '<svg width="16" height="16" viewBox="0 0 896.41 896.43" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M415.82,109.83l-48,48.05q-11.67,11.67-23.34,23.33c-14.07,14-33.73,14.73-46.83,1.73s-12.53-32.9,1.73-47.17q59-59.06,118.08-118.09c2.82-2.83,5.51-5.8,8.4-8.56,12.57-12,32.28-12.27,44.62,0q64.28,64.05,128.23,128.43a31.73,31.73,0,0,1,0,45.37c-12.6,12.5-32.34,12.53-45.37-.36-22.87-22.61-45.53-45.44-68.25-68.21-1.29-1.3-2.32-2.85-4.48-3.71V415.9H786.3c-1.58-1.7-2.72-3-3.95-4.25-22.74-22.76-45.57-45.41-68.2-68.27-17.51-17.69-10.76-46.49,12.53-53.62,12.85-3.94,23.94-.4,33.33,9q55.34,55.33,110.67,110.65c5.3,5.3,10.7,10.51,16,15.83,12.84,12.93,13.06,32.88.24,45.72q-63.58,63.68-127.36,127.18c-13.4,13.34-33.4,13.48-46.1.58s-12.39-32.47.78-45.74q33.82-34.05,67.88-67.87a42.32,42.32,0,0,1,4.34-3.38l-.68-1.09H480.5V786.38c1.78-1.66,3.1-2.82,4.34-4.06,22.75-22.74,45.39-45.59,68.27-68.2,17.57-17.36,46-10.82,53.41,12.18,4.13,12.82.82,24-8.56,33.42Q563.39,794.43,528.69,829q-28.62,28.66-57.19,57.36c-13.28,13.32-33.2,13.4-46.44.15q-63.24-63.3-126.45-126.67c-15.18-15.23-13.55-38.16,3.41-49.93,13-9,29.71-7.37,41.5,4.36q34,33.84,67.88,67.87c1.28,1.27,2.3,2.8,4.44,3.56V480.48H110c1.59,1.68,2.73,2.93,3.92,4.13,22.74,22.75,45.56,45.42,68.2,68.26,16.12,16.26,12.33,41.91-7.47,51.9-12.65,6.39-27,4-37.65-6.56-15.15-15-30.17-30.16-45.27-45.23Q51,512.36,10.27,471.77C-3.29,458.26-3.46,438.41,10,425q63.14-63.06,126.31-126.1c12.29-12.27,29-14.12,42.24-4.83,16.7,11.76,18.39,34.58,3.47,49.61-22.55,22.71-45.23,45.27-67.85,67.91-1.25,1.25-2.43,2.57-4.12,4.37H415.82Z"/></g></g></svg>',
+            menu: isMenu,
+            action: (event) => showAddToList(event, 1),
         },
         addFavourite: {
             name: '收藏',
@@ -205,6 +230,7 @@ const MenuItems = {
         visitArtist: {
             name: '查看歌手',
             icon: '<svg width="16" height="16" viewBox="0 0 810 854.54" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M385,0c117.88.3,213.35,96.08,213,213.66-.38,118.12-95.71,213.26-213.49,213.07s-213.49-96.16-213-213.58C172,95,267.43-.3,385,0Zm-.58,341.47c70.36.28,127.94-56.94,128.31-127.5a128,128,0,1,0-256-.64C256.5,283.64,313.83,341.19,384.37,341.47Z"/><path d="M640.7,682.51v-20q0-74,0-148c0-19.27,8.52-33,25.74-41.6,27.27-13.56,54.42-27.36,81.76-40.78,25.87-12.7,55.2,1.93,61,30.15,3.72,18-5.84,37.41-22.29,45.6-18.92,9.41-37.7,19.1-56.66,28.43-3.37,1.66-4.38,3.6-4.38,7.23q.17,107.74.09,215.48c0,46.09-36,88-81.81,93.46-20.79,2.51-42,3.79-62.43-2.85-38.64-12.58-61.61-39.33-68.54-79.37-.83-4.8.79-10.24,2.08-15.17a97.51,97.51,0,0,1,100-72.67C623.48,682.9,631.8,682.51,640.7,682.51Z"/><path d="M312.19,512q56.49,0,113,0c21.61,0,38.67,12.73,43.48,32.1,6.92,27.84-13.42,53.25-43,53.34-46.49.15-93,0-139.46,0-25.33,0-50.66-.34-76,.16-65,1.29-119.65,52.93-123.4,117.82-1.79,30.89-.74,61.95-.8,92.94,0,9.06-1.78,17.5-6.67,25.2a42.56,42.56,0,0,1-47,18.26C14.33,847,1,831.09.85,812.66c-.32-32.49-1.95-65.13.39-97.45,6.53-89.82,52.23-152.77,135-188.31,25.72-11,53.08-14.93,81-14.92Z"/></g></g></svg>',
+            menu: isMultiArtists,
             action: visitItemArtist,
         }, 
         visitAlbum: {
@@ -247,11 +273,15 @@ const MenuItems = {
             icon: '<svg width="16" height="16" class="spacing" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z" transform="translate(-833 -413)"/><path d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z" transform="translate(-833 -413)"/><path d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z" transform="translate(-833 -413)"/><path d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z" transform="translate(-833 -413)"/></svg>',
             action: removeFromCustom,
         },
+        removeSongFromRecent: {
+            name: '删除',
+            icon: '<svg width="16" height="16" class="spacing" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z" transform="translate(-833 -413)"/><path d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z" transform="translate(-833 -413)"/><path d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z" transform="translate(-833 -413)"/><path d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z" transform="translate(-833 -413)"/></svg>',
+            action: removeSongFromRecent,
+        },
 }
 
 const doInit = (data) => {
-    hideCommonCtxMenu()
-    hideAddToListSubmenu()
+    hideAllCtxMenus()
     setCommonCtxMenuData(data)
 }
 
@@ -261,6 +291,7 @@ EventBus.on("commonCtxMenu-init", dataType => {
     switch(dataType) {
         case 0: //普通歌曲列表（歌单页、歌手页、专辑页）
             data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList, 
+                MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
                 MenuItems.sp, MenuItems.addFavourite, MenuItems.share, ]
             break;
         case 1: //本地歌曲列表
@@ -268,16 +299,23 @@ EventBus.on("commonCtxMenu-init", dataType => {
                     MenuItems.sp, MenuItems.addFavourite, MenuItems.removeFromLocal, ]
             break;
         case 2: //我的主页-我的收藏-歌曲列表
-            data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList,
-                MenuItems.sp, MenuItems.share, MenuItems.removeFromFavourite, ]
+            data = [ MenuItems.play, MenuItems.playLater,
+                MenuItems.addToList, MenuItems.sp,
+                MenuItems.share, MenuItems.removeFromFavourite, ]
             break;
         case 3: //我的主页-创建的歌单列表
             data = [ MenuItems.playCustom, MenuItems.editCustom, MenuItems.removeCustom ]
             break;
         case 4: //创建的歌单 - 歌曲列表
-        data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList, 
-                MenuItems.sp, MenuItems.addFavourite, MenuItems.share, 
-                MenuItems.sp, MenuItems.removeFromCustom ]
+        data = [ MenuItems.play, MenuItems.playLater, MenuItems.sp, 
+                MenuItems.addToList, MenuItems.moveToList, MenuItems.sp, 
+                MenuItems.addFavourite, MenuItems.share, MenuItems.sp, 
+                MenuItems.removeFromCustom ]
+            break;
+        case 5: //我的主页-最近播放-歌曲列表
+            data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList, 
+                MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
+                MenuItems.sp, MenuItems.addFavourite, MenuItems.removeSongFromRecent, ]
             break;
         case 9: //当前播放列表
             data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList, 
@@ -290,8 +328,10 @@ EventBus.on("commonCtxMenu-init", dataType => {
 })
 
 const showSubmenu = (item, index, event) => {
-    if(!item || !item.menu) {
-        //EventBus.emit("addToListSubmenu-hide", event)
+    //TODO
+    EventBus.emit("addToListSubmenu-hide", event)
+    EventBus.emit("artistListSubmenu-hide", event)
+    if(!item || !item.menu || !item.menu()) { 
         return
     }
     if(item.action) item.action(event)
@@ -331,7 +371,7 @@ const visitMenuItem  = (item, index, event) => {
     border-radius: 8px;
     padding: 15px 0px;
     border: 0.1px solid var(--border-color);
-    box-shadow: 0px 0px 1px var(--ctx-menu-border-color);
+    box-shadow: 0px 0px 1.5px var(--ctx-menu-border-color);
 }
 
 .common-ctx-menu .menuItem {

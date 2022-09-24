@@ -16,12 +16,12 @@ import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
-import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
 
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showToast, hideCommonCtxMenu, hideAddToListSubmenu } = useMainViewStore()
+const { showToast, hideAllCtxMenus } = useMainViewStore()
+const { addRecentPlaylist } = useUserProfileStore()
 
 const props = defineProps({
     platform: String,
@@ -77,6 +77,12 @@ const loadMoreContent = () => {
     }
 }
 
+//目前以加入当前播放列表为参考标准
+const traceRecentPlay = () => {
+    const { id, platform, title, cover } = detail
+    addRecentPlaylist(id, platform, title, cover)
+}
+
 const playAll = () => {
     resetQueue()
     addAll("即将为您播放全部！")
@@ -86,6 +92,7 @@ const playAll = () => {
 const addAll = (text) => {
     addTracks(detail.data)
     showToast(text || "歌曲已全部添加！")
+    traceRecentPlay()
 }
 
 //TODO
@@ -131,8 +138,7 @@ const scrollToLoad = () => {
        loadMoreContent()
     }
     //TODO
-    hideCommonCtxMenu()
-    hideAddToListSubmenu()
+    hideAllCtxMenus()
 }
 
 const bindScrollListener = () => {
@@ -186,7 +192,7 @@ onMounted(() => {
                     <div class="loading-mask" v-for="i in 3" style="width: 95%; height: 20px; display: inline-block;"></div>
                 </div>
                 <div class="action">
-                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 168px; height: 30px; display: inline-block;"></div>
+                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 168px; height: 32px; display: inline-block;"></div>
                 </div>
             </div>
         </div>

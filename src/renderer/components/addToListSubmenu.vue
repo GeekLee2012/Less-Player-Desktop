@@ -1,6 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { onMounted, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
 import { useMainViewStore } from '../store/mainViewStore';
 import { usePlayStore } from '../store/playStore';
@@ -11,22 +12,27 @@ const props = defineProps({
     posStyle: Object
 })
 
+const router = useRouter()
 const { addTrack } = usePlayStore()
-const { commonCtxMenuCacheItem } = storeToRefs(useMainViewStore())
-const { showToast, hideCommonCtxMenu, hideAddToListSubmenu } = useMainViewStore()
+const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useMainViewStore())
+const { showToast, hideAllCtxMenus, setCommonNotificationType, hidePlaybackQueueView } = useMainViewStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore()) 
-const { addToCustomPlaylist } = useUserProfileStore()
+const { addToCustomPlaylist, moveToCustomPlaylist } = useUserProfileStore()
 const customData = reactive([])
 
 const toastAndHideMenu = (text) => {
     showToast(text)
-    hideCommonCtxMenu()
-    hideAddToListSubmenu()
+    hideAllCtxMenus()
 }
 
 const addToQueue = () => {
     addTrack(commonCtxMenuCacheItem.value)
     toastAndHideMenu("歌曲已添加成功！")
+}
+
+const createCustom = () => {
+    router.push("/userhome/customPlaylist/create")
+    hidePlaybackQueueView()
 }
 
 const MenuItems = {
@@ -41,25 +47,52 @@ const MenuItems = {
         create: {
             name: '新建歌单',
             icon: '<svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>',
-            action: null,
+            action: createCustom,
         },
 }
 
-const initData = () => {
+
+const handleClick = (item, mode) => {
+    const { isFMRadio  } = commonCtxMenuCacheItem.value
+    let text = "歌曲已添加成功！"
+    if(isFMRadio) {
+        text = "FM电台无法加入歌单！"
+        setCommonNotificationType(1)
+        toastAndHideMenu(text)
+        return
+    }
+    let success = false
+    if(mode == 1) {
+        const { id } = commonCtxItem.value
+        success =moveToCustomPlaylist(item.id, id, commonCtxMenuCacheItem.value)
+        text = "歌曲已移动成功！"
+    } else {
+        success =addToCustomPlaylist(item.id, commonCtxMenuCacheItem.value)
+    }
+    text = success ? text : "歌曲已存在！"
+    setCommonNotificationType(success ? 0 : 1)
+    toastAndHideMenu(text)
+}
+
+const initData = (mode) => {
     customData.length = 0
-    const fixedItems = [ MenuItems.playbackQueue, MenuItems.create]
-    customData.push(...fixedItems)
+    const fixedItems = [ MenuItems.playbackQueue, MenuItems.create ]
+    if(mode == 1) { //移动模式
+        customData.push(fixedItems[1])
+    } else {
+        customData.push(...fixedItems)
+    }
     customPlaylists.value.forEach(item => {
         customData.push({
             name: item.title,
-            action: () => addToCustomPlaylist(item.id, commonCtxMenuCacheItem.value),
+            action: (event) => handleClick(item, mode),
         })
     })
 }
 
 onMounted(() => initData())
 
-EventBus.on("addToListSubmenu-init", initData)
+EventBus.on("addToListSubmenu-init", (mode) => initData(mode))
 </script>
 
 <template>
