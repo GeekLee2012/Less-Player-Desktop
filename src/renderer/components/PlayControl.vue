@@ -65,8 +65,6 @@ const togglePlaybackQueue = () => {
 }
 
 .play-ctl svg:hover {
-    fill: linear-gradient(to top right, #28c83f, #1ca388) !important;
-    fill: #28c83f;
     fill: var(--hl-color);
 }
 

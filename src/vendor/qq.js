@@ -613,8 +613,8 @@ export class QQ {
             }
             getJson(url, reqBody).then(json => {
                 const playlist = json.cdlist[0]
-                
-                result.id = playlist.dissid
+                result.id = id
+                result.dissid = playlist.dissid
                 result.platform = QQ.CODE
                 result.title = playlist.dissname
                 result.cover = getPlaylistCover(playlist.logo)

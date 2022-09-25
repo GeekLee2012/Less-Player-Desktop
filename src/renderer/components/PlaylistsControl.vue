@@ -7,6 +7,7 @@ import EventBus from '../../common/EventBus';
 import { useMainViewStore } from '../store/mainViewStore';
 import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
+import { useUserProfileStore } from '../store/userProfileStore';
 
 const props = defineProps({
     data: Array
@@ -14,8 +15,10 @@ const props = defineProps({
 
 const router = useRouter()
 const { getVender, isPlatformValid } = usePlatformStore()
-const { addTrack, playTrack, resetQueue } = usePlayStore()
+const { addTrack, addTracks, playTrack, resetQueue, playNextTrack } = usePlayStore()
 const { exploreModeCode } = storeToRefs(useMainViewStore())
+const { showToast } = useMainViewStore()
+const { addRecentPlaylist } = useUserProfileStore()
 
 const visitItem = (item) => {
     const platform = item.platform
@@ -35,6 +38,30 @@ const visitItem = (item) => {
     }
 }
 
+const playItem = (item) => {
+    const { id, platform } = item
+    const vender = getVender(platform)
+    if(!vender) return 
+    vender.playlistDetail(id, 0, 1000, 1).then(result => {
+        playAll(result)
+    })
+}
+
+//目前以加入当前播放列表为参考标准
+const traceRecentPlay = (playlist) => {
+    const { id, platform, title, cover } = playlist
+    addRecentPlaylist(id, platform, title, cover)
+}
+
+const playAll = (playlist) => {
+    if(!playlist || playlist.data.length < 1) return 
+    resetQueue()
+    addTracks(playlist.data)
+    showToast("即将为您播放全部！")
+    traceRecentPlay(playlist)
+    playNextTrack()
+}
+
 const nextRadioTrack = (platform, channel, track) => {
     if(!track || !Track.hasId(track)) resetQueue()
     getVender(platform).nextRadioTrack(channel, track).then(result => {
@@ -51,10 +78,12 @@ EventBus.on('radio-nextTrack', track => nextRadioTrack(track.platform, track.cha
     <div class="playlists-ctl">
          <PaginationTiles>
             <template #data>
-                <ImageTextTile v-for="item in data" 
+                <ImageTextTile v-for="item in data"
+                    @click="visitItem(item)"
                     :cover="item.cover" 
                     :title="item.title"
-                    @click="visitItem(item)" >
+                    :playable="true"
+                    :playAction="() => playItem(item)" >
                 </ImageTextTile>
             </template>
         </PaginationTiles>

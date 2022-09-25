@@ -74,7 +74,7 @@ const { user, getFavouriteSongs, getFavouritePlaylilsts,
     getCustomPlaylists, getFollowArtists,
     getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios } = storeToRefs(useUserProfileStore())
-const { cleanUpAllSongs } = useUserProfileStore()
+const { cleanUpAllSongs, updateUser, removeAllRecents } = useUserProfileStore()
 
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
@@ -90,6 +90,15 @@ const subTabTipText = ref("")
 let isDiffTab = true
 const dataType = ref(2)
 const userProfileRef = ref(null)
+const startDecoSqNum = 1001, sqNums = 3
+let currentDecoSqNum = startDecoSqNum 
+const decoSrc = ref(`deco_${currentDecoSqNum}.png`)
+
+const nextDecoSrc = () => {
+    ++currentDecoSqNum
+    if(currentDecoSqNum > (startDecoSqNum + sqNums - 1)) currentDecoSqNum = startDecoSqNum
+    decoSrc.value = `deco_${currentDecoSqNum}.png`
+}
 
 const visitUserInfo = () => {
     router.push("/userhome/user/edit")
@@ -188,10 +197,18 @@ const showBatchView = () => {
 const clearAll = () => {
     ["userProfile", "user", "profile"].forEach(key => localStorage.removeItem(key))
     const store = useUserProfileStore()
+    const { nickname, about, cover } = store.user
     store.$reset()
-    visitTab(0)
     EventBus.emit("userProfile-reset")
+    visitTab(0)
     showToast("全部数据已被清空！")
+    //updateUser(nickname, about, cover)
+    store.$patch({ user: { nickname, about, cover } })
+}
+
+const clearRecents = () => {
+    removeAllRecents()
+    showToast("最近播放已被清空！")
 }
 
 const refresh = () => {
@@ -204,7 +221,7 @@ const isAvailableSongTab = () => {
     if(tabData.length < 1) return false
     const tabIndex = activeTab.value
     const subTabIndex = activeSubTab.value
-    return subTabIndex == 0 && (tabIndex == 0 || tabIndex == 3)
+    return subTabIndex == 0 && (tabIndex == 0 || tabIndex == -1)
 }
 
 onActivated(() => {
@@ -229,6 +246,9 @@ EventBus.on("userHome-refresh", refresh)
     
 <template>
     <div id="user-profile" ref="userProfileRef" >
+        <div class="decoration">
+            <img v-lazy="decoSrc" @click="nextDecoSrc"/>
+        </div>
         <div class="header">
             <div>
                 <img class="cover" v-lazy="user.cover" />
@@ -242,10 +262,12 @@ EventBus.on("userHome-refresh", refresh)
                 </div>
                 <div class="about" v-html="user.about"></div>
                 <div class="action">
-                    <CreatePlaylistBtn :leftAction="visitCreateCustomPlaylistView">
+                    <CreatePlaylistBtn :leftAction="visitCreateCustomPlaylistView" class="spacing">
                     </CreatePlaylistBtn>
                     <BatchDeleteBtn :leftAction="showBatchView" :rightAction="clearAll" class="spacing">
                     </BatchDeleteBtn>
+                    <DeleteAllBtn v-show="activeTab == 3" text="清空最近播放" :leftAction="clearRecents"  class="spacing">
+                    </DeleteAllBtn>
                     <PlayAddAllBtn v-show="isAvailableSongTab()" class="spacing"
                         :leftAction="playAllSongs" :rightAction="addAllSongs">
                     </PlayAddAllBtn>
@@ -282,13 +304,14 @@ EventBus.on("userHome-refresh", refresh)
     </div>
 </template>
     
-<style>
+<style scoped>
 #user-profile {
     display: flex;
     flex-direction: column;
     padding: 25px 33px 15px 33px;
     flex: 1;
     overflow: auto;
+    position: relative;
 }
 
 #user-profile .header {
@@ -299,7 +322,7 @@ EventBus.on("userHome-refresh", refresh)
 
 #user-profile .header .right {
     flex: 1;
-    margin-left: 20px;
+    margin-left: 20px; 
 }
 
 #user-profile .header .titleWrap {
@@ -359,10 +382,12 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile .action {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 }
 
 #user-profile .spacing {
-    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 10px;
 }
 
 #user-profile .tab-nav {
@@ -426,9 +451,21 @@ EventBus.on("userHome-refresh", refresh)
     color: transparent;
 }
 
-
 #user-profile .songlist {
     display: flex;
     flex-direction: column;
+}
+
+#user-profile .decoration {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    z-index: 3px;
+}
+
+#user-profile .decoration img {
+    width: 68px;
+    height: 68px;
+    cursor: pointer;
 }
 </style>

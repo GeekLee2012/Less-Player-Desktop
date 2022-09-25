@@ -284,6 +284,13 @@ export const useUserProfileStore = defineStore("userProfile", {
             const { id, platform } = track
             this.removeItem(this.recents.songs, { id, platform })
         },
+        removeAllRecents() {
+            this.recents.songs.length = 0
+            this.recents.playlists.length = 0
+            this.recents.albums.length = 0
+            this.recents.radios.length = 0
+            this.refreshUserHome()
+        },
         refreshUserHome() {
             EventBus.emit("userHome-refresh")
         }

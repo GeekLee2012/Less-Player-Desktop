@@ -101,7 +101,6 @@ const traceRecentPlay = (track) => {
 }
 
 EventBus.on('radio-play', track => traceRecentPlay(track))
-
 EventBus.on('track-changed', track => {
     traceRecentPlay(track)
     bootstrapTrack(track, track => {
@@ -109,9 +108,12 @@ EventBus.on('track-changed', track => {
         loadLyric(track)
     })
 })
-EventBus.on('track-restoreInit', track => bootstrapTrack(track, track => {
+EventBus.on('track-restoreInit', track => {
+    traceRecentPlay(track)
+    bootstrapTrack(track, track => {
         EventBus.emit("track-restore", track)
-    }, true))
+    }, true)
+})
 EventBus.on('track-loadLyric', track => loadLyric(track))
 </script>
 <template>

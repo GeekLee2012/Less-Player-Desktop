@@ -13,7 +13,8 @@ const router = useRouter()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { exploreModeCode } = storeToRefs(useMainViewStore())
 
-const visitItem = (platform, id) => {
+const visitItem = (item) => {
+    const { id, platform } = item
     const platformValid = platform && (platform.trim().length > 0)
     const idValid = (id != 0)
     const visitable = platformValid && idValid
@@ -22,6 +23,10 @@ const visitItem = (platform, id) => {
         router.push(url)
         updateAlbumDetailKeys(platform, id)
     }
+}
+
+const playItem = (item) => {
+    const { id, platform } = item
 }
 
 </script>
@@ -34,7 +39,7 @@ const visitItem = (platform, id) => {
                     :cover="item.cover" 
                     :title="item.title" 
                     :subtitle="item.publishTime"
-                    @click="visitItem(item.platform, item.id)" >
+                    @click="visitItem(item)" >
                 </ImageTextTile>
             </template>
         </PaginationTiles>

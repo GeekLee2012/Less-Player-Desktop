@@ -165,14 +165,27 @@ const createWindow = () => {
 const initMenuTemplate = () => {
   let menuItems = [ { role: 'about' },
     { role: 'toggleDevTools' },
-    { role: 'quit' } ]
+    { role: 'quit' }, ]
   if(!isDevEnv) menuItems = [ { role: 'quit' } ]
   const appName = app.name.replace('-', '')
   const template = [
       ...[{
         label: appName,
-        submenu: menuItems
-      }],
+        submenu: menuItems,
+      }, {
+        label: 'Edit',
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'delete' },
+          { type: 'separator' },
+          { role: 'selectAll' }
+        ]
+      }]
   ]
   return template
 }
