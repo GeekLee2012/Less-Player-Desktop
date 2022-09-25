@@ -21,16 +21,15 @@ const { showToast } = useMainViewStore()
 const { addRecentPlaylist } = useUserProfileStore()
 
 const visitItem = (item) => {
-    const platform = item.platform
-    const id = item.id
+    const { id, platform, isFMRadio, isRadioType } = item
     const platformValid = isPlatformValid(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
-    if(item.isFMRadio) { //FM广播
+    if(isFMRadio) { //FM广播
         const track = Track.fromChannel(item.channel, true)
         addTrack(track)
         playTrack(track)
-    } else if(item.isRadioType) { //音乐电台歌单
+    } else if(isRadioType) { //音乐电台歌单
         nextRadioTrack(platform, id)
     } else if(visitable) { //普通歌单
         const url = '/' + exploreModeCode.value + '/playlist/' + platform + "/" + id
@@ -39,7 +38,11 @@ const visitItem = (item) => {
 }
 
 const playItem = (item) => {
-    const { id, platform } = item
+    const { id, platform, isFMRadio, isRadioType } = item
+    if(isFMRadio || isRadioType) {
+        visitItem(item)
+        return 
+    }
     const vender = getVender(platform)
     if(!vender) return 
     vender.playlistDetail(id, 0, 1000, 1).then(result => {
@@ -63,9 +66,9 @@ const playAll = (playlist) => {
 }
 
 const nextRadioTrack = (platform, channel, track) => {
-    if(!track || !Track.hasId(track)) resetQueue()
+    if(!Track.hasId(track)) resetQueue()
     getVender(platform).nextRadioTrack(channel, track).then(result => {
-        if(!result || !Track.hasId(result)) return 
+        if(!Track.hasId(result)) return 
         addTrack(result)
         playTrack(result)
     })

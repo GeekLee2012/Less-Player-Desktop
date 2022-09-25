@@ -57,15 +57,15 @@ const tryCancelPlayNextTimer = () => {
 let toastCnt = 0 //连跳计数器
 const bootstrapTrack = (track, callback, noToast) => {
     if(!track) return 
-    const platform = track.platform
+    const { id, platform, isFMRadio, isRadioType }= track
     const vender = getVender(platform);
-    if(!vender || track.isFMRadio) return
-    vender.playDetail(track.id, track).then(result => {
+    if(!vender || isFMRadio) return
+    vender.playDetail(id, track).then(result => {
         if(Track.hasUrl(result)) Object.assign(track, { url: result.url })
         tryCancelPlayNextTimer()
         //if(!track.hasUrl()) track = await United.transferTrack(track)
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
-            if(queueTracksSize.value < 2) { //没有下一曲
+            if(queueTracksSize.value < 2 && !isRadioType) { //非电台歌曲，且没有下一曲
                 if(!noToast) showToast()
             } else if(toastCnt < 10) { 
                 //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
