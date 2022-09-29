@@ -45,7 +45,7 @@ const props = defineProps({
     background-color: var(--text-color);
 }
 
-.image-text-tile .cover:hover {
+.image-text-tile .cover-wrap:hover {
     transform: scale(1.05) translateY(-4px);
 }
 

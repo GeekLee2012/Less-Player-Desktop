@@ -48,7 +48,7 @@
   "build": {
     "appId": "xyz.rive2012.${name}",
     "productName": "Less Player",
-    "copyright": "Copyright © ${author.name}",
+    "copyright": "Copyright © ${author}",
     "beforePack": "src/main/beforePack.js",
     "directories": {
       "output": "output"

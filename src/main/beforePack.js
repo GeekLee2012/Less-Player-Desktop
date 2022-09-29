@@ -11,7 +11,7 @@ exports.default = async function(context) {
         console.log("安全起见: 打包输出目录，必须在项目根目录下")
         return
     }
-    const option = { recursive: true, force: true }
+    const option = { recursive: true, force: true, maxRetries: 3 }
     rm(outDir, option)
     console.log("---------------- End Before Pack Hook ----------------")
 }

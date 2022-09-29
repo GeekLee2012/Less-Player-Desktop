@@ -61,15 +61,16 @@
   或分两个步骤，执行编译和打包  
   `npm run build`  
   `npm run pack`  
+    
   *请特别注意：此处的命令被重新规范，与之前版本同名，但功能截然不同！！！*  
   *一起告别琐屑命令和手动删除编译打包历史目录的时代~*  
   
 #### FAQ常见问题
-请参考文件：[FAQ.md](FAQ.md)  
+请参考：[FAQ.md](FAQ.md)  
   
 #### 项目进展  
 想要了解一下，某功能是否已经实现？请参考：  
-TODO待办事项：[TODO.md](TODO.md)  
+待办事项：[TODO.md](TODO.md)  
 更新日志：[CHANGELOG.md](CHANGELOG.md)   
   
 #### 发行版  
