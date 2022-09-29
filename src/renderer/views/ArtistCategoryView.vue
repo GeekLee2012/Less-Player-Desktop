@@ -56,7 +56,7 @@ EventBus.on('exploreMode-changed', mode => {
         <div class="center">
             <div v-for="(cate, row) in category" class="fl-row">
                 <div class="cate-title">{{ cate.name }}</div>
-                <div>
+                <div class="cate-item-wrap">
                     <div v-for="(item, col) in cate.data" 
                         class="fl-item" 
                         :class="{ current : col == currentCategoryItems[cate.name].index }"
@@ -153,6 +153,11 @@ EventBus.on('exploreMode-changed', mode => {
     min-width: 36px;
     margin-top: 15px;
     margin-right: 15px;
+}
+
+.artist-category-view .cate-item-wrap {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .artist-category-view .fl-item {

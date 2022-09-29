@@ -8,9 +8,10 @@ import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { useUseCustomTrafficLight } from '../../common/Utils';
 
 //是否使用自定义交通灯控件
-const useCustomTrafficLight = electronAPI.useCustomTrafficLight
+const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { playingViewShow } = storeToRefs(useMainViewStore())
 const { hidePlayingView, minimize, showToast } = useMainViewStore()

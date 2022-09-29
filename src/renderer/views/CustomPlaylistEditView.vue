@@ -12,12 +12,13 @@ import { useMainViewStore } from '../store/mainViewStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import { useRouter } from 'vue-router';
+import { useIpcRenderer } from '../../common/Utils';
 
 const props = defineProps({
     id: String
 })
 
-const ipcRenderer = electronAPI.ipcRenderer
+const ipcRenderer = useIpcRenderer()
 const router = useRouter()
 
 const { showToast } = useMainViewStore()
@@ -72,11 +73,12 @@ const cancel = () => {
 
 //TODO
 const updateCover = async () => {
+    if(!ipcRenderer) return 
     const result = await ipcRenderer.invoke('open-image')
     if(result.length > 0) {
         const title = titleRef.value.value.trim()
         const about = aboutRef.value.value.trim()
-        const cover = "file:///" + result[0]
+        const cover = result[0]
         Object.assign(detail, { title, about, cover })
     }
 }

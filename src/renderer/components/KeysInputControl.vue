@@ -8,7 +8,7 @@ const props = defineProps({
 
 <template>
     <div class="keys-input-ctl">
-        <input type="text" :value="value" />
+        <input type="text" :value="value" @keydown.stop=""/>
     </div>
 </template>
 

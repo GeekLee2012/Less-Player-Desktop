@@ -5,9 +5,10 @@ import { usePlatformStore } from '../store/platformStore';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import EventBus from '../../common/EventBus';
+import { useUseCustomTrafficLight } from '../../common/Utils';
 
 //是否使用自定义交通灯控件
-const useCustomTrafficLight = electronAPI.useCustomTrafficLight
+const useCustomTrafficLight = useUseCustomTrafficLight()
 const router = useRouter()
 
 const { platforms, currentPlatformIndex, 

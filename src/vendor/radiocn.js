@@ -195,7 +195,7 @@ export class RadioCN {
                 const programs = json.data.program
                 programs.forEach(item => {
                     const artist = []
-                    const album = { id: item.odChannelIds , name: '' }
+                    const album = { id: 0, name: '' }
                     const duration = parseInt(item.duration) * 1000
                     const cover = result.cover
                     const track = new Track(item.id, RadioCN.CODE, item.name, artist, album, duration, cover)

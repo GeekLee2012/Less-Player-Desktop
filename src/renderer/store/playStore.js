@@ -5,9 +5,9 @@ import { Track } from '../../common/Track';
 import { toMmss } from '../../common/Times';
 
 const NO_TRACK = new Track(0, '', '听你想听，爱你所爱', 
-                    [ { id: 0, name: '趁青春' }], 
-                    { id: 0, name: '山川湖海，日月星辰' }, 
-                    0, 'default_cover.png')
+    [ { id: 0, name: '趁青春' }], 
+    { id: 0, name: '山川湖海，日月星辰' }, 
+    0, 'default_cover.png')
 
 export const usePlayStore = defineStore('play', {
     state: ()=> ({
@@ -21,6 +21,8 @@ export const usePlayStore = defineStore('play', {
         progress: 0.0,
         //0.0 - 1.0
         volume: 0.5,
+        //是否正在自动下一曲
+        isAutoPlaying: false,
     }),
     getters: {
         currentTrack(state) {
@@ -118,6 +120,7 @@ export const usePlayStore = defineStore('play', {
             }
         },
         resetQueue() {
+            this.isAutoPlaying = false
             this.queueTracks.length = 0
             this.playingIndex = -1
             this.__resetPlayState()
@@ -224,6 +227,9 @@ export const usePlayStore = defineStore('play', {
             this.playMode = ++this.playMode % 3
             //TODO
         },
+        setAutoPlaying(value) {
+            this.isAutoPlaying = value
+        }
     },
     persist: {
         enabled: true,

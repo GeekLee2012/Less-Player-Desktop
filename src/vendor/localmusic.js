@@ -1,6 +1,7 @@
 import { Lyric } from "../common/Lyric"
+import { useIpcRenderer } from "../common/Utils"
 
-const ipcRenderer = electronAPI.ipcRenderer
+const ipcRenderer = useIpcRenderer() 
 
 const FILE_PREFIX = 'file:///'
 
@@ -21,6 +22,10 @@ export class LocalMusic {
     //歌词
     static lyric(id, track) {
         return new Promise(async (resolve, reject) => {
+            if(!ipcRenderer) {
+                resolve(null)
+                return 
+            }
             try {
                 let url = track.url
                 if(url.includes(FILE_PREFIX)) {

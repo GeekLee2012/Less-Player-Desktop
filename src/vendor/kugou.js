@@ -640,7 +640,7 @@ export class KuGou {
             source[1] = cate['字母'].item.value
             return source.join('-')
         } catch(e) {
-            console.log(e)
+            //console.log(e)
         }
         return '1-all-1'
     }

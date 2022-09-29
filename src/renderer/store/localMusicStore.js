@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import { Track } from "../../common/Track";
+import { useIpcRenderer } from "../../common/Utils";
 
-const ipcRenderer = electronAPI.ipcRenderer
+const ipcRenderer = useIpcRenderer()
 
 export const useLocalMusicStore = defineStore('localMusic', {
     state: () => ({
@@ -14,6 +15,7 @@ export const useLocalMusicStore = defineStore('localMusic', {
     },
     actions: {
         async addFolders() {
+            if(!ipcRenderer) return 
             this.isLoading = true
             const result = await ipcRenderer.invoke('open-dirs')
             
@@ -26,6 +28,7 @@ export const useLocalMusicStore = defineStore('localMusic', {
             this.isLoading = false
         },
         async addFiles() {
+            if(!ipcRenderer) return 
             this.isLoading = true
             const result = await ipcRenderer.invoke('open-files')
             

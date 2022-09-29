@@ -6,8 +6,9 @@ import KeysInputControl from '../components/KeysInputControl.vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useMainViewStore } from '../store/mainViewStore';
+import { useIpcRenderer } from '../../common/Utils';
 
-const ipcRenderer = electronAPI.ipcRenderer
+const ipcRenderer = useIpcRenderer()
 
 const { theme, track, keys, tray, cache, other } = storeToRefs(useSettingStore())
 const { setThemeIndex, 
@@ -26,7 +27,7 @@ const { showToast } = useMainViewStore()
 
 const visitAuthor = () => {
     const url = 'https://github.com/GeekLee2012/'
-    ipcRenderer.send('visit-link', url)
+    if(ipcRenderer) ipcRenderer.send('visit-link', url)
 }
 
 const clearSettingsCache = () => {

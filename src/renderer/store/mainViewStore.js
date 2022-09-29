@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import EventBus from '../../common/EventBus';
+import { useIpcRenderer } from "../../common/Utils";
 
-const ipcRenderer = electronAPI.ipcRenderer
+const ipcRenderer = useIpcRenderer()
 
 export const useMainViewStore = defineStore('mainView', {
     state: () => ({
@@ -79,13 +80,13 @@ export const useMainViewStore = defineStore('mainView', {
             this.coverMaskShow = !this.coverMaskShow
         },
         quit() {
-            ipcRenderer.send('app-quit')
+            if(ipcRenderer) ipcRenderer.send('app-quit')
         },
         minimize() {
-            ipcRenderer.send('app-min')
+            if(ipcRenderer) ipcRenderer.send('app-min')
         },
         maximize() {
-            ipcRenderer.send('app-max')
+            if(ipcRenderer) ipcRenderer.send('app-max')
         },
         setExploreMode(index) {
             if(!index || index < 0  || index > 2) index = 0

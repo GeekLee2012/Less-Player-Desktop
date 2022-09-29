@@ -127,7 +127,6 @@ const visitItemArtist = (event)=> {
 const visitItemAlbum = ()=> {
     const { platform, album } = commonCtxMenuCacheItem.value
     visitAlbumDetail(platform, album.id)
-    hideAllCtxMenus()
 }
 
 const removeQueueItem = ()=> {

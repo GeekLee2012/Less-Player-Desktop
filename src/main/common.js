@@ -1,5 +1,5 @@
 const { opendirSync, readFileSync, statSync } = require('fs');
-const { opendir } = require('fs/promises');
+const { opendir, rmdir } = require('fs/promises');
 const path = require('path');
 const mm = require('music-metadata');
 const jschardet = require('jschardet');
@@ -128,4 +128,31 @@ function readText(file) {
     return null
 }
 
-module.exports = { scanDir, parseTracks, readText }
+const ALPHABET_NUMS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz01234567890'
+
+/** 随机字符串
+ * @param src 限定组成元素的字符串，如：ABCDEFGHIJKLMNOPQRSTUVWSYZ
+ * @param len 长度
+ */
+const randomText = (src, len) => {
+    let result = []
+    for (let i = 0; i < len; i++) {
+        const index = Math.floor(Math.random() * (src.length - 1))
+        result.push(src.charAt(index))
+    }
+    return result.join('')
+}
+
+/** 随机字符串: 大小写字母和数字组成 */
+const randomTextWithinAlphabetNums = (len) => {
+    return randomText(ALPHABET_NUMS, len)
+}
+
+module.exports = { 
+    scanDir, 
+    parseTracks, 
+    readText, 
+    FILE_PREFIX,
+    ALPHABET_NUMS, 
+    randomText, 
+    randomTextWithinAlphabetNums }

@@ -12,12 +12,13 @@ import { useMainViewStore } from '../store/mainViewStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import { useRouter } from 'vue-router';
+import { useIpcRenderer } from '../../common/Utils';
 
 const props = defineProps({
     id: String
 })
 
-const ipcRenderer = electronAPI.ipcRenderer
+const ipcRenderer = useIpcRenderer()
 const route = useRouter()
 
 const { showToast } = useMainViewStore()
@@ -53,10 +54,10 @@ const cancel = () => {
 
 //TODO 使用本地文件图片，不利于迁移共享
 const updateCover = async () => {
+    if(!ipcRenderer) return 
     const result = await ipcRenderer.invoke('open-image')
-    if(result.length > 0) { 
-        const cover = "file:///" + result[0]
-        coverRef.value.src = cover
+    if(result.length > 0) {
+        coverRef.value.src = result[0]
     }
 }
 </script>

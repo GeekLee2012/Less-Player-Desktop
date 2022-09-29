@@ -1,5 +1,7 @@
-//配置环境相关常量、变量等
+//环境配置，相关常量、变量等
 
+//关闭警告提示
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 //浏览器UserAgent
 const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:97.0) Gecko/20100101 Firefox/97.0"
 //支持的音频文件扩展名（本地文件）

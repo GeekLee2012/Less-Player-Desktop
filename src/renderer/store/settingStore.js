@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import EventBus from '../../common/EventBus';
+import { useIpcRenderer } from '../../common/Utils';
 
-const ipcRenderer = electronAPI.ipcRenderer
+const ipcRenderer = useIpcRenderer()
 
 //TODO 或许可能大概会实现吧......
 export const useSettingStore = defineStore('setting', {
@@ -180,7 +181,7 @@ export const useSettingStore = defineStore('setting', {
         },
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping
-            ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
+            setupAppSuspension()
         },
         toggleTrayMenu() {
             this.tray.showMenu = !this.tray.showMenu
@@ -197,6 +198,9 @@ export const useSettingStore = defineStore('setting', {
         resetKeys() {
             
         },
+        setupAppSuspension() {
+            if(ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
+        }
     },
     persist: {
         enabled: true,

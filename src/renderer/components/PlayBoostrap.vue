@@ -8,7 +8,7 @@ import { storeToRefs } from 'pinia';
 import { useUserProfileStore } from '../store/userProfileStore';
 
 const { queueTracksSize } = storeToRefs(usePlayStore())
-const { playTrack, playNextTrack } = usePlayStore()
+const { playTrack, playNextTrack, setAutoPlaying } = usePlayStore()
 const { getVender } = usePlatformStore()
 const { showPlayNotification, hidePlayNotification } = useMainViewStore()
 const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
@@ -57,31 +57,38 @@ const tryCancelPlayNextTimer = () => {
 let toastCnt = 0 //连跳计数器
 const bootstrapTrack = (track, callback, noToast) => {
     if(!track) return 
-    const { id, platform, isFMRadio, isRadioType }= track
+    const { id, platform, isFMRadio, isRadioType, artistNotCompleted }= track
     const vender = getVender(platform);
     if(!vender || isFMRadio) return
     vender.playDetail(id, track).then(result => {
-        if(Track.hasUrl(result)) Object.assign(track, { url: result.url })
+        const { lyric, cover, artist, url } = result
+        if(Track.hasUrl(result)) Object.assign(track, { url })
+        //TODO 流程待优化完善
         tryCancelPlayNextTimer()
-        //if(!track.hasUrl()) track = await United.transferTrack(track)
+        //if(!Track.hasUrl(track)) track = await United.transferTrack(track)
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
             if(queueTracksSize.value < 2 && !isRadioType) { //非电台歌曲，且没有下一曲
                 if(!noToast) showToast()
-            } else if(toastCnt < 10) { 
+            } else if(toastCnt < 9) { 
+                setAutoPlaying(true)
                 //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
                 if(!noToast) showToast(playNextTrack)
                 ++toastCnt
             } else { //10连跳啦，暂停一下吧
                 toastCnt = 0 //重置连跳计数
+                setAutoPlaying(false)
             }
             return
         }
         toastCnt =0 //重置连跳计数
-        if(Track.hasLyric(result)) assignLyric(track, result.lyric)
-        if(Track.hasCover(result)) Object.assign(track, { cover: result.cover })
-        if(track.artistNotCompleted && result.artist) {
-            Object.assign(track, { artist: result.artist })
-            EventBus.emit('track-artistUpdated', { trackId: track.id, artist: track.artist })
+        setAutoPlaying(false)
+        
+        if(Track.hasLyric(result)) assignLyric(track, lyric)
+        if(Track.hasCover(result)) Object.assign(track, { cover })
+        //TODO 部分音乐平台artist信息无法在同一API中完整获取
+        if(artistNotCompleted && artist) { 
+            Object.assign(track, { artist })
+            EventBus.emit('track-artistUpdated', { trackId: id, artist })
         }
         if(callback) callback(track)
     }).catch(e => {

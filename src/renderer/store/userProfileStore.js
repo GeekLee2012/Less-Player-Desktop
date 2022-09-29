@@ -1,16 +1,7 @@
 import { defineStore } from "pinia";
 import EventBus from "../../common/EventBus";
+import { randomTextWithinAlphabetNums } from "../../common/Utils";
 
-const choice = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz01234567890'
-//随机字符串
-const randomText = (src, len) => {
-    let result = []
-    for (let i = 0; i < len; i++) {
-        const index = Math.floor(Math.random() * (src.length - 1))
-        result.push(src.charAt(index))
-    }
-    return result.join('')
-}
 
 const filterByPlatform = (state, platform) => {
     if(!platform || platform.trim() == 'all') {
@@ -187,7 +178,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         //自建歌单
         addCustomPlaylist(title, about, cover){
-            const id = randomText(choice, 16)
+            const id = randomTextWithinAlphabetNums(16)
             this.addItem(this.customPlaylists, {
                 id, title, about, cover, data: []
             }, (e1, e2) => e1.id === e2.id)
@@ -260,6 +251,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         //最近播放
         addRecentSong(track) {
             const { id, platform, title, artist, album, duration, cover } = track
+            if(!platform || platform.trim().length < 1) return 
             this.uniqueInsertFirst(this.recents.songs, { 
                 id, platform, title, artist, album, duration, cover 
             })

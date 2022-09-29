@@ -5,25 +5,16 @@ import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { toMMssSSS } from "../common/Times";
 import { Album } from "../common/Album";
+import { randomTextWithinAlphabetNums } from "../common/Utils";
 
-const randomText = (src, len) => {
-    let result = []
-    for (let i = 0; i < len; i++) {
-        const index = Math.floor(Math.random() * (src.length - 1))
-        result.push(src.charAt(index))
-    }
-    return result.join('')
-}
-
-const CHOICE = 'abcedfghijklmnopqrstuvwxyz1234567890'
 //e2db8a61-afdb-11ec-9d7b-c9324a8678ec
 //efe8c650-de5c-11ec-9d92-a133baea2d31
 //8-4-4-4-12
-const REQ_ID = randomText(CHOICE, 8) 
-    + '-' + randomText(CHOICE, 4) 
-    + '-' + randomText(CHOICE, 4) 
-    + '-' + randomText(CHOICE, 4) 
-    + '-' + randomText(CHOICE, 12)
+const REQ_ID = (randomTextWithinAlphabetNums(8) 
+    + '-' + randomTextWithinAlphabetNums(4) 
+    + '-' + randomTextWithinAlphabetNums(4) 
+    + '-' + randomTextWithinAlphabetNums(4) 
+    + '-' + randomTextWithinAlphabetNums(12)).toLowerCase()
 
 const CONFIG = {
     withCredentials: true
@@ -468,7 +459,7 @@ export class KuWo {
             }
             return Object.assign(result, source)
         } catch (e) {
-            console.log(e)
+            //console.log(e)
         }
         return result
     }

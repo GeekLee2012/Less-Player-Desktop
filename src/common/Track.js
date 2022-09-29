@@ -12,7 +12,7 @@ export class Track {
         this.artist = artist ? artist : []
         this.artistNotCompleted = false //数据是否不完整
         //{id, name}
-        this.album = album
+        this.album = album ? album : ({ id: 0, name: '' })
         //millis
         this.duration = duration ? duration : 0
         this.cover = cover ? cover : DEFAULT_COVER

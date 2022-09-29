@@ -6,13 +6,17 @@
   "author": {
     "name": "RIVE2012"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GeekLee2012/Less-Player-Desktop.git"
+  },
+  "license": "Apache License 2.0",
   "main": "src/main/main.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=dev concurrently vite \"electron .\"",
-    "dev:vite": "vite",
     "build": "cross-env NODE_ENV=proc vite build",
-    "preview": "vite preview",
-    "dist": "cross-env NODE_ENV=proc electron-builder"
+    "pack": "cross-env NODE_ENV=proc electron-builder",
+    "dist": "cross-env NODE_ENV=proc vite build && electron-builder"
   },
   "dependencies": {
     "axios": "^0.26.1",
@@ -42,9 +46,10 @@
     "wait-on": "^6.0.1"
   },
   "build": {
-    "appId": "xyz.rive.less-player",
+    "appId": "xyz.rive2012.${name}",
     "productName": "Less Player",
-    "copyright": "Copyright © RIVE2012",
+    "copyright": "Copyright © ${author.name}",
+    "beforePack": "src/main/beforePack.js",
     "directories": {
       "output": "output"
     },

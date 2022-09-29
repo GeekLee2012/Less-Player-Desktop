@@ -6,6 +6,7 @@ import { toYmd } from "../common/Times";
 import { Lyric } from "../common/Lyric";
 import forge from 'node-forge';
 import { Album } from "../common/Album";
+import { randomText } from "../common/Utils";
 import CryptoJS from 'crypto-js';
 
 //常量
@@ -20,15 +21,6 @@ const CHOICE = "012345679abcdef"
 
 //URL
 const BASE_URL = "https://music.163.com"
-
-const randomText = (src, len) => {
-    let result = []
-    for (let i = 0; i < len; i++) {
-        const index = Math.floor(Math.random() * (src.length - 1))
-        result.push(src.charAt(index))
-    }
-    return result.join('')
-}
 
 const rsaEncrypt = (src, publicKey, modulus) => {
     src = src.split('').reverse().join('')
@@ -534,7 +526,7 @@ export class NetEase {
             }
             return Object.assign(result, source)
         } catch (e) {
-            console.log(e)
+            //console.log(e)
         }
         return result
     }

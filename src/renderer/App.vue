@@ -15,23 +15,7 @@ import AddToListSubmenu from './components/addToListSubmenu.vue';
 import { useUserProfileStore } from './store/userProfileStore';
 import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
 
-const { getCurrentThemeName } = useSettingStore()
-
-//TODO 设置主题
-const setupAppTheme = (themeName) => {
-  themeName = themeName || 'dark'
-  themeName = themeName.trim()
-  /*
-  const themeUrl = './assets/styles/' + themeName + '-theme.css'
-  import(themeUrl)
-  */
-  document.documentElement.setAttribute('theme', themeName)
-}
-
-/* @vite-ignore */
-setupAppTheme(getCurrentThemeName())
-onMounted(() => EventBus.emit('radio-init', document.querySelector('.radio-holder')))
-EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
+const { getCurrentThemeName, setupAppSuspension } = useSettingStore()
 
 const ctxMenuPosStyle = reactive({ left: -999, top: -999})
 const ctxSubmenuPosStyle = reactive({ left: -999, top: -999})
@@ -161,6 +145,30 @@ const doToast = (text, callback, delay) => {
 EventBus.on("toast", o => {
   const { text, callback, delay } = o
   doToast(text, callback, delay)
+})
+
+//TODO 设置主题
+const setupAppTheme = (themeName) => {
+  themeName = themeName || 'dark'
+  themeName = themeName.trim()
+  /*
+  const themeUrl = './assets/styles/' + themeName + '-theme.css'
+  import(themeUrl)
+  */
+  document.documentElement.setAttribute('theme', themeName)
+}
+
+const initRadioPlayer = () => {
+  EventBus.emit('radio-init', document.querySelector('.radio-holder'))
+}
+
+/* @vite-ignore */
+EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
+
+onMounted(() => {
+  initRadioPlayer()
+  setupAppTheme(getCurrentThemeName())
+  setupAppSuspension()
 })
 
 //TODO
