@@ -104,7 +104,7 @@ EventBus.on('playlistCategory-update', () => {
     text-align: center;
     line-height: 36px;
     color: var(--text-color);
-    font-size: 16px;
+    font-size: var(--text-size);
     cursor: pointer;
     white-space: nowrap;
     border-radius: 10rem;

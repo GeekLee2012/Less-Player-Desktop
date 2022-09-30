@@ -80,7 +80,7 @@ const filterData = (data) => {
     text-align: center;
     line-height: 36px;
     color: var(--text-color);
-    font-size: 16px;
+    font-size: var(--text-size);
     cursor: pointer;
     border-radius: 10rem;
     border: 0.1px solid transparent;

@@ -150,8 +150,8 @@ export const useSettingStore = defineStore('setting', {
             storeLocalMusic: false, //退出后记录已经添加的本地歌曲
         },
         /* 其他 */
-        other: {
-            //TODO
+        other: { //TODO
+            blockHole: null,
         }
     }),
     getters: {
@@ -200,6 +200,9 @@ export const useSettingStore = defineStore('setting', {
         },
         setupAppSuspension() {
             if(ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
+        },
+        updateBlackHole(value) {
+            this.other.blockHole = value
         }
     },
     persist: {

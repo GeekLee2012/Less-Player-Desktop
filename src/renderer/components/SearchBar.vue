@@ -50,10 +50,12 @@ const clear = () => {
 .search-bar .keyword, 
 .search-bar .clear-btn {
     border: 0px solid var(--searchbar-border-color);
+    height: 28px;
 }
 
 .search-bar .search-btn {
     border-radius: 10rem 0 0 10rem;
+    border-right: 0px;
     width: 28px;
     background: linear-gradient(to top right, #28c83f, #1ca388);
     background: var(--btn-bg);
@@ -73,19 +75,21 @@ const clear = () => {
 
 .search-bar .keyword {
     font-size: 15px;
-    height: 28px;
     padding-left: 5px;
     padding-right: 6px;
     background-color: var(--searchbar-bg);
     outline: 0;
     width: 115px;
     color: var(--searchbar-text-color);
+    border-left: 0px;
+    border-right: 0px;
 }
 
 .search-bar .clear-btn {
     border-radius: 0 10rem 10rem 0;
     width: 18px;
     background: var(--searchbar-bg);
+    border-left: 0px;
 }
 
 .search-bar .clear-btn svg {

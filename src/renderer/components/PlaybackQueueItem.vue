@@ -148,6 +148,7 @@ onMounted(() => {
     margin-bottom: 6px;
     */
     width: 258px;
+    width: 77%;
     top: 2px;
 }
 
@@ -167,6 +168,7 @@ onMounted(() => {
     position: absolute;
     left: 0px;
     width: 210px;
+    width: 62.68%;
     cursor: pointer;
 }
 
@@ -217,6 +219,7 @@ onMounted(() => {
 .playback-queue-item:hover .title, 
 .playback-queue-item:hover .artist {
     width: 158px;
+    width: 47.16%;
 }
 
 .playback-queue-item:hover .action{

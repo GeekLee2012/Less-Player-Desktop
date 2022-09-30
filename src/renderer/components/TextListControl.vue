@@ -36,7 +36,7 @@ const props = defineProps({
 }
 
 .textlist-ctl p {
-    font-size: 14px;
+    font-size: var(--text-size);
     margin-bottom: 36px;
 }
 

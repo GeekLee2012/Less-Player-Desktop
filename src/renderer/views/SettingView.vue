@@ -20,7 +20,7 @@ const { setThemeIndex,
     toggleStoreLocalMusic,
     toggleTrayMenu,
     toggleKeysGlobal,
-    resetKeys
+    updateBlackHole
 } = useSettingStore()
 
 const { showToast } = useMainViewStore()
@@ -34,6 +34,7 @@ const clearSettingsCache = () => {
     ["setting", "settings"].forEach(key => {
         localStorage.removeItem(key)
     })
+    updateBlackHole(Math.random() * 100000000)
     showToast("当前设置缓存已清空！")
 }
 </script>
@@ -102,7 +103,7 @@ const clearSettingsCache = () => {
                     <div class="last">
                         <SvgTextButton text="清空设置页缓存" :left-action="clearSettingsCache">
                         </SvgTextButton>
-                        <span class="tip-text">（提示：清空缓存，可能会重置当前设置；修改任何设置时会重新缓存）</span>
+                        <span class="tip-text">（ 提示：版本更新时，由于缓存原因，导致新版本的设置可能没有生效。<br/>&nbsp;&nbsp;&nbsp;&nbsp;需手动清空缓存，刷新一下才生效。请放心操作，不会影响当前设置 ）</span>
                     </div>
                     <!--
                     <div class="last">
@@ -135,7 +136,7 @@ const clearSettingsCache = () => {
                     <div v-for="(item,index) in keys.data"
                         :class="{ last: index == (keys.data.length - 1) }" >
                         <b>{{ item.name }}：</b>
-                        <KeysInputControl :value="item.binding"></KeysInputControl>
+                        <KeysInputControl :value="item.binding" :class="{ keysInputAdptWidth: !keys.global }"></KeysInputControl>
                         <KeysInputControl class="global-keys-ctrl" v-show="keys.global"></KeysInputControl>
                     </div>
                 </div>
@@ -154,7 +155,7 @@ const clearSettingsCache = () => {
     </div>
 </template>
 
-<style scoped>
+<style>
 #setting-view {
     flex: 1;
     display: flex;
@@ -206,6 +207,12 @@ const clearSettingsCache = () => {
     font-weight: normal;
 }
 
+#setting-view .content, 
+#setting-view .content > div,
+#setting-view .keys-input-ctl  {
+    flex: 1;
+}
+
 #setting-view .content > div {
     margin-bottom: 30px;
     display: flex;
@@ -240,6 +247,7 @@ const clearSettingsCache = () => {
     justify-content: center;
     align-items: center;
     border: 3px solid transparent;
+    flex: 1;
 }
 
 #setting-view .theme .content div b{
@@ -292,5 +300,15 @@ const clearSettingsCache = () => {
 #setting-view .center .about a {
     text-decoration: none;
     color: var(--text-color);
+}
+
+#setting-view .keys-input-ctl input {
+    min-width: 159px;
+    width: 93.5%;
+    padding: 8px;
+}
+
+#setting-view .keysInputAdptWidth input{
+    width: 42%;
 }
 </style>

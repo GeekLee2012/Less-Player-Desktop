@@ -239,6 +239,8 @@ textarea {
   /* 文本 */
   --text-family: system-ui, "PingFang SC", STHeitiSC-Medium, "Heiti SC Medium", "Heiti SC Light", "Microsoft YaHei", sans-serif;
   --text-size: 15px;
+  --text-sub-size: 14px;
+  --tab-title-text-size: 16px;
 }
 
 :root[theme='dark'] {
@@ -278,7 +280,7 @@ textarea {
   /* 搜索框(目前无边框) */
   --searchbar-bg: #eee;
   --searchbar-text-color: #555;
-  --searchbar-border-color: #eee;
+  --searchbar-border-color: var(--hl-color);
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
@@ -327,7 +329,7 @@ textarea {
   /* 搜索框 (目前无边框) */
   --searchbar-bg: #eee;
   --searchbar-text-color: #313131;
-  --searchbar-border-color: #eee;
+  --searchbar-border-color: var(--hl-color);
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
@@ -376,7 +378,7 @@ textarea {
   /* 搜索框（目前无边框） */
   --searchbar-bg: #eee;
   --searchbar-text-color: #555;
-  --searchbar-border-color: #eee;
+  --searchbar-border-color: var(--hl-color);
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
@@ -432,6 +434,55 @@ textarea {
   --ntf-text-color: var(--text-color);
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
+  --error-color: red;
+}
+
+:root[theme='green'] {
+  /* 全局背景 */
+  --bg-color: #fff;
+  /* 文本 */
+  --text-color: #212121;
+  --text-sub-color: #666;
+  --hl-color: #28c83f;
+  --hl-color: #1ca388;
+  --hl-text-bg: linear-gradient(to top right, #28c83f, #1ca388);
+  /* 歌词文本颜色 */
+  --text-lyric-color: #666;
+  /* 按钮 */
+  --svg-color: #414141;
+  --svg-text-color: #fff;
+  --svg-btn-color: #fff;
+  --btn-bg: linear-gradient(to right, #1ca388, #28c83f);
+  --btn-hover-bg: linear-gradient(to top right, #2edfa3, #28c83f) !important;
+  --toggle-btn-bg: #a0a0a0;
+  --toggle-btn-bg: #888;
+  --toggle-btn-color: #a0a0a0;
+  --toggle-btn-color: #bbb;
+  /* 进度条 */
+  --progress-track-bg: linear-gradient(to right, #999, #ccc) !important;
+  /*滚动条*/
+  --scrollbar-thumb-bg: #999;
+  /* 列表项 hover */
+  --list-item-hover: #eee !important;
+  /* 边框 */
+  --main-left-border-color: #ddd;
+  --ctx-menu-border-color: #181818;
+  --border-color: #f4f4f4;
+  /* 设置页，每一分类栏底部分隔线颜色 */
+  --setting-bottom-border-color: #f8f8f8;
+  /* 当前播放列表 左侧边框高亮颜色 */
+  --pbq-hl-border: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
+  /* 搜索框 (目前无边框) */
+  --searchbar-bg: #eee;
+  --searchbar-text-color: #313131;
+  --searchbar-border-color: var(--hl-color);
+  /* 按键输入框背景 */
+  --keyinput-ctl-bg: var(--searchbar-bg);
+  /* 通知消息 */
+  --ntf-bg: #eee;
+  --ntf-text-color: var(--text-color);
+  /* 加载中遮盖 */
+  --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
   --error-color: red;
 }
 
@@ -510,6 +561,7 @@ img {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
+
 }
 
 ::-webkit-scrollbar {
@@ -537,6 +589,8 @@ img {
     top: 0;
     right: 0px;
     width: 335px;
+    max-width: 404px;
+    width: 33.5%;
     height: 100%;
     z-index: 99;
     background-color: var(--bg-color);

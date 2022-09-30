@@ -21,19 +21,114 @@ const handleKeys = (e) => {
     }
 }
 
-const setCategoryHeight = () => {
+const setPlayMetaSize = () => {
+    const minClientWidth = 999, minClientHeight = 666 
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minClientWidth
+    //const hScaleRatio = clientHeight / minClientHeight
+    const width = 205 * Math.max(wScaleRatio, 1)
+    const el1 = document.querySelector(".play-meta .title-wrap")
+    const el2 = document.querySelector(".play-meta .time-volume-wrap")
+    el1.style.width = width + "px"
+    el2.style.width = width + "px"
+}
+
+const setSearchBarSize = () => {
+    const minClientWidth = 999, minClientHeight = 666 
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minClientWidth
+    //const hScaleRatio = clientHeight / minClientHeight
+    const size = 115 * Math.max(wScaleRatio, 1)
+    const el = document.querySelector(".search-bar .keyword")
+    el.style.width = size + "px"
+}
+
+const setCategorySize = () => {
     const mainContent = document.getElementById('main-content')
     const playlistCategory = document.querySelector('#playlist-category-view')
     const artistCategory = document.querySelector('#artist-category-view')
-    const viewHeight = (mainContent.clientHeight - 37) + "px"
-    if(playlistCategory) playlistCategory.style.height = viewHeight
-    if(artistCategory) artistCategory.style.height = viewHeight
+    const { clientHeight } = mainContent, padding = 37
+    const height = (clientHeight - padding)
+    if(playlistCategory) playlistCategory.style.height = height + "px"
+    if(artistCategory) artistCategory.style.height = height + "px"
+}
+
+const setImageTextTileSize = () => {
+    const tileMinWidth = 165;
+    const tileHMargin = 12.5;
+    const mainMargin = 33;
+    const scrollBarWidth = 6
+    const limits = [ 5, 4 ]
+    const mainContent = document.getElementById('main-content')
+    const { clientWidth }  = mainContent
+    const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
+    const tileCovers = document.querySelectorAll(".image-text-tile .cover")
+    const tileTitles = document.querySelectorAll(".image-text-tile .title")
+    let tileWidth = 165, limit = 0
+    if(clientWidth > minWidths[0]) {
+        limit = limits[0]
+    } else if(clientWidth > minWidths[1]) {
+        limit = limits[1]
+    }
+    if(limit > 0) tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
+    tileCovers.forEach(item => {
+        item.style.width = tileWidth + "px"
+        item.style.height = tileWidth + "px"
+    })
+    tileTitles.forEach(item => {
+        item.style.width =  tileWidth + "px"
+    })
+}
+
+const setPlaybackQueueSize = () => {
+    const minClientWidth = 999, minClientHeight = 666 
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minClientWidth
+    const hScaleRatio = clientHeight / minClientHeight
+    let size = 335 * Math.max(wScaleRatio * 0.85, 1)
+    const el = document.querySelector("#playback-queue")
+    el.style.width = size + "px"
+}
+
+const setPlayingCoverSize = () => {
+    const minClientWidth = 999, minClientHeight = 666 
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minClientWidth
+    const hScaleRatio = clientHeight / minClientHeight
+    let size = 265 * Math.min(wScaleRatio, hScaleRatio)
+    const el = document.querySelector(".playing-view .cover img")
+    el.style.width = size + "px"
+    el.style.height = size + "px"
+}
+
+const setPlayingLyricCtlSize = () => {
+    const minClientWidth = 999, minClientHeight = 666 
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minClientWidth
+    const hScaleRatio = clientHeight / minClientHeight
+    let size = 366 * Math.min(wScaleRatio, hScaleRatio)
+    const el = document.querySelector(".lyric-ctl .center")
+    el.style.width = size + "px"
+    el.style.height = size + "px"
 }
 
 onMounted (() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', e => {
-        setCategoryHeight()
+        //自适应播放元信息组件大小
+        setPlayMetaSize()
+        //自适应搜索框大小
+        setSearchBarSize()
+        //自适应ImageTextTile组件大小
+        setImageTextTileSize()
+        //自适应分类列表大小
+        setCategorySize()
+        //自适应当前播放列表大小
+        //setPlaybackQueueSize()
+        //自适应播放页封面大小
+        setPlayingCoverSize()
+        //自适应播放页歌词组件大小
+        setPlayingLyricCtlSize()
         //隐藏上下文菜单
         hideAllCtxMenus()
     })
@@ -42,8 +137,8 @@ onMounted (() => {
     document.addEventListener('click', e => {
         //隐藏当前播放列表
         hidePlaybackQueueView()
-        //强制重置高度
-        setCategoryHeight()
+        //强制分类列表重置大小
+        setCategorySize()
         //隐藏歌单分类列表
         hidePlaylistCategoryView()
         //隐藏歌手分类列表
@@ -58,7 +153,9 @@ onMounted (() => {
     })
 })
 
-watch([playlistCategoryViewShow, artistCategoryViewShow], setCategoryHeight)
+EventBus.on("imageTextTile-load", setImageTextTileSize)
+//TODO
+watch([playlistCategoryViewShow, artistCategoryViewShow], setCategorySize)
 </script>
 
 <template>
@@ -106,6 +203,7 @@ watch([playlistCategoryViewShow, artistCategoryViewShow], setCategoryHeight)
     top: 75px;
     right: 0px;
     width: 404px;
+    width: 40.4%;
     padding-bottom: 30px;
     z-index: 55;
     background-color: var(--bg-color);
@@ -127,6 +225,7 @@ watch([playlistCategoryViewShow, artistCategoryViewShow], setCategoryHeight)
 .fade-ex-enter-from,
 .fade-ex-leave-to {
   transform: translateX(404px);
+  transform: translateX(40.4%);
   opacity: 0;
 }
 </style>

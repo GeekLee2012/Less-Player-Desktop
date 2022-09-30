@@ -286,6 +286,7 @@ const loadAll = () => {
     scrollToTop()
     resetPagination()
     visitTab(0)
+    EventBus.emit("imageTextTile-load")
 }
 
 //TODO 后期需要梳理优化，容易出现重复加载Bug
@@ -405,7 +406,7 @@ watch(() => props.id , (nv, ov) => reloadAll())
 }
 
 #artist-detail .tab {
-    font-size: 16px;
+    font-size: var(--tab-title-text-size);
     padding-left: 6px;
     padding-right: 6px;
     margin-right: 15px;

@@ -314,7 +314,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
 }
 
 #album-detail .tab {
-    font-size: 16px;
+    font-size: var(--tab-title-text-size);
     padding-left: 6px;
     padding-right: 6px;
     margin-right: 15px;

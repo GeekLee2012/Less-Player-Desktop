@@ -99,7 +99,7 @@ onMounted(() => {
 .song-item > div {
     line-height: 50px;
     vertical-align: middle;
-    font-size: 16px;
+    font-size: var(--text-size);
 }
 
 .song-item .spacing {

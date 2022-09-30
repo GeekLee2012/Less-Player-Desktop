@@ -1,4 +1,7 @@
 <script setup>
+import { onMounted } from 'vue';
+import EventBus from '../../common/EventBus';
+
 const props = defineProps({
     cover: String,
     title: String,
@@ -7,6 +10,9 @@ const props = defineProps({
     playAction: Function
 })
 
+onMounted(() => {
+    EventBus.emit("imageTextTile-load")
+})
 </script>
 
 <template>
