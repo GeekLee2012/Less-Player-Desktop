@@ -331,7 +331,6 @@ watch(()=> props.id, (nv, ov) => reloadAll())
     position: absolute;
     right: 10px;
     font-size: 16px;
-    background: linear-gradient(to top right, #1ca388, #28c83f);
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

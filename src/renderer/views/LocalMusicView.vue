@@ -1,7 +1,7 @@
 <script setup>
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
-import BatchDeleteBtn from '../components/BatchDeleteBtn.vue';
+import BatchActionBtn from '../components/BatchActionBtn.vue';
 import { usePlayStore } from '../store/playStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { storeToRefs } from 'pinia';
@@ -41,7 +41,7 @@ const noTracks = () => (localTracks.value.length < 1)
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll" :rightAction="addAll" ></PlayAddAllBtn>
                     <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="spacing"></AddFolderFileBtn>
-                    <BatchDeleteBtn :leftAction="batchDelete" :rightAction="resetAll" class="spacing"></BatchDeleteBtn>
+                    <BatchActionBtn :deleteBtn="true" :leftAction="batchDelete" :rightAction="resetAll" class="spacing"></BatchActionBtn>
                 </div>
             </div>
         </div>

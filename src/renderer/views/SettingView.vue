@@ -7,6 +7,7 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useMainViewStore } from '../store/mainViewStore';
 import { useIpcRenderer } from '../../common/Utils';
+import { onMounted } from 'vue';
 
 const ipcRenderer = useIpcRenderer()
 
@@ -35,8 +36,10 @@ const clearSettingsCache = () => {
         localStorage.removeItem(key)
     })
     updateBlackHole(Math.random() * 100000000)
-    showToast("当前设置缓存已清空！")
+    //showToast("当前设置缓存已清空！")
 }
+
+onMounted(clearSettingsCache)
 </script>
 
 <template>
@@ -94,20 +97,17 @@ const clearSettingsCache = () => {
                             :value="cache.storePlayState">
                         </ToggleControl>
                     </div>
-                    <div>
+                    <div class="last">
                         <b>应用退出前，保存本地歌曲：</b>
                         <ToggleControl @click="toggleStoreLocalMusic"
                             :value="cache.storeLocalMusic">
                         </ToggleControl>
                     </div>
+                    <!--
                     <div class="last">
                         <SvgTextButton text="清空设置页缓存" :left-action="clearSettingsCache">
                         </SvgTextButton>
                         <span class="tip-text">（ 提示：版本更新时，由于缓存原因，导致新版本的设置可能没有生效。<br/>&nbsp;&nbsp;&nbsp;&nbsp;需手动清空缓存，刷新一下才生效。请放心操作，不会影响当前设置 ）</span>
-                    </div>
-                    <!--
-                    <div class="last">
-                        <b>缓存根目录：</b>
                     </div>
                     -->
                 </div>

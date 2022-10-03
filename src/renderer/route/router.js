@@ -11,6 +11,7 @@ import AlbumDetailView from '../views/AlbumDetailView.vue';
 import CustomPlaylistEditView from '../views/CustomPlaylistEditView.vue';
 import CustomPlaylistDetailView from '../views/CustomPlaylistDetailView.vue';
 import UserInfoEditView from '../views/UserInfoEditView.vue'; 
+import BatchActionView from '../views/BatchActionView.vue'; 
 
 const routes = [ 
     { //默认
@@ -28,7 +29,7 @@ const routes = [
         component:  LocalMusicView 
     },
     {  //我的主页
-        path: '/userhome', 
+        path: '/userhome/:platform', 
         component:  UserHomeView 
     },
     {  //设置
@@ -74,7 +75,11 @@ const routes = [
         props: true, 
         component:  CustomPlaylistDetailView 
     },
-    
+    {  //批量操作
+        path: '/:exploreMode/batch/:source/:id',
+        props: true, 
+        component: BatchActionView 
+    },
 ]
 
 export const router = createRouter({

@@ -6,6 +6,7 @@ import AlbumListControl from '../components/AlbumListControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
+import { useMainViewStore } from '../store/mainViewStore';
 
 const props = defineProps({
     keyword: String
@@ -23,6 +24,7 @@ const { setActiveTab,
         isArtistsTab,
         currentVender
     } = useSearchViewStore()
+const { hideAllCtxMenus } = useMainViewStore()
 
 const currentTabView = shallowRef(null)
 const tabData = ref([])
@@ -101,14 +103,23 @@ const byPlatform = (index) => {
     setCurrentPlatformIndex(index)
 }
 
+//TODO
+const viewRef = ref(null)
+const bindScrollListener = () => {
+    if(!viewRef.value) return 
+    viewRef.value.removeEventListener('scroll', hideAllCtxMenus)
+    viewRef.value.addEventListener('scroll', hideAllCtxMenus)
+}
+
 onActivated(() => visitTab(0))
 watch(currentPlatformIndex, (nv, ov) => loadTab())
 watch(activeTab, (nv, ov) => visitTab(nv))
 watch(() => props.keyword, (nv,ov) => loadTab())
+onMounted(bindScrollListener)
 </script>
 
 <template>
-    <div id="search-view">
+    <div id="search-view" ref="viewRef">
         <div class="header">
             <div class="keyword">
                 <b>搜  </b><span class="text">{{ keyword }}</span>
@@ -167,6 +178,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
 #search-view .keyword .text{
     background: linear-gradient(to top right, #1ca388, #28c83f);
     background: var(--hl-text-bg);
+    background: var(--hl-color);
     -webkit-background-clip: text;
     color: transparent;
 
@@ -197,9 +209,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
 }
 
 #search-view .platform .active {
-    background: linear-gradient(to top right, #1ca388, #28c83f);
     background: var(--hl-text-bg);
-    border-color: #28c83f;
     border-color: var(--hl-color);
     color: var(--svg-btn-color) !important;
 }
@@ -234,6 +244,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     /*background: linear-gradient(to top right, #1ca388, #28c83f);
     background: var(--hl-text-bg);*/
     background: var(--btn-bg);
+    background: var(--hl-color);
     -webkit-background-clip: text;
     color: transparent;
 }

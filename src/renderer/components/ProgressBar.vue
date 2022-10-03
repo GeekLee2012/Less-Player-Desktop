@@ -47,7 +47,6 @@ defineExpose({
    width: 0%;
    height: 100%;
    border-radius: 10rem;
-   background: linear-gradient(to top right, #28c83f, #1ca388);
    background: var(--hl-text-bg);
 }
 </style>

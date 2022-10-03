@@ -10,7 +10,11 @@ import { Track } from '../../common/Track';
 import { useUserProfileStore } from '../store/userProfileStore';
 
 const props = defineProps({
-    data: Array
+    data: Array,
+    checkbox: Boolean,
+    checkedAll: Boolean,
+    ignoreCheckAllEvent: Boolean,
+    checkChangedFn: Function
 })
 
 const router = useRouter()
@@ -21,6 +25,8 @@ const { showToast } = useMainViewStore()
 const { addRecentPlaylist } = useUserProfileStore()
 
 const visitItem = (item) => {
+    const { checkbox } = props
+    if(checkbox) return
     const { id, platform, isFMRadio, isRadioType } = item
     const platformValid = isPlatformValid(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
@@ -86,7 +92,11 @@ EventBus.on('radio-nextTrack', track => nextRadioTrack(track.platform, track.cha
                     :cover="item.cover" 
                     :title="item.title"
                     :playable="true"
-                    :playAction="() => playItem(item)" >
+                    :playAction="() => playItem(item)"
+                    :checkbox="checkbox"
+                    :checked="checkedAll"
+                    :ignoreCheckAllEvent="ignoreCheckAllEvent"
+                    :checkChangedFn="(checked) => checkChangedFn(checked, item)" >
                 </ImageTextTile>
             </template>
         </PaginationTiles>

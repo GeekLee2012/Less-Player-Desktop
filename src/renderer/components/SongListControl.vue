@@ -4,6 +4,10 @@ const props = defineProps({
     artistVisitable: Boolean,
     albumVisitable: Boolean,
     dataType: Number,
+    checkbox: Boolean,
+    checkedAll: Boolean,
+    ignoreCheckAllEvent: Boolean,
+    checkChangedFn: Function
 })
 </script>
 
@@ -13,7 +17,11 @@ const props = defineProps({
             <SongItem :index="index" :data="item"
                 :artistVisitable="artistVisitable"
                 :albumVisitable="albumVisitable"
-                :dataType="dataType" >
+                :dataType="dataType"
+                :checkbox="checkbox"
+                :checked="checkedAll"
+                :ignoreCheckAllEvent="ignoreCheckAllEvent"
+                :checkChangedFn="checkChangedFn" >
             </SongItem>
         </div>
     </div>

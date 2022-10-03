@@ -112,6 +112,15 @@ const setPlayingLyricCtlSize = () => {
     el.style.height = size + "px"
 }
 
+//TODO
+const setBatchViewListSize = () => {
+    const mainContent = document.getElementById('main-content')
+    const el = document.querySelector('#batch-action-view .content')
+    const { clientHeight } = mainContent, padding = 52
+    const height = (clientHeight - 133 - padding)
+    if(el) el.style.height = height + "px"
+}
+
 onMounted (() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', e => {
@@ -129,6 +138,8 @@ onMounted (() => {
         setPlayingCoverSize()
         //自适应播放页歌词组件大小
         setPlayingLyricCtlSize()
+        //自适应批量操作页面列表大小
+        setBatchViewListSize()
         //隐藏上下文菜单
         hideAllCtxMenus()
     })
@@ -154,6 +165,7 @@ onMounted (() => {
 })
 
 EventBus.on("imageTextTile-load", setImageTextTileSize)
+EventBus.on("batchView-show", setBatchViewListSize)
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow], setCategorySize)
 </script>

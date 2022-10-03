@@ -82,10 +82,12 @@ export const usePlayStore = defineStore('play', {
         },
         addTracks(tracks) {
             //TODO 暂时不去重, 超级列表如何保证时效
-            this.queueTracks.push(...tracks)
+            //this.queueTracks.push(...tracks)
+            if(tracks.length < 1) return
+            tracks.forEach(item => this.addTrack(item));
         },
         playTrackLater(track) {
-            let index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
+            let index = this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
             if(index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
@@ -100,7 +102,7 @@ export const usePlayStore = defineStore('play', {
             }
         },
         removeTrack(track) {
-            const index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
+            const index = this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
             if(index > -1) {
                 const isCurrent = (index == this.playingIndex)
                 this.queueTracks.splice(index, 1)
@@ -149,7 +151,7 @@ export const usePlayStore = defineStore('play', {
         playTrack(track) {
             //TODO
             //let index = this.queueTracks.indexOf(track)
-            let index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
+            let index = this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
             if(index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)

@@ -14,7 +14,7 @@ export const useUserProfileStore = defineStore("userProfile", {
     state: () => ({
         user: {
             id: 0,
-            nickname: "我的主页(测试阶段)",
+            nickname: "我的主页",
             cover: "",
             about: "这个人很懒，什么也没留下~"
         },
@@ -164,12 +164,21 @@ export const useUserProfileStore = defineStore("userProfile", {
         isFavouriteRadio(id, platform) {
             return this.findItemIndex(this.favorites.radios, { id, platform}) > -1
         },
+        removeAllFavourites() {
+            this.favorites.songs.length = 0
+            this.favorites.playlists.length = 0
+            this.favorites.albums.length = 0
+            this.favorites.radios.length = 0
+            this.refreshUserHome()
+        },
         //清理
         cleanUpAllSongs(states) {
             states = states || [ this.favorites.songs, this.recents.songs ]
             const props = ['url', 'lyric']
             states.forEach(state => {
                 state.forEach(item => {
+                    const { isFMRadio } = item
+                    if(isFMRadio) return
                     props.forEach(p => {
                         Reflect.deleteProperty(item, p)
                     })
@@ -275,6 +284,18 @@ export const useUserProfileStore = defineStore("userProfile", {
         removeRecentSong(track) {
             const { id, platform } = track
             this.removeItem(this.recents.songs, { id, platform })
+        },
+        removeRecentPlaylist(playlist) {
+            const { id, platform } = playlist
+            this.removeItem(this.recents.playlists, { id, platform })
+        },
+        removeRecentAlbum(album) {
+            const { id, platform } = album
+            this.removeItem(this.recents.albums, { id, platform })
+        },
+        removeRecentRadio(track) {
+            const { id, platform } = track
+            this.removeItem(this.recents.radios, { id, platform })
         },
         removeAllRecents() {
             this.recents.songs.length = 0

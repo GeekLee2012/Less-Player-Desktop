@@ -15,7 +15,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import { useRouter } from 'vue-router';
 import CustomPlaylistListControl from '../components/CustomPlaylistListControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
-import BatchDeleteBtn from '../components/BatchDeleteBtn.vue';
+import BatchActionBtn from '../components/BatchActionBtn.vue';
 
 const tabs = [ {
         code: 'favourites',
@@ -74,7 +74,8 @@ const { user, getFavouriteSongs, getFavouritePlaylilsts,
     getCustomPlaylists, getFollowArtists,
     getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios } = storeToRefs(useUserProfileStore())
-const { cleanUpAllSongs, updateUser, removeAllRecents } = useUserProfileStore()
+const { cleanUpAllSongs, updateUser, 
+    removeAllFavourites, removeAllRecents } = useUserProfileStore()
 
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
@@ -189,8 +190,15 @@ const switchSubTab = () => {
     subTabTipText.value = typeTabs[activeSubTab.value].text.replace('0', tabData.length)
 }
 
-const showBatchView = () => {
-    
+const visitBatchActionView = () => {
+    const source = tabs[activeTab.value].code
+    router.push(`/userhome/batch/${source}/0`)
+}
+
+const batchRemoveAll = () => {
+    const index = activeTab.value
+    //if(index == 0) clearFavourites()
+    if(index == 3) clearRecents()
 }
 
 //TODO
@@ -204,6 +212,11 @@ const clearAll = () => {
     showToast("全部数据已被清空！")
     //updateUser(nickname, about, cover)
     store.$patch({ user: { nickname, about, cover } })
+}
+
+const clearFavourites = () => {
+    removeAllFavourites()
+    showToast("我的收藏已被清空！")
 }
 
 const clearRecents = () => {
@@ -237,7 +250,8 @@ watch(playingViewShow, (nv, ov) => {
 })
 
 watch(currentPlatformCode, (nv, ov) => {
-    if(!isUserHomeMode.value) return
+    const path = router.currentRoute.value.path
+    if(!isUserHomeMode.value && path.includes("/batch/")) return
     refresh()
 })
 
@@ -262,15 +276,16 @@ EventBus.on("userHome-refresh", refresh)
                 </div>
                 <div class="about" v-html="user.about"></div>
                 <div class="action">
-                    <CreatePlaylistBtn :leftAction="visitCreateCustomPlaylistView" class="spacing">
-                    </CreatePlaylistBtn>
-                    <BatchDeleteBtn :leftAction="showBatchView" :rightAction="clearAll" class="spacing">
-                    </BatchDeleteBtn>
-                    <DeleteAllBtn v-show="activeTab == 3" text="清空最近播放" :leftAction="clearRecents"  class="spacing">
-                    </DeleteAllBtn>
                     <PlayAddAllBtn v-show="isAvailableSongTab()" class="spacing"
                         :leftAction="playAllSongs" :rightAction="addAllSongs">
                     </PlayAddAllBtn>
+                    <CreatePlaylistBtn :leftAction="visitCreateCustomPlaylistView" class="spacing">
+                    </CreatePlaylistBtn>
+                    <BatchActionBtn v-show="activeTab == 0 || activeTab == 3" class="spacing"
+                        :deleteBtn="activeTab == 3" 
+                        :leftAction="visitBatchActionView" 
+                        :rightAction="batchRemoveAll">
+                    </BatchActionBtn>
                 </div>
             </div>
         </div>
@@ -394,12 +409,12 @@ EventBus.on("userHome-refresh", refresh)
     position: relative;
     display: flex;
     height: 30px;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
     border-bottom: 1px solid var(--border-color);
 }
 
 #user-profile .tab {
-    font-size: 16px;
+    font-size: var(--tab-title-text-size);
     padding-left: 6px;
     padding-right: 6px;
     margin-right: 15px;
@@ -410,7 +425,7 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile .tab-tip {
     position: absolute;
     right: 10px;
-    font-size: 16px;
+    font-size: var(--tab-title-text-size);
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

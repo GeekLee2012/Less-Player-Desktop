@@ -2,13 +2,26 @@
 const props = defineProps({
     text: String,
     leftAction: Function,
-    rightAction: Function
+    rightAction: Function,
+    isDisabled: Boolean
 })
+
+const handleLeftClick = (event) => {
+    const { isDisabled, leftAction } = props
+    if(isDisabled) return 
+    if(leftAction) leftAction(event)
+}
+
+const handleRightClick = (event) => {
+    const { isDisabled, rightAction } = props
+    if(isDisabled) return 
+    if(rightAction) rightAction(event)
+}
 </script>
 
 <template>
-    <div class="svg-text-btn">
-        <div class="left-btn" @click="leftAction">
+    <div class="svg-text-btn" :class="{ btnDisabled: isDisabled }">
+        <div class="left-btn" @click="handleLeftClick">
             <div class="img">
                 <slot name="left-img"></slot>
             </div>
@@ -16,7 +29,7 @@ const props = defineProps({
                 {{ text }}
             </div>
         </div>
-        <div class="right-btn" @click="rightAction">
+        <div class="right-btn" @click="handleRightClick">
             <slot name="right-img"></slot>
         </div>
     </div>
@@ -68,5 +81,10 @@ const props = defineProps({
     border-radius: 0 10rem 10rem 0;
     padding-left: 8px;
     padding-right: 10px;
+}
+
+.btnDisabled .left-btn:hover,
+.btnDisabled .right-btn:hover {
+    background: var(--btn-bg);
 }
 </style>

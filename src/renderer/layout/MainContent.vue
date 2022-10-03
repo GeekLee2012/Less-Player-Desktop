@@ -24,7 +24,7 @@ const highlightPlatform = (to) => {
     } else if(path.includes('/local')) {
         code = 'local'
     }  else if(path.includes('/userhome')) {
-        code = 'all'
+        code = path.split('/')[2]
     } 
     updateCurrentPlatformByCode(code)
 }
@@ -50,7 +50,7 @@ const hideRelativeComponents = (to) => {
     updateCommonCtxItem(null)
 }
 
-const excludes = [ 'CustomPlaylistEditView', 'UserInfoEditView' ]
+const excludes = [ 'CustomPlaylistEditView', 'UserInfoEditView', 'BatchActionView' ]
 </script>
 
 <template>

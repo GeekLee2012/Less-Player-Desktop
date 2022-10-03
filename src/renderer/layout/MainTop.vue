@@ -17,7 +17,7 @@ const visitSettingView = () => {
 }
 
 const visitUserHomeView = () => {
-    router.push('/userhome')
+    router.push('/userhome/all')
 }
 
 const seekTrack = (percent) => {

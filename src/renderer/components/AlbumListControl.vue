@@ -6,7 +6,11 @@ import { storeToRefs } from 'pinia';
 import { useMainViewStore } from '../store/mainViewStore';
 
 const props = defineProps({
-    data: Array
+    data: Array,
+    checkbox: Boolean,
+    checkedAll: Boolean,
+    ignoreCheckAllEvent: Boolean,
+    checkChangedFn: Function
 })
 
 const router = useRouter()
@@ -14,6 +18,8 @@ const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { exploreModeCode } = storeToRefs(useMainViewStore())
 
 const visitItem = (item) => {
+    const { checkbox } = props
+    if(checkbox) return
     const { id, platform } = item
     const platformValid = platform && (platform.trim().length > 0)
     const idValid = (id != 0)
@@ -24,11 +30,6 @@ const visitItem = (item) => {
         updateAlbumDetailKeys(platform, id)
     }
 }
-
-const playItem = (item) => {
-    const { id, platform } = item
-}
-
 </script>
 
 <template>
@@ -39,7 +40,11 @@ const playItem = (item) => {
                     :cover="item.cover" 
                     :title="item.title" 
                     :subtitle="item.publishTime"
-                    @click="visitItem(item)" >
+                    @click="visitItem(item)"
+                    :checkbox="checkbox"
+                    :checked="checkedAll"
+                    :ignoreCheckAllEvent="ignoreCheckAllEvent"
+                    :checkChangedFn="(checked) => checkChangedFn(checked, item)" >
                 </ImageTextTile>
             </template>
         </PaginationTiles>

@@ -14,6 +14,7 @@ import CommonContextMenu from './components/CommonContextMenu.vue';
 import AddToListSubmenu from './components/addToListSubmenu.vue';
 import { useUserProfileStore } from './store/userProfileStore';
 import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
+import { usePlayStore } from './store/playStore';
 
 const { getCurrentThemeName, setupAppSuspension } = useSettingStore()
 
@@ -32,6 +33,8 @@ const { hideCommonCtxMenu, showCommonCtxMenu,
   showArtistListSubmenu, hideArtistListSubmenu, 
   hideAllCtxMenus } = useMainViewStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
+const { cleanUpAllSongs } = useUserProfileStore()
+const { queueTracks } = storeToRefs(usePlayStore())
 
 const getCtxMenuAutoHeight = () => {
   const total = commonCtxMenuData.value.length || 1
@@ -169,6 +172,7 @@ onMounted(() => {
   initRadioPlayer()
   setupAppTheme(getCurrentThemeName())
   setupAppSuspension()
+  cleanUpAllSongs([ queueTracks.value ])
 })
 
 //TODO
@@ -241,6 +245,7 @@ textarea {
   --text-size: 15px;
   --text-sub-size: 14px;
   --tab-title-text-size: 16px;
+  --app-bg: transparent;
 }
 
 :root[theme='dark'] {
@@ -444,7 +449,6 @@ textarea {
   --text-color: #212121;
   --text-sub-color: #666;
   --hl-color: #28c83f;
-  --hl-color: #1ca388;
   --hl-text-bg: linear-gradient(to top right, #28c83f, #1ca388);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
@@ -534,7 +538,7 @@ textarea {
 }
 
 html, body, #app {
-  background-color: var(--bg-color);
+  background: var(--bg-color);
   /*
   background-image: linear-gradient(rgba(0, 0, 255, 0.5), rgba(0, 0, 0, 0.68)), 
       url("../renderer/assets/images/clean-sky.jpg");
@@ -561,7 +565,10 @@ img {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
+}
 
+.btnDisabled {
+    opacity: 0.33;
 }
 
 ::-webkit-scrollbar {

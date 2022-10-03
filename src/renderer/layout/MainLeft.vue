@@ -6,6 +6,7 @@ import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import EventBus from '../../common/EventBus';
 import { useUseCustomTrafficLight } from '../../common/Utils';
+import path from 'path';
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -18,19 +19,26 @@ const { isPlaylistMode, isArtistMode, isUserHomeMode,
     exploreModeIndex, exploreModeCode } = storeToRefs(useMainViewStore())
 const { setExploreMode } = useMainViewStore()
 
-const updateNavIndex = (index) => {
+//TODO
+const updateNavIndex = (index, isSwitchMode) => {
     updateCurrentPlatform(index)
     const code = currentPlatformCode.value
     const exploreMode = exploreModeCode.value
-    let url = isUserHomeMode.value ? '/' + exploreMode : (
-        isLocal.value? '/' + code : ('/' + exploreMode + '/square/' + code))
-    router.push(url)
+    let url = null
+    if(isLocal.value) {
+        url = '/' + code
+    } else if(isUserHomeMode.value && isSwitchMode) {
+        url = '/' + exploreMode + '/' + code
+    } else if(isPlaylistMode.value || isArtistMode.value){
+        url = '/' + exploreMode + '/square/' + code
+    }
+    if(url) router.push(url)
 }
 
 const switchExploreMode = () => {
     const index = (exploreModeIndex.value + 1) % 3
     setExploreMode(index)
-    updateNavIndex(0)
+    updateNavIndex(0, true)
     EventBus.emit('exploreMode-changed', index)
 }
 </script>

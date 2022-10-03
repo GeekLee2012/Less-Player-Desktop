@@ -155,7 +155,6 @@ watch([currentTrack, playingViewShow ], checkFavourite)
 
 .playing-view .header svg:hover, 
 .playing-view .collapse-btn:hover svg {
-    fill: #28c83f;
     fill: var(--hl-color);
     cursor: pointer;
 }

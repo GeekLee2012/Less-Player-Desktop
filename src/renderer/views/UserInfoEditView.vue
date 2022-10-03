@@ -19,7 +19,7 @@ const props = defineProps({
 })
 
 const ipcRenderer = useIpcRenderer()
-const route = useRouter()
+const router = useRouter()
 
 const { showToast } = useMainViewStore()
 const titleRef = ref(null)
@@ -45,11 +45,12 @@ const submit = () => {
         return 
     }
     updateUser(nickname, about, cover)
-    showToast("用户信息已更新", () => route.push("/userhome"))
+    showToast("用户信息已更新", back)
 }
 
-const cancel = () => {
-    route.push("/userhome")
+const back = () => {
+    //router.push("/userhome/all")
+    router.back()
 }
 
 //TODO 使用本地文件图片，不利于迁移共享
@@ -90,7 +91,7 @@ const updateCover = async () => {
                 </div>
                 <div class="action">
                     <SvgTextButton :leftAction="submit" text="保存"></SvgTextButton>
-                    <SvgTextButton :leftAction="cancel" text="取消" class="spacing"></SvgTextButton>
+                    <SvgTextButton :leftAction="back" text="取消" class="spacing"></SvgTextButton>
                 </div>
             </div>
         </div>
