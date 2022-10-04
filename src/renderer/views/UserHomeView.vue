@@ -73,9 +73,11 @@ const { user, getFavouriteSongs, getFavouritePlaylilsts,
     getFavouriteAlbums, getFavouriteRadios,
     getCustomPlaylists, getFollowArtists,
     getRecentSongs, getRecentPlaylilsts,
-    getRecentAlbums, getRecentRadios } = storeToRefs(useUserProfileStore())
+    getRecentAlbums, getRecentRadios,
+    decoration } = storeToRefs(useUserProfileStore())
 const { cleanUpAllSongs, updateUser, 
-    removeAllFavourites, removeAllRecents } = useUserProfileStore()
+    removeAllFavourites, removeAllRecents,
+    nextDecoration } = useUserProfileStore()
 
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
@@ -91,15 +93,6 @@ const subTabTipText = ref("")
 let isDiffTab = true
 const dataType = ref(2)
 const userProfileRef = ref(null)
-const startDecoSqNum = 1001, sqNums = 3
-let currentDecoSqNum = startDecoSqNum 
-const decoSrc = ref(`deco_${currentDecoSqNum}.png`)
-
-const nextDecoSrc = () => {
-    ++currentDecoSqNum
-    if(currentDecoSqNum > (startDecoSqNum + sqNums - 1)) currentDecoSqNum = startDecoSqNum
-    decoSrc.value = `deco_${currentDecoSqNum}.png`
-}
 
 const visitUserInfo = () => {
     router.push("/userhome/user/edit")
@@ -261,7 +254,7 @@ EventBus.on("userHome-refresh", refresh)
 <template>
     <div id="user-profile" ref="userProfileRef" >
         <div class="decoration">
-            <img v-lazy="decoSrc" @click="nextDecoSrc"/>
+            <img :src="`deco_${decoration.current}.png`" @click="nextDecoration"/>
         </div>
         <div class="header">
             <div>

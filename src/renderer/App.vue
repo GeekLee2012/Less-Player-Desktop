@@ -16,7 +16,7 @@ import { useUserProfileStore } from './store/userProfileStore';
 import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
 import { usePlayStore } from './store/playStore';
 
-const { getCurrentThemeName, setupAppSuspension } = useSettingStore()
+const { getCurrentThemeId, setupAppSuspension } = useSettingStore()
 
 const ctxMenuPosStyle = reactive({ left: -999, top: -999})
 const ctxSubmenuPosStyle = reactive({ left: -999, top: -999})
@@ -151,14 +151,14 @@ EventBus.on("toast", o => {
 })
 
 //TODO 设置主题
-const setupAppTheme = (themeName) => {
-  themeName = themeName || 'dark'
-  themeName = themeName.trim()
+const setupAppTheme = (themeId) => {
+  themeId = themeId || 'dark'
+  themeId = themeId.trim()
   /*
   const themeUrl = './assets/styles/' + themeName + '-theme.css'
   import(themeUrl)
   */
-  document.documentElement.setAttribute('theme', themeName)
+  document.documentElement.setAttribute('theme', themeId)
 }
 
 const initRadioPlayer = () => {
@@ -166,11 +166,11 @@ const initRadioPlayer = () => {
 }
 
 /* @vite-ignore */
-EventBus.on("switchTheme", themeName => setupAppTheme(themeName))
+EventBus.on("switchTheme", themeId => setupAppTheme(themeId))
 
 onMounted(() => {
   initRadioPlayer()
-  setupAppTheme(getCurrentThemeName())
+  setupAppTheme(getCurrentThemeId())
   setupAppSuspension()
   cleanUpAllSongs([ queueTracks.value ])
 })
@@ -251,6 +251,7 @@ textarea {
 :root[theme='dark'] {
   /* 全局背景 */
   --bg-color: #313131;
+  --app-bg: var(--bg-color);
   /* 文本 */
   --text-color: #eaeaea;
   --text-sub-color: #989898;
@@ -280,12 +281,13 @@ textarea {
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: #363636;
   /* 当前播放列表 左侧边框高亮颜色 */
+  --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
 
   /* 搜索框(目前无边框) */
   --searchbar-bg: #eee;
   --searchbar-text-color: #555;
-  --searchbar-border-color: var(--hl-color);
+  --searchbar-border-color: transparent;
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
@@ -294,11 +296,16 @@ textarea {
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg, #414141 8%,#515151 18%,#414141 33%);
   --error-color: red;
+  
+  --checkbox-bg: #fff;
+  --logo-bg: var(--btn-bg);
+  --logo-color: var(--svg-btn-color);
 }
 
 :root[theme='light'] {
   /* 全局背景 */
   --bg-color: #fff;
+  --app-bg: var(--bg-color);
   /* 文本 */
   --text-color: #212121;
   --text-sub-color: #666;
@@ -318,6 +325,7 @@ textarea {
   --toggle-btn-color: #bbb;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #999, #ccc) !important;
+  --progress-bg: linear-gradient(to top right, #e667af, #e6399b);
   --btn-hover-bg: linear-gradient(to top right, #e6399b, #992667) !important;
   /*滚动条*/
   --scrollbar-thumb-bg: #999;
@@ -330,11 +338,12 @@ textarea {
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: #f8f8f8;
   /* 当前播放列表 左侧边框高亮颜色 */
+  --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to right, #e6399b, #e667af) 0 0 0 2;
   /* 搜索框 (目前无边框) */
   --searchbar-bg: #eee;
   --searchbar-text-color: #313131;
-  --searchbar-border-color: var(--hl-color);
+  --searchbar-border-color: transparent;
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
@@ -343,16 +352,21 @@ textarea {
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
   --error-color: red;
+  
+  --checkbox-bg: #fff;
+  --logo-bg: var(--btn-bg);
+  --logo-color: var(--svg-btn-color);
 }
 
 :root[theme='pink'] {
   /* 全局背景 */
   --bg-color: #393939;
+  --app-bg: var(--bg-color);
   /* 文本 */
   --text-color: #eaeaea;
   --text-sub-color: #989898;
-  --hl-color: #e667af;
-  --hl-text-bg: linear-gradient(to top right, #e667af, #e6399b);
+  --hl-color: #fc589c;
+  --hl-text-bg: linear-gradient(to top right, #fc589c, #e6399b);
   /* 歌词文本颜色 */
   --text-lyric-color: #ccc;
   /* 按钮 */
@@ -360,13 +374,13 @@ textarea {
   --svg-text-color: #eaeaea;
   --svg-btn-color: #fff;
   --btn-bg: linear-gradient(to right, #e667af, #e6399b);
-  --btn-bg: linear-gradient(to top right, #e6399b, #e667af);
-  --btn-hover-bg: linear-gradient(to top right, #e6399b, #992667) !important;
+  --btn-bg: linear-gradient(to top right, #e6399b, #fc589c);
+  --btn-hover-bg: linear-gradient(to top right, #fc589c, #992667) !important;
   --toggle-btn-bg: #a0a0a0;
   --toggle-btn-color: #eaeaea;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #252525, #313131) !important;
-  --progress-bg: linear-gradient(to top right, #e667af, #e6399b);
+  --progress-bg: linear-gradient(to top right, #fc589c, #e6399b);
   /*滚动条*/
   --scrollbar-thumb-bg: #212121;
   /* 列表项 hover */
@@ -378,12 +392,13 @@ textarea {
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: #363636;
   /* 当前播放列表 左侧边框高亮颜色 */
-  --pbq-hl-border: linear-gradient(to right, #e6399b, #e667af) 0 0 0 2;
+  --pbq-hl-text-color: var(--hl-text-bg);
+  --pbq-hl-border: linear-gradient(to right, #e6399b, #fc589c) 0 0 0 2;
 
   /* 搜索框（目前无边框） */
   --searchbar-bg: #eee;
   --searchbar-text-color: #555;
-  --searchbar-border-color: var(--hl-color);
+  --searchbar-border-color: transparent;
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
@@ -392,59 +407,75 @@ textarea {
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg, #494949 8%,#595959 18%,#494949 33%);
   --error-color: red;
+  
+  --checkbox-bg: #fff;
+  --logo-bg: var(--btn-bg);
+  --logo-color: var(--svg-btn-color);
 }
 
 :root[theme='red'] {
   /* 全局背景 */
-  --bg-color: #eee;
+  --bg-color: #fff;
+  --app-bg: linear-gradient(to top, #ba5776, #fc99a7);
   /* 文本 */
-  --text-color: #313131;
-  --text-sub-color: #666;
-  --hl-color: #fc7688;
+  --text-color: #fff;
+  --text-sub-color: #eee;
+  --hl-color: #fff;
   --hl-text-bg: linear-gradient(to top right, #fc7688, #f84860);
+  --hl-text-bg: #fff;
   /* 歌词文本颜色 */
-  --text-lyric-color: #666;
+  --text-lyric-color: #eee;
   /* 按钮 */
   --svg-color: #f84860;
-  --svg-text-color: #fff;
-  --svg-btn-color: #fff;
+  --svg-color: #fff;
+  --svg-text-color: #fc7688;
+  --svg-btn-color: #fc7688;
   --btn-bg: linear-gradient(to right, #ba5776, #f84860);
+  --btn-bg: linear-gradient(to right, #eee, #fff);
   /*--btn-hover-bg: linear-gradient(to top right, #f84860, #fc7688) !important;*/
   --btn-hover-bg: linear-gradient(to top right, #f84860, #fc99a7) !important;
-  --toggle-btn-bg: #a0a0a0;
-  --toggle-btn-color: #fff;
+  --btn-hover-bg: linear-gradient(to top right, #ddd, #fff) !important;
+  --toggle-btn-bg: #ccc;
+  --toggle-btn-color: #ba5776;
   /* 进度条 */
-  --progress-track-bg: linear-gradient(to right, #888, #bbb) !important;
-  --progress-bg: linear-gradient(to top right, #f84860, #fc7688);
+  --progress-track-bg: linear-gradient(to right, #eee, #fff) !important;
+  --progress-bg: linear-gradient(to top right, #ba5776, #fc7688);
   /*滚动条*/
-  --scrollbar-thumb-bg: #999;
+  --scrollbar-thumb-bg: #eee;
   /* 列表项 hover */
-  --list-item-hover: #ddd !important;
+  --list-item-hover: #16161633 !important;
   /* 边框 */
-  --main-left-border-color: #999;
-  --ctx-menu-border-color: #181818;
-  --border-color: #e6e6e6;
+  --main-left-border-color: #31313159;
+  --ctx-menu-border-color: transparent;
+  --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
-  --setting-bottom-border-color: #e6e6e6;
+  --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
+  --pbq-hl-text-color: #ffcdd2;
   --pbq-hl-border: linear-gradient(to top right, #f84860, #fc7688) 0 0 0 2;
+  --pbq-hl-border: linear-gradient(to top right, #fff, #fff) 0 0 0 2;
   /* 搜索框 (目前无边框) */
-  --searchbar-bg: #ddd;
+  --searchbar-bg: #fff;
   --searchbar-text-color: #555;
-  --searchbar-border-color: #eee;
+  --searchbar-border-color: transparent;
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
-  --ntf-bg: #eee;
+  --ntf-bg: #313131cb;
   --ntf-text-color: var(--text-color);
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
   --error-color: red;
+
+  --checkbox-bg: #161616ab;
+  --logo-bg: var(--btn-bg);
+  --logo-color: var(--svg-btn-color);
 }
 
 :root[theme='green'] {
   /* 全局背景 */
   --bg-color: #fff;
+  --app-bg: var(--bg-color);
   /* 文本 */
   --text-color: #212121;
   --text-sub-color: #666;
@@ -464,6 +495,7 @@ textarea {
   --toggle-btn-color: #bbb;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #999, #ccc) !important;
+  --progress-bg: linear-gradient(to top right, #1ca388, #28c83f);
   /*滚动条*/
   --scrollbar-thumb-bg: #999;
   /* 列表项 hover */
@@ -475,11 +507,12 @@ textarea {
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: #f8f8f8;
   /* 当前播放列表 左侧边框高亮颜色 */
+  --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
   /* 搜索框 (目前无边框) */
   --searchbar-bg: #eee;
   --searchbar-text-color: #313131;
-  --searchbar-border-color: var(--hl-color);
+  --searchbar-border-color: transparent;
   /* 按键输入框背景 */
   --keyinput-ctl-bg: var(--searchbar-bg);
   /* 通知消息 */
@@ -488,57 +521,141 @@ textarea {
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
   --error-color: red;
+
+  --checkbox-bg: #fff;
+  --logo-bg: var(--btn-bg);
+  --logo-color: var(--svg-btn-color);
 }
 
 :root[theme='blue'] {
   /* 全局背景 */
-  --bg-color: #eee;
+  --bg-color: #fff;
+  --app-bg: url('../../public/bg_blue.jpg');
   /* 文本 */
   --text-color: #313131;
+  --text-color: #161616;
   --text-sub-color: #666;
+  --text-sub-color: #434343;
+  --hl-color: #0f4a9a;
+  --hl-color: #1976d2;
+  --hl-color: #62a0f6;
   --hl-color: #2f80ed;
-  --hl-text-bg: linear-gradient(to top right, #56ccf2, #2f80ed);
+  --hl-text-bg: linear-gradient(to right, #2f80ed, #56ccf2);
+  --hl-text-bg: linear-gradient(to top right, #1976d2, #42a5f5);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
   /* 按钮 */
-  --svg-color: #666;
+  --svg-color: #313131;
+  --svg-color: #161616;
   --svg-text-color: #fff;
   --svg-btn-color: #fff;
   --btn-bg: linear-gradient(to right, #2f80ed, #56ccf2);
-  --btn-hover-bg: linear-gradient(to top right, #2f80ed, #62a0f6) !important;
-  --toggle-btn-bg: #a0a0a0;
-  --toggle-btn-color: #eaeaea;
+  --btn-hover-bg: linear-gradient(to top right, #2f80ed, #fff) !important;
+  --toggle-btn-bg: #999;
+  --toggle-btn-color: #fff;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #888, #bbb) !important;
-  --btn-hover-bg: linear-gradient(to top right, #0f4a9a, #56ccf2) !important;
+  --progress-bg: linear-gradient(to top right, #2f80ed, #56ccf2);
+  --progress-bg: linear-gradient(to top right, #1976d2, #42a5f5);
+  --btn-hover-bg: linear-gradient(to top right, #1976d2, #42a5f5) !important;
   /*滚动条*/
-  --scrollbar-thumb-bg: #999;
+  --scrollbar-thumb-bg: #ababab;
   /* 列表项 hover */
-  --list-item-hover: #ababab !important;
+  --list-item-hover: #16161633 !important;
+  --list-item-hover: #ffffffcb !important;
   /* 边框 */
   --main-left-border-color: #888;
-  --ctx-menu-border-color: #181818;
-  --border-color: #ccc;
+  --ctx-menu-border-color: #313131cd;
+  --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
-  --setting-bottom-border-color: #dfdfdf;
+  --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
+  --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #f84860, #fc7688) 0 0 0 2;
+  --pbq-hl-border: linear-gradient(to top right, #2f80ed, #56ccf2) 0 0 0 2;
   /* 搜索框 (目前无边框) */
-  --searchbar-bg: #ddd;
-  --searchbar-text-color: #555;
-  --searchbar-border-color: #eee;
+  --searchbar-bg: #56ccf299;
+  --searchbar-text-color: #414141;
+  --searchbar-border-color: transparent;
+  --searchbar-placeholder-color: #686868;
   /* 按键输入框背景 */
-  --keyinput-ctl-bg: var(--searchbar-bg);
+  --keyinput-ctl-bg: #fff;
   /* 通知消息 */
-  --ntf-bg: #ccc;
+  --ntf-bg: #fff;
   --ntf-text-color: var(--text-color);
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
   --error-color: red;
+
+  --checkbox-bg: #fff;
+  --logo-bg: linear-gradient(to top right, #ccc, #fff);
+  --logo-color: var(--hl-color);
+}
+
+:root[theme='yellow'] {
+  /* 全局背景 */
+  --bg-color: #fff;
+  --app-bg: var(--bg-color);
+  /* 文本 */
+  --text-color: #000;
+  --text-sub-color: #333;
+  --hl-color: #0f4a9a;
+  --hl-color: #1976d2;
+  --hl-color: #ffb300;
+  --hl-text-bg: #ffb300;
+  /* 歌词文本颜色 */
+  --text-lyric-color: #888;
+  /* 按钮 */
+  --svg-color: #000;
+  --svg-text-color: #fff;
+  --svg-btn-color: #fff;
+  --svg-text-btn-rbtn-border: 0.1px solid #eee;
+  --btn-bg: #ffb300;
+  --btn-hover-bg: #ffb300;
+  --toggle-btn-bg: #ddd;
+  --toggle-btn-color: #31313152;
+  /* 进度条 */
+  --progress-track-bg: #cbcbcb;
+  --progress-bg: #ffb300;
+  --btn-hover-bg: #ffb300;
+  /*滚动条*/
+  --scrollbar-thumb-bg: #cbcbcb;
+  /* 列表项 hover */
+  --list-item-hover: #ffb30025;
+  /* 边框 */
+  --main-left-border-color: #ccc;
+  --ctx-menu-border-color: #000;
+  --border-color: transparent;
+  /* 设置页，每一分类栏底部分隔线颜色 */
+  --setting-bottom-border-color: transparent;
+  /* 当前播放列表 左侧边框高亮颜色 */
+  --pbq-hl-text-color: var(--hl-text-bg);
+  --pbq-hl-border: linear-gradient(to top right, #ffb300, #ffb300) 0 0 0 2;
+  /* 搜索框 (目前无边框) */
+  --searchbar-bg: #ffb30066;
+  --searchbar-bg: #fff;
+  --searchbar-text-color: #414141;
+  --searchbar-border-color: var(--hl-color);
+  --searchbar-placeholder-color: #686868;
+  /* 按键输入框背景 */
+  --keyinput-ctl-bg: var(--searchbar-bg);
+  --keyinput-ctl-border: #ccc;
+  /* 通知消息 */
+  --ntf-bg: #fff;
+  --ntf-text-color: var(--text-color);
+  /* 加载中遮盖 */
+  --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
+  --error-color: red;
+
+  --checkbox-bg: #fff;
+  --logo-bg: #ffb300;
+  --logo-color: #fff;
 }
 
 html, body, #app {
-  background: var(--bg-color);
+  background: var(--app-bg);
+  background-position: center;
+  background-size: cover;
   /*
   background-image: linear-gradient(rgba(0, 0, 255, 0.5), rgba(0, 0, 0, 0.68)), 
       url("../renderer/assets/images/clean-sky.jpg");
@@ -600,7 +717,7 @@ img {
     width: 33.5%;
     height: 100%;
     z-index: 99;
-    background-color: var(--bg-color);
+    background: var(--app-bg);
     box-shadow: 0px 0px 10px #161616;
 }
 
@@ -611,7 +728,7 @@ img {
     width: 100%;
     height: 100%;
     z-index: 88;
-    background-color: var(--bg-color);
+    background: var(--app-bg);
 }
 
 /* fade-y */

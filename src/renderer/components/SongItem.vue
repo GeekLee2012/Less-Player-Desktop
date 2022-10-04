@@ -124,7 +124,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .song-item:hover {
-    background-color: var(--list-item-hover);
+    background: var(--list-item-hover);
 }
 
 .song-item .hidden {
@@ -223,7 +223,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     padding-left: 10px;
     padding-right: 10px;
     
-    background-color: var(--list-item-hover);
+    /* background: var(--list-item-hover); */
     visibility: hidden;
 }
 

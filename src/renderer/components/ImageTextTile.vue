@@ -147,7 +147,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     left: 10px;
     width: 25px;
     height: 25px;
-    background: #fff;
+    background: var(--checkbox-bg);
     border-radius: 6px;
     display: flex;
     justify-content: flex-start;
@@ -159,7 +159,6 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .checkbox svg {
-    fill: var(--svg-color);
     fill: var(--hl-color);
 }
 

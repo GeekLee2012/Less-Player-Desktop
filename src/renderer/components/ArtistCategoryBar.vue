@@ -105,10 +105,8 @@ const filterData = (data) => {
 }
 
 .artist-category-bar .active {
-    border-color: #28c83f;
     border-color: var(--hl-color);
-    background: linear-gradient(to right, #1ca388, #28c83f);
-    background: var(--hl-text-bg);
+    background: var(--hl-text-bg) !important;
     color: var(--text-color);
     color: var(--svg-btn-color) !important;
 }

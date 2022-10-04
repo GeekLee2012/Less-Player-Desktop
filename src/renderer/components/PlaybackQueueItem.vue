@@ -83,7 +83,7 @@ onMounted(() => {
 }
 
 .playback-queue-item:hover {
-    background-color: var(--list-item-hover);
+    background: var(--list-item-hover);
 }
 
 .playback-queue-item .spacing {
@@ -97,8 +97,8 @@ onMounted(() => {
 .current .title, 
 .current .artist,
 .current .duration {
-    background: linear-gradient(to top right, #28c83f, #1ca388);
     background: var(--hl-text-bg);
+    background: var(--pbq-hl-text-color);
     -webkit-background-clip: text;
     color: transparent !important;
 }
@@ -201,7 +201,7 @@ onMounted(() => {
     padding-left: 15px;
     padding-right: 15px;
     
-    background-color: var(--list-item-hover);
+    /*background: var(--list-item-hover);*/
     visibility: hidden;
 }
 
@@ -223,5 +223,10 @@ onMounted(() => {
 
 .playback-queue-item:hover .action{
     visibility: visible;
+}
+
+
+.playback-queue-item:hover .duration {
+    visibility: hidden;
 }
 </style>

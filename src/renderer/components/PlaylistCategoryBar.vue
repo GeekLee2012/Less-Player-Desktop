@@ -103,16 +103,16 @@ EventBus.on('playlistCategory-update', () => {
     vertical-align: middle;
     text-align: center;
     line-height: 36px;
-    color: var(--text-color);
     font-size: var(--text-size);
     cursor: pointer;
     white-space: nowrap;
     border-radius: 10rem;
     border: 0.1px solid transparent;
+    color: var(--text-color);
 }
 
 .playlist-category-bar span:hover {
-    background-color: var(--list-item-hover);
+    background: var(--list-item-hover);
     color: var(--text-color);
 }
 
@@ -129,10 +129,8 @@ EventBus.on('playlistCategory-update', () => {
 }
 
 .playlist-category-bar .active {
-    border-color: #28c83f;
     border-color: var(--hl-color);
-    background: linear-gradient(to right, #1ca388, #28c83f);
-    background: var(--btn-bg);
+    background: var(--btn-bg) !important;
     color: var(--text-color);
     color: var(--svg-btn-color) !important;
 }

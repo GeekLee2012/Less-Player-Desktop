@@ -176,7 +176,6 @@ onMounted(bindScrollListener)
 }
 
 #search-view .keyword .text{
-    background: linear-gradient(to top right, #1ca388, #28c83f);
     background: var(--hl-text-bg);
     background: var(--hl-color);
     -webkit-background-clip: text;
@@ -205,11 +204,11 @@ onMounted(bindScrollListener)
 
 #search-view .platform .item:hover {
     color: var(--text-color);
-    background-color: var(--list-item-hover); 
+    background: var(--list-item-hover); 
 }
 
 #search-view .platform .active {
-    background: var(--hl-text-bg);
+    background: var(--hl-text-bg) !important;
     border-color: var(--hl-color);
     color: var(--svg-btn-color) !important;
 }
@@ -232,7 +231,6 @@ onMounted(bindScrollListener)
 }
 
 #search-view .tab-nav .active {
-    border-color: #28c83f;
     border-color: var(--hl-color);
 }
 
@@ -241,8 +239,7 @@ onMounted(bindScrollListener)
     position: absolute;
     right: 10px;
 
-    /*background: linear-gradient(to top right, #1ca388, #28c83f);
-    background: var(--hl-text-bg);*/
+    /*background: var(--hl-text-bg);*/
     background: var(--btn-bg);
     background: var(--hl-color);
     -webkit-background-clip: text;

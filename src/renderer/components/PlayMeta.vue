@@ -155,6 +155,7 @@ onMounted(() => {
 
 .play-meta .audio-time {
     color: #989898;
+    color: var(--text-sub-color);
     font-size: 14px;
     text-align: left;
     flex: 1;

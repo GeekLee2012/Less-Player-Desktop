@@ -48,5 +48,6 @@ defineExpose({
    height: 100%;
    border-radius: 10rem;
    background: var(--hl-text-bg);
+   background: var(--progress-bg);
 }
 </style>

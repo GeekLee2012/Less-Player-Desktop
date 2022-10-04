@@ -218,7 +218,7 @@ watch([playlistCategoryViewShow, artistCategoryViewShow], setCategorySize)
     width: 40.4%;
     padding-bottom: 30px;
     z-index: 55;
-    background-color: var(--bg-color);
+    background: var(--app-bg);
     box-shadow: 0px 0px 10px #161616;
 }
 

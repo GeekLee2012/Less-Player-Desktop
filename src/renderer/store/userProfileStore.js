@@ -34,6 +34,11 @@ export const useUserProfileStore = defineStore("userProfile", {
             songs: [],
             radios: [],
         },
+        decoration: {
+            start: 1001,
+            count: 3,
+            current: 1001
+        },
         
     }),
     getters: {
@@ -306,6 +311,13 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         refreshUserHome() {
             EventBus.emit("userHome-refresh")
+        },
+        nextDecoration() {
+            const start = this.decoration.start
+            const count = this.decoration.count
+            const max = start + count - 1
+            let num = this.decoration.current
+            this.decoration.current = ((++num > max) ? start : num)
         }
     },
     persist: {

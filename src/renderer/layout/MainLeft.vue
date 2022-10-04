@@ -145,7 +145,7 @@ const switchExploreMode = () => {
 }
 
 #platform-list .active {
-    background: var(--btn-bg);
+    background: var(--btn-bg) !important;
     color: var(--svg-btn-color);
 }
 
@@ -167,8 +167,8 @@ const switchExploreMode = () => {
     border-radius: 10rem 0 10rem 10rem;
     border: 0px solid;
     font-weight: bold;
-    background: var(--btn-bg);
-    color: var(--svg-btn-color);
+    background: var(--logo-bg);
+    color: var(--logo-color);
 }
 
 #app-title {
@@ -178,7 +178,7 @@ const switchExploreMode = () => {
     margin-left: 8px;
     font-size: 17.1px;
     font-weight: bold;
-    background: var(--btn-bg);
+    background: var(--logo-bg);
     -webkit-background-clip: text;
     color: transparent;
 }

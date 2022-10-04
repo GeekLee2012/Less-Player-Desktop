@@ -81,6 +81,7 @@ const handleRightClick = (event) => {
     border-radius: 0 10rem 10rem 0;
     padding-left: 8px;
     padding-right: 10px;
+    border-left: var(--svg-text-btn-rbtn-border);
 }
 
 .btnDisabled .left-btn:hover,

@@ -49,7 +49,7 @@ const clear = () => {
 .search-bar .search-btn, 
 .search-bar .keyword, 
 .search-bar .clear-btn {
-    border: 0px solid var(--searchbar-border-color);
+    border: 1px solid var(--searchbar-border-color);
     height: 28px;
 }
 
@@ -57,13 +57,11 @@ const clear = () => {
     border-radius: 10rem 0 0 10rem;
     border-right: 0px;
     width: 28px;
-    background: linear-gradient(to top right, #28c83f, #1ca388);
     background: var(--btn-bg);
     cursor: pointer;
 }
 
 .search-bar .search-btn:hover {
-    /*background: linear-gradient(to top right, #2edfa3, #28c83f) !important; */
     background: var(--btn-hover-bg);
 }
 
@@ -77,19 +75,19 @@ const clear = () => {
     font-size: 15px;
     padding-left: 5px;
     padding-right: 6px;
-    background-color: var(--searchbar-bg);
     outline: 0;
     width: 115px;
-    color: var(--searchbar-text-color);
     border-left: 0px;
     border-right: 0px;
+    background: var(--searchbar-bg);
+    color: var(--searchbar-text-color);
 }
 
 .search-bar .clear-btn {
     border-radius: 0 10rem 10rem 0;
     width: 18px;
-    background: var(--searchbar-bg);
     border-left: 0px;
+    background: var(--searchbar-bg);
 }
 
 .search-bar .clear-btn svg {
@@ -100,4 +98,7 @@ const clear = () => {
     cursor: pointer;
 }
 
+.search-bar .keyword::-webkit-input-placeholder {
+    /* color: var(--searchbar-placeholder-color); */
+}
 </style>

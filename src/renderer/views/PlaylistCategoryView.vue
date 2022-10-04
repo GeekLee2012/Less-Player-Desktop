@@ -155,8 +155,7 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
 
 .playlist-category-view .current {
     border-radius: 10rem;
-    background: linear-gradient(to top right, #1ca388, #28c83f);
-    background: var(--hl-text-bg);
+    background: var(--hl-text-bg) !important;
     color: var(--svg-btn-color) !important;
 }
 </style>

@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted } from 'vue';
 import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import { storeToRefs } from 'pinia';
@@ -7,7 +8,6 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useMainViewStore } from '../store/mainViewStore';
 import { useIpcRenderer } from '../../common/Utils';
-import { onMounted } from 'vue';
 
 const ipcRenderer = useIpcRenderer()
 
@@ -21,7 +21,9 @@ const { setThemeIndex,
     toggleStoreLocalMusic,
     toggleTrayMenu,
     toggleKeysGlobal,
-    updateBlackHole
+    updateBlackHole,
+    allThemes, 
+    allQualities
 } = useSettingStore()
 
 const { showToast } = useMainViewStore()
@@ -31,15 +33,15 @@ const visitAuthor = () => {
     if(ipcRenderer) ipcRenderer.send('visit-link', url)
 }
 
-const clearSettingsCache = () => {
+const clearSettingsCache = (noToast) => {
     ["setting", "settings"].forEach(key => {
         localStorage.removeItem(key)
     })
     updateBlackHole(Math.random() * 100000000)
-    //showToast("当前设置缓存已清空！")
+    if(!noToast) showToast("当前设置缓存已清空！")
 }
 
-onMounted(clearSettingsCache)
+onMounted(() => clearSettingsCache(true))
 </script>
 
 <template>
@@ -49,7 +51,7 @@ onMounted(clearSettingsCache)
             <div class="theme row">
                 <b>主题</b>
                 <div class="content">
-                    <div class="last" v-for="(item,index) in theme.data" 
+                    <div class="last" v-for="(item,index) in allThemes()" 
                         :class="{ active: index == theme.index, lightText: item.dark }"
                         :style="{ background: item.bg }" 
                         @click="setThemeIndex(index)" >
@@ -62,7 +64,7 @@ onMounted(clearSettingsCache)
                 <div class="content">
                     <div>
                         <b>优先音质：</b>
-                        <span v-for="(item,index) in track.quality.data"
+                        <span v-for="(item,index) in allQualities()"
                             :class="{ active: index == track.quality.index }"
                             @click="setTrackQualityIndex(index)" >
                             {{ item.name }}
@@ -105,7 +107,7 @@ onMounted(clearSettingsCache)
                     </div>
                     <!--
                     <div class="last">
-                        <SvgTextButton text="清空设置页缓存" :left-action="clearSettingsCache">
+                        <SvgTextButton text="清空设置页缓存" :left-action="() => clearSettingsCache()">
                         </SvgTextButton>
                         <span class="tip-text">（ 提示：版本更新时，由于缓存原因，导致新版本的设置可能没有生效。<br/>&nbsp;&nbsp;&nbsp;&nbsp;需手动清空缓存，刷新一下才生效。请放心操作，不会影响当前设置 ）</span>
                     </div>
@@ -275,17 +277,18 @@ onMounted(clearSettingsCache)
     text-align: center;
     border-radius: 10rem;
     margin-right: 20px;
-    border: 1px solid var(--border-color);
+    border: 0px solid var(--border-color);
     cursor: pointer;
 }
 
 #setting-view .track .content span:hover {
     background-color: var(--border-color);
+    background-color: var(--list-item-hover);
 }
 
 #setting-view .track .content .active {
-    background: var(--btn-bg);
-    color: var(--svg-btn-color);
+    background: var(--btn-bg) !important;
+    color: var(--svg-btn-color) !important;
     /*border: 1px solid var(--border-color);*/
 }
 

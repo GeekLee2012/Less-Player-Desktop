@@ -4,69 +4,74 @@ import { useIpcRenderer } from '../../common/Utils';
 
 const ipcRenderer = useIpcRenderer()
 
+const THEMES = [{
+    id: 'dark',
+    name: '默认',
+    bg: '#464646',
+    dark: true
+}, {
+    id: 'light',
+    name: '白色',
+    bg: '#fafafa',
+    dark: false
+}, {
+    id: 'pink',
+    name: '粉色',
+    //bg: '#e667af',
+    bg: '#fc589c',
+    dark: false
+}, {
+    id: 'red',
+    name: '粉红',
+    //bg: '#ef5350',
+    bg: '#fc7688',
+    dark: false
+}, {
+    id: 'green',
+    name: '绿色',
+    //bg: '#1ca388',
+    bg: '#28c83f',
+    dark: false
+}, {
+    id: 'blue',
+    name: '蓝色',
+    bg: '#56ccf2',
+    dark: false
+}, {
+    id: 'yellow',
+    name: '黄色',
+    bg: '#ffb300',
+    dark: false
+}, {
+    id: 'purple',
+    name: '紫色',
+    bg: '#9c27b0',
+    dark: true
+}]   
+
+const QUALITIES = [{
+    id: 'NQ',
+    name: '普通'
+}, {
+    id: 'HQ',
+    name: '高'
+}, {
+    id: 'SQ',
+    name: '无损'
+}]
+
 //TODO 或许可能大概会实现吧......
 export const useSettingStore = defineStore('setting', {
     state: ()=> ({
         /* 主题 */
         theme: {
             index: 0,
-            data: [{
-                id: 'dark',
-                name: '默认',
-                bg: '#464646',
-                dark: true
-            }, {
-                id: 'light',
-                name: '白色',
-                bg: '#fafafa',
-                dark: false
-            }, {
-                id: 'pink',
-                name: '粉色',
-                bg: '#e667af',
-                dark: false
-            }, {
-                id: 'red',
-                name: '红色',
-                bg: '#ef5350',
-                dark: false
-            }, {
-                id: 'green',
-                name: '绿色',
-                bg: '#1ca288',
-                dark: false
-            }, {
-                id: 'blue',
-                name: '蓝色',
-                bg: '#56ccf2',
-                dark: false
-            }, {
-                id: 'yellow',
-                name: '黄色',
-                bg: '#ffb300',
-                dark: false
-            }, {
-                id: 'purple',
-                name: '紫色',
-                bg: '#9c27b0',
-                dark: true
-            }]   
         },
         /* 播放歌曲 */
         track: {
             //音质级别：NQ(普通)、HQ（高音质）、SQ（超高、无损）
             quality: {
                 index: 0,
-                data: [{
-                    id: 'NQ',
-                    name: '普通'
-                }, {
-                    id: 'HQ',
-                    name: '高'
-                }, {
-                    id: 'SQ',
-                    name: '无损'
-                }]
             },  
             //VIP收费歌曲，是否自动切换到免费歌曲（可能来自不同平台），默认暂停播放
             vipTransfer: false,  
@@ -152,7 +157,7 @@ export const useSettingStore = defineStore('setting', {
         /* 其他 */
         other: { //TODO
             blockHole: null,
-        }
+        },
     }),
     getters: {
         isPlaylistCategoryBarRandom(state) {
@@ -162,13 +167,13 @@ export const useSettingStore = defineStore('setting', {
     actions: {
         setThemeIndex(index) {
             this.theme.index = index
-            const themeName = this.theme.data[index].id
-            EventBus.emit("switchTheme", themeName)
+            const themeId = THEMES[index].id
+            EventBus.emit("switchTheme", themeId)
         },
-        getCurrentThemeName() {
+        getCurrentThemeId() {
             let index = this.theme.index
             index = index > 0 ? index : 0
-            return this.theme.data[index].id
+            return THEMES[index].id
         },
         setTrackQualityIndex(index) {
             this.track.quality.index = index
@@ -203,6 +208,12 @@ export const useSettingStore = defineStore('setting', {
         },
         updateBlackHole(value) {
             this.other.blockHole = value
+        },
+        allThemes () {
+            return THEMES
+        },
+        allQualities() {
+            return QUALITIES
         }
     },
     persist: {
@@ -211,7 +222,7 @@ export const useSettingStore = defineStore('setting', {
             {
                 //key: 'setting',
                 storage: localStorage,
-                //paths: [ 'theme', 'track', 'keys', 'tray', 'cache' ]
+                paths: [ 'theme', 'track', 'keys', 'tray', 'cache' ]
             },
         ],
     },
