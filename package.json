@@ -46,9 +46,9 @@
     "wait-on": "^6.0.1"
   },
   "build": {
-    "appId": "xyz.rive2012.${name}",
+    "appId": "xyz.rive2012.less-player",
     "productName": "Less Player",
-    "copyright": "Copyright © ${author}",
+    "copyright": "Copyright © RIVE2012",
     "beforePack": "src/main/beforePack.js",
     "directories": {
       "output": "output"
