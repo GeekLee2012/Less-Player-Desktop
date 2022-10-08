@@ -220,7 +220,7 @@ const clearRecents = () => {
 const refresh = () => {
     visitTab(activeTab.value)
     //TODO
-    cleanUpAllSongs()
+    //cleanUpAllSongs()
 }
 
 const isAvailableSongTab = () => {

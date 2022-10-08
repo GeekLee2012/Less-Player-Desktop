@@ -9,6 +9,7 @@ export class Player {
     constructor(track) {
         this.currentTrack = track
         this.sound = null
+        this.retry = 0
     }
 
     static get() {
@@ -39,6 +40,7 @@ export class Player {
             src: [ this.currentTrack.url ],
             html5: true,
             onplay: function() {
+                this.retry = 0
                 requestAnimationFrame(self.__step.bind(self))
                 self.notifyStateChanged(PLAY_STATE.PLAYING)
             },
@@ -50,6 +52,12 @@ export class Player {
             },
             onseek: function() {
                 requestAnimationFrame(self.__step.bind(self))
+            },
+            onloaderror: function() {
+                if((self.retry++) < 1) self.notifyError()
+            },
+            onplayerror: function() {
+                if((self.retry++) < 1) self.notifyError()
             }
         })
         return this.sound
@@ -135,4 +143,8 @@ export class Player {
         EventBus.emit('track-state', state)
     }
     
+    notifyError() {
+        EventBus.emit('track-error', this.currentTrack)
+    }
+
 }

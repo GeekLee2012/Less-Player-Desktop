@@ -1,11 +1,8 @@
 <script setup>
-import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import EventBus from '../../common/EventBus';
+import { onMounted, ref } from 'vue';
 import { useMainViewStore } from '../store/mainViewStore';
 
-const { showToast, hideAllCtxMenus, hideAddToListSubmenu, hideArtistListSubmenu } = useMainViewStore()
+const { hideAllCtxMenus, hideAddToListSubmenu, hideArtistListSubmenu } = useMainViewStore()
 
 const props = defineProps({
     posStyle: Object,
@@ -24,13 +21,19 @@ const hideAllSubmenus = () => {
     hideArtistListSubmenu()
 }
 
+//TODO 没起作用
+const submenuListRef = ref(null)
+const resetScroll = () => {
+    if(submenuListRef.value) submenuListRef.value.scrollTop = 0
+}
+
 </script>
 
 <template>
     <div class="common-ctx-submenu" :style="posStyle" 
         @click.stop="" @mouseleave="hideAllSubmenus">
         <div class="padding"></div>
-        <div class="center">
+        <div class="center" ref="submenuListRef">
             <template v-for="(item, index) in data">
                 <div class="menuItem" @click="(event) => handleMenuItem(item, index, event)" v-show="!item.separator">
                     <div v-html="item.icon" v-show="item.icon"></div>
@@ -53,10 +56,10 @@ const hideAllSubmenus = () => {
     /*justify-content: center;*/
     background: var(--ntf-bg);
     border-radius: 8px;
-    /*padding: 15px 0px;*/
+    /*padding: 15px 0px;
+    max-height: 297px;*/
     border: 0.1px solid var(--border-color);
     box-shadow: 0px 0px 1.5px var(--ctx-menu-border-color);
-    max-height: 297px;
 }
 
 .common-ctx-submenu .padding {
@@ -65,6 +68,7 @@ const hideAllSubmenus = () => {
 
 .common-ctx-submenu .center {
     overflow: auto;
+    max-height: 267px;
 } 
 
 .common-ctx-submenu .menuItem {

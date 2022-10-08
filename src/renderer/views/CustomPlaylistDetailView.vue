@@ -48,7 +48,7 @@ const nextPage = () =>  {
 
 const loadContent = () => {
     const playlist = getCustomPlaylist(props.id)
-    if(playlist.data) cleanUpAllSongs([ playlist.data ])
+    //if(playlist.data) cleanUpAllSongs([ playlist.data ])
     Object.assign(detail, {...playlist})
     updateCommonCtxItem(playlist)
 }

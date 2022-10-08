@@ -176,19 +176,23 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.favorites.radios.length = 0
             this.refreshUserHome()
         },
-        //清理
+        //TODO 清理, 数据量较大时卡住，暂时废弃不用
         cleanUpAllSongs(states) {
             states = states || [ this.favorites.songs, this.recents.songs ]
             const props = ['url', 'lyric']
-            states.forEach(state => {
-                state.forEach(item => {
-                    const { isFMRadio } = item
-                    if(isFMRadio) return
-                    props.forEach(p => {
-                        Reflect.deleteProperty(item, p)
+            try {
+                states.forEach(state => {
+                    state.forEach(item => {
+                        const { isFMRadio } = item
+                        if(isFMRadio) return
+                        props.forEach(p => {
+                            Reflect.deleteProperty(item, p)
+                        })
                     })
                 })
-            })
+            } catch(error) {
+                //TODO
+            }
         },
         //自建歌单
         addCustomPlaylist(title, about, cover){

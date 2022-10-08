@@ -6,6 +6,7 @@ import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { storeToRefs } from 'pinia';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { onMounted } from 'vue';
 
 const { queueTracksSize } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack, setAutoPlaying } = usePlayStore()
@@ -107,6 +108,14 @@ const traceRecentPlay = (track) => {
     EventBus.emit("userHome-refresh")
 }
 
+const initRadioPlayer = () => {
+    EventBus.emit('radio-init', document.querySelector('.radio-holder'))
+}
+
+const retry = (track) => {
+    EventBus.emit('track-changed', track)
+}
+
 EventBus.on('radio-play', track => traceRecentPlay(track))
 EventBus.on('track-changed', track => {
     traceRecentPlay(track)
@@ -122,11 +131,16 @@ EventBus.on('track-restoreInit', track => {
     }, true)
 })
 EventBus.on('track-loadLyric', track => loadLyric(track))
+EventBus.on('track-error', track => retry(track))
+
+onMounted(initRadioPlayer)
 </script>
 <template>
     <!-- FM广播audio -->
     <audio class="radio-holder"></audio>
 </template>
 <style>
-
+.radio-holder {
+  visibility: hidden;
+}
 </style>

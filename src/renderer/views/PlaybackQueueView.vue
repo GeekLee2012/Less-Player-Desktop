@@ -54,10 +54,10 @@ onMounted(() => {
             </div>
         </div>
         <div class="center" ref="listRef">
-            <div v-for="(item, index) in queueTracks">
+            <template v-for="(item, index) in queueTracks">
                 <PlaybackQueueItem :data="item" :active="playingIndex == index">
                 </PlaybackQueueItem>
-            </div>
+            </template>
         </div>
     </div>
 </template>

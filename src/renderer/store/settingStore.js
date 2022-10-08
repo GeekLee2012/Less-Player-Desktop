@@ -149,6 +149,16 @@ export const useSettingStore = defineStore('setting', {
         tray: {
             showMenu: false, //是否在系统托盘显示
         },
+        /* 对话框 */
+        dialog: {
+            clearQueue: true,
+            batchAdd: false,
+            batchMove: true,
+            batchDelete: true,
+            restore: true,
+            reset: true,
+            quit: false,
+        },
         /* 缓存 */
         cache: {
             storePlayState: true,  //退出后保存播放状态：包括当前歌曲、播放列表等
@@ -222,7 +232,7 @@ export const useSettingStore = defineStore('setting', {
             {
                 //key: 'setting',
                 storage: localStorage,
-                paths: [ 'theme', 'track', 'keys', 'tray', 'cache' ]
+                paths: [ 'theme', 'track', 'dialog', 'keys', 'tray', 'cache' ]
             },
         ],
     },

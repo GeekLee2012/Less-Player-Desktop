@@ -122,8 +122,10 @@ const resetTab = () => {
     Object.assign(actionShowCtl, {
             playBtn: false,
             addToBtn: false,
+            moveToBtn: false,
             deleteBtn: true,
         })
+    EventBus.emit("checkbox-refresh")
 }
 
 const updateTipText = () => {

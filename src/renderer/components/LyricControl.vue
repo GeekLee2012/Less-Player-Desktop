@@ -223,7 +223,6 @@ onMounted(() => {
 }
 
 .lyric-ctl .center .current {
-    background: linear-gradient(to top right, #28c83f, #1ca388);
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

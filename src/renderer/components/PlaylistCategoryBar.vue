@@ -37,12 +37,12 @@ const visitCateItem = (item, row, col) => {
 }
 
 const flatData = []
-//TODO 随机打乱数据
+//TODO 随机打乱数据，感觉不够乱......
 const shuffle = (arr) => {
-    let i = arr.length;
+    let i = arr.length
     while (i) {
         let j = Math.floor(Math.random() * i--);
-        [arr[j], arr[i]] = [arr[i], arr[j]];
+        [arr[j], arr[i]] = [arr[i], arr[j]]
     }
 }
 
