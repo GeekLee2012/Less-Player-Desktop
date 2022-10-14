@@ -22,7 +22,7 @@ const scanDir = async (dir, exts) => {
         const list = await opendir(dir)
         const files = []
         for await (const dirent of list) {
-            console.log(dirent.name)
+            //console.log(dirent.name)
             if(dirent.isFile() && isExtentionValid(dirent.name, exts)) {
                 const fullname = path.join(dir, dirent.name)
                 files.push(fullname)

@@ -10,11 +10,14 @@ const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
 const IMAGE_EXTS = ['jpg', 'jpeg', 'png'] 
 //是否为macOS
 //是否为macOS
-const isMacOS = (process.platform === 'darwin');
+const isMacOS = (process.platform === 'darwin')
 //是否使用自定义交通灯控件
-const useCustomTrafficLight = !isMacOS;
-//TODO 是否为开发环境, NODE_ENV取值：dev、proc
-const isDevEnv = (process.env['NODE_ENV'] === 'dev');
+const useCustomTrafficLight = !isMacOS
+//TODO NODE_ENV取值：dev、proc
+//是否为开发环境
+const isDevEnv = (process.env['NODE_ENV'] === 'dev')
+//应用Icon
+const APP_ICON = isMacOS ? '../../public/icon.png' : '../../public/icon@2x.png'
 
 //导出
 module.exports = {
@@ -24,4 +27,5 @@ module.exports = {
     USER_AGENT,
     AUDIO_EXTS,
     IMAGE_EXTS,
+    APP_ICON
 }

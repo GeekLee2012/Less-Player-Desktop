@@ -38,6 +38,10 @@ const noTracks = () => (localTracks.value.length < 1)
             </div>
             <div class="right">
                 <div class="title">本地歌曲</div>
+                <div class="about">
+                    <p>目前支持的音频格式有：.mp3、.flac、.ogg、.wav、.aac、.m4a</p>
+                    <p>此功能仅供试用体验，暂时还没有完善~</p>
+                </div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll" :rightAction="addAll" ></PlayAddAllBtn>
                     <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="spacing"></AddFolderFileBtn>
@@ -69,7 +73,7 @@ const noTracks = () => (localTracks.value.length < 1)
 #local-music {
     display: flex;
     flex-direction: column;
-    padding: 25px;
+    padding: 28px 33px 10px 33px;
     overflow: auto;
     flex: 1;
 }
@@ -81,26 +85,42 @@ const noTracks = () => (localTracks.value.length < 1)
 }
 
 #local-music .header .cover {
-    width: 150px;
-    height: 150px;
+    width: 233px;
+    height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 10px #161616;
 }
 
 #local-music .header .right {
     flex: 1;
-    margin-left: 20px;
+    margin-left: 30px;
 }
 
 #local-music .header .title{
     text-align: left;
     margin-top: 5px;
-    font-size: 25px;
+    margin-bottom: 20px;
+    font-size: 30px;
     font-weight: bold;
 }
 
+#local-music .header .about {
+    text-align: left;
+    margin-bottom: 20px;
+    line-height: 23px;
+    color: var(--text-sub-color);
+
+    overflow: hidden;
+    word-wrap: break-all;
+    white-space:pre-wrap;
+    line-break: anywhere;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+}
+
 #local-music .header .action {
-    margin-top: 30px;
     display: flex;
 }
 
@@ -111,8 +131,8 @@ const noTracks = () => (localTracks.value.length < 1)
 #local-music .list-title {
     margin-bottom: 15px;
     text-align: left;
-    font-size: 18px;
-    background: linear-gradient(to top right, #1ca388, #28c83f);
+    font-size: 16px;
+    font-weight: bold;
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

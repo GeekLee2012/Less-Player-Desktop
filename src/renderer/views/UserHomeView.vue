@@ -8,7 +8,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useMainViewStore } from '../store/mainViewStore';
-import DeleteAllBtn from '../components/DeleteAllBtn.vue';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
 import EventBus from '../../common/EventBus';
 import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
@@ -82,9 +82,8 @@ const { cleanUpAllSongs, updateUser,
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
 const tabTipText = ref("")
-let offset = 0
-let page = 1
-let limit = 30
+let offset = 0, page = 1, limit = 30
+let markScrollTop = 0
 const loading = ref(false)
 const activeTab = ref(0)
 const activeSubTab = ref(0)
@@ -93,6 +92,7 @@ const subTabTipText = ref("")
 let isDiffTab = true
 const dataType = ref(2)
 const userProfileRef = ref(null)
+const back2TopBtnRef = ref(null)
 
 const visitUserInfo = () => {
     router.push("/userhome/user/edit")
@@ -230,14 +230,39 @@ const isAvailableSongTab = () => {
     return subTabIndex == 0 && (tabIndex == 0 || tabIndex == -1)
 }
 
+const resetBack2TopBtn = () => {
+    if(!back2TopBtnRef.value || !userProfileRef.value) return
+    back2TopBtnRef.value.setScrollTarget(userProfileRef.value)
+}
+
+const markScrollState = () => {
+    if(!userProfileRef.value) return
+    markScrollTop = userProfileRef.value.scrollTop
+}
+
+const restoreScrollState = () => {
+    if(!userProfileRef.value) return
+    if(markScrollTop < 1) return 
+    userProfileRef.value.scrollTop = markScrollTop
+}
+
+const scrollToLoad = () => {
+    markScrollState()
+    hideAllCtxMenus()
+}
+
+//TODO
+const onScroll = () => {
+    scrollToLoad()
+}
+
 onActivated(() => {
+    resetBack2TopBtn()
+    restoreScrollState()
+
     refresh()
-    //TODO
-    if(userProfileRef.value) {
-        userProfileRef.value.removeEventListener('scroll', hideAllCtxMenus)
-        userProfileRef.value.addEventListener('scroll', hideAllCtxMenus)
-    }
 })
+
 watch(playingViewShow, (nv, ov) => {
     if(!nv) refresh()
 })
@@ -252,7 +277,7 @@ EventBus.on("userHome-refresh", refresh)
 </script>
     
 <template>
-    <div id="user-profile" ref="userProfileRef" >
+    <div id="user-profile" ref="userProfileRef" @scroll="onScroll">
         <div class="decoration">
             <img :src="`deco_${decoration.current}.png`" @click="nextDecoration"/>
         </div>
@@ -309,6 +334,7 @@ EventBus.on("userHome-refresh", refresh)
                 <div class="loading-mask" v-for="i in 12" style="width: 100%;  height: 36px; margin-bottom: 5px; display: inline-block;"></div>
             </div>
         </div>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
     
@@ -352,7 +378,7 @@ EventBus.on("userHome-refresh", refresh)
 
 #user-profile .header .title{
     text-align: left;
-    font-size: 25px;
+    font-size: 30px;
     font-weight: bold;
     margin-left: 10px;
     overflow: hidden;
@@ -367,7 +393,7 @@ EventBus.on("userHome-refresh", refresh)
 
 #user-profile .header .about{
     text-align: left;
-    margin-bottom: 20px;
+    margin-bottom: 39px;
     font-size: 15px;
     color: var(--text-sub-color);
     overflow: hidden;
@@ -383,6 +409,8 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile .header .cover {
     width: 168px;
     height: 168px;
+    width: 202px;
+    height: 202px;
     border-radius: 10rem;
     box-shadow: 0px 0px 10px #161616;
 }

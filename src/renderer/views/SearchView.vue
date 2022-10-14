@@ -28,9 +28,12 @@ const { hideAllCtxMenus } = useMainViewStore()
 
 const currentTabView = shallowRef(null)
 const tabData = ref([])
-const offset = 0
-const limit = 50
-const page = 1
+let offset = 0, limit = 50, page = 1
+const isLoading = ref(false)
+
+const setLoading = (value) => {
+    isLoading.value = value
+}
 
 const visitTab = (index) => {
     if(index < 0 || activeTab.value == index) return
@@ -45,47 +48,57 @@ const updateTabData = (data) => {
 }
 
 const loadSongs = ()=> {
+    currentTabView.value = SongListControl
+    setLoading(true)
     const vender = currentVender()
     if(!vender) return 
     vender.searchSongs(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
-        currentTabView.value = SongListControl
+        setLoading(false)
     })
 }
 
 const loadPlaylists = ()=> {
+    currentTabView.value = PlaylistsControl
+    setLoading(true)
     const vender = currentVender()
     if(!vender) return
     vender.searchPlaylists(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
-        currentTabView.value = PlaylistsControl
+        setLoading(false)
     })
 }
 
 const loadAlbums = ()=> {
+    currentTabView.value = AlbumListControl
+    setLoading(true)
     const vender = currentVender()
     if(!vender) return
     vender.searchAlbums(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
-        currentTabView.value = AlbumListControl
+        setLoading(false)
     })
 }
 
 const loadArtists = ()=> {
+    currentTabView.value = ArtistListControl
+    setLoading(true)
    const vender = currentVender()
     if(!vender) return
     vender.searchArtists(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
-        currentTabView.value = ArtistListControl
+        setLoading(false)
     })
 }
 
 const resetTabView = () => {
     currentTabView.value = null
+    tabData.value.length = 0
     updateTabTipText(0)
 }
 
 const loadTab = () => {
+    setLoading(true)
     resetTabView()
     if(isSongsTab()) {
         loadSongs()
@@ -104,22 +117,18 @@ const byPlatform = (index) => {
 }
 
 //TODO
-const viewRef = ref(null)
-const bindScrollListener = () => {
-    if(!viewRef.value) return 
-    viewRef.value.removeEventListener('scroll', hideAllCtxMenus)
-    viewRef.value.addEventListener('scroll', hideAllCtxMenus)
+const onScroll = () => {
+    hideAllCtxMenus()
 }
 
 onActivated(() => visitTab(0))
 watch(currentPlatformIndex, (nv, ov) => loadTab())
 watch(activeTab, (nv, ov) => visitTab(nv))
 watch(() => props.keyword, (nv,ov) => loadTab())
-onMounted(bindScrollListener)
 </script>
 
 <template>
-    <div id="search-view" ref="viewRef">
+    <div id="search-view" @scroll="onScroll">
         <div class="header">
             <div class="keyword">
                 <b>搜  </b><span class="text">{{ keyword }}</span>
@@ -142,7 +151,8 @@ onMounted(bindScrollListener)
             </div>
             <component :is="currentTabView" :data="tabData" 
                 :artistVisitable="true" 
-                :albumVisitable="true">
+                :albumVisitable="true"
+                :loading="isLoading" ß>
             </component>
         </div>
     </div>
@@ -166,7 +176,7 @@ onMounted(bindScrollListener)
 #search-view .keyword{
     text-align: left;
     display: flex;
-    font-size: 25px;
+    font-size: 28px;
     font-weight: bold;
     line-height: 36px;
 }

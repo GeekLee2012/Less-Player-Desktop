@@ -1,36 +1,32 @@
 <script setup>
-import { onMounted, onActivated, reactive, ref, watch } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, onUpdated } from 'vue';
+import { useRouter } from 'vue-router';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
-import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
-import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { toYyyymmddHhMmSs } from '../../common/Times';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
-import { useRouter } from 'vue-router';
-
-const router = useRouter()
-const { getVender } = usePlatformStore()
-const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showToast, updateCommonCtxItem } = useMainViewStore()
-const { getCustomPlaylist, removeAllTracksFromCustomPlaylist, 
-    cleanUpAllSongs, } = useUserProfileStore()
+import Back2TopBtn from '../components/Back2TopBtn.vue';
 
 const props = defineProps({
+    exploreMode: String,
     id: String
 })
 
-const detail = reactive({})
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
-let offset = 0
-let page = 1
-let limit = 1000
+const detail = reactive({})
+let offset = 0, page = 1, limit = 1000
 let markScrollTop = 0
 const loading = ref(true)
+
+const router = useRouter()
+const { addTracks, resetQueue, playNextTrack } = usePlayStore()
+const { showToast, updateCommonCtxItem } = useMainViewStore()
+const { getCustomPlaylist, removeAllTracksFromCustomPlaylist } = useUserProfileStore()
 
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', about: '',data: [] })
@@ -83,6 +79,7 @@ const markScrollState = () => {
 
 const resetScrollState = () => {
     markScrollTop = 0
+    playlistDetailRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
@@ -100,18 +97,18 @@ const scrollToLoad = () => {
     }
 }
 
-const bindScrollListener = () => {
-    if(!playlistDetailRef.value) return 
-    playlistDetailRef.value.removeEventListener('scroll', scrollToLoad)
-    playlistDetailRef.value.addEventListener('scroll', scrollToLoad)
+const onScroll = () => {
+    scrollToLoad()
 }
 
 const resetBack2TopBtn = () => {
+    if(!back2TopBtnRef.value || !playlistDetailRef.value) return
     back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
 }
 
 const visitCustomEdit = () => {
-    router.push("/userhome/customPlaylist/edit/" + props.id)
+    const { exploreMode, id } = props
+    router.push(`/${exploreMode}/customPlaylist/edit/${id}`)
 }
 
 const visitBatchView = () => {
@@ -139,12 +136,16 @@ onMounted(() => {
     resetView()
     resetBack2TopBtn()
     loadContent()
-    bindScrollListener()
+})
+
+//TODO
+onUpdated(() => {
+    resetBack2TopBtn()
 })
 </script>
 
 <template>
-    <div id="custom-playlist-detail" ref="playlistDetailRef">
+    <div id="custom-playlist-detail" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="detail.cover" />
@@ -161,13 +162,14 @@ onMounted(() => {
                     </div>
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playAll"  :rightAction="() => addAll()" class="btn-spacing">
+                    <PlayAddAllBtn  class="btn-spacing" 
+                        :leftAction="playAll" 
+                        :rightAction="() => addAll()">
                     </PlayAddAllBtn>
-                    <!--
-                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFovourite">
-                    </FavouriteShareBtn>
-                    -->
-                    <BatchActionBtn :deleteBtn="true" :leftAction="visitBatchView" :rightAction="removeAll"></BatchActionBtn>
+                    <BatchActionBtn :deleteBtn="true" 
+                        :leftAction="visitBatchView" 
+                        :rightAction="removeAll">
+                    </BatchActionBtn>
                 </div>
             </div>
         </div>
@@ -181,10 +183,10 @@ onMounted(() => {
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
-    </div>
+    </div>    
 </template>
 
-<style>
+<style scoped>
 #custom-playlist-detail {
     display: flex;
     flex: 1;
@@ -201,7 +203,7 @@ onMounted(() => {
 
 #custom-playlist-detail .header .right {
     flex: 1;
-    margin-left: 20px;
+    margin-left: 30px;
 }
 
 #custom-playlist-detail .header .title, 
@@ -211,13 +213,13 @@ onMounted(() => {
 }
 
 #custom-playlist-detail .header .title {
-    font-size: 21px;
+    font-size: 30px;
     font-weight: bold;
 }
 
 #custom-playlist-detail .header .about {
-    height: 88px;
-    line-height: 20px;
+    height: 108px;
+    line-height: 21px;
     color: var(--text-sub-color);
     overflow: hidden;
     word-wrap: break-all;
@@ -227,14 +229,14 @@ onMounted(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 5;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 #custom-playlist-detail .right .edit {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 #custom-playlist-detail .spacing {
@@ -257,8 +259,8 @@ onMounted(() => {
 }
 
 #custom-playlist-detail .header .cover {
-    width: 202px;
-    height: 202px;
+    width: 233px;
+    height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 10px #161616;
 }
@@ -273,10 +275,11 @@ onMounted(() => {
 }
 
 #custom-playlist-detail .list-title {
-    margin-bottom: 15px;
+    margin-left: 3px;
+    margin-bottom: 3px;
     text-align: left;
-    font-size: 18px;
-    background: linear-gradient(to top right, #1ca388, #28c83f);
+    font-size: 16px;
+    font-weight: bold;
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

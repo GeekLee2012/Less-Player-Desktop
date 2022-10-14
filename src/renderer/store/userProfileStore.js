@@ -210,7 +210,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             Object.assign(this.customPlaylists[index], { title, about, cover, updated })
         },
         getCustomPlaylist(id){
-            if(this.customPlaylists.length < 1) return 
+            if(this.customPlaylists.length < 1) return { id }
             const index = this.findItemIndex(this.customPlaylists, { id }, 
                 (e1, e2) => e1.id === e2.id)
             return index < 0 ? { id } : this.customPlaylists[index]
@@ -253,6 +253,12 @@ export const useUserProfileStore = defineStore("userProfile", {
             const updated = Date.now()
             Object.assign(playlist, { updated })
             return true
+        },
+        findCustomPlaylistIndex(id) {
+            if(!id || id.trim().length < 1) return -1
+            if(this.customPlaylists.length < 1) return -1
+            return this.findItemIndex(this.customPlaylists, { id }, 
+                (e1, e2) => e1.id === e2.id)
         },
         //关注的歌手
         addFollowArtist(id, platform, title, cover) {

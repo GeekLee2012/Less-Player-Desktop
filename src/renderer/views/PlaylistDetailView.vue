@@ -17,6 +17,7 @@ import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
+import EventBus from '../../common/EventBus';
 
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
@@ -32,11 +33,13 @@ const detail = reactive({})
 const listSize = ref(0)
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
-let offset = 0
-let page = 1
-let limit = 1000
+let offset = 0, page = 1, limit = 1000
 let markScrollTop = 0
-const loading = ref(true)
+const isLoading = ref(true)
+
+const setLoading = (value) => {
+    isLoading.value = value
+}
 
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', about: '',data: [] })
@@ -54,21 +57,20 @@ const nextPage = () =>  {
 }
 
 const loadContent = () => {
-    loading.value = true
+    setLoading(true)
     checkFavourite()
     
     const vender = getVender(props.platform)
-    if(vender) {
-        vender.playlistDetail(props.id, offset, limit, page)
-            .then(result => {
-            if(page > 1) {
-                result.data.unshift(...detail.data)
-            }
-            Object.assign(detail, result)
-            listSize.value = detail.data.length
-            loading.value = false
-        })
-    }
+    if(!vender) return 
+    vender.playlistDetail(props.id, offset, limit, page)
+        .then(result => {
+        if(page > 1) {
+            result.data.unshift(...detail.data)
+        }
+        Object.assign(detail, result)
+        listSize.value = detail.data.length
+        setLoading(false)
+    })
 }
 
 const loadMoreContent = () => {
@@ -121,6 +123,7 @@ const markScrollState = () => {
 
 const resetScrollState = () => {
     markScrollTop = 0
+    playlistDetailRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
@@ -130,6 +133,7 @@ const restoreScrollState = () => {
 }
 
 const scrollToLoad = () => {
+    if(isLoading.value) return
     const scrollTop = playlistDetailRef.value.scrollTop
     const scrollHeight = playlistDetailRef.value.scrollHeight
     const clientHeight = playlistDetailRef.value.clientHeight
@@ -137,15 +141,12 @@ const scrollToLoad = () => {
     if((scrollTop + clientHeight) >= scrollHeight) {
        loadMoreContent()
     }
-    //TODO
-    hideAllCtxMenus()
 }
 
 //TODO
-const bindScrollListener = () => {
-    if(!playlistDetailRef.value) return 
-    playlistDetailRef.value.removeEventListener('scroll', scrollToLoad)
-    playlistDetailRef.value.addEventListener('scroll', scrollToLoad)
+const onScroll = () => {
+    hideAllCtxMenus()
+    scrollToLoad()
 }
 
 const resetBack2TopBtn = () => {
@@ -165,17 +166,18 @@ onMounted(() => {
     resetView()
     resetBack2TopBtn()
     loadContent()
-    bindScrollListener()
 })
+
+EventBus.on("refresh-favourite", checkFavourite)
 </script>
 
 <template>
-    <div id="playlist-detail" ref="playlistDetailRef">
+    <div id="playlist-detail" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="detail.cover" />
             </div>
-            <div class="right" v-show="!loading">
+            <div class="right" v-show="!isLoading">
                 <div class="title" v-html="detail.title"></div>
                 <div class="about" v-html="detail.about"></div>
                 <div class="action">
@@ -185,15 +187,15 @@ onMounted(() => {
                     </FavouriteShareBtn>
                 </div>
             </div>
-            <div class="right" v-show="loading">
+            <div class="right" v-show="isLoading">
                 <div class="title">
-                    <div class="loading-mask" style="width: 66%; height: 36px; display: inline-block;"></div>
+                    <div class="loading-mask" style="width: 66%; height: 39px; display: inline-block;"></div>
                 </div>
                 <div class="about">
-                    <div class="loading-mask" v-for="i in 3" style="width: 95%; height: 20px; display: inline-block;"></div>
+                    <div class="loading-mask" v-for="i in 3" style="width: 95%; height: 23px; display: inline-block;"></div>
                 </div>
                 <div class="action">
-                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 168px; height: 32px; display: inline-block;"></div>
+                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 168px; height: 36px; display: inline-block;"></div>
                 </div>
             </div>
         </div>
@@ -202,11 +204,8 @@ onMounted(() => {
             <SongListControl :data="detail.data" 
                 :artistVisitable="true" 
                 :albumVisitable="true" 
-                v-show="!loading" >
+                :loading="isLoading">
             </SongListControl>
-            <div v-show="loading">
-                <div class="loading-mask" v-for="i in 12" style="width: 100%; height: 36px; margin-bottom: 5px; display: inline-block;"></div>
-            </div>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
@@ -224,30 +223,40 @@ onMounted(() => {
 #playlist-detail .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 #playlist-detail .header .right {
     flex: 1;
-    margin-left: 20px;
+    margin-left: 25px;
 }
 
 #playlist-detail .header .title, 
 #playlist-detail .header .about {
     text-align: left;
-    margin-bottom: 13px;
+    margin-bottom: 10px;
 }
 
 #playlist-detail .header .title {
-    font-size: 21px;
+    font-size: 30px;
     font-weight: bold;
+    margin-bottom: 3px;
+
+    overflow: hidden;
+    word-wrap: break-all;
+    white-space: pre-wrap;
+    line-break: anywhere;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 #playlist-detail .header .about {
-    height: 119px;
-    line-height: 20px;
-    color: #bababa;
+    height: 139px;
+    line-height: 23px;
     color: var(--text-sub-color);
+
     overflow: hidden;
     word-wrap: break-all;
     white-space:pre-wrap;
@@ -259,8 +268,8 @@ onMounted(() => {
 }
 
 #playlist-detail .header .cover {
-    width: 202px;
-    height: 202px;
+    width: 233px;
+    height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 10px #161616;
 }
@@ -275,10 +284,11 @@ onMounted(() => {
 }
 
 #playlist-detail .list-title {
-    margin-bottom: 15px;
+    margin-left: 3px;
+    margin-bottom: 3px;
     text-align: left;
-    font-size: 18px;
-    background: linear-gradient(to top right, #1ca388, #28c83f);
+    font-size: 16px;
+    font-weight: bold;
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

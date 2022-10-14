@@ -21,6 +21,17 @@ const { currentPlatformCode, currentCategoryCode } = storeToRefs(usePlaylistSqua
 const { currentVender, currentCategory, putCategory, } = usePlaylistSquareViewStore()
 const { isPlaylistMode } = storeToRefs(useMainViewStore())
 
+const isLoadingCategories = ref(true)
+const isLoadingContent = ref(true)
+
+const setLoadingCategories = (value) => {
+    isLoadingCategories.value = value
+}
+
+const setLoadingContent = (value) => {
+    isLoadingContent.value = value
+}
+
 const resetPagination = () => {
     playlists.length = 0
     pagination.offset = 0
@@ -34,6 +45,8 @@ const nextPage = () =>  {
 
 const loadCategories = () => {
     categories.length = 0
+    setLoadingCategories(true)
+    setLoadingContent(true)
     let cached = currentCategory()
     if(!cached) {
         const vender = currentVender()
@@ -43,16 +56,19 @@ const loadCategories = () => {
             //TODO
             categories.push(...result.data)
             EventBus.emit('playlistCategory-update')
+            setLoadingCategories(false)
         })
     } else {
         categories.push(...cached)
         EventBus.emit('playlistCategory-update')
+        setLoadingCategories(false)
     }
 }
 
-const loadContent = () => {
+const loadContent = (noLoadingMask) => {
     const vender = currentVender()
     if(!vender) return
+    if(!noLoadingMask) setLoadingContent(true)
     const cate = currentCategoryCode.value
     const offset = pagination.offset
     const limit = pagination.limit
@@ -62,16 +78,18 @@ const loadContent = () => {
         if(platform != result.platform) return 
         if(cate != result.cate) return 
         playlists.push(...result.data)
+        setLoadingContent(false)
     })
 }
 
 
 const loadMoreContent = () => {
     nextPage()
-    loadContent()
+    loadContent(true)
 }
 
 const scrollToLoad = () => {
+    if(isLoadingContent.value) return
     const scrollTop = squareContentRef.value.scrollTop
     const scrollHeight = squareContentRef.value.scrollHeight
     const clientHeight = squareContentRef.value.clientHeight
@@ -81,9 +99,8 @@ const scrollToLoad = () => {
     }
 }
 
-const bindScrollListener = () => {
-    squareContentRef.value.removeEventListener('scroll', scrollToLoad)
-    squareContentRef.value.addEventListener('scroll', scrollToLoad)
+const onScroll = () => {
+    scrollToLoad()
 }
 
 const markScrollState = () => {
@@ -92,6 +109,7 @@ const markScrollState = () => {
 
 const resetScrollState = () => {
     markScrollTop = 0
+    squareContentRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
@@ -107,10 +125,8 @@ const resetBack2TopBtn = () => {
 //TODO 后期需要梳理优化
 /*-------------- 各种监听 --------------*/
 onMounted(() => {
-    resetPagination()
+    resetCommom()
     loadCategories()
-    bindScrollListener()
-    resetBack2TopBtn()
 })
 
 onActivated(() => restoreScrollState())
@@ -132,15 +148,15 @@ watch(currentPlatformCode, (nv, ov) => {
     loadCategories()
 })
 
-EventBus.on("playlistSquare-refresh", () => refreshData())
+EventBus.on("playlistSquare-refresh", refreshData)
 </script>
 
 <template>
-    <div class="playlist-square-view" ref="squareContentRef">
-        <PlaylistCategoryBar :data="categories" 
-            v-show="categories.length > 0" >
+    <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
+        <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories">
         </PlaylistCategoryBar>
-        <PlaylistsControl :data="playlists"></PlaylistsControl>
+        <PlaylistsControl :data="playlists" :loading="isLoadingContent">
+        </PlaylistsControl>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>

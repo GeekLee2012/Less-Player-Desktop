@@ -14,16 +14,24 @@ const back2TopBtnRef = ref(null)
 //全部分类
 const categories = reactive([])
 const artists = reactive([])
-const pagination = { offset: 0, limit: 35, page: 1}
+const pagination = { offset: 0, limit: 35, page: 1 }
 let markScrollTop = 0
+const isLoadingCategories = ref(true)
+const isLoadingContent = ref(true)
 
 const { currentPlatformCode, currentCategoryItems, currentAlphabet } 
     = storeToRefs(useArtistSquareViewStore())
 const { currentVender, currentCategory, 
-        putCategory, resetCurrentCategoryItems,
-        putAlphabet
-    } = useArtistSquareViewStore()
+        putCategory, putAlphabet } = useArtistSquareViewStore()
 const { isArtistMode } = storeToRefs(useMainViewStore())
+
+const setLoadingCategories = (value) => {
+    isLoadingCategories.value = value
+}
+
+const setLoadingContent = (value) => {
+    isLoadingContent.value = value
+}
 
 const resetPagination = () => {
     artists.length = 0
@@ -36,40 +44,40 @@ const nextPage = () =>  {
     pagination.page = pagination.page + 1
 }
 
-//TODO
 const addArtistData = (data) => {
     if(!data || data.length < 1) return 
     data.forEach(item => {
-        if(JSON.stringify(artists).includes(JSON.stringify(item))) return 
-        artists.push(item)
+        const index = artists.findIndex(ar => (ar.id == item.id && ar.platform == item.platform))
+        if(index < 0) artists.push(item)
     })
 }
 
 //TODO
 const loadCategories = () => {
-    return new Promise((resolve, reject) => {
-        categories.length = 0
-        let cached = currentCategory()
-        if(!cached) {
-            const vender = currentVender()
-            if(!vender || !vender.artistCategories) return 
-            vender.artistCategories().then(result => {
-                result.data.push(result.alphabet)
-                putCategory(result.platform, result.data)
-                categories.push(...result.data)
-                putAlphabet(result.platform, result.alphabet)
-                EventBus.emit('artistCategory-update')
-                resolve(categories)
-            })
-        } else {
-            categories.push(...cached)
+    setLoadingCategories(true)
+    setLoadingContent(true)
+    categories.length = 0
+    let cached = currentCategory()
+    if(!cached) {
+        const vender = currentVender()
+        if(!vender) return 
+        vender.artistCategories().then(result => {
+            result.data.push(result.alphabet)
+            putCategory(result.platform, result.data)
+            categories.push(...result.data)
+            putAlphabet(result.platform, result.alphabet)
+            setLoadingCategories(false)
             EventBus.emit('artistCategory-update')
-            resolve(categories)
-        }
-    })
+        })
+    } else {
+        categories.push(...cached)
+        setLoadingCategories(false)
+        EventBus.emit('artistCategory-update')
+    }
 }
 
-const loadContent = () => {
+const loadContent = (noLoadingMask) => {
+    if(!noLoadingMask) setLoadingContent(true)
     const vender = currentVender()
     if(!vender) return
     const cate = currentCategoryItems.value
@@ -79,21 +87,15 @@ const loadContent = () => {
     const platform = currentPlatformCode.value
     vender.artistSquare(cate, offset, limit, page).then(result => {
         pagination.page = result.page
-        if(platform != result.platform) return 
-        if(cate != result.cate) return 
+        if(platform != result.platform || cate != result.cate) return 
         addArtistData(result.data)
-    })
-}
-
-const loadData = () => {
-    loadCategories().then(cates => {
-        loadContent()
+        setLoadingContent(false)
     })
 }
 
 const loadMoreContent = () => {
     nextPage()
-    loadContent()
+    loadContent(true)
 }
 
 const scrollToLoad = () => {
@@ -106,9 +108,8 @@ const scrollToLoad = () => {
     }
 }
 
-const bindScrollListener = () => {
-    squareRef.value.removeEventListener('scroll', scrollToLoad)
-    squareRef.value.addEventListener('scroll', scrollToLoad)
+const onScroll = () => {
+    scrollToLoad()
 }
 
 const markScrollState = () => {
@@ -117,9 +118,11 @@ const markScrollState = () => {
 
 const resetScrollState = () => {
     markScrollTop = 0
+    squareRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
+    EventBus.emit("imageTextTile-load")
     if(markScrollTop < 1) return 
     squareRef.value.scrollTop = markScrollTop
 }
@@ -128,16 +131,25 @@ const resetBack2TopBtn = () => {
     back2TopBtnRef.value.setScrollTarget(squareRef.value)
 }
 
-/*-------------- 各种监听 --------------*/
-onMounted(() => {
-    resetCurrentCategoryItems()
+const refreshData = () => {
     resetCommom()
-    loadData()
+    loadContent()
+}
+
+/*-------------- 各种监听 --------------*/
+/*
+onMounted(() => {
+    loadCategories()
     bindScrollListener()
     resetBack2TopBtn()
 })
+*/
 
-onActivated(() => restoreScrollState())
+onActivated(() => {
+    loadCategories()
+    resetBack2TopBtn()
+    restoreScrollState()
+})
 
 const resetCommom = ()=> {
     resetPagination()
@@ -148,25 +160,17 @@ const resetCommom = ()=> {
 //TODO
 watch(currentPlatformCode, (nv, ov) => {
     if(!isArtistMode.value) return
-    resetCurrentCategoryItems()
-    resetCommom()
-    loadData()
+    loadCategories()
 })
 
-watch(currentCategoryItems, (nv, ov) => {
-    if(!isArtistMode.value) return
-    resetCommom()
-    loadContent()
-}, { deep: true })
+EventBus.on("artistSquare-refresh", refreshData)
 </script>
 
 <template>
-    <div class="artist-square-view" ref="squareRef">
-        <ArtistCategoryBar :data="categories"
-            :alphabet="currentAlphabet"
-            v-show="categories.length > 0" >
+    <div class="artist-square-view" ref="squareRef" @scroll="onScroll">
+        <ArtistCategoryBar :data="categories" :alphabet="currentAlphabet" :loading="isLoadingCategories" >
         </ArtistCategoryBar>
-        <ArtistListControl :data="artists"></ArtistListControl>
+        <ArtistListControl :data="artists" :loading="isLoadingContent"></ArtistListControl>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>

@@ -1,19 +1,63 @@
 <script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import { onMounted, provide, ref, watch } from 'vue';
-import PlayBoostrap from './components/PlayBoostrap.vue';
+import PlayerBoostrap from './components/PlayerBoostrap.vue';
 import Themes from './components/Themes.vue';
 import MainLeft from './layout/MainLeft.vue';
 import MainCenter from './layout/MainCenter.vue';
 import PopoversCtl from './components/PopoversCtl.vue';
 import EventBus from '../common/EventBus';
 import { useSettingStore } from './store/settingStore';
+import { storeToRefs } from 'pinia';
 
-const { getCurrentThemeId, setupAppSuspension } = useSettingStore()
+const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
+const { getCurrentThemeId, setupAppSuspension, 
+  setupTray, setupGlobalShortcut } = useSettingStore()
+
+const isReservedPath = (path) => {
+  const reservedPaths = [ 'id', 'name', 'binding', 'gBinding' ]
+  return reservedPaths.indexOf(path) > -1
+}
+
+const deepInState = (state, cache) => {
+    for(let path in state) {
+        const value = state[path]
+        if(typeof(value) === 'object') {
+            deepInState(state[path], cache[path])
+        } else {
+            state[path] = (isReservedPath(path) ? state[path] : cache[path])
+        }
+    }
+}
+
+//TODO 清理设置，解决不同版本导致的数据不一致问题
+const cleanupSetting = () => {
+    const store = useSettingStore()
+    const key = "setting"
+    const cache = localStorage.getItem("setting")
+    if(cache) {
+        const cacheStates = JSON.parse(cache)
+        store.$reset()
+        localStorage.removeItem(key)
+        deepInState(store.$state, cacheStates)
+    }
+    store.$patch({ blackHole: Math.random() * 100000000 })
+}
+
+const setupCache = () => {
+  if(!isStorePlayStateBeforeQuit.value) {
+      localStorage.removeItem('player')
+  }
+  if(!isStoreLocalMusicBeforeQuit.value) {
+      localStorage.removeItem('localMusic')
+  }
+}
 
 const initialize = () => {
+  cleanupSetting()
   setupAppSuspension()
+  setupCache()
+  setupTray()
+  setupGlobalShortcut()
 }
 
 //TODO 直接在setup()时初始化，不需要等待其他生命周期
@@ -21,12 +65,13 @@ initialize()
 </script>
 
 <template>
-    <PlayBoostrap></PlayBoostrap>
-    <Themes>
-      <MainLeft></MainLeft> 
-      <MainCenter></MainCenter>
-      <PopoversCtl></PopoversCtl>
-    </Themes>
+    <PlayerBoostrap>
+      <Themes>
+        <MainLeft></MainLeft> 
+        <MainCenter></MainCenter>
+        <PopoversCtl></PopoversCtl>
+      </Themes>
+    </PlayerBoostrap>
 </template>
 
 <style>

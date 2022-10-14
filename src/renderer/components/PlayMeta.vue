@@ -54,12 +54,13 @@ onMounted(() => {
 
 <style>
 .play-meta {
-    height: 68px;
+    /*height: 68px;*/
     display: flex;
+    height: 77px;
 }
 
 .play-meta .title-wrap {
-    width: 205px;
+    width: 211px;
     margin-left: 10px;
 }
 
@@ -72,16 +73,16 @@ onMounted(() => {
 
 .play-meta .cover-wrap {
     position: relative;
-    width: 68px;
-    height: 68px;
+    width: 77px;
+    height: 77px;
     box-shadow: 0px 0px 1px #161616;
     box-shadow: 0px 0px 1px var(--main-left-border-color);
 }
 
 .play-meta .audio-cover, .play-meta .cover-mask  {
     /*width: 100%;*/
-    width: 68px;
-    height: 100%;
+    width: 77px;
+    height: 77px;
     cursor: pointer;
     -webkit-user-drag: none;
     -webkit-app-region: no-drag;
@@ -144,17 +145,17 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 205px;
+    width: 211px;
     /* justify-content: center; */
 }
 
 .play-meta .audio-time,
 .play-meta .volume-bar {
     line-height: 25px;
+    line-height: 30px;
 }
 
 .play-meta .audio-time {
-    color: #989898;
     color: var(--text-sub-color);
     font-size: 14px;
     text-align: left;
@@ -166,14 +167,15 @@ onMounted(() => {
 }
 
 .play-meta .volume-status {
-    width: 16px;
+    width: 18px;
+    margin-top: 6px;
 }
 
 .play-meta .st-slient,
 .play-meta .st-small,
 .play-meta .st-large {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 .play-meta .volume-value {

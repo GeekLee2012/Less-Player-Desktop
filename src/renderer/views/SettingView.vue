@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onBeforeMount, onMounted } from 'vue';
 import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import { storeToRefs } from 'pinia';
@@ -8,39 +8,33 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useMainViewStore } from '../store/mainViewStore';
 import { useIpcRenderer } from '../../common/Utils';
+import EventBus from '../../common/EventBus';
 
 const ipcRenderer = useIpcRenderer()
 
-const { theme, track, keys, tray, dialog ,cache, other } = storeToRefs(useSettingStore())
+const { theme, track, keys, tray, navigation, dialog ,cache, other } = storeToRefs(useSettingStore())
 const { setThemeIndex, 
-    setTrackQualityIndex, 
-    toggleVipTransfer,
-    toggleCategoryBarRandom,
-    togglePlayingWithoutSleeping,
-    toggleStorePlayState,
-    toggleStoreLocalMusic,
-    toggleTrayMenu,
-    toggleKeysGlobal,
-    updateBlackHole,
-    allThemes, 
-    allQualities
-} = useSettingStore()
+        setTrackQualityIndex, 
+        toggleVipTransfer,
+        toggleCategoryBarRandom,
+        togglePlayingWithoutSleeping,
+        toggleStorePlayState,
+        toggleStoreLocalMusic,
+        toggleTrayShow,
+        toggleCustomPlaylistsShow,
+        toggleFavouritePlaylistsShow,
+        toggleFollowArtistsShow,
+        toggleKeysGlobal,
+        updateBlackHole,
+        allThemes, 
+        allQualities
+    } = useSettingStore()
 
 const { showToast } = useMainViewStore()
 
 const visitLink = (url) => {
     if(ipcRenderer) ipcRenderer.send('visit-link', url)
 }
-
-const clearSettingsCache = (noToast) => {
-    ["setting", "settings"].forEach(key => {
-        localStorage.removeItem(key)
-    })
-    updateBlackHole(Math.random() * 100000000)
-    if(!noToast) showToast("当前设置缓存已清空！")
-}
-
-onMounted(() => clearSettingsCache(true))
 </script>
 
 <template>
@@ -89,7 +83,7 @@ onMounted(() => clearSettingsCache(true))
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="cache row">
                 <b>缓存</b>
                 <div class="content">
                     <div>
@@ -113,18 +107,42 @@ onMounted(() => clearSettingsCache(true))
                     -->
                 </div>
             </div>
-            <div class="row">
+            <div class="menu row">
                 <b>菜单栏</b>
                 <div class="content">
                     <div class="last">
                         <b>在菜单栏（系统托盘）显示：</b>
-                        <ToggleControl @click="toggleTrayMenu"
-                            :value="tray.showMenu">
+                        <ToggleControl @click="toggleTrayShow"
+                            :value="tray.show">
                         </ToggleControl>
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="navigation row">
+                <b>导航栏</b>
+                <div class="content">
+                    <div>左侧导航栏显示：</div>
+                    <div>
+                        <b>创建的歌单：</b>
+                        <ToggleControl @click="toggleCustomPlaylistsShow"
+                            :value="navigation.customPlaylistsShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <b>收藏的歌单：</b>
+                        <ToggleControl @click="toggleFavouritePlaylistsShow"
+                            :value="navigation.favouritePlaylistsShow">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <b>关注的歌手：</b>
+                        <ToggleControl @click="toggleFollowArtistsShow"
+                            :value="navigation.followArtistsShow">
+                        </ToggleControl>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog row" style="display: none;">
                 <b>对话框</b>
                 <div class="content">
                     <div>当进行如下操作时，需要确认：</div>
@@ -180,17 +198,17 @@ onMounted(() => clearSettingsCache(true))
                         <ToggleControl @click="toggleKeysGlobal"
                             :value="keys.global" >
                         </ToggleControl>
-                        <SvgTextButton text="恢复默认"></SvgTextButton>
+                        <SvgTextButton text="恢复默认" style="display: none"></SvgTextButton>
                     </div>
                     <div v-for="(item,index) in keys.data"
                         :class="{ last: index == (keys.data.length - 1) }" >
                         <b>{{ item.name }}：</b>
                         <KeysInputControl :value="item.binding" :class="{ keysInputAdptWidth: !keys.global }"></KeysInputControl>
-                        <KeysInputControl class="global-keys-ctrl" v-show="keys.global"></KeysInputControl>
+                        <KeysInputControl :value="item.gBinding" class="global-keys-ctrl" v-show="keys.global"></KeysInputControl>
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="data row">
                 <b>数据</b>
                 <div class="content">
                     <div class="last">
@@ -262,7 +280,7 @@ onMounted(() => clearSettingsCache(true))
     margin-left: 35px;
     margin-right: 35px;
     padding-top: 25px;
-    font-size: 25px;
+    font-size: 30px;
     font-weight: bold;
     padding-bottom: 20px;
     border-bottom: 2px solid var(--setting-bottom-border-color);
@@ -290,6 +308,8 @@ onMounted(() => clearSettingsCache(true))
 
 #setting-view .center .row > b {
     font-size: 16.5px;
+    font-size: 17px;
+    margin-left: 10px;
     font-weight: bold;
     width: 125px;
     font-weight: normal;

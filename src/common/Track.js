@@ -77,7 +77,7 @@ export class Track {
     }
 
     static hasUrl(track) {
-        return track.url && track.url.trim().length > 0
+        return track && track.url && track.url.trim().length > 0
     }
 
     static hasCover(track) {

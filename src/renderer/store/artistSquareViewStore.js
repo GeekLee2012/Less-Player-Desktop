@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { Category } from "../../common/Category";
+import EventBus from "../../common/EventBus";
 import { usePlatformStore } from "./platformStore";
 
 export const useArtistSquareViewStore = defineStore('artistSquareView', {
@@ -35,6 +35,9 @@ export const useArtistSquareViewStore = defineStore('artistSquareView', {
             const { currentVender } = usePlatformStore()
             return currentVender()
         },
+        notifyRefresh() {
+            EventBus.emit("artistSquare-refresh")
+        },
         updateCurrentCategoryItem(name, item, index) {
             const cate = {}
             cate[name] = { item, index }
@@ -42,8 +45,10 @@ export const useArtistSquareViewStore = defineStore('artistSquareView', {
             const newValue = JSON.stringify(cate[name])
             if(oldValue == newValue) return
             Object.assign(this.currentCategoryItems, cate)
+            this.notifyRefresh()
         },
-        resetCurrentCategoryItems() {
+        resetCurrentCategoryItems() { 
+            //TODO
             for(var key in this.currentCategoryItems) {
                 delete this.currentCategoryItems[key]
             }
@@ -52,6 +57,7 @@ export const useArtistSquareViewStore = defineStore('artistSquareView', {
             category.forEach(item => {
                 this.currentCategoryItems[item.name] = { item: item.data[0], index: 0 }
             })
+            this.notifyRefresh()
         },
         putAlphabet(platform, alphabet) {
             this.alphabetMap.set(platform, alphabet)

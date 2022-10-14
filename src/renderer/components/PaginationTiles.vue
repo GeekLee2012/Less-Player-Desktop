@@ -1,9 +1,10 @@
 <script setup>
+//TODO 目前仅作为标记性组件，并无任何实现逻辑
 </script>
 
 <template>
     <div class="pagination-tiles">
-        <slot name="data"></slot>
+        <slot></slot>
     </div>
 </template>
 

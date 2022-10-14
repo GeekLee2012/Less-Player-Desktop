@@ -60,7 +60,7 @@ const QUALITIES = [{
     name: '无损'
 }]
 
-//TODO 或许可能大概会实现吧......
+//TODO 本地缓存导致Store State数据不一致
 export const useSettingStore = defineStore('setting', {
     state: ()=> ({
         /* 主题 */
@@ -80,74 +80,20 @@ export const useSettingStore = defineStore('setting', {
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: false, 
         },
-        /* 快捷键 */
-        keys: {
-            global: false, //是否全局（系统平台级别）快捷键
-            data: [{
-                id: 'togglePlayMode',
-                name: '切换播放模式',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'togglePlay',
-                name: '播放/暂停',
-                binding: 'Space',
-                gBinding: ''
-            }, {
-                id: 'playPrev',
-                name: '上一曲',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'playNext',
-                name: '下一曲',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'toggleSearch',
-                name: '打开/关闭搜索',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'toggleSetting',
-                name: '打开/关闭设置',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'toggleCategory',
-                name: '打开/关闭分类列表',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'togglePlaybackQueue',
-                name: '打开/关闭当前播放',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'volumeUp',
-                name: '增加音量',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'volumeDown',
-                name: '减小音量',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'volumeMax',
-                name: '最大音量',
-                binding: '',
-                gBinding: ''
-            }, {
-                id: 'volumeMute',
-                name: '静音',
-                binding: '',
-                gBinding: ''
-            }]
+        /* 缓存 */
+        cache: {
+            storePlayState: true,  //退出后保存播放状态：包括当前歌曲、播放列表等
+            storeLocalMusic: false, //退出后记录已经添加的本地歌曲
         },
         /* 菜单栏、系统托盘 */
         tray: {
-            showMenu: false, //是否在系统托盘显示
+            show: false, //是否在系统托盘显示
+        },
+        /* 导航栏 */
+        navigation: {
+            customPlaylistsShow: false,
+            favouritePlaylistsShow: false,
+            followArtistsShow: false,
         },
         /* 对话框 */
         dialog: {
@@ -159,19 +105,71 @@ export const useSettingStore = defineStore('setting', {
             reset: true,
             quit: false,
         },
-        /* 缓存 */
-        cache: {
-            storePlayState: true,  //退出后保存播放状态：包括当前歌曲、播放列表等
-            storeLocalMusic: false, //退出后记录已经添加的本地歌曲
+        /* 快捷键 */
+        keys: {
+            global: false, //是否全局（系统平台级别）快捷键
+            data: [ {
+                id: 'togglePlay',
+                name: '播放 / 暂停',
+                binding: 'Space',
+                gBinding: 'Shift + Space'
+            }, {
+                id: 'togglePlayMode',
+                name: '切换播放模式',
+                binding: 'M',
+                gBinding: 'Shift + M'
+            }, {
+                id: 'playPrev',
+                name: '上一曲',
+                binding: 'Left',
+                gBinding: 'Shift + Left'
+            }, {
+                id: 'playNext',
+                name: '下一曲',
+                binding: 'Right',
+                gBinding: 'Shift + Right'
+            }, {
+                id: 'volumeUp',
+                name: '增加音量',
+                binding: 'Up',
+                gBinding: 'Shift + Up'
+            }, {
+                id: 'volumeDown',
+                name: '减小音量',
+                binding: 'Down',
+                gBinding: 'Shift + Down'
+            }, {
+                id: 'volumeMuteOrMax',
+                name: '静音 / 最大音量',
+                binding: 'O',
+                gBinding: 'Shift + O'
+            }, {
+                id: 'toggleSetting',
+                name: '打开设置',
+                binding: 'P',
+                gBinding: 'Shift + P'
+            }, {
+                id: 'togglePlaybackQueue',
+                name: '打开 / 关闭当前播放',
+                binding: 'Q',
+                gBinding: 'Shift + Q'
+            } ]
         },
         /* 其他 */
-        other: { //TODO
-            blockHole: null,
+        other: {
+
         },
+        blackHole: null, //黑洞state，永远不需要持久化
     }),
     getters: {
         isPlaylistCategoryBarRandom(state) {
             return this.track.categoryBarRandom
+        },
+        isStorePlayStateBeforeQuit(state) {
+            return this.cache.storePlayState
+        },
+        isStoreLocalMusicBeforeQuit(state) {
+            return this.cache.storeLocalMusic
         }
     },
     actions: {
@@ -196,13 +194,24 @@ export const useSettingStore = defineStore('setting', {
         },
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping
-            setupAppSuspension()
+            this.setupAppSuspension()
         },
-        toggleTrayMenu() {
-            this.tray.showMenu = !this.tray.showMenu
+        toggleTrayShow() {
+            this.tray.show = !this.tray.show
+            this.setupTray()
+        },
+        toggleCustomPlaylistsShow() {
+            this.navigation.customPlaylistsShow = !this.navigation.customPlaylistsShow
+        },
+        toggleFavouritePlaylistsShow() {
+            this.navigation.favouritePlaylistsShow = !this.navigation.favouritePlaylistsShow
+        },
+        toggleFollowArtistsShow() {
+            this.navigation.followArtistsShow = !this.navigation.followArtistsShow
         },
         toggleKeysGlobal() {
             this.keys.global = !this.keys.global
+            this.setupGlobalShortcut()
         },
         toggleStorePlayState() {
             this.cache.storePlayState = !this.cache.storePlayState
@@ -216,8 +225,14 @@ export const useSettingStore = defineStore('setting', {
         setupAppSuspension() {
             if(ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
         },
+        setupTray() {
+            if(ipcRenderer) ipcRenderer.send("app-tray", this.tray.show)
+        },
+        setupGlobalShortcut() {
+            if(ipcRenderer) ipcRenderer.send("app-globalShortcut", this.keys.global)
+        },
         updateBlackHole(value) {
-            this.other.blockHole = value
+            this.blackHole = value
         },
         allThemes () {
             return THEMES
@@ -232,7 +247,7 @@ export const useSettingStore = defineStore('setting', {
             {
                 //key: 'setting',
                 storage: localStorage,
-                paths: [ 'theme', 'track', 'dialog', 'keys', 'tray', 'cache' ]
+                paths: [ 'theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys' ]
             },
         ],
     },

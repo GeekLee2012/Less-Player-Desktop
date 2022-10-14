@@ -61,17 +61,17 @@ const routes = [
         component:  UserInfoEditView 
     },
     {  //我的主页 - 自建歌单
-        path: '/userhome/customPlaylist/create',
-        //props: true, 
+        path: '/:exploreMode/customPlaylist/create',
+        props: true, 
         component:  CustomPlaylistEditView 
     },
     {  //我的主页 - 自建歌单 - 编辑
-        path: '/userhome/customPlaylist/edit/:id',
+        path: '/:exploreMode/customPlaylist/edit/:id',
         props: true, 
         component:  CustomPlaylistEditView 
     },
     {  //我的主页 - 自建歌单 - 详情
-        path: '/userhome/customPlaylist/:id',
+        path: '/:exploreMode/customPlaylist/:id',
         props: true, 
         component:  CustomPlaylistDetailView 
     },

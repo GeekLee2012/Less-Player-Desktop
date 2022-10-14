@@ -1,46 +1,87 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, Menu, dialog, powerMonitor, shell, powerSaveBlocker } = require('electron')
-const { isMacOS, useCustomTrafficLight, isDevEnv, USER_AGENT, AUDIO_EXTS, IMAGE_EXTS } = require('./env')
+const { app, BrowserWindow, ipcMain, 
+  Menu, dialog, powerMonitor, 
+  shell, powerSaveBlocker, Tray,
+  globalShortcut } = require('electron')
+const { isMacOS, useCustomTrafficLight, isDevEnv, 
+  USER_AGENT, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
 const path = require('path')
-const { scanDir, parseTracks, readText, FILE_PREFIX, randomTextWithinAlphabetNums } = require('./common') 
+const { scanDir, parseTracks, readText, FILE_PREFIX, 
+  randomTextWithinAlphabetNums } = require('./common') 
 
 //电源模式
-let powerSaveBlockerId = -1
+let powerSaveBlockerId = -1, appTray = null
 
 /* 自定义函数 */
 const startup = () => {
-  onReady()
+  init()
   registryGlobalListeners()
 }
 
-const onReady = () => {
+const init = () => {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   app.whenReady().then(() => {
+    //全局快捷键
+    //registryGlobalShortcuts()
     //全局UserAgent
     app.userAgentFallback = USER_AGENT
     app.mainWin = createWindow()
-  
-    app.on('activate', () => {
-      // On macOS it's common to re-create a window in the app when the
-      // dock icon is clicked and there are no other windows open.
-      if (BrowserWindow.getAllWindows().length === 0) {
-          app.mainWin = createWindow()
-      }
-    })
   })
-}
 
-const registryGlobalListeners = () => {
+  app.on('activate', (event) => {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (BrowserWindow.getAllWindows().length === 0) {
+        app.mainWin = createWindow()
+    }
+  })
+
   // Quit when all windows are closed, except on macOS. There, it's common
   // for applications and their menu bar to stay active until the user quits
   // explicitly with Cmd + Q.
-  app.on('window-all-closed', () => {
-    if(!isDevEnv) app.quit()
-    if(!isMacOS) app.quit()
+  app.on('window-all-closed', (event) => {
+    if(!isDevEnv || !isMacOS) app.quit()
   })
 
+  app.on('before-quit', (event) => {
+    sendToRenderer('app-quit')
+  })
+}
+
+//全局快捷键
+const registryGlobalShortcuts = () => {
+  const config = {
+    // 播放或暂停
+    'Shift+Space': 'togglePlay',
+    // 播放模式切换
+    'Shift+M': 'switchPlayMode',
+    // 上 / 下一曲
+    'Shift+Left': 'playPrev',
+    'Shift+Right': 'playNext',
+    // 增 / 减音量
+    'Shift+Up': 'volumeUp',
+    'Shift+Down': 'volumeDown',
+    // 最大音量 / 静音
+    'Shift+O': 'toggleVolumeMute',
+    // 打开设置
+    'Shift+P': 'visitSetting',
+    // 打开 / 关闭当前播放
+    'Shift+Q': 'togglePlaybackQueue'
+  }
+
+  const activeWindowValues = ['visitSetting', 'togglePlaybackQueue']
+  for(const [ key, value ] of Object.entries(config)) {
+    globalShortcut.register(key, () => {
+      sendToRenderer('globalShortcut-' + value)
+      if(activeWindowValues.includes(value)) app.mainWin.show()
+    })
+  }
+}
+
+//全局事件监听
+const registryGlobalListeners = () => {
   //主进程事件监听
   ipcMain.on('app-quit', ()=> {
     app.quit()
@@ -64,12 +105,28 @@ const registryGlobalListeners = () => {
       powerSaveBlocker.stop(powerSaveBlockerId)
       powerSaveBlockerId = -1
     }
+  }).on('app-tray', (e, value)=> {
+    if(value === true) {
+      if(appTray) appTray.destroy()
+      appTray = new Tray(path.join(__dirname, APP_ICON))
+      appTray.setContextMenu(Menu.buildFromTemplate(initTrayMenuTemplate()))
+    } else if(appTray) {
+      appTray.destroy()
+      appTray = null
+    }
   }).on('show-winBtn', ()=> {
     setWindowButtonVisibility(true)
   }).on('hide-winBtn', ()=> {
     setWindowButtonVisibility(false)
   }).on('visit-link', (e, data)=> {
     shell.openExternal(data)
+  }).on('app-globalShortcut', (e, data)=> {
+    if(data === true) {
+      globalShortcut.unregisterAll()
+      registryGlobalShortcuts()
+    } else {
+      globalShortcut.unregisterAll()
+    }
   })
 
   ipcMain.handle('open-dirs', async (e, ...args)=> {
@@ -116,10 +173,10 @@ const registryGlobalListeners = () => {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 999,
-    height: 666,
-    minWidth: 999,
-    minHeight: 666,
+    width: 1080,
+    height: 720,
+    minWidth: 1080,
+    minHeight: 720,
     titleBarStyle: 'hidden',
     trafficLightPosition: { x: 15, y: 15 },
     transparent: true,
@@ -139,7 +196,7 @@ const createWindow = () => {
     mainWindow.loadFile('dist/index.html')
   }
   //菜单
-  Menu.setApplicationMenu(Menu.buildFromTemplate(initMenuTemplate()))
+  Menu.setApplicationMenu(Menu.buildFromTemplate(initAppMenuTemplate()))
 
   mainWindow.once('ready-to-show', () => {
     setWindowButtonVisibility(!useCustomTrafficLight)
@@ -169,7 +226,7 @@ const createWindow = () => {
 }
 
 //菜单模板
-const initMenuTemplate = () => {
+const initAppMenuTemplate = () => {
   let menuItems = [ { role: 'about' },
     { role: 'toggleDevTools' },
     { role: 'quit' }, ]
@@ -194,6 +251,58 @@ const initMenuTemplate = () => {
         ]
       }]
   ]
+  return template
+}
+
+const sendToRenderer = (channel, args) => {
+  try {
+    app.mainWin.webContents.send(channel, args)
+  } catch(error) {
+
+  }
+}
+
+//TODO 
+const sendTrayAction = (action) => sendToRenderer('tray-action', action)
+
+const initTrayMenuTemplate = () => {
+  const template = [{
+    label: '听你想听，爱你所爱',
+    click: () => {
+      app.mainWin.show()
+      sendTrayAction(4)
+    }
+  }, {
+    type: 'separator'
+  }, {
+    label: '播放 / 暂停',
+    click: () => sendTrayAction(1)
+  }, {
+    label: '上一曲',
+    click: () => sendTrayAction(2)
+  }, {
+    label: '下一曲',
+    click: () => sendTrayAction(3)
+  }, {
+    type: 'separator'
+  }, {
+    label: '我的主页',
+    click: () => {
+      app.mainWin.show()
+      sendTrayAction(5)
+    }
+  }, {
+    label: '设置',
+    click: () => {
+      app.mainWin.show()
+      sendTrayAction(6)
+    }
+  }, {
+    type: 'separator'
+  }, {
+    label: "退出",
+    role: "quit"
+  }]
   return template
 }
 

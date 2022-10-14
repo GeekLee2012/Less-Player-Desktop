@@ -48,20 +48,15 @@ const removeItem = () => {
     toastAndHideMenu("歌单已删除！")
 }
 
-const itemRef = ref(null)
-onMounted(() => {
-    if(itemRef.value) {
-        itemRef.value.addEventListener("contextmenu", e => {
-            e.preventDefault()
-            EventBus.emit("commonCtxMenu-init", 3)
-            EventBus.emit("commonCtxMenu-show", { event: e, value: props.data })
-        })
-    }
-})
+const showContextMenu = (event) => {
+    event.preventDefault()
+    EventBus.emit("commonCtxMenu-init", 3)
+    EventBus.emit("commonCtxMenu-show", { event, value: props.data })
+}
 </script>
 
 <template>
-    <div class="custom-playlist-item" ref="itemRef">
+    <div class="custom-playlist-item" @contextmenu="showContextMenu">
         <div class="sqno">{{ index + 1 }}</div>
         <div class="cover">
             <img v-lazy="data.cover" />
@@ -90,7 +85,7 @@ onMounted(() => {
 <style scoped>
 .custom-playlist-item {
     width: 100%;
-    height: 68px;
+    height: 73px;
     display: flex;
     flex-direction: row;
     flex: 1;

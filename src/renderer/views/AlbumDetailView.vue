@@ -45,8 +45,19 @@ const { addRecentAlbum } = useUserProfileStore()
 let currentTabView = shallowRef(null)
 const tabData = ref([])
 const detail = reactive({})
+const isLoadingDetail = ref(false)
+const isLoading = ref(false)
 
-const visitTab = (index) => {
+const setLoadingDetail = (value) => {
+    isLoadingDetail.value = value
+}
+
+const setLoading = (value) => {
+    isLoading.value = value
+}
+
+const visitTab = (index, isClick) => {
+    if(isLoading.value && isClick) return 
     setActiveTab(index)
     switchTab()
 }
@@ -101,7 +112,9 @@ const updateTabData = (data) => {
 }
 
 const getAlbumDetail = () => {
+    setLoadingDetail(true)
     if(isAlbumDetailLoaded()) {
+        setLoadingDetail(false)
         return 
     }
     const vender = getVender(props.platform)
@@ -112,19 +125,23 @@ const getAlbumDetail = () => {
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
         updateAbout(result.about)
         Object.assign(detail, result)
+        setLoadingDetail(false)
         if(result.hasTracks()) {
             updateAllSongs(result.data)
             updateTabData(allSongs.value)
             currentTabView.value = SongListControl
+            setLoading(false)
             return 
         }
     })
 }
 
 const loadAllSongs = ()=> {
+    setLoading(true)
+    currentTabView.value = SongListControl
     if(isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
-        currentTabView.value = SongListControl
+        setLoading(false)
         return 
     }
     const vender = getVender(props.platform)
@@ -133,29 +150,27 @@ const loadAllSongs = ()=> {
     vender.albumDetailAllSongs(id, 0, 100).then(result => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
-        currentTabView.value = SongListControl
+        setLoading(false)
     })
 }
 
 const loadAbout = () => {
-    updateTabData(about.value)
     currentTabView.value = TextListControl
+    updateTabData(about.value)
 }
 
 const detailRef = ref(null)
-const bindScrollListener = () => {
-    if(!detailRef.value) return
-    detailRef.value.removeEventListener('scroll', hideAllCtxMenus)
-    detailRef.value.addEventListener('scroll', hideAllCtxMenus)
+const onScroll = () => {
+    hideAllCtxMenus()
 }
 
 const scrollToTop = () => {
-    const view = document.querySelector('#album-detail')
-    view.scrollTop = 0
-    bindScrollListener()
+    detailRef.value.scrollTop = 0
 }
 
 const reloadAll = () =>  {
+    setLoadingDetail(true)
+    setLoading(true)
     resetAll()
     loadAll()
 }
@@ -173,11 +188,13 @@ const resetView = () => {
 
 const switchTab = () => {
     resetView()
+    setLoading(true)
     getAlbumDetail()
     if(isAllSongsTab()) {
         loadAllSongs()
     } else if(isAboutTab()) {
         loadAbout()
+        setLoading(false)
     }
 }
 
@@ -189,26 +206,42 @@ watch(()=> props.id, (nv, ov) => reloadAll())
 </script>
 
 <template>
-    <div id="album-detail" ref="detailRef">
+    <div id="album-detail" ref="detailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="albumCover" />
             </div>
-            <div class="right">
+            <div class="right" v-show="!isLoading">
                 <div class="title" v-html="albumName"></div>
                 <div class="info">
                     <div class="info-row">
-                        <span><b>歌手:</b> {{ artistName }} </span>
+                        <span><b>歌手:</b> {{ artistName || '未知歌手' }} </span>
                     </div>
                     <div class="info-row">
-                        <span class="col1"><b>发行时间:</b> {{ publishTime }} </span>
+                        <span class="col1"><b>发行时间:</b> {{ publishTime || '未知' }} </span>
+                        <!--
                         <span class="col2"><b>发行公司:</b> {{ company }} </span>
+                        -->
+                    </div>
+                    <div class="info-row">
+                        <span class="col2"><b>发行公司:</b> {{ company || '未知' }}</span>
                     </div>
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()" class="spacing"></PlayAddAllBtn>
                     <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFavourite" class="spacing">
                     </FavouriteShareBtn>
+                </div>
+            </div>
+            <div class="right" v-show="isLoading">
+                <div class="title" v-show="isLoadingDetail">
+                    <div class="loading-mask" style="width: 36%; height: 39px; display: inline-block;"></div>
+                </div>
+                <div class="info" v-show="isLoadingDetail">
+                    <div class="loading-mask" v-for="i in 3" style="width: 500px; height: 36px; display: inline-block;"></div>
+                </div>
+                <div class="action">
+                    <div class="loading-mask spacing" v-for="i in 2" style="width: 168px; height: 36px; display: inline-block;"></div>
                 </div>
             </div>
         </div>
@@ -216,14 +249,16 @@ watch(()=> props.id, (nv, ov) => reloadAll())
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index }"
                     v-for="(tab,index) in tabs" 
-                    @click="visitTab(index)"
+                    @click="visitTab(index, true)"
                     v-html="tab.name" >
                 </span>
                 <span class="tab-tip" v-html="tabTipText" ></span>
             </div>
-            <component :is="currentTabView" :data="tabData" 
+            <component :is="currentTabView" 
+                :data="tabData" 
                 :artistVisitable="true" 
-                :albumVisitable="true" >
+                :albumVisitable="true"
+                :loading="isLoading" >
             </component>
         </div>
     </div>
@@ -246,26 +281,35 @@ watch(()=> props.id, (nv, ov) => reloadAll())
 
 #album-detail .header .right {
     flex: 1;
-    margin-left: 20px;
+    margin-left: 30px;
 }
 
 #album-detail .header .title {
     text-align: left;
     margin-top: 5px;
-    font-size: 25px;
+    font-size: 30px;
     font-weight: bold;
+
+    overflow: hidden;
+    word-wrap: break-all;
+    white-space: pre-wrap;
+    line-break: anywhere;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 #album-detail .header .cover {
-    width: 175px;
-    height: 175px;
+    width: 233px;
+    height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 10px #161616;
 }
 
 #album-detail .header .info {
     margin-top: 15px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     font-size: 16px;
     text-align: left;
 }
@@ -285,6 +329,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
 
 #album-detail .header .info-row .col1 {
     width: 200px;
+    width: 233px;
     display: inline-block;
 }
 
@@ -302,7 +347,7 @@ watch(()=> props.id, (nv, ov) => reloadAll())
 }
 
 #album-detail .spacing {
-    margin-left: 20px;
+    margin-right: 20px;
 }
 
 #album-detail .tab-nav {

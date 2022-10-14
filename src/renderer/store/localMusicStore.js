@@ -49,5 +49,14 @@ export const useLocalMusicStore = defineStore('localMusic', {
             this.localDirs.length = 0
             this.localTracks.length = 0
         }
+    },
+    persist: {
+        enabled: true,
+        strategies: [
+            {
+                storage: localStorage,
+                paths: [ 'localDirs', 'localTracks' ]
+            }
+        ]
     }
 })

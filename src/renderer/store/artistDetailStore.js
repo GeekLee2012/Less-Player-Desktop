@@ -26,7 +26,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
     state: () => ({
         artistId: '',
         platform: '',
-        artistName: '趁青春',
+        artistName: '未知歌手',
         artistAlias: '',
         artistCover: 'default_cover.png',
         hotSongs: [],
@@ -35,7 +35,9 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         about: '',
         activeTab: -1,
         tabTipText: '',
-        tabs: TAB_LIST
+        tabs: TAB_LIST,
+        hasHotSongTab: true,
+        hasAllSongTab: true
     }),
     getters: {
         activeTabCode() {
@@ -61,7 +63,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             this.about = ''
         },
         resetArtistDetail() {
-            this.updateArtist('趁青春', 'default_cover.png', '')
+            this.updateArtist('未知歌手', 'default_cover.png', '')
         },
         resetAll() {
             this.resetArtistDetail()
@@ -111,7 +113,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
 
             this.artistName = this.artistName.trim()
             if(this.artistName.length < 1) return false
-            if(this.artistName == '趁青春' ) return false
+            if(this.artistName == '未知歌手' ) return false
             return true
         },
         isHotSongsTabLoaded() {
@@ -133,18 +135,26 @@ export const useArtistDetailStore = defineStore('artistDetail', {
                 this.tabTipText = this.tabs[this.activeTab].text.replace('0', length)
             }
         },
+        setupSongTabs(hasHotSongs, hasAllSongs) {
+            this.hasHotSongTab = hasHotSongs
+            this.hasAllSongTab = hasAllSongs
+        },
         updateTabs() {
             const { isQQ, isNetEase, isKuWo, isKuGou, isDouBan } = usePlatformStore()
             if(isQQ(this.platform) 
                 || isNetEase(this.platform)) {
                 this.tabs = [ TAB_LIST[0], TAB_LIST[2], TAB_LIST[3] ]
+                this.setupSongTabs(true, false)
             } else if (isKuWo(this.platform) 
                 || isKuGou(this.platform) ){
                 this.tabs = [ TAB_LIST[1], TAB_LIST[2], TAB_LIST[3] ]
+                this.setupSongTabs(false, true)
             }  else if (isDouBan(this.platform)){
                 this.tabs = [ TAB_LIST[1], TAB_LIST[3] ]
+                this.setupSongTabs(false, true)
             } else {
                 this.tabs = TAB_LIST
+                this.setupSongTabs(true, true)
             }
         },
         isHotSongsTab() {

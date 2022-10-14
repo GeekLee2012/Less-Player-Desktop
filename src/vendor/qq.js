@@ -709,7 +709,7 @@ export class QQ {
                     scriptText = scriptText.trim()
                     if(scriptText.includes(key)) break
                 }
-                const result = { id, title: '趁青春', cover: 'default_cover.png', data:[], about: '' }
+                const result = { id, title: '未知歌手', cover: 'default_cover.png', data:[], about: '' }
                 if(scriptText) {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')

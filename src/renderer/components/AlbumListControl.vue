@@ -4,13 +4,15 @@ import PaginationTiles from './PaginationTiles.vue';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { storeToRefs } from 'pinia';
 import { useMainViewStore } from '../store/mainViewStore';
+import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 
 const props = defineProps({
     data: Array,
     checkbox: Boolean,
     checkedAll: Boolean,
     ignoreCheckAllEvent: Boolean,
-    checkChangedFn: Function
+    checkChangedFn: Function,
+    loading: Boolean
 })
 
 const router = useRouter()
@@ -34,20 +36,20 @@ const visitItem = (item) => {
 
 <template>
     <div class="albumlist-ctl">
-         <PaginationTiles>
-            <template #data>
-                <ImageTextTile v-for="item in data" 
-                    :cover="item.cover" 
-                    :title="item.title" 
-                    :subtitle="item.publishTime"
-                    @click="visitItem(item)"
-                    :checkbox="checkbox"
-                    :checked="checkedAll"
-                    :ignoreCheckAllEvent="ignoreCheckAllEvent"
-                    :checkChangedFn="(checked) => checkChangedFn(checked, item)" >
-                </ImageTextTile>
-            </template>
+         <PaginationTiles v-show="!loading">
+            <ImageTextTile v-for="item in data" 
+                :cover="item.cover" 
+                :title="item.title" 
+                :subtitle="item.publishTime"
+                @click="visitItem(item)"
+                :checkbox="checkbox"
+                :checked="checkedAll"
+                :ignoreCheckAllEvent="ignoreCheckAllEvent"
+                :checkChangedFn="(checked) => checkChangedFn(checked, item)" >
+            </ImageTextTile>
         </PaginationTiles>
+        <ImageTextTileLoadingMask :count="16" v-show="loading">
+        </ImageTextTileLoadingMask>
     </div>
 </template>
 

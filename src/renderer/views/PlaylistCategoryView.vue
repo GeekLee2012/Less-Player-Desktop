@@ -21,19 +21,20 @@ const resetScroll = () => {
     view.scrollTop = 0
 }
 
-let prevCate = null
 const isDiffCate = (item, row, col) => {
+    const prevCate = currentCategoryItem.value
     return prevCate ? (
-        prevCate.item.value != item.value
+        prevCate.data.value != item.value
         || prevCate.row != row 
         || prevCate.col != col) : true
 }
 
 const visitCateItem = (item, row, col) => {
+    const needRefresh = isDiffCate(item, row, col)
     updateCurrentCategoryItem(item, row, col)
-    if(isDiffCate(item, row, col)) {
+    if(needRefresh) {
         EventBus.emit("playlistSquare-refresh")
-        prevCate = { item, row, col }
+        //prevCate = { item, row, col }
         hidePlaylistCategoryView()
     }
     
@@ -51,7 +52,7 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
 <template>
     <div class="playlist-category-view" @click.stop="">
         <div class="header">
-            <div class="cate-title">当前分类</div>
+            <div class="cate-title">全部分类</div>
             <div class="fl-item" v-html="currentCategoryItem.data.key"></div>
         </div>
         <div class="center">
@@ -87,19 +88,28 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     padding-bottom: 10px;
     padding-left: 25px;
     padding-right: 25px;
+    /* border-bottom: 0.5px solid var(--category-view-border); */
     border-bottom: 0.5px solid #565656;
+    border-bottom: var(--category-view-border);
 }
 
 .playlist-category-view .header .cate-title {
     margin-right: 1px;
 }
 
-.playlist-category-view .header .fl-item {
+.playlist-category-view .header .fl-item,
+.playlist-category-view .header .fl-item:hover {
     cursor: default;
     font-size: 18px;
-    background: var(--hl-text-bg);
+    background: var(--hl-text-bg) ;
     -webkit-background-clip: text;
     color: transparent;
+    /*
+    padding-top: 8px;
+    margin-left: 30px;
+    */
+    position: absolute;
+    right: 30px;
 }
 
 .playlist-category-view .center {
@@ -128,11 +138,14 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     -webkit-background-clip: text;
     color: transparent;
     */
-    color: #ddd;
     color: var(--text-sub-color);
     min-width: 36px;
     margin-top: 15px;
     margin-right: 15px;
+}
+
+.playlist-category-view .header .cate-title {
+    font-size: 21px !important;
 }
 
 .playlist-category-view .fl-item {
@@ -142,7 +155,6 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     margin-top: 10px;
     margin-right: 10px;
     cursor: pointer;
-    color: #bcbcbc;
     color: var(--text-color);
     border-radius: 10rem;
 }

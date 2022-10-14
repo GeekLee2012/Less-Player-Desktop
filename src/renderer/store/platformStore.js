@@ -116,9 +116,10 @@ export const usePlatformStore = defineStore('platform', {
             for(var i = 0; i < pms.length; i++) {
                 if(code === pms[i].code) {
                     this.updateCurrentPlatform(i)
-                    break
+                    return
                 }
             }
+            this.updateCurrentPlatform(-1)
         },
         getVender(name) {
             name = name.toLowerCase().trim()

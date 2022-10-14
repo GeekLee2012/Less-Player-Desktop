@@ -14,6 +14,7 @@ import AlbumListControl from '../components/AlbumListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useMainViewStore } from '../store/mainViewStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
@@ -287,17 +288,20 @@ const refresh = () => {
 
 //TODO
 const contentRef = ref(null)
-const bindScrollListener = () => {
-    if(!contentRef.value) return 
-    contentRef.value.removeEventListener('scroll', hideAllCtxMenus)
-    contentRef.value.addEventListener('scroll', hideAllCtxMenus)
+const back2TopBtnRef = ref(null)
+const onScroll = () => {
+    hideAllCtxMenus()
+}
+
+const resetBack2TopBtn = () => {
+    back2TopBtnRef.value.setScrollTarget(contentRef.value)
 }
 
 onMounted(() => {
     updateCurrentPlatform(0)
     visitTab(0)
     updateTitle()
-    bindScrollListener()
+    resetBack2TopBtn()
 })
 
 watch(currentPlatformCode, (nv, ov) => {
@@ -367,7 +371,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                 </SvgTextButton>
                 <SvgTextButton text="完成" :leftAction="finish" class="to-right"></SvgTextButton>
             </div>
-            <div class="content" ref="contentRef">
+            <div class="content" ref="contentRef" @scroll="onScroll">
                 <component :is="currentTabView" 
                     :data="tabData"
                     :checkbox="true"
@@ -377,6 +381,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                 </component>
             </div>
         </div>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 
@@ -407,7 +412,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 
 #batch-action-view .header .title-wrap {
     text-align: left;
-    font-size: 25px;
+    font-size: 30px;
     font-weight: bold;
     position: relative;
 }
@@ -418,7 +423,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     right: 10px;
     text-align: right;
     margin-left: 25px;
-    font-size: 20px;
+    font-size: 23px;
     font-weight: bold;
 }
 

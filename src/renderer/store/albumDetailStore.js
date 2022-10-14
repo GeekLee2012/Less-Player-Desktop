@@ -18,7 +18,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         platform: '',
         albumName: '山川湖海，日月星辰',
         albumCover: 'default_cover.png',
-        artistName: '趁青春',
+        artistName: '未知歌手',
         company: '',
         publishTime: '',
         allSongs: [],
@@ -45,7 +45,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
             this.about = ''
         },
         resetAlbumDetail() {
-            this.updateAlbum('山川湖海，日月星辰', 'default_cover.png', '趁青春', '', '')
+            this.updateAlbum('山川湖海，日月星辰', 'default_cover.png', '未知歌手', '', '')
         },
         resetAll() {
             this.resetAlbumDetail()
@@ -76,7 +76,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         },
         isAlbumDetailLoaded() {
             return this.albumName != '山川湖海，日月星辰'
-                && this.artistName != '趁青春'
+                && this.artistName != '未知歌手'
         },
         isAllSongsTabLoaded() {
             return this.allSongs.length > 0

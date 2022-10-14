@@ -379,7 +379,9 @@ export class KuGou {
                 result.cover = json.data.img
                 const lyricText = json.data.lyrics
                 result.lyric = Lyric.parseFromText(lyricText)
-                result.artist = json.data.authors.map(ar => ({ id: ar.author_id, name: ar.author_name}))
+                if(json.data.authors) {
+                    result.artist = json.data.authors.map(ar => ({ id: ar.author_id, name: ar.author_name}))
+                }
                 resolve(result)
             })
         })

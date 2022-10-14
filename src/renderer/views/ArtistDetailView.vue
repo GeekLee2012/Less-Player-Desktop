@@ -21,6 +21,7 @@ import { useMainViewStore } from '../store/mainViewStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
 
 const props = defineProps({
     platform: String,
@@ -30,7 +31,7 @@ const props = defineProps({
 const { artistId, artistName, artistCover, 
         artistAlias, tabTipText, activeTab, 
         tabs, hotSongs, allSongs, 
-        albums, about
+        albums, about, hasHotSongTab, hasAllSongTab
     } = storeToRefs(useArtistDetailStore())
 const { setActiveTab, updateArtist,
         updateHotSongs, updateAllSongs, appendAllSongs, 
@@ -51,16 +52,36 @@ const { showToast, hideAllCtxMenus } = useMainViewStore()
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
-const tabData = ref([])
+const tabData = reactive([])
 const detail = reactive({})
-let offset = 0
-let page = 1
-let limit = 30
-const loadingDetail = ref(false)
-const loading = ref(false)
+let offset = 0,  page = 1, limit = 30
+const isLoadingDetail = ref(false)
+const isLoadingSongs = ref(false)
+const isLoadingAlbums = ref(false)
+const isLoading = ref(false)
+const back2TopBtnRef = ref(null)
+let markScrollTop = 0
 
-const visitTab = (index) => {
-    if(loading.value) return
+const setLoadingDetail = (value) => {
+    isLoadingDetail.value = value
+}
+
+const setLoading = (value) => {
+    isLoading.value = value
+}
+
+const setLoadingSongs = (value) => {
+    isLoadingSongs.value = value
+    setLoading(value)
+}
+
+const setLoadingAlbums = (value) => {
+    isLoadingAlbums.value = value
+    setLoading(value)
+}
+
+const visitTab = (index, isClick) => {
+    if(isLoading.value && isClick) return
     setActiveTab(index)
     switchTab()
 }
@@ -107,24 +128,26 @@ const checkFollow = () => {
     follow.value = isFollowArtist(props.id, props.platform)
 }
 const updateTabData = (data) => {
-    tabData.value.length = 0
     if(typeof(data) == 'string') {
-        tabData.value.push(data)
+        tabData.length = 0
+        tabData.push(data)
         updateTabTipText(0)
     } else {
-        tabData.value.push(...data)
-        updateTabTipText(tabData.value.length)
+        tabData.length = 0
+        tabData.push(...data)
+        updateTabTipText(tabData.length)
     }
 }
 
 const getArtistDetail = () => {
     checkFollow()
     if(isArtistDetailLoaded()) {
+        setLoadingDetail(false)
         return 
     }
     const vender = getVender(props.platform)
     if(!vender) return
-    loadingDetail.value = true
+    setLoadingDetail(true)
     const id = artistId.value
     vender.artistDetail(id).then(result => {
         updateArtist(result.title, result.cover)
@@ -132,18 +155,17 @@ const getArtistDetail = () => {
             updateAbout(result.about)
         }
         Object.assign(detail, result)
-        loadingDetail.value = false
+        setLoadingDetail(false)
     })
 }
 
 const loadHotSongs = () => {
+    setLoadingSongs(true)
     if(isHotSongsTabLoaded()) {
         updateTabData(hotSongs.value)
-        currentTabView.value = SongListControl
-        loading.value = false
+        setLoadingSongs(false)
         return 
     }
-    loading.value = true
     const vender = getVender(props.platform)
     if(!vender) return
     const id = artistId.value
@@ -151,12 +173,11 @@ const loadHotSongs = () => {
         if(result.name && result.cover) updateArtist(result.name, result.cover)
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
-        currentTabView.value = SongListControl
-
-        loading.value = false
+        setLoadingSongs(false)
     })
 }
 
+//TODO
 const loadMoreSongs = () => {
     const vender = getVender(props.platform)
     if(!vender) return
@@ -170,31 +191,32 @@ const loadMoreSongs = () => {
 }
 
 const loadAllSongs = () => {
+    setLoadingSongs(true)
     if(isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
-        currentTabView.value = SongListControl
-        loading.value = false
+        setLoadingSongs(false)
         return 
     }
     const vender = getVender(props.platform)
     if(!vender) return
-    loading.value = true
     const id = artistId.value
     vender.artistDetailAllSongs(id, offset, limit, page).then(result => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
-        currentTabView.value = SongListControl
-        loading.value = false
+        setLoadingSongs(false)
     })
     offset = page++ * limit
 }
 
 const loadAlbums = () => {
-    loadingDetail.value = false
-    loading.value = false
+    setLoadingDetail(false)
+    setLoadingAlbums(true)
     if(isAlbumsTabLoaded()) {
-        updateTabData(albums.value)
-        currentTabView.value = AlbumListControl
+        //TODO
+        setTimeout(() => {
+            updateTabData(albums.value)
+            setLoadingAlbums(false)
+        }, 0)
         return 
     }
     const vender = getVender(props.platform)
@@ -204,17 +226,17 @@ const loadAlbums = () => {
     vender.artistDetailAlbums(id, 0, 365, 1).then(result => {
         updateAlbums(result.data)
         updateTabData(albums.value)
-        currentTabView.value = AlbumListControl
+        setLoadingAlbums(false)
     })
 }
 
 const loadAbout = () => {
-    loadingDetail.value = false
-    loading.value = false
+    setLoadingDetail(false)
+    setLoadingSongs(false)
+    setLoadingAlbums(false)
     if(isAboutTabLoaded()) {
         updateTabData(about.value)
         updateTabTipText(0)
-        currentTabView.value = TextListControl
         return 
     }
     const vender = getVender(props.platform)
@@ -224,18 +246,15 @@ const loadAbout = () => {
         updateAbout(result)
         updateTabData(result)
         updateTabTipText(0)
-        currentTabView.value = TextListControl
     })
 }
 
-const scrollToTop = () => {
-    artistDetailRef.value.scrollTop = 0
-}
-
 const scrollToLoad = () => {
+    if(isLoading.value) return
     const scrollTop = artistDetailRef.value.scrollTop
     const scrollHeight = artistDetailRef.value.scrollHeight
     const clientHeight = artistDetailRef.value.clientHeight
+    markScrollState()
     if((scrollTop + clientHeight) >= scrollHeight) {
        loadMoreSongs()
     }
@@ -245,31 +264,65 @@ const scrollToLoad = () => {
 
 const resetTabView = () => {
     currentTabView.value = null
-    artistDetailRef.value.removeEventListener('scroll', scrollToLoad)
+    tabData.length = 0
     updateTabTipText(0)
 }
 
-const bindScrollListener = (handle) => {
-    if(!artistDetailRef.value) return 
-    artistDetailRef.value.removeEventListener('scroll', handle)
-    artistDetailRef.value.addEventListener('scroll', handle)
+const onScroll = () => {
+    hideAllCtxMenus()
+    if(isAllSongsTab()) {
+        scrollToLoad()
+    }
 }
 
 const switchTab = () => {
+    setLoading(true)
     resetTabView()
-    loading.value = true
     getArtistDetail()
     if(isHotSongsTab()) {
+        currentTabView.value = SongListControl
         loadHotSongs()
-        bindScrollListener(hideAllCtxMenus)
     } else if(isAllSongsTab()) {
+        currentTabView.value = SongListControl
         loadAllSongs()
-        bindScrollListener(scrollToLoad)
     } else if(isAlbumsTab()) {
+        currentTabView.value = AlbumListControl
         loadAlbums()
     } else if(isAboutTab()) {
+        currentTabView.value = TextListControl
         loadAbout()
     }
+}
+
+const isAvailableTab = (btnType) => {
+    const isPlayHotSongBtn = (btnType === 0)
+    const isPlayAllSongBtn = (btnType === 1)
+    if(isPlayHotSongBtn) {
+        if(isAllSongsTab()) return false
+        else if(hasAllSongTab.value) return false
+    } else if(isPlayAllSongBtn) {
+        if(isHotSongsTab()) return false
+        else if(hasHotSongTab.value) return false
+    }
+    return true
+}
+
+const resetBack2TopBtn = () => {
+    back2TopBtnRef.value.setScrollTarget(artistDetailRef.value)
+}
+
+const resetScrollState = () => {
+    markScrollTop = 0
+    artistDetailRef.value.scrollTop = markScrollTop
+}
+
+const markScrollState = () => {
+    markScrollTop = artistDetailRef.value.scrollTop
+}
+
+const restoreScrollState = () => {
+    if(markScrollTop < 1) return 
+    artistDetailRef.value.scrollTop = markScrollTop
 }
 
 const resetPagination = () => {
@@ -278,12 +331,16 @@ const resetPagination = () => {
 }
 
 const reloadAll = () =>  {
+    setLoadingDetail(true)
+    setLoadingSongs(true)
+    resetBack2TopBtn()
+    resetScrollState()
     resetAll()
     loadAll()
 }
 
 const loadAll = () => {
-    scrollToTop()
+    restoreScrollState()
     resetPagination()
     visitTab(0)
     EventBus.emit("imageTextTile-load")
@@ -291,7 +348,11 @@ const loadAll = () => {
 
 //TODO 后期需要梳理优化，容易出现重复加载Bug
 /*-------------- 各种监听 --------------*/
-onMounted(() => loadAll())
+onMounted(() => {
+    resetBack2TopBtn()
+    resetScrollState()
+    loadAll()
+})
 onActivated(() => loadAll())
 //watch(artistId, (nv, ov) => reloadAll())
 watch(activeTab, (nv,ov) => switchTab())
@@ -299,30 +360,34 @@ watch(() => props.id , (nv, ov) => reloadAll())
 </script>
 
 <template>
-    <div id="artist-detail" ref="artistDetailRef">
+    <div id="artist-detail" ref="artistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="artistCover" />
             </div>
-            <div class="right" v-show="!loading">
+            <div class="right" v-show="!isLoading">
                 <div class="title" v-html="artistName" ></div>
                 <div class="alias" v-html="artistAlias" ></div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isHotSongsTab()" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
-                    <PlayAddAllBtn :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAllSongsTab()" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
                     <FavouriteShareBtn :favourited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
                     </FavouriteShareBtn>
                 </div>
             </div>
-            <div class="right" v-show="loading">
-                <div class="title" v-show="loadingDetail">
-                    <div class="loading-mask" style="width: 36%; height: 36px; display: inline-block;"></div>
+            <div class="right" v-show="isLoading">
+                <div class="title" v-show="isLoadingDetail">
+                    <div class="loading-mask" style="width: 36%; height: 39px; display: inline-block;"></div>
                 </div>
-                <div class="title" v-show="!loadingDetail">
-                    <div class="loading-mask" style="width: 36%; height: 36px; display: inline-block;"></div>
+                <div class="title" v-html="artistName" v-show="!isLoadingDetail"></div>
+                <div class="action" v-show="isLoadingDetail">
+                    <div class="loading-mask spacing" v-for="i in 2" style="width: 168px; height: 36px; display: inline-block;"></div>
                 </div>
-                <div class="action">
-                    <div class="loading-mask spacing" v-for="i in 2" style="width: 168px; height: 30px; display: inline-block;"></div>
+                <div class="action" v-show="!isLoadingDetail">
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
+                    <FavouriteShareBtn :favourited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
+                    </FavouriteShareBtn>
                 </div>
             </div>
         </div>
@@ -330,7 +395,7 @@ watch(() => props.id , (nv, ov) => reloadAll())
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index }"
                     v-for="(tab,index) in tabs" 
-                    @click="visitTab(index)"
+                    @click="visitTab(index, true)"
                     v-html="tab.name" >
                 </span>
                 <span class="tab-tip" v-html="tabTipText" ></span>
@@ -339,12 +404,11 @@ watch(() => props.id , (nv, ov) => reloadAll())
                 :data="tabData"
                 :platform="platform"
                 :artistVisitable="true" 
-                :albumVisitable="true" >
+                :albumVisitable="true" 
+                :loading="isLoading" >
             </component>
-            <div v-show="loading">
-                <div class="loading-mask" v-for="i in 12" style="width: 100%;  height: 36px; margin-bottom: 5px; display: inline-block;"></div>
-            </div>
         </div>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 
@@ -365,16 +429,26 @@ watch(() => props.id , (nv, ov) => reloadAll())
 
 #artist-detail .header .right {
     flex: 1;
-    margin-left: 20px;
+    margin-left: 30px;
 }
 
 #artist-detail .header .title{
     text-align: left;
     margin-top: 5px;
     margin-bottom: 20px;
-    font-size: 25px;
+    margin-bottom: 39px;
+    font-size: 30px;
     font-weight: bold;
     height: 39px;
+
+    overflow: hidden;
+    word-wrap: break-all;
+    white-space: pre-wrap;
+    line-break: anywhere;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
 }
 
 #artist-detail .header .alias{
@@ -382,8 +456,8 @@ watch(() => props.id , (nv, ov) => reloadAll())
 }
 
 #artist-detail .header .cover {
-    width: 168px;
-    height: 168px;
+    width: 233px;
+    height: 233px;
     border-radius: 10rem;
     box-shadow: 0px 0px 10px #161616;
 }

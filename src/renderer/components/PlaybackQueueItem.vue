@@ -25,20 +25,16 @@ const removeItem = () => {
     showToast("歌曲已删除！")
 }
 
-const pbqItemRef = ref(null)
-onMounted(() => {
-    if(pbqItemRef.value) {
-        pbqItemRef.value.addEventListener("contextmenu", e => {
-            e.preventDefault()
-            EventBus.emit("commonCtxMenu-init", 9)
-            EventBus.emit("commonCtxMenu-show", { event: e, value: props.data })
-        })
-    }
-})
+const showContextMenu = (event) => {
+    event.preventDefault()
+    EventBus.emit("commonCtxMenu-init", 9)
+    EventBus.emit("commonCtxMenu-show", { event, value: props.data })
+}
 </script>
 
 <template>
-    <div class="playback-queue-item" @dblclick="" :class="{ current: active }" ref="pbqItemRef">
+    <div class="playback-queue-item" :class="{ current: active }"
+        @dblclick="" @contextmenu="showContextMenu">
         <div class="item-wrap">
             <div class="left">
                 <img class="cover" v-lazy="data.cover" />
@@ -70,12 +66,14 @@ onMounted(() => {
 <style scoped>
 .playback-queue-item {
     border-bottom: 1px solid var(--border-color);
+    --item-height: 66px;
+    --cover-size: 43px;
 }
 
 .playback-queue-item .item-wrap {
     margin: 0px;
     padding-left: 10px;
-    height: 60px;
+    height: var(--item-height);
     display: flex;
     flex: 1;
     align-items: center;
@@ -104,8 +102,8 @@ onMounted(() => {
 }
 
 .playback-queue-item .cover {
-    width: 41px;
-    height: 41px;
+    width: var(--cover-size);
+    height: var(--cover-size);
     margin-right: 8px;
     -webkit-user-drag: none;
 }
@@ -126,7 +124,7 @@ onMounted(() => {
 }
 
 .playback-queue-item .right .data {
-    height: 41px;
+    height: var(--cover-size);
     z-index: 1;
     display: flex;
     flex-direction: column;

@@ -1,6 +1,7 @@
 import { Howl, Howler } from 'howler';
 import { PLAY_STATE } from '../common/Constants';
 import EventBus from '../common/EventBus';
+import { Track } from './Track';
 
 let singleton = null
 
@@ -32,7 +33,7 @@ export class Player {
     }
 
     createSound() {
-        if(!this.currentTrack) return null
+        if(!Track.hasUrl(this.currentTrack)) return null
         var self = this
         //释放资源
         if(this.sound) this.sound.unload()
@@ -54,18 +55,17 @@ export class Player {
                 requestAnimationFrame(self.__step.bind(self))
             },
             onloaderror: function() {
-                if((self.retry++) < 1) self.notifyError()
+                self.retryPlay(1)
             },
             onplayerror: function() {
-                if((self.retry++) < 1) self.notifyError()
+                self.retryPlay(1)
             }
         })
         return this.sound
     }
 
     getSound() {
-        if(!this.currentTrack) return null
-        return this.sound
+        return Track.hasUrl(this.currentTrack) ? this.sound : null
     }
 
     //播放
@@ -82,7 +82,10 @@ export class Player {
 
     togglePlay() {
         const sound = this.getSound()
-        if(!sound) return 
+        if(!sound) {
+            this.retryPlay(1)
+            return
+        } 
         if(sound.playing()) {
             sound.pause()
         } else {
@@ -145,6 +148,11 @@ export class Player {
     
     notifyError() {
         EventBus.emit('track-error', this.currentTrack)
+    }
+
+    retryPlay(times) {
+        if(this.retry < times) this.notifyError()
+        ++this.retry
     }
 
 }

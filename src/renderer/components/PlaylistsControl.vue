@@ -8,13 +8,15 @@ import { useMainViewStore } from '../store/mainViewStore';
 import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
 import { useUserProfileStore } from '../store/userProfileStore';
+import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 
 const props = defineProps({
     data: Array,
     checkbox: Boolean,
     checkedAll: Boolean,
     ignoreCheckAllEvent: Boolean,
-    checkChangedFn: Function
+    checkChangedFn: Function,
+    loading: Boolean
 })
 
 const router = useRouter()
@@ -85,21 +87,20 @@ EventBus.on('radio-nextTrack', track => nextRadioTrack(track.platform, track.cha
 
 <template>
     <div class="playlists-ctl">
-         <PaginationTiles>
-            <template #data>
-                <ImageTextTile v-for="item in data"
-                    @click="visitItem(item)"
-                    :cover="item.cover" 
-                    :title="item.title"
-                    :playable="true"
-                    :playAction="() => playItem(item)"
-                    :checkbox="checkbox"
-                    :checked="checkedAll"
-                    :ignoreCheckAllEvent="ignoreCheckAllEvent"
-                    :checkChangedFn="(checked) => checkChangedFn(checked, item)" >
-                </ImageTextTile>
-            </template>
+         <PaginationTiles v-show="!loading">
+            <ImageTextTile v-for="item in data"
+                @click="visitItem(item)"
+                :cover="item.cover" 
+                :title="item.title"
+                :playable="true"
+                :playAction="() => playItem(item)"
+                :checkbox="checkbox"
+                :checked="checkedAll"
+                :ignoreCheckAllEvent="ignoreCheckAllEvent"
+                :checkChangedFn="(checked) => checkChangedFn(checked, item)" >
+            </ImageTextTile>
         </PaginationTiles>
+        <ImageTextTileLoadingMask :count="16" v-show="loading"></ImageTextTileLoadingMask>
     </div>
 </template>
 

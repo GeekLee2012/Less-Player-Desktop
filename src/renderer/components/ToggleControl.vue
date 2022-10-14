@@ -22,13 +22,12 @@ const toggle = () => {
     width: 40px;
     height: 20px;
     border-radius: 10rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--toggle-btn-border-color);
     display: flex;
     flex-direction: column;
     justify-content: center;
     cursor: pointer;
-    background-color: #a0a0a0;
-    background-color: var(--toggle-btn-bg);
+    background: var(--toggle-btn-bg);
 }
 
 .toggle-ctl .thumb {
@@ -36,15 +35,15 @@ const toggle = () => {
     width: 16px;
     height: 16px;
     border-radius: 10rem;
-    background-color: var(--toggle-btn-color);
+    background: var(--toggle-thumb-bg);
 }
 
 .toggle-ctl-active {
-    background-color: var(--toggle-btn-color);
+    background: var(--toggle-btn-active-bg);
     align-items: flex-end;
 }
 
 .toggle-ctl-active .thumb {
-    background: var(--btn-bg) !important;
+    background: var(--toggle-active-thumb-bg) !important;
 }
 </style>

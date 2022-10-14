@@ -1,11 +1,11 @@
-import { defineStore, storeToRefs } from 'pinia';
-import { PLAY_STATE, PLAY_MODE } from '../../common/Constants';
+import { defineStore } from 'pinia';
+import { PLAY_MODE } from '../../common/Constants';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { toMmss } from '../../common/Times';
 
 const NO_TRACK = new Track(0, '', '听你想听，爱你所爱', 
-    [ { id: 0, name: '趁青春' }], 
+    [ { id: 0, name: '不枉青春' }], 
     { id: 0, name: '山川湖海，日月星辰' }, 
     0, 'default_cover.png')
 
@@ -68,12 +68,14 @@ export const usePlayStore = defineStore('play', {
             }
             //播放列表为空
             if(this.queueTracksSize < 1) return
-            //当前歌曲存在
-            if(this.currentTrack && (NO_TRACK != this.currentTrack)) {
-                EventBus.emit('track-togglePlay')
-                return 
+            //当前歌曲不存在或存在但缺少url
+            if(!Track.hasUrl(this.currentTrack) 
+                || NO_TRACK == this.currentTrack) {
+                this.playNextTrack()
+                return
             }
-            this.playNextTrack()
+            //当前歌曲正常
+            EventBus.emit('track-togglePlay')
         },
         addTrack(track) {
             //TODO 超级列表如何保证时效
@@ -224,6 +226,14 @@ export const usePlayStore = defineStore('play', {
             value = value > 0 ? value : 0
             value = value < 1 ? value : 1 
             this.volume = value
+            EventBus.emit("volume-set", value)
+        },
+        updateVolumeByOffset(value) {
+            value = parseFloat(value)
+            this.updateVolume(this.volume + value)
+        },
+        toggleVolumeMute() {
+            this.updateVolume(this.volume > 0 ? 0.0 : 1.0)
         },
         switchPlayMode() {
             this.playMode = ++this.playMode % 3
@@ -243,44 +253,4 @@ export const usePlayStore = defineStore('play', {
             }
         ]
     }
-})
-
-EventBus.on('track-state', state => {
-    const { playNextTrack, setPlaying } = usePlayStore();
-    switch(state) {
-        case PLAY_STATE.PLAYING:
-            setPlaying(true)
-            break;
-        case PLAY_STATE.PAUSE:
-            setPlaying(false)
-            break;
-        case PLAY_STATE.END:
-            playNextTrack()
-            break;
-        default:
-            break
-    }
-})
-
-EventBus.on('track-pos', secs => {
-    const { updateCurrentTime, setPlaying } = usePlayStore()
-    //进度在更新，状态必为plyaing
-    setPlaying(true)
-    updateCurrentTime(secs)
-})
-
-EventBus.on('track-volume', value => {
-    const { updateVolume } = usePlayStore()
-    updateVolume(value)
-})
-
-EventBus.on('key-togglePlay', () => {
-    const { togglePlay } = usePlayStore()
-    togglePlay()
-})
-
-//FM广播
-EventBus.on('radio-state', state => {
-    const { setPlaying } = usePlayStore()
-    setPlaying(state)
 })

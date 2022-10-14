@@ -32,25 +32,24 @@
 }
 
 .ntf-dialog {
-    width: 235px;
-    height: 125px;
+    width: 258px;
+    height: 159px;
     border-radius: 12px;
-    background-color: #eaeaeaea;
-    background-color: var(--ntf-bg);
+    background: var(--ntf-bg);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0px 0px 10px #161616;
+    box-shadow: 0px 0px 10px var(--ntf-border-color);
 }
 
 .ntf-text {
-    font-size: 18px;
+    font-size: 20px;
     color: var(--ntf-text-color);
 }
 
 .ntf-text p {
-    line-height: 30px;
+    line-height: 36px;
 }
 
 .ntf-text svg {

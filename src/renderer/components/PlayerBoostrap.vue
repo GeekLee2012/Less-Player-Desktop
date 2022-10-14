@@ -7,12 +7,31 @@ import { Track } from '../../common/Track';
 import { storeToRefs } from 'pinia';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { onMounted } from 'vue';
+import { useIpcRenderer } from '../../common/Utils';
+import { PLAY_STATE, TRAY_ACTION } from '../../common/Constants';
+import { useRouter } from 'vue-router';
+import { useSettingStore } from '../store/settingStore';
+
+const router = useRouter()
+const ipcRenderer = useIpcRenderer()
 
 const { queueTracksSize } = storeToRefs(usePlayStore())
-const { playTrack, playNextTrack, setAutoPlaying } = usePlayStore()
+const { playTrack, playNextTrack, 
+    setAutoPlaying, playPrevTrack, 
+    togglePlay, switchPlayMode,
+    toggleVolumeMute, updateVolumeByOffset,
+    updateCurrentTime, setPlaying  } = usePlayStore()
 const { getVender } = usePlatformStore()
-const { showPlayNotification, hidePlayNotification } = useMainViewStore()
+const { showPlayNotification, hidePlayNotification, 
+    hidePlayingView, hidePlaybackQueueView, togglePlaybackQueueView } = useMainViewStore()
 const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
+const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
+
+const visitRoute = (path) => {
+    hidePlayingView()
+    hidePlaybackQueueView()
+    router.push(path)
+}
 
 const loadLyric = (track) => {
     if(!track) return 
@@ -53,7 +72,6 @@ const tryCancelPlayNextTimer = () => {
         hidePlayNotification()
     }
 }
-
 
 let toastCnt = 0 //连跳计数器
 const bootstrapTrack = (track, callback, noToast) => {
@@ -113,10 +131,17 @@ const initRadioPlayer = () => {
 }
 
 const retry = (track) => {
-    EventBus.emit('track-changed', track)
+    if(!Track.hasUrl(track)) {
+        playNextTrack()
+    } else {
+        EventBus.emit('track-changed', track)
+    }
 }
 
+//FM广播
 EventBus.on('radio-play', track => traceRecentPlay(track))
+EventBus.on('radio-state', state => setPlaying(state))
+//普通歌曲
 EventBus.on('track-changed', track => {
     traceRecentPlay(track)
     bootstrapTrack(track, track => {
@@ -132,12 +157,85 @@ EventBus.on('track-restoreInit', track => {
 })
 EventBus.on('track-loadLyric', track => loadLyric(track))
 EventBus.on('track-error', track => retry(track))
+EventBus.on('track-state', state => {
+    switch(state) {
+        case PLAY_STATE.PLAYING:
+            setPlaying(true)
+            break;
+        case PLAY_STATE.PAUSE:
+            setPlaying(false)
+            break;
+        case PLAY_STATE.END:
+            playNextTrack()
+            break;
+        default:
+            break
+    }
+})
+EventBus.on('track-pos', secs => {
+    //进度在更新，状态必为plyaing
+    setPlaying(true)
+    updateCurrentTime(secs)
+})
+
+//注册ipcMain消息监听器
+const registryIpcRenderderListeners = () => {
+    if(!ipcRenderer) return 
+    //Tray事件
+    ipcRenderer.on("tray-action", (e, value) => {
+        switch(value) {
+            case TRAY_ACTION.PLAY: 
+            case TRAY_ACTION.PAUSE:
+                togglePlay()
+                break
+            case TRAY_ACTION.PLAY_PREV:
+                playPrevTrack()
+                break
+            case TRAY_ACTION.PLAY_NEXT:
+                playNextTrack()
+                break
+            case TRAY_ACTION.HOME:
+                visitRoute('/')
+                break
+            case TRAY_ACTION.USERHOME:
+                visitRoute('/userhome/all')
+                break
+            case TRAY_ACTION.SETTING:
+                visitRoute('/setting')
+                break
+        }
+    })
+
+    //全局快捷键
+    ipcRenderer.on('globalShortcut-togglePlay', togglePlay)
+    ipcRenderer.on('globalShortcut-switchPlayMode', switchPlayMode)
+    ipcRenderer.on('globalShortcut-playPrev', playPrevTrack)
+    ipcRenderer.on('globalShortcut-playNext', playNextTrack)
+    ipcRenderer.on('globalShortcut-volumeUp', () => updateVolumeByOffset(0.05))
+    ipcRenderer.on('globalShortcut-volumeDown', () => updateVolumeByOffset(-0.05))
+    ipcRenderer.on('globalShortcut-toggleVolumeMute', toggleVolumeMute)
+    ipcRenderer.on('globalShortcut-visitSetting', () => visitRoute('/setting'))
+    ipcRenderer.on('globalShortcut-togglePlaybackQueue', togglePlaybackQueueView)
+
+    //其他事件
+    ipcRenderer.on('app-quit', () => {
+        if(!isStorePlayStateBeforeQuit.value) {
+            localStorage.removeItem('player')
+        }
+        if(!isStoreLocalMusicBeforeQuit.value) {
+            localStorage.removeItem('localMusic')
+        }
+    })
+}
+
+registryIpcRenderderListeners()
 
 onMounted(initRadioPlayer)
 </script>
 <template>
     <!-- FM广播audio -->
     <audio class="radio-holder"></audio>
+    <slot></slot>
 </template>
 <style>
 .radio-holder {

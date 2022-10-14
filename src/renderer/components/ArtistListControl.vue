@@ -5,9 +5,11 @@ import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useMainViewStore } from '../store/mainViewStore';
 import { storeToRefs } from 'pinia';
+import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 
 const props = defineProps({
-    data: Array
+    data: Array,
+    loading: Boolean
 })
 
 const router = useRouter()
@@ -30,15 +32,14 @@ const visitItem = (platform, id) => {
 
 <template>
     <div class="artistlist-ctl">
-         <PaginationTiles>
-            <template #data>
-                <ImageTextTile v-for="item in data" 
-                    :cover="item.cover" 
-                    :title="item.title"
-                    @click="visitItem(item.platform, item.id)" >
-                </ImageTextTile>
-            </template>
+         <PaginationTiles v-show="!loading">
+            <ImageTextTile v-for="item in data" 
+                :cover="item.cover" 
+                :title="item.title"
+                @click="visitItem(item.platform, item.id)" >
+            </ImageTextTile>
         </PaginationTiles>
+        <ImageTextTileLoadingMask :count="16" v-show="loading"></ImageTextTileLoadingMask>
     </div>
 </template>
 
@@ -55,5 +56,22 @@ const visitItem = (platform, id) => {
 .artistlist-ctl .image-text-tile .title {
     text-align: center !important;
     margin-top: 10px !important;
+}
+
+.artistlist-ctl .tiles-loading-mask .tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.artistlist-ctl .tiles-loading-mask .tile .cover {
+    border-radius: 10rem !important;
+}
+
+.artistlist-ctl .tiles-loading-mask .tile .title {
+    text-align: center !important;
+    margin-top: 10px !important;
+    width: 75%;
 }
 </style>

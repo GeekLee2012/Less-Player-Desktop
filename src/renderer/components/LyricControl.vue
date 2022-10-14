@@ -177,27 +177,27 @@ onMounted(() => {
 }
 
 .lyric-ctl .audio-title {
-    font-size: 23px;
+    font-size: 28px;
     font-weight: bold;
     margin-bottom: 6px;
 }
 
 .lyric-ctl .audio-artist,
 .lyric-ctl .audio-album {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: bold;
-    color: #ababab;
     color: var(--text-sub-color);
     display: flex;
 }
 
-.lyric-ctl .audio-artist .ar-ctl ,
+.lyric-ctl .audio-artist .ar-ctl,
 .lyric-ctl .audio-album .al-ctl {
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
 }
     
 .lyric-ctl .center {
     height: 366px;
+    height: 399px;
     overflow: auto;
     margin-top: 15px;
     padding-right: 6px;
@@ -226,7 +226,7 @@ onMounted(() => {
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
-    font-size: 19px;
+    font-size: 21px;
     font-weight: bold;
 }
 
@@ -243,7 +243,6 @@ onMounted(() => {
     margin-top: 125px;
     align-items: center;
     font-size: 19px;
-    color: #989898;
     color: var(--text-lyric-color);
 }
 </style>

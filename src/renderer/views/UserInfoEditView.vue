@@ -117,7 +117,7 @@ const updateCover = async () => {
 #user-info-edit .header .title {
     text-align: left;
     margin-top: 5px;
-    font-size: 25px;
+    font-size: 30px;
     font-weight: bold;
 }
 
@@ -149,7 +149,7 @@ const updateCover = async () => {
 }
 
 #user-info-edit .center .form-row {
-    margin-bottom: 15px;
+    margin-bottom: 18px;
 }
 
 #user-info-edit .center .form-row div {
@@ -167,12 +167,12 @@ const updateCover = async () => {
 #user-info-edit .center .form-row input,
 #user-info-edit .center .form-row textarea {
     flex: 1;
-    border: 1px solid var(--main-left-border-color);
+    border: 1px solid var(--input-border-color);
     outline: none;
     padding: 3px 6px;
     border-radius: 2px;
-    background-color: var(--searchbar-bg);
-    color: var(--searchbar-text-color);
+    background-color: var(--input-bg);
+    color: var(--input-text-color);
     font-size: 15px;
 }
 
@@ -181,7 +181,7 @@ const updateCover = async () => {
 }
 
 #user-info-edit .center .form-row textarea {
-    height: 256px;
+    height: 300px;
     padding: 8px;
 }
 
@@ -198,6 +198,10 @@ const updateCover = async () => {
     color: var(--hl-color) !important;
     font-weight: bold;
     font-size: 20px;
+}
+
+#user-info-edit ::-webkit-input-placeholder {
+    color: var(--input-placeholder-color);
 }
 
 #user-info-edit .invalid {

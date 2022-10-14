@@ -2,31 +2,62 @@
 import { onMounted, watch } from 'vue';
 import MainTop from './MainTop.vue';
 import MainContent from './MainContent.vue';
-import { useMainViewStore } from '../store/mainViewStore'
+import { useMainViewStore } from '../store/mainViewStore';
+import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
 import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
 import ArtistCategoryView from '../views/ArtistCategoryView.vue';
 import EventBus from '../../common/EventBus';
+import Mousetrap from 'mousetrap';
+import { useRouter } from 'vue-router';
+
 
 const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useMainViewStore())
 const { hidePlaylistCategoryView, hideArtistCategoryView, 
-    hidePlaybackQueueView, hideAllCtxMenus } = useMainViewStore()
+    hidePlaybackQueueView, hideAllCtxMenus,
+    togglePlaybackQueueView, togglePlayingView, 
+    hidePlayingView } = useMainViewStore()
 
+const { togglePlay, switchPlayMode, 
+    playPrevTrack, playNextTrack,
+    toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
+const router = useRouter()
 
-//应用级别按键监听
-const handleKeys = (e) => {
-    //空格键
-    if(e.keyCode == 32 || e.code.toLowerCase() === 'space') {
-        EventBus.emit('key-togglePlay')
-    }
+//const minAppWidth = 999, minAppHeight = 666 
+const minAppWidth = 1080, minAppHeight = 720 
+
+const visitRoute = (path) => {
+    hidePlaybackQueueView()
+    hidePlayingView()
+    router.push(path)
+}
+
+//注册默认应用级别快捷键
+const registryDefaultLocalKeys = () => {
+    // 播放或暂停
+    Mousetrap.bind('space', togglePlay)
+    // 播放模式切换
+    Mousetrap.bind(['m'], switchPlayMode, 'keyup')
+    // 上 / 下一曲
+    Mousetrap.bind(['left'], playPrevTrack)
+    Mousetrap.bind(['right'], playNextTrack)
+    // 增加 / 减小音量
+    Mousetrap.bind(['up'], ()=> updateVolumeByOffset(0.01))
+    Mousetrap.bind(['down'], ()=> updateVolumeByOffset(-0.01))
+    // 最大音量 / 静音
+    Mousetrap.bind(['o'], toggleVolumeMute, 'keyup')
+    // 打开设置
+    Mousetrap.bind(['p'], () => visitRoute('/setting'), 'keyup')
+    // 打开当前播放
+    Mousetrap.bind(['q'], togglePlaybackQueueView, 'keyup')
 }
 
 const setPlayMetaSize = () => {
-    const minClientWidth = 999, minClientHeight = 666 
+    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
-    const wScaleRatio = clientWidth / minClientWidth
+    const wScaleRatio = clientWidth / minAppWidth
     //const hScaleRatio = clientHeight / minClientHeight
-    const width = 205 * Math.max(wScaleRatio, 1)
+    const width = 211 * Math.max(wScaleRatio, 1)
     const el1 = document.querySelector(".play-meta .title-wrap")
     const el2 = document.querySelector(".play-meta .time-volume-wrap")
     el1.style.width = width + "px"
@@ -34,10 +65,10 @@ const setPlayMetaSize = () => {
 }
 
 const setSearchBarSize = () => {
-    const minClientWidth = 999, minClientHeight = 666 
+    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
-    const wScaleRatio = clientWidth / minClientWidth
-    //const hScaleRatio = clientHeight / minClientHeight
+    const wScaleRatio = clientWidth / minAppWidth
+    //const hScaleRatio = clientHeight / minAppHeight
     const size = 115 * Math.max(wScaleRatio, 1)
     const el = document.querySelector(".search-bar .keyword")
     el.style.width = size + "px"
@@ -47,7 +78,7 @@ const setCategorySize = () => {
     const mainContent = document.getElementById('main-content')
     const playlistCategory = document.querySelector('#playlist-category-view')
     const artistCategory = document.querySelector('#artist-category-view')
-    const { clientHeight } = mainContent, padding = 37
+    const { clientHeight } = mainContent, padding = 30
     const height = (clientHeight - padding)
     if(playlistCategory) playlistCategory.style.height = height + "px"
     if(artistCategory) artistCategory.style.height = height + "px"
@@ -80,33 +111,67 @@ const setImageTextTileSize = () => {
     })
 }
 
+const setImageTextTileLoadingMaskSize = () => {
+    const tileMinWidth = 175;
+    const tileHMargin = 12.5;
+    const mainMargin = 33;
+    const titleHeight = 28, titleMarginTop = 5;
+    const scrollBarWidth = 6
+    const limits = [ 5, 4 ]
+    const mainContent = document.getElementById('main-content')
+    const { clientWidth }  = mainContent
+    const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
+    const tiles = document.querySelectorAll(".tiles-loading-mask .tile")
+    const tileCovers = document.querySelectorAll(".tiles-loading-mask .tile .cover")
+    let tileWidth = 175, limit = 0, isLastVisible = true
+    if(clientWidth > minWidths[0]) {
+        limit = limits[0]
+        isLastVisible = false
+    } else if(clientWidth > minWidths[1]) {
+        limit = limits[1]
+        isLastVisible = true
+    }
+    if(limit > 0) tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
+    for(let i = 0; i < tiles.length; i++) {
+        const item = tiles[i]
+        item.style.width = tileWidth + "px"
+        item.style.height = tileWidth + titleHeight + titleMarginTop + "px"
+        if(i == (tiles.length - 1)) {
+            item.style.display = isLastVisible ? "block" : "none"
+        }
+    }
+    tileCovers.forEach(item => {
+        item.style.height = tileWidth + "px"
+    })
+}
+
 const setPlaybackQueueSize = () => {
-    const minClientWidth = 999, minClientHeight = 666 
+    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
-    const wScaleRatio = clientWidth / minClientWidth
-    const hScaleRatio = clientHeight / minClientHeight
+    const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
     let size = 335 * Math.max(wScaleRatio * 0.85, 1)
     const el = document.querySelector("#playback-queue")
     el.style.width = size + "px"
 }
 
 const setPlayingCoverSize = () => {
-    const minClientWidth = 999, minClientHeight = 666 
+    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
-    const wScaleRatio = clientWidth / minClientWidth
-    const hScaleRatio = clientHeight / minClientHeight
-    let size = 265 * Math.min(wScaleRatio, hScaleRatio)
+    const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
+    let size = 300 * Math.min(wScaleRatio, hScaleRatio)
     const el = document.querySelector(".playing-view .cover img")
     el.style.width = size + "px"
     el.style.height = size + "px"
 }
 
 const setPlayingLyricCtlSize = () => {
-    const minClientWidth = 999, minClientHeight = 666 
+    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
-    const wScaleRatio = clientWidth / minClientWidth
-    const hScaleRatio = clientHeight / minClientHeight
-    let size = 366 * Math.min(wScaleRatio, hScaleRatio)
+    const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
+    let size = 399 * Math.min(wScaleRatio, hScaleRatio)
     const el = document.querySelector(".lyric-ctl .center")
     el.style.width = size + "px"
     el.style.height = size + "px"
@@ -130,6 +195,7 @@ onMounted (() => {
         setSearchBarSize()
         //自适应ImageTextTile组件大小
         setImageTextTileSize()
+        setImageTextTileLoadingMaskSize()
         //自适应分类列表大小
         setCategorySize()
         //自适应当前播放列表大小
@@ -159,15 +225,17 @@ onMounted (() => {
     })
 
     //按键事件监听
-    document.addEventListener('keydown', e => {
-        handleKeys(e)
-    })
+    window.addEventListener('keydown', e =>  e.preventDefault())
+    registryDefaultLocalKeys()
 })
 
-EventBus.on("imageTextTile-load", setImageTextTileSize)
+EventBus.on("imageTextTile-load", () => {
+    setImageTextTileSize()
+    setImageTextTileLoadingMaskSize()
+})
 EventBus.on("batchView-show", setBatchViewListSize)
 //TODO
-watch([playlistCategoryViewShow, artistCategoryViewShow], setCategorySize)
+watch([ playlistCategoryViewShow, artistCategoryViewShow ], setCategorySize)
 </script>
 
 <template>
@@ -194,8 +262,7 @@ watch([playlistCategoryViewShow, artistCategoryViewShow], setCategorySize)
     display: flex;
     flex-direction: column;
     flex: 1;
-    overflow: hidden;
-    
+    overflow: hidden;    
 }
 
 #main-center,
@@ -206,13 +273,14 @@ watch([playlistCategoryViewShow, artistCategoryViewShow], setCategorySize)
 }
 
 #main-bottom {
-    height: 30px;
+    height: 52px;
 }
 
 #playlist-category-view,
 #artist-category-view {
     position: fixed;
     top: 75px;
+    top: 85px;
     right: 0px;
     width: 404px;
     width: 40.4%;

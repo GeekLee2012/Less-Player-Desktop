@@ -8,7 +8,7 @@ const props = defineProps({
 
 <template>
     <div class="keys-input-ctl">
-        <input type="text" :value="value" @keydown.stop=""/>
+        <input type="text" :value="value" readonly="true" />
     </div>
 </template>
 
@@ -18,12 +18,13 @@ const props = defineProps({
 }
 
 .keys-input-ctl input {
-    border: 1px solid var(--keyinput-ctl-border);
+    border: 1px solid var(--input-border-color);
     /*border-bottom: 1px solid #eee;*/
-    background-color: var(--keyinput-ctl-bg);
+    background-color: var(--input-bg);
     border-radius: 3px;
     padding: 5px;
     outline: 0;
-    color: var(--searchbar-text-color);
+    color: var(--input-text-color);
+    cursor: default;
 }
 </style>

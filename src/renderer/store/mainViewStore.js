@@ -76,6 +76,9 @@ export const useMainViewStore = defineStore('mainView', {
         hidePlayingView() {
             this.playingViewShow = false
         },
+        togglePlayingView() {
+            this.playingViewShow = !this.playingViewShow
+        },
         toggleCoverMask() {
             this.coverMaskShow = !this.coverMaskShow
         },

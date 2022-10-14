@@ -57,18 +57,29 @@ const clear = () => {
     border-radius: 10rem 0 0 10rem;
     border-right: 0px;
     width: 28px;
-    background: var(--btn-bg);
+    background: var(--search-btn-bg);
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .search-bar .search-btn:hover {
-    background: var(--btn-hover-bg);
+    background: var(--search-btn-hover-bg);
 }
 
 .search-bar .search-btn svg {
-    margin-top: 7px;
+    /* margin-top: 7px; 
     margin-left: 3px;
-    fill: var(--svg-btn-color);
+    */
+    margin-top: 1px;
+    margin-left: 3px;
+    fill: var(--search-btn-svg-color);
+}
+
+.search-bar .search-btn:hover svg {
+    fill: var(--search-btn-hover-svg-color);
 }
 
 .search-bar .keyword {

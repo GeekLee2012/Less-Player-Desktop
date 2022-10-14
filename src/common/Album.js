@@ -5,7 +5,7 @@ export class Album {
         this.title = title
         this.cover = cover
         //[ {id, name} ]
-        this.artist = artist ? artist : ([ {id: '', name: '趁青春'}])
+        this.artist = artist ? artist : ([ {id: '', name: '未知歌手'}])
         //发行公司
         this.company = company
         //发行时间
