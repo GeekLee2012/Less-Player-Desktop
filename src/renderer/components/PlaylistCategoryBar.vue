@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted } from 'vue';
+import { onMounted, reactive } from 'vue';
 import EventBus from '../../common/EventBus';
 import { useMainViewStore } from '../store/mainViewStore';
 import { usePlaylistSquareViewStore } from '../store/playlistSquareViewStore';
@@ -17,28 +17,28 @@ const props = defineProps({
     loading: Boolean
 })
 
-let prevCate = null
 const toggleCategory = () => {
     hidePlaybackQueueView()
     togglePlaylistCategoryView()
 }
 
 const isDiffCate = (item, row, col) => {
+    const prevCate = currentCategoryItem.value
     return prevCate ? (
-        prevCate.item.value != item.value
+        prevCate.data.value != item.value
         || prevCate.row != row 
         || prevCate.col != col) : true
 }
 
 const visitCateItem = (item, row, col) => {
+    const needRefresh = isDiffCate(item, row, col)
     updateCurrentCategoryItem(item, row, col)
-    if(isDiffCate(item, row, col)) {
+    if(needRefresh) {
         EventBus.emit("playlistSquare-refresh")
-        prevCate = { item, row, col }
     }
 }
 
-const flatData = []
+const flatData = reactive([])
 //TODO 随机打乱数据，感觉不够乱......
 const shuffle = (arr) => {
     let i = arr.length
@@ -71,7 +71,6 @@ const loadFirstCateData = () => {
 //TODO 实现方式很别扭
 EventBus.on('playlistCategory-update', () => {
     flatData.length = 0
-    prevCate = null
     loadFirstCateData()
 })
 </script>
