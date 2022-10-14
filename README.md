@@ -36,10 +36,10 @@
 * 开发模式运行  
   `npm run dev`
   
-* 构建打包
+* 构建打包  
   `npm run dist`  
       
-  或者，分步骤执行
+  或者，分步骤执行  
   `npm run build`  
   `npm run pack`  
   
