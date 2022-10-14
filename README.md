@@ -23,9 +23,9 @@
 *PS：目前所有操作暂无确认功能，任何删除清空操作（带垃圾桶图标的按钮）请谨慎！*  
   
 #### 界面预览  
-![snap 11.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2001.png)  
-![snap 12.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2002.png)  
-![snap 13.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%203.png)  
+![snap 11.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2011.png)  
+![snap 12.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2012.png)  
+![snap 13.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2013.png)  
   
 #### 开发者说  
 * 请下载安装最新版Nodejs  
