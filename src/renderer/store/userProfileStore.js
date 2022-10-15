@@ -14,9 +14,9 @@ export const useUserProfileStore = defineStore("userProfile", {
     state: () => ({
         user: {
             id: 0,
-            nickname: "我的主页",
+            nickname: "",
             cover: "",
-            about: "这个人很懒，什么也没留下~"
+            about: ""
         },
         favorites: {
             playlists: [],
@@ -40,6 +40,20 @@ export const useUserProfileStore = defineStore("userProfile", {
         
     }),
     getters: {
+        getUserNickName() {
+            let nickname = this.user.nickname
+            if(nickname && nickname.trim().length > 0) {
+                return nickname.trim()
+            }
+            return "我的主页"
+        },
+        getUserAbout() {
+            let about = this.user.about
+            if(about && about.trim().length > 0) {
+                return about.trim()
+            }
+            return "这个人很懒，什么也没留下~"
+        },
         getFavouriteSongs() {
             return (platform) => filterByPlatform(this.favorites.songs, platform)
         },
@@ -277,6 +291,13 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.uniqueInsertFirst(this.recents.songs, { 
                 id, platform, title, artist, album, duration, cover 
             })
+            //TODO
+            const limit = 999
+            if(this.recents.songs.length > limit) {
+                const deleteCount = this.recents.songs.length - limit
+                this.recents.songs.splice(limit, deleteCount)
+                this.refreshUserHome()
+            }
         },
         addRecentPlaylist(id, platform, title, cover) {
             this.uniqueInsertFirst(this.recents.playlists, {
