@@ -10,6 +10,8 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { toYyyymmddHhMmSs } from '../../common/Times';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { usePlatformStore } from '../store/platformStore';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps({
     exploreMode: String,
@@ -19,7 +21,7 @@ const props = defineProps({
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
 const detail = reactive({})
-let offset = 0, page = 1, limit = 1000
+let offset = 0, page = 1, limit = 1000, total = 0
 let markScrollTop = 0
 const loading = ref(true)
 
@@ -27,16 +29,17 @@ const router = useRouter()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem } = useMainViewStore()
 const { getCustomPlaylist, removeAllTracksFromCustomPlaylist } = useUserProfileStore()
+const { currentPlatformCode } = storeToRefs(usePlatformStore()) 
 
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', about: '',data: [] })
     offset = 0
     page = 1
-    detail.total = 0
+    total = 0
 }
 
 const nextPage = () =>  {
-    if(detail.data.length >= detail.total) return false
+    if(detail.data.length >= total) return false
     offset = page * limit
     page = page + 1
     return true
@@ -47,6 +50,12 @@ const loadContent = () => {
     //if(playlist.data) cleanUpAllSongs([ playlist.data ])
     Object.assign(detail, {...playlist})
     updateCommonCtxItem(playlist)
+    const platform = currentPlatformCode.value
+    if(!platform || platform.trim() == 'all') {
+        return
+    }
+    const data = playlist.data.filter(item => (item.platform == platform.trim()))
+    Object.assign(detail, { data })
 }
 
 const loadMoreContent = () => {
@@ -131,6 +140,8 @@ watch(() => props.id, () => {
     resetBack2TopBtn()
     loadContent()
 })
+
+watch(currentPlatformCode, loadContent)
 
 onMounted(() => {
     resetView()

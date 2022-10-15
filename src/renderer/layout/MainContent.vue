@@ -27,9 +27,12 @@ const highlightPlatform = (to) => {
         code = path.split('/')[3]
     } else if(path.includes('/local')) {
         code = 'local'
-    }  else if(path.includes('/userhome')) {
+    } else if(path.includes('/userhome')) {
         const parts = path.split('/')
+        // /userhome/{code}
         if(parts.length === 3) code = parts[2]
+        // /userhome/customPlaylist/{id}
+        if(parts.length === 4 && parts[2] === 'customPlaylist') code = 'all'
     } 
     updateCurrentPlatformByCode(code)
 }
