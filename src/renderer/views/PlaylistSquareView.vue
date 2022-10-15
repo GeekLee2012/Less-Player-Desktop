@@ -129,7 +129,10 @@ onMounted(() => {
     loadCategories()
 })
 
-onActivated(() => restoreScrollState())
+onActivated(() => {
+    resetCommom()
+    loadCategories()
+})
 
 const resetCommom = ()=> {
     resetPagination()

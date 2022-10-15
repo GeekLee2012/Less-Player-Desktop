@@ -56,7 +56,7 @@ const autoSwitchExploreMode = (to) => {
     } else if(path.includes('/userhome')) {
         setUserExploreMode()
     } else {
-        setExploreMode(0)
+        //setExploreMode(0)
     }
 }
 

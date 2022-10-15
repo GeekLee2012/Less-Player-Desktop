@@ -1,5 +1,5 @@
 ## Less Player 是一款基于Electron + Vue3开发的音乐播放器  
-### 欢迎喜欢GUI开发的朋友一起学习、交流和参与开发  
+### 欢迎喜欢的朋友一起学习、交流、参与开发  
 ### 本项目仅供学习交流，禁止非法商业用途，请支持正版音乐  
   
 #### 前言  
@@ -20,14 +20,18 @@
 * 支持2种探索（浏览）模式：歌单模式、歌手模式  
 * 其他方面：设置、我的主页（收藏、创建歌单、关注歌手、最近播放）等  
   
-*PS：目前所有操作暂无确认功能，任何删除清空操作（带垃圾桶图标的按钮）请谨慎！*  
+*PS：目前所有操作暂无确认功能，任何删除清空操作（带垃圾桶图标的按钮）请谨慎！其实也没这么夸张，哈哈~*  
   
-#### 界面预览  
+#### 预览图  
 ![snap 11.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2011.png)  
 ![snap 12.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2012.png)  
-![snap 13.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2013.png)  
+![snap 13.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%213.png)  
   
-#### 开发者说  
+![snap 01.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2001.png)  
+![snap 02.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2002.png)  
+![snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2003.png)  
+   
+#### For开发者  
 * 请下载安装最新版Nodejs  
   
 * 初始化项目  
@@ -39,7 +43,7 @@
 * 构建打包  
   `npm run dist`  
       
-  或者，分步骤执行  
+  或者，分步执行  
   `npm run build`  
   `npm run pack`  
   
@@ -49,8 +53,7 @@
 * 待办事项：[TODO.md](TODO.md)  
   
 #### 发行版  
-* 发行版二进制文件均为：x64版本；支持系统平台包括macOS、Windows 7及其以上版本  
-* Linux和x86平台：可下载源码，配置后编译打包，请参考 [常见问题 FAQ.md](FAQ.md)
+* 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
+* Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)
   
-#### 其他
-* 项目中一些常用组件没做封装：如Tab组件、分页组件等  
+#### 其他  

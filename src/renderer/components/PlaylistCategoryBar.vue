@@ -30,8 +30,8 @@ const isDiffCate = (item, row, col) => {
         || prevCate.col != col) : true
 }
 
-const visitCateItem = (item, row, col) => {
-    const needRefresh = isDiffCate(item, row, col)
+const visitCateItem = (item, row, col, forceRefresh) => {
+    const needRefresh = isDiffCate(item, row, col) || forceRefresh
     updateCurrentCategoryItem(item, row, col)
     if(needRefresh) {
         EventBus.emit("playlistSquare-refresh")
@@ -65,7 +65,7 @@ const getFlatData = () => {
 
 const loadFirstCateData = () => {
     const firstItem = getFlatData()[0]
-    visitCateItem(firstItem, firstItem.row, firstItem.col)
+    visitCateItem(firstItem, firstItem.row, firstItem.col, true)
 }
 
 //TODO 实现方式很别扭
