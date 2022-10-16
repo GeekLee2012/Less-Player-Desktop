@@ -130,8 +130,7 @@ onMounted(() => {
 })
 
 onActivated(() => {
-    resetCommom()
-    loadCategories()
+    resetScrollState()
 })
 
 const resetCommom = ()=> {

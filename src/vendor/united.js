@@ -9,7 +9,7 @@ const vendors = [ QQ, NetEase, KuWo, KuGou ]
 export class United {
     static CODE = 'united'
 
-    //TODO 互惠互助、互通有无、移花接木？奏是介些高大上的说法啦 ~
+    //TODO 互惠互助、互通有无、移花接木？奏是介些说法啦 ~
     static async transferTrack(track) {
         const fromPlatform = track.platform
         const title = track.title

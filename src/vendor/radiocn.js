@@ -168,8 +168,25 @@ export class RadioCN {
         })
     }
 
-    //歌单详情
+    //TODO 歌单详情, 一般最多2页数据
     static playlistDetail(id, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            RadioCN.doPlaylistDetail(id, offset, limit, page).then(p1 => {
+                let playlist = p1
+                let length = p1.data.length
+                while(length == 100 || length == limit) { //尝试获取下一页数据
+                    RadioCN.doPlaylistDetail(id, offset, limit, ++page).then(p2 => {
+                        length = p2.data.length
+                        if(length > 0) playlist.data.push(...p2.data)
+                    })
+                }
+                resolve(playlist)
+            })
+        })
+    }
+
+    //歌单详情
+    static doPlaylistDetail(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
             const result = new Playlist()
             const url = "http://tacc.radio.cn/pcpages/odchannelpages"
