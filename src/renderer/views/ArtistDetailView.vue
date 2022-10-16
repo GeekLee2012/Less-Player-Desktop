@@ -272,6 +272,8 @@ const onScroll = () => {
     hideAllCtxMenus()
     if(isAllSongsTab()) {
         scrollToLoad()
+    } else {
+        markScrollState()
     }
 }
 
@@ -334,14 +336,13 @@ const reloadAll = () =>  {
     setLoadingDetail(true)
     setLoadingSongs(true)
     resetBack2TopBtn()
-    resetScrollState()
     resetAll()
     loadAll()
 }
 
 const loadAll = () => {
-    restoreScrollState()
     resetPagination()
+    resetScrollState()
     visitTab(0)
     EventBus.emit("imageTextTile-load")
 }
@@ -349,11 +350,11 @@ const loadAll = () => {
 //TODO 后期需要梳理优化，容易出现重复加载Bug
 /*-------------- 各种监听 --------------*/
 onMounted(() => {
-    resetBack2TopBtn()
+    resetBack2TopBtn()  
     resetScrollState()
     loadAll()
 })
-onActivated(() => loadAll())
+onActivated(() => restoreScrollState())
 //watch(artistId, (nv, ov) => reloadAll())
 watch(activeTab, (nv,ov) => switchTab())
 watch(() => props.id , (nv, ov) => reloadAll())
