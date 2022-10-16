@@ -174,7 +174,7 @@ export class RadioCN {
             RadioCN.doPlaylistDetail(id, offset, limit, page).then(p1 => {
                 let playlist = p1
                 let length = p1.data.length
-                while(length == 100 || length == limit) { //尝试获取下一页数据
+                if(length === 100 || length === limit) { //尝试获取下一页数据
                     RadioCN.doPlaylistDetail(id, offset, limit, ++page).then(p2 => {
                         length = p2.data.length
                         if(length > 0) playlist.data.push(...p2.data)
