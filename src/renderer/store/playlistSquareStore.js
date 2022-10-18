@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { usePlatformStore } from "./platformStore";
 
-export const usePlaylistSquareViewStore = defineStore('playlistSquareView', {
+export const usePlaylistSquareStore = defineStore('playlistSquare', {
     state: () => ({
         // (platformCode, categoryArray)
         categoryMap: new Map(),

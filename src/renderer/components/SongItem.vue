@@ -3,12 +3,12 @@ import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { usePlayStore } from '../store/playStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { ref, watch } from 'vue';
 
 const { addTrack, playTrack } = usePlayStore()
-const { showToast, hidePlaybackQueueView } = useMainViewStore()
+const { showToast, hidePlaybackQueueView } = useAppCommonStore()
 
 const props = defineProps({
     index: Number,
@@ -236,8 +236,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .song-item .action svg:hover {
-    fill: #28c83f;
-    fill: var(--hl-color);
+    fill: var(--svg-hover-color);
 }
 
 .song-item .title:hover .action {

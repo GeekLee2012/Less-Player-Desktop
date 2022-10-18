@@ -42,7 +42,8 @@ const init = () => {
   // for applications and their menu bar to stay active until the user quits
   // explicitly with Cmd + Q.
   app.on('window-all-closed', (event) => {
-    if(!isDevEnv || !isMacOS) app.quit()
+    if(!isDevEnv) app.quit()
+    //if(!isMacOS) app.quit()
   })
 
   app.on('before-quit', (event) => {
@@ -256,7 +257,7 @@ const initAppMenuTemplate = () => {
 
 const sendToRenderer = (channel, args) => {
   try {
-    app.mainWin.webContents.send(channel, args)
+    if(app.mainWin) app.mainWin.webContents.send(channel, args)
   } catch(error) {
 
   }

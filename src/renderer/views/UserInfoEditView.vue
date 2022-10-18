@@ -8,7 +8,7 @@ export default {
 <script setup>
 import { storeToRefs } from 'pinia';
 import { onMounted, onActivated, ref, reactive, watch } from 'vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import { useRouter } from 'vue-router';
@@ -21,7 +21,7 @@ const props = defineProps({
 const ipcRenderer = useIpcRenderer()
 const router = useRouter()
 
-const { showToast } = useMainViewStore()
+const { showToast } = useAppCommonStore()
 const titleRef = ref(null)
 const aboutRef = ref(null)
 const coverRef = ref(null)
@@ -135,7 +135,8 @@ const updateCover = async () => {
 }
 
 #user-info-edit .center .cover-eidt-btn {
-    background-color: var(--main-left-border-color);
+    background: var(--btn-bg);
+    color: var(--svg-text-color);
     padding: 5px;
     border-radius: 3px;
     cursor: pointer;

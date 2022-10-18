@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router';
 import PaginationTiles from './PaginationTiles.vue';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { storeToRefs } from 'pinia';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 
@@ -15,7 +15,7 @@ const props = defineProps({
 const router = useRouter()
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { updateCurrentPlatformByCode, isPlatformValid } = usePlatformStore()
-const { exploreModeCode } = storeToRefs(useMainViewStore())
+const { exploreModeCode } = storeToRefs(useAppCommonStore())
 
 const visitItem = (platform, id) => {
     const platformValid = isPlatformValid(platform)

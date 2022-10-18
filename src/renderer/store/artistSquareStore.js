@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import EventBus from "../../common/EventBus";
 import { usePlatformStore } from "./platformStore";
 
-export const useArtistSquareViewStore = defineStore('artistSquareView', {
+export const useArtistSquareStore = defineStore('artistSquare', {
     state: () => ({
         // (platformCode, categoryArray)
         categoryMap: new Map(),

@@ -4,10 +4,10 @@ import ArtistControl from './ArtistControl.vue';
 import { usePlayStore } from '../store/playStore';
 import { onMounted, ref } from 'vue';
 import EventBus from '../../common/EventBus';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 
 const { playTrack, removeTrack, isCurrentTrack } = usePlayStore()
-const { showToast } = useMainViewStore()
+const { showToast } = useAppCommonStore()
 
 const props = defineProps({
     data: Object, //Track
@@ -209,8 +209,8 @@ const showContextMenu = (event) => {
 }
 
 .playback-queue-item .action svg:hover {
-    fill: #28c83f;
     fill: var(--hl-color);
+    fill: var(--svg-hover-color);
 }
 
 .playback-queue-item:hover .title, 

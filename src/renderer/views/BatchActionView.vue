@@ -15,7 +15,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
@@ -36,8 +36,8 @@ const { removeFavouriteSong, removeFavouritePlaylist,
     removeRecentAlbum, removeRecentRadio,
     getCustomPlaylist, removeTrackFromCustomPlaylist } = useUserProfileStore()
 const { addTracks, playTrack } = usePlayStore()
-const { commonCtxMenuShow, commonCtxItem } = storeToRefs(useMainViewStore())
-const { showToast, updateCommonCtxItem, hideAllCtxMenus } = useMainViewStore()
+const { commonCtxMenuShow, commonCtxItem } = storeToRefs(useAppCommonStore())
+const { showToast, updateCommonCtxItem, hideAllCtxMenus } = useAppCommonStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 

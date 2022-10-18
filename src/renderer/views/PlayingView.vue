@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import LyricControl from '../components/LyricControl.vue';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
@@ -13,8 +13,8 @@ import { useUseCustomTrafficLight } from '../../common/Utils';
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
-const { playingViewShow } = storeToRefs(useMainViewStore())
-const { hidePlayingView, minimize, showToast } = useMainViewStore()
+const { playingViewShow } = storeToRefs(useAppCommonStore())
+const { hidePlayingView, minimize, showToast } = useAppCommonStore()
 const { currentTrack, mmssCurrentTime, progress, playingIndex } = storeToRefs(usePlayStore())
 const progressBarRef = ref(null)
 
@@ -156,6 +156,7 @@ watch([currentTrack, playingViewShow ], checkFavourite)
 .playing-view .header svg:hover, 
 .playing-view .collapse-btn:hover svg {
     fill: var(--hl-color);
+    fill: var(--svg-hover-color);
     cursor: pointer;
 }
 
@@ -187,9 +188,8 @@ watch([currentTrack, playingViewShow ], checkFavourite)
 }
 
 .playing-view .bottom {
-    height: 68px;
     height: 77px;
-    margin-bottom: 5px;
+    padding-bottom: 5px;
 }
 
 .playing-view .bottom .action {
@@ -212,10 +212,10 @@ watch([currentTrack, playingViewShow ], checkFavourite)
 }
 
 .playing-view .bottom .action .btm-left svg:hover {
-    fill: var(--hl-color);
+    fill: var(--svg-hover-color);
 }
 
 .playing-view .bottom .action .love-btn {
-    fill: var(--hl-color) !important;
+    fill: var(--svg-hover-color) !important;
 }
 </style>

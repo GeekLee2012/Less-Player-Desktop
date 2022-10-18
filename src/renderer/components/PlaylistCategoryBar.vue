@@ -2,14 +2,14 @@
 import { storeToRefs } from 'pinia';
 import { onMounted, reactive } from 'vue';
 import EventBus from '../../common/EventBus';
-import { useMainViewStore } from '../store/mainViewStore';
-import { usePlaylistSquareViewStore } from '../store/playlistSquareViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useSettingStore } from '../store/settingStore';
 import CategoryBarLoadingMask from './CategoryBarLoadingMask.vue';
 
-const { currentCategoryItem } = storeToRefs(usePlaylistSquareViewStore())
-const { updateCurrentCategoryItem, setNeedRefresh } = usePlaylistSquareViewStore()
-const { togglePlaylistCategoryView, hidePlaybackQueueView } = useMainViewStore()
+const { currentCategoryItem } = storeToRefs(usePlaylistSquareStore())
+const { updateCurrentCategoryItem, setNeedRefresh } = usePlaylistSquareStore()
+const { togglePlaylistCategoryView, hidePlaybackQueueView } = useAppCommonStore()
 const { isPlaylistCategoryBarRandom } = storeToRefs(useSettingStore())
 
 const props = defineProps({
@@ -132,7 +132,6 @@ EventBus.on('playlistCategory-update', () => {
 .playlist-category-bar .active {
     border-color: var(--hl-color);
     background: var(--btn-bg) !important;
-    color: var(--text-color);
     color: var(--svg-btn-color) !important;
 }
 </style>

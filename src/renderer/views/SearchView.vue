@@ -1,12 +1,12 @@
 <script setup>
 import { onActivated, onMounted, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useSearchViewStore } from '../store/searchViewStore';
+import { useSearchStore } from '../store/searchStore';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 
 const props = defineProps({
     keyword: String
@@ -14,7 +14,7 @@ const props = defineProps({
 
 const { platforms, tabs, activeTab, 
         currentPlatformIndex, tabTipText
-    } = storeToRefs(useSearchViewStore())
+    } = storeToRefs(useSearchStore())
 const { setActiveTab, 
         setCurrentPlatformIndex,
         updateTabTipText,
@@ -23,8 +23,8 @@ const { setActiveTab,
         isAlbumsTab,
         isArtistsTab,
         currentVender
-    } = useSearchViewStore()
-const { hideAllCtxMenus } = useMainViewStore()
+    } = useSearchStore()
+const { hideAllCtxMenus } = useAppCommonStore()
 
 const currentTabView = shallowRef(null)
 const tabData = ref([])
@@ -218,8 +218,10 @@ watch(() => props.keyword, (nv,ov) => loadTab())
 }
 
 #search-view .platform .active {
-    background: var(--hl-text-bg) !important;
     border-color: var(--hl-color);
+    /* background: var(--hl-text-bg) !important;
+    color: var(--svg-btn-color) !important; */
+    background: var(--btn-bg) !important;
     color: var(--svg-btn-color) !important;
 }
 

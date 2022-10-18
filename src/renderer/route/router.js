@@ -1,4 +1,4 @@
-import { createRouter,  createWebHashHistory } from 'vue-router';
+import { createRouter,  createWebHashHistory, createWebHistory } from 'vue-router';
 import PlaylistSquareView from '../views/PlaylistSquareView.vue';
 import ArtistSquareView from '../views/ArtistSquareView.vue';
 import LocalMusicView from '../views/LocalMusicView.vue';
@@ -34,7 +34,7 @@ const routes = [
     },
     {  //设置
         path: '/setting', 
-        component:  SettingView 
+        component:  SettingView
     },
     {  //搜索
         path: '/search/:keyword', 

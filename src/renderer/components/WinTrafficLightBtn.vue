@@ -1,6 +1,6 @@
 <script setup>
-import { useMainViewStore } from '../store/mainViewStore';
-const { quit, minimize, maximize } = useMainViewStore()
+import { useAppCommonStore } from '../store/appCommonStore';
+const { quit, minimize, maximize } = useAppCommonStore()
 
 </script>
 

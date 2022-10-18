@@ -6,7 +6,7 @@ import { storeToRefs } from 'pinia';
 import KeysInputControl from '../components/KeysInputControl.vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { useIpcRenderer } from '../../common/Utils';
 import EventBus from '../../common/EventBus';
 
@@ -30,7 +30,7 @@ const { setThemeIndex,
         allQualities
     } = useSettingStore()
 
-const { showToast } = useMainViewStore()
+const { showToast } = useAppCommonStore()
 
 const visitLink = (url) => {
     if(ipcRenderer) ipcRenderer.send('visit-link', url)
@@ -337,25 +337,32 @@ const visitLink = (url) => {
     margin-bottom: 0px;
 }
 
+#setting-view .theme {
+    padding-bottom: 10px !important;
+}
+
 #setting-view .theme .content {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 }
 
 #setting-view .theme .content div {
     --size: 50px;
     width: var(--size);
+    max-width: var(--size);
     height: var(--size);
     border-radius: 5px;
     box-shadow: 0px 0px 10px #212121;
     text-align: center;
     margin-right: 23px;
+    margin-bottom: 25px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     border: 3px solid transparent;
-    flex: 1;
+    /* flex: 1; */
 }
 
 #setting-view .theme .content div b {
@@ -447,5 +454,6 @@ const visitLink = (url) => {
 
 #setting-view .link {
     color: var(--hl-color);
+    color: var(--text-color);
 }
 </style>

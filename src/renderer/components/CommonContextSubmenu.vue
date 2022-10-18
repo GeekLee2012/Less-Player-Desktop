@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 
-const { hideAllCtxMenus, hideAddToListSubmenu, hideArtistListSubmenu } = useMainViewStore()
+const { hideAllCtxMenus, hideAddToListSubmenu, hideArtistListSubmenu } = useAppCommonStore()
 
 const props = defineProps({
     posStyle: Object,

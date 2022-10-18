@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { toYyyymmddHhMmSs } from '../../common/Times';
@@ -27,7 +27,7 @@ const loading = ref(true)
 
 const router = useRouter()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showToast, updateCommonCtxItem } = useMainViewStore()
+const { showToast, updateCommonCtxItem } = useAppCommonStore()
 const { getCustomPlaylist, removeAllTracksFromCustomPlaylist } = useUserProfileStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore()) 
 

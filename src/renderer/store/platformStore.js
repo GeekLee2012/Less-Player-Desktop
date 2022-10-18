@@ -6,7 +6,7 @@ import { KuGou } from '../../vendor/kugou';
 import { DouBan } from '../../vendor/douban';
 import { RadioCN } from '../../vendor/radiocn';
 import { LocalMusic } from '../../vendor/localmusic';
-import { useMainViewStore } from './mainViewStore';
+import { useAppCommonStore } from './appCommonStore';
 
 //音乐平台
 const allPlatforms = [
@@ -78,14 +78,14 @@ export const usePlatformStore = defineStore('platform', {
     getters: {
         platforms() {
             return () => {
-                const { isArtistMode, isUserHomeMode } = useMainViewStore()
+                const { isArtistMode, isUserHomeMode } = useAppCommonStore()
                 if(isArtistMode) return artistPlatforms
                 if(isUserHomeMode) return userhomePlatforms
                 return playlistPlatforms
             }
         },
         currentPlatform(state) {
-            const { exploreMode } = useMainViewStore()
+            const { exploreMode } = useAppCommonStore()
             return state.platforms(exploreMode)[state.currentPlatformIndex]
         },
         currentPlatformCode(state) {
@@ -111,7 +111,7 @@ export const usePlatformStore = defineStore('platform', {
                 this.updateCurrentPlatform(-1)
                 return
             }
-            const { exploreMode } = useMainViewStore()
+            const { exploreMode } = useAppCommonStore()
             const pms = this.platforms(exploreMode)
             for(var i = 0; i < pms.length; i++) {
                 if(code === pms[i].code) {

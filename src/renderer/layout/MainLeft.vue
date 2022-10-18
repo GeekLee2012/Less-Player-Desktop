@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router';
 import { usePlatformStore } from '../store/platformStore';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import path from 'path';
@@ -20,8 +20,8 @@ const { platforms, currentPlatformIndex,
     currentPlatformCode, isLocal } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 const { isPlaylistMode, isArtistMode, isUserHomeMode, 
-    exploreModeIndex, exploreModeCode } = storeToRefs(useMainViewStore())
-const { setExploreMode } = useMainViewStore()
+    exploreModeIndex, exploreModeCode } = storeToRefs(useAppCommonStore())
+const { setExploreMode } = useAppCommonStore()
 const { getCustomPlaylists, getFavouritePlaylilsts ,getFollowArtists } = storeToRefs(useUserProfileStore())
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { navigation } = storeToRefs(useSettingStore())
@@ -133,7 +133,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
                 <div id="app-title" >Less Player</div>
             </div>
         </div>
-        <div class="center" @mousewheel="onUserMouseWheel">
+        <div class="center" @scroll="onUserMouseWheel">
             <div id="explore-mode">
                 <div class="mode-item" v-show="isPlaylistMode" @click="switchExploreMode">
                     <svg width="16" height="16" viewBox="0 0 615.13 462.95" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M375.69,462.91q-98,0-195.93,0c-20.4,0-36.72-11.68-41.88-29.86-7.59-26.71,11.94-52.66,40.07-52.76,47.81-.17,95.63,0,143.44,0q125.46,0,250.91,0c20.3,0,36.88,12.5,41.49,31,6.65,26.77-12.93,51.49-41.18,51.6-39.15.16-78.3.05-117.45.05Z"/><path d="M375.74,272.72q-97.2,0-194.41,0c-11.19,0-21.47-2.34-30.21-9.69a41.23,41.23,0,0,1,26.29-72.9q108-.15,215.91-.06,89.46,0,178.92,0c21.48,0,37.82,13.09,42,33.35,4.9,23.42-12.33,46.72-36.15,48.83-3.64.32-7.32.39-11,.4Q471.45,272.74,375.74,272.72Z"/><path d="M375.92,0q98.46,0,196.92,0c20,0,36.41,12.51,40.95,30.91,6.54,26.48-12.62,51.21-40.23,51.38-38,.23-76,.07-113.95.07q-140,0-279.88,0c-20.59,0-36.71-11.49-41.86-29.75C130.31,25.87,149.79.13,178,.07Q277-.12,375.92,0Z"/><path d="M82.18,421.39A41.09,41.09,0,1,1,0,421.46a41.47,41.47,0,0,1,41.12-41.07A41.13,41.13,0,0,1,82.18,421.39Z"/><path d="M82.17,231.36A41.08,41.08,0,1,1,0,231.15a41.08,41.08,0,0,1,82.16.21Z"/><path d="M82.18,40.9A41.09,41.09,0,1,1,0,41.28a41.09,41.09,0,0,1,82.18-.38Z"/></g></g></svg>
@@ -219,6 +219,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
     justify-content: center;
     align-items: center;
     box-shadow: 0px 0px 3px var(--main-left-border-color);
+    background: var(--main-left-bg);
 }
 
 #main-left ::-webkit-scrollbar-thumb {
@@ -226,7 +227,6 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
     border: 1px solid transparent;
 }
 
-#main-left ::-webkit-scrollbar-thumb:hover,
 .mousewheelViewpoint ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb-bg) !important;
     border: 1px solid var(--scrollbar-thumb-bg) !important;
@@ -297,11 +297,11 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 }
 
 #explore-mode .mode-item:hover span{
-    color: var(--hl-color);
+    color: var(--hl-title-color);
 }
 
 #explore-mode .mode-item:hover svg{
-    fill: var(--hl-color);
+    fill: var(--svg-hover-color);
 }
 
 #custom-playlist-list,
@@ -369,7 +369,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 }
 
 #main-left .active {
-    background: var(--btn-bg) !important;
+    background: var(--list-item-active-bg) !important;
     color: var(--svg-btn-color);
 }
 

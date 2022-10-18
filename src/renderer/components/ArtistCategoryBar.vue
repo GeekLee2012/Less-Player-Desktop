@@ -1,15 +1,15 @@
 <script setup>
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useMainViewStore } from '../store/mainViewStore';
-import { useArtistSquareViewStore } from '../store/artistSquareViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { useArtistSquareStore } from '../store/artistSquareStore';
 import { Category } from '../../common/Category';
 import CategoryBarLoadingMask from './CategoryBarLoadingMask.vue';
 import EventBus from '../../common/EventBus';
 
-const { currentCategoryItems } = storeToRefs(useArtistSquareViewStore())
-const { updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareViewStore()
-const { toggleArtistCategoryView, hidePlaybackQueueView } = useMainViewStore()
+const { currentCategoryItems } = storeToRefs(useArtistSquareStore())
+const { updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareStore()
+const { toggleArtistCategoryView, hidePlaybackQueueView } = useAppCommonStore()
 
 const props = defineProps({
     data: Array,
@@ -120,7 +120,7 @@ const getAlphabetData = () => {
 
 .artist-category-bar .active {
     border-color: var(--hl-color);
-    background: var(--hl-text-bg) !important;
+    background: var(--btn-bg) !important;
     color: var(--svg-btn-color) !important;
 }
 </style>

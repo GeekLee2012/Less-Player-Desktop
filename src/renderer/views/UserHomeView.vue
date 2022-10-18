@@ -7,7 +7,7 @@ import SongListControl from '../components/SongListControl.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import EventBus from '../../common/EventBus';
 import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
@@ -67,8 +67,8 @@ const router = useRouter()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
-const { playingViewShow, isUserHomeMode } = storeToRefs(useMainViewStore() )
-const { showToast, hideAllCtxMenus } = useMainViewStore() 
+const { playingViewShow, isUserHomeMode } = storeToRefs(useAppCommonStore() )
+const { showToast, hideAllCtxMenus } = useAppCommonStore() 
 const { user, getFavouriteSongs, getFavouritePlaylilsts, 
     getFavouriteAlbums, getFavouriteRadios,
     getCustomPlaylists, getFollowArtists,

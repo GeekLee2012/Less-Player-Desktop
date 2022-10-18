@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
@@ -14,8 +14,8 @@ const props = defineProps({
 
 const router = useRouter()
 const { addTrack } = usePlayStore()
-const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useMainViewStore())
-const { showToast, hideAllCtxMenus, setCommonNotificationType, hidePlaybackQueueView } = useMainViewStore()
+const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
+const { showToast, hideAllCtxMenus, setCommonNotificationType, hidePlaybackQueueView } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore()) 
 const { addToCustomPlaylist, moveToCustomPlaylist } = useUserProfileStore()
 const customData = reactive([])
@@ -77,7 +77,7 @@ const handleClick = (item, mode) => {
 const initData = (mode) => {
     customData.length = 0
     const fixedItems = [ MenuItems.playbackQueue, MenuItems.create ]
-    if(mode == 1) { //移动模式
+    if(mode >= 1) { //移动模式 或 其他无当前播放的模式
         customData.push(fixedItems[1])
     } else {
         customData.push(...fixedItems)

@@ -121,7 +121,6 @@ onMounted(() => {
 .slider-bar .slider-bar-ctl{
     height: 3px;
     border-radius: 10rem;
-    /*background: linear-gradient(to right, #464646, #666) !important;*/
     background: var(--progress-track-bg);
     cursor: pointer;
     display: flex;
@@ -140,8 +139,7 @@ onMounted(() => {
     width: 50%;
     height: 3px;
     border-radius: 10rem;
-    background: linear-gradient(to top right, #28c83f, #1ca388);
-    background: var(--hl-text-bg);
+    background: var(--progress-bg);
     z-index: 1;
     position: absolute;
 }
@@ -150,7 +148,7 @@ onMounted(() => {
     width: 10px;
     height: 10px;
     border-radius: 10rem;
-    background-color: var(--text-color);
+    background-color: var(--slider-thumb-bg);
     z-index: 2;
     position: absolute;
     left: 50%;

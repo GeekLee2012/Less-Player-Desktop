@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 
 const props = defineProps({
@@ -14,8 +14,8 @@ const props = defineProps({
 const router = useRouter()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { isAlbumDetailVisitable } = usePlatformStore()
-const { exploreModeCode } = storeToRefs(useMainViewStore())
-const { hidePlayingView } = useMainViewStore()
+const { exploreModeCode } = storeToRefs(useAppCommonStore())
+const { hidePlayingView } = useAppCommonStore()
 
 const visitAlbumDetail = (platform, id) => {
     const platformValid = isAlbumDetailVisitable(platform)

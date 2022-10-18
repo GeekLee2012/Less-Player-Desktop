@@ -1,13 +1,13 @@
 <script setup>
-import { usePlaylistSquareViewStore } from '../store/playlistSquareViewStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { usePlaylistSquareStore } from '../store/playlistSquareStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 
-const { currentCategoryItem } = storeToRefs(usePlaylistSquareViewStore())
-const { currentCategory, updateCurrentCategoryItem } = usePlaylistSquareViewStore()
-const { hidePlaylistCategoryView } = useMainViewStore()
+const { currentCategoryItem } = storeToRefs(usePlaylistSquareStore())
+const { currentCategory, updateCurrentCategoryItem } = usePlaylistSquareStore()
+const { hidePlaylistCategoryView } = useAppCommonStore()
 const category = reactive([])
 
 const updateCategory = () => {
@@ -86,8 +86,8 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     margin-top: 5px;
     margin-bottom: 5px;
     padding-bottom: 10px;
-    padding-left: 25px;
-    padding-right: 25px;
+    padding-left: 33px;
+    padding-right: 33px;
     /* border-bottom: 0.5px solid var(--category-view-border); */
     border-bottom: 0.5px solid #565656;
     border-bottom: var(--category-view-border);
@@ -114,8 +114,8 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
 
 .playlist-category-view .center {
     flex-direction: column;
-    margin-left: 25px;
-    margin-right: 25px;
+    margin-left: 33px;
+    margin-right: 33px;
 }
 
 .playlist-category-view .fl-row {
@@ -141,7 +141,7 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
     color: var(--text-sub-color);
     min-width: 36px;
     margin-top: 15px;
-    margin-right: 15px;
+    margin-right: 20px;
 }
 
 .playlist-category-view .header .cate-title {
@@ -167,7 +167,7 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
 
 .playlist-category-view .current {
     border-radius: 10rem;
-    background: var(--hl-text-bg) !important;
+    background: var(--btn-bg) !important;
     color: var(--svg-btn-color) !important;
 }
 </style>

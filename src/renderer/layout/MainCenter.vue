@@ -2,7 +2,7 @@
 import { onMounted, watch } from 'vue';
 import MainTop from './MainTop.vue';
 import MainContent from './MainContent.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
 import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
@@ -12,11 +12,11 @@ import Mousetrap from 'mousetrap';
 import { useRouter } from 'vue-router';
 
 
-const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useMainViewStore())
+const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useAppCommonStore())
 const { hidePlaylistCategoryView, hideArtistCategoryView, 
     hidePlaybackQueueView, hideAllCtxMenus,
     togglePlaybackQueueView, togglePlayingView, 
-    hidePlayingView } = useMainViewStore()
+    hidePlayingView } = useAppCommonStore()
 
 const { togglePlay, switchPlayMode, 
     playPrevTrack, playNextTrack,
@@ -263,6 +263,7 @@ watch([ playlistCategoryViewShow, artistCategoryViewShow ], setCategorySize)
     flex-direction: column;
     flex: 1;
     overflow: hidden;    
+    background: var(--main-center-bg);
 }
 
 #main-center,

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { useArtistDetailStore } from '../store/artistDetailStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 
 const props = defineProps({
@@ -15,8 +15,8 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const { exploreModeCode } = storeToRefs(useMainViewStore())
-const { hidePlayingView } = useMainViewStore()
+const { exploreModeCode } = storeToRefs(useAppCommonStore())
+const { hidePlayingView } = useAppCommonStore()
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { isArtistDetailVisitable } = usePlatformStore()
 let updatedArtist = { trackId: '', artist: [] }

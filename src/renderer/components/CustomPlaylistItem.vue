@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { toYyyymmddHhMmSs } from "../../common/Times";
 import { useRouter } from 'vue-router';
@@ -13,7 +13,7 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const { hideAllCtxMenus, showToast } = useMainViewStore()
+const { hideAllCtxMenus, showToast } = useAppCommonStore()
 const { getCustomPlaylist, removeCustomPlaylist } = useUserProfileStore()
 const { resetQueue, playNextTrack, addTracks } = usePlayStore()
 
@@ -192,6 +192,7 @@ const showContextMenu = (event) => {
 
 .custom-playlist-item .action svg:hover {
     fill: var(--hl-color);
+    fill: var(--svg-hover-color);
 }
 
 .custom-playlist-item .title-wrap:hover .action {

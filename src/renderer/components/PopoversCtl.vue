@@ -1,7 +1,7 @@
 <script setup>
 import {  onMounted, reactive, ref, watch } from 'vue';
 import Notification from './Notification.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import CommonContextMenu from './CommonContextMenu.vue';
@@ -18,11 +18,11 @@ const { playNotificationShow, commonNotificationShow,
   commonCtxMenuData, commonCtxMenuSeparatorNums,
   addToListSubmenuShow, commonNotificationType,
   artistListSubmenuShow, commonCtxMenuCacheItem,
-  playbackQueueViewShow, playingViewShow, } = storeToRefs(useMainViewStore())
+  playbackQueueViewShow, playingViewShow, } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu, 
   showArtistListSubmenu, hideArtistListSubmenu,
-  hideAllCtxMenus } = useMainViewStore()
+  hideAllCtxMenus } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 
 const getCtxMenuAutoHeight = () => {
@@ -103,7 +103,7 @@ EventBus.on("commonCtxMenu-show", e => {
 })
 
 //TODO 还可以进一步封装，但是......
-const { showCommonNotification, hideCommonNotification } = useMainViewStore()
+const { showCommonNotification, hideCommonNotification } = useAppCommonStore()
 const doToast = (text, callback, delay) => {
     delay = delay && delay >= 0 ? delay : 1500
     showCommonNotification(text)

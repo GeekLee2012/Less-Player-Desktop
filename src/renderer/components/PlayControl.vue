@@ -1,12 +1,12 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 
 const { playing, playMode } = storeToRefs(usePlayStore())
 const { playPrevTrack, togglePlay, playNextTrack, switchPlayMode } = usePlayStore()
 const { togglePlaybackQueueView, hidePlaylistCategoryView, 
-    hideArtistCategoryView, hideSongItemCtxMenu } = useMainViewStore()
+    hideArtistCategoryView, hideSongItemCtxMenu } = useAppCommonStore()
 
 const togglePlaybackQueue = () => {
     hidePlaylistCategoryView()
@@ -67,6 +67,7 @@ const togglePlaybackQueue = () => {
 
 .play-ctl svg:hover {
     fill: var(--hl-color);
+    fill: var(--svg-hover-color);
 }
 
 .play-ctl .play-btn {

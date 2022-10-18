@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router';
 import PaginationTiles from './PaginationTiles.vue';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { storeToRefs } from 'pinia';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 
 const props = defineProps({
@@ -17,7 +17,7 @@ const props = defineProps({
 
 const router = useRouter()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
-const { exploreModeCode } = storeToRefs(useMainViewStore())
+const { exploreModeCode } = storeToRefs(useAppCommonStore())
 
 const visitItem = (item) => {
     const { checkbox } = props

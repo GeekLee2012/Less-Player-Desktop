@@ -1,7 +1,7 @@
 <script setup>
 import VolumeBar from './VolumeBar.vue';
 import AudioTime from './AudioTime.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
@@ -9,8 +9,8 @@ import { onMounted, ref } from 'vue';
 import EventBus from '../../common/EventBus';
 
 const { currentTrack, mmssCurrentTime, volume } = storeToRefs(usePlayStore())
-const { coverMaskShow } = storeToRefs(useMainViewStore())
-const { showPlayingView, toggleCoverMask } = useMainViewStore()
+const { coverMaskShow } = storeToRefs(useAppCommonStore())
+const { showPlayingView, toggleCoverMask } = useAppCommonStore()
 
 const trackMeta = (track) => {
     let artistName = Track.artistName(track)

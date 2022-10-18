@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
 import { useArtistDetailStore } from '../store/artistDetailStore';
@@ -13,8 +13,8 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const { commonCtxMenuCacheItem, exploreModeCode } = storeToRefs(useMainViewStore())
-const { hideAllCtxMenus } = useMainViewStore()
+const { commonCtxMenuCacheItem, exploreModeCode } = storeToRefs(useAppCommonStore())
+const { hideAllCtxMenus } = useAppCommonStore()
 const { isArtistDetailVisitable } = usePlatformStore()
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const menuData = reactive([])

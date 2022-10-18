@@ -4,7 +4,7 @@ import PaginationTiles from './PaginationTiles.vue';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import EventBus from '../../common/EventBus';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
 import { useUserProfileStore } from '../store/userProfileStore';
@@ -22,8 +22,8 @@ const props = defineProps({
 const router = useRouter()
 const { getVender, isPlatformValid } = usePlatformStore()
 const { addTrack, addTracks, playTrack, resetQueue, playNextTrack } = usePlayStore()
-const { exploreModeCode } = storeToRefs(useMainViewStore())
-const { showToast } = useMainViewStore()
+const { exploreModeCode } = storeToRefs(useAppCommonStore())
+const { showToast } = useAppCommonStore()
 const { addRecentPlaylist } = useUserProfileStore()
 
 const visitItem = (item) => {

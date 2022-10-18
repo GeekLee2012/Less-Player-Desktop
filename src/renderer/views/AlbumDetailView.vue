@@ -17,7 +17,7 @@ import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 
 const props = defineProps({
@@ -25,7 +25,7 @@ const props = defineProps({
     id: String
 })
 
-const { albumId, albumName, albumCover, 
+const { albumId, albumName, albumCover, platform,
         artistName, publishTime, company,
         activeTab, tabs, tabTipText, 
         allSongs, about
@@ -39,7 +39,7 @@ const { setActiveTab, updateTabTipText,
 
 const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
-const { showToast, hideAllCtxMenus } = useMainViewStore()
+const { showToast, hideAllCtxMenus } = useAppCommonStore()
 const { addRecentAlbum } = useUserProfileStore()
 
 let currentTabView = shallowRef(null)
@@ -88,16 +88,16 @@ const toggleFavourite = () => {
     let text = "专辑收藏成功！"
     if(favourited.value) {
         const { title, cover, publishTime } = detail
-        addFavouriteAlbum(props.id, props.platform, title, cover, publishTime)
+        addFavouriteAlbum(albumId.value, platform.value, title, cover, publishTime)
     } else {
-        removeFavouriteAlbum(props.id, props.platform)
+        removeFavouriteAlbum(albumId.value, platform.value)
         text = "专辑已取消收藏！"
     }
     showToast(text)
 }
 
 const checkFavourite = () => {
-    favourited.value = isFavouriteAlbum(props.id, props.platform)
+    favourited.value = isFavouriteAlbum(albumId.value, platform.value)
 }
 
 const updateTabData = (data) => {
@@ -117,9 +117,9 @@ const getAlbumDetail = () => {
         setLoadingDetail(false)
         return 
     }
-    const vender = getVender(props.platform)
+    const vender = getVender(platform.value)
     if(!vender) return
-    const id = props.id || albumId.value
+    const id = albumId.value
     vender.albumDetail(id).then(result => {
         const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
@@ -144,9 +144,9 @@ const loadAllSongs = ()=> {
         setLoading(false)
         return 
     }
-    const vender = getVender(props.platform)
+    const vender = getVender(platform.value)
     if(!vender) return
-    const id = props.id || albumId.value
+    const id = albumId.value
     vender.albumDetailAllSongs(id, 0, 100).then(result => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
@@ -199,10 +199,10 @@ const switchTab = () => {
 }
 
 //TODO 后期需要梳理优化，容易出现重复加载Bug
-onMounted(() => loadAll())
-onActivated(() => loadAll())
-watch(activeTab, (nv,ov) => switchTab())
-watch(()=> props.id, (nv, ov) => reloadAll())
+onMounted(loadAll)
+onActivated(loadAll)
+watch(activeTab, switchTab)
+watch(albumId, reloadAll)
 </script>
 
 <template>

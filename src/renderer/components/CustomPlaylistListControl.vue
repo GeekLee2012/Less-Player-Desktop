@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import CustomPlaylistItem from './CustomPlaylistItem.vue';
 
 const props = defineProps({

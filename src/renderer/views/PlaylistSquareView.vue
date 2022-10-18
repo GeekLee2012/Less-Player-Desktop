@@ -2,11 +2,11 @@
 import { onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
-import { usePlaylistSquareViewStore } from '../store/playlistSquareViewStore';
+import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import PlaylistCategoryBar from '../components/PlaylistCategoryBar.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 
 const squareContentRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -17,9 +17,9 @@ const playlists = reactive([])
 const pagination = { offset: 0, limit: 35, page: 1 }
 let markScrollTop = 0
 
-const { currentPlatformCode, currentCategoryCode } = storeToRefs(usePlaylistSquareViewStore())
-const { currentVender, currentCategory, putCategory, } = usePlaylistSquareViewStore()
-const { isPlaylistMode } = storeToRefs(useMainViewStore())
+const { currentPlatformCode, currentCategoryCode } = storeToRefs(usePlaylistSquareStore())
+const { currentVender, currentCategory, putCategory, } = usePlaylistSquareStore()
+const { isPlaylistMode } = storeToRefs(useAppCommonStore())
 
 const isLoadingCategories = ref(true)
 const isLoadingContent = ref(true)

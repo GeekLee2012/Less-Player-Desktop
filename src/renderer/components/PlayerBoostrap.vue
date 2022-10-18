@@ -1,6 +1,6 @@
 <script setup>
 import { usePlayStore } from '../store/playStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
@@ -23,7 +23,7 @@ const { playTrack, playNextTrack,
     updateCurrentTime, setPlaying  } = usePlayStore()
 const { getVender } = usePlatformStore()
 const { showPlayNotification, hidePlayNotification, 
-    hidePlayingView, hidePlaybackQueueView, togglePlaybackQueueView } = useMainViewStore()
+    hidePlayingView, hidePlaybackQueueView, togglePlaybackQueueView } = useAppCommonStore()
 const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
 
@@ -205,18 +205,18 @@ const registryIpcRenderderListeners = () => {
                 break
         }
     })
-
+    
     //全局快捷键
     ipcRenderer.on('globalShortcut-togglePlay', togglePlay)
-    ipcRenderer.on('globalShortcut-switchPlayMode', switchPlayMode)
-    ipcRenderer.on('globalShortcut-playPrev', playPrevTrack)
-    ipcRenderer.on('globalShortcut-playNext', playNextTrack)
-    ipcRenderer.on('globalShortcut-volumeUp', () => updateVolumeByOffset(0.05))
-    ipcRenderer.on('globalShortcut-volumeDown', () => updateVolumeByOffset(-0.05))
-    ipcRenderer.on('globalShortcut-toggleVolumeMute', toggleVolumeMute)
-    ipcRenderer.on('globalShortcut-visitSetting', () => visitRoute('/setting'))
-    ipcRenderer.on('globalShortcut-togglePlaybackQueue', togglePlaybackQueueView)
-
+        .on('globalShortcut-switchPlayMode', switchPlayMode)
+        .on('globalShortcut-playPrev', playPrevTrack)
+        .on('globalShortcut-playNext', playNextTrack)
+        .on('globalShortcut-volumeUp', () => updateVolumeByOffset(0.05))
+        .on('globalShortcut-volumeDown', () => updateVolumeByOffset(-0.05))
+        .on('globalShortcut-toggleVolumeMute', toggleVolumeMute)
+        .on('globalShortcut-visitSetting', () => visitRoute('/setting'))
+        .on('globalShortcut-togglePlaybackQueue', togglePlaybackQueueView)
+    
     //其他事件
     ipcRenderer.on('app-quit', () => {
         if(!isStorePlayStateBeforeQuit.value) {

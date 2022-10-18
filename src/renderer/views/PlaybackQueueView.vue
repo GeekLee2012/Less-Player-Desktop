@@ -3,11 +3,11 @@ import { onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue } = usePlayStore()
-const { showToast, hidePlaybackQueueView, hidePlayingView, hideAllCtxMenus } = useMainViewStore()
+const { showToast, hidePlaybackQueueView, hidePlayingView, hideAllCtxMenus } = useAppCommonStore()
 
 const targetPlaying = () => {
     if(queueTracksSize < 1) return 

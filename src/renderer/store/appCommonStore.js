@@ -4,7 +4,7 @@ import { useIpcRenderer } from "../../common/Utils";
 
 const ipcRenderer = useIpcRenderer()
 
-export const useMainViewStore = defineStore('mainView', {
+export const useAppCommonStore = defineStore('appCommon', {
     state: () => ({
         coverMaskShow: false,
         playlistCategoryViewShow: false,

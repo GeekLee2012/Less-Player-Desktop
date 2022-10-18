@@ -1,14 +1,14 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 
 const router = useRouter()
 const { updateCurrentPlatformByCode } = usePlatformStore()
 const { setExploreMode, setArtistExploreMode, setUserExploreMode,
-    hideAllCtxMenus, hidePlayingView, updateCommonCtxItem } = useMainViewStore()
+    hideAllCtxMenus, hidePlayingView, updateCommonCtxItem } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 
 router.beforeResolve((to, from) => {
@@ -76,7 +76,7 @@ const excludes = [ 'CustomPlaylistEditView', 'UserInfoEditView', 'BatchActionVie
 
 <template>
     <div id="main-content">
-        <router-view v-slot="{ Component }">
+        <router-view v-slot="{ Component, route }">
             <keep-alive :exclude="excludes" :max="12">
                 <component :is="Component" />
             </keep-alive>
@@ -89,6 +89,6 @@ const excludes = [ 'CustomPlaylistEditView', 'UserInfoEditView', 'BatchActionVie
     display: flex;
     flex: 1;
     overflow: auto;
-    margin-right: 2px;
+    /*margin-right: 2px;*/
 }
 </style>

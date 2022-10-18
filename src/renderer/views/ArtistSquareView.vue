@@ -2,11 +2,11 @@
 import { onActivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
-import { useArtistSquareViewStore } from '../store/artistSquareViewStore';
+import { useArtistSquareStore } from '../store/artistSquareStore';
 import ArtistCategoryBar from '../components/ArtistCategoryBar.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 
 const squareRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -20,10 +20,10 @@ const isLoadingCategories = ref(true)
 const isLoadingContent = ref(true)
 
 const { currentPlatformCode, currentCategoryItems, currentAlphabet } 
-    = storeToRefs(useArtistSquareViewStore())
+    = storeToRefs(useArtistSquareStore())
 const { currentVender, currentCategory, 
-        putCategory, putAlphabet } = useArtistSquareViewStore()
-const { isArtistMode } = storeToRefs(useMainViewStore())
+        putCategory, putAlphabet } = useArtistSquareStore()
+const { isArtistMode } = storeToRefs(useAppCommonStore())
 
 const setLoadingCategories = (value) => {
     isLoadingCategories.value = value

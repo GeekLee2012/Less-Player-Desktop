@@ -20,7 +20,7 @@ const ALL_TABS = [ {
     }
 ]
 
-export const useSearchViewStore = defineStore('searchView', {
+export const useSearchStore = defineStore('search', {
     state: () => ({
         keyword: '',
         currentPlatformIndex: 1,

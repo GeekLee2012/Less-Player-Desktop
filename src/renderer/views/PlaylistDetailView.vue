@@ -14,14 +14,14 @@ import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
 
 const { getVender } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showToast, hideAllCtxMenus } = useMainViewStore()
+const { showToast, hideAllCtxMenus } = useAppCommonStore()
 const { addRecentPlaylist } = useUserProfileStore()
 
 const props = defineProps({

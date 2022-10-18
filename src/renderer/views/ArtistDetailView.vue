@@ -17,18 +17,19 @@ import SongListControl from '../components/SongListControl.vue';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
 import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 
 const props = defineProps({
+    exploreMode: String,
     platform: String,
     id: String
 })
 
-const { artistId, artistName, artistCover, 
+const { artistId, artistName, artistCover, platform,
         artistAlias, tabTipText, activeTab, 
         tabs, hotSongs, allSongs, 
         albums, about, hasHotSongTab, hasAllSongTab
@@ -48,7 +49,7 @@ const { setActiveTab, updateArtist,
 
 const { getVender } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
-const { showToast, hideAllCtxMenus } = useMainViewStore() 
+const { showToast, hideAllCtxMenus } = useAppCommonStore() 
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
@@ -145,7 +146,7 @@ const getArtistDetail = () => {
         setLoadingDetail(false)
         return 
     }
-    const vender = getVender(props.platform)
+    const vender = getVender(platform.value)
     if(!vender) return
     setLoadingDetail(true)
     const id = artistId.value
@@ -166,7 +167,7 @@ const loadHotSongs = () => {
         setLoadingSongs(false)
         return 
     }
-    const vender = getVender(props.platform)
+    const vender = getVender(platform.value)
     if(!vender) return
     const id = artistId.value
     vender.artistDetailHotSongs(id).then(result => {
@@ -179,7 +180,7 @@ const loadHotSongs = () => {
 
 //TODO
 const loadMoreSongs = () => {
-    const vender = getVender(props.platform)
+    const vender = getVender(platform.value)
     if(!vender) return
     const id = artistId.value
     vender.artistDetailAllSongs(id, offset, limit, page).then(result => {
@@ -197,7 +198,7 @@ const loadAllSongs = () => {
         setLoadingSongs(false)
         return 
     }
-    const vender = getVender(props.platform)
+    const vender = getVender(platform.value)
     if(!vender) return
     const id = artistId.value
     vender.artistDetailAllSongs(id, offset, limit, page).then(result => {
@@ -219,7 +220,7 @@ const loadAlbums = () => {
         }, 0)
         return 
     }
-    const vender = getVender(props.platform)
+    const vender = getVender(platform.value)
     if(!vender) return
     const id = artistId.value
     //TODO
@@ -239,7 +240,7 @@ const loadAbout = () => {
         updateTabTipText(0)
         return 
     }
-    const vender = getVender(props.platform)
+    const vender = getVender(platform.value)
     if(!vender) return
     const id = artistId.value
     vender.artistDetailAbout(id).then(result => {
@@ -354,10 +355,12 @@ onMounted(() => {
     resetScrollState()
     loadAll()
 })
-onActivated(() => restoreScrollState())
-//watch(artistId, (nv, ov) => reloadAll())
-watch(activeTab, (nv,ov) => switchTab())
-watch(() => props.id , (nv, ov) => reloadAll())
+onActivated(() => {
+    getArtistDetail()
+    restoreScrollState()
+})
+watch(activeTab, switchTab)
+watch(artistId, reloadAll)
 </script>
 
 <template>

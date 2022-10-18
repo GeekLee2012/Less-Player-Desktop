@@ -56,9 +56,9 @@ watch(progress, (nv, ov) => {
 
 #main-top {
     flex-direction: column;
-    height: 71px;
     height: 80px;
     -webkit-app-region: drag;
+    /* background: #faf4f6; */
 }
 
 #play-nav #play-meta {
@@ -109,5 +109,6 @@ watch(progress, (nv, ov) => {
 #userhome-btn svg:hover,
 #setting-btn svg:hover {
     fill: var(--hl-color);
+    fill: var(--svg-hover-color);
 }
 </style>

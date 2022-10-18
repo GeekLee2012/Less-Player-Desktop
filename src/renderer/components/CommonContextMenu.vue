@@ -6,7 +6,7 @@ import EventBus from '../../common/EventBus';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
@@ -18,8 +18,8 @@ const props = defineProps({
 let currentDataType = -1
 
 const router = useRouter()
-const { commonCtxItem, commonCtxMenuCacheItem  } = storeToRefs(useMainViewStore())
-const { showToast, setCommonCtxMenuData, hideAllCtxMenus } = useMainViewStore()
+const { commonCtxItem, commonCtxMenuCacheItem  } = storeToRefs(useAppCommonStore())
+const { showToast, setCommonCtxMenuData, hideAllCtxMenus } = useAppCommonStore()
 const { playTrack, playTrackLater, addTrack, removeTrack, resetQueue, addTracks, playNextTrack } = usePlayStore()
 const { addFavouriteTrack, removeFavouriteSong, addFavouriteRadio,
     removeCustomPlaylist, removeTrackFromCustomPlaylist,
@@ -75,7 +75,7 @@ const addFavouriteItem = () => {
 }
 
 //TODO
-const { exploreModeCode } = storeToRefs(useMainViewStore())
+const { exploreModeCode } = storeToRefs(useAppCommonStore())
 
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { isArtistDetailVisitable } = usePlatformStore()
@@ -262,6 +262,12 @@ const MenuItems = {
             menu: isMenu,
             action: showAddToList,
         },
+        addToListNoQueue: () => ({
+            name: '添加到',
+            icon: '<svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>',
+            menu: isMenu,
+            action: (event) => showAddToList(event, 2),
+        }),
         moveToList: {
             name: '移动到',
             icon: '<svg width="16" height="16" viewBox="0 0 896.41 896.43" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M415.82,109.83l-48,48.05q-11.67,11.67-23.34,23.33c-14.07,14-33.73,14.73-46.83,1.73s-12.53-32.9,1.73-47.17q59-59.06,118.08-118.09c2.82-2.83,5.51-5.8,8.4-8.56,12.57-12,32.28-12.27,44.62,0q64.28,64.05,128.23,128.43a31.73,31.73,0,0,1,0,45.37c-12.6,12.5-32.34,12.53-45.37-.36-22.87-22.61-45.53-45.44-68.25-68.21-1.29-1.3-2.32-2.85-4.48-3.71V415.9H786.3c-1.58-1.7-2.72-3-3.95-4.25-22.74-22.76-45.57-45.41-68.2-68.27-17.51-17.69-10.76-46.49,12.53-53.62,12.85-3.94,23.94-.4,33.33,9q55.34,55.33,110.67,110.65c5.3,5.3,10.7,10.51,16,15.83,12.84,12.93,13.06,32.88.24,45.72q-63.58,63.68-127.36,127.18c-13.4,13.34-33.4,13.48-46.1.58s-12.39-32.47.78-45.74q33.82-34.05,67.88-67.87a42.32,42.32,0,0,1,4.34-3.38l-.68-1.09H480.5V786.38c1.78-1.66,3.1-2.82,4.34-4.06,22.75-22.74,45.39-45.59,68.27-68.2,17.57-17.36,46-10.82,53.41,12.18,4.13,12.82.82,24-8.56,33.42Q563.39,794.43,528.69,829q-28.62,28.66-57.19,57.36c-13.28,13.32-33.2,13.4-46.44.15q-63.24-63.3-126.45-126.67c-15.18-15.23-13.55-38.16,3.41-49.93,13-9,29.71-7.37,41.5,4.36q34,33.84,67.88,67.87c1.28,1.27,2.3,2.8,4.44,3.56V480.48H110c1.59,1.68,2.73,2.93,3.92,4.13,22.74,22.75,45.56,45.42,68.2,68.26,16.12,16.26,12.33,41.91-7.47,51.9-12.65,6.39-27,4-37.65-6.56-15.15-15-30.17-30.16-45.27-45.23Q51,512.36,10.27,471.77C-3.29,458.26-3.46,438.41,10,425q63.14-63.06,126.31-126.1c12.29-12.27,29-14.12,42.24-4.83,16.7,11.76,18.39,34.58,3.47,49.61-22.55,22.71-45.23,45.27-67.85,67.91-1.25,1.25-2.43,2.57-4.12,4.37H415.82Z"/></g></g></svg>',
@@ -463,7 +469,7 @@ EventBus.on("commonCtxMenu-init", dataType => {
             data = [ MenuItems.playPlaylist, MenuItems.removePlaylistFromFavourite ]
             break;
         case 9: //当前播放列表
-            data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList, 
+            data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToListNoQueue(), 
                     MenuItems.sp, MenuItems.addFavourite, MenuItems.share, 
                     MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, 
                     MenuItems.sp, MenuItems.removeFromQueue, ]

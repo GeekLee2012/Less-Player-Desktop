@@ -80,6 +80,7 @@ defineExpose({
 
 .volume-bar .volume-status:hover svg {
     fill: var(--hl-color);
+    fill: var(--svg-hover-color);
 }
 
 .volume-bar .volume-value {

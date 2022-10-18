@@ -1,14 +1,14 @@
 <script setup>
-import { useArtistSquareViewStore } from '../store/artistSquareViewStore';
-import { useMainViewStore } from '../store/mainViewStore';
+import { useArtistSquareStore } from '../store/artistSquareStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 
 const artistCategoryViewRef = ref(null)
-const { currentCategoryItems } = storeToRefs(useArtistSquareViewStore())
-const { currentCategory, updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareViewStore()
-const { isArtistMode } = storeToRefs(useMainViewStore())
+const { currentCategoryItems } = storeToRefs(useArtistSquareStore())
+const { currentCategory, updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareStore()
+const { isArtistMode } = storeToRefs(useAppCommonStore())
 const category = reactive([])
 
 const updateCategory = () => {
@@ -77,7 +77,7 @@ EventBus.on('artistCategory-resetScroll', ()=> {
 }
 
 .artist-category-view .header {
-    padding: 15px 25px;
+    padding: 15px 33px;
     border-bottom: 0.5px solid #565656;
     border-bottom: var(--category-view-border);
     display: flex;
@@ -125,8 +125,8 @@ EventBus.on('artistCategory-resetScroll', ()=> {
 
 .artist-category-view .center {
     flex-direction: column;
-    margin-left: 25px;
-    margin-right: 25px;
+    margin-left: 33px;
+    margin-right: 33px;
 }
 
 .artist-category-view .fl-row {
@@ -148,7 +148,7 @@ EventBus.on('artistCategory-resetScroll', ()=> {
     color: var(--text-sub-color);
     min-width: 36px;
     margin-top: 15px;
-    margin-right: 15px;
+    margin-right: 20px;
 }
 
 .artist-category-view .cate-item-wrap {
@@ -176,8 +176,7 @@ EventBus.on('artistCategory-resetScroll', ()=> {
 
 .artist-category-view .current {
     border-radius: 10rem;
-    background: var(--hl-text-bg) !important;
-    color: var(--text-color);
+    background: var(--btn-bg) !important;
     color: var(--svg-btn-color) !important;
 }
 </style>

@@ -1,8 +1,6 @@
 import { Lyric } from './Lyric';
 import { toMmss } from './Times';
 
-const DEFAULT_COVER = 'default_cover.png'
-
 export class Track {
     constructor(id, platform, title, artist, album, duration, cover) {
         this.id = id ? (id + '') : ''
@@ -15,7 +13,7 @@ export class Track {
         this.album = album ? album : ({ id: 0, name: '' })
         //millis
         this.duration = duration ? duration : 0
-        this.cover = cover ? cover : DEFAULT_COVER
+        this.cover = cover
         this.url = ''
         this.lyric = new Lyric()
         this.isRadioType = false //是否为电台歌曲

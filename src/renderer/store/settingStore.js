@@ -6,46 +6,86 @@ const ipcRenderer = useIpcRenderer()
 
 const THEMES = [{
     id: 'dark',
-    name: '默认',
+    name: '默认1',
     bg: '#464646',
     dark: true
 }, {
-    id: 'light',
-    name: '白色',
+    id: 'white',
+    name: '默认2',
+    //bg: '#1ca388',
     bg: '#fafafa',
     dark: false
 }, {
+    id: 'light',
+    name: '浅色',
+    bg: '#e7e1e3',
+    dark: false
+}, {
     id: 'pink',
-    name: '粉色',
+    name: '粉色1',
     //bg: '#e667af',
     bg: '#fc589c',
     dark: false
 }, {
-    id: 'red',
+    id: 'pink2',
+    name: '粉色2',
+    //bg: '#e667af',
+    bg: '#fc589c',
+    dark: false
+}, {
+    id: 'pink-red',
     name: '粉红',
     //bg: '#ef5350',
     bg: '#fc7688',
     dark: false
 }, {
-    id: 'green',
-    name: '绿色',
-    //bg: '#1ca388',
-    bg: '#28c83f',
+    id: 'red1',
+    name: '红色1',
+    //bg: '#ef5350',
+    bg: '#f9453f',
     dark: false
 }, {
+    id: 'red2',
+    name: '红色2',
+    //bg: '#ef5350',
+    bg: '#f9453f',
+    dark: false
+}, {
+    id: 'green',
+    name: '绿色1',
+    //bg: '#1ca388',
+    //bg: '#28c83f',
+    bg: '#cfdec3',
+    dark: false
+}, {
+    id: 'green2',
+    name: '绿色2',
+    bg: '#054a34',
+    dark: true
+},  {
     id: 'blue',
     name: '蓝色',
     bg: '#56ccf2',
     dark: false
 }, {
     id: 'yellow',
-    name: '黄色',
+    name: '黄色1',
+    bg: '#ffb300',
+    dark: false
+}, {
+    id: 'yellow2',
+    name: '黄色2',
     bg: '#ffb300',
     dark: false
 }, {
     id: 'purple',
-    name: '紫色',
+    name: '紫色1',
     bg: '#9c27b0',
+    dark: true
+}, {
+    id: 'purple2',
+    name: '紫色2',
+    bg: '#4d3e72',
     dark: true
 }]   
 
