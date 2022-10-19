@@ -65,6 +65,7 @@ setupAppTheme(getCurrentThemeId())
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #464646, #666) !important;
   --progress-bg: linear-gradient(to top right, #2edfa3, #28c83f);
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #666;
   /* 列表项 hover */
@@ -136,9 +137,9 @@ setupAppTheme(getCurrentThemeId())
   --toggle-btn-active-bg: var(--hl-color);
   --toggle-active-thumb-bg: #fff;
   /* 进度条 */
-  --progress-track-bg: linear-gradient(to right, #999, #ccc) !important;
   --progress-track-bg: linear-gradient(to right, #ccc, #ccc) !important;
   --progress-bg: linear-gradient(to top right, #1ca388, #28c83f);
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #999;
   /* 列表项 hover */
@@ -216,7 +217,8 @@ setupAppTheme(getCurrentThemeId())
   --progress-track-bg: linear-gradient(to right, #faf4f6, #faf4f6) !important;
   --progress-track-bg: linear-gradient(to right, #e7e1e3cb, #e7e1e3cb) !important;
   --progress-bg: linear-gradient(to top right, #c7c1c3, #c7c1c3) !important;
-  --slider-thumb-bg: #d7d1d3;
+  --slider-thumb-bg: var(--svg-color);
+  
   /*滚动条*/
   --scrollbar-thumb-bg: #878183;
   /* 列表项 hover */
@@ -283,7 +285,7 @@ setupAppTheme(getCurrentThemeId())
   --svg-btn-color: #fff;
   --btn-bg: linear-gradient(to top right, #e6399b, #e667af);
   --btn-hover-bg: linear-gradient(to top right, #e6399b, #992667) !important;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -293,7 +295,7 @@ setupAppTheme(getCurrentThemeId())
   --progress-track-bg: linear-gradient(to right, #999, #ccc) !important;
   --progress-track-bg: linear-gradient(to right, #ccc, #ccc) !important;
   --progress-bg: linear-gradient(to top right, #e667af, #e6399b);
-  --btn-hover-bg: linear-gradient(to top right, #e6399b, #992667) !important;
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #999;
   /* 列表项 hover */
@@ -367,6 +369,7 @@ setupAppTheme(getCurrentThemeId())
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #252525, #313131) !important;
   --progress-bg: linear-gradient(to top right, #fc589c, #e6399b);
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #212121;
   /* 列表项 hover */
@@ -448,6 +451,7 @@ setupAppTheme(getCurrentThemeId())
   --progress-track-bg: linear-gradient(to right, #ffffff56, #ffffff56) !important;
   --progress-bg: linear-gradient(to top right, #ba5776, #fc7688);
   --progress-bg: linear-gradient(to top right, #fff, #fff);
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #eee;
   /* 列表项 hover */
@@ -493,7 +497,7 @@ setupAppTheme(getCurrentThemeId())
   --input-placeholder-color: #ccc;
 }
 
-:root[theme='red1'] {
+:root[theme='red'] {
   /* 全局背景 */
   --bg-color: #fff;
   --app-bg: linear-gradient(to top, #f9453f, #c43631);
@@ -524,6 +528,8 @@ setupAppTheme(getCurrentThemeId())
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #e7e1e3, #e7e1e3) !important;
   --progress-bg: linear-gradient(to top right, #f9453f, #f84860);
+  --slider-thumb-bg: var(--svg-color);
+  
   /*滚动条*/
   --scrollbar-thumb-bg: #eee;
   /* 列表项 hover */
@@ -599,6 +605,7 @@ setupAppTheme(getCurrentThemeId())
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #555, #555) !important;
   --progress-bg: linear-gradient(to top right, #f9453f, #f84860);
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #666;
   /* 列表项 hover */
@@ -678,6 +685,7 @@ setupAppTheme(getCurrentThemeId())
   --progress-track-bg: linear-gradient(to right, #f1eee7, #f1eee7) !important;
   --progress-bg: linear-gradient(to top right, #666, #cfdec3);
   --progress-bg: linear-gradient(to right, #32323268, #32323268);
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #999;
   /* 列表项 hover */
@@ -759,6 +767,7 @@ setupAppTheme(getCurrentThemeId())
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #91934333, #91934333) !important;
   --progress-bg: linear-gradient(to top right, #e1e0a7ab, #e1e0a7ab);
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #91934366;
   /* 列表项 hover */
@@ -840,6 +849,7 @@ setupAppTheme(getCurrentThemeId())
   --progress-track-bg: linear-gradient(to right, #99999966, #99999966) !important;
   --progress-bg: linear-gradient(to top right, #1976d2, #42a5f5);
   --progress-bg: linear-gradient(to top right, #42a5f5, #42a5f5);
+  --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #ababab;
   /* 列表项 hover */
@@ -919,7 +929,8 @@ setupAppTheme(getCurrentThemeId())
   --progress-track-bg: #cbcbcb;
   --progress-track-bg: #ddd;
   --progress-bg: #ffb300;
-  --btn-hover-bg: #ffb300;
+  --slider-thumb-bg: var(--svg-color);
+  
   /*滚动条*/
   --scrollbar-thumb-bg: #cbcbcb;
   /* 列表项 hover */
@@ -997,7 +1008,8 @@ setupAppTheme(getCurrentThemeId())
   /* 进度条 */
   --progress-track-bg: #666;
   --progress-bg: #ffb300;
-  --btn-hover-bg: #ffb300;
+  --slider-thumb-bg: var(--svg-color);
+
   /*滚动条*/
   --scrollbar-thumb-bg: #cbcbcb;
   /* 列表项 hover */
@@ -1074,7 +1086,8 @@ setupAppTheme(getCurrentThemeId())
   /* 进度条 */
   --progress-track-bg: #ccc;
   --progress-bg: #000;
-  --btn-hover-bg: #000;
+  --slider-thumb-bg: var(--svg-color);
+
   /*滚动条*/
   --scrollbar-thumb-bg: #ccc;
   /* 列表项 hover */
@@ -1150,7 +1163,8 @@ setupAppTheme(getCurrentThemeId())
   --progress-track-bg: #cbcbcb;
   --progress-track-bg: #ddd;
   --progress-bg: #9c27b0;
-  --btn-hover-bg: #9c27b0;
+  --slider-thumb-bg: var(--svg-color);
+
   /*滚动条*/
   --scrollbar-thumb-bg: #cbcbcb;
   /* 列表项 hover */
@@ -1232,6 +1246,8 @@ setupAppTheme(getCurrentThemeId())
   --progress-track-bg: #cbcbcb;
   --progress-bg: #57457e;
   --progress-bg: #e5bc8c;
+  --slider-thumb-bg: var(--svg-color);
+  
   /*滚动条*/
   --scrollbar-thumb-bg: #cbcbcb;
   /* 列表项 hover */
@@ -1265,7 +1281,7 @@ setupAppTheme(getCurrentThemeId())
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg, #fdfdf2ab 8%,#fdfdf288 18%,#fdfdf2ab 33%);
+  --loading-mask-bg: linear-gradient(90deg, #fdfdf2ab 8%,#fdfdf288 18%, #fdfdf2ab 33%);
   --error-color: red;
 
   --checkbox-bg: #4d3e72;

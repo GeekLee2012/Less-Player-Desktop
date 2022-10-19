@@ -5,7 +5,7 @@ import App from './App.vue';
 import { createPinia } from 'pinia';
 import piniaPersist from 'pinia-plugin-persist'
 //Router
-import { router } from './route/router';
+import { router } from './route/Router';
 //LazyLoad
 import VueLazyLoad from 'vue3-lazyload';
 //播放器

@@ -39,7 +39,7 @@ const THEMES = [{
     bg: '#fc7688',
     dark: false
 }, {
-    id: 'red1',
+    id: 'red',
     name: '红色1',
     //bg: '#ef5350',
     bg: '#f9453f',

@@ -76,7 +76,7 @@ const excludes = [ 'CustomPlaylistEditView', 'UserInfoEditView', 'BatchActionVie
 
 <template>
     <div id="main-content">
-        <router-view v-slot="{ Component, route }">
+        <router-view v-slot="{ Component }">
             <keep-alive :exclude="excludes" :max="12">
                 <component :is="Component" />
             </keep-alive>

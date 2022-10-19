@@ -9,7 +9,9 @@ import packageCfg from '../../../package.json';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useIpcRenderer } from '../../common/Utils';
 import EventBus from '../../common/EventBus';
+import { useRouter } from 'vue-router';
 
+const router = useRouter()
 const ipcRenderer = useIpcRenderer()
 
 const { theme, track, keys, tray, navigation, dialog ,cache, other } = storeToRefs(useSettingStore())
@@ -32,6 +34,11 @@ const { setThemeIndex,
 
 const { showToast } = useAppCommonStore()
 
+//TODO
+const visitMoreTheme = () => {
+    //router.push('/setting/themes')
+} 
+
 const visitLink = (url) => {
     if(ipcRenderer) ipcRenderer.send('visit-link', url)
 }
@@ -49,6 +56,9 @@ const visitLink = (url) => {
                         :style="{ background: item.bg }" 
                         @click="setThemeIndex(index)" >
                         <b>{{ item.name }}</b>
+                    </div>
+                    <div class="last more" @click="visitMoreTheme" >
+                        <b>...</b>
                     </div>
                 </div>
             </div>
@@ -382,6 +392,18 @@ const visitLink = (url) => {
 
 #setting-view .theme .content .lightText {
     color: #fff !important;
+}
+
+#setting-view .theme .content .more {
+    background: #ffd700;
+}
+
+#setting-view .theme .content .more b {
+    /* visibility: visible; */
+    background-color: transparent;
+    color: #333;
+    font-size: 28px;
+    padding-bottom: 15px;
 }
 
 #setting-view .track .content span {

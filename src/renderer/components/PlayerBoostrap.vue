@@ -208,14 +208,14 @@ const registryIpcRenderderListeners = () => {
     
     //全局快捷键
     ipcRenderer.on('globalShortcut-togglePlay', togglePlay)
-        .on('globalShortcut-switchPlayMode', switchPlayMode)
-        .on('globalShortcut-playPrev', playPrevTrack)
-        .on('globalShortcut-playNext', playNextTrack)
-        .on('globalShortcut-volumeUp', () => updateVolumeByOffset(0.05))
-        .on('globalShortcut-volumeDown', () => updateVolumeByOffset(-0.05))
-        .on('globalShortcut-toggleVolumeMute', toggleVolumeMute)
-        .on('globalShortcut-visitSetting', () => visitRoute('/setting'))
-        .on('globalShortcut-togglePlaybackQueue', togglePlaybackQueueView)
+    ipcRenderer.on('globalShortcut-switchPlayMode', switchPlayMode)
+    ipcRenderer.on('globalShortcut-playPrev', playPrevTrack)
+    ipcRenderer.on('globalShortcut-playNext', playNextTrack)
+    ipcRenderer.on('globalShortcut-volumeUp', () => updateVolumeByOffset(0.05))
+    ipcRenderer.on('globalShortcut-volumeDown', () => updateVolumeByOffset(-0.05))
+    ipcRenderer.on('globalShortcut-toggleVolumeMute', toggleVolumeMute)
+    ipcRenderer.on('globalShortcut-visitSetting', () => visitRoute('/setting'))
+    ipcRenderer.on('globalShortcut-togglePlaybackQueue', togglePlaybackQueueView)
     
     //其他事件
     ipcRenderer.on('app-quit', () => {

@@ -22,10 +22,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   //ipcRenderer,
   ipcRenderer: {
     ...ipcRenderer,
-    on: () => {
-      ipcRenderer.on.bind(ipcRenderer)
-      return ipcRenderer
-    },
+    on: ipcRenderer.on.bind(ipcRenderer),
   },
   isMacOS,
   useCustomTrafficLight
