@@ -9,10 +9,11 @@ export const useAppCommonStore = defineStore('appCommon', {
         coverMaskShow: false,
         playlistCategoryViewShow: false,
         artistCategoryViewShow: false,
+        radioCategoryViewShow: false,
         playbackQueueViewShow: false,
         playingViewShow: false,
         //探索模式，歌单、歌手
-        exploreModes: [ 'playlists', 'artists', 'userhome' ], 
+        exploreModes: [ 'playlists', 'artists', 'radios', 'userhome' ], 
         exploreModeIndex: 0, 
         //播放状态通知
         playNotificationShow: false,
@@ -28,6 +29,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         commonCtxMenuSeparatorNums: 0,
         addToListSubmenuShow: false,
         artistListSubmenuShow: false,
+        exitToHomeBtnShow: false
     }),
     getters: {
         isPlaylistMode() {
@@ -36,11 +38,17 @@ export const useAppCommonStore = defineStore('appCommon', {
         isArtistMode() {
             return this.exploreModeIndex == 1
         },
-        isUserHomeMode() {
+        isRadioMode() {
             return this.exploreModeIndex == 2
+        },
+        isUserHomeMode() {
+            return this.exploreModeIndex == 3
         },
         exploreModeCode() {
             return this.exploreModes[this.exploreModeIndex]
+        },
+        exploreModeLength() {
+            return this.exploreModes.length 
         }
     },
     actions: {
@@ -70,6 +78,16 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.artistCategoryViewShow = false
             EventBus.emit("artistCategory-resetScroll")
         },
+        toggleRadioCategoryView() {
+            this.radioCategoryViewShow = !this.radioCategoryViewShow
+            if(!this.radioCategoryViewShow) {
+                EventBus.emit("radioCategory-resetScroll")
+            }
+        },
+        hideRadioCategoryView() {
+            this.radioCategoryViewShow = false
+            EventBus.emit("radioCategory-resetScroll")
+        },
         showPlayingView() {
             this.playingViewShow = true
         },
@@ -92,14 +110,25 @@ export const useAppCommonStore = defineStore('appCommon', {
             if(ipcRenderer) ipcRenderer.send('app-max')
         },
         setExploreMode(index) {
-            if(!index || index < 0  || index > 2) index = 0
-            this.exploreModeIndex = index
+            if(!index || index < 0) index = 0
+            this.exploreModeIndex = index % this.exploreModeLength
+        },
+        nextExploreMode() {
+            const length = this.exploreModeLength
+            if(this.exploreModeIndex == length - 2) {
+                this.setExploreMode(0)
+            } else {
+                this.setExploreMode(this.exploreModeIndex + 1)
+            }
         },
         setArtistExploreMode() {
             this.setExploreMode(1)
         },
-        setUserExploreMode() {
+        setRadioExploreMode() {
             this.setExploreMode(2)
+        },
+        setUserHomeExploreMode() {
+            this.setExploreMode(3)
         },
         showPlayNotification() {
             this.playNotificationShow = true
@@ -164,6 +193,9 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.hideCommonCtxMenu()
             this.hideAddToListSubmenu()
             this.hideArtistListSubmenu()
+        },
+        setExitToHomeBtnVisible(value) {
+            this.exitToHomeBtnShow = value
         }
     }
 })

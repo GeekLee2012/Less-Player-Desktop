@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
 import { useUserProfileStore } from '../store/userProfileStore';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
+import { Playlist } from '../../common/Playlist';
 
 const props = defineProps({
     data: Array,
@@ -29,25 +30,26 @@ const { addRecentPlaylist } = useUserProfileStore()
 const visitItem = (item) => {
     const { checkbox } = props
     if(checkbox) return
-    const { id, platform, isFMRadio, isRadioType } = item
+    const { id, platform } = item
     const platformValid = isPlatformValid(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
-    if(isFMRadio) { //FM广播
-        const track = Track.fromChannel(item.channel, true)
+    if(Playlist.isFMRadioType(item)) { //FM广播电台
+        const track = item.data[0]
         addTrack(track)
         playTrack(track)
-    } else if(isRadioType) { //音乐电台歌单
+    } else if(Playlist.isNormalRadioType(item)) { //普通歌单电台
         nextRadioTrack(platform, id)
-    } else if(visitable) { //普通歌单
+    } else if(visitable) { //其他，如普通歌单、主播电台歌单等
         const url = '/' + exploreModeCode.value + '/playlist/' + platform + "/" + id
         router.push(url)
     }
 }
 
 const playItem = (item) => {
-    const { id, platform, isFMRadio, isRadioType } = item
-    if(isFMRadio || isRadioType) {
+    const { id, platform } = item
+    if(Playlist.isNormalRadioType(item) 
+        || Playlist.isFMRadioType(item)) {
         visitItem(item)
         return 
     }
@@ -60,8 +62,8 @@ const playItem = (item) => {
 
 //目前以加入当前播放列表为参考标准
 const traceRecentPlay = (playlist) => {
-    const { id, platform, title, cover } = playlist
-    addRecentPlaylist(id, platform, title, cover)
+    const { id, platform, title, cover, type } = playlist
+    addRecentPlaylist(id, platform, title, cover, type)
 }
 
 const playAll = (playlist) => {

@@ -5,8 +5,10 @@ import { KuWo } from '../../vendor/kuwo';
 import { KuGou } from '../../vendor/kugou';
 import { DouBan } from '../../vendor/douban';
 import { RadioCN } from '../../vendor/radiocn';
+import { Qingting } from '../../vendor/qingting';
 import { LocalMusic } from '../../vendor/localmusic';
 import { useAppCommonStore } from './appCommonStore';
+import { Ximalaya } from '../../vendor/ximalaya';
 
 //音乐平台
 const allPlatforms = [
@@ -46,16 +48,29 @@ const allPlatforms = [
         online: true
     },
     { 
+        code: Qingting.CODE,
+        name: '蜻蜓FM',
+        online: true
+    },
+    { 
+        code: Ximalaya.CODE,
+        name: '喜马拉雅FM',
+        online: true
+    },
+    { 
         code: LocalMusic.CODE,
         name: '本地歌曲',
         online: false
     }
 ]
 
+const radioCount = 3
 const playlistPlatforms = allPlatforms.slice(1)
+playlistPlatforms.splice(5, radioCount)
 const artistPlatforms = allPlatforms.slice(1, 5)
-const userhomePlatforms = allPlatforms.slice(0, 7)
-const onlinePlatformFilter = allPlatforms.slice(0, allPlatforms.length - 2)
+const radioPlatforms = [ allPlatforms[2], allPlatforms[6], allPlatforms[7], allPlatforms[8] ]
+const userhomePlatforms = allPlatforms.slice(0, allPlatforms.length - 1)
+const onlinePlatformFilter = allPlatforms.slice(0, allPlatforms.length - (radioCount + 1))
 
 const venders = {
     qq: QQ, 
@@ -64,6 +79,8 @@ const venders = {
     kugou: KuGou,
     douban: DouBan,
     radiocn: RadioCN,
+    qingting: Qingting,
+    ximalaya: Ximalaya,
     local: LocalMusic
 }
 
@@ -78,8 +95,9 @@ export const usePlatformStore = defineStore('platform', {
     getters: {
         platforms() {
             return () => {
-                const { isArtistMode, isUserHomeMode } = useAppCommonStore()
+                const { isArtistMode, isRadioMode, isUserHomeMode } = useAppCommonStore()
                 if(isArtistMode) return artistPlatforms
+                if(isRadioMode) return radioPlatforms
                 if(isUserHomeMode) return userhomePlatforms
                 return playlistPlatforms
             }
@@ -129,25 +147,36 @@ export const usePlatformStore = defineStore('platform', {
             return this.getVender(this.currentPlatformCode)
         },
         isQQ(platform) {
-            return this.isPlatformValid(platform) && platform.trim() == QQ.CODE
+            if(!this.isPlatformValid(platform)) return false
+            return platform.trim() == QQ.CODE
         },
         isNetEase(platform) {
-            return this.isPlatformValid(platform) && platform.trim() == NetEase.CODE
+            if(!this.isPlatformValid(platform)) return false
+            return platform.trim() == NetEase.CODE
         },
         isKuWo(platform) {
-            return this.isPlatformValid(platform) && platform.trim() == KuWo.CODE
+            if(!this.isPlatformValid(platform)) return false
+            return platform.trim() == KuWo.CODE
         },
         isKuGou(platform) {
-            return this.isPlatformValid(platform) && platform.trim() == KuGou.CODE
+            if(!this.isPlatformValid(platform)) return false
+            return platform.trim() == KuGou.CODE
         },
         isDouBan(platform) {
-            return this.isPlatformValid(platform) && platform.trim() == DouBan.CODE
+            if(!this.isPlatformValid(platform)) return false
+            return platform.trim() == DouBan.CODE
+        },
+        isLocalMusic(platform) {
+            if(!this.isPlatformValid(platform)) return false
+            return platform.trim() == LocalMusic.CODE
         },
         isArtistDetailVisitable(platform) {
-            return this.isPlatformValid(platform) 
+            if(!this.isPlatformValid(platform)) return false
+            return !this.isLocalMusic(platform)
         },
         isAlbumDetailVisitable(platform) {
-            return !this.isDouBan(platform)
+            if(!this.isPlatformValid(platform)) return false
+            return !this.isDouBan(platform) || !this.isLocal(platform)
         },
         isPlatformValid(platform) {
             return platform && platform.trim().length > 0

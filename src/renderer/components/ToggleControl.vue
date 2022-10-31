@@ -1,18 +1,15 @@
 <script setup>
-import { ref } from 'vue';
+import { toRef } from 'vue';
 const props = defineProps({
-    value: Boolean
+    value: Boolean,
+    disabled: Boolean
 })
 
-const active = ref(props.value || false)
-
-const toggle = () => {
-    active.value = !active.value
-}
+const active = toRef(props, 'value')
 </script>
 
 <template>
-    <div class="toggle-ctl" :class="{ 'toggle-ctl-active': active }" @click.stop="toggle">
+    <div class="toggle-ctl" :class="{ 'toggle-ctl-active': active }" @click.stop="">
         <div class="thumb"></div>
     </div>
 </template>

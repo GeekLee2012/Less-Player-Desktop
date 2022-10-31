@@ -1,9 +1,10 @@
-const { opendirSync, readFileSync, statSync } = require('fs');
+const { opendirSync, readFileSync, statSync, writeFileSync } = require('fs');
 const { opendir, rmdir } = require('fs/promises');
 const path = require('path');
 const mm = require('music-metadata');
 const jschardet = require('jschardet');
 const iconv = require('iconv-lite');
+const CryptoJS = require('crypto-js');
 
 const FILE_PREFIX = 'file:///'
 
@@ -16,7 +17,7 @@ const isExtentionValid = (name, exts) => {
     return false
 }
 
-const scanDir = async (dir, exts) => {
+const scanDirTracks = async (dir, exts) => {
     try {
         const result = { path: dir, data: [] }
         const list = await opendir(dir)
@@ -78,9 +79,10 @@ async function parseTracks(audioFiles) {
                 }
             }
 
+            const hash = CryptoJS.MD5(title + artist.name + album.name + duration).toString()
             //TODO
             const track = {
-                id: 0, 
+                id: hash, 
                 platform: 'local',
                 title,
                 artist, 
@@ -89,7 +91,8 @@ async function parseTracks(audioFiles) {
                 cover: coverData
             }
             track.url = FILE_PREFIX + audioFile
-            tracks.push(track)
+            const index = tracks.findIndex(item => track.id == item.id)
+            if(index < 0) tracks.push(track)
         } catch(error) {
             console.log(error)
         }
@@ -97,10 +100,11 @@ async function parseTracks(audioFiles) {
     return tracks
 }
 
+//TODO 中文编码容易乱码
 function decodeText(text) {
     try {
         const detect =jschardet.detect(text)
-        console.log(detect)
+        //console.log(detect)
         if(!detect.encoding) return text
         const encoding = detect.encoding.trim().toLowerCase()
         if('windows-1252' === encoding) {
@@ -118,9 +122,10 @@ function decodeText(text) {
     return text
 }
 
-function readText(file) {
+function readText(file, encoding) {
     try {
-        const data = readFileSync(file)
+        const data = readFileSync(file, { encoding })
+        if(encoding) return data.toString()
         return decodeText(data.toString())
     } catch(error) {
         console.log(error)
@@ -128,6 +133,16 @@ function readText(file) {
     return null
 }
 
+function writeText(file, text) {
+    try {
+        writeFileSync(file, text)
+        return true
+    } catch(error) {
+        console.log(error)
+    }
+    return false
+}
+ 
 const ALPHABET_NUMS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz01234567890'
 
 /** 随机字符串
@@ -149,9 +164,10 @@ const randomTextWithinAlphabetNums = (len) => {
 }
 
 module.exports = { 
-    scanDir, 
+    scanDirTracks, 
     parseTracks, 
     readText, 
+    writeText,
     FILE_PREFIX,
     ALPHABET_NUMS, 
     randomText, 

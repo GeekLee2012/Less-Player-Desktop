@@ -2,11 +2,11 @@
 import { onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
-import { usePlaylistSquareStore } from '../store/playlistSquareStore';
-import PlaylistCategoryBar from '../components/PlaylistCategoryBar.vue';
-import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
+import RadioCategoryBar from '../components/RadioCategoryBar.vue';
+import { useRadioSquareStore } from '../store/radioSquareStore';
+import PlaylistsControl from '../components/PlaylistsControl.vue';
 
 const squareContentRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -14,14 +14,16 @@ const back2TopBtnRef = ref(null)
 //全部分类
 const categories = reactive([])
 const orders = reactive([])
-const playlists = reactive([])
+const radios = reactive([])
 const pagination = { offset: 0, limit: 35, page: 1 }
 let markScrollTop = 0
 
-const { currentPlatformCode, currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
+const { currentPlatformCode, currentCategoryCode, 
+    currentOrder, multiSelectMode, 
+    currentCategoryItems } = storeToRefs(useRadioSquareStore())
 const { currentVender, currentPlatformCategories, putCategories,
-    putOrders, currentPlatformOrders } = usePlaylistSquareStore()
-const { isPlaylistMode } = storeToRefs(useAppCommonStore())
+    putOrders, currentPlatformOrders, setMultiSelectMode } = useRadioSquareStore()
+const { isRadioMode } = storeToRefs(useAppCommonStore())
 
 const isLoadingCategories = ref(true)
 const isLoadingContent = ref(true)
@@ -35,7 +37,7 @@ const setLoadingContent = (value) => {
 }
 
 const resetPagination = () => {
-    playlists.length = 0
+    radios.length = 0
     pagination.offset = 0
     pagination.page = 1
 }
@@ -45,6 +47,7 @@ const nextPage = () =>  {
     pagination.page = pagination.page + 1
 }
 
+//TODO
 const loadCategories = () => {
     categories.length = 0
     orders.length = 0
@@ -55,21 +58,23 @@ const loadCategories = () => {
     if(!cachedCates) {
         const vender = currentVender()
         if(!vender) return 
-        vender.categories().then(result => {
-            putCategories(result.platform, result.data)
-            //TODO
+        vender.anchorRadioCategories().then(result => {
+            const multiSelectMode = (result.multiMode === true)
+            setMultiSelectMode(multiSelectMode)
+            putCategories(result.platform, { data: result.data, multiSelectMode })
             categories.push(...result.data)
             if(result.orders) {
                 putOrders(result.platform, result.orders)
                 orders.push(...result.orders)
             }
-            EventBus.emit('playlistCategory-update')
+            EventBus.emit('radioCategory-update')
             setLoadingCategories(false)
         })
     } else {
-        categories.push(...cachedCates)
+        setMultiSelectMode(cachedCates.multiSelectMode)
+        categories.push(...cachedCates.data)
         if(cachedOrders) orders.push(...cachedOrders)
-        EventBus.emit('playlistCategory-update')
+        EventBus.emit('radioCategory-update')
         setLoadingCategories(false)
     }
 }
@@ -78,16 +83,16 @@ const loadContent = (noLoadingMask) => {
     const vender = currentVender()
     if(!vender) return
     if(!noLoadingMask) setLoadingContent(true)
-    const cate = currentCategoryCode.value
+    const cate = multiSelectMode.value ? currentCategoryItems.value : currentCategoryCode.value
     const offset = pagination.offset
     const limit = pagination.limit
     const page = pagination.page
     const platform = currentPlatformCode.value
     const order = currentOrder.value.value
-    vender.square(cate, offset, limit, page, order).then(result => {
+    vender.anchorRadioSquare(cate, offset, limit, page, order).then(result => {
         if(platform != result.platform) return 
         if(cate != result.cate) return 
-        playlists.push(...result.data)
+        radios.push(...result.data)
         setLoadingContent(false)
     })
 }
@@ -155,24 +160,24 @@ const refreshData = () => {
 }
 
 watch(currentPlatformCode, (nv, ov) => {
-    if(!isPlaylistMode.value) return
+    if(!isRadioMode.value) return
     resetCommom()
     loadCategories()
 })
 
-EventBus.on("playlistSquare-refresh", refreshData)
+EventBus.on("radioSquare-refresh", refreshData)
 </script>
 
 <template>
-    <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
-        <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories"></PlaylistCategoryBar>
-        <PlaylistsControl :data="playlists" :loading="isLoadingContent"></PlaylistsControl>
+    <div class="radio-square-view" ref="squareContentRef" @scroll="onScroll">
+        <RadioCategoryBar :data="categories" :loading="isLoadingCategories"></RadioCategoryBar>
+        <PlaylistsControl :data="radios" :loading="isLoadingContent"></PlaylistsControl>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 
 <style scoped>
-.playlist-square-view {
+.radio-square-view {
     padding: 25px 33px 15px 33px;
     overflow: auto;
 }

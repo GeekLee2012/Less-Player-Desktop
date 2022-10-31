@@ -3,12 +3,15 @@ const props = defineProps({
     data: Array,
     artistVisitable: Boolean,
     albumVisitable: Boolean,
+    deleteFn: Function,
     dataType: Number,
     checkbox: Boolean,
     checkedAll: Boolean,
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function,
-    loading: Boolean
+    loading: Boolean,
+    useExtra1: Boolean,
+    useExtra2: Boolean
 })
 </script>
 
@@ -20,6 +23,7 @@ const props = defineProps({
                 :artistVisitable="artistVisitable"
                 :albumVisitable="albumVisitable"
                 :dataType="dataType"
+                :deleteFn="deleteFn"
                 :checkbox="checkbox"
                 :checked="checkedAll"
                 :ignoreCheckAllEvent="ignoreCheckAllEvent"

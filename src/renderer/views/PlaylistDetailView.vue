@@ -15,7 +15,7 @@ import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
+import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
 
@@ -30,7 +30,7 @@ const props = defineProps({
 })
 
 const detail = reactive({})
-const listSize = ref(0)
+const listSizeText = ref("0")
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
 let offset = 0, page = 1, limit = 1000
@@ -41,48 +41,61 @@ const setLoading = (value) => {
     isLoading.value = value
 }
 
+const updateListSizeText = () => {
+    const total = detail.total
+    const length = detail.data.length
+    const text = total > length ? `${length} / ${total}` : length
+    listSizeText.value = text
+}
+
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', about: '',data: [] })
     offset = 0
     page = 1
     detail.total = 0
-    listSize.value = detail.data.length
+    updateListSizeText()
 }
 
 const nextPage = () =>  {
     if(detail.data.length >= detail.total) return false
+    //const totalPage = Math.ceil(detail.total * 1.0 / limit)
+    //if(page == totalPage) return false
     offset = page * limit
     page = page + 1
     return true
 }
 
-const loadContent = () => {
-    setLoading(true)
-    checkFavourite()
+const loadContent = (noLoadingMask) => {
+    if(!noLoadingMask) setLoading(true)
+    checkFavorite()
     
     const vender = getVender(props.platform)
     if(!vender) return 
     vender.playlistDetail(props.id, offset, limit, page)
         .then(result => {
-        if(page > 1) {
-            result.data.unshift(...detail.data)
+        if(!result.data || result.data.length < 1) {
+            page = page - 1
+            offset = page * limit
+            return 
         }
+        if(page > 1) result.data.unshift(...detail.data)
+        if(!result.total) detail.total = 0
         Object.assign(detail, result)
-        listSize.value = detail.data.length
+        updateListSizeText()
         setLoading(false)
     })
 }
 
 const loadMoreContent = () => {
     if(nextPage()) {
-        loadContent()
+        loadContent(true)
     }
 }
 
 //目前以加入当前播放列表为参考标准
 const traceRecentPlay = () => {
-    const { id, platform, title, cover } = detail
-    addRecentPlaylist(id, platform, title, cover)
+    const { id, platform, title, cover, type } = detail
+    addRecentPlaylist(id, platform, title, cover, type)
 }
 
 const playAll = () => {
@@ -98,23 +111,23 @@ const addAll = (text) => {
 }
 
 //TODO
-const { addFavouritePlaylist, removeFavouritePlaylist, isFavouritePlaylist } = useUserProfileStore()
-const favourited = ref(false)
-const toggleFavourite = () => {
-    favourited.value = !favourited.value
+const { addFavoritePlaylist, removeFavoritePlaylist, isFavoritePlaylist } = useUserProfileStore()
+const favorited = ref(false)
+const toggleFavorite = () => {
+    favorited.value = !favorited.value
     let text = "歌单收藏成功！"
-    if(favourited.value) {
+    if(favorited.value) {
         const { title, cover } = detail
-        addFavouritePlaylist(props.id, props.platform, title, cover)
+        addFavoritePlaylist(props.id, props.platform, title, cover)
     } else {
-        removeFavouritePlaylist(props.id, props.platform)
+        removeFavoritePlaylist(props.id, props.platform)
         text = "歌单已取消收藏！"
     }
     showToast(text)
 }
 
-const checkFavourite = () => {
-    favourited.value = isFavouritePlaylist(props.id, props.platform)
+const checkFavorite = () => {
+    favorited.value = isFavoritePlaylist(props.id, props.platform)
 }
 
 const markScrollState = () => {
@@ -129,7 +142,7 @@ const resetScrollState = () => {
 const restoreScrollState = () => {
     if(markScrollTop < 1) return 
     playlistDetailRef.value.scrollTop = markScrollTop
-    checkFavourite()
+    checkFavorite()
 }
 
 const scrollToLoad = () => {
@@ -168,7 +181,7 @@ onMounted(() => {
     loadContent()
 })
 
-EventBus.on("refresh-favourite", checkFavourite)
+EventBus.on("refresh-favorite", checkFavorite)
 </script>
 
 <template>
@@ -183,8 +196,8 @@ EventBus.on("refresh-favourite", checkFavourite)
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll"  :rightAction="() => addAll()" class="btn-spacing">
                     </PlayAddAllBtn>
-                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFavourite">
-                    </FavouriteShareBtn>
+                    <FavoriteShareBtn :favorited="favorited" :leftAction="toggleFavorite">
+                    </FavoriteShareBtn>
                 </div>
             </div>
             <div class="right" v-show="isLoading">
@@ -200,11 +213,14 @@ EventBus.on("refresh-favourite", checkFavourite)
             </div>
         </div>
         <div class="center">
-            <div class="list-title">歌曲({{ listSize }})</div>
+            <div class="list-title">
+                <div class="size-text" v-show="!isLoading">列表({{ listSizeText }})</div>
+                <div class="loading-mask" v-show="isLoading" style="text-align: left;width: 150px; height: 28px; display: inline-block;"></div>
+            </div>
             <SongListControl :data="detail.data" 
                 :artistVisitable="true" 
                 :albumVisitable="true" 
-                :loading="isLoading">
+                :loading="isLoading" >
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -284,7 +300,6 @@ EventBus.on("refresh-favourite", checkFavourite)
 }
 
 #playlist-detail .list-title {
-    margin-left: 3px;
     margin-bottom: 3px;
     text-align: left;
     font-size: 16px;
@@ -292,5 +307,9 @@ EventBus.on("refresh-favourite", checkFavourite)
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
+}
+
+#playlist-detail .list-title .size-text {
+    margin-left: 3px;
 }
 </style>

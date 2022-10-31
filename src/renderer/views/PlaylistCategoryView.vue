@@ -5,15 +5,23 @@ import EventBus from '../../common/EventBus';
 import { reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 
-const { currentCategoryItem } = storeToRefs(usePlaylistSquareStore())
-const { currentCategory, updateCurrentCategoryItem } = usePlaylistSquareStore()
+const { currentCategoryItem, currentOrder } = storeToRefs(usePlaylistSquareStore())
+const { currentPlatformCategories, updateCurrentCategoryItem,
+    currentPlatformOrders, updateCurrentOrder } = usePlaylistSquareStore()
 const { hidePlaylistCategoryView } = useAppCommonStore()
-const category = reactive([])
+const categories = reactive([])
+const orders = reactive([])
 
-const updateCategory = () => {
-    category.length = 0
-    const cached = currentCategory() || []
-    category.push(...cached)
+const updateCategories = () => {
+    categories.length = 0
+    const cached = currentPlatformCategories() || []
+    categories.push(...cached)
+}
+
+const updateOrders = () => {
+    orders.length = 0
+    const cached = currentPlatformOrders() || []
+    orders.push(...cached)
 }
 
 const resetScroll = () => {
@@ -29,6 +37,13 @@ const isDiffCate = (item, row, col) => {
         || prevCate.col != col) : true
 }
 
+const isDiffOrder = (item, index) => {
+    const prevOrder = currentOrder.value
+    return prevOrder ? (
+        prevOrder.value != item.value
+        || prevOrder.index != index) : true
+}
+
 const visitCateItem = (item, row, col) => {
     const needRefresh = isDiffCate(item, row, col)
     updateCurrentCategoryItem(item, row, col)
@@ -37,16 +52,22 @@ const visitCateItem = (item, row, col) => {
         //prevCate = { item, row, col }
         hidePlaylistCategoryView()
     }
-    
 }
 
-EventBus.on('playlistCategory-update', ()=> {
-    updateCategory()
-})
+const visitByOrder = (item, index) => {
+    const needRefresh = isDiffOrder(item, index)
+    updateCurrentOrder(item.key, item.value, index)
+    if(needRefresh) {
+        EventBus.emit("playlistSquare-refresh")
+        hidePlaylistCategoryView()
+    }
+}
 
-EventBus.on('playlistCategory-resetScroll', ()=> {
-    resetScroll()
+EventBus.on('playlistCategory-update', () => {
+    updateCategories()
+    updateOrders()
 })
+EventBus.on('playlistCategory-resetScroll', resetScroll)
 </script>
 
 <template>
@@ -56,7 +77,17 @@ EventBus.on('playlistCategory-resetScroll', ()=> {
             <div class="fl-item" v-html="currentCategoryItem.data.key"></div>
         </div>
         <div class="center">
-            <div v-for="(cate, row) in category" class="fl-row">
+            <div class="fl-row" v-show="orders && orders.length > 0">
+                <div class="cate-title">排序</div>
+                <div class="cate-item-wrap">
+                    <div v-for="(item, index) in orders" class="fl-item" 
+                        :class="{ current : (currentOrder.index == index) }"
+                        @click="visitByOrder(item, index)"
+                        v-html="item.key" >
+                    </div>
+                </div>
+            </div>
+            <div v-for="(cate, row) in categories" class="fl-row">
                 <div class="cate-title">{{ cate.name }}</div>
                 <div class="cate-item-wrap">
                     <div v-for="(item, col) in cate.data" class="fl-item" 

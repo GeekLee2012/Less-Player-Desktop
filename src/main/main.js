@@ -1,13 +1,12 @@
-// Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain, 
   Menu, dialog, powerMonitor, 
   shell, powerSaveBlocker, Tray,
   globalShortcut } = require('electron')
-const { isMacOS, useCustomTrafficLight, isDevEnv, 
-  USER_AGENT, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
+const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv, 
+  USER_AGENT, USER_AGENT_APPLE, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
 const path = require('path')
-const { scanDir, parseTracks, readText, FILE_PREFIX, 
-  randomTextWithinAlphabetNums } = require('./common') 
+const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX, 
+  randomTextWithinAlphabetNums } = require('./common')
 
 //电源模式
 let powerSaveBlockerId = -1, appTray = null
@@ -88,17 +87,13 @@ const registryGlobalListeners = () => {
     app.quit()
   }).on('app-min', ()=> {
     const win = app.mainWin
-    //win.setFullScreen(false)
-    win.minimize()
+    if(win.isFullScreen()) win.setFullScreen(false)
+    if(win.isNormal()) win.minimize()
   }).on('app-max', ()=> {
     const win = app.mainWin
-    if(win.isMaximized()) {
-      win.unmaximize()
-      //win.setFullScreen(false)
-    } else {
-      win.maximize()
-      //win.setFullScreen(true)
-    }
+    const isFullScreen = !win.isFullScreen()
+    win.setFullScreen(isFullScreen)
+    sendToRenderer('app-max', isFullScreen)
   }).on('app-suspension', (e, data)=> {
     if(data === true) {
       powerSaveBlockerId = powerSaveBlocker.start('prevent-app-suspension')
@@ -130,16 +125,16 @@ const registryGlobalListeners = () => {
     }
   })
 
-  ipcMain.handle('open-dirs', async (e, ...args)=> {
+  ipcMain.handle('open-audio-dirs', async (event, ...args) => {
     const result = await dialog.showOpenDialog(app.mainWin, {
       title: '请选择文件夹',
       properties: [ 'openDirectory' ]
     })
     if(result.canceled) return null
-    return scanDir(result.filePaths[0], AUDIO_EXTS)
+    return scanDirTracks(result.filePaths[0], AUDIO_EXTS)
   })
 
-  ipcMain.handle('open-files', async (e, ...args)=> {
+  ipcMain.handle('open-audios', async (event, ...args) => {
     const result = await dialog.showOpenDialog(app.mainWin, {
       title: '请选择文件',
       filters: [
@@ -151,7 +146,7 @@ const registryGlobalListeners = () => {
     return parseTracks(result.filePaths)
   })
 
-  ipcMain.handle('open-image', async (e, ...args)=> {
+  ipcMain.handle('open-image', async (event, ...args) => {
     const result = await dialog.showOpenDialog(app.mainWin, {
       title: '请选择文件',
       filters: [
@@ -162,11 +157,49 @@ const registryGlobalListeners = () => {
     return result.filePaths.map(item => (FILE_PREFIX + item))
   })
 
-  ipcMain.handle('lyric-load', async (e, ...args)=> {
+  ipcMain.handle('lyric-load', async (event, ...args) => {
     const arg = args[0].trim()
     const index = arg.lastIndexOf('.')
     const lyricFile = arg.substring(0, index) + ".lrc"
     return readText(lyricFile)
+  })
+
+  ipcMain.handle('invoke-vender', async (event, ...args) => {
+    return invokeVender(args[0], args[1], args[2])
+  })
+
+  ipcMain.handle('save-file', async (event, ...args) => {
+    const { title, name, data } = args[0]
+    const result = await dialog.showSaveDialog(app.mainWin, {
+      title: (title || '文件保存'),
+      defaultPath: (name ? name : null),
+    })
+    if(result.canceled) return false
+    return writeText(result.filePath, data)
+  })
+
+  ipcMain.handle('open-backup-file', async (event, ...args) => {
+    const result = await dialog.showOpenDialog(app.mainWin, {
+      title: '请选择备份文件',
+      filters: [ { name: 'JSON文件', extensions: [ '.json' ]} ],
+      properties: [ 'openFile']
+    })
+    if(result.canceled) return null
+    const filePath = result.filePaths[0]
+    const data = readText(filePath, 'utf8')
+    return { filePath, data }
+  })
+
+  ipcMain.handle('show-confirm', async (event, ...args) => {
+    const { title, msg } = args[0]
+    const result = await dialog.showMessageBox(app.mainWin, {
+      message: msg,
+      type: "warning",
+      title: (title || '确认'),
+      buttons: [ "确定", "取消" ],
+      cancelId: 1
+    })
+    return result.response == 0
   })
 }
 
@@ -328,18 +361,10 @@ const overrideRequest = (details) => {
   if(url.includes("qq.com")) {
     origin = "https://y.qq.com/"
     referer = origin
-    /*
-    cookie = 	"fqm_pvqid=336b8c0b-9988-4607-a98e-9242dcd55f0e"
-      + "&fqm_sessionid=0fd12ef8-5cd6-409c-8ef0-b5b601e99737"
-      + "&pac_uid=0_32f39be6c9607"
-      + "&pgv_info=ssid=s7351377509"
-      + "&pgv_pvid=357794096"
-      + "&ts_last=y.qq.com/n/ryqq/player"
-      + "&ts_uid=2524044556"
-    */
   } else if(url.includes("music.163.com")) {
     origin = "https://music.163.com/"
     referer = origin
+    //if(url.includes("/dj/program/listen")) referer = null
   } else if(url.includes("kuwo")) {
     const CSRF = randomTextWithinAlphabetNums(11).toUpperCase()
     origin = "https://www.kuwo.cn/"
@@ -349,7 +374,7 @@ const overrideRequest = (details) => {
   } else if(url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
-    if(url.includes("mac.kugou.com/")) userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16) AppleWebKit/605.1.15 (KHTML, like Gecko)'
+    if(url.includes("mac.kugou.com")) userAgent = USER_AGENT_APPLE
   } else if(url.includes("douban")) {
     const bid = randomTextWithinAlphabetNums(11)
     origin = "https://fm.douban.com/"
@@ -358,6 +383,12 @@ const overrideRequest = (details) => {
     //cookie = 'bid=' + bid + '; __utma=30149280.1685369897.1647928743.1648005141.1648614477.3; __utmz=30149280.1648005141.2.2.utmcsr=cn.bing.com|utmccn=(referral)|utmcmd=referral|utmcct=/; _pk_ref.100001.f71f=%5B%22%22%2C%22%22%2C1650723346%2C%22https%3A%2F%2Fmusic.douban.com%2Ftag%2F%22%5D; _pk_id.100001.f71f=5c371c0960a75aeb.1647928769.4.1650723346.1648618102.; ll="118306"; _ga=GA1.2.1685369897.1647928743; douban-fav-remind=1; viewed="2995812"; ap_v=0,6.0'
   } else if(url.includes("radio.cn") || url.includes("cnr.cn")) {
     origin = "http://www.radio.cn/"
+    referer = origin
+  } else if(url.includes("qingting")) {
+    origin = "https://www.qingting.fm/"
+    referer = origin
+  } else if(url.includes("ximalaya")) {
+    origin = " https://www.ximalaya.com"
     referer = origin
   }
 

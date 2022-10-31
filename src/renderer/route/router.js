@@ -1,6 +1,7 @@
 import { createRouter,  createWebHashHistory } from 'vue-router';
 import PlaylistSquareView from '../views/PlaylistSquareView.vue';
 import ArtistSquareView from '../views/ArtistSquareView.vue';
+import RadioSquareView from '../views/RadioSquareView.vue';
 import LocalMusicView from '../views/LocalMusicView.vue';
 import SettingView from '../views/SettingView.vue';
 import UserHomeView from '../views/UserHomeView.vue';
@@ -12,6 +13,8 @@ import CustomPlaylistEditView from '../views/CustomPlaylistEditView.vue';
 import CustomPlaylistDetailView from '../views/CustomPlaylistDetailView.vue';
 import UserInfoEditView from '../views/UserInfoEditView.vue'; 
 import BatchActionView from '../views/BatchActionView.vue'; 
+import DataBackupView from '../views/DataBackupView.vue';
+import DataRestoreView from '../views/DataRestoreView.vue';
 
 const routes = [ 
     { //默认
@@ -23,6 +26,9 @@ const routes = [
     },{ //歌手广场
         path: '/artists/square/:platform', 
         component: ArtistSquareView 
+    },{ //电台广场
+        path: '/radios/square/:platform', 
+        component: RadioSquareView 
     },
     {  //本地歌曲
         path: '/local', 
@@ -79,6 +85,14 @@ const routes = [
         path: '/:exploreMode/batch/:source/:id',
         props: true, 
         component: BatchActionView 
+    },
+    {  //数据备份
+        path: '/data/backup',
+        component: DataBackupView 
+    },
+    {  //数据还原
+        path: '/data/restore',
+        component: DataRestoreView 
     },
 ]
 

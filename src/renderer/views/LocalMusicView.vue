@@ -1,37 +1,63 @@
+<script>
+//定义名称，方便用于<keep-alive>
+export default {
+    name: 'LocalMusicView'
+}
+</script>
+
 <script setup>
+import { onMounted, ref } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import { usePlayStore } from '../store/playStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+import { useAppCommonStore } from '../store/appCommonStore';
+import SongListControl from '../components/SongListControl.vue';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
 
+const router = useRouter()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { localDirs, localTracks, isLoading } = storeToRefs(useLocalMusicStore())
 const { addFolders, addFiles, resetAll, removeItem } = useLocalMusicStore()
+const { showToast, hideAllCtxMenus } = useAppCommonStore()
+const localMusicRef = ref(null)
+const back2TopBtnRef = ref(null)
 
 const playAll = () => {
     if(noTracks()) return
     resetQueue()
-    addAll()
+    addAll("即将为您播放全部！")
     playNextTrack()
 }
 
-const addAll = () => {
+const addAll = (text) => {
     if(noTracks()) return
     addTracks(localTracks.value)
+    showToast(text || "歌曲已全部添加！")
 }
 
-const batchDelete = () => {
-   //TODO
+const visitBatchActionView = () => {
+    router.push("/playlists/batch/local/0")
 }
 
 const noTracks = () => (localTracks.value.length < 1)
 
+const resetBack2TopBtn = () => {
+    back2TopBtnRef.value.setScrollTarget(localMusicRef.value)
+}
+
+const onScroll = () => {
+    hideAllCtxMenus()
+}
+
+onMounted(resetBack2TopBtn)
 </script>
 
 <template>
-    <div id="local-music">
+    <div id="local-music" ref="localMusicRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" src="/default_cover.png" />
@@ -40,12 +66,13 @@ const noTracks = () => (localTracks.value.length < 1)
                 <div class="title">本地歌曲</div>
                 <div class="about">
                     <p>目前支持的音频格式有：.mp3、.flac、.ogg、.wav、.aac、.m4a</p>
+                    <p>最近播放功能，暂时不支持记录本地歌曲</p>
                     <p>此功能仅供试用体验，暂时还没有完善~</p>
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playAll" :rightAction="addAll" ></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()" ></PlayAddAllBtn>
                     <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="spacing"></AddFolderFileBtn>
-                    <BatchActionBtn :deleteBtn="true" :leftAction="batchDelete" :rightAction="resetAll" class="spacing"></BatchActionBtn>
+                    <BatchActionBtn :deleteBtn="true" :leftAction="visitBatchActionView" :rightAction="resetAll" class="spacing"></BatchActionBtn>
                 </div>
             </div>
         </div>
@@ -56,16 +83,15 @@ const noTracks = () => (localTracks.value.length < 1)
             <div class="loading-tip" v-show="isLoading"><p>添加歌曲中，请稍候......</p></div>
             -->
             <div class="songlist">
-                <div v-for="(item, index) in localTracks">
-                    <SongItem :index="index" :data="item"
-                        :artistVisiable="false"
-                        :albumVisiable="false" 
-                        :deleteFn="removeItem"
-                        dataType="1" >
-                    </SongItem>
-                </div>
+                <SongListControl :data="localTracks"
+                    :artistVisiable="false"
+                    :albumVisiable="false"
+                    :deleteFn="removeItem"
+                    :dataType="1" >
+                </SongListControl>
             </div>
         </div>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 
@@ -154,7 +180,7 @@ const noTracks = () => (localTracks.value.length < 1)
 #local-music .artist span,
 #local-music .album span {
     cursor: default;
-    color: #eee;
+    color: var(--text-color) !important;
 }
 
 #local-music .songlist .title:hover .delete-btn {

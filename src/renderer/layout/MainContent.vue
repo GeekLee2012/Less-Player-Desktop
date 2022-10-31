@@ -7,8 +7,8 @@ import { useUserProfileStore } from '../store/userProfileStore';
 
 const router = useRouter()
 const { updateCurrentPlatformByCode } = usePlatformStore()
-const { setExploreMode, setArtistExploreMode, setUserExploreMode,
-    hideAllCtxMenus, hidePlayingView, updateCommonCtxItem } = useAppCommonStore()
+const { setExploreMode, setArtistExploreMode, setRadioExploreMode, setUserHomeExploreMode,
+    hideAllCtxMenus, hidePlayingView, updateCommonCtxItem, setExitToHomeBtnVisible } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 
 router.beforeResolve((to, from) => {
@@ -56,8 +56,10 @@ const autoSwitchExploreMode = (to) => {
         setExploreMode(0)
     } else if(path.includes('/artists/')) {
         setArtistExploreMode()
-    } else if(path.includes('/userhome')) {
-        setUserExploreMode()
+    } else if(path.includes('/radios')) {
+        setRadioExploreMode()
+    }  else if(path.includes('/userhome')) {
+        setUserHomeExploreMode()
     } else {
         //setExploreMode(0)
     }
@@ -71,7 +73,9 @@ const hideRelativeComponents = (to) => {
     updateCommonCtxItem(null)
 }
 
-const excludes = [ 'CustomPlaylistEditView', 'UserInfoEditView', 'BatchActionView' ]
+const excludes = [ 'LocalMusicView', 'CustomPlaylistEditView',
+    'UserInfoEditView', 'BatchActionView', 
+    'DataBackupView', 'DataRestoreView' ]
 </script>
 
 <template>

@@ -91,9 +91,7 @@ defineExpose({
     bottom: 36px;
     right: 15px;
     z-index: 66;
-}
 
-.back2top-btn {
     border: 0.1px solid var(--border-color);
     /* box-shadow: 0px 0px 2px #212121; */
     background: var(--btn-bg);
@@ -112,10 +110,10 @@ defineExpose({
 }
 
 .back2top-btn svg {
-    fill: #fff;
+    fill: #fff !important;
 }
 
 .back2top-btn svg:hover {
-    fill: #fff;
+    fill: #fff !important;
 }
 </style>

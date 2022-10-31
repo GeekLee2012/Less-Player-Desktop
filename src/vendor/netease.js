@@ -2,7 +2,7 @@ import { getDoc, getJson, postJson } from "../common/HttpClient";
 import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
-import { toYmd } from "../common/Times";
+import { toMillis, toYmd } from "../common/Times";
 import { Lyric } from "../common/Lyric";
 import forge from 'node-forge';
 import { Album } from "../common/Album";
@@ -35,14 +35,17 @@ const rsaEncrypt = (src, publicKey, modulus) => {
 const aesEncrypt = (src, secKey, iv) => {
     secKey = CryptoJS.enc.Utf8.parse(secKey)
     iv = CryptoJS.enc.Utf8.parse(iv)
-    return CryptoJS.AES.encrypt(src, secKey, { iv, mode: CryptoJS.mode.CBC })
+    src = CryptoJS.enc.Utf8.parse(src)
+    const buffer = CryptoJS.AES.encrypt(src, secKey, 
+        { iv, mode: CryptoJS.mode.CBC })
+    return buffer.toString()
 }
 
 const weapi = (text) => {
-    if(typeof(text) == 'object')  text = JSON.stringify(text)
+    if(typeof(text) === 'object') text = JSON.stringify(text)
     let secretkey = randomText(CHOICE, 16)
-    let base64Text = aesEncrypt(text, NONCE, IV).toString()
-    const params = aesEncrypt(base64Text, secretkey, IV).toString()
+    let base64Text = aesEncrypt(text, NONCE, IV)
+    const params = aesEncrypt(base64Text, secretkey, IV)
     const encSecKey = rsaEncrypt(secretkey, PUBLIC_KEY, MODULUS)
     return {  params, encSecKey }
 }
@@ -69,9 +72,9 @@ const trackIdsParam = (ids) => {
 const playParam = (id) => {
     return {
         ids: [ id ], 
-        level: 'standard',
-        encodeType: 'aac',
-        csrf_token: ''
+        level: "standard",
+        encodeType: "aac",
+        csrf_token: ""
     }
 }
 
@@ -103,13 +106,15 @@ DEFAULT_CATE.add("全部", '')
 export class NetEase {
     static CODE = 'netease'
     static TOPLIST_CODE = '排行榜'
+    static RADIO_PREFIX = 'DJR_'
 
     //全部分类
     static categories() {
         return new Promise((resolve) => {
             const url = "https://music.163.com/discover/playlist"
             getDoc(url).then(doc => {
-                const result = [ DEFAULT_CATE ]
+                const result = { platform: NetEase.CODE, data: [], orders: [] }
+                result.data.push(DEFAULT_CATE)
 
                 const listEl = doc.querySelectorAll("#cateListBox .f-cb")
                 listEl.forEach(el => {
@@ -120,17 +125,17 @@ export class NetEase {
                         const text = item.textContent
                         category.add(text, text)
                     })
-                    result.push(category)
+                    result.data.push(category)
                 })
-                const firstCate = result[0]
+                const firstCate = result.data[0]
                 firstCate.data.splice(1, 0, { key: '排行榜', value: NetEase.TOPLIST_CODE })
-                resolve({ platform: NetEase.CODE, data: result })
+                resolve(result)
             })
         })
     }
     
     //歌单(列表)广场
-    static square (cate, offset, limit, page) {
+    static square (cate, offset, limit, page, order) {
         if(cate == NetEase.TOPLIST_CODE) return NetEase.toplist(cate, offset, limit, page)
         return new Promise((resolve) => {
             const url = "https://music.163.com/discover/playlist"
@@ -204,6 +209,7 @@ export class NetEase {
 
     //歌单详情
     static playlistDetail(id, offset, limit, page) {
+        if(id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) return NetEase.anchorRadioDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
             const result = new Playlist()
             let url = "https://music.163.com/weapi/v3/playlist/detail"
@@ -223,8 +229,11 @@ export class NetEase {
                     ids.push(track.id)
                 })
 
+                result.total = ids.length
+                const end = Math.min((offset + limit), result.total)
+
                 url = "https://music.163.com/weapi/v3/song/detail"
-                param = trackIdsParam(ids.slice(offset, limit))
+                param = trackIdsParam(ids.slice(offset, end))
                 reqBody = weapi(param)
                 postJson(url, reqBody).then(json => {
                     const songs = json.songs
@@ -242,23 +251,24 @@ export class NetEase {
     }
 
     //歌曲播放详情：url、cover、lyric等
-    static playDetail(id) {
+    static playDetail(id, track) {
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token="
-            const param = playParam(id)
-            const reqBody = weapi(param)
-            postJson(url, reqBody).then(json => {
-                const result = new Track()
-                const song = json.data[0]
-                result.id = song.id
-                result.url = song.url
-                resolve(result)
+            NetEase.resolveAnchorRadio(id, track).then(resolvedId => {
+                const url = "https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token="
+                const param = playParam(resolvedId)
+                const reqBody = weapi(param)
+                postJson(url, reqBody).then(json => {
+                    const result = new Track(id)
+                    const song = json.data[0]
+                    result.url = song.url
+                    resolve(result)
+                })
             })
         })
     }
 
     //歌词
-    static lyric(id) {
+    static lyric(id, track) {
         return new Promise((resolve, reject) => {
             const url = "https://music.163.com/weapi/song/lyric?csrf_token="
             const param = lyricParam(id);
@@ -517,7 +527,7 @@ export class NetEase {
     }
 
     //提取分类
-    static parseCate(cate) {
+    static parseArtistCate(cate) {
         const result = { id: -1, initial: -1 }
         try {
             const source = {
@@ -534,7 +544,7 @@ export class NetEase {
     //歌手(列表)广场
     static artistSquare(cate, offset, limit, page) {
         //提取分类
-        const resolvedCate = NetEase.parseCate(cate)
+        const resolvedCate = NetEase.parseArtistCate(cate)
         //分类ID
         const cateId = parseInt(resolvedCate.id)
         //推荐歌手
@@ -659,4 +669,144 @@ export class NetEase {
         })
     }
 
+    static anchorRadioCategories() {
+        return new Promise((resolve, reject) => {
+            const url = "https://music.163.com/discover/djradio"
+            getDoc(url).then(doc => {
+                const result = { platform: NetEase.CODE, data: [], orders: [] }
+                const category = new Category("分类")
+                result.data.push(category)
+
+                const listEl = doc.querySelectorAll("#id-category-box .f-cb li")
+                listEl.forEach(el => {
+                    const text = el.querySelector("em").textContent
+                    if(['常见问题', '我要做主播'].indexOf(text) > -1) return
+                    const href = el.querySelector("a").getAttribute("href")
+                    const value = href.split("?id=")[1]
+                    category.add(text, value)
+                })
+                result.orders.push(...[{
+                    key: "上升最快",
+                    value: 1
+                }, {
+                    key: "最热电台",
+                    value: 2
+                }])
+                resolve(result)
+            })
+        })
+    }
+
+    static anchorRadioSquare(cate, offset, limit, page, order) {
+        order = order || 1
+        return new Promise((resolve, reject) => {
+            const url = "https://music.163.com/discover/djradio/category"
+                + "?id=" + cate+ "&order=" + order + "&_hash=allradios"
+                + "&limit=" + limit + "&offset=" + offset
+                
+            getDoc(url).then(doc => {
+                const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
+                //优质新电台
+                let listEl = doc.querySelectorAll(".m-radio > .new li")
+                listEl.forEach(el => {
+                    let id = null, cover = null, title = null, itemUrl = null
+
+                    const coverEl = el.querySelector(".u-cover img")
+                    const titleEl = el.querySelector(".f-fs2 a")
+
+                    if(coverEl) {
+                        cover = coverEl.getAttribute("src").replace("200y200", "500y500")
+                    }
+
+                    if(titleEl) {
+                        title = titleEl.textContent
+                        itemUrl = BASE_URL + titleEl.getAttribute('href')
+                        id = Playlist.ANCHOR_RADIO_ID_PREFIX + itemUrl.split('=')[1]
+                    }
+
+                    if(id && itemUrl) {
+                        const detail = new Playlist(id, NetEase.CODE , cover, title, itemUrl)
+                        result.data.push(detail)
+                    }
+                })
+                //电台排行榜
+                listEl = doc.querySelectorAll("#allradios .rdilist li")
+                listEl.forEach(el => {
+                    let id = null, cover = null, title = null, itemUrl = null
+
+                    const coverEl = el.querySelector(".u-cover img")
+                    const titleEl = el.querySelector(".cnt .f-fs3 a")
+
+                    if(coverEl) {
+                        cover = coverEl.getAttribute("src").replace("200y200", "500y500")
+                    }
+
+                    if(titleEl) {
+                        title = titleEl.textContent
+                        itemUrl = BASE_URL + titleEl.getAttribute('href')
+                        id = Playlist.ANCHOR_RADIO_ID_PREFIX + itemUrl.split('=')[1]
+                    }
+
+                    if(id && itemUrl) {
+                        const detail = new Playlist(id, NetEase.CODE , cover, title, itemUrl)
+                        result.data.push(detail)
+                    }
+                })
+                resolve(result)
+            })
+        })
+    }
+
+    static anchorRadioDetail(id, offset, limit, page) {
+        const resolvedId = id.replace(Playlist.ANCHOR_RADIO_ID_PREFIX, "")
+        return new Promise((resolve, reject) => {
+            const url = "https://music.163.com/djradio?id=" + resolvedId 
+                + "&order=1&_hash=programlist&limit=100&offset=" + ((page - 1) * 100)
+            getDoc(url).then(doc => {
+                const coverEl = doc.querySelector(".m-info .cover img")
+                const title = doc.querySelector(".m-info .tit").textContent.trim()
+                const about = doc.querySelector(".m-info .intr").textContent.trim()
+                const result = new Playlist(id, NetEase.CODE, null, title, url, about)
+                result.type = Playlist.ANCHOR_RADIO_TYPE
+                if(coverEl) {
+                    const cover = coverEl.getAttribute("src").replace("200y200", "500y500")
+                    result.cover = cover
+                }
+                const subtitleEl = doc.querySelector(".n-songtb .u-title .sub")
+                if(subtitleEl) {
+                    const subtitle = subtitleEl.textContent.replace('共', '').replace('期', '').trim()
+                    result.total = parseInt(subtitle)
+                }
+                
+                const artistName = doc.querySelector(".cnt .name").textContent.trim()
+                const trEls = doc.querySelectorAll('.n-songtb tbody tr')
+                trEls.forEach(trEl => {
+                    const songlistId = trEl.getAttribute("id").replace('songlist-', '')
+                    const tid =  NetEase.RADIO_PREFIX + trEl.querySelector(".tt a").getAttribute("href").split("=")[1]
+                    const tTitle = trEl.querySelector(".tt a").getAttribute("title")
+                    const artist = [ { id: '', name: artistName }]
+                    const album = { id, name: title }
+                    const duration = toMillis(trEl.querySelector(".f-pr .s-fc4").textContent)
+                    const updateTime = trEl.querySelector(".col5 .s-fc4").textContent
+
+                    const track = new Track(tid, NetEase.CODE, tTitle, artist, album, duration, result.cover)
+                    track.type = result.type
+                    track.pid = id
+                    track.songlistId = songlistId
+                    track.extra2 = updateTime
+                    track.lyric.addLine('00:00.000', about)
+
+                    result.addTrack(track)
+                })
+                resolve(result)
+            })
+        })
+    }
+
+    static resolveAnchorRadio(id, track) {
+        return new Promise((resolve, reject) => {
+            if(id.startsWith(NetEase.RADIO_PREFIX)) id = track.songlistId
+            resolve(id)
+        })
+    }
 }

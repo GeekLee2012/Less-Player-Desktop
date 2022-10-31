@@ -12,6 +12,7 @@ const seek = (e)=> {
     const offsetX = e.offsetX
     const offsetWidth = barRef.value.offsetWidth
     const percent = (offsetX / offsetWidth).toFixed(3)
+    updateProgress(percent)
     if(props.onseek) {
         props.onseek(percent)
     }

@@ -1,12 +1,14 @@
 import { defineStore } from "pinia";
+import EventBus from "../../common/EventBus";
 import { usePlatformStore } from "./platformStore";
 
-export const usePlaylistSquareStore = defineStore('playlistSquare', {
+export const useRadioSquareStore = defineStore('radioSquare', {
     state: () => ({
         // (platformCode, categoryArray)
         categoriesMap: new Map(),
+        //单选模式
         currentCategoryItem: {
-            data: { key: '默认', value: ''},
+            data: { key: '默认', value: '' },
             row: 0, 
             col: 0
         },
@@ -17,6 +19,9 @@ export const usePlaylistSquareStore = defineStore('playlistSquare', {
             value: null,
             index: 0,
         },
+        //多选模式
+        multiSelectMode: false,
+        currentCategoryItems: {}, 
     }),
     getters: {
         currentPlatformCode(state) {
@@ -51,7 +56,7 @@ export const usePlaylistSquareStore = defineStore('playlistSquare', {
             //Object.assign(this.currentCategory, { data, row, col })
         },
         resetCurrentCategoryItem() { //TODO
-            this.updateCurrentCategoryItem({ key: '默认', value: ''}, -1, -1)
+            this.updateCurrentCategoryItem({ key: '', value: ''}, -1, -1)
         },
         putOrders(key, value) {
             this.ordersMap.set(key, value)
@@ -69,6 +74,33 @@ export const usePlaylistSquareStore = defineStore('playlistSquare', {
         },
         resetOrder() {
             this.updateCurrentOrder(null, null, 0)
+        },
+        //多选模式
+        notifyRefresh() {
+            EventBus.emit("radioSquare-refresh")
+        },
+        updateMultiModeCurrentCategoryItem(name, item, index) {
+            const cate = {}
+            cate[name] = { item, index }
+            const oldValue = JSON.stringify(this.currentCategoryItems[name])
+            const newValue = JSON.stringify(cate[name])
+            if(oldValue == newValue) return
+            Object.assign(this.currentCategoryItems, cate)
+            this.notifyRefresh()
+        },
+        resetCurrentCategoryItems() {
+            for(var key in this.currentCategoryItems) {
+                Reflect.deleteProperty(this.currentCategoryItems, key)
+            }
+            const categories = this.currentPlatformCategories()
+            if(!categories) return 
+            categories.data.forEach(item => {
+                this.currentCategoryItems[item.name] = { item: item.data[0], index: 0 }
+            })
+            this.notifyRefresh()
+        },
+        setMultiSelectMode(value) {
+            this.multiSelectMode = (value === true)
         }
     }
 })

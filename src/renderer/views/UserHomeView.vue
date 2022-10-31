@@ -18,7 +18,7 @@ import ArtistListControl from '../components/ArtistListControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 
 const tabs = [ {
-        code: 'favourites',
+        code: 'favorites',
         name: '我的收藏',
         text: '',
         hasSubTabs: true
@@ -30,7 +30,7 @@ const tabs = [ {
         hasSubTabs: false
     },
     {
-        code: 'favouriteArtists',
+        code: 'favoriteArtists',
         name: '关注的歌手',
         text: '共0个歌手',
         hasSubTabs: false
@@ -69,14 +69,14 @@ const { updateCurrentPlatform } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
 const { playingViewShow, isUserHomeMode } = storeToRefs(useAppCommonStore() )
 const { showToast, hideAllCtxMenus } = useAppCommonStore() 
-const { user, getFavouriteSongs, getFavouritePlaylilsts, 
-    getFavouriteAlbums, getFavouriteRadios,
+const { getFavoriteSongs, getFavoritePlaylilsts, 
+    getFavoriteAlbums, getFavoriteRadios,
     getCustomPlaylists, getFollowArtists,
     getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios,
-    decoration, getUserNickName, getUserAbout } = storeToRefs(useUserProfileStore())
-const { cleanUpAllSongs, updateUser, 
-    removeAllFavourites, removeAllRecents,
+    decoration, getUserCover, 
+    getUserNickName, getUserAbout } = storeToRefs(useUserProfileStore())
+const { removeAllFavorites, removeAllRecents,
     nextDecoration } = useUserProfileStore()
 
 const currentTabView = shallowRef(null)
@@ -164,20 +164,20 @@ const switchSubTab = () => {
     subTabTipText.value = ""
     const platform = currentPlatformCode.value
     if(activeSubTab.value == 0) {
-        if(activeTab.value == 0) tabData.push(...getFavouriteSongs.value(platform))
+        if(activeTab.value == 0) tabData.push(...getFavoriteSongs.value(platform))
         if(activeTab.value == 3) tabData.push(...getRecentSongs.value(platform))
         currentTabView.value = SongListControl
     } else if(activeSubTab.value == 1) {
-        if(activeTab.value == 0) tabData.push(...getFavouritePlaylilsts.value(platform))
+        if(activeTab.value == 0) tabData.push(...getFavoritePlaylilsts.value(platform))
         if(activeTab.value == 3) tabData.push(...getRecentPlaylilsts.value(platform))
         currentTabView.value = PlaylistsControl
     } else if(activeSubTab.value == 2) {
-        if(activeTab.value == 0) tabData.push(...getFavouriteAlbums.value(platform))
+        if(activeTab.value == 0) tabData.push(...getFavoriteAlbums.value(platform))
         if(activeTab.value == 3) tabData.push(...getRecentAlbums.value(platform))
         currentTabView.value = AlbumListControl
     } else if(activeSubTab.value == 3) {
-        if(activeTab.value == 0) tabData.push(...getFavouriteRadios.value)
-        if(activeTab.value == 3) tabData.push(...getRecentRadios.value)
+        if(activeTab.value == 0) tabData.push(...getFavoriteRadios.value(platform))
+        if(activeTab.value == 3) tabData.push(...getRecentRadios.value(platform))
         currentTabView.value = PlaylistsControl
     }
     subTabTipText.value = typeTabs[activeSubTab.value].text.replace('0', tabData.length)
@@ -190,7 +190,7 @@ const visitBatchActionView = () => {
 
 const batchRemoveAll = () => {
     const index = activeTab.value
-    //if(index == 0) clearFavourites()
+    //if(index == 0) clearFavorites()
     if(index == 3) clearRecents()
 }
 
@@ -207,8 +207,8 @@ const clearAll = () => {
     store.$patch({ user: { nickname, about, cover } })
 }
 
-const clearFavourites = () => {
-    removeAllFavourites()
+const clearFavorites = () => {
+    removeAllFavorites()
     showToast("我的收藏已被清空！")
 }
 
@@ -283,7 +283,7 @@ EventBus.on("userHome-refresh", refresh)
         </div>
         <div class="header">
             <div>
-                <img class="cover" v-lazy="user.cover" />
+                <img class="cover" v-lazy="getUserCover" />
             </div>
             <div class="right">
                 <div class="titleWrap">

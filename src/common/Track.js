@@ -1,25 +1,33 @@
 import { Lyric } from './Lyric';
+import { Playlist } from './Playlist';
 import { toMmss } from './Times';
 
+/** 
+ * 被废弃的属性： 
+ * isRadioType: 是否为电台歌曲;
+ * isFMRadio: 是否为广播电台(当歌单类型为电台时); 
+ */
 export class Track {
-    constructor(id, platform, title, artist, album, duration, cover) {
-        this.id = id ? (id + '') : ''
+    constructor(id, platform, title, artist, album, duration, cover, url, type, pid) {
+        this.id = id ? id.toString() : ''
         this.platform = platform
         this.title = title
         //[ {id, name} ]
         this.artist = artist ? artist : []
-        this.artistNotCompleted = false //数据是否不完整
+        this.artistNotCompleted = false //数据不完整
         //{id, name}
-        this.album = album ? album : ({ id: 0, name: '' })
+        this.album = album ? album : ({ id: '', name: '' })
         //millis
         this.duration = duration ? duration : 0
         this.cover = cover
-        this.url = ''
+        this.url = url || ''
         this.lyric = new Lyric()
-        this.isRadioType = false //是否为电台歌曲
-        //当歌单类型为电台时，是否为广播电台
-        this.isFMRadio = false
-        this.channel = '' //channelId
+        this.type = type || 0 //与 Playlist中的type一致
+        //this.channel = '' //channelId
+        this.pid = pid || '' //playlistId
+        //额外信息，当内容存在时显示，同时分别隐藏 artist、album
+        this.extra1 = null
+        this.extra2 = null
     }
 
     mmssDuration() {
@@ -82,7 +90,7 @@ export class Track {
         if(!track || !track.cover) return false
         track.cover = track.cover.trim()
         if(track.cover.length < 1) return false
-        return track.cover != DEFAULT_COVER
+        return true
     }
 
     static hasId(track) {
@@ -99,21 +107,24 @@ export class Track {
         return track && track.lyric ? track.lyric.data : []
     }
 
-    static fromChannel(channelTrack, isFMRadio) {
+    /*
+    static fromChannel(channelTrack, type) {
         const track = new Track()
         if(channelTrack) {
             Object.assign(track, channelTrack)
             track.artist.push(channelTrack.radio)
             track.channel = channelTrack
+            track.id = track.id + ""
         }
-        track.isRadioType = true
-        track.isFMRadio = isFMRadio
+        track.type = type
+        //track.isRadioType = true
+        //track.isFMRadio = isFMRadio
         return track
     }
+    */
 
     static isEquals(t1, t2) {
         if(!t1 || !t2) return false
-        return t1.id == t2.id
-            && t1.platform == t2.platform
+        return t1.id == t2.id && t1.platform == t2.platform
     }
 }

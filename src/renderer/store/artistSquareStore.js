@@ -50,7 +50,8 @@ export const useArtistSquareStore = defineStore('artistSquare', {
         resetCurrentCategoryItems() { 
             //TODO
             for(var key in this.currentCategoryItems) {
-                delete this.currentCategoryItems[key]
+                //delete this.currentCategoryItems[key]
+                Reflect.deleteProperty(this.currentCategoryItems, key)
             }
             const category = this.currentCategory()
             if(!category) return 

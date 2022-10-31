@@ -10,6 +10,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { Playlist } from '../../common/Playlist';
 
 const props = defineProps({
     posStyle: Object,
@@ -21,11 +22,11 @@ const router = useRouter()
 const { commonCtxItem, commonCtxMenuCacheItem  } = storeToRefs(useAppCommonStore())
 const { showToast, setCommonCtxMenuData, hideAllCtxMenus } = useAppCommonStore()
 const { playTrack, playTrackLater, addTrack, removeTrack, resetQueue, addTracks, playNextTrack } = usePlayStore()
-const { addFavouriteTrack, removeFavouriteSong, addFavouriteRadio,
+const { addFavoriteTrack, removeFavoriteSong, addFavoriteRadio,
     removeCustomPlaylist, removeTrackFromCustomPlaylist,
     getCustomPlaylist, removeRecentSong,
     addToCustomPlaylist, moveToCustomPlaylist,
-    removeFavouritePlaylist, addRecentPlaylist } = useUserProfileStore()
+    removeFavoritePlaylist, addRecentPlaylist } = useUserProfileStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { removeItem } = useLocalMusicStore()
 const { getVender } = usePlatformStore()
@@ -56,22 +57,21 @@ const playItemLater = () => {
     toastAndHideMenu("下一曲将为您播放！")
 }
 
-const refreshFavourite = () => {
-    EventBus.emit("refreshFavourite")
+const refreshFavorite = () => {
+    EventBus.emit("refreshFavorite")
 }
 
-const addFavouriteItem = () => {
+const addFavoriteItem = () => {
     const track = commonCtxMenuCacheItem.value
-    const { isFMRadio } = track
     let text = "歌曲收藏成功！"
-    if(isFMRadio) {
-        addFavouriteRadio(track)
+    if(Playlist.isFMRadioType(track)) {
+        addFavoriteRadio(track)
         text = "FM电台收藏成功！"
     } else {
-        addFavouriteTrack(track)
+        addFavoriteTrack(track)
     }
     toastAndHideMenu(text)
-    refreshFavourite()
+    refreshFavorite()
 }
 
 //TODO
@@ -106,9 +106,15 @@ const visitAlbumDetail = (platform, id) => {
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid 
     platform = platform.trim()
-    if(visitable) {
+    if(visitable) { //TODO
         const fromPath = router.currentRoute.value.path
-        const toPath = '/' + exploreModeCode.value + '/album/' + platform + "/" + id
+        let exploreMode = exploreModeCode.value
+        let moduleName = 'album'
+        if(id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
+            exploreMode = 'radios'
+            moduleName = 'playlist'
+        }
+        const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
         if(fromPath != toPath) {
             router.push(toPath)
             updateAlbumDetailKeys(platform, id)
@@ -149,9 +155,9 @@ const removeLocalItem = (item, index)=> {
     toastAndHideMenu("歌曲已删除！")
 }
 
-const removeFavouriteItem = ()=> {
+const removeFavoriteItem = ()=> {
     const { id, platform } = commonCtxMenuCacheItem.value
-    removeFavouriteSong(id, platform)
+    removeFavoriteSong(id, platform)
     toastAndHideMenu("歌曲已取消收藏！")
 }
 
@@ -208,8 +214,8 @@ const createCustom = () => {
 
 //目前以加入当前播放列表为参考标准
 const traceRecentPlay = (playlist) => {
-    const { id, platform, title, cover } = playlist
-    addRecentPlaylist(id, platform, title, cover)
+    const { id, platform, title, cover, type } = playlist
+    addRecentPlaylist(id, platform, title, cover, type)
 }
 
 const playAll = (playlist) => {
@@ -230,11 +236,11 @@ const playPlaylist = () => {
     })
 }
 
-const removePlaylistFromFavourite = () => {
+const removePlaylistFromFavorite = () => {
     const { id, platform } = commonCtxMenuCacheItem.value
-    removeFavouritePlaylist(id, platform)
+    removeFavoritePlaylist(id, platform)
     toastAndHideMenu("歌单已取消收藏！")
-    EventBus.emit("refresh-favourite")
+    EventBus.emit("refresh-favorite")
 }
 
 const MenuItems = {
@@ -255,7 +261,7 @@ const MenuItems = {
             name: '当前播放',
             icon: '<svg width="13" height="13" viewBox="0 0 682.28 597.06" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M597.41,348.87v-7.12q0-148.73,0-297.45c0-21.61,12.87-38.33,33-43.16,25.6-6.14,51,13.32,51.67,39.64.14,5.33.07,10.66.07,16,0,136.81.29,273.62-.14,410.42-.17,54.89-25.81,95.18-75.43,118.3-76.43,35.63-167.21-14.9-178.41-98.26C418.79,417.15,465.4,354,535,342.85a119,119,0,0,1,56.75,4.31C593.32,347.67,594.9,348.11,597.41,348.87Z"/><path d="M255.64,84.82q-104.73,0-209.46.06c-13.1,0-24.79-3.21-33.93-12.94C.19,59.1-3.13,44,3,27.57S21.6,2,39.19.34c2.65-.25,5.32-.29,8-.29Q255.89,0,464.6,0c9.48,0,18.54,1.16,26.81,6.3,15.55,9.68,23.33,28.26,19,45.77-4.53,18.37-19.25,31-37.85,32.44-3.15.24-6.32.29-9.48.29Q359.36,84.84,255.64,84.82Z"/><path d="M234.76,255.4q-95.46,0-190.92,0c-21.35,0-38.21-13.2-42.57-32.94A42.4,42.4,0,0,1,41,170.69c1.33-.06,2.66-.07,4-.07q189.66,0,379.33,0c21.48,0,38,12.15,43.2,31.67,7.08,26.38-12.46,52.85-39.81,53-64.3.27-128.61.09-192.91.09Z"/><path d="M170.39,341.48c42.81,0,85.62-.11,128.42,0,21.15.08,38,14.74,41.44,35.38a42.3,42.3,0,0,1-40.09,49.26c-1.33.07-2.67.07-4,.07q-125.67,0-251.35,0C24.12,426.22,8,414.9,2.16,396.47c-8.51-26.86,11.14-54.69,39.31-54.89,43-.3,85.94-.08,128.92-.08Z"/><path d="M170.48,596.82c-41.64,0-83.28-.08-124.92,0-17.84,0-31.81-6.75-40.39-22.64-14.51-26.86,3.62-59.55,34.07-61.89,2.32-.18,4.66-.28,7-.28q124.41,0,248.84-.06c18.44,0,32.79,6.84,41.31,23.55,13.68,26.81-4.47,58.93-34.5,60.88-12.44.81-25,.37-37.46.39Q217.46,596.87,170.48,596.82Z"/></g></g></svg>',
             action: addItemToQueue,
-        }, 
+        },
         addToList: {
             name: '添加到',
             icon: '<svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>',
@@ -274,10 +280,10 @@ const MenuItems = {
             menu: isMenu,
             action: (event) => showAddToList(event, 1),
         },
-        addFavourite: {
+        addFavorite: {
             name: '收藏',
             icon: '<svg width="16" height="16" viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M1024,299.77c-.89,7.24-1.74,14.5-2.67,21.74-5.4,41.95-19.53,81-39,118.35-24.74,47.39-56.62,89.8-91.22,130.27-48.69,57-101.85,109.6-156.46,160.77C661.69,799.26,588.19,867,514.93,935.05c-.85.78-1.75,1.49-2.85,2.41-1.09-.89-2.14-1.65-3.09-2.52q-101.8-92.36-203.56-184.77c-58.71-53.61-116.12-108.59-168.2-168.81-39.12-45.23-74.7-92.93-100.8-147.1-18.8-39-31.17-79.91-35.23-123.16-.32-3.45-.8-6.89-1.2-10.33v-36c1-7.74,1.79-15.5,2.86-23.23,8.06-57.93,30.88-109.28,71.21-151.7,67.09-70.55,150.24-98.35,246.11-86,75.62,9.71,138.64,44.83,189.43,101.75.74.82,1.61,1.52,2.53,2.39.91-1,1.61-1.66,2.26-2.4a297.6,297.6,0,0,1,98.07-74.34C690-5.4,769.66-11.19,849.33,21.27,948,61.45,1004.25,136.62,1021.1,241.55c1.24,7.69,1.95,15.47,2.9,23.21ZM922.22,282.9c-1.08-10.76-1.48-21.64-3.33-32.27-10-57.28-39.78-101.12-91.95-127.45-54.58-27.54-110.52-27-165.67-1.07-44.78,21.07-78.08,53.89-96.65,100.47-1.2,3-2.93,3.41-5.65,3.4-29.5-.06-59-.1-88.49.05-3.58,0-5.17-1.2-6.63-4.39C430.29,148.12,342.54,89.86,249.42,105.81c-41,7-76.09,25.21-103.36,56.83-38.87,45.08-49.77,97.9-40.53,155.58,5.72,35.66,20,68.21,38.16,99.15C171,463.93,205.43,505,242,544.39c57.44,61.87,119.67,118.78,182.1,175.48,28,25.43,56.23,50.62,84.27,76,5.68,5.15,6.89,5.4,12.43.28C568,752.47,615.47,709.05,662.35,665c54.55-51.26,108-103.64,156.07-161.17C846.69,470,872.66,434.6,892.47,395,910.12,359.76,921.42,322.79,922.22,282.9Z"/></g></g></svg>',
-            action: addFavouriteItem,
+            action: addFavoriteItem,
         }, 
         share: {
             name: '分享',
@@ -305,10 +311,10 @@ const MenuItems = {
             icon: '<svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z" transform="translate(-833 -413)"/><path d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z" transform="translate(-833 -413)"/><path d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z" transform="translate(-833 -413)"/><path d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z" transform="translate(-833 -413)"/></svg>',
             action: removeLocalItem,
         },
-        removeFromFavourite: {
+        removeFromFavorite: {
             name: '删除',
             icon: '<svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z" transform="translate(-833 -413)"/><path d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z" transform="translate(-833 -413)"/><path d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z" transform="translate(-833 -413)"/><path d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z" transform="translate(-833 -413)"/></svg>',
-            action: removeFavouriteItem,
+            action: removeFavoriteItem,
         },
         playCustom: {
             name: '播放歌单',
@@ -350,10 +356,10 @@ const MenuItems = {
             icon: '<svg width="16" height="16" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z"/></svg>',
             action: playPlaylist,
         }, 
-        removePlaylistFromFavourite: {
+        removePlaylistFromFavorite: {
             name: '删除',
             icon: '<svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z" transform="translate(-833 -413)"/><path d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z" transform="translate(-833 -413)"/><path d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z" transform="translate(-833 -413)"/><path d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z" transform="translate(-833 -413)"/></svg>',
-            action: removePlaylistFromFavourite,
+            action: removePlaylistFromFavorite,
         },
 }
 
@@ -433,16 +439,18 @@ EventBus.on("commonCtxMenu-init", dataType => {
         case 0: //普通歌曲列表（歌单页、歌手页、专辑页）
             data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList, 
                 MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
-                MenuItems.sp, MenuItems.addFavourite, MenuItems.share, ]
+                MenuItems.sp, MenuItems.addFavorite, MenuItems.share, ]
             break;
         case 1: //本地歌曲列表
-            data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToQueue,
-                    MenuItems.sp, MenuItems.addFavourite, MenuItems.removeFromLocal, ]
+            const addToQueueMenuItem = Object.assign({}, {...MenuItems.addToQueue})
+            addToQueueMenuItem.name = "添加到当前播放"
+            data = [ MenuItems.play, addToQueueMenuItem, MenuItems.playLater,
+                    MenuItems.sp, MenuItems.removeFromLocal, ]
             break;
         case 2: //我的主页-我的收藏-歌曲列表
             data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList, 
                 MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
-                MenuItems.sp, MenuItems.share, MenuItems.removeFromFavourite, ]
+                MenuItems.sp, MenuItems.share, MenuItems.removeFromFavorite, ]
             break;
         case 3: //我的主页-创建的歌单列表
             data = [ MenuItems.playCustom, MenuItems.editCustom, 
@@ -451,13 +459,13 @@ EventBus.on("commonCtxMenu-init", dataType => {
         case 4: //创建的歌单 - 歌曲列表
         data = [ MenuItems.play, MenuItems.playLater, MenuItems.sp, 
                 MenuItems.addToList, MenuItems.moveToList, MenuItems.sp, 
-                MenuItems.addFavourite, MenuItems.share, MenuItems.sp, 
+                MenuItems.addFavorite, MenuItems.share, MenuItems.sp, 
                 MenuItems.removeFromCustom ]
             break;
         case 5: //我的主页-最近播放-歌曲列表
             data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToList, 
                 MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
-                MenuItems.sp, MenuItems.addFavourite, MenuItems.removeSongFromRecent, ]
+                MenuItems.sp, MenuItems.addFavorite, MenuItems.removeSongFromRecent, ]
             break;
         case 6: //我的主页-批量操作-添加到菜单
             data = initToCustomMenuData()
@@ -466,11 +474,11 @@ EventBus.on("commonCtxMenu-init", dataType => {
             data = initToCustomMenuData(1)
             break;
         case 8: //首页-收藏的歌单
-            data = [ MenuItems.playPlaylist, MenuItems.removePlaylistFromFavourite ]
+            data = [ MenuItems.playPlaylist, MenuItems.removePlaylistFromFavorite ]
             break;
         case 9: //当前播放列表
             data = [ MenuItems.play, MenuItems.playLater, MenuItems.addToListNoQueue(), 
-                    MenuItems.sp, MenuItems.addFavourite, MenuItems.share, 
+                    MenuItems.sp, MenuItems.addFavorite, MenuItems.share, 
                     MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, 
                     MenuItems.sp, MenuItems.removeFromQueue, ]
             break;

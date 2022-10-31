@@ -1,7 +1,27 @@
 <script setup>
+import { ref } from 'vue';
+import EventBus from '../../common/EventBus';
+import { useIpcRenderer } from '../../common/Utils';
 import { useAppCommonStore } from '../store/appCommonStore';
 const { quit, minimize, maximize } = useAppCommonStore()
+const isMinBtnDisabled = ref(false)
 
+const setMinBtnDisabled = (value) => {
+    isMinBtnDisabled.value = value
+}
+
+const doMinimize = () => {
+    if(isMinBtnDisabled.value) return 
+    minimize()
+}
+
+const ipcRenderer = useIpcRenderer()
+
+if(ipcRenderer) {
+    ipcRenderer.on('app-max', (event, ...args) => {
+        setMinBtnDisabled(args[0])
+    })
+}
 </script>
 
 <template>
@@ -9,7 +29,7 @@ const { quit, minimize, maximize } = useAppCommonStore()
         <div @click="quit" class="close-btn">
             <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g id="cross"><line class="cls-1" x1="7" x2="25" y1="7" y2="25"/><line class="cls-1" x1="7" x2="25" y1="25" y2="7"/></g></svg>
         </div>
-        <div @click="minimize" class="min-btn">
+        <div @click="doMinimize" class="min-btn" :class="{ btnDisabled: isMinBtnDisabled }">
             <svg viewBox="0 0 256 256" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M208,134.4H48c-3.534,0-6.4-2.866-6.4-6.4s2.866-6.4,6.4-6.4h160c3.534,0,6.4,2.866,6.4,6.4S211.534,134.4,208,134.4z"/></svg>
         </div>
         <div @click="maximize" class="max-btn">
@@ -24,6 +44,10 @@ const { quit, minimize, maximize } = useAppCommonStore()
     width: 56px;
     margin-top: 18px;
     margin-left: 15px;
+}
+
+.win-traffic-light-btn .btnDisabled {
+    cursor: default !important;
 }
 
 .win-traffic-light-btn div {
@@ -46,9 +70,9 @@ const { quit, minimize, maximize } = useAppCommonStore()
 }
 
 .win-traffic-light-btn svg {
-    fill: #464646;
-    stroke-width: 5px;
-    stroke: #464646;
+    fill: #555;
+    stroke-width: 3.6px;
+    stroke: #555;
     padding: 1px;
     visibility: hidden;
 }

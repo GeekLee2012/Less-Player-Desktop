@@ -1,6 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
+import { Playlist } from '../../common/Playlist';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -17,6 +18,7 @@ const { isAlbumDetailVisitable } = usePlatformStore()
 const { exploreModeCode } = storeToRefs(useAppCommonStore())
 const { hidePlayingView } = useAppCommonStore()
 
+//TODO 单一责任
 const visitAlbumDetail = (platform, id) => {
     const platformValid = isAlbumDetailVisitable(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
@@ -24,10 +26,18 @@ const visitAlbumDetail = (platform, id) => {
     platform = platform.trim()
     if(visitable) {
         const fromPath = router.currentRoute.value.path
-        const toPath = '/' + exploreModeCode.value + '/album/' + platform + "/" + id
+        let exploreMode = exploreModeCode.value
+        let moduleName = 'album'
+        let isAlbum = true
+        if(id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
+            exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
+            moduleName = 'playlist'
+            isAlbum = false
+        }
+        const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
         if(fromPath != toPath) {
             router.push(toPath)
-            updateAlbumDetailKeys(platform, id)
+            if(isAlbum) updateAlbumDetailKeys(platform, id)
         }
         hidePlayingView()
     }

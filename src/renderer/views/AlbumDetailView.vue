@@ -16,7 +16,7 @@ import TextListControl from '../components/TextListControl.vue';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
-import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
+import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 
@@ -81,23 +81,23 @@ const addAll = (text) => {
 } 
 
 //TODO
-const { addFavouriteAlbum, removeFavouriteAlbum, isFavouriteAlbum } = useUserProfileStore()
-const favourited = ref(false)
-const toggleFavourite = () => {
-    favourited.value = !favourited.value
+const { addFavoriteAlbum, removeFavoriteAlbum, isFavoriteAlbum } = useUserProfileStore()
+const favorited = ref(false)
+const toggleFavorite = () => {
+    favorited.value = !favorited.value
     let text = "专辑收藏成功！"
-    if(favourited.value) {
+    if(favorited.value) {
         const { title, cover, publishTime } = detail
-        addFavouriteAlbum(albumId.value, platform.value, title, cover, publishTime)
+        addFavoriteAlbum(albumId.value, platform.value, title, cover, publishTime)
     } else {
-        removeFavouriteAlbum(albumId.value, platform.value)
+        removeFavoriteAlbum(albumId.value, platform.value)
         text = "专辑已取消收藏！"
     }
     showToast(text)
 }
 
-const checkFavourite = () => {
-    favourited.value = isFavouriteAlbum(albumId.value, platform.value)
+const checkFavorite = () => {
+    favorited.value = isFavoriteAlbum(albumId.value, platform.value)
 }
 
 const updateTabData = (data) => {
@@ -183,7 +183,7 @@ const loadAll = () =>  {
 const resetView = () => {
     currentTabView.value = null
     updateTabTipText(0)
-    checkFavourite()
+    checkFavorite()
 }
 
 const switchTab = () => {
@@ -229,8 +229,8 @@ watch(albumId, reloadAll)
                 </div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()" class="spacing"></PlayAddAllBtn>
-                    <FavouriteShareBtn :favourited="favourited" :leftAction="toggleFavourite" class="spacing">
-                    </FavouriteShareBtn>
+                    <FavoriteShareBtn :favorited="favorited" :leftAction="toggleFavorite" class="spacing">
+                    </FavoriteShareBtn>
                 </div>
             </div>
             <div class="right" v-show="isLoading">

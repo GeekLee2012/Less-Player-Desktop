@@ -9,12 +9,12 @@ const artistCategoryViewRef = ref(null)
 const { currentCategoryItems } = storeToRefs(useArtistSquareStore())
 const { currentCategory, updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareStore()
 const { isArtistMode } = storeToRefs(useAppCommonStore())
-const category = reactive([])
+const categories = reactive([])
 
 const updateCategory = () => {
-    category.length = 0
+    categories.length = 0
     const cached = currentCategory()
-    if(cached) category.push(...cached)
+    if(cached) categories.push(...cached)
     resetCurrentCategoryItems()
 }
 
@@ -49,7 +49,7 @@ EventBus.on('artistCategory-resetScroll', ()=> {
             </div>
         </div>
         <div class="center">
-            <div v-for="(cate, row) in category" class="fl-row">
+            <div v-for="(cate, row) in categories" class="fl-row">
                 <div class="cate-title">{{ cate.name }}</div>
                 <div class="cate-item-wrap">
                     <div v-for="(item, col) in cate.data" 

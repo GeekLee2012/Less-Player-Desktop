@@ -71,7 +71,7 @@ export class KuGou {
     //全部歌单分类
     static categories() {
         return new Promise((resolve, reject) => {
-            const result = { platform: KuGou.CODE, data: [] }
+            const result = { platform: KuGou.CODE, data: [], orders: [] }
             const url = 'http://mac.kugou.com/v2/musicol/yueku/v1/special/index/getData/getData.html&cdn=cdn&t=5&c='
             getDoc(url).then(doc => {
                 //specail? 拼写错误！正确：special
@@ -91,17 +91,21 @@ export class KuGou {
                 })
                 result.data[0].add("榜单", KuGou.TOPLIST_CODE)
                     .add("电台", KuGou.RADIO_CODE)
-                    .add("最热", "#6")
-                    .add("最新", "#7")
-                    .add("热藏", "#3")
-                    .add("飙升", "#8")
+                
+                result.orders.push(...[
+                    { key: "推荐", value: "5" },
+                    { key: "最热", value: "6" },
+                    { key: "最新", value: "7" },
+                    { key: "热藏", value: "3" },
+                    { key: "飙升", value: "8" },
+                ])
                 resolve(result)
             })
         })
     }
 
     //榜单列表
-    static toplist(cate, offset, limit, page) {
+    static toplist(cate, offset, limit, page, order) {
         const result = { platform: KuGou.CODE, cate, offset, limit, page, total:0, data: [] }
         return new Promise((resolve, reject) => {
             if(page > 1) {
@@ -185,7 +189,7 @@ export class KuGou {
     }
 
     //电台列表
-    static radioList(cate, offset, limit, page) {
+    static radioList(cate, offset, limit, page, order) {
         const result = { platform: KuGou.CODE, cate, offset, limit, page, total: 0, data: [] }
         return new Promise((resolve, reject) => {
             if(page > 1) {
@@ -201,7 +205,8 @@ export class KuGou {
                     const cover = item.querySelector('.cover img').getAttribute('src')
                     const title = item.querySelector('.name').textContent
                     const playlist = new Playlist(fmid, KuGou.CODE, cover, title, url)
-                    playlist.isRadioType = true
+                    //playlist.isRadioType = true
+                    playlist.type = Playlist.NORMAL_RADIO_TYPE
                     result.data.push(playlist)
                 })
                 resolve(result)
@@ -254,7 +259,8 @@ export class KuGou {
                     const duration = item.audio_info.duration_128
                     const cover = getCustomCover(item.album_info.sizable_cover)
                     const cache = new Track(item.album_audio_id, KuGou.CODE, item.audio_name, artist, album, duration, cover)
-                    cache.isRadioType = true
+                    //cache.isRadioType = true
+                    cache.type = Playlist.NORMAL_RADIO_TYPE
                     cache.channel = channel
                     cache.hash = item.audio_info.hash_128
                     cache.artistNotCompleted = true
@@ -267,24 +273,19 @@ export class KuGou {
     }
 
     //歌单(列表)广场
-    static square(cate, offset, limit, page) {
+    static square(cate, offset, limit, page, order) {
         const originCate = cate ? (cate + "") : "";
         let resolvedCate = originCate.trim()
+        order = order || 5
         //榜单
-        if(resolvedCate === KuGou.TOPLIST_CODE) return KuGou.toplist(cate, offset, limit, page)
+        if(resolvedCate === KuGou.TOPLIST_CODE) return KuGou.toplist(cate, offset, limit, page, order)
         //电台
-        if(resolvedCate === KuGou.RADIO_CODE) return KuGou.radioList(cate, offset, limit, page)
+        if(resolvedCate === KuGou.RADIO_CODE) return KuGou.radioList(cate, offset, limit, page, order)
         //普通歌单
         return new Promise((resolve, reject) => {
-            let type = 5 || 6 || 7 || 3 || 8 //推荐、最热、最新、热藏、飙升
-            //TODO 暂时全部排序
-            if(resolvedCate.startsWith("#")) {
-                type = parseInt(resolvedCate.substring(1))
-                resolvedCate = ""
-            }
-            const result = { platform: KuGou.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
+            const result = { platform: KuGou.CODE, cate: originCate, order, offset, limit, page, total: 0, data: [] }
             const url = 'http://mac.kugou.com/v2/musicol/yueku/v1/special/index/getData/getData.html&cdn=cdn&p=' 
-                + page + '&pagesize=20&t=' + type + '&c=' + resolvedCate
+                + page + '&pagesize=20&t=' + order + '&c=' + resolvedCate
             getDoc(url).then(doc => {
                 let key = 'global.special ='
                 const scripts = doc.getElementsByTagName('script')
@@ -635,7 +636,7 @@ export class KuGou {
     }
     
     //TODO 格式：page-filter-id
-    static parseCate(cate, offset, limit, page) {
+    static parseArtistCate(cate, offset, limit, page) {
         try {
             const source = cate['默认'].item.value.split('-')
             source[0] = page
@@ -657,7 +658,7 @@ export class KuGou {
                 return 
             }
             //const url = 'https://www.kugou.com/yy/html/singer.html'
-            const url = 'https://www.kugou.com/yy/singer/index/' + KuGou.parseCate(cate, offset, limit, page) + '.html'
+            const url = 'https://www.kugou.com/yy/singer/index/' + KuGou.parseArtistCate(cate, offset, limit, page) + '.html'
             getDoc(url).then(doc => {
                 let els = doc.querySelectorAll('.sng .r #list_head li')
                 els.forEach(el => {

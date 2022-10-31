@@ -2,8 +2,10 @@ import { QQ } from "../vendor/qq";
 import { NetEase } from "../vendor/netease";
 import { KuWo } from "../vendor/kuwo";
 import { KuGou } from "../vendor/kugou";
+import { DouBan } from "../vendor/douban";
+import { RadioCN } from "../vendor/radiocn";
 
-const vendors = [ QQ, NetEase, KuWo, KuGou ]
+const vendors = [ QQ, NetEase, KuWo, KuGou, DouBan, RadioCN ]
 
 /** 统一平台，协调处理公共业务 */
 export class United {
@@ -55,5 +57,19 @@ export class United {
     static matchAndSort(reference, array) {
 
     }
+}
 
+export const getVender = (name) => {
+    for(let i in vendors) {
+        let vender = vendors[i]
+        if(vender.CODE === name) return vender
+    }
+    return null
+} 
+
+export const invokeVender = async (name, fn, args) => {
+    const vender = getVender(name)
+    if(!vender || vender[fn]) return null
+    const result = await vender[fn](...args)
+    return result
 }

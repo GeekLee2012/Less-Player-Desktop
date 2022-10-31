@@ -4,6 +4,7 @@ export class Category {
         this.name = name
         this.code = code ? code : name
         this.data = []
+        this.isolated = false //是否独立
     }
 
     add(key, value) {

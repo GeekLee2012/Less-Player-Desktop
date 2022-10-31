@@ -40,6 +40,8 @@ export class Player {
         this.sound = new Howl({
             src: [ this.currentTrack.url ],
             html5: true,
+            autoplay: false,
+            preload: false,
             onplay: function() {
                 this.retry = 0
                 requestAnimationFrame(self.__step.bind(self))

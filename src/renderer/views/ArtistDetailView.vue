@@ -18,7 +18,7 @@ import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import FavouriteShareBtn from '../components/FavouriteShareBtn.vue';
+import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
@@ -109,7 +109,6 @@ const addAllSongs = (text) => {
     showToast(text || "歌曲已全部添加！")
 }
 
-//TODO
 const { addFollowArtist, removeFollowArtist, isFollowArtist } = useUserProfileStore()
 const follow = ref(false)
 const toggleFollow = () => {
@@ -129,12 +128,11 @@ const checkFollow = () => {
     follow.value = isFollowArtist(props.id, props.platform)
 }
 const updateTabData = (data) => {
+    tabData.length = 0
     if(typeof(data) == 'string') {
-        tabData.length = 0
         tabData.push(data)
         updateTabTipText(0)
-    } else {
-        tabData.length = 0
+    } else if(currentTabView.value != TextListControl) { //TODO
         tabData.push(...data)
         updateTabTipText(tabData.length)
     }
@@ -375,8 +373,8 @@ watch(artistId, reloadAll)
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
-                    <FavouriteShareBtn :favourited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
-                    </FavouriteShareBtn>
+                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
+                    </FavoriteShareBtn>
                 </div>
             </div>
             <div class="right" v-show="isLoading">
@@ -390,8 +388,8 @@ watch(artistId, reloadAll)
                 <div class="action" v-show="!isLoadingDetail">
                     <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
-                    <FavouriteShareBtn :favourited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
-                    </FavouriteShareBtn>
+                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
+                    </FavoriteShareBtn>
                 </div>
             </div>
         </div>

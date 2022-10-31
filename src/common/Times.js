@@ -42,8 +42,16 @@ export const toYmd = (timestamp, sp) => {
     return yyyy + sp + m + sp + d
 }
 
-export const toYyyymmddHhMmSs = (timestamp, sp) => {
-    sp = sp || '-'
+/**
+ * @param {*} timestamp 
+ * @param {*} sp1 年月日间隔符
+ * @param {*} sp2 日期与时间的间隔符
+ * @param {*} sp3 时分秒间隔符
+ */
+export const toYyyymmddHhMmSs = (timestamp, sp1, sp2 , sp3) => {
+    sp1 = sp1 || '-'
+    sp2 = sp2 || ' '
+    sp3 = sp3 || ':'
     const date = new Date(timestamp)
     const yyyy = date.getFullYear()
     let mm = (date.getMonth() + 1)
@@ -56,6 +64,19 @@ export const toYyyymmddHhMmSs = (timestamp, sp) => {
     Mm = Mm < 10 ? ('0' + Mm) : Mm
     let Ss = date.getSeconds()
     Ss = Ss < 10 ? ('0' + Ss) : Ss
-    return yyyy + sp + mm + sp + dd + " " 
-        + Hh + ":" + Mm + ":" + Ss
+    return yyyy + sp1 + mm + sp1 + dd + sp2 
+        + Hh + sp3 + Mm + sp3 + Ss
+}
+
+
+export const toMillis = (mmss) => {
+    try {
+        const timeParts = mmss.split(":")
+        const minutes = parseInt(timeParts[0].trim())
+        const seconds = parseInt(timeParts[1].trim())
+        return (minutes * 60 + seconds) * 1000
+    } catch(error) {
+        console.log(mmss, "\n", error)
+    }
+    return -1
 }

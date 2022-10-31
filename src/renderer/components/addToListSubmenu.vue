@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import EventBus from '../../common/EventBus';
+import { Playlist } from '../../common/Playlist';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
@@ -53,9 +54,9 @@ const MenuItems = {
 
 
 const handleClick = (item, mode) => {
-    const { isFMRadio  } = commonCtxMenuCacheItem.value
+    const track = commonCtxMenuCacheItem.value
     let text = "歌曲已添加成功！"
-    if(isFMRadio) {
+    if(Playlist.isFMRadioType(track)) {
         text = "FM电台无法加入歌单！"
         setCommonNotificationType(1)
         toastAndHideMenu(text)
@@ -64,10 +65,10 @@ const handleClick = (item, mode) => {
     let success = false
     if(mode == 1) {
         const { id } = commonCtxItem.value
-        success =moveToCustomPlaylist(item.id, id, commonCtxMenuCacheItem.value)
+        success =moveToCustomPlaylist(item.id, id, track)
         text = "歌曲已移动成功！"
     } else {
-        success =addToCustomPlaylist(item.id, commonCtxMenuCacheItem.value)
+        success =addToCustomPlaylist(item.id, track)
     }
     text = success ? text : "歌曲已存在！"
     setCommonNotificationType(success ? 0 : 1)

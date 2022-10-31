@@ -33,14 +33,15 @@ export class KuWo {
     //全部分类
     static categories() {
         return new Promise((resolve, reject) => {
-           const url = "https://www.kuwo.cn/api/www/playlist/getTagList" 
+            const result = { platform: KuWo.CODE, data: [], orders: [] }
+            const url = "https://www.kuwo.cn/api/www/playlist/getTagList" 
                     + "?httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
                 const defaultCategory = new Category("精选")
                 defaultCategory.add("最新", '#new')
                 defaultCategory.add("最热", '#hot')
-
-                const result = [ defaultCategory ]
+                result.data.push(defaultCategory)
+                
                 const cateArray = json.data
                 cateArray.forEach(cate => {
                     const category = new Category(cate.name)
@@ -49,18 +50,18 @@ export class KuWo {
                         category.add(item.name, item.id)
                     })
                     if(category.data.length > 0) {
-                        result.push(category)
+                        result.data.push(category)
                     }
                 })
-                const firstCate = result[0]
+                const firstCate = result.data[0]
                 firstCate.data.splice(2, 0, { key: '排行榜', value: KuWo.TOPLIST_CODE })
-                resolve({ platform: KuWo.CODE, data: result })
+                resolve(result)
             })
         })
     }
 
     //歌单(列表)广场
-    static square(cate, offset, limit, page) {
+    static square(cate, offset, limit, page, order) {
         const originCate = cate
         let resolvedCate = cate.trim()
         resolvedCate = resolvedCate.length > 0 ? resolvedCate : "#new"
@@ -115,8 +116,8 @@ export class KuWo {
                 let key = 'window.__NUXT__='
                 if(scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
-                    const json = eval(scriptText)
-                    
+                    //const json = eval(scriptText)
+                    const json = Function('return ' + scriptText)()
 
                     //参考官方页面
                     const bangList = json.data[0].bangMenu
@@ -243,7 +244,8 @@ export class KuWo {
                 let key = 'window.__NUXT__='
                 if(scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
-                    const json = eval(scriptText)
+                    //const json = eval(scriptText)
+                    const json = Function('return ' + scriptText)()
 
                     const singerInfo = json.data[0].singerInfo
                     title = escapseHtml(singerInfo.name)
@@ -313,8 +315,8 @@ export class KuWo {
                 let key = 'window.__NUXT__='
                 if(scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
-                    const json = eval(scriptText)
-                    
+                    //const json = eval(scriptText)
+                    const json = Function('return ' + scriptText)()
                     
                     const pageData = json.data[0].pageData
                     const albumInfo = json.data[0].albumInfo
@@ -450,7 +452,7 @@ export class KuWo {
     }
 
     //提取分类
-    static parseCate(cate) {
+    static parseArtistCate(cate) {
         const result = { category: 0, prefix: '' }
         try {
             const source = {
@@ -469,7 +471,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const result = { platform: KuWo.CODE, cate, offset, limit, page, total: 0, data: [] }
             const url = 'https://www.kuwo.cn/api/www/artist/artistInfo'
-            const resolvedCate = KuWo.parseCate(cate)
+            const resolvedCate = KuWo.parseArtistCate(cate)
             const reqBody = {
                 category: resolvedCate.category,
                 prefix: '' + resolvedCate.prefix,

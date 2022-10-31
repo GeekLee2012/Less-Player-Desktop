@@ -72,6 +72,22 @@ watch(() => props.checked,  (nv, ov) => {
     setChecked(nv)
 })
 
+const isExtra1Available = () => {
+    const extra = props.data.extra1
+    if(typeof(extra) === 'string') {
+        return extra ? extra.trim().length > 0 : false 
+    }
+    return false
+}
+
+const isExtra2Available = () => {
+    const extra = props.data.extra2
+    if(typeof(extra) === 'string') {
+        return extra ? extra.trim().length > 0 : false 
+    }
+    return false
+}
+
 EventBus.on("checkbox-refresh", () => setChecked(false))
 </script>
 
@@ -95,19 +111,21 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
                 -->
             </div>
         </div>
-        <div class="artist spacing1">
+        <div class="artist spacing1" v-show="!isExtra1Available()">
             <ArtistControl :visitable="artistVisitable && !checkbox"
                 :platform="data.platform"
                 :data="data.artist"
                 :trackId="toString(data.id)" >
             </ArtistControl>
         </div>
-        <div class="album spacing1">
+        <div class="album spacing1" v-show="!isExtra2Available()">
             <AlbumControl :visitable="albumVisitable && !checkbox"
                 :platform="data.platform"
                 :data="data.album" >
             </AlbumControl>
         </div>
+        <div class="extra1 spacing1" v-show="isExtra1Available()">{{ data.extra1 }}</div>
+        <div class="extra2 spacing1" v-show="isExtra2Available()">{{ data.extra2 }}</div>
         <div class="duration spacing1">{{ Track.mmssDuration(data) }}</div>
     </div>
 </template>
@@ -192,12 +210,24 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     z-index: 1;
 }
 
-.song-item .artist {
+.song-item .artist, 
+.song-item .extra1 {
     width: 25%;
 }
 
-.song-item .album {
+.song-item .album,
+.song-item .extra2 {
     width: 25%;
+}
+
+.song-item .extra1,
+.song-item .extra2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: left;
 }
 
 .song-item .duration {

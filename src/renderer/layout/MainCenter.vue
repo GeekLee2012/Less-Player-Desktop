@@ -7,13 +7,14 @@ import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
 import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
 import ArtistCategoryView from '../views/ArtistCategoryView.vue';
+import RadioCategoryView from '../views/RadioCategoryView.vue';
 import EventBus from '../../common/EventBus';
 import Mousetrap from 'mousetrap';
 import { useRouter } from 'vue-router';
 
 
-const { playlistCategoryViewShow, artistCategoryViewShow } = storeToRefs(useAppCommonStore())
-const { hidePlaylistCategoryView, hideArtistCategoryView, 
+const { playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow } = storeToRefs(useAppCommonStore())
+const { hidePlaylistCategoryView, hideArtistCategoryView,  hideRadioCategoryView,
     hidePlaybackQueueView, hideAllCtxMenus,
     togglePlaybackQueueView, togglePlayingView, 
     hidePlayingView } = useAppCommonStore()
@@ -74,14 +75,16 @@ const setSearchBarSize = () => {
     el.style.width = size + "px"
 }
 
-const setCategorySize = () => {
+const setCategoryViewSize = () => {
     const mainContent = document.getElementById('main-content')
     const playlistCategory = document.querySelector('#playlist-category-view')
     const artistCategory = document.querySelector('#artist-category-view')
+    const radioCategory = document.querySelector('#radio-category-view')
     const { clientHeight } = mainContent, padding = 30
     const height = (clientHeight - padding)
     if(playlistCategory) playlistCategory.style.height = height + "px"
     if(artistCategory) artistCategory.style.height = height + "px"
+    if(radioCategory) radioCategory.style.height = height + "px"
 }
 
 const setImageTextTileSize = () => {
@@ -186,6 +189,13 @@ const setBatchViewListSize = () => {
     if(el) el.style.height = height + "px"
 }
 
+const hideAllFloatingViews = () => {
+    hidePlaybackQueueView()
+    hidePlaylistCategoryView()
+    hideArtistCategoryView()
+    hideRadioCategoryView()
+}
+
 onMounted (() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', e => {
@@ -197,7 +207,7 @@ onMounted (() => {
         setImageTextTileSize()
         setImageTextTileLoadingMaskSize()
         //自适应分类列表大小
-        setCategorySize()
+        setCategoryViewSize()
         //自适应当前播放列表大小
         //setPlaybackQueueSize()
         //自适应播放页封面大小
@@ -212,14 +222,10 @@ onMounted (() => {
     
     //点击事件监听
     document.addEventListener('click', e => {
-        //隐藏当前播放列表
-        hidePlaybackQueueView()
         //强制分类列表重置大小
-        setCategorySize()
-        //隐藏歌单分类列表
-        hidePlaylistCategoryView()
-        //隐藏歌手分类列表
-        hideArtistCategoryView()
+        setCategoryViewSize()
+        //隐藏浮层
+        hideAllFloatingViews()
         //隐藏上下文菜单
         hideAllCtxMenus()
     })
@@ -235,7 +241,7 @@ EventBus.on("imageTextTile-load", () => {
 })
 EventBus.on("batchView-show", setBatchViewListSize)
 //TODO
-watch([ playlistCategoryViewShow, artistCategoryViewShow ], setCategorySize)
+watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
 </script>
 
 <template>
@@ -253,6 +259,11 @@ watch([ playlistCategoryViewShow, artistCategoryViewShow ], setCategorySize)
         <transition name="fade-ex">
             <ArtistCategoryView id="artist-category-view" v-show="artistCategoryViewShow">
             </ArtistCategoryView> 
+        </transition>
+
+        <transition name="fade-ex">
+            <RadioCategoryView id="radio-category-view" v-show="radioCategoryViewShow">
+            </RadioCategoryView> 
         </transition>
     </div>
 </template>
@@ -278,7 +289,8 @@ watch([ playlistCategoryViewShow, artistCategoryViewShow ], setCategorySize)
 }
 
 #playlist-category-view,
-#artist-category-view {
+#artist-category-view,
+#radio-category-view {
     position: fixed;
     top: 75px;
     top: 85px;

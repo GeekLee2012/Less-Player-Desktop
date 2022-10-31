@@ -7,7 +7,7 @@ const ipcRenderer = useIpcRenderer()
 const THEMES = [{
     id: 'dark',
     name: '默认1',
-    bg: '#464646',
+    bg: '#313131',
     dark: true
 }, {
     id: 'white',
@@ -24,7 +24,7 @@ const THEMES = [{
     id: 'pink',
     name: '粉色1',
     //bg: '#e667af',
-    bg: '#fc589c',
+    bg: '#e667af',
     dark: false
 }, {
     id: 'pink2',
@@ -48,7 +48,7 @@ const THEMES = [{
     id: 'red2',
     name: '红色2',
     //bg: '#ef5350',
-    bg: '#f9453f',
+    bg: '#d53943',
     dark: false
 }, {
     id: 'green',
@@ -75,7 +75,7 @@ const THEMES = [{
 }, {
     id: 'yellow2',
     name: '黄色2',
-    bg: '#ffb300',
+    bg: '#fc9b29',
     dark: false
 }, {
     id: 'purple',
@@ -132,7 +132,7 @@ export const useSettingStore = defineStore('setting', {
         /* 导航栏 */
         navigation: {
             customPlaylistsShow: false,
-            favouritePlaylistsShow: false,
+            favoritePlaylistsShow: false,
             followArtistsShow: false,
         },
         /* 对话框 */
@@ -215,8 +215,8 @@ export const useSettingStore = defineStore('setting', {
     actions: {
         setThemeIndex(index) {
             this.theme.index = index
-            const themeId = THEMES[index].id
-            EventBus.emit("switchTheme", themeId)
+            //const themeId = THEMES[index].id
+            //EventBus.emit("switchTheme", themeId)
         },
         getCurrentThemeId() {
             let index = this.theme.index
@@ -243,8 +243,8 @@ export const useSettingStore = defineStore('setting', {
         toggleCustomPlaylistsShow() {
             this.navigation.customPlaylistsShow = !this.navigation.customPlaylistsShow
         },
-        toggleFavouritePlaylistsShow() {
-            this.navigation.favouritePlaylistsShow = !this.navigation.favouritePlaylistsShow
+        toggleFavoritePlaylistsShow() {
+            this.navigation.favoritePlaylistsShow = !this.navigation.favoritePlaylistsShow
         },
         toggleFollowArtistsShow() {
             this.navigation.followArtistsShow = !this.navigation.followArtistsShow

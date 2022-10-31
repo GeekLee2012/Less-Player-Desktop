@@ -3,10 +3,11 @@ import { PLAY_MODE } from '../../common/Constants';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { toMmss } from '../../common/Times';
+import { Playlist } from '../../common/Playlist';
 
-const NO_TRACK = new Track(0, '', '听你想听，爱你所爱', 
-    [ { id: 0, name: '不枉青春' }], 
-    { id: 0, name: '山川湖海，日月星辰' }, 
+const NO_TRACK = new Track('0', '', '听你想听，爱你所爱', 
+    [ { id: '0', name: '不枉青春' }], 
+    { id: '0', name: '山川湖海，日月星辰' }, 
     0, 'default_cover.png')
 
 export const usePlayStore = defineStore('play', {
@@ -31,7 +32,7 @@ export const usePlayStore = defineStore('play', {
         },
         isCurrentTrack(state) {
             return (track) => {
-                return track.id > 0 && state.currentTrack.id == track.id
+                return state.currentTrack.id == track.id
             }
         },
         track(state) {
@@ -62,7 +63,7 @@ export const usePlayStore = defineStore('play', {
         },
         togglePlay() {
             //FM广播
-            if(this.currentTrack.isFMRadio) {
+            if(Playlist.isFMRadioType(this.currentTrack)) {
                 EventBus.emit('radio-togglePlay')
                 return 
             }
@@ -136,7 +137,7 @@ export const usePlayStore = defineStore('play', {
             this.progress = 0.0
         },
         __changeTrack(track) {
-            if(track.isFMRadio) {
+            if(Playlist.isFMRadioType(track)) {
                 this.__resetPlayState()
                 EventBus.emit('radio-play', track)
             } else {
@@ -160,7 +161,7 @@ export const usePlayStore = defineStore('play', {
             }
             this.playingIndex = index
             //FM广播
-            if(track.isFMRadio) {
+            if(Playlist.isFMRadioType(track)) {
                 EventBus.emit('radio-play', track)
                 return
             }
@@ -191,8 +192,7 @@ export const usePlayStore = defineStore('play', {
         },
         playNextTrack() {
             //TODO
-            if(this.currentTrack.isRadioType 
-                && !this.currentTrack.isFMRadio) {
+            if(Playlist.isNormalRadioType(this.currentTrack)) {
                 EventBus.emit('radio-nextTrack', this.currentTrack)
                 return 
             }

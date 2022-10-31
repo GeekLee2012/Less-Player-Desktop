@@ -2,12 +2,16 @@
 </template>
 
 <style>
+:root {
+  --scrollbar-width: 6px;
+}
+
 .btnDisabled {
     opacity: 0.33;
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
+  width: var(--scrollbar-width);
 }
 
 ::-webkit-scrollbar-track {

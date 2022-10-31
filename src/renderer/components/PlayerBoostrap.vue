@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted } from 'vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -6,11 +7,11 @@ import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { storeToRefs } from 'pinia';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { onMounted } from 'vue';
 import { useIpcRenderer } from '../../common/Utils';
 import { PLAY_STATE, TRAY_ACTION } from '../../common/Constants';
 import { useRouter } from 'vue-router';
 import { useSettingStore } from '../store/settingStore';
+import { Playlist } from '../../common/Playlist';
 
 const router = useRouter()
 const ipcRenderer = useIpcRenderer()
@@ -21,7 +22,7 @@ const { playTrack, playNextTrack,
     togglePlay, switchPlayMode,
     toggleVolumeMute, updateVolumeByOffset,
     updateCurrentTime, setPlaying  } = usePlayStore()
-const { getVender } = usePlatformStore()
+const { getVender, isLocalMusic } = usePlatformStore()
 const { showPlayNotification, hidePlayNotification, 
     hidePlayingView, hidePlaybackQueueView, togglePlaybackQueueView } = useAppCommonStore()
 const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
@@ -42,6 +43,7 @@ const loadLyric = (track) => {
     const platform = track.platform
     const vender = getVender(platform);
     if(!vender) return 
+    if(Playlist.isFMRadioType(track) || Playlist.isAnchorRadioType(track)) return 
     vender.lyric(track.id, track).then(result => assignLyric(track, result))
 }
 
@@ -76,9 +78,9 @@ const tryCancelPlayNextTimer = () => {
 let toastCnt = 0 //连跳计数器
 const bootstrapTrack = (track, callback, noToast) => {
     if(!track) return 
-    const { id, platform, isFMRadio, isRadioType, artistNotCompleted }= track
+    const { id, platform, artistNotCompleted }= track
     const vender = getVender(platform);
-    if(!vender || isFMRadio) return
+    if(!vender || Playlist.isFMRadioType(track)) return
     vender.playDetail(id, track).then(result => {
         const { lyric, cover, artist, url } = result
         if(Track.hasUrl(result)) Object.assign(track, { url })
@@ -86,7 +88,7 @@ const bootstrapTrack = (track, callback, noToast) => {
         tryCancelPlayNextTimer()
         //if(!Track.hasUrl(track)) track = await United.transferTrack(track)
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
-            if(queueTracksSize.value < 2 && !isRadioType) { //非电台歌曲，且没有下一曲
+            if(queueTracksSize.value < 2 && !Playlist.isNormalRadioType(track)) { //非电台歌曲，且没有下一曲
                 if(!noToast) showToast()
             } else if(toastCnt < 9) { 
                 setAutoPlaying(true)
@@ -117,8 +119,9 @@ const bootstrapTrack = (track, callback, noToast) => {
 }
 
 const traceRecentPlay = (track) => {
-    const { isFMRadio } = track
-    if(isFMRadio) {
+    const { platform } = track
+    if(isLocalMusic(platform)) return
+    if(Playlist.isFMRadioType(track)) {
         addRecentRadio(track)
     } else {
         addRecentSong(track)
@@ -229,9 +232,9 @@ const registryIpcRenderderListeners = () => {
 }
 
 registryIpcRenderderListeners()
-
 onMounted(initRadioPlayer)
 </script>
+
 <template>
     <!-- FM广播audio -->
     <audio class="radio-holder"></audio>

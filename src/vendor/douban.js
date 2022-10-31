@@ -19,24 +19,26 @@ export class DouBan {
     //全部分类
     static categories() {
         return new Promise((resolve, reject) => {
+            const result = { platform: DouBan.CODE, data: [], orders: [] }
             const defaultCategory = new Category("默认")
             defaultCategory.add("兆赫MHz", "MHz")
             //defaultCategory.add("为你推荐", '1')
             const songlistCategory = new Category('歌单')
-            const result = [ defaultCategory, songlistCategory ]
+            result.data.push(defaultCategory)
+            result.data.push(songlistCategory)
             
             const url = "https://fm.douban.com/j/v2/songlist/explore/genres"
             getJson(url).then(json => {
                 json.forEach(item => {
                     songlistCategory.add(item.name, item.id + '')
                 })
-                resolve({ platform: DouBan.CODE, data: result })
+                resolve(result)
             })
         })
     }
 
     //歌单(列表)广场
-    static square(cate, offset, limit, page) {
+    static square(cate, offset, limit, page, order) {
         const originCate = cate
         let resolvedCate = cate.trim()
         resolvedCate = resolvedCate.length > 0  ? cate : 'MHz'

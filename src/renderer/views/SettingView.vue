@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onMounted } from 'vue';
+import { onActivated } from 'vue';
 import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import { storeToRefs } from 'pinia';
@@ -8,8 +8,8 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useIpcRenderer } from '../../common/Utils';
-import EventBus from '../../common/EventBus';
 import { useRouter } from 'vue-router';
+import { useUserProfileStore } from '../store/userProfileStore';
 
 const router = useRouter()
 const ipcRenderer = useIpcRenderer()
@@ -24,7 +24,7 @@ const { setThemeIndex,
         toggleStoreLocalMusic,
         toggleTrayShow,
         toggleCustomPlaylistsShow,
-        toggleFavouritePlaylistsShow,
+        toggleFavoritePlaylistsShow,
         toggleFollowArtistsShow,
         toggleKeysGlobal,
         updateBlackHole,
@@ -39,9 +39,42 @@ const visitMoreTheme = () => {
     //router.push('/setting/themes')
 } 
 
+const visitDataBackView = () => {
+    router.push('/data/backup')
+}
+
+const visitDataRestoreView = () => {
+    router.push('/data/restore')
+}
+
+const resetData = async () => {
+    if(!ipcRenderer) return 
+    const ok = await ipcRenderer.invoke('show-confirm', {
+        title: "确认",
+        msg: "数据重置，将会清空我的主页、恢复默认设置。确定要继续吗？"
+    })
+    if(!ok) return
+    const userProfileStore = useUserProfileStore()
+    const settingStore = useSettingStore()
+
+    userProfileStore.$reset()
+    settingStore.$reset()
+
+    const storeKeys = [ 'userProfile', 'setting' ]
+    storeKeys.forEach(key => {
+        localStorage.removeItem(key)
+    })
+
+    showToast("数据已重置成功!")
+} 
+
 const visitLink = (url) => {
     if(ipcRenderer) ipcRenderer.send('visit-link', url)
 }
+
+onActivated(() => {
+    updateBlackHole(Math.random() * 100000000)
+})
 </script>
 
 <template>
@@ -66,7 +99,7 @@ const visitLink = (url) => {
                 <b>播放歌曲</b>
                 <div class="content">
                     <div>
-                        <b>优先音质：</b>
+                        <b>优先音质（暂时无法支持）：</b>
                         <span v-for="(item,index) in allQualities()"
                             :class="{ active: index == track.quality.index }"
                             @click="setTrackQualityIndex(index)" >
@@ -140,8 +173,8 @@ const visitLink = (url) => {
                     </div>
                     <div>
                         <b>收藏的歌单：</b>
-                        <ToggleControl @click="toggleFavouritePlaylistsShow"
-                            :value="navigation.favouritePlaylistsShow">
+                        <ToggleControl @click="toggleFavoritePlaylistsShow"
+                            :value="navigation.favoritePlaylistsShow">
                         </ToggleControl>
                     </div>
                     <div class="last">
@@ -222,11 +255,11 @@ const visitLink = (url) => {
                 <b>数据</b>
                 <div class="content">
                     <div class="last">
-                        <SvgTextButton text="备份" :leftAction="null">
+                        <SvgTextButton text="备份" :leftAction="visitDataBackView">
                         </SvgTextButton>
-                        <SvgTextButton text="还原" :leftAction="null" class="spacing">
+                        <SvgTextButton text="还原" :leftAction="visitDataRestoreView" class="spacing">
                         </SvgTextButton>
-                        <SvgTextButton text="重置" :leftAction="null" class="spacing">
+                        <SvgTextButton text="重置" :leftAction="resetData" class="spacing">
                         </SvgTextButton>
                     </div>
                 </div>
@@ -278,6 +311,10 @@ const visitLink = (url) => {
     flex-direction: column;
     text-align: left;
     overflow: auto;
+}
+
+#setting-view .unsupported {
+    text-decoration: line-through;
 }
 
 #setting-view .tip-text {

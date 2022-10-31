@@ -108,9 +108,11 @@ onMounted(() => {
     fill: var(--svg-color);
 }
 
-.playback-queue .text-btn:hover,
-.playback-queue .text-btn:hover svg {
+.playback-queue .text-btn:hover {
     color: var(--hl-color);
+}
+
+.playback-queue .text-btn:hover svg {
     fill: var(--hl-color);
 }
 

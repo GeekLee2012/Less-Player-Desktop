@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import EventBus from "../../common/EventBus";
 import { randomTextWithinAlphabetNums } from "../../common/Utils";
+import { Playlist } from "../../common/Playlist";
 
 
 const filterByPlatform = (state, platform) => {
@@ -40,6 +41,9 @@ export const useUserProfileStore = defineStore("userProfile", {
         
     }),
     getters: {
+        getUserCover() { //Potrait
+            return this.user.cover
+        },
         getUserNickName() {
             let nickname = this.user.nickname
             if(nickname && nickname.trim().length > 0) {
@@ -54,17 +58,17 @@ export const useUserProfileStore = defineStore("userProfile", {
             }
             return "这个人很懒，什么也没留下~"
         },
-        getFavouriteSongs() {
+        getFavoriteSongs() {
             return (platform) => filterByPlatform(this.favorites.songs, platform)
         },
-        getFavouritePlaylilsts() {
+        getFavoritePlaylilsts() {
             return (platform) => filterByPlatform(this.favorites.playlists, platform)
         },
-        getFavouriteAlbums() {
+        getFavoriteAlbums() {
             return (platform) => filterByPlatform(this.favorites.albums, platform)
         },
-        getFavouriteRadios() {
-            return this.favorites.radios
+        getFavoriteRadios() {
+            return (platform) => filterByPlatform(this.favorites.radios, platform)
         },
         getCustomPlaylists() {
             return this.customPlaylists
@@ -82,7 +86,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             return (platform) => filterByPlatform(this.recents.albums, platform)
         },
         getRecentRadios() {
-            return this.recents.radios
+            return (platform) => filterByPlatform(this.recents.radios, platform)
         },
     },
     actions: {
@@ -95,7 +99,9 @@ export const useUserProfileStore = defineStore("userProfile", {
             if(!item) return -1
             return state.findIndex(e => {
                 return compareFn ? compareFn(item, e) : 
-                    (item.id === e.id && item.platform == e.platform)
+                    (item.id && e.id 
+                    && (item.id + '') === (e.id + '') 
+                    && item.platform == e.platform)
             })
         },
         addItem(state, item, compareFn) {
@@ -132,56 +138,59 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.insertFirst(state, item, compareFn)
         },
         //我的收藏
-        addFavouritePlaylist(id, platform, title, cover) {
+        addFavoritePlaylist(id, platform, title, cover, type) {
             this.addItem(this.favorites.playlists, {
-                id, platform, title, cover
+                id, platform, title, cover, type
             })
         },
-        addFavouriteAlbum(id, platform, title, cover, publishTime) {
+        addFavoriteAlbum(id, platform, title, cover, publishTime) {
             this.addItem(this.favorites.albums, {
                 id, platform, title, cover, publishTime
             })
         },
-        addFavouriteSong(id, platform, title, artist, album, duration, cover) {
-            this.addItem(this.favorites.songs, {
-                id, platform, title, artist, album, duration, cover
+        addFavoriteTrack(track) {
+            const { id, platform, title, artist, album, duration, cover, 
+                type, pid, songlistId, extra1, extra2 } = track
+            //TODO
+            const url = Playlist.isAnchorRadioType(track) ? track.url : null
+            this.addItem(this.favorites.songs, { 
+                id, platform, title, artist, album, duration, cover, url,
+                type, pid, songlistId, extra1, extra2
             })
         },
-        addFavouriteTrack(track) {
-            const { id, platform, title, artist, album, duration, cover } = track
-            this.addFavouriteSong(id, platform, title, artist, album, duration, cover)
-        },
-        addFavouriteRadio(track) {
-            const { id, platform, title, cover, artist, isFMRadio, channel } = track
+        addFavoriteRadio(track) {
+            const { id, platform, title, cover, artist, url, 
+                type, pid, songlistId, extra1, extra2  } = track
             this.addItem(this.favorites.radios, {
-                id, platform, title, cover, artist, isFMRadio, channel
+                id, platform, title, cover, artist, url, 
+                type, pid, songlistId, extra1, extra2
             })
         },
-        removeFavouritePlaylist(id, platform) {
+        removeFavoritePlaylist(id, platform) {
             this.removeItem(this.favorites.playlists, { id, platform })
         },
-        removeFavouriteAlbum(id, platform) {
+        removeFavoriteAlbum(id, platform) {
             this.removeItem(this.favorites.albums, { id, platform })
         },
-        removeFavouriteSong(id, platform) {
+        removeFavoriteSong(id, platform) {
             this.removeItem(this.favorites.songs, { id, platform })
         },
-        removeFavouriteRadio(id, platform) {
+        removeFavoriteRadio(id, platform) {
             this.removeItem(this.favorites.radios, { id, platform })
         },
-        isFavouritePlaylist(id, platform) {
+        isFavoritePlaylist(id, platform) {
             return this.findItemIndex(this.favorites.playlists, { id, platform}) > -1
         },
-        isFavouriteAlbum(id, platform) {
+        isFavoriteAlbum(id, platform) {
             return this.findItemIndex(this.favorites.albums, { id, platform}) > -1
         },
-        isFavouriteSong(id, platform) {
+        isFavoriteSong(id, platform) {
             return this.findItemIndex(this.favorites.songs, { id, platform}) > -1
         },
-        isFavouriteRadio(id, platform) {
+        isFavoriteRadio(id, platform) {
             return this.findItemIndex(this.favorites.radios, { id, platform}) > -1
         },
-        removeAllFavourites() {
+        removeAllFavorites() {
             this.favorites.songs.length = 0
             this.favorites.playlists.length = 0
             this.favorites.albums.length = 0
@@ -195,8 +204,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             try {
                 states.forEach(state => {
                     state.forEach(item => {
-                        const { isFMRadio } = item
-                        if(isFMRadio) return
+                        if(Playlist.isFMRadioType(item)) return
                         props.forEach(p => {
                             Reflect.deleteProperty(item, p)
                         })
@@ -286,10 +294,12 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         //最近播放
         addRecentSong(track) {
-            const { id, platform, title, artist, album, duration, cover } = track
+            const { id, platform, title, artist, album, duration, cover, type, pid, songlistId, extra1, extra2 } = track
             if(!platform || platform.trim().length < 1) return 
+            //TODO
+            const url = Playlist.isAnchorRadioType(track) ? track.url : null
             this.uniqueInsertFirst(this.recents.songs, { 
-                id, platform, title, artist, album, duration, cover 
+                id, platform, title, artist, album, duration, cover, url, type, pid, songlistId, extra1, extra2
             })
             //TODO
             const limit = 999
@@ -299,9 +309,9 @@ export const useUserProfileStore = defineStore("userProfile", {
                 this.refreshUserHome()
             }
         },
-        addRecentPlaylist(id, platform, title, cover) {
+        addRecentPlaylist(id, platform, title, cover, type) {
             this.uniqueInsertFirst(this.recents.playlists, {
-                id, platform, title, cover
+                id, platform, title, cover, type
             })
         },
         addRecentAlbum(id, platform, title, cover, publishTime) {
@@ -310,9 +320,9 @@ export const useUserProfileStore = defineStore("userProfile", {
             })
         },
         addRecentRadio(track) {
-            const { id, platform, title, cover, artist, isFMRadio, channel } = track
+            const { id, platform, title, cover, type, } = track
             this.uniqueInsertFirst(this.recents.radios, {
-                id, platform, title, cover, artist, isFMRadio, channel
+                id, platform, title, cover, type, data: [ track ]
             })
         },
         removeRecentSong(track) {

@@ -360,9 +360,8 @@ export class QQ {
                 inCharset: 'utf8',
                 outCharset: 'utf8'
             }
+            const result = { platform: QQ.CODE, data: [], orders: [] }
             getJson(url, reqBody).then(json => {
-                const result = []
-                //
                 const cateNameCached = []
                 const list = json.data.categories
                 list.forEach(cate => {
@@ -375,20 +374,20 @@ export class QQ {
                         category.add(name, id)
                     })
                     if(cateNameCached.includes(cateName)) return
-                    result.push(category)
+                    result.data.push(category)
                     cateNameCached.push(cateName)
                 })
-                const firstCate = result[0]
+                const firstCate = result.data[0]
                 firstCate.data.splice(1, 0, { key: '最新', value: QQ.NEW_CODE })
                 firstCate.data.splice(2, 0, { key: '排行榜', value: QQ.TOPLIST_CODE })
                 firstCate.data.splice(3, 0, { key: '电台', value: QQ.RADIO_CODE })        
-                resolve({ platform: QQ.CODE, data: result })
+                resolve(result)
             })
         })
     }
 
     //排行榜列表
-    static toplist(cate, offset, limit, page) {
+    static toplist(cate, offset, limit, page, order) {
         return new Promise((resolve, reject) => {
             let result = { platform: QQ.CODE, cate, offset: 0, limit: 100, page: 1, total: 0, data: [] }
             if(page > 1) {
@@ -497,14 +496,14 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = radioListReqBody()
             getJson(url, reqBody).then(json => {
-                
                 const radioList = json.req_1.data.radio_list
                 radioList.forEach(group => {
                     group.list.forEach(item => {
                         const cid = item.id
                         const title = group.title + '| ' + item.title
                         const playlist = new Playlist(cid, QQ.CODE, item.pic_url, title)
-                        playlist.isRadioType = true
+                        //playlist.isRadioType = true
+                        playlist.type = Playlist.NORMAL_RADIO_TYPE
                         result.data.push(playlist)
                     })
                 })
@@ -536,7 +535,6 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = radioSonglistReqBody(channel, firstplay)
             getJson(url, reqBody).then(json => {
-                
                 const list = json.req_1.data.track_list
                 list.forEach(item => {
                     const artist = item.singer.map(ar => ({id: ar.mid, name: ar.name }))
@@ -544,7 +542,8 @@ export class QQ {
                     const duration = item.interval * 1000
                     const cover = getAlbumCover(item.album.mid)
                     const cache = new Track(item.mid, QQ.CODE, item.title, artist, album, duration, cover)
-                    cache.isRadioType = true
+                    //cache.isRadioType = true
+                    cache.type = Playlist.NORMAL_RADIO_TYPE
                     cache.channel = channel
                     QQ.RADIO_CACHE.data.push(cache)
                 })
@@ -985,7 +984,7 @@ export class QQ {
     }
 
     //提取分类
-    static parseCate(cate) {
+    static parseArtistCate(cate) {
         const result = { area: -100, sex: -100, genre: -100, index: -100 }
         const source = {}
         const tagsMap = QQ.tagsMap()
@@ -1006,7 +1005,7 @@ export class QQ {
         return new Promise((resolve, reject) => {
             const result = { platform: QQ.CODE, cate, offset, limit, page, total: 0, data: [] }
             const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
-            const resolvedCate = QQ.parseCate(cate)
+            const resolvedCate = QQ.parseArtistCate(cate)
             const reqBody = {
                 data: JSON.stringify({
                     comm: { 

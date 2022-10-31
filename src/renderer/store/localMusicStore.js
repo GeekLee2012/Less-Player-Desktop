@@ -11,13 +11,15 @@ export const useLocalMusicStore = defineStore('localMusic', {
         isLoading: false
     }),
     getters: {
-        
+        getLocalSongs() {
+            return this.localTracks
+        }
     },
     actions: {
         async addFolders() {
             if(!ipcRenderer) return 
             this.isLoading = true
-            const result = await ipcRenderer.invoke('open-dirs')
+            const result = await ipcRenderer.invoke('open-audio-dirs')
             
             if(result) {
                 this.localDirs.push(result.path)
@@ -30,7 +32,7 @@ export const useLocalMusicStore = defineStore('localMusic', {
         async addFiles() {
             if(!ipcRenderer) return 
             this.isLoading = true
-            const result = await ipcRenderer.invoke('open-files')
+            const result = await ipcRenderer.invoke('open-audios')
             
             if(result) {
                 result.forEach(item => {
