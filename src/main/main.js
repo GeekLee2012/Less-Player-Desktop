@@ -8,8 +8,7 @@ const path = require('path')
 const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX, 
   randomTextWithinAlphabetNums } = require('./common')
 
-//电源模式
-let powerSaveBlockerId = -1, appTray = null
+let mainWin = null, powerSaveBlockerId = -1, appTray = null
 
 /* 自定义函数 */
 const startup = () => {
@@ -26,14 +25,14 @@ const init = () => {
     //registryGlobalShortcuts()
     //全局UserAgent
     app.userAgentFallback = USER_AGENT
-    app.mainWin = createWindow()
+    mainWin = createWindow()
   })
 
   app.on('activate', (event) => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-        app.mainWin = createWindow()
+        mainWin = createWindow()
     }
   })
 
@@ -75,7 +74,7 @@ const registryGlobalShortcuts = () => {
   for(const [ key, value ] of Object.entries(config)) {
     globalShortcut.register(key, () => {
       sendToRenderer('globalShortcut-' + value)
-      if(activeWindowValues.includes(value)) app.mainWin.show()
+      if(activeWindowValues.includes(value)) mainWin.show()
     })
   }
 }
@@ -86,13 +85,11 @@ const registryGlobalListeners = () => {
   ipcMain.on('app-quit', ()=> {
     app.quit()
   }).on('app-min', ()=> {
-    const win = app.mainWin
-    if(win.isFullScreen()) win.setFullScreen(false)
-    if(win.isNormal()) win.minimize()
+    if(mainWin.isFullScreen()) mainWin.setFullScreen(false)
+    if(mainWin.isNormal()) mainWin.minimize()
   }).on('app-max', ()=> {
-    const win = app.mainWin
-    const isFullScreen = !win.isFullScreen()
-    win.setFullScreen(isFullScreen)
+    const isFullScreen = !mainWin.isFullScreen()
+    mainWin.setFullScreen(isFullScreen)
     sendToRenderer('app-max', isFullScreen)
   }).on('app-suspension', (e, data)=> {
     if(data === true) {
@@ -126,7 +123,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-audio-dirs', async (event, ...args) => {
-    const result = await dialog.showOpenDialog(app.mainWin, {
+    const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件夹',
       properties: [ 'openDirectory' ]
     })
@@ -135,7 +132,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-audios', async (event, ...args) => {
-    const result = await dialog.showOpenDialog(app.mainWin, {
+    const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件',
       filters: [
         { name: 'Audios', extensions: AUDIO_EXTS}
@@ -147,7 +144,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-image', async (event, ...args) => {
-    const result = await dialog.showOpenDialog(app.mainWin, {
+    const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件',
       filters: [
         { name: 'Image', extensions: IMAGE_EXTS}
@@ -170,7 +167,7 @@ const registryGlobalListeners = () => {
 
   ipcMain.handle('save-file', async (event, ...args) => {
     const { title, name, data } = args[0]
-    const result = await dialog.showSaveDialog(app.mainWin, {
+    const result = await dialog.showSaveDialog(mainWin, {
       title: (title || '文件保存'),
       defaultPath: (name ? name : null),
     })
@@ -179,7 +176,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-backup-file', async (event, ...args) => {
-    const result = await dialog.showOpenDialog(app.mainWin, {
+    const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择备份文件',
       filters: [ { name: 'JSON文件', extensions: [ '.json' ]} ],
       properties: [ 'openFile']
@@ -192,7 +189,7 @@ const registryGlobalListeners = () => {
 
   ipcMain.handle('show-confirm', async (event, ...args) => {
     const { title, msg } = args[0]
-    const result = await dialog.showMessageBox(app.mainWin, {
+    const result = await dialog.showMessageBox(mainWin, {
       message: msg,
       type: "warning",
       title: (title || '确认'),
@@ -290,7 +287,7 @@ const initAppMenuTemplate = () => {
 
 const sendToRenderer = (channel, args) => {
   try {
-    if(app.mainWin) app.mainWin.webContents.send(channel, args)
+    if(mainWin) mainWin.webContents.send(channel, args)
   } catch(error) {
 
   }
@@ -303,7 +300,7 @@ const initTrayMenuTemplate = () => {
   const template = [{
     label: '听你想听，爱你所爱',
     click: () => {
-      app.mainWin.show()
+      mainWin.show()
       sendTrayAction(4)
     }
   }, {
@@ -322,13 +319,13 @@ const initTrayMenuTemplate = () => {
   }, {
     label: '我的主页',
     click: () => {
-      app.mainWin.show()
+      mainWin.show()
       sendTrayAction(5)
     }
   }, {
     label: '设置',
     click: () => {
-      app.mainWin.show()
+      mainWin.show()
       sendTrayAction(6)
     }
   }, {
@@ -344,7 +341,7 @@ const initTrayMenuTemplate = () => {
 const setWindowButtonVisibility = (visible) => {
   if(!isMacOS) return
   try {
-    app.mainWin.setWindowButtonVisibility(visible)
+    mainWin.setWindowButtonVisibility(visible)
   } catch (error) {
     console.log(error)
   }
