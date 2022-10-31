@@ -112,6 +112,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='white'] {
@@ -187,6 +190,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='light'] {
@@ -268,6 +274,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: var(--svg-btn-color);
 }
 
 :root[theme='pink'] {
@@ -343,6 +352,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='pink2'] {
@@ -422,6 +434,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='pink-red'] {
@@ -502,6 +517,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #ccc;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: var(--svg-btn-color);
 }
 
 :root[theme='red'] {
@@ -579,6 +597,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #ccc;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='red2'] {
@@ -660,6 +681,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #ccc;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='green'] {
@@ -698,7 +722,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --progress-bg: linear-gradient(to right, #64903f88, #64903f88);
   --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
-  --scrollbar-thumb-bg: #999;
+  --scrollbar-thumb-bg: #919793;
   /* 列表项 hover */
   --list-item-hover: #ffffff88 !important;
   --list-item-active-bg: var(--btn-bg);
@@ -741,6 +765,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: var(--svg-btn-color);
 }
 
 :root[theme='green2'] {
@@ -823,6 +850,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: var(--svg-btn-color);
 }
 
 :root[theme='blue'] {
@@ -908,6 +938,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: #ccc;
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='yellow'] {
@@ -987,6 +1020,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='yellow2'] {
@@ -1071,6 +1107,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='black'] {
@@ -1146,6 +1185,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='purple'] {
@@ -1218,14 +1260,17 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #fff;
   --logo-bg: #9c27b0;
-  --logo-color: #fff;
   --logo-color: #ffb300;
+  --logo-color: #fff;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 :root[theme='purple2'] {
@@ -1310,6 +1355,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-border-color: var(--main-left-border-color);
   --input-border-color: #fdfdf266;
   --input-placeholder-color: #888;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
 }
 
 ::-webkit-scrollbar-thumb {

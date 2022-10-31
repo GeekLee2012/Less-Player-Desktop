@@ -106,14 +106,14 @@ defineExpose({
 }
 
 .back2top-btn:hover {
-    background: var(--btn-hover-bg);
+    background: var(--back2top-btn-bg);
 }
 
 .back2top-btn svg {
-    fill: #fff !important;
+    fill: var(--back2top-btn-svg-color) !important;
 }
 
 .back2top-btn svg:hover {
-    fill: #fff !important;
+    fill: var(--back2top-btn-svg-color) !important;
 }
 </style>
