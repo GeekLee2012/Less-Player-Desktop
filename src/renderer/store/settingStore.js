@@ -62,10 +62,15 @@ const THEMES = [{
     name: '绿色2',
     bg: '#054a34',
     dark: true
-},  {
+}, {
     id: 'blue',
-    name: '蓝色',
+    name: '蓝色1',
     bg: '#56ccf2',
+    dark: false
+}, {
+    id: 'blue2',
+    name: '蓝色2',
+    bg: '#a8c5cb',
     dark: false
 }, {
     id: 'yellow',

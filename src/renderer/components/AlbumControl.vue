@@ -22,14 +22,13 @@ const { hidePlayingView } = useAppCommonStore()
 const visitAlbumDetail = (platform, id) => {
     const platformValid = isAlbumDetailVisitable(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
-    const visitable = props.visitable && platformValid && idValid 
+    const visitable = props.visitable && platformValid && idValid
     platform = platform.trim()
     if(visitable) {
         const fromPath = router.currentRoute.value.path
         let exploreMode = exploreModeCode.value
-        let moduleName = 'album'
-        let isAlbum = true
-        if(id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
+        let moduleName = 'album', isAlbum = true
+        if(id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
             moduleName = 'playlist'
             isAlbum = false

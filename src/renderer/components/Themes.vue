@@ -943,6 +943,90 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 }
 
+:root[theme='blue2'] {
+  /* 全局背景 */
+  --bg-color: #fff;
+  --app-bg: linear-gradient(to bottom right, #cce3e9, #a8c5cb);;
+  /* 文本 */
+  --text-color: #273b42;
+  --text-sub-color: #375b62;
+  --text-subtitle-color: #878b82;
+  --hl-color: #c5d8de;
+  --hl-color: #a8c5cb;
+  --hl-color: #273b42;
+  --hl-text-bg: linear-gradient(to right, #395a62, #395a62);
+  --hl-title-color: var(--hl-color);
+  /* 歌词文本颜色 */
+  --text-lyric-color: #395a62;
+  /* 按钮 */
+  --svg-color: #395a62;
+  --svg-hover-color: #273b42;
+  --svg-text-color: #fff;
+  --svg-btn-color: #fff;
+  --btn-bg: linear-gradient(to right, #a0665a, #ca655c);
+  --btn-bg: linear-gradient(to right, #395a62, #395a62);
+  --btn-hover-bg: linear-gradient(to top right, #395a62, #273b42) !important;
+  
+  --toggle-btn-bg: #979b92;
+  --toggle-thumb-bg: #c7cbc2;
+  --toggle-btn-border-color: #c7cbc2;
+  --toggle-btn-active-bg: #395a62;
+  --toggle-active-thumb-bg: #ffffffcb;
+  /* 进度条 */
+  --progress-track-bg: linear-gradient(to right, #ffffff99, #ffffff99) !important;
+  --progress-bg: linear-gradient(to top right, #0a262a, #0a262a);
+  --slider-thumb-bg: var(--svg-color);
+  /*滚动条*/
+  --scrollbar-thumb-bg: #395a6266;
+  /* 列表项 hover */
+  --list-item-hover: #91b6c0 !important;
+  --list-item-active-bg: var(--btn-bg);
+  /* 边框 */
+  --main-left-border-color: #878b82;
+  --ctx-menu-bg: var(--bg-color);
+  --ctx-menu-border-color: #ababab;
+  --border-color: transparent;
+  /* 设置页，每一分类栏底部分隔线颜色 */
+  --setting-bottom-border-color: transparent;
+  /* 当前播放列表 左侧边框高亮颜色 */
+  --pbq-hl-text-color: #182626;
+  --pbq-hl-text-color: #fff;
+  --pbq-hl-border: linear-gradient(to top right, #395a62, #273b42) 0 0 0 2;
+  /* 搜索框 */
+  --searchbar-bg: #fff;
+  --search-btn-bg: #fff;
+  --search-btn-svg-color: var(--svg-btn-color);
+  --search-btn-svg-color: var(--svg-color);
+  --searchbar-text-color: #414141;
+  --searchbar-border-color: transparent;
+  --searchbar-placeholder-color: #686868;
+  --searchbar-placeholder-color: #878b82;
+
+  --search-btn-hover-bg: var(--search-btn-bg);
+  --search-btn-hover-svg-color: var(--hl-color);
+  
+  /* 通知消息 */
+  --ntf-bg: var(--ctx-menu-bg);
+  --ntf-text-color: var(--text-color);
+  --ntf-border-color: var(--ctx-menu-border-color);
+  /* 加载中遮盖 */
+  --loading-mask-bg: linear-gradient(90deg,#91b6c088 8%,#91b6c055 18%,#91b6c088 33%);
+  --error-color: red;
+
+  --checkbox-bg: #fff;
+  --logo-bg: #395a62;
+  --logo-color: #fff;
+
+  --category-view-border: 0.1px solid var(--main-left-border-color);
+  --input-bg: #ffffffcb;
+  --input-text-color: var(--text-color);
+  --input-border-color: #ccc;
+  --input-placeholder-color: #878b82;
+
+  --back2top-btn-bg: var(--btn-hover-bg);
+  --back2top-btn-svg-color: #fff;
+}
+
 :root[theme='yellow'] {
   /* 全局背景 */
   --bg-color: #fff;

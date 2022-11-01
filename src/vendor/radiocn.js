@@ -215,7 +215,7 @@ export class RadioCN {
     }
 
     //歌词
-    static lyric(id) {
+    static lyric(id, track) {
         return new Promise((resolve, reject) => {
             resolve(new Lyric())
         })

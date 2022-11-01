@@ -90,7 +90,7 @@ onActivated(() => {
                         @click="setThemeIndex(index)" >
                         <b>{{ item.name }}</b>
                     </div>
-                    <div class="last more" @click="visitMoreTheme" >
+                    <div class="last more" @click="visitMoreTheme" v-show="false">
                         <b>...</b>
                     </div>
                 </div>
