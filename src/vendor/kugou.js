@@ -399,7 +399,8 @@ export class KuGou {
     //歌手详情：Name、Cover、简介(如果有)等
     static artistDetail(id) {
         return new Promise((resolve, reject) => {
-            const url = "https://www.kugou.com/singer/" + id + ".html"
+            //const url = "https://www.kugou.com/singer/" + id + ".html"
+            const url = "https://www.kugou.com/singer/info/" + id + "/"
             getDoc(url).then(doc => {
                 const cover = doc.querySelector('.sng_ins_1 .top img').getAttribute('_src')
                 const title = doc.querySelector('.sng_ins_1 .top .intro strong').textContent
@@ -658,12 +659,14 @@ export class KuGou {
                 return 
             }
             //const url = 'https://www.kugou.com/yy/html/singer.html'
-            const url = 'https://www.kugou.com/yy/singer/index/' + KuGou.parseArtistCate(cate, offset, limit, page) + '.html'
+            const resolvedCate = KuGou.parseArtistCate(cate, offset, limit, page)
+            const url = 'https://www.kugou.com/yy/singer/index/' + resolvedCate + '.html'
             getDoc(url).then(doc => {
                 let els = doc.querySelectorAll('.sng .r #list_head li')
                 els.forEach(el => {
                     const aEl = el.querySelector('.pic')
-                    const id = aEl.getAttribute('href').split('/singer/home/')[1].split('.html')[0]
+                    //const id = aEl.getAttribute('href').split('/singer/home/')[1].split('.html')[0]
+                    const id = aEl.getAttribute('href').split('/singer/info/')[1].split('/')[0]
                     const title = aEl.getAttribute('title')
                     let cover = aEl.querySelector('img').getAttribute('_src')
                     cover = cover.replace('/100/', '/240/')
@@ -673,7 +676,7 @@ export class KuGou {
                 els = doc.querySelectorAll('.sng .r .list1 li')
                 els.forEach(el => {
                     const aEl = el.querySelector('.text')
-                    const id = aEl.getAttribute('href').split('/singer/home/')[1].split('.html')[0]
+                    const id = aEl.getAttribute('href').split('/singer/info/')[1].split('/')[0]
                     const title = aEl.getAttribute('title')
                     //TODO
                     const cover = null

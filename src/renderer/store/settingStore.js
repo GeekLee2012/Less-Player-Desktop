@@ -72,7 +72,12 @@ const THEMES = [{
     name: '蓝色2',
     bg: '#a8c5cb',
     dark: false
-}, {
+},/*{
+    id: 'blue3',
+    name: '蓝色3',
+    bg: '#293581',
+    dark: false
+}, */ {
     id: 'yellow',
     name: '黄色1',
     bg: '#ffb300',
@@ -92,7 +97,12 @@ const THEMES = [{
     name: '紫色2',
     bg: '#4d3e72',
     dark: true
-}]   
+}, /*{
+    id: 'purple3',
+    name: '紫色3',
+    bg: '#5f3d70',
+    dark: true
+} */]   
 
 const QUALITIES = [{
     id: 'NQ',

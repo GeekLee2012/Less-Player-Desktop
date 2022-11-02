@@ -399,7 +399,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 }
 
 #main-left li:hover {
-    background-color: var(--list-item-hover);
+    background: var(--list-item-hover);
 }
 
 #favorite-playlist-list li {
