@@ -11,6 +11,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { ref } from 'vue';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { useSettingStore } from '../store/settingStore';
+import { Playlist } from '../../common/Playlist';
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -95,8 +96,11 @@ const visitArtist = (item, index) => {
 
 const visitFavourteItem = (item, index) => {
     activeCustomPlaylistIndex.value = -1
-    const exploreMode = exploreModeCode.value
+    let exploreMode = exploreModeCode.value
     const { id, platform } = item
+    if(id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
+        exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
+    }
     router.push(`/${exploreMode}/playlist/${platform}/${id}`)
 }
 
