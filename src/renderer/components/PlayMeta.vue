@@ -54,9 +54,9 @@ onMounted(() => {
 
 <style>
 .play-meta {
-    /*height: 68px;*/
     display: flex;
-    height: 77px;
+    height: var(--play-meta-height);
+    align-items: center;
 }
 
 .play-meta .title-wrap {
@@ -73,16 +73,16 @@ onMounted(() => {
 
 .play-meta .cover-wrap {
     position: relative;
-    width: 77px;
-    height: 77px;
+    width: var(--play-meta-height);
+    height: var(--play-meta-height);
     box-shadow: 0px 0px 1px #161616;
     box-shadow: 0px 0px 1px var(--main-left-border-color);
 }
 
 .play-meta .audio-cover, .play-meta .cover-mask  {
     /*width: 100%;*/
-    width: 77px;
-    height: 77px;
+    width: var(--play-meta-height);
+    height: var(--play-meta-height);
     cursor: pointer;
     -webkit-user-drag: none;
     -webkit-app-region: no-drag;
@@ -101,7 +101,6 @@ onMounted(() => {
     z-index: 2;
     display: flex;
     align-items: center;
-    background-color: #373737ab;
     background-color: var(--ntf-bg);
     opacity: 0.68;
 }
@@ -119,11 +118,12 @@ onMounted(() => {
 .play-meta .audio-title {
     font-size: 14;
     text-align: left;
+    display: flex;
+    align-items: flex-end;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    margin-top: 15px;
-    height: 20px;
+    height: 33px;
 }
 
 .play-meta .favorite-btn {
@@ -151,7 +151,6 @@ onMounted(() => {
 
 .play-meta .audio-time,
 .play-meta .volume-bar {
-    line-height: 25px;
     line-height: 30px;
 }
 
@@ -164,6 +163,7 @@ onMounted(() => {
 
 .play-meta .volume-bar {
     margin-left: 10px;
+    margin-top: 3px;
 }
 
 .play-meta .volume-status {

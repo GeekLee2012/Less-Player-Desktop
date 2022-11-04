@@ -239,6 +239,10 @@ EventBus.on("imageTextTile-load", () => {
     setImageTextTileSize()
     setImageTextTileLoadingMaskSize()
 })
+EventBus.on("imageTextTileLoadingMask-load", () => {
+    setImageTextTileSize()
+    setImageTextTileLoadingMaskSize()
+})
 EventBus.on("batchView-show", setBatchViewListSize)
 //TODO
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)

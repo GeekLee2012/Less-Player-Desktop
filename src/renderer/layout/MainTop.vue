@@ -33,7 +33,9 @@ watch(progress, (nv, ov) => {
     <div id="main-top">
         <div id="play-nav">
             <PlayMeta id="play-meta"></PlayMeta>
-            <PlayControl id="play-ctl"></PlayControl>
+            <div class="play-ctl-wrap">
+                <PlayControl></PlayControl>
+            </div>
             <div class="top-right">
                 <SearchBar></SearchBar>
                 <div id="userhome-btn" @click="visitUserHomeView">
@@ -56,7 +58,7 @@ watch(progress, (nv, ov) => {
 
 #main-top {
     flex-direction: column;
-    height: 80px;
+    height: var(--main-top-height);
     -webkit-app-region: drag;
     /* background: #faf4f6; */
 }
@@ -65,12 +67,13 @@ watch(progress, (nv, ov) => {
     width: 34.33%;
 }
 
-#play-nav #play-ctl {
+#play-nav .play-ctl-wrap {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-left: 15px;
-    margin-right: 15px;
+    margin: 0px 15px;
 }
 
 #play-nav .top-right {

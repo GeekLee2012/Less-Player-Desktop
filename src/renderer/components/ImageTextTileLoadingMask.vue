@@ -1,6 +1,12 @@
 <script setup>
+import { onMounted } from 'vue';
+import EventBus from '../../common/EventBus';
+
 const props = defineProps({
     count: Number
+})
+onMounted(() => {
+    EventBus.emit("imageTextTileLoadingMask-load")
 })
 </script>
 

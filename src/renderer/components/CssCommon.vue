@@ -4,6 +4,8 @@
 <style>
 :root {
   --scrollbar-width: 6px;
+  --play-meta-height: 77px;
+  --main-top-height: 80px;
 }
 
 .btnDisabled {

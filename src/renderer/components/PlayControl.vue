@@ -42,8 +42,7 @@ const togglePlaybackQueue = () => {
 <style scoped>
 .play-ctl {
     display: flex;
-    height: 68px;
-    height: 77px;
+    height: var(--play-meta-height);
     align-items: center;
 }
 
