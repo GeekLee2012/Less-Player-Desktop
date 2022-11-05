@@ -199,6 +199,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 全局背景 */
   --bg-color: #fff;
   --app-bg: var(--bg-color);
+  --main-left-bg: linear-gradient(to bottom, #e7cddb, #e7d2d1, #e7cde3);
   --main-left-bg: #e7e1e3cb;
   --main-center-bg: var(--bg-color);
   /* 文本 */

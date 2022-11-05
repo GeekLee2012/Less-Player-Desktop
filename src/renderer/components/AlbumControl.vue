@@ -1,6 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
+import EventBus from '../../common/EventBus';
 import { Playlist } from '../../common/Playlist';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -19,7 +20,7 @@ const { exploreModeCode } = storeToRefs(useAppCommonStore())
 const { hidePlayingView } = useAppCommonStore()
 
 //TODO 单一责任
-const visitAlbumDetail = (platform, id) => {
+const visitAlbumDetail = (platform, id, callback) => {
     const platformValid = isAlbumDetailVisitable(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = props.visitable && platformValid && idValid
@@ -36,14 +37,19 @@ const visitAlbumDetail = (platform, id) => {
             exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
-        if(fromPath != toPath) {
+        const isDiffPath = (fromPath != toPath)
+        if(isDiffPath) {
             router.push(toPath)
             if(isAlbum) updateAlbumDetailKeys(platform, id)
         }
         hidePlayingView()
+        if(callback) callback(visitable, isDiffPath)
     }
+    if(callback) callback(visitable)
 }
 
+//TODO 下面代码都存在问题，惊群效应
+EventBus.on('visit-album', ({platform, id, callback}) => visitAlbumDetail(platform, id, callback))
 </script>
 
 <template>

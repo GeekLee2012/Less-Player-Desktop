@@ -88,7 +88,11 @@ const visitArtistDetail = (platform, item, index) => {
     platform = platform.trim()
     if(visitable) {
         const fromPath = router.currentRoute.value.path
-        const toPath = '/' + exploreModeCode.value + '/artist/' + platform + "/" + id
+        //const toPath = '/' + exploreModeCode.value + '/artist/' + platform + "/" + id
+        let exploreMode = exploreModeCode.value
+        //let moduleName = 'artist'
+        exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
+        const toPath = `/${exploreMode}/artist/${platform}/${id}`
         if(fromPath != toPath) {
             router.push(toPath)
             updateArtistDetailKeys(platform, id)
@@ -106,13 +110,15 @@ const visitAlbumDetail = (platform, id) => {
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid 
     platform = platform.trim()
-    if(visitable) { //TODO
+    if(visitable) {
         const fromPath = router.currentRoute.value.path
         let exploreMode = exploreModeCode.value
         let moduleName = 'album'
         if(id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
-            exploreMode = 'radios'
+            exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
             moduleName = 'playlist'
+        } else {
+            exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
         if(fromPath != toPath) {
@@ -133,7 +139,13 @@ const isMultiArtists = () => {
 const visitItemArtist = (event)=> {
     const { platform, artist } = commonCtxMenuCacheItem.value
     if(artist.length == 1) {
-        visitArtistDetail(platform, artist[0])
+        //visitArtistDetail(platform, artist[0])
+        EventBus.emit('visit-artist', { 
+            platform, 
+            item: artist[0], 
+            index: -1, 
+            callback: (visitable) => { if(visitable) hideAllCtxMenus() }
+        })
     } else {
         EventBus.emit("artistListSubmenu-init")    
         EventBus.emit("artistListSubmenu-show", event)
@@ -142,7 +154,12 @@ const visitItemArtist = (event)=> {
 
 const visitItemAlbum = ()=> {
     const { platform, album } = commonCtxMenuCacheItem.value
-    visitAlbumDetail(platform, album.id)
+    //visitAlbumDetail(platform, album.id)
+    EventBus.emit("visit-album", {
+        platform, 
+        id: album.id,
+        callback: (visitable) => { if(visitable) hideAllCtxMenus() }
+    })
 }
 
 const removeQueueItem = ()=> {

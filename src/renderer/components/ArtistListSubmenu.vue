@@ -24,6 +24,7 @@ const valiadateArtistId = (id) => {
 }
 
 const visitArtist = (item, index) => {
+    /*
     let id = item.id
     const { platform } = commonCtxMenuCacheItem.value
     const platformValid = isArtistDetailVisitable(platform)
@@ -38,6 +39,12 @@ const visitArtist = (item, index) => {
         }
         hideAllCtxMenus()
     }
+    */
+    const { platform } = commonCtxMenuCacheItem.value
+    EventBus.emit('visit-artist', { 
+        platform, item, index, 
+        callback: (visitable) => { if(visitable) hideAllCtxMenus() } 
+    })
 }
 
 const initData = () => {
