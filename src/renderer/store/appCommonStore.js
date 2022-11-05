@@ -189,6 +189,11 @@ export const useAppCommonStore = defineStore('appCommon', {
         hideArtistListSubmenu() {
             this.artistListSubmenuShow = false
         },
+        hideAllCategoryViews() {
+            this.hidePlaylistCategoryView()
+            this.hideArtistCategoryView()
+            this.hideRadioCategoryView()
+        },
         hideAllCtxMenus() {
             this.hideCommonCtxMenu()
             this.hideAddToListSubmenu()

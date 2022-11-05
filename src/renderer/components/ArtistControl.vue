@@ -38,7 +38,10 @@ const visitArtistDetail = (platform, item, index) => {
     platform = platform.trim()
     if(visitable) {
         const fromPath = router.currentRoute.value.path
-        const toPath = '/' + exploreModeCode.value + '/artist/' + platform + "/" + id
+        let exploreMode = exploreModeCode.value
+        //let moduleName = 'artist'
+        exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
+        const toPath = `/${exploreMode}/artist/${platform}/${id}`
         if(fromPath != toPath) {
             router.push(toPath)
             updateArtistDetailKeys(platform, id)

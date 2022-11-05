@@ -14,10 +14,9 @@ import { useRouter } from 'vue-router';
 
 
 const { playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow } = storeToRefs(useAppCommonStore())
-const { hidePlaylistCategoryView, hideArtistCategoryView,  hideRadioCategoryView,
-    hidePlaybackQueueView, hideAllCtxMenus,
-    togglePlaybackQueueView, togglePlayingView, 
-    hidePlayingView } = useAppCommonStore()
+const { hideAllCategoryViews, hideAllCtxMenus,
+    hidePlaybackQueueView, hidePlayingView,
+    togglePlaybackQueueView, togglePlayingView } = useAppCommonStore()
 
 const { togglePlay, switchPlayMode, 
     playPrevTrack, playNextTrack,
@@ -189,11 +188,13 @@ const setBatchViewListSize = () => {
     if(el) el.style.height = height + "px"
 }
 
-const hideAllFloatingViews = () => {
+const hideAllPopoverViews = () => {
+    //隐藏当前播放
     hidePlaybackQueueView()
-    hidePlaylistCategoryView()
-    hideArtistCategoryView()
-    hideRadioCategoryView()
+    //隐藏全部分类
+    hideAllCategoryViews()
+    //隐藏上下文菜单
+    hideAllCtxMenus()
 }
 
 onMounted (() => {
@@ -224,10 +225,8 @@ onMounted (() => {
     document.addEventListener('click', e => {
         //强制分类列表重置大小
         setCategoryViewSize()
-        //隐藏浮层
-        hideAllFloatingViews()
-        //隐藏上下文菜单
-        hideAllCtxMenus()
+        //隐藏全部浮层
+        hideAllPopoverViews()
     })
 
     //按键事件监听

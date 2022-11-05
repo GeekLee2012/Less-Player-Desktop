@@ -32,6 +32,8 @@ const visitAlbumDetail = (platform, id) => {
             exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
             moduleName = 'playlist'
             isAlbum = false
+        } else { //TODO
+            exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
         if(fromPath != toPath) {
