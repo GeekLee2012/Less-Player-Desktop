@@ -131,7 +131,7 @@ export class Player {
         // Get the Howl we want to manipulate.
         const sound = this.getSound()
         if(!sound) return
-        if(!sound.playing()) return 
+        //if(!sound.playing()) return 
         // Determine our current seek position.
         const seek = sound.seek() || 0
         EventBus.emit('track-pos', seek)

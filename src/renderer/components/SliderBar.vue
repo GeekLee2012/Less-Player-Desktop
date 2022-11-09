@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-//TODO 拖动滑块,改变进度条暂不支持
-//组件代码写得乱，后期再梳理
+//TODO 组件代码写得乱，后期再梳理
 
 const props = defineProps({
     initValue: Number, //0.0 - 1.0
@@ -23,9 +22,7 @@ const seekProgress = (e)=> {
     } else {
         updateProgressByWidth(e.offsetX)
     }
-    if(props.onseek) {
-        props.onseek(value)
-    }
+    if(props.onseek) props.onseek(value)
 }
 
 //滚轮改变进度
@@ -37,9 +34,7 @@ const scrollProgress = (e) => {
     tmp += step
     const percent = (tmp / 100).toFixed(2)
     updateProgress(percent)
-    if(props.onscroll) {
-        props.onscroll(value)
-    }
+    if(props.onscroll) props.onscroll(value)
 }
 
 const updateProgress = (percent) => {
@@ -82,9 +77,7 @@ const dragMove = (e) => {
     const progress = e.clientX - sliderCtlRef.value.offsetLeft
     const width = sliderCtlRef.value.clientWidth
     updateProgress(progress/width)
-    if(props.ondrag) {
-        props.onseek(value)
-    }
+    if(props.ondrag)  props.onseek(value)
 }
 
 /* 以下为拖动滑块改变进度相关 */

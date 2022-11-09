@@ -1,15 +1,16 @@
 <script setup>
-import { useRouter } from 'vue-router';
 import PaginationTiles from './PaginationTiles.vue';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
 import { useUserProfileStore } from '../store/userProfileStore';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { Playlist } from '../../common/Playlist';
+import { inject } from 'vue';
+
+const { visitPlaylist } = inject('appRoute')
 
 const props = defineProps({
     data: Array,
@@ -20,10 +21,8 @@ const props = defineProps({
     loading: Boolean
 })
 
-const router = useRouter()
-const { getVender, isPlatformValid } = usePlatformStore()
+const { getVendor, isPlatformValid } = usePlatformStore()
 const { addTrack, addTracks, playTrack, resetQueue, playNextTrack } = usePlayStore()
-const { exploreModeCode } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
 const { addRecentPlaylist } = useUserProfileStore()
 
@@ -41,8 +40,7 @@ const visitItem = (item) => {
     } else if(Playlist.isNormalRadioType(item)) { //普通歌单电台
         nextRadioTrack(platform, id)
     } else if(visitable) { //其他，如普通歌单、主播电台歌单等
-        const url = '/' + exploreModeCode.value + '/playlist/' + platform + "/" + id
-        router.push(url)
+        visitPlaylist(platform, id)
     }
 }
 
@@ -53,9 +51,9 @@ const playItem = (item) => {
         visitItem(item)
         return 
     }
-    const vender = getVender(platform)
-    if(!vender) return 
-    vender.playlistDetail(id, 0, 1000, 1).then(result => {
+    const vendor = getVendor(platform)
+    if(!vendor) return 
+    vendor.playlistDetail(id, 0, 1000, 1).then(result => {
         playAll(result)
     })
 }
@@ -77,7 +75,7 @@ const playAll = (playlist) => {
 
 const nextRadioTrack = (platform, channel, track) => {
     if(!Track.hasId(track)) resetQueue()
-    getVender(platform).nextRadioTrack(channel, track).then(result => {
+    getVendor(platform).nextRadioTrack(channel, track).then(result => {
         if(!Track.hasId(result)) return 
         addTrack(result)
         playTrack(result)

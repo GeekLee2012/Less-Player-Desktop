@@ -1,27 +1,20 @@
 <script setup>
-import { storeToRefs } from 'pinia';
-import { onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import EventBus from '../../common/EventBus';
-import { useAppCommonStore } from '../store/appCommonStore';
+import { inject } from 'vue';
 import CustomPlaylistItem from './CustomPlaylistItem.vue';
+
+
+const { visitCustomPlaylist } = inject('appRoute')
 
 const props = defineProps({
     data: Array,
 })
-
-const route = useRouter()
-const visitItem = (item) => {
-    route.push("/userhome/customPlaylist/" + item.id)
-}
-
 </script>
 
 <template>
     <div class="customPlaylist-list-ctl">
         <div v-for="(item, index) in data">
             <CustomPlaylistItem :index="index" :data="item"
-              @click="visitItem(item)">
+              @click="() => visitCustomPlaylist(item.id)">
             </CustomPlaylistItem>
         </div>
     </div>

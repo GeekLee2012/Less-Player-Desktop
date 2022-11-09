@@ -6,8 +6,7 @@ export default {
 </script>
 
 <script setup>
-import { reactive, ref, toRef, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { inject, reactive, ref, toRef, watch } from 'vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
@@ -19,7 +18,9 @@ import { useIpcRenderer } from '../../common/Utils';
 import { toYyyymmddHhMmSs } from '../../common/Times';
 import { useAppCommonStore } from '../store/appCommonStore';
 
-const router = useRouter()
+
+const { backward } = inject('appRoute') 
+
 const userProfileStore = useUserProfileStore()
 const settingStore = useSettingStore()
 const ipcRenderer = useIpcRenderer()
@@ -253,10 +254,6 @@ const restore = async () => {
     showToast("数据还原成功!")
 }
 
-const finish = () => {
-    router.back()
-}
-
 const hasChildren = (item) => {
     return item.children && item.children.length > 0
 }
@@ -355,7 +352,7 @@ watch(sourcesCategories, () => {
                 </div>
                 <SvgTextButton class="spacing" text="打开备份文件" :leftAction="openBackupFile" ></SvgTextButton>
                 <SvgTextButton class="spacing" :isDisabled="!isReady" text="开始还原" :leftAction="restore" ></SvgTextButton>
-                <SvgTextButton text="完成" :leftAction="finish" class="to-right"></SvgTextButton>
+                <SvgTextButton text="完成" :leftAction="backward" class="to-right"></SvgTextButton>
             </div>
         </div>
         <div class="center">

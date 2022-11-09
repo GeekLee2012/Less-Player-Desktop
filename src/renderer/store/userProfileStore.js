@@ -150,12 +150,12 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         addFavoriteTrack(track) {
             const { id, platform, title, artist, album, duration, cover, 
-                type, pid, songlistId, extra1, extra2 } = track
+                type, pid, songlistId, extra1, extra2, mv } = track
             //TODO
             const url = Playlist.isAnchorRadioType(track) ? track.url : null
             this.addItem(this.favorites.songs, { 
                 id, platform, title, artist, album, duration, cover, url,
-                type, pid, songlistId, extra1, extra2
+                type, pid, songlistId, extra1, extra2, mv
             })
         },
         addFavoriteRadio(track) {
@@ -294,12 +294,14 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         //最近播放
         addRecentSong(track) {
-            const { id, platform, title, artist, album, duration, cover, type, pid, songlistId, extra1, extra2 } = track
+            const { id, platform, title, artist, album, duration, cover, 
+                type, pid, songlistId, extra1, extra2, mv } = track
             if(!platform || platform.trim().length < 1) return 
             //TODO
             const url = Playlist.isAnchorRadioType(track) ? track.url : null
             this.uniqueInsertFirst(this.recents.songs, { 
-                id, platform, title, artist, album, duration, cover, url, type, pid, songlistId, extra1, extra2
+                id, platform, title, artist, album, duration, cover, url, 
+                type, pid, songlistId, extra1, extra2, mv
             })
             //TODO
             const limit = 999

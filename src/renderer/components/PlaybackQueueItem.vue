@@ -99,6 +99,7 @@ const showContextMenu = (event) => {
     background: var(--pbq-hl-text-color);
     -webkit-background-clip: text;
     color: transparent !important;
+    font-weight: 520;
 }
 
 .playback-queue-item .cover {
@@ -106,6 +107,7 @@ const showContextMenu = (event) => {
     height: var(--cover-size);
     margin-right: 8px;
     -webkit-user-drag: none;
+    box-shadow: 0px 0px 1px #161616;
 }
 
 .playback-queue-item .left {
@@ -156,10 +158,14 @@ const showContextMenu = (event) => {
 
 .playback-queue-item .artist,
 .playback-queue-item .duration {
-    color: #989898;
     color: var(--text-sub-color);
+    /*
     font-size: 14px;
     bottom: 10px;
+    */
+    font-size: 13px;
+    bottom: 12px;
+    font-weight: 520;
 }
 
 .playback-queue-item .artist {

@@ -179,6 +179,7 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo" 
                     + "?pid=" + id + "&pn=" + page + "&rn=" + limit + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
+                console.log(json)
                 const result = new Playlist(id, KuWo.CODE, json.data.img500, json.data.name)
                 result.about = json.data.info
                 result.total = json.data.total
@@ -189,6 +190,7 @@ export class KuWo {
                     const duration = item.duration * 1000
                     const cover = item.pic
                     const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
+                    if(item.hasmv == 1) track.mv = item.rid
                     result.addTrack(track)
                 })
                 resolve(result)
@@ -274,6 +276,7 @@ export class KuWo {
                     const duration = item.duration * 1000
                     const cover = item.pic
                     const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
+                    if(item.hasmv) track.mv = item.rid
                     data.push(track)
                 })
                 const result = { offset, limit, page, total, data }
@@ -332,6 +335,7 @@ export class KuWo {
                         const trackAlbum = { id: item.albumid, name: item.album }
                         const duration = item.duration * 1000
                         const track = new Track(item.rid, KuWo.CODE, item.name, trackArtist, trackAlbum, duration, item.pic)
+                        if(item.hasmv) track.mv = item.rid
                         data.push(track)
                     })
                 }
@@ -357,6 +361,7 @@ export class KuWo {
                         const album = { id: item.albumid, name: item.album }
                         const duration = item.duration * 1000
                         const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, item.pic)
+                        if(item.hasmv) track.mv = item.rid
                         return track
                     })
                 } 
@@ -489,6 +494,18 @@ export class KuWo {
                     const artist = { id,  platform: KuWo.CODE, title, cover }
                     result.data.push(artist)
                 })
+                resolve(result)
+            })
+        })
+    }
+
+    static videoDetail(id, quality) {
+        return new Promise((resolve, reject) => {
+            const url = "https://www.kuwo.cn/api/v1/www/music/playUrl" 
+                + `?mid=${id}&type=mv&httpsStatus=1&reqId=${REQ_ID}`
+            getJson(url).then(json => {
+                const result = { id, platform: KuWo.CODE, quality, url: '' }
+                result.url = json.data.url
                 resolve(result)
             })
         })

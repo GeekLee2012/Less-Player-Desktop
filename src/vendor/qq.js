@@ -626,6 +626,7 @@ export class QQ {
                     const duration = song.interval * 1000
                     const cover = getAlbumCover(song.albummid)
                     const track = new Track(song.songmid, QQ.CODE, song.songname, artist, album, duration, cover)
+                    track.mv = song.vid
                     result.addTrack(track)
                 })
                 resolve(result)
@@ -759,6 +760,7 @@ export class QQ {
 
                     const track = new Track(item.mid, QQ.CODE, item.title, 
                         artist, album, duration, cover)
+                    track.mv = item.mv.vid
                     result.data.push(track)
                 })
                 resolve(result)
@@ -837,6 +839,7 @@ export class QQ {
                     const cover = getAlbumCover(id)
                     const duration = song.interval * 1000
                     const track = new Track(song.mid, QQ.CODE, song.name, artist, album, duration, cover)
+                    track.mv = song.mv.vid
                     result.addTrack(track)
                 })
                 resolve(result)
@@ -858,6 +861,7 @@ export class QQ {
                     const duration = item.interval * 1000
                     const cover = getAlbumCover(item.albummid)
                     const track = new Track(item.songmid, QQ.CODE, item.songname, artist, album, duration, cover)
+                    //track.mv = item.vid
                     return track
                 })
                 const result = { offset, limit, page, data }
@@ -1036,4 +1040,44 @@ export class QQ {
         })
     }
     
+    static videoDetail(id, quality) {
+        return new Promise((resolve, reject) => {
+            const url = 'http://u.y.qq.com/cgi-bin/musicu.fcg'
+            const reqBody = {
+                data: JSON.stringify({
+                    req_1: {
+                        module: 'gosrf.Stream.MvUrlProxy',
+                        method: 'GetMvUrls',
+                        param: {
+                            vids: [ id ],
+                            request_typet: 10001,
+                        }
+                    }
+                })
+            }
+            getJson(url, reqBody).then(json => {
+                const data = json.req_1.data
+                const mvData = {}
+                Object.keys(data).forEach(vid => {
+                    const mp4Arr = data[vid].mp4 || []
+                    mvData[vid] = mp4Arr.map(item => {
+                        return item.freeflow_url[0] || ''
+                    })
+                })
+                const result = { id, platform: QQ.CODE, quality, url: '' }
+                const mvUrls = mvData[id]
+                /*
+                for(var i = 0; i < mvUrls.length; i++ ) {
+                    const url = mvUrls[i]
+                    if(url.trim().length > 0) {
+                        result.url = url
+                        break
+                    }
+                }*/
+                result.url = mvUrls.length > 0 ? mvUrls[mvUrls.length - 1] : ''
+                resolve(result)
+            })
+        })
+    }
+
 }

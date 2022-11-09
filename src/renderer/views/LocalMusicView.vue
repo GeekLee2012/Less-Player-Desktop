@@ -6,19 +6,20 @@ export default {
 </script>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import { usePlayStore } from '../store/playStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
 import { useAppCommonStore } from '../store/appCommonStore';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 
-const router = useRouter()
+
+const { visitBatchLocalMusic } = inject('appRoute')
+
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { localDirs, localTracks, isLoading } = storeToRefs(useLocalMusicStore())
 const { addFolders, addFiles, resetAll, removeItem } = useLocalMusicStore()
@@ -37,10 +38,6 @@ const addAll = (text) => {
     if(noTracks()) return
     addTracks(localTracks.value)
     showToast(text || "歌曲已全部添加！")
-}
-
-const visitBatchActionView = () => {
-    router.push("/playlists/batch/local/0")
 }
 
 const noTracks = () => (localTracks.value.length < 1)
@@ -72,7 +69,7 @@ onMounted(resetBack2TopBtn)
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()" ></PlayAddAllBtn>
                     <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="spacing"></AddFolderFileBtn>
-                    <BatchActionBtn :deleteBtn="true" :leftAction="visitBatchActionView" :rightAction="resetAll" class="spacing"></BatchActionBtn>
+                    <BatchActionBtn :deleteBtn="true" :leftAction="visitBatchLocalMusic" :rightAction="resetAll" class="spacing"></BatchActionBtn>
                 </div>
             </div>
         </div>
@@ -114,7 +111,7 @@ onMounted(resetBack2TopBtn)
     width: 233px;
     height: 233px;
     border-radius: 6px;
-    box-shadow: 0px 0px 10px #161616;
+    box-shadow: 0px 0px 1px #161616;
 }
 
 #local-music .header .right {

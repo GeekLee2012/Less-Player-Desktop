@@ -50,9 +50,9 @@ const updateTabData = (data) => {
 const loadSongs = ()=> {
     currentTabView.value = SongListControl
     setLoading(true)
-    const vender = currentVender()
-    if(!vender) return 
-    vender.searchSongs(props.keyword, offset, limit, page).then(result => {
+    const vendor = currentVender()
+    if(!vendor) return 
+    vendor.searchSongs(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
         setLoading(false)
     })
@@ -61,9 +61,9 @@ const loadSongs = ()=> {
 const loadPlaylists = ()=> {
     currentTabView.value = PlaylistsControl
     setLoading(true)
-    const vender = currentVender()
-    if(!vender) return
-    vender.searchPlaylists(props.keyword, offset, limit, page).then(result => {
+    const vendor = currentVender()
+    if(!vendor) return
+    vendor.searchPlaylists(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
         setLoading(false)
     })
@@ -72,9 +72,9 @@ const loadPlaylists = ()=> {
 const loadAlbums = ()=> {
     currentTabView.value = AlbumListControl
     setLoading(true)
-    const vender = currentVender()
-    if(!vender) return
-    vender.searchAlbums(props.keyword, offset, limit, page).then(result => {
+    const vendor = currentVender()
+    if(!vendor) return
+    vendor.searchAlbums(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
         setLoading(false)
     })
@@ -83,9 +83,9 @@ const loadAlbums = ()=> {
 const loadArtists = ()=> {
     currentTabView.value = ArtistListControl
     setLoading(true)
-   const vender = currentVender()
-    if(!vender) return
-    vender.searchArtists(props.keyword, offset, limit, page).then(result => {
+   const vendor = currentVender()
+    if(!vendor) return
+    vendor.searchArtists(props.keyword, offset, limit, page).then(result => {
         updateTabData(result.data)
         setLoading(false)
     })

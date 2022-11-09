@@ -1,19 +1,17 @@
 <script setup>
-import { onMounted } from 'vue';
-import { usePlayStore } from '../store/playStore';
-import { useAppCommonStore } from '../store/appCommonStore';
-import { usePlatformStore } from '../store/platformStore';
-import EventBus from '../../common/EventBus';
-import { Track } from '../../common/Track';
+import { inject, onMounted } from 'vue';
+import { usePlayStore } from './store/playStore';
+import { useAppCommonStore } from './store/appCommonStore';
+import { usePlatformStore } from './store/platformStore';
+import EventBus from '../common/EventBus';
+import { Track } from '../common/Track';
 import { storeToRefs } from 'pinia';
-import { useUserProfileStore } from '../store/userProfileStore';
-import { useIpcRenderer } from '../../common/Utils';
-import { PLAY_STATE, TRAY_ACTION } from '../../common/Constants';
-import { useRouter } from 'vue-router';
-import { useSettingStore } from '../store/settingStore';
-import { Playlist } from '../../common/Playlist';
+import { useUserProfileStore } from './store/userProfileStore';
+import { useIpcRenderer } from '../common/Utils';
+import { PLAY_STATE, TRAY_ACTION } from '../common/Constants';
+import { useSettingStore } from './store/settingStore';
+import { Playlist } from '../common/Playlist';
 
-const router = useRouter()
 const ipcRenderer = useIpcRenderer()
 
 const { queueTracksSize } = storeToRefs(usePlayStore())
@@ -22,17 +20,14 @@ const { playTrack, playNextTrack,
     togglePlay, switchPlayMode,
     toggleVolumeMute, updateVolumeByOffset,
     updateCurrentTime, setPlaying  } = usePlayStore()
-const { getVender, isLocalMusic } = usePlatformStore()
+const { getVendor, isLocalMusic } = usePlatformStore()
+const { videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { showPlayNotification, hidePlayNotification, 
-    hidePlayingView, hidePlaybackQueueView, togglePlaybackQueueView } = useAppCommonStore()
+    togglePlaybackQueueView } = useAppCommonStore()
 const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
 
-const visitRoute = (path) => {
-    hidePlayingView()
-    hidePlaybackQueueView()
-    router.push(path)
-}
+const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
 
 const loadLyric = (track) => {
     if(!track) return 
@@ -41,10 +36,10 @@ const loadLyric = (track) => {
         return 
     }
     const platform = track.platform
-    const vender = getVender(platform);
-    if(!vender) return 
+    const vendor = getVendor(platform);
+    if(!vendor) return 
     if(Playlist.isFMRadioType(track) || Playlist.isAnchorRadioType(track)) return 
-    vender.lyric(track.id, track).then(result => assignLyric(track, result))
+    vendor.lyric(track.id, track).then(result => assignLyric(track, result))
 }
 
 const assignLyric = (track, lyric) => {
@@ -79,9 +74,9 @@ let toastCnt = 0 //连跳计数器
 const bootstrapTrack = (track, callback, noToast) => {
     if(!track) return 
     const { id, platform, artistNotCompleted }= track
-    const vender = getVender(platform);
-    if(!vender || Playlist.isFMRadioType(track)) return
-    vender.playDetail(id, track).then(result => {
+    const vendor = getVendor(platform);
+    if(!vendor || Playlist.isFMRadioType(track)) return
+    vendor.playDetail(id, track).then(result => {
         const { lyric, cover, artist, url } = result
         if(Track.hasUrl(result)) Object.assign(track, { url })
         //TODO 流程待优化完善
@@ -176,8 +171,7 @@ EventBus.on('track-state', state => {
     }
 })
 EventBus.on('track-pos', secs => {
-    //进度在更新，状态必为plyaing
-    setPlaying(true)
+    //setPlaying(true)
     updateCurrentTime(secs)
 })
 
@@ -186,6 +180,8 @@ const registryIpcRenderderListeners = () => {
     if(!ipcRenderer) return 
     //Tray事件
     ipcRenderer.on("tray-action", (e, value) => {
+        //TODO 视频播放中，暂时不允许中断
+        if(videoPlayingViewShow.value) return
         switch(value) {
             case TRAY_ACTION.PLAY: 
             case TRAY_ACTION.PAUSE:
@@ -198,13 +194,13 @@ const registryIpcRenderderListeners = () => {
                 playNextTrack()
                 break
             case TRAY_ACTION.HOME:
-                visitRoute('/')
+                visitHome()
                 break
             case TRAY_ACTION.USERHOME:
-                visitRoute('/userhome/all')
+                visitUserHome()
                 break
             case TRAY_ACTION.SETTING:
-                visitRoute('/setting')
+                visitSetting()
                 break
         }
     })

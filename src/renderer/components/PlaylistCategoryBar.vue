@@ -39,7 +39,7 @@ const visitCateItem = (item, row, col, forceRefresh) => {
 }
 
 const flatData = reactive([])
-//TODO 随机打乱数据，感觉不够乱......
+//TODO 随机打乱数据，感觉算法有问题，不够乱......
 const shuffle = (arr) => {
     let i = arr.length
     while (i) {
@@ -58,7 +58,10 @@ const getFlatData = () => {
                 flatData.push(item)
             })
         })
-        if(isPlaylistCategoryBarRandom.value) shuffle(flatData)
+        if(isPlaylistCategoryBarRandom.value) {
+            const shuffleTimes = Math.random(1024) % 3 + 1
+            for(var i = 0; i < shuffleTimes; i++) shuffle(flatData)
+        }
     }
     return flatData
 }

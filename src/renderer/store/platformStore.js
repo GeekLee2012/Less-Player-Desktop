@@ -72,7 +72,7 @@ const radioPlatforms = [ allPlatforms[2], allPlatforms[6], allPlatforms[7], allP
 const userhomePlatforms = allPlatforms.slice(0, allPlatforms.length - 1)
 const onlinePlatformFilter = allPlatforms.slice(0, allPlatforms.length - (radioCount + 1))
 
-const venders = {
+const vendors = {
     qq: QQ, 
     netease: NetEase,
     kuwo: KuWo,
@@ -89,7 +89,7 @@ export const usePlatformStore = defineStore('platform', {
     //State
     state: () => ({
         currentPlatformIndex: 0,
-        venders,
+        vendors,
     }),
     //Getters
     getters: {
@@ -111,9 +111,6 @@ export const usePlatformStore = defineStore('platform', {
         },
         onlinePlatformsFilter() {
             return onlinePlatformFilter
-        },
-        isLocal(state) {
-            return this.currentPlatformCode === 'local';
         },
         isAll(state) {
             return this.currentPlatformCode === 'all';
@@ -139,12 +136,12 @@ export const usePlatformStore = defineStore('platform', {
             }
             this.updateCurrentPlatform(-1)
         },
-        getVender(name) {
+        getVendor(name) {
             name = name.toLowerCase().trim()
-            return this.venders[name]
+            return this.vendors[name]
         },
         currentVender() {
-            return this.getVender(this.currentPlatformCode)
+            return this.getVendor(this.currentPlatformCode)
         },
         isQQ(platform) {
             if(!this.isPlatformValid(platform)) return false
@@ -176,7 +173,7 @@ export const usePlatformStore = defineStore('platform', {
         },
         isAlbumDetailVisitable(platform) {
             if(!this.isPlatformValid(platform)) return false
-            return !this.isDouBan(platform) || !this.isLocal(platform)
+            return !this.isDouBan(platform) || !this.isLocalMusic(platform)
         },
         isPlatformValid(platform) {
             return platform && platform.trim().length > 0

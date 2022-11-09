@@ -1,18 +1,19 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { toYyyymmddHhMmSs } from "../../common/Times";
-import { useRouter } from 'vue-router';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlayStore } from '../store/playStore';
+
+
+const { visitCustomPlaylistEdit, visitBatchCustomPlaylist } = inject('appRoute')
 
 const props = defineProps({
     index: Number,
     data: Object 
 })
 
-const router = useRouter()
 const { hideAllCtxMenus, showToast } = useAppCommonStore()
 const { getCustomPlaylist, removeCustomPlaylist } = useUserProfileStore()
 const { resetQueue, playNextTrack, addTracks } = usePlayStore()
@@ -32,15 +33,9 @@ const playItem = () => {
     playNextTrack()
 }
 
-const editItem = () => {
-    const { id } = props.data
-    router.push("/userhome/customPlaylist/edit/" + id)
-}
+const editItem = () => visitCustomPlaylistEdit(props.data.id)
 
-const visitBatch = () => {
-    const { id } = props.data
-    router.push("/userhome/batch/customPlaylist/" + id)
-}
+const visitBatch = () => visitBatchCustomPlaylist(props.data.id)
 
 const removeItem = () => {
     const { id } = props.data
@@ -156,11 +151,13 @@ const showContextMenu = (event) => {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .custom-playlist-item .title-wrap .size {
     font-size: var(--text-sub-size);
+    font-size: 13px;
+    font-weight: 520;
     color: var(--text-sub-color);
 }
 

@@ -74,7 +74,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     line-height: 165px;
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0px 0px 10px #161616;
+    box-shadow: 0px 0px 3px #161616;
     background-color: var(--text-color);
 }
 
@@ -84,10 +84,10 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 .image-text-tile .title {
     width: 165px;
-    margin-top: 5px;
+    margin-top: 12px;
     text-align: left;
     cursor: pointer;
-    line-height: 21px;
+    line-height: 23px;
 
     overflow: hidden;
     text-overflow: ellipsis;
@@ -95,8 +95,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 }
+
 .image-text-tile .title:hover {
-    background: linear-gradient(to right, #1ca388, #28c83f);
     background: var(--btn-bg);
     -webkit-background-clip: text;
     color: transparent;
@@ -107,7 +107,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     text-align: left;
     line-height: 25px;
     color: #989898;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 520;
 
     overflow: hidden;
     text-overflow: ellipsis;

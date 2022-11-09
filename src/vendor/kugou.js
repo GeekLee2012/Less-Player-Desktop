@@ -322,6 +322,7 @@ export class KuGou {
         if(id.startsWith(KuGou.TOPLIST_PREFIX)) return KuGou.toplistDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
             const url = "https://www.kugou.com/yy/special/single/" + id + ".html"
+            //const url = "http://mac.kugou.com/v2/musicol/yueku/v1/special/single/" + id + "-5-9999.html"
             getDoc(url).then(doc => {
                 let cover = doc.querySelector('.specialPage .pic img').getAttribute('_src')
                 cover = getCustomCover(cover)
@@ -348,6 +349,56 @@ export class KuGou {
                     const json = JSON.parse(scriptText)
                     
                     json.forEach(item => {
+                        const artist = []
+                        const album = { id: item.album_id, name: item.album_name }
+                        const duration = item.duration
+                        let trackCover = null
+                        const authors = item.authors
+                        if(authors && authors.length > 0) {
+                            trackCover = getCustomCover(authors[0].sizable_avatar)
+                            const arData = authors.map(ar => ({
+                                id: ar.author_id, name: ar.author_name
+                            }))
+                            artist.push(...arData)
+                        }
+                        const track = new Track(item.audio_id, KuGou.CODE, item.songname, artist, album, duration, trackCover)
+                        track.hash = item.hash
+                        result.addTrack(track)
+                    })
+                }
+                resolve(result)
+            })
+        })
+    }
+
+    //歌单详情
+    static playlistDetailMac(id, offset, limit, page) {
+        id = (id + '').trim()
+        if(id.startsWith(KuGou.TOPLIST_PREFIX)) return KuGou.toplistDetail(id, offset, limit, page)
+        return new Promise((resolve, reject) => {
+            //TODO
+            const url = "http://mac.kugou.com/v2/musicol/yueku/v1/special/single/" + id + "-5-9999.html"
+            
+            getDoc(url).then(doc => {
+                const result = new Playlist(id, KuGou.CODE)
+                //Tracks
+                let key = 'var global'
+                const scripts = doc.body.getElementsByTagName('script')
+                let scriptText = null
+                for(var i = 0; i < scripts.length; i++) {
+                    const scriptCon = scripts[i].innerHTML
+                    if(scriptCon && scriptCon.includes(key)) {
+                        scriptText = scriptCon
+                        break
+                    }
+                }
+                if(scriptText) {
+                    const json = Function(scriptText + ' return global')()
+                    
+                    result.cover = json.cover.replace("/240/", '/480/')
+                    result.title = json.name
+
+                    json.data.forEach(item => {
                         const artist = []
                         const album = { id: item.album_id, name: item.album_name }
                         const duration = item.duration

@@ -161,7 +161,7 @@ const registryGlobalListeners = () => {
     return readText(lyricFile)
   })
 
-  ipcMain.handle('invoke-vender', async (event, ...args) => {
+  ipcMain.handle('invoke-vendor', async (event, ...args) => {
     return invokeVender(args[0], args[1], args[2])
   })
 
@@ -239,6 +239,7 @@ const createWindow = () => {
     urls: [ 
         "*://*.qq.com/*",
         "*://music.163.com/*" ,
+        "*://*.126.net/*" ,
         "*://*.kuwo.cn/*", 
         "*://*.kugou.com/*",
         "*://*.douban.com/*",
@@ -358,7 +359,7 @@ const overrideRequest = (details) => {
   if(url.includes("qq.com")) {
     origin = "https://y.qq.com/"
     referer = origin
-  } else if(url.includes("music.163.com")) {
+  } else if(url.includes("music.163.com") || url.includes("126.net")) {
     origin = "https://music.163.com/"
     referer = origin
     //if(url.includes("/dj/program/listen")) referer = null

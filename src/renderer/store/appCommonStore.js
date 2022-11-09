@@ -12,6 +12,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         radioCategoryViewShow: false,
         playbackQueueViewShow: false,
         playingViewShow: false,
+        videoPlayingViewShow: false,
         //探索模式，歌单、歌手
         exploreModes: [ 'playlists', 'artists', 'radios', 'userhome' ], 
         exploreModeIndex: 0, 
@@ -96,6 +97,12 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         togglePlayingView() {
             this.playingViewShow = !this.playingViewShow
+        },
+        hideVideoPlayingView() {
+            this.videoPlayingViewShow = false
+        },
+        toggleVideoPlayingView() {
+            this.videoPlayingViewShow = !this.videoPlayingViewShow
         },
         toggleCoverMask() {
             this.coverMaskShow = !this.coverMaskShow

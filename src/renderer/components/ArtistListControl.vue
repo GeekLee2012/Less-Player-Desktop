@@ -1,32 +1,22 @@
 <script setup>
-import { useRouter } from 'vue-router';
 import PaginationTiles from './PaginationTiles.vue';
-import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
-import { useAppCommonStore } from '../store/appCommonStore';
-import { storeToRefs } from 'pinia';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
+import { inject } from 'vue';
+
+
+const { visitArtist } = inject('appRoute')
 
 const props = defineProps({
     data: Array,
     loading: Boolean
 })
 
-const router = useRouter()
-const { updateArtistDetailKeys } = useArtistDetailStore()
-const { updateCurrentPlatformByCode, isPlatformValid } = usePlatformStore()
-const { exploreModeCode } = storeToRefs(useAppCommonStore())
+const { updateCurrentPlatformByCode } = usePlatformStore()
 
-const visitItem = (platform, id) => {
-    const platformValid = isPlatformValid(platform)
-    const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
-    const visitable = platformValid && idValid
-    if(visitable) {
-        const url = '/' + exploreModeCode.value + '/artist/' + platform + "/" + id
-        router.push(url)
-        updateArtistDetailKeys(platform, id)
-        updateCurrentPlatformByCode(platform)
-    }
+const visitItem = (item) => {
+    const { platform } = item
+    visitArtist({ platform, item, onReadyRoute: () => updateCurrentPlatformByCode(platform) })
 }
 </script>
 
@@ -36,7 +26,7 @@ const visitItem = (platform, id) => {
             <ImageTextTile v-for="item in data" 
                 :cover="item.cover" 
                 :title="item.title"
-                @click="visitItem(item.platform, item.id)" >
+                @click="visitItem(item)" >
             </ImageTextTile>
         </PaginationTiles>
         <ImageTextTileLoadingMask :count="16" v-show="loading"></ImageTextTileLoadingMask>

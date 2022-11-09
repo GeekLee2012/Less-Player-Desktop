@@ -1,11 +1,8 @@
 <script setup>
-import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { inject } from 'vue';
 import EventBus from '../../common/EventBus';
-import { Track } from '../../common/Track';
-import { useArtistDetailStore } from '../store/artistDetailStore';
-import { useAppCommonStore } from '../store/appCommonStore';
-import { usePlatformStore } from '../store/platformStore';
+
+const { visitArtist } = inject('appRoute')
 
 const props = defineProps({
     visitable: Boolean,
@@ -14,62 +11,20 @@ const props = defineProps({
     trackId: String
 })
 
-const router = useRouter()
-const { exploreModeCode } = storeToRefs(useAppCommonStore())
-const { hidePlayingView } = useAppCommonStore()
-const { updateArtistDetailKeys } = useArtistDetailStore()
-const { isArtistDetailVisitable } = usePlatformStore()
 let updatedArtist = { trackId: '', artist: [] }
 
 const visitArtistDetail = (platform, item, index, callback) => {
-    let id = item.id
-    const platformValid = isArtistDetailVisitable(platform)
-    let idValid = valiadateArtistId(id)
-    if(!idValid) { // 二次确认数据
-        if(updatedArtist.trackId == props.trackId
-            && updatedArtist.artist.length > 0
-            && index > -1 && index < updatedArtist.artist.length) {
-            const name = updatedArtist.artist[index].name
-            if(item.name == name) {
-                id = updatedArtist.artist[index].id
-                idValid = valiadateArtistId(id)
-            } 
-        }
-    }
-    const visitable = props.visitable && platformValid && idValid
-    platform = platform.trim()
-    if(visitable) {
-        const fromPath = router.currentRoute.value.path
-        let exploreMode = exploreModeCode.value
-        //let moduleName = 'artist'
-        //TODO 存在隐藏Bug，歌手页存在，但在当前exploreMode下找不到平台
-        //如豆瓣FM有歌手页的，但无专辑页
-        exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
-        const toPath = `/${exploreMode}/artist/${platform}/${id}`
-        const isDiffPath = (fromPath != toPath)
-        if(isDiffPath) {
-            router.push(toPath)
-            updateArtistDetailKeys(platform, id)
-        }
-        hidePlayingView()
-        if(callback) callback(visitable, isDiffPath)
-    }
-    if(callback) callback(visitable)
+    if(!props.visitable) return
+    visitArtist({ platform, item, index, callback, updatedArtist })
 }
 
-const valiadateArtistId = (id) => {
-    return (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
-}
-
-//TODO 下面代码都存在问题，惊群效应
+//TODO 下面代码存在问题，惊群效应
 //前期接口未能提供完整数据，后期某个接口更新补全数据
 EventBus.on('track-artistUpdated', data => {
     if(!data) return
     if(data.trackId != props.trackId) return 
     updatedArtist = data
 })
-
-EventBus.on('visit-artist', ({platform, item, index, callback}) => visitArtistDetail(platform, item, index, callback))
 </script>
 
 <template>

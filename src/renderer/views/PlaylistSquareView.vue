@@ -53,9 +53,9 @@ const loadCategories = () => {
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
     if(!cachedCates) {
-        const vender = currentVender()
-        if(!vender) return 
-        vender.categories().then(result => {
+        const vendor = currentVender()
+        if(!vendor) return 
+        vendor.categories().then(result => {
             putCategories(result.platform, result.data)
             //TODO
             categories.push(...result.data)
@@ -75,8 +75,8 @@ const loadCategories = () => {
 }
 
 const loadContent = (noLoadingMask) => {
-    const vender = currentVender()
-    if(!vender) return
+    const vendor = currentVender()
+    if(!vendor) return
     if(!noLoadingMask) setLoadingContent(true)
     const cate = currentCategoryCode.value
     const offset = pagination.offset
@@ -84,7 +84,7 @@ const loadContent = (noLoadingMask) => {
     const page = pagination.page
     const platform = currentPlatformCode.value
     const order = currentOrder.value.value
-    vender.square(cate, offset, limit, page, order).then(result => {
+    vendor.square(cate, offset, limit, page, order).then(result => {
         if(platform != result.platform) return 
         if(cate != result.cate) return 
         playlists.push(...result.data)

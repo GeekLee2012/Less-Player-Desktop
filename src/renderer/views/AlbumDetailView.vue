@@ -37,7 +37,7 @@ const { setActiveTab, updateTabTipText,
         updateAbout, resetAll
     } = useAlbumDetailStore()
 
-const { getVender } = usePlatformStore()
+const { getVendor } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
 const { addRecentAlbum } = useUserProfileStore()
@@ -117,10 +117,10 @@ const getAlbumDetail = () => {
         setLoadingDetail(false)
         return 
     }
-    const vender = getVender(platform.value)
-    if(!vender) return
+    const vendor = getVendor(platform.value)
+    if(!vendor) return
     const id = albumId.value
-    vender.albumDetail(id).then(result => {
+    vendor.albumDetail(id).then(result => {
         const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
         updateAbout(result.about)
@@ -144,10 +144,10 @@ const loadAllSongs = ()=> {
         setLoading(false)
         return 
     }
-    const vender = getVender(platform.value)
-    if(!vender) return
+    const vendor = getVendor(platform.value)
+    if(!vendor) return
     const id = albumId.value
-    vender.albumDetailAllSongs(id, 0, 100).then(result => {
+    vendor.albumDetailAllSongs(id, 0, 100).then(result => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         setLoading(false)
@@ -264,7 +264,7 @@ watch(albumId, reloadAll)
     </div>
 </template>
 
-<style>
+<style scoped>
 #album-detail {
     display: flex;
     flex-direction: column;
@@ -304,7 +304,7 @@ watch(albumId, reloadAll)
     width: 233px;
     height: 233px;
     border-radius: 6px;
-    box-shadow: 0px 0px 10px #161616;
+    box-shadow: 0px 0px 1px #161616;
 }
 
 #album-detail .header .info {

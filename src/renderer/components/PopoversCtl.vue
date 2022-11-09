@@ -18,7 +18,8 @@ const { playNotificationShow, commonNotificationShow,
   commonCtxMenuData, commonCtxMenuSeparatorNums,
   addToListSubmenuShow, commonNotificationType,
   artistListSubmenuShow, commonCtxMenuCacheItem,
-  playbackQueueViewShow, playingViewShow, } = storeToRefs(useAppCommonStore())
+  playbackQueueViewShow, playingViewShow, 
+  videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu, 
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -144,6 +145,7 @@ const bindEventListeners = () => {
 //TODO
 watch(playbackQueueViewShow, hideAllCtxMenus)
 
+
 onMounted(()=> {
   bindEventListeners()
 })
@@ -192,6 +194,12 @@ onMounted(()=> {
 
     <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow">
     </PlaybackQueueView>
+
+    <!-- 顶层浮动窗口 -->
+    <transition name="fade-y">
+      <VideoPlayingView id="video-playing-view" v-show="videoPlayingViewShow">
+      </VideoPlayingView>
+    </transition>
 </template>
 
 <style>
@@ -208,7 +216,8 @@ onMounted(()=> {
     box-shadow: 0px 0px 10px #161616;
 }
 
-#playing-view {
+#playing-view,
+#video-playing-view {
     position: absolute;
     top: 0;
     left: 0px;

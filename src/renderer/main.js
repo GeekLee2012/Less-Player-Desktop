@@ -11,6 +11,7 @@ import VueLazyLoad from 'vue3-lazyload';
 //播放器
 import { Player } from '../common/Player';
 import { RadioPlayer } from '../common/RadioPlayer';
+import { VideoPlayer } from '../common/VideoPlayer';
 
 //Components
 import ProgressBar from './components/ProgressBar.vue';
@@ -22,6 +23,7 @@ import ImageTextTile from './components/ImageTextTile.vue';
 import SongItem from './components/SongItem.vue';
 //Views
 import PlayingView from './views/PlayingView.vue';
+import VideoPlayingView from './views/VideoPlayingView.vue';
 import PlaybackQueueView from './views/PlaybackQueueView.vue';
 
 //状态管理
@@ -31,6 +33,7 @@ pinia.use(piniaPersist)
 //播放器：初始化并配置
 Player.initAndSetup()
 RadioPlayer.initAndSetup()
+VideoPlayer.initAndSetup()
 
 //应用：创建、配置
 const app = createApp(App);
@@ -57,5 +60,6 @@ app.use(pinia)
     .component('SongItem', SongItem)
     //Views
     .component('PlayingView', PlayingView)
+    .component('VideoPlayingView', VideoPlayingView)
     .component('PlaybackQueueView', PlaybackQueueView)
     .mount('#app')

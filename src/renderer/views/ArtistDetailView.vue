@@ -47,7 +47,7 @@ const { setActiveTab, updateArtist,
         isArtistDetailLoaded
     } = useArtistDetailStore()
 
-const { getVender } = usePlatformStore()
+const { getVendor } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore() 
 
@@ -144,11 +144,11 @@ const getArtistDetail = () => {
         setLoadingDetail(false)
         return 
     }
-    const vender = getVender(platform.value)
-    if(!vender) return
+    const vendor = getVendor(platform.value)
+    if(!vendor) return
     setLoadingDetail(true)
     const id = artistId.value
-    vender.artistDetail(id).then(result => {
+    vendor.artistDetail(id).then(result => {
         updateArtist(result.title, result.cover)
         if(result.about) {
             updateAbout(result.about)
@@ -165,10 +165,10 @@ const loadHotSongs = () => {
         setLoadingSongs(false)
         return 
     }
-    const vender = getVender(platform.value)
-    if(!vender) return
+    const vendor = getVendor(platform.value)
+    if(!vendor) return
     const id = artistId.value
-    vender.artistDetailHotSongs(id).then(result => {
+    vendor.artistDetailHotSongs(id).then(result => {
         if(result.name && result.cover) updateArtist(result.name, result.cover)
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
@@ -178,10 +178,10 @@ const loadHotSongs = () => {
 
 //TODO
 const loadMoreSongs = () => {
-    const vender = getVender(platform.value)
-    if(!vender) return
+    const vendor = getVendor(platform.value)
+    if(!vendor) return
     const id = artistId.value
-    vender.artistDetailAllSongs(id, offset, limit, page).then(result => {
+    vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
         appendAllSongs(result.data)
         updateTabData(allSongs.value)
         currentTabView.value = SongListControl
@@ -196,10 +196,10 @@ const loadAllSongs = () => {
         setLoadingSongs(false)
         return 
     }
-    const vender = getVender(platform.value)
-    if(!vender) return
+    const vendor = getVendor(platform.value)
+    if(!vendor) return
     const id = artistId.value
-    vender.artistDetailAllSongs(id, offset, limit, page).then(result => {
+    vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         setLoadingSongs(false)
@@ -218,13 +218,13 @@ const loadAlbums = () => {
         }, 0)
         return 
     }
-    const vender = getVender(platform.value)
-    if(!vender) return
+    const vendor = getVendor(platform.value)
+    if(!vendor) return
     const id = artistId.value
     //TODO
-    vender.artistDetailAlbums(id, 0, 365, 1).then(result => {
+    vendor.artistDetailAlbums(id, 0, 365, 1).then(result => {
         updateAlbums(result.data)
-        updateTabData(albums.value)
+        updateTabData(result.data)
         setLoadingAlbums(false)
     })
 }
@@ -238,10 +238,10 @@ const loadAbout = () => {
         updateTabTipText(0)
         return 
     }
-    const vender = getVender(platform.value)
-    if(!vender) return
+    const vendor = getVendor(platform.value)
+    if(!vendor) return
     const id = artistId.value
-    vender.artistDetailAbout(id).then(result => {
+    vendor.artistDetailAbout(id).then(result => {
         updateAbout(result)
         updateTabData(result)
         updateTabTipText(0)
@@ -414,7 +414,7 @@ watch(artistId, reloadAll)
     </div>
 </template>
 
-<style>
+<style scoped>
 #artist-detail {
     display: flex;
     flex-direction: column;
@@ -461,7 +461,7 @@ watch(artistId, reloadAll)
     width: 233px;
     height: 233px;
     border-radius: 10rem;
-    box-shadow: 0px 0px 10px #161616;
+    box-shadow: 0px 0px 1px #161616;
 }
 
 #artist-detail .action {

@@ -19,7 +19,7 @@ import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
 
-const { getVender } = usePlatformStore()
+const { getVendor } = usePlatformStore()
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
 const { addRecentPlaylist } = useUserProfileStore()
@@ -69,9 +69,9 @@ const loadContent = (noLoadingMask) => {
     if(!noLoadingMask) setLoading(true)
     checkFavorite()
     
-    const vender = getVender(props.platform)
-    if(!vender) return 
-    vender.playlistDetail(props.id, offset, limit, page)
+    const vendor = getVendor(props.platform)
+    if(!vendor) return 
+    vendor.playlistDetail(props.id, offset, limit, page)
         .then(result => {
         if(!result.data || result.data.length < 1) {
             page = page - 1
@@ -202,13 +202,13 @@ EventBus.on("refresh-favorite", checkFavorite)
             </div>
             <div class="right" v-show="isLoading">
                 <div class="title">
-                    <div class="loading-mask" style="width: 66%; height: 39px; display: inline-block;"></div>
+                    <div class="loading-mask" style="width: 88%; height: 39px; display: inline-block;"></div>
                 </div>
                 <div class="about">
-                    <div class="loading-mask" v-for="i in 3" style="width: 95%; height: 23px; display: inline-block;"></div>
+                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 23px; display: inline-block;"></div>
                 </div>
                 <div class="action">
-                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 168px; height: 36px; display: inline-block;"></div>
+                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 188px; height: 36px; display: inline-block;"></div>
                 </div>
             </div>
         </div>
@@ -273,6 +273,8 @@ EventBus.on("refresh-favorite", checkFavorite)
     line-height: 23px;
     color: var(--text-sub-color);
 
+    font-size: 15px;
+
     overflow: hidden;
     word-wrap: break-all;
     white-space:pre-wrap;
@@ -287,7 +289,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     width: 233px;
     height: 233px;
     border-radius: 6px;
-    box-shadow: 0px 0px 10px #161616;
+    box-shadow: 0px 0px 1px #161616;
 }
 
 #playlist-detail .action {

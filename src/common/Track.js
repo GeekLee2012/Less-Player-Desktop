@@ -8,7 +8,7 @@ import { toMmss } from './Times';
  * isFMRadio: 是否为广播电台(当歌单类型为电台时); 
  */
 export class Track {
-    constructor(id, platform, title, artist, album, duration, cover, url, type, pid) {
+    constructor(id, platform, title, artist, album, duration, cover, url, type, pid, mv) {
         this.id = id ? id.toString() : ''
         this.platform = platform
         this.title = title
@@ -28,6 +28,8 @@ export class Track {
         //额外信息，当内容存在时显示，同时分别隐藏 artist、album
         this.extra1 = null
         this.extra2 = null
+        //mv id
+        this.mv = null
     }
 
     mmssDuration() {
@@ -95,8 +97,9 @@ export class Track {
 
     static hasId(track) {
         if(!track || !track.id) return false
-        if(typeof(track.id) == 'number') return track.id > 0
-        if(typeof(track.id) == 'string') return track.id.trim().length > 0
+        const id = track.id
+        if(typeof(id) == 'number') return id > 0
+        if(typeof(id) == 'string') return id.trim().length > 0
     }
 
     static firstArtistName(track) {
@@ -126,5 +129,12 @@ export class Track {
     static isEquals(t1, t2) {
         if(!t1 || !t2) return false
         return t1.id == t2.id && t1.platform == t2.platform
+    }
+
+    static hasMv(track) {
+        if(!track || !track.mv) return false
+        const mv = track.mv.toString()
+        if(typeof(mv) == 'number') return mv > 0
+        if(typeof(mv) == 'string') return mv.trim().length > 0
     }
 }

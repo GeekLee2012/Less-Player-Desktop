@@ -1,14 +1,16 @@
 <script setup>
+import { ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
-import { ref, watch } from 'vue';
 
-const { addTrack, playTrack } = usePlayStore()
-const { showToast, hidePlaybackQueueView } = useAppCommonStore()
+const { playing } = storeToRefs(usePlayStore())
+const { addTrack, playTrack, togglePlay } = usePlayStore()
+const { showToast, hidePlaybackQueueView, toggleVideoPlayingView } = useAppCommonStore()
 
 const props = defineProps({
     index: Number,
@@ -33,6 +35,15 @@ const toggleCheck = () => {
 
 const setChecked = (value) => {
     isChecked.value = value
+}
+
+//TODO
+const playMv = () => {
+    if(!Track.hasMv(props.data)) return
+    if(playing.value) togglePlay()
+    const { platform, mv } = props.data
+    toggleVideoPlayingView()
+    EventBus.emit('video-load', { platform, id: mv })
 }
 
 const playItem = () => {
@@ -64,7 +75,7 @@ const showContextMenu = (event) => {
 
 //TODO
 const toString = (value) => {
-    return value ? value + "" : value
+    return value ? value.toString() : value
 }
 
 watch(() => props.checked,  (nv, ov) => {
@@ -98,7 +109,10 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
             <svg v-show="isChecked" class="checked-svg" width="16" height="16" viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z"/></g></g></svg>
         </div>
         <div v-show="!checkbox" class="sqno">{{ index + 1 }}</div>
-        <div class="title" :class="{ spacing: !checkbox }">
+        <div class="mv" v-show="!checkbox && Track.hasMv(data)" :class="{ spacing: !checkbox}">
+            <svg @click="playMv" width="18" height="15" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M1024,158.76v536c-.3,1.61-.58,3.21-.92,4.81-2.52,12-3.91,24.43-7.76,36-23.93,72-88.54,117.91-165.13,117.92q-338.19,0-676.4-.1a205.81,205.81,0,0,1-32.3-2.69C76,840.18,19.81,787.63,5,723.14c-2.15-9.35-3.36-18.91-5-28.38v-537c.3-1.26.66-2.51.89-3.79,1.6-8.83,2.52-17.84,4.85-26.48C26.32,51.12,93.47.05,173.29,0Q512,0,850.72.13a200.6,200.6,0,0,1,31.8,2.68C948.44,13.47,1004,65.66,1019.09,130.88,1021.21,140.06,1022.39,149.46,1024,158.76ZM384,426.39c0,45.66-.09,91.32,0,137,.07,24.51,19.76,43.56,43.38,42.47,8.95-.42,15.83-5.3,23.06-9.86q69.25-43.74,138.74-87.11,40.63-25.42,81.44-50.6c23.18-14.34,23.09-49-.25-63.14-3.27-2-6.69-3.72-9.93-5.74q-30.08-18.81-60.08-37.69Q522.2,302.46,444,253.2a34.65,34.65,0,0,0-26.33-4.87c-19.87,4.13-33.64,21.28-33.68,42.09Q383.9,358.42,384,426.39Z"/></g></g></svg>
+        </div>
+        <div class="title-wrap" :class="{ spacing: !(checkbox || Track.hasMv(data)) }">
             <span v-html="data.title" :class="{ limitedSpan: !checkbox }"></span>
             <div class="action" :class="{ hidden: checkbox }">
                 <svg @click="playItem" width="18" height="18" class="play-btn" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z"/></svg>
@@ -162,7 +176,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     margin-left: 8px;
 }
 
-.song-item .title,
+.song-item .title-wrap,
 .song-item .artist,
 .song-item .album {
     overflow: hidden;
@@ -200,14 +214,27 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     fill: var(--hl-color) !important;
 }
 
-.song-item .title {
+.song-item .title-wrap {
     flex: 1;
     position: relative;
     text-align: left;
 }
 
-.song-item .title span {
+.song-item .title-wrap span {
     z-index: 1;
+}
+
+.song-item .mv {
+    display: flex;
+    flex-direction: column;
+    margin-right: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.song-item .mv svg {
+    fill: var(--svg-color);
+    cursor: pointer;
 }
 
 .song-item .artist, 
@@ -265,15 +292,16 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     cursor: pointer;
 }
 
+.song-item .mv svg:hover,
 .song-item .action svg:hover {
     fill: var(--svg-hover-color);
 }
 
-.song-item .title:hover .action {
+.song-item .title-wrap:hover .action {
     visibility: visible;
 }
 
-.song-item .title:hover .limitedSpan {
+.song-item .title-wrap:hover .limitedSpan {
     width: 158px;
     width: 50%;
     overflow: hidden;

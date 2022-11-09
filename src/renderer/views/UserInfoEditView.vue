@@ -7,19 +7,20 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted, onActivated, ref, reactive, watch } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import SvgTextButton from '../components/SvgTextButton.vue';
-import { useRouter } from 'vue-router';
 import { useIpcRenderer } from '../../common/Utils';
+
+
+const { backward } = inject('appRoute')
 
 const props = defineProps({
     id: String
 })
 
 const ipcRenderer = useIpcRenderer()
-const router = useRouter()
 
 const { showToast } = useAppCommonStore()
 const titleRef = ref(null)
@@ -45,12 +46,7 @@ const submit = () => {
         return 
     }
     updateUser(nickname, about, cover)
-    showToast("用户信息已更新", back)
-}
-
-const back = () => {
-    //router.push("/userhome/all")
-    router.back()
+    showToast("用户信息已更新", backward)
 }
 
 //TODO 使用本地文件图片，不利于迁移共享
@@ -91,7 +87,7 @@ const updateCover = async () => {
                 </div>
                 <div class="action">
                     <SvgTextButton :leftAction="submit" text="保存"></SvgTextButton>
-                    <SvgTextButton :leftAction="back" text="取消" class="spacing"></SvgTextButton>
+                    <SvgTextButton :leftAction="() => backward()" text="取消" class="spacing"></SvgTextButton>
                 </div>
             </div>
         </div>
@@ -131,7 +127,8 @@ const updateCover = async () => {
     width: 175px;
     height: 175px;
     border-radius: 6px;
-    border: 1px solid var(--main-left-border-color);
+    /* border: 1px solid var(--main-left-border-color); */
+    box-shadow: 0px 0px 1px #161616;
 }
 
 #user-info-edit .center .cover-eidt-btn {

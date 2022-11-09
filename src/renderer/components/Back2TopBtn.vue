@@ -93,7 +93,7 @@ defineExpose({
     z-index: 66;
 
     border: 0.1px solid var(--border-color);
-    /* box-shadow: 0px 0px 2px #212121; */
+    box-shadow: 0px 0px 1px #161616;
     background: var(--btn-bg);
     border-radius: 6px;
     width: 36px;

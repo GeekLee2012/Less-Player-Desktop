@@ -1,22 +1,19 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { inject, ref } from 'vue';
 
-const router = useRouter()
+const { visitSearch } = inject('appRoute')
 
 const keywordRef = ref(null)
 const hasText = ref(false)
 
 const visitSearchView = () => {
     const kwInputEl = keywordRef.value
-    const data = kwInputEl.value.trim();
-    if(data.length > 0) {
-        router.push('/search/' + data)
-    }
+    const keyword = kwInputEl.value.trim()
+    if(keyword.length > 0) visitSearch(keyword)
 }
 
 const toggleClearBtn = () => {
-    const data = keywordRef.value.value;
+    const data = keywordRef.value.value
     hasText.value = (data && data.length > 0)
 }
 

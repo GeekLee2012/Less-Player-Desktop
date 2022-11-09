@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue';
+import { inject, onMounted, watch } from 'vue';
 import MainTop from './MainTop.vue';
 import MainContent from './MainContent.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -10,10 +10,11 @@ import ArtistCategoryView from '../views/ArtistCategoryView.vue';
 import RadioCategoryView from '../views/RadioCategoryView.vue';
 import EventBus from '../../common/EventBus';
 import Mousetrap from 'mousetrap';
-import { useRouter } from 'vue-router';
 
+const  { visitRoute, visitSetting } = inject('appRoute')
 
-const { playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow } = storeToRefs(useAppCommonStore())
+const { playlistCategoryViewShow, artistCategoryViewShow, 
+    radioCategoryViewShow, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { hideAllCategoryViews, hideAllCtxMenus,
     hidePlaybackQueueView, hidePlayingView,
     togglePlaybackQueueView, togglePlayingView } = useAppCommonStore()
@@ -21,16 +22,9 @@ const { hideAllCategoryViews, hideAllCtxMenus,
 const { togglePlay, switchPlayMode, 
     playPrevTrack, playNextTrack,
     toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
-const router = useRouter()
 
 //const minAppWidth = 999, minAppHeight = 666 
 const minAppWidth = 1080, minAppHeight = 720 
-
-const visitRoute = (path) => {
-    hidePlaybackQueueView()
-    hidePlayingView()
-    router.push(path)
-}
 
 //注册默认应用级别快捷键
 const registryDefaultLocalKeys = () => {
@@ -47,7 +41,7 @@ const registryDefaultLocalKeys = () => {
     // 最大音量 / 静音
     Mousetrap.bind(['o'], toggleVolumeMute, 'keyup')
     // 打开设置
-    Mousetrap.bind(['p'], () => visitRoute('/setting'), 'keyup')
+    Mousetrap.bind(['p'], () => visitSetting(hidePlaybackQueueView), 'keyup')
     // 打开当前播放
     Mousetrap.bind(['q'], togglePlaybackQueueView, 'keyup')
 }
@@ -59,9 +53,11 @@ const setPlayMetaSize = () => {
     //const hScaleRatio = clientHeight / minClientHeight
     const width = 211 * Math.max(wScaleRatio, 1)
     const el1 = document.querySelector(".play-meta .title-wrap")
-    const el2 = document.querySelector(".play-meta .time-volume-wrap")
+    const el2 = document.querySelector(".play-meta .audio-title")
+    const el3 = document.querySelector(".play-meta .time-volume-wrap")
     el1.style.width = width + "px"
     el2.style.width = width + "px"
+    el3.style.width = width + "px"
 }
 
 const setSearchBarSize = () => {
@@ -188,6 +184,13 @@ const setBatchViewListSize = () => {
     if(el) el.style.height = height + "px"
 }
 
+const setVideoViewSize = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const el = document.querySelector(".video-holder")
+    el.style.width = clientWidth + "px"
+    el.style.height = (clientHeight - 39) + "px"
+}
+
 const hideAllPopoverViews = () => {
     //隐藏当前播放
     hidePlaybackQueueView()
@@ -217,6 +220,8 @@ onMounted (() => {
         setPlayingLyricCtlSize()
         //自适应批量操作页面列表大小
         setBatchViewListSize()
+        //自适应视频页面大小
+        setVideoViewSize()
         //隐藏上下文菜单
         hideAllCtxMenus()
     })
@@ -245,6 +250,7 @@ EventBus.on("imageTextTileLoadingMask-load", () => {
 EventBus.on("batchView-show", setBatchViewListSize)
 //TODO
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
+watch([ videoPlayingViewShow ], setVideoViewSize)
 </script>
 
 <template>

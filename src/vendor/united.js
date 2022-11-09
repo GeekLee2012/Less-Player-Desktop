@@ -59,17 +59,17 @@ export class United {
     }
 }
 
-export const getVender = (name) => {
+export const getVendor = (name) => {
     for(let i in vendors) {
-        let vender = vendors[i]
-        if(vender.CODE === name) return vender
+        let vendor = vendors[i]
+        if(vendor.CODE === name) return vendor
     }
     return null
 } 
 
 export const invokeVender = async (name, fn, args) => {
-    const vender = getVender(name)
-    if(!vender || vender[fn]) return null
-    const result = await vender[fn](...args)
+    const vendor = getVendor(name)
+    if(!vendor || vendor[fn]) return null
+    const result = await vendor[fn](...args)
     return result
 }

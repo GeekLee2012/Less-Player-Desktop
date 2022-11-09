@@ -59,9 +59,9 @@ const loadCategories = () => {
     categories.length = 0
     let cached = currentCategory()
     if(!cached) {
-        const vender = currentVender()
-        if(!vender) return 
-        vender.artistCategories().then(result => {
+        const vendor = currentVender()
+        if(!vendor) return 
+        vendor.artistCategories().then(result => {
             result.data.push(result.alphabet)
             putCategory(result.platform, result.data)
             categories.push(...result.data)
@@ -78,14 +78,14 @@ const loadCategories = () => {
 
 const loadContent = (noLoadingMask) => {
     if(!noLoadingMask) setLoadingContent(true)
-    const vender = currentVender()
-    if(!vender) return
+    const vendor = currentVender()
+    if(!vendor) return
     const cate = currentCategoryItems.value
     const offset = pagination.offset
     const limit = pagination.limit
     const page = pagination.page
     const platform = currentPlatformCode.value
-    vender.artistSquare(cate, offset, limit, page).then(result => {
+    vendor.artistSquare(cate, offset, limit, page).then(result => {
         pagination.page = result.page
         if(platform != result.platform || cate != result.cate) return 
         addArtistData(result.data)

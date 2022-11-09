@@ -1,7 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { inject, ref } from 'vue';
 import EventBus from '../../common/EventBus';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { useArtistDetailStore } from '../store/artistDetailStore';
@@ -16,9 +15,14 @@ const props = defineProps({
     posStyle: Object,
     data: Array
 })
+
+const { visitRoute, visitArtist, 
+    visitAlbum, visitCustomPlaylistCreate,
+    visitCustomPlaylistEdit, visitBatchCustomPlaylist,
+     } = inject('appRoute')
+
 let currentDataType = -1
 
-const router = useRouter()
 const { commonCtxItem, commonCtxMenuCacheItem  } = storeToRefs(useAppCommonStore())
 const { showToast, setCommonCtxMenuData, hideAllCtxMenus } = useAppCommonStore()
 const { playTrack, playTrackLater, addTrack, removeTrack, resetQueue, addTracks, playNextTrack } = usePlayStore()
@@ -29,7 +33,7 @@ const { addFavoriteTrack, removeFavoriteSong, addFavoriteRadio,
     removeFavoritePlaylist, addRecentPlaylist } = useUserProfileStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { removeItem } = useLocalMusicStore()
-const { getVender } = usePlatformStore()
+const { getVendor } = usePlatformStore()
 
 
 const toastAndHideMenu = (text) => {
@@ -75,60 +79,6 @@ const addFavoriteItem = () => {
 }
 
 //TODO
-const { exploreModeCode } = storeToRefs(useAppCommonStore())
-
-const { updateArtistDetailKeys } = useArtistDetailStore()
-const { isArtistDetailVisitable } = usePlatformStore()
-
-const visitArtistDetail = (platform, item, index) => {
-    let id = item.id
-    const platformValid = isArtistDetailVisitable(platform)
-    let idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
-    const visitable = platformValid && idValid
-    platform = platform.trim()
-    if(visitable) {
-        const fromPath = router.currentRoute.value.path
-        //const toPath = '/' + exploreModeCode.value + '/artist/' + platform + "/" + id
-        let exploreMode = exploreModeCode.value
-        //let moduleName = 'artist'
-        exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
-        const toPath = `/${exploreMode}/artist/${platform}/${id}`
-        if(fromPath != toPath) {
-            router.push(toPath)
-            updateArtistDetailKeys(platform, id)
-        }
-        hideAllCtxMenus()
-    }
-}
-
-//TODO
-const { updateAlbumDetailKeys } = useAlbumDetailStore()
-const { isAlbumDetailVisitable } = usePlatformStore()
-
-const visitAlbumDetail = (platform, id) => {
-    const platformValid = isAlbumDetailVisitable(platform)
-    const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
-    const visitable = platformValid && idValid 
-    platform = platform.trim()
-    if(visitable) {
-        const fromPath = router.currentRoute.value.path
-        let exploreMode = exploreModeCode.value
-        let moduleName = 'album'
-        if(id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
-            exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
-            moduleName = 'playlist'
-        } else {
-            exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
-        }
-        const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
-        if(fromPath != toPath) {
-            router.push(toPath)
-            updateAlbumDetailKeys(platform, id)
-        }
-        hideAllCtxMenus()
-    }
-}
-
 const isMenu = () => true
 
 const isMultiArtists = () => {
@@ -139,13 +89,7 @@ const isMultiArtists = () => {
 const visitItemArtist = (event)=> {
     const { platform, artist } = commonCtxMenuCacheItem.value
     if(artist.length == 1) {
-        //visitArtistDetail(platform, artist[0])
-        EventBus.emit('visit-artist', { 
-            platform, 
-            item: artist[0], 
-            index: -1, 
-            callback: (visitable) => { if(visitable) hideAllCtxMenus() }
-        })
+        visitArtist({  platform, item: artist[0], index: -1 })
     } else {
         EventBus.emit("artistListSubmenu-init")    
         EventBus.emit("artistListSubmenu-show", event)
@@ -154,12 +98,7 @@ const visitItemArtist = (event)=> {
 
 const visitItemAlbum = ()=> {
     const { platform, album } = commonCtxMenuCacheItem.value
-    //visitAlbumDetail(platform, album.id)
-    EventBus.emit("visit-album", {
-        platform, 
-        id: album.id,
-        callback: (visitable) => { if(visitable) hideAllCtxMenus() }
-    })
+    visitAlbum({ platform, id: album.id })
 }
 
 const removeQueueItem = ()=> {
@@ -188,15 +127,14 @@ const playCustom = () => {
     playNextTrack()
 }
 
-const visitCustom = () => {
-    const exploreMode = exploreModeCode.value
+const visitCustomEdit = () => {
     const { id } = commonCtxMenuCacheItem.value
-    router.push(`/${exploreMode}/customPlaylist/edit/${id}`)
+    visitCustomPlaylistEdit(id)
 }
 
 const visitBatchCustom = () => {
     const { id } = commonCtxMenuCacheItem.value
-    router.push("/userhome/batch/customPlaylist/" + id)
+    visitBatchCustomPlaylist(id, 'userhome')
 }
 
 const removeCustom = () => {
@@ -224,11 +162,6 @@ const showAddToList = (event, mode) => {
     EventBus.emit("addToListSubmenu-show", event)
 }
 
-const createCustom = () => {
-    const exploreMode = exploreModeCode.value
-    router.push(`/${exploreMode}/customPlaylist/create`)
-}
-
 //目前以加入当前播放列表为参考标准
 const traceRecentPlay = (playlist) => {
     const { id, platform, title, cover, type } = playlist
@@ -246,9 +179,9 @@ const playAll = (playlist) => {
 
 const playPlaylist = () => {
     const { id, platform } = commonCtxMenuCacheItem.value
-    const vender = getVender(platform)
-    if(!vender) return 
-    vender.playlistDetail(id, 0, 1000, 1).then(result => {
+    const vendor = getVendor(platform)
+    if(!vendor) return 
+    vendor.playlistDetail(id, 0, 1000, 1).then(result => {
         playAll(result)
     })
 }
@@ -341,12 +274,12 @@ const MenuItems = {
         createCustom: {
             name: '新建歌单',
             icon: '<svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>',
-            action: createCustom,
+            action: visitCustomPlaylistCreate,
         },
         editCustom: {
             name: '编辑歌单',
             icon: '<svg width="16" height="16" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M428.27,992.13c-88.16,0-176.32.28-264.48-.1-56.56-.24-101.65-23.86-134.6-69.78A150.76,150.76,0,0,1,.34,833.37C0,743.21.19,653.05.18,562.89c0-88-.5-176,.17-264C.82,236.36,29,188.83,82.63,156.81c25.32-15.11,53.25-21.18,82.69-21.15q161,.15,322,.06c26.66,0,45.78,15.33,50.38,40,5,26.58-15,53-41.88,55.53-3.31.31-6.66.42-10,.42q-159.75,0-319.49-.06c-25.45,0-45.64,9.41-59.78,30.75-7.47,11.29-10.42,23.92-10.41,37.45q.09,229.23,0,458.47,0,35.25,0,70.5c.06,38.34,29,67.32,67.42,67.33q264.74,0,529.47,0c38.53,0,67.21-28.52,67.44-67.25.21-32.66.05-65.33.05-98q0-112.74,0-225.49c0-19.14,7-34.41,23.5-44.58,30.3-18.63,70.25,2.33,72.32,37.83.13,2.17.21,4.33.21,6.5q0,161.24,0,322.48c0,47.47-16.82,87.91-51.29,120.5-30,28.4-66.18,43.56-107.53,43.81-89.83.52-179.66.16-269.49.16Z"/><path d="M417,473.1c1.08-20.29,2.1-40.59,3.27-60.88a46.93,46.93,0,0,1,11.63-28.62c1.74-2,3.64-3.89,5.53-5.78L798.28,16.91c22.51-22.5,50.7-22.57,73.22-.07q52.15,52.11,104.27,104.27c22,22,22.06,50.57.07,72.54Q794.42,374.91,613,556.14c-10.34,10.34-22.49,15.36-37,16.06q-50.93,2.47-101.8,5.69c-14.62.91-28.69.35-40.88-9.11-12.48-9.69-19.48-22.41-19.12-38.27.43-19.15,1.73-38.28,2.65-57.41Zm95.78,6.38c13.28-.76,25.7-1.6,38.15-2.09a12.52,12.52,0,0,0,9.12-4q156.09-156.07,312.3-312c1.26-1.26,2.43-2.58,3.23-3.43l-41.31-41.26-72.48,72.49Q640.15,310.8,518.56,432.44c-1.44,1.45-3.22,3.37-3.35,5.18C514.19,451.23,513.55,464.86,512.74,479.48Z"/></g></g></svg>',
-            action: visitCustom,
+            action: visitCustomEdit,
         }, 
         batchCustom: {
             name: '批量操作',
@@ -533,7 +466,7 @@ EventBus.on("commonCtxMenu-init", dataType => {
     background: var(--ctx-menu-bg);
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    box-shadow: 0px 0px 8px var(--ctx-menu-border-color);
+    box-shadow: 0px 0px 3px var(--ctx-menu-border-color);
     max-height: 386px;
 }
 

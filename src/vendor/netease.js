@@ -242,6 +242,7 @@ export class NetEase {
                         song.ar.forEach(e => artist.push({id: e.id, name: e.name }))
                         const album = { id: song.al.id, name: song.al.name }
                         const track = new Track(song.id, NetEase.CODE, song.name, artist, album, song.dt, song.al.picUrl)
+                        track.mv = song.mv
                         result.addTrack(track)
                     })
                     resolve(result)
@@ -310,10 +311,11 @@ export class NetEase {
 
                     const track = new Track(item.id, NetEase.CODE, item.name, 
                         artist, album, item.duration, albumCover)
-                        data.push(track)
+                    track.mv = item.mvid
+                    data.push(track)
                 })
 
-                const result = { id, title, cover, data }
+                const result = { id, platform: NetEase.CODE, title, cover, data }
                 resolve(result)
             })
         })
@@ -357,7 +359,8 @@ export class NetEase {
         return new Promise((resolve, reject) => {
             const url = "https://music.163.com/artist/desc" + "?id=" + id
             getDoc(url).then(doc => {
-                const result = doc.querySelector(".n-artdesc").innerHTML
+                const desc = doc.querySelector(".n-artdesc")
+                const result = desc ? desc.innerHTML : null
                 resolve(result)
             })
         })
@@ -369,7 +372,7 @@ export class NetEase {
             const url = "https://music.163.com/album" + "?id=" + id
             getDoc(url).then(doc => {
                 const infoEl = doc.querySelector('.m-info ')
-                const cover = infoEl.querySelector('.u-cover img').getAttribute('src')
+                let cover = infoEl.querySelector('.u-cover img').getAttribute('src')
                 const title = infoEl.querySelector('.tit').textContent.trim()
                 const introEl = infoEl.querySelectorAll('.intr')
                 const artistName = introEl[0].querySelector('span').getAttribute('title')
@@ -392,6 +395,7 @@ export class NetEase {
                     about = pEl.innerHTML
                 }
                 
+                cover = cover.replace('177y177', '1024y1024')
                 const result = new Album(id, NetEase.CODE, title, cover, artist, company, publishTime, about)
                 
                 const predata = doc.querySelector('#song-list-pre-data')
@@ -403,6 +407,7 @@ export class NetEase {
                         const album = { id, name: title }
                         const trackCover = item.album.picUrl
                         const track = new Track(item.id, NetEase.CODE, item.name, trackArtist, album, item.duration, trackCover)
+                        track.mv = item.mvid
                         result.addTrack(track)
                     })
                 }
@@ -424,6 +429,7 @@ export class NetEase {
                     const artist = item.ar.map(e => ({ id: e.id, name: e.name }))
                     const album = { id: item.al.id, name : item.al.name }
                     const track = new Track(item.id, NetEase.CODE, item.name, artist, album, item.dt, item.al.picUrl)
+                    track.mv = item.mv
                     return track
                 })
                 const result = { offset, limit, page, data }
@@ -707,28 +713,31 @@ export class NetEase {
             getDoc(url).then(doc => {
                 const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
                 //优质新电台
-                let listEl = doc.querySelectorAll(".m-radio > .new li")
-                listEl.forEach(el => {
-                    let id = null, cover = null, title = null, itemUrl = null
-
-                    const coverEl = el.querySelector(".u-cover img")
-                    const titleEl = el.querySelector(".f-fs2 a")
-
-                    if(coverEl) {
-                        cover = coverEl.getAttribute("src").replace("200y200", "500y500")
-                    }
-
-                    if(titleEl) {
-                        title = titleEl.textContent
-                        itemUrl = BASE_URL + titleEl.getAttribute('href')
-                        id = Playlist.ANCHOR_RADIO_ID_PREFIX + itemUrl.split('=')[1]
-                    }
-
-                    if(id && itemUrl) {
-                        const detail = new Playlist(id, NetEase.CODE , cover, title, itemUrl)
-                        result.data.push(detail)
-                    }
-                })
+                let listEl = null
+                if(page == 1) {
+                    listEl = doc.querySelectorAll(".m-radio > .new li")
+                    listEl.forEach(el => {
+                        let id = null, cover = null, title = null, itemUrl = null
+    
+                        const coverEl = el.querySelector(".u-cover img")
+                        const titleEl = el.querySelector(".f-fs2 a")
+    
+                        if(coverEl) {
+                            cover = coverEl.getAttribute("src").replace("200y200", "500y500")
+                        }
+    
+                        if(titleEl) {
+                            title = titleEl.textContent
+                            itemUrl = BASE_URL + titleEl.getAttribute('href')
+                            id = Playlist.ANCHOR_RADIO_ID_PREFIX + itemUrl.split('=')[1]
+                        }
+    
+                        if(id && itemUrl) {
+                            const detail = new Playlist(id, NetEase.CODE , cover, title, itemUrl)
+                            result.data.push(detail)
+                        }
+                    })
+                }
                 //电台排行榜
                 listEl = doc.querySelectorAll("#allradios .rdilist li")
                 listEl.forEach(el => {
@@ -807,6 +816,39 @@ export class NetEase {
         return new Promise((resolve, reject) => {
             if(id.startsWith(NetEase.RADIO_PREFIX)) id = track.songlistId
             resolve(id)
+        })
+    }
+
+    //视频播放详情：url、cover等
+    static videoDetail(id, quality) {
+        //quality = quality || 1080
+        return new Promise((resolve, reject) => {
+            let url = "https://music.163.com/weapi/v1/mv/detail?csrf_token="
+            let param = {
+                id,
+                type: 'MP4',
+                csrf_token: ""
+            }
+            let reqBody = weapi(param)
+            postJson(url, reqBody).then(json => {
+                let maxQuality = 0
+                json.data.brs.forEach(item => {
+                    maxQuality = Math.max(maxQuality, item.br)
+                })
+                maxQuality = maxQuality || 1080
+                url = "https://music.163.com/weapi/song/enhance/play/mv/url?csrf_token="
+                param = {
+                    id,
+                    r: maxQuality,
+                    csrf_token: ""
+                }
+                reqBody = weapi(param)
+                postJson(url, reqBody).then(json => {
+                    const result = { id, platform: NetEase.CODE, quality, url: '' }
+                    result.url = json.data.url
+                    resolve(result)
+                })
+            })
         })
     }
 }

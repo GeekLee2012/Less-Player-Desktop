@@ -56,9 +56,9 @@ const loadCategories = () => {
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
     if(!cachedCates) {
-        const vender = currentVender()
-        if(!vender) return 
-        vender.anchorRadioCategories().then(result => {
+        const vendor = currentVender()
+        if(!vendor) return 
+        vendor.anchorRadioCategories().then(result => {
             const multiSelectMode = (result.multiMode === true)
             setMultiSelectMode(multiSelectMode)
             putCategories(result.platform, { data: result.data, multiSelectMode })
@@ -80,8 +80,8 @@ const loadCategories = () => {
 }
 
 const loadContent = (noLoadingMask) => {
-    const vender = currentVender()
-    if(!vender) return
+    const vendor = currentVender()
+    if(!vendor) return
     if(!noLoadingMask) setLoadingContent(true)
     const cate = multiSelectMode.value ? currentCategoryItems.value : currentCategoryCode.value
     const offset = pagination.offset
@@ -89,7 +89,7 @@ const loadContent = (noLoadingMask) => {
     const page = pagination.page
     const platform = currentPlatformCode.value
     const order = currentOrder.value.value
-    vender.anchorRadioSquare(cate, offset, limit, page, order).then(result => {
+    vendor.anchorRadioSquare(cate, offset, limit, page, order).then(result => {
         if(platform != result.platform) return 
         if(cate != result.cate) return 
         radios.push(...result.data)

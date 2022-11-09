@@ -1,7 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted, reactive } from 'vue';
-import { useRouter } from 'vue-router';
+import { inject, onMounted, reactive } from 'vue';
 import EventBus from '../../common/EventBus';
 import { Playlist } from '../../common/Playlist';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -9,11 +8,13 @@ import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
 
+
+const { visitCustomPlaylistCreate } = inject('appRoute')
+
 const props = defineProps({
     posStyle: Object
 })
 
-const router = useRouter()
 const { addTrack } = usePlayStore()
 const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast, hideAllCtxMenus, setCommonNotificationType, hidePlaybackQueueView } = useAppCommonStore()
@@ -32,7 +33,7 @@ const addToQueue = () => {
 }
 
 const createCustom = () => {
-    router.push("/userhome/customPlaylist/create")
+    visitCustomPlaylistCreate('userhome')
     hidePlaybackQueueView()
 }
 

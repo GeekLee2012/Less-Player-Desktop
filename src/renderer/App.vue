@@ -1,13 +1,14 @@
 <script setup>
 import { onMounted, provide, ref, watch } from 'vue';
-import PlayerBoostrap from './components/PlayerBoostrap.vue';
-import Themes from './components/Themes.vue';
+import PlayerBoostrap from './PlayerBoostrap.vue';
+import Themes from './Themes.vue';
 import MainLeft from './layout/MainLeft.vue';
 import MainCenter from './layout/MainCenter.vue';
 import PopoversCtl from './components/PopoversCtl.vue';
 import EventBus from '../common/EventBus';
 import { useSettingStore } from './store/settingStore';
 import { storeToRefs } from 'pinia';
+import AppRoute from './AppRoute.vue';
 
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
 const { getCurrentThemeId, setupAppSuspension, 
@@ -65,13 +66,15 @@ initialize()
 </script>
 
 <template>
+  <AppRoute>
     <PlayerBoostrap>
       <Themes>
-        <MainLeft></MainLeft> 
-        <MainCenter></MainCenter>
-        <PopoversCtl></PopoversCtl>
+          <MainLeft></MainLeft> 
+          <MainCenter></MainCenter>
+          <PopoversCtl></PopoversCtl>
       </Themes>
     </PlayerBoostrap>
+  </AppRoute>
 </template>
 
 <style>

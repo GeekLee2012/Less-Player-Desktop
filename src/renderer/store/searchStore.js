@@ -68,10 +68,10 @@ export const useSearchStore = defineStore('search', {
             }
         },
         currentVender() {
-            const { getVender } = usePlatformStore()
+            const { getVendor } = usePlatformStore()
             const index = this.currentPlatformIndex
             const platform = this.platforms[index].code
-            return getVender(platform)
+            return getVendor(platform)
         },
         isSongsTab() {
             return this.activeTabCode == 'songs'

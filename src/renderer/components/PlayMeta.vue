@@ -37,7 +37,7 @@ onMounted(() => {
                 </div>
             </div>
             <div class="title-wrap">
-                <div class="flex-row">
+                <div class="audio-title-wrap">
                     <div class="audio-title" v-html="trackMeta(currentTrack)"></div>
                     <div class="favorite-btn">
                         <svg v-show="true" width="18" height="18" viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M1024,299.77c-.89,7.24-1.74,14.5-2.67,21.74-5.4,41.95-19.53,81-39,118.35-24.74,47.39-56.62,89.8-91.22,130.27-48.69,57-101.85,109.6-156.46,160.77C661.69,799.26,588.19,867,514.93,935.05c-.85.78-1.75,1.49-2.85,2.41-1.09-.89-2.14-1.65-3.09-2.52q-101.8-92.36-203.56-184.77c-58.71-53.61-116.12-108.59-168.2-168.81-39.12-45.23-74.7-92.93-100.8-147.1-18.8-39-31.17-79.91-35.23-123.16-.32-3.45-.8-6.89-1.2-10.33v-36c1-7.74,1.79-15.5,2.86-23.23,8.06-57.93,30.88-109.28,71.21-151.7,67.09-70.55,150.24-98.35,246.11-86,75.62,9.71,138.64,44.83,189.43,101.75.74.82,1.61,1.52,2.53,2.39.91-1,1.61-1.66,2.26-2.4a297.6,297.6,0,0,1,98.07-74.34C690-5.4,769.66-11.19,849.33,21.27,948,61.45,1004.25,136.62,1021.1,241.55c1.24,7.69,1.95,15.47,2.9,23.21ZM922.22,282.9c-1.08-10.76-1.48-21.64-3.33-32.27-10-57.28-39.78-101.12-91.95-127.45-54.58-27.54-110.52-27-165.67-1.07-44.78,21.07-78.08,53.89-96.65,100.47-1.2,3-2.93,3.41-5.65,3.4-29.5-.06-59-.1-88.49.05-3.58,0-5.17-1.2-6.63-4.39C430.29,148.12,342.54,89.86,249.42,105.81c-41,7-76.09,25.21-103.36,56.83-38.87,45.08-49.77,97.9-40.53,155.58,5.72,35.66,20,68.21,38.16,99.15C171,463.93,205.43,505,242,544.39c57.44,61.87,119.67,118.78,182.1,175.48,28,25.43,56.23,50.62,84.27,76,5.68,5.15,6.89,5.4,12.43.28C568,752.47,615.47,709.05,662.35,665c54.55-51.26,108-103.64,156.07-161.17C846.69,470,872.66,434.6,892.47,395,910.12,359.76,921.42,322.79,922.22,282.9Z"/></g></g></svg>
@@ -64,11 +64,12 @@ onMounted(() => {
     margin-left: 10px;
 }
 
-.play-meta .flex-row {
+.play-meta .audio-title-wrap {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
+    justify-content: center;
+    align-items: flex-end;
+    height: 33px;
 }
 
 .play-meta .cover-wrap {
@@ -79,7 +80,8 @@ onMounted(() => {
     box-shadow: 0px 0px 1px var(--main-left-border-color);
 }
 
-.play-meta .audio-cover, .play-meta .cover-mask  {
+.play-meta .audio-cover, 
+.play-meta .cover-mask  {
     /*width: 100%;*/
     width: var(--play-meta-height);
     height: var(--play-meta-height);
@@ -118,12 +120,12 @@ onMounted(() => {
 .play-meta .audio-title {
     font-size: 14;
     text-align: left;
-    display: flex;
-    align-items: flex-end;
+    
+    vertical-align: bottom;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    height: 33px;
+    width: 211px;
 }
 
 .play-meta .favorite-btn {

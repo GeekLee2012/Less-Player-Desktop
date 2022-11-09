@@ -1,6 +1,5 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router';
 import { usePlatformStore } from '../store/platformStore';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -8,23 +7,24 @@ import EventBus from '../../common/EventBus';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import path from 'path';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { ref } from 'vue';
-import { useArtistDetailStore } from '../store/artistDetailStore';
+import { inject, ref } from 'vue';
 import { useSettingStore } from '../store/settingStore';
 import { Playlist } from '../../common/Playlist';
 
+const { visitRoute, visitArtist, visitHome,
+    visitFavoritePlaylist, visitCustomPlaylist, 
+    visitCustomPlaylistCreate,  } = inject('appRoute')
+
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
-const router = useRouter()
 
 const { platforms, currentPlatformIndex, 
-    currentPlatformCode, isLocal } = storeToRefs(usePlatformStore())
-const { updateCurrentPlatform } = usePlatformStore()
+    currentPlatformCode } = storeToRefs(usePlatformStore())
+const { updateCurrentPlatform, isLocalMusic } = usePlatformStore()
 const { isPlaylistMode, isArtistMode, isRadioMode, isUserHomeMode, 
      exploreModeCode, exitToHomeBtnShow } = storeToRefs(useAppCommonStore())
 const { nextExploreMode } = useAppCommonStore()
 const { getCustomPlaylists, getFavoritePlaylilsts ,getFollowArtists } = storeToRefs(useUserProfileStore())
-const { updateArtistDetailKeys } = useArtistDetailStore()
 const { navigation } = storeToRefs(useSettingStore())
 
 const activeCustomPlaylistIndex = ref(-1)
@@ -40,17 +40,17 @@ const updatePlatformIndex = (index, isSwitchMode) => {
     activeCustomPlaylistIndex.value = -1
     activeArtistIndex.value = -1
 
-    const code = currentPlatformCode.value
+    const platform = currentPlatformCode.value
     const exploreMode = exploreModeCode.value
-    let url = null
-    if(isLocal.value) {
-        url = '/' + code
+    let path = null
+    if(isLocalMusic(platform)) {
+        path = `/${platform}`
     } else if(isUserHomeMode.value && isSwitchMode) {
-        url = '/' + exploreMode + '/' + code
+        path = `/${exploreMode}/${platform}`
     } else if(isPlaylistMode.value || isArtistMode.value || isRadioMode.value){
-        url = '/' + exploreMode + '/square/' + code
+        path = `/${exploreMode}/square/${platform}`
     }
-    if(url) router.push(url)
+    visitRoute(path)
 }
 
 const switchExploreMode = () => {
@@ -58,21 +58,10 @@ const switchExploreMode = () => {
     updatePlatformIndex(0, true)
 }
 
-const exitToHome = () => {
-    router.push("/")
-}
-
-const addCustom = () => {
-    const exploreMode = exploreModeCode.value
-    router.push(`/${exploreMode}/customPlaylist/create`)
-}
-
-const visitCustom = (item, index) => {
+const visitCustomItem = (item, index) => {
     activeCustomPlaylistIndex.value = index
     updateCurrentPlatform(-1)
-    const exploreMode = exploreModeCode.value
-    const id = item.id
-    router.push(`/${exploreMode}/customPlaylist/${id}`)
+    visitCustomPlaylist(item.id)
 }
 
 const showContextMenu = (item, index, event, dataType) => {
@@ -81,27 +70,19 @@ const showContextMenu = (item, index, event, dataType) => {
     EventBus.emit("commonCtxMenu-show", { event, value: item })
 }
 
-const visitArtist = (item, index) => {
+const visitArtistItem = (item, index) => {
     activeArtistIndex.value = index
-    const exploreMode = exploreModeCode.value
-    const { id, platform } = item
-    const fromPath = router.currentRoute.value.path
-    const toPath = `/${exploreMode}/artist/${platform}/${id}`
-    if(fromPath != toPath) {
-        updateCurrentPlatform(-1)
-        router.push(toPath)
-        updateArtistDetailKeys(platform, id)
-    }
+    const { platform } = item
+    visitArtist({ 
+        platform, item, 
+        onRouteReady: () => updateCurrentPlatform(-1)
+    })
 }
 
 const visitFavourteItem = (item, index) => {
     activeCustomPlaylistIndex.value = -1
-    let exploreMode = exploreModeCode.value
     const { id, platform } = item
-    if(id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
-        exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
-    }
-    router.push(`/${exploreMode}/playlist/${platform}/${id}`)
+    visitFavoritePlaylist(platform, id)
 }
 
 const setFavoritePlaylistsCollapsed = (value) => {
@@ -135,10 +116,6 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
     <div id="main-left" :class="{ mousewheelViewpoint: isUserMouseWheel }">
         <div class="header">
             <WinTrafficLightBtn v-show="useCustomTrafficLight"></WinTrafficLightBtn>
-            <div class="logo-wrap">
-                <div id="app-logo" >L</div>
-                <div id="app-title" >Less Player</div>
-            </div>
         </div>
         <div class="center" @scroll="onUserMouseWheel">
             <div id="explore-mode">
@@ -158,7 +135,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
                     <svg width="17" height="17" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M0,469C.33,209.53,210.36-.32,469.38,0,729.05.32,939.22,210.78,938.47,469.76c-.76,259.7-211.12,469.66-469.63,468.74C208.87,937.57-.33,728.06,0,469Zm453.81,128,.12-.34-1.95-.2c-53.39-5.09-94.44-29.95-122-76.3-14.75-24.84-23-52-27.21-80.35-4.62-31.1-6.87-62.34-.49-93.46,10.07-49.16,36-87.34,80.26-111.88,32.13-17.8,67-23.53,103.32-20.28,46.06,4.12,84.22,23.72,113.49,59.63,24.9,30.54,37.7,66,39.88,105.16,2.3,41.55-2.47,82.21-19,120.79-19.26,44.86-51.57,75.78-98.75,90.18a171.59,171.59,0,0,1-18,4.28c-6,1.14-12.07,1.77-19.36,2.8,2.76.19,4.26.35,5.75.38,39.17.82,78.23,3.08,117,8.94,33.49,5.07,66.42,12.41,97.94,25.1,27.78,11.19,53.28,25.93,73.53,48.57,2.16,2.43,4.24,4.93,6.42,7.46,100.84-141.58,96.84-361.06-57.33-502.35C576.61,46.82,340.65,52.88,196.73,198.77,51.56,345.94,60.23,558.41,153.79,687.36c2.07-2.44,4.06-4.88,6.15-7.22,23.12-25.8,52.64-41.45,84.68-52.86,50.51-18,103.12-24.68,156.28-28C418.51,598.18,436.17,597.7,453.81,596.94Zm15.45,85.56c-55,0-99.89,3.54-143.71,11.75C299.3,699.17,273.61,706,250,719c-13.9,7.67-26.18,17.11-33.23,32-1.83,3.88-1.62,6.33,1.92,9.29,86,71.89,184.71,102.35,296.12,90,74.25-8.24,140.09-37.15,198-84.26,12.85-10.45,12.94-12.24,2.41-25.61-9-11.4-20.9-19-33.75-25.16-25-12-51.65-18.4-78.78-23C558.52,684.74,513.94,682.83,469.26,682.5ZM383.5,389.86c1,11.78,1.58,23.6,3,35.32a178.07,178.07,0,0,0,4.84,24c10.64,39.94,33.24,60,72.16,62.46,39.11,2.43,67.94-13.22,81.51-52.5,9.63-27.85,11.93-56.79,7.84-85.82-3.8-26.92-16.6-49.06-40.58-63.43C495,299.51,476.06,297,456.38,299.32c-31.89,3.81-55.18,19.38-66.8,50.18C384.68,362.46,383.45,376,383.5,389.86Z"/></g></g></svg>
                     <span>我的主页</span>
                 </div>
-                <div class="exit-btn" v-show="isUserHomeMode" @click="exitToHome">
+                <div class="exit-btn" v-show="isUserHomeMode" @click="() => visitHome()">
                     <svg width="15" height="15" viewBox="0 0 640.23 768.15" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M512,85.7H85.8V682.57H512c0-2.09,0-4,0-6,.2-14.15-.46-28.39.81-42.45,1.89-20.83,20.72-36.7,41.89-36.75s40.69,15.86,41.85,36.66c1.27,23.06,2.24,46.53-.55,69.34-4.64,38-37.44,64.66-75.84,64.68q-221.51.1-443-.08a80.15,80.15,0,0,1-19.74-2.52C23,756.6.11,726.35.06,689.86Q-.09,585.61,0,481.37,0,280.63,0,79.88C0,43.63,20.56,14.09,53.67,4A92.41,92.41,0,0,1,80.21.28q207-.33,414-.12c12,0,24.12-.71,35.93.83,38.78,5.05,66,35.29,67.24,74.25.57,17.65.47,35.34,0,53-.57,23.31-16.68,40.19-39.7,42.42-20.07,1.94-39.48-12.22-44.31-32.66a61.57,61.57,0,0,1-1.32-13.37C511.91,111.81,512,99,512,85.7Z"/><path d="M489.48,340.39a36,36,0,0,1-4.44-3.26c-16.29-16.21-32.62-32.41-48.77-48.77-13.15-13.31-17.2-29.26-11.14-46.86s19.24-27.7,37.75-29.85c14.67-1.71,27.05,3.67,37.42,14.08q33.15,33.3,66.44,66.46l58,58c20.6,20.61,20.75,47.13.24,67.67q-62.33,62.44-124.79,124.75c-25.31,25.16-66,15.55-75.69-17.85-4.94-17.11-.68-32.28,11.9-44.94q23.43-23.58,47-47c1.27-1.27,2.49-2.6,4.85-5.06h-9.36q-131.46-.4-262.92-.81c-23.51-.08-40.64-14-44.58-36.25-4-22.64,12.66-46,35.54-48.39,11.87-1.25,24-.76,35.93-.73q121.21.33,242.43.79c1.09,0,2.18-.14,3.27-.21Z"/></g></g></svg>
                 </div>
             </div>
@@ -177,12 +154,12 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
             <div id="custom-playlist-list" v-show="isPlaylistMode && navigation.customPlaylistsShow">
                 <div class="subtitle">
                     <span>创建的歌单</span>
-                    <svg class="add-custom-btn" @click="addCustom" width="11" height="11" viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M298.59,384.15h-7.06q-123.24,0-246.49,0c-21.63,0-38.69-12.57-43.64-31.94-7-27.56,13.21-53.29,42.33-53.51,25.33-.18,50.66,0,76,0H298.59v-6.44q0-123.49,0-247c0-20.39,10.77-36.44,28.49-42.71C355-7.34,383.55,13,384,43.16c.26,16.33,0,32.67,0,49V298.65h6.82q123.49,0,247,0c21.52,0,38.61,12.77,43.43,32.19,6.75,27.26-13.06,52.7-41.62,53.25-11.16.22-22.33,0-33.49,0H384.09v6.69q0,123.5,0,247c0,21.59-12.66,38.65-32.06,43.53-27.59,6.95-53.24-13.31-53.39-42.46-.17-32.66,0-65.33,0-98V384.15Z"/></g></g></svg>
+                    <svg class="add-custom-btn" @click="() => visitCustomPlaylistCreate()" width="11" height="11" viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M298.59,384.15h-7.06q-123.24,0-246.49,0c-21.63,0-38.69-12.57-43.64-31.94-7-27.56,13.21-53.29,42.33-53.51,25.33-.18,50.66,0,76,0H298.59v-6.44q0-123.49,0-247c0-20.39,10.77-36.44,28.49-42.71C355-7.34,383.55,13,384,43.16c.26,16.33,0,32.67,0,49V298.65h6.82q123.49,0,247,0c21.52,0,38.61,12.77,43.43,32.19,6.75,27.26-13.06,52.7-41.62,53.25-11.16.22-22.33,0-33.49,0H384.09v6.69q0,123.5,0,247c0,21.59-12.66,38.65-32.06,43.53-27.59,6.95-53.24-13.31-53.39-42.46-.17-32.66,0-65.33,0-98V384.15Z"/></g></g></svg>
                 </div>
                 <ul>
                     <li v-for="(item, index) in getCustomPlaylists" 
                         :class="{ active: (activeCustomPlaylistIndex == index) }"
-                        @click="visitCustom(item, index)" 
+                        @click="visitCustomItem(item, index)" 
                         @contextmenu="(e) => showContextMenu(item, index, e, 3)"
                         v-html="item.title" >
                     </li>
@@ -214,22 +191,23 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
                 <ul>
                     <li v-for="(item, index) in getFollowArtists()" 
                         :class="{ active0: (activeArtistIndex == index) }"
-                        @click="visitArtist(item, index)" 
+                        @click="visitArtistItem(item, index)" 
                         v-html="item.title" >
                     </li>
                 </ul>
             </div>
         </div>
         <div class="bottom">
-            <div id="app-logo" >L</div>
-            <div id="app-title" >Less Player</div>
+            <div id="app-logo" >
+                <span>L</span>
+            </div>
+            <div id="app-name" >Less Player</div>
         </div>
     </div>
 </template>
 
 <style>
 #main-left {
-    width: 16.5%;
     width: 211px;
     height: 100%;
     display: flex;
@@ -251,11 +229,13 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 }
 
 #main-left .subtitle {
-    font-size: 14px;
+    font-size: 13px;
     text-align: left;
     color: var(--text-subtitle-color);
     padding-left: 22%;
+    padding-left: 19.5%;
     margin-bottom: 10px;
+    font-weight: 520;
 }
 
 #main-left .header,
@@ -313,9 +293,10 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
     cursor: pointer;
     padding: 3px 6px;
     font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
     color: var(--text-sub-color);
-    margin-right: 25%;
+    margin-right: 23%;
 }
 
 #explore-mode .mode-item:hover span{
@@ -362,13 +343,15 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
     fill: var(--text-sub-color);
     cursor: pointer;
     position: absolute;
-    right: 15px;
+    /* right: 15px; */
+    right: 19px;
     top: 4px;
 }
 
 #main-left .collapse-btn,
 #main-left .expand-btn {
-    right: 22px;
+    /* right: 22px; */
+    right: 26px;
 }
 
 #main-left .add-custom-btn:hover {
@@ -380,12 +363,14 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
     text-align: left;
     line-height: 32px;
     padding-left: 13%;
+    padding-left: 10%;
 }
 
 #main-left li {
     text-decoration: none;
     width: 65%;
     width: 117px;
+    width: 128px;
     margin-bottom: 10.5px;
     padding-left: 20px;
     padding-right: 20px;
@@ -409,8 +394,8 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 #favorite-playlist-list li {
     padding-left: 15px;
     padding-right: 15px;
-    width: 70%;
-    width: 127px;
+    /* width: 127px; */
+    width: 138px; 
 }
 
 #main-left .active {
@@ -421,9 +406,10 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 #main-left .bottom {
     height: 100px;
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-right: 15px;
+    margin-right: 22px;
 }
 
 #app-logo {
@@ -436,10 +422,20 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
     border: 0px solid;
     font-weight: bold;
     background: var(--logo-bg);
-    color: var(--logo-color);
+    /*color: var(--logo-color);*/
 }
 
-#app-title {
+#app-logo span {
+    width: 16px;
+    height: 16px;
+    font-size: 13px;
+    justify-content: center;
+    border-radius: 10rem;
+    background: var(--logo-text-bg);
+    color: var(--logo-text-color);
+}
+
+#app-name {
     display: flex;
     align-items: center;
     justify-content: center;

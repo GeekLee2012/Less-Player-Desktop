@@ -2,8 +2,8 @@
 import { inject, onBeforeMount, watch } from 'vue';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
-import EventBus from '../../common/EventBus';
-import { useSettingStore } from '../store/settingStore';
+import EventBus from '../common/EventBus';
+import { useSettingStore } from './store/settingStore';
 import { storeToRefs } from 'pinia';
 
 const { theme } = storeToRefs(useSettingStore())
@@ -34,10 +34,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
 <style>
 :root {
   --text-family: system-ui, "PingFang SC", STHeitiSC-Medium, "Heiti SC Medium", "Heiti SC Light", "Microsoft YaHei", sans-serif;
-  --text-size: 15px;
+  --text-size: 15.5px;
   --text-sub-size: 14px;
-  --tab-title-text-size: 16px;
+  --tab-title-text-size: 17px;
   --app-bg: transparent;
+  /* font-weight: 520; */
 }
 
 :root[theme='dark'] {
@@ -105,7 +106,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   
   --checkbox-bg: #fff;
   --logo-bg: var(--btn-bg);
-  --logo-color: var(--svg-btn-color);
+  --logo-text-bg: #fff;
+  --logo-text-color: #1ca388;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: #464646;
@@ -183,7 +185,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #fff;
   --logo-bg: var(--btn-bg);
-  --logo-color: var(--svg-btn-color);
+  --logo-text-bg: #fff;
+  --logo-text-color: #1ca388;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
@@ -267,8 +270,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   
   --checkbox-bg: #fff;
   --logo-bg: #878183;
-  --logo-color: #e7e1e3;
-  --logo-color: #faf4f6;
+  --logo-text-bg: #fff;
+  --logo-text-color: #878183;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
@@ -346,7 +349,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   
   --checkbox-bg: #fff;
   --logo-bg: var(--btn-bg);
-  --logo-color: var(--svg-btn-color);
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
@@ -423,11 +427,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 加载中遮盖 */
   --loading-mask-bg: linear-gradient(90deg, #494949 8%,#595959 18%,#494949 33%);
   --error-color: red;
-  
   --checkbox-bg: #eee;
 
   --logo-bg: var(--btn-bg);
-  --logo-color: var(--svg-btn-color);
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   
@@ -489,6 +493,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: #ffcdd2;
+  --pbq-hl-text-color: #fff;
   --pbq-hl-border: linear-gradient(to top right, #f84860, #fc7688) 0 0 0 2;
   --pbq-hl-border: linear-gradient(to top right, #fff, #fff) 0 0 0 2;
   /* 搜索框  */
@@ -511,7 +516,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #161616ab;
   --logo-bg: var(--btn-bg);
-  --logo-color: var(--svg-btn-color);
+  --logo-text-bg: #fc7688;
+  --logo-text-color: #fff;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: #16161633;
@@ -591,7 +597,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #fff;
   --logo-bg: var(--btn-bg);
-  --logo-color: var(--svg-btn-color);
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
@@ -675,7 +682,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #ddd;
   --logo-bg: var(--btn-bg);
-  --logo-color: var(--svg-btn-color);
+  --logo-text-bg: #ccc;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: #555;
@@ -736,6 +744,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-color);
+  --pbq-hl-text-color: #64903f;
   --pbq-hl-border: linear-gradient(to top right, #666, #cfdec3) 0 0 0 2;
   /* 搜索框 */
   --searchbar-bg: #f1eee7;
@@ -759,7 +768,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --checkbox-bg: #161616ab;
   --logo-bg: var(--svg-color);
   --logo-bg: #64903f88;
-  --logo-color: #cfdec3;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--logo-bg);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: #f1eee7;
@@ -843,8 +853,10 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #919343ab;
   --logo-bg: var(--btn-bg);
-  --logo-bg: var(--btn-bg);
-  --logo-color: #054a34;
+  --logo-text-bg: #054a34;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--logo-bg);
+  --logo-text-color: #054a34;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: #91934336;
@@ -911,8 +923,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-border: linear-gradient(to top right, #f84860, #fc7688) 0 0 0 2;
   --pbq-hl-border: linear-gradient(to top right, #2f80ed, #56ccf2) 0 0 0 2;
   /* 搜索框 */
-  --searchbar-bg: #56ccf299;
-  --search-btn-bg: #56ccf299;
+  --searchbar-bg: #56ccf266;
+  --search-btn-bg: #56ccf266;
   --search-btn-svg-color: var(--svg-btn-color);
   --search-btn-svg-color: var(--svg-color);
   --searchbar-text-color: #414141;
@@ -927,12 +939,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#ffffffab 8%,#ffffff66 18%,#ffffffab 33%);
+  --loading-mask-bg: linear-gradient(90deg, #ffffffab 8%, #ffffff66 18%, #ffffffab 33%);
   --error-color: red;
 
   --checkbox-bg: #fff;
-  --logo-bg: linear-gradient(to top right, #ccc, #fff);
-  --logo-color: var(--hl-color);
+  --logo-bg: linear-gradient(to top right, #ababab, #fff);
+  --logo-bg: #56ccf2;
+  --logo-text-bg: #fff;
+  --logo-text-color: #56ccf2;
 
   --category-view-border: 0.1px solid var(--main-left-border-color);
   --input-bg: #ffffffcb;
@@ -975,7 +989,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --toggle-active-thumb-bg: #ffffffcb;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #ffffff99, #ffffff99) !important;
-  --progress-bg: linear-gradient(to top right, #0a262a, #0a262a);
+  --progress-bg: linear-gradient(to top right, #0a262aab, #0a262aab);
   --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #395a6266;
@@ -990,8 +1004,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
-  --pbq-hl-text-color: #182626;
-  --pbq-hl-text-color: #fff;
+  --pbq-hl-text-color: #273b42;
+  --pbq-hl-text-color: #172b32;
   --pbq-hl-border: linear-gradient(to top right, #395a62, #273b42) 0 0 0 2;
   /* 搜索框 */
   --searchbar-bg: #fff;
@@ -1016,7 +1030,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #fff;
   --logo-bg: #395a62;
-  --logo-color: #fff;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.1px solid var(--main-left-border-color);
   --input-bg: #ffffffcb;
@@ -1095,7 +1110,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #fff;
   --logo-bg: linear-gradient(to right, #344a83, #2a3d9b, #3e53be, #263b7a);
-  --logo-color: #fff;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.1px solid var(--main-left-border-color);
   --input-bg: #ffffffcb;
@@ -1177,7 +1193,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #fff;
   --logo-bg: #ffb300;
-  --logo-color: #fff;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
@@ -1264,7 +1281,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --checkbox-bg: #fff;
   --logo-bg: #ffb300;
   --logo-bg: #fc9b29;
-  --logo-color: #fff;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: #fff;
@@ -1342,7 +1360,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #fff;
   --logo-bg: #000;
-  --logo-color: #fff;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
@@ -1425,7 +1444,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --checkbox-bg: #fff;
   --logo-bg: #9c27b0;
   --logo-color: #ffb300;
-  --logo-color: #fff;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
@@ -1512,6 +1532,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --checkbox-bg: #4d3e72;
   --logo-bg: #e5bc8c;
   --logo-color: #4d3e72;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
+  --logo-text-color: #4d3e72;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
@@ -1594,6 +1617,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --checkbox-bg: #4d3e72;
   --logo-bg: #8c6293;
   --logo-color: #f7f2f6;
+  --logo-text-bg: #fff;
+  --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: var(--bg-color);
