@@ -41,7 +41,7 @@ const registryDefaultLocalKeys = () => {
     // 最大音量 / 静音
     Mousetrap.bind(['o'], toggleVolumeMute, 'keyup')
     // 打开设置
-    Mousetrap.bind(['p'], () => visitSetting(hidePlaybackQueueView), 'keyup')
+    Mousetrap.bind(['p'], visitSetting, 'keyup')
     // 打开当前播放
     Mousetrap.bind(['q'], togglePlaybackQueueView, 'keyup')
 }

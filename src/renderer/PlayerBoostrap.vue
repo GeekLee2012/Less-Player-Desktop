@@ -221,7 +221,7 @@ const registryIpcRenderderListeners = () => {
     ipcRenderer.on('globalShortcut-volumeUp', () => updateVolumeByOffset(0.05))
     ipcRenderer.on('globalShortcut-volumeDown', () => updateVolumeByOffset(-0.05))
     ipcRenderer.on('globalShortcut-toggleVolumeMute', toggleVolumeMute)
-    ipcRenderer.on('globalShortcut-visitSetting', () => visitRoute('/setting'))
+    ipcRenderer.on('globalShortcut-visitSetting', () => visitSetting())
     ipcRenderer.on('globalShortcut-togglePlaybackQueue', togglePlaybackQueueView)
     
     //其他事件

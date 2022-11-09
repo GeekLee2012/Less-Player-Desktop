@@ -32,7 +32,7 @@ const resolveRoute = (route) => {
     if(typeof(route) == 'object') return route
     return { toPath: route.toString() }
 }
-const commonBeforeRoute = () => ({ beforeRoute: hidePlaybackQueueView })
+const commonBeforeRoute = { beforeRoute: hidePlaybackQueueView }
 
 
 router.beforeResolve((to, from) => {
@@ -191,10 +191,10 @@ provide('appRoute', {
     visitRoute,
     backward: () => router.back(),
     forward: () => router.forward(),
-    visitHome: () => (visitRoute({ toPath: '/', commonBeforeRoute })),
-    visitUserHome: () => (visitRoute('/userhome/all', commonBeforeRoute)),
-    visitSetting: () => (visitRoute('/setting', commonBeforeRoute)),
-    visitSearch: (keyword) => (visitRoute(`/search/${keyword}`, commonBeforeRoute)),
+    visitHome: () => (visitRoute({ toPath: '/', ...commonBeforeRoute })),
+    visitUserHome: () => (visitRoute({ toPath: '/userhome/all', ...commonBeforeRoute })),
+    visitSetting: () => (visitRoute({ toPath: '/setting', ...commonBeforeRoute })),
+    visitSearch: (keyword) => (visitRoute({ toPath: `/search/${keyword}`, ...commonBeforeRoute })),
     visitPlaylist: (platform, id) => {
         const exploreMode = resolveExploreMode()
         return visitRoute(`/${exploreMode}/playlist/${platform}/${id}`)
