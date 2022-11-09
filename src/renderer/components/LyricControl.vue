@@ -105,14 +105,7 @@ const onUserMouseWheel = (e) => {
     }, 3000)
 }
 
-//TODO
-const playMv = () => {
-    if(!Track.hasMv(props.track)) return
-    if(playing.value) togglePlay()
-    const { platform, mv } = props.track
-    toggleVideoPlayingView()
-    EventBus.emit('video-load', { platform, id: mv })
-}
+const playMv = () => EventBus.emit('track-playMv', props.track)
 
 watch(() => props.track, (nv, ov) => reloadLyricData(nv))
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))

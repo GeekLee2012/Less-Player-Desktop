@@ -37,14 +37,7 @@ const setChecked = (value) => {
     isChecked.value = value
 }
 
-//TODO
-const playMv = () => {
-    if(!Track.hasMv(props.data)) return
-    if(playing.value) togglePlay()
-    const { platform, mv } = props.data
-    toggleVideoPlayingView()
-    EventBus.emit('video-load', { platform, id: mv })
-}
+const playMv = () => EventBus.emit('track-playMv', props.data)
 
 const playItem = () => {
     playTrack(props.data)

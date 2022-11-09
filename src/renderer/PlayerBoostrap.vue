@@ -14,7 +14,7 @@ import { Playlist } from '../common/Playlist';
 
 const ipcRenderer = useIpcRenderer()
 
-const { queueTracksSize } = storeToRefs(usePlayStore())
+const { queueTracksSize, playing } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack, 
     setAutoPlaying, playPrevTrack, 
     togglePlay, switchPlayMode,
@@ -23,7 +23,7 @@ const { playTrack, playNextTrack,
 const { getVendor, isLocalMusic } = usePlatformStore()
 const { videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { showPlayNotification, hidePlayNotification, 
-    togglePlaybackQueueView } = useAppCommonStore()
+    togglePlaybackQueueView, toggleVideoPlayingView } = useAppCommonStore()
 const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
 
@@ -173,6 +173,14 @@ EventBus.on('track-state', state => {
 EventBus.on('track-pos', secs => {
     //setPlaying(true)
     updateCurrentTime(secs)
+})
+
+EventBus.on('track-playMv', track => {
+    if(!Track.hasMv(track)) return
+    if(playing.value) togglePlay()
+    const { platform, mv } = track
+    toggleVideoPlayingView()
+    EventBus.emit('video-load', { platform, id: mv })
 })
 
 //注册ipcMain消息监听器
