@@ -34,7 +34,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 <style>
 :root {
   --text-family: system-ui, "PingFang SC", STHeitiSC-Medium, "Heiti SC Medium", "Heiti SC Light", "Microsoft YaHei", sans-serif;
-  --text-size: 15.5px;
+  --text-size: 15px;
   --text-sub-size: 14px;
   --tab-title-text-size: 17px;
   --app-bg: transparent;
