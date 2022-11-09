@@ -1066,14 +1066,7 @@ export class QQ {
                 })
                 const result = { id, platform: QQ.CODE, quality, url: '' }
                 const mvUrls = mvData[id]
-                /*
-                for(var i = 0; i < mvUrls.length; i++ ) {
-                    const url = mvUrls[i]
-                    if(url.trim().length > 0) {
-                        result.url = url
-                        break
-                    }
-                }*/
+                //TODO 其实应该全部返回给客户端，由客户端决定播放url，播放失败时也方便重试
                 result.url = mvUrls.length > 0 ? mvUrls[mvUrls.length - 1] : ''
                 resolve(result)
             })

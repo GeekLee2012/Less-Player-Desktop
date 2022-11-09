@@ -428,6 +428,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 #app-logo span {
     width: 16px;
     height: 16px;
+    line-height: 16px;
     font-size: 13px;
     justify-content: center;
     border-radius: 10rem;
