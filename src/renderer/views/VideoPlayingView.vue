@@ -1,40 +1,23 @@
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue';
-import { storeToRefs } from 'pinia';
-import { usePlatformStore } from '../store/platformStore';
+import { onMounted } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useUserProfileStore } from '../store/userProfileStore';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
-const { videoPlayingViewShow } = storeToRefs(useAppCommonStore())
-const { hideVideoPlayingView, minimize, showToast } = useAppCommonStore()
-const { getVendor } = usePlatformStore()
+const { hideVideoPlayingView, minimize } = useAppCommonStore()
 
 const initVideoPlayer = () => {
     EventBus.emit('video-init', document.querySelector('.video-holder'))
-}
-
-const loadVideo = (platform, id) => {
-    const vendor = getVendor(platform)
-    if(!vendor) return 
-    const quality = '1080'
-    vendor.videoDetail(id, quality).then(result => {
-        if(!result.url || result.url.trim().length < 1) return 
-        EventBus.emit('video-play', result)
-    })
 }
 
 const quitVideo = () => {
     EventBus.emit('video-stop')
     hideVideoPlayingView()
 }
-
-EventBus.on('video-load', ({ platform , id }) => loadVideo(platform, id))
 
 onMounted(() => initVideoPlayer())
 </script>

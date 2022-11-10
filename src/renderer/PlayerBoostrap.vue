@@ -23,7 +23,8 @@ const { playTrack, playNextTrack,
 const { getVendor, isLocalMusic } = usePlatformStore()
 const { videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { showPlayNotification, hidePlayNotification, 
-    togglePlaybackQueueView, toggleVideoPlayingView } = useAppCommonStore()
+    togglePlaybackQueueView, toggleVideoPlayingView, 
+    showFailToast } = useAppCommonStore()
 const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
 
@@ -52,7 +53,7 @@ const assignLyric = (track, lyric) => {
 
 //TODO 用户手动干预，即主动点击上/下一曲时，产生体验上的Bug
 let playNextTimer = null
-const showToast = (callback) => {
+const showPlayToast = (callback) => {
     showPlayNotification()
     playNextTimer = setTimeout(() => {
         hidePlayNotification()
@@ -84,11 +85,11 @@ const bootstrapTrack = (track, callback, noToast) => {
         //if(!Track.hasUrl(track)) track = await United.transferTrack(track)
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
             if(queueTracksSize.value < 2 && !Playlist.isNormalRadioType(track)) { //非电台歌曲，且没有下一曲
-                if(!noToast) showToast()
+                if(!noToast) showPlayToast()
             } else if(toastCnt < 9) { 
                 setAutoPlaying(true)
                 //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
-                if(!noToast) showToast(playNextTrack)
+                if(!noToast) showPlayToast(playNextTrack)
                 ++toastCnt
             } else { //10连跳啦，暂停一下吧
                 toastCnt = 0 //重置连跳计数
@@ -109,7 +110,7 @@ const bootstrapTrack = (track, callback, noToast) => {
         if(callback) callback(track)
     }).catch(e => {
         console.log(e)
-        //showToast(playNextTrack)
+        //showPlayToast(playNextTrack)
     })
 }
 
@@ -134,6 +135,24 @@ const retry = (track) => {
     } else {
         EventBus.emit('track-changed', track)
     }
+}
+
+const getVideoDetail = (platform, id) => {
+    return new Promise((resolve, reject) => {
+        const vendor = getVendor(platform)
+        if(!vendor) {
+            if(reject) reject()
+            return 
+        }
+        const quality = '1080'
+        vendor.videoDetail(id, quality).then(result => {
+            if(!result.url || result.url.trim().length < 1) {
+                if(reject) reject()
+                return
+            }
+            resolve(result)
+        })
+    })
 }
 
 //FM广播
@@ -179,9 +198,14 @@ EventBus.on('track-playMv', track => {
     if(!Track.hasMv(track)) return
     if(playing.value) togglePlay()
     const { platform, mv } = track
-    toggleVideoPlayingView()
-    EventBus.emit('video-load', { platform, id: mv })
-    traceRecentPlay(track)
+    //toggleVideoPlayingView()
+    //EventBus.emit('video-load', { platform, id: mv })
+    //traceRecentPlay(track)
+    getVideoDetail(platform, mv).then(result => {
+        toggleVideoPlayingView()
+        EventBus.emit('video-play', result)
+        traceRecentPlay(track)
+    }, reason => showFailToast('当前MV无法播放！'))
 })
 
 //注册ipcMain消息监听器
