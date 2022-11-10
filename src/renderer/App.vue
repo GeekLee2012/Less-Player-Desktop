@@ -4,7 +4,7 @@ import PlayerBoostrap from './PlayerBoostrap.vue';
 import Themes from './Themes.vue';
 import MainLeft from './layout/MainLeft.vue';
 import MainCenter from './layout/MainCenter.vue';
-import PopoversCtl from './components/PopoversCtl.vue';
+import Popovers from './Popovers.vue';
 import EventBus from '../common/EventBus';
 import { useSettingStore } from './store/settingStore';
 import { storeToRefs } from 'pinia';
@@ -71,7 +71,7 @@ initialize()
       <Themes>
           <MainLeft></MainLeft> 
           <MainCenter></MainCenter>
-          <PopoversCtl></PopoversCtl>
+          <Popovers></Popovers>
       </Themes>
     </PlayerBoostrap>
   </AppRoute>

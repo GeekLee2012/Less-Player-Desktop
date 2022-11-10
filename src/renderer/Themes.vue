@@ -86,6 +86,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
 
   /* 搜索框 */
   --searchbar-bg: #fff;
@@ -165,6 +166,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #fff;
   --search-btn-bg: #fff;
@@ -250,6 +253,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to right, #676163, #e7e1e3) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #e7e1e3;
   --search-btn-bg: #e7e1e3;
@@ -330,6 +335,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to right, #e6399b, #e667af) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #e8e8e8;
   --search-btn-bg: #e8e8e8;
@@ -409,6 +416,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to right, #e6399b, #fc589c) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #000;
 
   /* 搜索框 */
   --searchbar-bg: #eee;
@@ -496,6 +504,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: #fff;
   --pbq-hl-border: linear-gradient(to top right, #f84860, #fc7688) 0 0 0 2;
   --pbq-hl-border: linear-gradient(to top right, #fff, #fff) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框  */
   --searchbar-bg: #fff;
   --search-btn-bg: var(--btn-bg);
@@ -577,6 +587,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: #f9453f;
   --pbq-hl-border: linear-gradient(to top right, #f9453f, #f84860) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框  */
   --searchbar-bg: #fff;
   --search-btn-bg: var(--btn-bg);
@@ -618,7 +630,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 文本 */
   --text-color: #ccc;
   --text-sub-color: #ababab;
-  --text-subtitle-color: #999;
+  --text-subtitle-color: #666;
   --hl-color: #d53943;
   --hl-text-bg: linear-gradient(to top right, #f84860, #f9453f);
   --hl-text-bg: linear-gradient(to top right, #f84860, #d53943);
@@ -661,6 +673,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: #f9453f;
   --pbq-hl-border: linear-gradient(to top right, #f9453f, #f84860) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #000;
+
   /* 搜索框  */
   --searchbar-bg: #ddd;
   --search-btn-bg: var(--btn-bg);
@@ -746,6 +760,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: var(--hl-color);
   --pbq-hl-text-color: #64903f;
   --pbq-hl-border: linear-gradient(to top right, #666, #cfdec3) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #f1eee7;
   --search-btn-bg: #f1eee7;
@@ -833,6 +849,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-color);
   --pbq-hl-border: linear-gradient(to top right, #919343, #e1e0a7) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #91934336;
   --search-btn-bg: #91934336;
@@ -853,10 +871,12 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #919343ab;
   --logo-bg: var(--btn-bg);
+  --logo-bg: #919343;
   --logo-text-bg: #054a34;
   --logo-text-bg: #fff;
   --logo-text-color: var(--logo-bg);
   --logo-text-color: #054a34;
+  --logo-text-color: #919343;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
   --input-bg: #91934336;
@@ -922,6 +942,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #f84860, #fc7688) 0 0 0 2;
   --pbq-hl-border: linear-gradient(to top right, #2f80ed, #56ccf2) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #56ccf266;
   --search-btn-bg: #56ccf266;
@@ -1007,6 +1029,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: #273b42;
   --pbq-hl-text-color: #172b32;
   --pbq-hl-border: linear-gradient(to top right, #395a62, #273b42) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #fff;
   --search-btn-bg: #fff;
@@ -1089,6 +1113,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: #182626;
   --pbq-hl-text-color: #fff;
   --pbq-hl-border: linear-gradient(to top right, #fff, #fff) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: var(--bg-color);
   --search-btn-bg: var(--bg-color);
@@ -1171,6 +1197,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #ffb300, #ffb300) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #ffb30066;
   --searchbar-bg: #fff;
@@ -1259,6 +1287,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #fc9b29, #fc9b29) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #fff;
   --search-btn-bg: #fff;
@@ -1339,6 +1369,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #000, #000) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #fff;
   --search-btn-bg: var(--btn-bg);
@@ -1421,6 +1453,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #9c27b0, #9c27b0) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #ffb30066;
   --searchbar-bg: #fff;
@@ -1509,6 +1543,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: #e5bc8c;
   --pbq-hl-border: linear-gradient(to top right, #e5bc8c, #e5bc8c) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #fdfdf2;
   --search-btn-bg: #fdfdf2;
@@ -1595,6 +1631,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-color);
   --pbq-hl-border: linear-gradient(to top right, #ff0307, #ff0307) 0 0 0 2;
+  --pbq-box-shadow: 0px 0px 10px #161616;
+
   /* 搜索框 */
   --searchbar-bg: #fdfdf2;
   --search-btn-bg: #fdfdf2;

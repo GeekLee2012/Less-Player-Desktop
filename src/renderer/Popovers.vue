@@ -1,13 +1,13 @@
 <script setup>
 import {  onMounted, reactive, ref, watch } from 'vue';
-import Notification from './Notification.vue';
-import { useAppCommonStore } from '../store/appCommonStore';
+import Notification from './components/Notification.vue';
+import { useAppCommonStore } from './store/appCommonStore';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
-import CommonContextMenu from './CommonContextMenu.vue';
-import AddToListSubmenu from './addToListSubmenu.vue';
-import { useUserProfileStore } from '../store/userProfileStore';
-import ArtistListSubmenu from './ArtistListSubmenu.vue';
+import EventBus from '../common/EventBus';
+import CommonContextMenu from './components/CommonContextMenu.vue';
+import AddToListSubmenu from './components/addToListSubmenu.vue';
+import { useUserProfileStore } from './store/userProfileStore';
+import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
 
 const ctxMenuPosStyle = reactive({ left: -999, top: -999})
 const ctxSubmenuPosStyle = reactive({ left: -999, top: -999})
@@ -213,7 +213,7 @@ onMounted(()=> {
     height: 100%;
     z-index: 99;
     background: var(--app-bg);
-    box-shadow: 0px 0px 10px #161616;
+    box-shadow: var(--pbq-box-shadow);
 }
 
 #playing-view,
