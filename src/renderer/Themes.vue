@@ -214,6 +214,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --text-subtitle-color: #a0a0a0;
   --hl-color: #e7e1e3;
   --hl-color: #b7b1b3;
+  --hl-color: #979193;
   --hl-text-bg: #414141;
   --hl-title-color: #888;
   /* 歌词文本颜色 */

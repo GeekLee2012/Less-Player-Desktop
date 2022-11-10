@@ -181,6 +181,7 @@ EventBus.on('track-playMv', track => {
     const { platform, mv } = track
     toggleVideoPlayingView()
     EventBus.emit('video-load', { platform, id: mv })
+    traceRecentPlay(track)
 })
 
 //注册ipcMain消息监听器
