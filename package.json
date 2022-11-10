@@ -14,9 +14,9 @@
   "main": "src/main/main.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=dev concurrently vite \"electron .\"",
-    "build": "cross-env NODE_ENV=proc vite build",
-    "pack": "cross-env NODE_ENV=proc electron-builder",
-    "dist": "cross-env NODE_ENV=proc vite build && electron-builder"
+    "dist": "cross-env NODE_ENV=prod vite build && electron-builder",
+    "build": "cross-env NODE_ENV=prod vite build",
+    "pack": "cross-env NODE_ENV=prod electron-builder"
   },
   "dependencies": {
     "axios": "^0.26.1",
