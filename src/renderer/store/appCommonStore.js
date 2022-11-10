@@ -153,10 +153,11 @@ export const useAppCommonStore = defineStore('appCommon', {
         hideCommonNotification() {
             this.commonNotificationShow = false
             this.commonNotificationText = null
-            this.commonNotificationType = 0
+            this.commonNotificationType = null
         },
         showToast(text, callback, delay) {
             text = text || "操作成功！"
+            this.setCommonNotificationType(this.commonNotificationType)
             EventBus.emit("toast", { text, callback, delay })
         },
         showFailToast(text, callback, delay) {
