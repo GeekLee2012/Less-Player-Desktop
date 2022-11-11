@@ -141,13 +141,13 @@ const getVideoDetail = (platform, id) => {
     return new Promise((resolve, reject) => {
         const vendor = getVendor(platform)
         if(!vendor) {
-            if(reject) reject()
+            if(reject) reject('NoVendor')
             return 
         }
         const quality = '1080'
         vendor.videoDetail(id, quality).then(result => {
             if(!result.url || result.url.trim().length < 1) {
-                if(reject) reject()
+                if(reject) reject('NoURL')
                 return
             }
             resolve(result)
@@ -196,12 +196,9 @@ EventBus.on('track-pos', secs => {
 
 EventBus.on('track-playMv', track => {
     if(!Track.hasMv(track)) return
-    if(playing.value) togglePlay()
     const { platform, mv } = track
-    //toggleVideoPlayingView()
-    //EventBus.emit('video-load', { platform, id: mv })
-    //traceRecentPlay(track)
     getVideoDetail(platform, mv).then(result => {
+        if(playing.value) togglePlay()
         toggleVideoPlayingView()
         EventBus.emit('video-play', result)
         traceRecentPlay(track)
