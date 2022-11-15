@@ -14,16 +14,15 @@ import Mousetrap from 'mousetrap';
 const  { visitRoute, visitSetting } = inject('appRoute')
 
 const { playlistCategoryViewShow, artistCategoryViewShow, 
-    radioCategoryViewShow, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
+    radioCategoryViewShow, videoPlayingViewShow,
+    playingViewThemeIndex, playingViewShow } = storeToRefs(useAppCommonStore())
 const { hideAllCategoryViews, hideAllCtxMenus,
-    hidePlaybackQueueView, hidePlayingView,
-    togglePlaybackQueueView, togglePlayingView } = useAppCommonStore()
+    hidePlaybackQueueView, togglePlaybackQueueView, } = useAppCommonStore()
 
 const { togglePlay, switchPlayMode, 
     playPrevTrack, playNextTrack,
     toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
 
-//const minAppWidth = 999, minAppHeight = 666 
 const minAppWidth = 1080, minAppHeight = 720 
 
 //注册默认应用级别快捷键
@@ -154,25 +153,61 @@ const setPlaybackQueueSize = () => {
 }
 
 const setPlayingCoverSize = () => {
-    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    let size = 300 * Math.min(wScaleRatio, hScaleRatio)
+    let size = 333 * Math.min(wScaleRatio, hScaleRatio)
     const el = document.querySelector(".playing-view .cover img")
+    if(!el) return 
     el.style.width = size + "px"
     el.style.height = size + "px"
 }
 
 const setPlayingLyricCtlSize = () => {
-    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    let size = 399 * Math.min(wScaleRatio, hScaleRatio)
-    const el = document.querySelector(".lyric-ctl .center")
+    const height = 399 * Math.min(hScaleRatio, hScaleRatio)
+    const el = document.querySelector(".playing-view .lyric-ctl .center")
+    if(!el) return 
+    //el.style.width = size + "px"
+    el.style.height = height + "px"
+}
+
+const setVisualPlayingViewLyricCtlSize = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
+    //const height = 435 * Math.min(hScaleRatio, hScaleRatio)
+    const padding = hScaleRatio >= 1.25 ? 50 : 0
+    const height = 435 * Math.min(hScaleRatio, hScaleRatio) + padding
+    const el = document.querySelector(".visual-playing-view .lyric-ctl .center")
+    if(!el) return 
+    //el.style.width = size + "px"
+    el.style.height = height + "px"
+}
+
+const setVisualPlayingViewCoverSize = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
+    const size = 365 * Math.min(wScaleRatio, hScaleRatio)
+    const el = document.querySelector(".visual-playing-view .cover img")
+    if(!el) return 
     el.style.width = size + "px"
     el.style.height = size + "px"
+}
+
+const setVisualPlayingViewCanvasSize = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
+    const width = 404 * Math.min(wScaleRatio, hScaleRatio)
+    const height = 66 * Math.min(wScaleRatio, hScaleRatio)
+    const el = document.querySelector(".visual-playing-view .center canvas")
+    if(!el) return 
+    el.width = width
+    el.height = height
 }
 
 //TODO
@@ -200,6 +235,16 @@ const hideAllPopoverViews = () => {
     hideAllCtxMenus()
 }
 
+//自适应播放页组件大小
+const setPlayingViewSize = () => {
+    setPlayingCoverSize()
+    setPlayingLyricCtlSize()
+
+    setVisualPlayingViewCoverSize()
+    setVisualPlayingViewLyricCtlSize()
+    setVisualPlayingViewCanvasSize()
+}
+
 onMounted (() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', e => {
@@ -214,10 +259,8 @@ onMounted (() => {
         setCategoryViewSize()
         //自适应当前播放列表大小
         //setPlaybackQueueSize()
-        //自适应播放页封面大小
-        setPlayingCoverSize()
-        //自适应播放页歌词组件大小
-        setPlayingLyricCtlSize()
+        //自适应播放页组件大小
+        setPlayingViewSize()
         //自适应批量操作页面列表大小
         setBatchViewListSize()
         //自适应视频页面大小
@@ -248,9 +291,12 @@ EventBus.on("imageTextTileLoadingMask-load", () => {
     setImageTextTileLoadingMaskSize()
 })
 EventBus.on("batchView-show", setBatchViewListSize)
+EventBus.on('playingView-changed', setPlayingViewSize)
+
 //TODO
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
 watch([ videoPlayingViewShow ], setVideoViewSize)
+//watch([ playingViewThemeIndex ], setPlayingViewSize)
 </script>
 
 <template>

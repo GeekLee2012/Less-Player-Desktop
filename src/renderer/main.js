@@ -22,7 +22,7 @@ import PlayControl from './components/PlayControl.vue';
 import ImageTextTile from './components/ImageTextTile.vue';
 import SongItem from './components/SongItem.vue';
 //Views
-import PlayingView from './views/PlayingView.vue';
+//import PlayingView from './views/PlayingView.vue';
 import VideoPlayingView from './views/VideoPlayingView.vue';
 import PlaybackQueueView from './views/PlaybackQueueView.vue';
 
@@ -59,7 +59,7 @@ app.use(pinia)
     .component('ImageTextTile', ImageTextTile)
     .component('SongItem', SongItem)
     //Views
-    .component('PlayingView', PlayingView)
+    //.component('PlayingView', PlayingView)
     .component('VideoPlayingView', VideoPlayingView)
     .component('PlaybackQueueView', PlaybackQueueView)
     .mount('#app')

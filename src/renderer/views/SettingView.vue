@@ -80,7 +80,7 @@ onActivated(() => {
                 <div class="content">
                     <div class="last" v-for="(item,index) in allThemes()" 
                         :class="{ active: index == theme.index, lightText: item.dark }"
-                        :style="{ background: item.bg }" 
+                        :style="{ background: item.color }" 
                         @click="setThemeIndex(index)" >
                         <span>{{ item.name }}</span>
                     </div>

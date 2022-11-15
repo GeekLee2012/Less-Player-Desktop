@@ -7,100 +7,119 @@ const ipcRenderer = useIpcRenderer()
 const THEMES = [{
     id: 'dark',
     name: '默认1',
-    bg: '#313131',
+    color: '#313131',
+    hlColor: '#28c83f',
     dark: true
 }, {
     id: 'white',
     name: '默认2',
-    //bg: '#1ca388',
-    bg: '#fafafa',
+    //color: '#1ca388',
+    color: '#fafafa',
+    hlColor: '#28c83f',
     dark: false
 }, {
     id: 'light',
     name: '浅色',
-    bg: '#e7e1e3',
+    color: '#e7e1e3',
+    hlColor: '#979193',
     dark: false
 }, {
     id: 'pink',
     name: '粉色1',
-    //bg: '#e667af',
-    bg: '#e667af',
+    //color: '#e667af',
+    color: '#e667af',
+    hlColor: '#e667af',
     dark: false
 }, {
     id: 'pink2',
     name: '粉色2',
-    //bg: '#e667af',
-    bg: '#fc589c',
+    //color: '#e667af',
+    color: '#fc589c',
+    hlColor: '#fc589c',
     dark: false
 }, {
     id: 'pink-red',
     name: '粉红',
-    //bg: '#ef5350',
-    bg: '#fc7688',
+    //color: '#ef5350',
+    color: '#fc7688',
+    //hlColor: '#fc7688',
+    hlColor: '#fff',
     dark: false
 }, {
     id: 'red',
     name: '红色1',
-    //bg: '#ef5350',
-    bg: '#f9453f',
+    //color: '#ef5350',
+    color: '#f9453f',
+    hlColor: '#f9453f',
     dark: false
 }, {
     id: 'red2',
     name: '红色2',
-    //bg: '#ef5350',
-    bg: '#d53943',
+    //color: '#ef5350',
+    color: '#d53943',
+    hlColor: '#d53943',
     dark: false
 }, {
     id: 'green',
     name: '绿色1',
-    //bg: '#1ca388',
-    //bg: '#28c83f',
-    bg: '#cfdec3',
+    //color: '#1ca388',
+    //color: '#28c83f',
+    color: '#cfdec3',
+    hlColor: '#323232',
     dark: false
 }, {
     id: 'green2',
     name: '绿色2',
-    bg: '#054a34',
+    color: '#054a34',
+    hlColor: '#e1e0a7',
     dark: true
 }, {
     id: 'blue',
     name: '蓝色1',
-    bg: '#56ccf2',
+    color: '#56ccf2',
+    hlColor: '#42a5f5',
     dark: false
 }, {
     id: 'blue2',
     name: '蓝色2',
-    bg: '#a8c5cb',
+    color: '#a8c5cb',
+    hlColor: '#273b42',
     dark: false
 },/*{
     id: 'blue3',
     name: '蓝色3',
-    bg: '#293581',
+    color: '#293581',
+    hlColor: '#293581',
     dark: false
 }, */ {
     id: 'yellow',
     name: '黄色1',
-    bg: '#ffb300',
+    color: '#ffb300',
+    hlColor: '#ffb300',
     dark: false
 }, {
     id: 'yellow2',
     name: '黄色2',
-    bg: '#fc9b29',
+    color: '#fc9b29',
+    hlColor: '#fc9b29',
     dark: false
 }, {
     id: 'purple',
     name: '紫色1',
-    bg: '#9c27b0',
+    color: '#9c27b0',
+    hlColor: '#9c27b0',
     dark: true
 }, {
     id: 'purple2',
     name: '紫色2',
-    bg: '#4d3e72',
+    color: '#4d3e72',
+    hlColor: '#e5bc8c',
     dark: true
 }, /*{
     id: 'purple3',
     name: '紫色3',
-    bg: '#5f3d70',
+    color: '#5f3d70',
+    hlColor: '#5f3d70',
     dark: true
 } */]   
 
@@ -237,6 +256,16 @@ export const useSettingStore = defineStore('setting', {
             let index = this.theme.index
             index = index > 0 ? index : 0
             return THEMES[index].id
+        },
+        getCurrentThemeColor() {
+            let index = this.theme.index
+            index = index > 0 ? index : 0
+            return THEMES[index].color
+        },
+        getCurrentThemeHlColor() {
+            let index = this.theme.index
+            index = index > 0 ? index : 0
+            return THEMES[index].hlColor
         },
         setTrackQualityIndex(index) {
             this.track.quality.index = index

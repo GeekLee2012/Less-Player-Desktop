@@ -181,6 +181,7 @@ export class RadioCN {
             }
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
+
                 const playlist = json.data.odchannel
                 const { name, imageUrl, description } = playlist
                 const cover = imageUrl[0].url
@@ -194,9 +195,10 @@ export class RadioCN {
                     const album = { id, name }
                     const duration = parseInt(item.duration) * 1000
                     const cover = result.cover
-                    const track = new Track(item.id, RadioCN.CODE, item.name, artist, album, duration, cover)
-                    track.url = item.streams[0].url
-                    track.lyric.addLine('00:00.000', item.description)
+                    const tid = item.id || item.programId
+                    const track = new Track(tid,RadioCN.CODE, item.name, artist, album, duration, cover)
+                    track.url = item.downloadUrl || item.streams[0].url
+                    track.lyric.addLine('999:99.000', item.description || description)
                     track.type = result.type
                     track.extra2 = item.onlinetime
                     result.addTrack(track)

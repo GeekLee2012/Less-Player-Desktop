@@ -30,7 +30,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         commonCtxMenuSeparatorNums: 0,
         addToListSubmenuShow: false,
         artistListSubmenuShow: false,
-        exitToHomeBtnShow: false
+        exitToHomeBtnShow: false,
+        playingViewThemeIndex: 0,
+        spectrumIndex: 0,
     }),
     getters: {
         isPlaylistMode() {
@@ -213,6 +215,13 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setExitToHomeBtnVisible(value) {
             this.exitToHomeBtnShow = value
+        },
+        switchPlayingViewTheme() {
+            this.playingViewThemeIndex = (this.playingViewThemeIndex + 1) % 2
+        }
+        ,
+        switchSpectrumIndex() {
+            this.spectrumIndex = (this.spectrumIndex + 1) % 2
         }
     }
 })

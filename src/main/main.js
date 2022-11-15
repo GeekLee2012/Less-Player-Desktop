@@ -354,6 +354,7 @@ const overrideRequest = (details) => {
   let referer = null
   let cookie = null
   let userAgent = null
+  let xrouter = null
 
   const url = details.url
   if(url.includes("qq.com")) {
@@ -373,6 +374,7 @@ const overrideRequest = (details) => {
     origin = "https://www.kugou.com/"
     referer = origin
     if(url.includes("mac.kugou.com")) userAgent = USER_AGENT_APPLE
+    if(url.includes("&cmd=123&ext=mp4&hash=")) xrouter = 'trackermv.kugou.com'
   } else if(url.includes("douban")) {
     const bid = randomTextWithinAlphabetNums(11)
     origin = "https://fm.douban.com/"
@@ -399,6 +401,7 @@ const overrideRequest = (details) => {
   if(userAgent) details.requestHeaders['UserAgent'] = userAgent
   if(referer) details.requestHeaders['Referer'] = referer
   if(cookie) details.requestHeaders['Cookie'] = cookie
+  if(xrouter) details.requestHeaders['x-router'] = xrouter
 
 }
 

@@ -1,9 +1,9 @@
 import EventBus from '../common/EventBus';
 import Hls from 'hls.js';
 
-let singleton = null
 let gRadioHolder = null
 let lastPlayTime = null
+let singleton = null, audioSource = null, analyser = null
 
 export class RadioPlayer {
 
@@ -12,6 +12,7 @@ export class RadioPlayer {
         this.hls = new Hls()
         this.playing = false
         this.channelChanged = false
+        this.audioCtx = new AudioContext()
     }
 
     static get() {
@@ -99,6 +100,7 @@ export class RadioPlayer {
         const currentTime = (nowTime - lastPlayTime) || 0
         const currentSecs = currentTime / 1000
         EventBus.emit('track-pos', currentSecs)
+        this.analyseSound()
         requestAnimationFrame(this.__step.bind(this))
     }
 
@@ -107,4 +109,19 @@ export class RadioPlayer {
         return this
     }
 
+    analyseSound () {
+        if(!gRadioHolder) return 
+        if(!analyser) {
+            analyser = this.audioCtx.createAnalyser()
+            //analyser.fftSize = 256
+            analyser.fftSize = 512
+            //gRadioHolder.crossOrigin = 'anonymous'
+            if(!audioSource) audioSource = this.audioCtx.createMediaElementSource(gRadioHolder)
+            audioSource.connect(analyser)
+            analyser.connect(this.audioCtx.destination)
+        }
+        const freqData = new Uint8Array(analyser.frequencyBinCount)
+        analyser.getByteFrequencyData(freqData)
+        EventBus.emit('track-freqUnit8Data', freqData)
+    }
 }

@@ -1,9 +1,10 @@
 import { Howl, Howler } from 'howler';
 import { PLAY_STATE } from '../common/Constants';
 import EventBus from '../common/EventBus';
+import { Playlist } from './Playlist';
 import { Track } from './Track';
 
-let singleton = null
+let singleton = null, audioSource = null, analyser = null
 
 //追求简洁、组合式API、单一责任
 export class Player {
@@ -63,6 +64,7 @@ export class Player {
                 self.retryPlay(1)
             }
         })
+        this.tryUnlockHowlAudios()
         return this.sound
     }
 
@@ -123,18 +125,24 @@ export class Player {
 
     seek(percent) {
         const sound = this.getSound()
-        if(!sound) return 
-        if(sound.playing()) sound.seek(sound.duration() * percent)
+        if(!sound || !sound.playing()) return 
+        sound.seek(sound.duration() * percent)
     }
     
     __step() {
         // Get the Howl we want to manipulate.
         const sound = this.getSound()
         if(!sound) return
-        //if(!sound.playing()) return 
+        if(!sound.playing()) return 
         // Determine our current seek position.
         const seek = sound.seek() || 0
         EventBus.emit('track-pos', seek)
+        try {
+            this.analyseSound()
+        } catch(error) {
+            console.log(error)
+            this.retryPlay(1)
+        }
         // If the sound is still playing, continue stepping.
         requestAnimationFrame(this.__step.bind(this))
     }
@@ -155,6 +163,32 @@ export class Player {
     retryPlay(times) {
         if(this.retry < times) this.notifyError()
         ++this.retry
+    }
+
+    analyseSound () {
+        const audioCtx = Howler.ctx
+        if(!audioCtx) return 
+        const audioNode = this.sound._sounds[0]._node
+        if(!audioNode) return 
+        if(!analyser) {
+            analyser = audioCtx.createAnalyser()
+            //analyser.fftSize = 256
+            analyser.fftSize = 512
+            //audioNode.crossOrigin = 'anonymous'
+            if(!audioSource) audioSource = audioCtx.createMediaElementSource(audioNode)
+            audioSource.connect(analyser)
+            analyser.connect(audioCtx.destination)
+        }
+        const freqData = new Uint8Array(analyser.frequencyBinCount)
+        analyser.getByteFrequencyData(freqData)
+        EventBus.emit('track-freqUnit8Data', freqData)
+    }
+
+    tryUnlockHowlAudios() {
+        const audios = Howler._html5AudioPool
+        audios.forEach(audio => {
+            audio.crossOrigin = 'anonymous'
+        })
     }
 
 }

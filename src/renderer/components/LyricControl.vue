@@ -109,6 +109,7 @@ const playMv = () => EventBus.emit('track-playMv', props.track)
 
 watch(() => props.track, (nv, ov) => reloadLyricData(nv))
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
+EventBus.on('lyric-userMouseWheel', onUserMouseWheel)
 
 onMounted(() => {
     EventBus.emit('track-loadLyric', props.track)
@@ -116,7 +117,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="lyric-ctl" @mousewheel="onUserMouseWheel">
+    <div class="lyric-ctl" >
         <div class="header">
             <div class="audio-title">
                 <span class="mv" v-show="Track.hasMv(track)">
@@ -219,7 +220,6 @@ onMounted(() => {
 }
     
 .lyric-ctl .center {
-    height: 366px;
     height: 399px;
     overflow: auto;
     margin-top: 15px;

@@ -198,6 +198,24 @@ const searchParam = (keyword, type, offset, limit, page) => {
     }
 }
 
+const searchParamNew = (keyword, type, offset, limit, page) => {
+    keyword = keyword ? keyword.trim() : ''
+    return {
+        comm: {
+            ct: '6',
+            cv: '80500'
+        },
+        req_1: moduleReq('music.search.SearchCgiService', 'DoSearchForQQMusicDesktop', 
+        {
+            num_per_page: 30,
+			page_num: page,
+			query: keyword,
+            search_type: type,
+            grp: 1
+        })
+    }
+}
+
 const topListReqBody = () => {
     return {
         _: Date.now(),
@@ -850,18 +868,17 @@ export class QQ {
     //搜索: 歌曲
     static searchSongs(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            keyword = keyword.trim()
-            const url = "http://c.y.qq.com/soso/fcgi-bin/client_search_cp"
-            const reqBody = searchParam(keyword, 0, offset, limit, page)
-            getJson(url, reqBody).then(json => {
-                const list = json.data.song.list
+            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            const reqBody = JSON.stringify(searchParamNew(keyword, 0, offset, limit, page))
+            postJson(url, reqBody).then(json => {
+                const list = json.req_1.data.body.song.list
                 const data = list.map(item => {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
-                    const album = { id: item.albummid, name : item.albumname }
+                    const album = { id: item.album.mid, name : item.album.name }
                     const duration = item.interval * 1000
-                    const cover = getAlbumCover(item.albummid)
-                    const track = new Track(item.songmid, QQ.CODE, item.songname, artist, album, duration, cover)
-                    //track.mv = item.vid
+                    const cover = getAlbumCover(item.album.mid)
+                    const track = new Track(item.mid, QQ.CODE, item.name, artist, album, duration, cover)
+                    track.mv = item.mv.vid
                     return track
                 })
                 const result = { offset, limit, page, data }
@@ -873,20 +890,13 @@ export class QQ {
     //搜索: 歌单
     static searchPlaylists(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const url = "https://c.y.qq.com/soso/fcgi-bin/client_music_search_songlist"
-            const reqBody = {
-                format: 'json',
-                // inCharset: 'utf8',
-                // outCharset: 'utf8',
-                remoteplace: 'txt.yqq.playlist',
-                page_no: page,
-                num_per_page: limit,
-                query: keyword
-            }
-            getJson(url, reqBody).then(json => {
-                const list = json.data.list
+            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            const reqBody = JSON.stringify(searchParamNew(keyword, 3, offset, limit, page))
+            postJson(url, reqBody).then(json => {
+                const list = json.req_1.data.body.songlist.list
                 const data = list.map(item => {
-                    const playlist = new Playlist(item.dissid, QQ.CODE, item.imgurl, escapeHtml(item.dissname))
+                    const playlist = new Playlist(item.dissid, QQ.CODE, item.imgurl, item.dissname)
+                    //playlist.about = item.introduction
                     return playlist
                 })
                 const result = { offset, limit, page, data }
@@ -898,10 +908,10 @@ export class QQ {
     //搜索: 专辑
     static searchAlbums(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const url = "http://c.y.qq.com/soso/fcgi-bin/client_search_cp"
-            const reqBody = searchParam(keyword, 8, offset, limit, page)
-            getJson(url, reqBody).then(json => {
-                const list = json.data.album.list
+            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            const reqBody = JSON.stringify(searchParamNew(keyword, 2, offset, limit, page))
+            postJson(url, reqBody).then(json => {
+                const list = json.req_1.data.body.album.list
                 const data = list.map(item => {
                     const album = new Album(item.albumMID, QQ.CODE, item.albumName, item.albumPic)
                     album.publishTime = item.publicTime
@@ -916,11 +926,10 @@ export class QQ {
     //搜索: 歌手
     static searchArtists(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const url = "http://c.y.qq.com/soso/fcgi-bin/client_search_cp"
-            const reqBody = searchParam(keyword, 9, offset, limit, page)
-            getJson(url, reqBody).then(json => {
-                
-                const list = json.data.singer.list
+            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            const reqBody = JSON.stringify(searchParamNew(keyword, 1, offset, limit, page))
+            postJson(url, reqBody).then(json => {
+                const list = json.req_1.data.body.singer.list
                 const result = { offset, limit, page, data: [] }
                 if(list) {
                     result.data = list.map(item => ({

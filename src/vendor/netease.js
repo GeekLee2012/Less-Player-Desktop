@@ -803,7 +803,7 @@ export class NetEase {
                     track.pid = id
                     track.songlistId = songlistId
                     track.extra2 = updateTime
-                    track.lyric.addLine('00:00.000', about)
+                    track.lyric.addLine('999:99.000', about)
 
                     result.addTrack(track)
                 })

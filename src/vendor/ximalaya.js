@@ -68,8 +68,8 @@ export class Ximalaya {
                 const value = category.substring(1)
                 result.categoryId = value
             }
-        } catch (e) {
-            //console.log(e)
+        } catch (error) {
+            //console.log(error)
         }
         return result
     }

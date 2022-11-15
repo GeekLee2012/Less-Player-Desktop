@@ -179,7 +179,6 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo" 
                     + "?pid=" + id + "&pn=" + page + "&rn=" + limit + "&httpsStatus=1&reqId=" + REQ_ID
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
                 const result = new Playlist(id, KuWo.CODE, json.data.img500, json.data.name)
                 result.about = json.data.info
                 result.total = json.data.total
@@ -436,7 +435,7 @@ export class KuWo {
             const result = { platform: KuWo.CODE, data: [], alphabet: new Category('字母') }
             const url = "https://www.kuwo.cn/singers"
             getDoc(url).then(doc => {
-                let els =doc.querySelectorAll(".main_con .tag_en li")
+                let els = doc.querySelectorAll(".main_con .tag_en li")
                 els.forEach(el => {
                     const key = el.textContent.trim()
                     const value = key.replace('热门', '')
@@ -465,8 +464,8 @@ export class KuWo {
                 prefix: encodeURIComponent(cate['字母'].item.value)
             }
             return Object.assign(result, source)
-        } catch (e) {
-            //console.log(e)
+        } catch (error) {
+            //console.log(error)
         }
         return result
     }
@@ -505,7 +504,7 @@ export class KuWo {
                 + `?mid=${id}&type=mv&httpsStatus=1&reqId=${REQ_ID}`
             getJson(url).then(json => {
                 const result = { id, platform: KuWo.CODE, quality, url: '' }
-                result.url = json.data.url
+                if(json.data) result.url = json.data.url || ''
                 resolve(result)
             })
         })

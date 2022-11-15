@@ -11,14 +11,13 @@ import EventBus from '../../common/EventBus';
 const { currentTrack, mmssCurrentTime, volume } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useAppCommonStore())
 const { showPlayingView, toggleCoverMask } = useAppCommonStore()
+const volumeBar = ref(null)
 
 const trackMeta = (track) => {
     let artistName = Track.artistName(track)
     if(artistName.length > 0) artistName = ' - ' + artistName
     return track.title + artistName
 }
-
-const volumeBar = ref(null)
 
 onMounted(() => {
     EventBus.emit("track-restoreInit", currentTrack.value)

@@ -84,7 +84,7 @@ export class Qingting {
                     const track = new Track(id, Qingting.CODE, title, artist, album, duration * 1000, cover)
                     track.pid = result.id
                     track.type = result.type
-                    track.lyric.addLine('00:00.000', detail)
+                    track.lyric.addLine('999:99.000', detail)
                     //track.extra1 = playcount
                     track.extra2 = update_time
                     result.addTrack(track)

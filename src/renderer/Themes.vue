@@ -1695,4 +1695,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
     from { background-position: -360px 0 }
     to { background-position: 360px 0 }
 }
+
+@keyframes rotate {
+    from { transform:rotateZ(0deg) }
+    to { transform:rotateZ(360deg)  }
+}
 </style>

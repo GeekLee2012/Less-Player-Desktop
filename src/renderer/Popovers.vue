@@ -1,5 +1,5 @@
 <script setup>
-import {  onMounted, reactive, ref, watch } from 'vue';
+import {  onMounted, reactive, shallowRef, watch } from 'vue';
 import Notification from './components/Notification.vue';
 import { useAppCommonStore } from './store/appCommonStore';
 import { storeToRefs } from 'pinia';
@@ -8,7 +8,10 @@ import CommonContextMenu from './components/CommonContextMenu.vue';
 import AddToListSubmenu from './components/addToListSubmenu.vue';
 import { useUserProfileStore } from './store/userProfileStore';
 import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
+import PlayingView from './views/PlayingView.vue';
+import VisualPlayingView from './views/VisualPlayingView.vue';
 
+const currentPlayingView = shallowRef(null)
 const ctxMenuPosStyle = reactive({ left: -999, top: -999})
 const ctxSubmenuPosStyle = reactive({ left: -999, top: -999})
 let ctxMenuPos = null, submenuItemNums = 0
@@ -19,7 +22,7 @@ const { playNotificationShow, commonNotificationShow,
   addToListSubmenuShow, commonNotificationType,
   artistListSubmenuShow, commonCtxMenuCacheItem,
   playbackQueueViewShow, playingViewShow, 
-  videoPlayingViewShow } = storeToRefs(useAppCommonStore())
+  videoPlayingViewShow, playingViewThemeIndex } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu, 
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -144,10 +147,16 @@ const bindEventListeners = () => {
 
 //TODO
 watch(playbackQueueViewShow, hideAllCtxMenus)
+watch(playingViewThemeIndex, (nv) => setupPlayingView(nv))
 
+const setupPlayingView = (index) => {
+  const themeViews = [ PlayingView, VisualPlayingView ]
+  currentPlayingView.value = themeViews[index || 0]
+}
 
 onMounted(()=> {
   bindEventListeners()
+  setupPlayingView()
 })
 </script>
 
@@ -187,9 +196,16 @@ onMounted(()=> {
     </transition>
 
     <!-- 顶层浮动窗口 -->
+    <!--
     <transition name="fade-y">
       <PlayingView id="playing-view" v-show="playingViewShow">
       </PlayingView>
+    </transition>
+    -->
+    
+    <transition name="fade-y">
+      <component id="playing-view" v-show="playingViewShow" :is="currentPlayingView">
+      </component>
     </transition>
 
     <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow">

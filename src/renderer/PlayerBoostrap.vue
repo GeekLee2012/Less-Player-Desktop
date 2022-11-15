@@ -108,8 +108,8 @@ const bootstrapTrack = (track, callback, noToast) => {
             EventBus.emit('track-artistUpdated', { trackId: id, artist })
         }
         if(callback) callback(track)
-    }).catch(e => {
-        console.log(e)
+    }).catch(error => {
+        console.log(error)
         //showPlayToast(playNextTrack)
     })
 }
@@ -263,7 +263,7 @@ onMounted(initRadioPlayer)
 
 <template>
     <!-- FM广播audio -->
-    <audio class="radio-holder"></audio>
+    <audio class="radio-holder" crossOrigin="anonymous"></audio>
     <slot></slot>
 </template>
 <style>

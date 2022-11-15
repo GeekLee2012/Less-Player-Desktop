@@ -15,9 +15,10 @@ import { Playlist } from '../../common/Playlist';
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
-const { hidePlayingView, minimize, showToast } = useAppCommonStore()
-const { currentTrack, mmssCurrentTime, progress, playingIndex } = storeToRefs(usePlayStore())
+const { hidePlayingView, minimize, showToast, switchPlayingViewTheme } = useAppCommonStore()
+const { currentTrack, mmssCurrentTime, progress, playingIndex, volume } = storeToRefs(usePlayStore())
 const progressBarRef = ref(null)
+const volumeBar = ref(null)
 
 const seekTrack = (percent) => {
     EventBus.emit('track-seek', percent)
@@ -58,12 +59,20 @@ const checkFavorite = () => {
     favorited.value = isFavoriteRadio(id, platform) || isFavoriteSong(id, platform)
 }
 
+const onUserMouseWheel = (e) => EventBus.emit('lyric-userMouseWheel', e)
+
 watch(progress, (nv, ov) => {
-    progressBarRef.value.updateProgress(nv)
+    if(progressBarRef) progressBarRef.value.updateProgress(nv)
 })
 
 EventBus.on("userProfile-reset", checkFavorite)
 EventBus.on("refreshFavorite", checkFavorite)
+
+onMounted(() => {
+    EventBus.emit('playingView-changed')
+    if(progressBarRef) progressBarRef.value.updateProgress(progress.value)
+    if(volumeBar) volumeBar.value.setVolume(volume.value)
+})
 
 watch([currentTrack, playingViewShow ], checkFavorite)
 </script>
@@ -84,7 +93,8 @@ watch([currentTrack, playingViewShow ], checkFavorite)
                 <img v-lazy="currentTrack.cover" />
             </div>
             <div class="lyric-view">
-                <LyricControl :track="currentTrack"></LyricControl>
+                <LyricControl :track="currentTrack" @mousewheel="onUserMouseWheel">
+                </LyricControl>
             </div>
         </div>
         <div class="bottom">
@@ -106,9 +116,13 @@ watch([currentTrack, playingViewShow ], checkFavorite)
                     <PlayControl></PlayControl>
                 </div>
                 <div>
-                    <VolumeBar></VolumeBar>
+                    <VolumeBar ref="volumeBar"></VolumeBar>
                 </div>
-                <div class="btm-right"></div>
+                <div class="btm-right">
+                    <div class="theme" @click="switchPlayingViewTheme">
+                        <svg width="20" height="20" viewBox="0 0 853.81 853.37" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M.06,469.31c0-55.84-.16-111.67.05-167.5.25-67,25.33-123,76.46-166.42,39.71-33.76,86.24-50,138.39-50q104.75,0,209.49,0c23.75,0,41.8,15,44.51,36.72,3.26,26.11-15.9,48.33-42.22,48.47-37.17.19-74.33.05-111.5.05-33.67,0-67.33-.05-101,0-63.74.12-116.53,44.74-127.09,107.56a130.89,130.89,0,0,0-1.52,21.4c-.09,113-.37,226,.07,339,.2,52.53,24.66,91.22,70.88,115.88,17.94,9.56,37.46,13.42,57.81,13.41,113.16,0,226.33.16,339.49-.09,65.18-.15,117.4-45.14,127.53-109.26a138,138,0,0,0,1.34-21.42q.15-104.5.07-209c0-21.13,12.59-37.72,32.23-42.79,26-6.7,52.44,12.38,52.76,39.21.56,46.16.25,92.33.25,138.49,0,27.84.26,55.68-.23,83.5-1.51,86.76-60.89,167.32-143.17,195A225.82,225.82,0,0,1,552,853.35q-167.76,0-335.5,0c-91.18,0-169.06-52.84-202.29-137.38C4.32,690.73.08,664.38.07,637.3Q0,553.3.06,469.31Z"/><path d="M533.61,467.94c.48,5.94,1,11.54,1.39,17.15,5.7,86.42-55.85,162.13-141.7,173.43-14.24,1.87-28.91,1.43-43.32.72-33.92-1.67-66.38,3.93-97.25,18-15.75,7.17-30.88,7.78-45.52-2.07-9.61-6.47-16.11-15.84-21.65-25.81-13.09-23.55-16.68-49.18-14.25-75.46C178,502.27,205.89,439,251.05,383.81c31-37.91,72.91-55.81,122-56.23,3.65,0,7.29.54,10.92.83,1.59-8.8,2.62-17.72,4.85-26.32,7.32-28.25,22.08-51.63,45.29-69.87q134-105.32,267.61-211.1c56.76-44.91,138-14.55,150.59,56.72,4.62,26.26-1.54,50.54-18,71.48q-109,138.44-218.55,276.39c-18.68,23.41-44.88,35.46-74.11,40.91C539.19,467.07,536.72,467.43,533.61,467.94ZM255,584.49c14.32-2.64,27.17-5.41,40.14-7.31,20.14-2.95,40.48-4.9,60.74-2.22,34.48,4.56,67.88-11.24,84.07-40.71a83.78,83.78,0,0,0-9.89-94.75c-31.41-36.31-86-35.39-116,2.13a270.61,270.61,0,0,0-52.05,106.29C259.2,559.82,257.41,572,255,584.49Zm214.5-248.07a85.44,85.44,0,0,0,1.3,9.61c4.64,19.32,16.72,31.79,36,35.94,18.58,4,35.06-.52,47.34-16q93.67-118.38,187.27-236.81Q753.42,114,765.33,98.91c3.32-4.25,3.48-8.24.63-11.25s-7-3-11.58.55l-1.58,1.23Q620.06,194.35,487.29,299.22C475.34,308.64,470.31,321,469.53,336.42Z"/></g></g></svg>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -151,11 +165,13 @@ watch([currentTrack, playingViewShow ], checkFavorite)
     -webkit-app-region: none;
 }
 
-.playing-view .header svg {
+.playing-view svg {
     fill: var(--svg-color);
+    cursor: pointer;
 }
 
 .playing-view .header svg:hover, 
+.playing-view .theme svg:hover, 
 .playing-view .collapse-btn:hover svg {
     fill: var(--hl-color);
     fill: var(--svg-hover-color);
@@ -181,10 +197,10 @@ watch([currentTrack, playingViewShow ], checkFavorite)
 }
 
 .playing-view .cover img {
-    width: 265px;
-    height: 265px;
     width: 300px;
     height: 300px;
+    width: 333px;
+    height: 333px;
     border: 5px solid #292929;
     border-radius: 3px;
 }
