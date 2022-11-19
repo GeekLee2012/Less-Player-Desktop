@@ -10,11 +10,15 @@ import { randomTextWithinAlphabetNums } from "../common/Utils";
 //e2db8a61-afdb-11ec-9d7b-c9324a8678ec
 //efe8c650-de5c-11ec-9d92-a133baea2d31
 //8-4-4-4-12
-const REQ_ID = (randomTextWithinAlphabetNums(8) 
+const randomReqId = () => {
+    return (randomTextWithinAlphabetNums(8) 
     + '-' + randomTextWithinAlphabetNums(4) 
     + '-' + randomTextWithinAlphabetNums(4) 
     + '-' + randomTextWithinAlphabetNums(4) 
     + '-' + randomTextWithinAlphabetNums(12)).toLowerCase()
+}
+
+//const REQ_ID = randomReqId()
 
 const CONFIG = {
     withCredentials: true
@@ -35,7 +39,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const result = { platform: KuWo.CODE, data: [], orders: [] }
             const url = "https://www.kuwo.cn/api/www/playlist/getTagList" 
-                    + "?httpsStatus=1&reqId=" + REQ_ID
+                    + "?httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const defaultCategory = new Category("精选")
                 defaultCategory.add("最新", '#new')
@@ -73,11 +77,11 @@ export class KuWo {
                 resolvedCate = resolvedCate.substring(1)
                 url = "https://www.kuwo.cn/api/www/classify/playlist/getRcmPlayList"
                     + "?pn=" + page + "&rn=" + limit 
-                    + "&order=" + resolvedCate +"&httpsStatus=1&reqId=" + REQ_ID
+                    + "&order=" + resolvedCate +"&httpsStatus=1&reqId=" + randomReqId()
             } else {
                 url = "https://www.kuwo.cn/api/www/classify/playlist/getTagPlayList" 
                     + "?pn=" + page + "&rn=" + limit 
-                    + "&id=" + resolvedCate + "&httpsStatus=1&reqId=" + REQ_ID
+                    + "&id=" + resolvedCate + "&httpsStatus=1&reqId=" + randomReqId()
             }
             getJson(url, null, CONFIG).then(json => {
                 const pagination = json.data
@@ -148,7 +152,7 @@ export class KuWo {
                 pn: page,
                 rn: 300,
                 httpsStatus: 1,
-                reqId: REQ_ID
+                reqId: randomReqId()
             }
             getJson(url, reqBody, CONFIG).then(json => {
                 const cache = KuWo.CACHE_TOPLISTS.get(id)
@@ -177,7 +181,7 @@ export class KuWo {
         if(id.startsWith(KuWo.TOPLIST_PREFIX)) return this.toplistDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo" 
-                    + "?pid=" + id + "&pn=" + page + "&rn=" + limit + "&httpsStatus=1&reqId=" + REQ_ID
+                    + "?pid=" + id + "&pn=" + page + "&rn=" + limit + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const result = new Playlist(id, KuWo.CODE, json.data.img500, json.data.name)
                 result.about = json.data.info
@@ -201,7 +205,7 @@ export class KuWo {
     static playDetail(id) {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/v1/www/music/playUrl"
-                + "?mid=" + id + "&type=music" + "&httpsStatus=1&reqId=" + REQ_ID
+                + "?mid=" + id + "&type=music" + "&httpsStatus=1&reqId=" + randomReqId()
             const result = new Track(id, KuWo.CODE)
             getJson(url, null, CONFIG).then(json => {
                 if(json.data) {
@@ -218,7 +222,7 @@ export class KuWo {
     static lyric(id) {
         return new Promise((resolve, reject) => {
             const url = "http://m.kuwo.cn/newh5/singles/songinfoandlrc"
-                + "?musicId=" + id + "&httpsStatus=1&reqId=" + REQ_ID
+                + "?musicId=" + id + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const result = new Lyric()
                 const lrclist = json.data.lrclist
@@ -264,7 +268,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "http://www.kuwo.cn/api/www/artist/artistMusic" 
                 + "?artistid=" + id + "&pn=" + page +"&rn=" + limit 
-                + "&httpsStatus=1&reqId=" + REQ_ID
+                + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const total = json.data.total
                 const data = []
@@ -289,7 +293,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "http://www.kuwo.cn/api/www/artist/artistAlbum" 
                 + "?artistid=" + id + "&pn=" + page +"&rn=" + limit 
-                + "&httpsStatus=1&reqId=" + REQ_ID
+                + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const total = json.data.total
                 const data = []
@@ -351,7 +355,7 @@ export class KuWo {
             keyword = keyword.trim()
             const url = "https://www.kuwo.cn/api/www/search/searchMusicBykeyWord"
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
-                    + "&httpsStatus=1&reqId=" + REQ_ID
+                    + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 let data = []
                 if(json.code == 200) {
@@ -375,7 +379,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/www/search/searchPlayListBykeyWord"
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
-                    + "&httpsStatus=1&reqId=" + REQ_ID
+                    + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.list.map(item => {
                     const playlist = new Playlist(item.id, KuWo.CODE, item.img, escapseHtml(item.name))
@@ -392,7 +396,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/www/search/searchAlbumBykeyWord"
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
-                    + "&httpsStatus=1&reqId=" + REQ_ID
+                    + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.albumList.map(item => {
                     const artist = [ { id: item.artistid, name: item.artist } ]
@@ -412,7 +416,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/www/search/searchArtistBykeyWord"
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
-                    + "&httpsStatus=1&reqId=" + REQ_ID
+                    + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 
                 const data = json.data.artistList.map(item => {
@@ -482,7 +486,7 @@ export class KuWo {
                 pn: page,
                 rn: 102,
                 httpsStatus: 1,
-                reqId: REQ_ID
+                reqId: randomReqId()
             }
             getJson(url, reqBody).then(json => {
                 const list = json.data.artistList
@@ -501,7 +505,7 @@ export class KuWo {
     static videoDetail(id, quality) {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/v1/www/music/playUrl" 
-                + `?mid=${id}&type=mv&httpsStatus=1&reqId=${REQ_ID}`
+                + `?mid=${id}&type=mv&httpsStatus=1&reqId=${randomReqId()}`
             getJson(url).then(json => {
                 const result = { id, platform: KuWo.CODE, quality, url: '' }
                 if(json.data) result.url = json.data.url || ''

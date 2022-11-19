@@ -15,7 +15,8 @@ const  { visitRoute, visitSetting } = inject('appRoute')
 
 const { playlistCategoryViewShow, artistCategoryViewShow, 
     radioCategoryViewShow, videoPlayingViewShow,
-    playingViewThemeIndex, playingViewShow } = storeToRefs(useAppCommonStore())
+    playingViewThemeIndex, playingViewShow, 
+    audioEffectViewShow } = storeToRefs(useAppCommonStore())
 const { hideAllCategoryViews, hideAllCtxMenus,
     hidePlaybackQueueView, togglePlaybackQueueView, } = useAppCommonStore()
 
@@ -148,7 +149,7 @@ const setPlaybackQueueSize = () => {
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
     let size = 335 * Math.max(wScaleRatio * 0.85, 1)
-    const el = document.querySelector("#playback-queue")
+    const el = document.querySelector("#playback-queue-view")
     el.style.width = size + "px"
 }
 
@@ -245,6 +246,17 @@ const setPlayingViewSize = () => {
     setVisualPlayingViewCanvasSize()
 }
 
+const setAudioEffectViewAlignment = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const view = document.querySelector("#audio-effect-view")
+    const width = 725, height = 550
+    if(!view) return
+    const left = (clientWidth - width) / 2
+    const top = (clientHeight - height) / 2
+    view.style.left = left + 'px'
+    view.style.top = top + 'px'
+}
+
 onMounted (() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', e => {
@@ -265,6 +277,8 @@ onMounted (() => {
         setBatchViewListSize()
         //自适应视频页面大小
         setVideoViewSize()
+        //音效窗口自动居中
+        setAudioEffectViewAlignment()
         //隐藏上下文菜单
         hideAllCtxMenus()
     })
@@ -296,6 +310,7 @@ EventBus.on('playingView-changed', setPlayingViewSize)
 //TODO
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
 watch([ videoPlayingViewShow ], setVideoViewSize)
+watch([ audioEffectViewShow ], setAudioEffectViewAlignment)
 //watch([ playingViewThemeIndex ], setPlayingViewSize)
 </script>
 

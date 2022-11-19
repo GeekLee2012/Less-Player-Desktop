@@ -3,7 +3,50 @@ import Hls from 'hls.js';
 
 let gRadioHolder = null
 let lastPlayTime = null
-let singleton = null, audioSource = null, analyser = null
+let singleton = null
+let audioSource = null, analyser = null, eqFilters = null
+const EQ = [
+    {
+        frequency: 31,
+        type: 'lowshelf'
+    },
+    {
+        frequency: 62,
+        type: 'peaking'
+    },
+    {
+        frequency: 125,
+        type: 'peaking'
+    },
+    {
+        frequency: 250,
+        type: 'peaking'
+    },
+    {
+        frequency: 500,
+        type: 'peaking'
+    },
+    {
+        frequency: 1000,
+        type: 'peaking'
+    },
+    {
+        frequency: 2000,
+        type: 'peaking'
+    },
+    {
+        frequency: 4000,
+        type: 'peaking'
+    },
+    {
+        frequency: 8000,
+        type: 'peaking'
+    },
+    {
+        frequency: 16000,
+        type: 'highshelf'
+    }
+]
 
 export class RadioPlayer {
 
@@ -32,6 +75,7 @@ export class RadioPlayer {
             .on('queue-empty', () => player.setChannel(null))
             .on('track-play', () => player.setChannel(null))
             .on('track-restoreInit', channel => player.setChannel(channel))
+            .on('track-updateEQ', (values) => player.updateEQ(values))
     }
 
     //播放
@@ -112,16 +156,52 @@ export class RadioPlayer {
     analyseSound () {
         if(!gRadioHolder) return 
         if(!analyser) {
-            analyser = this.audioCtx.createAnalyser()
+            const audioCtx = this.audioCtx
+            analyser = audioCtx.createAnalyser()
             //analyser.fftSize = 256
             analyser.fftSize = 512
             //gRadioHolder.crossOrigin = 'anonymous'
-            if(!audioSource) audioSource = this.audioCtx.createMediaElementSource(gRadioHolder)
+            var distortion = audioCtx.createWaveShaper()
+            var gainNode = audioCtx.createGain()
+            var biquadFilters = this.createBiquadFilters(audioCtx)
+            eqFilters = biquadFilters
+            if(!audioSource) audioSource = audioCtx.createMediaElementSource(gRadioHolder)
             audioSource.connect(analyser)
-            analyser.connect(this.audioCtx.destination)
+            analyser.connect(distortion)
+            this.connectBiquadFilters(biquadFilters, distortion, gainNode)
+            gainNode.connect(audioCtx.destination)
         }
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
         EventBus.emit('track-freqUnit8Data', freqData)
     }
+
+    createBiquadFilters(audioCtx) {
+        if(!audioCtx) return []
+        let filters = EQ.map(function(band) {
+            let filter = audioCtx.createBiquadFilter()
+            filter.type = band.type
+            filter.gain.value = 0 // -40 ~ 40
+            filter.Q.value = 1
+            filter.frequency.value = band.frequency
+            return filter
+        })
+        return filters
+    }
+
+    connectBiquadFilters(filters, currentNode, nextNode) {
+        if(!filters || filters.length < 0) return
+        filters.reduce(function (prev, curr) {
+            prev.connect(curr)
+            return curr
+        }, currentNode).connect(nextNode)
+    }
+
+    updateEQ(values) {
+        if(!eqFilters || eqFilters.length < 1) return
+        eqFilters.forEach((filter, index) => {
+            filter.gain.value = values[index]
+        })
+    }
+    
 }

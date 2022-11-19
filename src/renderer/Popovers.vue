@@ -10,6 +10,7 @@ import { useUserProfileStore } from './store/userProfileStore';
 import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
 import PlayingView from './views/PlayingView.vue';
 import VisualPlayingView from './views/VisualPlayingView.vue';
+import AudioEffectView from './views/AudioEffectView.vue';
 
 const currentPlayingView = shallowRef(null)
 const ctxMenuPosStyle = reactive({ left: -999, top: -999})
@@ -22,7 +23,8 @@ const { playNotificationShow, commonNotificationShow,
   addToListSubmenuShow, commonNotificationType,
   artistListSubmenuShow, commonCtxMenuCacheItem,
   playbackQueueViewShow, playingViewShow, 
-  videoPlayingViewShow, playingViewThemeIndex } = storeToRefs(useAppCommonStore())
+  videoPlayingViewShow, playingViewThemeIndex,
+  audioEffectViewShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu, 
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -150,8 +152,9 @@ watch(playbackQueueViewShow, hideAllCtxMenus)
 watch(playingViewThemeIndex, (nv) => setupPlayingView(nv))
 
 const setupPlayingView = (index) => {
+  index = index || playingViewThemeIndex.value
   const themeViews = [ PlayingView, VisualPlayingView ]
-  currentPlayingView.value = themeViews[index || 0]
+  currentPlayingView.value = themeViews[index]
 }
 
 onMounted(()=> {
@@ -208,7 +211,7 @@ onMounted(()=> {
       </component>
     </transition>
 
-    <PlaybackQueueView id="playback-queue" v-show="playbackQueueViewShow">
+    <PlaybackQueueView id="playback-queue-view" v-show="playbackQueueViewShow">
     </PlaybackQueueView>
 
     <!-- 顶层浮动窗口 -->
@@ -216,10 +219,13 @@ onMounted(()=> {
       <VideoPlayingView id="video-playing-view" v-show="videoPlayingViewShow">
       </VideoPlayingView>
     </transition>
+
+    <AudioEffectView id="audio-effect-view" v-show="audioEffectViewShow">
+    </AudioEffectView>
 </template>
 
 <style>
-#playback-queue {
+#playback-queue-view {
     position: absolute;
     top: 0;
     right: 0px;
@@ -241,5 +247,16 @@ onMounted(()=> {
     height: 100%;
     z-index: 88;
     background: var(--app-bg);
+}
+
+#audio-effect-view {
+    position: absolute;
+    right: 30px;
+    bottom: 80px;
+    width: 725px;
+    height: 550px;
+    z-index: 404;
+    background: var(--app-bg);
+    box-shadow: var(--pbq-box-shadow);
 }
 </style>

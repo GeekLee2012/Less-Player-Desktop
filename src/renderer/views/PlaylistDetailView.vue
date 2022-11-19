@@ -1,12 +1,3 @@
-<!--
-<script>
-//定义名称，方便用于<keep-alive>
-export default {
-    name: 'PlaylistDetailView'
-}
-</script>
--->
-
 <script setup>
 import { onMounted, onActivated, reactive, ref, watch } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
@@ -166,6 +157,12 @@ const resetBack2TopBtn = () => {
     back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
 }
 
+const trimExtraHtml = (text) => {
+    text = (text || '').trim()
+    //TODO 暂时不处理html空白格式信息
+    return text
+}
+
 onActivated(() => restoreScrollState())
 
 watch(() => props.id, () => {
@@ -192,7 +189,7 @@ EventBus.on("refresh-favorite", checkFavorite)
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="detail.title"></div>
-                <div class="about" v-html="detail.about"></div>
+                <div class="about" v-html="trimExtraHtml(detail.about)"></div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll"  :rightAction="() => addAll()" class="btn-spacing">
                     </PlayAddAllBtn>

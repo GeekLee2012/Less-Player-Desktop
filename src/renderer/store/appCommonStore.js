@@ -13,6 +13,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         playbackQueueViewShow: false,
         playingViewShow: false,
         videoPlayingViewShow: false,
+        audioEffectViewShow: false,
         //探索模式，歌单、歌手
         exploreModes: [ 'playlists', 'artists', 'radios', 'userhome' ], 
         exploreModeIndex: 0, 
@@ -105,6 +106,12 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleVideoPlayingView() {
             this.videoPlayingViewShow = !this.videoPlayingViewShow
+        },
+        hideAudioEffectView() {
+            this.audioEffectViewShow = false
+        },
+        toggleAudioEffectView() {
+            this.audioEffectViewShow = !this.audioEffectViewShow
         },
         toggleCoverMask() {
             this.coverMaskShow = !this.coverMaskShow
@@ -218,10 +225,21 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         switchPlayingViewTheme() {
             this.playingViewThemeIndex = (this.playingViewThemeIndex + 1) % 2
+            this.hideAudioEffectView()
         }
         ,
         switchSpectrumIndex() {
             this.spectrumIndex = (this.spectrumIndex + 1) % 2
         }
-    }
+    },
+    persist: {
+        enabled: true,
+        strategies: [
+            {
+                //key: 'appCommon',
+                storage: localStorage,
+                paths: [ 'playingViewThemeIndex', 'spectrumIndex' ]
+            },
+        ],
+    },
 })

@@ -51,7 +51,7 @@ defineExpose({
 .volume-bar {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     -webkit-app-region: none;
 }

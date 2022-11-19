@@ -1,9 +1,9 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, toRef, watch } from 'vue';
 //TODO 组件代码写得乱，后期再梳理
 
 const props = defineProps({
-    initValue: Number, //0.0 - 1.0
+    value: Number, //0.0 - 1.0
     onseek: Function,
     onscroll: Function,
     ondrag: Function
@@ -13,14 +13,16 @@ const sliderCtlRef = ref(null)
 const progressRef = ref(null)
 const thumbRef = ref(null)
 let onDrag = false
-let value = parseFloat(props.initValue).toFixed(2)
+let value = parseFloat(props.value || 0.5).toFixed(2)
 
 //点击改变进度
 const seekProgress = (e)=> {
     if(thumbRef.value.contains(e.target)) {
-        updateProgressByDeltaWidth(e.offsetX)
+        updateProgressByDeltaHeight(e.offsetY)
+    } else if(sliderCtlRef.value == e.target) {
+        updateProgressByHeight(e.offsetY, true)
     } else {
-        updateProgressByWidth(e.offsetX)
+        updateProgressByHeight(e.offsetY)
     }
     if(props.onseek) props.onseek(value)
 }
@@ -37,12 +39,13 @@ const scrollProgress = (e) => {
     if(props.onscroll) props.onscroll(value)
 }
 
-const updateProgress = (percent) => {
+const updateProgress = (percent, noUpdate) => {
     percent = percent * 100
     percent = percent > 0 ? percent : 0
     percent = percent < 100 ? percent : 100
-    progressRef.value.style.width = percent + "%"
-    thumbRef.value.style.left = percent + "%"
+    progressRef.value.style.height = percent + "%"
+    thumbRef.value.style.top = (100 - percent) + "%"
+    if(noUpdate) return
     value = (percent / 100).toFixed(2)
 }
 
@@ -52,20 +55,27 @@ const toggleProgress = () => {
     return value
 }
 
-const updateProgressByWidth = (width) => {
-    const totalWidth = sliderCtlRef.value.offsetWidth
-    let percent = width / totalWidth
-    //console.log("percent: " + percent)
+const updateProgressByHeight = (height, needReverse) => {
+    const totalHeight = sliderCtlRef.value.offsetHeight
+    let oPercent = parseFloat(progressRef.value.style.height.replace('%', '')) / 100
+    if(isNaN(oPercent)) oPercent = 0.5 
+    const oHeight = totalHeight * oPercent
+    let percent = height / totalHeight
+    if(needReverse) {
+        percent = 1 - percent
+    } else {
+        if(oHeight >= height) percent = (oHeight - height) / totalHeight
+    }
     updateProgress(percent)
 }
 
-const updateProgressByDeltaWidth = (delta) => {
-    if(delta == 0) return 
-    const totalWidth = sliderCtlRef.value.offsetWidth
-    const oPercent = parseFloat(progressRef.value.style.width.replace('%', '')) / 100
-    if(isNaN(oPercent)) return 
-    let oWidth = totalWidth * oPercent
-    updateProgressByWidth(oWidth + delta)
+const updateProgressByDeltaHeight = (delta) => {
+    if(delta == 0) return
+    const totalHeight = sliderCtlRef.value.offsetHeight
+    let oPercent = parseFloat(progressRef.value.style.height.replace('%', '')) / 100
+    if(isNaN(oPercent)) oPercent = 0.5 
+    let oHeight = totalHeight * oPercent
+    updateProgressByHeight(oHeight + delta)
 }
 
 const startDrag = (e)=> {
@@ -76,10 +86,11 @@ const startDrag = (e)=> {
 
 const dragMove = (e) => {
     if(!onDrag) return 
-    const progress = e.clientX - sliderCtlRef.value.offsetLeft
-    const width = sliderCtlRef.value.clientWidth
-    updateProgress(progress/width)
-    if(props.ondrag)  props.onseek(value)
+    const progress = e.offsetY
+    const totalHeight = sliderCtlRef.value.clientHeight
+    const percent = progress / totalHeight
+    //updateProgress(percent)
+    //if(props.ondrag)  props.onseek(value)
 }
 
 /* 以下为拖动滑块改变进度相关 */
@@ -95,14 +106,15 @@ defineExpose({
     toggleProgress
 })
 
-onMounted(() => {
-    
-})
+watch(() => props.value, (nv, ov) => updateProgress(nv, true))
 </script>
 
 <template>
-    <div class="slider-bar" @mousewheel="scrollProgress"> 
-        <div class="slider-bar-ctl" ref="sliderCtlRef" @click="seekProgress">
+    <!--
+        <input type="range" ></input>
+    -->
+    <div class="vertical-slider-bar" @mousewheel="scrollProgress"> 
+        <div class="vertical-slider-bar-ctl" ref="sliderCtlRef" @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
             <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>
         </div>
@@ -110,39 +122,42 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.slider-bar {
-    height: 10px;
+.vertical-slider-bar {
+    height: 168px;
     background: transparent;
     -webkit-app-region: none;
 }
 
-.slider-bar .slider-bar-ctl{
-    height: 3px;
+.vertical-slider-bar .vertical-slider-bar-ctl {
+    width: 3px;
+    height: 100%;
     border-radius: 10rem;
     background: var(--progress-track-bg);
     cursor: pointer;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: flex-end;
     align-items: center;
     position: relative;
 }
 
-.slider-bar .progress {
-    width: 50%;
-    height: 3px;
+.vertical-slider-bar .progress {
+    width: 3px;
+    height: 50%;
     border-radius: 10rem;
     background: var(--progress-bg);
     z-index: 1;
     position: absolute;
 }
 
-.slider-bar .thumb {
+.vertical-slider-bar .thumb {
     width: 10px;
     height: 10px;
     border-radius: 10rem;
     background-color: var(--slider-thumb-bg);
+    background: var(--progress-bg);
     z-index: 2;
     position: absolute;
-    left: 50%;
+    top: 50%;
 }
 </style>

@@ -4,7 +4,49 @@ import EventBus from '../common/EventBus';
 import { Playlist } from './Playlist';
 import { Track } from './Track';
 
-let singleton = null, audioSource = null, analyser = null
+let singleton = null, audioSource = null, analyser = null, eqFilters = null
+const EQ = [
+    {
+        frequency: 31,
+        type: 'lowshelf'
+    },
+    {
+        frequency: 62,
+        type: 'peaking'
+    },
+    {
+        frequency: 125,
+        type: 'peaking'
+    },
+    {
+        frequency: 250,
+        type: 'peaking'
+    },
+    {
+        frequency: 500,
+        type: 'peaking'
+    },
+    {
+        frequency: 1000,
+        type: 'peaking'
+    },
+    {
+        frequency: 2000,
+        type: 'peaking'
+    },
+    {
+        frequency: 4000,
+        type: 'peaking'
+    },
+    {
+        frequency: 8000,
+        type: 'peaking'
+    },
+    {
+        frequency: 16000,
+        type: 'highshelf'
+    }
+]
 
 //追求简洁、组合式API、单一责任
 export class Player {
@@ -31,6 +73,7 @@ export class Player {
             .on('track-stop', () => player.setCurrent(null))
             .on('radio-play', () => player.setCurrent(null))
             .on('queue-empty', () => player.setCurrent(null))
+            .on('track-updateEQ', (values) => player.updateEQ(values))
     }
 
     createSound() {
@@ -174,10 +217,15 @@ export class Player {
             analyser = audioCtx.createAnalyser()
             //analyser.fftSize = 256
             analyser.fftSize = 512
-            //audioNode.crossOrigin = 'anonymous'
+            var distortion = audioCtx.createWaveShaper()
+            var gainNode = audioCtx.createGain()
+            var biquadFilters = this.createBiquadFilters(audioCtx)
+            eqFilters = biquadFilters
             if(!audioSource) audioSource = audioCtx.createMediaElementSource(audioNode)
             audioSource.connect(analyser)
-            analyser.connect(audioCtx.destination)
+            analyser.connect(distortion)
+            this.connectBiquadFilters(biquadFilters, distortion, gainNode)
+            gainNode.connect(audioCtx.destination)
         }
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
@@ -186,8 +234,37 @@ export class Player {
 
     tryUnlockHowlAudios() {
         const audios = Howler._html5AudioPool
+        // Unlock CORS
         audios.forEach(audio => {
             audio.crossOrigin = 'anonymous'
+        })
+    }
+
+    createBiquadFilters(audioCtx) {
+        if(!audioCtx) return []
+        let filters = EQ.map(function(band) {
+            let filter = audioCtx.createBiquadFilter()
+            filter.type = band.type
+            filter.gain.value = 0 // -40 ~ 40
+            filter.Q.value = 1
+            filter.frequency.value = band.frequency
+            return filter
+        })
+        return filters
+    }
+
+    connectBiquadFilters(filters, currentNode, nextNode) {
+        if(!filters || filters.length < 0) return
+        filters.reduce(function (prev, curr) {
+            prev.connect(curr)
+            return curr
+        }, currentNode).connect(nextNode)
+    }
+
+    updateEQ(values) {
+        if(!eqFilters || eqFilters.length < 1) return
+        eqFilters.forEach((filter, index) => {
+            filter.gain.value = values[index]
         })
     }
 

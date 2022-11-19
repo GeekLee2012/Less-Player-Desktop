@@ -368,7 +368,9 @@ const overrideRequest = (details) => {
     const CSRF = randomTextWithinAlphabetNums(11).toUpperCase()
     origin = "https://www.kuwo.cn/"
     referer = origin
-    cookie = "kw_token=" + CSRF
+    cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; " 
+      + "_ga=GA1.2.1036906485.1647595722; " 
+      + "kw_token=" + CSRF
     details.requestHeaders['CSRF'] = CSRF
   } else if(url.includes("kugou")) {
     origin = "https://www.kugou.com/"
