@@ -323,7 +323,10 @@ onMounted (() => {
     })
 
     //按键事件监听
-    window.addEventListener('keydown', e =>  e.preventDefault())
+    window.addEventListener('keydown', e => {
+        //Space键
+        if(e.key == ' ') e.preventDefault()
+    })
     registryDefaultLocalKeys()
 })
 

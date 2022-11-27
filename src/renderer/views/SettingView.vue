@@ -8,7 +8,6 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useIpcRenderer } from '../../common/Utils';
-
 import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
 
@@ -71,9 +70,13 @@ const visitLink = (url) => {
     if(ipcRenderer) ipcRenderer.send('visit-link', url)
 }
 
+//通用设置
+const zoomTickmarks = [ 50, 70, 85, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300 ]
+const fontWeights = [ 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 ]
+
 const updateWinZoom = (e) => {
     setWindowZoom(e.target.value)
-} 
+}
 
 const getWinZoom = () => {
     return common.value.winZoom + "%"
@@ -134,20 +137,10 @@ onActivated(() => {
                         </div>
                         <div>
                             <datalist id="zoom-tickmarks">
-                                <option value="50" label="50"></option>
-                                <option value="70" label="70"></option>
-                                <option value="85" label="85"></option>
-                                <option value="100" label="100"></option>
-                                <option value="120" label="120"></option>
-                                <option value="140" label="140"></option>
-                                <option value="160" label="160"></option>
-                                <option value="180" label="180"></option>
-                                <option value="200" label="200"></option>
-                                <option value="220" label="220"></option>
-                                <option value="240" label="240"></option>
-                                <option value="260" label="260"></option>
-                                <option value="280" label="280"></option>
-                                <option value="300" label="300"></option>
+                                <option v-for="(item,index) in zoomTickmarks"
+                                    :value="item" :label="item" 
+                                    @click="() => setWindowZoom(item)">
+                                </option>
                             </datalist>
                         </div>    
                     </div>
@@ -165,16 +158,8 @@ onActivated(() => {
                                 @focusout="updateFontWeight"
                                 list="fontweight-suggests"/>
                             <datalist id="fontweight-suggests">
-                                <option value="100"></option>
-                                <option value="200"></option>
-                                <option value="300"></option>
-                                <option value="400"></option>
-                                <option value="500"></option>
-                                <option value="600"></option>
-                                <option value="700"></option>
-                                <option value="800"></option>
-                                <option value="900"></option>
-                                <option value="1000"></option>
+                                <option v-for="(item, index) in fontWeights" :value="item">
+                                </option>
                             </datalist>
                         </div>
                     </div>
@@ -642,6 +627,7 @@ onActivated(() => {
 
 #setting-view #zoom-tickmarks option {
     font-size: 13px;
+    cursor: pointer;
 }
 
 #setting-view input[type=range] {

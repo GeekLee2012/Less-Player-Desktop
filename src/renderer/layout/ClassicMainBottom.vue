@@ -105,8 +105,7 @@ watch([ currentTrack, playingViewShow ], checkFavorite)
 .classic-main-bottom {
     flex-direction: column;
     height: var(--main-play-nav-height);
-    -webkit-app-region: drag;
-    /* background: #faf4f6; */
+    -webkit-app-region: none;
 }
 
 .classic-main-bottom .spacing {
