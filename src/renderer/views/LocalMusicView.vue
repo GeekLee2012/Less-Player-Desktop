@@ -54,7 +54,7 @@ onMounted(resetBack2TopBtn)
 </script>
 
 <template>
-    <div id="local-music" ref="localMusicRef" @scroll="onScroll">
+    <div id="local-music-view" ref="localMusicRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" src="/default_cover.png" />
@@ -93,7 +93,7 @@ onMounted(resetBack2TopBtn)
 </template>
 
 <style>
-#local-music {
+#local-music-view {
     display: flex;
     flex-direction: column;
     padding: 28px 33px 10px 33px;
@@ -101,25 +101,25 @@ onMounted(resetBack2TopBtn)
     flex: 1;
 }
 
-#local-music .header {
+#local-music-view .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
 }
 
-#local-music .header .cover {
+#local-music-view .header .cover {
     width: 233px;
     height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }
 
-#local-music .header .right {
+#local-music-view .header .right {
     flex: 1;
     margin-left: 30px;
 }
 
-#local-music .header .title{
+#local-music-view .header .title{
     text-align: left;
     margin-top: 5px;
     margin-bottom: 20px;
@@ -127,7 +127,7 @@ onMounted(resetBack2TopBtn)
     font-weight: bold;
 }
 
-#local-music .header .about {
+#local-music-view .header .about {
     text-align: left;
     margin-bottom: 20px;
     line-height: 23px;
@@ -143,15 +143,15 @@ onMounted(resetBack2TopBtn)
     -webkit-line-clamp: 6;
 }
 
-#local-music .header .action {
+#local-music-view .header .action {
     display: flex;
 }
 
-#local-music .header .spacing {
+#local-music-view .header .spacing {
     margin-left: 20px;
 }
 
-#local-music .list-title {
+#local-music-view .list-title {
     margin-bottom: 15px;
     text-align: left;
     font-size: 16px;
@@ -161,26 +161,26 @@ onMounted(resetBack2TopBtn)
     color: transparent;
 }
 
-#local-music .empty-tip,
-#local-music .loading-tip {
+#local-music-view .empty-tip,
+#local-music-view .loading-tip {
     margin-top: 66px;
     font-size: 18px;
     line-height: 28px;
     color: var(--text-sub-color);
 }
 
-#local-music .songlist {
+#local-music-view .songlist {
     display: flex;
     flex-direction: column;
 }
 
-#local-music .artist span,
-#local-music .album span {
+#local-music-view .artist span,
+#local-music-view .album span {
     cursor: default;
     color: var(--text-color) !important;
 }
 
-#local-music .songlist .title:hover .delete-btn {
+#local-music-view .songlist .title:hover .delete-btn {
     visibility: visible;
 }
 

@@ -141,6 +141,14 @@ export const useSettingStore = defineStore('setting', {
         theme: {
             index: 0,
         },
+        layout: {
+            index: 0,
+        },
+        common: {
+            winZoom: 100,
+            fontFamily: '',
+            fontWeight: 400,
+        },
         /* 播放歌曲 */
         track: {
             //音质级别：NQ(普通)、HQ（高音质）、SQ（超高、无损）
@@ -244,6 +252,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isStoreLocalMusicBeforeQuit(state) {
             return this.cache.storeLocalMusic
+        },
+        getWindowZoom() {
+            return this.common.winZoom
         }
     },
     actions: {
@@ -251,6 +262,10 @@ export const useSettingStore = defineStore('setting', {
             this.theme.index = index
             //const themeId = THEMES[index].id
             //EventBus.emit("switchTheme", themeId)
+        },
+        setLayoutIndex(index) {
+            this.layout.index = index
+            EventBus.emit("app-layout")
         },
         getCurrentThemeId() {
             let index = this.theme.index
@@ -266,6 +281,10 @@ export const useSettingStore = defineStore('setting', {
             let index = this.theme.index
             index = index > 0 ? index : 0
             return THEMES[index].hlColor
+        },
+        setWindowZoom(value) {
+            this.common.winZoom = value
+            this.setupWindowZoom()
         },
         setTrackQualityIndex(index) {
             this.track.quality.index = index
@@ -306,6 +325,11 @@ export const useSettingStore = defineStore('setting', {
         resetKeys() {
             
         },
+        setupWindowZoom() {
+            const winZoom = this.common.winZoom
+            if(ipcRenderer) ipcRenderer.send("app-zoom", winZoom)
+            EventBus.emit("app-zoom", winZoom)
+        }, 
         setupAppSuspension() {
             if(ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
         },
@@ -315,6 +339,13 @@ export const useSettingStore = defineStore('setting', {
         setupGlobalShortcut() {
             if(ipcRenderer) ipcRenderer.send("app-globalShortcut", this.keys.global)
         },
+        setupFontFamily() {
+            EventBus.emit('setting-fontFamily', this.common.fontFamily)
+        },
+        setupFontWeight() {
+            const weight = this.common.fontWeight || 400
+            EventBus.emit('setting-fontWeight', weight)
+        },
         updateBlackHole(value) {
             this.blackHole = value
         },
@@ -323,7 +354,18 @@ export const useSettingStore = defineStore('setting', {
         },
         allQualities() {
             return QUALITIES
-        }
+        },
+        setFontFamily(value) {
+            const fontFamily = (value || '').trim()
+            this.common.fontFamily = fontFamily
+            this.setupFontFamily()
+        },
+        setFontWeight(value) {
+            const weight = parseInt(value || 400)
+            if(weight < 100 || weight > 1000) return
+            this.common.fontWeight = weight
+            this.setupFontWeight()
+        },
     },
     persist: {
         enabled: true,
@@ -331,7 +373,8 @@ export const useSettingStore = defineStore('setting', {
             {
                 //key: 'setting',
                 storage: localStorage,
-                paths: [ 'theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys' ]
+                paths: [ 'theme', 'layout', 'common', 'track', 'cache', 
+                    'tray', 'navigation', 'dialog', 'keys' ]
             },
         ],
     },

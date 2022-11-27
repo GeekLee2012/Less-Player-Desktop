@@ -84,7 +84,7 @@ onMounted(() => loadCustomPlaylist())
 </script>
 
 <template>
-    <div id="custom-playlist-edit">
+    <div id="custom-playlist-edit-view">
         <div class="header">
             <span class="title" v-show="!id">创建歌单</span>
             <span class="title" v-show="id">编辑歌单</span>
@@ -123,7 +123,7 @@ onMounted(() => loadCustomPlaylist())
 </template>
 
 <style>
-#custom-playlist-edit {
+#custom-playlist-edit-view {
     display: flex;
     flex-direction: column;
     padding: 25px 33px 15px 33px;
@@ -131,27 +131,27 @@ onMounted(() => loadCustomPlaylist())
     overflow: auto;
 }
 
-#custom-playlist-edit .header {
+#custom-playlist-edit-view .header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 20px;
 }
 
-#custom-playlist-edit .header .title {
+#custom-playlist-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
     font-size: 30px;
     font-weight: bold;
 }
 
-#custom-playlist-edit .center {
+#custom-playlist-edit-view .center {
     display: flex;
     flex-direction: row;
     flex: 1;
 }
 
-#custom-playlist-edit .center .cover {
+#custom-playlist-edit-view .center .cover {
     width: 175px;
     height: 175px;
     border-radius: 6px;
@@ -159,7 +159,7 @@ onMounted(() => loadCustomPlaylist())
     box-shadow: 0px 0px 1px #161616;
 }
 
-#custom-playlist-edit .center .cover-eidt-btn {
+#custom-playlist-edit-view .center .cover-eidt-btn {
     background: var(--btn-bg);
     color: var(--svg-text-color);
     padding: 5px;
@@ -168,31 +168,31 @@ onMounted(() => loadCustomPlaylist())
 }
 
 
-#custom-playlist-edit .center .right {
+#custom-playlist-edit-view .center .right {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-left: 20px;
 }
 
-#custom-playlist-edit .center .form-row {
+#custom-playlist-edit-view .center .form-row {
     margin-bottom: 18px;
 }
 
-#custom-playlist-edit .center .form-row div {
+#custom-playlist-edit-view .center .form-row div {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#custom-playlist-edit .center .form-row span {
+#custom-playlist-edit-view .center .form-row span {
     font-size: 16px;
     color: var(--text-color);
     margin-bottom: 8px;
 }
 
-#custom-playlist-edit .center .form-row input,
-#custom-playlist-edit .center .form-row textarea {
+#custom-playlist-edit-view .center .form-row input,
+#custom-playlist-edit-view .center .form-row textarea {
     flex: 1;
     border: 1px solid var(--input-border-color);
     outline: none;
@@ -203,36 +203,36 @@ onMounted(() => loadCustomPlaylist())
     font-size: 15px;
 }
 
-#custom-playlist-edit .center .form-row input {
+#custom-playlist-edit-view .center .form-row input {
     height: 25px;
 }
 
-#custom-playlist-edit .center .form-row textarea {
+#custom-playlist-edit-view .center .form-row textarea {
     height: 300px;
     padding: 8px;
 }
 
-#custom-playlist-edit .center .action {
+#custom-playlist-edit-view .center .action {
     display: flex;
     flex-direction: row;
 }
 
-#custom-playlist-edit .spacing {
+#custom-playlist-edit-view .spacing {
     margin-left: 20px;
 }
 
-#custom-playlist-edit .required {
+#custom-playlist-edit-view .required {
     color: var(--hl-color) !important;
     font-weight: bold;
     font-size: 20px;
 }
 
-#custom-playlist-edit .invalid {
+#custom-playlist-edit-view .invalid {
     border-color: var(--error-color) !important;
     border-width: 3px;
 }
 
-#custom-playlist-edit ::-webkit-input-placeholder {
+#custom-playlist-edit-view ::-webkit-input-placeholder {
     color: var(--input-placeholder-color);
 }
 </style>

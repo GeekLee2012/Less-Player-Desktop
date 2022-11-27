@@ -362,7 +362,7 @@ watch(artistId, reloadAll)
 </script>
 
 <template>
-    <div id="artist-detail" ref="artistDetailRef" @scroll="onScroll">
+    <div id="artist-detail-view" ref="artistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="artistCover" />
@@ -415,7 +415,7 @@ watch(artistId, reloadAll)
 </template>
 
 <style scoped>
-#artist-detail {
+#artist-detail-view {
     display: flex;
     flex-direction: column;
     padding: 25px 33px 15px 33px;
@@ -423,18 +423,18 @@ watch(artistId, reloadAll)
     overflow: auto;
 }
 
-#artist-detail .header {
+#artist-detail-view .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
 }
 
-#artist-detail .header .right {
+#artist-detail-view .header .right {
     flex: 1;
     margin-left: 30px;
 }
 
-#artist-detail .header .title{
+#artist-detail-view .header .title{
     text-align: left;
     margin-top: 5px;
     margin-bottom: 20px;
@@ -453,27 +453,27 @@ watch(artistId, reloadAll)
     -webkit-line-clamp: 1;
 }
 
-#artist-detail .header .alias{
+#artist-detail-view .header .alias{
     display: none;
 }
 
-#artist-detail .header .cover {
+#artist-detail-view .header .cover {
     width: 233px;
     height: 233px;
     border-radius: 10rem;
     box-shadow: 0px 0px 1px #161616;
 }
 
-#artist-detail .action {
+#artist-detail-view .action {
     display: flex;
     flex-direction: row;
 }
 
-#artist-detail .spacing {
+#artist-detail-view .spacing {
     margin-right: 20px;
 }
 
-#artist-detail .tab-nav {
+#artist-detail-view .tab-nav {
     position: relative;
     display: flex;
     height: 30px;
@@ -481,7 +481,7 @@ watch(artistId, reloadAll)
     border-bottom: 1px solid var(--border-color);
 }
 
-#artist-detail .tab {
+#artist-detail-view .tab {
     font-size: var(--tab-title-text-size);
     padding-left: 6px;
     padding-right: 6px;
@@ -490,7 +490,7 @@ watch(artistId, reloadAll)
     cursor: pointer;
 }
 
-#artist-detail .tab-tip {
+#artist-detail-view .tab-tip {
     position: absolute;
     right: 10px;
     font-size: 16px;
@@ -500,12 +500,12 @@ watch(artistId, reloadAll)
     color: transparent;
 }
 
-#artist-detail .tab-nav .active {
+#artist-detail-view .tab-nav .active {
     border-color: #28c83f;
     border-color: var(--hl-color);
 }
 
-#artist-detail .songlist {
+#artist-detail-view .songlist {
     display: flex;
     flex-direction: column;
 }

@@ -17,4 +17,9 @@ img {
   background-size: cover;
   object-fit: cover;
 }
+
+input {
+  outline: 0;
+  padding: 0px;
+}
 </style>

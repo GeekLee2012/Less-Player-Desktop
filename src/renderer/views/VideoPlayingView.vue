@@ -1,14 +1,17 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { useSettingStore } from '../store/settingStore';
 import EventBus from '../../common/EventBus';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUseCustomTrafficLight } from '../../common/Utils';
+import { storeToRefs } from 'pinia';
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { hideVideoPlayingView, minimize } = useAppCommonStore()
+const { getWindowZoom } = storeToRefs(useSettingStore())
 
 const initVideoPlayer = () => {
     EventBus.emit('video-init', document.querySelector('.video-holder'))
@@ -19,7 +22,24 @@ const quitVideo = () => {
     hideVideoPlayingView()
 }
 
-onMounted(() => initVideoPlayer())
+const adjustCollapseBtnPos = () => {
+    const el = document.querySelector('.video-playing-view .collapse-btn')
+    if(!el) return
+    const zoom = Number(getWindowZoom.value)
+    const orginMarginTop = 15, orginLeft = 80, scale = 100 / zoom
+    let marginTop = orginMarginTop * scale
+    let left = orginLeft * scale
+    el.style.marginTop = marginTop + "px"
+    el.style.left = left + "px"
+}
+
+EventBus.on("app-zoom", adjustCollapseBtnPos)
+EventBus.on("app-route", quitVideo)
+
+onMounted(() => {
+    adjustCollapseBtnPos()
+    initVideoPlayer()
+})
 </script>
 
 <template>

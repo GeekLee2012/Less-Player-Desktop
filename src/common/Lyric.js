@@ -13,11 +13,11 @@ const TIME_LINE_REGEX = /^\[\d{2}:\d{2}(:\d{2})?(\.\d{2,3})?].*/
 
 export class Lyric {
     constructor(title, artist, album, by, offset) {
-        this.title = title
+        this.title = title || ''
         this.artist = artist
         this.album = album
-        this.by = by
-        this.offset = offset
+        this.by = by || ''
+        this.offset = offset || 0
         this.data = new Map()
     }
 
@@ -44,6 +44,7 @@ export class Lyric {
             lines.forEach(line => {
                 line = line.trim()
                 if(line.length < 1) return 
+                //console.log(line)
                 if(!line.startsWith(TAG_BEGIN) || !line.includes(TAG_END)) return
                 if(Lyric.__isTimeDataLine(line)) {
                     Lyric.__parseTimeData(lyric, line)
@@ -81,8 +82,8 @@ export class Lyric {
         let name = tokens[0]
         let value = tokens[1]
         if(!name || !value) return
-        name = name.trim().toLowerCase()
-        value = value.trim()
+        name = name.toString().trim().toLowerCase()
+        value = value.toString().trim()
         if(value.len < 1) return
         if(TITLE_TAG_NAME == name) {
             lyric.title = value

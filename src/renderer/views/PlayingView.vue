@@ -8,6 +8,7 @@ import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { useSettingStore } from '../store/settingStore';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import { Playlist } from '../../common/Playlist';
 import { useAudioEffectStore } from '../store/audioEffectStore';
@@ -22,8 +23,9 @@ const { hidePlayingView, minimize,
 const { currentTrack, mmssCurrentTime, 
     progress, playingIndex, volume } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useAudioEffectStore())
+const { getWindowZoom } = storeToRefs(useSettingStore())
 const progressBarRef = ref(null)
-const volumeBar = ref(null)
+const volumeBarRef = ref(null)
 
 const seekTrack = (percent) => {
     EventBus.emit('track-seek', percent)
@@ -66,19 +68,31 @@ const checkFavorite = () => {
 
 const onUserMouseWheel = (e) => EventBus.emit('lyric-userMouseWheel', e)
 
-watch(progress, (nv, ov) => {
-    if(progressBarRef) progressBarRef.value.updateProgress(nv)
+const adjustCollapseBtnPos = () => {
+    const el = document.querySelector('.playing-view .collapse-btn')
+    if(!el) return
+    const zoom = Number(getWindowZoom.value)
+    const orginMarginTop = 15, orginLeft = 80, scale = 100 / zoom
+    let marginTop = orginMarginTop * scale
+    let left = orginLeft * scale
+    el.style.marginTop = marginTop + "px"
+    el.style.left = left + "px"
+}
+
+onMounted(() => {
+    adjustCollapseBtnPos()
+    EventBus.emit('playingView-changed')
+    if(progressBarRef) progressBarRef.value.updateProgress(progress.value)
+    if(volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 
 EventBus.on("userProfile-reset", checkFavorite)
 EventBus.on("refreshFavorite", checkFavorite)
+EventBus.on("app-zoom", adjustCollapseBtnPos)
 
-onMounted(() => {
-    EventBus.emit('playingView-changed')
-    if(progressBarRef) progressBarRef.value.updateProgress(progress.value)
-    if(volumeBar) volumeBar.value.setVolume(volume.value)
+watch(progress, (nv, ov) => {
+    if(progressBarRef) progressBarRef.value.updateProgress(nv)
 })
-
 watch([currentTrack, playingViewShow ], checkFavorite)
 </script>
 
@@ -121,7 +135,7 @@ watch([currentTrack, playingViewShow ], checkFavorite)
                     <PlayControl></PlayControl>
                 </div>
                 <div>
-                    <VolumeBar ref="volumeBar"></VolumeBar>
+                    <VolumeBar ref="volumeBarRef"></VolumeBar>
                 </div>
                 <div class="btm-right">
                     <div class="theme" @click="switchPlayingViewTheme">

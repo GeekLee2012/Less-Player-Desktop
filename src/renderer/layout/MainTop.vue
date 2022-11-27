@@ -22,7 +22,7 @@ watch(progress, (nv, ov) => {
 </script>
 
 <template>
-    <div id="main-top">
+    <div class="main-top">
         <div id="play-nav">
             <PlayMeta id="play-meta"></PlayMeta>
             <div class="play-ctl-wrap">
@@ -44,22 +44,22 @@ watch(progress, (nv, ov) => {
 </template>
 
 <style scoped>
-#main-top, #play-nav {
+.main-top, #play-nav {
     display: flex;
 }
 
-#main-top {
+.main-top {
     flex-direction: column;
-    height: var(--main-top-height);
+    height: var(--main-play-nav-height);
     -webkit-app-region: drag;
     /* background: #faf4f6; */
 }
 
-#play-nav #play-meta {
+.main-top #play-nav #play-meta {
     width: 34.33%;
 }
 
-#play-nav .play-ctl-wrap {
+.main-top #play-nav .play-ctl-wrap {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -68,7 +68,7 @@ watch(progress, (nv, ov) => {
     margin: 0px 15px;
 }
 
-#play-nav .top-right {
+.main-top #play-nav .top-right {
     width: 39.33%;
     display: flex;
     flex-direction: row;
@@ -76,7 +76,7 @@ watch(progress, (nv, ov) => {
     justify-content: center;
 }
 
-#userhome-btn {
+.main-top #userhome-btn {
     cursor: pointer;
     -webkit-app-region: none;
     margin-left: 16px;
@@ -84,25 +84,25 @@ watch(progress, (nv, ov) => {
     background-color: transparent;
 }
 
-#userhome-btn svg {
+.main-top #userhome-btn svg {
     margin-top: 4px;
     fill: var(--svg-color);
 }
 
-#setting-btn {
+.main-top #setting-btn {
     cursor: pointer;
     -webkit-app-region: none;
     /*margin-left: 15px;*/
     margin-right: 12px;
 }
 
-#setting-btn svg {
+.main-top #setting-btn svg {
     margin-top: 4px;
     fill: var(--svg-color);
 }
 
-#userhome-btn svg:hover,
-#setting-btn svg:hover {
+.main-top #userhome-btn svg:hover,
+.main-top #setting-btn svg:hover {
     fill: var(--hl-color);
     fill: var(--svg-hover-color);
 }

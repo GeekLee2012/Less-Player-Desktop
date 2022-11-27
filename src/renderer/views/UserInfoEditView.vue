@@ -60,14 +60,14 @@ const updateCover = async () => {
 </script>
 
 <template>
-    <div id="user-info-edit">
+    <div id="user-info-edit-view">
         <div class="header">
             <span class="title">编辑用户信息</span>
         </div>
         <div class="center">
             <div>
                 <img class="cover" v-lazy="user.cover" ref="coverRef"/>
-                <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
+                <div class="cover-eidt-btn" @click="updateCover">编辑头像</div>
             </div>
             <div class="right">
                 <div class="form-row">
@@ -95,7 +95,7 @@ const updateCover = async () => {
 </template>
 
 <style>
-#user-info-edit {
+#user-info-edit-view {
     display: flex;
     flex-direction: column;
     padding: 25px 33px 15px 33px;
@@ -103,27 +103,27 @@ const updateCover = async () => {
     overflow: auto;
 }
 
-#user-info-edit .header {
+#user-info-edit-view .header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 20px;
 }
 
-#user-info-edit .header .title {
+#user-info-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
     font-size: 30px;
     font-weight: bold;
 }
 
-#user-info-edit .center {
+#user-info-edit-view .center {
     display: flex;
     flex-direction: row;
     flex: 1;
 }
 
-#user-info-edit .center .cover {
+#user-info-edit-view .center .cover {
     width: 175px;
     height: 175px;
     border-radius: 6px;
@@ -131,7 +131,7 @@ const updateCover = async () => {
     box-shadow: 0px 0px 1px #161616;
 }
 
-#user-info-edit .center .cover-eidt-btn {
+#user-info-edit-view .center .cover-eidt-btn {
     background: var(--btn-bg);
     color: var(--svg-text-color);
     padding: 5px;
@@ -139,31 +139,31 @@ const updateCover = async () => {
     cursor: pointer;
 }
 
-#user-info-edit .center .right {
+#user-info-edit-view .center .right {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-left: 20px;
 }
 
-#user-info-edit .center .form-row {
+#user-info-edit-view .center .form-row {
     margin-bottom: 18px;
 }
 
-#user-info-edit .center .form-row div {
+#user-info-edit-view .center .form-row div {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#user-info-edit .center .form-row span {
+#user-info-edit-view .center .form-row span {
     font-size: 16px;
     color: var(--text-color);
     margin-bottom: 8px;
 }
 
-#user-info-edit .center .form-row input,
-#user-info-edit .center .form-row textarea {
+#user-info-edit-view .center .form-row input,
+#user-info-edit-view .center .form-row textarea {
     flex: 1;
     border: 1px solid var(--input-border-color);
     outline: none;
@@ -174,35 +174,35 @@ const updateCover = async () => {
     font-size: 15px;
 }
 
-#user-info-edit .center .form-row input {
+#user-info-edit-view .center .form-row input {
     height: 25px;
 }
 
-#user-info-edit .center .form-row textarea {
+#user-info-edit-view .center .form-row textarea {
     height: 300px;
     padding: 8px;
 }
 
-#user-info-edit .center .action {
+#user-info-edit-view .center .action {
     display: flex;
     flex-direction: row;
 }
 
-#user-info-edit .spacing {
+#user-info-edit-view .spacing {
     margin-left: 20px;
 }
 
-#user-info-edit .required {
+#user-info-edit-view .required {
     color: var(--hl-color) !important;
     font-weight: bold;
     font-size: 20px;
 }
 
-#user-info-edit ::-webkit-input-placeholder {
+#user-info-edit-view ::-webkit-input-placeholder {
     color: var(--input-placeholder-color);
 }
 
-#user-info-edit .invalid {
+#user-info-edit-view .invalid {
     border-color: var(--error-color) !important;
     border-width: 3px;
 }

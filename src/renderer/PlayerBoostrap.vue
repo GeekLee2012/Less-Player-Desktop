@@ -14,7 +14,7 @@ import { Playlist } from '../common/Playlist';
 
 const ipcRenderer = useIpcRenderer()
 
-const { queueTracksSize, playing } = storeToRefs(usePlayStore())
+const { currentTrack, queueTracksSize, playing } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack, 
     setAutoPlaying, playPrevTrack, 
     togglePlay, switchPlayMode,
@@ -258,7 +258,10 @@ const registryIpcRenderderListeners = () => {
 }
 
 registryIpcRenderderListeners()
-onMounted(initRadioPlayer)
+onMounted(() => {
+    EventBus.emit("track-restoreInit", currentTrack.value)
+    initRadioPlayer()
+})
 </script>
 
 <template>

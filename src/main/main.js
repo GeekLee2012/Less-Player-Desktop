@@ -9,6 +9,7 @@ const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX,
   randomTextWithinAlphabetNums } = require('./common')
 
 let mainWin = null, powerSaveBlockerId = -1, appTray = null
+const appWidth = 1080, appHeight = 720
 
 /* 自定义函数 */
 const startup = () => {
@@ -86,10 +87,15 @@ const registryGlobalListeners = () => {
     app.quit()
   }).on('app-min', ()=> {
     if(mainWin.isFullScreen()) mainWin.setFullScreen(false)
-    if(mainWin.isNormal()) mainWin.minimize()
+    if(mainWin.isMaximized() || mainWin.isNormal()) mainWin.minimize()
   }).on('app-max', ()=> {
-    const isFullScreen = !mainWin.isFullScreen()
-    mainWin.setFullScreen(isFullScreen)
+    let isFullScreen = false
+    if(isWinOS){
+      isFullScreen = toggleWinOSFullScreen()
+    } else {
+      isFullScreen = !mainWin.isFullScreen()
+      mainWin.setFullScreen(isFullScreen)
+    }
     sendToRenderer('app-max', isFullScreen)
   }).on('app-suspension', (e, data)=> {
     if(data === true) {
@@ -107,6 +113,8 @@ const registryGlobalListeners = () => {
       appTray.destroy()
       appTray = null
     }
+  }).on('app-zoom', (e, value)=> {
+    setAppWindowZoom(value)
   }).on('show-winBtn', ()=> {
     setWindowButtonVisibility(true)
   }).on('hide-winBtn', ()=> {
@@ -204,10 +212,10 @@ const registryGlobalListeners = () => {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1080,
-    height: 720,
-    minWidth: 1080,
-    minHeight: 720,
+    width: appWidth,
+    height: appHeight,
+    minWidth: appWidth,
+    minHeight: appHeight,
     titleBarStyle: 'hidden',
     trafficLightPosition: { x: 15, y: 15 },
     transparent: true,
@@ -345,6 +353,30 @@ const setWindowButtonVisibility = (visible) => {
     mainWin.setWindowButtonVisibility(visible)
   } catch (error) {
     console.log(error)
+  }
+}
+
+const toggleWinOSFullScreen = () => {
+  if(!isWinOS) return null
+  const isMax = mainWin.isMaximized()
+  if(isMax) {
+    mainWin.unmaximize()
+  } else {
+    mainWin.maximize()
+  }
+  return !isMax
+}
+
+const setAppWindowZoom = (value) => {
+  const zoom = Number(value || 100)
+  const zoomFactor = parseFloat(zoom / 100)
+  const width = parseInt(appWidth * zoomFactor)
+  const height = parseInt(appHeight * zoomFactor)
+  mainWin.webContents.setZoomFactor(zoomFactor)
+  mainWin.setMinimumSize(width, height)
+  if(mainWin.isNormal()) {
+    mainWin.setSize(width, height)
+    mainWin.center()
   }
 }
 

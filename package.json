@@ -1,7 +1,7 @@
 {
   "name": "less-player",
   "private": true,
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Less Player, Less is More ! All for One, One for All ~",
   "author": {
     "name": "RIVE2012"
@@ -65,6 +65,9 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": true,
       "deleteAppDataOnUninstall": true
+    },
+    "linux": {
+      "icon": "dist/icon@2x.png"
     }
   }
 }

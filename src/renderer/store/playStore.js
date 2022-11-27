@@ -33,6 +33,7 @@ export const usePlayStore = defineStore('play', {
         isCurrentTrack(state) {
             return (track) => {
                 return state.currentTrack.id == track.id
+                    && state.currentTrack.platform == track.platform
             }
         },
         track(state) {
@@ -159,6 +160,12 @@ export const usePlayStore = defineStore('play', {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
             }
+            /* 交给外部逻辑来判断
+            if(this.playingIndex == index) {
+                this.togglePlay()
+                return 
+            }
+            */
             this.playingIndex = index
             //FM广播
             if(Playlist.isFMRadioType(track)) {

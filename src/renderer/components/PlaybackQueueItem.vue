@@ -6,7 +6,7 @@ import { onMounted, ref } from 'vue';
 import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 
-const { playTrack, removeTrack, isCurrentTrack } = usePlayStore()
+const { playTrack, removeTrack, isCurrentTrack, togglePlay } = usePlayStore()
 const { showToast } = useAppCommonStore()
 
 const props = defineProps({
@@ -16,7 +16,10 @@ const props = defineProps({
 
 const playItem = () => {
     const track = props.data
-    if(isCurrentTrack(track)) return 
+    if(isCurrentTrack(track)) {
+        togglePlay()
+        return
+    }
     playTrack(track)
 }
 

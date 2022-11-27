@@ -339,7 +339,7 @@ watch(sourcesCategories, () => {
 </script>
 
 <template>
-    <div id="data-backup-view">
+    <div id="data-restore-view">
         <div class="header">
             <div class="title">数据还原
                 <span class="subtitle" v-html="backupFile"></span>
@@ -389,7 +389,7 @@ watch(sourcesCategories, () => {
 </template>
 
 <style>
-#data-backup-view {
+#data-restore-view {
     padding: 25px 0px 15px 0px;
     flex: 1;
     display: flex;
@@ -397,15 +397,15 @@ watch(sourcesCategories, () => {
     overflow: hidden;
 }
 
-#data-backup-view .spacing {
+#data-restore-view .spacing {
     margin-right: 20px;
 }
 
-#data-backup-view .header {
+#data-restore-view .header {
     margin: 0px 33px 5px 33px;
 }
 
-#data-backup-view .header .title {
+#data-restore-view .header .title {
     text-align: left;
     font-size: 30px;
     font-weight: bold;
@@ -415,7 +415,7 @@ watch(sourcesCategories, () => {
     position: relative;
 }
 
-#data-backup-view .header .subtitle {
+#data-restore-view .header .subtitle {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -435,13 +435,13 @@ watch(sourcesCategories, () => {
     -webkit-line-clamp: 1;
 }
 
-#data-backup-view .action {
+#data-restore-view .action {
     display: flex;
     flex-direction: row;
     position: relative;
 }
 
-#data-backup-view .action .checkallbox {
+#data-restore-view .action .checkallbox {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -449,35 +449,35 @@ watch(sourcesCategories, () => {
     margin-right: 25px;
 }
 
-#data-backup-view .action .checkallbox svg {
+#data-restore-view .action .checkallbox svg {
     fill: var(--svg-color);
     cursor: pointer; 
 }
 
-#data-backup-view .action .checkallbox .checked-svg {
+#data-restore-view .action .checkallbox .checked-svg {
     fill: var(--hl-color); 
 }
 
-#data-backup-view .action .checkallbox > span {
+#data-restore-view .action .checkallbox > span {
     text-align: left;
     margin: 0px 20px;
     width: 65px;
     cursor: pointer;
 }
 
-#data-backup-view .action .to-right {
+#data-restore-view .action .to-right {
     position: absolute;
     right: 33px;
 }
 
-#data-backup-view  .center {
+#data-restore-view  .center {
     display: flex;
     flex-direction: column;
     padding: 0px 33px 0px 33px;
     overflow: auto;
 }
 
-#data-backup-view  .center .length {
+#data-restore-view  .center .length {
     vertical-align: middle;
     margin-left: 3px;
 }

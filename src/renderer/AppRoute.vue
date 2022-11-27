@@ -22,7 +22,7 @@ const { setExploreMode, setArtistExploreMode,
     setRadioExploreMode, setUserHomeExploreMode,
     hideAllCtxMenus, hidePlayingView, 
     updateCommonCtxItem, hidePlaybackQueueView,
-    setExitToHomeBtnVisible } = useAppCommonStore()
+    hideVideoPlayingView, setExitToHomeBtnVisible } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 
 
@@ -32,7 +32,10 @@ const resolveRoute = (route) => {
     if(typeof(route) == 'object') return route
     return { toPath: route.toString() }
 }
-const commonBeforeRoute = { beforeRoute: hidePlaybackQueueView }
+const commonBeforeRoute = { beforeRoute: (toPath) => {
+    hidePlaybackQueueView()
+    EventBus.emit('app-route', toPath)
+} }
 
 
 router.beforeResolve((to, from) => {
@@ -112,14 +115,14 @@ const visitRoute = (route) => {
         }
 
         hidePlayingView()
-        if(beforeRoute) beforeRoute()
+        if(beforeRoute) beforeRoute(toPath)
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
         if(isSame) {
             //if(reject) reject()
             return 
         }
-        if(onRouteReady) onRouteReady()
+        if(onRouteReady) onRouteReady(toPath)
         router.push(toPath)
         if(resolve) resolve()
     })

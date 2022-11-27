@@ -206,7 +206,7 @@ watch(albumId, reloadAll)
 </script>
 
 <template>
-    <div id="album-detail" ref="detailRef" @scroll="onScroll">
+    <div id="album-detail-view" ref="detailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="albumCover" />
@@ -265,7 +265,7 @@ watch(albumId, reloadAll)
 </template>
 
 <style scoped>
-#album-detail {
+#album-detail-view {
     display: flex;
     flex-direction: column;
     padding: 25px 33px 15px 33px;
@@ -273,18 +273,18 @@ watch(albumId, reloadAll)
     overflow: auto;
 }
 
-#album-detail .header {
+#album-detail-view .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
 }
 
-#album-detail .header .right {
+#album-detail-view .header .right {
     flex: 1;
     margin-left: 30px;
 }
 
-#album-detail .header .title {
+#album-detail-view .header .title {
     text-align: left;
     margin-top: 5px;
     font-size: 30px;
@@ -300,40 +300,40 @@ watch(albumId, reloadAll)
     -webkit-line-clamp: 2;
 }
 
-#album-detail .header .cover {
+#album-detail-view .header .cover {
     width: 233px;
     height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }
 
-#album-detail .header .info {
+#album-detail-view .header .info {
     margin-top: 15px;
     margin-bottom: 20px;
     font-size: 16px;
     text-align: left;
 }
 
-#album-detail .header .info-row {
+#album-detail-view .header .info-row {
     margin-top: 10px;
 }
 
-#album-detail .header .info-row span {
+#album-detail-view .header .info-row span {
     color: #ababab;
     color: var(--text-sub-color);
 }
 
-#album-detail .header .info-row b {
+#album-detail-view .header .info-row b {
     margin-right: 8px;
 }
 
-#album-detail .header .info-row .col1 {
+#album-detail-view .header .info-row .col1 {
     width: 200px;
     width: 233px;
     display: inline-block;
 }
 
-#album-detail .header .info-row .col2 {
+#album-detail-view .header .info-row .col2 {
     overflow: hidden;
     text-overflow: ellipsis;
     -webkit-line-clamp: 1;
@@ -341,16 +341,16 @@ watch(albumId, reloadAll)
     text-align: left;
 }
 
-#album-detail .action {
+#album-detail-view .action {
     display: flex;
     flex-direction: row;
 }
 
-#album-detail .spacing {
+#album-detail-view .spacing {
     margin-right: 20px;
 }
 
-#album-detail .tab-nav {
+#album-detail-view .tab-nav {
     position: relative;
     display: flex;
     height: 30px;
@@ -358,7 +358,7 @@ watch(albumId, reloadAll)
     border-bottom: 1px solid var(--border-color);
 }
 
-#album-detail .tab {
+#album-detail-view .tab {
     font-size: var(--tab-title-text-size);
     padding-left: 6px;
     padding-right: 6px;
@@ -367,12 +367,12 @@ watch(albumId, reloadAll)
     cursor: pointer;
 }
 
-#album-detail .tab-nav .active {
+#album-detail-view .tab-nav .active {
     border-color: #28c83f;
     border-color: var(--hl-color);
 }
 
-#album-detail .tab-tip {
+#album-detail-view .tab-tip {
     position: absolute;
     right: 10px;
     font-size: 16px;
@@ -381,12 +381,12 @@ watch(albumId, reloadAll)
     color: transparent;
 }
 
-#album-detail  .songlist {
+#album-detail-view  .songlist {
     display: flex;
     flex-direction: column;
 }
 
-#album-detail .text-ctl p {
+#album-detail-view .text-ctl p {
     margin-top: 15px;
     margin-bottom: 5px;
 }

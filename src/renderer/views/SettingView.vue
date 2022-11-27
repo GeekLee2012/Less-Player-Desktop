@@ -10,14 +10,19 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useIpcRenderer } from '../../common/Utils';
 
 import { useUserProfileStore } from '../store/userProfileStore';
+import EventBus from '../../common/EventBus';
 
 
 const { visitDataBackup, visitDataRestore, } = inject('appRoute')
 
 const ipcRenderer = useIpcRenderer()
 
-const { theme, track, keys, tray, navigation, dialog ,cache, other } = storeToRefs(useSettingStore())
+const { theme, layout, common, track, keys, tray, navigation, dialog ,cache, other } = storeToRefs(useSettingStore())
 const { setThemeIndex, 
+        setLayoutIndex,
+        setWindowZoom,
+        setFontFamily,
+        setFontWeight,
         setTrackQualityIndex, 
         toggleVipTransfer,
         toggleCategoryBarRandom,
@@ -66,6 +71,22 @@ const visitLink = (url) => {
     if(ipcRenderer) ipcRenderer.send('visit-link', url)
 }
 
+const updateWinZoom = (e) => {
+    setWindowZoom(e.target.value)
+} 
+
+const getWinZoom = () => {
+    return common.value.winZoom + "%"
+}
+
+const updateFontFamily = (e) => {
+    setFontFamily(e.target.value)
+}
+
+const updateFontWeight = (e) => {
+    setFontWeight(e.target.value)
+}
+
 onActivated(() => {
     updateBlackHole(Math.random() * 100000000)
 })
@@ -86,6 +107,76 @@ onActivated(() => {
                     </div>
                     <div class="last more" @click="visitMoreTheme" v-show="false">
                         <span>...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="layout row">
+                <span class="cate-name">布局</span>
+                <div class="content">
+                    <div class="last">
+                        <span v-for="(item, index) in [ '默认', '经典主流' ]"
+                            class="layout-item"
+                            :class="{ active: index == layout.index }"
+                            @click="setLayoutIndex(index)" >
+                            {{ item }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="common row">
+                <span class="cate-name">通用</span>
+                <div class="content">
+                    <div class="window-zoom">
+                        <div class="zoom-title">窗口缩放：<span v-html="getWinZoom()"></span></div>
+                        <div>
+                            <input type="range" min="50" max="300" :value="common.winZoom" step="5" 
+                                @input="updateWinZoom" list="zoom-tickmarks"/>
+                        </div>
+                        <div>
+                            <datalist id="zoom-tickmarks">
+                                <option value="50" label="50"></option>
+                                <option value="70" label="70"></option>
+                                <option value="85" label="85"></option>
+                                <option value="100" label="100"></option>
+                                <option value="120" label="120"></option>
+                                <option value="140" label="140"></option>
+                                <option value="160" label="160"></option>
+                                <option value="180" label="180"></option>
+                                <option value="200" label="200"></option>
+                                <option value="220" label="220"></option>
+                                <option value="240" label="240"></option>
+                                <option value="260" label="260"></option>
+                                <option value="280" label="280"></option>
+                                <option value="300" label="300"></option>
+                            </datalist>
+                        </div>    
+                    </div>
+                    <div class="font last" @keydown.stop="">
+                        <div>
+                            <span>字体: </span>
+                            <input type="text" :value="common.fontFamily" placeholder="格式：请参考CSS" 
+                                @keydown.enter="updateFontFamily" @focusout="updateFontFamily"/>
+                        </div>
+                        <div class="spacing">
+                            <span>字重:</span>
+                            <input type="number" :value="common.fontWeight" placeholder="范围100 - 1000，默认400" 
+                                min="100" max="1000" step="10"
+                                @input="updateFontWeight" 
+                                @focusout="updateFontWeight"
+                                list="fontweight-suggests"/>
+                            <datalist id="fontweight-suggests">
+                                <option value="100"></option>
+                                <option value="200"></option>
+                                <option value="300"></option>
+                                <option value="400"></option>
+                                <option value="500"></option>
+                                <option value="600"></option>
+                                <option value="700"></option>
+                                <option value="800"></option>
+                                <option value="900"></option>
+                                <option value="1000"></option>
+                            </datalist>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -369,7 +460,6 @@ onActivated(() => {
 }
 
 #setting-view .content > div span {
-    width: 215px;
     width: 225px;
 }
 
@@ -436,8 +526,34 @@ onActivated(() => {
     padding-bottom: 15px;
 }
 
+#setting-view .common .content {
+    display: flex;
+    flex-direction: column;
+    margin-right: 30px;
+}
+
+#setting-view .common .window-zoom {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#setting-view .common .window-zoom div {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    width: 100%;
+}
+
+#setting-view .common .window-zoom .zoom-title span {
+    margin-left: 18px;
+    padding-top: 2px;
+}
+
+#setting-view .layout .content .layout-item,
 #setting-view .track .content .quality-item {
-    width: 56px;
+    width: 68px;
     padding: 6px;
     text-align: center;
     border-radius: 10rem;
@@ -446,11 +562,13 @@ onActivated(() => {
     cursor: pointer;
 }
 
+#setting-view .layout .content .layout-item:hover,
 #setting-view .track .content .quality-item:hover {
     background-color: var(--border-color);
     background-color: var(--list-item-hover);
 }
 
+#setting-view .layout .content .active,
 #setting-view .track .content .active {
     background: var(--btn-bg) !important;
     color: var(--svg-btn-color) !important;
@@ -505,7 +623,67 @@ onActivated(() => {
 }
 
 #setting-view .link {
-    color: var(--hl-color);
     color: var(--text-color);
+}
+
+    
+#setting-view  datalist {
+    background: transparent;
+}
+
+#setting-view  #zoom-tickmarks {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  writing-mode: lr;
+  flex: 1;
+}
+
+#setting-view #zoom-tickmarks option {
+    font-size: 13px;
+}
+
+#setting-view input[type=range] {
+    width: 100%;
+    cursor: pointer;
+    background: transparent;
+    -webkit-appearance: none; 
+    margin-top: 10px;
+    margin-bottom: 5px;
+    padding: 0px;
+}
+
+#setting-view input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; 
+  height: 22px;
+  width: 6px;
+  background: var(--hl-color); 
+  border-radius: 10rem; 
+  margin-top: -8px;
+}
+
+#setting-view input[type=range]::-webkit-slider-runnable-track {
+    background: var(--progress-track-bg);
+    border-radius: 10rem;
+    height: 6px;
+}
+
+#setting-view .font {
+    display: flex;
+    margin-top: 3px;
+}
+
+#setting-view .font div {
+    flex: 1;
+}
+
+#setting-view .font input {
+    border-radius: 3px;
+    padding: 8px;
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-bg);
+    margin-left: 10px;
+    min-width: 223px;
 }
 </style>

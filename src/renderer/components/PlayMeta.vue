@@ -8,10 +8,14 @@ import { Track } from '../../common/Track';
 import { onMounted, ref } from 'vue';
 import EventBus from '../../common/EventBus';
 
-const { currentTrack, mmssCurrentTime, volume } = storeToRefs(usePlayStore())
+const props = defineProps({
+    hideVolumeBar: Boolean,
+})
+
+const { currentTrack, mmssCurrentTime, volume, playing } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useAppCommonStore())
 const { showPlayingView, toggleCoverMask } = useAppCommonStore()
-const volumeBar = ref(null)
+const volumeBarRef = ref(null)
 
 const trackMeta = (track) => {
     let artistName = Track.artistName(track)
@@ -20,8 +24,7 @@ const trackMeta = (track) => {
 }
 
 onMounted(() => {
-    EventBus.emit("track-restoreInit", currentTrack.value)
-    if(volumeBar) volumeBar.value.setVolume(volume.value)
+    if(volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 </script>
 
@@ -45,7 +48,7 @@ onMounted(() => {
                 </div>
                 <div class="time-volume-wrap">
                     <AudioTime :current="mmssCurrentTime" :duration="Track.mmssDuration(currentTrack)"></AudioTime>
-                    <VolumeBar class="volume-bar" ref="volumeBar"></VolumeBar>
+                    <VolumeBar class="volume-bar" ref="volumeBarRef" v-show="!hideVolumeBar"></VolumeBar>
                 </div>
             </div>
         </div>

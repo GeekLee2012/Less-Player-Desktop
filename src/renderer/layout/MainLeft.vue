@@ -404,7 +404,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 }
 
 #main-left .bottom {
-    height: 100px;
+    height: 72px;
     display: flex;
     flex-direction: row;
     align-items: center;

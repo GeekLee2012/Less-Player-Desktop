@@ -23,7 +23,6 @@ const props = defineProps({
     background-color: var(--input-bg);
     border-radius: 3px;
     padding: 5px;
-    outline: 0;
     color: var(--input-text-color);
     cursor: default;
 }

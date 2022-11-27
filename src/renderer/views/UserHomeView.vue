@@ -273,7 +273,7 @@ EventBus.on("userHome-refresh", refresh)
 </script>
     
 <template>
-    <div id="user-profile" ref="userProfileRef" @scroll="onScroll">
+    <div id="user-profile-view" ref="userProfileRef" @scroll="onScroll">
         <div class="decoration">
             <img :src="`deco_${decoration.current}.png`" @click="nextDecoration"/>
         </div>
@@ -335,7 +335,7 @@ EventBus.on("userHome-refresh", refresh)
 </template>
     
 <style scoped>
-#user-profile {
+#user-profile-view {
     display: flex;
     flex-direction: column;
     padding: 25px 33px 15px 33px;
@@ -344,18 +344,18 @@ EventBus.on("userHome-refresh", refresh)
     position: relative;
 }
 
-#user-profile .header {
+#user-profile-view .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
 }
 
-#user-profile .header .right {
+#user-profile-view .header .right {
     flex: 1;
     margin-left: 20px; 
 }
 
-#user-profile .header .titleWrap {
+#user-profile-view .header .titleWrap {
     margin-top: 5px;
     margin-bottom: 10px;
     display: flex;
@@ -363,16 +363,16 @@ EventBus.on("userHome-refresh", refresh)
     align-items: center;
 }
 
-#user-profile .header .titleWrap svg {
+#user-profile-view .header .titleWrap svg {
     fill: var(--svg-color);
     cursor: pointer;
 }
 
-#user-profile .header .titleWrap svg:hover {
+#user-profile-view .header .titleWrap svg:hover {
     fill: var(--hl-color);
 }
 
-#user-profile .header .title{
+#user-profile-view .header .title{
     text-align: left;
     font-size: 30px;
     font-weight: bold;
@@ -387,7 +387,7 @@ EventBus.on("userHome-refresh", refresh)
     -webkit-line-clamp: 1;
 }
 
-#user-profile .header .about{
+#user-profile-view .header .about{
     text-align: left;
     margin-bottom: 39px;
     font-size: 15px;
@@ -402,7 +402,7 @@ EventBus.on("userHome-refresh", refresh)
     -webkit-line-clamp: 3;
 }
 
-#user-profile .header .cover {
+#user-profile-view .header .cover {
     width: 168px;
     height: 168px;
     width: 202px;
@@ -411,18 +411,18 @@ EventBus.on("userHome-refresh", refresh)
     box-shadow: 0px 0px 1px #161616;
 }
 
-#user-profile .action {
+#user-profile-view .action {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
 }
 
-#user-profile .spacing {
+#user-profile-view .spacing {
     margin-right: 20px;
     margin-bottom: 10px;
 }
 
-#user-profile .tab-nav {
+#user-profile-view .tab-nav {
     position: relative;
     display: flex;
     height: 30px;
@@ -430,7 +430,7 @@ EventBus.on("userHome-refresh", refresh)
     border-bottom: 1px solid var(--border-color);
 }
 
-#user-profile .tab {
+#user-profile-view .tab {
     font-size: var(--tab-title-text-size);
     padding-left: 6px;
     padding-right: 6px;
@@ -439,7 +439,7 @@ EventBus.on("userHome-refresh", refresh)
     cursor: pointer;
 }
 
-#user-profile .tab-tip {
+#user-profile-view .tab-tip {
     position: absolute;
     right: 10px;
     font-size: var(--tab-title-text-size);
@@ -449,12 +449,12 @@ EventBus.on("userHome-refresh", refresh)
     color: transparent;
 }
 
-#user-profile .tab-nav .active {
+#user-profile-view .tab-nav .active {
     border-color: #28c83f;
     border-color: var(--hl-color);
 }
 
-#user-profile .sub-tab-nav {
+#user-profile-view .sub-tab-nav {
     position: relative;
     display: flex;
     height: 20px;
@@ -462,7 +462,7 @@ EventBus.on("userHome-refresh", refresh)
     margin-bottom: 3px;
 }
 
-#user-profile .sub-tab {
+#user-profile-view .sub-tab {
     font-size: 14px;
     font-weight: 520;
     padding-left: 6px;
@@ -471,12 +471,12 @@ EventBus.on("userHome-refresh", refresh)
     cursor: pointer;
 }
 
-#user-profile .sub-tab-nav .active {
+#user-profile-view .sub-tab-nav .active {
     color: var(--hl-color);
     font-weight: bold;
 }
 
-#user-profile .sub-tab-nav .tab-tip {
+#user-profile-view .sub-tab-nav .tab-tip {
     position: absolute;
     right: 10px;
     font-size: 14px;
@@ -486,19 +486,19 @@ EventBus.on("userHome-refresh", refresh)
     color: transparent;
 }
 
-#user-profile .songlist {
+#user-profile-view .songlist {
     display: flex;
     flex-direction: column;
 }
 
-#user-profile .decoration {
+#user-profile-view .decoration {
     position: absolute;
     top: 5px;
     right: 10px;
     z-index: 3px;
 }
 
-#user-profile .decoration img {
+#user-profile-view .decoration img {
     width: 68px;
     height: 68px;
     cursor: pointer;

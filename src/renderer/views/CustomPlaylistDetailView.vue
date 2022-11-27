@@ -147,7 +147,7 @@ onUpdated(() => {
 </script>
 
 <template>
-    <div id="custom-playlist-detail" ref="playlistDetailRef" @scroll="onScroll">
+    <div id="custom-playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="detail.cover" />
@@ -189,7 +189,7 @@ onUpdated(() => {
 </template>
 
 <style scoped>
-#custom-playlist-detail {
+#custom-playlist-detail-view {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -197,29 +197,29 @@ onUpdated(() => {
     overflow: auto;
 }
 
-#custom-playlist-detail .header {
+#custom-playlist-detail-view .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
 }
 
-#custom-playlist-detail .header .right {
+#custom-playlist-detail-view .header .right {
     flex: 1;
     margin-left: 30px;
 }
 
-#custom-playlist-detail .header .title, 
-#custom-playlist-detail .header .about {
+#custom-playlist-detail-view .header .title, 
+#custom-playlist-detail-view .header .about {
     text-align: left;
     margin-bottom: 13px;
 }
 
-#custom-playlist-detail .header .title {
+#custom-playlist-detail-view .header .title {
     font-size: 30px;
     font-weight: bold;
 }
 
-#custom-playlist-detail .header .about {
+#custom-playlist-detail-view .header .about {
     height: 108px;
     line-height: 21px;
     color: var(--text-sub-color);
@@ -235,50 +235,50 @@ onUpdated(() => {
     font-size: 15px;
 }
 
-#custom-playlist-detail .right .edit {
+#custom-playlist-detail-view .right .edit {
     display: flex;
     flex-direction: row;
     align-items: center;
     margin-bottom: 15px;
 }
 
-#custom-playlist-detail .spacing {
+#custom-playlist-detail-view .spacing {
     margin-left: 6px;
 }
 
-#custom-playlist-detail .edit svg {
+#custom-playlist-detail-view .edit svg {
     fill: var(--svg-color);
     cursor: pointer;
 }
 
-#custom-playlist-detail .edit svg:hover {
+#custom-playlist-detail-view .edit svg:hover {
     fill: var(--hl-color);
 }
 
-#custom-playlist-detail .time {
+#custom-playlist-detail-view .time {
     font-size: 13px;
     font-weight: 520;
     color: var(--text-sub-color);
     text-align: left;
 }
 
-#custom-playlist-detail .header .cover {
+#custom-playlist-detail-view .header .cover {
     width: 233px;
     height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }
 
-#custom-playlist-detail .action {
+#custom-playlist-detail-view .action {
     display: flex;
     flex-direction: row;
 }
 
-#custom-playlist-detail .btn-spacing {
+#custom-playlist-detail-view .btn-spacing {
     margin-right: 20px;
 }
 
-#custom-playlist-detail .list-title {
+#custom-playlist-detail-view .list-title {
     margin-left: 3px;
     margin-bottom: 3px;
     text-align: left;

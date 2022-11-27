@@ -11,7 +11,7 @@ const { showToast, hidePlaybackQueueView, hidePlayingView, hideAllCtxMenus } = u
 
 const targetPlaying = () => {
     if(queueTracksSize < 1) return 
-    const queueItemsWrap = document.querySelector('.playback-queue .center')
+    const queueItemsWrap = document.querySelector('.playback-queue-view .center')
     const clientHeight = queueItemsWrap.clientHeight
     const scrollHeight = queueItemsWrap.scrollHeight
     const maxScroll = scrollHeight - clientHeight
@@ -36,7 +36,7 @@ onMounted(() => {
 
 <template>
     <!-- click事件: 必须阻止冒泡，因为document全局监听click事件 -->
-    <div class="playback-queue" @click.stop="hidePlaybackQueueItemCtxMenu" ref="pbqRef">
+    <div class="playback-queue-view" @click.stop="hidePlaybackQueueItemCtxMenu" ref="pbqRef">
         <div class="header">
             <div class="title">当前播放</div>
             <div class="detail">
@@ -63,18 +63,18 @@ onMounted(() => {
 </template>
 
 <style>
-.playback-queue {
+.playback-queue-view {
     display: flex;
     flex-direction: column;
     -webkit-app-region: none;
 }
 
-.playback-queue .header {
+.playback-queue-view .header {
     padding: 20px 15px 10px 10px;
     border-bottom: 0.1px solid var(--border-color);
 }
 
-.playback-queue .detail {
+.playback-queue-view .detail {
     margin-top: 8px;
     margin-left: 3px;
     text-align: left;
@@ -82,18 +82,18 @@ onMounted(() => {
     display: flex;
 }
 
-.playback-queue .subtext {
+.playback-queue-view .subtext {
     color: var(--text-sub-color);
 }
 
-.playback-queue .action {
+.playback-queue-view .action {
     display: flex;
     flex-direction: row;
     position: absolute;
     right: 18px;
 }
 
-.playback-queue .text-btn {
+.playback-queue-view .text-btn {
     text-align: left;
     font-size: 14px;
     display: flex;
@@ -103,31 +103,31 @@ onMounted(() => {
     margin-left: 20px;
 }
 
-.playback-queue .text-btn svg {
+.playback-queue-view .text-btn svg {
     margin-right: 3px;
     fill: var(--svg-color);
 }
 
-.playback-queue .text-btn:hover {
+.playback-queue-view .text-btn:hover {
     color: var(--hl-color);
 }
 
-.playback-queue .text-btn:hover svg {
+.playback-queue-view .text-btn:hover svg {
     fill: var(--hl-color);
 }
 
 /*
-.playback-queue .text-btn span {
+.playback-queue-view .text-btn span {
     display: none;
 }
 
-.playback-queue .target-btn:hover span,
-.playback-queue .clear-btn:hover span {
+.playback-queue-view .target-btn:hover span,
+.playback-queue-view .clear-btn:hover span {
     display: flex;
 }
 */
 
-.playback-queue .header .title {
+.playback-queue-view .header .title {
     text-align: left;
     font-size: 23px;
     font-weight: bold;
@@ -136,7 +136,7 @@ onMounted(() => {
     color: transparent;
 }
 
-.playback-queue .center {
+.playback-queue-view .center {
     flex: 1;
     overflow: auto;
 }

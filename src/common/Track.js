@@ -110,6 +110,10 @@ export class Track {
         return track && track.lyric ? track.lyric.data : []
     }
 
+    static lyricOffset(track) {
+        return track && track.lyric ? (track.lyric.offset || 0) : 0
+    }
+
     /*
     static fromChannel(channelTrack, type) {
         const track = new Track()

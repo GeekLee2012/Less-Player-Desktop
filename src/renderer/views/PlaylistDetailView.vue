@@ -182,7 +182,7 @@ EventBus.on("refresh-favorite", checkFavorite)
 </script>
 
 <template>
-    <div id="playlist-detail" ref="playlistDetailRef" @scroll="onScroll">
+    <div id="playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="detail.cover" />
@@ -225,7 +225,7 @@ EventBus.on("refresh-favorite", checkFavorite)
 </template>
 
 <style>
-#playlist-detail {
+#playlist-detail-view {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -233,24 +233,24 @@ EventBus.on("refresh-favorite", checkFavorite)
     overflow: auto;
 }
 
-#playlist-detail .header {
+#playlist-detail-view .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 25px;
 }
 
-#playlist-detail .header .right {
+#playlist-detail-view .header .right {
     flex: 1;
     margin-left: 25px;
 }
 
-#playlist-detail .header .title, 
-#playlist-detail .header .about {
+#playlist-detail-view .header .title, 
+#playlist-detail-view .header .about {
     text-align: left;
     margin-bottom: 10px;
 }
 
-#playlist-detail .header .title {
+#playlist-detail-view .header .title {
     font-size: 30px;
     font-weight: bold;
     margin-bottom: 3px;
@@ -265,7 +265,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     -webkit-line-clamp: 2;
 }
 
-#playlist-detail .header .about {
+#playlist-detail-view .header .about {
     height: 139px;
     line-height: 23px;
     color: var(--text-sub-color);
@@ -282,23 +282,23 @@ EventBus.on("refresh-favorite", checkFavorite)
     -webkit-line-clamp: 6;
 }
 
-#playlist-detail .header .cover {
+#playlist-detail-view .header .cover {
     width: 233px;
     height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }
 
-#playlist-detail .action {
+#playlist-detail-view .action {
     display: flex;
     flex-direction: row;
 }
 
-#playlist-detail .btn-spacing {
+#playlist-detail-view .btn-spacing {
     margin-right: 20px;
 }
 
-#playlist-detail .list-title {
+#playlist-detail-view .list-title {
     margin-bottom: 3px;
     text-align: left;
     font-size: 16px;
@@ -308,7 +308,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     color: transparent;
 }
 
-#playlist-detail .list-title .size-text {
+#playlist-detail-view .list-title .size-text {
     margin-left: 3px;
 }
 </style>

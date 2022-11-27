@@ -5,7 +5,7 @@
 :root {
   --scrollbar-width: 6px;
   --play-meta-height: 77px;
-  --main-top-height: 80px;
+  --main-play-nav-height: 80px;
 }
 
 .btnDisabled {

@@ -20,6 +20,7 @@ const { toggleVideoPlayingView } = useAppCommonStore()
 const currentIndex = ref(-1)
 const hasLyric = ref(false)
 const lyricData = ref(Track.lyricData(props.track))
+let offset = Track.lyricOffset(props.track)
 
 let destScrollTop = -1
 let rafId = null
@@ -28,6 +29,7 @@ let isUserMouseWheel = false
 let userMouseWheelCancelTimer = null
 
 const renderAndScrollLyric = (secs) => {
+    secs = Math.max(0, (secs + offset))
     const MMssSSS = toMMssSSS(secs * 1000)
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     const lines = lyricWrap.querySelectorAll('.line')
@@ -94,6 +96,7 @@ EventBus.on('track-pos', secs => {
 const reloadLyricData = (track) => {
     hasLyric.value = Track.hasLyric(track)
     lyricData.value = Track.lyricData(track)
+    offset = Track.lyricOffset(track)
 }
 
 const onUserMouseWheel = (e) => {

@@ -1,5 +1,5 @@
 <script setup>
-import { inject, onBeforeMount, watch } from 'vue';
+import { inject, onBeforeMount, onMounted, watch } from 'vue';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
 import EventBus from '../common/EventBus';
@@ -7,7 +7,7 @@ import { useSettingStore } from './store/settingStore';
 import { storeToRefs } from 'pinia';
 
 const { theme } = storeToRefs(useSettingStore())
-const { getCurrentThemeId } = useSettingStore()
+const { getCurrentThemeId, setupFontFamily, setupFontWeight } = useSettingStore()
 
 //TODO设置主题
 const setupAppTheme = (themeId) => {
@@ -22,6 +22,24 @@ const setupAppTheme = (themeId) => {
 //TODO 直接在setup()时执行，不需要等待其他生命周期
 setupAppTheme(getCurrentThemeId())
 
+
+const updateFontFamily = (value) => {
+  value = value.trim()
+  const fontFamily = value.length > 2 ? value : "var(--text-font-family)"
+  document.documentElement.style.fontFamily = fontFamily
+}
+
+const updateFontWeight = (value) => {
+  document.documentElement.style.fontWeight = value
+}
+
+EventBus.on('setting-fontFamily', updateFontFamily)
+EventBus.on('setting-fontWeight', updateFontWeight)
+
+onMounted(() => {
+  setupFontFamily()
+  setupFontWeight()
+})
 watch(theme, () => setupAppTheme(), { deep: true })
 </script>
 
@@ -33,12 +51,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
 <style>
 :root {
-  --text-family: system-ui, "PingFang SC", STHeitiSC-Medium, "Heiti SC Medium", "Heiti SC Light", "Microsoft YaHei", sans-serif;
+  --text-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Microsoft YaHei", "Arial", sans-serif;
   --text-size: 15px;
   --text-sub-size: 14px;
   --tab-title-text-size: 17px;
   --app-bg: transparent;
   /* font-weight: 520; */
+  font-family: var(--text-font-family);
 }
 
 :root[theme='dark'] {

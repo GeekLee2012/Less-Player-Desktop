@@ -1,15 +1,23 @@
 <script setup>
-import { inject, onMounted, watch } from 'vue';
+import { inject, onMounted, shallowRef, watch } from 'vue';
 import MainTop from './MainTop.vue';
+import ClassicMainTop from './ClassicMainTop.vue';
+import ClassicMainBottom from './ClassicMainBottom.vue';
 import MainContent from './MainContent.vue';
+import MainBottom from './MainBottom.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
+import { useSettingStore } from '../store/settingStore';
 import { storeToRefs } from 'pinia';
 import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
 import ArtistCategoryView from '../views/ArtistCategoryView.vue';
 import RadioCategoryView from '../views/RadioCategoryView.vue';
 import EventBus from '../../common/EventBus';
 import Mousetrap from 'mousetrap';
+
+
+const currentMainTop = shallowRef(null)
+const currentMainBottom = shallowRef(null)
 
 const  { visitRoute, visitSetting } = inject('appRoute')
 
@@ -23,6 +31,9 @@ const { hideAllCategoryViews, hideAllCtxMenus,
 const { togglePlay, switchPlayMode, 
     playPrevTrack, playNextTrack,
     toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
+
+const { layout } = storeToRefs(useSettingStore())
+const { setupWindowZoom } = useSettingStore()
 
 const minAppWidth = 1080, minAppHeight = 720 
 
@@ -66,7 +77,8 @@ const setSearchBarSize = () => {
     const wScaleRatio = clientWidth / minAppWidth
     //const hScaleRatio = clientHeight / minAppHeight
     const size = 115 * Math.max(wScaleRatio, 1)
-    const el = document.querySelector(".search-bar .keyword")
+    const el = document.querySelector(".main-top .search-bar .keyword")
+    if(!el) return 
     el.style.width = size + "px"
 }
 
@@ -257,6 +269,22 @@ const setAudioEffectViewAlignment = () => {
     view.style.top = top + 'px'
 }
 
+const setupLayout = () => {
+    const index = layout.value.index
+    switch (index) {
+        case 1:
+            currentMainTop.value = ClassicMainTop
+            currentMainBottom.value = ClassicMainBottom
+            break;
+        default:
+            currentMainTop.value = MainTop
+            currentMainBottom.value = MainBottom
+            break;
+    }
+}
+
+setupLayout()
+
 onMounted (() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', e => {
@@ -281,6 +309,9 @@ onMounted (() => {
         setAudioEffectViewAlignment()
         //隐藏上下文菜单
         hideAllCtxMenus()
+
+        //放在最后执行确保缩放
+        setupWindowZoom()
     })
     
     //点击事件监听
@@ -306,6 +337,7 @@ EventBus.on("imageTextTileLoadingMask-load", () => {
 })
 EventBus.on("batchView-show", setBatchViewListSize)
 EventBus.on('playingView-changed', setPlayingViewSize)
+EventBus.on("app-layout", setupLayout)
 
 //TODO
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
@@ -316,23 +348,33 @@ watch([ audioEffectViewShow ], setAudioEffectViewAlignment)
 
 <template>
     <div id="main-center">
-        <MainTop id="main-top"></MainTop>
-        <MainContent id="main-content"></MainContent>
-        <div id="main-bottom"></div>
+        <component id="main-top" :is="currentMainTop">
+        </component>
+        <MainContent id="main-content" 
+            :class="{ autopadding: (layout.index == 1) }">
+        </MainContent>
+        <component id="main-bottom" :is="currentMainBottom">
+        </component>
 
         <!-- 浮层(Component、View)-->
         <transition name="fade-ex">
-            <PlaylistCategoryView id="playlist-category-view" v-show="playlistCategoryViewShow">
+            <PlaylistCategoryView id="playlist-category-view" 
+                :class="{ autolayout: (layout.index == 1) }"
+                v-show="playlistCategoryViewShow">
             </PlaylistCategoryView> 
         </transition>
 
         <transition name="fade-ex">
-            <ArtistCategoryView id="artist-category-view" v-show="artistCategoryViewShow">
+            <ArtistCategoryView id="artist-category-view" 
+                :class="{ autolayout: (layout.index == 1) }"
+                v-show="artistCategoryViewShow">
             </ArtistCategoryView> 
         </transition>
 
         <transition name="fade-ex">
-            <RadioCategoryView id="radio-category-view" v-show="radioCategoryViewShow">
+            <RadioCategoryView id="radio-category-view" 
+                :class="{ autolayout: (layout.index == 1) }"
+                v-show="radioCategoryViewShow">
             </RadioCategoryView> 
         </transition>
     </div>
@@ -354,15 +396,10 @@ watch([ audioEffectViewShow ], setAudioEffectViewAlignment)
     z-index: 1;
 }
 
-#main-bottom {
-    height: 52px;
-}
-
 #playlist-category-view,
 #artist-category-view,
 #radio-category-view {
     position: fixed;
-    top: 75px;
     top: 85px;
     right: 0px;
     width: 404px;
@@ -371,6 +408,10 @@ watch([ audioEffectViewShow ], setAudioEffectViewAlignment)
     z-index: 55;
     background: var(--app-bg);
     box-shadow: 0px 0px 10px #161616;
+}
+
+#main-center .autolayout {
+    top: 60px;
 }
 
 /* 可以为进入和离开动画设置不同的持续时间和动画函数 */
@@ -390,5 +431,28 @@ watch([ audioEffectViewShow ], setAudioEffectViewAlignment)
   transform: translateX(404px);
   transform: translateX(40.4%);
   opacity: 0;
+}
+
+/* TODO */
+#main-center .autopadding .playlist-square-view,
+#main-center .autopadding .artist-square-view,
+#main-center .autopadding .radio-square-view,
+#main-center .autopadding #setting-view .title,
+#main-center .autopadding #search-view,
+#main-center .autopadding #user-profile-view, 
+#main-center .autopadding #batch-action-view,
+#main-center .autopadding #user-info-edit-view,
+#main-center .autopadding #custom-playlist-edit-view,
+#main-center .autopadding #data-backup-view, 
+#main-center .autopadding #data-restore-view {
+    padding-top: 10px;
+}
+
+#main-center .autopadding #local-music-view,
+#main-center .autopadding #playlist-detail-view, 
+#main-center .autopadding #artist-detail-view, 
+#main-center .autopadding #album-detail-view, 
+#main-center .autopadding #custom-playlist-detail-view {
+    padding-top: 15px;
 }
 </style>

@@ -1,17 +1,17 @@
 <script setup>
-import { onMounted, provide, ref, watch } from 'vue';
+import { onMounted, provide, ref, shallowRef, watch } from 'vue';
 import PlayerBoostrap from './PlayerBoostrap.vue';
 import Themes from './Themes.vue';
-import MainLeft from './layout/MainLeft.vue';
-import MainCenter from './layout/MainCenter.vue';
-import Popovers from './Popovers.vue';
 import EventBus from '../common/EventBus';
 import { useSettingStore } from './store/settingStore';
 import { storeToRefs } from 'pinia';
 import AppRoute from './AppRoute.vue';
+import SimpleLayout from './layout/SimpleLayout.vue';
+
+const currentAppSkin = shallowRef(SimpleLayout)
 
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
-const { getCurrentThemeId, setupAppSuspension, 
+const { setupWindowZoom, setupAppSuspension, 
   setupTray, setupGlobalShortcut } = useSettingStore()
 
 const isReservedPath = (path) => {
@@ -34,7 +34,7 @@ const deepInState = (state, cache) => {
 const cleanupSetting = () => {
     const store = useSettingStore()
     const key = "setting"
-    const cache = localStorage.getItem("setting")
+    const cache = localStorage.getItem(key)
     if(cache) {
         const cacheStates = JSON.parse(cache)
         store.$reset()
@@ -55,6 +55,7 @@ const setupCache = () => {
 
 const initialize = () => {
   cleanupSetting()
+  setupWindowZoom()
   setupAppSuspension()
   setupCache()
   setupTray()
@@ -69,9 +70,8 @@ initialize()
   <AppRoute>
     <PlayerBoostrap>
       <Themes>
-          <MainLeft></MainLeft> 
-          <MainCenter></MainCenter>
-          <Popovers></Popovers>
+        <component :is="currentAppSkin">
+        </component>
       </Themes>
     </PlayerBoostrap>
   </AppRoute>
@@ -99,7 +99,7 @@ html, body, #app {
 
 #app {
   display: flex;
-  font-family: var(--text-family);
+  /* font-family: var(--text-font-family); */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

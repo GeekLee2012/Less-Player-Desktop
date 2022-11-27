@@ -1,10 +1,15 @@
 <script setup>
-import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { onMounted, ref } from 'vue';
 import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from '../../common/Utils';
+import { useIpcRenderer, isWinOS } from '../../common/Utils';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { useSettingStore } from '../store/settingStore';
+
+
 const { quit, minimize, maximize } = useAppCommonStore()
 const isMinBtnDisabled = ref(false)
+const { getWindowZoom } = storeToRefs(useSettingStore())
 
 const setMinBtnDisabled = (value) => {
     isMinBtnDisabled.value = value
@@ -19,20 +24,62 @@ const ipcRenderer = useIpcRenderer()
 
 if(ipcRenderer) {
     ipcRenderer.on('app-max', (event, ...args) => {
-        setMinBtnDisabled(args[0])
+        if(!isWinOS) setMinBtnDisabled(args[0])
     })
 }
+
+//TODO
+const adjustTrafficLightCtlBtn = () => {
+    const els = document.querySelectorAll('.win-traffic-light-btn')
+    if(!els) return 
+    const zoom = Number(getWindowZoom.value)
+    const orginWidth = 56, orginMarginTop = 18, orginMarginLeft = 15, scale = 100 / zoom
+    let width = orginWidth * scale
+    let marginTop = orginMarginTop * scale
+    let marginLeft = orginMarginLeft * scale
+    els.forEach(el => {
+        el.style.width = width + "px"
+        el.style.marginTop = marginTop + "px"
+        el.style.marginLeft = marginLeft + "px"
+    })
+    
+    const btnEls = document.querySelectorAll('.win-traffic-light-btn .ctl-btn')
+    const orginBtnSize = 12.5, orginBtnMarginRight = 8
+    let btnSize = orginBtnSize * scale
+    let btnMarginRight = orginBtnMarginRight * scale
+    if(!btnEls) return 
+    btnEls.forEach(btnEl => {
+        btnEl.style.width = btnSize + "px"
+        btnEl.style.height = btnSize + "px"
+        btnEl.style.marginRight = btnMarginRight + "px"
+    })
+
+    const orginSvgSize = 7
+    let svgSize = orginSvgSize * scale
+    const maxBtnSvgEls = document.querySelectorAll('.win-traffic-light-btn .max-btn svg')
+    if(!maxBtnSvgEls) return 
+    maxBtnSvgEls.forEach(svgEl => {
+        svgEl.style.width = svgSize + "px"
+        svgEl.style.height = svgSize + "px"
+    })
+}
+
+EventBus.on("app-zoom", adjustTrafficLightCtlBtn)
+
+onMounted(() => {
+    adjustTrafficLightCtlBtn()
+})
 </script>
 
 <template>
     <div class="win-traffic-light-btn">
-        <div @click="quit" class="close-btn">
+        <div @click="quit" class="ctl-btn close-btn">
             <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g id="cross"><line class="cls-1" x1="7" x2="25" y1="7" y2="25"/><line class="cls-1" x1="7" x2="25" y1="25" y2="7"/></g></svg>
         </div>
-        <div @click="doMinimize" class="min-btn" :class="{ btnDisabled: isMinBtnDisabled }">
+        <div @click="doMinimize" class="ctl-btn min-btn" :class="{ btnDisabled: isMinBtnDisabled }">
             <svg viewBox="0 0 256 256" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M208,134.4H48c-3.534,0-6.4-2.866-6.4-6.4s2.866-6.4,6.4-6.4h160c3.534,0,6.4,2.866,6.4,6.4S211.534,134.4,208,134.4z"/></svg>
         </div>
-        <div @click="maximize" class="max-btn">
+        <div @click="maximize" class="ctl-btn max-btn">
             <svg width="7" height="7" viewBox="0 0 25 24" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path class="cls-1" d="M2,18V2H18"/><path class="cls-1" d="M23,6V22H7"/></g></g></svg>
         </div>
     </div>
@@ -50,10 +97,10 @@ if(ipcRenderer) {
     cursor: default !important;
 }
 
-.win-traffic-light-btn div {
-    width: 12.5px;
+.win-traffic-light-btn .ctl-btn {
+    width: 16px;
     height: 12.5px;
-    border-radius: 10rem;
+    border-radius: 100rem;
     margin-right: 8px;
     -webkit-app-region: none;
     cursor: pointer;
