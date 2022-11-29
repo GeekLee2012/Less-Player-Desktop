@@ -185,6 +185,7 @@ export class KuGou {
                         const track = new Track(item.audio_id, KuGou.CODE, item.FileName, artist, album, duration)
                         track.hash = item.Hash
                         track.artistNotCompleted = true
+                        track.pid = id
                         result.addTrack(track)
                     })
                 }
@@ -368,6 +369,7 @@ export class KuGou {
                         }
                         const track = new Track(item.audio_id, KuGou.CODE, item.songname, artist, album, duration, trackCover)
                         track.hash = item.hash
+                        track.pid = id
                         result.addTrack(track)
                     })
                 }

@@ -145,10 +145,10 @@ export class NetEase {
                 const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
                 const listEl = doc.querySelectorAll("#m-pl-container li")
                 listEl.forEach(el => {
-                    let id = null, cover = null, title = null, itemUrl = null
-
+                    let id = null, cover = null, title = null, itemUrl = null, listenNum = 0
                     const coverEl = el.querySelector(".u-cover img")
                     const titleEl = el.querySelector(".dec a")
+                    const listenNumEl = el.querySelector(".bottom .nb")
 
                     if(coverEl) {
                         cover = coverEl.getAttribute("src").replace("140y140", "500y500")
@@ -160,9 +160,14 @@ export class NetEase {
                         id = itemUrl.split('=')[1]
                     }
 
+                    if(listenNumEl) {
+                        listenNum = parseInt(listenNumEl.textContent || 0)
+                    }
+
                     if(id && itemUrl) {
-                        const detail = new Playlist(id, NetEase.CODE , cover, title, itemUrl)
-                        result.data.push(detail)
+                        const playlist = new Playlist(id, NetEase.CODE , cover, title, itemUrl)
+                        playlist.listenNum = listenNum
+                        result.data.push(playlist)
                     }
                 });
                 resolve(result)
@@ -243,6 +248,7 @@ export class NetEase {
                         const album = { id: song.al.id, name: song.al.name }
                         const track = new Track(song.id, NetEase.CODE, song.name, artist, album, song.dt, song.al.picUrl)
                         track.mv = song.mv
+                        track.pid = id
                         result.addTrack(track)
                     })
                     resolve(result)

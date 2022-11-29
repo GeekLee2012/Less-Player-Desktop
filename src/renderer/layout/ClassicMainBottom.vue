@@ -75,7 +75,7 @@ watch([ currentTrack, playingViewShow ], checkFavorite)
 
 <template>
     <div class="classic-main-bottom">
-        <ProgressBar id="progress-bar" ref="progressBarRef" :onseek="seekTrack"></ProgressBar>
+        <ProgressBar id="progress-bar" ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
         <div id="play-nav">
             <PlayMeta id="play-meta" :hideVolumeBar="true"></PlayMeta>
             <div class="play-ctl-wrap">

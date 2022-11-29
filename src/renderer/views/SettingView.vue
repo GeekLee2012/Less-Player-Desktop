@@ -1,5 +1,5 @@
 <script setup>
-import { inject, onActivated } from 'vue';
+import { inject, onActivated, onDeactivated, onMounted, ref } from 'vue';
 import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import { storeToRefs } from 'pinia';
@@ -7,16 +7,18 @@ import KeysInputControl from '../components/KeysInputControl.vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useIpcRenderer } from '../../common/Utils';
+import { useIpcRenderer, isMacOS, isWinOS } from '../../common/Utils';
 import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
+import { getDoc } from '../../common/HttpClient';
 
 
 const { visitDataBackup, visitDataRestore, } = inject('appRoute')
 
 const ipcRenderer = useIpcRenderer()
 
-const { theme, layout, common, track, keys, tray, navigation, dialog ,cache, other } = storeToRefs(useSettingStore())
+const { theme, layout, common, track, keys, 
+    tray, navigation, dialog ,cache, other } = storeToRefs(useSettingStore())
 const { setThemeIndex, 
         setLayoutIndex,
         setWindowZoom,
@@ -24,7 +26,9 @@ const { setThemeIndex,
         setFontWeight,
         setTrackQualityIndex, 
         toggleVipTransfer,
+        toggleVipFlagShow,
         toggleCategoryBarRandom,
+        toggleListenNumShow,
         togglePlayingWithoutSleeping,
         toggleStorePlayState,
         toggleStoreLocalMusic,
@@ -90,9 +94,124 @@ const updateFontWeight = (e) => {
     setFontWeight(e.target.value)
 }
 
+const changelogUrl = "https://gitee.com/rive08/less-player-desktop/blob/master/CHANGELOG.md"
+const lastReleaseUrlRoot = "https://gitee.com/rive08/less-player-desktop/releases/tag/"
+const { version } = packageCfg
+const lastVersion = ref(version)
+const isLastRelease = ref(true)
+const downloadState = ref(0)
+const progressBarRef = ref(null)
+const downloadProgress = ref('准备开始下载')
+let localSavePath = null
+
+const setLastRelease = (value) => {
+    isLastRelease.value = value
+}
+
+const setDownloadState = (value) => {
+    downloadState.value = value
+}
+
+const isUnstarted = () => (downloadState.value == 0)
+const isDownloading = () => (downloadState.value == 1)
+const isDownloaded = () => (downloadState.value == 2)
+
+const updateDownloadProgress = (received, total) => {
+    let receivedMB = 0, totalMB = 0
+    if(isMacOS) {
+        receivedMB = parseFloat(received / (1000 * 1000)).toFixed(2)
+        totalMB = parseFloat(total / (1000 * 1000)).toFixed(2)
+    } else {
+        receivedMB = parseFloat(received / (1024 * 1024)).toFixed(2)
+        totalMB = parseFloat(total / (1024 * 1024)).toFixed(2)
+    }
+    if(receivedMB >= totalMB && total > 0) {
+        downloadProgress.value = '下载完成'
+        setDownloadState(2)
+    } else if(total > 0) {
+        downloadProgress.value = `${receivedMB}MB / ${totalMB}MB` 
+    } else {
+        downloadProgress.value = '准备开始下载'
+    }
+    const percent = total > 0 ? received / total : 0
+    if(progressBarRef) progressBarRef.value.updateProgress(percent)
+}
+
+const resetDownloadProgress = () => {
+    setDownloadState(0)
+    updateDownloadProgress(0, 0)
+}
+
+const getLastReleaseVersion = () => {
+    return new Promise((resolve, reject) => {
+        getDoc(changelogUrl).then(doc => {
+            let lastVersion = doc.querySelector('.file_content h3').textContent.trim()
+            resolve(lastVersion)
+        }).catch(reason => {
+            reject(version)
+        })
+    })
+}
+
+const getVersionReleaseUrl = (version) => {
+    return new Promise((resolve, reject) => {
+        const url = lastReleaseUrlRoot + version
+        let targetExt = 'NULL'
+        if(isMacOS()) targetExt = '.dmg'
+        else if(isWinOS()) targetExt = '.exe'
+        
+        let releaseUrl = null
+        getDoc(url).then(doc => {
+            const els = doc.querySelectorAll('.releases-download-list .item a')
+            els.forEach(el => {
+                const href = el.getAttribute('href').trim()
+                if(!href.endsWith(targetExt)) return
+                releaseUrl = "https://gitee.com" + href
+            })
+            resolve(releaseUrl)
+        }).catch(reason => {
+            reject(null)
+        })
+    })
+}
+
+//TODO 目前仅考虑单任务下载
+const startDownload = async () => {
+    if(!ipcRenderer) return 
+    setDownloadState(1)
+    const lastReleaseUrl = await getVersionReleaseUrl(lastVersion.value)
+    if(!lastReleaseUrl) return
+    ipcRenderer.on('download-progressing', (e, item) => {
+        const { url, savePath, received, total } = item
+        localSavePath = savePath
+        updateDownloadProgress(received, total)
+    })
+    ipcRenderer.send('download-item', { url: lastReleaseUrl })
+}
+
+const checkForUpdate = () => {
+    getLastReleaseVersion().then(result => {
+        const currentVersion = ("v" + version)
+        lastVersion.value = result
+        setLastRelease(currentVersion >= result)
+    })
+}
+
+const cancelDownload = () => {
+    if(ipcRenderer) ipcRenderer.send('cancel-download')
+    resetDownloadProgress()
+}
+
+const showPath = async () => {
+    if(!ipcRenderer) return 
+    ipcRenderer.send('show-path', localSavePath)
+}
+
 onActivated(() => {
     updateBlackHole(Math.random() * 100000000)
 })
+
+onMounted(checkForUpdate)
 </script>
 
 <template>
@@ -147,7 +266,7 @@ onActivated(() => {
                     <div class="font last" @keydown.stop="">
                         <div>
                             <span>字体: </span>
-                            <input type="text" :value="common.fontFamily" placeholder="格式：请参考CSS" 
+                            <input type="text" :value="common.fontFamily" placeholder="FontFamily, 格式：请参考CSS" 
                                 @keydown.enter="updateFontFamily" @focusout="updateFontFamily"/>
                         </div>
                         <div class="spacing">
@@ -184,9 +303,21 @@ onActivated(() => {
                         </ToggleControl>
                     </div>
                     <div>
+                        <span>歌曲显示VIP标识：</span>
+                        <ToggleControl @click="toggleVipFlagShow" 
+                            :value="track.vipFlagShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span>歌单分类栏，随机显示分类：</span>
                         <ToggleControl @click="toggleCategoryBarRandom" 
                             :value="track.categoryBarRandom">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span>歌单显示播放量：</span>
+                        <ToggleControl @click="toggleListenNumShow" 
+                            :value="track.listenNumShow">
                         </ToggleControl>
                     </div>
                     <div class="last">
@@ -212,13 +343,6 @@ onActivated(() => {
                             :value="cache.storeLocalMusic">
                         </ToggleControl>
                     </div>
-                    <!--
-                    <div class="last">
-                        <SvgTextButton text="清空设置页缓存" :leftAction="() => clearSettingsCache()">
-                        </SvgTextButton>
-                        <span class="tip-text">（ 提示：版本更新时，由于缓存原因，导致新版本的设置可能没有生效。<br/>&nbsp;&nbsp;&nbsp;&nbsp;需手动清空缓存，刷新一下才生效。请放心操作，不会影响当前设置 ）</span>
-                    </div>
-                    -->
                 </div>
             </div>
             <div class="menu row">
@@ -335,12 +459,31 @@ onActivated(() => {
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="version row">
                 <span class="cate-name">版本</span>
                 <div class="content">
-                    <div class="last">
+                    <div :class="{ last: isLastRelease }">
                         <div>{{ packageCfg.version }}</div>
-                        <a href="#" @click.prevent="visitLink('https://gitee.com/rive08/less-player-desktop/blob/master/CHANGELOG.md')" class="spacing link">更新日志</a>
+                        <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing link">更新日志</a>
+                    </div>
+                    <div class="last" v-show="!isLastRelease" >
+                        <SvgTextButton v-show="!isLastRelease && isUnstarted()" 
+                            text="下载更新"
+                            :leftAction="startDownload" >
+                        </SvgTextButton>
+                        <SvgTextButton v-show="isDownloading()" text="取消下载"
+                            :leftAction="cancelDownload" >
+                        </SvgTextButton>
+                        <SvgTextButton v-show="isDownloaded()" text="打开文件"
+                            :leftAction="showPath" >
+                        </SvgTextButton>
+                        <div v-show="!isLastRelease && isUnstarted()" class="spacing">
+                            <span>发现新版本：{{ lastVersion }}</span>
+                        </div>
+                        <div v-show="!isUnstarted()" class="download-wrap spacing">
+                            <ProgressBar ref="progressBarRef"></ProgressBar>
+                            <span class="spacing" v-html="downloadProgress"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -671,5 +814,16 @@ onActivated(() => {
     background-color: var(--input-bg);
     margin-left: 10px;
     min-width: 223px;
+    color: var(--text-color);
+}
+
+#setting-view .version .download-wrap {
+    display: flex;
+    align-items: center;
+}
+
+#setting-view .version .download-wrap .progress-bar {
+    width: 211px; 
+    height: 5px;
 }
 </style>

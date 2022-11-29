@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
+import EventBus from '../../common/EventBus';
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue } = usePlayStore()
@@ -18,13 +19,19 @@ const targetPlaying = () => {
     queueItemsWrap.scrollTop = maxScroll * (playingIndex.value / (queueTracksSize.value - 1))
 } 
 
-const clearAll = () => {
-    resetQueue()
+const onQueueEmpty = () => {
     showToast("当前播放已清空！", ()=> {
         hidePlaybackQueueView()
         hidePlayingView()
     }, 666)
 }
+
+const clearAll = () => {
+    resetQueue()
+    onQueueEmpty()
+}
+
+EventBus.on("playbackQueue-empty", onQueueEmpty)
 
 const pbqRef = ref(null)
 const listRef = ref(null)

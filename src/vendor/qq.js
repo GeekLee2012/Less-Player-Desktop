@@ -415,8 +415,6 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = topListReqBody()
             getJson(url, reqBody).then(json => {
-                
-                
                 const groupList = json.req_1.data.group
                 groupList.forEach(group => {
                     group.toplist.forEach(item => {
@@ -440,7 +438,6 @@ export class QQ {
             const topid = parseInt(id.replace(QQ.TOPLIST_PREFIX, ''))
             const reqBody = topListDetailReqBody(topid, offset, limit, page)
             getJson(url, reqBody).then(json => {
-                
                 const playlist = json.req_1.data.data
 
                 result.id = playlist.topId
@@ -456,6 +453,7 @@ export class QQ {
                     const duration = song.interval * 1000
                     const cover = getAlbumCover(song.album.mid)
                     const track = new Track(song.mid, QQ.CODE, song.name, artist, album, duration, cover)
+                    track.pid = id
                     result.addTrack(track)
                 })
                 resolve(result)
@@ -603,10 +601,10 @@ export class QQ {
                 const list = json.data.list
                 list.forEach(item => {
                     const cover = item.imgurl
-
-                    const detail = new Playlist(item.dissid, QQ.CODE, cover, item.dissname) 
-                    detail.about = item.introduction
-                    result.data.push(detail)
+                    const playlist = new Playlist(item.dissid, QQ.CODE, cover, item.dissname) 
+                    playlist.about = item.introduction
+                    playlist.listenNum = item.listennum
+                    result.data.push(playlist)
                 })
                 resolve(result)
             })
@@ -629,6 +627,7 @@ export class QQ {
                 loginUin: 0,
             }
             getJson(url, reqBody).then(json => {
+                console.log(json)
                 const playlist = json.cdlist[0]
                 result.id = id
                 result.dissid = playlist.dissid
@@ -645,6 +644,9 @@ export class QQ {
                     const cover = getAlbumCover(song.albummid)
                     const track = new Track(song.songmid, QQ.CODE, song.songname, artist, album, duration, cover)
                     track.mv = song.vid
+                    track.pid = id
+                    track.payPlay = (song.pay.payplay == 1)
+                    track.payDownload = (song.pay.paydownload == 1)
                     result.addTrack(track)
                 })
                 resolve(result)
@@ -698,7 +700,6 @@ export class QQ {
             const url = "http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg"
             const reqBody = lyricReqBody(id) 
             getJson(url, reqBody).then(json => {
-                
                 let lyric = json.lyric
                 if(lyric) {
                     lyric = CryptoJS.enc.Base64.parse(lyric).toString(CryptoJS.enc.Utf8)
@@ -779,6 +780,8 @@ export class QQ {
                     const track = new Track(item.mid, QQ.CODE, item.title, 
                         artist, album, duration, cover)
                     track.mv = item.mv.vid
+                    track.payPlay = (item.pay.pay_play == 1)
+                    track.payDownload = (item.pay.pay_down == 1)
                     result.data.push(track)
                 })
                 resolve(result)
@@ -792,7 +795,6 @@ export class QQ {
             const url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = artistAlbumReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
-                
                 const result = { id, offset, limit, page, data: [] }
                 const albumList = json.req_1.data.list
                 albumList.forEach(item => {
@@ -848,6 +850,7 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&format=json&inCharset=utf8&outCharset=utf8"
             const reqBody = albumAllSongsReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
+                console.log(json)
                 const result = new Album(id)
                 const songList = json.req_1.data.songList
                 songList.forEach(item => {
@@ -858,6 +861,8 @@ export class QQ {
                     const duration = song.interval * 1000
                     const track = new Track(song.mid, QQ.CODE, song.name, artist, album, duration, cover)
                     track.mv = song.mv.vid
+                    track.payPlay = (song.pay.pay_play == 1)
+                    track.payDownload = (song.pay.pay_down == 1)
                     result.addTrack(track)
                 })
                 resolve(result)
@@ -879,6 +884,8 @@ export class QQ {
                     const cover = getAlbumCover(item.album.mid)
                     const track = new Track(item.mid, QQ.CODE, item.name, artist, album, duration, cover)
                     track.mv = item.mv.vid
+                    track.payPlay = (item.pay.pay_play == 1)
+                    track.payDownload = (item.pay.pay_down == 1)
                     return track
                 })
                 const result = { offset, limit, page, data }

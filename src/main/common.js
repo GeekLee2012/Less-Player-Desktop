@@ -1,5 +1,6 @@
 const { opendirSync, readFileSync, statSync, writeFileSync } = require('fs');
-const { opendir, rmdir } = require('fs/promises');
+const { opendir, rmdir, rm } = require('fs/promises');
+const { homedir } = require('os');
 const path = require('path');
 const mm = require('music-metadata');
 const jschardet = require('jschardet');
@@ -163,6 +164,14 @@ const randomTextWithinAlphabetNums = (len) => {
     return randomText(ALPHABET_NUMS, len)
 }
 
+const getDownloadDir = () => {
+    return homedir() + "/Downloads/"
+}
+
+const removePath = (path) => {
+    rm(path, { force: true })
+}
+
 module.exports = { 
     scanDirTracks, 
     parseTracks, 
@@ -171,4 +180,6 @@ module.exports = {
     FILE_PREFIX,
     ALPHABET_NUMS, 
     randomText, 
-    randomTextWithinAlphabetNums }
+    randomTextWithinAlphabetNums,
+    getDownloadDir,
+    removePath }

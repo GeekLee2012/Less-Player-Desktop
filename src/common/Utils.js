@@ -7,6 +7,15 @@ export const useIpcRenderer = () => {
     return null
 }
 
+export const isMacOS = () => {
+    try {
+        return electronAPI ? electronAPI.isMacOS : null
+    } catch(error) {
+        //Do Nothing
+    }
+    return null
+}
+
 export const isWinOS = () => {
     try {
         return electronAPI ? electronAPI.isWinOS : null

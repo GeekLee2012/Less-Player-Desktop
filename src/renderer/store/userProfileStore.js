@@ -150,12 +150,14 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         addFavoriteTrack(track) {
             const { id, platform, title, artist, album, duration, cover, 
-                type, pid, songlistId, extra1, extra2, mv } = track
+                type, pid, songlistId, extra1, extra2, mv, 
+                payPlay, payDownload } = track
             //TODO
             const url = Playlist.isAnchorRadioType(track) ? track.url : null
             this.addItem(this.favorites.songs, { 
                 id, platform, title, artist, album, duration, cover, url,
-                type, pid, songlistId, extra1, extra2, mv
+                type, pid, songlistId, extra1, extra2, mv, 
+                payPlay, payDownload
             })
         },
         addFavoriteRadio(track) {
@@ -216,7 +218,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         //自建歌单
         addCustomPlaylist(title, about, cover){
-            const id = randomTextWithinAlphabetNums(16)
+            const id = Playlist.CUSTOM_ID_PREFIX + randomTextWithinAlphabetNums(12)
             this.addItem(this.customPlaylists, {
                 id, title, about, cover, data: []
             }, (e1, e2) => e1.id === e2.id)
@@ -295,13 +297,15 @@ export const useUserProfileStore = defineStore("userProfile", {
         //最近播放
         addRecentSong(track) {
             const { id, platform, title, artist, album, duration, cover, 
-                type, pid, songlistId, extra1, extra2, mv } = track
+                type, pid, songlistId, extra1, extra2, mv, 
+                payPlay, payDownload } = track
             if(!platform || platform.trim().length < 1) return 
             //TODO
             const url = Playlist.isAnchorRadioType(track) ? track.url : null
             this.uniqueInsertFirst(this.recents.songs, { 
                 id, platform, title, artist, album, duration, cover, url, 
-                type, pid, songlistId, extra1, extra2, mv
+                type, pid, songlistId, extra1, extra2, mv, 
+                payPlay, payDownload
             })
             //TODO
             const limit = 999

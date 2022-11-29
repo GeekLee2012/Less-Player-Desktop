@@ -258,7 +258,7 @@ onUnmounted(() => setDisactived(true))
                         <canvas class="spectrumCanvas" width="404" height="39" ></canvas>
                     </div>
                     <div class="progress-wrap">
-                        <ProgressBar ref="progressBarRef" :onseek="seekTrack"></ProgressBar>
+                        <ProgressBar ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
                     </div>
                     <div class="audio-time-wrap">
                         <span class="t-current" v-html="mmssCurrentTime"></span>

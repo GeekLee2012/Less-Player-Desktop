@@ -5,10 +5,12 @@ const barRef = ref(null)
 const barValueRef = ref(null)
 
 const props = defineProps({
+    seekable: Boolean,
     onseek: Function
 })
 
 const seek = (e)=> {
+    if(!props.seekable) return 
     const offsetX = e.offsetX
     const offsetWidth = barRef.value.offsetWidth
     const percent = (offsetX / offsetWidth).toFixed(3)
@@ -25,7 +27,7 @@ defineExpose({ updateProgress })
 </script>
 
 <template>
-    <div class="progress-bar" ref="barRef" @click="seek">
+    <div class="progress-bar" :class="{ handcur: seekable }" ref="barRef" @click="seek">
         <div class="progress" ref="barValueRef"></div>
     </div>
 </template>
@@ -36,7 +38,6 @@ defineExpose({ updateProgress })
     border-radius: 10rem;
     /*background: linear-gradient(to right, #464646, #666) !important;*/
     background: var(--progress-track-bg);
-    cursor: pointer;
     -webkit-app-region: none;
 }
 
@@ -46,5 +47,9 @@ defineExpose({ updateProgress })
    border-radius: 10rem;
    background: var(--hl-text-bg);
    background: var(--progress-bg);
+}
+
+.handcur {
+    cursor: pointer;
 }
 </style>

@@ -201,6 +201,7 @@ export class RadioCN {
                     track.lyric.addLine('999:99.000', item.description || description)
                     track.type = result.type
                     track.extra2 = item.onlinetime
+                    track.pid = id
                     result.addTrack(track)
                 })
                 resolve(result)

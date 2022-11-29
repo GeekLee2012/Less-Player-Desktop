@@ -39,7 +39,7 @@ watch(progress, (nv, ov) => {
                 <Navigator></Navigator>
             </div>
         </div>
-        <ProgressBar ref="progressBarRef" :onseek="seekTrack"></ProgressBar>
+        <ProgressBar ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
     </div>
 </template>
 

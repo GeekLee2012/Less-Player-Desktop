@@ -117,7 +117,7 @@ watch([currentTrack, playingViewShow ], checkFavorite)
             </div>
         </div>
         <div class="bottom">
-            <ProgressBar ref="progressBarRef" :onseek="seekTrack"></ProgressBar>
+            <ProgressBar ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
             <div class="action">
                 <div class="btm-left">
                     <div @click="toggleFavorite">

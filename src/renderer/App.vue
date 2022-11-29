@@ -70,8 +70,7 @@ initialize()
   <AppRoute>
     <PlayerBoostrap>
       <Themes>
-        <component :is="currentAppSkin">
-        </component>
+        <component :is="currentAppSkin"></component>
       </Themes>
     </PlayerBoostrap>
   </AppRoute>
@@ -83,13 +82,6 @@ html, body, #app {
   background: var(--app-bg);
   background-position: center;
   background-size: cover;
-  /*
-  background-image: linear-gradient(rgba(0, 0, 255, 0.5), rgba(0, 0, 0, 0.68)), 
-      url("../renderer/assets/images/clean-sky.jpg");
-  background-image: var(--bg-img);
-  background-position: center;
-  background-size: cover;
-  */
   margin: 0px auto;
   height: 100%;
   font-size: var(--text-size);
@@ -99,7 +91,6 @@ html, body, #app {
 
 #app {
   display: flex;
-  /* font-family: var(--text-font-family); */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

@@ -8,28 +8,31 @@ import { toMmss } from './Times';
  * isFMRadio: 是否为广播电台(当歌单类型为电台时); 
  */
 export class Track {
-    constructor(id, platform, title, artist, album, duration, cover, url, type, pid, mv) {
+    constructor(id, platform, title, artist, album, duration, cover, url, type, pid, mv, payPlay, payDownload) {
         this.id = id ? id.toString() : ''
         this.platform = platform
         this.title = title
         //[ {id, name} ]
         this.artist = artist ? artist : []
-        this.artistNotCompleted = false //数据不完整
+        //数据不完整
+        this.artistNotCompleted = false 
         //{id, name}
         this.album = album ? album : ({ id: '', name: '' })
-        //millis
+        //Millis
         this.duration = duration ? duration : 0
         this.cover = cover
         this.url = url || ''
         this.lyric = new Lyric()
         this.type = type || 0 //与 Playlist中的type一致
-        //this.channel = '' //channelId
         this.pid = pid || '' //playlistId
         //额外信息，当内容存在时显示，同时分别隐藏 artist、album
         this.extra1 = null
         this.extra2 = null
-        //mv id
-        this.mv = null
+        //MV id
+        this.mv = mv
+        //VIP付费信息
+        this.payPlay = payPlay
+        this.payDownload = payDownload
     }
 
     mmssDuration() {
@@ -67,6 +70,14 @@ export class Track {
 
     static mmssDuration(track) {
         return toMmss(track.duration)
+    }
+
+    hasPid() {
+        return Track.hasPid(this)
+    }
+
+    static isVip(track) {
+        return Track.isVip(this)
     }
 
     static artistName(track) {
@@ -141,4 +152,17 @@ export class Track {
         if(typeof(mv) == 'number') return mv > 0
         if(typeof(mv) == 'string') return mv.trim().length > 0
     }
+
+    static hasPid(track) {
+        if(!track || !track.pid) return false
+        const pid = track.pid
+        if(typeof(pid) == 'number') return pid > 0
+        if(typeof(pid) == 'string') return pid.trim().length > 0
+    }
+
+    static isVip(track) {
+        if(!track) return false
+        return track.payPlay
+    }
+
 }

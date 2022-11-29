@@ -9,8 +9,10 @@ export class Playlist {
     static ANCHOR_RADIO_TYPE = 3
     //TODO
     static ANCHOR_RADIO_ID_PREFIX = "ARP_"
+    //自定义列表
+    static CUSTOM_ID_PREFIX = "CMP_" 
 
-    constructor(id, platform, cover, title, url, about, data, total, type) {
+    constructor(id, platform, cover, title, url, about, data, total, type, listenNum) {
         this.id = id
         this.platform = platform
         this.cover = cover
@@ -21,6 +23,8 @@ export class Playlist {
         this.total = total || 0
         //歌单类型：普通歌单、电台歌单、FM广播电台歌单、主播电台歌单
         this.type = type || 0
+        //播放量
+        this.listenNum = listenNum
     }
 
     addTrack(track) {
@@ -58,6 +62,12 @@ export class Playlist {
 
     static isAnchorRadioType(item) {
         return Playlist.doAssertType(item, Playlist.ANCHOR_RADIO_TYPE)
+    }
+
+    static isCustomType(item) {
+        const id = item.id.toString().trim()
+        return id.startsWith(Playlist.CUSTOM_ID_PREFIX)
+            //|| id.length == 16
     }
 
 }

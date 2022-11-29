@@ -1,15 +1,17 @@
 const { app, BrowserWindow, ipcMain, 
   Menu, dialog, powerMonitor, 
   shell, powerSaveBlocker, Tray,
-  globalShortcut } = require('electron')
+  globalShortcut, session } = require('electron')
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv, 
   USER_AGENT, USER_AGENT_APPLE, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
 const path = require('path')
 const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX, 
-  randomTextWithinAlphabetNums } = require('./common')
+  randomTextWithinAlphabetNums, getDownloadDir, removePath } = require('./common')
 
 let mainWin = null, powerSaveBlockerId = -1, appTray = null
 const appWidth = 1080, appHeight = 720
+//TODO 下载队列
+let downloadingItem = null
 
 /* 自定义函数 */
 const startup = () => {
@@ -27,6 +29,36 @@ const init = () => {
     //全局UserAgent
     app.userAgentFallback = USER_AGENT
     mainWin = createWindow()
+
+    session.defaultSession.on('will-download', (event, item, webContents) => {
+      //event.preventDefault()
+      downloadingItem = item
+      const filename = item.getFilename()
+      const savePath = getDownloadDir() + filename
+      removePath(savePath)
+      item.setSavePath(savePath)
+      item.on('updated', (event, state) => {
+        if(state == 'progressing') {
+          const received = item.getReceivedBytes()
+          const total = item.getTotalBytes()
+          sendToRenderer('download-progressing', {
+            url: item.getURL(),
+            savePath,
+            received,
+            total
+          })
+        }
+      })
+
+      item.on('done', (event, state) => {
+        downloadingItem = null
+        sendToRenderer('download-done', {
+          url: item.getURL(),
+          savePath
+        })
+        console.log("[ Download-Done ]")
+      })
+    })
   })
 
   app.on('activate', (event) => {
@@ -41,12 +73,16 @@ const init = () => {
   // for applications and their menu bar to stay active until the user quits
   // explicitly with Cmd + Q.
   app.on('window-all-closed', (event) => {
-    if(!isDevEnv) app.quit()
+    cancelDownload()
+    if(!isDevEnv) {
+      app.quit()
+    }
     //if(!isMacOS) app.quit()
   })
 
   app.on('before-quit', (event) => {
     sendToRenderer('app-quit')
+    cancelDownload()
   })
 }
 
@@ -128,6 +164,13 @@ const registryGlobalListeners = () => {
     } else {
       globalShortcut.unregisterAll()
     }
+  }).on('download-item', (e, data) => {
+    const { url } = data
+    mainWin.webContents.downloadURL(url)
+  }).on('cancel-download', (e, data) => {
+    cancelDownload()
+  }).on('show-path', (e, path) => {
+    if(path) shell.showItemInFolder(path)
   })
 
   ipcMain.handle('open-audio-dirs', async (event, ...args) => {
@@ -377,6 +420,13 @@ const setAppWindowZoom = (value) => {
   if(mainWin.isNormal()) {
     mainWin.setSize(width, height)
     mainWin.center()
+  }
+}
+
+const cancelDownload = () => {
+  if(downloadingItem) {
+    downloadingItem.cancel()
+    downloadingItem = null
   }
 }
 

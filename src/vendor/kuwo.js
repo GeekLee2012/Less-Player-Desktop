@@ -84,6 +84,7 @@ export class KuWo {
                     + "&id=" + resolvedCate + "&httpsStatus=1&reqId=" + randomReqId()
             }
             getJson(url, null, CONFIG).then(json => {
+                console.log(json)
                 const pagination = json.data
                 //const page = pagination.pn
                 const data = pagination.data
@@ -95,9 +96,10 @@ export class KuWo {
                     const title = item.name
 
                     if(id) {
-                        const detail = new Playlist(id, KuWo.CODE , cover, title)
-                        detail.total = item.total
-                        result.data.push(detail)
+                        const playlist = new Playlist(id, KuWo.CODE , cover, title)
+                        playlist.total = item.total
+                        playlist.listenNum = parseInt(item.listencnt || 0)
+                        result.data.push(playlist)
                     }
                 })
                 resolve(result)
@@ -194,6 +196,7 @@ export class KuWo {
                     const cover = item.pic
                     const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
                     if(item.hasmv == 1) track.mv = item.rid
+                    track.pid = id
                     result.addTrack(track)
                 })
                 resolve(result)

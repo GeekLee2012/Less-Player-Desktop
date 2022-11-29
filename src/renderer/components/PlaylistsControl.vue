@@ -6,9 +6,11 @@ import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { Track } from '../../common/Track';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { useSettingStore } from '../store/settingStore';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { Playlist } from '../../common/Playlist';
 import { inject } from 'vue';
+import { storeToRefs } from 'pinia';
 
 const { visitPlaylist } = inject('appRoute')
 
@@ -25,6 +27,7 @@ const { getVendor, isPlatformValid } = usePlatformStore()
 const { addTrack, addTracks, playTrack, resetQueue, playNextTrack } = usePlayStore()
 const { showToast } = useAppCommonStore()
 const { addRecentPlaylist } = useUserProfileStore()
+const { isListenNumShow } = storeToRefs(useSettingStore())
 
 const visitItem = (item) => {
     const { checkbox } = props
@@ -82,6 +85,15 @@ const nextRadioTrack = (platform, channel, track) => {
     })
 }
 
+const getListenNumText = (item) => {
+    if(!isListenNumShow.value) return null
+    let num = item.listenNum
+    if(!num) return null
+    const unit = 10000
+    if(num >= unit) num = parseFloat(num / unit).toFixed(1) + "万"
+    return '播放：' + num
+}
+
 EventBus.on('radio-nextTrack', track => nextRadioTrack(track.platform, track.channel, track))
 </script>
 
@@ -92,6 +104,7 @@ EventBus.on('radio-nextTrack', track => nextRadioTrack(track.platform, track.cha
                 @click="visitItem(item)"
                 :cover="item.cover" 
                 :title="item.title"
+                :subtitle="getListenNumText(item)"
                 :playable="true"
                 :playAction="() => playItem(item)"
                 :checkbox="checkbox"

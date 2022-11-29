@@ -156,9 +156,11 @@ export const useSettingStore = defineStore('setting', {
                 index: 0,
             },  
             //VIP收费歌曲，是否自动切换到免费歌曲（可能来自不同平台），默认暂停播放
-            vipTransfer: false,  
+            vipTransfer: false, 
+            vipFlagShow: false, 
             //歌单分类栏随机显示
             categoryBarRandom: false, 
+            listenNumShow: false,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: false, 
         },
@@ -255,6 +257,9 @@ export const useSettingStore = defineStore('setting', {
         },
         getWindowZoom() {
             return this.common.winZoom
+        },
+        isListenNumShow() {
+            return this.track.listenNumShow
         }
     },
     actions: {
@@ -298,6 +303,12 @@ export const useSettingStore = defineStore('setting', {
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping
             this.setupAppSuspension()
+        },
+        toggleListenNumShow() {
+            this.track.listenNumShow = !this.track.listenNumShow
+        },
+        toggleVipFlagShow() {
+            this.track.vipFlagShow = !this.track.vipFlagShow
         },
         toggleTrayShow() {
             this.tray.show = !this.tray.show
@@ -355,9 +366,29 @@ export const useSettingStore = defineStore('setting', {
         allQualities() {
             return QUALITIES
         },
+        resolveFont(value) {
+            value = (value || '').trim()
+            value = value.replaceAll("'", "").replaceAll('"','')
+            if(value.includes(" ")) value = '"' + value + '"'
+            return value
+        },
+        formatFontFamily(value) {
+            let fontFamily = (value || '').trim()
+            const fonts = fontFamily.split(',')
+            if(fonts.length > 1) {
+                let temp = ''
+                fonts.reduce((prev, curr) => {
+                    temp = temp + "," + this.resolveFont(prev) + "," + this.resolveFont(curr)
+                    temp = temp.trim()
+                })
+                fontFamily = temp.substring(1).replaceAll(",,", ",")
+            } else {
+                fontFamily = this.resolveFont(fontFamily)
+            }
+            return fontFamily
+        },
         setFontFamily(value) {
-            const fontFamily = (value || '').trim()
-            this.common.fontFamily = fontFamily
+            this.common.fontFamily = this.formatFontFamily(value)
             this.setupFontFamily()
         },
         setFontWeight(value) {

@@ -56,7 +56,6 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --text-sub-size: 14px;
   --tab-title-text-size: 17px;
   --app-bg: transparent;
-  /* font-weight: 520; */
   font-family: var(--text-font-family);
 }
 

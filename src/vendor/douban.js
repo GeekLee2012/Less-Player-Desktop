@@ -131,6 +131,7 @@ export class DouBan {
                     const track = new Track(item.sid, DouBan.CODE, item.title, artist, album, duration, cover)
                     track.url = item.url
                     track.ssid = item.ssid
+                    track.pid = id
                     result.addTrack(track)
                 })
                 resolve(result)

@@ -1,52 +1,10 @@
 import { Howl, Howler } from 'howler';
 import { PLAY_STATE } from '../common/Constants';
 import EventBus from '../common/EventBus';
-import { Playlist } from './Playlist';
 import { Track } from './Track';
+import { WebAudioApi } from './WebAudioApi';
 
-let singleton = null, audioSource = null, analyser = null, eqFilters = null
-const EQ = [
-    {
-        frequency: 31,
-        type: 'lowshelf'
-    },
-    {
-        frequency: 62,
-        type: 'peaking'
-    },
-    {
-        frequency: 125,
-        type: 'peaking'
-    },
-    {
-        frequency: 250,
-        type: 'peaking'
-    },
-    {
-        frequency: 500,
-        type: 'peaking'
-    },
-    {
-        frequency: 1000,
-        type: 'peaking'
-    },
-    {
-        frequency: 2000,
-        type: 'peaking'
-    },
-    {
-        frequency: 4000,
-        type: 'peaking'
-    },
-    {
-        frequency: 8000,
-        type: 'peaking'
-    },
-    {
-        frequency: 16000,
-        type: 'highshelf'
-    }
-]
+let singleton = null
 
 //追求简洁、组合式API、单一责任
 export class Player {
@@ -54,6 +12,7 @@ export class Player {
         this.currentTrack = track
         this.sound = null
         this.retry = 0
+        this.webAudioApi = null
     }
 
     static get() {
@@ -173,20 +132,17 @@ export class Player {
     }
     
     __step() {
-        // Get the Howl we want to manipulate.
         const sound = this.getSound()
         if(!sound) return
         if(!sound.playing()) return 
-        // Determine our current seek position.
         const seek = sound.seek() || 0
         EventBus.emit('track-pos', seek)
         try {
-            this.analyseSound()
+            this.resolveSound()
         } catch(error) {
             console.log(error)
             this.retryPlay(1)
         }
-        // If the sound is still playing, continue stepping.
         requestAnimationFrame(this.__step.bind(this))
     }
     
@@ -208,25 +164,19 @@ export class Player {
         ++this.retry
     }
 
-    analyseSound () {
+    createWebAudioApi() {
+        if(this.webAudioApi) return
         const audioCtx = Howler.ctx
         if(!audioCtx) return 
         const audioNode = this.sound._sounds[0]._node
         if(!audioNode) return 
-        if(!analyser) {
-            analyser = audioCtx.createAnalyser()
-            //analyser.fftSize = 256
-            analyser.fftSize = 512
-            var distortion = audioCtx.createWaveShaper()
-            var gainNode = audioCtx.createGain()
-            var biquadFilters = this.createBiquadFilters(audioCtx)
-            eqFilters = biquadFilters
-            if(!audioSource) audioSource = audioCtx.createMediaElementSource(audioNode)
-            audioSource.connect(analyser)
-            analyser.connect(distortion)
-            this.connectBiquadFilters(biquadFilters, distortion, gainNode)
-            gainNode.connect(audioCtx.destination)
-        }
+        this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
+    }
+
+    resolveSound () {
+        this.createWebAudioApi()
+        if(!this.webAudioApi) return
+        const analyser = this.webAudioApi.getAnalyser()
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
         EventBus.emit('track-freqUnit8Data', freqData)
@@ -240,32 +190,8 @@ export class Player {
         })
     }
 
-    createBiquadFilters(audioCtx) {
-        if(!audioCtx) return []
-        let filters = EQ.map(function(band) {
-            let filter = audioCtx.createBiquadFilter()
-            filter.type = band.type
-            filter.gain.value = 0 // -40 ~ 40
-            filter.Q.value = 1
-            filter.frequency.value = band.frequency
-            return filter
-        })
-        return filters
-    }
-
-    connectBiquadFilters(filters, currentNode, nextNode) {
-        if(!filters || filters.length < 0) return
-        filters.reduce(function (prev, curr) {
-            prev.connect(curr)
-            return curr
-        }, currentNode).connect(nextNode)
-    }
-
     updateEQ(values) {
-        if(!eqFilters || eqFilters.length < 1) return
-        eqFilters.forEach((filter, index) => {
-            filter.gain.value = values[index]
-        })
+        if(this.webAudioApi) this.webAudioApi.updateEQ(values)
     }
 
 }
