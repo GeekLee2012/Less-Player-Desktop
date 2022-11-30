@@ -627,7 +627,6 @@ export class QQ {
                 loginUin: 0,
             }
             getJson(url, reqBody).then(json => {
-                console.log(json)
                 const playlist = json.cdlist[0]
                 result.id = id
                 result.dissid = playlist.dissid
@@ -850,7 +849,6 @@ export class QQ {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=5381&format=json&inCharset=utf8&outCharset=utf8"
             const reqBody = albumAllSongsReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
-                console.log(json)
                 const result = new Album(id)
                 const songList = json.req_1.data.songList
                 songList.forEach(item => {

@@ -84,7 +84,6 @@ export class KuWo {
                     + "&id=" + resolvedCate + "&httpsStatus=1&reqId=" + randomReqId()
             }
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
                 const pagination = json.data
                 //const page = pagination.pn
                 const data = pagination.data

@@ -608,7 +608,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --text-sub-color: #666;
   --text-subtitle-color: #999;
   --hl-color: #f9453f;
-  --hl-text-bg: linear-gradient(to top right, #f84860, #f9453f);
+  --hl-color: #f7314d;
+  --hl-text-bg: linear-gradient(to top right, #f84860, #f7314d);
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
@@ -618,23 +619,23 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-text-color: #fff;
   --svg-btn-color: #fff;
   --svg-text-btn-rbtn-border: 0.1px solid transparent;
-  --btn-bg: linear-gradient(to right, #f84860, #f9453f);
-  --btn-hover-bg: linear-gradient(to right, #f9453f, #c43631) !important;
+  --btn-bg: linear-gradient(to right, #f84860, #f7314d);
+  --btn-hover-bg: linear-gradient(to right, #f7314d, #c43631) !important;
   
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
-  --toggle-btn-active-bg: #f9453f;
+  --toggle-btn-active-bg: #f7314d;
   --toggle-active-thumb-bg: #fff;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #e7e1e3, #e7e1e3) !important;
-  --progress-bg: linear-gradient(to top right, #f9453f, #f84860);
+  --progress-bg: linear-gradient(to top right, #f7314d, #f84860);
   --slider-thumb-bg: var(--svg-color);
   
   /*滚动条*/
   --scrollbar-thumb-bg: #eee;
   /* 列表项 hover */
-  --list-item-hover: #f9453f33 !important;
+  --list-item-hover: #f7314d0f !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
   --main-left-border-color: #31313159;
@@ -644,8 +645,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
-  --pbq-hl-text-color: #f9453f;
-  --pbq-hl-border: linear-gradient(to top right, #f9453f, #f84860) 0 0 0 2;
+  --pbq-hl-text-color: #f7314d;
+  --pbq-hl-border: linear-gradient(to top right, #f7314d, #f84860) 0 0 0 2;
   --pbq-box-shadow: 0px 0px 10px #161616;
 
   /* 搜索框  */
@@ -653,7 +654,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --search-btn-bg: var(--btn-bg);
   --search-btn-svg-color: var(--svg-btn-color);
   --searchbar-text-color: #555;
-  --searchbar-border-color: #f9453f;
+  --searchbar-border-color: #f7314d;
 
   --search-btn-hover-bg: var(--btn-hover-bg);
   --search-btn-hover-svg-color: var(--search-btn-svg-color);
@@ -790,22 +791,22 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --main-center-bg: #f1eee7;
   --main-center-bg: transparent;
   /* 文本 */
-  --text-color: #323232;
+  --text-color: #282828;
   --text-sub-color: #464646;
   --text-subtitle-color: #999;
-  --hl-color: #fff;
-  --hl-color: #fff;
-  --hl-text-bg: #323232cb;
+  --hl-color: #ffffff;
+  --hl-color: #64903f;
+  --hl-text-bg: #64903f;
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
   /* 按钮 */
-  --svg-color: #323232cb;
+  --svg-color: #282828cb;
   --svg-hover-color: var(--hl-color);
   --svg-text-color: #666;
   --svg-btn-color: #323232cb;
-  --btn-bg: #fff;
-  --btn-hover-bg: linear-gradient(to top right, #66666666, #cfdec3ab) !important;
+  --btn-bg: #ffffffcb;
+  --btn-hover-bg: linear-gradient(to top right, #64903fcb, #cfdec3) !important;
   
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
@@ -815,12 +816,12 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #f1eee7, #f1eee7) !important;
   --progress-bg: linear-gradient(to top right, #666, #cfdec3);
-  --progress-bg: linear-gradient(to right, #64903f88, #64903f88);
+  --progress-bg: linear-gradient(to right, #64903f, #64903f);
   --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #919793;
   /* 列表项 hover */
-  --list-item-hover: #ffffff88 !important;
+  --list-item-hover: #ffffff36 !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
   --main-left-border-color: #ababab;
@@ -832,7 +833,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-color);
   --pbq-hl-text-color: #64903f;
-  --pbq-hl-border: linear-gradient(to top right, #666, #cfdec3) 0 0 0 2;
+  --pbq-hl-border: linear-gradient(to top right, #64903f, #cfdec3) 0 0 0 2;
   --pbq-box-shadow: 0px 0px 10px #161616;
 
   /* 搜索框 */
@@ -856,7 +857,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #161616ab;
   --logo-bg: var(--svg-color);
-  --logo-bg: #64903f88;
+  --logo-bg: #74a04f;
   --logo-text-bg: #fff;
   --logo-text-color: var(--logo-bg);
 
@@ -983,11 +984,10 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --text-color: #161616;
   --text-sub-color: #434343;
   --text-subtitle-color: #888;
-  --hl-color: #0f4a9a;
-  --hl-color: #62a0f6;
   --hl-color: #42a5f5;
-  --hl-text-bg: linear-gradient(to right, #2f80ed, #56ccf2);
-  --hl-text-bg: linear-gradient(to top right, #1976d2, #42a5f5);
+  --hl-color: #0753cb;
+  --hl-color: #2783fb;
+  --hl-text-bg: linear-gradient(to top right, #2783fb, #0753cb);
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
@@ -997,10 +997,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-hover-color: var(--hl-color);
   --svg-text-color: #fff;
   --svg-btn-color: #fff;
-  --btn-bg: linear-gradient(to right, #2f80ed, #56ccf2);
-  --btn-bg: linear-gradient(to right, #42a5f5, #56ccf2);
-  --btn-hover-bg: linear-gradient(to top right, #2f80ed, #fff) !important;
-  --btn-hover-bg: linear-gradient(to top right, #1976d2, #42a5f5) !important;
+  --btn-bg: linear-gradient(to right, #2783fb, #2783fb);
+  --btn-hover-bg: linear-gradient(to top right, #2783fb, #0753cb) !important;
   
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
@@ -1009,14 +1007,12 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --toggle-active-thumb-bg: #fff;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #99999966, #99999966) !important;
-  --progress-bg: linear-gradient(to top right, #1976d2, #42a5f5);
-  --progress-bg: linear-gradient(to top right, #42a5f5, #42a5f5);
+  --progress-bg: linear-gradient(to top right, #0753cb, #2783fb);
   --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
-  --scrollbar-thumb-bg: #ababab;
+  --scrollbar-thumb-bg: #989898;
   /* 列表项 hover */
-  --list-item-hover: #16161633 !important;
-  --list-item-hover: #ffffffcb !important;
+  --list-item-hover: #ffffff66 !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
   --main-left-border-color: #888;
@@ -1027,8 +1023,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
-  --pbq-hl-border: linear-gradient(to top right, #f84860, #fc7688) 0 0 0 2;
-  --pbq-hl-border: linear-gradient(to top right, #2f80ed, #56ccf2) 0 0 0 2;
+  --pbq-hl-border: linear-gradient(to top right, #2783fb, #2783fb) 0 0 0 2;
   --pbq-box-shadow: 0px 0px 10px #161616;
 
   /* 搜索框 */
@@ -1053,9 +1048,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --checkbox-bg: #fff;
   --logo-bg: linear-gradient(to top right, #ababab, #fff);
-  --logo-bg: #56ccf2;
+  --logo-bg: #0753cb;
   --logo-text-bg: #fff;
-  --logo-text-color: #56ccf2;
+  --logo-text-color: #0753cb;
 
   --category-view-border: 0.1px solid var(--main-left-border-color);
   --input-bg: #ffffffcb;
