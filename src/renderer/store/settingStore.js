@@ -76,8 +76,8 @@ const THEMES = [{
 }, {
     id: 'blue',
     name: '蓝色1',
-    color: '#56ccf2',
-    hlColor: '#42a5f5',
+    color: '#2783fb',
+    hlColor: '#2783fb',
     dark: false
 }, {
     id: 'blue2',
