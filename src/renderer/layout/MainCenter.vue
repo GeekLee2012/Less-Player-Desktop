@@ -24,9 +24,10 @@ const  { visitRoute, visitSetting } = inject('appRoute')
 const { playlistCategoryViewShow, artistCategoryViewShow, 
     radioCategoryViewShow, videoPlayingViewShow,
     playingViewThemeIndex, playingViewShow, 
-    audioEffectViewShow } = storeToRefs(useAppCommonStore())
+    audioEffectViewShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideAllCategoryViews, hideAllCtxMenus,
-    hidePlaybackQueueView, togglePlaybackQueueView, } = useAppCommonStore()
+    hidePlaybackQueueView, togglePlaybackQueueView, 
+    toggleLyricToolbar, hideLyricToolbar } = useAppCommonStore()
 
 const { togglePlay, switchPlayMode, 
     playPrevTrack, playNextTrack,
@@ -55,6 +56,10 @@ const registryDefaultLocalKeys = () => {
     Mousetrap.bind(['p'], visitSetting, 'keyup')
     // 打开当前播放
     Mousetrap.bind(['q'], togglePlaybackQueueView, 'keyup')
+    // 打开/关闭歌词设置
+    Mousetrap.bind(['l'], () => {
+        if(playingViewShow.value) toggleLyricToolbar()
+    }, 'keyup')
 }
 
 const setPlayMetaSize = () => {
@@ -187,6 +192,18 @@ const setPlayingLyricCtlSize = () => {
     el.style.height = height + "px"
 }
 
+const setVisualPlayingViewCenterSize = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
+    const padding = 56 + 36
+    const height = clientHeight - padding
+    const el = document.querySelector(".visual-playing-view .center")
+    if(!el) return 
+    //el.style.width = width + "px"
+    el.style.height = height + "px"
+}
+
 const setVisualPlayingViewLyricCtlSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
@@ -253,6 +270,7 @@ const setPlayingViewSize = () => {
     setPlayingCoverSize()
     setPlayingLyricCtlSize()
 
+    setVisualPlayingViewCenterSize()
     setVisualPlayingViewCoverSize()
     setVisualPlayingViewLyricCtlSize()
     setVisualPlayingViewCanvasSize()
@@ -267,6 +285,18 @@ const setAudioEffectViewAlignment = () => {
     const top = (clientHeight - height) / 2
     view.style.left = left + 'px'
     view.style.top = top + 'px'
+}
+
+const setLyricToolbarPos = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const el = document.querySelector("#lyric-toolbar")
+    if(!el) return
+    const width = 150, height = 446, padding = 30
+    const left = (clientWidth - width - padding)
+    const top = (clientHeight - height) / 2
+    //el.style.right = padding + 'px'
+    el.style.left = left + 'px'
+    el.style.top = top + 'px'
 }
 
 const setupLayout = () => {
@@ -307,9 +337,10 @@ onMounted (() => {
         setVideoViewSize()
         //音效窗口自动居中
         setAudioEffectViewAlignment()
+        setLyricToolbarPos()
+
         //隐藏上下文菜单
         hideAllCtxMenus()
-
         //放在最后执行确保缩放
         setupWindowZoom()
     })
@@ -346,6 +377,8 @@ EventBus.on("app-layout", setupLayout)
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
 watch([ videoPlayingViewShow ], setVideoViewSize)
 watch([ audioEffectViewShow ], setAudioEffectViewAlignment)
+watch([ playingViewShow ], hideLyricToolbar)
+watch(lyricToolbarShow, setLyricToolbarPos)
 //watch([ playingViewThemeIndex ], setPlayingViewSize)
 </script>
 

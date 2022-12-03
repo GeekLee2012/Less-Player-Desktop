@@ -8,6 +8,7 @@ import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { useSettingStore } from '../store/settingStore';
 
 const props = defineProps({
     track: Object //Track
@@ -15,12 +16,13 @@ const props = defineProps({
 
 const { playing } = storeToRefs(usePlayStore())
 const { togglePlay } = usePlayStore()
-const { toggleVideoPlayingView } = useAppCommonStore()
+const { toggleVideoPlayingView, toggleLyricToolbar } = useAppCommonStore()
+const { lyric } = storeToRefs(useSettingStore())
 
 const currentIndex = ref(-1)
 const hasLyric = ref(false)
 const lyricData = ref(Track.lyricData(props.track))
-let offset = Track.lyricOffset(props.track)
+let presetOffset = Track.lyricOffset(props.track)
 
 let destScrollTop = -1
 let rafId = null
@@ -29,11 +31,14 @@ let isUserMouseWheel = false
 let userMouseWheelCancelTimer = null
 
 const renderAndScrollLyric = (secs) => {
-    secs = Math.max(0, (secs + offset))
+    if(!hasLyric.value) return
+
+    const userOffset = lyric.value.offset / 1000
+    secs = Math.max(0, (secs + presetOffset + userOffset))
     const MMssSSS = toMMssSSS(secs * 1000)
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     const lines = lyricWrap.querySelectorAll('.line')
-    //Hightlight 
+    //Highlight 
     //TODO算法存在Bug
     let index = -1
     for(var i = 0; i < lines.length; i++) {
@@ -44,9 +49,11 @@ const renderAndScrollLyric = (secs) => {
             break
         }
     }
+
+    setupLyricLines()
+
     if(index < 0) return
     currentIndex.value = index
-
     //Scroll
     if(isUserMouseWheel) return 
     const scrollIndex = index > 1 ? (index - 1) : 0
@@ -56,6 +63,7 @@ const renderAndScrollLyric = (secs) => {
     destScrollTop = maxScrollTop * (scrollIndex / (lines.length - 1))
     lyricWrap.scrollTop = destScrollTop
     //smoothScroll(lyricWrap, 300)
+
 }
 
 //参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
@@ -85,18 +93,12 @@ function smoothScroll(target, duration) {
     easeInOutScroll()
 }
 
-EventBus.on('track-pos', secs => {
-    try {
-        renderAndScrollLyric(secs)
-    } catch(error) {
-        console.log(error)
-    }
-})
-
 const reloadLyricData = (track) => {
     hasLyric.value = Track.hasLyric(track)
     lyricData.value = Track.lyricData(track)
-    offset = Track.lyricOffset(track)
+    presetOffset = Track.lyricOffset(track)
+
+    setTimeout(setupLyricLines, 300)
 }
 
 const onUserMouseWheel = (e) => {
@@ -108,19 +110,56 @@ const onUserMouseWheel = (e) => {
     }, 3000)
 }
 
+const loadLyric = () => EventBus.emit('track-loadLyric', props.track)
 const playMv = () => EventBus.emit('track-playMv', props.track)
 
-watch(() => props.track, (nv, ov) => reloadLyricData(nv))
+const setupLyricLines = () => {
+    const els = document.querySelectorAll(".lyric-ctl .center .line")
+    if(!els) return
+    const fontSize = lyric.value.fontSize
+    const hlFontSize = lyric.value.hlFontSize
+    const fontWeight = lyric.value.fontWeight
+    const lineHeight = lyric.value.lineHeight
+    const lineSpacing = lyric.value.lineSpacing
+    els.forEach(el => {
+        el.style.lineHeight = lineHeight + "px"
+        el.style.marginTop = lineSpacing + "px"
+
+        const classAttr = el.getAttribute('class')
+        if(classAttr.includes('current')) { //高亮行
+            el.style.fontSize = hlFontSize  + "px"
+            el.style.fontWeight = 'bold'
+        } else { //普通行
+            el.style.fontSize = fontSize + "px"
+            el.style.fontWeight = fontWeight
+        }
+    })
+}
+
+EventBus.on('track-pos', secs => {
+    try {
+        renderAndScrollLyric(secs)
+    } catch(error) {
+        console.log(error)
+    }
+})
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
 EventBus.on('lyric-userMouseWheel', onUserMouseWheel)
+EventBus.on('lyric-fontSize', setupLyricLines)
+EventBus.on('lyric-hlFontSize', setupLyricLines)
+EventBus.on('lyric-fontWeight', setupLyricLines)
+EventBus.on('lyric-lineHeight', setupLyricLines)
+EventBus.on('lyric-lineSpacing', setupLyricLines)
 
 onMounted(() => {
-    EventBus.emit('track-loadLyric', props.track)
+    loadLyric()
 })
+
+watch(() => props.track, (nv, ov) => reloadLyricData(nv))
 </script>
 
 <template>
-    <div class="lyric-ctl" >
+    <div class="lyric-ctl" @contextmenu="toggleLyricToolbar">
         <div class="header">
             <div class="audio-title">
                 <span class="mv" v-show="Track.hasMv(track)">

@@ -8,6 +8,7 @@ import CommonContextMenu from './components/CommonContextMenu.vue';
 import AddToListSubmenu from './components/addToListSubmenu.vue';
 import { useUserProfileStore } from './store/userProfileStore';
 import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
+import LyricToolbar from './components/LyricToolbar.vue';
 import PlayingView from './views/PlayingView.vue';
 import VisualPlayingView from './views/VisualPlayingView.vue';
 import AudioEffectView from './views/AudioEffectView.vue';
@@ -24,7 +25,7 @@ const { playNotificationShow, commonNotificationShow,
   artistListSubmenuShow, commonCtxMenuCacheItem,
   playbackQueueViewShow, playingViewShow, 
   videoPlayingViewShow, playingViewThemeIndex,
-  audioEffectViewShow } = storeToRefs(useAppCommonStore())
+  audioEffectViewShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu, 
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -222,6 +223,9 @@ onMounted(()=> {
 
     <AudioEffectView id="audio-effect-view" v-show="audioEffectViewShow">
     </AudioEffectView>
+
+    <LyricToolbar id="lyric-toolbar" v-show="lyricToolbarShow">
+    </LyricToolbar>
 </template>
 
 <style>
@@ -258,5 +262,12 @@ onMounted(()=> {
     z-index: 404;
     background: var(--app-bg);
     box-shadow: var(--pbq-box-shadow);
+}
+
+#lyric-toolbar {
+    position: absolute;
+    top: 202px;
+    right: 30px;
+    z-index: 88;
 }
 </style>

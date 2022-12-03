@@ -21,10 +21,10 @@ const { playTrack, playNextTrack,
     toggleVolumeMute, updateVolumeByOffset,
     updateCurrentTime, setPlaying  } = usePlayStore()
 const { getVendor, isLocalMusic } = usePlatformStore()
-const { videoPlayingViewShow } = storeToRefs(useAppCommonStore())
+const { playingViewShow ,videoPlayingViewShow, } = storeToRefs(useAppCommonStore())
 const { showPlayNotification, hidePlayNotification, 
     togglePlaybackQueueView, toggleVideoPlayingView, 
-    showFailToast } = useAppCommonStore()
+    showFailToast, toggleLyricToolbar } = useAppCommonStore()
 const { addRecentSong, addRecentRadio, addRecentAlbum } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit } = storeToRefs(useSettingStore())
 
@@ -245,6 +245,9 @@ const registryIpcRenderderListeners = () => {
     ipcRenderer.on('globalShortcut-toggleVolumeMute', toggleVolumeMute)
     ipcRenderer.on('globalShortcut-visitSetting', () => visitSetting())
     ipcRenderer.on('globalShortcut-togglePlaybackQueue', togglePlaybackQueueView)
+    ipcRenderer.on('globalShortcut-toggleLyricToolbar', () => {
+        if(playingViewShow.value) toggleLyricToolbar() 
+    })
     
     //其他事件
     ipcRenderer.on('app-quit', () => {

@@ -125,7 +125,7 @@ const drawSpectrum = (canvas, freqData, alignment) => {
     for(var i = 0; i < dataLen; i++) {
         //if( (x + barWidth + spacing) >= WIDTH) break
 
-        barHeight = freqData[i]/7
+        barHeight = freqData[i]/ 255 * HEIGHT 
         barHeight = barHeight > 0 ? barHeight : 1
 
         canvasCtx.fillStyle = spectrumColor
@@ -250,7 +250,7 @@ onUnmounted(() => setDisactived(true))
                 </div>
             </div>
             <div class="center">
-                <div class="left-view">
+                <div class="left">
                     <div class="cover">
                         <img v-lazy="currentTrack.cover" :class="{ rotation: playing }"/>
                     </div>
@@ -265,7 +265,7 @@ onUnmounted(() => setDisactived(true))
                         <span class="t-duration" v-html="Track.mmssDuration(currentTrack)"></span>
                     </div>
                     <div class="action">
-                        <div class="btm-left-view">
+                        <div class="btm-left">
                             <div @click="toggleFavorite">
                                 <svg v-show="!favorited" width="21" height="21" viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M1024,299.77c-.89,7.24-1.74,14.5-2.67,21.74-5.4,41.95-19.53,81-39,118.35-24.74,47.39-56.62,89.8-91.22,130.27-48.69,57-101.85,109.6-156.46,160.77C661.69,799.26,588.19,867,514.93,935.05c-.85.78-1.75,1.49-2.85,2.41-1.09-.89-2.14-1.65-3.09-2.52q-101.8-92.36-203.56-184.77c-58.71-53.61-116.12-108.59-168.2-168.81-39.12-45.23-74.7-92.93-100.8-147.1-18.8-39-31.17-79.91-35.23-123.16-.32-3.45-.8-6.89-1.2-10.33v-36c1-7.74,1.79-15.5,2.86-23.23,8.06-57.93,30.88-109.28,71.21-151.7,67.09-70.55,150.24-98.35,246.11-86,75.62,9.71,138.64,44.83,189.43,101.75.74.82,1.61,1.52,2.53,2.39.91-1,1.61-1.66,2.26-2.4a297.6,297.6,0,0,1,98.07-74.34C690-5.4,769.66-11.19,849.33,21.27,948,61.45,1004.25,136.62,1021.1,241.55c1.24,7.69,1.95,15.47,2.9,23.21ZM922.22,282.9c-1.08-10.76-1.48-21.64-3.33-32.27-10-57.28-39.78-101.12-91.95-127.45-54.58-27.54-110.52-27-165.67-1.07-44.78,21.07-78.08,53.89-96.65,100.47-1.2,3-2.93,3.41-5.65,3.4-29.5-.06-59-.1-88.49.05-3.58,0-5.17-1.2-6.63-4.39C430.29,148.12,342.54,89.86,249.42,105.81c-41,7-76.09,25.21-103.36,56.83-38.87,45.08-49.77,97.9-40.53,155.58,5.72,35.66,20,68.21,38.16,99.15C171,463.93,205.43,505,242,544.39c57.44,61.87,119.67,118.78,182.1,175.48,28,25.43,56.23,50.62,84.27,76,5.68,5.15,6.89,5.4,12.43.28C568,752.47,615.47,709.05,662.35,665c54.55-51.26,108-103.64,156.07-161.17C846.69,470,872.66,434.6,892.47,395,910.12,359.76,921.42,322.79,922.22,282.9Z"/></g></g></svg>
                                 <svg v-show="favorited" class="love-btn" width="21" height="21" viewBox="0 0 1024 937.53" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M1024,264.78v35c-.41,3.45-.89,6.89-1.23,10.34-3.89,39.7-15.25,77.26-32.22,113.22-23.28,49.33-54.76,93.24-89.46,135-49.41,59.44-104,113.93-160.28,166.77-74.94,70.39-150.55,140-225.89,210-.93.87-2,1.58-3.1,2.42-1.47-1.32-2.72-2.41-3.93-3.54-20.27-18.82-40.33-37.87-60.84-56.43C396.63,832,345.74,786.88,295.54,741c-52.69-48.1-103.88-97.76-151.07-151.36-37.41-42.48-71.92-87-98.75-137.15C23.93,411.83,8.38,369.06,2.64,323,1.71,315.62.88,308.2,0,300.79v-36c1-7.74,1.79-15.51,2.86-23.24,8.06-57.92,30.88-109.28,71.21-151.7C141.16,19.28,224.31-8.52,320.18,3.78c75.62,9.71,138.64,44.83,189.43,101.76.74.82,1.61,1.52,2.53,2.39.91-1,1.61-1.66,2.26-2.4a297.49,297.49,0,0,1,98.07-74.35C690-5.4,769.66-11.19,849.33,21.27,948,61.46,1004.25,136.63,1021.1,241.57,1022.34,249.26,1023.05,257,1024,264.78Z"/></g></g></svg>
@@ -281,9 +281,6 @@ onUnmounted(() => setDisactived(true))
                             <PlayControl></PlayControl>
                         </div>
                         <div class="btm-right">
-                            <!--
-                            <VolumeBar ref="volumeBar"></VolumeBar>
-                            -->
                             <div class="theme" @click="switchPlayingViewTheme">
                                 <svg width="20" height="20" viewBox="0 0 853.81 853.37" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M.06,469.31c0-55.84-.16-111.67.05-167.5.25-67,25.33-123,76.46-166.42,39.71-33.76,86.24-50,138.39-50q104.75,0,209.49,0c23.75,0,41.8,15,44.51,36.72,3.26,26.11-15.9,48.33-42.22,48.47-37.17.19-74.33.05-111.5.05-33.67,0-67.33-.05-101,0-63.74.12-116.53,44.74-127.09,107.56a130.89,130.89,0,0,0-1.52,21.4c-.09,113-.37,226,.07,339,.2,52.53,24.66,91.22,70.88,115.88,17.94,9.56,37.46,13.42,57.81,13.41,113.16,0,226.33.16,339.49-.09,65.18-.15,117.4-45.14,127.53-109.26a138,138,0,0,0,1.34-21.42q.15-104.5.07-209c0-21.13,12.59-37.72,32.23-42.79,26-6.7,52.44,12.38,52.76,39.21.56,46.16.25,92.33.25,138.49,0,27.84.26,55.68-.23,83.5-1.51,86.76-60.89,167.32-143.17,195A225.82,225.82,0,0,1,552,853.35q-167.76,0-335.5,0c-91.18,0-169.06-52.84-202.29-137.38C4.32,690.73.08,664.38.07,637.3Q0,553.3.06,469.31Z"/><path d="M533.61,467.94c.48,5.94,1,11.54,1.39,17.15,5.7,86.42-55.85,162.13-141.7,173.43-14.24,1.87-28.91,1.43-43.32.72-33.92-1.67-66.38,3.93-97.25,18-15.75,7.17-30.88,7.78-45.52-2.07-9.61-6.47-16.11-15.84-21.65-25.81-13.09-23.55-16.68-49.18-14.25-75.46C178,502.27,205.89,439,251.05,383.81c31-37.91,72.91-55.81,122-56.23,3.65,0,7.29.54,10.92.83,1.59-8.8,2.62-17.72,4.85-26.32,7.32-28.25,22.08-51.63,45.29-69.87q134-105.32,267.61-211.1c56.76-44.91,138-14.55,150.59,56.72,4.62,26.26-1.54,50.54-18,71.48q-109,138.44-218.55,276.39c-18.68,23.41-44.88,35.46-74.11,40.91C539.19,467.07,536.72,467.43,533.61,467.94ZM255,584.49c14.32-2.64,27.17-5.41,40.14-7.31,20.14-2.95,40.48-4.9,60.74-2.22,34.48,4.56,67.88-11.24,84.07-40.71a83.78,83.78,0,0,0-9.89-94.75c-31.41-36.31-86-35.39-116,2.13a270.61,270.61,0,0,0-52.05,106.29C259.2,559.82,257.41,572,255,584.49Zm214.5-248.07a85.44,85.44,0,0,0,1.3,9.61c4.64,19.32,16.72,31.79,36,35.94,18.58,4,35.06-.52,47.34-16q93.67-118.38,187.27-236.81Q753.42,114,765.33,98.91c3.32-4.25,3.48-8.24.63-11.25s-7-3-11.58.55l-1.58,1.23Q620.06,194.35,487.29,299.22C475.34,308.64,470.31,321,469.53,336.42Z"/></g></g></svg>
                             </div>
@@ -293,7 +290,7 @@ onUnmounted(() => setDisactived(true))
                         </div>
                     </div>
                 </div>
-                <div class="lyric-view">
+                <div class="lyric-wrap">
                     <LyricControl :track="currentTrack" @mousewheel="onUserMouseWheel">
                     </LyricControl>
                 </div>
@@ -367,15 +364,16 @@ onUnmounted(() => setDisactived(true))
     margin-right: 99px;
 
     margin: 0px 60px;
-    padding-bottom: 30px;
+    overflow: hidden;
+    height: 625px;
 }
 
-.visual-playing-view .center .left-view,
-.visual-playing-view .center .lyric-view {
+.visual-playing-view .center .left,
+.visual-playing-view .center .lyric-wrap {
     flex: 1;
 }
 
-.visual-playing-view .center .left-view {
+.visual-playing-view .center .left {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -397,7 +395,7 @@ onUnmounted(() => setDisactived(true))
 }
 
 
-.visual-playing-view .center .left-view .audio-time {
+.visual-playing-view .center .left .audio-time {
     margin: 0px 8px;
 }
 
@@ -445,6 +443,7 @@ onUnmounted(() => setDisactived(true))
 
 .visual-playing-view canvas {
     flex: 1;
+    overflow: hidden;
 }
 
 .visual-playing-view .action svg:hover {
@@ -455,7 +454,7 @@ onUnmounted(() => setDisactived(true))
     fill: var(--svg-hover-color) !important;
 }
 
-.visual-playing-view .action .btm-left-view,
+.visual-playing-view .action .btm-left,
 .visual-playing-view .action .btm-right {
     width: 150px;
     display: flex;
@@ -463,7 +462,7 @@ onUnmounted(() => setDisactived(true))
     align-items: center;
 }
 
-.visual-playing-view .action .btm-left-view {
+.visual-playing-view .action .btm-left {
     justify-content: flex-start;
 }
 
@@ -491,7 +490,7 @@ onUnmounted(() => setDisactived(true))
     fill: var(--svg-hover-color) !important;
 }
 
-.visual-playing-view .center .lyric-view {
+.visual-playing-view .center .lyric-wrap {
     margin: 30px 0px 0px 30px;
 }
 </style>

@@ -813,6 +813,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --toggle-btn-border-color: #ccc;
   --toggle-btn-active-bg: #fff;
   --toggle-active-thumb-bg: var(--bg-color);
+  --toggle-active-thumb-bg: #64903f;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #f1eee7, #f1eee7) !important;
   --progress-bg: linear-gradient(to top right, #666, #cfdec3);
@@ -971,6 +972,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 音效 */
   --aeview-bg: var(--ctx-menu-bg);
   --aeview-left-bg: #919343;
+  --aeview-left-bg: #c1c373;
   --aeview-border: 1px solid var(--main-left-border-color);
   --aeview-list-item-bg: #f3f3f3;
   --aeview-list-item-color: var(--text-color);

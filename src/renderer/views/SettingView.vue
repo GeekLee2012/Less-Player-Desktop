@@ -271,7 +271,7 @@ onMounted(checkForUpdate)
                         </div>
                         <div class="spacing">
                             <span>字重:</span>
-                            <input type="number" :value="common.fontWeight" placeholder="范围100 - 1000，默认400" 
+                            <input type="number" :value="common.fontWeight" placeholder="粗细，范围100-1000，默认400" 
                                 min="100" max="1000" step="10"
                                 @input="updateFontWeight" 
                                 @focusout="updateFontWeight"
@@ -438,7 +438,7 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                         <SvgTextButton text="恢复默认" style="display: none"></SvgTextButton>
                     </div>
-                    <div v-for="(item,index) in keys.data"
+                    <div v-for="(item, index) in keys.data"
                         :class="{ last: index == (keys.data.length - 1) }" >
                         <span>{{ item.name }}：</span>
                         <KeysInputControl :value="item.binding" :class="{ keysInputAdptWidth: !keys.global }"></KeysInputControl>

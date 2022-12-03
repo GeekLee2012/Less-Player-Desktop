@@ -34,6 +34,8 @@ export const useAppCommonStore = defineStore('appCommon', {
         exitToHomeBtnShow: false,
         playingViewThemeIndex: 0,
         spectrumIndex: 0,
+        //歌词设置
+        lyricToolbarShow: false,
     }),
     getters: {
         isPlaylistMode() {
@@ -230,6 +232,12 @@ export const useAppCommonStore = defineStore('appCommon', {
         ,
         switchSpectrumIndex() {
             this.spectrumIndex = (this.spectrumIndex + 1) % 2
+        },
+        hideLyricToolbar() {
+            this.lyricToolbarShow = false
+        },
+        toggleLyricToolbar() {
+            this.lyricToolbarShow = !this.lyricToolbarShow
         }
     },
     persist: {

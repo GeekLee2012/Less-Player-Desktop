@@ -104,10 +104,12 @@ const registryGlobalShortcuts = () => {
     // 打开设置
     'Shift+P': 'visitSetting',
     // 打开 / 关闭当前播放
-    'Shift+Q': 'togglePlaybackQueue'
+    'Shift+Q': 'togglePlaybackQueue',
+    // 打开 / 关闭歌词设置
+    'Shift+L': 'toggleLyricToolbar'
   }
 
-  const activeWindowValues = ['visitSetting', 'togglePlaybackQueue']
+  const activeWindowValues = ['visitSetting', 'togglePlaybackQueue', 'toggleLyricToolbar']
   for(const [ key, value ] of Object.entries(config)) {
     globalShortcut.register(key, () => {
       sendToRenderer('globalShortcut-' + value)
