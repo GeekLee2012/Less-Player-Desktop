@@ -296,6 +296,7 @@ export const useSettingStore = defineStore('setting', {
             if(!value) return
             const zoom = value || 100
             if(zoom < 50 || zoom > 300) return
+            if(this.common.winZoom == zoom) return
             this.common.winZoom = zoom
             this.setupWindowZoom()
         },
