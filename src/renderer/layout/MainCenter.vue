@@ -34,7 +34,7 @@ const { togglePlay, switchPlayMode,
     toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
 
 const { layout } = storeToRefs(useSettingStore())
-const { setupWindowZoom } = useSettingStore()
+const { setupWindowZoomWithoutResize } = useSettingStore()
 
 const minAppWidth = 1080, minAppHeight = 720 
 
@@ -342,7 +342,7 @@ onMounted (() => {
         //隐藏上下文菜单
         hideAllCtxMenus()
         //放在最后执行确保缩放
-        setupWindowZoom()
+        setupWindowZoomWithoutResize()
     })
     
     //点击事件监听

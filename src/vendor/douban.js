@@ -82,7 +82,7 @@ export class DouBan {
                     if(!cateName) return
                     const chnnItems = channels[key].map(item => {
                         const cover = item.cover || item.banner
-                        const title = cateName + '| ' + item.name
+                        const title = cateName + ' - ' + item.name
                         const playlist = new Playlist(DouBan.MHZ_PREFIX + item.id, DouBan.CODE , cover, title)
                         playlist.isRadioType = true
                         return playlist
@@ -105,7 +105,7 @@ export class DouBan {
                 //其他兆赫
                 channels.forEach(item => {
                     const cover = item.avatar
-                    const title = '艺术家| ' + item.name_usual + ' 系'
+                    const title = '艺术家 - ' + item.name_usual + ' 系'
                     const playlist = new Playlist(DouBan.MHZ_PREFIX + item.channel, DouBan.CODE , cover, title)
                     playlist.isRadioType = true
                     result.data.push(playlist)

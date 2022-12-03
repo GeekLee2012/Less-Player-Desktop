@@ -341,11 +341,16 @@ export const useSettingStore = defineStore('setting', {
         resetKeys() {
             
         },
-        setupWindowZoom() {
+        setupWindowZoom() { // 
             const winZoom = this.common.winZoom
             if(ipcRenderer) ipcRenderer.send("app-zoom", winZoom)
             EventBus.emit("app-zoom", winZoom)
         }, 
+        setupWindowZoomWithoutResize() {
+            const winZoom = this.common.winZoom
+            if(ipcRenderer) ipcRenderer.send("app-zoom-noResize", winZoom)
+            EventBus.emit("app-zoom", winZoom)
+        },
         setupAppSuspension() {
             if(ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
         },
