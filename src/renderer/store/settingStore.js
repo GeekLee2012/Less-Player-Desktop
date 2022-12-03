@@ -293,7 +293,10 @@ export const useSettingStore = defineStore('setting', {
             return THEMES[index].hlColor
         },
         setWindowZoom(value) {
-            this.common.winZoom = value
+            if(!value) return
+            const zoom = value || 100
+            if(zoom < 50 || zoom > 300) return
+            this.common.winZoom = zoom
             this.setupWindowZoom()
         },
         setTrackQualityIndex(index) {
@@ -341,7 +344,7 @@ export const useSettingStore = defineStore('setting', {
         resetKeys() {
             
         },
-        setupWindowZoom() { // 
+        setupWindowZoom() { 
             const winZoom = this.common.winZoom
             if(ipcRenderer) ipcRenderer.send("app-zoom", winZoom)
             EventBus.emit("app-zoom", winZoom)

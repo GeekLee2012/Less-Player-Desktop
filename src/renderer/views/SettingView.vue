@@ -249,9 +249,18 @@ onMounted(checkForUpdate)
                 <span class="cate-name">通用</span>
                 <div class="content">
                     <div class="window-zoom">
+                        <!--
                         <div class="zoom-title">窗口缩放：<span v-html="getWinZoom()"></span></div>
+                        -->
+                        <div class="zoom-title">窗口缩放 (%)：
+                            <input type="number" min="50" max="300" step="1"
+                                :value="common.winZoom" 
+                                @keydown.enter="updateWinZoom" 
+                                @focusout="updateWinZoom" />
+                            <div class="tip-text">提示：范围50 - 300，默认100，Enter键或焦点离开输入框时生效</div>
+                        </div>
                         <div>
-                            <input type="range" min="50" max="300" :value="common.winZoom" step="5" 
+                            <input type="range" min="50" max="300" :value="common.winZoom" step="2" 
                                 @input="updateWinZoom" list="zoom-tickmarks"/>
                         </div>
                         <div>
@@ -288,7 +297,7 @@ onMounted(checkForUpdate)
                 <span class="cate-name">播放歌曲</span>
                 <div class="content">
                     <div>
-                        <span>优先音质（暂时无法支持）：</span>
+                        <span>优先音质（目前无法支持）：</span>
                         <span v-for="(item,index) in allQualities()"
                             class="quality-item"
                             :class="{ active: index == track.quality.index }"
@@ -301,6 +310,7 @@ onMounted(checkForUpdate)
                         <ToggleControl @click="toggleVipTransfer" 
                             :value="track.vipTransfer">
                         </ToggleControl>
+                        <div class="tip-text">提示：目前无法支持</div>
                     </div>
                     <div>
                         <span>歌曲显示VIP标识：</span>
@@ -325,6 +335,7 @@ onMounted(checkForUpdate)
                         <ToggleControl @click="togglePlayingWithoutSleeping" 
                             :value="track.playingWithoutSleeping">
                         </ToggleControl>
+                        <div class="tip-text">提示：不会影响系统熄屏、锁屏</div>
                     </div>
                 </div>
             </div>
@@ -437,6 +448,7 @@ onMounted(checkForUpdate)
                             :value="keys.global" >
                         </ToggleControl>
                         <SvgTextButton text="恢复默认" style="display: none"></SvgTextButton>
+                        <div class="tip-text" v-show="false">提示：目前暂时不支持自定义</div>
                     </div>
                     <div v-for="(item, index) in keys.data"
                         :class="{ last: index == (keys.data.length - 1) }" >
@@ -532,7 +544,7 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .tip-text {
-    font-size: 14px;
+    font-size: 13.5px;
     margin-left: 15px;
     color: var(--text-sub-color);
 }
@@ -672,11 +684,23 @@ onMounted(checkForUpdate)
     flex-direction: row;
     flex: 1;
     width: 100%;
+    align-items: center;
 }
 
 #setting-view .common .window-zoom .zoom-title span {
     margin-left: 18px;
     padding-top: 2px;
+}
+
+#setting-view .common .window-zoom .zoom-title input {
+    border-radius: 3px;
+    padding: 8px;
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-bg);
+    margin-left: 15px;
+    color: var(--text-color);
+    text-align: center;
+    min-width: 66px;
 }
 
 #setting-view .layout .content .layout-item,
