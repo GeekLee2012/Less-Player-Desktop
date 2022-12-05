@@ -6,7 +6,7 @@ const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
   USER_AGENT, USER_AGENT_APPLE, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
 const path = require('path')
 const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX, 
-  randomTextWithinAlphabetNums, getDownloadDir, removePath } = require('./common')
+  randomTextWithinAlphabetNums, getDownloadDir, removePath, filterPath } = require('./common')
 
 let mainWin = null, powerSaveBlockerId = -1, appTray = null
 const appWidth = 1080, appHeight = 720
@@ -253,6 +253,23 @@ const registryGlobalListeners = () => {
     })
     return result.response == 0
   })
+
+  ipcMain.handle('download-checkExists', async (event, ...args) => {
+    //TODO 实现有些奇怪，目前仅支持and逻辑
+    const { nameContains } = args[0]
+    const downloadDir = getDownloadDir()
+    const result = await filterPath(downloadDir, (name) => {
+      let needFilter = false
+      for(var i = 0; i < nameContains.length; i++) {
+        needFilter = needFilter || !name.includes(nameContains[i])
+        if(needFilter) break
+      }
+      return needFilter
+    })
+    if(result && result.length > 0) return result[0]
+    return null
+  })
+
 }
 
 //创建浏览窗口
@@ -415,12 +432,14 @@ const toggleWinOSFullScreen = () => {
 }
 
 const setAppWindowZoom = (value, noResize) => {
-  const zoom = Number(value || 100)
+  if(!value) return
+  const zoom = Number(value) || 100
   const zoomFactor = parseFloat(zoom / 100)
-  const width = parseInt(appWidth * zoomFactor)
-  const height = parseInt(appHeight * zoomFactor)
+  if(zoomFactor < 0.5 || zoomFactor > 3) return
   mainWin.webContents.setZoomFactor(zoomFactor)
   if(noResize) return 
+  const width = parseInt(appWidth * zoomFactor)
+  const height = parseInt(appHeight * zoomFactor)
   mainWin.setMinimumSize(width, height)
   if(mainWin.isNormal()) {
     mainWin.setSize(width, height)

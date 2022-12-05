@@ -119,7 +119,7 @@ EventBus.on('radioCategory-update', () => {
     cursor: pointer;
     white-space: nowrap;
     border-radius: 10rem;
-    border: 1px solid transparent;
+    /*border: 1px solid transparent;*/
     color: var(--text-color);
 }
 

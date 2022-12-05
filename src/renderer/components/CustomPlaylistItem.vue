@@ -6,8 +6,7 @@ import { toYyyymmddHhMmSs } from "../../common/Times";
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlayStore } from '../store/playStore';
 
-
-const { visitCustomPlaylistEdit, visitBatchCustomPlaylist } = inject('appRoute')
+const { visitCustomPlaylist, visitCustomPlaylistEdit, visitBatchCustomPlaylist } = inject('appRoute')
 
 const props = defineProps({
     index: Number,
@@ -21,6 +20,11 @@ const { resetQueue, playNextTrack, addTracks } = usePlayStore()
 const toastAndHideMenu = (text) => {
     showToast(text)
     hideAllCtxMenus()
+}
+
+const visitItem = () => {
+    const { id } = props.data
+    visitCustomPlaylist(id)
 }
 
 const playItem = () => {
@@ -53,12 +57,12 @@ const showContextMenu = (event) => {
 <template>
     <div class="custom-playlist-item" @contextmenu="showContextMenu">
         <div class="sqno">{{ index + 1 }}</div>
-        <div class="cover">
+        <div class="cover" @click="visitItem">
             <img v-lazy="data.cover" />
         </div>
         <div class="title-wrap spacing1">
             <div class="content">
-                <div class="title"><span v-html="data.title"></span></div>
+                <div class="title"><span v-html="data.title" @click="visitItem"></span></div>
                 <div class="size">{{ data.data.length}} 首歌曲</div>
             </div>
             <div class="action">
@@ -118,6 +122,7 @@ const showContextMenu = (event) => {
     justify-content: center;
     align-items: center;
     margin-left: 3px;
+    cursor: pointer;
 }
 
 .custom-playlist-item .cover img {
@@ -152,6 +157,7 @@ const showContextMenu = (event) => {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     margin-bottom: 6px;
+    cursor: pointer;
 }
 
 .custom-playlist-item .title-wrap .size {

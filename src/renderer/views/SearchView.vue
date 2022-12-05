@@ -185,7 +185,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     margin-right: 12px;
 }
 
-#search-view .keyword .text{
+#search-view .keyword .text {
     background: var(--hl-text-bg);
     background: var(--hl-color);
     -webkit-background-clip: text;
@@ -208,7 +208,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     margin-right: 20px;
     border-radius: 10rem;
     padding: 6px 15px;
-    border: 1px solid var(--border-color);
+    /* border: 1px solid var(--border-color); */
     cursor: pointer;
 }
 

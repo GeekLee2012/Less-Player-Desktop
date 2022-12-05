@@ -9,17 +9,14 @@ import { storeToRefs } from 'pinia';
 const { theme } = storeToRefs(useSettingStore())
 const { getCurrentThemeId, setupFontFamily, setupFontWeight } = useSettingStore()
 
-//TODO设置主题
+//设置主题
 const setupAppTheme = (themeId) => {
   themeId = themeId || getCurrentThemeId() || 'dark'
   themeId = themeId.trim()
   document.documentElement.setAttribute('theme', themeId)
 }
 
-/* @vite-ignore */
-//EventBus.on("switchTheme", themeId => setupAppTheme(themeId))
-
-//TODO 直接在setup()时执行，不需要等待其他生命周期
+//直接在setup()时执行，不需要等待其他生命周期
 setupAppTheme(getCurrentThemeId())
 
 
@@ -51,7 +48,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
 <style>
 :root {
-  --text-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Microsoft YaHei", "Arial", sans-serif;
+  --text-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
   --text-size: 15px;
   --text-sub-size: 14px;
   --tab-title-text-size: 17px;
@@ -1647,7 +1644,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --btn-bg: #fdfdf2;
   --btn-bg: #e5bc8c;
   --btn-hover-bg: #ce9252;
-  --btn-hover-bg: #e5bc8cab;
+  --btn-hover-bg: #c59c6c;
   
   --toggle-btn-bg: #fdfdf2ab;
   --toggle-thumb-bg: #666;

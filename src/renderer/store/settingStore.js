@@ -294,7 +294,7 @@ export const useSettingStore = defineStore('setting', {
         },
         setWindowZoom(value) {
             if(!value) return
-            const zoom = value || 100
+            const zoom = Number(value || 100)
             if(zoom < 50 || zoom > 300) return
             if(this.common.winZoom == zoom) return
             this.common.winZoom = zoom
@@ -346,14 +346,14 @@ export const useSettingStore = defineStore('setting', {
             
         },
         setupWindowZoom() { 
-            const winZoom = this.common.winZoom
-            if(ipcRenderer) ipcRenderer.send("app-zoom", winZoom)
-            EventBus.emit("app-zoom", winZoom)
+            const zoom = this.common.winZoom
+            if(ipcRenderer) ipcRenderer.send("app-zoom", zoom)
+            EventBus.emit("app-zoom", zoom)
         }, 
         setupWindowZoomWithoutResize() {
-            const winZoom = this.common.winZoom
-            if(ipcRenderer) ipcRenderer.send("app-zoom-noResize", winZoom)
-            EventBus.emit("app-zoom", winZoom)
+            const zoom = this.common.winZoom
+            if(ipcRenderer) ipcRenderer.send("app-zoom-noResize", zoom)
+            EventBus.emit("app-zoom", zoom)
         },
         setupAppSuspension() {
             if(ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)

@@ -172,6 +172,26 @@ const removePath = (path) => {
     rm(path, { force: true })
 }
 
+const filterPath = async (dir, filter) => {
+    try {
+        //const result = { path: dir, data: [] }
+        const list = await opendir(dir)
+        const files = []
+        for await (const dirent of list) {
+            //console.log(dirent.name)
+            if(dirent.isFile()) {
+                const fullname = path.join(dir, dirent.name)
+                if(filter && filter(dirent.name)) continue
+                files.push(fullname) 
+            }
+        }
+        return files
+    } catch (error) {
+        console.log(error);
+    }
+    return null
+}
+
 module.exports = { 
     scanDirTracks, 
     parseTracks, 
@@ -182,4 +202,6 @@ module.exports = {
     randomText, 
     randomTextWithinAlphabetNums,
     getDownloadDir,
-    removePath }
+    removePath,
+    filterPath
+}

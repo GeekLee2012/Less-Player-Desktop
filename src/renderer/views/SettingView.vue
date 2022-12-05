@@ -112,7 +112,8 @@ const setDownloadState = (value) => {
     downloadState.value = value
 }
 
-const isUnstarted = () => (downloadState.value == 0)
+const isDownloadError = () => (downloadState.value == -1)
+const isUnstarted = () => (downloadState.value <= 0)
 const isDownloading = () => (downloadState.value == 1)
 const isDownloaded = () => (downloadState.value == 2)
 
@@ -169,18 +170,39 @@ const getVersionReleaseUrl = (version) => {
                 releaseUrl = "https://gitee.com" + href
             })
             resolve(releaseUrl)
-        }).catch(reason => {
-            reject(null)
+        }, reason => {
+            resolve(null)
         })
     })
+}
+
+//是否已经下载，且存在下载文件但未进行安装
+const checkDownloaded = async () => {
+    if(!ipcRenderer) return 
+    let targetExt = 'NULL'
+    if(isMacOS()) targetExt = '.dmg'
+    else if(isWinOS()) targetExt = '.exe'
+    const path = await ipcRenderer.invoke('download-checkExists', {
+        //必须同时满足
+        nameContains: [ 'Less Player', lastVersion.value, targetExt ]
+    })
+    if(path) {
+        localSavePath = path
+        downloadProgress.value = "更新已下载，请手动安装"
+        setDownloadState(2)
+    }
 }
 
 //TODO 目前仅考虑单任务下载
 const startDownload = async () => {
     if(!ipcRenderer) return 
-    setDownloadState(1)
     const lastReleaseUrl = await getVersionReleaseUrl(lastVersion.value)
-    if(!lastReleaseUrl) return
+    if(!lastReleaseUrl) {
+        setDownloadState(-1)
+        downloadProgress.value = '下载失败！请稍候再重试'
+        return
+    }
+    setDownloadState(1)
     ipcRenderer.on('download-progressing', (e, item) => {
         const { url, savePath, received, total } = item
         localSavePath = savePath
@@ -194,6 +216,7 @@ const checkForUpdate = () => {
         const currentVersion = ("v" + version)
         lastVersion.value = result
         setLastRelease(currentVersion >= result)
+        checkDownloaded()
     })
 }
 
@@ -492,9 +515,15 @@ onMounted(checkForUpdate)
                         <div v-show="!isLastRelease && isUnstarted()" class="spacing">
                             <span>发现新版本：{{ lastVersion }}</span>
                         </div>
-                        <div v-show="!isUnstarted()" class="download-wrap spacing">
+                        <div v-show="isDownloadError()" class="download-wrap spacing">
+                            <span class="warning" v-html="downloadProgress"></span>
+                        </div>
+                        <div v-show="isDownloading()" class="download-wrap spacing">
                             <ProgressBar ref="progressBarRef"></ProgressBar>
                             <span class="spacing" v-html="downloadProgress"></span>
+                        </div>
+                        <div v-show="isDownloaded()" class="download-wrap spacing">
+                            <span v-html="downloadProgress"></span>
                         </div>
                     </div>
                 </div>

@@ -127,7 +127,7 @@ const setImageTextTileSize = () => {
 }
 
 const setImageTextTileLoadingMaskSize = () => {
-    const tileMinWidth = 175;
+    const tileMinWidth = 165;
     const tileHMargin = 12.5;
     const mainMargin = 33;
     const titleHeight = 28, titleMarginTop = 5;
@@ -138,7 +138,7 @@ const setImageTextTileLoadingMaskSize = () => {
     const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
     const tiles = document.querySelectorAll(".tiles-loading-mask .tile")
     const tileCovers = document.querySelectorAll(".tiles-loading-mask .tile .cover")
-    let tileWidth = 175, limit = 0, isLastVisible = true
+    let tileWidth = 165, limit = 0, isLastVisible = true
     if(clientWidth > minWidths[0]) {
         limit = limits[0]
         isLastVisible = false
@@ -158,6 +158,11 @@ const setImageTextTileLoadingMaskSize = () => {
     tileCovers.forEach(item => {
         item.style.height = tileWidth + "px"
     })
+}
+
+const setImageTextTileComponentSize = () => {
+    setImageTextTileSize()
+    setImageTextTileLoadingMaskSize()
 }
 
 const setPlaybackQueueSize = () => {
@@ -341,7 +346,7 @@ onMounted (() => {
 
         //隐藏上下文菜单
         hideAllCtxMenus()
-        //放在最后执行确保缩放
+        //TODO 偶发Bug，放在最后执行确保缩放
         setupWindowZoomWithoutResize()
     })
     
@@ -361,14 +366,8 @@ onMounted (() => {
     registryDefaultLocalKeys()
 })
 
-EventBus.on("imageTextTile-load", () => {
-    setImageTextTileSize()
-    setImageTextTileLoadingMaskSize()
-})
-EventBus.on("imageTextTileLoadingMask-load", () => {
-    setImageTextTileSize()
-    setImageTextTileLoadingMaskSize()
-})
+EventBus.on("imageTextTile-load", setImageTextTileComponentSize)
+EventBus.on("imageTextTileLoadingMask-load", setImageTextTileComponentSize)
 EventBus.on("batchView-show", setBatchViewListSize)
 EventBus.on('playingView-changed', setPlayingViewSize)
 EventBus.on("app-layout", setupLayout)

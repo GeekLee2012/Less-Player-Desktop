@@ -57,8 +57,8 @@ const resetScroll = () => {
     background: var(--ctx-menu-bg);
     border-radius: 8px;
     /*padding: 15px 0px;
-    max-height: 297px;*/
-    border: 1px solid var(--border-color);
+    max-height: 297px;
+    border: 1px solid var(--border-color);*/
     box-shadow: 0px 0px 8px var(--ctx-menu-border-color);
 }
 
