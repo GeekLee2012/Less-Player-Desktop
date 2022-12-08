@@ -94,7 +94,19 @@ function smoothScroll(target, duration) {
 }
 
 const reloadLyricData = (track) => {
-    hasLyric.value = Track.hasLyric(track)
+    if(Track.hasLyric(track)) { //确认是否存在有效歌词
+        const lyricData = track.lyric.data
+        let isValidLyric = true
+        if(lyricData.size == 1) {
+            const line = lyricData.values().next().value
+            isValidLyric = !(line.includes('纯音乐') 
+                || line.includes('没有填词')
+                || line.includes('没有歌词'))
+        }
+        hasLyric.value = isValidLyric
+    } else {
+        hasLyric.value = false
+    }
     lyricData.value = Track.lyricData(track)
     presetOffset = Track.lyricOffset(track)
 
@@ -136,6 +148,20 @@ const setupLyricLines = () => {
     })
 }
 
+const setupLyricAlignment = () => {
+    const lyricCtlEls = document.querySelectorAll(".lyric-ctl")
+    const artistEls = document.querySelectorAll(".lyric-ctl .audio-artist")
+    const albumEls = document.querySelectorAll(".lyric-ctl .audio-album")
+    const noLyricEls = document.querySelectorAll(".lyric-ctl .no-lyric")
+    const textAligns = ['left', 'center', 'right']
+    const flexAligns = ['flex-start', 'center', 'flex-end']
+    const { alignment } = lyric.value
+    if(lyricCtlEls) lyricCtlEls.forEach(el => el.style.textAlign = textAligns[alignment])
+    if(artistEls) artistEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
+    if(albumEls) albumEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
+    if(noLyricEls) noLyricEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
+}
+
 EventBus.on('track-pos', secs => {
     try {
         renderAndScrollLyric(secs)
@@ -150,9 +176,16 @@ EventBus.on('lyric-hlFontSize', setupLyricLines)
 EventBus.on('lyric-fontWeight', setupLyricLines)
 EventBus.on('lyric-lineHeight', setupLyricLines)
 EventBus.on('lyric-lineSpacing', setupLyricLines)
+EventBus.on('lyric-alignment', setupLyricAlignment)
+
+const isHeaderVisible = () => {
+    const { metaPos } = lyric.value
+    return metaPos == 0
+}
 
 onMounted(() => {
     loadLyric()
+    setupLyricAlignment()
 })
 
 watch(() => props.track, (nv, ov) => reloadLyricData(nv))
@@ -160,7 +193,7 @@ watch(() => props.track, (nv, ov) => reloadLyricData(nv))
 
 <template>
     <div class="lyric-ctl" @contextmenu="toggleLyricToolbar">
-        <div class="header">
+        <div class="header" v-show="isHeaderVisible()">
             <div class="audio-title">
                 <span class="mv" v-show="Track.hasMv(track)">
                     <svg @click="playMv" width="20" height="16" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M1024,158.76v536c-.3,1.61-.58,3.21-.92,4.81-2.52,12-3.91,24.43-7.76,36-23.93,72-88.54,117.91-165.13,117.92q-338.19,0-676.4-.1a205.81,205.81,0,0,1-32.3-2.69C76,840.18,19.81,787.63,5,723.14c-2.15-9.35-3.36-18.91-5-28.38v-537c.3-1.26.66-2.51.89-3.79,1.6-8.83,2.52-17.84,4.85-26.48C26.32,51.12,93.47.05,173.29,0Q512,0,850.72.13a200.6,200.6,0,0,1,31.8,2.68C948.44,13.47,1004,65.66,1019.09,130.88,1021.21,140.06,1022.39,149.46,1024,158.76ZM384,426.39c0,45.66-.09,91.32,0,137,.07,24.51,19.76,43.56,43.38,42.47,8.95-.42,15.83-5.3,23.06-9.86q69.25-43.74,138.74-87.11,40.63-25.42,81.44-50.6c23.18-14.34,23.09-49-.25-63.14-3.27-2-6.69-3.72-9.93-5.74q-30.08-18.81-60.08-37.69Q522.2,302.46,444,253.2a34.65,34.65,0,0,0-26.33-4.87c-19.87,4.13-33.64,21.28-33.68,42.09Q383.9,358.42,384,426.39Z"/></g></g></svg>
@@ -234,6 +267,10 @@ watch(() => props.track, (nv, ov) => reloadLyricData(nv))
     cursor: pointer;
 }
 
+.lyric-ctl .mv:hover svg {
+    fill: var(--svg-hover-color);
+}
+
 .lyric-ctl .audio-title {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -304,10 +341,12 @@ watch(() => props.track, (nv, ov) => reloadLyricData(nv))
 }
 
 .lyric-ctl .no-lyric {
+    flex: 1;
     display: flex;
-    margin-top: 125px;
     align-items: center;
-    font-size: 19px;
+    justify-content: flex-start;
+    font-size: 21px;
+    font-weight: bold;
     color: var(--text-lyric-color);
 }
 </style>

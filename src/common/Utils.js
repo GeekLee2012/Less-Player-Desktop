@@ -53,3 +53,8 @@ export const randomText = (src, len) => {
 export const randomTextWithinAlphabetNums = (len) => {
     return randomText(ALPHABET_NUMS, len)
 }
+
+export const toTrimString = (value) => {
+    value = value == 0 ? '0' : value
+    return (value || '').toString().trim()
+} 

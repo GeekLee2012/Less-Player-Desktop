@@ -1,17 +1,19 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import LyricControl from '../components/LyricControl.vue';
-import EventBus from '../../common/EventBus';
-import { Track } from '../../common/Track';
-import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
-import { useUseCustomTrafficLight } from '../../common/Utils';
-import { Playlist } from '../../common/Playlist';
 import { useAudioEffectStore } from '../store/audioEffectStore';
+import LyricControl from '../components/LyricControl.vue';
+import ArtistControl from '../components/ArtistControl.vue';
+import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
+import { useUseCustomTrafficLight } from '../../common/Utils';
+import { Track } from '../../common/Track';
+import { Playlist } from '../../common/Playlist';
+
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -23,7 +25,7 @@ const { hidePlayingView, minimize,
 const { currentTrack, mmssCurrentTime, 
     progress, playingIndex, volume } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useAudioEffectStore())
-const { getWindowZoom } = storeToRefs(useSettingStore())
+const { getWindowZoom, lyricMetaPos } = storeToRefs(useSettingStore())
 const progressBarRef = ref(null)
 const volumeBarRef = ref(null)
 
@@ -79,6 +81,8 @@ const adjustCollapseBtnPos = () => {
     el.style.left = left + "px"
 }
 
+const playMv = () => EventBus.emit('track-playMv', currentTrack.value)
+
 onMounted(() => {
     adjustCollapseBtnPos()
     EventBus.emit('playingView-changed')
@@ -105,6 +109,25 @@ watch([currentTrack, playingViewShow ], checkFavorite)
             </div>
             <div class="collapse-btn" @click="hidePlayingView">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640.13 352.15"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><g id="Layer_2-2" data-name="Layer 2"><g id="Layer_1-2-2" data-name="Layer 1-2"><path d="M319.64,76.3c-1.91,2.59-3,4.52-4.51,6Q186,211.6,56.78,340.8c-8.31,8.34-17.87,12.87-29.65,10.88-12.51-2.12-21.24-9.34-25.29-21.48-4.12-12.35-1.23-23.43,7.71-32.7C19.73,287,30.24,276.72,40.61,266.35L289.12,17.84c2.94-2.94,5.74-6,8.75-8.91a32.1,32.1,0,0,1,44.28-.15c3.15,3,6.05,6.2,9.11,9.26Q490,156.79,628.78,295.5c10.11,10.1,14.13,21.64,9.33,35.44a31.75,31.75,0,0,1-48.49,15.2,58.8,58.8,0,0,1-7.07-6.31Q453.85,211.22,325.2,82.51C323.68,81,322.32,79.3,319.64,76.3Z"/></g></g></g></g></svg>
+            </div>
+            <div class="meta-wrap" v-show="(lyricMetaPos == 2)">
+                <div class="meta">
+                    <div class="mv" v-show="Track.hasMv(currentTrack)">
+                        <svg @click="playMv" width="20" height="16" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M1024,158.76v536c-.3,1.61-.58,3.21-.92,4.81-2.52,12-3.91,24.43-7.76,36-23.93,72-88.54,117.91-165.13,117.92q-338.19,0-676.4-.1a205.81,205.81,0,0,1-32.3-2.69C76,840.18,19.81,787.63,5,723.14c-2.15-9.35-3.36-18.91-5-28.38v-537c.3-1.26.66-2.51.89-3.79,1.6-8.83,2.52-17.84,4.85-26.48C26.32,51.12,93.47.05,173.29,0Q512,0,850.72.13a200.6,200.6,0,0,1,31.8,2.68C948.44,13.47,1004,65.66,1019.09,130.88,1021.21,140.06,1022.39,149.46,1024,158.76ZM384,426.39c0,45.66-.09,91.32,0,137,.07,24.51,19.76,43.56,43.38,42.47,8.95-.42,15.83-5.3,23.06-9.86q69.25-43.74,138.74-87.11,40.63-25.42,81.44-50.6c23.18-14.34,23.09-49-.25-63.14-3.27-2-6.69-3.72-9.93-5.74q-30.08-18.81-60.08-37.69Q522.2,302.46,444,253.2a34.65,34.65,0,0,0-26.33-4.87c-19.87,4.13-33.64,21.28-33.68,42.09Q383.9,358.42,384,426.39Z"/></g></g></svg>
+                    </div>
+                    <div class="audio-title">
+                        {{ currentTrack.title}} 
+                    </div>
+                    <div v-show="Track.hasArtist(currentTrack)">&nbsp;-&nbsp;</div>
+                    <div class="audio-artist spacing">
+                        <ArtistControl :visitable="true" 
+                            :platform="currentTrack.platform" 
+                            :data="currentTrack.artist"
+                            :trackId="currentTrack.id"
+                            class="ar-ctl">
+                        </ArtistControl>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="center">
@@ -187,6 +210,43 @@ watch([currentTrack, playingViewShow ], checkFavorite)
     -webkit-app-region: none;
 }
 
+.playing-view .meta-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.playing-view .meta {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex: 1;
+    width: 61.8%;
+}
+
+.playing-view .meta-wrap .audio-title,
+.playing-view .meta-wrap .audio-artist {
+    font-weight: bold;
+    color: var(--text-sub-color);
+    text-align: left;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    align-items: center;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+}
+
+.playing-view .mv {
+    margin-right: 5px;
+    margin-top: 3px;
+}
+
 .playing-view svg {
     fill: var(--svg-color);
     cursor: pointer;
@@ -207,8 +267,7 @@ watch([currentTrack, playingViewShow ], checkFavorite)
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-left: 99px;
-    margin-right: 99px;
+    padding: 0px 99px;
 }
 
 .playing-view .cover,

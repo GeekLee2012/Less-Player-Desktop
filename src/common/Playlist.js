@@ -1,3 +1,5 @@
+import { toTrimString } from './Utils';
+
 export class Playlist {
     //普通歌单
     static NORMAL_TYPE = 0
@@ -16,9 +18,9 @@ export class Playlist {
         this.id = id
         this.platform = platform
         this.cover = cover
-        this.title = title
-        this.url = url
-        this.about = about ? about : ''
+        this.title = toTrimString(title)
+        this.url = toTrimString(url)
+        this.about = toTrimString(about)
         this.data = data || []
         this.total = total || 0
         //歌单类型：普通歌单、电台歌单、FM广播电台歌单、主播电台歌单
@@ -65,7 +67,7 @@ export class Playlist {
     }
 
     static isCustomType(item) {
-        const id = item.id.toString().trim()
+        const id = toTrimString(item.id)
         return id.startsWith(Playlist.CUSTOM_ID_PREFIX)
             //|| id.length == 16
     }

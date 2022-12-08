@@ -28,10 +28,11 @@ EventBus.on('track-artistUpdated', data => {
 </script>
 
 <template>
-    <div class="artist-ctl" v-show="data.length > 0">
+    <div class="artist-ctl" v-show="data && data.length > 0">
         <template v-for="(item, index) in data">
             <span @click="visitArtistDetail(platform, item, index)"
-                class="artist-item" v-html="item.name" >
+                class="artist-item" :class="{ visitable: visitable }"
+                v-html="item.name" >
             </span>
             <template v-if="index < (data.length - 1)">、</template>
         </template>
@@ -45,14 +46,15 @@ EventBus.on('track-artistUpdated', data => {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
+    -webkit-app-region: none;
     text-align: left;
 }
 
-.artist-ctl .artist-item{
+.artist-ctl .visitable {
     cursor: pointer;
 }
 
-.artist-ctl .artist-item:hover {
+.artist-ctl .visitable:hover {
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

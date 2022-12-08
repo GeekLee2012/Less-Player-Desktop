@@ -157,12 +157,14 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 歌词 */
         lyric: {
-            fontSize: 18,
-            hlFontSize: 21,
-            fontWeight: 400,
-            lineHeight: 28,
-            lineSpacing: 26,
-            offset: 0
+            fontSize: 18,   //普通字号
+            hlFontSize: 21, //高亮字号
+            fontWeight: 400,  
+            lineHeight: 28, 
+            lineSpacing: 26, 
+            offset: 0, //时间补偿值，快慢
+            metaPos: 0, //歌曲信息, 0:默认, 1:隐藏, 2:顶部
+            alignment: 0, //对齐方式, 0:左, 1:中, 2:右
         },
         /* 缓存 */
         cache: {
@@ -265,6 +267,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isListenNumShow() {
             return this.track.listenNumShow
+        },
+        lyricMetaPos() {
+            return this.lyric.metaPos
         }
     },
     actions: {
@@ -446,6 +451,14 @@ export const useSettingStore = defineStore('setting', {
             this.lyric.offset = offset
             this.setupLyricOffset()
         },
+        setLyricMetaPos(value) {
+            this.lyric.metaPos = value || 0
+            this.setupLyricMetaPos()
+        },
+        setLyricAlignment(value) {
+            this.lyric.alignment = value || 0
+            this.setupLyricAlignment()
+        },
         resetLyricSetting() {
             this.setLyricFontSize()
             this.setLyricHighlightFontSize()
@@ -453,6 +466,8 @@ export const useSettingStore = defineStore('setting', {
             this.setLyricLineSpacing()
             this.setLyricFontWeight()
             this.setLyricOffset()
+            this.setLyricMetaPos()
+            this.setLyricAlignment()
         },
         setupLyricFontSize() {
             const fontSize = this.lyric.fontSize || 18
@@ -477,6 +492,14 @@ export const useSettingStore = defineStore('setting', {
         setupLyricOffset() {
             const offset = this.lyric.offset || 0
             EventBus.emit('lyric-offset', offset)
+        },
+        setupLyricMetaPos() {
+            const metaPos = this.lyric.metaPos || 0
+            EventBus.emit('lyric-metaPos', metaPos)
+        },
+        setupLyricAlignment() {
+            const alignment = this.lyric.alignment || 0
+            EventBus.emit('lyric-alignment', alignment)
         },
     },
     persist: {

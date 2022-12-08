@@ -1,3 +1,5 @@
+import { toTrimString } from './Utils';
+
 const TAG_BEGIN = "["
 const TAG_END = "]"
 
@@ -13,10 +15,10 @@ const TIME_LINE_REGEX = /^\[\d{2}:\d{2}(:\d{2})?(\.\d{2,3})?].*/
 
 export class Lyric {
     constructor(title, artist, album, by, offset) {
-        this.title = title || ''
+        this.title = toTrimString(title)
         this.artist = artist
         this.album = album
-        this.by = by || ''
+        this.by = toTrimString(by)
         this.offset = offset || 0
         this.data = new Map()
     }
@@ -110,4 +112,5 @@ export class Lyric {
     static hasData(lyric) {
         return lyric && lyric.data.size > 0
     }
+
 }

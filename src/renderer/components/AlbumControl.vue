@@ -29,6 +29,7 @@ const visitAlbumDetail = (platform, id, callback) => {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
+    -webkit-app-region: none;
     text-align: left;
 }
 

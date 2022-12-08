@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
+import SingleSelectionControl from './SingleSelectionControl.vue';
 
 
 const { hideLyricToolbar } = useAppCommonStore()
@@ -9,44 +10,8 @@ const { lyric } = storeToRefs(useSettingStore())
 const { setLyricFontSize, setLyricHighlightFontSize,
     setLyricLineHeight, setLyricLineSpacing, 
     setLyricFontWeight, setLyricOffset, 
+    setLyricMetaPos, setLyricAlignment,
     resetLyricSetting, } = useSettingStore()
-
-let x = 0, y = 0
-
-const startDrag = (e) => {
-    x = e.x
-    y = e.y
-    document.addEventListener("mousemove", dragMove)
-    document.addEventListener("mouseup", releaseDrag)
-}
-
-const dragMove = (e) => {
-    const gx = e.x - x
-    const gy = e.y - y
-    x = e.x
-    y = e.y
-
-    const targetEl = document.querySelector(".lyric-toolbar")
-    const width = targetEl.clientWidth, height = targetEl.clientHeight
-    const { clientWidth, clientHeight } = document.documentElement
-
-    //console.log(width, height)
-    let left = (targetEl.offsetLeft + gx)
-    let top = (targetEl.offsetTop + gy)
-    //边界检查
-    left = Math.max(0, left)
-    left = Math.min((clientWidth - width), left)
-    top = Math.max(0, top)
-    top = Math.min((clientHeight - height), top)
-
-    targetEl.style.left = left + "px"
-    targetEl.style.top = top + "px"
-}
-
-const releaseDrag = (e) => {
-    document.removeEventListener("mousemove", dragMove)
-    document.removeEventListener("mouseup", releaseDrag)
-}
 
 const getInputValue = (e) => (e.target.value)
 
@@ -80,15 +45,29 @@ const getLyricOffsetText = () => {
 </script>
 
 <template>
-    <div class="lyric-toolbar">
-        <div class="header" @mousedown="startDrag">
+    <div class="lyric-toolbar" v-gesture-dnm="{ trigger: '.header' }">
+        <div class="header">
             <div class="close-btn">
                 <svg @click="hideLyricToolbar" width="10" height="10" viewBox="0 0 593.14 593.11" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z" transform="translate(-663.4 -243.46)"/></svg>
             </div>
             <div class="title">歌词设置</div>
         </div>
         <div class="center v-spacing">
-            <div class="row text">字号 (普通)：</div>
+            <div class="row text">歌曲信息：</div>
+            <div class="row">
+                <SingleSelectionControl :data="['默认', '隐藏', '顶部']"
+                    :value="lyric.metaPos"
+                    :onChanged="setLyricMetaPos">
+                </SingleSelectionControl>
+            </div>
+            <div class="row text v-spacing">对齐方式：</div>
+            <div class="row">
+                <SingleSelectionControl :data="['左边', '中间', '右边']"
+                    :value="lyric.alignment"
+                    :onChanged="setLyricAlignment">
+                </SingleSelectionControl>
+            </div>
+            <div class="row text v-spacing">字号 (普通)：</div>
             <div class="row">
                 <input type="number" placeholder="默认值18"
                     :value="lyric.fontSize"
@@ -145,7 +124,7 @@ const getLyricOffsetText = () => {
     box-shadow: 0px 0px 3px var(--ctx-menu-border-color);
     display: flex;
     flex-direction: column;
-    width: 150px;
+    width: 168px;
     padding-bottom: 18px;
     -webkit-app-region: none;
 }
@@ -196,7 +175,7 @@ const getLyricOffsetText = () => {
 }
 
 .lyric-toolbar .v-spacing {
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .lyric-toolbar input {
@@ -205,7 +184,7 @@ const getLyricOffsetText = () => {
     border: 1px solid var(--input-border-color);
     font-size: 14px;
     text-align: left;
-    width: 88px;
+    width: 108px;
 }
 
 

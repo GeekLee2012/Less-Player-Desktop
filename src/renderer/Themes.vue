@@ -129,6 +129,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-bg: #464646;
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
+  --input-border-color: #363636;
   --input-placeholder-color: #888;
 
   --back2top-btn-bg: var(--btn-hover-bg);
@@ -488,6 +489,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-bg: #454045;
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
+  --input-border-color: #454045;
   --input-placeholder-color: #888;
 
   --back2top-btn-bg: var(--btn-hover-bg);
@@ -767,6 +769,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --input-bg: #555;
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
+  --input-border-color: #454045;
   --input-placeholder-color: #ccc;
 
   --back2top-btn-bg: var(--btn-hover-bg);
@@ -800,17 +803,17 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 按钮 */
   --svg-color: #282828cb;
   --svg-hover-color: var(--hl-color);
-  --svg-text-color: #666;
-  --svg-btn-color: #323232cb;
-  --btn-bg: #ffffffcb;
-  --btn-hover-bg: linear-gradient(to top right, #64903fcb, #cfdec3) !important;
+  --svg-text-color: #ffffffcb;
+  --svg-btn-color: #ffffffcb;
+  --btn-bg: #64903fcb;
+  --btn-hover-bg: linear-gradient(to top right, #64903fcb, #64903f) !important;
   
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
   --toggle-btn-active-bg: #fff;
   --toggle-active-thumb-bg: var(--bg-color);
-  --toggle-active-thumb-bg: #64903f;
+  --toggle-active-thumb-bg: #64903fcb;
   /* 进度条 */
   --progress-track-bg: linear-gradient(to right, #f1eee7, #f1eee7) !important;
   --progress-bg: linear-gradient(to top right, #666, #cfdec3);

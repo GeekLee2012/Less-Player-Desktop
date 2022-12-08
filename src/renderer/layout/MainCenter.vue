@@ -33,7 +33,7 @@ const { togglePlay, switchPlayMode,
     playPrevTrack, playNextTrack,
     toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
 
-const { layout } = storeToRefs(useSettingStore())
+const { layout, lyricMetaPos } = storeToRefs(useSettingStore())
 const { setupWindowZoomWithoutResize } = useSettingStore()
 
 const minAppWidth = 1080, minAppHeight = 720 
@@ -190,18 +190,27 @@ const setPlayingLyricCtlSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    const height = 399 * Math.min(hScaleRatio, hScaleRatio)
+    const padding = 56 + 86 + 36
+    let height = 399 * Math.min(hScaleRatio, hScaleRatio)
+    let marginTop = 15
+    if(lyricMetaPos.value > 0) {
+        height = clientHeight - padding
+        marginTop = 0
+    }
     const el = document.querySelector(".playing-view .lyric-ctl .center")
-    if(!el) return 
-    //el.style.width = size + "px"
-    el.style.height = height + "px"
+    const noLyricEl = document.querySelector(".playing-view .no-lyric")
+    if(el) {
+        el.style.height = height + "px"
+        el.style.marginTop = marginTop + "px"
+    }
+    if(noLyricEl) noLyricEl.style.height = height + "px"
 }
 
 const setVisualPlayingViewCenterSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    const padding = 56 + 36
+    const padding = 56 * 2
     const height = clientHeight - padding
     const el = document.querySelector(".visual-playing-view .center")
     if(!el) return 
@@ -215,11 +224,15 @@ const setVisualPlayingViewLyricCtlSize = () => {
     const hScaleRatio = clientHeight / minAppHeight
     //const height = 435 * Math.min(hScaleRatio, hScaleRatio)
     const padding = hScaleRatio >= 1.25 ? 50 : 0
-    const height = 435 * Math.min(hScaleRatio, hScaleRatio) + padding
+    let height = 435 * Math.min(hScaleRatio, hScaleRatio) + padding
+    if(lyricMetaPos.value > 0) {
+        const centerEl = document.querySelector(".visual-playing-view .center")
+        if(centerEl) height = (centerEl.clientHeight || 628)
+    }
     const el = document.querySelector(".visual-playing-view .lyric-ctl .center")
-    if(!el) return 
-    //el.style.width = size + "px"
-    el.style.height = height + "px"
+    const noLyricEl = document.querySelector(".visual-playing-view .no-lyric")
+    if(el) el.style.height = height + "px"
+    if(noLyricEl) noLyricEl.style.height = height + "px"
 }
 
 const setVisualPlayingViewCoverSize = () => {
@@ -279,6 +292,8 @@ const setPlayingViewSize = () => {
     setVisualPlayingViewCoverSize()
     setVisualPlayingViewLyricCtlSize()
     setVisualPlayingViewCanvasSize()
+
+    setLyricToolbarPos()
 }
 
 const setAudioEffectViewAlignment = () => {
@@ -296,7 +311,8 @@ const setLyricToolbarPos = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const el = document.querySelector("#lyric-toolbar")
     if(!el) return
-    const width = 150, height = 446, padding = 30
+    //const width = 150, height = 446, padding = 30
+    const width = 168, height = 549, padding = 33
     const left = (clientWidth - width - padding)
     const top = (clientHeight - height) / 2
     //el.style.right = padding + 'px'
@@ -342,7 +358,6 @@ onMounted (() => {
         setVideoViewSize()
         //音效窗口自动居中
         setAudioEffectViewAlignment()
-        setLyricToolbarPos()
 
         //隐藏上下文菜单
         hideAllCtxMenus()
@@ -376,8 +391,15 @@ EventBus.on("app-layout", setupLayout)
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
 watch([ videoPlayingViewShow ], setVideoViewSize)
 watch([ audioEffectViewShow ], setAudioEffectViewAlignment)
-watch([ playingViewShow ], hideLyricToolbar)
+watch([ playingViewShow ], () => {
+    hideLyricToolbar()
+    setPlayingViewSize()
+})
 watch(lyricToolbarShow, setLyricToolbarPos)
+watch(lyricMetaPos, () => {
+    setPlayingLyricCtlSize()
+    setVisualPlayingViewLyricCtlSize()
+})
 //watch([ playingViewThemeIndex ], setPlayingViewSize)
 </script>
 

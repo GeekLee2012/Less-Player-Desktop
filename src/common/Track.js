@@ -1,5 +1,5 @@
 import { Lyric } from './Lyric';
-import { Playlist } from './Playlist';
+import { toTrimString } from './Utils';
 import { toMmss } from './Times';
 
 /** 
@@ -9,9 +9,9 @@ import { toMmss } from './Times';
  */
 export class Track {
     constructor(id, platform, title, artist, album, duration, cover, url, type, pid, mv, payPlay, payDownload) {
-        this.id = id ? id.toString() : ''
+        this.id = toTrimString(id)
         this.platform = platform
-        this.title = title
+        this.title = toTrimString(title)
         //[ {id, name} ]
         this.artist = artist ? artist : []
         //数据不完整
@@ -21,10 +21,10 @@ export class Track {
         //Millis
         this.duration = duration ? duration : 0
         this.cover = cover
-        this.url = url || ''
+        this.url = toTrimString(url)
         this.lyric = new Lyric()
         this.type = type || 0 //与 Playlist中的type一致
-        this.pid = pid || '' //playlistId
+        this.pid = toTrimString(pid) //playlistId
         //额外信息，当内容存在时显示，同时分别隐藏 artist、album
         this.extra1 = null
         this.extra2 = null
@@ -163,6 +163,11 @@ export class Track {
     static isVip(track) {
         if(!track) return false
         return track.payPlay
+    }
+
+    static hasArtist(track) {
+        return track && track.artist 
+            && track.artist.length > 0
     }
 
 }
