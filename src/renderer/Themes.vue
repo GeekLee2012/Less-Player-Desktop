@@ -1816,12 +1816,21 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --aeview-list-item-color: var(--text-color);
 }
 
+/* 滚动条 */
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb-bg);
   border: 1px solid var(--scrollbar-thumb-bg);
   width: var(--scrollbar-width);
   height: 66px;
   border-radius: 8px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-corner,
+::-webkit-scrollbar-button,
+::-webkit-resizer {
+  background: transparent;
 }
 
 /*TODO 试验性CSS */
