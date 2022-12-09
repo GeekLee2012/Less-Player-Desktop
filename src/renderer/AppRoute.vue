@@ -195,6 +195,7 @@ provide('appRoute', {
     backward: () => router.back(),
     forward: () => router.forward(),
     visitHome: () => (visitRoute({ toPath: '/', ...commonBeforeRoute })),
+    visitThemes: () => (visitRoute({ toPath: '/themes', ...commonBeforeRoute })),
     visitUserHome: () => (visitRoute({ toPath: '/userhome/all', ...commonBeforeRoute })),
     visitSetting: () => (visitRoute({ toPath: '/setting', ...commonBeforeRoute })),
     visitSearch: (keyword) => (visitRoute({ toPath: `/search/${keyword}`, ...commonBeforeRoute })),

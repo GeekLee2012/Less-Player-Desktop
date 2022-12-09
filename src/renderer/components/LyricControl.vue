@@ -308,7 +308,7 @@ watch(() => props.track, (nv, ov) => reloadLyricData(nv))
 }
 
 .lyric-ctl .lyric-content {
-    overflow: auto;
+    overflow: scroll;
 }
 
 .lyric-ctl .center::-webkit-scrollbar, 

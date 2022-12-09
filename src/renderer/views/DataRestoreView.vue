@@ -474,7 +474,7 @@ watch(sourcesCategories, () => {
     display: flex;
     flex-direction: column;
     padding: 0px 33px 0px 33px;
-    overflow: auto;
+    overflow: scroll;
 }
 
 #data-restore-view  .center .length {

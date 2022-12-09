@@ -163,7 +163,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     display: flex;
     flex-direction: column;
     padding: 20px 33px 15px 33px;
-    overflow: auto;
+    overflow: scroll;
     flex: 1;
 }
 

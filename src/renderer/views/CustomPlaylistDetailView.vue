@@ -194,7 +194,7 @@ onUpdated(() => {
     flex: 1;
     flex-direction: column;
     padding: 28px 33px 10px 33px;
-    overflow: auto;
+    overflow: scroll;
 }
 
 #custom-playlist-detail-view .header {

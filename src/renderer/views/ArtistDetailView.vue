@@ -420,7 +420,7 @@ watch(artistId, reloadAll)
     flex-direction: column;
     padding: 25px 33px 15px 33px;
     flex: 1;
-    overflow: auto;
+    overflow: scroll;
 }
 
 #artist-detail-view .header {

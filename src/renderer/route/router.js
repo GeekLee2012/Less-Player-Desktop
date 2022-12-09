@@ -3,6 +3,7 @@ import PlaylistSquareView from '../views/PlaylistSquareView.vue';
 import ArtistSquareView from '../views/ArtistSquareView.vue';
 import RadioSquareView from '../views/RadioSquareView.vue';
 import LocalMusicView from '../views/LocalMusicView.vue';
+import ThemesView from '../views/ThemesView.vue';
 import SettingView from '../views/SettingView.vue';
 import UserHomeView from '../views/UserHomeView.vue';
 import SearchView from '../views/SearchView.vue';
@@ -33,6 +34,10 @@ const routes = [
     {  //本地歌曲
         path: '/local', 
         component:  LocalMusicView 
+    },
+    {  //主题
+        path: '/themes', 
+        component:  ThemesView 
     },
     {  //我的主页
         path: '/userhome/:platform', 

@@ -550,6 +550,6 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 }
 
 #batch-action-view .content {
-    overflow: auto;
+    overflow: scroll;
 }
 </style>

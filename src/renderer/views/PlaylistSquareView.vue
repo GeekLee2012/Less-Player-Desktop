@@ -176,6 +176,6 @@ EventBus.on("playlistSquare-refresh", refreshData)
 <style scoped>
 .playlist-square-view {
     padding: 25px 33px 15px 33px;
-    overflow: auto;
+    overflow: scroll;
 }
 </style>

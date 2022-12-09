@@ -178,6 +178,6 @@ EventBus.on("artistSquare-refresh", refreshData)
 <style scoped>
 .artist-square-view {
     padding: 25px 33px 15px 33px;
-    overflow: auto;
+    overflow: scroll;
 }
 </style>

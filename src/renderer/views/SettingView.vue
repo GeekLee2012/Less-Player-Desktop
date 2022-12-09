@@ -13,7 +13,7 @@ import EventBus from '../../common/EventBus';
 import { getDoc } from '../../common/HttpClient';
 
 
-const { visitDataBackup, visitDataRestore, } = inject('appRoute')
+const { visitThemes, visitDataBackup, visitDataRestore, } = inject('appRoute')
 
 const ipcRenderer = useIpcRenderer()
 
@@ -38,16 +38,11 @@ const { setThemeIndex,
         toggleFollowArtistsShow,
         toggleKeysGlobal,
         updateBlackHole,
-        allThemes, 
+        presetThemes, 
         allQualities
     } = useSettingStore()
 
 const { showToast } = useAppCommonStore()
-
-//TODO
-const visitMoreTheme = () => {
-   
-}
 
 const resetData = async () => {
     if(!ipcRenderer) return 
@@ -239,19 +234,18 @@ onMounted(checkForUpdate)
 
 <template>
     <div id="setting-view">
-        <div class="title">设置</div>
+        <div class="header">
+            <div class="title">设置</div>
+        </div>
         <div class="center">
             <div class="theme row">
-                <span class="cate-name">主题</span>
+                <span class="cate-name"><b @click="visitThemes">主题</b></span>
                 <div class="content">
-                    <div class="last" v-for="(item,index) in allThemes()" 
+                    <div class="last" v-for="(item, index) in presetThemes()" 
                         :class="{ active: index == theme.index, lightText: item.dark }"
                         :style="{ background: item.color }" 
                         @click="setThemeIndex(index)" >
                         <span>{{ item.name }}</span>
-                    </div>
-                    <div class="last more" @click="visitMoreTheme" v-show="false">
-                        <span>...</span>
                     </div>
                 </div>
             </div>
@@ -565,11 +559,7 @@ onMounted(checkForUpdate)
     display: flex;
     flex-direction: column;
     text-align: left;
-    overflow: auto;
-}
-
-#setting-view .unsupported {
-    text-decoration: line-through;
+    overflow: scroll;
 }
 
 #setting-view .tip-text {
@@ -609,7 +599,6 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .center .row > .cate-name {
-    font-size: 16.5px;
     font-size: 17px;
     margin-left: 10px;
     width: 125px;
@@ -638,6 +627,16 @@ onMounted(checkForUpdate)
 
 #setting-view .theme {
     padding-bottom: 10px !important;
+}
+
+#setting-view .theme .cate-name b {
+    font-weight: normal;
+}
+
+#setting-view .theme .cate-name b:hover {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--hl-color);
 }
 
 #setting-view .theme .content {
@@ -681,18 +680,6 @@ onMounted(checkForUpdate)
 
 #setting-view .theme .content .lightText {
     color: #fff !important;
-}
-
-#setting-view .theme .content .more {
-    background: #ffd700;
-}
-
-#setting-view .theme .content .more span {
-    /* visibility: visible; */
-    background-color: transparent;
-    color: #333;
-    font-size: 28px;
-    padding-bottom: 15px;
 }
 
 #setting-view .common .content {

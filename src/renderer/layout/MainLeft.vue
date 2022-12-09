@@ -264,7 +264,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 #main-left .center {
     flex: 1;
     padding-bottom: 36px;
-    overflow: auto;
+    overflow: scroll;
 }
 
 #explore-mode {

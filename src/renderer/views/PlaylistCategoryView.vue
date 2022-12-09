@@ -104,7 +104,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 
 <style scoped>
 .playlist-category-view {
-    overflow: auto;
+    overflow: scroll;
 }
 
 .playlist-category-view .header,

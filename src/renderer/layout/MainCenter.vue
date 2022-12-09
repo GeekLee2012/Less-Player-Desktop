@@ -494,6 +494,7 @@ watch(lyricMetaPos, () => {
 #main-center .autopadding .playlist-square-view,
 #main-center .autopadding .artist-square-view,
 #main-center .autopadding .radio-square-view,
+#main-center .autopadding #themes-view .title,
 #main-center .autopadding #setting-view .title,
 #main-center .autopadding #search-view,
 #main-center .autopadding #user-profile-view, 

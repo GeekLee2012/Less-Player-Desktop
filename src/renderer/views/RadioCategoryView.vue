@@ -130,7 +130,7 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 
 <style scoped>
 .radio-category-view {
-    overflow: auto;
+    overflow: scroll;
 }
 
 .radio-category-view .header,

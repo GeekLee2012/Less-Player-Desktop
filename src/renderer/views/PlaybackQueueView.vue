@@ -145,6 +145,6 @@ onMounted(() => {
 
 .playback-queue-view .center {
     flex: 1;
-    overflow: auto;
+    overflow: scroll;
 }
 </style>

@@ -388,7 +388,7 @@ watch(sources, () => {
     display: flex;
     flex-direction: column;
     padding: 0px 33px 0px 33px;
-    overflow: auto;
+    overflow: scroll;
 }
 
 #data-backup-view  .center .length {
