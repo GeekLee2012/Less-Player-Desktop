@@ -336,7 +336,7 @@ const randomPlay = async () => {
     if(isPlaylistType(type)) {
         pickPlaylist(platform)
     } else if(isAnchorRadioType(type)) {
-        showFailToast('主播电台功能暂未开发')
+        pickAnchorRadio(platform)
     } else if(isFMRadioType(type)) {
         pickFMRadio(platform)
     }
@@ -413,11 +413,10 @@ const pickPlaylist = async (platform) => {
     //重置，下面会再次复用
     retry = 0
     
-    //获取随机一个分页数据
-    const randPage = () => (Math.max(nextInt(total), 1))
     let success = false
     do {
-        const page = randPage()
+        //获取随机一个分页数据
+        const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.square(cate, offset, limit, page, order)
         console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
@@ -438,6 +437,105 @@ const pickPlaylist = async (platform) => {
         }
         setRandomMusicCategoryName(cateName)
         EventBus.emit('playlist-play', { playlist, text: '即将为您播放歌单' })
+        success = true
+        break
+    } while(retry > 0 && retry < maxRetry) 
+    if(!success) showFailToast('网络异常！请稍候重试')
+}
+
+//获取主播电台分类
+const pickAnchorRadioCategory = async (platform) => {
+    //平台服务
+    const vendor = getVendor(platform)
+    if(!vendor || !vendor.radioCategories) {
+        showFailToast('服务异常！请稍候重试')
+        return
+    }
+    let cachedCategories = getCategories(platform)
+    if(!cachedCategories) {
+        let maxRetry = 3, retry = 0
+        do {
+            const result = await vendor.radioCategories()
+            if(result && result.data.length > 0) {
+                putCategories(result.platform, result.data)
+                cachedCategories = result.data
+                break
+            }
+            ++retry
+        } while(retry > 0 && retry < maxRetry)
+    }
+    if(!cachedCategories || !cachedCategories.length < 0) {
+        return null
+    }
+    //单个分类，且名称约定为电台或地区，如央广云听平台
+    let filtedData = cachedCategories.filter(
+        item => item.name != '电台' && item.name != '默认')
+    if(filtedData.length < 1) {
+        return null
+    }
+    //子分类
+    const data = filtedData[0].data
+    return !data || data.length < 1 ? null
+        : data[nextInt(data.length)]
+}
+
+//随机获取平台里的一个主播电台
+const pickAnchorRadio = async (platform) => {
+    //获取分类
+    let category = null 
+    try {
+        category = await pickAnchorRadioCategory(platform)
+    } catch(error) {
+        console.log(error)
+    }
+    let cateName = category ? category.key : '全部'
+    const cate = category ? category.value : null
+    const order = null
+    const limit = 35
+    let result = null, total = -1
+    //重试
+    let maxRetry = 3, retry = 0
+    //获取总页数
+    //平台服务
+    const vendor = getVendor(platform)
+    if(!vendor || !vendor.radioSquare) {
+        showFailToast('服务异常！请稍候重试')
+        return
+    }
+    do {
+        result = await vendor.radioSquare(cate, 0, limit, 1, order)
+        if(result && result.total > 0) {
+            total = result.total
+            break
+        }
+        ++retry
+    } while(retry > 0 && retry < maxRetry)
+    if(total < 0) { //获取不到数据，暂时返回
+        showFailToast('网络异常！请稍候重试')
+        return 
+    }
+    //重置，下面会再次复用
+    retry = 0
+    
+    //获取随机一个分页数据
+    let success = false
+    do {
+        const page = Math.max(nextInt(total), 1)
+        const offset = (page - 1) * limit
+        result = await vendor.radioSquare(cate, offset, limit, page, order)
+        console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+        if(!result || result.data.length < 1) {
+            ++retry
+            continue
+        }
+        //无需重置，直接break-out
+        //retry = 0
+
+        //随机选择一个主播电台列表
+        const playlists = result.data
+        const playlist = playlists[nextInt(playlists.length)]
+        setRandomMusicCategoryName(cateName)
+        EventBus.emit('playlist-play', { playlist, text: '即将为您打开主播电台' })
         success = true
         break
     } while(retry > 0 && retry < maxRetry) 
@@ -520,11 +618,10 @@ const pickFMRadio = async (platform) => {
     //重置，下面会再次复用
     retry = 0
     
-    //获取随机一个分页数据
-    const randPage = () => (Math.max(nextInt(total), 1))
     let success = false
     do {
-        const page = randPage()
+        //获取随机一个分页数据
+        const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.radioSquare(cate, offset, limit, page, order)
         console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
@@ -538,13 +635,8 @@ const pickFMRadio = async (platform) => {
         //随机选择一个歌单
         const playlists = result.data
         const playlist = playlists[nextInt(playlists.length)]
-        //特殊情况，歌单电台
-        if(Playlist.isNormalRadioType(playlist)) {
-            const titleParts = playlist.title.replaceAll(' ','').split('|')
-            cateName = titleParts.length > 1 ? titleParts[1] : titleParts[0]
-        }
         setRandomMusicCategoryName(cateName)
-        EventBus.emit('playlist-play', { playlist, text: '即将为您播放电台' })
+        EventBus.emit('playlist-play', { playlist, text: '即将为您收听广播电台' })
         success = true
         break
     } while(retry > 0 && retry < maxRetry) 
@@ -721,6 +813,7 @@ watch([ textColorIndex ], setupTextColor)
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     flex: 1;
     -webkit-app-region: none;
 }

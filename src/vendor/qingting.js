@@ -52,7 +52,9 @@ export class Qingting {
             const url = "https://i.qingting.fm/capi/neo-channel-filter"
                 + "?category=" + cate + "&attrs=0&curpage=" + page
             getJson(url).then(json => {
-                const list = json.data.channels
+                const list = json.data.channels 
+                //TODO 目前每页数据 12条，后期可能会变动
+                result.total = Math.ceil(json.total / 12)
                 list.forEach(item => {
                     const { id, title, cover, description } = item
                     const playlist = new Playlist(Playlist.ANCHOR_RADIO_ID_PREFIX + id, Qingting.CODE, cover, title, null, description)

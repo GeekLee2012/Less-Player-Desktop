@@ -273,7 +273,7 @@ const setPlayingViewSize = () => {
 
 const setAudioEffectViewAlignment = () => {
     EventBus.emit('app-elementAlignCenter', {
-        selector: "#audio-effect-view",
+        selector: ".default-layout #audio-effect-view",
         width: 725,
         height: 550
     })

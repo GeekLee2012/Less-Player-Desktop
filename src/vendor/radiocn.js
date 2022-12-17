@@ -134,7 +134,7 @@ export class RadioCN {
             
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
-                
+                result.total = json.data.total_page
                 const list = json.data.odchannel
                 list.forEach(item => {
                     const { id, imageUrl, name, description } = item

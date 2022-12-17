@@ -757,6 +757,12 @@ export class NetEase {
                         }
                     })
                 }
+                const pgEls = doc.querySelectorAll("#allradios .u-page .zpgi")
+                if(pgEls && pgEls.length > 0) {
+                    const totalEl = pgEls[pgEls.length - 1]
+                    if(totalEl) result.total = parseInt(totalEl.textContent)
+                }
+
                 //电台排行榜
                 listEl = doc.querySelectorAll("#allradios .rdilist li")
                 listEl.forEach(el => {

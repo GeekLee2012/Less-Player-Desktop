@@ -166,8 +166,8 @@ EventBus.on("app-zoom", adjustWinCtlBtns)
 EventBus.on("app-adjustWinCtlBtns", adjustWinCtlBtns)
 EventBus.on("app-layout", setupLayout)
 EventBus.on("app-elementAlignCenter", value => {
-  const { selector, width, height, offsetLeft, offsetTop } = value
-  setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
+    const { selector, width, height, offsetLeft, offsetTop } = value
+    setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
 })
 
 const initialize = () => {

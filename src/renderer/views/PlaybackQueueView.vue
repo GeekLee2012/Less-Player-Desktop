@@ -47,7 +47,7 @@ onMounted(() => {
         <div class="header">
             <div class="title">当前播放</div>
             <div class="detail">
-                <div class="subtext">共{{ queueTracks.length }}首歌曲</div>
+                <div class="subtext">共{{ queueTracks.length }}首</div>
                 <div class="action">
                     <div class="target-btn text-btn" @click="targetPlaying">
                         <svg width="16" height="15" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="aim"><path d="M12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z"/><path d="M23,11H22A10,10,0,0,0,13,2.05V1a1,1,0,0,0-2,0v1a10,10,0,0,0-8.95,9H1a1,1,0,0,0,0,2h1a10,10,0,0,0,9,9V23a1,1,0,0,0,2,0V22A10,10,0,0,0,22,13H23A1,1,0,0,0,23,11ZM13,19.93V19a1,1,0,0,0-2,0v.93A8,8,0,0,1,4.07,13H5a1,1,0,0,0,0-2H4.07A8,8,0,0,1,11,4.07V5a1,1,0,0,0,2,0V4.07A8,8,0,0,1,19.93,11H19a1,1,0,0,0,0,2h.93A8,8,0,0,1,13,19.93Z"/></g></svg>
