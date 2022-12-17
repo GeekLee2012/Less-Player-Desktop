@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch, toRaw } from 'vue';
+import { onActivated, ref, watch, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
@@ -179,7 +179,10 @@ const setHlLineIndex = (value) => hlLineIndex.value = value
 
 const renderLyric = (secs) => {
     if(!isLyricShow.value) return
-    if(!hasLyric.value) return
+    if(!hasLyric.value) {
+        setHlLineIndex(-1)
+        return
+    }
 
     const presetOffset = Track.lyricOffset(currentTrack.value)
     const userOffset = lyric.value.offset / 1000
@@ -331,7 +334,7 @@ const randomPlay = async () => {
     if(isPlaylistType(type)) {
         pickPlaylist(platform)
     } else if(isAnchorRadioType(type)) {
-
+        showFailToast('功能暂时未开发')
     } else if(isFMRadioType(type)) {
         pickFMRadio(platform)
     }
@@ -570,7 +573,7 @@ EventBus.on('lyric-lineSpacing', setupLyricLines)
 EventBus.on('lyric-alignment', setupLyricAlignment)
 
 /* 组件生命周期、钩子等 */
-onMounted(() => {
+onActivated(() => {
     setupTextColor()
     updatePlatformShortName()
     checkFavorite()
