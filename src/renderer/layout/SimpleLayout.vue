@@ -284,7 +284,7 @@ const randomPlay = async () => {
     }
     //获取完整类型信息
     const rmTypes = allTypes.filter(item => rmTypeCodes.includes(item.code))
-    const totalWeight = rmTypes.reduce((prev, curr) => prev.weight + curr.weight)
+    const totalWeight = rmTypes.reduce((acc, curr) => (acc + curr.weight), 0)
     //获取完整平台信息
     const rmPlatforms = allPlatforms.filter(item => rmPlatformCodes.includes(item.code))
     //重试
@@ -573,6 +573,7 @@ EventBus.on('lyric-alignment', setupLyricAlignment)
 onMounted(() => {
     setupTextColor()
     updatePlatformShortName()
+    checkFavorite()
 
     if(progressBarRef) progressBarRef.value.updateProgress(progress.value)
     if(volumeBarRef) volumeBarRef.value.setVolume(volume.value)
