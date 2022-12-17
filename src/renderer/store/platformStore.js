@@ -30,7 +30,7 @@ const T_TYPES = [ {
 }, {
     code: 'anchorRadios',
     name: '主播电台',
-    weight: 5
+    weight: 3
 }, {
     code: 'fmRadios',
     name: '广播电台',

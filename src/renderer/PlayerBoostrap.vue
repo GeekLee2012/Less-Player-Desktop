@@ -88,9 +88,9 @@ const bootstrapTrack = (track, callback, noToast) => {
         if(Track.hasUrl(result)) Object.assign(track, { url })
         //TODO 流程待优化完善
         tryCancelPlayNextTimer()
-        //if(!Track.hasUrl(track)) track = await United.transferTrack(track)
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
-            if(queueTracksSize.value < 2 && !Playlist.isNormalRadioType(track)) { //非电台歌曲，且没有下一曲
+            if(queueTracksSize.value < 2 
+                && !Playlist.isNormalRadioType(track)) { //非电台歌曲，且没有下一曲
                 if(!noToast) showPlayToast()
             } else if(toastCnt < 9) { 
                 setAutoPlaying(true)
@@ -103,7 +103,7 @@ const bootstrapTrack = (track, callback, noToast) => {
             }
             return
         }
-        toastCnt =0 //重置连跳计数
+        toastCnt = 0 //重置连跳计数
         setAutoPlaying(false)
         
         if(Track.hasLyric(result)) assignLyric(track, lyric)

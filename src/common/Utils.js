@@ -61,6 +61,7 @@ export const toTrimString = (value) => {
     return (value || '').toString().trim()
 } 
 
+/*
 export const useRgbaster = async (src, opts) => {
     return new Promise((resolve, reject) => {
         analyze(src, opts).then(result => {
@@ -78,6 +79,7 @@ export const useRgbaster = async (src, opts) => {
         })
     })
 }
+*/
 
 export const nextInt = (max) => {
     const limit = max < 1024 ? 1024 : max

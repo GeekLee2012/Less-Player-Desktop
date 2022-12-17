@@ -11,7 +11,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useAudioEffectStore } from '../store/audioEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { useRgbaster, nextInt } from '../../common/Utils';
+import { nextInt } from '../../common/Utils';
 import { toMMssSSS } from '../../common/Times';
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
@@ -93,6 +93,7 @@ const checkFavorite = () => {
     favorited.value = isFavoriteRadio(id, platform) || isFavoriteSong(id, platform)
 }
 
+/*
 const autoSetupTextColor = async (cover) => {
     if(!cover) return
     return new Promise((resolve, reject) => {
@@ -106,6 +107,7 @@ const autoSetupTextColor = async (cover) => {
         })
     })
 }
+*/
 
 const setupTextColor = () => {
     const index = textColorIndex.value
@@ -282,7 +284,7 @@ const randomPlay = async () => {
         (rmPlatformCodes.length < 1 ? 1 : -1)
     if(errorType > -1) {
         const errorTypeName = [ '类型', '平台' ][errorType]
-        showFailToast(`随机设置${errorTypeName}里没有开启`)
+        showFailToast(`随机设置中${errorTypeName}未开启`)
         return
     }
     //获取完整类型信息
@@ -334,7 +336,7 @@ const randomPlay = async () => {
     if(isPlaylistType(type)) {
         pickPlaylist(platform)
     } else if(isAnchorRadioType(type)) {
-        showFailToast('功能暂时未开发')
+        showFailToast('主播电台功能暂未开发')
     } else if(isFMRadioType(type)) {
         pickFMRadio(platform)
     }

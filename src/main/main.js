@@ -434,7 +434,7 @@ const initTrayMenuTemplate = () => {
 
 //设置系统交通灯按钮可见性
 const setWindowButtonVisibility = (visible) => {
-  //if(!isMacOS) return
+  if(!isMacOS) return
   try {
     if(mainWin) mainWin.setWindowButtonVisibility(visible)
   } catch (error) {

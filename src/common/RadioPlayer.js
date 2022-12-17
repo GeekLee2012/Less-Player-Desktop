@@ -77,6 +77,7 @@ export class RadioPlayer {
 
     setChannel(channel) {
         this.pause()
+        this.hls.stopLoad()
         this.channel = channel
         this.channelChanged = true
     }
