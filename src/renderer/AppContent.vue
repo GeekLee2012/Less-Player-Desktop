@@ -199,8 +199,10 @@ watch([ playingViewShow, playingViewThemeIndex, videoPlayingViewShow ], adjustWi
 
 <template>
     <Themes>
-        <component :is="currentAppLayout">
-        </component>
+        <keep-alive :max="2">
+          <component :is="currentAppLayout">
+          </component>
+        </keep-alive>
         <slot></slot>
     </Themes>
 </template>
