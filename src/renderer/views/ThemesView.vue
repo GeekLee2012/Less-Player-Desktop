@@ -103,6 +103,7 @@ const { setThemeIndex } = useSettingStore()
     cursor: pointer;
     box-shadow: 0px 0px 1px #cbcbcbdd;
     position: relative;
+    overflow: hidden;
 }
 
 #themes-view .center .row .content .text {

@@ -33,9 +33,7 @@ onMounted(() => {
             <div class="cover-wrap" @mouseenter="toggleCoverMask" @mouseleave="toggleCoverMask">
                 <img class="audio-cover" v-lazy="currentTrack.cover" />
                 <div class="cover-mask" v-show="coverMaskShow" @click="showPlayingView">
-                    <div class="down-btn">
-                        <svg viewBox="0 0 763.32 424.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M380.47,322.11c27.6-27.5,54-53.68,80.23-80Q575,127.75,689.38,13.4C708.7-5.81,735-2.92,750.83,12.91c17,17,16.57,43.39-.9,60.87L414.1,409.61c-19.89,19.89-45,20-64.9.08Q180.9,241.45,12.66,73.15A42.53,42.53,0,1,1,72.85,13Q224.7,164.87,376.48,316.73A46.1,46.1,0,0,1,380.47,322.11Z"/></g></g></svg>
-                    </div>
+                    <svg width="19" height="19" viewBox="0 0 763.32 424.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M380.47,322.11c27.6-27.5,54-53.68,80.23-80Q575,127.75,689.38,13.4C708.7-5.81,735-2.92,750.83,12.91c17,17,16.57,43.39-.9,60.87L414.1,409.61c-19.89,19.89-45,20-64.9.08Q180.9,241.45,12.66,73.15A42.53,42.53,0,1,1,72.85,13Q224.7,164.87,376.48,316.73A46.1,46.1,0,0,1,380.47,322.11Z"/></g></g></svg>
                 </div>
             </div>
             <div class="title-wrap">
@@ -105,18 +103,13 @@ onMounted(() => {
     z-index: 2;
     display: flex;
     align-items: center;
+    justify-content: center;
     background-color: var(--ntf-bg);
     opacity: 0.68;
 }
 
-.play-meta .cover-mask .down-btn {
-    flex: 1;
-}
-
-.play-meta .cover-mask .down-btn svg {
-    fill: var(--svg-color);
-    width: 20px;
-    height: 20px;
+.play-meta .cover-mask svg {
+    fill: var(--svg-color) !important;
 }
 
 .play-meta .audio-title {

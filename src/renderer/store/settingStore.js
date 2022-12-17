@@ -26,6 +26,7 @@ export const useSettingStore = defineStore('setting', {
         },
         layout: {
             index: 0,
+            fallbackIndex: 0
         },
         common: {
             winZoom: 100,
@@ -154,6 +155,14 @@ export const useSettingStore = defineStore('setting', {
         isStoreLocalMusicBeforeQuit(state) {
             return this.cache.storeLocalMusic
         },
+        isDefaultLayout() {
+            const index = this.layout.index
+            return index == 0 || index == 1
+        },
+        isSimpleLayout() {
+            const index = this.layout.index
+            return index == 2
+        },
         getWindowZoom() {
             return this.common.winZoom
         },
@@ -172,8 +181,14 @@ export const useSettingStore = defineStore('setting', {
             //EventBus.emit("switchTheme", themeId)
         },
         setLayoutIndex(index) {
-            this.layout.index = index
+            this.layout.index = index || 0
+            const currentIndex = this.layout.index
+            if(currentIndex < 2) this.layout.fallbackIndex = currentIndex
             EventBus.emit("app-layout")
+        },
+        switchToFallbackLayout() {
+            this.setLayoutIndex(this.layout.fallbackIndex)
+            this.setupWindowZoom()
         },
         presetThemes () {
             const { getPresetThemes } = useThemeStore()
@@ -243,9 +258,6 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleStoreLocalMusic() {
             this.cache.storeLocalMusic = !this.cache.storeLocalMusic
-        },
-        resetKeys() {
-            
         },
         setupWindowZoom() { 
             const zoom = this.common.winZoom
@@ -336,7 +348,7 @@ export const useSettingStore = defineStore('setting', {
         },
         setLyricLineSpacing(value) {
             const lineSpacing = parseInt(value || 26)
-            if(lineSpacing < 1 || lineSpacing > 100) return
+            if(lineSpacing < 0 || lineSpacing > 100) return
             this.lyric.lineSpacing = lineSpacing
             this.setupLyricLineSpacing()
         },

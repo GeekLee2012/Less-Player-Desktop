@@ -36,6 +36,11 @@ export const useAppCommonStore = defineStore('appCommon', {
         spectrumIndex: 0,
         //歌词设置
         lyricToolbarShow: false,
+        //随便听听设置
+        randomMusicToolbarShow: false,
+        randomMusicPlatformCodes: [],
+        randomMusicTypeCodes: [],
+        randomMusicCategoryName: null,
     }),
     getters: {
         isPlaylistMode() {
@@ -55,6 +60,16 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         exploreModeLength() {
             return this.exploreModes.length 
+        },
+        isActiveRandomMusicPlatform() {
+            return (platform) => {
+                return this.randomMusicPlatformCodes.includes(platform)
+            }
+        },
+        isActiveRandomMusicType() {
+            return (type) => {
+                return this.randomMusicTypeCodes.includes(type)
+            }
         }
     },
     actions: {
@@ -231,14 +246,43 @@ export const useAppCommonStore = defineStore('appCommon', {
         }
         ,
         switchSpectrumIndex() {
-            this.spectrumIndex = (this.spectrumIndex + 1) % 2
+            this.setSpectrumIndex((this.spectrumIndex + 1) % 3)
+        },
+        setSpectrumIndex(value) {
+            this.spectrumIndex = value
         },
         hideLyricToolbar() {
             this.lyricToolbarShow = false
         },
         toggleLyricToolbar() {
             this.lyricToolbarShow = !this.lyricToolbarShow
-        }
+        },
+        hideRandomMusicToolbar() {
+            this.randomMusicToolbarShow = false
+        },
+        toggleRandomMusicToolbar() {
+            this.randomMusicToolbarShow = !this.randomMusicToolbarShow
+        },
+        toggleRandomMusicPlatform(platform) {
+            const index = this.randomMusicPlatformCodes.indexOf(platform)
+            if(index == -1) {
+                this.randomMusicPlatformCodes.push(platform)
+            } else {
+                this.randomMusicPlatformCodes.splice(index, 1)
+            }
+        },
+        toggleRandomMusicType(type) {
+            const index = this.randomMusicTypeCodes.indexOf(type)
+            if(index == -1) {
+                this.randomMusicTypeCodes.push(type)
+            } else {
+                this.randomMusicTypeCodes.splice(index, 1)
+            }
+        },
+        setRandomMusicCategoryName(value) {
+            value = value ? value.toString().trim() : value
+            this.randomMusicCategoryName = value
+        },
     },
     persist: {
         enabled: true,
@@ -246,7 +290,8 @@ export const useAppCommonStore = defineStore('appCommon', {
             {
                 //key: 'appCommon',
                 storage: localStorage,
-                paths: [ 'playingViewThemeIndex', 'spectrumIndex' ]
+                paths: [ 'playingViewThemeIndex', 'spectrumIndex', 
+                    'randomMusicPlatformCodes', 'randomMusicTypeCodes', 'randomMusicCategoryName' ]
             },
         ],
     },

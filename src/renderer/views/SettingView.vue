@@ -44,6 +44,12 @@ const { setThemeIndex,
 
 const { showToast } = useAppCommonStore()
 
+//打开默认浏览器，并访问超链接
+const visitLink = (url) => {
+    if(ipcRenderer) ipcRenderer.send('visit-link', url)
+}
+
+/* 数据 - 重置 */
 const resetData = async () => {
     if(!ipcRenderer) return 
     const ok = await ipcRenderer.invoke('show-confirm', {
@@ -65,11 +71,7 @@ const resetData = async () => {
     showToast("数据已重置成功!")
 } 
 
-const visitLink = (url) => {
-    if(ipcRenderer) ipcRenderer.send('visit-link', url)
-}
-
-//通用设置
+/* 通用设置 */
 const zoomTickmarks = [ 50, 70, 85, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300 ]
 const fontWeights = [ 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 ]
 
@@ -89,6 +91,7 @@ const updateFontWeight = (e) => {
     setFontWeight(e.target.value)
 }
 
+/* 应用更新升级 */
 const changelogUrl = "https://gitee.com/rive08/less-player-desktop/blob/master/CHANGELOG.md"
 const lastReleaseUrlRoot = "https://gitee.com/rive08/less-player-desktop/releases/tag/"
 const { version } = packageCfg
@@ -122,7 +125,7 @@ const updateDownloadProgress = (received, total) => {
         totalMB = parseFloat(total / (1024 * 1024)).toFixed(2)
     }
     if(receivedMB >= totalMB && total > 0) {
-        downloadProgress.value = '下载完成'
+        downloadProgress.value = '下载完成，请手动安装更新'
         setDownloadState(2)
     } else if(total > 0) {
         downloadProgress.value = `${receivedMB}MB / ${totalMB}MB` 
@@ -225,6 +228,7 @@ const showPath = async () => {
     ipcRenderer.send('show-path', localSavePath)
 }
 
+/* 组件生命周期 */
 onActivated(() => {
     updateBlackHole(Math.random() * 100000000)
 })
@@ -253,7 +257,7 @@ onMounted(checkForUpdate)
                 <span class="cate-name">布局</span>
                 <div class="content">
                     <div class="last">
-                        <span v-for="(item, index) in [ '默认', '经典主流' ]"
+                        <span v-for="(item, index) in [ '默认', '经典主流', '简约' ]"
                             class="layout-item"
                             :class="{ active: index == layout.index }"
                             @click="setLayoutIndex(index)" >

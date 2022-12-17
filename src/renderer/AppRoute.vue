@@ -9,6 +9,7 @@ import { useAlbumDetailStore } from './store/albumDetailStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { usePlatformStore } from './store/platformStore';
 import { useUserProfileStore } from './store/userProfileStore';
+import { useSettingStore } from './store/settingStore';
 
 
 const router = useRouter()
@@ -24,7 +25,8 @@ const { setExploreMode, setArtistExploreMode,
     updateCommonCtxItem, hidePlaybackQueueView,
     hideVideoPlayingView, setExitToHomeBtnVisible } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
-
+const { isSimpleLayout } = storeToRefs(useSettingStore())
+const { switchToFallbackLayout } = useSettingStore()
 
 const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
@@ -32,19 +34,24 @@ const resolveRoute = (route) => {
     if(typeof(route) == 'object') return route
     return { toPath: route.toString() }
 }
+
 const commonBeforeRoute = { beforeRoute: (toPath) => {
-    hidePlaybackQueueView()
+    if(!toPath.includes('/artist/')) hidePlaybackQueueView()
+    if(isSimpleLayout.value) switchToFallbackLayout()
     EventBus.emit('app-route', toPath)
 } }
 
+const createCommonRoute = (toPath, onRouteReady) => ({ toPath, onRouteReady, ...commonBeforeRoute })
 
-router.beforeResolve((to, from) => {
-    console.log("[ ROUTE ] ==>>> " + to.path)
-    autoSwitchExploreMode(to)
-    highlightPlatform(to)
-    highlightNavigationCustomPlaylist(to, from)
-    hideRelativeComponents(to)
-})
+const setupRouter = () => {
+    router.beforeResolve((to, from) => {
+        console.log("[ ROUTE ] ==>>> " + to.path)
+        autoSwitchExploreMode(to)
+        highlightPlatform(to)
+        highlightNavigationCustomPlaylist(to, from)
+        hideRelativeComponents(to)
+    })
+}
 
 const highlightPlatform = (to) => {
     const path = to.path
@@ -157,7 +164,7 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
         //如豆瓣FM有歌手页的，但无专辑页
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
-        visitRoute({ toPath, onRouteReady }).then(() => updateArtistDetailKeys(platform, id),)
+        visitRoute(createCommonRoute(toPath, onRouteReady)).then(() => updateArtistDetailKeys(platform, id),)
         hideAllCtxMenus()
     }
     if(callback) callback(visitable)
@@ -180,7 +187,7 @@ const visitAlbumDetail = (platform, id, callback) => {
             exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
-        visitRoute(toPath).then(() => {
+        visitRoute(createCommonRoute(toPath)).then(() => {
             if(isAlbum) updateAlbumDetailKeys(platform, id)
         })
         hideAllCtxMenus()
@@ -188,20 +195,22 @@ const visitAlbumDetail = (platform, id, callback) => {
     if(callback) callback(visitable)
 }
 
+setupRouter()
+
 //TODO 世界上没有什么是绝对完美的，没有代码提示是硬伤 ~
 provide('appRoute', {
     currentRoutePath, 
     visitRoute,
     backward: () => router.back(),
     forward: () => router.forward(),
-    visitHome: () => (visitRoute({ toPath: '/', ...commonBeforeRoute })),
-    visitThemes: () => (visitRoute({ toPath: '/themes', ...commonBeforeRoute })),
-    visitUserHome: () => (visitRoute({ toPath: '/userhome/all', ...commonBeforeRoute })),
-    visitSetting: () => (visitRoute({ toPath: '/setting', ...commonBeforeRoute })),
-    visitSearch: (keyword) => (visitRoute({ toPath: `/search/${keyword}`, ...commonBeforeRoute })),
+    visitHome: () => (visitRoute(createCommonRoute('/'))),
+    visitThemes: () => (visitRoute(createCommonRoute('/themes'))),
+    visitUserHome: () => (visitRoute(createCommonRoute('/userhome/all'))),
+    visitSetting: () => (visitRoute(createCommonRoute('/setting'))),
+    visitSearch: (keyword) => (visitRoute(createCommonRoute(`/search/${keyword}`))),
     visitPlaylist: (platform, id) => {
         const exploreMode = resolveExploreMode()
-        return visitRoute(`/${exploreMode}/playlist/${platform}/${id}`)
+        return visitRoute(createCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`))
     },
     visitArtist: ({ platform, item, index, callback, onRouteReady }) => {
         visitArtistDetail({ platform, item, index, callback, onRouteReady })
@@ -219,7 +228,7 @@ provide('appRoute', {
     },
     visitCustomPlaylistCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/customPlaylist/create`)
+        return visitRoute(createCommonRoute(`/${exploreMode}/customPlaylist/create`))
     },
     visitCustomPlaylist: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)

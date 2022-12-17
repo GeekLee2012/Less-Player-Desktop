@@ -67,7 +67,9 @@ const getFlatData = () => {
 }
 
 const loadFirstCateData = () => {
-    const firstItem = getFlatData()[0]
+    const flatData = getFlatData()
+    if(!flatData || flatData.length < 1) return
+    const firstItem = flatData[0]
     visitCateItem(firstItem, firstItem.row, firstItem.col, true)
 }
 

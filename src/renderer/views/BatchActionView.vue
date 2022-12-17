@@ -251,7 +251,7 @@ const showAddToList = (event, dataType, elSelector) => {
     const { clientX, clientY } = event
     EventBus.emit("commonCtxMenu-init", dataType)
     EventBus.emit("commonCtxMenu-show", { 
-        event: { x, y: bottom, clientX, clientY }, 
+        event: { x, y: (bottom + 3), clientX, clientY }, 
         value: sortCheckData()
     })
 }

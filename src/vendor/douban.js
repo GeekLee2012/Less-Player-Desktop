@@ -2,7 +2,6 @@ import { getDoc, getJson, postJson } from "../common/HttpClient";
 import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
-import { toYmd } from "../common/Times";
 import { Lyric } from "../common/Lyric";
 
 const CATEGORY_GROUP = {
@@ -40,8 +39,8 @@ export class DouBan {
     //歌单(列表)广场
     static square(cate, offset, limit, page, order) {
         const originCate = cate
-        let resolvedCate = cate.trim()
-        resolvedCate = resolvedCate.length > 0  ? cate : 'MHz'
+        let resolvedCate = (cate || '').toString().trim()
+        resolvedCate = resolvedCate.length > 0  ? resolvedCate : 'MHz'
         if(resolvedCate == 'MHz') return DouBan.mhzChannels(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
             const result = { platform: DouBan.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
@@ -62,11 +61,16 @@ export class DouBan {
         })
     }
 
-    //兆赫列表
+    //暂时用不上
+    static playlistRadios(cate, offset, limit, page) {
+        return DouBan.mhzChannels(cate, offset, limit, page)
+    }
+
+    //兆赫列表，playlistRadios
     static mhzChannels(cate, offset, limit, page) {
         if(page > 1) return DouBan.guessMhzChannels(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
-            const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 0, data: [] }
+            const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 10, data: [] }
             const url = "https://fm.douban.com/j/v2/rec_channels?specific=all"
             getJson(url).then(json => {
                 const channels = json.data.channels
@@ -82,7 +86,7 @@ export class DouBan {
                     if(!cateName) return
                     const chnnItems = channels[key].map(item => {
                         const cover = item.cover || item.banner
-                        const title = cateName + ' - ' + item.name
+                        const title = cateName + '| ' + item.name
                         const playlist = new Playlist(DouBan.MHZ_PREFIX + item.id, DouBan.CODE , cover, title)
                         playlist.isRadioType = true
                         return playlist
@@ -105,7 +109,7 @@ export class DouBan {
                 //其他兆赫
                 channels.forEach(item => {
                     const cover = item.avatar
-                    const title = '艺术家 - ' + item.name_usual + ' 系'
+                    const title = '艺术家| ' + item.name_usual + ' 系'
                     const playlist = new Playlist(DouBan.MHZ_PREFIX + item.channel, DouBan.CODE , cover, title)
                     playlist.isRadioType = true
                     result.data.push(playlist)
@@ -215,7 +219,7 @@ export class DouBan {
     }
 
     //电台：下一首歌曲
-    static nextRadioTrack(channel, track) {
+    static nextPlaylistRadioTrack(channel, track) {
         channel = channel.replace(DouBan.MHZ_PREFIX, '')
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/playlist"
@@ -249,7 +253,7 @@ export class DouBan {
                 result.url = song.url
                 result.isRadioType = true
                 resolve(result)
-            })
+            }, error => resolve(null))
         })
     }
 
@@ -259,7 +263,6 @@ export class DouBan {
             keyword = keyword.trim()
             const url = "https://fm.douban.com/j/v2/query/song?q=" + keyword + "&limit=" + limit
             getJson(url).then(json => {
-                
                 const list = json.items
                 const data = list.map(item => {
                     const artist = item.singers.map(ar => ({ id: ar.id, name: ar.name }))
@@ -271,7 +274,7 @@ export class DouBan {
                     track.url = item.url
                     return track
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: DouBan.CODE, offset, limit, page, data }
                 resolve(result)
             })
         }) 
@@ -282,13 +285,12 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/query/songlist?q=" + keyword + "&limit=" + limit
             getJson(url).then(json => {
-                
                 const list = json.items
                 const data = list.map(item => {
                     const playlist = new Playlist(item.id, DouBan.CODE, item.cover, item.title)
                     return playlist
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: DouBan.CODE, offset, limit, page, data }
                 resolve(result)
             })
         }) 
@@ -297,7 +299,7 @@ export class DouBan {
     //搜索: 专辑
     static searchAlbums(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const result = { offset, limit, page, data: [] }
+            const result = { platform: DouBan.CODE, offset, limit, page, data: [] }
             resolve(result)
         })
     }
@@ -307,7 +309,6 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/query/artist?q=" + keyword + "&limit=" + limit
             getJson(url).then(json => {
-                
                 const list = json.items
                 const data = list.map(item => ({
                     id: item.id,
@@ -316,7 +317,7 @@ export class DouBan {
                     cover: item.avatar,
                     channel: item.channel
                 }))
-                const result = { offset, limit, page, data }
+                const result = { platform: DouBan.CODE, offset, limit, page, data }
                 resolve(result)
             })
         }) 

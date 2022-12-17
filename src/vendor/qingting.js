@@ -21,6 +21,14 @@ export class Qingting {
     static RADIO_PREFIX = 'FM_'
 
     //全部分类
+    static radioCategories() {
+        return Qingting.anchorRadioCategories()
+    }
+
+    static radioSquare(cate, offset, limit, page, order) {
+        return Qingting.anchorRadioSquare(cate, offset, limit, page, order)
+    }
+
     static anchorRadioCategories() {
         return new Promise((resolve, reject) => {
             const url = "https://i.qingting.fm/capi/neo-channel-filter?category=545&attrs=0&curpage=1"

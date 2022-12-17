@@ -591,6 +591,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   /* 音效 */
   --aeview-bg: var(--main-left-bg);
+  --aeview-bg: var(--app-bg);
   --aeview-left-bg: #16161625;
   --aeview-border: 1px solid var(--main-left-border-color);
   --aeview-list-item-bg: #16161616;
@@ -1158,7 +1159,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: none;
+  --aeview-bg: var(--app-bg);
   --aeview-left-bg: #ffffff36;
   --aeview-border: 1px solid var(--main-left-border-color);
   --aeview-list-item-bg: #ffffff25;
@@ -1815,6 +1816,17 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --aeview-list-item-bg: #f3f3f3;
   --aeview-list-item-color: var(--text-color);
 }
+
+/*
+svg {
+    fill: var(--svg-color);
+    cursor: pointer;
+}
+
+svg:hover {
+    fill: var(--svg-hover-color);
+}
+*/
 
 /* 滚动条 */
 ::-webkit-scrollbar-thumb {

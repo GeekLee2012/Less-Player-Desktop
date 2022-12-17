@@ -10,67 +10,118 @@ import { LocalMusic } from '../../vendor/localmusic';
 import { useAppCommonStore } from './appCommonStore';
 import { Ximalaya } from '../../vendor/ximalaya';
 
+//weight权重，范围：1 - 10
+const T_TYPES = [ {
+    code: 'songs',
+    name: '歌曲',
+    weight: 6
+}, {
+    code: 'playlists',
+    name: '歌单',
+    weight: 8,    //包括歌单电台
+}, {
+    code: 'albums',
+    name: '专辑',
+    weight: 5
+}, {
+    code: 'artists',
+    name: '歌手',
+    weight: 5
+}, {
+    code: 'anchorRadios',
+    name: '主播电台',
+    weight: 5
+}, {
+    code: 'fmRadios',
+    name: '广播电台',
+    weight: 3
+} ]
+
+const randomMusicTypes = T_TYPES.slice(1)
+randomMusicTypes.splice(1, 2)
+
 //音乐平台
-const allPlatforms = [
+const ALL_PLATFORMS = [
     { 
         code: 'all',
         name: '全部平台',
-        online: null
+        shortName: 'ALL',
+        online: null,
+        types: null
     }, 
     { 
         code: QQ.CODE,
         name: 'QQ音乐',
-        online: true
+        shortName: 'QQ',
+        online: true,
+        types: [ 'playlists', 'artists', 'albums' ]
     }, 
     { 
         code: NetEase.CODE,
         name: '网易云音乐',
-        online: true
+        shortName: 'WY',
+        online: true,
+        types: [ 'playlists', 'artists', 'albums', 'anchorRadios' ]
     }, 
     { 
         code: KuWo.CODE,
         name: '酷我音乐',
-        online: true
+        shortName: 'KW',
+        online: true,
+        types: [ 'playlists', 'artists', 'albums' ]
     }, 
     { 
         code: KuGou.CODE,
         name: '酷狗音乐',
-        online: true
+        shortName: 'KG',
+        online: true,
+        types: [ 'playlists', 'artists', 'albums' ]
     },
     { 
         code: DouBan.CODE,
         name: '豆瓣FM',
-        online: true
+        shortName: 'DB',
+        online: true,
+        types: [ 'playlists' ]
     },
     { 
         code: RadioCN.CODE,
         name: '央广云听',
-        online: true
+        shortName: 'YT',
+        online: true,
+        types: [ 'fmRadios', 'anchorRadios' ]
     },
     { 
         code: Qingting.CODE,
         name: '蜻蜓FM',
-        online: true
+        shortName: 'QT',
+        online: true,
+        types: [ 'anchorRadios' ]
     },
     { 
         code: Ximalaya.CODE,
         name: '喜马拉雅FM',
-        online: true
+        shortName: 'XMLY',
+        online: true,
+        types: [ 'fmRadios']
     },
     { 
         code: LocalMusic.CODE,
         name: '本地歌曲',
-        online: false
+        shortName: 'LO',
+        online: false,
+        types: null
     }
 ]
 
 const radioCount = 3
-const playlistPlatforms = allPlatforms.slice(1)
+const playlistPlatforms = ALL_PLATFORMS.slice(1)
 playlistPlatforms.splice(5, radioCount)
-const artistPlatforms = allPlatforms.slice(1, 5)
-const radioPlatforms = [ allPlatforms[2], allPlatforms[6], allPlatforms[7], allPlatforms[8] ]
-const userhomePlatforms = allPlatforms.slice(0, allPlatforms.length - 1)
-const onlinePlatformFilter = allPlatforms.slice(0, allPlatforms.length - (radioCount + 1))
+const artistPlatforms = ALL_PLATFORMS.slice(1, 5)
+const radioPlatforms = [ ALL_PLATFORMS[2], ALL_PLATFORMS[6], ALL_PLATFORMS[7], ALL_PLATFORMS[8] ]
+const userhomePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length - 1)
+const searchScopePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length - (radioCount + 1))
+const randomMusicScopePlatforms = ALL_PLATFORMS.slice(1, ALL_PLATFORMS.length - 1)
 
 const vendors = {
     qq: QQ, 
@@ -93,8 +144,12 @@ export const usePlatformStore = defineStore('platform', {
     }),
     //Getters
     getters: {
-        platforms() {
-            return () => {
+        platforms() { //根据使用范围获取平台
+            return (scope) => { 
+                scope = (scope || '').toString().trim()
+                if(scope == 'search') return searchScopePlatforms
+                else if(scope == 'random') return randomMusicScopePlatforms
+                //缺少范围或不匹配，按模式获取
                 const { isArtistMode, isRadioMode, isUserHomeMode } = useAppCommonStore()
                 if(isArtistMode) return artistPlatforms
                 if(isRadioMode) return radioPlatforms
@@ -102,19 +157,15 @@ export const usePlatformStore = defineStore('platform', {
                 return playlistPlatforms
             }
         },
-        currentPlatform(state) {
-            const { exploreMode } = useAppCommonStore()
-            return state.platforms(exploreMode)[state.currentPlatformIndex]
+        currentPlatform() {
+            return this.platforms()[this.currentPlatformIndex]
         },
-        currentPlatformCode(state) {
+        currentPlatformCode() {
             return this.currentPlatform ? this.currentPlatform.code : ''
         },
-        onlinePlatformsFilter() {
-            return onlinePlatformFilter
+        randomMusicTypes() {
+            return randomMusicTypes
         },
-        isAll(state) {
-            return this.currentPlatformCode === 'all';
-        }
     }, 
     //Actions
     actions: {
@@ -126,19 +177,18 @@ export const usePlatformStore = defineStore('platform', {
                 this.updateCurrentPlatform(-1)
                 return
             }
-            const { exploreMode } = useAppCommonStore()
-            const pms = this.platforms(exploreMode)
-            for(var i = 0; i < pms.length; i++) {
-                if(code === pms[i].code) {
+            const platformArr = this.platforms()
+            for(var i = 0; i < platformArr.length; i++) {
+                if(code === platformArr[i].code) {
                     this.updateCurrentPlatform(i)
                     return
                 }
             }
             this.updateCurrentPlatform(-1)
         },
-        getVendor(name) {
-            name = name.toLowerCase().trim()
-            return this.vendors[name]
+        getVendor(platform) {
+            platform = (platform || '').toString().trim().toLowerCase()
+            return this.vendors[platform]
         },
         currentVender() {
             return this.getVendor(this.currentPlatformCode)
@@ -177,6 +227,25 @@ export const usePlatformStore = defineStore('platform', {
         },
         isPlatformValid(platform) {
             return platform && platform.trim().length > 0
-        }
+        },
+        isPlaylistType(type) {
+            return type === 'playlists'
+        },
+        isAnchorRadioType(type) {
+            return type === 'anchorRadios'
+        },
+        isFMRadioType(type) {
+            return type === 'fmRadios'
+        },
+        getPlatformName(platform) {
+            const result = ALL_PLATFORMS.filter(item => item.code == platform)
+            return (!result || result.length != 1) ? null
+                : result[0].name
+        },
+        getPlatformShortName(platform) {
+            const result = ALL_PLATFORMS.filter(item => item.code == platform)
+            return (!result || result.length != 1) ? null
+                : result[0].shortName
+        },
     }
 })

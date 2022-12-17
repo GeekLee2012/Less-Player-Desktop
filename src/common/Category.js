@@ -3,7 +3,7 @@ export class Category {
     constructor(name, code) {
         this.name = name
         this.code = code ? code : name
-        this.data = []
+        this.data = [] //[key, value]
         this.isolated = false //是否独立
     }
 

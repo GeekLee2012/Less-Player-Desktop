@@ -80,6 +80,10 @@ export class Track {
         return Track.isVip(this)
     }
 
+    static title(track) {
+        return track ? track.title : ''
+    }
+
     static artistName(track) {
         let artistName = ''
         if(track && track.artist) {
@@ -118,7 +122,7 @@ export class Track {
     }
 
     static lyricData(track) {
-        return track && track.lyric ? track.lyric.data : []
+        return track && track.lyric ? track.lyric.data : new Map()
     }
 
     static lyricOffset(track) {

@@ -155,12 +155,12 @@ export class Player {
         EventBus.emit('track-state', state)
     }
     
-    notifyError() {
-        EventBus.emit('track-error', this.currentTrack)
+    notifyError(isRetry) {
+        EventBus.emit('track-error', isRetry ? this.currentTrack : null)
     }
 
     retryPlay(times) {
-        if(this.retry < times) this.notifyError()
+        this.notifyError(this.retry < times)
         ++this.retry
     }
 

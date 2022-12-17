@@ -12,6 +12,7 @@ import LyricToolbar from './components/LyricToolbar.vue';
 import PlayingView from './views/PlayingView.vue';
 import VisualPlayingView from './views/VisualPlayingView.vue';
 import AudioEffectView from './views/AudioEffectView.vue';
+import RandomMusicToolbar from './components/RandomMusicToolbar.vue';
 
 const currentPlayingView = shallowRef(null)
 const ctxMenuPosStyle = reactive({ left: -999, top: -999})
@@ -25,7 +26,8 @@ const { playNotificationShow, commonNotificationShow,
   artistListSubmenuShow, commonCtxMenuCacheItem,
   playbackQueueViewShow, playingViewShow, 
   videoPlayingViewShow, playingViewThemeIndex,
-  audioEffectViewShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
+  audioEffectViewShow, lyricToolbarShow,
+  randomMusicToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu, 
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -226,6 +228,9 @@ onMounted(()=> {
 
     <LyricToolbar id="lyric-toolbar" v-show="lyricToolbarShow">
     </LyricToolbar>
+
+    <RandomMusicToolbar id="random-music-toolbar" v-show="randomMusicToolbarShow">
+    </RandomMusicToolbar>
 </template>
 
 <style>
@@ -269,5 +274,13 @@ onMounted(()=> {
     top: 202px;
     right: 30px;
     z-index: 88;
+}
+
+#random-music-toolbar {
+    position: absolute;
+    bottom: 128px;
+    right: 30px;
+    z-index: 88;
+    box-shadow: var(--pbq-box-shadow);
 }
 </style>

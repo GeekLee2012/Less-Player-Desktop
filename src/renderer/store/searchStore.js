@@ -33,9 +33,9 @@ export const useSearchStore = defineStore('search', {
         foundArtists: []
     }),
     getters: {
-        platforms(state) {
-            const { onlinePlatformsFilter } = usePlatformStore()
-            return onlinePlatformsFilter.slice(1)
+        platforms() {
+            const { platforms } = usePlatformStore()
+            return platforms('search').slice(1)
         },
         activeTabCode(state) {
             if(this.activeTab < 0) return ''
@@ -67,10 +67,13 @@ export const useSearchStore = defineStore('search', {
                 this.tabTipText = this.tabs[index].text.replace('0', length)
             }
         },
+        currentPlatform() {
+            const index = this.currentPlatformIndex
+            return this.platforms[index].code
+        },
         currentVender() {
             const { getVendor } = usePlatformStore()
-            const index = this.currentPlatformIndex
-            const platform = this.platforms[index].code
+            const platform = this.currentPlatform()
             return getVendor(platform)
         },
         isSongsTab() {

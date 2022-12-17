@@ -169,7 +169,12 @@ export class NetEase {
                         playlist.listenNum = listenNum
                         result.data.push(playlist)
                     }
-                });
+                })
+                const pgEls = doc.querySelectorAll("#m-pl-pager .u-page .zpgi")
+                if(pgEls && pgEls.length > 0) {
+                    const totalEl = pgEls[pgEls.length - 1]
+                    if(totalEl) result.total = parseInt(totalEl.textContent)
+                }
                 resolve(result)
             })
         })
@@ -438,7 +443,7 @@ export class NetEase {
                     track.mv = item.mv
                     return track
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: NetEase.CODE, offset, limit, page, data }
                 resolve(result)
             })
         }) 
@@ -456,7 +461,7 @@ export class NetEase {
                     const playlist = new Playlist(item.id, NetEase.CODE, item.coverImgUrl, item.name)
                     return playlist
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: NetEase.CODE, offset, limit, page, data }
                 resolve(result)
             })
         }) 
@@ -475,7 +480,7 @@ export class NetEase {
                     album.publishTime = toYmd(item.publishTime)
                     return album
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: NetEase.CODE, offset, limit, page, data }
                 resolve(result)
             })
         }) 
@@ -489,7 +494,7 @@ export class NetEase {
             const reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
                 const list = json.result.artists
-                const result = { offset, limit, page, data: [] }
+                const result = { platform: NetEase.CODE, offset, limit, page, data: [] }
                 if(list) {
                     result.data = list.map(item => ({
                         id: item.id,
@@ -679,6 +684,14 @@ export class NetEase {
                 resolve(result)
             })
         })
+    }
+
+    static radioCategories() {
+        return NetEase.anchorRadioCategories()
+    }
+
+    static radioSquare(cate, offset, limit, page, order) {
+        return NetEase.anchorRadioSquare(cate, offset, limit, page, order)
     }
 
     static anchorRadioCategories() {

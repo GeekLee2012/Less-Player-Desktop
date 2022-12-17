@@ -3,13 +3,14 @@ const { app, BrowserWindow, ipcMain,
   shell, powerSaveBlocker, Tray,
   globalShortcut, session } = require('electron')
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv, 
-  USER_AGENT, USER_AGENT_APPLE, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
+  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
 const path = require('path')
 const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX, 
-  randomTextWithinAlphabetNums, getDownloadDir, removePath, filterPath } = require('./common')
+  randomTextWithinAlphabetNums, nextInt, 
+  getDownloadDir, removePath, listFiles } = require('./common')
 
 let mainWin = null, powerSaveBlockerId = -1, appTray = null
-const appWidth = 1080, appHeight = 720
+const appWidth = 1080, appHeight = 720, maxAppSize = 102400
 //TODO 下载队列
 let downloadingItem = null
 
@@ -27,7 +28,7 @@ const init = () => {
     //全局快捷键
     //registryGlobalShortcuts()
     //全局UserAgent
-    app.userAgentFallback = USER_AGENT
+    app.userAgentFallback = USER_AGENTS[nextInt(USER_AGENTS.length)]
     mainWin = createWindow()
 
     session.defaultSession.on('will-download', (event, item, webContents) => {
@@ -155,10 +156,12 @@ const registryGlobalListeners = () => {
     setAppWindowZoom(value)
   }).on('app-zoom-noResize', (e, value)=> {
     setAppWindowZoom(value, true)
-  }).on('show-winBtn', ()=> {
-    setWindowButtonVisibility(true)
-  }).on('hide-winBtn', ()=> {
-    setWindowButtonVisibility(false)
+  }).on('app-winBtn', (e, value)=> {
+    setWindowButtonVisibility(value === true)
+  }).on('app-layout-default', ()=> {
+    setupDefaultLayout()
+  }).on('app-layout-simple', ()=> {
+    setupSimpleLayout()
   }).on('visit-link', (e, data)=> {
     shell.openExternal(data)
   }).on('app-globalShortcut', (e, data)=> {
@@ -231,43 +234,44 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-backup-file', async (event, ...args) => {
-    const result = await dialog.showOpenDialog(mainWin, {
-      title: '请选择备份文件',
-      filters: [ { name: 'JSON文件', extensions: [ '.json' ]} ],
-      properties: [ 'openFile']
-    })
-    if(result.canceled) return null
-    const filePath = result.filePaths[0]
-    const data = readText(filePath, 'utf8')
-    return { filePath, data }
+      const result = await dialog.showOpenDialog(mainWin, {
+        title: '请选择备份文件',
+        filters: [ { name: 'JSON文件', extensions: [ '.json' ]} ],
+        properties: [ 'openFile']
+      })
+      if(result.canceled) return null
+      const filePath = result.filePaths[0]
+      const data = readText(filePath, 'utf8')
+      return { filePath, data }
   })
 
   ipcMain.handle('show-confirm', async (event, ...args) => {
-    const { title, msg } = args[0]
-    const result = await dialog.showMessageBox(mainWin, {
-      message: msg,
-      type: "warning",
-      title: (title || '确认'),
-      buttons: [ "确定", "取消" ],
-      cancelId: 1
-    })
-    return result.response == 0
+      const { title, msg } = args[0]
+      const result = await dialog.showMessageBox(mainWin, {
+        message: msg,
+        type: "warning",
+        title: (title || '确认'),
+        buttons: [ "确定", "取消" ],
+        cancelId: 1
+      })
+      return result.response == 0
   })
 
   ipcMain.handle('download-checkExists', async (event, ...args) => {
     //TODO 实现有些奇怪，目前仅支持and逻辑
-    const { nameContains } = args[0]
-    const downloadDir = getDownloadDir()
-    const result = await filterPath(downloadDir, (name) => {
-      let needFilter = false
-      for(var i = 0; i < nameContains.length; i++) {
-        needFilter = needFilter || !name.includes(nameContains[i])
-        if(needFilter) break
-      }
-      return needFilter
-    })
-    if(result && result.length > 0) return result[0]
-    return null
+      const { nameContains } = args[0]
+      const downloadDir = getDownloadDir()
+      const dlFiles = await listFiles(downloadDir)
+      const result = dlFiles.filter(name => {
+          if(!nameContains || nameContains.length < 1) return false
+          let needFilter = true
+          for(var i = 0; i < nameContains.length; i++) {
+            needFilter = needFilter && name.includes(nameContains[i])
+            if(!needFilter) break
+          }
+          return needFilter
+      })
+      return (result && result.length > 0) ? (downloadDir + result[0]) : null
   })
 
 }
@@ -281,7 +285,7 @@ const createWindow = () => {
     minWidth: appWidth,
     minHeight: appHeight,
     titleBarStyle: 'hidden',
-    trafficLightPosition: { x: 15, y: 15 },
+    //trafficLightPosition: { x: 20, y: 18 },
     transparent: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -327,6 +331,24 @@ const createWindow = () => {
   })
 
   return mainWindow
+}
+
+
+const setupDefaultLayout = () => {
+  //setWindowButtonVisibility(!useCustomTrafficLight)
+  mainWin.setMaximumSize(maxAppSize, maxAppSize)
+  mainWin.center()
+}
+
+const setupSimpleLayout = () => {
+  //setWindowButtonVisibility(false)
+  mainWin.webContents.setZoomFactor(1)
+  
+  const width = 500, height = 588
+  mainWin.setMinimumSize(width, height)
+  mainWin.setMaximumSize(width, height)
+  mainWin.setSize(width, height)
+  mainWin.center()
 }
 
 //菜单模板
@@ -412,9 +434,9 @@ const initTrayMenuTemplate = () => {
 
 //设置系统交通灯按钮可见性
 const setWindowButtonVisibility = (visible) => {
-  if(!isMacOS) return
+  //if(!isMacOS) return
   try {
-    mainWin.setWindowButtonVisibility(visible)
+    if(mainWin) mainWin.setWindowButtonVisibility(visible)
   } catch (error) {
     console.log(error)
   }
@@ -437,10 +459,10 @@ const setAppWindowZoom = (value, noResize) => {
   const zoomFactor = parseFloat(zoom / 100)
   if(zoomFactor < 0.5 || zoomFactor > 3) return
   mainWin.webContents.setZoomFactor(zoomFactor)
-  if(noResize) return 
   const width = parseInt(appWidth * zoomFactor)
   const height = parseInt(appHeight * zoomFactor)
   mainWin.setMinimumSize(width, height)
+  if(noResize) return 
   if(mainWin.isNormal()) {
     mainWin.setSize(width, height)
     mainWin.center()
@@ -481,7 +503,7 @@ const overrideRequest = (details) => {
   } else if(url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
-    if(url.includes("mac.kugou.com")) userAgent = USER_AGENT_APPLE
+    if(url.includes("mac.kugou.com")) userAgent = USER_AGENTS[0]
     if(url.includes("&cmd=123&ext=mp4&hash=")) xrouter = 'trackermv.kugou.com'
   } else if(url.includes("douban")) {
     const bid = randomTextWithinAlphabetNums(11)

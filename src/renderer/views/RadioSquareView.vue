@@ -48,7 +48,7 @@ const nextPage = () =>  {
 }
 
 //TODO
-const loadCategories = () => {
+const loadCategories = async () => {
     categories.length = 0
     orders.length = 0
     setLoadingCategories(true)
@@ -57,44 +57,43 @@ const loadCategories = () => {
     let cachedOrders = currentPlatformOrders()
     if(!cachedCates) {
         const vendor = currentVender()
-        if(!vendor) return 
-        vendor.anchorRadioCategories().then(result => {
-            const multiSelectMode = (result.multiMode === true)
-            setMultiSelectMode(multiSelectMode)
-            putCategories(result.platform, { data: result.data, multiSelectMode })
-            categories.push(...result.data)
-            if(result.orders) {
-                putOrders(result.platform, result.orders)
-                orders.push(...result.orders)
-            }
-            EventBus.emit('radioCategory-update')
-            setLoadingCategories(false)
-        })
-    } else {
-        setMultiSelectMode(cachedCates.multiSelectMode)
-        categories.push(...cachedCates.data)
-        if(cachedOrders) orders.push(...cachedOrders)
-        EventBus.emit('radioCategory-update')
-        setLoadingCategories(false)
+        if(!vendor || !vendor.radioCategories) return 
+        const result = await vendor.radioCategories()
+        if(!result) return 
+        const multiSelectMode = (result.multiMode === true)
+        cachedCates = { data: result.data, multiSelectMode }
+        cachedOrders = result.orders
+
+        if(!cachedCates) return 
+        putCategories(result.platform, cachedCates)
+        if(cachedOrders) {
+            putOrders(result.platform, cachedOrders)
+        }
     }
+
+    setMultiSelectMode(cachedCates.multiSelectMode)
+    categories.push(...cachedCates.data)
+    if(cachedOrders) orders.push(...cachedOrders)
+    EventBus.emit('radioCategory-update')
+    setLoadingCategories(false)
 }
 
-const loadContent = (noLoadingMask) => {
+const loadContent = async (noLoadingMask) => {
     const vendor = currentVender()
-    if(!vendor) return
+    if(!vendor || !vendor.radioSquare) return
     if(!noLoadingMask) setLoadingContent(true)
-    const cate = multiSelectMode.value ? currentCategoryItems.value : currentCategoryCode.value
+    let cate = multiSelectMode.value ? currentCategoryItems.value : currentCategoryCode.value
     const offset = pagination.offset
     const limit = pagination.limit
     const page = pagination.page
-    const platform = currentPlatformCode.value
     const order = currentOrder.value.value
-    vendor.anchorRadioSquare(cate, offset, limit, page, order).then(result => {
-        if(platform != result.platform) return 
-        if(cate != result.cate) return 
-        radios.push(...result.data)
-        setLoadingContent(false)
-    })
+    const result = await vendor.radioSquare(cate, offset, limit, page, order)
+    if(currentPlatformCode.value != result.platform) return 
+    //重新再获取一次，确保没有变更
+    cate = multiSelectMode.value ? currentCategoryItems.value : currentCategoryCode.value
+    if(cate != result.cate) return 
+    radios.push(...result.data)
+    setLoadingContent(false)
 }
 
 
@@ -105,6 +104,7 @@ const loadMoreContent = () => {
 
 const scrollToLoad = () => {
     if(isLoadingContent.value) return
+    if(!squareContentRef.value) return
     const scrollTop = squareContentRef.value.scrollTop
     const scrollHeight = squareContentRef.value.scrollHeight
     const clientHeight = squareContentRef.value.clientHeight
@@ -119,22 +119,25 @@ const onScroll = () => {
 }
 
 const markScrollState = () => {
+    if(squareContentRef.value) 
     markScrollTop = squareContentRef.value.scrollTop
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
+    if(!squareContentRef.value) return
     squareContentRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
     EventBus.emit("imageTextTile-load")
     if(markScrollTop < 1) return 
+    if(!squareContentRef.value) return
     squareContentRef.value.scrollTop = markScrollTop
 }
 
 const resetBack2TopBtn = () => {
-    back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
+    if(back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
 }
 
 //TODO 后期需要梳理优化

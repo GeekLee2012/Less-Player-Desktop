@@ -248,7 +248,12 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
     -webkit-app-region: drag;
     height: 72px;
     margin-bottom: 8px;
-    position: relative;
+    display: flex;
+}
+
+#main-left .header .win-traffic-light-btn {
+    margin-top: 17px;
+    margin-left: 20px;
 }
 
 #main-left .header .logo-wrap {

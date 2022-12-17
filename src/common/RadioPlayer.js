@@ -2,9 +2,7 @@ import EventBus from '../common/EventBus';
 import Hls from 'hls.js';
 import { WebAudioApi } from './WebAudioApi';
 
-let gRadioHolder = null
-let lastPlayTime = null
-let singleton = null
+let audioNode = null, lastPlayTime = null, singleton = null
 
 export class RadioPlayer {
     constructor(channel) {
@@ -23,7 +21,7 @@ export class RadioPlayer {
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = RadioPlayer.get()
-        return player.on('radio-init', radioHolder => player.createWebAudioApi(radioHolder)) 
+        return player.on('radio-init', node => player.createWebAudioApi(node)) 
             .on('radio-channelChange', channel => player.setChannel(channel))
             .on('radio-play', channel => player.playChannel(channel))
             .on('radio-togglePlay', () => player.togglePlay())
@@ -38,16 +36,16 @@ export class RadioPlayer {
     //播放
     play() {
         if(!Hls.isSupported()) return 
-        if(!gRadioHolder) return 
+        if(!audioNode) return 
         if(!this.channel) return
         
         //this.hls.loadSource('http://ngcdn001.cnr.cn/live/zgzs/index.m3u8')
         this.hls.loadSource(this.channel.url)
-        this.hls.attachMedia(gRadioHolder)
+        this.hls.attachMedia(audioNode)
         
         const self = this
         this.hls.on(Hls.Events.MANIFEST_PARSED, function() {
-            gRadioHolder.play()
+            audioNode.play()
             self.setState(true)
             self.channelChanged = false
             lastPlayTime = Date.now()
@@ -58,7 +56,7 @@ export class RadioPlayer {
     //暂停
     pause() {
         if(!Hls.isSupported()) return 
-        if(!gRadioHolder) return 
+        if(!audioNode) return 
         if(!this.playing) return 
         this.hls.detachMedia()
         this.setState(false)
@@ -90,8 +88,8 @@ export class RadioPlayer {
 
     volume(value) {
         if(!Hls.isSupported()) return 
-        if(!gRadioHolder) return 
-        gRadioHolder.volume = value
+        if(!audioNode) return 
+        audioNode.volume = value
     }
 
     __step() {
@@ -110,11 +108,11 @@ export class RadioPlayer {
         return this
     }
 
-    createWebAudioApi(radioHolder) {
-        if(!radioHolder) return 
-        gRadioHolder = radioHolder
+    createWebAudioApi(node) {
+        if(!node) return 
+        audioNode = node
         if(this.webAudioApi) return 
-        this.webAudioApi = WebAudioApi.create(new AudioContext(), gRadioHolder)
+        this.webAudioApi = WebAudioApi.create(new AudioContext(), audioNode)
     }
 
     resolveSound () {

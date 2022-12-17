@@ -26,7 +26,7 @@ const updateOrders = () => {
 
 const resetScroll = () => {
     const view = document.querySelector(".playlist-category-view")
-    view.scrollTop = 0
+    if(view) view.scrollTop = 0
 }
 
 const isDiffCate = (item, row, col) => {

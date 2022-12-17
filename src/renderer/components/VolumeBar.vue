@@ -63,7 +63,7 @@ defineExpose({
 
 .volume-bar .volume-status {
     margin-top: 3px;
-    width: 23px;
+    width: 20px;
     cursor: pointer;
 }
 
@@ -74,8 +74,8 @@ defineExpose({
 .volume-bar .st-slient,
 .volume-bar .st-small,
 .volume-bar .st-large {
-    width: 23px;
-    height: 23px;
+    width: 20px;
+    height: 20px;
 }
 
 .volume-bar .volume-status:hover svg {

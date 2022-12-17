@@ -22,7 +22,8 @@ const { setActiveTab,
         isPlaylistsTab,
         isAlbumsTab,
         isArtistsTab,
-        currentVender
+        currentVender,
+        currentPlatform
     } = useSearchStore()
 const { hideAllCtxMenus } = useAppCommonStore()
 
@@ -51,8 +52,10 @@ const loadSongs = ()=> {
     currentTabView.value = SongListControl
     setLoading(true)
     const vendor = currentVender()
-    if(!vendor) return 
+    if(!vendor || !vendor.searchSongs) return 
     vendor.searchSongs(props.keyword, offset, limit, page).then(result => {
+        if(!isSongsTab()) return
+        if(currentPlatform() != result.platform) return
         updateTabData(result.data)
         setLoading(false)
     })
@@ -62,8 +65,10 @@ const loadPlaylists = ()=> {
     currentTabView.value = PlaylistsControl
     setLoading(true)
     const vendor = currentVender()
-    if(!vendor) return
+    if(!vendor || !vendor.searchPlaylists) return
     vendor.searchPlaylists(props.keyword, offset, limit, page).then(result => {
+        if(!isPlaylistsTab()) return
+        if(currentPlatform() != result.platform) return
         updateTabData(result.data)
         setLoading(false)
     })
@@ -73,8 +78,10 @@ const loadAlbums = ()=> {
     currentTabView.value = AlbumListControl
     setLoading(true)
     const vendor = currentVender()
-    if(!vendor) return
+    if(!vendor || !vendor.searchAlbums) return
     vendor.searchAlbums(props.keyword, offset, limit, page).then(result => {
+        if(!isAlbumsTab()) return
+        if(currentPlatform() != result.platform) return
         updateTabData(result.data)
         setLoading(false)
     })
@@ -84,8 +91,10 @@ const loadArtists = ()=> {
     currentTabView.value = ArtistListControl
     setLoading(true)
    const vendor = currentVender()
-    if(!vendor) return
+    if(!vendor || !vendor.searchArtists) return
     vendor.searchArtists(props.keyword, offset, limit, page).then(result => {
+        if(!isArtistsTab()) return
+        if(currentPlatform() != result.platform) return
         updateTabData(result.data)
         setLoading(false)
     })

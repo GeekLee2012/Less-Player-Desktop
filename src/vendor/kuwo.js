@@ -67,7 +67,7 @@ export class KuWo {
     //歌单(列表)广场
     static square(cate, offset, limit, page, order) {
         const originCate = cate
-        let resolvedCate = cate.trim()
+        let resolvedCate = (cate || "").toString().trim()
         resolvedCate = resolvedCate.length > 0 ? resolvedCate : "#new"
         if(resolvedCate == KuWo.TOPLIST_CODE) return KuWo.toplist(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
@@ -87,7 +87,7 @@ export class KuWo {
                 const pagination = json.data
                 //const page = pagination.pn
                 const data = pagination.data
-                result.total = pagination.total
+                result.total = Math.ceil(pagination.total / limit)
 
                 data.forEach(item => {
                     const id = item.id
@@ -370,7 +370,7 @@ export class KuWo {
                         return track
                     })
                 } 
-                const result = { offset, limit, page, data }
+                const result = { platform: KuWo.CODE, offset, limit, page, data }
                 resolve(result)
             })
         })
@@ -387,7 +387,7 @@ export class KuWo {
                     const playlist = new Playlist(item.id, KuWo.CODE, item.img, escapseHtml(item.name))
                     return playlist
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: KuWo.CODE, offset, limit, page, data }
                 resolve(result)
             })
         })
@@ -407,7 +407,7 @@ export class KuWo {
                     album.publishTime = item.releaseDate
                     return album
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: KuWo.CODE, offset, limit, page, data }
                 resolve(result)
             })
         })
@@ -429,7 +429,7 @@ export class KuWo {
                         cover: item.pic300
                     }
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: KuWo.CODE, offset, limit, page, data }
                 resolve(result)
             })
         })

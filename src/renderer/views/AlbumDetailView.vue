@@ -118,7 +118,7 @@ const getAlbumDetail = () => {
         return 
     }
     const vendor = getVendor(platform.value)
-    if(!vendor) return
+    if(!vendor || !vendor.albumDetail) return
     const id = albumId.value
     vendor.albumDetail(id).then(result => {
         const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
@@ -145,9 +145,10 @@ const loadAllSongs = ()=> {
         return 
     }
     const vendor = getVendor(platform.value)
-    if(!vendor) return
+    if(!vendor || !vendor.albumDetailAllSongs) return
     const id = albumId.value
     vendor.albumDetailAllSongs(id, 0, 100).then(result => {
+        if(!isAllSongsTab()) return
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         setLoading(false)
@@ -156,6 +157,7 @@ const loadAllSongs = ()=> {
 
 const loadAbout = () => {
     currentTabView.value = TextListControl
+    if(!isAboutTab()) return
     updateTabData(about.value)
 }
 

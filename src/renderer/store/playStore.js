@@ -200,7 +200,7 @@ export const usePlayStore = defineStore('play', {
         playNextTrack() {
             //TODO
             if(Playlist.isNormalRadioType(this.currentTrack)) {
-                EventBus.emit('radio-nextTrack', this.currentTrack)
+                EventBus.emit('track-nextPlaylistRadioTrack', this.currentTrack)
                 return 
             }
             const maxSize = this.queueTracksSize

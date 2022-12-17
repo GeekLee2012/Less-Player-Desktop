@@ -52,45 +52,42 @@ const addArtistData = (data) => {
     })
 }
 
-//TODO
-const loadCategories = () => {
+const loadCategories = async () => {
     setLoadingCategories(true)
     setLoadingContent(true)
     categories.length = 0
     let cached = currentCategory()
     if(!cached) {
         const vendor = currentVender()
-        if(!vendor) return 
-        vendor.artistCategories().then(result => {
-            result.data.push(result.alphabet)
-            putCategory(result.platform, result.data)
-            categories.push(...result.data)
-            putAlphabet(result.platform, result.alphabet)
-            setLoadingCategories(false)
-            EventBus.emit('artistCategory-update')
-        })
-    } else {
-        categories.push(...cached)
-        setLoadingCategories(false)
-        EventBus.emit('artistCategory-update')
+        if(!vendor || !vendor.artistCategories) return 
+        const result = await vendor.artistCategories()
+        if(!result)return 
+        result.data.push(result.alphabet)
+        cached = result.data
+        putCategory(result.platform, cached)
+        putAlphabet(result.platform, result.alphabet)
     }
+
+    categories.push(...cached)
+    setLoadingCategories(false)
+    EventBus.emit('artistCategory-update')
 }
 
-const loadContent = (noLoadingMask) => {
+const loadContent = async (noLoadingMask) => {
     if(!noLoadingMask) setLoadingContent(true)
     const vendor = currentVender()
-    if(!vendor) return
+    if(!vendor || !vendor.artistSquare) return
     const cate = currentCategoryItems.value
     const offset = pagination.offset
     const limit = pagination.limit
     const page = pagination.page
-    const platform = currentPlatformCode.value
-    vendor.artistSquare(cate, offset, limit, page).then(result => {
-        pagination.page = result.page
-        if(platform != result.platform || cate != result.cate) return 
-        addArtistData(result.data)
-        setLoadingContent(false)
-    })
+    const result = await vendor.artistSquare(cate, offset, limit, page)
+    if(!result) return
+    if(currentPlatformCode.value != result.platform)
+    if(currentCategoryItems.value != result.cate) return 
+    pagination.page = result.page
+    addArtistData(result.data)
+    setLoadingContent(false)
 }
 
 const loadMoreContent = () => {
@@ -99,6 +96,7 @@ const loadMoreContent = () => {
 }
 
 const scrollToLoad = () => {
+    if(!squareRef.value) return 
     const scrollTop = squareRef.value.scrollTop
     const scrollHeight = squareRef.value.scrollHeight
     const clientHeight = squareRef.value.clientHeight
@@ -113,22 +111,25 @@ const onScroll = () => {
 }
 
 const markScrollState = () => {
+    if(!squareRef.value) return 
     markScrollTop = squareRef.value.scrollTop
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
+    if(!squareRef.value) return 
     squareRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
     EventBus.emit("imageTextTile-load")
     if(markScrollTop < 1) return 
+    if(!squareRef.value) return 
     squareRef.value.scrollTop = markScrollTop
 }
 
 const resetBack2TopBtn = () => {
-    back2TopBtnRef.value.setScrollTarget(squareRef.value)
+    if(back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareRef.value)
 }
 
 const refreshData = () => {

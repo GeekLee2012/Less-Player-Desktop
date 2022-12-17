@@ -4,8 +4,23 @@ import { KuWo } from "../vendor/kuwo";
 import { KuGou } from "../vendor/kugou";
 import { DouBan } from "../vendor/douban";
 import { RadioCN } from "../vendor/radiocn";
+import { Qingting } from "../vendor/qingting";
+import { Ximalaya } from "../vendor/ximalaya";
 
-const vendors = [ QQ, NetEase, KuWo, KuGou, DouBan, RadioCN ]
+const vendors = [ 
+    QQ, NetEase, 
+    KuWo, KuGou, 
+    DouBan, RadioCN, 
+    Qingting, Ximalaya 
+]
+
+const getVendor = (code) => {
+    for(let i in vendors) {
+        const vender = vendors[i]
+        if(vender.CODE === code) return vender
+    }
+    return null
+}
 
 /** 统一平台，协调处理公共业务 */
 export class United {
@@ -57,19 +72,5 @@ export class United {
     static matchAndSort(reference, array) {
 
     }
-}
 
-export const getVendor = (name) => {
-    for(let i in vendors) {
-        let vendor = vendors[i]
-        if(vendor.CODE === name) return vendor
-    }
-    return null
-} 
-
-export const invokeVender = async (name, fn, args) => {
-    const vendor = getVendor(name)
-    if(!vendor || vendor[fn]) return null
-    const result = await vendor[fn](...args)
-    return result
 }

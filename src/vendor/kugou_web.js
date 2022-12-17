@@ -238,7 +238,7 @@ export class KuGou {
     }
 
     //电台：下一首歌曲
-    static nextRadioTrack(channel, track) {
+    static nextPlaylistRadioTrack(channel, track) {
         return new Promise((resolve, reject) => {
             //TODO
             let result = null

@@ -79,7 +79,7 @@ const updateEQValue = (percent, item, index) => {
     overflow: hidden;
     border-radius: 15px;
     background: var(--aeview-bg);
-    -webkit-app-region: no-drag;
+    -webkit-app-region: none;
 }
 
 .audio-effect-view .spacing {
@@ -140,10 +140,12 @@ const updateEQValue = (percent, item, index) => {
 .audio-effect-view .center {
     flex: 1;
     background: var(--aeview-bg);
+    overflow: hidden;
 }
 
 .audio-effect-view .center .left {
     width: 108px;
+    min-width: 68px;
     background: var(--aeview-left-bg);
     /* border-right: var(--aeview-border); */
 }
@@ -188,6 +190,7 @@ const updateEQValue = (percent, item, index) => {
 
 .audio-effect-view .center .bands {
     justify-content: center;
+    overflow: hidden;
 }
 
 .audio-effect-view .center .bands .item {

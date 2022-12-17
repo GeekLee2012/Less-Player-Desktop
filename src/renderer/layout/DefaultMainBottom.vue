@@ -8,6 +8,6 @@
 
 <style scoped>
 #main-bottom {
-    height: 52px;
+    height: 36px;
 }
 </style>

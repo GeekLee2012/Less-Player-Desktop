@@ -1,10 +1,10 @@
 <script setup>
 import { inject, onMounted, shallowRef, watch } from 'vue';
-import MainTop from './MainTop.vue';
+import MainTop from './DefaultMainTop.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
-import MainContent from './MainContent.vue';
-import MainBottom from './MainBottom.vue';
+import MainContent from './DefaultMainContent.vue';
+import MainBottom from './DefaultMainBottom.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
@@ -29,38 +29,11 @@ const { hideAllCategoryViews, hideAllCtxMenus,
     hidePlaybackQueueView, togglePlaybackQueueView, 
     toggleLyricToolbar, hideLyricToolbar } = useAppCommonStore()
 
-const { togglePlay, switchPlayMode, 
-    playPrevTrack, playNextTrack,
-    toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
-
-const { layout, lyricMetaPos } = storeToRefs(useSettingStore())
+const { layout, lyricMetaPos, 
+    isDefaultLayout, isSimpleLayout } = storeToRefs(useSettingStore())
 const { setupWindowZoomWithoutResize } = useSettingStore()
 
-const minAppWidth = 1080, minAppHeight = 720 
-
-//注册默认应用级别快捷键
-const registryDefaultLocalKeys = () => {
-    // 播放或暂停
-    Mousetrap.bind('space', togglePlay)
-    // 播放模式切换
-    Mousetrap.bind(['m'], switchPlayMode, 'keyup')
-    // 上 / 下一曲
-    Mousetrap.bind(['left'], playPrevTrack)
-    Mousetrap.bind(['right'], playNextTrack)
-    // 增加 / 减小音量
-    Mousetrap.bind(['up'], ()=> updateVolumeByOffset(0.01))
-    Mousetrap.bind(['down'], ()=> updateVolumeByOffset(-0.01))
-    // 最大音量 / 静音
-    Mousetrap.bind(['o'], toggleVolumeMute, 'keyup')
-    // 打开设置
-    Mousetrap.bind(['p'], visitSetting, 'keyup')
-    // 打开当前播放
-    Mousetrap.bind(['q'], togglePlaybackQueueView, 'keyup')
-    // 打开/关闭歌词设置
-    Mousetrap.bind(['l'], () => {
-        if(playingViewShow.value) toggleLyricToolbar()
-    }, 'keyup')
-}
+const minAppWidth = 1080, minAppHeight = 720
 
 const setPlayMetaSize = () => {
     //const minClientWidth = 999, minClientHeight = 666 
@@ -92,6 +65,7 @@ const setCategoryViewSize = () => {
     const playlistCategory = document.querySelector('#playlist-category-view')
     const artistCategory = document.querySelector('#artist-category-view')
     const radioCategory = document.querySelector('#radio-category-view')
+    if(!mainContent) return 
     const { clientHeight } = mainContent, padding = 30
     const height = (clientHeight - padding)
     if(playlistCategory) playlistCategory.style.height = height + "px"
@@ -270,8 +244,9 @@ const setBatchViewListSize = () => {
 const setVideoViewSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const el = document.querySelector(".video-holder")
+    if(!el) return 
     el.style.width = clientWidth + "px"
-    el.style.height = (clientHeight - 39) + "px"
+    el.style.height = (clientHeight - 56) + "px"
 }
 
 const hideAllPopoverViews = () => {
@@ -297,14 +272,11 @@ const setPlayingViewSize = () => {
 }
 
 const setAudioEffectViewAlignment = () => {
-    const { clientWidth, clientHeight } = document.documentElement
-    const view = document.querySelector("#audio-effect-view")
-    const width = 725, height = 550
-    if(!view) return
-    const left = (clientWidth - width) / 2
-    const top = (clientHeight - height) / 2
-    view.style.left = left + 'px'
-    view.style.top = top + 'px'
+    EventBus.emit('app-elementAlignCenter', {
+        selector: "#audio-effect-view",
+        width: 725,
+        height: 550
+    })
 }
 
 const setLyricToolbarPos = () => {
@@ -320,25 +292,26 @@ const setLyricToolbarPos = () => {
     el.style.top = top + 'px'
 }
 
-const setupLayout = () => {
+const setupDefaultLayout = () => {
     const index = layout.value.index
     switch (index) {
+        case 0:
+            currentMainTop.value = MainTop
+            currentMainBottom.value = MainBottom
+            break
         case 1:
             currentMainTop.value = ClassicMainTop
             currentMainBottom.value = ClassicMainBottom
-            break;
-        default:
-            currentMainTop.value = MainTop
-            currentMainBottom.value = MainBottom
-            break;
+            break
     }
 }
 
-setupLayout()
+setupDefaultLayout()
 
 onMounted (() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', e => {
+        if(!isDefaultLayout.value) return
         //自适应播放元信息组件大小
         setPlayMetaSize()
         //自适应搜索框大小
@@ -348,8 +321,6 @@ onMounted (() => {
         setImageTextTileLoadingMaskSize()
         //自适应分类列表大小
         setCategoryViewSize()
-        //自适应当前播放列表大小
-        //setPlaybackQueueSize()
         //自适应播放页组件大小
         setPlayingViewSize()
         //自适应批量操作页面列表大小
@@ -369,23 +340,15 @@ onMounted (() => {
     document.addEventListener('click', e => {
         //强制分类列表重置大小
         setCategoryViewSize()
-        //隐藏全部浮层
-        hideAllPopoverViews()
     })
 
-    //按键事件监听
-    window.addEventListener('keydown', e => {
-        //Space键
-        if(e.key == ' ') e.preventDefault()
-    })
-    registryDefaultLocalKeys()
 })
 
 EventBus.on("imageTextTile-load", setImageTextTileComponentSize)
 EventBus.on("imageTextTileLoadingMask-load", setImageTextTileComponentSize)
 EventBus.on("batchView-show", setBatchViewListSize)
 EventBus.on('playingView-changed', setPlayingViewSize)
-EventBus.on("app-layout", setupLayout)
+EventBus.on("app-layout-default", setupDefaultLayout)
 
 //TODO
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
@@ -400,7 +363,6 @@ watch(lyricMetaPos, () => {
     setPlayingLyricCtlSize()
     setVisualPlayingViewLyricCtlSize()
 })
-//watch([ playingViewThemeIndex ], setPlayingViewSize)
 </script>
 
 <template>
@@ -503,7 +465,7 @@ watch(lyricMetaPos, () => {
 #main-center .autopadding #custom-playlist-edit-view,
 #main-center .autopadding #data-backup-view, 
 #main-center .autopadding #data-restore-view {
-    padding-top: 10px;
+    padding-top: 5px;
 }
 
 #main-center .autopadding #local-music-view,
@@ -511,6 +473,6 @@ watch(lyricMetaPos, () => {
 #main-center .autopadding #artist-detail-view, 
 #main-center .autopadding #album-detail-view, 
 #main-center .autopadding #custom-playlist-detail-view {
-    padding-top: 15px;
+    padding-top: 13px;
 }
 </style>

@@ -23,11 +23,10 @@ const props = defineProps({
     loading: Boolean
 })
 
-const { getVendor, isPlatformValid } = usePlatformStore()
-const { addTrack, addTracks, playTrack, resetQueue, playNextTrack } = usePlayStore()
-const { showToast } = useAppCommonStore()
-const { addRecentPlaylist } = useUserProfileStore()
+const { isPlatformValid } = usePlatformStore()
 const { isListenNumShow } = storeToRefs(useSettingStore())
+
+const playItem = (playlist, text) => EventBus.emit('playlist-play', { playlist, text})
 
 const visitItem = (item) => {
     const { checkbox } = props
@@ -36,53 +35,15 @@ const visitItem = (item) => {
     const platformValid = isPlatformValid(platform)
     const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
-    if(Playlist.isFMRadioType(item)) { //FM广播电台
-        const track = item.data[0]
-        addTrack(track)
-        playTrack(track)
-    } else if(Playlist.isNormalRadioType(item)) { //普通歌单电台
-        nextRadioTrack(platform, id)
-    } else if(visitable) { //其他，如普通歌单、主播电台歌单等
+
+    if(Playlist.isFMRadioType(item) 
+        || Playlist.isNormalRadioType(item)) {
+         //FM广播电台、普通歌单电台
+        playItem(item)
+    } else if(visitable) { 
+        //其他，如普通歌单、主播电台歌单等
         visitPlaylist(platform, id)
     }
-}
-
-const playItem = (item) => {
-    const { id, platform } = item
-    if(Playlist.isNormalRadioType(item) 
-        || Playlist.isFMRadioType(item)) {
-        visitItem(item)
-        return 
-    }
-    const vendor = getVendor(platform)
-    if(!vendor) return 
-    vendor.playlistDetail(id, 0, 1000, 1).then(result => {
-        playAll(result)
-    })
-}
-
-//目前以加入当前播放列表为参考标准
-const traceRecentPlay = (playlist) => {
-    const { id, platform, title, cover, type } = playlist
-    addRecentPlaylist(id, platform, title, cover, type)
-}
-
-const playAll = (playlist) => {
-    if(!playlist || playlist.data.length < 1) return 
-    resetQueue()
-    addTracks(playlist.data)
-    showToast("即将为您播放全部！")
-    traceRecentPlay(playlist)
-    playNextTrack()
-}
-
-const nextRadioTrack = (platform, channel, track) => {
-    if(!Track.hasId(track)) resetQueue()
-    getVendor(platform).nextRadioTrack(channel, track).then(result => {
-        if(!Track.hasId(result)) return 
-        addTrack(result)
-        playTrack(result)
-    })
 }
 
 const getListenNumText = (item) => {
@@ -93,8 +54,6 @@ const getListenNumText = (item) => {
     if(num >= unit) num = parseFloat(num / unit).toFixed(1) + "万"
     return '播放：' + num
 }
-
-EventBus.on('radio-nextTrack', track => nextRadioTrack(track.platform, track.channel, track))
 </script>
 
 <template>

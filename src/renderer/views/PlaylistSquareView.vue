@@ -45,7 +45,7 @@ const nextPage = () =>  {
     pagination.page = pagination.page + 1
 }
 
-const loadCategories = () => {
+const loadCategories = async () => {
     categories.length = 0
     orders.length = 0
     setLoadingCategories(true)
@@ -54,42 +54,37 @@ const loadCategories = () => {
     let cachedOrders = currentPlatformOrders()
     if(!cachedCates) {
         const vendor = currentVender()
-        if(!vendor) return 
-        vendor.categories().then(result => {
-            putCategories(result.platform, result.data)
-            //TODO
-            categories.push(...result.data)
-            if(result.orders) {
-                putOrders(result.platform, result.orders)
-                orders.push(...result.orders)
-            }
-            EventBus.emit('playlistCategory-update')
-            setLoadingCategories(false)
-        })
-    } else {
-        categories.push(...cachedCates)
-        if(cachedOrders) orders.push(...cachedOrders)
-        EventBus.emit('playlistCategory-update')
-        setLoadingCategories(false)
+        if(!vendor || !vendor.categories) return 
+        const result = await vendor.categories()
+        if(!result) return
+        cachedCates = result.data
+        cachedOrders = result.orders
+        if(!cachedCates) return
+        putCategories(result.platform, cachedCates)
+        if(cachedOrders) putOrders(result.platform, result.orders)
     }
+    categories.push(...cachedCates)
+    if(cachedOrders) orders.push(...cachedOrders)
+    EventBus.emit('playlistCategory-update')
+    setLoadingCategories(false)
 }
 
-const loadContent = (noLoadingMask) => {
+const loadContent = async (noLoadingMask) => {
     const vendor = currentVender()
-    if(!vendor) return
+    if(!vendor || !vendor.square) return
     if(!noLoadingMask) setLoadingContent(true)
     const cate = currentCategoryCode.value
     const offset = pagination.offset
     const limit = pagination.limit
     const page = pagination.page
-    const platform = currentPlatformCode.value
     const order = currentOrder.value.value
-    vendor.square(cate, offset, limit, page, order).then(result => {
-        if(platform != result.platform) return 
-        if(cate != result.cate) return 
-        playlists.push(...result.data)
-        setLoadingContent(false)
-    })
+    const result = await vendor.square(cate, offset, limit, page, order)
+    
+    if(!result) return 
+    if(currentPlatformCode.value != result.platform) return 
+    if(currentCategoryCode.value != result.cate) return 
+    playlists.push(...result.data)
+    setLoadingContent(false)
 }
 
 
@@ -116,22 +111,22 @@ const onScroll = () => {
 }
 
 const markScrollState = () => {
-    markScrollTop = squareContentRef.value.scrollTop
+    if(squareContentRef.value) markScrollTop = squareContentRef.value.scrollTop
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
-    squareContentRef.value.scrollTop = markScrollTop
+    if(squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
     EventBus.emit("imageTextTile-load")
     if(markScrollTop < 1) return 
-    squareContentRef.value.scrollTop = markScrollTop
+    if(squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
 }
 
 const resetBack2TopBtn = () => {
-    back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
+    if(back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
 }
 
 //TODO 后期需要梳理优化
@@ -158,6 +153,7 @@ const refreshData = () => {
 
 watch(currentPlatformCode, (nv, ov) => {
     if(!isPlaylistMode.value) return
+    if(!nv) reurn
     resetCommom()
     loadCategories()
 })

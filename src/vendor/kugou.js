@@ -195,7 +195,7 @@ export class KuGou {
     }
 
     //电台列表
-    static radioList(cate, offset, limit, page, order) {
+    static playlistRadios(cate, offset, limit, page, order) {
         const result = { platform: KuGou.CODE, cate, offset, limit, page, total: 0, data: [] }
         return new Promise((resolve, reject) => {
             if(page > 1) {
@@ -221,7 +221,7 @@ export class KuGou {
     }
 
     //电台：下一首歌曲
-    static nextRadioTrack(channel, track) {
+    static nextPlaylistRadioTrack(channel, track) {
         return new Promise((resolve, reject) => {
             //TODO
             let result = null
@@ -280,13 +280,13 @@ export class KuGou {
 
     //歌单(列表)广场
     static square(cate, offset, limit, page, order) {
-        const originCate = cate ? (cate + "") : "";
-        let resolvedCate = originCate.trim()
+        const originCate = cate
+        let resolvedCate = (cate || "").toString().trim()
         order = order || 5
         //榜单
         if(resolvedCate === KuGou.TOPLIST_CODE) return KuGou.toplist(cate, offset, limit, page, order)
         //电台
-        if(resolvedCate === KuGou.RADIO_CODE) return KuGou.radioList(cate, offset, limit, page, order)
+        if(resolvedCate === KuGou.RADIO_CODE) return KuGou.playlistRadios(cate, offset, limit, page, order)
         //普通歌单
         return new Promise((resolve, reject) => {
             const result = { platform: KuGou.CODE, cate: originCate, order, offset, limit, page, total: 0, data: [] }
@@ -304,10 +304,10 @@ export class KuGou {
                     }
                 }
                 if(scriptText) {
-                    scriptText = scriptText.split(key)[1].trim()
-                    scriptText = scriptText.substring(0, scriptText.length - 1)
-                    const json = JSON.parse(scriptText)
-                    const list = json
+                    const globalData = Function(scriptText + ' return global')()
+                    result.total = Math.ceil(parseInt(globalData.total) / limit) 
+
+                    const list = globalData.special
                     list.forEach(item => {
                         const id = item.specialid
                         const cover = getCustomCover(item.img)
@@ -348,12 +348,8 @@ export class KuGou {
                     }
                 }
                 if(scriptText) {
-                    scriptText = scriptText.split(key)[1]
-                    key = 'specialData ='
-                    scriptText = scriptText.split(key)[0].trim()
-                    scriptText = scriptText.substring(0, scriptText.length - 1)
-                    const json = JSON.parse(scriptText)
-                    
+                    const json = Function(scriptText + ' return data')()
+
                     json.forEach(item => {
                         const artist = []
                         const album = { id: item.album_id, name: item.album_name }
@@ -370,6 +366,7 @@ export class KuGou {
                         const track = new Track(item.audio_id, KuGou.CODE, item.songname, artist, album, duration, trackCover)
                         track.hash = item.hash
                         track.pid = id
+                        track.payPlay = (item.vip != 0)
                         result.addTrack(track)
                     })
                 }
@@ -604,7 +601,7 @@ export class KuGou {
                     track.mv = item.MvHash
                     return track
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: KuGou.CODE, offset, limit, page, data }
                 resolve(result)
             })
         })
@@ -631,7 +628,7 @@ export class KuGou {
                     const track = new Playlist(item.specialid, KuGou.CODE, getCustomCover(item.img), item.specialname, item.intro)
                     return track
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: KuGou.CODE, offset, limit, page, data }
                 resolve(result)
             })
         })
@@ -653,7 +650,7 @@ export class KuGou {
                     album.about = item.intro
                     return album
                 })
-                const result = { offset, limit, page, data }
+                const result = { platform: KuGou.CODE, offset, limit, page, data }
                 resolve(result)
             })
         })
@@ -662,7 +659,7 @@ export class KuGou {
     //搜索: 歌手
     static searchArtists(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const result = { offset, limit, page, data: [] }
+            const result = { platform: KuGou.CODE, offset, limit, page, data: [] }
             resolve(result)
         })
     }

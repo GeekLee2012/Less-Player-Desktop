@@ -132,7 +132,7 @@ const updateTabData = (data) => {
     if(typeof(data) == 'string') {
         tabData.push(data)
         updateTabTipText(0)
-    } else if(currentTabView.value != TextListControl) { //TODO
+    } else { 
         tabData.push(...data)
         updateTabTipText(tabData.length)
     }
@@ -166,9 +166,10 @@ const loadHotSongs = () => {
         return 
     }
     const vendor = getVendor(platform.value)
-    if(!vendor) return
+    if(!vendor || !vendor.artistDetailHotSongs) return
     const id = artistId.value
     vendor.artistDetailHotSongs(id).then(result => {
+        if(!isHotSongsTab()) return 
         if(result.name && result.cover) updateArtist(result.name, result.cover)
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
@@ -179,7 +180,7 @@ const loadHotSongs = () => {
 //TODO
 const loadMoreSongs = () => {
     const vendor = getVendor(platform.value)
-    if(!vendor) return
+    if(!vendor || !vendor.artistDetailAllSongs) return
     const id = artistId.value
     vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
         appendAllSongs(result.data)
@@ -197,9 +198,10 @@ const loadAllSongs = () => {
         return 
     }
     const vendor = getVendor(platform.value)
-    if(!vendor) return
+    if(!vendor || !vendor.artistDetailAllSongs) return
     const id = artistId.value
     vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
+        if(!isAllSongsTab()) return 
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         setLoadingSongs(false)
@@ -219,10 +221,11 @@ const loadAlbums = () => {
         return 
     }
     const vendor = getVendor(platform.value)
-    if(!vendor) return
+    if(!vendor || !vendor.artistDetailAlbums) return
     const id = artistId.value
-    //TODO
+    //TODO 分页加载全部
     vendor.artistDetailAlbums(id, 0, 365, 1).then(result => {
+        if(!isAlbumsTab()) return
         updateAlbums(result.data)
         updateTabData(result.data)
         setLoadingAlbums(false)
@@ -239,9 +242,10 @@ const loadAbout = () => {
         return 
     }
     const vendor = getVendor(platform.value)
-    if(!vendor) return
+    if(!vendor || !vendor.artistDetailAbout) return
     const id = artistId.value
     vendor.artistDetailAbout(id).then(result => {
+        if(!isAboutTab()) return
         updateAbout(result)
         updateTabData(result)
         updateTabTipText(0)

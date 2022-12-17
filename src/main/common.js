@@ -164,6 +164,11 @@ const randomTextWithinAlphabetNums = (len) => {
     return randomText(ALPHABET_NUMS, len)
 }
 
+const nextInt = (max) => {
+    const limit = max < 1024 ? 1024 : max
+    return parseInt(Math.random() * limit) % max
+}
+
 const getDownloadDir = () => {
     return homedir() + "/Downloads/"
 }
@@ -172,24 +177,23 @@ const removePath = (path) => {
     rm(path, { force: true })
 }
 
-const filterPath = async (dir, filter) => {
+/** 返回值为数组，且当没有文件时，默认为[ ] */
+const listFiles = async (dir, isFullname) => {
+    const files = []
     try {
         //const result = { path: dir, data: [] }
         const list = await opendir(dir)
-        const files = []
         for await (const dirent of list) {
             //console.log(dirent.name)
             if(dirent.isFile()) {
-                const fullname = path.join(dir, dirent.name)
-                if(filter && filter(dirent.name)) continue
-                files.push(fullname) 
+                const filename = isFullname ? path.join(dir, dirent.name) : dirent.name
+                files.push(filename) 
             }
         }
-        return files
     } catch (error) {
         console.log(error);
     }
-    return null
+    return files
 }
 
 module.exports = { 
@@ -201,7 +205,8 @@ module.exports = {
     ALPHABET_NUMS, 
     randomText, 
     randomTextWithinAlphabetNums,
+    nextInt,
     getDownloadDir,
     removePath,
-    filterPath
+    listFiles
 }
