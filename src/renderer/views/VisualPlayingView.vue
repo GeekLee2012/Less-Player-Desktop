@@ -317,6 +317,10 @@ onUnmounted(() => setDisactived(true))
     -webkit-line-clamp: 1;
 }
 
+.visual-playing-view .meta-wrap .audio-artist {
+    -webkit-app-region: none;
+}
+
 .visual-playing-view .mv {
     margin-right: 5px;
     margin-top: 3px;

@@ -61,11 +61,14 @@ export const useRadioSquareStore = defineStore('radioSquare', {
         putOrders(key, value) {
             this.ordersMap.set(key, value)
         },
+        getOrders(key) {
+            return this.ordersMap.get(key)
+        },
         putCurrentOrders(value){
             this.putOrders(this.currentPlatformCode, value)
         },
         currentPlatformOrders() {
-            return this.ordersMap.get(this.currentPlatformCode) 
+            return this.getOrders(this.currentPlatformCode) 
          },
         updateCurrentOrder(key, value, index) {
             this.currentOrder.key = key

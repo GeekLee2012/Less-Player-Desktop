@@ -78,17 +78,18 @@ const setImageTextTileSize = () => {
     const tileHMargin = 12.5;
     const mainMargin = 33;
     const scrollBarWidth = 6
-    const limits = [ 5, 4 ]
+    const limits = [ 5, 4 ] //TODO 宽屏、超宽屏，需更好兼容性
     const mainContent = document.getElementById('main-content')
     const { clientWidth }  = mainContent
     const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
     const tileCovers = document.querySelectorAll(".image-text-tile .cover")
     const tileTitles = document.querySelectorAll(".image-text-tile .title")
     let tileWidth = 165, limit = 0
-    if(clientWidth > minWidths[0]) {
-        limit = limits[0]
-    } else if(clientWidth > minWidths[1]) {
-        limit = limits[1]
+    for(var i = 0; i < limits.length; i++) {
+        if(clientWidth > minWidths[i]) {
+            limit = limits[i]
+            break
+        }
     }
     if(limit > 0) tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
     tileCovers.forEach(item => {

@@ -7,6 +7,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
+import { useRadioSquareStore } from '../store/radioSquareStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useAudioEffectStore } from '../store/audioEffectStore';
 import { Track } from '../../common/Track';
@@ -44,8 +45,6 @@ const { getVendor, platforms,
     isPlaylistType, isAnchorRadioType, 
     isFMRadioType, getPlatformName, 
     getPlatformShortName } = usePlatformStore()
-const { getCategories, putCategories } = usePlaylistSquareStore()
-
 
 const spectrumCanvasShow = ref(spectrumIndex.value >= 0)
 
@@ -298,16 +297,24 @@ const randomPlay = async () => {
     do {
         //默认随机方式不均衡
         //type = rmTypeCodes[nextInt(rmTypeCodes.length)]
-        //随机 + 权重
+
+        //随机 + 简单权重
+        //随机函数并不完全随机（伪随机），存在一定的分布规律
+        //需要根据分布规律，对数据进行排序
+        //Math.random()近似普通均匀分布？
+        const sortedTypes = rmTypes
         const maxNum = 1024, guessmeNum = nextInt(maxNum) //默认最大值1024
-        const currentWeight = (guessmeNum / maxNum)
-        let accWeight = 0, guessmeIndex = 0
-        for(var i = 0; i < rmTypes.length; i++) {
+        let currentScopeNum = guessmeNum, guessmeIndex = 0
+        for(var i = 0; i < sortedTypes.length; i++) {
             guessmeIndex = i
-            accWeight += (rmTypes[i].weight / totalWeight)
-            if(currentWeight <= accWeight) break
+            const currentWeight = (sortedTypes[i].weight / totalWeight)
+            //当前区间最大值
+            const scopeMax = currentWeight * 1024
+            if(currentScopeNum <= scopeMax) break
+            //不在当前区间，计算超出值
+            currentScopeNum = currentScopeNum - scopeMax
         }
-        type = rmTypeCodes[guessmeIndex]
+        type = sortedTypes[guessmeIndex].code
         //根据类型匹配相应平台
         availablePlatforms = rmPlatforms.filter(item => item.types.includes(type))
         if(availablePlatforms && availablePlatforms.length > 0) { 
@@ -344,6 +351,7 @@ const randomPlay = async () => {
 
 //获取歌单分类
 const pickCategory = async (platform) => {
+    const { getCategories, putCategories } = usePlaylistSquareStore()
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.categories) {
@@ -407,6 +415,7 @@ const pickPlaylist = async (platform) => {
         ++retry
     } while(retry > 0 && retry < maxRetry)
     if(total < 0) { //获取不到数据，暂时返回
+        console.log(`获取歌单失败：${platform} - ${cateName}`)
         showFailToast('网络异常！请稍候重试')
         return 
     }
@@ -445,6 +454,8 @@ const pickPlaylist = async (platform) => {
 
 //获取主播电台分类
 const pickAnchorRadioCategory = async (platform) => {
+    const { getCategories, putCategories, 
+        getOrders, putOrders  } = useRadioSquareStore()
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.radioCategories) {
@@ -452,23 +463,31 @@ const pickAnchorRadioCategory = async (platform) => {
         return
     }
     let cachedCategories = getCategories(platform)
+    let cachedOrders = getOrders(platform)
     if(!cachedCategories) {
         let maxRetry = 3, retry = 0
         do {
             const result = await vendor.radioCategories()
             if(result && result.data.length > 0) {
-                putCategories(result.platform, result.data)
-                cachedCategories = result.data
+                cachedCategories = {  
+                    data: result.data, 
+                    multiSelectMode: (result.multiMode === true)
+                }
+                cachedOrders = result.orders
+                putCategories(result.platform, cachedCategories)
+                if(cachedOrders) {
+                    putOrders(result.platform, cachedOrders)
+                }
                 break
             }
             ++retry
         } while(retry > 0 && retry < maxRetry)
     }
-    if(!cachedCategories || !cachedCategories.length < 0) {
+    if(!cachedCategories || !cachedCategories.data.length < 0) {
         return null
     }
     //单个分类，且名称约定为电台或地区，如央广云听平台
-    let filtedData = cachedCategories.filter(
+    let filtedData = cachedCategories.data.filter(
         item => item.name != '电台' && item.name != '默认')
     if(filtedData.length < 1) {
         return null
@@ -511,6 +530,7 @@ const pickAnchorRadio = async (platform) => {
         ++retry
     } while(retry > 0 && retry < maxRetry)
     if(total < 0) { //获取不到数据，暂时返回
+        console.log(`获取主播电台失败：${platform} - ${cateName}`)
         showFailToast('网络异常！请稍候重试')
         return 
     }
@@ -544,6 +564,8 @@ const pickAnchorRadio = async (platform) => {
 
 //获取广播电台分类
 const pickFMRadioCategory = async (platform) => {
+    const { getCategories, putCategories, 
+        getOrders, putOrders } = useRadioSquareStore()
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.radioCategories) {
@@ -551,23 +573,31 @@ const pickFMRadioCategory = async (platform) => {
         return
     }
     let cachedCategories = getCategories(platform)
+    let cachedOrders = getOrders(platform)
     if(!cachedCategories) {
         let maxRetry = 3, retry = 0
         do {
             const result = await vendor.radioCategories()
             if(result && result.data.length > 0) {
-                putCategories(result.platform, result.data)
-                cachedCategories = result.data
+                cachedCategories = {  
+                    data: result.data, 
+                    multiSelectMode: (result.multiMode === true)
+                }
+                cachedOrders = result.orders
+                putCategories(result.platform, cachedCategories)
+                if(cachedOrders) {
+                    putOrders(result.platform, cachedOrders)
+                }
                 break
             }
             ++retry
         } while(retry > 0 && retry < maxRetry)
     }
-    if(!cachedCategories || !cachedCategories.length < 0) {
+    if(!cachedCategories || !cachedCategories.data.length < 0) {
         return null
     }
     //单个分类，且名称约定为电台或地区，如央广云听平台
-    let filtedData = cachedCategories.filter(item => item.name == '电台')
+    let filtedData = cachedCategories.data.filter(item => item.name == '电台')
     if(filtedData.length == 1) {
         const data = filtedData[0].data
         return !data || data.length < 1 ? null
@@ -859,6 +889,10 @@ watch([ textColorIndex ], setupTextColor)
     flex-direction: row;
     align-items: center;
     justify-content: center;
+}
+
+.simple-layout > .center .top svg {
+    -webkit-app-region: none;
 }
 
 .simple-layout > .center .top:hover {
