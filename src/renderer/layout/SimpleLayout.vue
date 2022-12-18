@@ -12,7 +12,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useAudioEffectStore } from '../store/audioEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { nextInt } from '../../common/Utils';
+import { isMacOS, nextInt } from '../../common/Utils';
 import { toMMssSSS } from '../../common/Times';
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
@@ -741,7 +741,7 @@ watch([ textColorIndex ], setupTextColor)
 <template>
     <div class="simple-layout">
         <div class="center"  @contextmenu="toggleRandomMusicToolbar()">
-            <div class="top">
+            <div class="top" :class="{ 'top-fixed': !isMacOS() }">
                 <div class="left">
                     <div class="win-ctl-wrap" >
                         <WinTrafficLightBtn :hideMaxBtn="true"></WinTrafficLightBtn>
@@ -955,18 +955,6 @@ watch([ textColorIndex ], setupTextColor)
     width: 75px;
 }
 
-.simple-layout > .center .top .left,
-.simple-layout > .center .top .flex-space,
-.simple-layout > .center .top .action {
-    visibility: hidden;
-}
-
-.simple-layout > .center .top:hover .left,
-.simple-layout > .center .top:hover .flex-space,
-.simple-layout > .center .top:hover .action {
-    visibility: visible;
-}
-
 .simple-layout > .center .top .flex-space {
     flex: 1;
     display: flex;
@@ -1052,6 +1040,21 @@ watch([ textColorIndex ], setupTextColor)
 .simple-layout > .center .top .action .text-color-black {
     background: #fff;
     color: #000;
+}
+
+.simple-layout > .center .top .left,
+.simple-layout > .center .top .flex-space,
+.simple-layout > .center .top .action {
+    visibility: hidden;
+}
+
+.simple-layout > .center .top-fixed .left,
+.simple-layout > .center .top-fixed .flex-space,
+.simple-layout > .center .top-fixed .action,
+.simple-layout > .center .top:hover .left,
+.simple-layout > .center .top:hover .flex-space,
+.simple-layout > .center .top:hover .action {
+    visibility: visible;
 }
 
 .simple-layout > .center .meta-wrap {

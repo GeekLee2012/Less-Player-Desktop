@@ -261,6 +261,10 @@ onUnmounted(() => setDisactived(true))
     -webkit-app-region: drag;
 }
 
+.visual-playing-view .header svg {
+    -webkit-app-region: none;
+}
+
 .visual-playing-view .header .win-ctl-wrap {
     display: flex;
     justify-content: flex-end;
@@ -323,7 +327,10 @@ onUnmounted(() => setDisactived(true))
 
 .visual-playing-view .mv {
     margin-right: 5px;
-    margin-top: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 .visual-playing-view svg {
