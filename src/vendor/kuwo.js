@@ -369,10 +369,10 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/search/searchMusicBykeyWord"
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + randomReqId()
+            const result = { platform: KuWo.CODE, offset, limit, page, data: [] }
             getJson(url, null, CONFIG).then(json => {
-                let data = []
                 if(json.code == 200) {
-                    data = json.data.list.map(item => {
+                    const data = json.data.list.map(item => {
                         const artist = [ { id: item.artistid, name: item.artist } ]
                         const album = { id: item.albumid, name: item.album }
                         const duration = item.duration * 1000
@@ -380,10 +380,10 @@ export class KuWo {
                         if(item.hasmv) track.mv = item.rid
                         return track
                     })
-                } 
-                const result = { platform: KuWo.CODE, offset, limit, page, data }
+                    if(data && data.length > 0) result.push(...data)
+                }
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 

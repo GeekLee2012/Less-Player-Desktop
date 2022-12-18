@@ -32,7 +32,7 @@ export class DouBan {
                     songlistCategory.add(item.name, item.id + '')
                 })
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 
@@ -94,7 +94,7 @@ export class DouBan {
                     result.data.push(...chnnItems)
                 })
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 
@@ -115,7 +115,7 @@ export class DouBan {
                     result.data.push(playlist)
                 })
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 
@@ -205,7 +205,7 @@ export class DouBan {
                     result.data.push(track)
                 })
                 resolve(result)
-            })
+            }).catch(error => resolve(null))
         })
     }
 

@@ -172,6 +172,7 @@ const loadHotSongs = () => {
     const id = artistId.value
     vendor.artistDetailHotSongs(id).then(result => {
         if(!isHotSongsTab()) return 
+        if(!result) return
         if(result.name && result.cover) updateArtist(result.name, result.cover)
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
@@ -204,6 +205,7 @@ const loadAllSongs = () => {
     const id = artistId.value
     vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
         if(!isAllSongsTab()) return 
+        if(!result) return
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         setLoadingSongs(false)
@@ -228,6 +230,7 @@ const loadAlbums = () => {
     //TODO 分页加载全部
     vendor.artistDetailAlbums(id, 0, 365, 1).then(result => {
         if(!isAlbumsTab()) return
+        if(!result) return
         updateAlbums(result.data)
         updateTabData(result.data)
         setLoadingAlbums(false)
@@ -315,20 +318,24 @@ const isAvailableTab = (btnType) => {
 }
 
 const resetBack2TopBtn = () => {
+    if(!back2TopBtnRef.value) return 
     back2TopBtnRef.value.setScrollTarget(artistDetailRef.value)
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
+    if(!artistDetailRef.value) return 
     artistDetailRef.value.scrollTop = markScrollTop
 }
 
 const markScrollState = () => {
+    if(!artistDetailRef.value) return 
     markScrollTop = artistDetailRef.value.scrollTop
 }
 
 const restoreScrollState = () => {
     if(markScrollTop < 1) return 
+    if(!artistDetailRef.value) return
     artistDetailRef.value.scrollTop = markScrollTop
 }
 
