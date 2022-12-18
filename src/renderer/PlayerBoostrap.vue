@@ -168,8 +168,8 @@ const bootstrapTrack = (track, callback, noToast) => {
 //添加到播放列表，并开始播放
 const addAndPlayTracks = (tracks, needReset, text) => {
     if(needReset) resetQueue()
-    addTracks(tracks)
     showToast(text || "即将为您播放全部！")
+    addTracks(tracks)
     playNextTrack()
 }
 
@@ -226,7 +226,7 @@ const playPlaylist = async (playlist, text) => {
     }
     //可播放歌单
     traceRecentPlaylist(playlist)
-    addAndPlayTracks(playlist.data, true)
+    addAndPlayTracks(playlist.data, true, text)
 }
 
 //播放电台
