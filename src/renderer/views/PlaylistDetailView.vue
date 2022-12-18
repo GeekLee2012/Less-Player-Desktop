@@ -11,9 +11,8 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
 
 const { getVendor } = usePlatformStore()
-const { addTracks, resetQueue, playNextTrack } = usePlayStore()
+const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
-const { addRecentPlaylist } = useUserProfileStore()
 
 const props = defineProps({
     platform: String,
@@ -48,33 +47,38 @@ const resetView = () => {
 }
 
 const nextPage = () =>  {
-    if(detail.data.length >= detail.total) return false
-    //const totalPage = Math.ceil(detail.total * 1.0 / limit)
-    //if(page == totalPage) return false
+    //TODO
     offset = page * limit
     page = page + 1
     return true
 }
 
-const loadContent = (noLoadingMask) => {
+const loadContent = async (noLoadingMask) => {
     if(!noLoadingMask) setLoading(true)
     checkFavorite()
     
     const vendor = getVendor(props.platform)
-    if(!vendor) return 
-    vendor.playlistDetail(props.id, offset, limit, page)
-        .then(result => {
-        if(!result.data || result.data.length < 1) {
-            page = page - 1
-            offset = page * limit
-            return 
+    if(!vendor || !vendor.playlistDetail) return
+    let maxRetry = 3, retry = 0, success = false
+    do {
+        const result = await vendor.playlistDetail(props.id, offset, limit, page)
+        if(!result || result.data.length < 1) {
+            ++retry
+            continue 
         }
         if(page > 1) result.data.unshift(...detail.data)
         if(!result.total) detail.total = 0
         Object.assign(detail, result)
         updateListSizeText()
         setLoading(false)
-    })
+        success = true
+        break
+    } while(retry > 0 && retry < maxRetry)
+    if(!success) { //回退分页信息，并提示
+        page = page - 1
+        offset = page * limit
+        if(offset < detail.total) showToast('网络异常！请稍候重试')
+    }
 }
 
 const loadMoreContent = () => {
@@ -83,22 +87,11 @@ const loadMoreContent = () => {
     }
 }
 
-//目前以加入当前播放列表为参考标准
-const traceRecentPlay = () => {
-    const { id, platform, title, cover, type } = detail
-    addRecentPlaylist(id, platform, title, cover, type)
-}
-
-const playAll = () => {
-    resetQueue()
-    addAll("即将为您播放全部！")
-    playNextTrack()
-}
+const playAll = () => EventBus.emit('playlist-play', { playlist: detail })
 
 const addAll = (text) => {
     addTracks(detail.data)
     showToast(text || "歌曲已全部添加！")
-    traceRecentPlay()
 }
 
 //TODO

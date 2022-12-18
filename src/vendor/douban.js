@@ -43,8 +43,8 @@ export class DouBan {
         resolvedCate = resolvedCate.length > 0  ? resolvedCate : 'MHz'
         if(resolvedCate == 'MHz') return DouBan.mhzChannels(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
-            const result = { platform: DouBan.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
-            if(page > 1) {
+            const result = { platform: DouBan.CODE, cate: originCate, offset, limit, page, total: 1, data: [] }
+            if(page > 1) { //TODO
                 resolve(result)
                 return
             }
@@ -57,7 +57,7 @@ export class DouBan {
                     result.data.push(playlist)
                 })
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 
@@ -123,9 +123,17 @@ export class DouBan {
     static playlistDetail(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/songlist/" + id + "?kbps=192"
+            const result = new Playlist(id, DouBan.CODE)
             getJson(url).then(json => {
-                const result = new Playlist(id, DouBan.CODE, json.cover, json.title, url, json.intro)
-                result.total = json.count
+                //const result = new Playlist(id, DouBan.CODE, json.cover, json.title, url, json.intro)
+                //result.total = json.count
+                Object.assign(result,  {
+                    cover: json.cover,
+                    title: json.title,
+                    about: json.intro,
+                    total: json.count,
+                    url
+                })
                 const list = json.songs
                 list.forEach(item => {
                     const artist = item.singers.map(ar => ({ id: ar.id, name: ar.name }))
@@ -139,7 +147,7 @@ export class DouBan {
                     result.addTrack(track)
                 })
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 
@@ -148,11 +156,10 @@ export class DouBan {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/lyric" + "?sid=" + id + "&ssid=" + track.ssid
             getJson(url).then(json => {
-                
                 const lyricText = json.lyric
                 track.lyric = Lyric.parseFromText(lyricText)
                 resolve(track)
-            })
+            }).catch(error => resolve(track))
         })
     }
 

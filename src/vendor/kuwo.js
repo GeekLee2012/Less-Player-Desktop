@@ -24,10 +24,6 @@ const CONFIG = {
     withCredentials: true
 }
 
-const escapseHtml = (text) => {
-    return text.trim().replace(/&nbsp;/g,' ')
-}
-
 export class KuWo {
     static CODE = 'kuwo'
     static TOPLIST_CODE  = 'KW_RANKLIST'
@@ -181,12 +177,25 @@ export class KuWo {
     static playlistDetail(id, offset, limit, page) {
         if(id.startsWith(KuWo.TOPLIST_PREFIX)) return this.toplistDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
+            //TODO 官方 rn = 30
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo" 
-                    + "?pid=" + id + "&pn=" + page + "&rn=" + limit + "&httpsStatus=1&reqId=" + randomReqId()
+                    + "?pid=" + id + "&pn=" + page + "&rn=" + limit
+                    + "&httpsStatus=1&reqId=" + randomReqId()
+            const result = new Playlist(id, KuWo.CODE)
+            /*
+            result.cover = json.data.img500
+            result.title = json.data.name
+            result.about = json.data.info
+            result.total = json.data.total
+            */
             getJson(url, null, CONFIG).then(json => {
-                const result = new Playlist(id, KuWo.CODE, json.data.img500, json.data.name)
-                result.about = json.data.info
-                result.total = json.data.total
+                const { img500, img700, img300, info, total } = json.data
+                Object.assign(result, {
+                    cover: img700 || img500 || img300,
+                    title: json.data.name,
+                    about: info,
+                    total: Math.ceil(total / 30)
+                })
                 const playlist = json.data.musicList
                 playlist.forEach(item => {
                     const artist = [ { id: item.artistid, name: item.artist } ]
@@ -198,6 +207,8 @@ export class KuWo {
                     track.pid = id
                     result.addTrack(track)
                 })
+                resolve(result)
+            }).catch(error => {
                 resolve(result)
             })
         })
@@ -255,7 +266,7 @@ export class KuWo {
                     const json = Function('return ' + scriptText)()
 
                     const singerInfo = json.data[0].singerInfo
-                    title = escapseHtml(singerInfo.name)
+                    title = singerInfo.name
                     cover = singerInfo.pic300
                     about = singerInfo.info 
                 }
@@ -384,7 +395,7 @@ export class KuWo {
                     + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.list.map(item => {
-                    const playlist = new Playlist(item.id, KuWo.CODE, item.img, escapseHtml(item.name))
+                    const playlist = new Playlist(item.id, KuWo.CODE, item.img, item.name)
                     return playlist
                 })
                 const result = { platform: KuWo.CODE, offset, limit, page, data }
@@ -402,7 +413,7 @@ export class KuWo {
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.albumList.map(item => {
                     const artist = [ { id: item.artistid, name: item.artist } ]
-                    const albumName = escapseHtml(item.album)
+                    const albumName = item.album
                     const album = new Album(item.albumid, KuWo.CODE, albumName, item.pic, artist)
                     album.publishTime = item.releaseDate
                     return album
@@ -420,12 +431,11 @@ export class KuWo {
                     + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
                     + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
-                
                 const data = json.data.artistList.map(item => {
                     return {
                         id: item.id,
                         platform: KuWo.CODE,
-                        title: escapseHtml(item.name),
+                        title: item.name,
                         cover: item.pic300
                     }
                 })

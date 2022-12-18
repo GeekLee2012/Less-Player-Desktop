@@ -102,19 +102,14 @@ const setupCache = () => {
 }
 
 const setupLayout = () => {
-  const index = layout.value.index
-  switch (index) {
-      case 0:
-      case 1:
+    if(isDefaultLayout.value) {
         currentAppLayout.value = DefaultLayout
         EventBus.emit('app-layout-default')
         if(ipcRenderer) ipcRenderer.send('app-layout-default')
-        break
-      case 2:
+    } else if(isSimpleLayout.value) {
         currentAppLayout.value = SimpleLayout
         if(ipcRenderer) ipcRenderer.send('app-layout-simple')
-        break
-  }
+    }
 }
 
 //TODO 暂时弃用macOS自带交通灯控件

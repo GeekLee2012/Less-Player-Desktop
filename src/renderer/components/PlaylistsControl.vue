@@ -26,7 +26,7 @@ const props = defineProps({
 const { isPlatformValid } = usePlatformStore()
 const { isListenNumShow } = storeToRefs(useSettingStore())
 
-const playItem = (playlist, text) => EventBus.emit('playlist-play', { playlist, text})
+const playItem = (playlist, text) => EventBus.emit('playlist-play', { playlist, text })
 
 const visitItem = (item) => {
     const { checkbox } = props

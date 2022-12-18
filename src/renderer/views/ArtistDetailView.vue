@@ -48,7 +48,7 @@ const { setActiveTab, updateArtist,
     } = useArtistDetailStore()
 
 const { getVendor } = usePlatformStore()
-const { addTracks, playNextTrack, resetQueue } = usePlayStore()
+const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore() 
 
 const artistDetailRef = ref(null)
@@ -88,9 +88,10 @@ const visitTab = (index, isClick) => {
 }
 
 const playHotSongs = () => {
-    resetQueue()
-    addHotSongs("即将为您播放全部！")
-    playNextTrack()
+    EventBus.emit('tracks-play', {
+        data: hotSongs.value,
+        needReset: true
+    })
 }
 
 const addHotSongs = (text) => {
@@ -99,9 +100,10 @@ const addHotSongs = (text) => {
 }
 
 const playAllSongs = () => {
-    resetQueue()
-    addAllSongs("即将为您播放全部！")
-    playNextTrack()
+    EventBus.emit('tracks-play', {
+        data: allSongs.value,
+        needReset: true
+    })
 }
 
 const addAllSongs = (text) => {

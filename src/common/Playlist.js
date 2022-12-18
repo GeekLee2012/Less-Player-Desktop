@@ -50,8 +50,8 @@ export class Playlist {
         return item && item.type === type
     }
 
-    static isNormalType(item) {
-        return Playlist.doAssertType(item, Playlist.NORMAL_TYPE)
+    static isNormalType(item) { //普通歌单，必须设置平台
+        return item.platform && Playlist.doAssertType(item, Playlist.NORMAL_TYPE)
     }
 
     static isNormalRadioType(item) {
@@ -69,7 +69,8 @@ export class Playlist {
     static isCustomType(item) {
         const id = toTrimString(item.id)
         return id.startsWith(Playlist.CUSTOM_ID_PREFIX)
-            //|| id.length == 16
+            //下面写法为兼容旧版本数据
+            || (id.length == 16 && !item.platform)
     }
 
 }

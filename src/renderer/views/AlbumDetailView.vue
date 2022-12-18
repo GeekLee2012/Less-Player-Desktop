@@ -8,8 +8,8 @@ export default {
 -->
 
 <script setup>
+import { onMounted, onActivated, ref, reactive, shallowRef, watch, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
-import { onMounted, onActivated, ref, reactive, shallowRef, watch } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
@@ -19,6 +19,7 @@ import { usePlayStore } from '../store/playStore';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
+import EventBus from '../../common/EventBus';
 
 const props = defineProps({
     platform: String,
@@ -38,9 +39,8 @@ const { setActiveTab, updateTabTipText,
     } = useAlbumDetailStore()
 
 const { getVendor } = usePlatformStore()
-const { addTracks, playNextTrack, resetQueue } = usePlayStore()
+const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
-const { addRecentAlbum } = useUserProfileStore()
 
 let currentTabView = shallowRef(null)
 const tabData = ref([])
@@ -62,22 +62,14 @@ const visitTab = (index, isClick) => {
     switchTab()
 }
 
-//目前以加入当前播放列表为参考标准
-const traceRecentPlay = () => {
-    const { id, platform, title, cover, publishTime } = detail
-    addRecentAlbum(id, platform, title, cover, publishTime)
-}
-
 const playAll = () => {
-    resetQueue()
-    addAll("即将为您播放全部！")
-    playNextTrack()
+    const data = allSongs.value
+    EventBus.emit('album-play', { album: { ...toRaw(detail), data } })
 }
 
 const addAll = (text) => {
     addTracks(allSongs.value)
     showToast(text || "歌曲已全部添加！")
-    traceRecentPlay()
 } 
 
 //TODO

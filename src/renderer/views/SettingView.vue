@@ -369,10 +369,16 @@ onMounted(checkForUpdate)
                             :value="cache.storePlayState">
                         </ToggleControl>
                     </div>
-                    <div class="last">
+                    <div>
                         <span>应用退出前，保存本地歌曲：</span>
                         <ToggleControl @click="toggleStoreLocalMusic"
                             :value="cache.storeLocalMusic">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span>保存最近播放记录：</span>
+                        <ToggleControl @click="toggleStoreRecentPlay"
+                            :value="cache.storeRecentPlay">
                         </ToggleControl>
                     </div>
                 </div>

@@ -20,7 +20,7 @@ const __get = (url, data, config, parseContentType) => {
                 resolve(resp.data)
             }
         }, error => reject(error))
-        .catch(error => reject(error))
+        //.catch(error => reject(error))
     })
 }
 
@@ -37,7 +37,7 @@ const __post = (url, data, config, parseContentType) => {
                 resolve(resp.data)
             }
         }, error => reject(error))
-        .catch(error => reject(error))
+        //.catch(error => reject(error))
     })
 }
 

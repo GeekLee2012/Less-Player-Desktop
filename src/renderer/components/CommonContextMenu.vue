@@ -25,7 +25,7 @@ let currentDataType = -1
 
 const { commonCtxItem, commonCtxMenuCacheItem  } = storeToRefs(useAppCommonStore())
 const { showToast, setCommonCtxMenuData, hideAllCtxMenus } = useAppCommonStore()
-const { playTrack, playTrackLater, addTrack, removeTrack, resetQueue, addTracks, playNextTrack } = usePlayStore()
+const { playTrackLater, addTrack, removeTrack, addTracks } = usePlayStore()
 const { addFavoriteTrack, removeFavoriteSong, addFavoriteRadio,
     removeCustomPlaylist, removeTrackFromCustomPlaylist,
     getCustomPlaylist, removeRecentSong,
@@ -33,7 +33,6 @@ const { addFavoriteTrack, removeFavoriteSong, addFavoriteRadio,
     removeFavoritePlaylist, addRecentPlaylist } = useUserProfileStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { removeItem } = useLocalMusicStore()
-const { getVendor } = usePlatformStore()
 
 
 const toastAndHideMenu = (text) => {
@@ -42,8 +41,8 @@ const toastAndHideMenu = (text) => {
 }
 
 const playItem = () => {
-    playTrack(commonCtxMenuCacheItem.value)
     hideAllCtxMenus()
+    EventBus.emit('track-playNow', commonCtxMenuCacheItem.value)
 }
 
 const addItemToQueue = () => {
@@ -61,6 +60,7 @@ const playItemLater = () => {
     toastAndHideMenu("下一曲将为您播放！")
 }
 
+//TODO
 const refreshFavorite = () => {
     EventBus.emit("refreshFavorite")
 }
@@ -120,11 +120,8 @@ const removeFavoriteItem = ()=> {
 const playCustom = () => {
     const { id } = commonCtxMenuCacheItem.value
     const playlist = getCustomPlaylist(id)
-    if(!playlist || playlist.data.length < 1) return 
-    resetQueue()
-    addTracks(playlist.data)
-    toastAndHideMenu("即将为您播放歌单！")
-    playNextTrack()
+    hideAllCtxMenus()
+    EventBus.emit('playlist-play', { playlist })
 }
 
 const visitCustomEdit = () => {
@@ -162,27 +159,10 @@ const showAddToList = (event, mode) => {
     EventBus.emit("addToListSubmenu-show", event)
 }
 
-//目前以加入当前播放列表为参考标准
-const traceRecentPlay = (playlist) => {
-    const { id, platform, title, cover, type } = playlist
-    addRecentPlaylist(id, platform, title, cover, type)
-}
-
-const playAll = (playlist) => {
-    if(!playlist || playlist.data.length < 1) return 
-    resetQueue()
-    addTracks(playlist.data)
-    toastAndHideMenu("即将为您播放全部！")
-    traceRecentPlay(playlist)
-    playNextTrack()
-}
-
 const playPlaylist = () => {
-    const { id, platform } = commonCtxMenuCacheItem.value
-    const vendor = getVendor(platform)
-    if(!vendor) return 
-    vendor.playlistDetail(id, 0, 1000, 1).then(result => {
-        playAll(result)
+    hideAllCtxMenus()
+    EventBus.emit('playlist-play', {
+        playlist: commonCtxMenuCacheItem.value
     })
 }
 
