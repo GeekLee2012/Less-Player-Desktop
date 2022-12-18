@@ -247,7 +247,7 @@ const setVideoViewSize = () => {
     const el = document.querySelector(".video-holder")
     if(!el) return 
     el.style.width = clientWidth + "px"
-    el.style.height = (clientHeight - 56) + "px"
+    el.style.height = (clientHeight - 56 + 1) + "px"
 }
 
 const hideAllPopoverViews = () => {
