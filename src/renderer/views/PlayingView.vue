@@ -246,10 +246,10 @@ watch([currentTrack, playingViewShow ], checkFavorite)
 
 .playing-view .mv {
     margin-right: 5px;
+    display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
-    -webkit-app-region: none;
 }
 
 .playing-view svg {
