@@ -180,6 +180,10 @@ watch([currentTrack, playingViewShow ], checkFavorite)
     -webkit-app-region: drag;
 }
 
+.playing-view .header svg {
+    -webkit-app-region: none;
+}
+
 .playing-view .header .win-ctl-wrap {
     display: flex;
     justify-content: flex-end;
@@ -236,9 +240,16 @@ watch([currentTrack, playingViewShow ], checkFavorite)
     -webkit-line-clamp: 1;
 }
 
+.playing-view .meta-wrap .audio-artist {
+    -webkit-app-region: none;
+}
+
 .playing-view .mv {
     margin-right: 5px;
-    margin-top: 3px;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    -webkit-app-region: none;
 }
 
 .playing-view svg {

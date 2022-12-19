@@ -159,9 +159,13 @@ export const useSettingStore = defineStore('setting', {
         isStoreRecentPlay() {
             return this.cache.storeRecentPlay
         },
-        isDefaultLayout() {
+        isDefaultLayout() { //默认布局，目前包含2种
             const index = this.layout.index
             return index == 0 || index == 1
+        },
+        isDefaultClassicLayout() {
+            const index = this.layout.index
+            return index == 1
         },
         isSimpleLayout() {
             const index = this.layout.index

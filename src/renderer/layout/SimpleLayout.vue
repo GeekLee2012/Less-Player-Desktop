@@ -991,12 +991,9 @@ watch([ textColorIndex ], setupTextColor)
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    height: 100%;
-    width: 173px;
+    width: 130px;
     padding-right: 15px;
-}
-
-.simple-layout > .center .top .action > span {
+    margin-left: 43px;
     -webkit-app-region: none;
 }
 

@@ -1,5 +1,5 @@
 <script setup>
-import { inject, onMounted, shallowRef, watch } from 'vue';
+import { inject, onActivated, onMounted, shallowRef, watch } from 'vue';
 import MainTop from './DefaultMainTop.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
@@ -29,8 +29,8 @@ const { hideAllCategoryViews, hideAllCtxMenus,
     hidePlaybackQueueView, togglePlaybackQueueView, 
     toggleLyricToolbar, hideLyricToolbar } = useAppCommonStore()
 
-const { layout, lyricMetaPos, 
-    isDefaultLayout, isSimpleLayout } = storeToRefs(useSettingStore())
+const { lyricMetaPos, isDefaultLayout, 
+    isDefaultClassicLayout, isSimpleLayout } = storeToRefs(useSettingStore())
 const { setupWindowZoomWithoutResize } = useSettingStore()
 
 const minAppWidth = 1080, minAppHeight = 720
@@ -44,9 +44,9 @@ const setPlayMetaSize = () => {
     const el1 = document.querySelector(".play-meta .title-wrap")
     const el2 = document.querySelector(".play-meta .audio-title")
     const el3 = document.querySelector(".play-meta .time-volume-wrap")
-    el1.style.width = width + "px"
-    el2.style.width = width + "px"
-    el3.style.width = width + "px"
+    if(el1) el1.style.width = width + "px"
+    if(el2) el2.style.width = width + "px"
+    if(el3) el3.style.width = width + "px"
 }
 
 const setSearchBarSize = () => {
@@ -80,6 +80,7 @@ const setImageTextTileSize = () => {
     const scrollBarWidth = 6
     const limits = [ 5, 4 ] //TODO 宽屏、超宽屏，需更好兼容性
     const mainContent = document.getElementById('main-content')
+    if(!mainContent) return
     const { clientWidth }  = mainContent
     const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
     const tileCovers = document.querySelectorAll(".image-text-tile .cover")
@@ -109,6 +110,7 @@ const setImageTextTileLoadingMaskSize = () => {
     const scrollBarWidth = 6
     const limits = [ 5, 4 ]
     const mainContent = document.getElementById('main-content')
+    if(!mainContent) return 
     const { clientWidth }  = mainContent
     const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
     const tiles = document.querySelectorAll(".tiles-loading-mask .tile")
@@ -236,18 +238,11 @@ const setVisualPlayingViewCanvasSize = () => {
 //TODO
 const setBatchViewListSize = () => {
     const mainContent = document.getElementById('main-content')
+    if(!mainContent) return
     const el = document.querySelector('#batch-action-view .content')
     const { clientHeight } = mainContent, padding = 52
     const height = (clientHeight - 133 - padding)
     if(el) el.style.height = height + "px"
-}
-
-const setVideoViewSize = () => {
-    const { clientWidth, clientHeight } = document.documentElement
-    const el = document.querySelector(".video-holder")
-    if(!el) return 
-    el.style.width = clientWidth + "px"
-    el.style.height = (clientHeight - 56 + 1) + "px"
 }
 
 const hideAllPopoverViews = () => {
@@ -294,20 +289,16 @@ const setLyricToolbarPos = () => {
 }
 
 const setupDefaultLayout = () => {
-    const index = layout.value.index
-    switch (index) {
-        case 0:
-            currentMainTop.value = MainTop
-            currentMainBottom.value = MainBottom
-            break
-        case 1:
-            currentMainTop.value = ClassicMainTop
-            currentMainBottom.value = ClassicMainBottom
-            break
+    if(isDefaultClassicLayout.value) {
+        currentMainTop.value = ClassicMainTop
+        currentMainBottom.value = ClassicMainBottom
+    } else {
+        currentMainTop.value = MainTop
+        currentMainBottom.value = MainBottom
     }
 }
 
-setupDefaultLayout()
+onActivated(setupDefaultLayout)
 
 onMounted (() => {
     //窗口大小变化事件监听
@@ -327,7 +318,7 @@ onMounted (() => {
         //自适应批量操作页面列表大小
         setBatchViewListSize()
         //自适应视频页面大小
-        setVideoViewSize()
+        //setVideoViewSize()
         //音效窗口自动居中
         setAudioEffectViewAlignment()
 
@@ -353,7 +344,7 @@ EventBus.on("app-layout-default", setupDefaultLayout)
 
 //TODO
 watch([ playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow ], setCategoryViewSize)
-watch([ videoPlayingViewShow ], setVideoViewSize)
+//watch([ videoPlayingViewShow ], setVideoViewSize)
 watch([ audioEffectViewShow ], setAudioEffectViewAlignment)
 watch([ playingViewShow ], () => {
     hideLyricToolbar()
@@ -371,7 +362,7 @@ watch(lyricMetaPos, () => {
         <component id="main-top" :is="currentMainTop">
         </component>
         <MainContent id="main-content" 
-            :class="{ autopadding: (layout.index == 1) }">
+            :class="{ autopadding: isDefaultClassicLayout }">
         </MainContent>
         <component id="main-bottom" :is="currentMainBottom">
         </component>
@@ -379,21 +370,21 @@ watch(lyricMetaPos, () => {
         <!-- 浮层(Component、View)-->
         <transition name="fade-ex">
             <PlaylistCategoryView id="playlist-category-view" 
-                :class="{ autolayout: (layout.index == 1) }"
+                :class="{ autolayout: isDefaultClassicLayout }"
                 v-show="playlistCategoryViewShow">
             </PlaylistCategoryView> 
         </transition>
 
         <transition name="fade-ex">
             <ArtistCategoryView id="artist-category-view" 
-                :class="{ autolayout: (layout.index == 1) }"
+                :class="{ autolayout: isDefaultClassicLayout }"
                 v-show="artistCategoryViewShow">
             </ArtistCategoryView> 
         </transition>
 
         <transition name="fade-ex">
             <RadioCategoryView id="radio-category-view" 
-                :class="{ autolayout: (layout.index == 1) }"
+                :class="{ autolayout: isDefaultClassicLayout }"
                 v-show="radioCategoryViewShow">
             </RadioCategoryView> 
         </transition>

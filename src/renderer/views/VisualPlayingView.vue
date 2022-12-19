@@ -261,10 +261,6 @@ onUnmounted(() => setDisactived(true))
     -webkit-app-region: drag;
 }
 
-.visual-playing-view .header svg {
-    -webkit-app-region: none;
-}
-
 .visual-playing-view .header .win-ctl-wrap {
     display: flex;
     justify-content: flex-end;
@@ -321,16 +317,13 @@ onUnmounted(() => setDisactived(true))
     -webkit-line-clamp: 1;
 }
 
-.visual-playing-view .meta-wrap .audio-artist {
-    -webkit-app-region: none;
-}
-
 .visual-playing-view .mv {
     margin-right: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
+    -webkit-app-region: none;
 }
 
 .visual-playing-view svg {

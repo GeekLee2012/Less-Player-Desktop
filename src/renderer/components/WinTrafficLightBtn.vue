@@ -88,6 +88,7 @@ onMounted(() => {
 <style scoped>
 .win-traffic-light-btn {
     display: flex;
+    -webkit-app-region: none;
     /* width: 56px; */
 }
 

@@ -118,7 +118,7 @@ const setupWindowCtlButton = () => {
   if(ipcRenderer) ipcRenderer.send('app-winBtn', visible)
 }
 
-//TODO
+//TODO 方式有些别扭
 const adjustWinCtlBtns = () => {
     const wrapEls = document.querySelectorAll('.header .win-ctl-wrap')
     if(!wrapEls || wrapEls.length < 1) return
@@ -135,6 +135,17 @@ const adjustWinCtlBtns = () => {
         el.style.paddingLeft = 5 * scale + 'px'
       })
     }
+}
+
+
+const setVideoViewSize = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const els = document.querySelectorAll(".video-holder")
+    if(!els) return 
+    els.forEach(el => {
+      el.style.width = clientWidth + "px"
+      el.style.height = (clientHeight - 56 + 1) + "px"
+    })
 }
 
 const hideAllPopoverViews = () => {
@@ -178,6 +189,12 @@ const initialize = () => {
 initialize()
 
 onMounted(() => {
+  //窗口大小变化事件监听
+  window.addEventListener('resize', e => {
+    //自适应视频页面大小
+    //setVideoViewSize()
+  })
+
   //点击事件监听
   document.addEventListener('click', e => {
       //隐藏全部浮层
@@ -189,6 +206,7 @@ onMounted(() => {
   registryDefaultLocalKeys()
 })
 
+//watch([ videoPlayingViewShow ], setVideoViewSize)
 watch([ playingViewShow, playingViewThemeIndex, videoPlayingViewShow ], adjustWinCtlBtns)
 </script>
 

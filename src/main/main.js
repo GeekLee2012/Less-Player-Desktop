@@ -333,7 +333,6 @@ const createWindow = () => {
   return mainWindow
 }
 
-
 const setupDefaultLayout = () => {
   //setWindowButtonVisibility(!useCustomTrafficLight)
   mainWin.setMaximumSize(maxAppSize, maxAppSize)
@@ -343,7 +342,7 @@ const setupDefaultLayout = () => {
 const setupSimpleLayout = () => {
   //setWindowButtonVisibility(false)
   mainWin.webContents.setZoomFactor(1)
-  
+
   const width = 500, height = 588
   mainWin.setMinimumSize(width, height)
   mainWin.setMaximumSize(width, height)

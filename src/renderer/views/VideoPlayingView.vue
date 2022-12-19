@@ -22,7 +22,7 @@ const quitVideo = () => {
     hideVideoPlayingView()
 }
 
-EventBus.on("app-route", quitVideo)
+EventBus.on("app-beforeRoute", quitVideo)
 
 onMounted(() => {
     EventBus.emit("app-adjustWinCtlBtns")
@@ -110,14 +110,12 @@ onMounted(() => {
 
 .video-playing-view .center {
     flex: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
+    background-color: red;
 }
 
 .video-playing-view .center video {
     background-color: #000;
     width: 100%;
+    height: 100%;
 }
 </style>
