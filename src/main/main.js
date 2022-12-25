@@ -1,16 +1,17 @@
-const { app, BrowserWindow, ipcMain, 
-  Menu, dialog, powerMonitor, 
+const { app, BrowserWindow, ipcMain,
+  Menu, dialog, powerMonitor,
   shell, powerSaveBlocker, Tray,
   globalShortcut, session } = require('electron')
-const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv, 
+const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
   USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
 const path = require('path')
-const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX, 
-  randomTextWithinAlphabetNums, nextInt, 
+const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX,
+  randomTextWithinAlphabetNums, nextInt,
   getDownloadDir, removePath, listFiles } = require('./common')
 
 let mainWin = null, powerSaveBlockerId = -1, appTray = null
 const appWidth = 1080, appHeight = 720, maxAppSize = 102400
+const proxyAuthRealms = []
 //TODO 下载队列
 let downloadingItem = null
 
@@ -39,7 +40,7 @@ const init = () => {
       removePath(savePath)
       item.setSavePath(savePath)
       item.on('updated', (event, state) => {
-        if(state == 'progressing') {
+        if (state == 'progressing') {
           const received = item.getReceivedBytes()
           const total = item.getTotalBytes()
           sendToRenderer('download-progressing', {
@@ -66,7 +67,7 @@ const init = () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-        mainWin = createWindow()
+      mainWin = createWindow()
     }
   })
 
@@ -75,7 +76,7 @@ const init = () => {
   // explicitly with Cmd + Q.
   app.on('window-all-closed', (event) => {
     cancelDownload()
-    if(!isDevEnv) {
+    if (!isDevEnv) {
       app.quit()
     }
     //if(!isMacOS) app.quit()
@@ -85,6 +86,16 @@ const init = () => {
     sendToRenderer('app-quit')
     cancelDownload()
   })
+
+  app.on('login', (event, webContents, details, authInfo, callback) => {
+    const { isProxy, scheme, host, port } = authInfo
+    if (isProxy) {
+      event.preventDefault()
+      const { username, secret } = getProxyAuthRealm(scheme, host, port)
+      callback(username, secret)
+    }
+  })
+
 }
 
 //全局快捷键
@@ -111,10 +122,10 @@ const registryGlobalShortcuts = () => {
   }
 
   const activeWindowValues = ['visitSetting', 'togglePlaybackQueue', 'toggleLyricToolbar']
-  for(const [ key, value ] of Object.entries(config)) {
+  for (const [key, value] of Object.entries(config)) {
     globalShortcut.register(key, () => {
       sendToRenderer('globalShortcut-' + value)
-      if(activeWindowValues.includes(value)) mainWin.show()
+      if (activeWindowValues.includes(value)) mainWin.show()
     })
   }
 }
@@ -122,70 +133,76 @@ const registryGlobalShortcuts = () => {
 //全局事件监听
 const registryGlobalListeners = () => {
   //主进程事件监听
-  ipcMain.on('app-quit', ()=> {
+  ipcMain.on('app-quit', () => {
+    if (isDevEnv && isMacOS) {
+      mainWin.close()
+      return
+    }
     app.quit()
-  }).on('app-min', ()=> {
-    if(mainWin.isFullScreen()) mainWin.setFullScreen(false)
-    if(mainWin.isMaximized() || mainWin.isNormal()) mainWin.minimize()
-  }).on('app-max', ()=> {
+  }).on('app-min', () => {
+    if (mainWin.isFullScreen()) mainWin.setFullScreen(false)
+    if (mainWin.isMaximized() || mainWin.isNormal()) mainWin.minimize()
+  }).on('app-max', () => {
     let isFullScreen = false
-    if(isWinOS){
+    if (isWinOS) {
       isFullScreen = toggleWinOSFullScreen()
     } else {
       isFullScreen = !mainWin.isFullScreen()
       mainWin.setFullScreen(isFullScreen)
     }
     sendToRenderer('app-max', isFullScreen)
-  }).on('app-suspension', (e, data)=> {
-    if(data === true) {
+  }).on('app-suspension', (e, data) => {
+    if (data === true) {
       powerSaveBlockerId = powerSaveBlocker.start('prevent-app-suspension')
-    } else if(powerSaveBlockerId != -1) {
+    } else if (powerSaveBlockerId != -1) {
       powerSaveBlocker.stop(powerSaveBlockerId)
       powerSaveBlockerId = -1
     }
-  }).on('app-tray', (e, value)=> {
-    if(value === true) {
-      if(appTray) appTray.destroy()
+  }).on('app-tray', (e, value) => {
+    if (value === true) {
+      if (appTray) appTray.destroy()
       appTray = new Tray(path.join(__dirname, APP_ICON))
       appTray.setContextMenu(Menu.buildFromTemplate(initTrayMenuTemplate()))
-    } else if(appTray) {
+    } else if (appTray) {
       appTray.destroy()
       appTray = null
     }
-  }).on('app-zoom', (e, value)=> {
+  }).on('app-zoom', (e, value) => {
     setAppWindowZoom(value)
-  }).on('app-zoom-noResize', (e, value)=> {
+  }).on('app-zoom-noResize', (e, value) => {
     setAppWindowZoom(value, true)
-  }).on('app-winBtn', (e, value)=> {
+  }).on('app-winBtn', (e, value) => {
     setWindowButtonVisibility(value === true)
-  }).on('app-layout-default', ()=> {
+  }).on('app-layout-default', () => {
     setupDefaultLayout()
-  }).on('app-layout-simple', ()=> {
+  }).on('app-layout-simple', () => {
     setupSimpleLayout()
-  }).on('visit-link', (e, data)=> {
-    shell.openExternal(data)
-  }).on('app-globalShortcut', (e, data)=> {
-    if(data === true) {
+  }).on('app-globalShortcut', (e, data) => {
+    if (data === true) {
       globalShortcut.unregisterAll()
       registryGlobalShortcuts()
     } else {
       globalShortcut.unregisterAll()
     }
+  }).on('app-setGlobalProxy', (e, data) => {
+    setAppGlobalProxy(data)
+  }).on('visit-link', (e, data) => {
+    shell.openExternal(data)
   }).on('download-item', (e, data) => {
     const { url } = data
     mainWin.webContents.downloadURL(url)
-  }).on('cancel-download', (e, data) => {
+  }).on('download-cancel', (e, data) => {
     cancelDownload()
-  }).on('show-path', (e, path) => {
-    if(path) shell.showItemInFolder(path)
+  }).on('path-showInFolder', (e, path) => {
+    if (path) shell.showItemInFolder(path)
   })
 
   ipcMain.handle('open-audio-dirs', async (event, ...args) => {
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件夹',
-      properties: [ 'openDirectory' ]
+      properties: ['openDirectory']
     })
-    if(result.canceled) return null
+    if (result.canceled) return null
     return scanDirTracks(result.filePaths[0], AUDIO_EXTS)
   })
 
@@ -193,11 +210,11 @@ const registryGlobalListeners = () => {
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件',
       filters: [
-        { name: 'Audios', extensions: AUDIO_EXTS}
+        { name: 'Audios', extensions: AUDIO_EXTS }
       ],
-      properties: [ 'openFile', 'multiSelections']
+      properties: ['openFile', 'multiSelections']
     })
-    if(result.canceled) return null
+    if (result.canceled) return null
     return parseTracks(result.filePaths)
   })
 
@@ -205,9 +222,9 @@ const registryGlobalListeners = () => {
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件',
       filters: [
-        { name: 'Image', extensions: IMAGE_EXTS}
+        { name: 'Image', extensions: IMAGE_EXTS }
       ],
-      properties: [ 'openFile']
+      properties: ['openFile']
     })
     return result.filePaths.map(item => (FILE_PREFIX + item))
   })
@@ -229,49 +246,49 @@ const registryGlobalListeners = () => {
       title: (title || '文件保存'),
       defaultPath: (name ? name : null),
     })
-    if(result.canceled) return false
+    if (result.canceled) return false
     return writeText(result.filePath, data)
   })
 
   ipcMain.handle('open-backup-file', async (event, ...args) => {
-      const result = await dialog.showOpenDialog(mainWin, {
-        title: '请选择备份文件',
-        filters: [ { name: 'JSON文件', extensions: [ '.json' ]} ],
-        properties: [ 'openFile']
-      })
-      if(result.canceled) return null
-      const filePath = result.filePaths[0]
-      const data = readText(filePath, 'utf8')
-      return { filePath, data }
+    const result = await dialog.showOpenDialog(mainWin, {
+      title: '请选择备份文件',
+      filters: [{ name: 'JSON文件', extensions: ['.json'] }],
+      properties: ['openFile']
+    })
+    if (result.canceled) return null
+    const filePath = result.filePaths[0]
+    const data = readText(filePath, 'utf8')
+    return { filePath, data }
   })
 
   ipcMain.handle('show-confirm', async (event, ...args) => {
-      const { title, msg } = args[0]
-      const result = await dialog.showMessageBox(mainWin, {
-        message: msg,
-        type: "warning",
-        title: (title || '确认'),
-        buttons: [ "确定", "取消" ],
-        cancelId: 1
-      })
-      return result.response == 0
+    const { title, msg } = args[0]
+    const result = await dialog.showMessageBox(mainWin, {
+      message: msg,
+      type: "warning",
+      title: (title || '确认'),
+      buttons: ["确定", "取消"],
+      cancelId: 1
+    })
+    return result.response == 0
   })
 
   ipcMain.handle('download-checkExists', async (event, ...args) => {
     //TODO 实现有些奇怪，目前仅支持and逻辑
-      const { nameContains } = args[0]
-      const downloadDir = getDownloadDir()
-      const dlFiles = await listFiles(downloadDir)
-      const result = dlFiles.filter(name => {
-          if(!nameContains || nameContains.length < 1) return false
-          let needFilter = true
-          for(var i = 0; i < nameContains.length; i++) {
-            needFilter = needFilter && name.includes(nameContains[i])
-            if(!needFilter) break
-          }
-          return needFilter
-      })
-      return (result && result.length > 0) ? (downloadDir + result[0]) : null
+    const { nameContains } = args[0]
+    const downloadDir = getDownloadDir()
+    const dlFiles = await listFiles(downloadDir)
+    const result = dlFiles.filter(name => {
+      if (!nameContains || nameContains.length < 1) return false
+      let needFilter = true
+      for (var i = 0; i < nameContains.length; i++) {
+        needFilter = needFilter && name.includes(nameContains[i])
+        if (!needFilter) break
+      }
+      return needFilter
+    })
+    return (result && result.length > 0) ? (downloadDir + result[0]) : null
   })
 
 }
@@ -293,8 +310,8 @@ const createWindow = () => {
       webSecurity: false  //TODO 有风险，暂时保留此方案，留待后期调整
     }
   })
-  
-  if(isDevEnv) {
+
+  if (isDevEnv) {
     mainWindow.loadURL("http://localhost:3000/")
     // Open the DevTools.
     mainWindow.webContents.openDevTools()
@@ -311,18 +328,18 @@ const createWindow = () => {
   })
 
   //配置请求过滤
-  const filter = { 
-    urls: [ 
-        "*://*.qq.com/*",
-        "*://music.163.com/*" ,
-        "*://*.126.net/*" ,
-        "*://*.kuwo.cn/*", 
-        "*://*.kugou.com/*",
-        "*://*.douban.com/*",
-        "*://*.doubanio.com/*",
-        "*://*.ridio.cn/*",
-        "*://*.cnr.cn/*"
-      ]
+  const filter = {
+    urls: [
+      "*://*.qq.com/*",
+      "*://music.163.com/*",
+      "*://*.126.net/*",
+      "*://*.kuwo.cn/*",
+      "*://*.kugou.com/*",
+      "*://*.douban.com/*",
+      "*://*.doubanio.com/*",
+      "*://*.ridio.cn/*",
+      "*://*.cnr.cn/*"
+    ]
   }
   const webSession = mainWindow.webContents.session
   webSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
@@ -352,38 +369,38 @@ const setupSimpleLayout = () => {
 
 //菜单模板
 const initAppMenuTemplate = () => {
-  let menuItems = [ { role: 'about' },
-    { role: 'toggleDevTools' },
-    { role: 'quit' }, ]
-  if(!isDevEnv) menuItems = [ { role: 'quit' } ]
+  let menuItems = [{ role: 'about' },
+  { role: 'toggleDevTools' },
+  { role: 'quit' },]
+  if (!isDevEnv) menuItems = [{ role: 'quit' }]
   const appName = app.name.replace('-', '')
   const template = [
-      ...[{
-        label: appName,
-        submenu: menuItems,
-      }, {
-        label: 'Edit',
-        submenu: [
-          { role: 'undo' },
-          { role: 'redo' },
-          { type: 'separator' },
-          { role: 'cut' },
-          { role: 'copy' },
-          { role: 'paste' },
-          { role: 'delete' },
-          { type: 'separator' },
-          { role: 'selectAll' }
-        ]
-      }]
+    ...[{
+      label: appName,
+      submenu: menuItems,
+    }, {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'delete' },
+        { type: 'separator' },
+        { role: 'selectAll' }
+      ]
+    }]
   ]
   return template
 }
 
 const sendToRenderer = (channel, args) => {
   try {
-    if(mainWin) mainWin.webContents.send(channel, args)
-  } catch(error) {
-
+    if (mainWin) mainWin.webContents.send(channel, args)
+  } catch (error) {
+    console.log(error)
   }
 }
 
@@ -433,18 +450,18 @@ const initTrayMenuTemplate = () => {
 
 //设置系统交通灯按钮可见性
 const setWindowButtonVisibility = (visible) => {
-  if(!isMacOS) return
+  if (!isMacOS) return
   try {
-    if(mainWin) mainWin.setWindowButtonVisibility(visible)
+    if (mainWin) mainWin.setWindowButtonVisibility(visible)
   } catch (error) {
     console.log(error)
   }
 }
 
 const toggleWinOSFullScreen = () => {
-  if(!isWinOS) return null
+  if (!isWinOS) return null
   const isMax = mainWin.isMaximized()
-  if(isMax) {
+  if (isMax) {
     mainWin.unmaximize()
   } else {
     mainWin.maximize()
@@ -453,26 +470,79 @@ const toggleWinOSFullScreen = () => {
 }
 
 const setAppWindowZoom = (value, noResize) => {
-  if(!value) return
+  if (!value) return
   const zoom = Number(value) || 100
   const zoomFactor = parseFloat(zoom / 100)
-  if(zoomFactor < 0.5 || zoomFactor > 3) return
+  if (zoomFactor < 0.5 || zoomFactor > 3) return
   mainWin.webContents.setZoomFactor(zoomFactor)
   const width = parseInt(appWidth * zoomFactor)
   const height = parseInt(appHeight * zoomFactor)
   mainWin.setMinimumSize(width, height)
-  if(noResize) return 
-  if(mainWin.isNormal()) {
+  if (noResize) return
+  if (mainWin.isNormal()) {
     mainWin.setSize(width, height)
     mainWin.center()
   }
 }
 
 const cancelDownload = () => {
-  if(downloadingItem) {
+  if (downloadingItem) {
     downloadingItem.cancel()
     downloadingItem = null
   }
+}
+
+const setAppGlobalProxy = (data) => {
+  const config = {}
+  proxyAuthRealms.length = 0
+  if (!data) {
+    session.defaultSession.setProxy(config)
+    return
+  }
+  const { http, socks } = data
+  const proxyRules = []
+  if (http) {
+    proxyRules.push(`${http.host}:${http.port}`)
+
+    if (http.username && http.password) {
+      proxyAuthRealms.push({
+        scheme: 'http',
+        ...http
+      })
+    }
+  }
+  if (socks) {
+    proxyRules.push(`socks5://${socks.host}:${socks.port}`)
+    proxyRules.push(`socks://${socks.host}:${socks.port}`)
+
+    if (socks.username && socks.password) {
+      proxyAuthRealms.push({
+        scheme: 'socks',
+        ...socks
+      })
+    }
+  }
+
+  if (proxyRules.length > 0) {
+    Object.assign(config, {
+      proxyRules: proxyRules.join(";"),
+      proxyBypassRules: 'localhost'
+    })
+  }
+  console.log('ProxyConfig: ', config)
+  session.defaultSession.setProxy(config)
+}
+
+const getProxyAuthRealm = (scheme, host, port) => {
+  for (var i = 0; i < proxyAuthRealms.length; i++) {
+    const realm = proxyAuthRealms[i]
+    if (realm.scheme.includes(scheme)
+      && realm.host == host && realm.port == port) {
+      const { username, password } = realm
+      return { username, secret: password }
+    }
+  }
+  return { username: null, secret: null }
 }
 
 //覆盖(包装)请求
@@ -484,39 +554,39 @@ const overrideRequest = (details) => {
   let xrouter = null
 
   const url = details.url
-  if(url.includes("qq.com")) {
+  if (url.includes("qq.com")) {
     origin = "https://y.qq.com/"
     referer = origin
-  } else if(url.includes("music.163.com") || url.includes("126.net")) {
+  } else if (url.includes("music.163.com") || url.includes("126.net")) {
     origin = "https://music.163.com/"
     referer = origin
     //if(url.includes("/dj/program/listen")) referer = null
-  } else if(url.includes("kuwo")) {
+  } else if (url.includes("kuwo")) {
     const CSRF = randomTextWithinAlphabetNums(11).toUpperCase()
     origin = "https://www.kuwo.cn/"
     referer = origin
-    cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; " 
-      + "_ga=GA1.2.1036906485.1647595722; " 
+    cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; "
+      + "_ga=GA1.2.1036906485.1647595722; "
       + "kw_token=" + CSRF
     details.requestHeaders['CSRF'] = CSRF
-  } else if(url.includes("kugou")) {
+  } else if (url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
-    if(url.includes("mac.kugou.com")) userAgent = USER_AGENTS[0]
-    if(url.includes("&cmd=123&ext=mp4&hash=")) xrouter = 'trackermv.kugou.com'
-  } else if(url.includes("douban")) {
+    if (url.includes("mac.kugou.com")) userAgent = USER_AGENTS[0]
+    if (url.includes("&cmd=123&ext=mp4&hash=")) xrouter = 'trackermv.kugou.com'
+  } else if (url.includes("douban")) {
     const bid = randomTextWithinAlphabetNums(11)
     origin = "https://fm.douban.com/"
     referer = origin
     cookie = "bid=" + bid
     //cookie = 'bid=' + bid + '; __utma=30149280.1685369897.1647928743.1648005141.1648614477.3; __utmz=30149280.1648005141.2.2.utmcsr=cn.bing.com|utmccn=(referral)|utmcmd=referral|utmcct=/; _pk_ref.100001.f71f=%5B%22%22%2C%22%22%2C1650723346%2C%22https%3A%2F%2Fmusic.douban.com%2Ftag%2F%22%5D; _pk_id.100001.f71f=5c371c0960a75aeb.1647928769.4.1650723346.1648618102.; ll="118306"; _ga=GA1.2.1685369897.1647928743; douban-fav-remind=1; viewed="2995812"; ap_v=0,6.0'
-  } else if(url.includes("radio.cn") || url.includes("cnr.cn")) {
+  } else if (url.includes("radio.cn") || url.includes("cnr.cn")) {
     origin = "http://www.radio.cn/"
     referer = origin
-  } else if(url.includes("qingting")) {
+  } else if (url.includes("qingting")) {
     origin = "https://www.qingting.fm/"
     referer = origin
-  } else if(url.includes("ximalaya")) {
+  } else if (url.includes("ximalaya")) {
     origin = " https://www.ximalaya.com"
     referer = origin
   }
@@ -527,10 +597,10 @@ const overrideRequest = (details) => {
   */
 
   //if(origin) details.requestHeaders['Origin'] = origin
-  if(userAgent) details.requestHeaders['UserAgent'] = userAgent
-  if(referer) details.requestHeaders['Referer'] = referer
-  if(cookie) details.requestHeaders['Cookie'] = cookie
-  if(xrouter) details.requestHeaders['x-router'] = xrouter
+  if (userAgent) details.requestHeaders['UserAgent'] = userAgent
+  if (referer) details.requestHeaders['Referer'] = referer
+  if (cookie) details.requestHeaders['Cookie'] = cookie
+  if (xrouter) details.requestHeaders['x-router'] = xrouter
 
 }
 

@@ -71,7 +71,7 @@ export class KuGou {
     static TOPLIST_CODE = "0-0-0"
     static RADIO_CODE = "f-m-0"
     static TOPLIST_PREFIX = "TOP_"
-    static RADIO_CACHE = { channel: 0, data: [], index: 0, page: 1 }
+    static RADIO_CACHE = { channel: 0, data: [], page: 1 }
 
     //全部歌单分类
     static categories() {
@@ -223,30 +223,26 @@ export class KuGou {
     //电台：下一首歌曲
     static nextPlaylistRadioTrack(channel, track) {
         return new Promise((resolve, reject) => {
-            //TODO
             let result = null
-            let index = KuGou.RADIO_CACHE.index
-            let page = KuGou.RADIO_CACHE.page
+            const index = !track ? 0 :
+                KuGou.RADIO_CACHE.data.findIndex(item => item.id == track.id)
             const length = KuGou.RADIO_CACHE.data.length
             //是否命中缓存
             if(channel == KuGou.RADIO_CACHE.channel) {
-                if(index < (length - 1)) {
-                    result = KuGou.RADIO_CACHE.data[++index]
-                    KuGou.RADIO_CACHE.index = index
+                if(length > 0 && index > -1 && index < (length - 1)) {
+                    result = KuGou.RADIO_CACHE.data[index + 1]
                     resolve(result)
                     return
-                } else {
-                    KuGou.RADIO_CACHE.page = ++page
                 }
+                KuGou.RADIO_CACHE.page += 1
             } else { //不命中，重置缓存分页参数
                 KuGou.RADIO_CACHE.page = 1
             }
             //不命中，重置缓存
             KuGou.RADIO_CACHE.channel = channel
             KuGou.RADIO_CACHE.data.length = 0
-            KuGou.RADIO_CACHE.index = 0
             
-            page = KuGou.RADIO_CACHE.page
+            const page = KuGou.RADIO_CACHE.page
             const limit = 20
             const offset = (page - 1) * limit
 

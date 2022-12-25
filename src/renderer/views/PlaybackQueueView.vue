@@ -20,7 +20,7 @@ const targetPlaying = () => {
 } 
 
 const onQueueEmpty = () => {
-    showToast("当前播放已清空！", ()=> {
+    showToast("播放列表已被清空！", ()=> {
         hidePlaybackQueueView()
         hidePlayingView()
     }, 666)
@@ -33,8 +33,7 @@ const clearAll = () => {
 
 EventBus.on("playbackQueue-empty", onQueueEmpty)
 
-const pbqRef = ref(null)
-const listRef = ref(null)
+const pbqRef = ref(null), listRef = ref(null)
 onMounted(() => {
     if(pbqRef.value) pbqRef.value.addEventListener('click', hideAllCtxMenus)
     if(listRef.value) listRef.value.addEventListener('scroll', hideAllCtxMenus)

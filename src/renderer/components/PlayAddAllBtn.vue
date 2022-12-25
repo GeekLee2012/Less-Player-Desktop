@@ -15,10 +15,6 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 </template>
 
 <style>
-.play-add-all-btn svg {
-    fill: var(--svg-btn-color);
-}
-
 .play-add-all-btn .right-btn svg {
     margin-top: 3px;
 }

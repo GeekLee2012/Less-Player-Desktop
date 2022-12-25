@@ -14,7 +14,7 @@ import { Ximalaya } from '../../vendor/ximalaya';
 const T_TYPES = [ {
     code: 'songs',
     name: '歌曲',
-    weight: 6
+    weight: 5
 }, {
     code: 'playlists',
     name: '歌单',
@@ -22,18 +22,18 @@ const T_TYPES = [ {
 }, {
     code: 'albums',
     name: '专辑',
-    weight: 5
+    weight: 3
 }, {
     code: 'artists',
     name: '歌手',
     weight: 5
 }, {
-    code: 'anchorRadios',
-    name: '主播电台',
-    weight: 3
-}, {
     code: 'fmRadios',
     name: '广播电台',
+    weight: 3
+}, {
+    code: 'anchorRadios',
+    name: '主播电台',
     weight: 3
 } ]
 
@@ -54,56 +54,64 @@ const ALL_PLATFORMS = [
         name: 'QQ音乐',
         shortName: 'QQ',
         online: true,
-        types: [ 'playlists', 'artists', 'albums' ]
+        types: [ 'playlists', 'artists', 'albums' ],
+        weight: 8
     }, 
     { 
         code: NetEase.CODE,
         name: '网易云音乐',
         shortName: 'WY',
         online: true,
-        types: [ 'playlists', 'artists', 'albums', 'anchorRadios' ]
+        types: [ 'playlists', 'artists', 'albums', 'anchorRadios' ],
+        weight: 8
     }, 
     { 
         code: KuWo.CODE,
         name: '酷我音乐',
         shortName: 'KW',
         online: true,
-        types: [ 'playlists', 'artists', 'albums' ]
+        types: [ 'playlists', 'artists', 'albums' ],
+        weight: 8
     }, 
     { 
         code: KuGou.CODE,
         name: '酷狗音乐',
         shortName: 'KG',
         online: true,
-        types: [ 'playlists', 'artists', 'albums' ]
+        types: [ 'playlists', 'artists', 'albums' ],
+        weight: 8
     },
     { 
         code: DouBan.CODE,
         name: '豆瓣FM',
         shortName: 'DB',
         online: true,
-        types: [ 'playlists' ]
+        types: [ 'playlists' ],
+        weight: 5
     },
     { 
         code: RadioCN.CODE,
         name: '央广云听',
         shortName: 'YT',
         online: true,
-        types: [ 'fmRadios', 'anchorRadios' ]
+        types: [ 'fmRadios', 'anchorRadios' ],
+        weight: 5
     },
     { 
         code: Qingting.CODE,
         name: '蜻蜓FM',
         shortName: 'QT',
         online: true,
-        types: [ 'anchorRadios' ]
+        types: [ 'anchorRadios' ],
+        weight: 5
     },
     { 
         code: Ximalaya.CODE,
         name: '喜马拉雅FM',
         shortName: 'XMLY',
         online: true,
-        types: [ 'fmRadios']
+        types: [ 'fmRadios'],
+        weight: 5
     },
     { 
         code: LocalMusic.CODE,

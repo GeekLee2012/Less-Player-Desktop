@@ -140,24 +140,23 @@ const updateTabData = (data) => {
     }
 }
 
-const getArtistDetail = () => {
+const getArtistDetail = async () => {
     checkFollow()
     if(isArtistDetailLoaded()) {
         setLoadingDetail(false)
         return 
     }
     const vendor = getVendor(platform.value)
-    if(!vendor) return
+    if(!vendor || !vendor.artistDetail) return
     setLoadingDetail(true)
     const id = artistId.value
-    vendor.artistDetail(id).then(result => {
-        updateArtist(result.title, result.cover)
-        if(result.about) {
-            updateAbout(result.about)
-        }
-        Object.assign(detail, result)
-        setLoadingDetail(false)
-    })
+    const result = await vendor.artistDetail(id)
+    if(!result) return
+    updateArtist(result.title, result.cover)
+    if(result.about) updateAbout(result.about)
+    if(result.hotSongs) updateHotSongs(result.hotSongs)
+    Object.assign(detail, result)
+    setLoadingDetail(false)
 }
 
 const loadHotSongs = () => {
@@ -288,7 +287,6 @@ const onScroll = () => {
 const switchTab = () => {
     setLoading(true)
     resetTabView()
-    getArtistDetail()
     if(isHotSongsTab()) {
         currentTabView.value = SongListControl
         loadHotSongs()
@@ -352,26 +350,20 @@ const reloadAll = () =>  {
     loadAll()
 }
 
-const loadAll = () => {
+const loadAll = async() => {
     resetPagination()
     resetScrollState()
+    await getArtistDetail()
     visitTab(0)
     EventBus.emit("imageTextTile-load")
 }
 
-//TODO 后期需要梳理优化，容易出现重复加载Bug
-/*-------------- 各种监听 --------------*/
-onMounted(() => {
-    resetBack2TopBtn()  
-    resetScrollState()
-    loadAll()
-})
+/* 生命周期、监听 */
+//TODO 需要梳理优化，容易出现重复加载Bug
 onActivated(() => {
-    getArtistDetail()
     restoreScrollState()
 })
-watch(activeTab, switchTab)
-watch(artistId, reloadAll)
+watch([ platform, artistId ], reloadAll, { immediate: true })
 </script>
 
 <template>

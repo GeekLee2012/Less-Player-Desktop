@@ -132,31 +132,23 @@ const resetBack2TopBtn = () => {
     if(back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareRef.value)
 }
 
-const refreshData = () => {
-    resetCommom()
-    loadContent()
-}
-
-/*-------------- 各种监听 --------------*/
-/*
-onMounted(() => {
-    loadCategories()
-    bindScrollListener()
-    resetBack2TopBtn()
-})
-*/
-
-onActivated(() => {
-    loadCategories()
-    resetBack2TopBtn()
-    restoreScrollState()
-})
-
 const resetCommom = ()=> {
     resetPagination()
     resetScrollState()
     resetBack2TopBtn()
 }
+
+const refreshData = () => {
+    resetCommom()
+    loadContent()
+}
+
+/* 生命周期、监听 */
+onActivated(() => {
+    loadCategories()
+    resetBack2TopBtn()
+    restoreScrollState()
+})
 
 //TODO
 watch(currentPlatformCode, (nv, ov) => {

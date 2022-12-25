@@ -18,7 +18,7 @@ const QUALITIES = [{
 
 //TODO 本地缓存导致Store State数据不一致
 export const useSettingStore = defineStore('setting', {
-    state: ()=> ({
+    state: () => ({
         /* 主题 */
         theme: {
             index: 0,
@@ -38,23 +38,23 @@ export const useSettingStore = defineStore('setting', {
             //音质级别：NQ(普通)、HQ（高音质）、SQ（超高、无损）
             quality: {
                 index: 0,
-            },  
+            },
             //VIP收费歌曲，是否自动切换到免费歌曲（可能来自不同平台），默认暂停播放
-            vipTransfer: false, 
-            vipFlagShow: false, 
+            vipTransfer: false,
+            vipFlagShow: false,
             //歌单分类栏随机显示
-            categoryBarRandom: false, 
+            categoryBarRandom: false,
             listenNumShow: false,
             //播放歌曲时，防止系统睡眠
-            playingWithoutSleeping: false, 
+            playingWithoutSleeping: false,
         },
         /* 歌词 */
         lyric: {
             fontSize: 18,   //普通字号
             hlFontSize: 21, //高亮字号
-            fontWeight: 400,  
-            lineHeight: 28, 
-            lineSpacing: 26, 
+            fontWeight: 400,
+            lineHeight: 28,
+            lineSpacing: 26,
             offset: 0, //时间补偿值，快慢
             metaPos: 0, //歌曲信息, 0:默认, 1:隐藏, 2:顶部
             alignment: 0, //对齐方式, 0:左, 1:中, 2:右
@@ -88,7 +88,7 @@ export const useSettingStore = defineStore('setting', {
         /* 快捷键 */
         keys: {
             global: false, //是否全局（系统平台级别）快捷键
-            data: [ {
+            data: [{
                 id: 'togglePlay',
                 name: '播放 / 暂停',
                 binding: 'Space',
@@ -138,7 +138,24 @@ export const useSettingStore = defineStore('setting', {
                 name: '打开 / 关闭歌词设置',
                 binding: 'L',
                 gBinding: 'Shift + L'
-            } ]
+            }]
+        },
+        /* 网络 */
+        network: {
+            httpProxy: {
+                enable: false,
+                host: null,
+                port: 80,
+                username: null,
+                password: null
+            },
+            socksProxy: {
+                enable: false,
+                host: null,
+                port: 80,
+                username: null,
+                password: null
+            }
         },
         /* 其他 */
         other: {
@@ -179,6 +196,12 @@ export const useSettingStore = defineStore('setting', {
         },
         lyricMetaPos() {
             return this.lyric.metaPos
+        },
+        isHttpProxyEnable() {
+            return this.network.httpProxy.enable
+        },
+        isSocksProxyEnable() {
+            return this.network.socksProxy.enable
         }
     },
     actions: {
@@ -191,14 +214,14 @@ export const useSettingStore = defineStore('setting', {
         setLayoutIndex(index) {
             this.layout.index = index || 0
             const currentIndex = this.layout.index
-            if(currentIndex < 2) this.layout.fallbackIndex = currentIndex
+            if (currentIndex < 2) this.layout.fallbackIndex = currentIndex
             EventBus.emit("app-layout")
         },
         switchToFallbackLayout() {
             this.setLayoutIndex(this.layout.fallbackIndex)
             this.setupWindowZoom()
         },
-        presetThemes () {
+        presetThemes() {
             const { getPresetThemes } = useThemeStore()
             return getPresetThemes()
         },
@@ -218,10 +241,10 @@ export const useSettingStore = defineStore('setting', {
             return getTheme(type, index).hlColor
         },
         setWindowZoom(value) {
-            if(!value) return
+            if (!value) return
             const zoom = Number(value || 100)
-            if(zoom < 50 || zoom > 300) return
-            if(this.common.winZoom == zoom) return
+            if (zoom < 50 || zoom > 300) return
+            if (this.common.winZoom == zoom) return
             this.common.winZoom = zoom
             this.setupWindowZoom()
         },
@@ -270,24 +293,24 @@ export const useSettingStore = defineStore('setting', {
         toggleStoreRecentPlay() {
             this.cache.storeRecentPlay = !this.cache.storeRecentPlay
         },
-        setupWindowZoom() { 
+        setupWindowZoom() {
             const zoom = this.common.winZoom
-            if(ipcRenderer) ipcRenderer.send("app-zoom", zoom)
+            if (ipcRenderer) ipcRenderer.send("app-zoom", zoom)
             EventBus.emit("app-zoom", zoom)
-        }, 
+        },
         setupWindowZoomWithoutResize() {
             const zoom = this.common.winZoom
-            if(ipcRenderer) ipcRenderer.send("app-zoom-noResize", zoom)
+            if (ipcRenderer) ipcRenderer.send("app-zoom-noResize", zoom)
             EventBus.emit("app-zoom", zoom)
         },
         setupAppSuspension() {
-            if(ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
+            if (ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
         },
         setupTray() {
-            if(ipcRenderer) ipcRenderer.send("app-tray", this.tray.show)
+            if (ipcRenderer) ipcRenderer.send("app-tray", this.tray.show)
         },
         setupGlobalShortcut() {
-            if(ipcRenderer) ipcRenderer.send("app-globalShortcut", this.keys.global)
+            if (ipcRenderer) ipcRenderer.send("app-globalShortcut", this.keys.global)
         },
         setupFontFamily() {
             EventBus.emit('setting-fontFamily', this.common.fontFamily)
@@ -304,14 +327,14 @@ export const useSettingStore = defineStore('setting', {
         },
         resolveFont(value) {
             value = (value || '').trim()
-            value = value.replaceAll("'", "").replaceAll('"','')
-            if(value.includes(" ")) value = '"' + value + '"'
+            value = value.replaceAll("'", "").replaceAll('"', '')
+            if (value.includes(" ")) value = '"' + value + '"'
             return value
         },
         formatFontFamily(value) {
             let fontFamily = (value || '').trim()
             const fonts = fontFamily.split(',')
-            if(fonts.length > 1) {
+            if (fonts.length > 1) {
                 let temp = ''
                 fonts.reduce((prev, curr) => {
                     temp = temp + "," + this.resolveFont(prev) + "," + this.resolveFont(curr)
@@ -329,37 +352,37 @@ export const useSettingStore = defineStore('setting', {
         },
         setFontWeight(value) {
             const weight = parseInt(value || 400)
-            if(weight < 100 || weight > 1000) return
+            if (weight < 100 || weight > 1000) return
             this.common.fontWeight = weight
             this.setupFontWeight()
         },
         setLyricFontSize(value) {
             const fontSize = parseInt(value || 18)
-            if(fontSize < 10 || fontSize > 100) return
+            if (fontSize < 10 || fontSize > 100) return
             this.lyric.fontSize = fontSize
             this.setupLyricFontSize()
         },
         setLyricHighlightFontSize(value) {
             const fontSize = parseInt(value || 21)
-            if(fontSize < 10 || fontSize > 100) return
+            if (fontSize < 10 || fontSize > 100) return
             this.lyric.hlFontSize = fontSize
             this.setupLyricHighlightFontSize()
         },
         setLyricFontWeight(value) {
             const weight = parseInt(value || 400)
-            if(weight < 100 || weight > 1000) return
+            if (weight < 100 || weight > 1000) return
             this.lyric.fontWeight = weight
             this.setupLyricFontWeight()
         },
         setLyricLineHeight(value) {
             const lineHeight = parseInt(value || 28)
-            if(lineHeight < 10 || lineHeight > 168) return
+            if (lineHeight < 10 || lineHeight > 168) return
             this.lyric.lineHeight = lineHeight
             this.setupLyricLineHeight()
         },
         setLyricLineSpacing(value) {
             const lineSpacing = parseInt(value || 26)
-            if(lineSpacing < 0 || lineSpacing > 100) return
+            if (lineSpacing < 0 || lineSpacing > 100) return
             this.lyric.lineSpacing = lineSpacing
             this.setupLyricLineSpacing()
         },
@@ -418,6 +441,48 @@ export const useSettingStore = defineStore('setting', {
             const alignment = this.lyric.alignment || 0
             EventBus.emit('lyric-alignment', alignment)
         },
+        toggleHttpProxy() {
+            this.network.httpProxy.enable = !this.network.httpProxy.enable
+        },
+        setHttpProxy(host, port, username, password) {
+            this.network.httpProxy.host = host
+            this.network.httpProxy.port = parseInt(port) || 80
+            this.network.httpProxy.username = username
+            this.network.httpProxy.password = password
+        },
+        resetHttpProxy() {
+            this.network.httpProxy.enable = false
+            this.setHttpProxy(null, 80, null, null)
+        },
+        toggleSocksProxy() {
+            this.network.socksProxy.enable = !this.network.socksProxy.enable
+        },
+        setSocksProxy(host, port, username, password) {
+            this.network.socksProxy.host = host
+            this.network.socksProxy.port = parseInt(port) || 80
+            this.network.socksProxy.username = username
+            this.network.socksProxy.password = password
+        },
+        resetSocksProxy() {
+            this.network.socksProxy.enable = false
+            this.setSocksProxy(null, 80, null, null)
+        },
+        resetProxies() {
+            this.resetHttpProxy()
+            this.resetSocksProxy()
+        },
+        setupAppGlobalProxy() {
+            const proxy = { http: null, socks: null }
+            if (this.isHttpProxyEnable) {
+                const { host, port, username, password } = this.network.httpProxy
+                Object.assign(proxy, { http: { host, port, username, password } })
+            }
+            if (this.isSocksProxyEnable) {
+                const { host, port, username, password } = this.network.socksProxy
+                Object.assign(proxy, { socks: { host, port, username, password } })
+            }
+            if (ipcRenderer) ipcRenderer.send('app-setGlobalProxy', proxy)
+        },
     },
     persist: {
         enabled: true,
@@ -425,8 +490,9 @@ export const useSettingStore = defineStore('setting', {
             {
                 //key: 'setting',
                 storage: localStorage,
-                paths: [ 'theme', 'layout', 'common', 'track', 'lyric', 'cache', 
-                    'tray', 'navigation', 'dialog', 'keys' ]
+                paths: ['theme', 'layout', 'common', 'track',
+                    'lyric', 'cache', 'tray', 'navigation',
+                    'dialog', 'keys', 'network']
             },
         ],
     },

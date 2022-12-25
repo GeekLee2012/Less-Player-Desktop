@@ -29,8 +29,4 @@ const getTextByStatus = () => {
     width: 108px;
     /*justify-content: flex-start !important;*/
 }
-
-.favorite-share-btn svg {
-    fill: var(--svg-btn-color);
-}
 </style>

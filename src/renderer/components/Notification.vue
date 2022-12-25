@@ -23,7 +23,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 108;
+    z-index: 202;
 }
 
 .ntf-dialog-mask {

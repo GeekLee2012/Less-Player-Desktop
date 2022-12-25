@@ -27,7 +27,7 @@ export class RadioPlayer {
             .on('radio-togglePlay', () => player.togglePlay())
             .on('volume-set', volume => player.volume(volume))
             .on('radio-stop', () => player.setChannel(null))
-            .on('queue-empty', () => player.setChannel(null))
+            .on('playbackQueue-empty', () => player.setChannel(null))
             .on('track-play', () => player.setChannel(null))
             .on('track-restoreInit', channel => player.setChannel(channel))
             .on('track-updateEQ', (values) => player.updateEQ(values))

@@ -252,6 +252,8 @@ const onScroll = () => {
     scrollToLoad()
 }
 
+
+/* 生命周期、监听 */
 onActivated(() => {
     resetBack2TopBtn()
     restoreScrollState()

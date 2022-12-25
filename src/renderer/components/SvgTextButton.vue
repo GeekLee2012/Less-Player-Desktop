@@ -31,11 +31,12 @@ const handleRightClick = (event) => {
         </div>
         <div class="right-btn" @click="handleRightClick">
             <slot name="right-img"></slot>
+            <slot name="right-text"></slot>
         </div>
     </div>
 </template>
 
-<style scoped>
+<style>
 .svg-text-btn {
     display: flex;
     flex-direction: row;
@@ -43,6 +44,10 @@ const handleRightClick = (event) => {
     border-radius: 10rem;
     height: 32px;
     color: var(--svg-text-color);
+}
+
+.svg-text-btn svg {
+    fill: var(--svg-btn-color);
 }
 
 .svg-text-btn .left-btn,
@@ -72,11 +77,6 @@ const handleRightClick = (event) => {
     margin-left: 12px;
 }
 
-.svg-text-btn .left-btn .text {
-    margin-left: 5px;
-    margin-right: 8px;
-}
-
 .svg-text-btn .right-btn {
     border-radius: 0 10rem 10rem 0;
     padding-left: 8px;
@@ -88,4 +88,15 @@ const handleRightClick = (event) => {
 .btnDisabled .right-btn:hover {
     background: var(--btn-bg);
 }
+
+.svg-text-btn .left-btn .text{
+    margin-left: 5px;
+    margin-right: 8px;
+}
+
+.svg-text-btn .right-btn .text {
+    margin-left: 1px;
+    margin-right: 6px;
+}
+
 </style>

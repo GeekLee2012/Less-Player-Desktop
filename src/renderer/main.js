@@ -50,7 +50,13 @@ app.use(pinia)
     .use(router)
     .use(VueLazyLoad, {
         loading: 'default_cover.png',
-        error: 'default_cover.png'
+        error: 'default_cover.png',
+        log: false,
+        lifecycle: {
+          error: (el) => {
+            //console.log(el)
+          }
+        }
     })
     //Components
     .component('SliderBar', SliderBar)

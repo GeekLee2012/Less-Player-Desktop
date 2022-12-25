@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import EventBus from "../../common/EventBus";
 import { usePlatformStore } from "./platformStore";
 
 const TAB_LIST = [ {
@@ -77,7 +78,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         updateArtistDetailKeys(platform, id) {
             this.artistId = id
             this.platform = platform
-            this.resetArtistDetail()
+            //this.resetArtistDetail()
             this.updateTabs()
         },
         updateArtist(title, cover, alias) {
@@ -107,8 +108,6 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         isArtistDetailLoaded() {
             if(!this.artistId) return false
             if(!this.artistName) return false
-            if(typeof(this.artistId) != 'string') this.artistId += ''
-            this.artistId = this.artistId.trim()
             if(this.artistId.length < 1) return false
 
             this.artistName = this.artistName.trim()

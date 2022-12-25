@@ -326,7 +326,7 @@ export class NetEase {
                     data.push(track)
                 })
 
-                const result = { id, platform: NetEase.CODE, title, cover, data }
+                const result = { id, platform: NetEase.CODE, title, cover, hotSongs: data }
                 resolve(result)
             })
         })
@@ -334,7 +334,13 @@ export class NetEase {
 
     //歌手详情：热门歌曲
     static artistDetailHotSongs(id) {
-        return NetEase.artistDetail(id)
+        return new Promise(async (resolve, reject) => {
+            const result = await NetEase.artistDetail(id)
+            const data = result.hotSongs
+            result.data = data
+            Reflect.deleteProperty(result, 'hotSongs')
+            resolve(result)
+        })
     }
 
     //歌手详情: 专辑
@@ -876,4 +882,5 @@ export class NetEase {
             })
         })
     }
+    
 }

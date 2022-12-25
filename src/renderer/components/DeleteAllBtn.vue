@@ -17,7 +17,4 @@ const props = defineProps({
 </template>
 
 <style>
-.delete-all-btn svg {
-    fill: var(--svg-btn-color);
-}
 </style>

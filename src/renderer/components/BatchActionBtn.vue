@@ -17,7 +17,4 @@ const props = defineProps({
 </template>
 
 <style>
-.batch-action-btn svg {
-    fill: var(--svg-btn-color);
-}
 </style>

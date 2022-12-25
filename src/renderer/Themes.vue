@@ -41,9 +41,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
 </script>
 
 <template>
-    <CssReset></CssReset>
-    <CssCommon></CssCommon>
-    <slot></slot>
+  <CssReset></CssReset>
+  <CssCommon></CssCommon>
+  <slot></slot>
 </template>
 
 <style>
@@ -117,9 +117,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载等待遮盖 */
-  --loading-mask-bg: linear-gradient(90deg, #414141 8%,#515151 18%,#414141 33%);
+  --loading-mask-bg: linear-gradient(90deg, #414141 8%, #515151 18%, #414141 33%);
   --error-color: red;
-  
+
   --checkbox-bg: #fff;
   --logo-bg: var(--btn-bg);
   --logo-text-bg: #fff;
@@ -163,7 +163,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-btn-color: #fff;
   --btn-bg: linear-gradient(to right, #1ca388, #28c83f);
   --btn-hover-bg: linear-gradient(to top right, #2edfa3, #28c83f) !important;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -199,13 +199,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: var(--hl-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
+  --loading-mask-bg: linear-gradient(90deg, #eee 8%, #ddd 18%, #eee 33%);
   --error-color: red;
 
   --checkbox-bg: #fff;
@@ -222,7 +222,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-bg: var(--btn-hover-bg);
   --back2top-btn-svg-color: #fff;
 
-   /* 音效 */
+  /* 音效 */
   --aeview-bg: var(--bg-color);
   --aeview-left-bg: #eee;
   --aeview-border: 1px solid #eee;
@@ -256,7 +256,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-text-btn-rbtn-border: 0.1px solid #d7d1d3;
   --btn-bg: #e7e1e3cb;
   --btn-hover-bg: #d7d1d3cb !important;
-  
+
   --toggle-btn-bg: #ddd;
   --toggle-thumb-bg: var(--hl-color);
   --toggle-btn-border-color: #ccc;
@@ -267,7 +267,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --progress-track-bg: linear-gradient(to right, #e7e1e3cb, #e7e1e3cb) !important;
   --progress-bg: linear-gradient(to top right, #c7c1c3, #c7c1c3) !important;
   --slider-thumb-bg: var(--svg-color);
-  
+
   /*滚动条*/
   --scrollbar-thumb-bg: #878183;
   /* 列表项 hover */
@@ -300,9 +300,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
+  --loading-mask-bg: linear-gradient(90deg, #eee 8%, #ddd 18%, #eee 33%);
   --error-color: red;
-  
+
   --checkbox-bg: #fff;
   --logo-bg: #878183;
   --logo-text-bg: #fff;
@@ -388,9 +388,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
+  --loading-mask-bg: linear-gradient(90deg, #eee 8%, #ddd 18%, #eee 33%);
   --error-color: red;
-  
+
   --checkbox-bg: #fff;
   --logo-bg: var(--btn-bg);
   --logo-text-bg: #fff;
@@ -434,7 +434,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --btn-bg: linear-gradient(to right, #e667af, #e6399b);
   --btn-bg: linear-gradient(to top right, #e6399b, #fc589c);
   --btn-hover-bg: linear-gradient(to top right, #fc589c, #992667) !important;
-  
+
   --toggle-btn-bg: #454045;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -476,7 +476,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg, #494949 8%,#595959 18%,#494949 33%);
+  --loading-mask-bg: linear-gradient(90deg, #494949 8%, #595959 18%, #494949 33%);
   --error-color: red;
   --checkbox-bg: #eee;
 
@@ -485,7 +485,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --logo-text-color: var(--hl-color);
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
-  
+
   --input-bg: #454045;
   --input-text-color: var(--text-color);
   --input-border-color: var(--main-left-border-color);
@@ -527,7 +527,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /*--btn-hover-bg: linear-gradient(to top right, #f84860, #fc7688) !important;*/
   --btn-hover-bg: linear-gradient(to top right, #f84860, #fc99a7) !important;
   --btn-hover-bg: linear-gradient(to top right, #ddd, #fff) !important;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -566,13 +566,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--btn-hover-bg);
   --search-btn-hover-svg-color: var(--search-btn-svg-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#ffffffab 8%,#ffffff88 18%,#ffffffab 33%);
+  --loading-mask-bg: linear-gradient(90deg, #ffffffab 8%, #ffffff88 18%, #ffffffab 33%);
   --error-color: red;
 
   --checkbox-bg: #161616ab;
@@ -621,7 +621,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-text-btn-rbtn-border: 0.1px solid transparent;
   --btn-bg: linear-gradient(to right, #f84860, #f7314d);
   --btn-hover-bg: linear-gradient(to right, #f7314d, #c43631) !important;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -631,7 +631,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --progress-track-bg: linear-gradient(to right, #e7e1e3, #e7e1e3) !important;
   --progress-bg: linear-gradient(to top right, #f7314d, #f84860);
   --slider-thumb-bg: var(--svg-color);
-  
+
   /*滚动条*/
   --scrollbar-thumb-bg: #eee;
   /* 列表项 hover */
@@ -658,13 +658,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--btn-hover-bg);
   --search-btn-hover-svg-color: var(--search-btn-svg-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
+  --loading-mask-bg: linear-gradient(90deg, #eee 8%, #ddd 18%, #eee 33%);
   --error-color: red;
 
   --checkbox-bg: #fff;
@@ -714,7 +714,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --btn-bg: linear-gradient(to right, #f84860, #d53943);
   --btn-hover-bg: linear-gradient(to right, #f9453f, #c43631) !important;
   --btn-hover-bg: linear-gradient(to right, #d53943, #c43631) !important;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -751,14 +751,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--btn-hover-bg);
   --search-btn-hover-svg-color: var(--search-btn-svg-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
-  --loading-mask-bg: linear-gradient(90deg, #414141 8%,#515151 18%,#414141 33%);
+  --loading-mask-bg: linear-gradient(90deg, #eee 8%, #ddd 18%, #eee 33%);
+  --loading-mask-bg: linear-gradient(90deg, #414141 8%, #515151 18%, #414141 33%);
   --error-color: red;
 
   --checkbox-bg: #ddd;
@@ -808,7 +808,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-btn-color: #ffffffcb;
   --btn-bg: #64903fcb;
   --btn-hover-bg: linear-gradient(to top right, #64903fcb, #64903f) !important;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -847,14 +847,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: var(--hl-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#eee 8%,#ddd 18%,#eee 33%);
-  --loading-mask-bg: linear-gradient(90deg,#f1eee7 8%,#f9f8f3 18%,#f1eee7 33%);
+  --loading-mask-bg: linear-gradient(90deg, #eee 8%, #ddd 18%, #eee 33%);
+  --loading-mask-bg: linear-gradient(90deg, #f1eee7 8%, #f9f8f3 18%, #f1eee7 33%);
   --error-color: red;
 
   --checkbox-bg: #161616ab;
@@ -907,7 +907,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-btn-color: #054a34;
   --btn-bg: #e1e0a7;
   --btn-hover-bg: linear-gradient(to top right, #919343, #e1e0a7) !important;
-  
+
   --toggle-btn-bg: #91934333;
   --toggle-thumb-bg: #ababab;
   --toggle-btn-border-color: #ccc;
@@ -943,13 +943,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: var(--hl-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#e1e0a736 8%,#91934336 18%,#e1e0a736 33%);
+  --loading-mask-bg: linear-gradient(90deg, #e1e0a736 8%, #91934336 18%, #e1e0a736 33%);
   --error-color: red;
 
   --checkbox-bg: #919343ab;
@@ -1002,7 +1002,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-btn-color: #fff;
   --btn-bg: linear-gradient(to right, #2783fb, #2783fb);
   --btn-hover-bg: linear-gradient(to top right, #2783fb, #0753cb) !important;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -1040,7 +1040,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: var(--hl-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
@@ -1075,7 +1075,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 :root[theme='blue2'] {
   /* 全局背景 */
   --bg-color: #fff;
-  --app-bg: linear-gradient(to bottom right, #cce3e9, #a8c5cb);;
+  --app-bg: linear-gradient(to bottom right, #cce3e9, #a8c5cb);
+  ;
   /* 文本 */
   --text-color: #273b42;
   --text-sub-color: #375b62;
@@ -1095,7 +1096,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --btn-bg: linear-gradient(to right, #a0665a, #ca655c);
   --btn-bg: linear-gradient(to right, #395a62, #395a62);
   --btn-hover-bg: linear-gradient(to top right, #395a62, #273b42) !important;
-  
+
   --toggle-btn-bg: #979b92;
   --toggle-thumb-bg: #c7cbc2;
   --toggle-btn-border-color: #c7cbc2;
@@ -1135,13 +1136,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: var(--hl-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#91b6c088 8%,#91b6c055 18%,#91b6c088 33%);
+  --loading-mask-bg: linear-gradient(90deg, #91b6c088 8%, #91b6c055 18%, #91b6c088 33%);
   --error-color: red;
 
   --checkbox-bg: #fff;
@@ -1186,7 +1187,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-btn-color: #fff;
   --btn-bg: linear-gradient(to right, #344a83, #2a3d9b, #3e53be, #263b7a);
   --btn-hover-bg: linear-gradient(to right, #344a83, #2a3d9b, #3e53be, #263b7a) !important;
-  
+
   --toggle-btn-bg: var(--bg-color);
   --toggle-thumb-bg: #ababab;
   --toggle-btn-border-color: #ababab;
@@ -1224,13 +1225,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: var(--hl-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#263b7a66 8%,#263b7a36 18%,#263b7a66 33%);
+  --loading-mask-bg: linear-gradient(90deg, #263b7a66 8%, #263b7a36 18%, #263b7a66 33%);
   --error-color: red;
 
   --checkbox-bg: #fff;
@@ -1276,7 +1277,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-text-btn-rbtn-border: 0.1px solid #eee;
   --btn-bg: #ffb300;
   --btn-hover-bg: #ffb300;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -1287,7 +1288,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --progress-track-bg: #ddd;
   --progress-bg: #ffb300;
   --slider-thumb-bg: var(--svg-color);
-  
+
   /*滚动条*/
   --scrollbar-thumb-bg: #cbcbcb;
   /* 列表项 hover */
@@ -1316,7 +1317,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--btn-hover-bg);
   --search-btn-hover-svg-color: var(--search-btn-svg-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
@@ -1371,7 +1372,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-text-btn-rbtn-border: 0.1px solid #eee;
   --btn-bg: #fc9b29;
   --btn-hover-bg: #fc9b29;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -1412,13 +1413,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: var(--hl-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg, #ddddddab 8%,#dddddd88 18%,#ddddddab 33%);
+  --loading-mask-bg: linear-gradient(90deg, #ddddddab 8%, #dddddd88 18%, #ddddddab 33%);
   --error-color: red;
 
   --checkbox-bg: #fff;
@@ -1464,7 +1465,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-text-btn-rbtn-border: 0.1px solid #ccc;
   --btn-bg: #000;
   --btn-hover-bg: #000;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -1501,13 +1502,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--btn-hover-bg);
   --search-btn-hover-svg-color: var(--search-btn-svg-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg,#ddd 8%,#ccc 18%,#ddd 33%);
+  --loading-mask-bg: linear-gradient(90deg, #ddd 8%, #ccc 18%, #ddd 33%);
   --error-color: red;
 
   --checkbox-bg: #fff;
@@ -1553,7 +1554,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-text-btn-rbtn-border: 0.1px solid transparent;
   --btn-bg: #9c27b0;
   --btn-hover-bg: #9c27b0;
-  
+
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
@@ -1593,7 +1594,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--btn-hover-bg);
   --search-btn-hover-svg-color: var(--search-btn-svg-color);
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
@@ -1649,7 +1650,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --btn-bg: #e5bc8c;
   --btn-hover-bg: #ce9252;
   --btn-hover-bg: #c59c6c;
-  
+
   --toggle-btn-bg: #fdfdf2ab;
   --toggle-thumb-bg: #666;
   --toggle-btn-border-color: #ccc;
@@ -1660,7 +1661,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --progress-bg: #57457e;
   --progress-bg: #e5bc8c;
   --slider-thumb-bg: var(--svg-color);
-  
+
   /*滚动条*/
   --scrollbar-thumb-bg: #cbcbcb;
   /* 列表项 hover */
@@ -1690,13 +1691,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: #e5bc8c;
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg, #fdfdf2ab 8%,#fdfdf288 18%, #fdfdf2ab 33%);
+  --loading-mask-bg: linear-gradient(90deg, #fdfdf2ab 8%, #fdfdf288 18%, #fdfdf2ab 33%);
   --error-color: red;
 
   --checkbox-bg: #4d3e72;
@@ -1746,7 +1747,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --svg-text-btn-rbtn-border: 0.1px solid transparent;
   --btn-bg: linear-gradient(to top right, #ff0307ee, #bd0e19ee);
   --btn-hover-bg: linear-gradient(to top right, #ff0307, #bd0e19);
-  
+
   --toggle-btn-bg: #fdfdf2ab;
   --toggle-thumb-bg: #666;
   --toggle-btn-border-color: #ccc;
@@ -1756,7 +1757,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --progress-track-bg: #cbcbcb;
   --progress-bg: linear-gradient(to right, #ff0307cb, #bd0e19cb);
   --slider-thumb-bg: var(--svg-color);
-  
+
   /*滚动条*/
   --scrollbar-thumb-bg: #cbcbcb;
   /* 列表项 hover */
@@ -1784,13 +1785,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: #ff0307;
-  
+
   /* 通知消息 */
   --ntf-bg: var(--ctx-menu-bg);
   --ntf-text-color: var(--text-color);
   --ntf-border-color: var(--ctx-menu-border-color);
   /* 加载中遮盖 */
-  --loading-mask-bg: linear-gradient(90deg, #f8ce89ab 8%,#c38f55 18%, #f8ce89ab 33%);
+  --loading-mask-bg: linear-gradient(90deg, #f8ce89ab 8%, #c38f55 18%, #f8ce89ab 33%);
   --error-color: red;
 
   --checkbox-bg: #4d3e72;
@@ -1847,24 +1848,34 @@ svg:hover {
 
 /*TODO 试验性CSS */
 .loading-mask {
-    animation-duration: 1s;
-    animation-fill-mode: forwards;
-    animation-iteration-count: infinite;
-    animation-name: forwards;
-    animation-timing-function: linear;
-    background: var(--loading-mask-bg);
-    background-size: 100% auto;
-    height: 66px;
-    position: relative;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: forwards;
+  animation-timing-function: linear;
+  background: var(--loading-mask-bg);
+  background-size: 100% auto;
+  height: 66px;
+  position: relative;
 }
 
 @keyframes forwards {
-    from { background-position: -360px 0 }
-    to { background-position: 360px 0 }
+  from {
+    background-position: -360px 0
+  }
+
+  to {
+    background-position: 360px 0
+  }
 }
 
 @keyframes rotate {
-    from { transform:rotateZ(0deg) }
-    to { transform:rotateZ(360deg)  }
+  from {
+    transform: rotateZ(0deg)
+  }
+
+  to {
+    transform: rotateZ(360deg)
+  }
 }
 </style>

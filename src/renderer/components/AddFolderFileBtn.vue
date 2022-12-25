@@ -15,7 +15,4 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 </template>
 
 <style>
-.add-folder-file-btn svg {
-    fill: var(--svg-btn-color);
-}
 </style>

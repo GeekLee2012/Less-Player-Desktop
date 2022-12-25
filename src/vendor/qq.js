@@ -367,7 +367,7 @@ export class QQ {
     static RADIO_CODE= 88888888
     static NEW_CODE= 22222222
     static TOPLIST_PREFIX = "TOP_"
-    static RADIO_CACHE = { channel: 0, data: [], index: 0 }
+    static RADIO_CACHE = { channel: 0, data: [] }
     
     //全部分类
     static categories() {
@@ -492,22 +492,22 @@ export class QQ {
     static nextPlaylistRadioTrack(channel, track) {
         return new Promise((resolve, reject) => {
             let result = null
-            let index = QQ.RADIO_CACHE.index
-            const length = QQ.RADIO_CACHE.data.length
+            const firstplay = !track ? 1 : 0
             //是否命中缓存
-            if(channel == QQ.RADIO_CACHE.channel 
-                && index < (length - 1)) {
-                result = QQ.RADIO_CACHE.data[++index]
-                QQ.RADIO_CACHE.index = index
-                resolve(result)
-                return 
+            if(channel == QQ.RADIO_CACHE.channel) {
+                const index = (firstplay == 1) ? 0 :
+                    QQ.RADIO_CACHE.data.findIndex(item => item.id == track.id)
+                const length = QQ.RADIO_CACHE.data.length
+                if(length > 0  && index > -1 && index < (length - 1)) {
+                    result = QQ.RADIO_CACHE.data[index + 1]
+                    resolve(result)
+                    return 
+                }
             }
             //不命中，重置缓存
             QQ.RADIO_CACHE.channel = channel
             QQ.RADIO_CACHE.data.length = 0
-            QQ.RADIO_CACHE.index = 0
             //拉取数据
-            const firstplay = track ? 0 : 1
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = radioSonglistReqBody(channel, firstplay)
             getJson(url, reqBody).then(json => {
@@ -518,7 +518,6 @@ export class QQ {
                     const duration = item.interval * 1000
                     const cover = getAlbumCover(item.album.mid)
                     const cache = new Track(item.mid, QQ.CODE, item.title, artist, album, duration, cover)
-                    //cache.isRadioType = true
                     cache.type = Playlist.NORMAL_RADIO_TYPE
                     cache.channel = channel
                     QQ.RADIO_CACHE.data.push(cache)

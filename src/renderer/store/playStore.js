@@ -30,12 +30,6 @@ export const usePlayStore = defineStore('play', {
             if(this.playingIndex < 0) return NO_TRACK
             return this.track(this.playingIndex)
         },
-        isCurrentTrack(state) {
-            return (track) => {
-                return state.currentTrack.id == track.id
-                    && state.currentTrack.platform == track.platform
-            }
-        },
         track(state) {
             return (index) => {
                 return state.queueTracks[index]
@@ -59,6 +53,15 @@ export const usePlayStore = defineStore('play', {
         }
     },
     actions: {
+        findIndex(track) {
+            return this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
+        },
+        isCurrentTrack(track) {
+            return Track.isEquals(this.currentTrack, track)
+        },
+        isPlaying() {
+            return this.playing
+        },
         setPlaying(value) {
             this.playing = value
         },
@@ -81,7 +84,7 @@ export const usePlayStore = defineStore('play', {
         },
         addTrack(track) {
             //TODO 超级列表如何保证时效
-            const index = this.queueTracks.findIndex((e, index) => Track.isEquals(track, e))
+            const index = this.findIndex(track)
             if(index == -1) this.queueTracks.push(track)
         },
         addTracks(tracks) {
@@ -91,7 +94,7 @@ export const usePlayStore = defineStore('play', {
             tracks.forEach(item => this.addTrack(item));
         },
         playTrackLater(track) {
-            let index = this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
+            let index = this.findIndex(track)
             if(index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
@@ -106,7 +109,7 @@ export const usePlayStore = defineStore('play', {
             }
         },
         removeTrack(track) {
-            const index = this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
+            const index = this.findIndex(track)
             if(index > -1) {
                 const isCurrent = (index == this.playingIndex)
                 this.queueTracks.splice(index, 1)
@@ -130,55 +133,37 @@ export const usePlayStore = defineStore('play', {
             this.queueTracks.length = 0
             this.playingIndex = -1
             this.__resetPlayState()
-            EventBus.emit('queue-empty')
         },
         __resetPlayState() {
             this.playing = false
             this.currentTime = 0
             this.progress = 0.0
         },
-        __changeTrack(track) {
-            if(Playlist.isFMRadioType(track)) {
-                this.__resetPlayState()
-                EventBus.emit('radio-play', track)
-            } else {
-                EventBus.emit('track-stop')
-                EventBus.emit('track-changed', track)
-                this.__resetPlayState()
-            }
-        },
         __validPlayingIndex() {
             const maxSize = this.queueTracksSize
             this.playingIndex = this.playingIndex > 0 ? this.playingIndex : 0
             this.playingIndex = this.playingIndex < maxSize ? this.playingIndex : (maxSize - 1)
         },
+        //直接播放，其他状态一概不管
+        playTrackDirectly(track) {
+            this.__resetPlayState()
+            let playEventName = 'track-play'
+            if(Playlist.isFMRadioType(track)) { //FM广播
+                playEventName = 'radio-play'
+            } else if(!Track.hasUrl(track)) {   //普通歌曲
+                playEventName = 'track-changed'
+            }
+            EventBus.emit(playEventName, track)
+        },
+        //播放，并更新当前播放列表相关状态
         playTrack(track) {
-            //TODO
-            //let index = this.queueTracks.indexOf(track)
-            let index = this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
+            let index = this.findIndex(track)
             if(index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
             }
-            /* 交给外部逻辑来判断
-            if(this.playingIndex == index) {
-                this.togglePlay()
-                return 
-            }
-            */
             this.playingIndex = index
-            //FM广播
-            if(Playlist.isFMRadioType(track)) {
-                EventBus.emit('radio-play', track)
-                return
-            }
-            // 普通歌曲
-            if(Track.hasUrl(track)) {
-                EventBus.emit('track-play', track)
-                if(!Track.hasLyric(track)) EventBus.emit('track-loadLyric', track)
-            } else {
-                this.__changeTrack(track)
-            }
+            this.playTrackDirectly(track)
         },
         playPrevTrack() {
             //TODO
@@ -195,7 +180,7 @@ export const usePlayStore = defineStore('play', {
                     break
             }
             this.__validPlayingIndex()
-            this.__changeTrack(this.currentTrack)
+            this.playTrackDirectly(this.currentTrack)
         },
         playNextTrack() {
             //TODO
@@ -216,7 +201,7 @@ export const usePlayStore = defineStore('play', {
                     break
             }
             this.__validPlayingIndex()
-            this.__changeTrack(this.currentTrack)
+            this.playTrackDirectly(this.currentTrack)
         },
         updateCurrentTime(secs) {
             this.currentTime = secs * 1000

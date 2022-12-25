@@ -1,9 +1,9 @@
-import analyze from 'rgbaster';
+//import analyze from 'rgbaster';
 
 export const useIpcRenderer = () => {
     try {
         return electronAPI ? electronAPI.ipcRenderer : null
-    } catch(error) {
+    } catch (error) {
         //Do Nothing
     }
     return null
@@ -12,7 +12,7 @@ export const useIpcRenderer = () => {
 export const isMacOS = () => {
     try {
         return electronAPI ? electronAPI.isMacOS : null
-    } catch(error) {
+    } catch (error) {
         //Do Nothing
     }
     return null
@@ -21,7 +21,7 @@ export const isMacOS = () => {
 export const isWinOS = () => {
     try {
         return electronAPI ? electronAPI.isWinOS : null
-    } catch(error) {
+    } catch (error) {
         //Do Nothing
     }
     return null
@@ -30,13 +30,14 @@ export const isWinOS = () => {
 export const useUseCustomTrafficLight = () => {
     try {
         return electronAPI ? electronAPI.useCustomTrafficLight : false
-    } catch(error) {
+    } catch (error) {
         //Do Nothing
     }
     return false
 }
 
-export const ALPHABET_NUMS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz01234567890'
+export const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz'
+export const ALPHABET_NUMS = ALPHABETS + '01234567890'
 
 /** 随机字符串
  * @param src 限定组成元素的字符串，如：ABCDEFGHIJKLMNOPQRSTUVWSYZ
@@ -51,15 +52,16 @@ export const randomText = (src, len) => {
     return result.join('')
 }
 
+/** 随机字符串: 只有大小写字母组成 */
+export const randomTextWithinAlphabet = (len) => (randomText(ALPHABETS, len))
+
 /** 随机字符串: 大小写字母和数字组成 */
-export const randomTextWithinAlphabetNums = (len) => {
-    return randomText(ALPHABET_NUMS, len)
-}
+export const randomTextWithinAlphabetNums = (len) => (randomText(ALPHABET_NUMS, len))
 
 export const toTrimString = (value) => {
-    value = value == 0 ? '0' : value
+    value = value === 0 ? '0' : value
     return (value || '').toString().trim()
-} 
+}
 
 /*
 export const useRgbaster = async (src, opts) => {

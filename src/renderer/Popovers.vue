@@ -19,15 +19,14 @@ const ctxMenuPosStyle = reactive({ left: -999, top: -999})
 const ctxSubmenuPosStyle = reactive({ left: -999, top: -999})
 let ctxMenuPos = null, submenuItemNums = 0
 
-const { playNotificationShow, commonNotificationShow, 
-  commonNotificationText, commonCtxMenuShow, 
+const { commonNotificationShow, commonNotificationText, 
+  commonNotificationType, commonCtxMenuShow,  
   commonCtxMenuData, commonCtxMenuSeparatorNums,
-  addToListSubmenuShow, commonNotificationType,
-  artistListSubmenuShow, commonCtxMenuCacheItem,
-  playbackQueueViewShow, playingViewShow, 
-  videoPlayingViewShow, playingViewThemeIndex,
-  audioEffectViewShow, lyricToolbarShow,
-  randomMusicToolbarShow } = storeToRefs(useAppCommonStore())
+  addToListSubmenuShow, artistListSubmenuShow, 
+  commonCtxMenuCacheItem, playbackQueueViewShow, 
+  playingViewShow, videoPlayingViewShow, 
+  playingViewThemeIndex, audioEffectViewShow, 
+  lyricToolbarShow, randomMusicToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu, 
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -144,10 +143,7 @@ const bindEventListeners = () => {
     hideArtistListSubmenu()
   })
 
-  EventBus.on("toast", o => {
-    const { text, callback, delay } = o
-    doToast(text, callback, delay)
-  })
+  EventBus.on("toast", ({ text, callback, delay }) =>  doToast(text, callback, delay))
 }
 
 //TODO
@@ -180,16 +176,6 @@ onMounted(()=> {
       :posStyle="ctxSubmenuPosStyle">
     </ArtistListSubmenu>
 
-    <!-- 播放失败通知 -->
-    <transition>
-      <Notification class="playing-ntf" v-show="playNotificationShow">
-          <template #text>
-              <p>当前歌曲无法播放！</p>
-              <p>将为您播放下一曲~</p>
-          </template>
-      </Notification>
-    </transition>
-
     <!-- 通用通知 -->
     <transition>
       <Notification class="common-ntf" v-show="commonNotificationShow">
@@ -202,13 +188,6 @@ onMounted(()=> {
     </transition>
 
     <!-- 顶层浮动窗口 -->
-    <!--
-    <transition name="fade-y">
-      <PlayingView id="playing-view" v-show="playingViewShow">
-      </PlayingView>
-    </transition>
-    -->
-    
     <transition name="fade-y">
       <component id="playing-view" v-show="playingViewShow" :is="currentPlayingView">
       </component>
@@ -254,8 +233,12 @@ onMounted(()=> {
     left: 0px;
     width: 100%;
     height: 100%;
-    z-index: 88;
+    z-index: 99;
     background: var(--app-bg);
+}
+
+#video-playing-view {
+  z-index: 100;
 }
 
 #audio-effect-view {
@@ -264,7 +247,7 @@ onMounted(()=> {
     bottom: 80px;
     width: 725px;
     height: 550px;
-    z-index: 404;
+    z-index: 99;
     background: var(--app-bg);
     box-shadow: var(--pbq-box-shadow);
 }
@@ -273,14 +256,14 @@ onMounted(()=> {
     position: absolute;
     top: 202px;
     right: 30px;
-    z-index: 88;
+    z-index: 99;
 }
 
 #random-music-toolbar {
     position: absolute;
     bottom: 128px;
     right: 30px;
-    z-index: 88;
+    z-index: 99;
     box-shadow: var(--pbq-box-shadow);
 }
 </style>

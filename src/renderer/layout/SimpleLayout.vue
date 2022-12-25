@@ -12,7 +12,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useAudioEffectStore } from '../store/audioEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { isMacOS, nextInt } from '../../common/Utils';
+import { isMacOS, nextInt, randomTextWithinAlphabet } from '../../common/Utils';
 import { toMMssSSS } from '../../common/Times';
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
@@ -35,7 +35,8 @@ const { audioEffectViewShow, spectrumIndex,
 const { showToast, toggleAudioEffectView, 
     setSpectrumIndex, toggleLyricToolbar,
     toggleRandomMusicToolbar, showFailToast,
-    setRandomMusicCategoryName } = useAppCommonStore()
+    setRandomMusicCategoryName, setCurrentTraceId,
+    isCurrentTraceId } = useAppCommonStore()
 const { isUseEffect } = storeToRefs(useAudioEffectStore())
 const { lyric } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -270,8 +271,58 @@ const setupLyricAlignment = () => {
     if(lyricCtlEls) lyricCtlEls.forEach(el => el.style.textAlign = textAligns[alignment])
 }
 
+
+//默认随机方式不满足需求
+//随机 + 简单加权（重）
+//随机函数并不完全随机（伪随机），存在一定的分布规律
+//需要根据分布规律，对数据进行排序
+//Math.random()近似普通均匀分布？
+
+//随机获取一种类型（简单加权）
+const nextRandomTypeCode = (types) => {
+    const sortedTypes = types.sort((e1, e2) => (e2.weight - e1.weight))
+    const totalTypesWeight = sortedTypes.reduce((acc, curr) => (acc + curr.weight), 0)
+    const maxNum = 1024, guessmeNum = nextInt(maxNum) //默认最大值1024
+    let currentScopeNum = guessmeNum, guessmeIndex = 0
+    for(var i = 0; i < sortedTypes.length; i++) {
+        const currentWeight = sortedTypes[i].weight
+        //当前区间最大值
+        const scopeMax = maxNum * (currentWeight / totalTypesWeight)
+        if(currentScopeNum <= scopeMax) {
+            guessmeIndex = i
+            break
+        }
+        //不在当前区间，计算超出值
+        currentScopeNum = currentScopeNum - scopeMax
+    }
+    return sortedTypes[guessmeIndex].code
+}
+
+//随机获取一个平台（简单加权）
+const nextRandomPlatformCode = (platforms) => {
+    const sortedPlatforms = platforms.sort((e1, e2) => (e2.weight - e1.weight))
+    const totalPlatformsWeight = sortedPlatforms.reduce((acc, curr) => (acc + curr.weight), 0)
+    const maxNum = 1024, guessmeNum = nextInt(maxNum) //默认最大值1024
+    let currentScopeNum = guessmeNum, guessmeIndex = 0
+    for(var i = 0; i < sortedPlatforms.length; i++) {
+        const currentWeight = sortedPlatforms[i].weight
+        //当前区间最大值
+        const scopeMax = maxNum * (currentWeight / totalPlatformsWeight)
+        if(currentScopeNum <= scopeMax) {
+            guessmeIndex = i
+            break 
+        }
+        //不在当前区间，计算超出值
+        currentScopeNum = currentScopeNum - scopeMax
+    }
+    return sortedPlatforms[guessmeIndex].code
+}
+
 /* 随便听听 */
 const randomPlay = async () => {
+    const traceId = randomTextWithinAlphabet(6) +  Date.now()
+    setCurrentTraceId(traceId)
+
     //数组，全部类型、全部平台
     const allTypes = randomMusicTypes.value
     const allPlatforms = platforms('random')
@@ -283,85 +334,74 @@ const randomPlay = async () => {
         (rmPlatformCodes.length < 1 ? 1 : -1)
     if(errorType > -1) {
         const errorTypeName = [ '类型', '平台' ][errorType]
-        showFailToast(`随机设置中${errorTypeName}未开启`)
+        showCurrentTracFailToast(traceId, `随机设置中${errorTypeName}未开启`)
         return
     }
     //获取完整类型信息
     const rmTypes = allTypes.filter(item => rmTypeCodes.includes(item.code))
-    const totalWeight = rmTypes.reduce((acc, curr) => (acc + curr.weight), 0)
     //获取完整平台信息
     const rmPlatforms = allPlatforms.filter(item => rmPlatformCodes.includes(item.code))
     //重试
     let maxRetry = 6, retry = 0
-    let availablePlatforms = null, type = null
+    let availablePlatforms = null, rmTypeCode = null
     do {
-        //默认随机方式不均衡
-        //type = rmTypeCodes[nextInt(rmTypeCodes.length)]
-
-        //随机 + 简单权重
-        //随机函数并不完全随机（伪随机），存在一定的分布规律
-        //需要根据分布规律，对数据进行排序
-        //Math.random()近似普通均匀分布？
-        const sortedTypes = rmTypes
-        const maxNum = 1024, guessmeNum = nextInt(maxNum) //默认最大值1024
-        let currentScopeNum = guessmeNum, guessmeIndex = 0
-        for(var i = 0; i < sortedTypes.length; i++) {
-            guessmeIndex = i
-            const currentWeight = (sortedTypes[i].weight / totalWeight)
-            //当前区间最大值
-            const scopeMax = currentWeight * 1024
-            if(currentScopeNum <= scopeMax) break
-            //不在当前区间，计算超出值
-            currentScopeNum = currentScopeNum - scopeMax
-        }
-        type = sortedTypes[guessmeIndex].code
+        //随机获取一种类型
+        rmTypeCode = nextRandomTypeCode(rmTypes)
         //根据类型匹配相应平台
-        availablePlatforms = rmPlatforms.filter(item => item.types.includes(type))
+        availablePlatforms = rmPlatforms.filter(item => item.types.includes(rmTypeCode))
         if(availablePlatforms && availablePlatforms.length > 0) { 
             break
         }
         //匹配失败，重试其他类型
         ++retry
     } while(retry > 0 && retry < maxRetry)
-    //匹配不到任何平台
+    //超出最大重试次数，匹配不到任何平台
     if(!availablePlatforms || availablePlatforms.length < 0) {
-        showFailToast('服务异常！请稍候重试')
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
         return
     } 
 
     //随机一个平台
-    const platform = availablePlatforms[nextInt(availablePlatforms.length)].code
+    const platform = nextRandomPlatformCode(availablePlatforms)
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor) {
-        showFailToast('服务异常！请稍候重试')
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     const platformName = getPlatformName(platform)
+    if(!isCurrentTraceId(traceId)) return
     showToast(`正在连接：${platformName}`)
     //获取可播放数据
-    if(isPlaylistType(type)) {
-        pickPlaylist(platform)
-    } else if(isAnchorRadioType(type)) {
-        pickAnchorRadio(platform)
-    } else if(isFMRadioType(type)) {
-        pickFMRadio(platform)
+    if(isPlaylistType(rmTypeCode)) {
+        pickPlaylist(platform, traceId)
+    } else if(isAnchorRadioType(rmTypeCode)) {
+        pickAnchorRadio(platform, traceId)
+    } else if(isFMRadioType(rmTypeCode)) {
+        pickFMRadio(platform, traceId)
     }
 }
 
+//显示当前调用链路的Toast
+const showCurrentTracFailToast = (traceId, text) => {
+    if(isCurrentTraceId(traceId)) showFailToast(text || '网络异常！请稍候重试')
+}
+
 //获取歌单分类
-const pickCategory = async (platform) => {
+const pickCategory = async (platform, traceId) => {
     const { getCategories, putCategories } = usePlaylistSquareStore()
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.categories) {
-        showFailToast('服务异常！请稍候重试')
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     let cachedCategories = getCategories(platform)
     if(!cachedCategories) {
         let maxRetry = 3, retry = 0
         do {
+            if(!isCurrentTraceId(traceId))  return
+
             const result = await vendor.categories()
             if(result && result.data.length > 0) {
                 putCategories(result.platform, result.data)
@@ -371,6 +411,8 @@ const pickCategory = async (platform) => {
             ++retry
         } while(retry > 0 && retry < maxRetry)
     }
+    if(!isCurrentTraceId(traceId))  return
+
     if(!cachedCategories || !cachedCategories.length < 0) {
         return null
     }
@@ -384,14 +426,16 @@ const pickCategory = async (platform) => {
 }
 
 //随机获取平台里的一个歌单
-const pickPlaylist = async (platform) => {
+const pickPlaylist = async (platform, traceId) => {
     //获取歌单分类
     let category = null
     try {
-        category = await pickCategory(platform)
+        category = await pickCategory(platform, traceId)
     } catch(error) {
         console.log(error)
     }
+    if(!isCurrentTraceId(traceId)) return
+
     let cateName = category ? category.key : null
     const cate = category ? category.value : null
     const order = null
@@ -400,13 +444,15 @@ const pickPlaylist = async (platform) => {
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.square) {
-        showFailToast('服务异常！请稍候重试')
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     //重试
     let maxRetry = 3, retry = 0
     //获取总页数
     do {
+        if(!isCurrentTraceId(traceId)) return
+        
         result = await vendor.square(cate, 0, limit, 1, order)
         if(result && result.total > 0) {
             total = result.total
@@ -415,8 +461,8 @@ const pickPlaylist = async (platform) => {
         ++retry
     } while(retry > 0 && retry < maxRetry)
     if(total < 0) { //获取不到数据，暂时返回
-        console.log(`获取歌单失败：${platform} - ${cateName}`)
-        showFailToast('网络异常！请稍候重试')
+        console.log(`获取歌单失败：${platform} - ${cateName}, TraceId: ${traceId}`)
+        showCurrentTracFailToast(traceId)
         return 
     }
     //重置，下面会再次复用
@@ -424,6 +470,7 @@ const pickPlaylist = async (platform) => {
     
     let success = false
     do {
+        if(!isCurrentTraceId(traceId)) return
         //获取随机一个分页数据
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
@@ -444,22 +491,24 @@ const pickPlaylist = async (platform) => {
             const titleParts = playlist.title.replaceAll(' ','').split('|')
             cateName = titleParts.length > 1 ? titleParts[1] : titleParts[0]
         }
-        setRandomMusicCategoryName(cateName)
-        EventBus.emit('playlist-play', { playlist, text: '即将为您播放歌单' })
+        if(isCurrentTraceId(traceId)) {
+            setRandomMusicCategoryName(cateName)
+            EventBus.emit('playlist-play', { playlist, traceId })
+        }
         success = true
         break
     } while(retry > 0 && retry < maxRetry) 
-    if(!success) showFailToast('网络异常！请稍候重试')
+    if(!success) showCurrentTracFailToast(traceId)
 }
 
 //获取主播电台分类
-const pickAnchorRadioCategory = async (platform) => {
+const pickAnchorRadioCategory = async (platform, traceId) => {
     const { getCategories, putCategories, 
         getOrders, putOrders  } = useRadioSquareStore()
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.radioCategories) {
-        showFailToast('服务异常！请稍候重试')
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     let cachedCategories = getCategories(platform)
@@ -467,6 +516,8 @@ const pickAnchorRadioCategory = async (platform) => {
     if(!cachedCategories) {
         let maxRetry = 3, retry = 0
         do {
+            if(!isCurrentTraceId(traceId)) return
+
             const result = await vendor.radioCategories()
             if(result && result.data.length > 0) {
                 cachedCategories = {  
@@ -483,6 +534,8 @@ const pickAnchorRadioCategory = async (platform) => {
             ++retry
         } while(retry > 0 && retry < maxRetry)
     }
+    if(!isCurrentTraceId(traceId)) return
+
     if(!cachedCategories || !cachedCategories.data.length < 0) {
         return null
     }
@@ -499,14 +552,16 @@ const pickAnchorRadioCategory = async (platform) => {
 }
 
 //随机获取平台里的一个主播电台
-const pickAnchorRadio = async (platform) => {
+const pickAnchorRadio = async (platform, traceId) => {
     //获取分类
     let category = null 
     try {
-        category = await pickAnchorRadioCategory(platform)
+        category = await pickAnchorRadioCategory(platform, traceId)
     } catch(error) {
         console.log(error)
     }
+    if(!isCurrentTraceId(traceId)) return
+
     let cateName = category ? category.key : '全部'
     const cate = category ? category.value : null
     const order = null
@@ -518,10 +573,12 @@ const pickAnchorRadio = async (platform) => {
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.radioSquare) {
-        showFailToast('服务异常！请稍候重试')
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     do {
+        if(!isCurrentTraceId(traceId)) return
+
         result = await vendor.radioSquare(cate, 0, limit, 1, order)
         if(result && result.total > 0) {
             total = result.total
@@ -531,7 +588,7 @@ const pickAnchorRadio = async (platform) => {
     } while(retry > 0 && retry < maxRetry)
     if(total < 0) { //获取不到数据，暂时返回
         console.log(`获取主播电台失败：${platform} - ${cateName}`)
-        showFailToast('网络异常！请稍候重试')
+        showCurrentTracFailToast(traceId)
         return 
     }
     //重置，下面会再次复用
@@ -540,6 +597,8 @@ const pickAnchorRadio = async (platform) => {
     //获取随机一个分页数据
     let success = false
     do {
+        if(!isCurrentTraceId(traceId)) return
+
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.radioSquare(cate, offset, limit, page, order)
@@ -554,22 +613,24 @@ const pickAnchorRadio = async (platform) => {
         //随机选择一个主播电台列表
         const playlists = result.data
         const playlist = playlists[nextInt(playlists.length)]
-        setRandomMusicCategoryName(cateName)
-        EventBus.emit('playlist-play', { playlist, text: '即将为您打开主播电台' })
+        if(isCurrentTraceId(traceId)) {
+            setRandomMusicCategoryName(cateName)
+            EventBus.emit('playlist-play', { playlist, text: '即将为您打开主播电台', traceId })
+        }
         success = true
         break
     } while(retry > 0 && retry < maxRetry) 
-    if(!success) showFailToast('网络异常！请稍候重试')
+    if(!success) showCurrentTracFailToast(traceId)
 }
 
 //获取广播电台分类
-const pickFMRadioCategory = async (platform) => {
+const pickFMRadioCategory = async (platform, traceId) => {
     const { getCategories, putCategories, 
         getOrders, putOrders } = useRadioSquareStore()
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.radioCategories) {
-        showFailToast('服务异常！请稍候重试')
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     let cachedCategories = getCategories(platform)
@@ -577,6 +638,8 @@ const pickFMRadioCategory = async (platform) => {
     if(!cachedCategories) {
         let maxRetry = 3, retry = 0
         do {
+            if(!isCurrentTraceId(traceId)) return
+
             const result = await vendor.radioCategories()
             if(result && result.data.length > 0) {
                 cachedCategories = {  
@@ -593,6 +656,8 @@ const pickFMRadioCategory = async (platform) => {
             ++retry
         } while(retry > 0 && retry < maxRetry)
     }
+    if(!isCurrentTraceId(traceId)) return
+
     if(!cachedCategories || !cachedCategories.data.length < 0) {
         return null
     }
@@ -611,14 +676,16 @@ const pickFMRadioCategory = async (platform) => {
 }
 
 //随机获取平台里的一个广播电台
-const pickFMRadio = async (platform) => {
+const pickFMRadio = async (platform, traceId) => {
     //获取分类
     let category = null 
     try {
-        category = await pickFMRadioCategory(platform)
+        category = await pickFMRadioCategory(platform, traceId)
     } catch(error) {
         console.log(error)
     }
+    if(!isCurrentTraceId(traceId)) return
+
     let cateName = category ? category.key : '全部'
     const cate = category ? category.value : null
     const order = null
@@ -630,10 +697,12 @@ const pickFMRadio = async (platform) => {
     //平台服务
     const vendor = getVendor(platform)
     if(!vendor || !vendor.radioSquare) {
-        showFailToast('服务异常！请稍候重试')
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     do {
+        if(!isCurrentTraceId(traceId)) return
+
         result = await vendor.radioSquare(cate, 0, limit, 1, order)
         if(result && result.total > 0) {
             total = result.total
@@ -642,7 +711,7 @@ const pickFMRadio = async (platform) => {
         ++retry
     } while(retry > 0 && retry < maxRetry)
     if(total < 0) { //获取不到数据，暂时返回
-        showFailToast('网络异常！请稍候重试')
+        showCurrentTracFailToast(traceId)
         return 
     }
     //重置，下面会再次复用
@@ -650,6 +719,8 @@ const pickFMRadio = async (platform) => {
     
     let success = false
     do {
+        if(!isCurrentTraceId(traceId)) return
+
         //获取随机一个分页数据
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
@@ -665,12 +736,14 @@ const pickFMRadio = async (platform) => {
         //随机选择一个歌单
         const playlists = result.data
         const playlist = playlists[nextInt(playlists.length)]
-        setRandomMusicCategoryName(cateName)
-        EventBus.emit('playlist-play', { playlist, text: '即将为您收听广播电台' })
+        if(isCurrentTraceId(traceId)) {
+            setRandomMusicCategoryName(cateName)
+            EventBus.emit('playlist-play', { playlist, text: '即将为您收听广播电台', traceId })
+        }
         success = true
         break
     } while(retry > 0 && retry < maxRetry) 
-    if(!success) showFailToast('网络异常！请稍候重试')
+    if(!success) showCurrentTracFailToast(traceId)
 }
 
 const updatePlatformShortName = () => {
@@ -782,7 +855,8 @@ watch([ textColorIndex ], setupTextColor)
                 </div>
             </div>
             <div class="cover">
-                <img v-lazy="currentTrack.cover" :class="{ rotation: false }"/>
+                <img v-lazy="currentTrack.cover" 
+                    :class="{ rotation: false }" />
             </div>
             <div class="meta-wrap" v-show="lyric.metaPos != 1">
                 <div class="audio-title" v-html="Track.title(currentTrack)"></div>
@@ -846,6 +920,9 @@ watch([ textColorIndex ], setupTextColor)
     justify-content: center;
     flex: 1;
     -webkit-app-region: none;
+    --cover-size: 500px;
+    --scrollbar-height: 3px;
+    --bottom-height: 88px;
 }
 
 .simple-layout .spacing {
@@ -874,7 +951,7 @@ watch([ textColorIndex ], setupTextColor)
     justify-content: center;
     flex: 1;
     position: relative;
-    height: 500px;
+    height: var(--cover-size);
 }
 
 .simple-layout > .center .top {
@@ -994,7 +1071,6 @@ watch([ textColorIndex ], setupTextColor)
     width: 130px;
     padding-right: 15px;
     margin-left: 43px;
-    -webkit-app-region: none;
 }
 
 .simple-layout > .center .top .action .lyric-btn {
@@ -1045,6 +1121,10 @@ watch([ textColorIndex ], setupTextColor)
     visibility: hidden;
 }
 
+.simple-layout > .center .top-fixed .action {
+    -webkit-app-region: none;
+}
+
 .simple-layout > .center .top-fixed .left,
 .simple-layout > .center .top-fixed .flex-space,
 .simple-layout > .center .top-fixed .action,
@@ -1087,13 +1167,13 @@ watch([ textColorIndex ], setupTextColor)
     line-height: 32px;
 }
 
+
 .simple-layout > .center .cover,
 .simple-layout > .center .cover img {
-    width: 500px;
-    height: 500px;
+    width: var(--cover-size);
+    height: var(--cover-size);
     z-index: 1;
 }
-
 
 .simple-layout > .center .audio-time-wrap {
     width: 100%;
@@ -1134,7 +1214,7 @@ watch([ textColorIndex ], setupTextColor)
 
 .simple-layout > .bottom {
     width: 100%;
-    height: 88px;
+    height: var(--bottom-height);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1150,7 +1230,7 @@ watch([ textColorIndex ], setupTextColor)
 
 .simple-layout .progress-wrap .progress-bar {
     flex: 1;
-    height: 3px;
+    height: var(--scrollbar-height);
 }
 
 .simple-layout > .bottom .action {

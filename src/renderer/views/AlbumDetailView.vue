@@ -97,7 +97,7 @@ const updateTabData = (data) => {
     if(typeof(data) == 'string') {
         tabData.value.push(data)
         updateTabTipText(0)
-    } else {
+    } else if(data){
         tabData.value.push(...data)
         updateTabTipText(tabData.value.length)
     }
@@ -159,7 +159,7 @@ const onScroll = () => {
 }
 
 const scrollToTop = () => {
-    detailRef.value.scrollTop = 0
+    if(detailRef.value) detailRef.value.scrollTop = 0
 }
 
 const reloadAll = () =>  {
@@ -171,6 +171,7 @@ const reloadAll = () =>  {
 
 const loadAll = () =>  {
     scrollToTop()
+    getAlbumDetail()
     visitTab(0)
 }
 
@@ -183,7 +184,6 @@ const resetView = () => {
 const switchTab = () => {
     resetView()
     setLoading(true)
-    getAlbumDetail()
     if(isAllSongsTab()) {
         loadAllSongs()
     } else if(isAboutTab()) {
@@ -192,11 +192,8 @@ const switchTab = () => {
     }
 }
 
-//TODO 后期需要梳理优化，容易出现重复加载Bug
-onMounted(loadAll)
-onActivated(loadAll)
-watch(activeTab, switchTab)
-watch(albumId, reloadAll)
+//TODO 需要梳理优化
+watch([ platform, albumId ], reloadAll, { immediate: true })
 </script>
 
 <template>

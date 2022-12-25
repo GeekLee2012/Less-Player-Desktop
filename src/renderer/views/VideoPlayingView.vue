@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, onActivated } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import EventBus from '../../common/EventBus';
@@ -24,7 +24,7 @@ const quitVideo = () => {
 
 EventBus.on("app-beforeRoute", quitVideo)
 
-onMounted(() => {
+onActivated(() => {
     EventBus.emit("app-adjustWinCtlBtns")
     initVideoPlayer()
 })
@@ -58,6 +58,8 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    --view-bg: #000;
+    background: var(--view-bg);
 }
 
 .video-playing-view .spacing {
@@ -69,7 +71,7 @@ onMounted(() => {
     display: flex;
     -webkit-app-region: drag;
     z-index: 89;
-    background-color: #000;
+    background: var(--view-bg);
 }
 
 .video-playing-view .header .win-ctl-wrap {
@@ -110,12 +112,16 @@ onMounted(() => {
 
 .video-playing-view .center {
     flex: 1;
-    background-color: red;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--view-bg);
 }
 
 .video-playing-view .center video {
-    background-color: #000;
+    flex: 1;
     width: 100%;
-    height: 100%;
+    background: var(--view-bg);
 }
 </style>

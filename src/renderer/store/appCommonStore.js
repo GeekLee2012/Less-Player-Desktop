@@ -17,8 +17,6 @@ export const useAppCommonStore = defineStore('appCommon', {
         //探索模式，歌单、歌手
         exploreModes: [ 'playlists', 'artists', 'radios', 'userhome' ], 
         exploreModeIndex: 0, 
-        //播放状态通知
-        playNotificationShow: false,
         //通用通知
         commonNotificationShow: false,
         commonNotificationText: null,
@@ -41,6 +39,8 @@ export const useAppCommonStore = defineStore('appCommon', {
         randomMusicPlatformCodes: [],
         randomMusicTypeCodes: [],
         randomMusicCategoryName: null,
+        //当前调用链路追踪ID
+        currentTraceId: null,
     }),
     getters: {
         isPlaylistMode() {
@@ -163,12 +163,6 @@ export const useAppCommonStore = defineStore('appCommon', {
         setUserHomeExploreMode() {
             this.setExploreMode(3)
         },
-        showPlayNotification() {
-            this.playNotificationShow = true
-        },
-        hidePlayNotification() {
-            this.playNotificationShow = false
-        },
         showCommonNotification(text) {
             this.commonNotificationShow = true
             this.commonNotificationText = text || "操作成功！"
@@ -183,12 +177,13 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         showToast(text, callback, delay) {
             text = text || "操作成功！"
-            this.setCommonNotificationType(this.commonNotificationType)
+            this.setCommonNotificationType(0)
             EventBus.emit("toast", { text, callback, delay })
         },
         showFailToast(text, callback, delay) {
+            text = text || "操作失败！"
             this.setCommonNotificationType(1)
-            this.showToast((text || "操作失败！"), callback, delay)
+            EventBus.emit("toast", { text, callback, delay })
         },
         updateCommonCtxItem(value) {
             this.commonCtxItem = value
@@ -283,6 +278,12 @@ export const useAppCommonStore = defineStore('appCommon', {
             value = value ? value.toString().trim() : value
             this.randomMusicCategoryName = value
         },
+        setCurrentTraceId(id) {
+            this.currentTraceId = id
+        },
+        isCurrentTraceId(id) {
+            return this.currentTraceId == id
+        }
     },
     persist: {
         enabled: true,

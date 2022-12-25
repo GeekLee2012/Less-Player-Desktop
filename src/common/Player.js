@@ -26,12 +26,12 @@ export class Player {
         return player.on('suspend', () => player.pause())
             .on('track-play', track => player.playTrack(track))
             .on('track-restore', track => player.restore(track))
+            .on('track-changed', () => player.setCurrent(null))
             .on('track-togglePlay', () => player.togglePlay())
             .on('track-seek', percent => player.seek(percent))
             .on('volume-set', volume => player.volume(volume))
-            .on('track-stop', () => player.setCurrent(null))
             .on('radio-play', () => player.setCurrent(null))
-            .on('queue-empty', () => player.setCurrent(null))
+            .on('playbackQueue-empty', () => player.setCurrent(null))
             .on('track-updateEQ', (values) => player.updateEQ(values))
     }
 

@@ -115,17 +115,17 @@ const checkFavorite = () => {
 }
 
 const markScrollState = () => {
-    markScrollTop = playlistDetailRef.value.scrollTop
+    if(playlistDetailRef.value) markScrollTop = playlistDetailRef.value.scrollTop
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
-    playlistDetailRef.value.scrollTop = markScrollTop
+    if(playlistDetailRef.value) playlistDetailRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
     if(markScrollTop < 1) return 
-    playlistDetailRef.value.scrollTop = markScrollTop
+    if(playlistDetailRef.value) playlistDetailRef.value.scrollTop = markScrollTop
     checkFavorite()
 }
 
@@ -147,15 +147,18 @@ const onScroll = () => {
 }
 
 const resetBack2TopBtn = () => {
-    back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
+    if(back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
 }
 
+//TODO
 const trimExtraHtml = (text) => {
     text = (text || '').trim()
     //TODO 暂时不处理html空白格式信息
     return text
 }
 
+
+/* 生命周期、监听 */
 onActivated(() => restoreScrollState())
 
 watch(() => props.id, () => {
@@ -163,13 +166,7 @@ watch(() => props.id, () => {
     resetScrollState()
     resetBack2TopBtn()
     loadContent()
-})
-
-onMounted(() => {
-    resetView()
-    resetBack2TopBtn()
-    loadContent()
-})
+}, { immediate: true })
 
 EventBus.on("refresh-favorite", checkFavorite)
 </script>

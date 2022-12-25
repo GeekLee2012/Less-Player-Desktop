@@ -19,8 +19,13 @@ npm config set registry http://registry.npmmirror.com
 ```
 npm config delete registry
 ```
-
-3. 其他问题，请尝试以下命令  
+  
+3. 配置Electron镜像（.npmrc配置文件，如国内阿里镜像）
+```
+ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
+```
+  
+4. 其他问题，请尝试以下命令  
   npm检查命令： `npm doctor`  
   npm安装时显示详细命令： `npm install --verbose`  
   npm配置查看命令： `npm config ls` 或 `npm config list`  

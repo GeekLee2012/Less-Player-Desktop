@@ -151,6 +151,8 @@ const refreshData = () => {
     loadContent()
 }
 
+
+/* 生命周期、监听 */
 watch(currentPlatformCode, (nv, ov) => {
     if(!isPlaylistMode.value) return
     if(!nv) reurn

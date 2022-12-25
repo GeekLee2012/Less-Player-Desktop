@@ -57,7 +57,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         updateAlbumDetailKeys(platform, id) {
             this.platform = platform
             this.albumId = id
-            this.resetAlbumDetail()
+            //this.resetAlbumDetail()
         },
         updateAlbum(title, cover, artistName, company, publishTime) {
             this.albumName = title

@@ -14,9 +14,7 @@ const props = defineProps({
     track: Object //Track
 })
 
-const { playing } = storeToRefs(usePlayStore())
-const { togglePlay } = usePlayStore()
-const { toggleVideoPlayingView, toggleLyricToolbar } = useAppCommonStore()
+const { toggleLyricToolbar } = useAppCommonStore()
 const { lyric } = storeToRefs(useSettingStore())
 
 const currentIndex = ref(-1)
@@ -188,7 +186,7 @@ onMounted(() => {
     setupLyricAlignment()
 })
 
-watch(() => props.track, (nv, ov) => reloadLyricData(nv))
+watch(() => props.track, (nv, ov) => loadLyric())
 </script>
 
 <template>

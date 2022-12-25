@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, shallowRef, inject, watch } from 'vue';
+import { onMounted, shallowRef, inject, watch, triggerRef } from 'vue';
 import Themes from './Themes.vue';
 import EventBus from '../common/EventBus';
 import { useSettingStore } from './store/settingStore';
@@ -11,174 +11,177 @@ import SimpleLayout from './layout/SimpleLayout.vue';
 import { useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
 import Mousetrap from 'mousetrap';
 
+
+
 const { visitSetting } = inject('appRoute')
 const ipcRenderer = useIpcRenderer()
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const currentAppLayout = shallowRef(null)
 
-const { layout, isStorePlayStateBeforeQuit, 
-  isStoreLocalMusicBeforeQuit, getWindowZoom,
-  isDefaultLayout, isSimpleLayout } = storeToRefs(useSettingStore())
-const { setupWindowZoom, setupAppSuspension, 
-  setupTray, setupGlobalShortcut } = useSettingStore()
+const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
+  getWindowZoom, isSimpleLayout } = storeToRefs(useSettingStore())
+const { setupWindowZoom, setupAppSuspension,
+  setupTray, setupGlobalShortcut,
+  setupAppGlobalProxy } = useSettingStore()
 
-const { togglePlay, switchPlayMode, 
+const { togglePlay, switchPlayMode,
   playPrevTrack, playNextTrack,
   toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
-const { playingViewShow, videoPlayingViewShow, 
+const { playingViewShow, videoPlayingViewShow,
   playingViewThemeIndex } = storeToRefs(useAppCommonStore())
-const { togglePlaybackQueueView, toggleLyricToolbar, 
+const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
   hideAllCategoryViews } = useAppCommonStore()
 
 const isReservedPath = (path) => {
-  const reservedPaths = [ 'id', 'name', 'binding', 'gBinding' ]
+  const reservedPaths = ['id', 'name', 'binding', 'gBinding']
   return reservedPaths.indexOf(path) > -1
 }
 
 const deepInState = (state, cache) => {
-    for(let path in state) {
-        const value = state[path]
-        if(typeof(value) === 'object') {
-            deepInState(state[path], cache[path])
-        } else {
-            state[path] = (isReservedPath(path) ? state[path] : cache[path])
-        }
+  for (let path in state) {
+    const value = state[path]
+    if (value && typeof (value) === 'object') {
+      deepInState(state[path], cache[path])
+    } else {
+      state[path] = (isReservedPath(path) ? state[path] : cache[path])
     }
+  }
 }
 
 //注册默认应用级别快捷键
 const registryDefaultLocalKeys = () => {
-    //按键事件监听
-    window.addEventListener('keydown', e => {
-        //Space键
-        if(e.key == ' ') e.preventDefault()
-    })
+  //按键事件监听
+  window.addEventListener('keydown', e => {
+    //Space键
+    if (e.key == ' ') e.preventDefault()
+  })
 
-    // 播放或暂停
-    Mousetrap.bind('space', togglePlay)
-    // 播放模式切换
-    Mousetrap.bind(['m'], switchPlayMode, 'keyup')
-    // 上 / 下一曲
-    Mousetrap.bind(['left'], playPrevTrack)
-    Mousetrap.bind(['right'], playNextTrack)
-    // 增加 / 减小音量
-    Mousetrap.bind(['up'], ()=> updateVolumeByOffset(0.01))
-    Mousetrap.bind(['down'], ()=> updateVolumeByOffset(-0.01))
-    // 最大音量 / 静音
-    Mousetrap.bind(['o'], toggleVolumeMute, 'keyup')
-    // 打开设置
-    Mousetrap.bind(['p'], visitSetting, 'keyup')
-    // 打开当前播放
-    Mousetrap.bind(['q'], togglePlaybackQueueView, 'keyup')
-    // 打开/关闭歌词设置
-    Mousetrap.bind(['l'], () => {
-        if(playingViewShow.value || isSimpleLayout.value) toggleLyricToolbar()
-    }, 'keyup')
+  // 播放或暂停
+  Mousetrap.bind('space', togglePlay)
+  // 播放模式切换
+  Mousetrap.bind(['m'], switchPlayMode, 'keyup')
+  // 上 / 下一曲
+  Mousetrap.bind(['left'], playPrevTrack)
+  Mousetrap.bind(['right'], playNextTrack)
+  // 增加 / 减小音量
+  Mousetrap.bind(['up'], () => updateVolumeByOffset(0.01))
+  Mousetrap.bind(['down'], () => updateVolumeByOffset(-0.01))
+  // 最大音量 / 静音
+  Mousetrap.bind(['o'], toggleVolumeMute, 'keyup')
+  // 打开设置
+  Mousetrap.bind(['p'], visitSetting, 'keyup')
+  // 打开当前播放
+  Mousetrap.bind(['q'], togglePlaybackQueueView, 'keyup')
+  // 打开/关闭歌词设置
+  Mousetrap.bind(['l'], () => {
+    if (videoPlayingViewShow.value) return
+    if (playingViewShow.value || isSimpleLayout.value) toggleLyricToolbar()
+  }, 'keyup')
 }
 
 //TODO 清理设置，解决不同版本导致的数据不一致问题
 const cleanupSetting = () => {
-    const store = useSettingStore()
-    const key = "setting"
-    const cache = localStorage.getItem(key)
-    if(cache) {
-        const cacheStates = JSON.parse(cache)
-        store.$reset()
-        localStorage.removeItem(key)
-        deepInState(store.$state, cacheStates)
-    }
-    store.$patch({ blackHole: Math.random() * 100000000 })
+  const store = useSettingStore()
+  const key = "setting"
+  const cache = localStorage.getItem(key)
+  if (cache) {
+    const cacheStates = JSON.parse(cache)
+    store.$reset()
+    localStorage.removeItem(key)
+    deepInState(store.$state, cacheStates)
+  }
+  store.$patch({ blackHole: Math.random() * 100000000 })
 }
 
 const setupCache = () => {
-  if(!isStorePlayStateBeforeQuit.value) {
-      localStorage.removeItem('player')
+  if (!isStorePlayStateBeforeQuit.value) {
+    localStorage.removeItem('player')
   }
-  if(!isStoreLocalMusicBeforeQuit.value) {
-      localStorage.removeItem('localMusic')
+  if (!isStoreLocalMusicBeforeQuit.value) {
+    localStorage.removeItem('localMusic')
   }
 }
 
 const setupLayout = () => {
-    if(isDefaultLayout.value) {
-        currentAppLayout.value = DefaultLayout
-        EventBus.emit('app-layout-default')
-        if(ipcRenderer) ipcRenderer.send('app-layout-default')
-    } else if(isSimpleLayout.value) {
-        currentAppLayout.value = SimpleLayout
-        if(ipcRenderer) ipcRenderer.send('app-layout-simple')
-    }
+  if (isSimpleLayout.value) {
+    currentAppLayout.value = SimpleLayout
+    if (ipcRenderer) ipcRenderer.send('app-layout-simple')
+  } else {
+    currentAppLayout.value = DefaultLayout
+    EventBus.emit('app-layout-default')
+    if (ipcRenderer) ipcRenderer.send('app-layout-default')
+  }
+  //triggerRef(currentAppLayout)
 }
 
 //TODO 暂时弃用macOS自带交通灯控件
 const setupWindowCtlButton = () => {
   const visible = !useCustomTrafficLight && !isSimpleLayout.value
-  if(ipcRenderer) ipcRenderer.send('app-winBtn', visible)
+  if (ipcRenderer) ipcRenderer.send('app-winBtn', visible)
 }
 
 //TODO 方式有些别扭
 const adjustWinCtlBtns = () => {
-    const wrapEls = document.querySelectorAll('.header .win-ctl-wrap')
-    if(!wrapEls || wrapEls.length < 1) return
-    const zoom = Number(getWindowZoom.value)
-    const scale = 100 / zoom
-    const wrapWidth = 105 * scale
-    wrapEls.forEach(el => el.style.width = wrapWidth + 'px')
-    const collapseBtnSvgEls = document.querySelectorAll('.header .win-ctl-wrap .collapse-btn svg')
-    const collapseBtnSvgSize = 18 * scale
-    if(collapseBtnSvgEls) {
-      collapseBtnSvgEls.forEach(el => {
-        el.style.width = collapseBtnSvgSize + 'px'
-        el.style.height = collapseBtnSvgSize + 'px'
-        el.style.paddingLeft = 5 * scale + 'px'
-      })
-    }
+  const wrapEls = document.querySelectorAll('.header .win-ctl-wrap')
+  if (!wrapEls || wrapEls.length < 1) return
+  const zoom = Number(getWindowZoom.value)
+  const scale = 100 / zoom
+  const wrapWidth = 105 * scale
+  wrapEls.forEach(el => el.style.width = wrapWidth + 'px')
+  const collapseBtnSvgEls = document.querySelectorAll('.header .win-ctl-wrap .collapse-btn svg')
+  const collapseBtnSvgSize = 18 * scale
+  if (collapseBtnSvgEls) {
+    collapseBtnSvgEls.forEach(el => {
+      el.style.width = collapseBtnSvgSize + 'px'
+      el.style.height = collapseBtnSvgSize + 'px'
+      el.style.paddingLeft = 5 * scale + 'px'
+    })
+  }
 }
 
-
 const setVideoViewSize = () => {
-    const { clientWidth, clientHeight } = document.documentElement
-    const els = document.querySelectorAll(".video-holder")
-    if(!els) return 
-    els.forEach(el => {
-      el.style.width = clientWidth + "px"
-      el.style.height = (clientHeight - 56 + 1) + "px"
-    })
+  const { clientWidth, clientHeight } = document.documentElement
+  const els = document.querySelectorAll(".video-holder")
+  if (!els) return
+  els.forEach(el => {
+    el.style.width = clientWidth + "px"
+    el.style.height = (clientHeight - 56) + "px"
+  })
 }
 
 const hideAllPopoverViews = () => {
-    //隐藏当前播放
-    hidePlaybackQueueView()
-    //隐藏全部分类
-    hideAllCategoryViews()
-    //隐藏上下文菜单
-    hideAllCtxMenus()
+  //隐藏当前播放
+  hidePlaybackQueueView()
+  //隐藏全部分类
+  hideAllCategoryViews()
+  //隐藏上下文菜单
+  hideAllCtxMenus()
 }
 
 const setElementAlignCenter = (selector, width, height, offsetLeft, offsetTop) => {
-    const { clientWidth, clientHeight } = document.documentElement
-    const el = document.querySelector(selector)
-    if(!el) return
-    //offsetXXX 设置偏移量
-    const left = (clientWidth - width) / 2 + (offsetLeft || 0)
-    const top = (clientHeight - height) / 2 + (offsetTop || 0)
-    el.style.left = left + 'px'
-    el.style.top = top + 'px'
+  const { clientWidth, clientHeight } = document.documentElement
+  const el = document.querySelector(selector)
+  if (!el) return
+  //offsetXXX 设置偏移量
+  const left = (clientWidth - width) / 2 + (offsetLeft || 0)
+  const top = (clientHeight - height) / 2 + (offsetTop || 0)
+  el.style.left = left + 'px'
+  el.style.top = top + 'px'
 }
 
 EventBus.on("app-zoom", adjustWinCtlBtns)
 EventBus.on("app-adjustWinCtlBtns", adjustWinCtlBtns)
 EventBus.on("app-layout", setupLayout)
 EventBus.on("app-elementAlignCenter", value => {
-    const { selector, width, height, offsetLeft, offsetTop } = value
-    setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
+  const { selector, width, height, offsetLeft, offsetTop } = value
+  setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
 })
 
 const initialize = () => {
   cleanupSetting()
-  if(!isSimpleLayout.value) setupWindowZoom()
+  if (!isSimpleLayout.value) setupWindowZoom()
   setupAppSuspension()
   setupCache()
   setupTray()
@@ -189,36 +192,40 @@ const initialize = () => {
 initialize()
 
 onMounted(() => {
+  /*
   //窗口大小变化事件监听
   window.addEventListener('resize', e => {
     //自适应视频页面大小
-    //setVideoViewSize()
+    setVideoViewSize()
   })
+  */
 
   //点击事件监听
   document.addEventListener('click', e => {
-      //隐藏全部浮层
-      hideAllPopoverViews()
+    //隐藏全部浮层
+    hideAllPopoverViews()
   })
 
   setupLayout()
+  setupAppGlobalProxy()
   //setupWindowCtlButton()
   registryDefaultLocalKeys()
 })
 
 //watch([ videoPlayingViewShow ], setVideoViewSize)
-watch([ playingViewShow, playingViewThemeIndex, videoPlayingViewShow ], adjustWinCtlBtns)
+watch([playingViewShow, playingViewThemeIndex, videoPlayingViewShow], adjustWinCtlBtns)
 </script>
 
 <template>
-    <Themes>
-        <keep-alive :max="2">
-          <component :is="currentAppLayout">
-          </component>
-        </keep-alive>
-        <slot></slot>
-    </Themes>
+  <Themes>
+    <keep-alive :max="2">
+      <component :is="currentAppLayout">
+      </component>
+    </keep-alive>
+    <slot></slot>
+  </Themes>
 </template>
 
 <style>
+
 </style>

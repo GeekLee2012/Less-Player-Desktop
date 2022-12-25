@@ -14,21 +14,21 @@ import { Playlist } from '../common/Playlist';
 
 const ipcRenderer = useIpcRenderer()
 
-const { currentTrack, queueTracksSize, playing } = storeToRefs(usePlayStore())
+const { currentTrack, queueTracksSize } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack, 
     setAutoPlaying, playPrevTrack, 
     togglePlay, switchPlayMode,
     toggleVolumeMute, updateVolumeByOffset,
     updateCurrentTime, setPlaying,
     resetQueue, addTracks, 
-    addTrack, } = usePlayStore()
+    addTrack, playTrackDirectly,
+    isCurrentTrack, isPlaying } = usePlayStore()
 const { getVendor, isLocalMusic } = usePlatformStore()
 const { playingViewShow ,videoPlayingViewShow, 
     playingViewThemeIndex, spectrumIndex } = storeToRefs(useAppCommonStore())
-const { showPlayNotification, hidePlayNotification, 
-    togglePlaybackQueueView, toggleVideoPlayingView, 
+const { togglePlaybackQueueView, toggleVideoPlayingView, 
     showFailToast, toggleLyricToolbar,
-    showToast } = useAppCommonStore()
+    showToast, isCurrentTraceId } = useAppCommonStore()
 const { addRecentSong, addRecentRadio, 
     addRecentPlaylist, addRecentAlbum } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit, 
@@ -39,7 +39,6 @@ const { getCurrentThemeHlColor } = useSettingStore()
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
 
 /* 记录最近播放 */
-//目前以加入当前播放列表为参考标准
 //歌曲、电台
 const traceRecentTrack = (track) => {
     if(!isStoreRecentPlay.value) return
@@ -70,28 +69,6 @@ const traceRecentAlbum = (album) => {
 }
 
 
-/* 通用函数 */
-//TODO 用户手动干预，即主动点击上/下一曲时，产生体验上的Bug
-let playNextTimer = null
-const showPlayToast = (callback) => {
-    showPlayNotification()
-    playNextTimer = setTimeout(() => {
-        hidePlayNotification()
-        if(callback) callback()
-    }, 2000)
-}
-
-const tryCancelPlayNextTimer = () => {
-    try {
-        if(playNextTimer) clearTimeout(playNextTimer)
-    } catch(e) {
-        //Do nothing
-    } finally {
-        hidePlayNotification()
-    }
-}
-
-
 
 /* 歌词获取 */
 const loadLyric = (track) => {
@@ -116,57 +93,101 @@ const assignLyric = (track, lyric) => {
 }
 
 
+//处理不可播放歌曲
+const AUTO_PLAY_NEXT_MSG = '当前歌曲无法播放<br>即将为您播放下一曲'
+const NO_NEXT_MSG = '当前歌曲无法播放<br>且列表已无其他歌曲'
+const TOO_FAST_MSG = '尝试播放次数太多<br>请手动播放其他歌曲吧'
 //连跳计数器
-let toastCnt = 0 
+let autoSkipCnt = 0
+//重置连跳计数
+const resetAutoSkip = () => autoSkipCnt = 0
+
+//用户手动干预，即主动点击上/下一曲时，产生体验上的Bug
+//目前实现方式已稍作处理
+const handleUnplayableTrack = (track) => {
+    const queueSize = queueTracksSize.value
+    const isPlaylistRadio = Playlist.isNormalRadioType(track)
+    //提示并播放下一曲
+    const toastAndPlayNext = () => {
+        //前提条件：必须是当前歌曲
+        if(isCurrentTrack(track)) {
+            showFailToast(AUTO_PLAY_NEXT_MSG, () => {
+                if(isCurrentTrack(track)) playNextTrack()
+            })
+        }
+    }
+    if(isPlaylistRadio) { //普通歌单电台
+        toastAndPlayNext()
+        return
+    } else if(queueSize < 2) { //非电台歌曲，且没有下一曲
+        showFailToast(NO_NEXT_MSG)
+        return
+    } 
+    //普通歌曲
+    //频繁切换下一曲，体验不好，对音乐平台也不友好
+    if(autoSkipCnt < 9) { 
+        ++autoSkipCnt
+        toastAndPlayNext()
+        return
+    }
+    //10连跳啦，暂停一下吧
+    resetAutoSkip()
+    showFailToast(TOO_FAST_MSG)
+}
+
 //获取和设置歌曲播放信息
-const bootstrapTrack = (track, callback, noToast) => {
-    if(!track) return 
-    if(Playlist.isFMRadioType(track)) return
-
-    const { id, platform, artistNotCompleted }= track
-    if(isLocalMusic(platform)) return
-
-    const vendor = getVendor(platform)
-    if(!vendor  || !vendor.playDetail) return
-    vendor.playDetail(id, track).then(result => {
+const bootstrapTrack =  (track) => {
+    return new Promise(async (resolve, reject) => {
+        if(!track) { 
+            reject() 
+            return 
+        }
+        //FM电台不需要再处理
+        if(Playlist.isFMRadioType(track)) { 
+            reject() 
+            return 
+        }
+        const { id, platform, artistNotCompleted }= track
+        //本地音乐也不需要再处理
+        if(isLocalMusic(platform)) { 
+            reject() 
+            return 
+        } 
+        //平台服务
+        const vendor = getVendor(platform)
+        if(!vendor  || !vendor.playDetail) { 
+            reject() 
+            return 
+        } 
+        //播放相关数据
+        const result = await vendor.playDetail(id, track)
         const { lyric, cover, artist, url } = result
+        //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
         if(Track.hasUrl(result)) Object.assign(track, { url })
-        //TODO 流程待优化完善
-        tryCancelPlayNextTimer()
+        //无法获取到有效url
         if(!Track.hasUrl(track)) { //VIP收费歌曲或其他
-            if(queueTracksSize.value < 2 
-                && !Playlist.isNormalRadioType(track)) { //非电台歌曲，且没有下一曲
-                if(!noToast) showPlayToast()
-            } else if(toastCnt < 9) { 
-                setAutoPlaying(true)
-                //TODO 频繁切换下一曲，体验不好，对音乐平台也不友好
-                if(!noToast) showPlayToast(playNextTrack)
-                ++toastCnt
-            } else { //10连跳啦，暂停一下吧
-                toastCnt = 0 //重置连跳计数
-                setAutoPlaying(false)
-            }
+            reject('noUrl')
             return
         }
-        toastCnt = 0 //重置连跳计数
         setAutoPlaying(false)
-        
+        //设置歌词
         if(Track.hasLyric(result)) assignLyric(track, lyric)
+        //设置封面
         if(Track.hasCover(result)) Object.assign(track, { cover })
+        //设置歌手信息
         //TODO 部分音乐平台artist信息无法在同一API中完整获取
         if(artistNotCompleted && artist) { 
             Object.assign(track, { artist })
             EventBus.emit('track-artistUpdated', { trackId: id, artist })
         }
-        if(callback) callback(track)
-    }).catch(error => {
-        console.log(error)
-        //showPlayToast(playNextTrack)
+        resolve(track)
     })
 }
 
 //添加到播放列表，并开始播放
-const addAndPlayTracks = (tracks, needReset, text) => {
+const addAndPlayTracks = (tracks, needReset, text, traceId) => {
+    if(traceId && !isCurrentTraceId(traceId)) return
+
     if(needReset) resetQueue()
     showToast(text || "即将为您播放全部！")
     addTracks(tracks)
@@ -183,34 +204,39 @@ const onPlayerErrorRetry = (track) => {
 }
 
 /* 播放歌单 */
-const tryPlayPlaylist = async(playlist, text) => {
+const tryPlayPlaylist = async(playlist, text, traceId) => {
     try {
-        playPlaylist(playlist, text)
+        playPlaylist(playlist, text, traceId)
     } catch(error) {
         console.log(error)
+        if(traceId && !isCurrentTraceId(traceId)) return
         showFailToast('网络异常！请稍候重试')
         return
     }
 }
 
 //播放歌单
-const playPlaylist = async (playlist, text) => {
+const playPlaylist = async (playlist, text, traceId) => {
+    if(traceId && !isCurrentTraceId(traceId)) return
+
     const { id, platform } = playlist
     if(Playlist.isFMRadioType(playlist)) { //FM广播电台
+        if(text) showToast(text)
         const track = playlist.data[0]
         addTrack(track)
         playTrack(track)
-        traceRecentTrack(track)
-        if(text) showToast(text)
         return
     } else if(Playlist.isNormalRadioType(playlist)) { //歌单电台
-        if(text) showToast(text) //提示前置，避免因网络卡顿导致用户多次请求
-        playNextPlaylistRadioTrack(platform, id)
+        //提示前置，避免因网络卡顿导致用户多次请求
+        if(text) showToast(text)
+        playNextPlaylistRadioTrack(platform, id, traceId)
         return
     } else if(Playlist.isNormalType(playlist) 
         || Playlist.isAnchorRadioType(playlist)) {
         let maxRetry = 3, retry = 0
         while(!playlist.data || playlist.data.length < 1) {
+            if(traceId && !isCurrentTraceId(traceId)) return
+
             if(++retry > maxRetry) return
             //重试一次加载数据
             const vendor = getVendor(platform)
@@ -221,20 +247,30 @@ const playPlaylist = async (playlist, text) => {
     if(!playlist.data || playlist.data.length < 1) {
         const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
             : '网络异常！请稍候重试'
+        if(traceId && !isCurrentTraceId(traceId)) return
         showFailToast(failMsg)
         return
     }
     //可播放歌单
     traceRecentPlaylist(playlist)
-    addAndPlayTracks(playlist.data, true, text)
+    addAndPlayTracks(playlist.data, true, text || '即将为您播放歌单', traceId)
 }
 
 //播放电台
-const playNextPlaylistRadioTrack = async (platform, channel, track) => {
+const playNextPlaylistRadioTrack = async (platform, channel, track, traceId) => {
+    if(traceId && !isCurrentTraceId(traceId)) return
+
+    const vendor = getVendor(platform)
+    if(!vendor || !vendor.nextPlaylistRadioTrack) {
+        showFailToast('网络异常！请稍候重试')
+        return
+    }
     const needReset = !Track.hasId(track)
     let maxRetry = 3, retry = 0, success = false
     do {
-        const result = await getVendor(platform).nextPlaylistRadioTrack(channel, track)
+        if(traceId && !isCurrentTraceId(traceId)) return
+
+        const result = await vendor.nextPlaylistRadioTrack(channel, track)
         if(!Track.hasId(result)) {
             ++retry
             continue
@@ -242,11 +278,13 @@ const playNextPlaylistRadioTrack = async (platform, channel, track) => {
         if(needReset) resetQueue()
         addTrack(result)
         playTrack(result)
-        traceRecentTrack(result)
         success = true
         break 
     } while(retry > 0 && retry < maxRetry)
-    if(!success) showFailToast('网络异常！请稍候重试')
+    if(!success) {
+        if(traceId && !isCurrentTraceId(traceId)) return
+        showFailToast('网络异常！请稍候重试')
+    }
 }
 
 //播放专辑
@@ -387,18 +425,16 @@ EventBus.on('radio-play', track => traceRecentTrack(track))
 EventBus.on('radio-state', state => setPlaying(state))
 //普通歌曲
 EventBus.on('track-changed', track => {
-    //traceRecentTrack(track) 
-    bootstrapTrack(track, track => {
-        traceRecentTrack(track)
-        playTrack(track)
-        loadLyric(track)
+    bootstrapTrack(track).then(track => {
+        if(isCurrentTrack(track)) playTrackDirectly(track)
+    }, reason => {
+        if(reason == 'noUrl') handleUnplayableTrack(track)
     })
 })
-EventBus.on('track-restoreInit', track => {
+EventBus.on('track-play', track => {
+    resetAutoSkip()
     traceRecentTrack(track)
-    bootstrapTrack(track, track => {
-        EventBus.emit("track-restore", track)
-    }, true)
+    loadLyric(track)
 })
 EventBus.on('track-loadLyric', track => loadLyric(track))
 EventBus.on('track-error', track => onPlayerErrorRetry(track))
@@ -418,15 +454,15 @@ EventBus.on('track-state', state => {
     }
 })
 EventBus.on('track-pos', secs => {
-    //setPlaying(true)
+    if(videoPlayingViewShow.value) {
+        if(isPlaying()) togglePlay()
+        return 
+    }
     updateCurrentTime(secs)
 })
 
 //播放歌曲
-EventBus.on('track-playNow', track => {
-    traceRecentTrack(track)
-    playTrack(track)
-})
+EventBus.on('track-playNow', track => playTrack(track))
 
 //歌单电台 - 下一曲
 EventBus.on('track-nextPlaylistRadioTrack', track => 
@@ -437,7 +473,7 @@ EventBus.on('track-playMv', track => {
     if(!Track.hasMv(track)) return
     const { platform, mv } = track
     getVideoDetail(platform, mv).then(result => {
-        if(playing.value) togglePlay()
+        if(isPlaying()) togglePlay()
         toggleVideoPlayingView()
         EventBus.emit('video-play', result)
         traceRecentTrack(track)
@@ -451,29 +487,26 @@ EventBus.on("track-freqUnit8Data", freqData => {
 })
 
 //歌单
-EventBus.on('playlist-play', item => {
-    const { playlist, text } = item
-    tryPlayPlaylist(playlist, text)
-})
+EventBus.on('playlist-play', ({ playlist, text, traceId }) => tryPlayPlaylist(playlist, text, traceId))
 
 //专辑
-EventBus.on('album-play', item => {
-    const { album, text } = item
-    playAlbum(album, text)
-})
+EventBus.on('album-play', ({ album, text }) => playAlbum(album, text))
 
 //歌曲数组
-EventBus.on('tracks-play', item => {
-    const { data, needReset, text } = item
-    addAndPlayTracks(data, needReset, text)
-})
+EventBus.on('tracks-play', ({ data, needReset, text }) => addAndPlayTracks(data, needReset, text))
+
+EventBus.on('queue-empty', )
 
 
 //设置RadioPlayer
 const setupRadioPlayer = () => EventBus.emit('radio-init', document.querySelector('.audio-node'))
 
 //应用启动时，恢复歌曲信息
-const restoreTrack = () => EventBus.emit("track-restoreInit", currentTrack.value)
+const restoreTrack = () => {
+    bootstrapTrack(currentTrack.value, true).then(track => {
+        EventBus.emit("track-restore", track)
+    }).catch(error => console.log(error))
+}
 
 //注册ipcMain消息监听器
 const registryIpcRenderderListeners = () => {
@@ -536,9 +569,12 @@ onMounted(() => {
     restoreTrack()
 })
 
+watch(queueTracksSize, (nv, ov) => {
+    if(nv < 1) EventBus.emit('playbackQueue-empty')
+})
 //TODO
 watch(theme, () => {
-    if(playing.value || (playingViewThemeIndex.value != 1 
+    if(isPlaying() || (playingViewThemeIndex.value != 1 
             && layout.value.index != 2)) {
         return
     }
