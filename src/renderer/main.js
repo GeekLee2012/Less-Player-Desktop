@@ -5,7 +5,7 @@ import App from './App.vue';
 import { createPinia } from 'pinia';
 import piniaPersist from 'pinia-plugin-persist'
 //Router
-import { router } from './route/Router';
+import { router } from './route/router';
 //LazyLoad
 import VueLazyLoad from 'vue3-lazyload';
 //播放器
@@ -42,33 +42,33 @@ const app = createApp(App);
 
 //全局异常处理器
 app.config.errorHandler = (err, vm, info) => {
-    // 处理错误
-    // `info` 是 Vue 特定的错误信息，比如错误所在的生命周期钩子
+  // 处理错误
+  // `info` 是 Vue 特定的错误信息，比如错误所在的生命周期钩子
 }
 
 app.use(pinia)
-    .use(router)
-    .use(VueLazyLoad, {
-        loading: 'default_cover.png',
-        error: 'default_cover.png',
-        log: false,
-        lifecycle: {
-          error: (el) => {
-            //console.log(el)
-          }
-        }
-    })
-    //Components
-    .component('SliderBar', SliderBar)
-    .component('ProgressBar', ProgressBar)
-    .component('VolumeBar', VolumeBar)
-    .component('AudioTime', AudioTime)
-    .component('PlayControl', PlayControl)
-    .component('ImageTextTile', ImageTextTile)
-    .component('SongItem', SongItem)
-    //Views
-    //.component('PlayingView', PlayingView)
-    .component('VideoPlayingView', VideoPlayingView)
-    .component('PlaybackQueueView', PlaybackQueueView)
-    .directive('gesture-dnm', (el, binding) => dragAndMove(el, binding.value))
-    .mount('#app')
+  .use(router)
+  .use(VueLazyLoad, {
+    loading: 'default_cover.png',
+    error: 'default_cover.png',
+    log: false,
+    lifecycle: {
+      error: (el) => {
+        //console.log(el)
+      }
+    }
+  })
+  //Components
+  .component('SliderBar', SliderBar)
+  .component('ProgressBar', ProgressBar)
+  .component('VolumeBar', VolumeBar)
+  .component('AudioTime', AudioTime)
+  .component('PlayControl', PlayControl)
+  .component('ImageTextTile', ImageTextTile)
+  .component('SongItem', SongItem)
+  //Views
+  //.component('PlayingView', PlayingView)
+  .component('VideoPlayingView', VideoPlayingView)
+  .component('PlaybackQueueView', PlaybackQueueView)
+  .directive('gesture-dnm', (el, binding) => dragAndMove(el, binding.value))
+  .mount('#app')

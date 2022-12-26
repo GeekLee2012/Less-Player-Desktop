@@ -14,14 +14,14 @@ export class RadioPlayer {
     }
 
     static get() {
-        if(!singleton) singleton = new RadioPlayer()
+        if (!singleton) singleton = new RadioPlayer()
         return singleton
     }
 
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = RadioPlayer.get()
-        return player.on('radio-init', node => player.createWebAudioApi(node)) 
+        return player.on('radio-init', node => player.createWebAudioApi(node))
             .on('radio-channelChange', channel => player.setChannel(channel))
             .on('radio-play', channel => player.playChannel(channel))
             .on('radio-togglePlay', () => player.togglePlay())
@@ -35,16 +35,16 @@ export class RadioPlayer {
 
     //播放
     play() {
-        if(!Hls.isSupported()) return 
-        if(!audioNode) return 
-        if(!this.channel) return
-        
+        if (!Hls.isSupported()) return
+        if (!audioNode) return
+        if (!this.channel) return
+
         //this.hls.loadSource('http://ngcdn001.cnr.cn/live/zgzs/index.m3u8')
         this.hls.loadSource(this.channel.url)
         this.hls.attachMedia(audioNode)
-        
+
         const self = this
-        this.hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
             audioNode.play()
             self.setState(true)
             self.channelChanged = false
@@ -55,15 +55,15 @@ export class RadioPlayer {
 
     //暂停
     pause() {
-        if(!Hls.isSupported()) return 
-        if(!audioNode) return 
-        if(!this.playing) return 
+        if (!Hls.isSupported()) return
+        if (!audioNode) return
+        if (!this.playing) return
         this.hls.detachMedia()
         this.setState(false)
     }
 
     togglePlay() {
-        if(this.playing) {
+        if (this.playing) {
             this.pause()
         } else {
             this.play()
@@ -88,14 +88,14 @@ export class RadioPlayer {
     }
 
     volume(value) {
-        if(!Hls.isSupported()) return 
-        if(!audioNode) return 
+        if (!Hls.isSupported()) return
+        if (!audioNode) return
         audioNode.volume = value
     }
 
     __step() {
-        if(!this.channel) return 
-        if(!this.playing) return
+        if (!this.channel) return
+        if (!this.playing) return
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
         const currentSecs = currentTime / 1000
@@ -110,14 +110,14 @@ export class RadioPlayer {
     }
 
     createWebAudioApi(node) {
-        if(!node) return 
+        if (!node) return
         audioNode = node
-        if(this.webAudioApi) return 
+        if (this.webAudioApi) return
         this.webAudioApi = WebAudioApi.create(new AudioContext(), audioNode)
     }
 
-    resolveSound () {
-        if(!this.webAudioApi) return 
+    resolveSound() {
+        if (!this.webAudioApi) return
 
         const analyser = this.webAudioApi.getAnalyser()
         const freqData = new Uint8Array(analyser.frequencyBinCount)
@@ -126,7 +126,7 @@ export class RadioPlayer {
     }
 
     updateEQ(values) {
-        if(this.webAudioApi) this.webAudioApi.updateEQ(values)
+        if (this.webAudioApi) this.webAudioApi.updateEQ(values)
     }
-    
+
 }

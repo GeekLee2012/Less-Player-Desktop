@@ -2,9 +2,10 @@
   "name": "less-player",
   "private": true,
   "version": "0.1.15",
-  "description": "Less Player, Less is More ! All for One, One for All ~",
+  "description": "Less Player, Less is More ! ",
   "author": {
-    "name": "RIVE2012"
+    "name": "RIVE2012",
+    "email": "Rive08@126.com"
   },
   "repository": {
     "type": "git",
@@ -67,7 +68,16 @@
       "deleteAppDataOnUninstall": true
     },
     "linux": {
-      "icon": "dist/icon@2x.png"
+      "target": [
+        {
+          "target": "AppImage"
+        },
+        {
+          "target": "deb"
+        }
+      ],
+      "icon": "dist/icon@256X256.icns",
+      "category": "Audio Video"
     }
   }
 }

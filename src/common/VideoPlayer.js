@@ -15,14 +15,14 @@ export class VideoPlayer {
     }
 
     static get() {
-        if(!singleton) singleton = new VideoPlayer()
+        if (!singleton) singleton = new VideoPlayer()
         return singleton
     }
 
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = VideoPlayer.get()
-        return player.on('video-init', videoHolder => VideoPlayer.setVideoHolder(videoHolder)) 
+        return player.on('video-init', videoHolder => VideoPlayer.setVideoHolder(videoHolder))
             .on('video-change', video => player.setVideo(video))
             .on('video-play', video => player.playVideo(video))
             .on('video-togglePlay', () => player.togglePlay())
@@ -31,23 +31,23 @@ export class VideoPlayer {
             .on('video-restoreInit', video => player.setVideo(video))
     }
 
-    static setVideoHolder (videoHolder) {
+    static setVideoHolder(videoHolder) {
         gVideoHolder = videoHolder
     }
 
     //播放
     play() {
-        if(!Hls.isSupported()) return 
-        if(!gVideoHolder) return 
-        if(!this.video || !this.video.url) return
+        if (!Hls.isSupported()) return
+        if (!gVideoHolder) return
+        if (!this.video || !this.video.url) return
         const self = this
 
         const src = this.video.url
-        if(this.isM3U8Video()) {
+        if (this.isM3U8Video()) {
             this.hls.loadSource(src)
             this.hls.attachMedia(gVideoHolder)
-            
-            this.hls.on(Hls.Events.MANIFEST_PARSED, function() {
+
+            this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 gVideoHolder.play()
                 self.setState(true)
                 self.videoChanged = false
@@ -63,13 +63,13 @@ export class VideoPlayer {
     }
 
     isM3U8Video() {
-        if(!this.video || !this.video.url) return false
+        if (!this.video || !this.video.url) return false
         return this.video.url.includes('.m3u8')
     }
 
-    addSourceToVideo (element, src, type) {
+    addSourceToVideo(element, src, type) {
         let source = element.querySelector('source')
-        if(!source) {
+        if (!source) {
             source = document.createElement('source')
             element.appendChild(source)
         }
@@ -79,10 +79,10 @@ export class VideoPlayer {
 
     //暂停
     pause() {
-        if(!Hls.isSupported()) return 
-        if(!gVideoHolder) return 
-        if(!this.playing) return 
-        if(this.isM3U8Video()) {
+        if (!Hls.isSupported()) return
+        if (!gVideoHolder) return
+        if (!this.playing) return
+        if (this.isM3U8Video()) {
             this.hls.detachMedia()
         } else {
             gVideoHolder.pause()
@@ -91,7 +91,7 @@ export class VideoPlayer {
     }
 
     togglePlay() {
-        if(this.playing) {
+        if (this.playing) {
             this.pause()
         } else {
             this.play()
@@ -105,9 +105,10 @@ export class VideoPlayer {
 
     setVideo(video) {
         this.pause()
+        this.hls.stopLoad()
         this.video = video
         this.videoChanged = true
-        if(!video) this.resetHtmlVideo()
+        if (!video) this.resetHtmlVideo()
     }
 
     resetHtmlVideo() {
@@ -121,14 +122,14 @@ export class VideoPlayer {
     }
 
     volume(value) {
-        if(!Hls.isSupported()) return 
-        if(!gVideoHolder) return 
+        if (!Hls.isSupported()) return
+        if (!gVideoHolder) return
         gVideoHolder.volume = value
     }
 
     __step() {
-        if(!this.video) return 
-        if(!this.playing) return
+        if (!this.video) return
+        if (!this.playing) return
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
         const currentSecs = currentTime / 1000

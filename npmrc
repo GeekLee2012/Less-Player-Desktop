@@ -1,0 +1,5 @@
+#文件真正名称：.npmrc
+
+#registry=http://registry.npmmirror.com
+ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
+#ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/
