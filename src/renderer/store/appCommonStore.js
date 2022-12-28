@@ -3,6 +3,7 @@ import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from "../../common/Utils";
 
 const ipcRenderer = useIpcRenderer()
+let toastTimer = null
 
 export const useAppCommonStore = defineStore('appCommon', {
     state: () => ({
@@ -15,8 +16,8 @@ export const useAppCommonStore = defineStore('appCommon', {
         videoPlayingViewShow: false,
         audioEffectViewShow: false,
         //探索模式，歌单、歌手
-        exploreModes: [ 'playlists', 'artists', 'radios', 'userhome' ], 
-        exploreModeIndex: 0, 
+        exploreModes: ['playlists', 'artists', 'radios', 'userhome'],
+        exploreModeIndex: 0,
         //通用通知
         commonNotificationShow: false,
         commonNotificationText: null,
@@ -59,7 +60,7 @@ export const useAppCommonStore = defineStore('appCommon', {
             return this.exploreModes[this.exploreModeIndex]
         },
         exploreModeLength() {
-            return this.exploreModes.length 
+            return this.exploreModes.length
         },
         isActiveRandomMusicPlatform() {
             return (platform) => {
@@ -81,7 +82,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         togglePlaylistCategoryView() {
             this.playlistCategoryViewShow = !this.playlistCategoryViewShow
-            if(!this.playlistCategoryViewShow) {
+            if (!this.playlistCategoryViewShow) {
                 EventBus.emit("playlistCategory-resetScroll")
             }
         },
@@ -91,7 +92,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleArtistCategoryView() {
             this.artistCategoryViewShow = !this.artistCategoryViewShow
-            if(!this.artistCategoryViewShow) {
+            if (!this.artistCategoryViewShow) {
                 EventBus.emit("artistCategory-resetScroll")
             }
         },
@@ -101,7 +102,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleRadioCategoryView() {
             this.radioCategoryViewShow = !this.radioCategoryViewShow
-            if(!this.radioCategoryViewShow) {
+            if (!this.radioCategoryViewShow) {
                 EventBus.emit("radioCategory-resetScroll")
             }
         },
@@ -134,21 +135,21 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.coverMaskShow = !this.coverMaskShow
         },
         quit() {
-            if(ipcRenderer) ipcRenderer.send('app-quit')
+            if (ipcRenderer) ipcRenderer.send('app-quit')
         },
         minimize() {
-            if(ipcRenderer) ipcRenderer.send('app-min')
+            if (ipcRenderer) ipcRenderer.send('app-min')
         },
         maximize() {
-            if(ipcRenderer) ipcRenderer.send('app-max')
+            if (ipcRenderer) ipcRenderer.send('app-max')
         },
         setExploreMode(index) {
-            if(!index || index < 0) index = 0
+            if (!index || index < 0) index = 0
             this.exploreModeIndex = index % this.exploreModeLength
         },
         nextExploreMode() {
             const length = this.exploreModeLength
-            if(this.exploreModeIndex == length - 2) {
+            if (this.exploreModeIndex == length - 2) {
                 this.setExploreMode(0)
             } else {
                 this.setExploreMode(this.exploreModeIndex + 1)
@@ -163,27 +164,38 @@ export const useAppCommonStore = defineStore('appCommon', {
         setUserHomeExploreMode() {
             this.setExploreMode(3)
         },
-        showCommonNotification(text) {
-            this.commonNotificationShow = true
-            this.commonNotificationText = text || "操作成功！"
-        },
         setCommonNotificationType(type) {
             this.commonNotificationType = type || 0
         },
+        showCommonNotification(text) {
+            //没有内容就不显示
+            if (!text || typeof (text) != 'string' || text.trim().length < 1) return
+            this.commonNotificationText = text
+            this.commonNotificationShow = true
+        },
         hideCommonNotification() {
-            this.commonNotificationShow = false
             this.commonNotificationText = null
-            this.commonNotificationType = null
+            this.setCommonNotificationType()
+            this.commonNotificationShow = false
+        },
+        doToast(text, type, callback, delay) {
+            if (toastTimer) clearTimeout(toastTimer)
+            this.showCommonNotification(text)
+            this.setCommonNotificationType(type)
+            toastTimer = setTimeout(() => {
+                this.hideCommonNotification()
+                try {
+                    if (callback) callback()
+                } catch (error) {
+                    console.log(error)
+                }
+            }, (delay || 1500))
         },
         showToast(text, callback, delay) {
-            text = text || "操作成功！"
-            this.setCommonNotificationType(0)
-            EventBus.emit("toast", { text, callback, delay })
+            this.doToast(text || "操作成功！", 0, callback, delay)
         },
         showFailToast(text, callback, delay) {
-            text = text || "操作失败！"
-            this.setCommonNotificationType(1)
-            EventBus.emit("toast", { text, callback, delay })
+            this.doToast(text || "操作失败！", 1, callback, delay)
         },
         updateCommonCtxItem(value) {
             this.commonCtxItem = value
@@ -194,18 +206,18 @@ export const useAppCommonStore = defineStore('appCommon', {
         showCommonCtxMenu(value) {
             this.commonCtxMenuShow = true
             this.updateCommonCtxMenuCacheItem(value)
-        }, 
+        },
         hideCommonCtxMenu(clearCache) {
             this.commonCtxMenuShow = false
-            if(clearCache) this.updateCommonCtxMenuCacheItem(null)
+            if (clearCache) this.updateCommonCtxMenuCacheItem(null)
         },
         setCommonCtxMenuData(data) {
             this.commonCtxMenuData.length = 0
-            if(data) {
+            if (data) {
                 let spCnt = 0
                 data.forEach(item => {
                     this.commonCtxMenuData.push(item)
-                    if(item.separator) ++spCnt
+                    if (item.separator) ++spCnt
                 });
                 this.commonCtxMenuSeparatorNums = spCnt
             }
@@ -260,7 +272,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleRandomMusicPlatform(platform) {
             const index = this.randomMusicPlatformCodes.indexOf(platform)
-            if(index == -1) {
+            if (index == -1) {
                 this.randomMusicPlatformCodes.push(platform)
             } else {
                 this.randomMusicPlatformCodes.splice(index, 1)
@@ -268,7 +280,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleRandomMusicType(type) {
             const index = this.randomMusicTypeCodes.indexOf(type)
-            if(index == -1) {
+            if (index == -1) {
                 this.randomMusicTypeCodes.push(type)
             } else {
                 this.randomMusicTypeCodes.splice(index, 1)
@@ -291,8 +303,8 @@ export const useAppCommonStore = defineStore('appCommon', {
             {
                 //key: 'appCommon',
                 storage: localStorage,
-                paths: [ 'playingViewThemeIndex', 'spectrumIndex', 
-                    'randomMusicPlatformCodes', 'randomMusicTypeCodes', 'randomMusicCategoryName' ]
+                paths: ['playingViewThemeIndex', 'spectrumIndex',
+                    'randomMusicPlatformCodes', 'randomMusicTypeCodes', 'randomMusicCategoryName']
             },
         ],
     },

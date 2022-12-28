@@ -29,10 +29,11 @@ const { togglePlay, switchPlayMode,
   playPrevTrack, playNextTrack,
   toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
 const { playingViewShow, videoPlayingViewShow,
-  playingViewThemeIndex } = storeToRefs(useAppCommonStore())
+  playingViewThemeIndex, commonNotificationText,
+  commonNotificationShow } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
-  hideAllCategoryViews } = useAppCommonStore()
+  hideAllCategoryViews, hideCommonNotification } = useAppCommonStore()
 
 const isReservedPath = (path) => {
   const reservedPaths = ['id', 'name', 'binding', 'gBinding']
@@ -158,6 +159,15 @@ const hideAllPopoverViews = () => {
   hideAllCategoryViews()
   //隐藏上下文菜单
   hideAllCtxMenus()
+  //隐藏未正确关闭的Toast
+  hideEmptyToast()
+}
+
+const hideEmptyToast = () => {
+  const text = commonNotificationText.value
+  if (!text || text.trim().length < 1) {
+    hideCommonNotification()
+  }
 }
 
 const setElementAlignCenter = (selector, width, height, offsetLeft, offsetTop) => {
@@ -186,19 +196,18 @@ const initialize = () => {
   setupCache()
   setupTray()
   setupGlobalShortcut()
+  setupLayout()
 }
 
 //TODO 直接在setup()时初始化，不需要等待其他生命周期
 initialize()
 
 onMounted(() => {
-  /*
   //窗口大小变化事件监听
   window.addEventListener('resize', e => {
     //自适应视频页面大小
     setVideoViewSize()
   })
-  */
 
   //点击事件监听
   document.addEventListener('click', e => {
@@ -206,7 +215,7 @@ onMounted(() => {
     hideAllPopoverViews()
   })
 
-  setupLayout()
+  //setupLayout()
   setupAppGlobalProxy()
   //setupWindowCtlButton()
   registryDefaultLocalKeys()

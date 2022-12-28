@@ -7,7 +7,7 @@ import Popovers from '../Popovers.vue';
 
 <template>
     <div class="default-layout">
-        <MainLeft></MainLeft> 
+        <MainLeft></MainLeft>
         <MainCenter></MainCenter>
         <Popovers></Popovers>
     </div>

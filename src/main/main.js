@@ -9,8 +9,26 @@ const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX,
   randomTextWithinAlphabetNums, nextInt,
   getDownloadDir, removePath, listFiles } = require('./common')
 
-let mainWin = null, powerSaveBlockerId = -1, appTray = null
-const appWidth = 1080, appHeight = 720, maxAppSize = 102400
+
+const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
+const appLayoutConfig = {
+  'default': {
+    appWidth: 1080,
+    appHeight: 720,
+    maxWidth: 102400,
+    maxHeight: 102400
+  },
+  'simple': {
+    appWidth: 500,
+    appHeight: 588,
+    minWidth: 500,
+    minHeight: 588,
+    maxWidth: 500,
+    maxHeight: 588
+  }
+}
+let mainWin = null, appLayout = DEFAULT_LAYOUT
+let powerSaveBlockerId = -1, appTray = null
 const proxyAuthRealms = []
 //TODO 下载队列
 let downloadingItem = null
@@ -118,14 +136,21 @@ const registryGlobalShortcuts = () => {
     // 打开 / 关闭当前播放
     'Shift+Q': 'togglePlaybackQueue',
     // 打开 / 关闭歌词设置
-    'Shift+L': 'toggleLyricToolbar'
+    'Shift+L': 'toggleLyricToolbar',
+    // 打开
+    'Shift+I': openDevTools
   }
 
   const activeWindowValues = ['visitSetting', 'togglePlaybackQueue', 'toggleLyricToolbar']
   for (const [key, value] of Object.entries(config)) {
     globalShortcut.register(key, () => {
-      sendToRenderer('globalShortcut-' + value)
-      if (activeWindowValues.includes(value)) mainWin.show()
+      const valueType = typeof (value)
+      if (valueType === 'function') {
+        value()
+      } else if (valueType === 'string') {
+        sendToRenderer('globalShortcut-' + value)
+        if (activeWindowValues.includes(value)) mainWin.show()
+      }
     })
   }
 }
@@ -174,9 +199,9 @@ const registryGlobalListeners = () => {
   }).on('app-winBtn', (e, value) => {
     setWindowButtonVisibility(value === true)
   }).on('app-layout-default', () => {
-    setupDefaultLayout()
+    setupAppLayout(DEFAULT_LAYOUT)
   }).on('app-layout-simple', () => {
-    setupSimpleLayout()
+    setupAppLayout(SIMPLE_LAYOUT)
   }).on('app-globalShortcut', (e, data) => {
     if (data === true) {
       globalShortcut.unregisterAll()
@@ -188,8 +213,7 @@ const registryGlobalListeners = () => {
     setAppGlobalProxy(data)
   }).on('visit-link', (e, data) => {
     shell.openExternal(data)
-  }).on('download-item', (e, data) => {
-    const { url } = data
+  }).on('download-item', (e, { url }) => {
     mainWin.webContents.downloadURL(url)
   }).on('download-cancel', (e, data) => {
     cancelDownload()
@@ -295,6 +319,7 @@ const registryGlobalListeners = () => {
 
 //创建浏览窗口
 const createWindow = () => {
+  const { appWidth, appHeight } = appLayoutConfig[appLayout]
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: appWidth,
@@ -351,20 +376,15 @@ const createWindow = () => {
   return mainWindow
 }
 
-const setupDefaultLayout = () => {
-  //setWindowButtonVisibility(!useCustomTrafficLight)
-  mainWin.setMaximumSize(maxAppSize, maxAppSize)
-  mainWin.center()
-}
-
-const setupSimpleLayout = () => {
-  //setWindowButtonVisibility(false)
-  mainWin.webContents.setZoomFactor(1)
-
-  const width = 500, height = 588
-  mainWin.setMinimumSize(width, height)
-  mainWin.setMaximumSize(width, height)
-  mainWin.setSize(width, height)
+const setupAppLayout = (layout) => {
+  appLayout = layout
+  const { appWidth, appHeight, maxWidth, maxHeight } = appLayoutConfig[appLayout]
+  mainWin.setMaximumSize(maxWidth, maxHeight)
+  if (appLayout === SIMPLE_LAYOUT) {
+    mainWin.webContents.setZoomFactor(1)
+    mainWin.setMinimumSize(appWidth, appHeight)
+    mainWin.setSize(appWidth, appHeight)
+  }
   mainWin.center()
 }
 
@@ -471,11 +491,12 @@ const toggleWinOSFullScreen = () => {
 }
 
 const setAppWindowZoom = (value, noResize) => {
-  if (!value) return
+  if (!value || appLayout === SIMPLE_LAYOUT) return
   const zoom = Number(value) || 100
   const zoomFactor = parseFloat(zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return
   mainWin.webContents.setZoomFactor(zoomFactor)
+  const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = parseInt(appWidth * zoomFactor)
   const height = parseInt(appHeight * zoomFactor)
   mainWin.setMinimumSize(width, height)
@@ -544,6 +565,10 @@ const getProxyAuthRealm = (scheme, host, port) => {
     }
   }
   return { username: null, secret: null }
+}
+
+const openDevTools = () => {
+  if (mainWin) mainWin.webContents.openDevTools()
 }
 
 //覆盖(包装)请求

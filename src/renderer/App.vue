@@ -13,12 +13,13 @@ import AppContent from "./AppContent.vue";
 </template>
 
 <style>
-html, body, #app {
+html,
+body,
+#app {
   background-color: var(--bg-color);
   background: var(--app-bg);
   background-position: center;
   background-size: cover;
-  margin: 0px auto;
   height: 100%;
   font-size: var(--text-size);
   color: var(--text-color);
