@@ -379,11 +379,15 @@ const createWindow = () => {
 const setupAppLayout = (layout) => {
   appLayout = layout
   const { appWidth, appHeight, maxWidth, maxHeight } = appLayoutConfig[appLayout]
-  mainWin.setMaximumSize(maxWidth, maxHeight)
+  const zoomFactor = mainWin.webContents.getZoomFactor()
   if (appLayout === SIMPLE_LAYOUT) {
-    mainWin.webContents.setZoomFactor(1)
-    mainWin.setMinimumSize(appWidth, appHeight)
-    mainWin.setSize(appWidth, appHeight)
+    //mainWin.webContents.setZoomFactor(1)
+    const width = parseInt(appWidth * zoomFactor), height = parseInt(appHeight * zoomFactor)
+    mainWin.setMaximumSize(width, height)
+    mainWin.setMinimumSize(width, height)
+    mainWin.setSize(width, height)
+  } else {
+    mainWin.setMaximumSize(maxWidth, maxHeight)
   }
   mainWin.center()
 }
@@ -491,7 +495,7 @@ const toggleWinOSFullScreen = () => {
 }
 
 const setAppWindowZoom = (value, noResize) => {
-  if (!value || appLayout === SIMPLE_LAYOUT) return
+  if (!value) return
   const zoom = Number(value) || 100
   const zoomFactor = parseFloat(zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return
