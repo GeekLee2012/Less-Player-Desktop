@@ -33,7 +33,7 @@ const { playingViewShow, videoPlayingViewShow,
   commonNotificationShow } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
-  hideAllCategoryViews, hideCommonNotification } = useAppCommonStore()
+  hideAllCategoryViews, showToast } = useAppCommonStore()
 
 const isReservedPath = (path) => {
   const reservedPaths = ['id', 'name', 'binding', 'gBinding']
@@ -165,8 +165,15 @@ const hideAllPopoverViews = () => {
 
 const hideEmptyToast = () => {
   const text = commonNotificationText.value
-  if (!text || text.trim().length < 1) {
-    hideCommonNotification()
+  if (!text || text.trim().length < 1) forceHideToast()
+}
+
+const forceHideToast = () => {
+  const els = document.querySelectorAll('.common-ntf')
+  if (els) {
+    els.forEach(el => {
+      el.style.display = 'none'
+    })
   }
 }
 
