@@ -30,7 +30,7 @@ const { commonNotificationShow, commonNotificationText,
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
-  hideAllCtxMenus, hideCommonNotification } = useAppCommonStore()
+  hideAllCtxMenus } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 
 const getCtxMenuAutoHeight = () => {
@@ -162,7 +162,7 @@ onMounted(() => {
 
   <!-- 通用通知 -->
   <transition>
-    <Notification class="common-ntf" v-show="commonNotificationShow" :dblclick="hideCommonNotification">
+    <Notification class="common-ntf" v-show="commonNotificationShow">
       <template #text>
         <svg v-show="commonNotificationType == 0" width="36" height="36" viewBox="0 0 938.64 938.69"
           xmlns="http://www.w3.org/2000/svg">

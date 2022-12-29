@@ -1,12 +1,9 @@
 <script setup>
-const props = defineProps({
-    dblclick: Function
-})
 //TODO
 </script>
 
 <template>
-    <div class="ntf" @dblclick.stop="dblclick">
+    <div class="ntf">
         <div class="ntf-dialog-mask">
             <div class="ntf-dialog">
                 <div class="ntf-text">

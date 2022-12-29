@@ -105,15 +105,16 @@ const setupCache = () => {
   }
 }
 
-const setupLayout = () => {
+const setupLayout = (isInit) => {
+  let channel = 'app-layout-default'
   if (isSimpleLayout.value) {
     currentAppLayout.value = SimpleLayout
-    if (ipcRenderer) ipcRenderer.send('app-layout-simple')
+    channel = 'app-layout-simple'
   } else {
     currentAppLayout.value = DefaultLayout
-    EventBus.emit('app-layout-default')
-    if (ipcRenderer) ipcRenderer.send('app-layout-default')
+    EventBus.emit(channel)
   }
+  if (ipcRenderer) ipcRenderer.send(channel, { zoom: getWindowZoom.value, isInit })
   //triggerRef(currentAppLayout)
 }
 
@@ -196,14 +197,20 @@ EventBus.on("app-elementAlignCenter", value => {
   setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
 })
 
+//注册ipcMain消息监听器
+const registryIpcRenderderListeners = () => {
+  if (!ipcRenderer) return
+  ipcRenderer.on('app-active', hideEmptyToast)
+}
+
 const initialize = () => {
   cleanupSetting()
-  if (!isSimpleLayout.value) setupWindowZoom()
   setupAppSuspension()
   setupCache()
   setupTray()
   setupGlobalShortcut()
-  setupLayout()
+  setupLayout(true)
+  registryIpcRenderderListeners()
 }
 
 //TODO 直接在setup()时初始化，不需要等待其他生命周期

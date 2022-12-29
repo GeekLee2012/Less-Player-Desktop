@@ -14,17 +14,11 @@ const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
   'default': {
     appWidth: 1080,
-    appHeight: 720,
-    maxWidth: 102400,
-    maxHeight: 102400
+    appHeight: 720
   },
   'simple': {
     appWidth: 500,
-    appHeight: 588,
-    minWidth: 500,
-    minHeight: 588,
-    maxWidth: 500,
-    maxHeight: 588
+    appHeight: 588
   }
 }
 let mainWin = null, appLayout = DEFAULT_LAYOUT
@@ -87,6 +81,11 @@ const init = () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       mainWin = createWindow()
     }
+    sendToRenderer('app-active')
+  })
+
+  app.on('did-become-active', (event) => {
+    sendToRenderer('app-active')
   })
 
   // Quit when all windows are closed, except on macOS. There, it's common
@@ -193,15 +192,15 @@ const registryGlobalListeners = () => {
       appTray = null
     }
   }).on('app-zoom', (e, value) => {
-    setAppWindowZoom(value)
+    setupAppWindowZoom(value)
   }).on('app-zoom-noResize', (e, value) => {
-    setAppWindowZoom(value, true)
+    setupAppWindowZoom(value, true)
   }).on('app-winBtn', (e, value) => {
     setWindowButtonVisibility(value === true)
-  }).on('app-layout-default', () => {
-    setupAppLayout(DEFAULT_LAYOUT)
-  }).on('app-layout-simple', () => {
-    setupAppLayout(SIMPLE_LAYOUT)
+  }).on('app-layout-default', (e, { zoom, isInit }) => {
+    setupAppLayout(DEFAULT_LAYOUT, zoom, isInit)
+  }).on('app-layout-simple', (e, { zoom, isInit }) => {
+    setupAppLayout(SIMPLE_LAYOUT, zoom, isInit)
   }).on('app-globalShortcut', (e, data) => {
     if (data === true) {
       globalShortcut.unregisterAll()
@@ -210,7 +209,7 @@ const registryGlobalListeners = () => {
       globalShortcut.unregisterAll()
     }
   }).on('app-setGlobalProxy', (e, data) => {
-    setAppGlobalProxy(data)
+    setupAppGlobalProxy(data)
   }).on('visit-link', (e, data) => {
     shell.openExternal(data)
   }).on('download-item', (e, { url }) => {
@@ -353,6 +352,10 @@ const createWindow = () => {
     mainWindow.show()
   })
 
+  mainWindow.on('show', () => {
+    sendToRenderer('app-active')
+  })
+
   //配置请求过滤
   const filter = {
     urls: [
@@ -376,18 +379,23 @@ const createWindow = () => {
   return mainWindow
 }
 
-const setupAppLayout = (layout) => {
+const setupAppLayout = (layout, zoom, isInit) => {
   appLayout = layout
-  const { appWidth, appHeight, maxWidth, maxHeight } = appLayoutConfig[appLayout]
-  const zoomFactor = mainWin.webContents.getZoomFactor()
-  if (appLayout === SIMPLE_LAYOUT) {
-    //mainWin.webContents.setZoomFactor(1)
-    const width = parseInt(appWidth * zoomFactor), height = parseInt(appHeight * zoomFactor)
-    mainWin.setMaximumSize(width, height)
+
+  zoom = Number(zoom) || 100
+  const zoomFactor = parseFloat(zoom / 100)
+  if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 1
+  mainWin.webContents.setZoomFactor(zoomFactor)
+
+  const { appWidth, appHeight } = appLayoutConfig[appLayout]
+  const width = parseInt(appWidth * zoomFactor), height = parseInt(appHeight * zoomFactor)
+  const isSimpleLayout = (appLayout === SIMPLE_LAYOUT)
+  const maxWidth = (isSimpleLayout ? width : 102400)
+  const maxHeight = (isSimpleLayout ? height : 102400)
+  mainWin.setMaximumSize(maxWidth, maxHeight)
+  if (isInit || isSimpleLayout) {
     mainWin.setMinimumSize(width, height)
     mainWin.setSize(width, height)
-  } else {
-    mainWin.setMaximumSize(maxWidth, maxHeight)
   }
   mainWin.center()
 }
@@ -423,21 +431,23 @@ const initAppMenuTemplate = () => {
 
 const sendToRenderer = (channel, args) => {
   try {
-    if (mainWin) mainWin.webContents.send(channel, args)
+    if (mainWin && mainWin.webContents) mainWin.webContents.send(channel, args)
   } catch (error) {
     console.log(error)
   }
 }
 
 //TODO 
-const sendTrayAction = (action) => sendToRenderer('tray-action', action)
+const sendTrayAction = (action, showWin) => {
+  if (showWin && mainWin) mainWin.show()
+  sendToRenderer('tray-action', action)
+}
 
 const initTrayMenuTemplate = () => {
   const template = [{
     label: '听你想听，爱你所爱',
     click: () => {
-      mainWin.show()
-      sendTrayAction(4)
+      sendTrayAction(4, true)
     }
   }, {
     type: 'separator'
@@ -455,14 +465,12 @@ const initTrayMenuTemplate = () => {
   }, {
     label: '我的主页',
     click: () => {
-      mainWin.show()
-      sendTrayAction(5)
+      sendTrayAction(5, true)
     }
   }, {
     label: '设置',
     click: () => {
-      mainWin.show()
-      sendTrayAction(6)
+      sendTrayAction(6, true)
     }
   }, {
     type: 'separator'
@@ -494,7 +502,7 @@ const toggleWinOSFullScreen = () => {
   return !isMax
 }
 
-const setAppWindowZoom = (value, noResize) => {
+const setupAppWindowZoom = (value, noResize) => {
   if (!value) return
   const zoom = Number(value) || 100
   const zoomFactor = parseFloat(zoom / 100)
@@ -518,7 +526,7 @@ const cancelDownload = () => {
   }
 }
 
-const setAppGlobalProxy = (data) => {
+const setupAppGlobalProxy = (data) => {
   const config = {}
   proxyAuthRealms.length = 0
   if (!data) {
