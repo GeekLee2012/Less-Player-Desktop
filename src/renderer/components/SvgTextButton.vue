@@ -8,14 +8,14 @@ const props = defineProps({
 
 const handleLeftClick = (event) => {
     const { isDisabled, leftAction } = props
-    if(isDisabled) return 
-    if(leftAction) leftAction(event)
+    if (isDisabled) return
+    if (leftAction) leftAction(event)
 }
 
 const handleRightClick = (event) => {
     const { isDisabled, rightAction } = props
-    if(isDisabled) return 
-    if(rightAction) rightAction(event)
+    if (isDisabled) return
+    if (rightAction) rightAction(event)
 }
 </script>
 
@@ -89,7 +89,7 @@ const handleRightClick = (event) => {
     background: var(--btn-bg);
 }
 
-.svg-text-btn .left-btn .text{
+.svg-text-btn .left-btn .text {
     margin-left: 5px;
     margin-right: 8px;
 }
@@ -98,5 +98,4 @@ const handleRightClick = (event) => {
     margin-left: 1px;
     margin-right: 6px;
 }
-
 </style>

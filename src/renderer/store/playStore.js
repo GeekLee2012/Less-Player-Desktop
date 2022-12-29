@@ -5,13 +5,15 @@ import { Track } from '../../common/Track';
 import { toMmss } from '../../common/Times';
 import { Playlist } from '../../common/Playlist';
 
-const NO_TRACK = new Track('0', '', '听你想听，爱你所爱', 
-    [ { id: '0', name: '不枉青春' }], 
-    { id: '0', name: '山川湖海，日月星辰' }, 
+
+
+const NO_TRACK = new Track('0', '', '听你想听，爱你所爱',
+    [{ id: '0', name: '不枉青春' }],
+    { id: '0', name: '山川湖海，日月星辰' },
     0, 'default_cover.png')
 
 export const usePlayStore = defineStore('play', {
-    state: ()=> ({
+    state: () => ({
         playing: false,
         playingIndex: -1,
         playMode: PLAY_MODE.REPEAT_ALL,
@@ -27,7 +29,7 @@ export const usePlayStore = defineStore('play', {
     }),
     getters: {
         currentTrack(state) {
-            if(this.playingIndex < 0) return NO_TRACK
+            if (this.playingIndex < 0) return NO_TRACK
             return this.track(this.playingIndex)
         },
         track(state) {
@@ -46,9 +48,9 @@ export const usePlayStore = defineStore('play', {
         },
         hasLyric(state) {
             const track = state.currentTrack
-            if(!track) return false
+            if (!track) return false
             const lyric = track.lyric
-            if(!lyric) return false
+            if (!lyric) return false
             return lyric.data.size > 0
         }
     },
@@ -67,14 +69,14 @@ export const usePlayStore = defineStore('play', {
         },
         togglePlay() {
             //FM广播
-            if(Playlist.isFMRadioType(this.currentTrack)) {
+            if (Playlist.isFMRadioType(this.currentTrack)) {
                 EventBus.emit('radio-togglePlay')
-                return 
+                return
             }
             //播放列表为空
-            if(this.queueTracksSize < 1) return
+            if (this.queueTracksSize < 1) return
             //当前歌曲不存在或存在但缺少url
-            if(!Track.hasUrl(this.currentTrack) 
+            if (!Track.hasUrl(this.currentTrack)
                 || NO_TRACK == this.currentTrack) {
                 this.playNextTrack()
                 return
@@ -85,24 +87,24 @@ export const usePlayStore = defineStore('play', {
         addTrack(track) {
             //TODO 超级列表如何保证时效
             const index = this.findIndex(track)
-            if(index == -1) this.queueTracks.push(track)
+            if (index == -1) this.queueTracks.push(track)
         },
         addTracks(tracks) {
             //TODO 暂时不去重, 超级列表如何保证时效
             //this.queueTracks.push(...tracks)
-            if(tracks.length < 1) return
+            if (tracks.length < 1) return
             tracks.forEach(item => this.addTrack(item));
         },
         playTrackLater(track) {
             let index = this.findIndex(track)
-            if(index == -1) {
+            if (index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
-            } else if(index < this.playingIndex) {
+            } else if (index < this.playingIndex) {
                 this.queueTracks.splice(this.playingIndex + 1, 0, track)
                 this.queueTracks.splice(index, 1)
                 --this.playingIndex
-            } else if(index > this.playingIndex 
+            } else if (index > this.playingIndex
                 && (index != this.playingIndex + 1)) {
                 this.queueTracks.splice(this.playingIndex + 1, 0, track)
                 this.queueTracks.splice(index + 1, 1)
@@ -110,22 +112,22 @@ export const usePlayStore = defineStore('play', {
         },
         removeTrack(track) {
             const index = this.findIndex(track)
-            if(index > -1) {
+            if (index > -1) {
                 const isCurrent = (index == this.playingIndex)
                 this.queueTracks.splice(index, 1)
-                if(index <= this.playingIndex) {
+                if (index <= this.playingIndex) {
                     --this.playingIndex
                 }
                 const maxSize = this.queueTracksSize
-                if(maxSize < 1){
+                if (maxSize < 1) {
                     this.resetQueue()
-                    return 
-                }        
-                if(isCurrent) {
-                    if(this.playing) {
+                    return
+                }
+                if (isCurrent) {
+                    if (this.playing) {
                         this.playNextTrack()
                     }
-                } 
+                }
             }
         },
         resetQueue() {
@@ -148,9 +150,9 @@ export const usePlayStore = defineStore('play', {
         playTrackDirectly(track) {
             this.__resetPlayState()
             let playEventName = 'track-play'
-            if(Playlist.isFMRadioType(track)) { //FM广播
+            if (Playlist.isFMRadioType(track)) { //FM广播
                 playEventName = 'radio-play'
-            } else if(!Track.hasUrl(track)) {   //普通歌曲
+            } else if (!Track.hasUrl(track)) {   //普通歌曲
                 playEventName = 'track-changed'
             }
             EventBus.emit(playEventName, track)
@@ -158,7 +160,7 @@ export const usePlayStore = defineStore('play', {
         //播放，并更新当前播放列表相关状态
         playTrack(track) {
             let index = this.findIndex(track)
-            if(index == -1) {
+            if (index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
             }
@@ -168,8 +170,8 @@ export const usePlayStore = defineStore('play', {
         playPrevTrack() {
             //TODO
             const maxSize = this.queueTracksSize
-            if(maxSize < 1) return
-            switch(this.playMode) {
+            if (maxSize < 1) return
+            switch (this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     --this.playingIndex
                     this.playingIndex = this.playingIndex < 0 ? maxSize - 1 : this.playingIndex
@@ -184,13 +186,13 @@ export const usePlayStore = defineStore('play', {
         },
         playNextTrack() {
             //TODO
-            if(Playlist.isNormalRadioType(this.currentTrack)) {
+            if (Playlist.isNormalRadioType(this.currentTrack)) {
                 EventBus.emit('track-nextPlaylistRadioTrack', this.currentTrack)
-                return 
+                return
             }
             const maxSize = this.queueTracksSize
-            if(maxSize < 1) return
-            switch(this.playMode) {
+            if (maxSize < 1) return
+            switch (this.playMode) {
                 case PLAY_MODE.REPEAT_ALL:
                     this.playingIndex = ++this.playingIndex % maxSize
                     break
@@ -208,7 +210,7 @@ export const usePlayStore = defineStore('play', {
             let duration = 0
             try {
                 duration = this.currentTrack.duration
-            } catch(error) {
+            } catch (error) {
                 console.log(error)
             }
             this.progress = duration > 0 ? (this.currentTime / duration) : 0
@@ -216,7 +218,7 @@ export const usePlayStore = defineStore('play', {
         updateVolume(value) {
             value = parseFloat(value)
             value = value > 0 ? value : 0
-            value = value < 1 ? value : 1 
+            value = value < 1 ? value : 1
             this.volume = value
             EventBus.emit("volume-set", value)
         },
@@ -241,7 +243,7 @@ export const usePlayStore = defineStore('play', {
             {
                 key: "player",
                 storage: localStorage,
-                paths: [ 'playingIndex', 'playMode', 'queueTracks', 'volume' ]
+                paths: ['playingIndex', 'playMode', 'queueTracks', 'volume']
             }
         ]
     }

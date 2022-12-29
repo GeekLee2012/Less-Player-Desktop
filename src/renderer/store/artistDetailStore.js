@@ -1,27 +1,28 @@
 import { defineStore } from "pinia";
-import EventBus from "../../common/EventBus";
 import { usePlatformStore } from "./platformStore";
 
-const TAB_LIST = [ {
-        code: 'hot-songs',
-        name: '热门歌曲',
-        text: '共0首歌曲'
-    },
-    {
-        code: 'all-songs',
-        name: '歌曲',
-        text: '共0首歌曲'
-    },
-    {
-        code: 'albums',
-        name: '专辑',
-        text: '共0张专辑'
-    },
-    {
-        code: 'about',
-        name: '歌手详情',
-        text: ''
-    } ]
+
+
+const TAB_LIST = [{
+    code: 'hot-songs',
+    name: '热门歌曲',
+    text: '共0首歌曲'
+},
+{
+    code: 'all-songs',
+    name: '歌曲',
+    text: '共0首歌曲'
+},
+{
+    code: 'albums',
+    name: '专辑',
+    text: '共0张专辑'
+},
+{
+    code: 'about',
+    name: '歌手详情',
+    text: ''
+}]
 
 export const useArtistDetailStore = defineStore('artistDetail', {
     state: () => ({
@@ -42,12 +43,12 @@ export const useArtistDetailStore = defineStore('artistDetail', {
     }),
     getters: {
         activeTabCode() {
-            if(this.activeTab < 0) return ''
+            if (this.activeTab < 0) return ''
             return this.tabs[this.activeTab].code
         }
     },
     actions: {
-        setActiveTab(index) { 
+        setActiveTab(index) {
             //TODO 边界检查
             this.activeTab = index
         },
@@ -106,13 +107,13 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             this.about = about
         },
         isArtistDetailLoaded() {
-            if(!this.artistId) return false
-            if(!this.artistName) return false
-            if(this.artistId.length < 1) return false
+            if (!this.artistId) return false
+            if (!this.artistName) return false
+            if (this.artistId.length < 1) return false
 
             this.artistName = this.artistName.trim()
-            if(this.artistName.length < 1) return false
-            if(this.artistName == '未知歌手' ) return false
+            if (this.artistName.length < 1) return false
+            if (this.artistName == '未知歌手') return false
             return true
         },
         isHotSongsTabLoaded() {
@@ -128,7 +129,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             return this.about.trim().length > 0
         },
         updateTabTipText(length) {
-            if(this.activeTab < 0) {
+            if (this.activeTab < 0) {
                 this.tabTipText = ''
             } else {
                 this.tabTipText = this.tabs[this.activeTab].text.replace('0', length)
@@ -140,16 +141,16 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         },
         updateTabs() {
             const { isQQ, isNetEase, isKuWo, isKuGou, isDouBan } = usePlatformStore()
-            if(isQQ(this.platform) 
+            if (isQQ(this.platform)
                 || isNetEase(this.platform)) {
-                this.tabs = [ TAB_LIST[0], TAB_LIST[2], TAB_LIST[3] ]
+                this.tabs = [TAB_LIST[0], TAB_LIST[2], TAB_LIST[3]]
                 this.setupSongTabs(true, false)
-            } else if (isKuWo(this.platform) 
-                || isKuGou(this.platform) ){
-                this.tabs = [ TAB_LIST[1], TAB_LIST[2], TAB_LIST[3] ]
+            } else if (isKuWo(this.platform)
+                || isKuGou(this.platform)) {
+                this.tabs = [TAB_LIST[1], TAB_LIST[2], TAB_LIST[3]]
                 this.setupSongTabs(false, true)
-            }  else if (isDouBan(this.platform)){
-                this.tabs = [ TAB_LIST[1], TAB_LIST[3] ]
+            } else if (isDouBan(this.platform)) {
+                this.tabs = [TAB_LIST[1], TAB_LIST[3]]
                 this.setupSongTabs(false, true)
             } else {
                 this.tabs = TAB_LIST

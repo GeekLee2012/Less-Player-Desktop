@@ -1,5 +1,7 @@
 //import analyze from 'rgbaster';
 
+
+
 export const useIpcRenderer = () => {
     try {
         return electronAPI ? electronAPI.ipcRenderer : null

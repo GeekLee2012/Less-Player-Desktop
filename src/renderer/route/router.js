@@ -17,6 +17,8 @@ import BatchActionView from '../views/BatchActionView.vue';
 import DataBackupView from '../views/DataBackupView.vue';
 import DataRestoreView from '../views/DataRestoreView.vue';
 
+
+
 const routes = [
     { //默认
         path: '/',

@@ -11,14 +11,16 @@ import { usePlatformStore } from './store/platformStore';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useSettingStore } from './store/settingStore';
 
+
+
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
-const { isArtistDetailVisitable, isAlbumDetailVisitable, 
+const { isArtistDetailVisitable, isAlbumDetailVisitable,
     updateCurrentPlatformByCode } = usePlatformStore()
 const { exploreModeCode } = storeToRefs(useAppCommonStore())
-const { setExploreMode, setArtistExploreMode, 
+const { setExploreMode, setArtistExploreMode,
     setRadioExploreMode, setUserHomeExploreMode,
-    hideAllCtxMenus, hidePlayingView, 
+    hideAllCtxMenus, hidePlayingView,
     updateCommonCtxItem, hidePlaybackQueueView, } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout } = storeToRefs(useSettingStore())
@@ -39,9 +41,9 @@ const setupRouter = () => {
 //TODO 数据量大时，可能有卡顿风险
 const highlightNavigationCustomPlaylist = (to, from) => {
     const path = to.path
-    let index = -1 
-    if(path.includes('/customPlaylist/') 
-        && !path.includes('/create') 
+    let index = -1
+    if (path.includes('/customPlaylist/')
+        && !path.includes('/create')
         && !path.includes('/edit')) {
         const id = path.split('/')[3]
         index = findCustomPlaylistIndex(id)
@@ -51,13 +53,13 @@ const highlightNavigationCustomPlaylist = (to, from) => {
 
 const autoSwitchExploreMode = (to) => {
     const path = to.path
-    if(path.includes('/playlists/')) {
+    if (path.includes('/playlists/')) {
         setExploreMode(0)
-    } else if(path.includes('/artists/')) {
+    } else if (path.includes('/artists/')) {
         setArtistExploreMode()
-    } else if(path.includes('/radios')) {
+    } else if (path.includes('/radios')) {
         setRadioExploreMode()
-    }  else if(path.includes('/userhome')) {
+    } else if (path.includes('/userhome')) {
         setUserHomeExploreMode()
     } else {
         //setExploreMode(0)
@@ -72,14 +74,14 @@ const hideRelativeComponents = (to) => {
     updateCommonCtxItem(null)
 }
 
-const createCommonRoute = (toPath, onRouteReady) => ({ 
-    toPath, 
-    onRouteReady, 
+const createCommonRoute = (toPath, onRouteReady) => ({
+    toPath,
+    onRouteReady,
     //不完全等价 router.beforeResovle()
-    beforeRoute: (toPath) => { 
+    beforeRoute: (toPath) => {
         hidePlayingView()
-        if(isSimpleLayout.value) switchToFallbackLayout()
-        if(!toPath.includes('/artist/')) hidePlaybackQueueView()
+        if (isSimpleLayout.value) switchToFallbackLayout()
+        if (!toPath.includes('/artist/')) hidePlaybackQueueView()
         EventBus.emit('app-beforeRoute', toPath)
     }
 })
@@ -87,55 +89,55 @@ const createCommonRoute = (toPath, onRouteReady) => ({
 const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
 const resolveRoute = (route) => {
-    if(typeof(route) == 'object') return route
+    if (typeof (route) == 'object') return route
     return { toPath: route.toString() }
 }
 
 //TODO Reject是否需要实现待考虑
 const visitRoute = (route) => {
     return new Promise((resolve, reject) => {
-        if(!route) {
+        if (!route) {
             //if(reject) reject()
-            return 
+            return
         }
         const { toPath, onRouteReady, beforeRoute } = resolveRoute(route)
-        if(!toPath) {
+        if (!toPath) {
             //if(reject) reject()
-            return 
+            return
         }
-        if(beforeRoute) beforeRoute(toPath)
+        if (beforeRoute) beforeRoute(toPath)
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
-        if(isSame) {
+        if (isSame) {
             //if(reject) reject()
-            return 
+            return
         }
-        if(onRouteReady) onRouteReady(toPath)
+        if (onRouteReady) onRouteReady(toPath)
         router.push(toPath)
-        if(resolve) resolve()
+        if (resolve) resolve()
     })
 }
 
 const highlightPlatform = (to) => {
     const path = to.path
     let platform = ''
-    if(path.includes('/square') || path.includes('/playlist')
-         || path.includes('/artist')  || path.includes('/album')) {
-            platform = path.split('/')[3]
-    } else if(path.includes('/local')) {
+    if (path.includes('/square') || path.includes('/playlist')
+        || path.includes('/artist') || path.includes('/album')) {
+        platform = path.split('/')[3]
+    } else if (path.includes('/local')) {
         platform = 'local'
-    } else if(path.includes('/userhome')) {
+    } else if (path.includes('/userhome')) {
         const parts = path.split('/')
         // /userhome/{code}
-        if(parts.length === 3) platform = parts[2]
+        if (parts.length === 3) platform = parts[2]
         // /userhome/customPlaylist/{id}
-        if(parts.length === 4 && parts[2] === 'customPlaylist') platform = 'all'
-    } 
+        if (parts.length === 4 && parts[2] === 'customPlaylist') platform = 'all'
+    }
     updateCurrentPlatformByCode(platform)
 }
 
 const valiadateArtistId = (id) => {
-    return (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
+    return (typeof (id) == 'string') ? (id.trim().length > 0) : (id > 0)
 }
 
 const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onRouteReady }) => {
@@ -143,20 +145,20 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
     const platformValid = isArtistDetailVisitable(platform)
     let idValid = valiadateArtistId(id)
     //TODO 二次确认数据，太别扭啦，后续改掉
-    if(!idValid && updatedArtist) { 
-        if(updatedArtist.trackId == props.trackId
+    if (!idValid && updatedArtist) {
+        if (updatedArtist.trackId == props.trackId
             && updatedArtist.artist.length > 0
             && index > -1 && index < updatedArtist.artist.length) {
             const name = updatedArtist.artist[index].name
-            if(item.name == name) {
+            if (item.name == name) {
                 id = updatedArtist.artist[index].id
                 idValid = valiadateArtistId(id)
-            } 
+            }
         }
     }
     const visitable = platformValid && idValid
     platform = platform.trim()
-    if(visitable) {
+    if (visitable) {
         let exploreMode = exploreModeCode.value
         //let moduleName = 'artist'
         //TODO 存在隐藏Bug，歌手页存在，但在当前exploreMode下找不到平台
@@ -166,19 +168,19 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
         visitRoute(createCommonRoute(toPath, onRouteReady)).then(() => updateArtistDetailKeys(platform, id))
         hideAllCtxMenus()
     }
-    if(callback) callback(visitable)
+    if (callback) callback(visitable)
 }
 
 //TODO 单一责任
 const visitAlbumDetail = (platform, id, callback) => {
     const platformValid = isAlbumDetailVisitable(platform)
-    const idValid = (typeof(id) == 'string') ? (id.trim().length > 0) : (id > 0)
+    const idValid = (typeof (id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
     platform = platform.trim()
-    if(visitable) {
+    if (visitable) {
         let exploreMode = exploreModeCode.value
         let moduleName = 'album', isAlbum = true
-        if(id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
+        if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
             moduleName = 'playlist'
             isAlbum = false
@@ -187,18 +189,18 @@ const visitAlbumDetail = (platform, id, callback) => {
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
         visitRoute(createCommonRoute(toPath)).then(() => {
-            if(isAlbum) updateAlbumDetailKeys(platform, id)
+            if (isAlbum) updateAlbumDetailKeys(platform, id)
         })
         hideAllCtxMenus()
     }
-    if(callback) callback(visitable)
+    if (callback) callback(visitable)
 }
 
 setupRouter()
 
 //TODO 世界上没有什么是绝对完美的，没有代码提示是硬伤 ~
 provide('appRoute', {
-    currentRoutePath, 
+    currentRoutePath,
     visitRoute,
     backward: () => router.back(),
     forward: () => router.forward(),
@@ -218,9 +220,9 @@ provide('appRoute', {
         visitAlbumDetail(platform, id, callback)
     },
     //类似visitPlaylist，但有些区别
-    visitFavoritePlaylist: (platform, id) => { 
+    visitFavoritePlaylist: (platform, id) => {
         let exploreMode = resolveExploreMode()
-        if(id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
+        if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
         }
         return visitRoute(`/${exploreMode}/playlist/${platform}/${id}`)
@@ -261,4 +263,5 @@ provide('appRoute', {
 </template>
 
 <style scoped>
+
 </style>

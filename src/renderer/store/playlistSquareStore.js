@@ -1,13 +1,15 @@
 import { defineStore } from "pinia";
 import { usePlatformStore } from "./platformStore";
 
+
+
 export const usePlaylistSquareStore = defineStore('playlistSquare', {
     state: () => ({
         // (platformCode, categoryArray)
         categoriesMap: new Map(),
         currentCategoryItem: {
-            data: { key: '默认', value: ''},
-            row: 0, 
+            data: { key: '默认', value: '' },
+            row: 0,
             col: 0
         },
         // (platformCode, orderArray)
@@ -31,14 +33,14 @@ export const usePlaylistSquareStore = defineStore('playlistSquare', {
         putCategories(key, value) {
             this.categoriesMap.set(key, value)
         },
-        putCurrentPlatformCategories(value){
+        putCurrentPlatformCategories(value) {
             this.putCategory(this.currentPlatformCode, value)
         },
         getCategories(key) {
             return this.categoriesMap.get(key)
         },
         currentPlatformCategories() {
-           return this.getCategories(this.currentPlatformCode) 
+            return this.getCategories(this.currentPlatformCode)
         },
         currentVender() {
             const { currentVender } = usePlatformStore()
@@ -51,17 +53,17 @@ export const usePlaylistSquareStore = defineStore('playlistSquare', {
             //Object.assign(this.currentCategory, { data, row, col })
         },
         resetCurrentCategoryItem() { //TODO
-            this.updateCurrentCategoryItem({ key: '默认', value: ''}, -1, -1)
+            this.updateCurrentCategoryItem({ key: '默认', value: '' }, -1, -1)
         },
         putOrders(key, value) {
             this.ordersMap.set(key, value)
         },
-        putCurrentOrders(value){
+        putCurrentOrders(value) {
             this.putOrders(this.currentPlatformCode, value)
         },
         currentPlatformOrders() {
-            return this.ordersMap.get(this.currentPlatformCode) 
-         },
+            return this.ordersMap.get(this.currentPlatformCode)
+        },
         updateCurrentOrder(key, value, index) {
             this.currentOrder.key = key
             this.currentOrder.value = value

@@ -12,14 +12,12 @@ import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
 import { useSettingStore } from '../store/settingStore';
-import { version } from '../../../package.json';
-import { storeToRefs } from 'pinia';
 import { useIpcRenderer } from '../../common/Utils';
-import { toYyyymmddHhMmSs } from '../../common/Times';
 import { useAppCommonStore } from '../store/appCommonStore';
 
 
-const { backward } = inject('appRoute') 
+
+const { backward } = inject('appRoute')
 
 const userProfileStore = useUserProfileStore()
 const settingStore = useSettingStore()
@@ -125,23 +123,23 @@ const checkedLength = reactive({
 })
 
 const updateCheckedLength = () => {
-    for(var i = 0; i < sourcesCategories.length; i++) {
+    for (var i = 0; i < sourcesCategories.length; i++) {
         const children = sourcesCategories[i].children
-        if(!children) continue
+        if (!children) continue
 
         const id = sourcesCategories[i].id
         const checked = sourcesCategories[i].checked
-        if(checked) {
+        if (checked) {
             checkedLength[id] = children.length
             continue
         }
         let length = 0
-        for(var j = 0; j < children.length; j++) {
-            if(children[j].checked) ++length
+        for (var j = 0; j < children.length; j++) {
+            if (children[j].checked) ++length
         }
         checkedLength[id] = length
     }
-} 
+}
 
 const setReady = (value) => {
     isReady.value = value
@@ -152,7 +150,7 @@ const setCheckedAll = (value) => {
 }
 
 const resetSourcesData = () => {
-    for(const key in Object.keys(sourcesData)) {
+    for (const key in Object.keys(sourcesData)) {
         Reflect.deleteProperty(sourcesData, key)
     }
 }
@@ -166,7 +164,7 @@ const toggleCheckAll = () => {
 const doCheckedAll = () => {
     const checked = isCheckedAll.value
     //setReady(checked)
-    for(var i = 0; i < sourcesCategories.length; i++) {
+    for (var i = 0; i < sourcesCategories.length; i++) {
         updateItemChecked(i, checked, sourcesCategories[i].id, true)
     }
 }
@@ -179,9 +177,9 @@ const resovleFilename = (filePath) => {
 }
 
 const openBackupFile = async () => {
-    if(!ipcRenderer) return 
+    if (!ipcRenderer) return
     const result = await ipcRenderer.invoke("open-backup-file")
-    if(!result) return 
+    if (!result) return
 
     sourcesCategories.length = 0
     resetSourcesData()
@@ -189,20 +187,20 @@ const openBackupFile = async () => {
     const backupData = JSON.parse(result.data)
     const { appVersion, created, data } = backupData
     Object.assign(sourcesData, { ...data })
-    for(const [ key, value ] of Object.entries(data)) {
+    for (const [key, value] of Object.entries(data)) {
         const item = { id: key, name: getItemName(key), checked: true, showSuffix: true }
         sourcesCategories.push(item)
         //sourcesData[key] = value
 
-        if(key === 'user' || key === 'setting') {
+        if (key === 'user' || key === 'setting') {
             item.showSuffix = false
             continue
-        } else if(key === 'customPlaylists') {
+        } else if (key === 'customPlaylists') {
             customPlaylistsLength.value = value.length
             continue
-        } else if(typeof(value) === 'object') {
+        } else if (typeof (value) === 'object') {
             const children = []
-            for(const [ childKey, childValue ] of Object.entries(value)) {
+            for (const [childKey, childValue] of Object.entries(value)) {
                 children.push({
                     id: childKey,
                     name: getItemName(childKey),
@@ -218,34 +216,34 @@ const openBackupFile = async () => {
 }
 
 const restore = async () => {
-    const settingPaths = [ 'theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys' ]
-    for(var i = 0; i < sourcesCategories.length; i++) {
+    const settingPaths = ['theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys']
+    for (var i = 0; i < sourcesCategories.length; i++) {
         const id = sourcesCategories[i].id
         const checked = sourcesCategories[i].checked
         const children = sourcesCategories[i].children
 
-        if(id === "setting") {
-            if(!checked) continue
+        if (id === "setting") {
+            if (!checked) continue
             localStorage.removeItem(id)
             settingStore.$reset()
             const backupSetting = {}
-            for(var j = 0; j < settingPaths.length; j++) {
+            for (var j = 0; j < settingPaths.length; j++) {
                 const path = settingPaths[j]
                 backupSetting[path] = sourcesData[id][path]
             }
             settingStore.$patch(backupSetting)
             EventBus.emit("setting-refresh")
-        } else if(checked) {
+        } else if (checked) {
             const backupData = {}
             backupData[id] = sourcesData[id]
             userProfileStore.$patch(backupData)
-        } else if(children) {
+        } else if (children) {
             const backupData = {}
             backupData[id] = userProfileStore.$state[id]
-            for(var j = 0; j < children.length; j++) {
+            for (var j = 0; j < children.length; j++) {
                 const childId = children[j].id
                 const checked = children[j].checked
-                if(!checked) continue
+                if (!checked) continue
                 stateData[childId] = sourcesData[id][childId]
             }
             userProfileStore.$patch(backupData)
@@ -269,13 +267,13 @@ const getChildItemSuffix = (id, subId) => {
 }
 
 const updateCheckedAll = (isTriggerChecked) => {
-    if(!isTriggerChecked) {
+    if (!isTriggerChecked) {
         setCheckedAll(false)
         setReady(false)
         return
     }
     let checked = true
-    for(var i in sourcesCategories) {
+    for (var i in sourcesCategories) {
         checked = checked && sourcesCategories[i].checked
     }
     setCheckedAll(checked)
@@ -284,8 +282,8 @@ const updateCheckedAll = (isTriggerChecked) => {
 const updateItemChecked = (index, checked, id, selfRefresh) => {
     let item = sourcesCategories[index]
     item.checked = checked
-    if(selfRefresh) EventBus.emit("checkeboxTextItem-refresh", { id: item.id, checked })
-    for(var i in item.children) {
+    if (selfRefresh) EventBus.emit("checkeboxTextItem-refresh", { id: item.id, checked })
+    for (var i in item.children) {
         const child = item.children[i]
         child.checked = checked
         const childId = id + "." + child.id
@@ -302,27 +300,27 @@ const onChildItemCheckChanged = (parentIndex, index, checked, id) => {
     let parent = sourcesCategories[parentIndex]
     parent.children[index].checked = checked
     let all = true
-    for(var i in parent.children) {
+    for (var i in parent.children) {
         all = all && parent.children[i].checked
     }
     const ov = parent.checked
     parent.checked = all
-    if(ov != all) {
+    if (ov != all) {
         EventBus.emit("checkeboxTextItem-refresh", { id: parent.id, checked: all })
     }
     updateCheckedAll(checked)
 }
 
 const checkReady = () => {
-    for(var i = 0; i < sourcesCategories.length; i++) {
-        if(sourcesCategories[i].checked) {
+    for (var i = 0; i < sourcesCategories.length; i++) {
+        if (sourcesCategories[i].checked) {
             setReady(true)
             return
         }
         const children = sourcesCategories[i].children
-        if(children) {
-            for(var j = 0; j < children.length; j++) {
-                if(children[j].checked) {
+        if (children) {
+            for (var j = 0; j < children.length; j++) {
+                if (children[j].checked) {
                     setReady(true)
                     return
                 }
@@ -345,37 +343,50 @@ watch(sourcesCategories, () => {
                 <span class="subtitle" v-html="backupFile"></span>
             </div>
             <div class="action">
-                <div class="checkallbox" >
-                    <svg @click="toggleCheckAll" v-show="!isCheckedAll" width="16" height="16" viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z"/></g></g></svg>
-                    <svg @click="toggleCheckAll" v-show="isCheckedAll" class="checked-svg" width="16" height="16" viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z"/></g></g></svg>
+                <div class="checkallbox">
+                    <svg @click="toggleCheckAll" v-show="!isCheckedAll" width="16" height="16"
+                        viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
+                            </g>
+                        </g>
+                    </svg>
+                    <svg @click="toggleCheckAll" v-show="isCheckedAll" class="checked-svg" width="16" height="16"
+                        viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
+                            </g>
+                        </g>
+                    </svg>
                     <span @click="toggleCheckAll">{{ (isCheckedAll ? "取消全选" : "全选") }}</span>
                 </div>
-                <SvgTextButton class="spacing" text="打开备份文件" :leftAction="openBackupFile" ></SvgTextButton>
-                <SvgTextButton class="spacing" :isDisabled="!isReady" text="开始还原" :leftAction="restore" ></SvgTextButton>
+                <SvgTextButton class="spacing" text="打开备份文件" :leftAction="openBackupFile"></SvgTextButton>
+                <SvgTextButton class="spacing" :isDisabled="!isReady" text="开始还原" :leftAction="restore"></SvgTextButton>
                 <SvgTextButton text="完成" :leftAction="backward" class="to-right"></SvgTextButton>
             </div>
         </div>
         <div class="center">
             <div v-for="(item, index) in sourcesCategories">
-                <CheckboxTextItem :index="index" 
-                    :id="item.id" 
-                    :text="item.name"
-                    :checked="item.checked"
+                <CheckboxTextItem :index="index" :id="item.id" :text="item.name" :checked="item.checked"
                     :checkChangedFn="(id, checked, index) => onItemCheckChanged(index, checked, id)"
-                    :isParent="hasChildren(item)" >
+                    :isParent="hasChildren(item)">
                     <template #suffix>
                         <div class="length" v-show="item.showSuffix">
-                            <span v-show="item.id == 'customPlaylists'">{{ '(' + customPlaylistsLength + ')'}}</span>
-                            <span v-show="item.id != 'customPlaylists'">({{ checkedLength[item.id] }} / {{ item.children ? item.children.length : 0 }})</span>
+                            <span v-show="item.id == 'customPlaylists'">{{ '(' + customPlaylistsLength + ')' }}</span>
+                            <span v-show="item.id != 'customPlaylists'">({{ checkedLength[item.id] }} / {{ item.children
+        ? item.children.length : 0
+}})</span>
                         </div>
                     </template>
                     <template #children>
                         <div v-for="(child, cIndex) in item.children" v-show="hasChildren(item)">
-                            <CheckboxTextItem :index="cIndex"
-                                :id="getChildItemId(item, child)"  
-                                :text="child.name"
+                            <CheckboxTextItem :index="cIndex" :id="getChildItemId(item, child)" :text="child.name"
                                 :checked="child.checked"
-                                :checkChangedFn="(id, checked, childIndex) => onChildItemCheckChanged(index, childIndex, checked, id)" >
+                                :checkChangedFn="(id, checked, childIndex) => onChildItemCheckChanged(index, childIndex, checked, id)">
                                 <template #suffix>
                                     <div class="length" v-html="getChildItemSuffix(item.id, child.id)"></div>
                                 </template>
@@ -451,14 +462,14 @@ watch(sourcesCategories, () => {
 
 #data-restore-view .action .checkallbox svg {
     fill: var(--svg-color);
-    cursor: pointer; 
+    cursor: pointer;
 }
 
 #data-restore-view .action .checkallbox .checked-svg {
-    fill: var(--hl-color); 
+    fill: var(--hl-color);
 }
 
-#data-restore-view .action .checkallbox > span {
+#data-restore-view .action .checkallbox>span {
     text-align: left;
     margin: 0px 20px;
     width: 65px;
@@ -470,14 +481,14 @@ watch(sourcesCategories, () => {
     right: 33px;
 }
 
-#data-restore-view  .center {
+#data-restore-view .center {
     display: flex;
     flex-direction: column;
     padding: 0px 33px 0px 33px;
     overflow: scroll;
 }
 
-#data-restore-view  .center .length {
+#data-restore-view .center .length {
     vertical-align: middle;
     margin-left: 3px;
 }

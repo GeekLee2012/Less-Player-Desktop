@@ -2,6 +2,8 @@
 import { onMounted, ref, toRef, watch } from 'vue';
 //TODO 组件代码写得乱，后期再梳理
 
+
+
 const props = defineProps({
     value: Number, //0.0 - 1.0
     onseek: Function,
@@ -16,27 +18,27 @@ let onDrag = false
 let value = parseFloat(props.value || 0.5).toFixed(2)
 
 //点击改变进度
-const seekProgress = (e)=> {
-    if(thumbRef.value.contains(e.target)) {
+const seekProgress = (e) => {
+    if (thumbRef.value.contains(e.target)) {
         updateProgressByDeltaHeight(e.offsetY)
-    } else if(sliderCtlRef.value == e.target) {
+    } else if (sliderCtlRef.value == e.target) {
         updateProgressByHeight(e.offsetY, true)
     } else {
         updateProgressByHeight(e.offsetY)
     }
-    if(props.onseek) props.onseek(value)
+    if (props.onseek) props.onseek(value)
 }
 
 //滚轮改变进度
 const scrollProgress = (e) => {
-    if(e.deltaY == 0) return 
+    if (e.deltaY == 0) return
     const direction = e.deltaY > 0 ? -1 : 1
     const step = 1 * direction
     let tmp = value * 100
     tmp += step
     const percent = (tmp / 100).toFixed(2)
     updateProgress(percent)
-    if(props.onscroll) props.onscroll(value)
+    if (props.onscroll) props.onscroll(value)
 }
 
 const updateProgress = (percent, noUpdate) => {
@@ -45,7 +47,7 @@ const updateProgress = (percent, noUpdate) => {
     percent = percent < 100 ? percent : 100
     progressRef.value.style.height = percent + "%"
     thumbRef.value.style.top = (100 - percent) + "%"
-    if(noUpdate) return
+    if (noUpdate) return
     value = (percent / 100).toFixed(2)
 }
 
@@ -58,34 +60,34 @@ const toggleProgress = () => {
 const updateProgressByHeight = (height, needReverse) => {
     const totalHeight = sliderCtlRef.value.offsetHeight
     let oPercent = parseFloat(progressRef.value.style.height.replace('%', '')) / 100
-    if(isNaN(oPercent)) oPercent = 0.5 
+    if (isNaN(oPercent)) oPercent = 0.5
     const oHeight = totalHeight * oPercent
     let percent = height / totalHeight
-    if(needReverse) {
+    if (needReverse) {
         percent = 1 - percent
     } else {
-        if(oHeight >= height) percent = (oHeight - height) / totalHeight
+        if (oHeight >= height) percent = (oHeight - height) / totalHeight
     }
     updateProgress(percent)
 }
 
 const updateProgressByDeltaHeight = (delta) => {
-    if(delta == 0) return
+    if (delta == 0) return
     const totalHeight = sliderCtlRef.value.offsetHeight
     let oPercent = parseFloat(progressRef.value.style.height.replace('%', '')) / 100
-    if(isNaN(oPercent)) oPercent = 0.5 
+    if (isNaN(oPercent)) oPercent = 0.5
     let oHeight = totalHeight * oPercent
     updateProgressByHeight(oHeight + delta)
 }
 
-const startDrag = (e)=> {
+const startDrag = (e) => {
     onDrag = true
     document.addEventListener("mousemove", dragMove)
     document.addEventListener("mouseup", endDrag)
 }
 
 const dragMove = (e) => {
-    if(!onDrag) return 
+    if (!onDrag) return
     const progress = e.offsetY
     const totalHeight = sliderCtlRef.value.clientHeight
     const percent = progress / totalHeight
@@ -94,7 +96,7 @@ const dragMove = (e) => {
 }
 
 /* 以下为拖动滑块改变进度相关 */
-const endDrag = (e)=> {
+const endDrag = (e) => {
     onDrag = false
     document.removeEventListener("mousemove", dragMove)
     document.removeEventListener("mouseup", endDrag)
@@ -113,7 +115,7 @@ watch(() => props.value, (nv, ov) => updateProgress(nv, true))
     <!--
         <input type="range" ></input>
     -->
-    <div class="vertical-slider-bar" @mousewheel="scrollProgress"> 
+    <div class="vertical-slider-bar" @mousewheel="scrollProgress">
         <div class="vertical-slider-bar-ctl" ref="sliderCtlRef" @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
             <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>

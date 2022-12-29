@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import EventBus from "../../common/EventBus";
 import { usePlatformStore } from "./platformStore";
 
+
+
 export const useRadioSquareStore = defineStore('radioSquare', {
     state: () => ({
         // (platformCode, categoryArray)
@@ -9,7 +11,7 @@ export const useRadioSquareStore = defineStore('radioSquare', {
         //单选模式
         currentCategoryItem: {
             data: { key: '默认', value: '' },
-            row: 0, 
+            row: 0,
             col: 0
         },
         // (platformCode, orderArray)
@@ -21,7 +23,7 @@ export const useRadioSquareStore = defineStore('radioSquare', {
         },
         //多选模式
         multiSelectMode: false,
-        currentCategoryItems: {}, 
+        currentCategoryItems: {},
     }),
     getters: {
         currentPlatformCode(state) {
@@ -36,14 +38,14 @@ export const useRadioSquareStore = defineStore('radioSquare', {
         putCategories(key, value) {
             this.categoriesMap.set(key, value)
         },
-        putCurrentPlatformCategories(value){
+        putCurrentPlatformCategories(value) {
             this.putCategory(this.currentPlatformCode, value)
         },
         getCategories(key) {
             return this.categoriesMap.get(key)
         },
         currentPlatformCategories() {
-           return this.getCategories(this.currentPlatformCode) 
+            return this.getCategories(this.currentPlatformCode)
         },
         currentVender() {
             const { currentVender } = usePlatformStore()
@@ -56,7 +58,7 @@ export const useRadioSquareStore = defineStore('radioSquare', {
             //Object.assign(this.currentCategory, { data, row, col })
         },
         resetCurrentCategoryItem() { //TODO
-            this.updateCurrentCategoryItem({ key: '', value: ''}, -1, -1)
+            this.updateCurrentCategoryItem({ key: '', value: '' }, -1, -1)
         },
         putOrders(key, value) {
             this.ordersMap.set(key, value)
@@ -64,12 +66,12 @@ export const useRadioSquareStore = defineStore('radioSquare', {
         getOrders(key) {
             return this.ordersMap.get(key)
         },
-        putCurrentOrders(value){
+        putCurrentOrders(value) {
             this.putOrders(this.currentPlatformCode, value)
         },
         currentPlatformOrders() {
-            return this.getOrders(this.currentPlatformCode) 
-         },
+            return this.getOrders(this.currentPlatformCode)
+        },
         updateCurrentOrder(key, value, index) {
             this.currentOrder.key = key
             this.currentOrder.value = value
@@ -87,16 +89,16 @@ export const useRadioSquareStore = defineStore('radioSquare', {
             cate[name] = { item, index }
             const oldValue = JSON.stringify(this.currentCategoryItems[name])
             const newValue = JSON.stringify(cate[name])
-            if(oldValue == newValue) return
+            if (oldValue == newValue) return
             Object.assign(this.currentCategoryItems, cate)
             this.notifyRefresh()
         },
         resetCurrentCategoryItems() {
-            for(var key in this.currentCategoryItems) {
+            for (var key in this.currentCategoryItems) {
                 Reflect.deleteProperty(this.currentCategoryItems, key)
             }
             const categories = this.currentPlatformCategories()
-            if(!categories) return 
+            if (!categories) return
             categories.data.forEach(item => {
                 this.currentCategoryItems[item.name] = { item: item.data[0], index: 0 }
             })

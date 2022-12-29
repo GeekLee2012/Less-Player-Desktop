@@ -7,15 +7,17 @@ import { toMMssSSS } from "../common/Times";
 import { Album } from "../common/Album";
 import { randomTextWithinAlphabetNums } from "../common/Utils";
 
+
+
 //e2db8a61-afdb-11ec-9d7b-c9324a8678ec
 //efe8c650-de5c-11ec-9d92-a133baea2d31
 //8-4-4-4-12
 const randomReqId = () => {
-    return (randomTextWithinAlphabetNums(8) 
-    + '-' + randomTextWithinAlphabetNums(4) 
-    + '-' + randomTextWithinAlphabetNums(4) 
-    + '-' + randomTextWithinAlphabetNums(4) 
-    + '-' + randomTextWithinAlphabetNums(12)).toLowerCase()
+    return (randomTextWithinAlphabetNums(8)
+        + '-' + randomTextWithinAlphabetNums(4)
+        + '-' + randomTextWithinAlphabetNums(4)
+        + '-' + randomTextWithinAlphabetNums(4)
+        + '-' + randomTextWithinAlphabetNums(12)).toLowerCase()
 }
 
 //const REQ_ID = randomReqId()
@@ -26,22 +28,22 @@ const CONFIG = {
 
 export class KuWo {
     static CODE = 'kuwo'
-    static TOPLIST_CODE  = 'KW_RANKLIST'
-    static TOPLIST_PREFIX  = 'TOP_'
+    static TOPLIST_CODE = 'KW_RANKLIST'
+    static TOPLIST_PREFIX = 'TOP_'
     static CACHE_TOPLISTS = new Map()
 
     //全部分类
     static categories() {
         return new Promise((resolve, reject) => {
             const result = { platform: KuWo.CODE, data: [], orders: [] }
-            const url = "https://www.kuwo.cn/api/www/playlist/getTagList" 
-                    + "?httpsStatus=1&reqId=" + randomReqId()
+            const url = "https://www.kuwo.cn/api/www/playlist/getTagList"
+                + "?httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const defaultCategory = new Category("精选")
                 defaultCategory.add("最新", '#new')
                 defaultCategory.add("最热", '#hot')
                 result.data.push(defaultCategory)
-                
+
                 const cateArray = json.data
                 cateArray.forEach(cate => {
                     const category = new Category(cate.name)
@@ -49,7 +51,7 @@ export class KuWo {
                     cateItems.forEach(item => {
                         category.add(item.name, item.id)
                     })
-                    if(category.data.length > 0) {
+                    if (category.data.length > 0) {
                         result.data.push(category)
                     }
                 })
@@ -65,18 +67,18 @@ export class KuWo {
         const originCate = cate
         let resolvedCate = (cate || "").toString().trim()
         resolvedCate = resolvedCate.length > 0 ? resolvedCate : "#new"
-        if(resolvedCate == KuWo.TOPLIST_CODE) return KuWo.toplist(cate, offset, limit, page)
+        if (resolvedCate == KuWo.TOPLIST_CODE) return KuWo.toplist(cate, offset, limit, page)
         return new Promise((resolve, reject) => {
             const result = { platform: KuWo.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             let url = null
-            if(resolvedCate.startsWith('#')) {
+            if (resolvedCate.startsWith('#')) {
                 resolvedCate = resolvedCate.substring(1)
                 url = "https://www.kuwo.cn/api/www/classify/playlist/getRcmPlayList"
-                    + "?pn=" + page + "&rn=" + limit 
-                    + "&order=" + resolvedCate +"&httpsStatus=1&reqId=" + randomReqId()
+                    + "?pn=" + page + "&rn=" + limit
+                    + "&order=" + resolvedCate + "&httpsStatus=1&reqId=" + randomReqId()
             } else {
-                url = "https://www.kuwo.cn/api/www/classify/playlist/getTagPlayList" 
-                    + "?pn=" + page + "&rn=" + limit 
+                url = "https://www.kuwo.cn/api/www/classify/playlist/getTagPlayList"
+                    + "?pn=" + page + "&rn=" + limit
                     + "&id=" + resolvedCate + "&httpsStatus=1&reqId=" + randomReqId()
             }
             getJson(url, null, CONFIG).then(json => {
@@ -90,8 +92,8 @@ export class KuWo {
                     const cover = item.img
                     const title = item.name
 
-                    if(id) {
-                        const playlist = new Playlist(id, KuWo.CODE , cover, title)
+                    if (id) {
+                        const playlist = new Playlist(id, KuWo.CODE, cover, title)
                         playlist.total = item.total
                         playlist.listenNum = parseInt(item.listencnt || 0)
                         result.data.push(playlist)
@@ -106,7 +108,7 @@ export class KuWo {
     static toplist(cate, offset, limit, page) {
         return new Promise((resolve) => {
             let result = { platform: KuWo.CODE, cate, offset: 0, limit: 100, page: 1, data: [] }
-            if(page > 1) {
+            if (page > 1) {
                 resolve(result)
                 return
             }
@@ -115,18 +117,18 @@ export class KuWo {
             getDoc(url).then(doc => {
                 let scriptText = doc.querySelector('script').textContent
                 let key = 'window.__NUXT__='
-                if(scriptText.indexOf(key) != -1) {
+                if (scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
                     //const json = eval(scriptText)
                     const json = Function('return ' + scriptText)()
 
                     //参考官方页面
                     const bangList = json.data[0].bangMenu
-                    for(var i = 0; i < 3; i++) {
+                    for (var i = 0; i < 3; i++) {
                         const bang = bangList[i]
                         bang.list.forEach(item => {
                             const id = KuWo.TOPLIST_PREFIX + item.sourceid
-                            const detail = new Playlist(id, KuWo.CODE , item.pic, item.name)
+                            const detail = new Playlist(id, KuWo.CODE, item.pic, item.name)
                             detail.about = item.intro
                             result.data.push(detail)
 
@@ -154,14 +156,14 @@ export class KuWo {
             getJson(url, reqBody, CONFIG).then(json => {
                 const cache = KuWo.CACHE_TOPLISTS.get(id)
                 const result = new Playlist(id, KuWo.CODE)
-                if(cache) {
+                if (cache) {
                     result.cover = cache.cover
                     result.title = cache.title
                     result.about = cache.about
                 }
                 const playlist = json.data.musicList
                 playlist.forEach(item => {
-                    const artist = [ { id: item.artistid, name: item.artist } ]
+                    const artist = [{ id: item.artistid, name: item.artist }]
                     const album = { id: item.albumid, name: item.album }
                     const duration = item.duration * 1000
                     const cover = item.pic
@@ -175,12 +177,12 @@ export class KuWo {
 
     //歌单详情
     static playlistDetail(id, offset, limit, page) {
-        if(id.startsWith(KuWo.TOPLIST_PREFIX)) return this.toplistDetail(id, offset, limit, page)
+        if (id.startsWith(KuWo.TOPLIST_PREFIX)) return this.toplistDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
             //TODO 官方 rn = 30
-            const url = "https://www.kuwo.cn/api/www/playlist/playListInfo" 
-                    + "?pid=" + id + "&pn=" + page + "&rn=" + limit
-                    + "&httpsStatus=1&reqId=" + randomReqId()
+            const url = "https://www.kuwo.cn/api/www/playlist/playListInfo"
+                + "?pid=" + id + "&pn=" + page + "&rn=" + limit
+                + "&httpsStatus=1&reqId=" + randomReqId()
             const result = new Playlist(id, KuWo.CODE)
             /*
             result.cover = json.data.img500
@@ -198,12 +200,12 @@ export class KuWo {
                 })
                 const playlist = json.data.musicList
                 playlist.forEach(item => {
-                    const artist = [ { id: item.artistid, name: item.artist } ]
+                    const artist = [{ id: item.artistid, name: item.artist }]
                     const album = { id: item.albumid, name: item.album }
                     const duration = item.duration * 1000
                     const cover = item.pic
                     const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
-                    if(item.hasmv == 1) track.mv = item.rid
+                    if (item.hasmv == 1) track.mv = item.rid
                     track.pid = id
                     result.addTrack(track)
                 })
@@ -221,7 +223,7 @@ export class KuWo {
                 + "?mid=" + id + "&type=music" + "&httpsStatus=1&reqId=" + randomReqId()
             const result = new Track(id, KuWo.CODE)
             getJson(url, null, CONFIG).then(json => {
-                if(json.data) {
+                if (json.data) {
                     result.url = json.data.url
                 }
                 resolve(result)
@@ -239,7 +241,7 @@ export class KuWo {
             getJson(url, null, CONFIG).then(json => {
                 const result = new Lyric()
                 const lrclist = json.data.lrclist
-                if(lrclist) {
+                if (lrclist) {
                     lrclist.forEach(lineObj => {
                         const mmssSSS = toMMssSSS(lineObj.time * 1000)
                         const text = lineObj.lineLyric
@@ -260,7 +262,7 @@ export class KuWo {
 
                 let scriptText = doc.querySelector('script').textContent
                 let key = 'window.__NUXT__='
-                if(scriptText.indexOf(key) != -1) {
+                if (scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
                     //const json = eval(scriptText)
                     const json = Function('return ' + scriptText)()
@@ -268,7 +270,7 @@ export class KuWo {
                     const singerInfo = json.data[0].singerInfo
                     title = singerInfo.name
                     cover = singerInfo.pic300
-                    about = singerInfo.info 
+                    about = singerInfo.info
                 }
                 const result = { id, title, cover, about }
                 resolve(result)
@@ -279,20 +281,20 @@ export class KuWo {
     //歌手详情: 全部歌曲
     static artistDetailAllSongs(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const url = "http://www.kuwo.cn/api/www/artist/artistMusic" 
-                + "?artistid=" + id + "&pn=" + page +"&rn=" + limit 
+            const url = "http://www.kuwo.cn/api/www/artist/artistMusic"
+                + "?artistid=" + id + "&pn=" + page + "&rn=" + limit
                 + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const total = json.data.total
                 const data = []
                 const list = json.data.list
                 list.forEach(item => {
-                    const artist = [ { id: item.artistid, name: item.artist } ]
+                    const artist = [{ id: item.artistid, name: item.artist }]
                     const album = { id: item.albumid, name: item.album }
                     const duration = item.duration * 1000
                     const cover = item.pic
                     const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
-                    if(item.hasmv) track.mv = item.rid
+                    if (item.hasmv) track.mv = item.rid
                     data.push(track)
                 })
                 const result = { offset, limit, page, total, data }
@@ -300,21 +302,21 @@ export class KuWo {
             })
         })
     }
-    
+
     //歌手详情: 专辑
     static artistDetailAlbums(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const url = "http://www.kuwo.cn/api/www/artist/artistAlbum" 
-                + "?artistid=" + id + "&pn=" + page +"&rn=" + limit 
+            const url = "http://www.kuwo.cn/api/www/artist/artistAlbum"
+                + "?artistid=" + id + "&pn=" + page + "&rn=" + limit
                 + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const total = json.data.total
                 const data = []
                 const list = json.data.albumList
                 list.forEach(item => {
-                    const artist = [ { id: item.artistid, name: item.artist } ]
-                    const album = new Album(item.albumid, KuWo.CODE, item.album, item.pic, artist, 
-                        null, item.releaseDate,item.albuminfo)
+                    const artist = [{ id: item.artistid, name: item.artist }]
+                    const album = new Album(item.albumid, KuWo.CODE, item.album, item.pic, artist,
+                        null, item.releaseDate, item.albuminfo)
                     data.push(album)
                 })
                 const result = { offset, limit, page, total, data }
@@ -332,11 +334,11 @@ export class KuWo {
 
                 let scriptText = doc.querySelector('script').textContent
                 let key = 'window.__NUXT__='
-                if(scriptText.indexOf(key) != -1) {
+                if (scriptText.indexOf(key) != -1) {
                     scriptText = scriptText.split(key)[1]
                     //const json = eval(scriptText)
                     const json = Function('return ' + scriptText)()
-                    
+
                     const pageData = json.data[0].pageData
                     const albumInfo = json.data[0].albumInfo
 
@@ -347,15 +349,15 @@ export class KuWo {
                     about = albumInfo.albuminfo
 
                     albumInfo.musicList.forEach(item => {
-                        const trackArtist = [ { id: item.artistid, name: item.artist } ]
+                        const trackArtist = [{ id: item.artistid, name: item.artist }]
                         const trackAlbum = { id: item.albumid, name: item.album }
                         const duration = item.duration * 1000
                         const track = new Track(item.rid, KuWo.CODE, item.name, trackArtist, trackAlbum, duration, item.pic)
-                        if(item.hasmv) track.mv = item.rid
+                        if (item.hasmv) track.mv = item.rid
                         data.push(track)
                     })
                 }
-                const result = new Album(id, KuWo.CODE, name, cover, artist, 
+                const result = new Album(id, KuWo.CODE, name, cover, artist,
                     company, publishTime, about, data)
                 resolve(result)
             })
@@ -367,20 +369,20 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             keyword = keyword.trim()
             const url = "https://www.kuwo.cn/api/www/search/searchMusicBykeyWord"
-                    + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
-                    + "&httpsStatus=1&reqId=" + randomReqId()
+                + "?key=" + keyword + "&pn=" + page + "&rn=" + limit
+                + "&httpsStatus=1&reqId=" + randomReqId()
             const result = { platform: KuWo.CODE, offset, limit, page, data: [] }
             getJson(url, null, CONFIG).then(json => {
-                if(json.code == 200) {
+                if (json.code == 200) {
                     const data = json.data.list.map(item => {
-                        const artist = [ { id: item.artistid, name: item.artist } ]
+                        const artist = [{ id: item.artistid, name: item.artist }]
                         const album = { id: item.albumid, name: item.album }
                         const duration = item.duration * 1000
                         const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, item.pic)
-                        if(item.hasmv) track.mv = item.rid
+                        if (item.hasmv) track.mv = item.rid
                         return track
                     })
-                    if(data && data.length > 0) result.push(...data)
+                    if (data && data.length > 0) result.push(...data)
                 }
                 resolve(result)
             }).catch(error => resolve(result))
@@ -391,8 +393,8 @@ export class KuWo {
     static searchPlaylists(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/www/search/searchPlayListBykeyWord"
-                    + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
-                    + "&httpsStatus=1&reqId=" + randomReqId()
+                + "?key=" + keyword + "&pn=" + page + "&rn=" + limit
+                + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.list.map(item => {
                     const playlist = new Playlist(item.id, KuWo.CODE, item.img, item.name)
@@ -403,16 +405,16 @@ export class KuWo {
             })
         })
     }
-    
+
     //搜索: 专辑
     static searchAlbums(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/www/search/searchAlbumBykeyWord"
-                    + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
-                    + "&httpsStatus=1&reqId=" + randomReqId()
+                + "?key=" + keyword + "&pn=" + page + "&rn=" + limit
+                + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.albumList.map(item => {
-                    const artist = [ { id: item.artistid, name: item.artist } ]
+                    const artist = [{ id: item.artistid, name: item.artist }]
                     const albumName = item.album
                     const album = new Album(item.albumid, KuWo.CODE, albumName, item.pic, artist)
                     album.publishTime = item.releaseDate
@@ -428,8 +430,8 @@ export class KuWo {
     static searchArtists(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/www/search/searchArtistBykeyWord"
-                    + "?key=" + keyword + "&pn=" + page +"&rn=" + limit 
-                    + "&httpsStatus=1&reqId=" + randomReqId()
+                + "?key=" + keyword + "&pn=" + page + "&rn=" + limit
+                + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.artistList.map(item => {
                     return {
@@ -461,7 +463,7 @@ export class KuWo {
                 const category = new Category('默认')
                 result.data.push(category)
                 els = doc.querySelectorAll(".main_con .tag_kind li")
-                for(var i = 0; i < els.length; i++) {
+                for (var i = 0; i < els.length; i++) {
                     const key = els[i].textContent.trim()
                     const value = i
                     category.add(key, value)
@@ -506,7 +508,7 @@ export class KuWo {
                     const id = item.id
                     const title = item.name
                     const cover = item.pic300 || item.pic || item.pic120 || item.pic70
-                    const artist = { id,  platform: KuWo.CODE, title, cover }
+                    const artist = { id, platform: KuWo.CODE, title, cover }
                     result.data.push(artist)
                 })
                 resolve(result)
@@ -516,11 +518,11 @@ export class KuWo {
 
     static videoDetail(id, quality) {
         return new Promise((resolve, reject) => {
-            const url = "https://www.kuwo.cn/api/v1/www/music/playUrl" 
+            const url = "https://www.kuwo.cn/api/v1/www/music/playUrl"
                 + `?mid=${id}&type=mv&httpsStatus=1&reqId=${randomReqId()}`
             getJson(url).then(json => {
                 const result = { id, platform: KuWo.CODE, quality, url: '' }
-                if(json.data) result.url = json.data.url || ''
+                if (json.data) result.url = json.data.url || ''
                 resolve(result)
             })
         })

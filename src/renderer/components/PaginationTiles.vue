@@ -9,7 +9,7 @@
 </template>
 
 <style>
- .pagination-tiles {
+.pagination-tiles {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;

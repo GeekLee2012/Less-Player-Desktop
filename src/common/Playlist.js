@@ -1,5 +1,7 @@
 import { toTrimString } from './Utils';
 
+
+
 export class Playlist {
     //普通歌单
     static NORMAL_TYPE = 0
@@ -12,7 +14,7 @@ export class Playlist {
     //TODO
     static ANCHOR_RADIO_ID_PREFIX = "ARP_"
     //自定义列表
-    static CUSTOM_ID_PREFIX = "CMP_" 
+    static CUSTOM_ID_PREFIX = "CMP_"
 
     constructor(id, platform, cover, title, url, about, data, total, type, listenNum) {
         this.id = id
@@ -35,11 +37,11 @@ export class Playlist {
     }
 
     static resolveOldVersionType(item) {
-        if(item.isFMRadio) {
+        if (item.isFMRadio) {
             item.type = Playlist.FM_RADIO_TYPE
-        } else if(item.isRadioType) {
+        } else if (item.isRadioType) {
             item.type = Playlist.NORMAL_RADIO_TYPE
-        } else if(!item.type){
+        } else if (!item.type) {
             item.type = Playlist.NORMAL_TYPE
         }
         return item

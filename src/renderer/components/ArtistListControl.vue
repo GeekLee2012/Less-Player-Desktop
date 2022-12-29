@@ -5,6 +5,7 @@ import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { inject } from 'vue';
 
 
+
 const { visitArtist } = inject('appRoute')
 
 const props = defineProps({
@@ -22,11 +23,8 @@ const visitItem = (item) => {
 
 <template>
     <div class="artistlist-ctl">
-         <PaginationTiles v-show="!loading">
-            <ImageTextTile v-for="item in data" 
-                :cover="item.cover" 
-                :title="item.title"
-                @click="visitItem(item)" >
+        <PaginationTiles v-show="!loading">
+            <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title" @click="visitItem(item)">
             </ImageTextTile>
         </PaginationTiles>
         <ImageTextTileLoadingMask :count="16" v-show="loading"></ImageTextTileLoadingMask>

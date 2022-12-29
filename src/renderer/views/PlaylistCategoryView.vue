@@ -5,6 +5,8 @@ import EventBus from '../../common/EventBus';
 import { reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 
+
+
 const { currentCategoryItem, currentOrder } = storeToRefs(usePlaylistSquareStore())
 const { currentPlatformCategories, updateCurrentCategoryItem,
     currentPlatformOrders, updateCurrentOrder } = usePlaylistSquareStore()
@@ -26,14 +28,14 @@ const updateOrders = () => {
 
 const resetScroll = () => {
     const view = document.querySelector(".playlist-category-view")
-    if(view) view.scrollTop = 0
+    if (view) view.scrollTop = 0
 }
 
 const isDiffCate = (item, row, col) => {
     const prevCate = currentCategoryItem.value
     return prevCate ? (
         prevCate.data.value != item.value
-        || prevCate.row != row 
+        || prevCate.row != row
         || prevCate.col != col) : true
 }
 
@@ -47,7 +49,7 @@ const isDiffOrder = (item, index) => {
 const visitCateItem = (item, row, col) => {
     const needRefresh = isDiffCate(item, row, col)
     updateCurrentCategoryItem(item, row, col)
-    if(needRefresh) {
+    if (needRefresh) {
         EventBus.emit("playlistSquare-refresh")
         //prevCate = { item, row, col }
         hidePlaylistCategoryView()
@@ -57,7 +59,7 @@ const visitCateItem = (item, row, col) => {
 const visitByOrder = (item, index) => {
     const needRefresh = isDiffOrder(item, index)
     updateCurrentOrder(item.key, item.value, index)
-    if(needRefresh) {
+    if (needRefresh) {
         EventBus.emit("playlistSquare-refresh")
         hidePlaylistCategoryView()
     }
@@ -80,21 +82,20 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
             <div class="fl-row" v-show="orders && orders.length > 0">
                 <div class="cate-title">排序</div>
                 <div class="cate-item-wrap">
-                    <div v-for="(item, index) in orders" class="fl-item" 
-                        :class="{ current : (currentOrder.index == index) }"
-                        @click="visitByOrder(item, index)"
-                        v-html="item.key" >
+                    <div v-for="(item, index) in orders" class="fl-item"
+                        :class="{ current: (currentOrder.index == index) }" @click="visitByOrder(item, index)"
+                        v-html="item.key">
                     </div>
                 </div>
             </div>
             <div v-for="(cate, row) in categories" class="fl-row">
                 <div class="cate-title">{{ cate.name }}</div>
                 <div class="cate-item-wrap">
-                    <div v-for="(item, col) in cate.data" class="fl-item" 
-                        :class="{ current : (row == currentCategoryItem.row 
-                            && col == currentCategoryItem.col )}"
-                        @click="visitCateItem(item, row, col)"
-                        v-html="item.key" >
+                    <div v-for="(item, col) in cate.data" class="fl-item" :class="{
+    current: (row == currentCategoryItem.row
+        && col == currentCategoryItem.col)
+}" @click="visitCateItem(item, row, col)"
+                        v-html="item.key">
                     </div>
                 </div>
             </div>
@@ -132,7 +133,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 .playlist-category-view .header .fl-item:hover {
     cursor: default;
     font-size: 18px;
-    background: var(--hl-text-bg) ;
+    background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
     /*
@@ -194,7 +195,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     background-color: var(--list-item-hover);
     color: var(--text-color);
 }
-    
+
 
 .playlist-category-view .current {
     border-radius: 10rem;

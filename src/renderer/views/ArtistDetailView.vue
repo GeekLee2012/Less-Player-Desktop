@@ -9,7 +9,7 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted, onActivated ,ref, shallowRef, watch, reactive } from 'vue';
+import { onMounted, onActivated, ref, shallowRef, watch, reactive, inject } from 'vue';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
@@ -23,39 +23,43 @@ import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 
+
+
 const props = defineProps({
     exploreMode: String,
     platform: String,
     id: String
 })
 
+const { addAndPlayTracks } = inject('player')
+
 const { artistId, artistName, artistCover, platform,
-        artistAlias, tabTipText, activeTab, 
-        tabs, hotSongs, allSongs, 
-        albums, about, hasHotSongTab, hasAllSongTab
-    } = storeToRefs(useArtistDetailStore())
+    artistAlias, tabTipText, activeTab,
+    tabs, hotSongs, allSongs,
+    albums, about, hasHotSongTab, hasAllSongTab
+} = storeToRefs(useArtistDetailStore())
 const { setActiveTab, updateArtist,
-        updateHotSongs, updateAllSongs, appendAllSongs, 
-        updateAlbums, updateAbout, 
-        resetAll, updateTabTipText,
-        isHotSongsTab, isAllSongsTab, 
-        isAlbumsTab, isAboutTab,
-        isHotSongsTabLoaded,
-        isAllSongsTabLoaded,
-        isAlbumsTabLoaded,
-        isAboutTabLoaded,
-        isArtistDetailLoaded
-    } = useArtistDetailStore()
+    updateHotSongs, updateAllSongs, appendAllSongs,
+    updateAlbums, updateAbout,
+    resetAll, updateTabTipText,
+    isHotSongsTab, isAllSongsTab,
+    isAlbumsTab, isAboutTab,
+    isHotSongsTabLoaded,
+    isAllSongsTabLoaded,
+    isAlbumsTabLoaded,
+    isAboutTabLoaded,
+    isArtistDetailLoaded
+} = useArtistDetailStore()
 
 const { getVendor } = usePlatformStore()
 const { addTracks } = usePlayStore()
-const { showToast, hideAllCtxMenus } = useAppCommonStore() 
+const { showToast, hideAllCtxMenus } = useAppCommonStore()
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
 const detail = reactive({})
-let offset = 0,  page = 1, limit = 30
+let offset = 0, page = 1, limit = 30
 const isLoadingDetail = ref(false)
 const isLoadingSongs = ref(false)
 const isLoadingAlbums = ref(false)
@@ -82,28 +86,17 @@ const setLoadingAlbums = (value) => {
 }
 
 const visitTab = (index, isClick) => {
-    if(isLoading.value && isClick) return
+    if (isLoading.value && isClick) return
     setActiveTab(index)
     switchTab()
 }
 
-const playHotSongs = () => {
-    EventBus.emit('tracks-play', {
-        data: hotSongs.value,
-        needReset: true
-    })
-}
+const playHotSongs = () => addAndPlayTracks(hotSongs.value, true)
+const playAllSongs = () => addAndPlayTracks(allSongs.value, true)
 
 const addHotSongs = (text) => {
     addTracks(hotSongs.value)
     showToast(text || "歌曲已全部添加！")
-}
-
-const playAllSongs = () => {
-    EventBus.emit('tracks-play', {
-        data: allSongs.value,
-        needReset: true
-    })
 }
 
 const addAllSongs = (text) => {
@@ -116,7 +109,7 @@ const follow = ref(false)
 const toggleFollow = () => {
     follow.value = !follow.value
     let text = "歌手关注成功！"
-    if(follow.value) {
+    if (follow.value) {
         const { title, cover } = detail
         addFollowArtist(props.id, props.platform, title, cover)
     } else {
@@ -131,10 +124,10 @@ const checkFollow = () => {
 }
 const updateTabData = (data) => {
     tabData.length = 0
-    if(typeof(data) == 'string') {
+    if (typeof (data) == 'string') {
         tabData.push(data)
         updateTabTipText(0)
-    } else { 
+    } else {
         tabData.push(...data)
         updateTabTipText(tabData.length)
     }
@@ -142,37 +135,37 @@ const updateTabData = (data) => {
 
 const getArtistDetail = async () => {
     checkFollow()
-    if(isArtistDetailLoaded()) {
+    if (isArtistDetailLoaded()) {
         setLoadingDetail(false)
-        return 
+        return
     }
     const vendor = getVendor(platform.value)
-    if(!vendor || !vendor.artistDetail) return
+    if (!vendor || !vendor.artistDetail) return
     setLoadingDetail(true)
     const id = artistId.value
     const result = await vendor.artistDetail(id)
-    if(!result) return
+    if (!result) return
     updateArtist(result.title, result.cover)
-    if(result.about) updateAbout(result.about)
-    if(result.hotSongs) updateHotSongs(result.hotSongs)
+    if (result.about) updateAbout(result.about)
+    if (result.hotSongs) updateHotSongs(result.hotSongs)
     Object.assign(detail, result)
     setLoadingDetail(false)
 }
 
 const loadHotSongs = () => {
     setLoadingSongs(true)
-    if(isHotSongsTabLoaded()) {
+    if (isHotSongsTabLoaded()) {
         updateTabData(hotSongs.value)
         setLoadingSongs(false)
-        return 
+        return
     }
     const vendor = getVendor(platform.value)
-    if(!vendor || !vendor.artistDetailHotSongs) return
+    if (!vendor || !vendor.artistDetailHotSongs) return
     const id = artistId.value
     vendor.artistDetailHotSongs(id).then(result => {
-        if(!isHotSongsTab()) return 
-        if(!result) return
-        if(result.name && result.cover) updateArtist(result.name, result.cover)
+        if (!isHotSongsTab()) return
+        if (!result) return
+        if (result.name && result.cover) updateArtist(result.name, result.cover)
         updateHotSongs(result.data)
         updateTabData(hotSongs.value)
         setLoadingSongs(false)
@@ -182,7 +175,7 @@ const loadHotSongs = () => {
 //TODO
 const loadMoreSongs = () => {
     const vendor = getVendor(platform.value)
-    if(!vendor || !vendor.artistDetailAllSongs) return
+    if (!vendor || !vendor.artistDetailAllSongs) return
     const id = artistId.value
     vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
         appendAllSongs(result.data)
@@ -194,17 +187,17 @@ const loadMoreSongs = () => {
 
 const loadAllSongs = () => {
     setLoadingSongs(true)
-    if(isAllSongsTabLoaded()) {
+    if (isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
         setLoadingSongs(false)
-        return 
+        return
     }
     const vendor = getVendor(platform.value)
-    if(!vendor || !vendor.artistDetailAllSongs) return
+    if (!vendor || !vendor.artistDetailAllSongs) return
     const id = artistId.value
     vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
-        if(!isAllSongsTab()) return 
-        if(!result) return
+        if (!isAllSongsTab()) return
+        if (!result) return
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         setLoadingSongs(false)
@@ -215,21 +208,21 @@ const loadAllSongs = () => {
 const loadAlbums = () => {
     setLoadingDetail(false)
     setLoadingAlbums(true)
-    if(isAlbumsTabLoaded()) {
+    if (isAlbumsTabLoaded()) {
         //TODO
         setTimeout(() => {
             updateTabData(albums.value)
             setLoadingAlbums(false)
         }, 0)
-        return 
+        return
     }
     const vendor = getVendor(platform.value)
-    if(!vendor || !vendor.artistDetailAlbums) return
+    if (!vendor || !vendor.artistDetailAlbums) return
     const id = artistId.value
     //TODO 分页加载全部
     vendor.artistDetailAlbums(id, 0, 365, 1).then(result => {
-        if(!isAlbumsTab()) return
-        if(!result) return
+        if (!isAlbumsTab()) return
+        if (!result) return
         updateAlbums(result.data)
         updateTabData(result.data)
         setLoadingAlbums(false)
@@ -240,16 +233,16 @@ const loadAbout = () => {
     setLoadingDetail(false)
     setLoadingSongs(false)
     setLoadingAlbums(false)
-    if(isAboutTabLoaded()) {
+    if (isAboutTabLoaded()) {
         updateTabData(about.value)
         updateTabTipText(0)
-        return 
+        return
     }
     const vendor = getVendor(platform.value)
-    if(!vendor || !vendor.artistDetailAbout) return
+    if (!vendor || !vendor.artistDetailAbout) return
     const id = artistId.value
     vendor.artistDetailAbout(id).then(result => {
-        if(!isAboutTab()) return
+        if (!isAboutTab()) return
         updateAbout(result)
         updateTabData(result)
         updateTabTipText(0)
@@ -257,13 +250,13 @@ const loadAbout = () => {
 }
 
 const scrollToLoad = () => {
-    if(isLoading.value) return
+    if (isLoading.value) return
     const scrollTop = artistDetailRef.value.scrollTop
     const scrollHeight = artistDetailRef.value.scrollHeight
     const clientHeight = artistDetailRef.value.clientHeight
     markScrollState()
-    if((scrollTop + clientHeight) >= scrollHeight) {
-       loadMoreSongs()
+    if ((scrollTop + clientHeight) >= scrollHeight) {
+        loadMoreSongs()
     }
     //TODO
     hideAllCtxMenus()
@@ -277,7 +270,7 @@ const resetTabView = () => {
 
 const onScroll = () => {
     hideAllCtxMenus()
-    if(isAllSongsTab()) {
+    if (isAllSongsTab()) {
         scrollToLoad()
     } else {
         markScrollState()
@@ -287,16 +280,16 @@ const onScroll = () => {
 const switchTab = () => {
     setLoading(true)
     resetTabView()
-    if(isHotSongsTab()) {
+    if (isHotSongsTab()) {
         currentTabView.value = SongListControl
         loadHotSongs()
-    } else if(isAllSongsTab()) {
+    } else if (isAllSongsTab()) {
         currentTabView.value = SongListControl
         loadAllSongs()
-    } else if(isAlbumsTab()) {
+    } else if (isAlbumsTab()) {
         currentTabView.value = AlbumListControl
         loadAlbums()
-    } else if(isAboutTab()) {
+    } else if (isAboutTab()) {
         currentTabView.value = TextListControl
         loadAbout()
     }
@@ -305,35 +298,35 @@ const switchTab = () => {
 const isAvailableTab = (btnType) => {
     const isPlayHotSongBtn = (btnType === 0)
     const isPlayAllSongBtn = (btnType === 1)
-    if(isPlayHotSongBtn) {
-        if(isAllSongsTab()) return false
-        else if(hasAllSongTab.value) return false
-    } else if(isPlayAllSongBtn) {
-        if(isHotSongsTab()) return false
-        else if(hasHotSongTab.value) return false
+    if (isPlayHotSongBtn) {
+        if (isAllSongsTab()) return false
+        else if (hasAllSongTab.value) return false
+    } else if (isPlayAllSongBtn) {
+        if (isHotSongsTab()) return false
+        else if (hasHotSongTab.value) return false
     }
     return true
 }
 
 const resetBack2TopBtn = () => {
-    if(!back2TopBtnRef.value) return 
+    if (!back2TopBtnRef.value) return
     back2TopBtnRef.value.setScrollTarget(artistDetailRef.value)
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
-    if(!artistDetailRef.value) return 
+    if (!artistDetailRef.value) return
     artistDetailRef.value.scrollTop = markScrollTop
 }
 
 const markScrollState = () => {
-    if(!artistDetailRef.value) return 
+    if (!artistDetailRef.value) return
     markScrollTop = artistDetailRef.value.scrollTop
 }
 
 const restoreScrollState = () => {
-    if(markScrollTop < 1) return 
-    if(!artistDetailRef.value) return
+    if (markScrollTop < 1) return
+    if (!artistDetailRef.value) return
     artistDetailRef.value.scrollTop = markScrollTop
 }
 
@@ -342,7 +335,7 @@ const resetPagination = () => {
     page = 1
 }
 
-const reloadAll = () =>  {
+const reloadAll = () => {
     setLoadingDetail(true)
     setLoadingSongs(true)
     resetBack2TopBtn()
@@ -350,7 +343,7 @@ const reloadAll = () =>  {
     loadAll()
 }
 
-const loadAll = async() => {
+const loadAll = async () => {
     resetPagination()
     resetScrollState()
     await getArtistDetail()
@@ -363,7 +356,7 @@ const loadAll = async() => {
 onActivated(() => {
     restoreScrollState()
 })
-watch([ platform, artistId ], reloadAll, { immediate: true })
+watch([platform, artistId], reloadAll, { immediate: true })
 </script>
 
 <template>
@@ -373,11 +366,13 @@ watch([ platform, artistId ], reloadAll, { immediate: true })
                 <img class="cover" v-lazy="artistCover" />
             </div>
             <div class="right" v-show="!isLoading">
-                <div class="title" v-html="artistName" ></div>
-                <div class="alias" v-html="artistAlias" ></div>
+                <div class="title" v-html="artistName"></div>
+                <div class="alias" v-html="artistAlias"></div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
-                    <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
+                        v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
+                        v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
                     <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
                     </FavoriteShareBtn>
                 </div>
@@ -388,11 +383,14 @@ watch([ platform, artistId ], reloadAll, { immediate: true })
                 </div>
                 <div class="title" v-html="artistName" v-show="!isLoadingDetail"></div>
                 <div class="action" v-show="isLoadingDetail">
-                    <div class="loading-mask spacing" v-for="i in 2" style="width: 168px; height: 36px; display: inline-block;"></div>
+                    <div class="loading-mask spacing" v-for="i in 2"
+                        style="width: 168px; height: 36px; display: inline-block;"></div>
                 </div>
                 <div class="action" v-show="!isLoadingDetail">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
-                    <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()" v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
+                        v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
+                        v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
                     <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
                     </FavoriteShareBtn>
                 </div>
@@ -400,19 +398,13 @@ watch([ platform, artistId ], reloadAll, { immediate: true })
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" :class="{ active: activeTab == index }"
-                    v-for="(tab,index) in tabs" 
-                    @click="visitTab(index, true)"
-                    v-html="tab.name" >
+                <span class="tab" :class="{ active: activeTab == index }" v-for="(tab, index) in tabs"
+                    @click="visitTab(index, true)" v-html="tab.name">
                 </span>
-                <span class="tab-tip" v-html="tabTipText" ></span>
+                <span class="tab-tip" v-html="tabTipText"></span>
             </div>
-            <component :is="currentTabView" 
-                :data="tabData"
-                :platform="platform"
-                :artistVisitable="true" 
-                :albumVisitable="true" 
-                :loading="isLoading" >
+            <component :is="currentTabView" :data="tabData" :platform="platform" :artistVisitable="true"
+                :albumVisitable="true" :loading="isLoading">
             </component>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -439,7 +431,7 @@ watch([ platform, artistId ], reloadAll, { immediate: true })
     margin-left: 30px;
 }
 
-#artist-detail-view .header .title{
+#artist-detail-view .header .title {
     text-align: left;
     margin-top: 5px;
     margin-bottom: 20px;
@@ -458,7 +450,7 @@ watch([ platform, artistId ], reloadAll, { immediate: true })
     -webkit-line-clamp: 1;
 }
 
-#artist-detail-view .header .alias{
+#artist-detail-view .header .alias {
     display: none;
 }
 

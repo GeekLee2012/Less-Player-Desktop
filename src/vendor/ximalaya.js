@@ -7,6 +7,7 @@ import { toYyyymmdd } from "../common/Times";
 import CryptoJS from 'crypto-js';
 
 
+
 const parseJson = (jsonp, callbackName) => {
     jsonp = jsonp.split(callbackName + '(')[1].trim()
     return JSON.parse(jsonp.substring(0, jsonp.length - 1))
@@ -36,7 +37,7 @@ export class Ximalaya {
             getDoc(url).then(doc => {
                 const result = { platform: Ximalaya.CODE, data: [], orders: [], multiMode: true }
                 const cateListWraps = doc.querySelectorAll(".category-list .all-wrap > .all")
-                cateListWraps.forEach(wrapItem => { 
+                cateListWraps.forEach(wrapItem => {
                     const category = new Category()
                     result.data.push(category)
                     const list = wrapItem.querySelectorAll(".category-item")
@@ -44,7 +45,7 @@ export class Ximalaya {
                         const classStyle = item.getAttribute("class")
                         const name = item.getAttribute("title")
                         let value = item.getAttribute("href")
-                        if(classStyle.includes('all')) {
+                        if (classStyle.includes('all')) {
                             category.name = name.replace('全部', '')
                             value = value.split("/")[1]
                         } else {
@@ -56,7 +57,7 @@ export class Ximalaya {
                 resolve(result)
             })
         })
-    }    
+    }
 
     //提取电台分类
     static parseFMRadioCate(cate) {
@@ -64,7 +65,7 @@ export class Ximalaya {
         try {
             const VALUE_ALL = 'radio'
             //默认全部
-            cate = cate || { 
+            cate = cate || {
                 '地区': {
                     item: { key: '全部', value: VALUE_ALL }
                 },
@@ -74,16 +75,16 @@ export class Ximalaya {
             }
             const location = cate['地区'].item.value
             const category = cate['分类'].item.value
-            
-            if(location != VALUE_ALL) {
+
+            if (location != VALUE_ALL) {
                 const value = location.substring(1)
-                if(value.length > 1) {
+                if (value.length > 1) {
                     result.locationId = value
                 } else {
                     result.locationTypeId = value
                 }
             }
-            if(category != VALUE_ALL) {
+            if (category != VALUE_ALL) {
                 const value = category.substring(1)
                 result.categoryId = value
             }
@@ -98,12 +99,12 @@ export class Ximalaya {
         return new Promise((resolve, reject) => {
             const result = { platform: Ximalaya.CODE, cate, offset, limit, page, total: 0, data: [] }
             const pageSize = 48
-            const url = "https://mobile.ximalaya.com/radio-first-page-app/search" 
-                + "?locationId=" + locationId + "&locationTypeId=" + locationTypeId 
+            const url = "https://mobile.ximalaya.com/radio-first-page-app/search"
+                + "?locationId=" + locationId + "&locationTypeId=" + locationTypeId
                 + "&categoryId=" + categoryId + "&pageNum=" + page + "&pageSize=" + pageSize
             getJson(url).then(json => {
                 const list = json.data.radios
-                const total= json.data.total
+                const total = json.data.total
                 result.total = Math.ceil(total / pageSize)
                 list.forEach(item => {
                     const { id, name, coverSmall, coverLarge, categoryName, programId, programScheduleId } = item
@@ -112,12 +113,12 @@ export class Ximalaya {
                     playlist.programId = programId
                     playlist.type = Playlist.FM_RADIO_TYPE
 
-                    const artist = [ { id:'', name: '喜马拉雅FM' } ]
-                    const album = { id:'', name: categoryName }
+                    const artist = [{ id: '', name: '喜马拉雅FM' }]
+                    const album = { id: '', name: categoryName }
                     const channelTrack = new Track(id, playlist.platform, name, artist, album, 0, cover)
                     channelTrack.url = `https://live.ximalaya.com/radio-first-page-app/live/${id}/64.m3u8?transcode=ts`
                     channelTrack.type = playlist.type
-                    
+
                     playlist.addTrack(channelTrack)
                     result.data.push(playlist)
                 })
@@ -129,13 +130,13 @@ export class Ximalaya {
     //歌曲播放详情：url、cover、lyric等
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
-            const src = "/audiostream/redirect/" 
-                + track.pid + "/" + id 
+            const src = "/audiostream/redirect/"
+                + track.pid + "/" + id
                 + "?access_token=&device_id=MOBILESITE&qingting_id=&t=" + Date.now()
             const url = "https://audio.qtfm.cn" + src + "&sign=" + getSign(src)
             const result = new Track(id, Ximalaya.CODE)
             result.url = url
-            resolve(result)  
+            resolve(result)
         })
     }
 

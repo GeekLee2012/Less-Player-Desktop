@@ -3,8 +3,8 @@ import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
-import { toYyyymmdd } from "../common/Times";
 import CryptoJS from 'crypto-js';
+
 
 
 const parseJson = (jsonp, callbackName) => {
@@ -44,7 +44,7 @@ export class Qingting {
                 resolve(result)
             })
         })
-    }    
+    }
 
     static anchorRadioSquare(cate, offset, limit, page, order) {
         return new Promise((resolve, reject) => {
@@ -52,7 +52,7 @@ export class Qingting {
             const url = "https://i.qingting.fm/capi/neo-channel-filter"
                 + "?category=" + cate + "&attrs=0&curpage=" + page
             getJson(url).then(json => {
-                const list = json.data.channels 
+                const list = json.data.channels
                 //TODO 目前每页数据 12条，后期可能会变动
                 result.total = Math.ceil(json.total / 12)
                 list.forEach(item => {
@@ -89,7 +89,7 @@ export class Qingting {
 
                 plist.forEach(item => {
                     const { id, title, duration, cover, playcount, update_time } = item
-                    const artist = [{ id: '', name: artistName } ]
+                    const artist = [{ id: '', name: artistName }]
                     const album = { id: result.id, name }
                     const track = new Track(id, Qingting.CODE, title, artist, album, duration * 1000, cover)
                     track.pid = result.id
@@ -108,12 +108,12 @@ export class Qingting {
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
             const pid = track.pid.replace(Playlist.ANCHOR_RADIO_ID_PREFIX, '')
-            const ts = Date.now() 
+            const ts = Date.now()
             const src = `/audiostream/redirect/${pid}/${id}?access_token=&device_id=MOBILESITE&qingting_id=&t=${ts}`
             const sign = getSign(src)
             const result = new Track(id, Qingting.CODE)
             result.url = `https://audio.qtfm.cn${src}&sign=${sign}`
-            resolve(result)  
+            resolve(result)
         })
     }
 

@@ -1,16 +1,16 @@
 <script setup>
 import { inject, onActivated, onMounted, ref, toRaw, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
-import { storeToRefs } from 'pinia';
 import KeysInputControl from '../components/KeysInputControl.vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useIpcRenderer, isMacOS, isWinOS } from '../../common/Utils';
 import { useUserProfileStore } from '../store/userProfileStore';
-import EventBus from '../../common/EventBus';
 import { getDoc } from '../../common/HttpClient';
+
 
 
 const { visitThemes, visitDataBackup, visitDataRestore, } = inject('appRoute')

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, reactive, ref, watch } from 'vue';
+import { onMounted, onActivated, reactive, ref, watch, inject } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';
@@ -9,6 +9,9 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
+
+
+const { playPlaylist } = inject('player')
 
 const { getVendor } = usePlatformStore()
 const { addTracks } = usePlayStore()
@@ -39,14 +42,14 @@ const updateListSizeText = () => {
 }
 
 const resetView = () => {
-    Object.assign(detail, { cover: 'default_cover.png', title: '', about: '',data: [] })
+    Object.assign(detail, { cover: 'default_cover.png', title: '', about: '', data: [] })
     offset = 0
     page = 1
     detail.total = 0
     updateListSizeText()
 }
 
-const nextPage = () =>  {
+const nextPage = () => {
     //TODO
     offset = page * limit
     page = page + 1
@@ -54,40 +57,38 @@ const nextPage = () =>  {
 }
 
 const loadContent = async (noLoadingMask) => {
-    if(!noLoadingMask) setLoading(true)
+    if (!noLoadingMask) setLoading(true)
     checkFavorite()
-    
+
     const vendor = getVendor(props.platform)
-    if(!vendor || !vendor.playlistDetail) return
+    if (!vendor || !vendor.playlistDetail) return
     let maxRetry = 3, retry = 0, success = false
     do {
         const result = await vendor.playlistDetail(props.id, offset, limit, page)
-        if(!result || result.data.length < 1) {
+        if (!result || result.data.length < 1) {
             ++retry
-            continue 
+            continue
         }
-        if(page > 1) result.data.unshift(...detail.data)
-        if(!result.total) detail.total = 0
+        if (page > 1) result.data.unshift(...detail.data)
+        if (!result.total) detail.total = 0
         Object.assign(detail, result)
         updateListSizeText()
         setLoading(false)
         success = true
         break
-    } while(retry > 0 && retry < maxRetry)
-    if(!success) { //回退分页信息，并提示
+    } while (retry > 0 && retry < maxRetry)
+    if (!success) { //回退分页信息，并提示
         page = page - 1
         offset = page * limit
-        if(offset < detail.total) showToast('网络异常！请稍候重试')
+        if (offset < detail.total) showToast('网络异常！请稍候重试')
     }
 }
 
 const loadMoreContent = () => {
-    if(nextPage()) {
+    if (nextPage()) {
         loadContent(true)
     }
 }
-
-const playAll = () => EventBus.emit('playlist-play', { playlist: detail })
 
 const addAll = (text) => {
     addTracks(detail.data)
@@ -100,7 +101,7 @@ const favorited = ref(false)
 const toggleFavorite = () => {
     favorited.value = !favorited.value
     let text = "歌单收藏成功！"
-    if(favorited.value) {
+    if (favorited.value) {
         const { title, cover } = detail
         addFavoritePlaylist(props.id, props.platform, title, cover)
     } else {
@@ -115,28 +116,28 @@ const checkFavorite = () => {
 }
 
 const markScrollState = () => {
-    if(playlistDetailRef.value) markScrollTop = playlistDetailRef.value.scrollTop
+    if (playlistDetailRef.value) markScrollTop = playlistDetailRef.value.scrollTop
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
-    if(playlistDetailRef.value) playlistDetailRef.value.scrollTop = markScrollTop
+    if (playlistDetailRef.value) playlistDetailRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
-    if(markScrollTop < 1) return 
-    if(playlistDetailRef.value) playlistDetailRef.value.scrollTop = markScrollTop
+    if (markScrollTop < 1) return
+    if (playlistDetailRef.value) playlistDetailRef.value.scrollTop = markScrollTop
     checkFavorite()
 }
 
 const scrollToLoad = () => {
-    if(isLoading.value) return
+    if (isLoading.value) return
     const scrollTop = playlistDetailRef.value.scrollTop
     const scrollHeight = playlistDetailRef.value.scrollHeight
     const clientHeight = playlistDetailRef.value.clientHeight
     markScrollState()
-    if((scrollTop + clientHeight) >= scrollHeight) {
-       loadMoreContent()
+    if ((scrollTop + clientHeight) >= scrollHeight) {
+        loadMoreContent()
     }
 }
 
@@ -147,7 +148,7 @@ const onScroll = () => {
 }
 
 const resetBack2TopBtn = () => {
-    if(back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
+    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
 }
 
 //TODO
@@ -181,7 +182,8 @@ EventBus.on("refresh-favorite", checkFavorite)
                 <div class="title" v-html="detail.title"></div>
                 <div class="about" v-html="trimExtraHtml(detail.about)"></div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playAll"  :rightAction="() => addAll()" class="btn-spacing">
+                    <PlayAddAllBtn :leftAction="() => playPlaylist(detail)" :rightAction="() => addAll()"
+                        class="btn-spacing">
                     </PlayAddAllBtn>
                     <FavoriteShareBtn :favorited="favorited" :leftAction="toggleFavorite">
                     </FavoriteShareBtn>
@@ -192,22 +194,22 @@ EventBus.on("refresh-favorite", checkFavorite)
                     <div class="loading-mask" style="width: 88%; height: 39px; display: inline-block;"></div>
                 </div>
                 <div class="about">
-                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 23px; display: inline-block;"></div>
+                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 23px; display: inline-block;">
+                    </div>
                 </div>
                 <div class="action">
-                    <div class="loading-mask btn-spacing" v-for="i in 2" style="width: 188px; height: 36px; display: inline-block;"></div>
+                    <div class="loading-mask btn-spacing" v-for="i in 2"
+                        style="width: 188px; height: 36px; display: inline-block;"></div>
                 </div>
             </div>
         </div>
         <div class="center">
             <div class="list-title">
                 <div class="size-text" v-show="!isLoading">列表({{ listSizeText }})</div>
-                <div class="loading-mask" v-show="isLoading" style="text-align: left;width: 150px; height: 28px; display: inline-block;"></div>
+                <div class="loading-mask" v-show="isLoading"
+                    style="text-align: left;width: 150px; height: 28px; display: inline-block;"></div>
             </div>
-            <SongListControl :data="detail.data" 
-                :artistVisitable="true" 
-                :albumVisitable="true" 
-                :loading="isLoading" >
+            <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :loading="isLoading">
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -234,7 +236,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     margin-left: 25px;
 }
 
-#playlist-detail-view .header .title, 
+#playlist-detail-view .header .title,
 #playlist-detail-view .header .about {
     text-align: left;
     margin-bottom: 10px;
@@ -264,7 +266,7 @@ EventBus.on("refresh-favorite", checkFavorite)
 
     overflow: hidden;
     word-wrap: break-all;
-    white-space:pre-wrap;
+    white-space: pre-wrap;
     line-break: anywhere;
     text-overflow: ellipsis;
     display: -webkit-box;

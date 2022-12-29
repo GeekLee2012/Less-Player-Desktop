@@ -1,31 +1,30 @@
 <script setup>
 import { toRef } from 'vue';
 
-const props =  defineProps({
+
+
+const props = defineProps({
     data: Array,
     value: Number,
     onChanged: Function
 })
 
-const current = toRef(props, 'value') 
+const current = toRef(props, 'value')
 
 const setCurrentIndex = (index) => {
     const { onChanged } = props
-    if(onChanged) onChanged(index)
+    if (onChanged) onChanged(index)
 }
 </script>
 
 <template>
     <div class="single-selection-ctl">
-        <div v-for="(item, index) in data"
-            :class="{
-                item: true,
-                first: (index == 0),
-                last: (index == data.length - 1),
-                active: (index == current)
-            }"
-            @click="setCurrentIndex(index)"
-            v-html="item">
+        <div v-for="(item, index) in data" :class="{
+    item: true,
+    first: (index == 0),
+    last: (index == data.length - 1),
+    active: (index == current)
+}" @click="setCurrentIndex(index)" v-html="item">
         </div>
     </div>
 </template>
@@ -41,10 +40,10 @@ const setCurrentIndex = (index) => {
 }
 
 .single-selection-ctl .item {
-    border-width: 0px; 
-    border-left: 1px solid var(--item-border-color); 
-    border-top: 1px solid var(--item-border-color); 
-    border-bottom: 1px solid var(--item-border-color); 
+    border-width: 0px;
+    border-left: 1px solid var(--item-border-color);
+    border-top: 1px solid var(--item-border-color);
+    border-bottom: 1px solid var(--item-border-color);
     padding: 4px 6px;
     cursor: pointer;
     font-size: 13px;

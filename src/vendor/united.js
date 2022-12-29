@@ -7,17 +7,19 @@ import { RadioCN } from "../vendor/radiocn";
 import { Qingting } from "../vendor/qingting";
 import { Ximalaya } from "../vendor/ximalaya";
 
-const vendors = [ 
-    QQ, NetEase, 
-    KuWo, KuGou, 
-    DouBan, RadioCN, 
-    Qingting, Ximalaya 
+
+
+const vendors = [
+    QQ, NetEase,
+    KuWo, KuGou,
+    DouBan, RadioCN,
+    Qingting, Ximalaya
 ]
 
 const getVendor = (code) => {
-    for(let i in vendors) {
+    for (let i in vendors) {
         const vender = vendors[i]
-        if(vender.CODE === code) return vender
+        if (vender.CODE === code) return vender
     }
     return null
 }
@@ -35,28 +37,28 @@ export class United {
         keyword = keyword.trim()
         return new Promise(async (resolve, reject) => {
             let candidates = []
-            let result = null 
+            let result = null
             const top = 3
 
             console.log('<------ Transfer Begin ------>')
             whereDreamBegins:
-            for(var i = 0; i < vendors.length; i++) {
+            for (var i = 0; i < vendors.length; i++) {
                 const vendor = vendors[i]
                 const songs = await vendor.searchSongs(keyword)
                 candidates = songs.data
                 //TODO 匹配算法才是关键
                 //candidates = United.matchAndSort(track, candidates)
-                if(candidates.length < 1) continue
-                for(var j = 0; j < top; j++) {
+                if (candidates.length < 1) continue
+                for (var j = 0; j < top; j++) {
                     const candidate = candidates[j]
                     result = await vendor.playDetail(candidate.id, candidate)
-                    if(!result.hasUrl()) continue
+                    if (!result.hasUrl()) continue
 
                     const lyric = await vendor.lyric(candidate.id, candidate)
                     track.url = result.url
                     track.lyric = lyric
                     track.borrow = candidate
-                    
+
                     break whereDreamBegins
                 }
             }

@@ -14,7 +14,8 @@ import SvgTextButton from '../components/SvgTextButton.vue';
 import { useIpcRenderer } from '../../common/Utils';
 
 
-const { backward } = inject('appRoute') 
+
+const { backward } = inject('appRoute')
 
 const props = defineProps({
     id: String
@@ -33,16 +34,16 @@ const detail = reactive({ title: null, about: null, cover: null })
 const { addCustomPlaylist, updateCustomPlaylist, getCustomPlaylist } = useUserProfileStore()
 
 const loadCustomPlaylist = () => {
-    if(!props.id) return 
+    if (!props.id) return
     const id = props.id.trim()
-    if(id.length < 1) return
+    if (id.length < 1) return
     const playlist = getCustomPlaylist(id)
-    if(!playlist) return 
+    if (!playlist) return
     const { title, about, cover } = playlist
     Object.assign(detail, { id })
-    if(cover) Object.assign(detail, { cover })
-    if(title) Object.assign(detail, { title })
-    if(about) Object.assign(detail, { about })
+    if (cover) Object.assign(detail, { cover })
+    if (title) Object.assign(detail, { title })
+    if (about) Object.assign(detail, { about })
 }
 
 const checkValid = () => {
@@ -54,12 +55,12 @@ const submit = () => {
     let title = titleRef.value.value.trim()
     let about = aboutRef.value.value.trim()
     let cover = coverRef.value.src
-    if(title.length < 1) {
+    if (title.length < 1) {
         invalid.value = true
-        return 
+        return
     }
     let text = "歌单已创建成功!"
-    if(!props.id) {
+    if (!props.id) {
         addCustomPlaylist(title, about, cover)
     } else {
         updateCustomPlaylist(props.id, title, about, cover)
@@ -70,9 +71,9 @@ const submit = () => {
 
 //TODO
 const updateCover = async () => {
-    if(!ipcRenderer) return 
+    if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-image')
-    if(result.length > 0) {
+    if (result.length > 0) {
         const title = titleRef.value.value.trim()
         const about = aboutRef.value.value.trim()
         const cover = result[0]
@@ -91,7 +92,7 @@ onMounted(() => loadCustomPlaylist())
         </div>
         <div class="center">
             <div>
-                <img class="cover" v-lazy="detail.cover" ref="coverRef"/>
+                <img class="cover" v-lazy="detail.cover" ref="coverRef" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
             </div>
             <div class="right">
@@ -101,15 +102,15 @@ onMounted(() => loadCustomPlaylist())
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" 
-                            maxlength="25" placeholder="请输入歌单名称，最多允许输入25个字符哦" />
+                        <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="25"
+                            placeholder="请输入歌单名称，最多允许输入25个字符哦" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="detail.about" ref="aboutRef" 
-                            maxlength="520" placeholder="你想用歌单诉说什么，一起分享一下吧~ 最多允许输入520个字符哦">
+                        <textarea :value="detail.about" ref="aboutRef" maxlength="520"
+                            placeholder="你想用歌单诉说什么，一起分享一下吧~ 最多允许输入520个字符哦">
                         </textarea>
                     </div>
                 </div>

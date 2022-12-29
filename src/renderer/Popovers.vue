@@ -1,18 +1,20 @@
 <script setup>
 import { onMounted, reactive, shallowRef, watch } from 'vue';
-import Notification from './components/Notification.vue';
-import { useAppCommonStore } from './store/appCommonStore';
 import { storeToRefs } from 'pinia';
-import EventBus from '../common/EventBus';
+import { useAppCommonStore } from './store/appCommonStore';
+import { useUserProfileStore } from './store/userProfileStore';
+import Notification from './components/Notification.vue';
 import CommonContextMenu from './components/CommonContextMenu.vue';
 import AddToListSubmenu from './components/addToListSubmenu.vue';
-import { useUserProfileStore } from './store/userProfileStore';
 import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
 import LyricToolbar from './components/LyricToolbar.vue';
+import RandomMusicToolbar from './components/RandomMusicToolbar.vue';
 import PlayingView from './views/PlayingView.vue';
 import VisualPlayingView from './views/VisualPlayingView.vue';
 import AudioEffectView from './views/AudioEffectView.vue';
-import RandomMusicToolbar from './components/RandomMusicToolbar.vue';
+import EventBus from '../common/EventBus';
+
+
 
 const currentPlayingView = shallowRef(null)
 const ctxMenuPosStyle = reactive({ left: -999, top: -999 })

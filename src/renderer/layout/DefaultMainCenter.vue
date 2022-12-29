@@ -1,33 +1,28 @@
 <script setup>
 import { inject, onActivated, onMounted, shallowRef, watch } from 'vue';
-import MainTop from './DefaultMainTop.vue';
+import DefaultMainTop from './DefaultMainTop.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
-import MainContent from './DefaultMainContent.vue';
-import MainBottom from './DefaultMainBottom.vue';
+import DefaultMainContent from './DefaultMainContent.vue';
+import DefaultMainBottom from './DefaultMainBottom.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
 import { storeToRefs } from 'pinia';
 import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
 import ArtistCategoryView from '../views/ArtistCategoryView.vue';
 import RadioCategoryView from '../views/RadioCategoryView.vue';
 import EventBus from '../../common/EventBus';
-import Mousetrap from 'mousetrap';
+
 
 
 const currentMainTop = shallowRef(null)
 const currentMainBottom = shallowRef(null)
 
-const { visitRoute, visitSetting } = inject('appRoute')
-
 const { playlistCategoryViewShow, artistCategoryViewShow,
-    radioCategoryViewShow, videoPlayingViewShow,
-    playingViewThemeIndex, playingViewShow,
+    radioCategoryViewShow, playingViewShow,
     audioEffectViewShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideAllCategoryViews, hideAllCtxMenus,
-    hidePlaybackQueueView, togglePlaybackQueueView,
-    toggleLyricToolbar, hideLyricToolbar } = useAppCommonStore()
+    hidePlaybackQueueView, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
     isDefaultClassicLayout, isSimpleLayout } = storeToRefs(useSettingStore())
@@ -55,13 +50,13 @@ const setSearchBarSize = () => {
     const wScaleRatio = clientWidth / minAppWidth
     //const hScaleRatio = clientHeight / minAppHeight
     const size = 115 * Math.max(wScaleRatio, 1)
-    const el = document.querySelector(".main-top .search-bar .keyword")
+    const el = document.querySelector(".default-main-top .search-bar .keyword")
     if (!el) return
     el.style.width = size + "px"
 }
 
 const setCategoryViewSize = () => {
-    const mainContent = document.getElementById('main-content')
+    const mainContent = document.getElementById('default-main-content')
     const playlistCategory = document.querySelector('#playlist-category-view')
     const artistCategory = document.querySelector('#artist-category-view')
     const radioCategory = document.querySelector('#radio-category-view')
@@ -79,7 +74,7 @@ const setImageTextTileSize = () => {
     const mainMargin = 33;
     const scrollBarWidth = 6
     const limits = [5, 4] //TODO 宽屏、超宽屏，需更好兼容性
-    const mainContent = document.getElementById('main-content')
+    const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const { clientWidth } = mainContent
     const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
@@ -109,7 +104,7 @@ const setImageTextTileLoadingMaskSize = () => {
     const titleHeight = 28, titleMarginTop = 5;
     const scrollBarWidth = 6
     const limits = [5, 4]
-    const mainContent = document.getElementById('main-content')
+    const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const { clientWidth } = mainContent
     const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
@@ -140,16 +135,6 @@ const setImageTextTileLoadingMaskSize = () => {
 const setImageTextTileComponentSize = () => {
     setImageTextTileSize()
     setImageTextTileLoadingMaskSize()
-}
-
-const setPlaybackQueueSize = () => {
-    //const minClientWidth = 999, minClientHeight = 666 
-    const { clientWidth, clientHeight } = document.documentElement
-    const wScaleRatio = clientWidth / minAppWidth
-    const hScaleRatio = clientHeight / minAppHeight
-    let size = 335 * Math.max(wScaleRatio * 0.85, 1)
-    const el = document.querySelector("#playback-queue-view")
-    el.style.width = size + "px"
 }
 
 const setPlayingCoverSize = () => {
@@ -237,21 +222,12 @@ const setVisualPlayingViewCanvasSize = () => {
 
 //TODO
 const setBatchViewListSize = () => {
-    const mainContent = document.getElementById('main-content')
+    const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const el = document.querySelector('#batch-action-view .content')
     const { clientHeight } = mainContent, padding = 52
     const height = (clientHeight - 133 - padding)
     if (el) el.style.height = height + "px"
-}
-
-const hideAllPopoverViews = () => {
-    //隐藏当前播放
-    hidePlaybackQueueView()
-    //隐藏全部分类
-    hideAllCategoryViews()
-    //隐藏上下文菜单
-    hideAllCtxMenus()
 }
 
 //自适应播放页组件大小
@@ -293,8 +269,8 @@ const setupDefaultLayout = () => {
         currentMainTop.value = ClassicMainTop
         currentMainBottom.value = ClassicMainBottom
     } else {
-        currentMainTop.value = MainTop
-        currentMainBottom.value = MainBottom
+        currentMainTop.value = DefaultMainTop
+        currentMainBottom.value = DefaultMainBottom
     }
 }
 
@@ -344,7 +320,6 @@ EventBus.on("app-layout-default", setupDefaultLayout)
 
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)
-//watch([ videoPlayingViewShow ], setVideoViewSize)
 watch([audioEffectViewShow], setAudioEffectViewAlignment)
 watch([playingViewShow], () => {
     hideLyricToolbar()
@@ -358,12 +333,12 @@ watch(lyricMetaPos, () => {
 </script>
 
 <template>
-    <div id="main-center">
-        <component id="main-top" :is="currentMainTop">
+    <div id="default-main-center">
+        <component id="default-main-top" :is="currentMainTop">
         </component>
-        <MainContent id="main-content" :class="{ autopadding: isDefaultClassicLayout }">
-        </MainContent>
-        <component id="main-bottom" :is="currentMainBottom">
+        <DefaultMainContent id="default-main-content" :class="{ autopadding: isDefaultClassicLayout }">
+        </DefaultMainContent>
+        <component id="default-main-bottom" :is="currentMainBottom">
         </component>
 
         <!-- 浮层(Component、View)-->
@@ -388,18 +363,18 @@ watch(lyricMetaPos, () => {
 </template>
 
 <style>
-#main-center {
+#default-main-center {
     display: flex;
     flex-direction: column;
     flex: 1;
     overflow: hidden;
-    background: var(--main-center-bg);
+    background: var(--default-main-center-bg);
 }
 
-#main-center,
-#main-top,
-#main-content,
-#main-bottom {
+#default-main-center,
+#default-main-top,
+#default-main-content,
+#default-main-bottom {
     z-index: 1;
 }
 
@@ -417,7 +392,7 @@ watch(lyricMetaPos, () => {
     box-shadow: 0px 0px 10px #161616;
 }
 
-#main-center .autolayout {
+#default-main-center .autolayout {
     top: 60px;
 }
 
@@ -441,26 +416,26 @@ watch(lyricMetaPos, () => {
 }
 
 /* TODO */
-#main-center .autopadding .playlist-square-view,
-#main-center .autopadding .artist-square-view,
-#main-center .autopadding .radio-square-view,
-#main-center .autopadding #themes-view .title,
-#main-center .autopadding #setting-view .title,
-#main-center .autopadding #search-view,
-#main-center .autopadding #user-profile-view,
-#main-center .autopadding #batch-action-view,
-#main-center .autopadding #user-info-edit-view,
-#main-center .autopadding #custom-playlist-edit-view,
-#main-center .autopadding #data-backup-view,
-#main-center .autopadding #data-restore-view {
+#default-main-center .autopadding .playlist-square-view,
+#default-main-center .autopadding .artist-square-view,
+#default-main-center .autopadding .radio-square-view,
+#default-main-center .autopadding #themes-view .title,
+#default-main-center .autopadding #setting-view .title,
+#default-main-center .autopadding #search-view,
+#default-main-center .autopadding #user-profile-view,
+#default-main-center .autopadding #batch-action-view,
+#default-main-center .autopadding #user-info-edit-view,
+#default-main-center .autopadding #custom-playlist-edit-view,
+#default-main-center .autopadding #data-backup-view,
+#default-main-center .autopadding #data-restore-view {
     padding-top: 5px;
 }
 
-#main-center .autopadding #local-music-view,
-#main-center .autopadding #playlist-detail-view,
-#main-center .autopadding #artist-detail-view,
-#main-center .autopadding #album-detail-view,
-#main-center .autopadding #custom-playlist-detail-view {
+#default-main-center .autopadding #local-music-view,
+#default-main-center .autopadding #playlist-detail-view,
+#default-main-center .autopadding #artist-detail-view,
+#default-main-center .autopadding #album-detail-view,
+#default-main-center .autopadding #custom-playlist-detail-view {
     padding-top: 13px;
 }
 </style>

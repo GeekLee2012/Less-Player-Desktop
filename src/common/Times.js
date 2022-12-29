@@ -1,7 +1,7 @@
 export const toMmss = (millis) => {
     let minutes = Math.floor(millis / 60000);
     let seconds = ((millis % 60000) / 1000).toFixed(0);
-    if(seconds >= 60) { //toFixed()是否引起进位
+    if (seconds >= 60) { //toFixed()是否引起进位
         seconds = seconds - 60
         ++minutes
     }
@@ -48,7 +48,7 @@ export const toYmd = (timestamp, sp) => {
  * @param {*} sp2 日期与时间的间隔符
  * @param {*} sp3 时分秒间隔符
  */
-export const toYyyymmddHhMmSs = (timestamp, sp1, sp2 , sp3) => {
+export const toYyyymmddHhMmSs = (timestamp, sp1, sp2, sp3) => {
     sp1 = sp1 || '-'
     sp2 = sp2 || ' '
     sp3 = sp3 || ':'
@@ -64,7 +64,7 @@ export const toYyyymmddHhMmSs = (timestamp, sp1, sp2 , sp3) => {
     Mm = Mm < 10 ? ('0' + Mm) : Mm
     let Ss = date.getSeconds()
     Ss = Ss < 10 ? ('0' + Ss) : Ss
-    return yyyy + sp1 + mm + sp1 + dd + sp2 
+    return yyyy + sp1 + mm + sp1 + dd + sp2
         + Hh + sp3 + Mm + sp3 + Ss
 }
 
@@ -75,7 +75,7 @@ export const toMillis = (mmss) => {
         const minutes = parseInt(timeParts[0].trim())
         const seconds = parseInt(timeParts[1].trim())
         return (minutes * 60 + seconds) * 1000
-    } catch(error) {
+    } catch (error) {
         console.log(mmss, "\n", error)
     }
     return -1

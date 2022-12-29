@@ -1,7 +1,9 @@
 import { Lyric } from "../common/Lyric"
 import { useIpcRenderer } from "../common/Utils"
 
-const ipcRenderer = useIpcRenderer() 
+
+
+const ipcRenderer = useIpcRenderer()
 
 const FILE_PREFIX = 'file:///'
 
@@ -12,7 +14,7 @@ export class LocalMusic {
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
             let url = track.url
-            if(!url.includes(FILE_PREFIX)) {
+            if (!url.includes(FILE_PREFIX)) {
                 track.url = FILE_PREFIX + url
             }
             resolve(track)
@@ -22,19 +24,19 @@ export class LocalMusic {
     //歌词
     static lyric(id, track) {
         return new Promise(async (resolve, reject) => {
-            if(!ipcRenderer) {
+            if (!ipcRenderer) {
                 resolve(null)
-                return 
+                return
             }
             try {
                 let url = track.url
-                if(url.includes(FILE_PREFIX)) {
+                if (url.includes(FILE_PREFIX)) {
                     url = url.replace(FILE_PREFIX, '')
                 }
                 const text = await ipcRenderer.invoke('lyric-load', url)
                 const result = Lyric.parseFromText(text)
                 resolve(result)
-            } catch(error) {
+            } catch (error) {
                 console.log(error)
                 resolve(null)
             }

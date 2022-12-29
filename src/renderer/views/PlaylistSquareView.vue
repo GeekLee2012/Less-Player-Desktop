@@ -8,6 +8,8 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 
+
+
 const squareContentRef = ref(null)
 const back2TopBtnRef = ref(null)
 
@@ -40,7 +42,7 @@ const resetPagination = () => {
     pagination.page = 1
 }
 
-const nextPage = () =>  {
+const nextPage = () => {
     pagination.offset = pagination.page * pagination.limit
     pagination.page = pagination.page + 1
 }
@@ -52,37 +54,37 @@ const loadCategories = async () => {
     setLoadingContent(true)
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
-    if(!cachedCates) {
+    if (!cachedCates) {
         const vendor = currentVender()
-        if(!vendor || !vendor.categories) return 
+        if (!vendor || !vendor.categories) return
         const result = await vendor.categories()
-        if(!result) return
+        if (!result) return
         cachedCates = result.data
         cachedOrders = result.orders
-        if(!cachedCates) return
+        if (!cachedCates) return
         putCategories(result.platform, cachedCates)
-        if(cachedOrders) putOrders(result.platform, result.orders)
+        if (cachedOrders) putOrders(result.platform, result.orders)
     }
     categories.push(...cachedCates)
-    if(cachedOrders) orders.push(...cachedOrders)
+    if (cachedOrders) orders.push(...cachedOrders)
     EventBus.emit('playlistCategory-update')
     setLoadingCategories(false)
 }
 
 const loadContent = async (noLoadingMask) => {
     const vendor = currentVender()
-    if(!vendor || !vendor.square) return
-    if(!noLoadingMask) setLoadingContent(true)
+    if (!vendor || !vendor.square) return
+    if (!noLoadingMask) setLoadingContent(true)
     const cate = currentCategoryCode.value
     const offset = pagination.offset
     const limit = pagination.limit
     const page = pagination.page
     const order = currentOrder.value.value
     const result = await vendor.square(cate, offset, limit, page, order)
-    
-    if(!result) return 
-    if(currentPlatformCode.value != result.platform) return 
-    if(currentCategoryCode.value != result.cate) return 
+
+    if (!result) return
+    if (currentPlatformCode.value != result.platform) return
+    if (currentCategoryCode.value != result.cate) return
     playlists.push(...result.data)
     setLoadingContent(false)
 }
@@ -94,15 +96,15 @@ const loadMoreContent = () => {
 }
 
 const scrollToLoad = () => {
-    if(isLoadingContent.value) return
+    if (isLoadingContent.value) return
     const scrollTop = squareContentRef.value.scrollTop
     const scrollHeight = squareContentRef.value.scrollHeight
     const clientHeight = squareContentRef.value.clientHeight
     markScrollState()
     //console.log(scrollTop + clientHeight, ' : ', scrollHeight)
     const allowedError = 10 //允许误差
-    if((scrollTop + clientHeight + allowedError) >= scrollHeight) {
-       loadMoreContent()
+    if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
+        loadMoreContent()
     }
 }
 
@@ -111,22 +113,22 @@ const onScroll = () => {
 }
 
 const markScrollState = () => {
-    if(squareContentRef.value) markScrollTop = squareContentRef.value.scrollTop
+    if (squareContentRef.value) markScrollTop = squareContentRef.value.scrollTop
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
-    if(squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
+    if (squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
     EventBus.emit("imageTextTile-load")
-    if(markScrollTop < 1) return 
-    if(squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
+    if (markScrollTop < 1) return
+    if (squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
 }
 
 const resetBack2TopBtn = () => {
-    if(back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
+    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
 }
 
 //TODO 后期需要梳理优化
@@ -140,7 +142,7 @@ onActivated(() => {
     restoreScrollState()
 })
 
-const resetCommom = ()=> {
+const resetCommom = () => {
     resetPagination()
     resetScrollState()
     resetBack2TopBtn()
@@ -154,8 +156,8 @@ const refreshData = () => {
 
 /* 生命周期、监听 */
 watch(currentPlatformCode, (nv, ov) => {
-    if(!isPlaylistMode.value) return
-    if(!nv) reurn
+    if (!isPlaylistMode.value) return
+    if (!nv) reurn
     resetCommom()
     loadCategories()
 })

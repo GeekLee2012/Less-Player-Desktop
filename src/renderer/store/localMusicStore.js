@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { Track } from "../../common/Track";
 import { useIpcRenderer } from "../../common/Utils";
 
+
+
 const ipcRenderer = useIpcRenderer()
 
 export const useLocalMusicStore = defineStore('localMusic', {
@@ -17,11 +19,11 @@ export const useLocalMusicStore = defineStore('localMusic', {
     },
     actions: {
         async addFolders() {
-            if(!ipcRenderer) return 
+            if (!ipcRenderer) return
             this.isLoading = true
             const result = await ipcRenderer.invoke('open-audio-dirs')
-            
-            if(result) {
+
+            if (result) {
                 this.localDirs.push(result.path)
                 result.data.forEach(item => {
                     this.localTracks.push(Object.assign(new Track(), item))
@@ -30,11 +32,11 @@ export const useLocalMusicStore = defineStore('localMusic', {
             this.isLoading = false
         },
         async addFiles() {
-            if(!ipcRenderer) return 
+            if (!ipcRenderer) return
             this.isLoading = true
             const result = await ipcRenderer.invoke('open-audios')
-            
-            if(result) {
+
+            if (result) {
                 result.forEach(item => {
                     this.localTracks.push(Object.assign(new Track(), item))
                 })
@@ -42,8 +44,8 @@ export const useLocalMusicStore = defineStore('localMusic', {
             this.isLoading = false
         },
         removeItem(index) {
-            if(isNaN(index)) return
-            if(index > -1) {
+            if (isNaN(index)) return
+            if (index > -1) {
                 this.localTracks.splice(index, 1)
             }
         },
@@ -57,7 +59,7 @@ export const useLocalMusicStore = defineStore('localMusic', {
         strategies: [
             {
                 storage: localStorage,
-                paths: [ 'localDirs', 'localTracks' ]
+                paths: ['localDirs', 'localTracks']
             }
         ]
     }

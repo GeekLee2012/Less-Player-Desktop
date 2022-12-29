@@ -8,7 +8,7 @@ export default {
 -->
 
 <script setup>
-import { onMounted, onActivated, ref, reactive, shallowRef, watch, toRaw } from 'vue';
+import { inject, ref, reactive, shallowRef, watch, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
@@ -19,24 +19,27 @@ import { usePlayStore } from '../store/playStore';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import EventBus from '../../common/EventBus';
+
+
 
 const props = defineProps({
     platform: String,
     id: String
 })
 
+const { playAlbum } = inject('player')
+
 const { albumId, albumName, albumCover, platform,
-        artistName, publishTime, company,
-        activeTab, tabs, tabTipText, 
-        allSongs, about
-    } = storeToRefs(useAlbumDetailStore())
-const { setActiveTab, updateTabTipText, 
-        isAllSongsTab, isAboutTab,
-        isAllSongsTabLoaded, isAlbumDetailLoaded,
-        updateAllSongs, updateAlbum, 
-        updateAbout, resetAll
-    } = useAlbumDetailStore()
+    artistName, publishTime, company,
+    activeTab, tabs, tabTipText,
+    allSongs, about
+} = storeToRefs(useAlbumDetailStore())
+const { setActiveTab, updateTabTipText,
+    isAllSongsTab, isAboutTab,
+    isAllSongsTabLoaded, isAlbumDetailLoaded,
+    updateAllSongs, updateAlbum,
+    updateAbout, resetAll
+} = useAlbumDetailStore()
 
 const { getVendor } = usePlatformStore()
 const { addTracks } = usePlayStore()
@@ -57,20 +60,20 @@ const setLoading = (value) => {
 }
 
 const visitTab = (index, isClick) => {
-    if(isLoading.value && isClick) return 
+    if (isLoading.value && isClick) return
     setActiveTab(index)
     switchTab()
 }
 
 const playAll = () => {
     const data = allSongs.value
-    EventBus.emit('album-play', { album: { ...toRaw(detail), data } })
+    playAlbum({ ...toRaw(detail), data })
 }
 
 const addAll = (text) => {
     addTracks(allSongs.value)
     showToast(text || "歌曲已全部添加！")
-} 
+}
 
 //TODO
 const { addFavoriteAlbum, removeFavoriteAlbum, isFavoriteAlbum } = useUserProfileStore()
@@ -78,7 +81,7 @@ const favorited = ref(false)
 const toggleFavorite = () => {
     favorited.value = !favorited.value
     let text = "专辑收藏成功！"
-    if(favorited.value) {
+    if (favorited.value) {
         const { title, cover, publishTime } = detail
         addFavoriteAlbum(albumId.value, platform.value, title, cover, publishTime)
     } else {
@@ -94,10 +97,10 @@ const checkFavorite = () => {
 
 const updateTabData = (data) => {
     tabData.value.length = 0
-    if(typeof(data) == 'string') {
+    if (typeof (data) == 'string') {
         tabData.value.push(data)
         updateTabTipText(0)
-    } else if(data){
+    } else if (data) {
         tabData.value.push(...data)
         updateTabTipText(tabData.value.length)
     }
@@ -105,12 +108,12 @@ const updateTabData = (data) => {
 
 const getAlbumDetail = () => {
     setLoadingDetail(true)
-    if(isAlbumDetailLoaded()) {
+    if (isAlbumDetailLoaded()) {
         setLoadingDetail(false)
-        return 
+        return
     }
     const vendor = getVendor(platform.value)
-    if(!vendor || !vendor.albumDetail) return
+    if (!vendor || !vendor.albumDetail) return
     const id = albumId.value
     vendor.albumDetail(id).then(result => {
         const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
@@ -118,29 +121,29 @@ const getAlbumDetail = () => {
         updateAbout(result.about)
         Object.assign(detail, result)
         setLoadingDetail(false)
-        if(result.hasTracks()) {
+        if (result.hasTracks()) {
             updateAllSongs(result.data)
             updateTabData(allSongs.value)
             currentTabView.value = SongListControl
             setLoading(false)
-            return 
+            return
         }
     })
 }
 
-const loadAllSongs = ()=> {
+const loadAllSongs = () => {
     setLoading(true)
     currentTabView.value = SongListControl
-    if(isAllSongsTabLoaded()) {
+    if (isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
         setLoading(false)
-        return 
+        return
     }
     const vendor = getVendor(platform.value)
-    if(!vendor || !vendor.albumDetailAllSongs) return
+    if (!vendor || !vendor.albumDetailAllSongs) return
     const id = albumId.value
     vendor.albumDetailAllSongs(id, 0, 100).then(result => {
-        if(!isAllSongsTab()) return
+        if (!isAllSongsTab()) return
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         setLoading(false)
@@ -149,7 +152,7 @@ const loadAllSongs = ()=> {
 
 const loadAbout = () => {
     currentTabView.value = TextListControl
-    if(!isAboutTab()) return
+    if (!isAboutTab()) return
     updateTabData(about.value)
 }
 
@@ -159,17 +162,17 @@ const onScroll = () => {
 }
 
 const scrollToTop = () => {
-    if(detailRef.value) detailRef.value.scrollTop = 0
+    if (detailRef.value) detailRef.value.scrollTop = 0
 }
 
-const reloadAll = () =>  {
+const reloadAll = () => {
     setLoadingDetail(true)
     setLoading(true)
     resetAll()
     loadAll()
 }
 
-const loadAll = () =>  {
+const loadAll = () => {
     scrollToTop()
     getAlbumDetail()
     visitTab(0)
@@ -184,16 +187,16 @@ const resetView = () => {
 const switchTab = () => {
     resetView()
     setLoading(true)
-    if(isAllSongsTab()) {
+    if (isAllSongsTab()) {
         loadAllSongs()
-    } else if(isAboutTab()) {
+    } else if (isAboutTab()) {
         loadAbout()
         setLoading(false)
     }
 }
 
 //TODO 需要梳理优化
-watch([ platform, albumId ], reloadAll, { immediate: true })
+watch([platform, albumId], reloadAll, { immediate: true })
 </script>
 
 <template>
@@ -229,27 +232,24 @@ watch([ platform, albumId ], reloadAll, { immediate: true })
                     <div class="loading-mask" style="width: 36%; height: 39px; display: inline-block;"></div>
                 </div>
                 <div class="info" v-show="isLoadingDetail">
-                    <div class="loading-mask" v-for="i in 3" style="width: 500px; height: 36px; display: inline-block;"></div>
+                    <div class="loading-mask" v-for="i in 3" style="width: 500px; height: 36px; display: inline-block;">
+                    </div>
                 </div>
                 <div class="action">
-                    <div class="loading-mask spacing" v-for="i in 2" style="width: 168px; height: 36px; display: inline-block;"></div>
+                    <div class="loading-mask spacing" v-for="i in 2"
+                        style="width: 168px; height: 36px; display: inline-block;"></div>
                 </div>
             </div>
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" :class="{ active: activeTab == index }"
-                    v-for="(tab,index) in tabs" 
-                    @click="visitTab(index, true)"
-                    v-html="tab.name" >
+                <span class="tab" :class="{ active: activeTab == index }" v-for="(tab, index) in tabs"
+                    @click="visitTab(index, true)" v-html="tab.name">
                 </span>
-                <span class="tab-tip" v-html="tabTipText" ></span>
+                <span class="tab-tip" v-html="tabTipText"></span>
             </div>
-            <component :is="currentTabView" 
-                :data="tabData" 
-                :artistVisitable="true" 
-                :albumVisitable="true"
-                :loading="isLoading" >
+            <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
+                :loading="isLoading">
             </component>
         </div>
     </div>
@@ -372,7 +372,7 @@ watch([ platform, albumId ], reloadAll, { immediate: true })
     color: transparent;
 }
 
-#album-detail-view  .songlist {
+#album-detail-view .songlist {
     display: flex;
     flex-direction: column;
 }

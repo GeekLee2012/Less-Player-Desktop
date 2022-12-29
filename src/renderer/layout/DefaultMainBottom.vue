@@ -2,12 +2,12 @@
 </script>
 
 <template>
-    <div id="main-bottom">
+    <div id="default-main-bottom">
     </div>
 </template>
 
 <style scoped>
-#main-bottom {
+#default-main-bottom {
     height: 36px;
 }
 </style>

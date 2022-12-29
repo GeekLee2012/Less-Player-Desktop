@@ -1,15 +1,15 @@
 <script setup>
 import { onMounted, shallowRef, inject, watch, triggerRef } from 'vue';
-import Themes from './Themes.vue';
-import EventBus from '../common/EventBus';
+import { storeToRefs } from 'pinia';
+import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
-import { storeToRefs } from 'pinia';
+import Themes from './Themes.vue';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
+import EventBus from '../common/EventBus';
 import { useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
-import Mousetrap from 'mousetrap';
 
 
 

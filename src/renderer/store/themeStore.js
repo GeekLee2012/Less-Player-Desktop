@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from '../../common/Utils';
 
+
+
 const ipcRenderer = useIpcRenderer()
 
 const PRESET_THEMES = [{
@@ -115,7 +117,7 @@ const PRESET_THEMES = [{
 } */]
 
 export const useThemeStore = defineStore('themes', {
-    state: ()=> ({
+    state: () => ({
         customThemes: []
     }),
     getters: {
@@ -124,7 +126,7 @@ export const useThemeStore = defineStore('themes', {
     actions: {
         getTheme(type, index) {
             index = index > 0 ? index : 0
-            const allThemes = [ PRESET_THEMES, this.customThemes ]
+            const allThemes = [PRESET_THEMES, this.customThemes]
             return allThemes[type][index]
         },
         getPresetThemes() {

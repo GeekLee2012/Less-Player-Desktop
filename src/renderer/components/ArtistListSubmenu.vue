@@ -6,6 +6,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
 
 
+
 const { visitArtist } = inject('appRoute')
 
 const props = defineProps({
@@ -40,4 +41,5 @@ EventBus.on("artistListSubmenu-init", initData)
 </template>
 
 <style>
+
 </style>

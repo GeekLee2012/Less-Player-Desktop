@@ -2,6 +2,8 @@ import { Lyric } from './Lyric';
 import { toTrimString } from './Utils';
 import { toMmss } from './Times';
 
+
+
 /** 
  * 被废弃的属性： 
  * isRadioType: 是否为电台歌曲;
@@ -15,7 +17,7 @@ export class Track {
         //[ {id, name} ]
         this.artist = artist ? artist : []
         //数据不完整
-        this.artistNotCompleted = false 
+        this.artistNotCompleted = false
         //{id, name}
         this.album = album ? album : ({ id: '', name: '' })
         //Millis
@@ -86,7 +88,7 @@ export class Track {
 
     static artistName(track) {
         let artistName = ''
-        if(track && track.artist) {
+        if (track && track.artist) {
             const names = []
             track.artist.forEach(e => names.push(e.name));
             artistName = names.join('、')
@@ -104,17 +106,17 @@ export class Track {
     }
 
     static hasCover(track) {
-        if(!track || !track.cover) return false
+        if (!track || !track.cover) return false
         track.cover = track.cover.trim()
-        if(track.cover.length < 1) return false
+        if (track.cover.length < 1) return false
         return true
     }
 
     static hasId(track) {
-        if(!track || !track.id) return false
+        if (!track || !track.id) return false
         const id = track.id
-        if(typeof(id) == 'number') return id > 0
-        if(typeof(id) == 'string') return id.trim().length > 0
+        if (typeof (id) == 'number') return id > 0
+        if (typeof (id) == 'string') return id.trim().length > 0
     }
 
     static firstArtistName(track) {
@@ -146,31 +148,31 @@ export class Track {
     */
 
     static isEquals(t1, t2) {
-        if(!t1 || !t2) return false
+        if (!t1 || !t2) return false
         return t1.id == t2.id && t1.platform == t2.platform
     }
 
     static hasMv(track) {
-        if(!track || !track.mv) return false
+        if (!track || !track.mv) return false
         const mv = track.mv.toString()
-        if(typeof(mv) == 'number') return mv > 0
-        if(typeof(mv) == 'string') return mv.trim().length > 0
+        if (typeof (mv) == 'number') return mv > 0
+        if (typeof (mv) == 'string') return mv.trim().length > 0
     }
 
     static hasPid(track) {
-        if(!track || !track.pid) return false
+        if (!track || !track.pid) return false
         const pid = track.pid
-        if(typeof(pid) == 'number') return pid > 0
-        if(typeof(pid) == 'string') return pid.trim().length > 0
+        if (typeof (pid) == 'number') return pid > 0
+        if (typeof (pid) == 'string') return pid.trim().length > 0
     }
 
     static isVip(track) {
-        if(!track) return false
+        if (!track) return false
         return track.payPlay
     }
 
     static hasArtist(track) {
-        return track && track.artist 
+        return track && track.artist
             && track.artist.length > 0
     }
 

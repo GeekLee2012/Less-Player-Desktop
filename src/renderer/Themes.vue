@@ -1,10 +1,12 @@
 <script setup>
 import { inject, onBeforeMount, onMounted, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useSettingStore } from './store/settingStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
 import EventBus from '../common/EventBus';
-import { useSettingStore } from './store/settingStore';
-import { storeToRefs } from 'pinia';
+
+
 
 const { theme } = storeToRefs(useSettingStore())
 const { getCurrentThemeId, setupFontFamily, setupFontWeight } = useSettingStore()

@@ -4,7 +4,7 @@
 export const dragAndMove = (el, binding) => {
     const { trigger } = binding
     const triggerEl = el.querySelector(trigger)
-    if(!triggerEl) return 
+    if (!triggerEl) return
     let x = 0, y = 0
     triggerEl.onmousedown = (e) => {
         x = e.x
@@ -26,7 +26,7 @@ export const dragAndMove = (el, binding) => {
             left = Math.min((clientWidth - width), left)
             top = Math.max(0, top)
             top = Math.min((clientHeight - height), top)
-        
+
             el.style.left = left + "px"
             el.style.top = top + "px"
         }

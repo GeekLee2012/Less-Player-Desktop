@@ -1,14 +1,13 @@
 <script setup>
-import MainLeft from './DefaultMainLeft.vue';
-import MainCenter from './DefaultMainCenter.vue';
+import DefaultMainLeft from './DefaultMainLeft.vue';
+import DefaultMainCenter from './DefaultMainCenter.vue';
 import Popovers from '../Popovers.vue';
-
 </script>
 
 <template>
     <div class="default-layout">
-        <MainLeft></MainLeft>
-        <MainCenter></MainCenter>
+        <DefaultMainLeft></DefaultMainLeft>
+        <DefaultMainCenter></DefaultMainCenter>
         <Popovers></Popovers>
     </div>
 </template>

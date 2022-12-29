@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 
+
+
 const barRef = ref(null)
 const barValueRef = ref(null)
 
@@ -9,17 +11,17 @@ const props = defineProps({
     onseek: Function
 })
 
-const seek = (e)=> {
-    if(!props.seekable) return 
+const seek = (e) => {
+    if (!props.seekable) return
     const offsetX = e.offsetX
     const offsetWidth = barRef.value.offsetWidth
     const percent = (offsetX / offsetWidth).toFixed(3)
     updateProgress(percent)
-    if(props.onseek) props.onseek(percent)
+    if (props.onseek) props.onseek(percent)
 }
 
 const updateProgress = (percent) => {
-    percent = percent  * 100
+    percent = percent * 100
     barValueRef.value.style.width = percent + "%"
 }
 
@@ -42,11 +44,11 @@ defineExpose({ updateProgress })
 }
 
 .progress-bar .progress {
-   width: 0%;
-   height: 100%;
-   border-radius: 10rem;
-   background: var(--hl-text-bg);
-   background: var(--progress-bg);
+    width: 0%;
+    height: 100%;
+    border-radius: 10rem;
+    background: var(--hl-text-bg);
+    background: var(--progress-bg);
 }
 
 .handcur {

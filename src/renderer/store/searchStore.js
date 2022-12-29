@@ -1,23 +1,25 @@
 import { defineStore } from "pinia";
 import { usePlatformStore } from "./platformStore";
 
-const ALL_TABS = [ {
-        code: 'songs',
-        name: '歌曲',
-        text: '约找到0首歌曲'
-    }, {
-        code: 'playlists',
-        name: '歌单',
-        text: '约找到0个歌单'
-    }, {
-        code: 'albums',
-        name: '专辑',
-        text: '约找到0张专辑'
-    }, {
-        code: 'artists',
-        name: '歌手',
-        text: '约找到0个歌手'
-    }
+
+
+const ALL_TABS = [{
+    code: 'songs',
+    name: '歌曲',
+    text: '约找到0首歌曲'
+}, {
+    code: 'playlists',
+    name: '歌单',
+    text: '约找到0个歌单'
+}, {
+    code: 'albums',
+    name: '专辑',
+    text: '约找到0张专辑'
+}, {
+    code: 'artists',
+    name: '歌手',
+    text: '约找到0个歌手'
+}
 ]
 
 export const useSearchStore = defineStore('search', {
@@ -38,7 +40,7 @@ export const useSearchStore = defineStore('search', {
             return platforms('search').slice(1)
         },
         activeTabCode(state) {
-            if(this.activeTab < 0) return ''
+            if (this.activeTab < 0) return ''
             return this.tabs[this.activeTab].code
         }
     },
@@ -61,7 +63,7 @@ export const useSearchStore = defineStore('search', {
         },
         updateTabTipText(length) {
             const index = this.activeTab
-            if(index < 0) {
+            if (index < 0) {
                 this.tabTipText = ''
             } else {
                 this.tabTipText = this.tabs[index].text.replace('0', length)

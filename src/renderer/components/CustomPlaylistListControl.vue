@@ -2,6 +2,8 @@
 import { inject } from 'vue';
 import CustomPlaylistItem from './CustomPlaylistItem.vue';
 
+
+
 const { visitCustomPlaylist } = inject('appRoute')
 
 const props = defineProps({

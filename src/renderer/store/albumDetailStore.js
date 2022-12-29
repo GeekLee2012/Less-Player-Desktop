@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 
-const TAB_LIST = [ 
+
+
+const TAB_LIST = [
     {
         code: 'all-songs',
         name: '歌曲',
@@ -10,7 +12,7 @@ const TAB_LIST = [
         code: 'about',
         name: '专辑详情',
         text: ''
-    } ]
+    }]
 
 export const useAlbumDetailStore = defineStore('albumDetail', {
     state: () => ({
@@ -29,12 +31,12 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
     }),
     getters: {
         activeTabCode(state) {
-            if(state.activeTab < 0) return ''
+            if (state.activeTab < 0) return ''
             return state.tabs[state.activeTab].code
         }
     },
     actions: {
-        setActiveTab(index) { 
+        setActiveTab(index) {
             //TODO 边界检查
             this.activeTab = index
         },
@@ -85,7 +87,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
             return this.about.trim().length > 0
         },
         updateTabTipText(length) {
-            if(this.activeTab < 0) {
+            if (this.activeTab < 0) {
                 this.tabTipText = ''
             } else {
                 this.tabTipText = this.tabs[this.activeTab].text.replace('0', length)

@@ -18,6 +18,7 @@ import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 
 
+
 const { visitBatchLocalMusic } = inject('appRoute')
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
@@ -28,14 +29,14 @@ const localMusicRef = ref(null)
 const back2TopBtnRef = ref(null)
 
 const playAll = () => {
-    if(noTracks()) return
+    if (noTracks()) return
     resetQueue()
     addAll("即将为您播放全部！")
     playNextTrack()
 }
 
 const addAll = (text) => {
-    if(noTracks()) return
+    if (noTracks()) return
     addTracks(localTracks.value)
     showToast(text || "歌曲已全部添加！")
 }
@@ -67,9 +68,11 @@ onMounted(resetBack2TopBtn)
                     <p>此功能仅供试用体验，暂时还没有完善~</p>
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()" ></PlayAddAllBtn>
-                    <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="spacing"></AddFolderFileBtn>
-                    <BatchActionBtn :deleteBtn="true" :leftAction="visitBatchLocalMusic" :rightAction="resetAll" class="spacing"></BatchActionBtn>
+                    <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()"></PlayAddAllBtn>
+                    <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="spacing">
+                    </AddFolderFileBtn>
+                    <BatchActionBtn :deleteBtn="true" :leftAction="visitBatchLocalMusic" :rightAction="resetAll"
+                        class="spacing"></BatchActionBtn>
                 </div>
             </div>
         </div>
@@ -80,11 +83,8 @@ onMounted(resetBack2TopBtn)
             <div class="loading-tip" v-show="isLoading"><p>添加歌曲中，请稍候......</p></div>
             -->
             <div class="songlist">
-                <SongListControl :data="localTracks"
-                    :artistVisiable="false"
-                    :albumVisiable="false"
-                    :deleteFn="removeItem"
-                    :dataType="1" >
+                <SongListControl :data="localTracks" :artistVisiable="false" :albumVisiable="false"
+                    :deleteFn="removeItem" :dataType="1">
                 </SongListControl>
             </div>
         </div>
@@ -119,7 +119,7 @@ onMounted(resetBack2TopBtn)
     margin-left: 30px;
 }
 
-#local-music-view .header .title{
+#local-music-view .header .title {
     text-align: left;
     margin-top: 5px;
     margin-bottom: 20px;
@@ -135,7 +135,7 @@ onMounted(resetBack2TopBtn)
 
     overflow: hidden;
     word-wrap: break-all;
-    white-space:pre-wrap;
+    white-space: pre-wrap;
     line-break: anywhere;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -183,5 +183,4 @@ onMounted(resetBack2TopBtn)
 #local-music-view .songlist .title:hover .delete-btn {
     visibility: visible;
 }
-
 </style>

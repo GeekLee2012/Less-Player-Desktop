@@ -7,6 +7,8 @@ import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useSettingStore } from '../store/settingStore';
 import CategoryBarLoadingMask from './CategoryBarLoadingMask.vue';
 
+
+
 const { currentCategoryItem } = storeToRefs(usePlaylistSquareStore())
 const { updateCurrentCategoryItem } = usePlaylistSquareStore()
 const { togglePlaylistCategoryView, hidePlaybackQueueView } = useAppCommonStore()
@@ -26,14 +28,14 @@ const isDiffCate = (item, row, col) => {
     const prevCate = currentCategoryItem.value
     return prevCate ? (
         prevCate.data.value != item.value
-        || prevCate.row != row 
+        || prevCate.row != row
         || prevCate.col != col) : true
 }
 
 const visitCateItem = (item, row, col, forceRefresh) => {
     const needRefresh = isDiffCate(item, row, col) || forceRefresh
     updateCurrentCategoryItem(item, row, col)
-    if(needRefresh) {
+    if (needRefresh) {
         EventBus.emit("playlistSquare-refresh")
     }
 }
@@ -49,7 +51,7 @@ const shuffle = (arr) => {
 }
 
 const getFlatData = () => {
-    if(flatData.length <= 0) {
+    if (flatData.length <= 0) {
         //记录源数组原始坐标
         props.data.forEach((cate, row) => {
             cate.data.forEach((item, col) => {
@@ -58,9 +60,9 @@ const getFlatData = () => {
                 flatData.push(item)
             })
         })
-        if(isPlaylistCategoryBarRandom.value) {
+        if (isPlaylistCategoryBarRandom.value) {
             const shuffleTimes = Math.random(1024) % 3 + 1
-            for(var i = 0; i < shuffleTimes; i++) shuffle(flatData)
+            for (var i = 0; i < shuffleTimes; i++) shuffle(flatData)
         }
     }
     return flatData
@@ -68,7 +70,7 @@ const getFlatData = () => {
 
 const loadFirstCateData = () => {
     const flatData = getFlatData()
-    if(!flatData || flatData.length < 1) return
+    if (!flatData || flatData.length < 1) return
     const firstItem = flatData[0]
     visitCateItem(firstItem, firstItem.row, firstItem.col, true)
 }
@@ -83,12 +85,19 @@ EventBus.on('playlistCategory-update', () => {
 <template>
     <div class="playlist-category-bar">
         <div v-show="!loading">
-            <svg @click.stop="toggleCategory" width="15" height="15" viewBox="0 0 29.3 29.3"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z"/></g></g></svg>
+            <svg @click.stop="toggleCategory" width="15" height="15" viewBox="0 0 29.3 29.3">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="Layer_1-2" data-name="Layer 1">
+                        <path
+                            d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z" />
+                    </g>
+                </g>
+            </svg>
             <template v-for="item in getFlatData()" v-show="data.length > 0">
-                <span @click="visitCateItem(item, item.row, item.col)"
-                    :class="{ active: (item.row == currentCategoryItem.row 
-                        && item.col == currentCategoryItem.col )}"
-                    v-html="item.key" >
+                <span @click="visitCateItem(item, item.row, item.col)" :class="{
+    active: (item.row == currentCategoryItem.row
+        && item.col == currentCategoryItem.col)
+}" v-html="item.key">
                 </span>
             </template>
         </div>

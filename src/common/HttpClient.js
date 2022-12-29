@@ -1,13 +1,15 @@
 import axios from "axios";
 import qs from "qs";
 
+
+
 //TODO
 const DOM_PARSER = new DOMParser()
 //axios.defaults.withCredentials = true
 
 const __get = (url, data, config, parseContentType) => {
     return new Promise((resolve, reject) => {
-        if(data && (typeof(data) === 'object')) {
+        if (data && (typeof (data) === 'object')) {
             data = qs.stringify(data)
             url = url.includes('?') ? url : url + '?'
             url = url.endsWith('?') ? (url + data) : (url + "&" + data)
@@ -16,7 +18,7 @@ const __get = (url, data, config, parseContentType) => {
             try {
                 const result = parseContentType(resp)
                 resolve(result)
-            } catch(err) {
+            } catch (err) {
                 resolve(resp.data)
             }
         }, error => reject(error))
@@ -26,14 +28,14 @@ const __get = (url, data, config, parseContentType) => {
 
 const __post = (url, data, config, parseContentType) => {
     return new Promise((resolve, reject) => {
-        if(data && (typeof(data) === 'object')) {
+        if (data && (typeof (data) === 'object')) {
             data = qs.stringify(data)
         }
         axios.post(url, data, config).then(resp => {
             try {
                 const result = parseContentType(resp)
                 resolve(result)
-            } catch(err) {
+            } catch (err) {
                 resolve(resp.data)
             }
         }, error => reject(error))

@@ -3,6 +3,8 @@ import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from '../../common/Utils';
 import { useThemeStore } from './themeStore';
 
+
+
 const ipcRenderer = useIpcRenderer()
 
 const QUALITIES = [{

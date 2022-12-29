@@ -7,7 +7,7 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { onMounted, onActivated, ref, reactive, watch, inject } from 'vue';
+import { ref, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import SvgTextButton from '../components/SvgTextButton.vue';
@@ -42,8 +42,8 @@ const submit = () => {
     let about = aboutRef.value.value.trim()
     let cover = coverRef.value.src
     checkValid()
-    if(invalid.value) {
-        return 
+    if (invalid.value) {
+        return
     }
     updateUser(nickname, about, cover)
     showToast("用户信息已更新", backward)
@@ -51,9 +51,9 @@ const submit = () => {
 
 //TODO 使用本地文件图片，不利于迁移共享
 const updateCover = async () => {
-    if(!ipcRenderer) return 
+    if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-image')
-    if(result.length > 0) {
+    if (result.length > 0) {
         coverRef.value.src = result[0]
     }
 }
@@ -66,7 +66,7 @@ const updateCover = async () => {
         </div>
         <div class="center">
             <div>
-                <img class="cover" v-lazy="user.cover" ref="coverRef"/>
+                <img class="cover" v-lazy="user.cover" ref="coverRef" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑头像</div>
             </div>
             <div class="right">
@@ -76,13 +76,15 @@ const updateCover = async () => {
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="user.nickname" ref="titleRef" :class="{ invalid }" maxlength="20" placeholder="请输入用户昵称，最多允许输入20个字符哦">
+                        <input type="text" :value="user.nickname" ref="titleRef" :class="{ invalid }" maxlength="20"
+                            placeholder="请输入用户昵称，最多允许输入20个字符哦">
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介 / 说说</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="user.about" ref="aboutRef" maxlength="99" placeholder="今天想要对自己说些什么呀~ 最多允许输入99个字符哦"></textarea>
+                        <textarea :value="user.about" ref="aboutRef" maxlength="99"
+                            placeholder="今天想要对自己说些什么呀~ 最多允许输入99个字符哦"></textarea>
                     </div>
                 </div>
                 <div class="action">

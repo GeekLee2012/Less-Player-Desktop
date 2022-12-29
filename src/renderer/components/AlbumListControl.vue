@@ -4,6 +4,7 @@ import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { inject } from 'vue';
 
 
+
 const { visitAlbum } = inject('appRoute')
 
 const props = defineProps({
@@ -17,7 +18,7 @@ const props = defineProps({
 
 const visitItem = (item) => {
     const { checkbox } = props
-    if(checkbox) return
+    if (checkbox) return
     const { id, platform } = item
     visitAlbum({ platform, id })
 }
@@ -25,16 +26,10 @@ const visitItem = (item) => {
 
 <template>
     <div class="albumlist-ctl">
-         <PaginationTiles v-show="!loading">
-            <ImageTextTile v-for="item in data" 
-                :cover="item.cover" 
-                :title="item.title" 
-                :subtitle="item.publishTime"
-                @click="visitItem(item)"
-                :checkbox="checkbox"
-                :checked="checkedAll"
-                :ignoreCheckAllEvent="ignoreCheckAllEvent"
-                :checkChangedFn="(checked) => checkChangedFn(checked, item)" >
+        <PaginationTiles v-show="!loading">
+            <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title" :subtitle="item.publishTime"
+                @click="visitItem(item)" :checkbox="checkbox" :checked="checkedAll"
+                :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>
         </PaginationTiles>
         <ImageTextTileLoadingMask :count="16" v-show="loading">

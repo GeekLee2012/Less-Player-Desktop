@@ -4,6 +4,8 @@ import EventBus from '../common/EventBus';
 import { Track } from './Track';
 import { WebAudioApi } from './WebAudioApi';
 
+
+
 let singleton = null
 
 //追求简洁、组合式API、单一责任
@@ -16,7 +18,7 @@ export class Player {
     }
 
     static get() {
-        if(!singleton) singleton = new Player()
+        if (!singleton) singleton = new Player()
         return singleton
     }
 
@@ -36,33 +38,33 @@ export class Player {
     }
 
     createSound() {
-        if(!Track.hasUrl(this.currentTrack)) return null
+        if (!Track.hasUrl(this.currentTrack)) return null
         var self = this
         //释放资源
-        if(this.sound) this.sound.unload()
+        if (this.sound) this.sound.unload()
         this.sound = new Howl({
-            src: [ this.currentTrack.url ],
+            src: [this.currentTrack.url],
             html5: true,
             autoplay: false,
             preload: false,
-            onplay: function() {
+            onplay: function () {
                 this.retry = 0
                 requestAnimationFrame(self.__step.bind(self))
                 self.notifyStateChanged(PLAY_STATE.PLAYING)
             },
-            onpause: function() {
+            onpause: function () {
                 self.notifyStateChanged(PLAY_STATE.PAUSE)
             },
-            onend: function() {
+            onend: function () {
                 self.notifyStateChanged(PLAY_STATE.END)
             },
-            onseek: function() {
+            onseek: function () {
                 requestAnimationFrame(self.__step.bind(self))
             },
-            onloaderror: function() {
+            onloaderror: function () {
                 self.retryPlay(1)
             },
-            onplayerror: function() {
+            onplayerror: function () {
                 self.retryPlay(1)
             }
         })
@@ -77,22 +79,22 @@ export class Player {
     //播放
     play() {
         let sound = this.getSound()
-        if(sound) sound.play()
+        if (sound) sound.play()
     }
 
     //暂停
     pause() {
         const sound = this.getSound()
-        if(sound) sound.pause()
+        if (sound) sound.pause()
     }
 
     togglePlay() {
         const sound = this.getSound()
-        if(!sound) {
+        if (!sound) {
             this.retryPlay(1)
             return
-        } 
-        if(sound.playing()) {
+        }
+        if (sound.playing()) {
             sound.pause()
         } else {
             sound.play()
@@ -102,7 +104,7 @@ export class Player {
     //暂停
     stop() {
         const sound = this.getSound()
-        if(sound) sound.stop()
+        if (sound) sound.stop()
     }
 
     setCurrent(track) {
@@ -127,25 +129,25 @@ export class Player {
 
     seek(percent) {
         const sound = this.getSound()
-        if(!sound || !sound.playing()) return 
+        if (!sound || !sound.playing()) return
         sound.seek(sound.duration() * percent)
     }
-    
+
     __step() {
         const sound = this.getSound()
-        if(!sound) return
-        if(!sound.playing()) return 
+        if (!sound) return
+        if (!sound.playing()) return
         const seek = sound.seek() || 0
         EventBus.emit('track-pos', seek)
         try {
             this.resolveSound()
-        } catch(error) {
+        } catch (error) {
             console.log(error)
             this.retryPlay(1)
         }
         requestAnimationFrame(this.__step.bind(this))
     }
-    
+
     on(event, handler) {
         EventBus.on(event, handler)
         return this
@@ -154,7 +156,7 @@ export class Player {
     notifyStateChanged(state) {
         EventBus.emit('track-state', state)
     }
-    
+
     notifyError(isRetry) {
         EventBus.emit('track-error', isRetry ? this.currentTrack : null)
     }
@@ -165,17 +167,17 @@ export class Player {
     }
 
     createWebAudioApi() {
-        if(this.webAudioApi) return
+        if (this.webAudioApi) return
         const audioCtx = Howler.ctx
-        if(!audioCtx) return 
+        if (!audioCtx) return
         const audioNode = this.sound._sounds[0]._node
-        if(!audioNode) return 
+        if (!audioNode) return
         this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
     }
 
-    resolveSound () {
+    resolveSound() {
         this.createWebAudioApi()
-        if(!this.webAudioApi) return
+        if (!this.webAudioApi) return
         const analyser = this.webAudioApi.getAnalyser()
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
@@ -191,7 +193,7 @@ export class Player {
     }
 
     updateEQ(values) {
-        if(this.webAudioApi) this.webAudioApi.updateEQ(values)
+        if (this.webAudioApi) this.webAudioApi.updateEQ(values)
     }
 
 }

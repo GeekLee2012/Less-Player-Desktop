@@ -2,6 +2,8 @@
 import { onMounted, ref } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 
+
+
 const { hideAllCtxMenus, hideAddToListSubmenu, hideArtistListSubmenu } = useAppCommonStore()
 
 const props = defineProps({
@@ -10,7 +12,7 @@ const props = defineProps({
 })
 
 const handleMenuItem = (item, index, event) => {
-    if(!item.action) return
+    if (!item.action) return
     item.action(item, index, event)
     hideAllCtxMenus()
 }
@@ -24,14 +26,13 @@ const hideAllSubmenus = () => {
 //TODO 没起作用
 const submenuListRef = ref(null)
 const resetScroll = () => {
-    if(submenuListRef.value) submenuListRef.value.scrollTop = 0
+    if (submenuListRef.value) submenuListRef.value.scrollTop = 0
 }
 
 </script>
 
 <template>
-    <div class="common-ctx-submenu" :style="posStyle" 
-        @click.stop="" @mouseleave="hideAllSubmenus">
+    <div class="common-ctx-submenu" :style="posStyle" @click.stop="" @mouseleave="hideAllSubmenus">
         <div class="padding"></div>
         <div class="center" ref="submenuListRef">
             <template v-for="(item, index) in data">
@@ -69,7 +70,7 @@ const resetScroll = () => {
 .common-ctx-submenu .center {
     overflow: auto;
     max-height: 267px;
-} 
+}
 
 .common-ctx-submenu .menuItem {
     width: 139px;
@@ -90,7 +91,7 @@ const resetScroll = () => {
     fill: var(--svg-btn-color);
 }
 
-.common-ctx-submenu .menuItem > div {
+.common-ctx-submenu .menuItem>div {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -98,14 +99,14 @@ const resetScroll = () => {
 
 .common-ctx-submenu .menuItem svg {
     margin-right: 15px;
-    fill: var(--text-color); 
+    fill: var(--text-color);
 }
 
 .common-ctx-submenu .menuItem span {
     text-align: left;
     overflow: hidden;
     word-wrap: break-all;
-    white-space:pre-wrap;
+    white-space: pre-wrap;
     line-break: anywhere;
     text-overflow: ellipsis;
     display: -webkit-box;

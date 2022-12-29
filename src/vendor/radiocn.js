@@ -6,6 +6,7 @@ import { Lyric } from "../common/Lyric";
 import { toYyyymmdd } from "../common/Times";
 
 
+
 const parseJson = (jsonp, callbackName) => {
     jsonp = jsonp.split(callbackName + '(')[1].trim()
     return JSON.parse(jsonp.substring(0, jsonp.length - 1))
@@ -20,12 +21,12 @@ export class RadioCN {
 
     //全部分类
     static categories() {
-        return new Promise( async (resolve, reject) => {
-            const result = { platform: RadioCN.CODE, data: [], orders: [] }  
+        return new Promise(async (resolve, reject) => {
+            const result = { platform: RadioCN.CODE, data: [], orders: [] }
 
             const p1 = RadioCN.anchorRadioCategories()
             const p2 = RadioCN.fmRadioCategories()
-            Promise.all([ p1, p2 ]).then(values => {
+            Promise.all([p1, p2]).then(values => {
                 const anchorRadioCategories = values[0]
                 const fmRadioCategories = values[1]
 
@@ -57,7 +58,7 @@ export class RadioCN {
             result.data.push(category)
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
-                
+
                 const list = json.data.place
                 list.forEach(item => {
                     category.add(item.name, RadioCN.RADIO_PREFIX + item.id)
@@ -72,9 +73,9 @@ export class RadioCN {
         const result = { platform: RadioCN.CODE, cate, offset, limit, page, total: 1, data: [] }
         cate = cate.replace(RadioCN.RADIO_PREFIX, '')
         return new Promise((resolve, reject) => {
-            if(page > 1) {
+            if (page > 1) {
                 resolve(result)
-                return 
+                return
             }
             const url = "http://tacc.radio.cn/pcpages/radiopages"
             const ts = Date.now()
@@ -90,18 +91,18 @@ export class RadioCN {
                 const json = parseJson(jsonp, callback)
                 const list = json.data.top
                 list.forEach(item => {
-                    const { id, name, radio_id, radio_name, icon, streams, description} = item
+                    const { id, name, radio_id, radio_name, icon, streams, description } = item
                     const cover = icon[0].url
                     const playlist = new Playlist(id, RadioCN.CODE, cover, name, null, description)
                     playlist.type = Playlist.FM_RADIO_TYPE
-                    
-                    const artist = [ { id:'', name: '央广云听' } ]
-                    const album = { id:'', name: radio_name }
+
+                    const artist = [{ id: '', name: '央广云听' }]
+                    const album = { id: '', name: radio_name }
                     const channelTrack = new Track(id, playlist.platform, name, artist, album)
                     channelTrack.cover = cover
                     channelTrack.url = streams[0].url
                     channelTrack.type = playlist.type
-                    
+
                     playlist.addTrack(channelTrack)
                     result.data.push(playlist)
                 })
@@ -112,11 +113,11 @@ export class RadioCN {
 
     //全部
     static square(cate, offset, limit, page, order) {
-        const originCate = cate 
+        const originCate = cate
         let resolvedCate = (cate || "").toString().trim()
         resolvedCate = resolvedCate.length < 1 ? RadioCN.CNR_CODE : resolvedCate
         //电台
-        if(resolvedCate.startsWith(RadioCN.RADIO_PREFIX)) return RadioCN.fmRadioSquare(resolvedCate, offset, limit, page, order)
+        if (resolvedCate.startsWith(RadioCN.RADIO_PREFIX)) return RadioCN.fmRadioSquare(resolvedCate, offset, limit, page, order)
         //分类歌单
         return new Promise((resolve, reject) => {
             const result = { platform: RadioCN.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
@@ -131,7 +132,7 @@ export class RadioCN {
                 cate_id: resolvedCate,
                 _: ts
             }
-            
+
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
                 result.total = json.data.total_page
@@ -178,7 +179,7 @@ export class RadioCN {
                     const duration = parseInt(item.duration) * 1000
                     const cover = result.cover
                     const tid = item.id || item.programId
-                    const track = new Track(tid,RadioCN.CODE, item.name, artist, album, duration, cover)
+                    const track = new Track(tid, RadioCN.CODE, item.name, artist, album, duration, cover)
                     track.url = item.downloadUrl || item.streams[0].url
                     track.lyric.addLine('999:99.000', item.description || description)
                     track.type = result.type
@@ -195,7 +196,7 @@ export class RadioCN {
     //歌曲播放详情：url、cover、lyric等
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
-            resolve(track)  
+            resolve(track)
         })
     }
 
@@ -244,11 +245,11 @@ export class RadioCN {
                 resolve(result)
             })
         })
-    }    
+    }
 
     //主播电台
     static anchorRadioSquare(cate, offset, limit, page, order) {
         return RadioCN.square(cate, offset, limit, page, order)
     }
-    
+
 }

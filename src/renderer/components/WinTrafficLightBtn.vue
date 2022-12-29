@@ -7,6 +7,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 
 
+
 const props = defineProps({
     hideMinBtn: Boolean,
     hideMaxBtn: Boolean
@@ -21,7 +22,7 @@ const setMinBtnDisabled = (value) => {
 }
 
 const doMinimize = () => {
-    if(isMinBtnDisabled.value) return 
+    if (isMinBtnDisabled.value) return
     minimize()
 }
 
@@ -30,7 +31,7 @@ const ipcRenderer = useIpcRenderer()
 //TODO
 const adjustTrafficLightCtlBtn = () => {
     const els = document.querySelectorAll('.win-traffic-light-btn')
-    if(!els) return 
+    if (!els) return
     const zoom = Number(getWindowZoom.value)
     const scale = 100 / zoom
     /*
@@ -40,12 +41,12 @@ const adjustTrafficLightCtlBtn = () => {
         el.style.width = width + "px"
     })
     */
-    
+
     const btnEls = document.querySelectorAll('.win-traffic-light-btn .ctl-btn')
     const orginBtnSize = 13, orginBtnMarginRight = 8
     let btnSize = orginBtnSize * scale
     let btnMarginRight = orginBtnMarginRight * scale
-    if(!btnEls) return 
+    if (!btnEls) return
     btnEls.forEach(btnEl => {
         btnEl.style.width = btnSize + "px"
         btnEl.style.height = btnSize + "px"
@@ -55,7 +56,7 @@ const adjustTrafficLightCtlBtn = () => {
     const orginSvgSize = 8
     let svgSize = orginSvgSize * scale
     const maxBtnSvgEls = document.querySelectorAll('.win-traffic-light-btn .max-btn svg')
-    if(!maxBtnSvgEls) return 
+    if (!maxBtnSvgEls) return
     maxBtnSvgEls.forEach(svgEl => {
         svgEl.style.width = svgSize + "px"
         svgEl.style.height = svgSize + "px"
@@ -72,15 +73,30 @@ onMounted(() => {
 <template>
     <div class="win-traffic-light-btn">
         <div @click="quit" class="ctl-btn close-btn">
-            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g id="cross"><line class="cls-1" x1="7" x2="25" y1="7" y2="25"/><line class="cls-1" x1="7" x2="25" y1="25" y2="7"/></g></svg>
+            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <g id="cross">
+                    <line class="cls-1" x1="7" x2="25" y1="7" y2="25" />
+                    <line class="cls-1" x1="7" x2="25" y1="25" y2="7" />
+                </g>
+            </svg>
         </div>
-        <div @click="doMinimize" v-show="!hideMinBtn"
-            class="ctl-btn min-btn" :class="{ btnDisabled: isMinBtnDisabled }">
-            <svg viewBox="0 0 256 256" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M208,134.4H48c-3.534,0-6.4-2.866-6.4-6.4s2.866-6.4,6.4-6.4h160c3.534,0,6.4,2.866,6.4,6.4S211.534,134.4,208,134.4z"/></svg>
+        <div @click="doMinimize" v-show="!hideMinBtn" class="ctl-btn min-btn"
+            :class="{ btnDisabled: isMinBtnDisabled }">
+            <svg viewBox="0 0 256 256" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <path
+                    d="M208,134.4H48c-3.534,0-6.4-2.866-6.4-6.4s2.866-6.4,6.4-6.4h160c3.534,0,6.4,2.866,6.4,6.4S211.534,134.4,208,134.4z" />
+            </svg>
         </div>
-        <div @click="maximize" v-show="!hideMaxBtn"
-            class="ctl-btn max-btn">
-            <svg width="8" height="8" viewBox="0 0 25 24" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path class="cls-1" d="M2,18V2H18"/><path class="cls-1" d="M23,6V22H7"/></g></g></svg>
+        <div @click="maximize" v-show="!hideMaxBtn" class="ctl-btn max-btn">
+            <svg width="8" height="8" viewBox="0 0 25 24" xmlns="http://www.w3.org/2000/svg">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="Layer_1-2" data-name="Layer 1">
+                        <path class="cls-1" d="M2,18V2H18" />
+                        <path class="cls-1" d="M23,6V22H7" />
+                    </g>
+                </g>
+            </svg>
         </div>
     </div>
 </template>
@@ -108,6 +124,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
 }
+
 .win-traffic-light-btn div:hover {
     cursor: pointer;
 }

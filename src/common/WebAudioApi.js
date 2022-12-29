@@ -60,7 +60,7 @@ export class WebAudioApi {
         const distortion = audioCtx.createWaveShaper()
         const gainNode = audioCtx.createGain()
         this.biquadFilters = this.createBiquadFilters()
-        if(!this.audioSource) this.audioSource = audioCtx.createMediaElementSource(audioNode)
+        if (!this.audioSource) this.audioSource = audioCtx.createMediaElementSource(audioNode)
         this.audioSource.connect(this.analyser)
         this.analyser.connect(distortion)
         this.connectBiquadFilters(this.biquadFilters, distortion, gainNode)
@@ -74,7 +74,7 @@ export class WebAudioApi {
 
     createBiquadFilters() {
         const audioCtx = this.audioCtx
-        if(!audioCtx) return []
+        if (!audioCtx) return []
         let filters = EQ.map(band => {
             let filter = audioCtx.createBiquadFilter()
             filter.type = band.type
@@ -87,7 +87,7 @@ export class WebAudioApi {
     }
 
     connectBiquadFilters(filters, currentNode, nextNode) {
-        if(!filters || filters.length < 0) return
+        if (!filters || filters.length < 0) return
         filters.reduce((prev, curr) => {
             prev.connect(curr)
             return curr
@@ -96,7 +96,7 @@ export class WebAudioApi {
 
     updateEQ(values) {
         const eqFilters = this.biquadFilters
-        if(!eqFilters || eqFilters.length < 1) return
+        if (!eqFilters || eqFilters.length < 1) return
         eqFilters.forEach((filter, index) => {
             filter.gain.value = values[index]
         })

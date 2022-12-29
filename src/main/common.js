@@ -10,8 +10,8 @@ const CryptoJS = require('crypto-js');
 const FILE_PREFIX = 'file:///'
 
 const isExtentionValid = (name, exts) => {
-    for(var ext of exts) {
-        if(name.endsWith(ext)) {
+    for (var ext of exts) {
+        if (name.endsWith(ext)) {
             return true
         }
     }
@@ -25,12 +25,12 @@ const scanDirTracks = async (dir, exts) => {
         const files = []
         for await (const dirent of list) {
             //console.log(dirent.name)
-            if(dirent.isFile() && isExtentionValid(dirent.name, exts)) {
+            if (dirent.isFile() && isExtentionValid(dirent.name, exts)) {
                 const fullname = path.join(dir, dirent.name)
                 files.push(fullname)
             }
         }
-        if(files.length > 0) {
+        if (files.length > 0) {
             const tracks = await parseTracks(files)
             result.data.push(...tracks)
         }
@@ -42,16 +42,16 @@ const scanDirTracks = async (dir, exts) => {
 }
 
 function getSimpleFileName(fullname) {
-    if(!fullname) return ''
+    if (!fullname) return ''
     fullname = fullname.trim()
-    const from = fullname.lastIndexOf('/') 
+    const from = fullname.lastIndexOf('/')
     const to = fullname.lastIndexOf('.')
     return fullname.substring(from + 1, to)
 }
 
 async function parseTracks(audioFiles) {
     const tracks = []
-    for(const audioFile of audioFiles) {
+    for (const audioFile of audioFiles) {
         const metadata = await mm.parseFile(audioFile, { duration: true })
         const artist = []
         let title = getSimpleFileName(audioFile)
@@ -59,23 +59,23 @@ async function parseTracks(audioFiles) {
         let coverData = 'default_cover.png'
         let duration = 0
         try {
-            if(metadata.common) {
-                if(metadata.common.title) {
+            if (metadata.common) {
+                if (metadata.common.title) {
                     title = decodeText(metadata.common.title.trim())
                 }
-                if(metadata.common.artists) {
+                if (metadata.common.artists) {
                     metadata.common.artists.forEach(ar => artist.push({ id: '', name: decodeText(ar) }))
                 }
-                if(metadata.common.album) {
+                if (metadata.common.album) {
                     album.name = decodeText(metadata.common.album)
                 }
                 const cover = mm.selectCover(metadata.common.picture)
-                if(cover) {
+                if (cover) {
                     coverData = `data:${cover.format};base64,${cover.data.toString('base64')}`
                 }
             }
-            if(metadata.format) {
-                if(metadata.format.duration) {
+            if (metadata.format) {
+                if (metadata.format.duration) {
                     duration = metadata.format.duration * 1000
                 }
             }
@@ -83,18 +83,18 @@ async function parseTracks(audioFiles) {
             const hash = CryptoJS.MD5(title + artist.name + album.name + duration).toString()
             //TODO
             const track = {
-                id: hash, 
+                id: hash,
                 platform: 'local',
                 title,
-                artist, 
-                album, 
+                artist,
+                album,
                 duration,
                 cover: coverData
             }
             track.url = FILE_PREFIX + audioFile
             const index = tracks.findIndex(item => track.id == item.id)
-            if(index < 0) tracks.push(track)
-        } catch(error) {
+            if (index < 0) tracks.push(track)
+        } catch (error) {
             console.log(error)
         }
     }
@@ -104,20 +104,20 @@ async function parseTracks(audioFiles) {
 //TODO 中文编码容易乱码
 function decodeText(text) {
     try {
-        const detect =jschardet.detect(text)
+        const detect = jschardet.detect(text)
         //console.log(detect)
-        if(!detect.encoding) return text
+        if (!detect.encoding) return text
         const encoding = detect.encoding.trim().toLowerCase()
-        if('windows-1252' === encoding) {
+        if ('windows-1252' === encoding) {
             return iconv.decode(Buffer.from(text), 'gb2312')
-        } else if('ibm855' === encoding) {
+        } else if ('ibm855' === encoding) {
             return iconv.decode(Buffer.from(text), 'gb2312')
-        } else if('gb2312' === encoding) {
+        } else if ('gb2312' === encoding) {
             return iconv.decode(Buffer.from(text), 'gb2312')
-        } else if('gbk' === encoding) {
+        } else if ('gbk' === encoding) {
             return iconv.decode(Buffer.from(text), 'gbk')
         }
-    } catch(error) {
+    } catch (error) {
         console.log(error)
     }
     return text
@@ -126,9 +126,9 @@ function decodeText(text) {
 function readText(file, encoding) {
     try {
         const data = readFileSync(file, { encoding })
-        if(encoding) return data.toString()
+        if (encoding) return data.toString()
         return decodeText(data.toString())
-    } catch(error) {
+    } catch (error) {
         console.log(error)
     }
     return null
@@ -138,12 +138,12 @@ function writeText(file, text) {
     try {
         writeFileSync(file, text)
         return true
-    } catch(error) {
+    } catch (error) {
         console.log(error)
     }
     return false
 }
- 
+
 const ALPHABET_NUMS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz01234567890'
 
 /** 随机字符串
@@ -185,9 +185,9 @@ const listFiles = async (dir, isFullname) => {
         const list = await opendir(dir)
         for await (const dirent of list) {
             //console.log(dirent.name)
-            if(dirent.isFile()) {
+            if (dirent.isFile()) {
                 const filename = isFullname ? path.join(dir, dirent.name) : dirent.name
-                files.push(filename) 
+                files.push(filename)
             }
         }
     } catch (error) {
@@ -196,14 +196,14 @@ const listFiles = async (dir, isFullname) => {
     return files
 }
 
-module.exports = { 
-    scanDirTracks, 
-    parseTracks, 
-    readText, 
+module.exports = {
+    scanDirTracks,
+    parseTracks,
+    readText,
     writeText,
     FILE_PREFIX,
-    ALPHABET_NUMS, 
-    randomText, 
+    ALPHABET_NUMS,
+    randomText,
     randomTextWithinAlphabetNums,
     nextInt,
     getDownloadDir,

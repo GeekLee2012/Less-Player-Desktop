@@ -1,5 +1,7 @@
 import { toTrimString } from './Utils';
 
+
+
 export class Album {
     constructor(id, platform, title, cover, artist, company, publishTime, about, data) {
         this.id = id
@@ -7,7 +9,7 @@ export class Album {
         this.title = toTrimString(title)
         this.cover = cover
         //[ {id, name} ]
-        this.artist = artist ? artist : ([ {id: '', name: '未知歌手'}])
+        this.artist = artist ? artist : ([{ id: '', name: '未知歌手' }])
         //发行公司
         this.company = company
         //发行时间
@@ -22,7 +24,7 @@ export class Album {
     }
 
     addTrack(track) {
-        if(!this.data) {
+        if (!this.data) {
             this.data = []
         }
         this.data.push(track)

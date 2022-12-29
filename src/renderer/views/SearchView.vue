@@ -8,23 +8,25 @@ import SongListControl from '../components/SongListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 
+
+
 const props = defineProps({
     keyword: String
 })
 
-const { platforms, tabs, activeTab, 
-        currentPlatformIndex, tabTipText
-    } = storeToRefs(useSearchStore())
-const { setActiveTab, 
-        setCurrentPlatformIndex,
-        updateTabTipText,
-        isSongsTab,
-        isPlaylistsTab,
-        isAlbumsTab,
-        isArtistsTab,
-        currentVender,
-        currentPlatform
-    } = useSearchStore()
+const { platforms, tabs, activeTab,
+    currentPlatformIndex, tabTipText
+} = storeToRefs(useSearchStore())
+const { setActiveTab,
+    setCurrentPlatformIndex,
+    updateTabTipText,
+    isSongsTab,
+    isPlaylistsTab,
+    isAlbumsTab,
+    isArtistsTab,
+    currentVender,
+    currentPlatform
+} = useSearchStore()
 const { hideAllCtxMenus } = useAppCommonStore()
 
 const currentTabView = shallowRef(null)
@@ -37,7 +39,7 @@ const setLoading = (value) => {
 }
 
 const visitTab = (index) => {
-    if(index < 0 || activeTab.value == index) return
+    if (index < 0 || activeTab.value == index) return
     setActiveTab(index)
     loadTab()
 }
@@ -48,53 +50,53 @@ const updateTabData = (data) => {
     updateTabTipText(tabData.value.length)
 }
 
-const loadSongs = ()=> {
+const loadSongs = () => {
     currentTabView.value = SongListControl
     setLoading(true)
     const vendor = currentVender()
-    if(!vendor || !vendor.searchSongs) return 
+    if (!vendor || !vendor.searchSongs) return
     vendor.searchSongs(props.keyword, offset, limit, page).then(result => {
-        if(!isSongsTab()) return
-        if(currentPlatform() != result.platform) return
+        if (!isSongsTab()) return
+        if (currentPlatform() != result.platform) return
         updateTabData(result.data)
         setLoading(false)
     })
 }
 
-const loadPlaylists = ()=> {
+const loadPlaylists = () => {
     currentTabView.value = PlaylistsControl
     setLoading(true)
     const vendor = currentVender()
-    if(!vendor || !vendor.searchPlaylists) return
+    if (!vendor || !vendor.searchPlaylists) return
     vendor.searchPlaylists(props.keyword, offset, limit, page).then(result => {
-        if(!isPlaylistsTab()) return
-        if(currentPlatform() != result.platform) return
+        if (!isPlaylistsTab()) return
+        if (currentPlatform() != result.platform) return
         updateTabData(result.data)
         setLoading(false)
     })
 }
 
-const loadAlbums = ()=> {
+const loadAlbums = () => {
     currentTabView.value = AlbumListControl
     setLoading(true)
     const vendor = currentVender()
-    if(!vendor || !vendor.searchAlbums) return
+    if (!vendor || !vendor.searchAlbums) return
     vendor.searchAlbums(props.keyword, offset, limit, page).then(result => {
-        if(!isAlbumsTab()) return
-        if(currentPlatform() != result.platform) return
+        if (!isAlbumsTab()) return
+        if (currentPlatform() != result.platform) return
         updateTabData(result.data)
         setLoading(false)
     })
 }
 
-const loadArtists = ()=> {
+const loadArtists = () => {
     currentTabView.value = ArtistListControl
     setLoading(true)
-   const vendor = currentVender()
-    if(!vendor || !vendor.searchArtists) return
+    const vendor = currentVender()
+    if (!vendor || !vendor.searchArtists) return
     vendor.searchArtists(props.keyword, offset, limit, page).then(result => {
-        if(!isArtistsTab()) return
-        if(currentPlatform() != result.platform) return
+        if (!isArtistsTab()) return
+        if (currentPlatform() != result.platform) return
         updateTabData(result.data)
         setLoading(false)
     })
@@ -109,13 +111,13 @@ const resetTabView = () => {
 const loadTab = () => {
     setLoading(true)
     resetTabView()
-    if(isSongsTab()) {
+    if (isSongsTab()) {
         loadSongs()
-    } else if(isPlaylistsTab()) {
+    } else if (isPlaylistsTab()) {
         loadPlaylists()
-    } else if(isAlbumsTab()) {
+    } else if (isAlbumsTab()) {
         loadAlbums()
-    } else if(isArtistsTab()) {
+    } else if (isArtistsTab()) {
         loadArtists()
     }
     EventBus.emit("imageTextTile-load")
@@ -133,34 +135,29 @@ const onScroll = () => {
 onActivated(() => visitTab(0))
 watch(currentPlatformIndex, (nv, ov) => loadTab())
 watch(activeTab, (nv, ov) => visitTab(nv))
-watch(() => props.keyword, (nv,ov) => loadTab())
+watch(() => props.keyword, (nv, ov) => loadTab())
 </script>
 
 <template>
     <div id="search-view" @scroll="onScroll">
         <div class="header">
             <div class="keyword">
-                <b>搜  </b><span class="text">{{ keyword }}</span>
+                <b>搜 </b><span class="text">{{ keyword }}</span>
             </div>
             <div class="platform">
-                <span class="item" :class="{ active: currentPlatformIndex == index }" 
-                    v-for="(item, index) in platforms"
-                    @click="byPlatform(index)" 
-                    v-html="item.name" >
+                <span class="item" :class="{ active: currentPlatformIndex == index }" v-for="(item, index) in platforms"
+                    @click="byPlatform(index)" v-html="item.name">
                 </span>
             </div>
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" :class="{ active: activeTab == index }"
-                    v-for="(tab,index) in tabs" @click="visitTab(index)"
-                    v-html="tab.name" >
+                <span class="tab" :class="{ active: activeTab == index }" v-for="(tab, index) in tabs"
+                    @click="visitTab(index)" v-html="tab.name">
                 </span>
-                <span class="tip" v-html="tabTipText" ></span>
+                <span class="tip" v-html="tabTipText"></span>
             </div>
-            <component :is="currentTabView" :data="tabData" 
-                :artistVisitable="true" 
-                :albumVisitable="true"
+            <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
                 :loading="isLoading" ß>
             </component>
         </div>
@@ -182,7 +179,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     margin-bottom: 20px;
 }
 
-#search-view .keyword{
+#search-view .keyword {
     text-align: left;
     display: flex;
     font-size: 28px;
@@ -223,7 +220,7 @@ watch(() => props.keyword, (nv,ov) => loadTab())
 
 #search-view .platform .item:hover {
     color: var(--text-color);
-    background: var(--list-item-hover); 
+    background: var(--list-item-hover);
 }
 
 #search-view .platform .active {
@@ -266,5 +263,4 @@ watch(() => props.keyword, (nv,ov) => loadTab())
     -webkit-background-clip: text;
     color: transparent;
 }
-
 </style>

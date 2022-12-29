@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, ref, watch, toRaw } from 'vue';
+import { onActivated, ref, watch, toRaw, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
@@ -18,6 +18,9 @@ import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 
+
+
+const { seekTrack, playPlaylist, playMv } = inject('player')
 
 const progressBarRef = ref(null)
 const volumeBarRef = ref(null)
@@ -147,8 +150,6 @@ const switchTextColor = () => {
     setTextColorIndex((index + 1) % 2)
 }
 
-const seekTrack = (percent) => EventBus.emit('track-seek', percent)
-const playMv = () => EventBus.emit('track-playMv', currentTrack.value)
 
 /* 歌词 */
 const toggleLyric = () => {
@@ -493,7 +494,7 @@ const pickPlaylist = async (platform, traceId) => {
         }
         if (isCurrentTraceId(traceId)) {
             setRandomMusicCategoryName(cateName)
-            EventBus.emit('playlist-play', { playlist, traceId })
+            playPlaylist(playlist, null, traceId)
         }
         success = true
         break
@@ -615,7 +616,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         const playlist = playlists[nextInt(playlists.length)]
         if (isCurrentTraceId(traceId)) {
             setRandomMusicCategoryName(cateName)
-            EventBus.emit('playlist-play', { playlist, text: '即将为您打开主播电台', traceId })
+            playPlaylist(playlist, '即将为您打开主播电台', traceId)
         }
         success = true
         break
@@ -738,7 +739,7 @@ const pickFMRadio = async (platform, traceId) => {
         const playlist = playlists[nextInt(playlists.length)]
         if (isCurrentTraceId(traceId)) {
             setRandomMusicCategoryName(cateName)
-            EventBus.emit('playlist-play', { playlist, text: '即将为您收听广播电台', traceId })
+            playPlaylist(playlist, '即将为您收听广播电台', traceId)
         }
         success = true
         break
@@ -849,7 +850,7 @@ watch([textColorIndex], setupTextColor)
                 </div>
                 <div class="action">
                     <span class="mv" v-show="Track.hasMv(currentTrack)">
-                        <svg @click="playMv" width="20" height="16" viewBox="0 0 1024 853.52"
+                        <svg @click="playMv(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">

@@ -4,8 +4,9 @@ import { randomTextWithinAlphabetNums } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 
 
+
 const filterByPlatform = (state, platform) => {
-    if(!platform || platform.trim() == 'all') {
+    if (!platform || platform.trim() == 'all') {
         return state
     }
     return state.filter(item => (item.platform == platform.trim()))
@@ -38,7 +39,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         decoration: {
             current: 1001
         },
-        
+
     }),
     getters: {
         getUserCover() { //Potrait
@@ -46,14 +47,14 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         getUserNickName() {
             let nickname = this.user.nickname
-            if(nickname && nickname.trim().length > 0) {
+            if (nickname && nickname.trim().length > 0) {
                 return nickname.trim()
             }
             return "我的主页"
         },
         getUserAbout() {
             let about = this.user.about
-            if(about && about.trim().length > 0) {
+            if (about && about.trim().length > 0) {
                 return about.trim()
             }
             return "这个人很懒，什么也没留下~"
@@ -95,19 +96,19 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         //TODO state合法性待校验
         findItemIndex(state, item, compareFn) {
-            if(!state) return -1
-            if(!item) return -1
+            if (!state) return -1
+            if (!item) return -1
             return state.findIndex(e => {
-                return compareFn ? compareFn(item, e) : 
-                    (item.id && e.id 
-                    && (item.id + '') === (e.id + '') 
-                    && item.platform == e.platform)
+                return compareFn ? compareFn(item, e) :
+                    (item.id && e.id
+                        && (item.id + '') === (e.id + '')
+                        && item.platform == e.platform)
             })
         },
         addItem(state, item, compareFn) {
-            if(!state) return
+            if (!state) return
             const index = this.findItemIndex(state, item, compareFn)
-            if(index != -1) return false
+            if (index != -1) return false
             const created = Date.now()
             const updated = created
             Object.assign(item, { created, updated })
@@ -116,9 +117,9 @@ export const useUserProfileStore = defineStore("userProfile", {
             return true
         },
         insertFirst(state, item, compareFn) {
-            if(!state) return
+            if (!state) return
             const index = this.findItemIndex(state, item, compareFn)
-            if(index != -1) return false
+            if (index != -1) return false
             const created = Date.now()
             const updated = created
             Object.assign(item, { created, updated })
@@ -127,10 +128,10 @@ export const useUserProfileStore = defineStore("userProfile", {
             return true
         },
         removeItem(state, item, compareFn) {
-            if(!state) return 
-            if(!item) return
+            if (!state) return
+            if (!item) return
             const index = this.findItemIndex(state, item, compareFn)
-            if(index != -1) state.splice(index, 1)
+            if (index != -1) state.splice(index, 1)
             this.refreshUserHome()
         },
         uniqueInsertFirst(state, item, compareFn) {
@@ -149,22 +150,22 @@ export const useUserProfileStore = defineStore("userProfile", {
             })
         },
         addFavoriteTrack(track) {
-            const { id, platform, title, artist, album, duration, cover, 
-                type, pid, songlistId, extra1, extra2, mv, 
+            const { id, platform, title, artist, album, duration, cover,
+                type, pid, songlistId, extra1, extra2, mv,
                 payPlay, payDownload } = track
             //TODO
             const url = Playlist.isAnchorRadioType(track) ? track.url : null
-            this.addItem(this.favorites.songs, { 
+            this.addItem(this.favorites.songs, {
                 id, platform, title, artist, album, duration, cover, url,
-                type, pid, songlistId, extra1, extra2, mv, 
+                type, pid, songlistId, extra1, extra2, mv,
                 payPlay, payDownload
             })
         },
         addFavoriteRadio(track) {
-            const { id, platform, title, cover, artist, url, 
-                type, pid, songlistId, extra1, extra2  } = track
+            const { id, platform, title, cover, artist, url,
+                type, pid, songlistId, extra1, extra2 } = track
             this.addItem(this.favorites.radios, {
-                id, platform, title, cover, artist, url, 
+                id, platform, title, cover, artist, url,
                 type, pid, songlistId, extra1, extra2
             })
         },
@@ -181,16 +182,16 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.removeItem(this.favorites.radios, { id, platform })
         },
         isFavoritePlaylist(id, platform) {
-            return this.findItemIndex(this.favorites.playlists, { id, platform}) > -1
+            return this.findItemIndex(this.favorites.playlists, { id, platform }) > -1
         },
         isFavoriteAlbum(id, platform) {
-            return this.findItemIndex(this.favorites.albums, { id, platform}) > -1
+            return this.findItemIndex(this.favorites.albums, { id, platform }) > -1
         },
         isFavoriteSong(id, platform) {
-            return this.findItemIndex(this.favorites.songs, { id, platform}) > -1
+            return this.findItemIndex(this.favorites.songs, { id, platform }) > -1
         },
         isFavoriteRadio(id, platform) {
-            return this.findItemIndex(this.favorites.radios, { id, platform}) > -1
+            return this.findItemIndex(this.favorites.radios, { id, platform }) > -1
         },
         removeAllFavorites() {
             this.favorites.songs.length = 0
@@ -201,39 +202,39 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         //TODO 清理, 数据量较大时卡住，暂时废弃不用
         cleanUpAllSongs(states) {
-            states = states || [ this.favorites.songs, this.recents.songs ]
+            states = states || [this.favorites.songs, this.recents.songs]
             const props = ['url', 'lyric']
             try {
                 states.forEach(state => {
                     state.forEach(item => {
-                        if(Playlist.isFMRadioType(item)) return
+                        if (Playlist.isFMRadioType(item)) return
                         props.forEach(p => {
                             Reflect.deleteProperty(item, p)
                         })
                     })
                 })
-            } catch(error) {
+            } catch (error) {
                 //TODO
             }
         },
         //自建歌单
-        addCustomPlaylist(title, about, cover){
+        addCustomPlaylist(title, about, cover) {
             const id = Playlist.CUSTOM_ID_PREFIX + randomTextWithinAlphabetNums(12)
             this.addItem(this.customPlaylists, {
                 id, title, about, cover, data: []
             }, (e1, e2) => e1.id === e2.id)
         },
-        updateCustomPlaylist(id, title, about, cover){
-            if(this.customPlaylists.length < 1) return 
-            const index = this.findItemIndex(this.customPlaylists, { id }, 
+        updateCustomPlaylist(id, title, about, cover) {
+            if (this.customPlaylists.length < 1) return
+            const index = this.findItemIndex(this.customPlaylists, { id },
                 (e1, e2) => e1.id === e2.id)
-            if(index < 0) return 
+            if (index < 0) return
             const updated = Date.now()
             Object.assign(this.customPlaylists[index], { title, about, cover, updated })
         },
-        getCustomPlaylist(id){
-            if(this.customPlaylists.length < 1) return { id }
-            const index = this.findItemIndex(this.customPlaylists, { id }, 
+        getCustomPlaylist(id) {
+            if (this.customPlaylists.length < 1) return { id }
+            const index = this.findItemIndex(this.customPlaylists, { id },
                 (e1, e2) => e1.id === e2.id)
             return index < 0 ? { id } : this.customPlaylists[index]
         },
@@ -242,9 +243,9 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         addToCustomPlaylist(id, track) {
             const playlist = this.getCustomPlaylist(id)
-            if(!playlist) return false
+            if (!playlist) return false
             const index = this.findItemIndex(playlist.data, track)
-            if(index > -1) return false
+            if (index > -1) return false
             playlist.data.push(track)
             const updated = Date.now()
             Object.assign(playlist, { updated })
@@ -252,34 +253,34 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         removeTrackFromCustomPlaylist(id, track) {
             const playlist = this.getCustomPlaylist(id)
-            if(!playlist) return false
+            if (!playlist) return false
             const index = this.findItemIndex(playlist.data, track)
-            if(index < 0) return false 
+            if (index < 0) return false
             playlist.data.splice(index, 1)
             const updated = Date.now()
             Object.assign(playlist, { updated })
             return true
         },
         moveToCustomPlaylist(toId, fromId, track) {
-            if(!toId || !fromId) return false
-            if(toId == fromId) return false
-            if(this.addToCustomPlaylist(toId, track)) {
+            if (!toId || !fromId) return false
+            if (toId == fromId) return false
+            if (this.addToCustomPlaylist(toId, track)) {
                 return this.removeTrackFromCustomPlaylist(fromId, track)
             }
             return false
         },
         removeAllTracksFromCustomPlaylist(id) {
             const playlist = this.getCustomPlaylist(id)
-            if(!playlist) return false
+            if (!playlist) return false
             playlist.data.length = 0
             const updated = Date.now()
             Object.assign(playlist, { updated })
             return true
         },
         findCustomPlaylistIndex(id) {
-            if(!id || id.trim().length < 1) return -1
-            if(this.customPlaylists.length < 1) return -1
-            return this.findItemIndex(this.customPlaylists, { id }, 
+            if (!id || id.trim().length < 1) return -1
+            if (this.customPlaylists.length < 1) return -1
+            return this.findItemIndex(this.customPlaylists, { id },
                 (e1, e2) => e1.id === e2.id)
         },
         //关注的歌手
@@ -292,24 +293,24 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.removeItem(this.follows.artists, { id, platform })
         },
         isFollowArtist(id, platform) {
-            return this.findItemIndex(this.follows.artists, { id, platform }) != -1 
+            return this.findItemIndex(this.follows.artists, { id, platform }) != -1
         },
         //最近播放
         addRecentSong(track) {
-            const { id, platform, title, artist, album, duration, cover, 
-                type, pid, songlistId, extra1, extra2, mv, 
+            const { id, platform, title, artist, album, duration, cover,
+                type, pid, songlistId, extra1, extra2, mv,
                 payPlay, payDownload } = track
-            if(!platform || platform.trim().length < 1) return 
+            if (!platform || platform.trim().length < 1) return
             //TODO
             const url = Playlist.isAnchorRadioType(track) ? track.url : null
-            this.uniqueInsertFirst(this.recents.songs, { 
-                id, platform, title, artist, album, duration, cover, url, 
-                type, pid, songlistId, extra1, extra2, mv, 
+            this.uniqueInsertFirst(this.recents.songs, {
+                id, platform, title, artist, album, duration, cover, url,
+                type, pid, songlistId, extra1, extra2, mv,
                 payPlay, payDownload
             })
             //TODO
             const limit = 999
-            if(this.recents.songs.length > limit) {
+            if (this.recents.songs.length > limit) {
                 const deleteCount = this.recents.songs.length - limit
                 this.recents.songs.splice(limit, deleteCount)
                 this.refreshUserHome()
@@ -328,7 +329,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         addRecentRadio(track) {
             const { id, platform, title, cover, type, } = track
             this.uniqueInsertFirst(this.recents.radios, {
-                id, platform, title, cover, type, data: [ track ]
+                id, platform, title, cover, type, data: [track]
             })
         },
         removeRecentSong(track) {

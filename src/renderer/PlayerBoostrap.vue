@@ -1,16 +1,18 @@
 <script setup>
-import { inject, onMounted, watch } from 'vue';
+import { inject, provide, onMounted, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
-import { usePlatformStore } from './store/platformStore';
-import EventBus from '../common/EventBus';
-import { Track } from '../common/Track';
-import { storeToRefs } from 'pinia';
+import { usePlatformStore } from './store/platformStore';;
 import { useUserProfileStore } from './store/userProfileStore';
+import { useSettingStore } from './store/settingStore';
+import EventBus from '../common/EventBus';
+import { Track } from '../common/Track'
 import { useIpcRenderer } from '../common/Utils';
 import { PLAY_STATE, TRAY_ACTION } from '../common/Constants';
-import { useSettingStore } from './store/settingStore';
 import { Playlist } from '../common/Playlist';
+
+
 
 const ipcRenderer = useIpcRenderer()
 
@@ -72,23 +74,23 @@ const traceRecentAlbum = (album) => {
 
 /* 歌词获取 */
 const loadLyric = (track) => {
-    if (!track) return
-    if (Track.hasLyric(track)) {
+    if (!track || Track.hasLyric(track)) {
         EventBus.emit('track-lyricLoaded', track)
         return
     }
     const platform = track.platform
-    const vendor = getVendor(platform);
-    if (!vendor || !vendor.lyric) return
-    if (Playlist.isFMRadioType(track) || Playlist.isAnchorRadioType(track)) return
-    vendor.lyric(track.id, track).then(result => assignLyric(track, result))
+    const vendor = getVendor(platform)
+    if (!vendor || !vendor.lyric
+        || Playlist.isFMRadioType(track)
+        || Playlist.isAnchorRadioType(track)) {
+        EventBus.emit('track-lyricLoaded', track)
+        return
+    }
+    vendor.lyric(track.id, track).then(result => updateLyric(track, result))
 }
 
-const assignLyric = (track, lyric) => {
-    //track.lyric = result
-    if (!track) return
-    if (!lyric) return
-    Object.assign(track, { lyric })
+const updateLyric = (track, lyric) => {
+    if (track || lyric) Object.assign(track, { lyric })
     EventBus.emit('track-lyricLoaded', track)
 }
 
@@ -173,7 +175,7 @@ const bootstrapTrack = (track) => {
         }
         setAutoPlaying(false)
         //设置歌词
-        if (Track.hasLyric(result)) assignLyric(track, lyric)
+        if (Track.hasLyric(result)) updateLyric(track, lyric)
         //设置封面
         if (Track.hasCover(result)) Object.assign(track, { cover })
         //设置歌手信息
@@ -206,9 +208,9 @@ const onPlayerErrorRetry = (track) => {
 }
 
 /* 播放歌单 */
-const tryPlayPlaylist = async (playlist, text, traceId) => {
+const playPlaylist = async (playlist, text, traceId) => {
     try {
-        playPlaylist(playlist, text, traceId)
+        doPlayPlaylist(playlist, text, traceId)
     } catch (error) {
         console.log(error)
         if (traceId && !isCurrentTraceId(traceId)) return
@@ -218,7 +220,7 @@ const tryPlayPlaylist = async (playlist, text, traceId) => {
 }
 
 //播放歌单
-const playPlaylist = async (playlist, text, traceId) => {
+const doPlayPlaylist = async (playlist, text, traceId) => {
     if (traceId && !isCurrentTraceId(traceId)) return
 
     const { id, platform } = playlist
@@ -404,14 +406,14 @@ const drawCanvasSpectrum = () => {
 const getVideoDetail = (platform, id) => {
     return new Promise((resolve, reject) => {
         const vendor = getVendor(platform)
-        if (!vendor) {
+        if (!vendor || !vendor.videoDetail) {
             if (reject) reject('NoVendor')
             return
         }
         const quality = '1080'
         vendor.videoDetail(id, quality).then(result => {
             if (!result.url || result.url.trim().length < 1) {
-                if (reject) reject('NoURL')
+                if (reject) reject('noUrl')
                 return
             }
             resolve(result)
@@ -423,8 +425,8 @@ const getVideoDetail = (platform, id) => {
 
 /* EventBus事件 */
 //FM广播
-EventBus.on('radio-play', track => traceRecentTrack(track))
-EventBus.on('radio-state', state => setPlaying(state))
+EventBus.on('radio-play', traceRecentTrack)
+EventBus.on('radio-state', setPlaying)
 //普通歌曲
 EventBus.on('track-changed', track => {
     bootstrapTrack(track).then(track => {
@@ -438,8 +440,8 @@ EventBus.on('track-play', track => {
     traceRecentTrack(track)
     loadLyric(track)
 })
-EventBus.on('track-loadLyric', track => loadLyric(track))
-EventBus.on('track-error', track => onPlayerErrorRetry(track))
+
+EventBus.on('track-error', onPlayerErrorRetry)
 EventBus.on('track-state', state => {
     switch (state) {
         case PLAY_STATE.PLAYING:
@@ -463,15 +465,21 @@ EventBus.on('track-pos', secs => {
     updateCurrentTime(secs)
 })
 
-//播放歌曲
-EventBus.on('track-playNow', track => playTrack(track))
+EventBus.on("track-freqUnit8Data", freqData => {
+    cachedFreqData = freqData
+    if (playingViewThemeIndex.value != 1 && layout.value.index != 2) return
+    drawCanvasSpectrum()
+})
 
 //歌单电台 - 下一曲
 EventBus.on('track-nextPlaylistRadioTrack', track =>
     playNextPlaylistRadioTrack(track.platform, track.channel, track))
 
+//播放进度
+const seekTrack = (percent) => EventBus.emit('track-seek', percent)
+
 //播放MV
-EventBus.on('track-playMv', track => {
+const playMv = (track) => {
     if (!Track.hasMv(track)) return
     const { platform, mv } = track
     getVideoDetail(platform, mv).then(result => {
@@ -480,25 +488,7 @@ EventBus.on('track-playMv', track => {
         EventBus.emit('video-play', result)
         traceRecentTrack(track)
     }, reason => showFailToast('当前MV无法播放！'))
-})
-
-EventBus.on("track-freqUnit8Data", freqData => {
-    cachedFreqData = freqData
-    if (playingViewThemeIndex.value != 1 && layout.value.index != 2) return
-    drawCanvasSpectrum()
-})
-
-//歌单
-EventBus.on('playlist-play', ({ playlist, text, traceId }) => tryPlayPlaylist(playlist, text, traceId))
-
-//专辑
-EventBus.on('album-play', ({ album, text }) => playAlbum(album, text))
-
-//歌曲数组
-EventBus.on('tracks-play', ({ data, needReset, text }) => addAndPlayTracks(data, needReset, text))
-
-EventBus.on('queue-empty',)
-
+}
 
 //设置RadioPlayer
 const setupRadioPlayer = () => EventBus.emit('radio-init', document.querySelector('.audio-node'))
@@ -582,6 +572,17 @@ watch(theme, () => {
     }
     drawCanvasSpectrum()
 }, { deep: true })
+
+
+//播放器相关API
+provide('player', {
+    seekTrack,
+    playPlaylist,
+    playAlbum,
+    playMv,
+    addAndPlayTracks,
+    loadLyric,
+})
 </script>
 
 <template>
@@ -589,8 +590,9 @@ watch(theme, () => {
     <audio class="audio-node" crossOrigin="anonymous"></audio>
     <slot></slot>
 </template>
+
 <style>
-.radio-holder {
+.audio-node {
     visibility: hidden;
 }
 </style>

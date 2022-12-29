@@ -6,30 +6,32 @@ import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
 import CryptoJS from 'crypto-js';
 
+
+
 //@param ignore 是否忽略&字符
 const escapeHtml = (text, ignore) => {
     const regex = ignore ? (/#\d+;/g) : (/[&]#\d+;/g)
     return text.replace(regex, '')
-            .replace(/&apos;/g, "'")
+        .replace(/&apos;/g, "'")
 }
 
 const moduleReq = (module, method, param) => {
-    return { module,  method, param }
+    return { module, method, param }
 }
 
 const getPlaylistCover = (originUrl) => {
-    if(!originUrl) return null
+    if (!originUrl) return null
     return originUrl.replace("/300?n=1", "/600?n=1")
 }
 
 const getArtistCover = (artistmid) => {
-    if(!artistmid) return null
+    if (!artistmid) return null
     return "http://y.gtimg.cn/music/photo_new/T001R500x500M000"
         + artistmid + ".jpg"
 }
 
 const getAlbumCover = (albummid) => {
-    if(!albummid) return null
+    if (!albummid) return null
     return "https://y.qq.com/music/photo_new/T002R500x500M000"
         + albummid + ".jpg?max_age=2592000"
 }
@@ -56,13 +58,13 @@ const getTrackTypeMeta = (typeName) => {
             prefix: 'F000',
             ext: '.flac',
         }
-     }[typeName]
+    }[typeName]
 }
 
 const vkeyReqData = (trackInfo) => {
     //TODO
     const mediaId = trackInfo.mid
-    const songtype = [ trackInfo.type ]
+    const songtype = [trackInfo.type]
     const filename = ['m4a'].map(typeName => {
         const typeMeta = getTrackTypeMeta(typeName)
         return typeMeta.prefix + mediaId + mediaId + typeMeta.ext
@@ -77,16 +79,16 @@ const vkeyReqData = (trackInfo) => {
             ct: 24,
             cv: 0
         },
-        req_1: moduleReq('vkey.GetVkeyServer', 'CgiGetVkey', 
-        {
-            filename,
-            guid,
-            songmid: [ mediaId ],
-            songtype,
-            uin,
-            loginflag: 1,
-            platform: "20"
-        })
+        req_1: moduleReq('vkey.GetVkeyServer', 'CgiGetVkey',
+            {
+                filename,
+                guid,
+                songmid: [mediaId],
+                songtype,
+                uin,
+                loginflag: 1,
+                platform: "20"
+            })
     }
 }
 
@@ -113,7 +115,7 @@ const lyricReqBody = (id) => {
         g_tk: 5381,
         loginUin: 0,
         hostUin: 0,
-        format:'json',
+        format: 'json',
         inCharset: 'utf8',
         outCharset: 'utf8',
         notice: 0,
@@ -123,7 +125,7 @@ const lyricReqBody = (id) => {
 }
 
 const artistHotSongReqBody = (id, offset, limit) => {
-    return { 
+    return {
         data: JSON.stringify({
             comm: {
                 ct: 24,
@@ -132,7 +134,7 @@ const artistHotSongReqBody = (id, offset, limit) => {
             req_1: moduleReq('music.web_singer_info_svr', 'get_singer_detail_info', {
                 sort: 5,
                 singermid: id,
-                sin:  offset,
+                sin: offset,
                 num: limit
             })
         })
@@ -147,13 +149,13 @@ const artistAlbumReqBody = (id, offset, limit) => {
                 cv: 0
             },
             req_1: moduleReq('music.web_singer_info_svr', 'get_singer_album',
-            {
-                singermid: id,
-                order: "time",
-                begin: offset,
-                num: limit,
-                exstatus: 1
-            })
+                {
+                    singermid: id,
+                    order: "time",
+                    begin: offset,
+                    num: limit,
+                    exstatus: 1
+                })
         })
     }
 }
@@ -166,13 +168,13 @@ const albumAllSongsReqBody = (id, offset, limit) => {
                 cv: 10000
             },
             req_1: moduleReq('music.musichallAlbum.AlbumSongList', 'GetAlbumSongList',
-            {
-                albumMid: id,
-                albumID: 0,
-                begin: offset,
-                num: limit,
-                order: 2
-            })
+                {
+                    albumMid: id,
+                    albumID: 0,
+                    begin: offset,
+                    num: limit,
+                    order: 2
+                })
         })
     }
 }
@@ -189,7 +191,7 @@ const searchParam = (keyword, type, offset, limit, page) => {
     keyword = keyword ? keyword.trim() : ''
     return {
         format: 'json',
-        n: limit,   
+        n: limit,
         p: page,
         w: keyword,
         cr: 1,      //未知参数，但是加上此参数搜索结果更令人满意
@@ -205,14 +207,14 @@ const searchParamNew = (keyword, type, offset, limit, page) => {
             ct: '6',
             cv: '80500'
         },
-        req_1: moduleReq('music.search.SearchCgiService', 'DoSearchForQQMusicDesktop', 
-        {
-            num_per_page: 30,
-			page_num: page,
-			query: keyword,
-            search_type: type,
-            grp: 1
-        })
+        req_1: moduleReq('music.search.SearchCgiService', 'DoSearchForQQMusicDesktop',
+            {
+                num_per_page: 30,
+                page_num: page,
+                query: keyword,
+                search_type: type,
+                grp: 1
+            })
     }
 }
 
@@ -246,12 +248,12 @@ const topListDetailReqBody = (id, offset, limit, page) => {
                 cv: 0
             },
             req_1: moduleReq('musicToplist.ToplistInfoServer', 'GetDetail',
-            {
-                topid: id,
-                offset,
-                num: 100,
-                period: getPerid(id)
-            })
+                {
+                    topid: id,
+                    offset,
+                    num: 100,
+                    period: getPerid(id)
+                })
         })
     }
 }
@@ -278,7 +280,7 @@ const playlistRadiosReqBody = () => {
 }
 
 const radioSonglistReqBody = (id, firstplay) => {
-    if(typeof(id) == 'string') id = parseInt(id.trim())
+    if (typeof (id) == 'string') id = parseInt(id.trim())
     return {
         format: 'json',
         inCharset: 'utf8',
@@ -294,12 +296,12 @@ const radioSonglistReqBody = (id, firstplay) => {
                 ct: 24,
                 cv: 0
             },
-            req_1: moduleReq('pf.radiosvr', 'GetRadiosonglist', 
-            {
-                id,
-                firstplay, //数字：0或1
-                num: 10
-            })
+            req_1: moduleReq('pf.radiosvr', 'GetRadiosonglist',
+                {
+                    id,
+                    firstplay, //数字：0或1
+                    num: 10
+                })
         })
     }
 }
@@ -326,7 +328,7 @@ const getPerid = (id) => {
         case 4:
         case 52:
         case 67:
-            let d2 = day < 6 ? (dd - day + 1): dd
+            let d2 = day < 6 ? (dd - day + 1) : dd
             d2 = d2 < 10 ? ('0' + d2) : d2
             period = yyyy + "-" + mm + "-" + d2
             break
@@ -362,13 +364,13 @@ const getWeek = (dt) => {
 //参考： https://github.com/jsososo/QQMusicApi/
 export class QQ {
     static CODE = "qq"
-    static DEFAULT_CATE= 10000000
-    static TOPLIST_CODE= 99999999
-    static RADIO_CODE= 88888888
-    static NEW_CODE= 22222222
+    static DEFAULT_CATE = 10000000
+    static TOPLIST_CODE = 99999999
+    static RADIO_CODE = 88888888
+    static NEW_CODE = 22222222
     static TOPLIST_PREFIX = "TOP_"
     static RADIO_CACHE = { channel: 0, data: [] }
-    
+
     //全部分类
     static categories() {
         return new Promise((resolve, reject) => {
@@ -391,14 +393,14 @@ export class QQ {
                         const id = item.categoryId
                         category.add(name, id)
                     })
-                    if(cateNameCached.includes(cateName)) return
+                    if (cateNameCached.includes(cateName)) return
                     result.data.push(category)
                     cateNameCached.push(cateName)
                 })
                 const firstCate = result.data[0]
                 firstCate.data.splice(1, 0, { key: '最新', value: QQ.NEW_CODE })
                 firstCate.data.splice(2, 0, { key: '排行榜', value: QQ.TOPLIST_CODE })
-                firstCate.data.splice(3, 0, { key: '电台', value: QQ.RADIO_CODE })        
+                firstCate.data.splice(3, 0, { key: '电台', value: QQ.RADIO_CODE })
                 resolve(result)
             })
         })
@@ -408,7 +410,7 @@ export class QQ {
     static toplist(cate, offset, limit, page, order) {
         return new Promise((resolve, reject) => {
             let result = { platform: QQ.CODE, cate, offset: 0, limit: 100, page: 1, total: 0, data: [] }
-            if(page > 1) {
+            if (page > 1) {
                 resolve(result)
                 return
             }
@@ -420,7 +422,7 @@ export class QQ {
                     group.toplist.forEach(item => {
                         const id = QQ.TOPLIST_PREFIX + item.topId
                         const cover = item.frontPicUrl || item.headPicUrl
-                        const detail = new Playlist(id, QQ.CODE, cover, item.title) 
+                        const detail = new Playlist(id, QQ.CODE, cover, item.title)
                         detail.about = item.intro
                         result.data.push(detail)
                     })
@@ -448,7 +450,7 @@ export class QQ {
 
                 const songs = json.req_1.data.songInfoList
                 songs.forEach(song => {
-                    const artist = song.singer.map(ar => ({id: ar.mid, name: ar.name }))
+                    const artist = song.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     const album = { id: song.album.mid, name: song.album.name }
                     const duration = song.interval * 1000
                     const cover = getAlbumCover(song.album.mid)
@@ -464,8 +466,8 @@ export class QQ {
     //歌单电台列表
     static playlistRadios(cate, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const result = { platform: QQ.CODE, cate, offset, limit, page, total: 0, data:[] }
-            if(page > 1) {
+            const result = { platform: QQ.CODE, cate, offset, limit, page, total: 0, data: [] }
+            if (page > 1) {
                 resolve(result)
                 return
             }
@@ -494,14 +496,14 @@ export class QQ {
             let result = null
             const firstplay = !track ? 1 : 0
             //是否命中缓存
-            if(channel == QQ.RADIO_CACHE.channel) {
+            if (channel == QQ.RADIO_CACHE.channel) {
                 const index = (firstplay == 1) ? 0 :
                     QQ.RADIO_CACHE.data.findIndex(item => item.id == track.id)
                 const length = QQ.RADIO_CACHE.data.length
-                if(length > 0  && index > -1 && index < (length - 1)) {
+                if (length > 0 && index > -1 && index < (length - 1)) {
                     result = QQ.RADIO_CACHE.data[index + 1]
                     resolve(result)
-                    return 
+                    return
                 }
             }
             //不命中，重置缓存
@@ -513,7 +515,7 @@ export class QQ {
             getJson(url, reqBody).then(json => {
                 const list = json.req_1.data.track_list
                 list.forEach(item => {
-                    const artist = item.singer.map(ar => ({id: ar.mid, name: ar.name }))
+                    const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     const album = { id: item.album.mid, name: item.album.name }
                     const duration = item.interval * 1000
                     const cover = getAlbumCover(item.album.mid)
@@ -532,15 +534,15 @@ export class QQ {
     static square(cate, offset, limit, page) {
         const originCate = cate || 0
         let resolvedCate = cate
-        if(typeof(resolvedCate) == 'string') resolvedCate = parseInt(resolvedCate.trim())
+        if (typeof (resolvedCate) == 'string') resolvedCate = parseInt(resolvedCate.trim())
         resolvedCate = resolvedCate > 0 ? resolvedCate : QQ.DEFAULT_CATE
         //榜单
-        if(resolvedCate == QQ.TOPLIST_CODE) return QQ.toplist(cate, offset, limit, page)
+        if (resolvedCate == QQ.TOPLIST_CODE) return QQ.toplist(cate, offset, limit, page)
         //电台
-        if(resolvedCate == QQ.RADIO_CODE) return QQ.playlistRadios(cate, offset, limit, page)
+        if (resolvedCate == QQ.RADIO_CODE) return QQ.playlistRadios(cate, offset, limit, page)
         //普通歌单
         let sortId = 5 //最热
-        if(resolvedCate == QQ.NEW_CODE) {
+        if (resolvedCate == QQ.NEW_CODE) {
             sortId = 2 //最新
             resolvedCate = QQ.DEFAULT_CATE
         }
@@ -561,7 +563,7 @@ export class QQ {
                 const list = json.data.list
                 list.forEach(item => {
                     const cover = item.imgurl
-                    const playlist = new Playlist(item.dissid, QQ.CODE, cover, item.dissname) 
+                    const playlist = new Playlist(item.dissid, QQ.CODE, cover, item.dissname)
                     playlist.about = item.introduction
                     playlist.listenNum = item.listennum
                     result.data.push(playlist)
@@ -573,13 +575,13 @@ export class QQ {
 
     //歌单详情
     static playlistDetail(id, offset, limit, page) {
-        if(id.startsWith(QQ.TOPLIST_PREFIX)) {
+        if (id.startsWith(QQ.TOPLIST_PREFIX)) {
             return QQ.toplistDetail(id, offset, limit, page)
         }
         return new Promise((resolve, reject) => {
             const result = new Playlist()
             const url = "http://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg"
-            const reqBody = { 
+            const reqBody = {
                 format: 'json',
                 type: 1,
                 utf8: 1,
@@ -597,7 +599,7 @@ export class QQ {
 
                 const songs = playlist.songlist
                 songs.forEach(song => {
-                    const artist = song.singer.map(e => ({id: e.mid, name: e.name }))
+                    const artist = song.singer.map(e => ({ id: e.mid, name: e.name }))
                     const album = { id: song.albummid, name: song.albumname }
                     const duration = song.interval * 1000
                     const cover = getAlbumCover(song.albummid)
@@ -620,10 +622,10 @@ export class QQ {
             const reqBody = {
                 format: 'json',
                 data: JSON.stringify({
-                    songinfo: moduleReq('music.pf_song_detail_svr', 'get_song_detail_yqq', 
-                    {
-                        song_mid: id
-                    })
+                    songinfo: moduleReq('music.pf_song_detail_svr', 'get_song_detail_yqq',
+                        {
+                            song_mid: id
+                        })
                 })
             }
             getJson(url, reqBody).then(json => {
@@ -633,12 +635,12 @@ export class QQ {
                     const urlInfo = data.midurlinfo[0]
                     const vkey = urlInfo.vkey.trim()
                     const result = new Track(id, QQ.CODE)
-                    if(vkey.length > 0) {
+                    if (vkey.length > 0) {
                         result.url = data.sip[0] + urlInfo.purl
                     }
                     resolve(result)
                 })
-            })            
+            })
         })
     }
 
@@ -657,10 +659,10 @@ export class QQ {
     static lyric(id) {
         return new Promise((resolve, reject) => {
             const url = "http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg"
-            const reqBody = lyricReqBody(id) 
+            const reqBody = lyricReqBody(id)
             getJson(url, reqBody).then(json => {
                 let lyric = json.lyric
-                if(lyric) {
+                if (lyric) {
                     lyric = CryptoJS.enc.Base64.parse(lyric).toString(CryptoJS.enc.Utf8)
                     lyric = escapeHtml(lyric)
                     const result = Lyric.parseFromText(lyric)
@@ -681,14 +683,14 @@ export class QQ {
                 const key = "window.__INITIAL_DATA__"
 
                 let scriptText = null
-                for(var scriptEl of scriptEls) {
+                for (var scriptEl of scriptEls) {
                     scriptText = scriptEl.textContent
-                    if(!scriptText) continue
+                    if (!scriptText) continue
                     scriptText = scriptText.trim()
-                    if(scriptText.includes(key)) break
+                    if (scriptText.includes(key)) break
                 }
-                const result = { id, title: '未知歌手', cover: 'default_cover.png', data:[], about: '' }
-                if(scriptText) {
+                const result = { id, title: '未知歌手', cover: 'default_cover.png', data: [], about: '' }
+                if (scriptText) {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')
                     const json = JSON.parse(scriptText)
@@ -713,7 +715,7 @@ export class QQ {
                 outCharset: 'utf8'
             }
             getRaw(url, reqBody).then(xml => {
-                const result = { id, name:'', cover:'', data:[] }
+                const result = { id, name: '', cover: '', data: [] }
                 resolve(result)
             })
         })
@@ -732,11 +734,11 @@ export class QQ {
                 const songList = json.req_1.data.songlist
                 songList.forEach(item => {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
-                    const album = {  id: item.album.mid,  name: item.album.name }
+                    const album = { id: item.album.mid, name: item.album.name }
                     const duration = item.interval * 1000
                     const cover = getAlbumCover(item.album.mid)
 
-                    const track = new Track(item.mid, QQ.CODE, item.title, 
+                    const track = new Track(item.mid, QQ.CODE, item.title,
                         artist, album, duration, cover)
                     track.mv = item.mv.vid
                     track.payPlay = (item.pay.pay_play == 1)
@@ -777,19 +779,19 @@ export class QQ {
                 const key = "window.__INITIAL_DATA__"
 
                 let scriptText = null
-                for(var scriptEl of scriptEls) {
+                for (var scriptEl of scriptEls) {
                     scriptText = scriptEl.textContent
-                    if(!scriptText) continue
+                    if (!scriptText) continue
                     scriptText = scriptText.trim()
-                    if(scriptText.includes(key)) break
+                    if (scriptText.includes(key)) break
                 }
                 const result = new Album(id, QQ.CODE, '山川湖海，日月星辰', 'default_cover.png')
-                if(scriptText) {
+                if (scriptText) {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')
                     const json = JSON.parse(scriptText)
-                    
-                    
+
+
                     const detail = json.detail
                     result.title = detail.albumName
                     result.cover = detail.picurl.startsWith("//") ? ("https:" + detail.picurl) : detail.picurl
@@ -837,7 +839,7 @@ export class QQ {
                 const list = json.req_1.data.body.song.list
                 const data = list.map(item => {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
-                    const album = { id: item.album.mid, name : item.album.name }
+                    const album = { id: item.album.mid, name: item.album.name }
                     const duration = item.interval * 1000
                     const cover = getAlbumCover(item.album.mid)
                     const track = new Track(item.mid, QQ.CODE, item.name, artist, album, duration, cover)
@@ -849,7 +851,7 @@ export class QQ {
                 const result = { platform: QQ.CODE, offset, limit, page, data }
                 resolve(result)
             })
-        }) 
+        })
     }
 
     //搜索: 歌单
@@ -867,7 +869,7 @@ export class QQ {
                 const result = { platform: QQ.CODE, offset, limit, page, data }
                 resolve(result)
             })
-        }) 
+        })
     }
 
     //搜索: 专辑
@@ -885,7 +887,7 @@ export class QQ {
                 const result = { platform: QQ.CODE, offset, limit, page, data }
                 resolve(result)
             })
-        }) 
+        })
     }
 
     //搜索: 歌手
@@ -896,17 +898,17 @@ export class QQ {
             postJson(url, reqBody).then(json => {
                 const list = json.req_1.data.body.singer.list
                 const result = { platform: QQ.CODE, offset, limit, page, data: [] }
-                if(list) {
+                if (list) {
                     result.data = list.map(item => ({
                         id: item.singerMID,
                         platform: QQ.CODE,
                         title: item.singerName,
                         cover: item.singerPic
                     }))
-                }   
+                }
                 resolve(result)
             })
-        }) 
+        })
     }
 
     //歌手分类名称映射
@@ -918,7 +920,7 @@ export class QQ {
             genre: '流派',
         }
     }
-    
+
     //歌手分类
     static artistCategories() {
         return new Promise((resolve, reject) => {
@@ -926,16 +928,16 @@ export class QQ {
             const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
             const reqBody = {
                 data: JSON.stringify({
-                    comm: { 
-                        ct: 24, 
+                    comm: {
+                        ct: 24,
                         cv: 0
                     },
-                    req_1: moduleReq('Music.SingerListServer', 'get_singer_list', { 
-                        area: -100, 
+                    req_1: moduleReq('Music.SingerListServer', 'get_singer_list', {
+                        area: -100,
                         sex: -100,
-                        genre: -100, 
-                        index: -100, 
-                        sin: 0, 
+                        genre: -100,
+                        index: -100,
+                        sin: 0,
                         cur_page: 1
                     })
                 })
@@ -943,7 +945,7 @@ export class QQ {
             getJson(url, reqBody).then(json => {
                 const tags = json.req_1.data.tags
                 const tagsMap = QQ.tagsMap()
-                const keys = [ 'area', 'sex', 'genre' ]
+                const keys = ['area', 'sex', 'genre']
                 keys.forEach(key => {
                     const category = new Category(tagsMap[key])
                     const list = tags[key]
@@ -966,9 +968,9 @@ export class QQ {
         const result = { area: -100, sex: -100, genre: -100, index: -100 }
         const source = {}
         const tagsMap = QQ.tagsMap()
-        for(var key in cate) {
-            for(var tag in tagsMap) {
-                if(key == tagsMap[tag]) {
+        for (var key in cate) {
+            for (var tag in tagsMap) {
+                if (key == tagsMap[tag]) {
                     source[tag] = cate[key].item.value
                 }
             }
@@ -986,16 +988,16 @@ export class QQ {
             const resolvedCate = QQ.parseArtistCate(cate)
             const reqBody = {
                 data: JSON.stringify({
-                    comm: { 
-                        ct: 24, 
+                    comm: {
+                        ct: 24,
                         cv: 0
                     },
-                    req_1: moduleReq('Music.SingerListServer', 'get_singer_list', { 
-                        area: resolvedCate.area, 
+                    req_1: moduleReq('Music.SingerListServer', 'get_singer_list', {
+                        area: resolvedCate.area,
                         sex: resolvedCate.sex,
-                        genre: resolvedCate.genre, 
-                        index: resolvedCate.index, 
-                        sin: offset, 
+                        genre: resolvedCate.genre,
+                        index: resolvedCate.index,
+                        sin: offset,
                         cur_page: page
                     })
                 })
@@ -1006,14 +1008,14 @@ export class QQ {
                     const id = item.singer_mid
                     const title = item.singer_name
                     const cover = item.singer_pic
-                    const artist = { id,  platform: QQ.CODE, title, cover }
+                    const artist = { id, platform: QQ.CODE, title, cover }
                     result.data.push(artist)
                 })
                 resolve(result)
             })
         })
     }
-    
+
     static videoDetail(id, quality) {
         return new Promise((resolve, reject) => {
             const url = 'http://u.y.qq.com/cgi-bin/musicu.fcg'
@@ -1023,7 +1025,7 @@ export class QQ {
                         module: 'gosrf.Stream.MvUrlProxy',
                         method: 'GetMvUrls',
                         param: {
-                            vids: [ id ],
+                            vids: [id],
                             request_typet: 10001,
                         }
                     }

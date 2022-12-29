@@ -1,6 +1,8 @@
 import EventBus from './EventBus';
 import Hls from 'hls.js';
 
+
+
 let singleton = null
 let gVideoHolder = null
 let lastPlayTime = null

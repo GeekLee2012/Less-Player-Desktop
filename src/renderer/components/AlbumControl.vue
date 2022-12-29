@@ -1,6 +1,7 @@
 <script setup>
 import { inject } from 'vue';
 
+
 const { visitAlbum } = inject('appRoute')
 
 const props = defineProps({
@@ -10,14 +11,13 @@ const props = defineProps({
 })
 
 const visitAlbumDetail = (platform, id, callback) => {
-    if(!props.visitable) return 
+    if (!props.visitable) return
     visitAlbum({ platform, id, callback })
 }
 </script>
 
 <template>
-    <span @click="visitAlbumDetail(platform, data.id)" 
-        class="album-ctl" v-html="data.name" > 
+    <span @click="visitAlbumDetail(platform, data.id)" class="album-ctl" v-html="data.name">
     </span>
 </template>
 
