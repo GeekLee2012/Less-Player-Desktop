@@ -1,5 +1,7 @@
-#文件真正名称：.npmrc
-
+#.npmrc配置文件（注意：名称以.开头）
+#解决npm install失败问题 
 #registry=http://registry.npmmirror.com
 ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
+
+#解决npm run dist失败问题
 #ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/

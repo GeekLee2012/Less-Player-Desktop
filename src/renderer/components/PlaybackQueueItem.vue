@@ -181,16 +181,13 @@ const showContextMenu = (event) => {
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-break: anywhere;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
 }
 
 .playback-queue-item .title {
-    /*
-    margin-top: 2px;
-    margin-bottom: 6px;
-    */
     width: 258px;
     width: 77%;
     top: 2px;

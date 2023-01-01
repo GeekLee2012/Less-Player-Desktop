@@ -1,14 +1,19 @@
 const { app, BrowserWindow, ipcMain,
   Menu, dialog, powerMonitor,
   shell, powerSaveBlocker, Tray,
-  globalShortcut, session } = require('electron')
+  globalShortcut, session
+} = require('electron')
+
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
-  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON } = require('./env')
-const path = require('path')
+  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON
+} = require('./env')
+
 const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX,
   randomTextWithinAlphabetNums, nextInt,
-  getDownloadDir, removePath, listFiles } = require('./common')
+  getDownloadDir, removePath, listFiles
+} = require('./common')
 
+const path = require('path')
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
@@ -70,7 +75,7 @@ const init = () => {
           url: item.getURL(),
           savePath
         })
-        console.log("[ Download-Done ]")
+        console.log("[ Download - Done ]")
       })
     })
   })
@@ -92,16 +97,12 @@ const init = () => {
   // for applications and their menu bar to stay active until the user quits
   // explicitly with Cmd + Q.
   app.on('window-all-closed', (event) => {
-    cancelDownload()
-    if (!isDevEnv) {
-      app.quit()
-    }
-    //if(!isMacOS) app.quit()
+    if (!isDevEnv) app.quit()
   })
 
   app.on('before-quit', (event) => {
+    cleanupBeforeQuit()
     sendToRenderer('app-quit')
-    cancelDownload()
   })
 
   app.on('login', (event, webContents, details, authInfo, callback) => {
@@ -162,6 +163,7 @@ const registryGlobalListeners = () => {
       mainWin.close()
       return
     }
+    cleanupBeforeQuit()
     app.quit()
   }).on('app-min', () => {
     if (mainWin.isFullScreen()) mainWin.setFullScreen(false)
@@ -581,6 +583,10 @@ const getProxyAuthRealm = (scheme, host, port) => {
 
 const openDevTools = () => {
   if (mainWin) mainWin.webContents.openDevTools()
+}
+
+const cleanupBeforeQuit = () => {
+  cancelDownload()
 }
 
 //覆盖(包装)请求

@@ -31,9 +31,9 @@
 ![snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2003.png)  
    
 #### For开发者  
-* 请先下载安装最新版 Nodejs  
+* 请先下载安装最新版（或最新LTS版本） Nodejs  
   
-* 初始化项目  
+* 安装依赖  
   `npm install`
   
 * 开发模式运行  
