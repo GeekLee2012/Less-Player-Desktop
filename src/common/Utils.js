@@ -1,41 +1,29 @@
 //import analyze from 'rgbaster';
 
 
-
-export const useIpcRenderer = () => {
+const tryCall = (call, fallbackValue) => {
     try {
-        return electronAPI ? electronAPI.ipcRenderer : null
+        return call()
     } catch (error) {
         //Do Nothing
     }
-    return null
+    return fallbackValue
+}
+
+export const useIpcRenderer = () => {
+    return tryCall(() => (electronAPI.ipcRenderer), null)
 }
 
 export const isMacOS = () => {
-    try {
-        return electronAPI ? electronAPI.isMacOS : null
-    } catch (error) {
-        //Do Nothing
-    }
-    return null
+    return tryCall(() => (electronAPI.isMacOS), null)
 }
 
 export const isWinOS = () => {
-    try {
-        return electronAPI ? electronAPI.isWinOS : null
-    } catch (error) {
-        //Do Nothing
-    }
-    return null
+    return tryCall(() => (electronAPI.isWinOS), null)
 }
 
 export const useUseCustomTrafficLight = () => {
-    try {
-        return electronAPI ? electronAPI.useCustomTrafficLight : false
-    } catch (error) {
-        //Do Nothing
-    }
-    return false
+    return tryCall(() => (electronAPI.useCustomTrafficLight), false)
 }
 
 export const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz'
@@ -85,7 +73,8 @@ export const useRgbaster = async (src, opts) => {
 }
 */
 
+//TODO 随机数不随机！
 export const nextInt = (max) => {
     const limit = max < 1024 ? 1024 : max
-    return parseInt(Math.random() * limit) % max
+    return Math.floor(Math.random() * limit) % max
 }

@@ -238,6 +238,7 @@ const markScrollState = () => {
 }
 
 const restoreScrollState = () => {
+    
     if (!userProfileRef.value) return
     if (markScrollTop < 1) return
     userProfileRef.value.scrollTop = markScrollTop

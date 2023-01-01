@@ -1,8 +1,8 @@
 <script setup>
-import PaginationTiles from './PaginationTiles.vue';
-import { usePlatformStore } from '../store/platformStore';
-import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { inject } from 'vue';
+import { usePlatformStore } from '../store/platformStore';
+import PaginationTiles from './PaginationTiles.vue';
+import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 
 
 
@@ -19,6 +19,7 @@ const visitItem = (item) => {
     const { platform } = item
     visitArtist({ platform, item, onReadyRoute: () => updateCurrentPlatformByCode(platform) })
 }
+
 </script>
 
 <template>

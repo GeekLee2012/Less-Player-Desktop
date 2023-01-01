@@ -132,7 +132,7 @@ const resetScrollState = () => {
 }
 
 const restoreScrollState = () => {
-    EventBus.emit("imageTextTile-load")
+    EventBus.emit("imageTextTiles-update")
     if (markScrollTop < 1) return
     if (!squareContentRef.value) return
     squareContentRef.value.scrollTop = markScrollTop

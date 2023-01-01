@@ -744,7 +744,7 @@ onMounted(checkForUpdate)
 #setting-view .center .row>.cate-name {
     font-size: 17px;
     margin-left: 10px;
-    width: 125px;
+    width: 110px;
 }
 
 #setting-view .content,
@@ -887,7 +887,8 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .keys .global-keys-ctrl {
-    margin-left: 50px;
+    margin-left: 35px;
+    margin-right: 20px;
 }
 
 #setting-view .keys .svg-text-btn {

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import EventBus from '../../common/EventBus';
 
 
@@ -29,7 +29,7 @@ const setChecked = (value) => {
 }
 
 onMounted(() => {
-    EventBus.emit("imageTextTile-load")
+    EventBus.emit("imageTextTiles-update")
 })
 
 watch(() => props.checked, (nv, ov) => {
@@ -87,13 +87,14 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 <style scoped>
 .image-text-tile {
-    margin: 15px 12px;
+    margin: 15px 13px;
+    --cover-size: 173px;
 }
 
 .image-text-tile .cover {
-    width: 165px;
-    height: 165px;
-    line-height: 165px;
+    width: var(--cover-size);
+    height: var(--cover-size);
+    line-height: var(--cover-size);
     border-radius: 6px;
     cursor: pointer;
     box-shadow: 0px 0px 3px #161616;
@@ -105,7 +106,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .title {
-    width: 165px;
+    width: var(--cover-size);
     margin-top: 12px;
     text-align: left;
     cursor: pointer;
@@ -125,7 +126,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .subtitle {
-    width: 165px;
+    width: var(--cover-size);
     text-align: left;
     line-height: 25px;
     color: #989898;

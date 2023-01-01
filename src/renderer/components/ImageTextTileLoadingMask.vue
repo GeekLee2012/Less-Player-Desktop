@@ -1,14 +1,12 @@
 <script setup>
 import { onMounted } from 'vue';
-import EventBus from '../../common/EventBus';
-
-
 
 const props = defineProps({
     count: Number
 })
+
 onMounted(() => {
-    EventBus.emit("imageTextTileLoadingMask-load")
+    EventBus.emit("imageTextTiles-update")
 })
 </script>
 
@@ -26,17 +24,18 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    --tile-width: 173px;
 }
 
 .tiles-loading-mask .tile {
-    width: 175px;
-    height: 208px;
-    margin: 15px 12px;
+    width: var(--tile-width);
+    height: 206px;
+    margin: 15px 13px;
 }
 
 .tiles-loading-mask .tile .cover {
     width: 100%;
-    height: 175px;
+    height: var(--tile-width);
     border-radius: 6px;
 }
 

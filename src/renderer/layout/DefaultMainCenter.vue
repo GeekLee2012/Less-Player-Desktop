@@ -1,13 +1,13 @@
 <script setup>
-import { inject, onActivated, onMounted, shallowRef, watch } from 'vue';
-import DefaultMainTop from './DefaultMainTop.vue';
-import ClassicMainTop from './ClassicMainTop.vue';
-import ClassicMainBottom from './ClassicMainBottom.vue';
-import DefaultMainContent from './DefaultMainContent.vue';
-import DefaultMainBottom from './DefaultMainBottom.vue';
+import { onActivated, onMounted, shallowRef, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
-import { storeToRefs } from 'pinia';
+import DefaultMainTop from './DefaultMainTop.vue';
+import DefaultMainContent from './DefaultMainContent.vue';
+import DefaultMainBottom from './DefaultMainBottom.vue';
+import ClassicMainTop from './ClassicMainTop.vue';
+import ClassicMainBottom from './ClassicMainBottom.vue';
 import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
 import ArtistCategoryView from '../views/ArtistCategoryView.vue';
 import RadioCategoryView from '../views/RadioCategoryView.vue';
@@ -21,38 +21,32 @@ const currentMainBottom = shallowRef(null)
 const { playlistCategoryViewShow, artistCategoryViewShow,
     radioCategoryViewShow, playingViewShow,
     audioEffectViewShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
-const { hideAllCategoryViews, hideAllCtxMenus,
-    hidePlaybackQueueView, hideLyricToolbar } = useAppCommonStore()
+const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
-    isDefaultClassicLayout, isSimpleLayout } = storeToRefs(useSettingStore())
-const { setupWindowZoomWithoutResize } = useSettingStore()
+    isDefaultClassicLayout } = storeToRefs(useSettingStore())
 
 const minAppWidth = 1080, minAppHeight = 720
 
 const setPlayMetaSize = () => {
-    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
-    //const hScaleRatio = clientHeight / minClientHeight
     const width = 211 * Math.max(wScaleRatio, 1)
-    const el1 = document.querySelector(".play-meta .title-wrap")
-    const el2 = document.querySelector(".play-meta .audio-title")
-    const el3 = document.querySelector(".play-meta .time-volume-wrap")
-    if (el1) el1.style.width = width + "px"
-    if (el2) el2.style.width = width + "px"
-    if (el3) el3.style.width = width + "px"
+    const titleWrapEl = document.querySelector(".play-meta .title-wrap")
+    const audioTitleEl = document.querySelector(".play-meta .audio-title")
+    const timeVolWrapEl = document.querySelector(".play-meta .time-volume-wrap")
+    if (titleWrapEl) titleWrapEl.style.width = width + "px"
+    if (audioTitleEl) audioTitleEl.style.width = width + "px"
+    if (timeVolWrapEl) timeVolWrapEl.style.width = width + "px"
 }
 
 const setSearchBarSize = () => {
-    //const minClientWidth = 999, minClientHeight = 666 
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     //const hScaleRatio = clientHeight / minAppHeight
     const size = 115 * Math.max(wScaleRatio, 1)
     const el = document.querySelector(".default-main-top .search-bar .keyword")
-    if (!el) return
-    el.style.width = size + "px"
+    if (el) el.style.width = size + "px"
 }
 
 const setCategoryViewSize = () => {
@@ -69,25 +63,29 @@ const setCategoryViewSize = () => {
 }
 
 const setImageTextTileSize = () => {
-    const tileMinWidth = 165;
-    const tileHMargin = 12.5;
-    const mainMargin = 33;
+    const tileMinWidth = 173
+    const tileHMargin = 13
+    const mainMargin = 33
     const scrollBarWidth = 6
     const limits = [5, 4] //TODO 宽屏、超宽屏，需更好兼容性
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const { clientWidth } = mainContent
-    const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
+    const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
     const tileCovers = document.querySelectorAll(".image-text-tile .cover")
     const tileTitles = document.querySelectorAll(".image-text-tile .title")
-    let tileWidth = 165, limit = 0
+    const tileSubtitles = document.querySelectorAll(".image-text-tile .subtitle")
+    let tileWidth = tileMinWidth, limit = 4
     for (var i = 0; i < limits.length; i++) {
-        if (clientWidth > minWidths[i]) {
+        if (clientWidth >= minWidths[i]) {
             limit = limits[i]
             break
         }
     }
-    if (limit > 0) tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
+    tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
+    //console.log(clientWidth, limit, tileWidth)
+    //浮点数运算有误差，保险起见，设置一个误差值
+    tileWidth = parseInt(tileWidth) - 1
     tileCovers.forEach(item => {
         item.style.width = tileWidth + "px"
         item.style.height = tileWidth + "px"
@@ -95,11 +93,14 @@ const setImageTextTileSize = () => {
     tileTitles.forEach(item => {
         item.style.width = tileWidth + "px"
     })
+    tileSubtitles.forEach(item => {
+        item.style.width = tileWidth + "px"
+    })
 }
 
 const setImageTextTileLoadingMaskSize = () => {
-    const tileMinWidth = 165;
-    const tileHMargin = 12.5;
+    const tileMinWidth = 173;
+    const tileHMargin = 13;
     const mainMargin = 33;
     const titleHeight = 28, titleMarginTop = 5;
     const scrollBarWidth = 6
@@ -110,16 +111,20 @@ const setImageTextTileLoadingMaskSize = () => {
     const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
     const tiles = document.querySelectorAll(".tiles-loading-mask .tile")
     const tileCovers = document.querySelectorAll(".tiles-loading-mask .tile .cover")
-    let tileWidth = 165, limit = 0, isLastVisible = true
-    if (clientWidth > minWidths[0]) {
-        limit = limits[0]
-        isLastVisible = false
-    } else if (clientWidth > minWidths[1]) {
-        limit = limits[1]
-        isLastVisible = true
+    const tileTitles = document.querySelectorAll(".tiles-loading-mask .tile .title")
+    let tileWidth = tileMinWidth, limit = 4, isLastVisible = true
+    for (var i = 0; i < limits.length; i++) {
+        if (clientWidth >= minWidths[i]) {
+            limit = limits[i]
+            //TODO
+            isLastVisible = (i == 4)
+            break
+        }
     }
-    if (limit > 0) tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
-    for (let i = 0; i < tiles.length; i++) {
+    tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
+    //浮点数运算有误差，保险起见，设置一个误差值
+    tileWidth = parseInt(tileWidth) - 2
+    for (var i = 0; i < tiles.length; i++) {
         const item = tiles[i]
         item.style.width = tileWidth + "px"
         item.style.height = tileWidth + titleHeight + titleMarginTop + "px"
@@ -128,7 +133,11 @@ const setImageTextTileLoadingMaskSize = () => {
         }
     }
     tileCovers.forEach(item => {
+        item.style.width = tileWidth + "px"
         item.style.height = tileWidth + "px"
+    })
+    tileTitles.forEach(item => {
+        item.style.width = tileWidth + "px"
     })
 }
 
@@ -245,7 +254,7 @@ const setPlayingViewSize = () => {
 
 const setAudioEffectViewAlignment = () => {
     EventBus.emit('app-elementAlignCenter', {
-        selector: ".default-layout #audio-effect-view",
+        selector: '.default-layout #audio-effect-view',
         width: 725,
         height: 550
     })
@@ -253,7 +262,7 @@ const setAudioEffectViewAlignment = () => {
 
 const setLyricToolbarPos = () => {
     const { clientWidth, clientHeight } = document.documentElement
-    const el = document.querySelector("#lyric-toolbar")
+    const el = document.querySelector('#lyric-toolbar')
     if (!el) return
     //const width = 150, height = 446, padding = 30
     const width = 168, height = 549, padding = 33
@@ -285,8 +294,7 @@ onMounted(() => {
         //自适应搜索框大小
         setSearchBarSize()
         //自适应ImageTextTile组件大小
-        setImageTextTileSize()
-        setImageTextTileLoadingMaskSize()
+        setImageTextTileComponentSize()
         //自适应分类列表大小
         setCategoryViewSize()
         //自适应播放页组件大小
@@ -312,11 +320,11 @@ onMounted(() => {
 
 })
 
-EventBus.on("imageTextTile-load", setImageTextTileComponentSize)
-EventBus.on("imageTextTileLoadingMask-load", setImageTextTileComponentSize)
-EventBus.on("batchView-show", setBatchViewListSize)
+
+EventBus.on('imageTextTiles-update', setImageTextTileComponentSize)
+EventBus.on('batchView-show', setBatchViewListSize)
 EventBus.on('playingView-changed', setPlayingViewSize)
-EventBus.on("app-layout-default", setupDefaultLayout)
+EventBus.on('app-layout-default', setupDefaultLayout)
 
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)

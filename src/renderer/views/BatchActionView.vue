@@ -320,7 +320,7 @@ const onScroll = () => {
 }
 
 const resetBack2TopBtn = () => {
-    back2TopBtnRef.value.setScrollTarget(contentRef.value)
+    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(contentRef.value)
 }
 
 onMounted(() => {

@@ -120,7 +120,6 @@ const loadTab = () => {
     } else if (isArtistsTab()) {
         loadArtists()
     }
-    EventBus.emit("imageTextTile-load")
 }
 
 const byPlatform = (index) => {

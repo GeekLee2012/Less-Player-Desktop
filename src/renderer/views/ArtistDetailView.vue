@@ -8,20 +8,20 @@ export default {
 -->
 
 <script setup>
-import { storeToRefs } from 'pinia';
 import { onMounted, onActivated, ref, shallowRef, watch, reactive, inject } from 'vue';
-import AlbumListControl from '../components/AlbumListControl.vue';
-import TextListControl from '../components/TextListControl.vue';
-import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
-import SongListControl from '../components/SongListControl.vue';
+import { storeToRefs } from 'pinia';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
-import EventBus from '../../common/EventBus';
 import { useUserProfileStore } from '../store/userProfileStore';
+import AlbumListControl from '../components/AlbumListControl.vue';
+import TextListControl from '../components/TextListControl.vue';
+import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
+import SongListControl from '../components/SongListControl.vue';
+import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
+import EventBus from '../../common/EventBus';
 
 
 
@@ -325,6 +325,7 @@ const markScrollState = () => {
 }
 
 const restoreScrollState = () => {
+    EventBus.emit("imageTextTiles-update")
     if (markScrollTop < 1) return
     if (!artistDetailRef.value) return
     artistDetailRef.value.scrollTop = markScrollTop
@@ -336,6 +337,9 @@ const resetPagination = () => {
 }
 
 const reloadAll = () => {
+    resetTabView()
+    currentTabView.value = SongListControl
+
     setLoadingDetail(true)
     setLoadingSongs(true)
     resetBack2TopBtn()
@@ -348,7 +352,6 @@ const loadAll = async () => {
     resetScrollState()
     await getArtistDetail()
     visitTab(0)
-    EventBus.emit("imageTextTile-load")
 }
 
 /* 生命周期、监听 */

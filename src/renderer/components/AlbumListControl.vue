@@ -1,7 +1,7 @@
 <script setup>
+import { inject } from 'vue';
 import PaginationTiles from './PaginationTiles.vue';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
-import { inject } from 'vue';
 
 
 

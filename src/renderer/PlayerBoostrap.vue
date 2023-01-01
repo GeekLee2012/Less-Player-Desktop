@@ -497,11 +497,13 @@ const setupRadioPlayer = () => EventBus.emit('radio-init', document.querySelecto
 const restoreTrack = () => {
     bootstrapTrack(currentTrack.value, true).then(track => {
         EventBus.emit("track-restore", track)
-    }).catch(error => console.log(error))
+    }).catch(error => {
+        if (error) console.log(error)
+    })
 }
 
-//注册ipcMain消息监听器
-const registryIpcRenderderListeners = () => {
+//注册ipcRenderer消息监听器
+const registryIpcRendererListeners = () => {
     if (!ipcRenderer) return
     //Tray事件
     ipcRenderer.on("tray-action", (e, value) => {
@@ -545,16 +547,8 @@ const registryIpcRenderderListeners = () => {
     })
 
     //其他事件
-    ipcRenderer.on('app-quit', () => {
-        if (!isStorePlayStateBeforeQuit.value) {
-            localStorage.removeItem('player')
-        }
-        if (!isStoreLocalMusicBeforeQuit.value) {
-            localStorage.removeItem('localMusic')
-        }
-    })
 }
-registryIpcRenderderListeners()
+registryIpcRendererListeners()
 
 onMounted(() => {
     setupRadioPlayer()
@@ -564,6 +558,7 @@ onMounted(() => {
 watch(queueTracksSize, (nv, ov) => {
     if (nv < 1) EventBus.emit('playbackQueue-empty')
 })
+
 //TODO
 watch(theme, () => {
     if (isPlaying() || (playingViewThemeIndex.value != 1

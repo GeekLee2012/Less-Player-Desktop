@@ -171,11 +171,7 @@ const hideEmptyToast = () => {
 
 const forceHideToast = () => {
   const els = document.querySelectorAll('.common-ntf')
-  if (els) {
-    els.forEach(el => {
-      el.style.display = 'none'
-    })
-  }
+  if (els) els.forEach(el => el.style.display = 'none')
 }
 
 const setElementAlignCenter = (selector, width, height, offsetLeft, offsetTop) => {
@@ -197,10 +193,12 @@ EventBus.on("app-elementAlignCenter", value => {
   setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
 })
 
-//注册ipcMain消息监听器
-const registryIpcRenderderListeners = () => {
+//注册ipcRenderer消息监听器
+const registryIpcRendererListeners = () => {
   if (!ipcRenderer) return
+
   ipcRenderer.on('app-active', hideEmptyToast)
+  ipcRenderer.on('app-quit', setupCache)
 }
 
 const initialize = () => {
@@ -210,10 +208,10 @@ const initialize = () => {
   setupTray()
   setupGlobalShortcut()
   setupLayout(true)
-  registryIpcRenderderListeners()
+  registryIpcRendererListeners()
 }
 
-//TODO 直接在setup()时初始化，不需要等待其他生命周期
+//直接在setup()时初始化，不需要等待其他生命周期
 initialize()
 
 onMounted(() => {
