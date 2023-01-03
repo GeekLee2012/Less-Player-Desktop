@@ -193,10 +193,8 @@ const registryGlobalListeners = () => {
       appTray.destroy()
       appTray = null
     }
-  }).on('app-zoom', (e, value) => {
-    setupAppWindowZoom(value)
-  }).on('app-zoom-noResize', (e, value) => {
-    setupAppWindowZoom(value, true)
+  }).on('app-zoom', (e, { zoom, noResize }) => {
+    setupAppWindowZoom(zoom, noResize)
   }).on('app-winBtn', (e, value) => {
     setWindowButtonVisibility(value === true)
   }).on('app-layout-default', (e, { zoom, isInit }) => {
@@ -504,9 +502,9 @@ const toggleWinOSFullScreen = () => {
   return !isMax
 }
 
-const setupAppWindowZoom = (value, noResize) => {
-  if (!value) return
-  const zoom = Number(value) || 100
+const setupAppWindowZoom = (zoom, noResize) => {
+  if (!zoom) return
+  zoom = Number(zoom) || 100
   const zoomFactor = parseFloat(zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return
   mainWin.webContents.setZoomFactor(zoomFactor)

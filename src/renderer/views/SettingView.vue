@@ -520,7 +520,7 @@ onMounted(checkForUpdate)
                         </div>
                         <div class="tip-text spacing">提示：开启代理并配置后，请先保存才能生效哦</div>
                     </div>
-                    <div class="tip-text">提示：国内网络下，一般无需配置；开启代理后，若配置不当，本应用将无法正常联网</div>
+                    <div class="tip-text">提示：国内网络下，一般无需配置；开启代理后，若配置不当，当前应用将无法正常联网</div>
                     <div>
                         <span>HTTP代理模式：</span>
                         <ToggleControl @click="toggleHttpProxyShow" v-model="network.httpProxy.enable"
@@ -614,6 +614,7 @@ onMounted(checkForUpdate)
                     <div :class="{ last: isLastRelease }">
                         <div>{{ packageCfg.version }}</div>
                         <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing link">更新日志</a>
+                        <div class="tip-text spacing">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>
                     </div>
                     <div class="last" v-show="!isLastRelease">
                         <SvgTextButton v-show="!isLastRelease && isUnstarted()" text="下载更新" :leftAction="startDownload">

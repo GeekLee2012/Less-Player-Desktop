@@ -295,14 +295,9 @@ export const useSettingStore = defineStore('setting', {
         toggleStoreRecentPlay() {
             this.cache.storeRecentPlay = !this.cache.storeRecentPlay
         },
-        setupWindowZoom() {
+        setupWindowZoom(noResize) {
             const zoom = this.common.winZoom
-            if (ipcRenderer) ipcRenderer.send("app-zoom", zoom)
-            EventBus.emit("app-zoom", zoom)
-        },
-        setupWindowZoomWithoutResize() {
-            const zoom = this.common.winZoom
-            if (ipcRenderer) ipcRenderer.send("app-zoom-noResize", zoom)
+            if (ipcRenderer) ipcRenderer.send("app-zoom", { zoom, noResize })
             EventBus.emit("app-zoom", zoom)
         },
         setupAppSuspension() {

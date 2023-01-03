@@ -25,6 +25,7 @@ const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
     isDefaultClassicLayout } = storeToRefs(useSettingStore())
+const { setupWindowZoom } = useSettingStore()
 
 const minAppWidth = 1080, minAppHeight = 720
 
@@ -308,8 +309,8 @@ onMounted(() => {
 
         //隐藏上下文菜单
         hideAllCtxMenus()
-        //TODO 偶发Bug，放在最后执行确保缩放
-        //setupWindowZoomWithoutResize()
+        //TODO 窗口缩放Bug，放在最后执行确保缩放
+        setupWindowZoom(true)
     })
 
     //点击事件监听
