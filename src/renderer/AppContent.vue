@@ -185,6 +185,15 @@ const setElementAlignCenter = (selector, width, height, offsetLeft, offsetTop) =
   el.style.top = top + 'px'
 }
 
+const restoreSetting = () => {
+  cleanupSetting()
+  setupAppSuspension()
+  setupCache()
+  setupTray()
+  setupGlobalShortcut()
+  setupLayout(true)
+}
+
 EventBus.on("app-zoom", adjustWinCtlBtns)
 EventBus.on("app-adjustWinCtlBtns", adjustWinCtlBtns)
 EventBus.on("app-layout", setupLayout)
@@ -192,6 +201,7 @@ EventBus.on("app-elementAlignCenter", value => {
   const { selector, width, height, offsetLeft, offsetTop } = value
   setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
 })
+EventBus.on('setting-restore', restoreSetting)
 
 //注册ipcRenderer消息监听器
 const registryIpcRendererListeners = () => {
@@ -202,12 +212,7 @@ const registryIpcRendererListeners = () => {
 }
 
 const initialize = () => {
-  cleanupSetting()
-  setupAppSuspension()
-  setupCache()
-  setupTray()
-  setupGlobalShortcut()
-  setupLayout(true)
+  restoreSetting()
   registryIpcRendererListeners()
 }
 

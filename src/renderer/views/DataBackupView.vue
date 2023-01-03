@@ -6,7 +6,7 @@ export default {
 </script>
 
 <script setup>
-import { inject, reactive, ref, toRef, watch } from 'vue';
+import { inject, reactive, ref, toRef, toRaw, watch } from 'vue';
 import SvgTextButton from '../components/SvgTextButton.vue';
 import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
@@ -148,7 +148,7 @@ const backup = async () => {
     if (!ipcRenderer) return
 
     const backupSource = {}
-    const settingPaths = ['theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys']
+    //const settingPaths = ['theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys']
     for (var i = 0; i < sources.length; i++) {
         const id = sources[i].id
         const checked = sources[i].checked
@@ -160,8 +160,10 @@ const backup = async () => {
             backupSource[id] = userProfileStore.$state[id]
         } else if (id === "setting") {
             if (!checked) continue
+            const settingPaths = Object.keys(toRaw(settingStore.$state))
             for (var j = 0; j < settingPaths.length; j++) {
                 const path = settingPaths[j]
+                if ('other|blackHole'.includes(path)) continue
                 backupSource[id][path] = settingStore.$state[path]
             }
         } else if (id === "customPlaylists") {

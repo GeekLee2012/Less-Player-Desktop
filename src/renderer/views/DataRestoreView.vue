@@ -216,7 +216,13 @@ const openBackupFile = async () => {
 }
 
 const restore = async () => {
-    const settingPaths = ['theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys']
+    //TODO
+    /*
+    const settingPaths = ['theme', 'layout', 'common',
+        'track', 'lyric', 'cache',
+        'tray', 'navigation', 'dialog',
+        'keys', 'network']
+    */
     for (var i = 0; i < sourcesCategories.length; i++) {
         const id = sourcesCategories[i].id
         const checked = sourcesCategories[i].checked
@@ -227,12 +233,16 @@ const restore = async () => {
             localStorage.removeItem(id)
             settingStore.$reset()
             const backupSetting = {}
+            const settingPaths = Object.keys(sourcesData[id])
             for (var j = 0; j < settingPaths.length; j++) {
                 const path = settingPaths[j]
+                if ('other|blackHole'.includes(path)) continue
                 backupSetting[path] = sourcesData[id][path]
             }
+            //$patch仅改变值但并没有触发任何监听器
             settingStore.$patch(backupSetting)
-            EventBus.emit("setting-refresh")
+            //手动触发监听器
+            EventBus.emit("setting-restore")
         } else if (checked) {
             const backupData = {}
             backupData[id] = sourcesData[id]
