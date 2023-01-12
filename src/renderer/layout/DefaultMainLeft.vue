@@ -444,8 +444,7 @@ EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
 
 #main-left li {
     text-decoration: none;
-    width: 65%;
-    width: 117px;
+    width: 60%;
     width: 128px;
     margin-bottom: 10.5px;
     padding-left: 20px;

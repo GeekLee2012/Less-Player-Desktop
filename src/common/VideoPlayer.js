@@ -30,7 +30,6 @@ export class VideoPlayer {
             .on('video-togglePlay', () => player.togglePlay())
             .on('volume-set', volume => player.volume(volume))
             .on('video-stop', () => player.setVideo(null))
-            .on('video-restoreInit', video => player.setVideo(video))
     }
 
     static setVideoHolder(videoHolder) {

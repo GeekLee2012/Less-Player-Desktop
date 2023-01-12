@@ -31,7 +31,7 @@ export class RadioPlayer {
             .on('radio-stop', () => player.setChannel(null))
             .on('playbackQueue-empty', () => player.setChannel(null))
             .on('track-play', () => player.setChannel(null))
-            .on('track-restoreInit', channel => player.setChannel(channel))
+            .on('track-restore', channel => player.setChannel(channel))
             .on('track-updateEQ', (values) => player.updateEQ(values))
     }
 

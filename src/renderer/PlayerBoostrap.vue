@@ -148,13 +148,13 @@ const bootstrapTrack = (track) => {
         }
         //FM电台不需要再处理
         if (Playlist.isFMRadioType(track)) {
-            reject()
+            resolve(track)
             return
         }
         const { id, platform, artistNotCompleted } = track
         //本地音乐也不需要再处理
         if (isLocalMusic(platform)) {
-            reject()
+            resolve(track)
             return
         }
         //平台服务

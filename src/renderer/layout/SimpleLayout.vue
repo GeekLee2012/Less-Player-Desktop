@@ -390,7 +390,7 @@ const showCurrentTracFailToast = (traceId, text) => {
 
 //获取歌单分类
 const pickCategory = async (platform, traceId) => {
-    const { getCategories, putCategories } = usePlaylistSquareStore()
+    const { getCategories, putCategories, putOrders } = usePlaylistSquareStore()
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.categories) {
@@ -406,6 +406,8 @@ const pickCategory = async (platform, traceId) => {
             const result = await vendor.categories()
             if (result && result.data.length > 0) {
                 putCategories(result.platform, result.data)
+                putOrders(result.platform, result.orders)
+
                 cachedCategories = result.data
                 break
             }

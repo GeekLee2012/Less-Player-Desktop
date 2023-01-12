@@ -8,7 +8,7 @@ import { WebAudioApi } from './WebAudioApi';
 
 let singleton = null
 
-//追求简洁、组合式API、单一责任
+//追求简单、组合式API、单一责任
 export class Player {
     constructor(track) {
         this.currentTrack = track
@@ -37,8 +37,12 @@ export class Player {
             .on('track-updateEQ', (values) => player.updateEQ(values))
     }
 
+    isTrackAvailable() {
+        return Track.hasUrl(this.currentTrack)
+    }
+
     createSound() {
-        if (!Track.hasUrl(this.currentTrack)) return null
+        if (!this.isTrackAvailable()) return null
         var self = this
         //释放资源
         if (this.sound) this.sound.unload()
@@ -73,7 +77,7 @@ export class Player {
     }
 
     getSound() {
-        return Track.hasUrl(this.currentTrack) ? this.sound : null
+        return this.isTrackAvailable() ? this.sound : null
     }
 
     //播放
@@ -186,6 +190,7 @@ export class Player {
 
     tryUnlockHowlAudios() {
         const audios = Howler._html5AudioPool
+        if (!audios) return
         // Unlock CORS
         audios.forEach(audio => {
             audio.crossOrigin = 'anonymous'
