@@ -11,6 +11,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
 
 
+
 const { playPlaylist } = inject('player')
 
 const { getVendor } = usePlatformStore()
@@ -51,6 +52,7 @@ const resetView = () => {
 
 const nextPage = () => {
     //TODO
+    if (detail.total < 1) return false
     offset = page * limit
     page = page + 1
     return true
@@ -136,7 +138,8 @@ const scrollToLoad = () => {
     const scrollHeight = playlistDetailRef.value.scrollHeight
     const clientHeight = playlistDetailRef.value.clientHeight
     markScrollState()
-    if ((scrollTop + clientHeight) >= scrollHeight) {
+    const allowedError = 3 //允许误差
+    if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
         loadMoreContent()
     }
 }

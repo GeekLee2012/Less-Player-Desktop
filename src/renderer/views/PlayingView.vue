@@ -6,27 +6,27 @@ import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
-import { useAudioEffectStore } from '../store/audioEffectStore';
+import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
+import { toMmss } from '../../common/Times';
 
 
 
-const { seekTrack, playMv } = inject('player')
+const { seekTrack, playMv, progressState, mmssCurrentTime } = inject('player')
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize,
     showToast, switchPlayingViewTheme,
-    toggleAudioEffectView } = useAppCommonStore()
-const { currentTrack, mmssCurrentTime,
-    progress, playingIndex, volume } = storeToRefs(usePlayStore())
-const { isUseEffect } = storeToRefs(useAudioEffectStore())
+    toggleSoundEffectView } = useAppCommonStore()
+const { currentTrack, playingIndex, volume } = storeToRefs(usePlayStore())
+const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos } = storeToRefs(useSettingStore())
 const progressBarRef = ref(null)
 const volumeBarRef = ref(null)
@@ -69,19 +69,22 @@ const checkFavorite = () => {
 
 const onUserMouseWheel = (e) => EventBus.emit('lyric-userMouseWheel', e)
 
-onMounted(() => {
-    EventBus.emit("app-adjustWinCtlBtns")
-    EventBus.emit('playingView-changed')
-    if (progressBarRef) progressBarRef.value.updateProgress(progress.value)
-    if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
-})
 
 EventBus.on("userProfile-reset", checkFavorite)
 EventBus.on("refreshFavorite", checkFavorite)
 
-watch(progress, (nv, ov) => {
+
+onMounted(() => {
+    EventBus.emit("app-adjustWinCtlBtns")
+    EventBus.emit('playingView-changed')
+    if (progressBarRef.value) progressBarRef.value.updateProgress(progressState.value)
+    if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
+})
+
+watch(progressState, (nv, ov) => {
     if (progressBarRef) progressBarRef.value.updateProgress(nv)
 })
+
 watch([currentTrack, playingViewShow], checkFavorite)
 </script>
 
@@ -203,7 +206,7 @@ watch([currentTrack, playingViewShow], checkFavorite)
                             </g>
                         </svg>
                     </div>
-                    <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleAudioEffectView">
+                    <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
                         <svg width="17" height="17" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">

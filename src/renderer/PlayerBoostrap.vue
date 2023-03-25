@@ -1,5 +1,5 @@
 <script setup>
-import { inject, provide, onMounted, watch } from 'vue';
+import { inject, provide, onMounted, watch, ref, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -11,6 +11,7 @@ import { Track } from '../common/Track'
 import { useIpcRenderer } from '../common/Utils';
 import { PLAY_STATE, TRAY_ACTION } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
+import { toMmss } from '../common/Times';
 
 
 
@@ -98,7 +99,7 @@ const updateLyric = (track, lyric) => {
 //处理不可播放歌曲
 const AUTO_PLAY_NEXT_MSG = '当前歌曲无法播放<br>即将为您播放下一曲'
 const NO_NEXT_MSG = '当前歌曲无法播放<br>且列表已无其他歌曲'
-const TOO_FAST_MSG = '尝试播放次数太多<br>请手动播放其他歌曲吧'
+const OVERTRY_MSG = '尝试播放次数太多<br>请手动播放其他歌曲吧'
 //连跳计数器
 let autoSkipCnt = 0
 //重置连跳计数
@@ -136,14 +137,14 @@ const handleUnplayableTrack = (track) => {
     }
     //10连跳啦，暂停一下吧
     resetAutoSkip()
-    showFailToast(TOO_FAST_MSG)
+    showFailToast(OVERTRY_MSG)
 }
 
 //获取和设置歌曲播放信息
 const bootstrapTrack = (track) => {
     return new Promise(async (resolve, reject) => {
         if (!track) {
-            reject()
+            reject('none')
             return
         }
         //FM电台不需要再处理
@@ -160,7 +161,7 @@ const bootstrapTrack = (track) => {
         //平台服务
         const vendor = getVendor(platform)
         if (!vendor || !vendor.playDetail) {
-            reject()
+            reject('noService')
             return
         }
         //播放相关数据
@@ -407,7 +408,7 @@ const getVideoDetail = (platform, id) => {
     return new Promise((resolve, reject) => {
         const vendor = getVendor(platform)
         if (!vendor || !vendor.videoDetail) {
-            if (reject) reject('NoVendor')
+            if (reject) reject('noService')
             return
         }
         const quality = '1080'
@@ -420,7 +421,6 @@ const getVideoDetail = (platform, id) => {
         })
     })
 }
-
 
 
 /* EventBus事件 */
@@ -457,12 +457,24 @@ EventBus.on('track-state', state => {
             break
     }
 })
+//播放进度
+const mmssCurrentTime = ref('00:00')
+const progressState = ref(0)
 EventBus.on('track-pos', secs => {
     if (videoPlayingViewShow.value) {
         if (isPlaying()) togglePlay()
         return
     }
-    updateCurrentTime(secs)
+    const currentTime = secs * 1000
+    mmssCurrentTime.value = toMmss(currentTime)
+    let duration = 0
+    try {
+        duration = currentTrack.value.duration
+    } catch (error) {
+        console.log(error)
+    }
+    progressState.value = duration > 0 ? (currentTime / duration) : 0
+    //Object.assign(progressState, { currentTime, progress })
 })
 
 EventBus.on("track-freqUnit8Data", freqData => {
@@ -577,6 +589,8 @@ provide('player', {
     playMv,
     addAndPlayTracks,
     loadLyric,
+    mmssCurrentTime,
+    progressState,
 })
 </script>
 

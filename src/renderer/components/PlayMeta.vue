@@ -1,19 +1,22 @@
 <script setup>
+import { onMounted, ref, inject, watch } from 'vue';
 import VolumeBar from './VolumeBar.vue';
 import AudioTime from './AudioTime.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
+import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
-import { onMounted, ref } from 'vue';
+import { toMmss } from '../../common/Times';
 
 
+const { mmssCurrentTime } = inject('player')
 
 const props = defineProps({
     hideVolumeBar: Boolean,
 })
 
-const { currentTrack, mmssCurrentTime, volume, playing } = storeToRefs(usePlayStore())
+const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useAppCommonStore())
 const { showPlayingView, toggleCoverMask } = useAppCommonStore()
 const volumeBarRef = ref(null)
@@ -23,6 +26,7 @@ const trackMeta = (track) => {
     if (artistName.length > 0) artistName = ' - ' + artistName
     return track.title + artistName
 }
+
 
 onMounted(() => {
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
@@ -48,8 +52,7 @@ onMounted(() => {
             <div class="audio-title-wrap">
                 <div class="audio-title" v-html="trackMeta(currentTrack)"></div>
                 <div class="favorite-btn">
-                    <svg v-show="true" width="18" height="18" viewBox="0 0 1024 937.46"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg v-show="true" width="18" height="18" viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -57,8 +60,7 @@ onMounted(() => {
                             </g>
                         </g>
                     </svg>
-                    <svg v-show="false" width="18" height="18" viewBox="0 0 1024 937.53"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg v-show="false" width="18" height="18" viewBox="0 0 1024 937.53" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path

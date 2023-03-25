@@ -5,18 +5,20 @@ import PlayMeta from '../components/PlayMeta.vue';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
 import { usePlayStore } from '../store/playStore';
-
+import EventBus from '../../common/EventBus';
+import { toMmss } from '../../common/Times';
 
 
 const { visitUserHome, visitSetting } = inject('appRoute')
-const { seekTrack } = inject('player')
+const { seekTrack, progressState } = inject('player')
 
 const progressBarRef = ref(null)
-const { progress } = storeToRefs(usePlayStore())
+const { currentTrack } = storeToRefs(usePlayStore())
 
-watch(progress, (nv, ov) => {
-    progressBarRef.value.updateProgress(nv)
+watch(progressState, (nv, ov) => {
+    if (progressBarRef) progressBarRef.value.updateProgress(nv)
 })
+
 </script>
 
 <template>

@@ -11,7 +11,7 @@ import LyricToolbar from './components/LyricToolbar.vue';
 import RandomMusicToolbar from './components/RandomMusicToolbar.vue';
 import PlayingView from './views/PlayingView.vue';
 import VisualPlayingView from './views/VisualPlayingView.vue';
-import AudioEffectView from './views/AudioEffectView.vue';
+import SoundEffectView from './views/SoundEffectView.vue';
 import EventBus from '../common/EventBus';
 
 
@@ -27,7 +27,7 @@ const { commonNotificationShow, commonNotificationText,
   addToListSubmenuShow, artistListSubmenuShow,
   commonCtxMenuCacheItem, playbackQueueViewShow,
   playingViewShow, videoPlayingViewShow,
-  playingViewThemeIndex, audioEffectViewShow,
+  playingViewThemeIndex, soundEffectViewShow,
   lyricToolbarShow, randomMusicToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
@@ -210,8 +210,8 @@ onMounted(() => {
     </VideoPlayingView>
   </transition>
 
-  <AudioEffectView id="audio-effect-view" v-show="audioEffectViewShow">
-  </AudioEffectView>
+  <SoundEffectView id="sound-effect-view" v-show="soundEffectViewShow">
+  </SoundEffectView>
 
   <LyricToolbar id="lyric-toolbar" v-show="lyricToolbarShow">
   </LyricToolbar>
@@ -249,7 +249,7 @@ onMounted(() => {
   z-index: 100;
 }
 
-#audio-effect-view {
+#sound-effect-view {
   position: absolute;
   right: 30px;
   bottom: 80px;

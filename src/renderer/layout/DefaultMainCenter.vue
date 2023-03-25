@@ -20,7 +20,7 @@ const currentMainBottom = shallowRef(null)
 
 const { playlistCategoryViewShow, artistCategoryViewShow,
     radioCategoryViewShow, playingViewShow,
-    audioEffectViewShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
+    soundEffectViewShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
@@ -253,9 +253,9 @@ const setPlayingViewSize = () => {
     setLyricToolbarPos()
 }
 
-const setAudioEffectViewAlignment = () => {
+const setSoundEffectViewAlignment = () => {
     EventBus.emit('app-elementAlignCenter', {
-        selector: '.default-layout #audio-effect-view',
+        selector: '.default-layout #sound-effect-view',
         width: 725,
         height: 550
     })
@@ -305,7 +305,7 @@ onMounted(() => {
         //自适应视频页面大小
         //setVideoViewSize()
         //音效窗口自动居中
-        setAudioEffectViewAlignment()
+        setSoundEffectViewAlignment()
 
         //隐藏上下文菜单
         hideAllCtxMenus()
@@ -329,7 +329,7 @@ EventBus.on('app-layout-default', setupDefaultLayout)
 
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)
-watch([audioEffectViewShow], setAudioEffectViewAlignment)
+watch([soundEffectViewShow], setSoundEffectViewAlignment)
 watch([playingViewShow], () => {
     hideLyricToolbar()
     setPlayingViewSize()

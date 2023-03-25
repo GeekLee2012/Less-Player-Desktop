@@ -86,6 +86,7 @@ export class WebAudioApi {
         return filters
     }
 
+    // Node Chain: currentNode -> filters -> nextNode
     connectBiquadFilters(filters, currentNode, nextNode) {
         if (!filters || filters.length < 0) return
         filters.reduce((prev, curr) => {

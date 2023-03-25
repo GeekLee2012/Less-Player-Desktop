@@ -1,7 +1,8 @@
 //Gesture 
 
+//拖拽移动
 //TODO 似是而非，暂且也归类于此吧
-export const dragAndMove = (el, binding) => {
+export const bindDragAndMove = (el, binding) => {
     const { trigger } = binding
     const triggerEl = el.querySelector(trigger)
     if (!triggerEl) return

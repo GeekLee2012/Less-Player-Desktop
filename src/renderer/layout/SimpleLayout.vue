@@ -9,18 +9,18 @@ import { useSettingStore } from '../store/settingStore';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useRadioSquareStore } from '../store/radioSquareStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { useAudioEffectStore } from '../store/audioEffectStore';
+import { useSoundEffectStore } from '../store/soundEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
+import { toMmss, toMMssSSS } from '../../common/Times';
 import { isMacOS, nextInt, randomTextWithinAlphabet } from '../../common/Utils';
-import { toMMssSSS } from '../../common/Times';
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 
 
 
-const { seekTrack, playPlaylist, playMv } = inject('player')
+const { seekTrack, playPlaylist, playMv, progressState, mmssCurrentTime } = inject('player')
 
 const progressBarRef = ref(null)
 const volumeBarRef = ref(null)
@@ -29,19 +29,18 @@ const isLyricShow = ref(false)
 const hasLyric = ref(false)
 const platformShortName = ref('ALL')
 
-const { currentTrack, mmssCurrentTime,
-    playingIndex, progress, volume } = storeToRefs(usePlayStore())
-const { audioEffectViewShow, spectrumIndex,
+const { currentTrack, playingIndex, volume } = storeToRefs(usePlayStore())
+const { soundEffectViewShow, spectrumIndex,
     lyricToolbarShow, randomMusicToolbarShow,
     randomMusicPlatformCodes, randomMusicTypeCodes,
-    randomMusicCategoryName } = storeToRefs(useAppCommonStore())
-const { showToast, toggleAudioEffectView,
+    currentMusicCategoryName } = storeToRefs(useAppCommonStore())
+const { showToast, toggleSoundEffectView,
     setSpectrumIndex, toggleLyricToolbar,
     toggleRandomMusicToolbar, showFailToast,
-    setRandomMusicCategoryName, setCurrentTraceId,
+    setCurrentMusicCategoryName, setCurrentTraceId,
     isCurrentTraceId } = useAppCommonStore()
-const { isUseEffect } = storeToRefs(useAudioEffectStore())
-const { lyric } = storeToRefs(useSettingStore())
+const { isUseEffect } = storeToRefs(useSoundEffectStore())
+const { lyric, isSimpleLayout } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
 const { randomMusicTypes } = storeToRefs(usePlatformStore())
@@ -164,11 +163,17 @@ const checkLyricValid = () => {
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
         const lyricData = track.lyric.data
         let isValidLyric = true
-        if (lyricData.size == 1) {
-            const line = lyricData.values().next().value
-            isValidLyric = !(line.includes('纯音乐')
-                || line.includes('没有填词')
-                || line.includes('没有歌词'))
+        if (lyricData.size > 0 && lyricData.size <= 6) {
+            const linesIter = lyricData.values()
+            let line = linesIter.next()
+            while (!line.done) {
+                const lineText = line.value
+                isValidLyric = !(lineText.includes('纯音乐')
+                    || lineText.includes('没有填词')
+                    || lineText.includes('没有歌词'))
+                if (!isValidLyric) break
+                line = linesIter.next()
+            }
         }
         hasLyric.value = isValidLyric
     } else {
@@ -181,11 +186,11 @@ const hlLineIndex = ref(-1)
 const setHlLineIndex = (value) => hlLineIndex.value = value
 
 const renderLyric = (secs) => {
-    if (!isLyricShow.value) return
     if (!hasLyric.value) {
         setHlLineIndex(-1)
         return
     }
+    if (!isLyricShow.value) return
 
     const presetOffset = Track.lyricOffset(currentTrack.value)
     const userOffset = lyric.value.offset / 1000
@@ -495,7 +500,7 @@ const pickPlaylist = async (platform, traceId) => {
             cateName = titleParts.length > 1 ? titleParts[1] : titleParts[0]
         }
         if (isCurrentTraceId(traceId)) {
-            setRandomMusicCategoryName(cateName)
+            setCurrentMusicCategoryName(cateName)
             playPlaylist(playlist, null, traceId)
         }
         success = true
@@ -617,7 +622,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         const playlists = result.data
         const playlist = playlists[nextInt(playlists.length)]
         if (isCurrentTraceId(traceId)) {
-            setRandomMusicCategoryName(cateName)
+            setCurrentMusicCategoryName(cateName)
             playPlaylist(playlist, '即将为您打开主播电台', traceId)
         }
         success = true
@@ -740,7 +745,7 @@ const pickFMRadio = async (platform, traceId) => {
         const playlists = result.data
         const playlist = playlists[nextInt(playlists.length)]
         if (isCurrentTraceId(traceId)) {
-            setRandomMusicCategoryName(cateName)
+            setCurrentMusicCategoryName(cateName)
             playPlaylist(playlist, '即将为您收听广播电台', traceId)
         }
         success = true
@@ -757,6 +762,9 @@ const updatePlatformShortName = () => {
 
 /* EventBus事件 */
 EventBus.on('track-pos', secs => {
+    if (!isSimpleLayout.value) return
+
+    //歌词渲染
     try {
         renderLyric(secs)
     } catch (error) {
@@ -778,7 +786,7 @@ onActivated(() => {
     updatePlatformShortName()
     checkFavorite()
 
-    if (progressBarRef) progressBarRef.value.updateProgress(progress.value)
+    if (progressBarRef.value) progressBarRef.value.updateProgress(progressState.value)
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 
@@ -790,13 +798,13 @@ watch(currentTrack, (nv, ov) => {
     checkLyricValid()
 })
 
-watch(progress, (nv, ov) => {
+watch(progressState, (nv, ov) => {
     if (progressBarRef) progressBarRef.value.updateProgress(nv)
 })
 
-watch([audioEffectViewShow], () => {
+watch([soundEffectViewShow], () => {
     EventBus.emit('app-elementAlignCenter', {
-        selector: '.simple-layout #audio-effect-view',
+        selector: '.simple-layout #sound-effect-view',
         width: 404,
         height: 366,
     })
@@ -826,7 +834,7 @@ watch([textColorIndex], setupTextColor)
                         <div class="platform">
                             <span v-html="platformShortName"></span>
                         </div>
-                        <span class="cate-name" v-html="randomMusicCategoryName"></span>
+                        <span class="cate-name" v-html="currentMusicCategoryName"></span>
                     </div>
                 </div>
                 <div class="flex-space">
@@ -887,8 +895,8 @@ watch([textColorIndex], setupTextColor)
             <div class="meta-wrap" v-show="lyric.metaPos != 1">
                 <div class="audio-title" v-html="Track.title(currentTrack)"></div>
                 <!--
-                <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div>
-                -->
+                                                                                                                                                                                        <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div>
+                                                                                                                                                                                        -->
                 <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
                     :trackId="currentTrack.id" class="audio-artist">
                 </ArtistControl>
@@ -952,7 +960,7 @@ watch([textColorIndex], setupTextColor)
                         </svg>
                     </div>
                     <div class="equalizer spacing" :class="{ active: isUseEffect }">
-                        <svg @click="toggleAudioEffectView" width="17" height="17" viewBox="0 0 1024 1024"
+                        <svg @click="toggleSoundEffectView" width="17" height="17" viewBox="0 0 1024 1024"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -1405,22 +1413,22 @@ watch([textColorIndex], setupTextColor)
     width: 335px;
 }
 
-.simple-layout #audio-effect-view {
+.simple-layout #sound-effect-view {
     width: 404px;
     height: 366px;
 }
 
-.simple-layout #audio-effect-view .left {
+.simple-layout #sound-effect-view .left {
     width: 68px;
 }
 
-.simple-layout #audio-effect-view .center .content {
+.simple-layout #sound-effect-view .center .content {
     height: 295px;
     padding-top: 5px;
     overflow-y: scroll;
 }
 
-.simple-layout #audio-effect-view .center .bands {
+.simple-layout #sound-effect-view .center .bands {
     display: none;
 }
 

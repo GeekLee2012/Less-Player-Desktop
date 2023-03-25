@@ -17,13 +17,13 @@ const visitAlbumDetail = (platform, id, callback) => {
 </script>
 
 <template>
-    <span @click="visitAlbumDetail(platform, data.id)" class="album-ctl" v-html="data.name">
+    <span @click="visitAlbumDetail(platform, data.id)" class="album-ctl" :class="{ 'album-ctl-visitable': visitable }"
+        v-html="data.name">
     </span>
 </template>
 
 <style>
 .album-ctl {
-    cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -33,7 +33,11 @@ const visitAlbumDetail = (platform, id, callback) => {
     text-align: left;
 }
 
-.album-ctl:hover {
+.album-ctl-visitable {
+    cursor: pointer;
+}
+
+.album-ctl-visitable:hover {
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

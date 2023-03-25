@@ -255,7 +255,8 @@ const scrollToLoad = () => {
     const scrollHeight = artistDetailRef.value.scrollHeight
     const clientHeight = artistDetailRef.value.clientHeight
     markScrollState()
-    if ((scrollTop + clientHeight) >= scrollHeight) {
+    const allowedError = 3 //允许误差
+    if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
         loadMoreSongs()
     }
     //TODO

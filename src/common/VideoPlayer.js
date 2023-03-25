@@ -50,7 +50,7 @@ export class VideoPlayer {
 
             this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 gVideoHolder.play()
-                self.setState(true)
+                self.setPlayState(true)
                 self.videoChanged = false
                 lastPlayTime = Date.now()
                 requestAnimationFrame(self.__step.bind(self))
@@ -59,7 +59,7 @@ export class VideoPlayer {
             this.addSourceToVideo(gVideoHolder, src, 'video/mp4')
             gVideoHolder.load()
             gVideoHolder.play()
-            this.setState(true)
+            this.setPlayState(true)
         }
     }
 
@@ -88,7 +88,7 @@ export class VideoPlayer {
         } else {
             gVideoHolder.pause()
         }
-        this.setState(false)
+        this.setPlayState(false)
     }
 
     togglePlay() {
@@ -99,9 +99,9 @@ export class VideoPlayer {
         }
     }
 
-    setState(state) {
-        this.playing = state
-        EventBus.emit('video-state', state)
+    setPlayState(playing) {
+        this.playing = playing
+        EventBus.emit('video-state', playing)
     }
 
     setVideo(video) {

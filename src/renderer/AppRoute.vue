@@ -17,11 +17,12 @@ const { updateArtistDetailKeys } = useArtistDetailStore()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { isArtistDetailVisitable, isAlbumDetailVisitable,
     updateCurrentPlatformByCode } = usePlatformStore()
-const { exploreModeCode } = storeToRefs(useAppCommonStore())
+const { exploreModeCode, isUserHomeMode } = storeToRefs(useAppCommonStore())
 const { setExploreMode, setArtistExploreMode,
     setRadioExploreMode, setUserHomeExploreMode,
     hideAllCtxMenus, hidePlayingView,
-    updateCommonCtxItem, hidePlaybackQueueView, } = useAppCommonStore()
+    updateCommonCtxItem, hidePlaybackQueueView,
+    setPlaylistExploreMode, } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -82,6 +83,10 @@ const createCommonRoute = (toPath, onRouteReady) => ({
         hidePlayingView()
         if (isSimpleLayout.value) switchToFallbackLayout()
         if (!toPath.includes('/artist/')) hidePlaybackQueueView()
+        if (toPath.includes('/theme') ||
+            toPath.includes('/setting')) {
+            if (isUserHomeMode.value) setPlaylistExploreMode()
+        }
         EventBus.emit('app-beforeRoute', toPath)
     }
 })

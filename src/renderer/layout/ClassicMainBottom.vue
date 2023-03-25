@@ -5,20 +5,22 @@ import PlayMeta from '../components/PlayMeta.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { useAudioEffectStore } from '../store/audioEffectStore';
+import { useSoundEffectStore } from '../store/soundEffectStore';
 import EventBus from '../../common/EventBus';
 import { Playlist } from '../../common/Playlist';
+import { toMmss } from '../../common/Times';
 
 
 
-const { seekTrack } = inject('player')
+const { seekTrack, progressState } = inject('player')
 
 const progressBarRef = ref(null)
 const volumeBarRef = ref(null)
-const { currentTrack, progress, playingIndex, volume } = storeToRefs(usePlayStore())
-const { isUseEffect } = storeToRefs(useAudioEffectStore())
+
+const { currentTrack, playingIndex, volume } = storeToRefs(usePlayStore())
+const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { playingViewShow, } = storeToRefs(useAppCommonStore())
-const { showToast, toggleAudioEffectView } = useAppCommonStore()
+const { showToast, toggleSoundEffectView } = useAppCommonStore()
 
 
 const { addFavoriteTrack, removeFavoriteSong,
@@ -56,19 +58,20 @@ const checkFavorite = () => {
     favorited.value = isFavoriteRadio(id, platform) || isFavoriteSong(id, platform)
 }
 
-onMounted(() => {
-    //setDisactived(false)
-    //EventBus.emit('playingView-changed')
-    if (progressBarRef) progressBarRef.value.updateProgress(progress.value)
-    if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
-})
-
 EventBus.on("userProfile-reset", checkFavorite)
 EventBus.on("refreshFavorite", checkFavorite)
 
-watch(progress, (nv, ov) => {
+onMounted(() => {
+    //setDisactived(false)
+    //EventBus.emit('playingView-changed')
+    if (progressBarRef.value) progressBarRef.value.updateProgress(progressState.value)
+    if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
+})
+
+watch(progressState, (nv, ov) => {
     if (progressBarRef) progressBarRef.value.updateProgress(nv)
 })
+
 watch([currentTrack, playingViewShow], checkFavorite)
 </script>
 
@@ -104,7 +107,7 @@ watch([currentTrack, playingViewShow], checkFavorite)
                         </g>
                     </svg>
                 </div>
-                <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleAudioEffectView">
+                <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
                     <svg width="17" height="16" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">

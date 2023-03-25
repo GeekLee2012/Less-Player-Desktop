@@ -99,7 +99,7 @@ const PRESET_EFFECTS = [
 
 const MIN_GAIN = -40 / 4, MAX_GAIN = 40 / 4
 
-export const useAudioEffectStore = defineStore('audioEffect', {
+export const useSoundEffectStore = defineStore('audioEffect', {
     state: () => ({
         isUseEffect: false,
         currentEffectIndex: 0,

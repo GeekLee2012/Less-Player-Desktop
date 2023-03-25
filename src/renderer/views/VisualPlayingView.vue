@@ -6,17 +6,18 @@ import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
-import { useAudioEffectStore } from '../store/audioEffectStore';
+import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
+import { toMmss } from '../../common/Times';
 
 
 
-const { seekTrack, playMv } = inject('player')
+const { seekTrack, playMv, progressState, mmssCurrentTime } = inject('player')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -25,13 +26,11 @@ const { playingViewShow, spectrumIndex,
     playingViewThemeIndex } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize, showToast,
     switchPlayingViewTheme, switchSpectrumIndex,
-    toggleAudioEffectView } = useAppCommonStore()
+    toggleSoundEffectView } = useAppCommonStore()
 const { getCurrentThemeHlColor } = useSettingStore()
-const { currentTrack, mmssCurrentTime,
-    progress, playingIndex,
-    playing, volume,
-    queueTracksSize } = storeToRefs(usePlayStore())
-const { isUseEffect } = storeToRefs(useAudioEffectStore())
+const { currentTrack, playingIndex,
+    playing, volume, queueTracksSize } = storeToRefs(usePlayStore())
+const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos, theme, layout } = storeToRefs(useSettingStore())
 
 const progressBarRef = ref(null)
@@ -82,9 +81,6 @@ const checkFavorite = () => {
     favorited.value = isFavoriteRadio(id, platform) || isFavoriteSong(id, platform)
 }
 
-watch(progress, (nv, ov) => {
-    if (progressBarRef) progressBarRef.value.updateProgress(nv)
-})
 
 /*
 const randomRgbColor = () => {
@@ -142,11 +138,15 @@ watch([currentTrack, playingViewShow], () => {
     //setBackgroudEffect()
 })
 
+watch(progressState, (nv, ov) => {
+    if (progressBarRef) progressBarRef.value.updateProgress(nv)
+})
+
 onMounted(() => {
     EventBus.emit("app-adjustWinCtlBtns")
     setDisactived(false)
     //setBackgroudEffect()
-    if (progressBarRef) progressBarRef.value.updateProgress(progress.value)
+    if (progressBarRef.value) progressBarRef.value.updateProgress(progressState.value)
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 onUnmounted(() => setDisactived(true))
@@ -198,8 +198,8 @@ onUnmounted(() => setDisactived(true))
                         </div>
                         <div v-show="Track.hasArtist(currentTrack)">&nbsp;-&nbsp;</div>
                         <div class="audio-artist">
-                            <ArtistControl :visitable="true" :platform="currentTrack.platform"
-                                :data="currentTrack.artist" :trackId="currentTrack.id" class="ar-ctl">
+                            <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
+                                :trackId="currentTrack.id" class="ar-ctl">
                             </ArtistControl>
                         </div>
                     </div>
@@ -232,8 +232,8 @@ onUnmounted(() => setDisactived(true))
                                         </g>
                                     </g>
                                 </svg>
-                                <svg v-show="favorited" class="love-btn" width="20" height="20"
-                                    viewBox="0 0 1024 937.53" xmlns="http://www.w3.org/2000/svg">
+                                <svg v-show="favorited" class="love-btn" width="20" height="20" viewBox="0 0 1024 937.53"
+                                    xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">
                                             <path
@@ -244,18 +244,17 @@ onUnmounted(() => setDisactived(true))
                             </div>
                             <VolumeBar class="spacing" ref="volumeBarRef"></VolumeBar>
                             <!--
-                            <div class="spacing">
-                                <svg width="21" height="21" viewBox="0 0 767.96 895.83" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M458.7,677.8,274.75,559.58c-35.29,34.33-77.25,51.15-126.42,47.61C104,604,67.35,584.86,38.16,551.38c-53.89-61.79-50.31-156.85,8.26-216.25,60.08-60.95,162.47-65.53,228.41.79L458.59,217.83c-17.32-49.24-14-96.72,13.09-141.57,19.67-32.52,47.82-55.37,83.9-67.49,75.65-25.39,155.7,5.8,193.1,74.7C785.34,151,768.21,236,708.87,284.05c-60.76,49.2-153.42,49.49-215.57-12.43l-184,118.25a161.11,161.11,0,0,1,0,115.78l184,118.23c64.15-64.7,163-61.37,223-6C774.44,671.56,785,760.17,740.5,825.46c-44.86,65.91-131.3,89-202.23,54.35C466.68,844.85,428.1,760.37,458.7,677.8ZM512,159.4a96,96,0,1,0,96.37-95.62A96.09,96.09,0,0,0,512,159.4Zm0,576a96,96,0,1,0,96.36-95.62A96.08,96.08,0,0,0,512,735.4ZM160.36,351.78A96,96,0,1,0,256,448.11,96,96,0,0,0,160.36,351.78Z"/></g></g></svg>
-                            </div>
-                            -->
+                                                                                                                                                                                                <div class="spacing">
+                                                                                                                                                                                                    <svg width="21" height="21" viewBox="0 0 767.96 895.83" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M458.7,677.8,274.75,559.58c-35.29,34.33-77.25,51.15-126.42,47.61C104,604,67.35,584.86,38.16,551.38c-53.89-61.79-50.31-156.85,8.26-216.25,60.08-60.95,162.47-65.53,228.41.79L458.59,217.83c-17.32-49.24-14-96.72,13.09-141.57,19.67-32.52,47.82-55.37,83.9-67.49,75.65-25.39,155.7,5.8,193.1,74.7C785.34,151,768.21,236,708.87,284.05c-60.76,49.2-153.42,49.49-215.57-12.43l-184,118.25a161.11,161.11,0,0,1,0,115.78l184,118.23c64.15-64.7,163-61.37,223-6C774.44,671.56,785,760.17,740.5,825.46c-44.86,65.91-131.3,89-202.23,54.35C466.68,844.85,428.1,760.37,458.7,677.8ZM512,159.4a96,96,0,1,0,96.37-95.62A96.09,96.09,0,0,0,512,159.4Zm0,576a96,96,0,1,0,96.36-95.62A96.08,96.08,0,0,0,512,735.4ZM160.36,351.78A96,96,0,1,0,256,448.11,96,96,0,0,0,160.36,351.78Z"/></g></g></svg>
+                                                                                                                                                                                                </div>
+                                                                                                                                                                                                -->
                         </div>
                         <div class="btm-center">
                             <PlayControl></PlayControl>
                         </div>
                         <div class="btm-right">
                             <div class="theme" @click="switchPlayingViewTheme">
-                                <svg width="19" height="19" viewBox="0 0 853.81 853.37"
-                                    xmlns="http://www.w3.org/2000/svg">
+                                <svg width="19" height="19" viewBox="0 0 853.81 853.37" xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">
                                             <path
@@ -267,7 +266,7 @@ onUnmounted(() => setDisactived(true))
                                 </svg>
                             </div>
                             <div class="equalizer spacing" :class="{ active: isUseEffect }">
-                                <svg @click="toggleAudioEffectView" width="17" height="17" viewBox="0 0 1024 1024"
+                                <svg @click="toggleSoundEffectView" width="17" height="17" viewBox="0 0 1024 1024"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">

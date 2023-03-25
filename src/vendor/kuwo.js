@@ -240,6 +240,10 @@ export class KuWo {
                 + "?musicId=" + id + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
                 const result = new Lyric()
+                if (!json.data) {
+                    resolve(result)
+                    return
+                }
                 const lrclist = json.data.lrclist
                 if (lrclist) {
                     lrclist.forEach(lineObj => {

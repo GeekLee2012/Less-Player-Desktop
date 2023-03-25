@@ -10,17 +10,11 @@ import Navigator from '../components/Navigator.vue';
 
 const { visitThemes, visitUserHome, visitSetting } = inject('appRoute')
 
-const progressBarRef = ref(null)
-const { progress } = storeToRefs(usePlayStore())
 const { setLayoutIndex } = useSettingStore()
 
 const switchToSimpleLayout = () => {
     setLayoutIndex(2) //TODO
 }
-
-watch(progress, (nv, ov) => {
-    if (progressBarRef) progressBarRef.value.updateProgress(nv)
-})
 </script>
 
 <template>

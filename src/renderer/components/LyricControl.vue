@@ -99,11 +99,17 @@ const reloadLyricData = (track) => {
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
         const lyricData = track.lyric.data
         let isValidLyric = true
-        if (lyricData.size == 1) {
-            const line = lyricData.values().next().value
-            isValidLyric = !(line.includes('纯音乐')
-                || line.includes('没有填词')
-                || line.includes('没有歌词'))
+        if (lyricData.size > 0 && lyricData.size <= 6) {
+            const linesIter = lyricData.values()
+            let line = linesIter.next()
+            while (!line.done) {
+                const lineText = line.value
+                isValidLyric = !(lineText.includes('纯音乐')
+                    || lineText.includes('没有填词')
+                    || lineText.includes('没有歌词'))
+                if (!isValidLyric) break
+                line = linesIter.next()
+            }
         }
         hasLyric.value = isValidLyric
     } else {
@@ -228,10 +234,10 @@ watch(() => props.track, (nv, ov) => loadLyric(props.track))
                 <label>暂无歌词，请继续欣赏音乐吧~</label>
             </div>
             <div v-show="hasLyric" v-for="(item, index) in lyricData" class="line" :time-key="item[0]" :class="{
-    first: index == 0,
-    last: index == (lyricData.size - 1),
-    current: index == currentIndex
-}" v-html="item[1]">
+                first: index == 0,
+                last: index == (lyricData.size - 1),
+                current: index == currentIndex
+            }" v-html="item[1]">
             </div>
         </div>
     </div>

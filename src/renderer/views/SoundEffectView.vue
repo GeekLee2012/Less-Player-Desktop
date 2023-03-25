@@ -1,19 +1,23 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useAudioEffectStore } from '../store/audioEffectStore';
+import { useSoundEffectStore } from '../store/soundEffectStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import VerticalSliderBar from '../components/VerticalSliderBar.vue';
+import { ref } from 'vue';
 
 
 
-const { hideAudioEffectView } = useAppCommonStore()
+const { hideSoundEffectView } = useAppCommonStore()
 const { currentEffectIndex, currentEffectName,
     currentEQValue, currentEQValueToPercent,
-    isUseEffect } = storeToRefs(useAudioEffectStore())
+    isUseEffect } = storeToRefs(useSoundEffectStore())
 const { setUseEffect, toggleAudioEffect,
     getPresetEffects, getEQNames,
-    updateCustomEQValue, percentToEQValue } = useAudioEffectStore()
+    updateCustomEQValue, percentToEQValue } = useSoundEffectStore()
+const activeTabIndex = ref(0)
+
+const setActiveTab = (index) => activeTabIndex.value = index
 
 const switchEffect = (item, index) => {
     currentEffectIndex.value = index
@@ -27,13 +31,124 @@ const updateEQValue = (percent, item, index) => {
     updateCustomEQValue(index, percentToEQValue(percent))
     setUseEffect(true)
 }
+
+const impulseResponses = [
+    {
+        name: "关闭",
+        source: null
+    }, {
+        name: "教室",
+        source: "Classroom.wav"
+    },
+    {
+        name: "会议厅",
+        source: "Convocation Mall.wav"
+    },
+    {
+        name: "艺术博物馆",
+        source: "Cranbrook Art Museum.wav"
+    },
+    {
+        name: "深井",
+        source: "Deep Well.wav"
+    },
+    {
+        name: "海滩",
+        source: "Divorce Beach.wav"
+    },
+    {
+        name: "回声桥",
+        source: "Echo Bridge.wav"
+    },
+    {
+        name: "起居室 - 空荡",
+        source: "Empty Livingroom.wav"
+    },
+    {
+        name: "无尽隧道",
+        source: "Endless Tunnel.wav"
+    },
+    {
+        name: "走廊",
+        source: "Gallery.wav"
+    },
+    {
+        name: "大厅",
+        source: "Hall.wav"
+    },
+    {
+        name: "车内",
+        source: "Inside Car.wav"
+    },
+    {
+        name: "浴室 - 闭门",
+        source: "Inside Shower - Door Closed.wav"
+    },
+    {
+        name: "浴室 - 宽敞",
+        source: "Large Bathroom.wav"
+    },
+    {
+        name: "音乐大厅 - 大型",
+        source: "Large Concert Hall.wav"
+    },
+    {
+        name: "演讲礼堂",
+        source: "Lecture Hall.wav"
+    },
+    {
+        name: "起居室",
+        source: "Living Room.wav"
+    },
+    {
+        name: "更衣室",
+        source: "Locker Room.wav"
+    },
+    {
+        name: "洞窟 - 巨大",
+        source: "Massive Cavern.wav"
+    },
+    {
+        name: "洞穴 - 中型",
+        source: "Medium Sized Cave.wav"
+    },
+    {
+        name: "房间 - 中型",
+        source: "Mid-Sized Room.wav"
+    },
+    {
+        name: "狭窄螺旋楼梯",
+        source: "Narrow Spiral Staircase.wav"
+    },
+    {
+        name: "露天体育场",
+        source: "Open Air Stadium.wav"
+    },
+    {
+        name: "反向隧道",
+        source: "Reverse Tunnel.wav"
+    },
+    {
+        name: "亲水公园",
+        source: "Waterplace Park.wav"
+    },
+    {
+        name: "胡同巷子",
+        source: "WoodruffLane.wav"
+    },
+]
+
+const activeImpulseIndex = ref(-1)
+const switchImpulse = (item, index) => {
+    activeImpulseIndex.value = index
+}
 </script>
 
 <template>
-    <div class="audio-effect-view" v-gesture-dnm="{ trigger: '.header' }">
+    <div class="sound-effect-view" v-gesture-dnm="{ trigger: '.header' }">
         <div class="header">
             <div class="action">
-                <svg @click="hideAudioEffectView" width="12" height="12" viewBox="0 0 593.14 593.11" data-name="Layer 1"
+                <svg @click="hideSoundEffectView" width="12" height="12" viewBox="0 0 593.14 593.11" data-name="Layer 1"
                     xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z"
@@ -49,7 +164,7 @@ const updateEQValue = (percent, item, index) => {
         </div>
         <div class="center">
             <div class="left">
-                <div class="nav-item active">
+                <div class="nav-item" :class="{ active: activeTabIndex == 0 }" @click="() => setActiveTab(0)">
                     <svg width="36" height="36" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -64,8 +179,25 @@ const updateEQValue = (percent, item, index) => {
                     </svg>
                     <div class="text">均衡器</div>
                 </div>
+                <div class="nav-item" :class="{ active: activeTabIndex == 1 }" @click="() => setActiveTab(1)">
+                    <svg width="38" height="36" viewBox="0 0 1001.44 814.11" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M501.1.05q194.49,0,389,.07A111.18,111.18,0,0,1,997.82,85.75c3,12.48,3.36,25.8,3.38,38.73q.31,287.25,0,574.49c-.1,48.08-22.29,83.74-65.93,105.07-14.41,7-30,10-46,10q-385.48,0-771,.07c-28.18,0-53.91-6.84-75.8-24.69C17.21,768.8,1.67,742.15.82,709.06c-1.07-41.48-.69-83-.71-124.48Q0,353.33,0,122.09c0-20.8,2.41-41,12-59.64C29.9,27.36,58.54,6.72,97.68,1.23A167.87,167.87,0,0,1,121.11.05q190-.11,380,0Zm-.36,714h386c9.91,0,14.75-4.8,14.84-14.62,0-.83,0-1.66,0-2.5q0-245.72,0-491.44,0-45.5,0-91c0-10-4.72-14.58-14.73-14.69-.84,0-1.67,0-2.5,0H351.37q-118.23,0-236.47,0c-11.15,0-15.3,4.46-15.3,15.59q0,291,0,581.93c0,12.68,4.06,16.73,16.71,16.73Z" />
+                                <path
+                                    d="M675.69,406.17c.27,96.76-76.1,173.71-170.26,175.8-98.95,2.21-177.53-74.76-179.64-170.41-2.06-93.46,68.91-176.7,171.85-179.32C589.9,229.89,674.79,305.08,675.69,406.17Zm-250.17.92c-.56,41.24,34.61,75.36,74.87,75.05a75.32,75.32,0,0,0,75.19-75.33c0-41.17-33.85-74.62-75.22-74.79C459.35,331.85,424.81,366.57,425.52,407.09Z" />
+                                <path
+                                    d="M151.34,408c.69-95.88,34.15-177.75,100.28-246.23,22.81-23.62,59.92-21.37,78,4.52,14.21,20.37,11.85,46.48-6.36,65.36a259.63,259.63,0,0,0-35.14,44.65c-26.59,43.43-39,90.52-36.7,141.35q4.23,93.93,69.28,162c9.8,10.24,16.8,21.47,17.85,35.8,1.48,20.34-10.05,40-28.11,48.31-19.86,9.12-42,5.33-57.6-10.3a335.38,335.38,0,0,1-52.63-67.66A350.26,350.26,0,0,1,151.34,408Z" />
+                                <path
+                                    d="M850.8,411.79q-4.31,140.45-101.6,241c-15.11,15.61-37.85,20.32-56.44,12-20-9-31.47-27.52-30.11-49.59.83-13.4,6.83-24.53,16.33-33.86,20.08-19.73,35.54-42.78,47.47-68.1a242.8,242.8,0,0,0,23.36-116.8q-4.53-94.49-70-162.73c-9.62-10-16.15-21.14-17.15-35.07a49.32,49.32,0,0,1,28.62-48.46c19.81-9,41.91-4.89,57.5,10.85,20.61,20.81,38.67,43.64,53.24,69.07,23.51,41,39.45,84.7,44.6,131.92C848.42,378.6,849.43,395.21,850.8,411.79Z" />
+                            </g>
+                        </g>
+                    </svg>
+                    <div class="text">混响</div>
+                </div>
             </div>
-            <div class="content">
+            <div class="content" v-show="activeTabIndex == 0">
                 <div class="presets">
                     <div v-for="(item, index) in getPresetEffects()" @click="switchEffect(item, index)"
                         :class="{ active: currentEffectIndex == index }" class="item spacing1">
@@ -83,12 +215,17 @@ const updateEQValue = (percent, item, index) => {
                     </div>
                 </div>
             </div>
+            <div class="impulse-content" v-show="activeTabIndex == 1">
+                <div v-for="(item, index) in impulseResponses" class="item spacing1"
+                    :class="{ active: activeImpulseIndex == index }" v-html="item.name" @click="switchImpulse(item, index)">
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.audio-effect-view {
+.sound-effect-view {
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -97,90 +234,103 @@ const updateEQValue = (percent, item, index) => {
     -webkit-app-region: none;
 }
 
-.audio-effect-view .spacing {
+.sound-effect-view .spacing {
     margin-left: 15px;
 }
 
-.audio-effect-view .spacing1 {
+.sound-effect-view .spacing1 {
     margin-left: 25px;
 }
 
-.audio-effect-view .spacing2 {
+.sound-effect-view .spacing2 {
     margin-left: 33px;
 }
 
-.audio-effect-view .header,
-.audio-effect-view .center,
-.audio-effect-view .header .title-wrap,
-.audio-effect-view .center .bands {
+.sound-effect-view .header,
+.sound-effect-view .center,
+.sound-effect-view .header .title-wrap,
+.sound-effect-view .center .bands {
     display: flex;
     flex-direction: row;
 }
 
-.audio-effect-view .header {
+.sound-effect-view .header {
     padding: 12px;
     border-bottom: var(--aeview-border);
     background: var(--aeview-bg);
 }
 
-.audio-effect-view .header .action {
+.sound-effect-view .header .action {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.audio-effect-view .header .action svg {
+.sound-effect-view .header .action svg {
     fill: var(--svg-color);
     cursor: pointer;
 }
 
-.audio-effect-view .header .action svg:hover {
+.sound-effect-view .header .action svg:hover {
     fill: var(--svg-hover-color);
 }
 
-.audio-effect-view .header .title-wrap {
+.sound-effect-view .header .title-wrap {
     margin-left: 20px;
     display: flex;
 }
 
-.audio-effect-view .header .title {
+.sound-effect-view .header .title {
     margin-right: 30px;
     font-size: 16px;
 }
 
-.audio-effect-view .header .toggle-ctl {
+.sound-effect-view .header .toggle-ctl {
     cursor: default;
 }
 
-.audio-effect-view .center {
+.sound-effect-view .center {
     flex: 1;
     background: var(--aeview-bg);
     overflow: hidden;
 }
 
-.audio-effect-view .center .left {
+.sound-effect-view .center .left {
     width: 108px;
     min-width: 68px;
     background: var(--aeview-left-bg);
     /* border-right: var(--aeview-border); */
 }
 
-.audio-effect-view .center .left .nav-item {
+.sound-effect-view .center .left .nav-item {
     padding: 20px 0px;
+    cursor: pointer;
 }
 
-.audio-effect-view .center .left .active {
-    fill: var(--hl-color);
-    color: var(--hl-color);
+.sound-effect-view .center .left .nav-item svg {
+    fill: var(--text-sub-color);
+    color: var(--text-sub-color);
 }
 
-.audio-effect-view .center .content {
+.sound-effect-view .center .left .nav-item:hover,
+.sound-effect-view .center .left .nav-item:hover svg {
+    fill: var(--svg-color);
+    color: var(--text-color);
+}
+
+.sound-effect-view .center .left .active,
+.sound-effect-view .center .left .active svg {
+    fill: var(--hl-color) !important;
+    color: var(--hl-color) !important;
+}
+
+.sound-effect-view .center .content {
     flex: 1;
     padding-top: 15px;
     margin-left: 0px;
 }
 
-.audio-effect-view .center .content .presets {
+.sound-effect-view .center .content .presets {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -188,7 +338,7 @@ const updateEQValue = (percent, item, index) => {
     padding-right: 25px;
 }
 
-.audio-effect-view .center .presets .item {
+.sound-effect-view .center .presets .item {
     width: 96px;
     margin-top: 15px;
     padding: 3px 0px;
@@ -199,35 +349,64 @@ const updateEQValue = (percent, item, index) => {
     color: var(--aeview-list-item-color);
 }
 
-.audio-effect-view .center .presets .active {
+.sound-effect-view .center .presets .active {
     border: 2px solid var(--hl-color);
 }
 
-.audio-effect-view .center .bands {
+.sound-effect-view .center .bands {
     justify-content: center;
     overflow: hidden;
 }
 
-.audio-effect-view .center .bands .item {
+.sound-effect-view .center .bands .item {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 50px;
 }
 
-.audio-effect-view .center .bands .text,
-.audio-effect-view .center .bands .value {
+.sound-effect-view .center .bands .text,
+.sound-effect-view .center .bands .value {
     font-size: 13px;
     margin-top: 15px;
 }
 
-.audio-effect-view .center .bands .value {
+.sound-effect-view .center .bands .value {
     margin-top: 20px;
     margin-bottom: 20px;
     visibility: hidden;
 }
 
-.audio-effect-view .center .bands .item:hover .value {
+.sound-effect-view .center .bands .item:hover .value {
     visibility: visible;
+}
+
+.sound-effect-view .center .impulse-content {
+    flex: 1;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-left: 0px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    overflow: scroll;
+    padding-right: 25px;
+}
+
+.sound-effect-view .center .impulse-content .item {
+    width: 220px;
+    margin-top: 15px;
+    padding: 6px 0px;
+    border-radius: 3px;
+    border: 2px solid transparent;
+    background-color: #f3f3f3;
+    background: var(--aeview-list-item-bg);
+    color: var(--aeview-list-item-color);
+    cursor: pointer;
+}
+
+.sound-effect-view .center .impulse-content .active {
+    border: 2px solid var(--hl-color);
 }
 </style>

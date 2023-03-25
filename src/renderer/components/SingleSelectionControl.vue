@@ -20,11 +20,11 @@ const setCurrentIndex = (index) => {
 <template>
     <div class="single-selection-ctl">
         <div v-for="(item, index) in data" :class="{
-    item: true,
-    first: (index == 0),
-    last: (index == data.length - 1),
-    active: (index == current)
-}" @click="setCurrentIndex(index)" v-html="item">
+            item: true,
+            first: (index == 0),
+            last: (index == data.length - 1),
+            active: (index == current)
+        }" @click="setCurrentIndex(index)" v-html="item">
         </div>
     </div>
 </template>

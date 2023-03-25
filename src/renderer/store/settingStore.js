@@ -183,12 +183,10 @@ export const useSettingStore = defineStore('setting', {
             return index == 0 || index == 1
         },
         isDefaultClassicLayout() {
-            const index = this.layout.index
-            return index == 1
+            return this.layout.index == 1
         },
         isSimpleLayout() {
-            const index = this.layout.index
-            return index == 2
+            return this.layout.index == 2
         },
         getWindowZoom() {
             return this.common.winZoom

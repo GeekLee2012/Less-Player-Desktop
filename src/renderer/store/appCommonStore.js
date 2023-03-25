@@ -16,7 +16,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         playbackQueueViewShow: false,
         playingViewShow: false,
         videoPlayingViewShow: false,
-        audioEffectViewShow: false,
+        soundEffectViewShow: false,
         //探索模式，歌单、歌手
         exploreModes: ['playlists', 'artists', 'radios', 'userhome'],
         exploreModeIndex: 0,
@@ -41,7 +41,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         randomMusicToolbarShow: false,
         randomMusicPlatformCodes: [],
         randomMusicTypeCodes: [],
-        randomMusicCategoryName: null,
+        currentMusicCategoryName: null,
         //当前调用链路追踪ID
         currentTraceId: null,
     }),
@@ -127,11 +127,11 @@ export const useAppCommonStore = defineStore('appCommon', {
         toggleVideoPlayingView() {
             this.videoPlayingViewShow = !this.videoPlayingViewShow
         },
-        hideAudioEffectView() {
-            this.audioEffectViewShow = false
+        hideSoundEffectView() {
+            this.soundEffectViewShow = false
         },
-        toggleAudioEffectView() {
-            this.audioEffectViewShow = !this.audioEffectViewShow
+        toggleSoundEffectView() {
+            this.soundEffectViewShow = !this.soundEffectViewShow
         },
         toggleCoverMask() {
             this.coverMaskShow = !this.coverMaskShow
@@ -156,6 +156,9 @@ export const useAppCommonStore = defineStore('appCommon', {
             } else {
                 this.setExploreMode(this.exploreModeIndex + 1)
             }
+        },
+        setPlaylistExploreMode() {
+            this.setExploreMode(0)
         },
         setArtistExploreMode() {
             this.setExploreMode(1)
@@ -251,7 +254,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         switchPlayingViewTheme() {
             this.playingViewThemeIndex = (this.playingViewThemeIndex + 1) % 2
-            this.hideAudioEffectView()
+            this.hideSoundEffectView()
         }
         ,
         switchSpectrumIndex() {
@@ -288,9 +291,9 @@ export const useAppCommonStore = defineStore('appCommon', {
                 this.randomMusicTypeCodes.splice(index, 1)
             }
         },
-        setRandomMusicCategoryName(value) {
+        setCurrentMusicCategoryName(value) {
             value = value ? value.toString().trim() : value
-            this.randomMusicCategoryName = value
+            this.currentMusicCategoryName = value
         },
         setCurrentTraceId(id) {
             this.currentTraceId = id
@@ -306,7 +309,7 @@ export const useAppCommonStore = defineStore('appCommon', {
                 //key: 'appCommon',
                 storage: localStorage,
                 paths: ['playingViewThemeIndex', 'spectrumIndex',
-                    'randomMusicPlatformCodes', 'randomMusicTypeCodes', 'randomMusicCategoryName']
+                    'randomMusicPlatformCodes', 'randomMusicTypeCodes', 'currentMusicCategoryName']
             },
         ],
     },

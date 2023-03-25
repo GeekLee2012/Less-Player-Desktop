@@ -26,7 +26,7 @@ import SongItem from './components/SongItem.vue';
 import VideoPlayingView from './views/VideoPlayingView.vue';
 import PlaybackQueueView from './views/PlaybackQueueView.vue';
 //Directives
-import { dragAndMove } from './directives/gesture';
+import { bindDragAndMove } from './directives/gesture';
 
 
 
@@ -72,5 +72,5 @@ app.use(pinia)
   //.component('PlayingView', PlayingView)
   .component('VideoPlayingView', VideoPlayingView)
   .component('PlaybackQueueView', PlaybackQueueView)
-  .directive('gesture-dnm', (el, binding) => dragAndMove(el, binding.value))
+  .directive('gesture-dnm', (el, binding) => bindDragAndMove(el, binding.value))
   .mount('#app')

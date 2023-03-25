@@ -25,7 +25,7 @@ export const usePlayStore = defineStore('play', {
         //0.0 - 1.0
         volume: 0.5,
         //是否正在自动下一曲
-        isAutoPlaying: false,
+        isAutoPlaying: false
     }),
     getters: {
         currentTrack(state) {
@@ -205,15 +205,17 @@ export const usePlayStore = defineStore('play', {
             this.__validPlayingIndex()
             this.playTrackDirectly(this.currentTrack)
         },
+        //TODO 已废弃
         updateCurrentTime(secs) {
-            this.currentTime = secs * 1000
+            const currentTime = secs * 1000
+            this.currentTime = currentTime
             let duration = 0
             try {
                 duration = this.currentTrack.duration
             } catch (error) {
                 console.log(error)
             }
-            this.progress = duration > 0 ? (this.currentTime / duration) : 0
+            this.progress = duration > 0 ? (currentTime / duration) : 0
         },
         updateVolume(value) {
             value = parseFloat(value)
