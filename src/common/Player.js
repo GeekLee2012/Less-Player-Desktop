@@ -15,6 +15,8 @@ export class Player {
         this.sound = null
         this.retry = 0
         this.webAudioApi = null
+        this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
+        this.pendingSoundEffect = null
     }
 
     static get() {
@@ -35,6 +37,7 @@ export class Player {
             .on('radio-play', () => player.setCurrent(null))
             .on('playbackQueue-empty', () => player.setCurrent(null))
             .on('track-updateEQ', (values) => player.updateEQ(values))
+            .on('track-updateIR', (source) => player.updateIR(source))
     }
 
     isTrackAvailable() {
@@ -182,6 +185,7 @@ export class Player {
     resolveSound() {
         this.createWebAudioApi()
         if (!this.webAudioApi) return
+        this.resolvePendingSoundEffect()
         const analyser = this.webAudioApi.getAnalyser()
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
@@ -198,7 +202,31 @@ export class Player {
     }
 
     updateEQ(values) {
-        if (this.webAudioApi) this.webAudioApi.updateEQ(values)
+        if (this.webAudioApi) {
+            this.webAudioApi.updateEQ(values)
+            this.pendingSoundEffect = null
+        } else {
+            this.pendingSoundEffectType = 0
+            this.pendingSoundEffect = values
+        }
     }
 
+    updateIR(source) {
+        if (this.webAudioApi) {
+            this.webAudioApi.updateIR(source)
+            this.pendingSoundEffect = null
+        } else {
+            this.pendingSoundEffectType = 1
+            this.pendingSoundEffect = source
+        }
+    }
+
+    resolvePendingSoundEffect() {
+        if (!this.pendingSoundEffect) return
+        if (this.pendingSoundEffectType === 1) {
+            this.updateIR(this.pendingSoundEffect)
+        } else {
+            this.updateEQ(this.pendingSoundEffect)
+        }
+    }
 }

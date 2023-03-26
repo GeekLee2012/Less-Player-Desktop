@@ -465,16 +465,11 @@ EventBus.on('track-pos', secs => {
         if (isPlaying()) togglePlay()
         return
     }
+    const track = currentTrack.value
     const currentTime = secs * 1000
     mmssCurrentTime.value = toMmss(currentTime)
-    let duration = 0
-    try {
-        duration = currentTrack.value.duration
-    } catch (error) {
-        console.log(error)
-    }
+    const duration = track ? track.duration : 0
     progressState.value = duration > 0 ? (currentTime / duration) : 0
-    //Object.assign(progressState, { currentTime, progress })
 })
 
 EventBus.on("track-freqUnit8Data", freqData => {

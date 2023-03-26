@@ -163,7 +163,9 @@ const checkLyricValid = () => {
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
         const lyricData = track.lyric.data
         let isValidLyric = true
-        if (lyricData.size > 0 && lyricData.size <= 6) {
+        if (lyricData.size <= 3) { //歌词行数太少，直接判定为无效歌词
+            isValidLyric = false
+        } else if (lyricData.size <= 6) {
             const linesIter = lyricData.values()
             let line = linesIter.next()
             while (!line.done) {
@@ -895,8 +897,8 @@ watch([textColorIndex], setupTextColor)
             <div class="meta-wrap" v-show="lyric.metaPos != 1">
                 <div class="audio-title" v-html="Track.title(currentTrack)"></div>
                 <!--
-                                                                                                                                                                                        <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div>
-                                                                                                                                                                                        -->
+                                                                                                                                                                                            <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div>
+                                                                                                                                                                                            -->
                 <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
                     :trackId="currentTrack.id" class="audio-artist">
                 </ArtistControl>

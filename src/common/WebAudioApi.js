@@ -57,14 +57,14 @@ export class WebAudioApi {
         const audioNode = this.audioNode
         this.analyser = audioCtx.createAnalyser()
         this.analyser.fftSize = 512
-        const distortion = audioCtx.createWaveShaper()
-        const gainNode = audioCtx.createGain()
+        this.distortion = audioCtx.createWaveShaper()
+        this.gainNode = audioCtx.createGain()
         this.biquadFilters = this.createBiquadFilters()
         if (!this.audioSource) this.audioSource = audioCtx.createMediaElementSource(audioNode)
         this.audioSource.connect(this.analyser)
-        this.analyser.connect(distortion)
-        this.connectBiquadFilters(this.biquadFilters, distortion, gainNode)
-        gainNode.connect(audioCtx.destination)
+        this.analyser.connect(this.distortion)
+        this.connectBiquadFilters(this.biquadFilters, this.distortion, this.gainNode)
+        this.gainNode.connect(audioCtx.destination)
         return this
     }
 
@@ -101,6 +101,39 @@ export class WebAudioApi {
         eqFilters.forEach((filter, index) => {
             filter.gain.value = values[index]
         })
+    }
+
+    //混响 audioNodes -> reverb -> destination
+    connectReverb() {
+        this.gainNode.disconnect()
+        this.gainNode.connect(this.convolver)
+        this.convolver.connect(this.audioCtx.destination)
+    }
+
+    disconnectReverb() {
+        this.gainNode.disconnect()
+        this.gainNode.connect(this.audioCtx.destination)
+    }
+
+    //source格式： xxx.wav
+    async updateIR(source) {
+        if (!source) {
+            this.disconnectReverb()
+            return
+        }
+        const audioCtx = this.audioCtx
+        if (!this.convolver) {
+            this.convolver = audioCtx.createConvolver()
+        }
+        this.connectReverb()
+
+        //TODO
+        //从文件加载脉冲反应(Impulse Response)
+        let response = await fetch(`impulse/${source}`)
+        let buffer = await response.arrayBuffer()
+        this.convolver.buffer = await audioCtx.decodeAudioData(buffer)
+
+        return this.convolver
     }
 
 }

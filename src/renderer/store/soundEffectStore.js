@@ -46,7 +46,7 @@ const EQ = [
     }
 ]
 
-const PRESET_EFFECTS = [
+const PRESET_EQUALIZERS = [
     {
         id: 'none',
         name: '关闭',
@@ -99,21 +99,160 @@ const PRESET_EFFECTS = [
 
 const MIN_GAIN = -40 / 4, MAX_GAIN = 40 / 4
 
-export const useSoundEffectStore = defineStore('audioEffect', {
+//预设混响
+const PRESET_IMPULSE_RESPONSES = [
+    {
+        name: "关闭",
+        source: null,
+        enabled: true
+    }, {
+        name: "教室",
+        source: "Classroom.wav",
+        enabled: true
+    },
+    {
+        name: "会议厅",
+        source: "Convocation Mall.wav",
+        enabled: true
+    },
+    {
+        name: "艺术博物馆",
+        source: "Cranbrook Art Museum.wav",
+        enabled: true
+    },
+    {
+        name: "深井（无效）",
+        source: "Deep Well.wav",
+        enabled: false
+    },
+    {
+        name: "海滩",
+        source: "Divorce Beach.wav",
+        enabled: true
+    },
+    {
+        name: "回声桥",
+        source: "Echo Bridge.wav",
+        enabled: true
+    },
+    {
+        name: "起居室 - 空荡",
+        source: "Empty Livingroom.wav",
+        enabled: true
+    },
+    {
+        name: "无尽隧道",
+        source: "Endless Tunnel.wav",
+        enabled: true
+    },
+    {
+        name: "走廊",
+        source: "Gallery.wav",
+        enabled: true
+    },
+    {
+        name: "大厅",
+        source: "Hall.wav",
+        enabled: true
+    },
+    {
+        name: "车内",
+        source: "Inside Car.wav",
+        enabled: true
+    },
+    {
+        name: "浴室 - 闭门",
+        source: "Inside Shower Door Closed.wav",
+        enabled: true
+    },
+    {
+        name: "浴室 - 宽敞",
+        source: "Large Bathroom.wav",
+        enabled: true
+    },
+    {
+        name: "音乐大厅 - 大型（无效）",
+        source: "Large Concert Hall.wav",
+        enabled: false
+    },
+    {
+        name: "演讲礼堂",
+        source: "Lecture Hall.wav",
+        enabled: true
+    },
+    {
+        name: "起居室",
+        source: "Living Room.wav",
+        enabled: true
+    },
+    {
+        name: "更衣室",
+        source: "Locker Room.wav",
+        enabled: true
+    },
+    {
+        name: "洞窟 - 巨大",
+        source: "Massive Cavern.wav",
+        enabled: true
+    },
+    {
+        name: "洞穴 - 中型",
+        source: "Medium Sized Cave.wav",
+        enabled: true
+    },
+    {
+        name: "房间 - 中型（无效）",
+        source: "Mid-Sized Room.wav",
+        enabled: false
+    },
+    {
+        name: "狭窄螺旋楼梯",
+        source: "Narrow Spiral Staircase.wav",
+        enabled: true
+    },
+    {
+        name: "露天体育场（无效）",
+        source: "Open Air Stadium.wav",
+        enabled: false
+    },
+    {
+        name: "反向隧道",
+        source: "Reverse Tunnel.wav",
+        enabled: true
+    },
+    {
+        name: "亲水公园",
+        source: "Waterplace Park.wav",
+        enabled: true
+    },
+    {
+        name: "胡同巷子",
+        source: "WoodruffLane.wav",
+        enabled: true
+    },
+]
+
+export const useSoundEffectStore = defineStore('soundEffect', {
     state: () => ({
         isUseEffect: false,
-        currentEffectIndex: 0,
-        customEQValues: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        currentEffectType: 0,   // 0 => 均衡器, 1 => 混响
+        //均衡器 Equalizer
+        currentEQIndex: 0,
+        customEQValues: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        //混响 Impulse Response
+        currentIRIndex: 0,
     }),
     getters: {
-        currentEffect() {
-            return PRESET_EFFECTS[this.currentEffectIndex]
-        },
         currentEffectName() {
-            return this.isUseEffect ? this.currentEffect.name : '关闭'
+            if (!this.isUseEffect) return '关闭'
+            return this.currentEffectType == 1 ? this.currentIR.name : this.currentEQ.name
+        },
+        //均衡器
+        currentEQ() {
+            return PRESET_EQUALIZERS[this.currentEQIndex]
         },
         currentEQValues() {
-            const { id, values } = this.currentEffect
+            const { id, values } = this.currentEQ
             return id === 'custom' ? this.customEQValues : values
         },
         currentEQValue() {
@@ -126,21 +265,42 @@ export const useSoundEffectStore = defineStore('audioEffect', {
                 return percent
             }
         },
+        //混响
+        currentIR() {
+            return PRESET_IMPULSE_RESPONSES[this.currentIRIndex]
+        },
+        currentIRSource() {
+            return this.currentIR.source
+        }
     },
     actions: {
-        setUseEffect(value) {
-            this.isUseEffect = value || false
-            if (!this.isUseEffect) this.currentEffectIndex = 0
+        setUseEffect(type, index) {
+            type = type || 0
+            index = index || 0
+            this.currentEffectType = type
+            this.isUseEffect = (index > 0)
+            if (this.currentEffectType === 1) { //混响
+                this.currentEQIndex = 0
+                this.currentIRIndex = index
+            } else { //均衡器
+                this.currentEQIndex = index
+                this.currentIRIndex = 0
+            }
             EventBus.emit('track-updateEQ', this.currentEQValues)
+            EventBus.emit('track-updateIR', this.currentIRSource)
         },
-        toggleAudioEffect() {
-            this.setUseEffect(!this.isUseEffect)
+        //TODO 暂时简单处理：关闭时，相当于快捷关闭; 开启时，并不开启任何音效
+        toggleSoundEffect() {
+            this.isUseEffect = !this.isUseEffect
+            this.currentEQIndex = 0
+            this.currentIRIndex = 0
         },
-        getPresetEffects() {
-            return PRESET_EFFECTS
+        //均衡器
+        getPresetEQs() {
+            return PRESET_EQUALIZERS
         },
-        getPresetEffect(index) {
-            return this.getPresetEffects()[index]
+        getPresetEQ(index) {
+            return this.getPresetEQs()[index]
         },
         getEQNames() {
             return EQ
@@ -157,6 +317,10 @@ export const useSoundEffectStore = defineStore('audioEffect', {
                 return MAX_GAIN * (percent - ZERO_PERCENT) / ZERO_PERCENT
             }
             return 0
+        },
+        //混响
+        getPresetIRs() {
+            return PRESET_IMPULSE_RESPONSES
         }
     },
 })

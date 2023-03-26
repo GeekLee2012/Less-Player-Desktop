@@ -9,138 +9,33 @@ import { ref } from 'vue';
 
 
 const { hideSoundEffectView } = useAppCommonStore()
-const { currentEffectIndex, currentEffectName,
+const { currentEQIndex, currentEffectName,
     currentEQValue, currentEQValueToPercent,
-    isUseEffect } = storeToRefs(useSoundEffectStore())
-const { setUseEffect, toggleAudioEffect,
-    getPresetEffects, getEQNames,
-    updateCustomEQValue, percentToEQValue } = useSoundEffectStore()
+    isUseEffect, currentIRIndex, } = storeToRefs(useSoundEffectStore())
+const { setUseEffect, toggleSoundEffect,
+    getPresetEQs, getEQNames,
+    updateCustomEQValue, percentToEQValue,
+    getPresetIRs } = useSoundEffectStore()
 const activeTabIndex = ref(0)
 
 const setActiveTab = (index) => activeTabIndex.value = index
 
-const switchEffect = (item, index) => {
-    currentEffectIndex.value = index
-    setUseEffect(index > 0)
-}
+//均衡器
+const getEQFrequency = (frequency) => frequency.toString().replace('000', 'k')
 
-const getFrequency = (frequency) => frequency.toString().replace('000', 'k')
+const switchEQ = (item, index) => {
+    setUseEffect(0, index)
+}
 
 const updateEQValue = (percent, item, index) => {
-    currentEffectIndex.value = 1
+    //currentEQIndex.value = 1
     updateCustomEQValue(index, percentToEQValue(percent))
-    setUseEffect(true)
+    setUseEffect(0, 1)
 }
 
-const impulseResponses = [
-    {
-        name: "关闭",
-        source: null
-    }, {
-        name: "教室",
-        source: "Classroom.wav"
-    },
-    {
-        name: "会议厅",
-        source: "Convocation Mall.wav"
-    },
-    {
-        name: "艺术博物馆",
-        source: "Cranbrook Art Museum.wav"
-    },
-    {
-        name: "深井",
-        source: "Deep Well.wav"
-    },
-    {
-        name: "海滩",
-        source: "Divorce Beach.wav"
-    },
-    {
-        name: "回声桥",
-        source: "Echo Bridge.wav"
-    },
-    {
-        name: "起居室 - 空荡",
-        source: "Empty Livingroom.wav"
-    },
-    {
-        name: "无尽隧道",
-        source: "Endless Tunnel.wav"
-    },
-    {
-        name: "走廊",
-        source: "Gallery.wav"
-    },
-    {
-        name: "大厅",
-        source: "Hall.wav"
-    },
-    {
-        name: "车内",
-        source: "Inside Car.wav"
-    },
-    {
-        name: "浴室 - 闭门",
-        source: "Inside Shower - Door Closed.wav"
-    },
-    {
-        name: "浴室 - 宽敞",
-        source: "Large Bathroom.wav"
-    },
-    {
-        name: "音乐大厅 - 大型",
-        source: "Large Concert Hall.wav"
-    },
-    {
-        name: "演讲礼堂",
-        source: "Lecture Hall.wav"
-    },
-    {
-        name: "起居室",
-        source: "Living Room.wav"
-    },
-    {
-        name: "更衣室",
-        source: "Locker Room.wav"
-    },
-    {
-        name: "洞窟 - 巨大",
-        source: "Massive Cavern.wav"
-    },
-    {
-        name: "洞穴 - 中型",
-        source: "Medium Sized Cave.wav"
-    },
-    {
-        name: "房间 - 中型",
-        source: "Mid-Sized Room.wav"
-    },
-    {
-        name: "狭窄螺旋楼梯",
-        source: "Narrow Spiral Staircase.wav"
-    },
-    {
-        name: "露天体育场",
-        source: "Open Air Stadium.wav"
-    },
-    {
-        name: "反向隧道",
-        source: "Reverse Tunnel.wav"
-    },
-    {
-        name: "亲水公园",
-        source: "Waterplace Park.wav"
-    },
-    {
-        name: "胡同巷子",
-        source: "WoodruffLane.wav"
-    },
-]
-
-const activeImpulseIndex = ref(-1)
-const switchImpulse = (item, index) => {
-    activeImpulseIndex.value = index
+//混响
+const switchIR = (item, index) => {
+    if (item.enabled) setUseEffect(1, index)
 }
 </script>
 
@@ -157,7 +52,7 @@ const switchImpulse = (item, index) => {
             </div>
             <div class="title-wrap">
                 <div class="title">音效SOUND</div>
-                <ToggleControl class="toggle-ctl" :value="isUseEffect" @click="toggleAudioEffect">
+                <ToggleControl class="toggle-ctl" :value="isUseEffect" @click="toggleSoundEffect">
                 </ToggleControl>
                 <div class="text spacing">{{ currentEffectName }}</div>
             </div>
@@ -199,8 +94,8 @@ const switchImpulse = (item, index) => {
             </div>
             <div class="content" v-show="activeTabIndex == 0">
                 <div class="presets">
-                    <div v-for="(item, index) in getPresetEffects()" @click="switchEffect(item, index)"
-                        :class="{ active: currentEffectIndex == index }" class="item spacing1">
+                    <div v-for="(item, index) in getPresetEQs()" @click="switchEQ(item, index)"
+                        :class="{ active: currentEQIndex == index }" class="item spacing1">
                         <span>{{ item.name }}</span>
                     </div>
                 </div>
@@ -211,13 +106,13 @@ const switchImpulse = (item, index) => {
                             :onseek="(value) => updateEQValue(value, item, index)"
                             :onscroll="(value) => updateEQValue(value, item, index)">
                         </VerticalSliderBar>
-                        <div class="text">{{ getFrequency(item.frequency) }}</div>
+                        <div class="text">{{ getEQFrequency(item.frequency) }}</div>
                     </div>
                 </div>
             </div>
             <div class="impulse-content" v-show="activeTabIndex == 1">
-                <div v-for="(item, index) in impulseResponses" class="item spacing1"
-                    :class="{ active: activeImpulseIndex == index }" v-html="item.name" @click="switchImpulse(item, index)">
+                <div v-for="(item, index) in getPresetIRs()" v-show="item.enabled" v-html="item.name" class="item spacing1"
+                    :class="{ active: currentIRIndex == index, disabled: !item.enabled }" @click="switchIR(item, index)">
                 </div>
             </div>
         </div>
@@ -403,10 +298,15 @@ const switchImpulse = (item, index) => {
     background-color: #f3f3f3;
     background: var(--aeview-list-item-bg);
     color: var(--aeview-list-item-color);
-    cursor: pointer;
+    /* cursor: pointer; */
 }
 
 .sound-effect-view .center .impulse-content .active {
     border: 2px solid var(--hl-color);
+}
+
+.sound-effect-view .center .impulse-content .disabled {
+    cursor: not-allowed;
+    color: var(--toggle-thumb-bg) !important;
 }
 </style>
