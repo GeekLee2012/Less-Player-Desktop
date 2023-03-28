@@ -123,7 +123,7 @@ const ALL_PLATFORMS = [
         online: false,
         types: null
     },
-    {
+    /*{
         code: FreeFM.CODE,
         name: '自由电台',
         shortName: 'FREE',
@@ -131,6 +131,7 @@ const ALL_PLATFORMS = [
         types: ['fmRadios'],
         weight: 5
     },
+    */
 ]
 
 const radioCount = 3
