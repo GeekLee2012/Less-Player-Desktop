@@ -575,7 +575,7 @@ export class QQ {
 
     //歌单详情
     static playlistDetail(id, offset, limit, page) {
-        if (id.startsWith(QQ.TOPLIST_PREFIX)) {
+        if (id.toString().startsWith(QQ.TOPLIST_PREFIX)) {
             return QQ.toplistDetail(id, offset, limit, page)
         }
         return new Promise((resolve, reject) => {

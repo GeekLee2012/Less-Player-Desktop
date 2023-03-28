@@ -177,7 +177,7 @@ export class KuWo {
 
     //歌单详情
     static playlistDetail(id, offset, limit, page) {
-        if (id.startsWith(KuWo.TOPLIST_PREFIX)) return this.toplistDetail(id, offset, limit, page)
+        if (id.toString().startsWith(KuWo.TOPLIST_PREFIX)) return this.toplistDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
             //TODO 官方 rn = 30
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo"

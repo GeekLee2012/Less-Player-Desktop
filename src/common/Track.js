@@ -176,4 +176,8 @@ export class Track {
             && track.artist.length > 0
     }
 
+    static isM3U8(track) {
+        return Track.hasUrl(track) && track.url.includes(".m3u8")
+    }
+
 }

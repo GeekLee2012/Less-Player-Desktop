@@ -17,6 +17,7 @@ export class Player {
         this.webAudioApi = null
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
         this.pendingSoundEffect = null
+        this.animationFrameId = 0
     }
 
     static get() {
@@ -55,18 +56,20 @@ export class Player {
             autoplay: false,
             preload: false,
             onplay: function () {
-                this.retry = 0
-                requestAnimationFrame(self.__step.bind(self))
+                self.retry = 0
+                self.animationFrameId = requestAnimationFrame(self.__step.bind(self))
                 self.notifyStateChanged(PLAY_STATE.PLAYING)
             },
             onpause: function () {
+                cancelAnimationFrame(self.animationFrameId)
                 self.notifyStateChanged(PLAY_STATE.PAUSE)
             },
             onend: function () {
                 self.notifyStateChanged(PLAY_STATE.END)
             },
             onseek: function () {
-                requestAnimationFrame(self.__step.bind(self))
+                cancelAnimationFrame(self.animationFrameId)
+                self.animationFrameId = requestAnimationFrame(self.__step.bind(self))
             },
             onloaderror: function () {
                 self.retryPlay(1)
@@ -152,7 +155,7 @@ export class Player {
             console.log(error)
             this.retryPlay(1)
         }
-        requestAnimationFrame(this.__step.bind(this))
+        this.animationFrameId = requestAnimationFrame(this.__step.bind(this))
     }
 
     on(event, handler) {

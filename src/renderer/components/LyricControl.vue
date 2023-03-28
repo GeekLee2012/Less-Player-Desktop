@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref, onMounted, inject } from 'vue';
+import { watch, ref, onMounted, inject, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
@@ -16,7 +16,7 @@ const props = defineProps({
 })
 
 
-const { playMv, loadLyric } = inject('player')
+const { playMv, loadLyric, currentTimeState } = inject('player')
 
 const { toggleLyricToolbar } = useAppCommonStore()
 const { lyric } = storeToRefs(useSettingStore())
@@ -132,27 +132,25 @@ const onUserMouseWheel = (e) => {
     }, 3000)
 }
 
+const setLyricLineStyle = (line) => {
+    const { fontSize, hlFontSize, fontWeight, lineHeight, lineSpacing } = lyric.value
+
+    line.style.lineHeight = lineHeight + "px"
+    line.style.marginTop = lineSpacing + "px"
+
+    const classAttr = line.getAttribute('class')
+    if (classAttr.includes('current')) { //高亮行
+        line.style.fontSize = hlFontSize + "px"
+        line.style.fontWeight = 'bold'
+    } else { //普通行
+        line.style.fontSize = fontSize + "px"
+        line.style.fontWeight = fontWeight
+    }
+}
+
 const setupLyricLines = () => {
     const els = document.querySelectorAll(".lyric-ctl .center .line")
-    if (!els) return
-    const fontSize = lyric.value.fontSize
-    const hlFontSize = lyric.value.hlFontSize
-    const fontWeight = lyric.value.fontWeight
-    const lineHeight = lyric.value.lineHeight
-    const lineSpacing = lyric.value.lineSpacing
-    els.forEach(el => {
-        el.style.lineHeight = lineHeight + "px"
-        el.style.marginTop = lineSpacing + "px"
-
-        const classAttr = el.getAttribute('class')
-        if (classAttr.includes('current')) { //高亮行
-            el.style.fontSize = hlFontSize + "px"
-            el.style.fontWeight = 'bold'
-        } else { //普通行
-            el.style.fontSize = fontSize + "px"
-            el.style.fontWeight = fontWeight
-        }
-    })
+    if (els) els.forEach(el => setLyricLineStyle(el))
 }
 
 const setupLyricAlignment = () => {
@@ -169,13 +167,6 @@ const setupLyricAlignment = () => {
     if (noLyricEls) noLyricEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
 }
 
-EventBus.on('track-pos', secs => {
-    try {
-        renderAndScrollLyric(secs)
-    } catch (error) {
-        console.log(error)
-    }
-})
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
 EventBus.on('lyric-userMouseWheel', onUserMouseWheel)
 EventBus.on('lyric-fontSize', setupLyricLines)
@@ -193,6 +184,14 @@ const isHeaderVisible = () => {
 onMounted(() => {
     loadLyric(props.track)
     setupLyricAlignment()
+})
+
+watch(currentTimeState, (nv, ov) => {
+    try {
+        renderAndScrollLyric(nv)
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 watch(() => props.track, (nv, ov) => loadLyric(props.track))

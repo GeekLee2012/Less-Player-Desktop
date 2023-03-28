@@ -1,5 +1,5 @@
 <script setup>
-import { inject, provide, onMounted, watch, ref, reactive } from 'vue';
+import { inject, provide, onMounted, watch, ref, } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -35,8 +35,7 @@ const { togglePlaybackQueueView, toggleVideoPlayingView,
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
-    theme, layout,
-    isStoreRecentPlay } = storeToRefs(useSettingStore())
+    theme, layout, isStoreRecentPlay, isSimpleLayout } = storeToRefs(useSettingStore())
 const { getCurrentThemeHlColor } = useSettingStore()
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
@@ -70,7 +69,6 @@ const traceRecentAlbum = (album) => {
     const { id, platform, title, cover, publishTime } = album
     addRecentAlbum(id, platform, title, cover, publishTime)
 }
-
 
 
 /* 歌词获取 */
@@ -459,6 +457,7 @@ EventBus.on('track-state', state => {
 })
 //播放进度
 const mmssCurrentTime = ref('00:00')
+const currentTimeState = ref(0) //单位: 秒
 const progressState = ref(0)
 EventBus.on('track-pos', secs => {
     if (videoPlayingViewShow.value) {
@@ -468,14 +467,17 @@ EventBus.on('track-pos', secs => {
     const track = currentTrack.value
     const currentTime = secs * 1000
     mmssCurrentTime.value = toMmss(currentTime)
+    currentTimeState.value = secs
     const duration = track ? track.duration : 0
     progressState.value = duration > 0 ? (currentTime / duration) : 0
 })
 
 EventBus.on("track-freqUnit8Data", freqData => {
     cachedFreqData = freqData
-    if (playingViewThemeIndex.value != 1 && layout.value.index != 2) return
-    drawCanvasSpectrum()
+    //简约布局、可视化播放页
+    if (isSimpleLayout.value || (playingViewShow.value && playingViewThemeIndex.value == 1)) {
+        drawCanvasSpectrum()
+    }
 })
 
 //歌单电台 - 下一曲
@@ -585,6 +587,7 @@ provide('player', {
     addAndPlayTracks,
     loadLyric,
     mmssCurrentTime,
+    currentTimeState,
     progressState,
 })
 </script>

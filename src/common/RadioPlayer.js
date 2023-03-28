@@ -35,6 +35,7 @@ export class RadioPlayer {
             .on('track-play', () => player.setChannel(null))
             .on('track-restore', channel => player.setChannel(channel))
             .on('track-updateEQ', (values) => player.updateEQ(values))
+            .on('track-updateIR', (source) => player.updateIR(source))
     }
 
     //播放
@@ -44,6 +45,7 @@ export class RadioPlayer {
         if (!this.channel) return
 
         //this.hls.loadSource('http://ngcdn001.cnr.cn/live/zgzs/index.m3u8')
+        //this.channel.url = "https://npr-ice.streamguys1.com/live.mp3"
         this.hls.loadSource(this.channel.url)
         this.hls.attachMedia(audioNode)
 

@@ -12,7 +12,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { toMmss, toMMssSSS } from '../../common/Times';
+import { toMMssSSS } from '../../common/Times';
 import { isMacOS, nextInt, randomTextWithinAlphabet } from '../../common/Utils';
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
@@ -20,9 +20,8 @@ import ArtistControl from '../components/ArtistControl.vue';
 
 
 
-const { seekTrack, playPlaylist, playMv, progressState, mmssCurrentTime } = inject('player')
+const { seekTrack, playPlaylist, playMv, progressState, mmssCurrentTime, currentTimeState } = inject('player')
 
-const progressBarRef = ref(null)
 const volumeBarRef = ref(null)
 const textColorIndex = ref(0)
 const isLyricShow = ref(false)
@@ -763,17 +762,6 @@ const updatePlatformShortName = () => {
 }
 
 /* EventBus事件 */
-EventBus.on('track-pos', secs => {
-    if (!isSimpleLayout.value) return
-
-    //歌词渲染
-    try {
-        renderLyric(secs)
-    } catch (error) {
-        console.log(error)
-    }
-})
-
 EventBus.on('track-lyricLoaded', track => checkLyricValid(track))
 EventBus.on('lyric-fontSize', setupLyricLines)
 EventBus.on('lyric-hlFontSize', setupLyricLines)
@@ -788,8 +776,18 @@ onActivated(() => {
     updatePlatformShortName()
     checkFavorite()
 
-    if (progressBarRef.value) progressBarRef.value.updateProgress(progressState.value)
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
+})
+
+watch(currentTimeState, (nv, ov) => {
+    if (!isSimpleLayout.value) return
+
+    //歌词渲染
+    try {
+        renderLyric(nv)
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 watch(currentTrack, (nv, ov) => {
@@ -798,10 +796,6 @@ watch(currentTrack, (nv, ov) => {
     checkFavorite()
     resetLyric()
     checkLyricValid()
-})
-
-watch(progressState, (nv, ov) => {
-    if (progressBarRef) progressBarRef.value.updateProgress(nv)
 })
 
 watch([soundEffectViewShow], () => {
@@ -897,8 +891,8 @@ watch([textColorIndex], setupTextColor)
             <div class="meta-wrap" v-show="lyric.metaPos != 1">
                 <div class="audio-title" v-html="Track.title(currentTrack)"></div>
                 <!--
-                                                                                                                                                                                            <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div>
-                                                                                                                                                                                            -->
+                                                                                                                                                                                                                                                                        <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div>
+                                                                                                                                                                                                                                                                        -->
                 <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
                     :trackId="currentTrack.id" class="audio-artist">
                 </ArtistControl>
@@ -913,7 +907,7 @@ watch([textColorIndex], setupTextColor)
         </div>
         <div class="bottom" @contextmenu="toggleLyricToolbar()">
             <div class="progress-wrap">
-                <ProgressBar ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
+                <ProgressBar :value="progressState" :seekable="true" :onseek="seekTrack"></ProgressBar>
             </div>
             <div class="action" v-show="!isLyricShow">
                 <div class="btm-left">

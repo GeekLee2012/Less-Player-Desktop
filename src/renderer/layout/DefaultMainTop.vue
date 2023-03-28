@@ -1,24 +1,12 @@
 <script setup>
-import { inject, ref, watch } from 'vue';
-import { storeToRefs } from 'pinia';
+import { inject } from 'vue';
 import PlayMeta from '../components/PlayMeta.vue';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
-import { usePlayStore } from '../store/playStore';
-import EventBus from '../../common/EventBus';
-import { toMmss } from '../../common/Times';
 
 
 const { visitUserHome, visitSetting } = inject('appRoute')
 const { seekTrack, progressState } = inject('player')
-
-const progressBarRef = ref(null)
-const { currentTrack } = storeToRefs(usePlayStore())
-
-watch(progressState, (nv, ov) => {
-    if (progressBarRef) progressBarRef.value.updateProgress(nv)
-})
-
 </script>
 
 <template>
@@ -53,7 +41,7 @@ watch(progressState, (nv, ov) => {
                 <Navigator></Navigator>
             </div>
         </div>
-        <ProgressBar ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
+        <ProgressBar :value="progressState" :seekable="true" :onseek="seekTrack"></ProgressBar>
     </div>
 </template>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch, inject } from 'vue';
+import { onMounted, ref, watch, inject, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
@@ -28,7 +28,6 @@ const { hidePlayingView, minimize,
 const { currentTrack, playingIndex, volume } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos } = storeToRefs(useSettingStore())
-const progressBarRef = ref(null)
 const volumeBarRef = ref(null)
 
 
@@ -77,12 +76,7 @@ EventBus.on("refreshFavorite", checkFavorite)
 onMounted(() => {
     EventBus.emit("app-adjustWinCtlBtns")
     EventBus.emit('playingView-changed')
-    if (progressBarRef.value) progressBarRef.value.updateProgress(progressState.value)
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
-})
-
-watch(progressState, (nv, ov) => {
-    if (progressBarRef) progressBarRef.value.updateProgress(nv)
 })
 
 watch([currentTrack, playingViewShow], checkFavorite)
@@ -150,7 +144,7 @@ watch([currentTrack, playingViewShow], checkFavorite)
             </div>
         </div>
         <div class="bottom">
-            <ProgressBar ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
+            <ProgressBar :value="progressState" :seekable="true" :onseek="seekTrack"></ProgressBar>
             <div class="action">
                 <div class="btm-left">
                     <div @click="toggleFavorite">

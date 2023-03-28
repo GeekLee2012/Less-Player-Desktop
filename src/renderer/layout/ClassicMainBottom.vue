@@ -8,13 +8,11 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import EventBus from '../../common/EventBus';
 import { Playlist } from '../../common/Playlist';
-import { toMmss } from '../../common/Times';
 
 
 
 const { seekTrack, progressState } = inject('player')
 
-const progressBarRef = ref(null)
 const volumeBarRef = ref(null)
 
 const { currentTrack, playingIndex, volume } = storeToRefs(usePlayStore())
@@ -64,12 +62,7 @@ EventBus.on("refreshFavorite", checkFavorite)
 onMounted(() => {
     //setDisactived(false)
     //EventBus.emit('playingView-changed')
-    if (progressBarRef.value) progressBarRef.value.updateProgress(progressState.value)
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
-})
-
-watch(progressState, (nv, ov) => {
-    if (progressBarRef) progressBarRef.value.updateProgress(nv)
 })
 
 watch([currentTrack, playingViewShow], checkFavorite)
@@ -77,7 +70,8 @@ watch([currentTrack, playingViewShow], checkFavorite)
 
 <template>
     <div class="classic-main-bottom">
-        <ProgressBar id="progress-bar" ref="progressBarRef" :seekable="true" :onseek="seekTrack"></ProgressBar>
+        <ProgressBar id="progress-bar" :value="progressState" :seekable="true" :onseek="seekTrack">
+        </ProgressBar>
         <div id="play-nav">
             <PlayMeta id="play-meta" :hideVolumeBar="true"></PlayMeta>
             <div class="play-ctl-wrap">

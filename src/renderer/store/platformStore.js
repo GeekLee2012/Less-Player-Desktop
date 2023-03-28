@@ -9,6 +9,7 @@ import { Qingting } from '../../vendor/qingting';
 import { LocalMusic } from '../../vendor/localmusic';
 import { useAppCommonStore } from './appCommonStore';
 import { Ximalaya } from '../../vendor/ximalaya';
+import { FreeFM } from '../../vendor/freefm';
 
 
 
@@ -121,7 +122,15 @@ const ALL_PLATFORMS = [
         shortName: 'LO',
         online: false,
         types: null
-    }
+    },
+    {
+        code: FreeFM.CODE,
+        name: '自由电台',
+        shortName: 'FREE',
+        online: true,
+        types: ['fmRadios'],
+        weight: 5
+    },
 ]
 
 const radioCount = 3
@@ -142,7 +151,8 @@ const vendors = {
     radiocn: RadioCN,
     qingting: Qingting,
     ximalaya: Ximalaya,
-    local: LocalMusic
+    local: LocalMusic,
+    freefm: FreeFM,
 }
 
 //平台相关Store

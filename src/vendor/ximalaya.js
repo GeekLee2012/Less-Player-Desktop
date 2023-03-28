@@ -109,7 +109,7 @@ export class Ximalaya {
                 list.forEach(item => {
                     const { id, name, coverSmall, coverLarge, categoryName, programId, programScheduleId } = item
                     const cover = (coverLarge || coverSmall)
-                    const playlist = new Playlist(id, Ximalaya.CODE, cover, name, null)
+                    const playlist = new Playlist(id, Ximalaya.CODE, cover, name)
                     playlist.programId = programId
                     playlist.type = Playlist.FM_RADIO_TYPE
 

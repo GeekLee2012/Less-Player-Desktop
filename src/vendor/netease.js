@@ -221,7 +221,7 @@ export class NetEase {
 
     //歌单详情
     static playlistDetail(id, offset, limit, page) {
-        if (id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) return NetEase.anchorRadioDetail(id, offset, limit, page)
+        if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) return NetEase.anchorRadioDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
             const result = new Playlist()
             let url = "https://music.163.com/weapi/v3/playlist/detail"
@@ -847,7 +847,7 @@ export class NetEase {
 
     static resolveAnchorRadio(id, track) {
         return new Promise((resolve, reject) => {
-            if (id.startsWith(NetEase.RADIO_PREFIX)) id = track.songlistId
+            if (id.toString().startsWith(NetEase.RADIO_PREFIX)) id = track.songlistId
             resolve(id)
         })
     }

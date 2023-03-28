@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 
 
@@ -7,6 +7,7 @@ const barRef = ref(null)
 const barValueRef = ref(null)
 
 const props = defineProps({
+    value: Number,
     seekable: Boolean,
     onseek: Function
 })
@@ -24,6 +25,10 @@ const updateProgress = (percent) => {
     percent = percent * 100
     barValueRef.value.style.width = percent + "%"
 }
+
+watch(() => props.value, (nv, ov) => {
+    updateProgress(nv)
+})
 
 defineExpose({ updateProgress })
 </script>
