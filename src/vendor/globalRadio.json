@@ -1,0 +1,23 @@
+{
+    "updated": "2023/03/28",
+    "description": "自由电台：世界那么大，我想和你一起去聆听~",
+    "countries": [
+        {
+            "code": "us",
+            "name": "美国"
+        }
+    ],
+    "data": {
+        "us": [
+            {
+                "id": 0,
+                "name": "NPR",
+                "cname": "美国国家公共广播",
+                "tags": null,
+                "cover": "https://static-assets.npr.org/static/images/favicon/favicon-180x180.png",
+                "url": "https://npr-ice.streamguys1.com/live.mp3",
+                "about": null
+            }
+        ]
+    }
+}

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, shallowRef, inject, watch, triggerRef } from 'vue';
+import { onMounted, shallowRef, inject, watch, triggerRef, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
@@ -252,6 +252,4 @@ watch([playingViewShow, playingViewThemeIndex, videoPlayingViewShow], adjustWinC
   </Themes>
 </template>
 
-<style>
-
-</style>
+<style></style>
