@@ -384,7 +384,7 @@ watch(lyricMetaPos, () => {
 #default-main-top,
 #default-main-content,
 #default-main-bottom {
-    z-index: 1;
+    z-index: 0;
 }
 
 #playlist-category-view,

@@ -43,11 +43,9 @@ export const useLocalMusicStore = defineStore('localMusic', {
             }
             this.isLoading = false
         },
-        removeItem(index) {
-            if (isNaN(index)) return
-            if (index > -1) {
-                this.localTracks.splice(index, 1)
-            }
+        removeItem(item) {
+            const index = this.localTracks.findIndex((e) => item.id === e.id)
+            if (index > -1) this.localTracks.splice(index, 1)
         },
         resetAll() {
             this.localDirs.length = 0

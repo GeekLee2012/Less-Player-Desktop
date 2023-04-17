@@ -28,7 +28,7 @@ const isLyricShow = ref(false)
 const hasLyric = ref(false)
 const platformShortName = ref('ALL')
 
-const { currentTrack, playingIndex, volume } = storeToRefs(usePlayStore())
+const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { soundEffectViewShow, spectrumIndex,
     lyricToolbarShow, randomMusicToolbarShow,
     randomMusicPlatformCodes, randomMusicTypeCodes,
@@ -890,9 +890,7 @@ watch([textColorIndex], setupTextColor)
             </div>
             <div class="meta-wrap" v-show="lyric.metaPos != 1">
                 <div class="audio-title" v-html="Track.title(currentTrack)"></div>
-                <!--
-                                                                                                                                                                                                                                                                        <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div>
-                                                                                                                                                                                                                                                                        -->
+                <!-- <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div> -->
                 <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
                     :trackId="currentTrack.id" class="audio-artist">
                 </ArtistControl>
@@ -907,7 +905,7 @@ watch([textColorIndex], setupTextColor)
         </div>
         <div class="bottom" @contextmenu="toggleLyricToolbar()">
             <div class="progress-wrap">
-                <ProgressBar :value="progressState" :seekable="true" :onseek="seekTrack"></ProgressBar>
+                <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
             </div>
             <div class="action" v-show="!isLyricShow">
                 <div class="btm-left">

@@ -1,12 +1,16 @@
 <script setup>
 import { inject } from 'vue';
+import { storeToRefs } from 'pinia';
 import PlayMeta from '../components/PlayMeta.vue';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
+import { usePlayStore } from '../store/playStore';
+
 
 
 const { visitUserHome, visitSetting } = inject('appRoute')
 const { seekTrack, progressState } = inject('player')
+const { playing } = storeToRefs(usePlayStore())
 </script>
 
 <template>
@@ -41,7 +45,7 @@ const { seekTrack, progressState } = inject('player')
                 <Navigator></Navigator>
             </div>
         </div>
-        <ProgressBar :value="progressState" :seekable="true" :onseek="seekTrack"></ProgressBar>
+        <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
     </div>
 </template>
 

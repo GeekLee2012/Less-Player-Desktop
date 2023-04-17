@@ -118,7 +118,7 @@ EventBus.on('artistCategory-resetScroll', () => {
 
 .artist-category-view .text-btn {
     text-align: left;
-    font-size: 15px;
+    /*font-size: 15px;*/
     display: flex;
     align-items: center;
     justify-items: center;
@@ -171,7 +171,7 @@ EventBus.on('artistCategory-resetScroll', () => {
 }
 
 .artist-category-view .fl-item {
-    font-size: 15px;
+    /*font-size: 15px;*/
     padding: 6px 16px;
     margin-top: 10px;
     margin-right: 10px;

@@ -77,8 +77,9 @@ const resetScroll = () => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    font-size: 14px;
+    /*font-size: 14px;*/
     padding: 9px 20px;
+    height: 20px;
 }
 
 .common-ctx-submenu .menuItem:hover {

@@ -238,7 +238,7 @@ const markScrollState = () => {
 }
 
 const restoreScrollState = () => {
-    
+
     if (!userProfileRef.value) return
     if (markScrollTop < 1) return
     userProfileRef.value.scrollTop = markScrollTop
@@ -308,8 +308,8 @@ EventBus.on("userHome-refresh", refresh)
                     </PlayAddAllBtn>
                     <CreatePlaylistBtn :leftAction="visitCustomPlaylistCreate" class="spacing">
                     </CreatePlaylistBtn>
-                    <BatchActionBtn v-show="activeTab == 0 || activeTab == 3" class="spacing"
-                        :deleteBtn="activeTab == 3" :leftAction="visitBatchActionView" :rightAction="batchRemoveAll">
+                    <BatchActionBtn v-show="activeTab == 0 || activeTab == 3" class="spacing" :deleteBtn="activeTab == 3"
+                        :leftAction="visitBatchActionView" :rightAction="batchRemoveAll">
                     </BatchActionBtn>
                 </div>
             </div>
@@ -395,7 +395,7 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile-view .header .about {
     text-align: left;
     margin-bottom: 39px;
-    font-size: 15px;
+    /* font-size: 15px; */
     color: var(--text-sub-color);
     overflow: hidden;
     word-wrap: break-all;

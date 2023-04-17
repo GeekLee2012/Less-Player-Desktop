@@ -142,8 +142,8 @@ watch(playingViewThemeIndex, (nv) => setupPlayingView(nv))
 
 const setupPlayingView = (index) => {
   index = index || playingViewThemeIndex.value
-  const themeViews = [PlayingView, VisualPlayingView]
-  currentPlayingView.value = themeViews[index]
+  const playingViewThemes = [PlayingView, VisualPlayingView]
+  currentPlayingView.value = playingViewThemes[index]
 }
 
 onMounted(() => {

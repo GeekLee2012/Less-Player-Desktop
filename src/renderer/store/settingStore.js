@@ -18,6 +18,26 @@ const QUALITIES = [{
     name: '无损'
 }]
 
+const FONTSIZE_LEVELS = [{
+    id: 'default',
+    name: '默认'
+}, {
+    id: 'small',
+    name: '较小'
+}, {
+    id: 'standard',
+    name: '标准'
+}, {
+    id: 'medium',
+    name: '中等'
+}, {
+    id: 'large',
+    name: '较大'
+}, {
+    id: 'larger',
+    name: '更大'
+}]
+
 //TODO 本地缓存导致Store State数据不一致
 export const useSettingStore = defineStore('setting', {
     state: () => ({
@@ -34,6 +54,7 @@ export const useSettingStore = defineStore('setting', {
             winZoom: 100,
             fontFamily: '',
             fontWeight: 400,
+            fontSizeLevel: 1,
         },
         /* 播放歌曲 */
         track: {
@@ -76,6 +97,7 @@ export const useSettingStore = defineStore('setting', {
             customPlaylistsShow: false,
             favoritePlaylistsShow: false,
             followArtistsShow: false,
+            radioModeShortcut: false,
         },
         /* 对话框 */
         dialog: {
@@ -202,6 +224,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isSocksProxyEnable() {
             return this.network.socksProxy.enable
+        },
+        isRadioModeShortcutEnable() {
+            return this.navigation.radioModeShortcut
         }
     },
     actions: {
@@ -248,6 +273,16 @@ export const useSettingStore = defineStore('setting', {
             this.common.winZoom = zoom
             this.setupWindowZoom()
         },
+        allFontSizeLevels() {
+            return FONTSIZE_LEVELS.slice(1)
+        },
+        currentFontSizeLevel() {
+            return this.common.fontSizeLevel
+        },
+        setFontSizeLevel(index) {
+            this.common.fontSizeLevel = index
+            EventBus.emit('setting-fontSizeLevel', this.common.fontSizeLevel)
+        },
         setTrackQualityIndex(index) {
             this.track.quality.index = index
         },
@@ -279,6 +314,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleFollowArtistsShow() {
             this.navigation.followArtistsShow = !this.navigation.followArtistsShow
+        },
+        toggleRadioModeShortcut() {
+            this.navigation.radioModeShortcut = !this.navigation.radioModeShortcut
         },
         toggleKeysGlobal() {
             this.keys.global = !this.keys.global

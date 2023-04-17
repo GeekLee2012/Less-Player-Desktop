@@ -9,7 +9,10 @@ import EventBus from '../common/EventBus';
 
 
 const { theme } = storeToRefs(useSettingStore())
-const { getCurrentThemeId, setupFontFamily, setupFontWeight } = useSettingStore()
+const { getCurrentThemeId, setupFontFamily,
+  setupFontWeight, allFontSizeLevels,
+  currentFontSizeLevel
+} = useSettingStore()
 
 //设置主题
 const setupAppTheme = (themeId) => {
@@ -32,12 +35,26 @@ const updateFontWeight = (value) => {
   document.documentElement.style.fontWeight = value
 }
 
+//设置字体大小
+const setupFontSizeLevel = (index) => {
+  const attrName = 'fsLevel'
+  const fontSizeLevels = allFontSizeLevels()
+  const level = fontSizeLevels[index || currentFontSizeLevel()]
+  if (level) {
+    document.documentElement.setAttribute(attrName, level.id)
+  } else {
+    document.documentElement.removeAttribute(attrName)
+  }
+}
+
 EventBus.on('setting-fontFamily', updateFontFamily)
 EventBus.on('setting-fontWeight', updateFontWeight)
+EventBus.on('setting-fontSizeLevel', setupFontSizeLevel)
 
 onMounted(() => {
   setupFontFamily()
   setupFontWeight()
+  setupFontSizeLevel()
 })
 watch(theme, () => setupAppTheme(), { deep: true })
 </script>
@@ -51,11 +68,44 @@ watch(theme, () => setupAppTheme(), { deep: true })
 <style>
 :root {
   --text-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
+  --app-bg: transparent;
+  font-family: var(--text-font-family);
+}
+
+:root,
+:root[fsLevel="default"],
+:root[fsLevel="standard"] {
   --text-size: 15px;
   --text-sub-size: 14px;
   --tab-title-text-size: 17px;
-  --app-bg: transparent;
-  font-family: var(--text-font-family);
+  --setting-cate-subtitle-width: 225px;
+}
+
+:root[fsLevel="small"] {
+  --text-size: 14px;
+  --text-sub-size: 13px;
+  --tab-title-text-size: 16px;
+}
+
+:root[fsLevel="medium"] {
+  --text-size: 16px;
+  --text-sub-size: 15px;
+  --tab-title-text-size: 18px;
+  --setting-cate-subtitle-width: 255px;
+}
+
+:root[fsLevel="large"] {
+  --text-size: 17px;
+  --text-sub-size: 16px;
+  --tab-title-text-size: 19px;
+  --setting-cate-subtitle-width: 255px;
+}
+
+:root[fsLevel="larger"] {
+  --text-size: 19px;
+  --text-sub-size: 18px;
+  --tab-title-text-size: 21px;
+  --setting-cate-subtitle-width: 275px;
 }
 
 :root[theme='dark'] {

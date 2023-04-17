@@ -252,7 +252,7 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 }
 
 #search-view .tab-nav .tip {
-    font-size: 15px;
+    /* font-size: 15px; */
     position: absolute;
     right: 10px;
 

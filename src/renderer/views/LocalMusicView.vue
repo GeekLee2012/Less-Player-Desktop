@@ -79,12 +79,12 @@ onMounted(resetBack2TopBtn)
         <div class="center">
             <div class="list-title">歌曲({{ localTracks.length }})</div>
             <!--
-            <div class="empty-tip" v-show="localTracks.length < 1"><p>爱丫丫，空空如也~<br>快来添加些歌曲吧~</p></div>
-            <div class="loading-tip" v-show="isLoading"><p>添加歌曲中，请稍候......</p></div>
-            -->
+                <div class="empty-tip" v-show="localTracks.length < 1"><p>爱丫丫，空空如也~<br>快来添加些歌曲吧~</p></div>
+                <div class="loading-tip" v-show="isLoading"><p>添加歌曲中，请稍候......</p></div>
+                -->
             <div class="songlist">
-                <SongListControl :data="localTracks" :artistVisiable="false" :albumVisiable="false"
-                    :deleteFn="removeItem" :dataType="1">
+                <SongListControl :data="localTracks" :artistVisiable="false" :albumVisiable="false" :deleteFn="removeItem"
+                    :dataType="1">
                 </SongListControl>
             </div>
         </div>

@@ -93,7 +93,7 @@ const clear = () => {
 }
 
 .search-bar .keyword {
-    font-size: 15px;
+    /*font-size: 15px; */
     padding-left: 5px;
     padding-right: 6px;
     outline: 0;

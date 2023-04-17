@@ -82,9 +82,8 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
             <div class="fl-row" v-show="orders && orders.length > 0">
                 <div class="cate-title">排序</div>
                 <div class="cate-item-wrap">
-                    <div v-for="(item, index) in orders" class="fl-item"
-                        :class="{ current: (currentOrder.index == index) }" @click="visitByOrder(item, index)"
-                        v-html="item.key">
+                    <div v-for="(item, index) in orders" class="fl-item" :class="{ current: (currentOrder.index == index) }"
+                        @click="visitByOrder(item, index)" v-html="item.key">
                     </div>
                 </div>
             </div>
@@ -92,10 +91,9 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
                 <div class="cate-title">{{ cate.name }}</div>
                 <div class="cate-item-wrap">
                     <div v-for="(item, col) in cate.data" class="fl-item" :class="{
-    current: (row == currentCategoryItem.row
-        && col == currentCategoryItem.col)
-}" @click="visitCateItem(item, row, col)"
-                        v-html="item.key">
+                        current: (row == currentCategoryItem.row
+                            && col == currentCategoryItem.col)
+                    }" @click="visitCateItem(item, row, col)" v-html="item.key">
                     </div>
                 </div>
             </div>
@@ -132,7 +130,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 .playlist-category-view .header .fl-item,
 .playlist-category-view .header .fl-item:hover {
     cursor: default;
-    font-size: 18px;
+    /* font-size: 18px; */
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
@@ -182,7 +180,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 
 .playlist-category-view .fl-item {
     /*float: left;*/
-    font-size: 15px;
+    /* font-size: 15px; */
     padding: 6px 16px;
     margin-top: 10px;
     margin-right: 10px;

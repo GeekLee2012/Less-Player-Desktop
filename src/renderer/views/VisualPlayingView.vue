@@ -44,7 +44,6 @@ const setDisactived = (value) => {
     EventBus.emit('playingView-changed')
 }
 
-
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
@@ -191,9 +190,7 @@ onUnmounted(() => {
                                 </g>
                             </svg>
                         </div>
-                        <div class="audio-title">
-                            {{ currentTrack.title }}
-                        </div>
+                        <div class="audio-title" v-html="currentTrack.title"></div>
                         <div v-show="Track.hasArtist(currentTrack)">&nbsp;-&nbsp;</div>
                         <div class="audio-artist">
                             <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
@@ -206,13 +203,13 @@ onUnmounted(() => {
             <div class="center">
                 <div class="left">
                     <div class="cover">
-                        <img v-lazy="currentTrack.cover" :class="{ rotation: playing }" />
+                        <img v-lazy="currentTrack.cover" :class="{ rotation: (playingViewShow && playing) }" />
                     </div>
                     <div class="canvas-wrap" @click="switchSpectrumIndex">
                         <canvas class="spectrum-canvas" width="404" height="56"></canvas>
                     </div>
                     <div class="progress-wrap">
-                        <ProgressBar :value="progressState" :seekable="true" :onseek="seekTrack">
+                        <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack">
                         </ProgressBar>
                     </div>
                     <div class="audio-time-wrap">
@@ -243,10 +240,10 @@ onUnmounted(() => {
                             </div>
                             <VolumeBar class="spacing" ref="volumeBarRef"></VolumeBar>
                             <!--
-                                                                                                                                                                                                                                                    <div class="spacing">
-                                                                                                                                                                                                                                                        <svg width="21" height="21" viewBox="0 0 767.96 895.83" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M458.7,677.8,274.75,559.58c-35.29,34.33-77.25,51.15-126.42,47.61C104,604,67.35,584.86,38.16,551.38c-53.89-61.79-50.31-156.85,8.26-216.25,60.08-60.95,162.47-65.53,228.41.79L458.59,217.83c-17.32-49.24-14-96.72,13.09-141.57,19.67-32.52,47.82-55.37,83.9-67.49,75.65-25.39,155.7,5.8,193.1,74.7C785.34,151,768.21,236,708.87,284.05c-60.76,49.2-153.42,49.49-215.57-12.43l-184,118.25a161.11,161.11,0,0,1,0,115.78l184,118.23c64.15-64.7,163-61.37,223-6C774.44,671.56,785,760.17,740.5,825.46c-44.86,65.91-131.3,89-202.23,54.35C466.68,844.85,428.1,760.37,458.7,677.8ZM512,159.4a96,96,0,1,0,96.37-95.62A96.09,96.09,0,0,0,512,159.4Zm0,576a96,96,0,1,0,96.36-95.62A96.08,96.08,0,0,0,512,735.4ZM160.36,351.78A96,96,0,1,0,256,448.11,96,96,0,0,0,160.36,351.78Z"/></g></g></svg>
-                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                    -->
+                                                                                                                            <div class="spacing">
+                                                                                                                                <svg width="21" height="21" viewBox="0 0 767.96 895.83" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M458.7,677.8,274.75,559.58c-35.29,34.33-77.25,51.15-126.42,47.61C104,604,67.35,584.86,38.16,551.38c-53.89-61.79-50.31-156.85,8.26-216.25,60.08-60.95,162.47-65.53,228.41.79L458.59,217.83c-17.32-49.24-14-96.72,13.09-141.57,19.67-32.52,47.82-55.37,83.9-67.49,75.65-25.39,155.7,5.8,193.1,74.7C785.34,151,768.21,236,708.87,284.05c-60.76,49.2-153.42,49.49-215.57-12.43l-184,118.25a161.11,161.11,0,0,1,0,115.78l184,118.23c64.15-64.7,163-61.37,223-6C774.44,671.56,785,760.17,740.5,825.46c-44.86,65.91-131.3,89-202.23,54.35C466.68,844.85,428.1,760.37,458.7,677.8ZM512,159.4a96,96,0,1,0,96.37-95.62A96.09,96.09,0,0,0,512,159.4Zm0,576a96,96,0,1,0,96.36-95.62A96.08,96.08,0,0,0,512,735.4ZM160.36,351.78A96,96,0,1,0,256,448.11,96,96,0,0,0,160.36,351.78Z"/></g></g></svg>
+                                                                                                                            </div>
+                                                                                                                        -->
                         </div>
                         <div class="btm-center">
                             <PlayControl></PlayControl>

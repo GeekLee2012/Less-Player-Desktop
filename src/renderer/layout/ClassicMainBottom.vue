@@ -15,7 +15,7 @@ const { seekTrack, progressState } = inject('player')
 
 const volumeBarRef = ref(null)
 
-const { currentTrack, playingIndex, volume } = storeToRefs(usePlayStore())
+const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { playingViewShow, } = storeToRefs(useAppCommonStore())
 const { showToast, toggleSoundEffectView } = useAppCommonStore()
@@ -70,7 +70,7 @@ watch([currentTrack, playingViewShow], checkFavorite)
 
 <template>
     <div class="classic-main-bottom">
-        <ProgressBar id="progress-bar" :value="progressState" :seekable="true" :onseek="seekTrack">
+        <ProgressBar id="progress-bar" :value="progressState" :seekable="playing" :onseek="seekTrack">
         </ProgressBar>
         <div id="play-nav">
             <PlayMeta id="play-meta" :hideVolumeBar="true"></PlayMeta>

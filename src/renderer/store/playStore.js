@@ -33,9 +33,7 @@ export const usePlayStore = defineStore('play', {
             return this.track(this.playingIndex)
         },
         track(state) {
-            return (index) => {
-                return state.queueTracks[index]
-            }
+            return (index) => (state.queueTracks[index])
         },
         noTrack() {
             return NO_TRACK

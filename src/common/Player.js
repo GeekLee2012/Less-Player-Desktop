@@ -18,6 +18,7 @@ export class Player {
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
         this.pendingSoundEffect = null
         this.animationFrameId = 0
+        this.seeking = false
     }
 
     static get() {
@@ -48,8 +49,6 @@ export class Player {
     createSound() {
         if (!this.isTrackAvailable()) return null
         var self = this
-        //释放资源
-        if (this.sound) this.sound.unload()
         this.sound = new Howl({
             src: [this.currentTrack.url],
             html5: true,
@@ -57,18 +56,20 @@ export class Player {
             preload: false,
             onplay: function () {
                 self.retry = 0
+                if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
                 self.animationFrameId = requestAnimationFrame(self.__step.bind(self))
                 self.notifyStateChanged(PLAY_STATE.PLAYING)
             },
             onpause: function () {
-                cancelAnimationFrame(self.animationFrameId)
+                if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
                 self.notifyStateChanged(PLAY_STATE.PAUSE)
             },
             onend: function () {
                 self.notifyStateChanged(PLAY_STATE.END)
             },
             onseek: function () {
-                cancelAnimationFrame(self.animationFrameId)
+                self.seeking = true
+                if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
                 self.animationFrameId = requestAnimationFrame(self.__step.bind(self))
             },
             onloaderror: function () {
@@ -111,10 +112,13 @@ export class Player {
         }
     }
 
-    //暂停
+    //停止
     stop() {
         const sound = this.getSound()
-        if (sound) sound.stop()
+        if (sound) { //释放资源
+            sound.stop()
+            sound.unload()
+        }
     }
 
     setCurrent(track) {
@@ -140,13 +144,15 @@ export class Player {
     seek(percent) {
         const sound = this.getSound()
         if (!sound || !sound.playing()) return
-        sound.seek(sound.duration() * percent)
+        const duration = sound.duration()
+        if (duration) sound.seek(duration * percent)
     }
 
     __step() {
         const sound = this.getSound()
         if (!sound) return
-        if (!sound.playing()) return
+        if (!sound.playing() && !this.seeking) return
+        if (this.seeking) this.seeking = false
         const seek = sound.seek() || 0
         EventBus.emit('track-pos', seek)
         try {
@@ -155,6 +161,7 @@ export class Player {
             console.log(error)
             this.retryPlay(1)
         }
+        if (this.animationFrameId > 0) cancelAnimationFrame(this.animationFrameId)
         this.animationFrameId = requestAnimationFrame(this.__step.bind(this))
     }
 

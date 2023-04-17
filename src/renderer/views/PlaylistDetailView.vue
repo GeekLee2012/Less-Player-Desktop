@@ -265,7 +265,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     line-height: 23px;
     color: var(--text-sub-color);
 
-    font-size: 15px;
+    /* font-size: 15px; */
 
     overflow: hidden;
     word-wrap: break-all;

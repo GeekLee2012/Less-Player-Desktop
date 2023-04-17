@@ -25,7 +25,7 @@ const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize,
     showToast, switchPlayingViewTheme,
     toggleSoundEffectView } = useAppCommonStore()
-const { currentTrack, playingIndex, volume } = storeToRefs(usePlayStore())
+const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos } = storeToRefs(useSettingStore())
 const volumeBarRef = ref(null)
@@ -122,9 +122,7 @@ watch([currentTrack, playingViewShow], checkFavorite)
                             </g>
                         </svg>
                     </div>
-                    <div class="audio-title">
-                        {{ currentTrack.title }}
-                    </div>
+                    <div class="audio-title" v-html="currentTrack.title"></div>
                     <div v-show="Track.hasArtist(currentTrack)">&nbsp;-&nbsp;</div>
                     <div class="audio-artist spacing">
                         <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
@@ -144,7 +142,7 @@ watch([currentTrack, playingViewShow], checkFavorite)
             </div>
         </div>
         <div class="bottom">
-            <ProgressBar :value="progressState" :seekable="true" :onseek="seekTrack"></ProgressBar>
+            <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
             <div class="action">
                 <div class="btm-left">
                     <div @click="toggleFavorite">

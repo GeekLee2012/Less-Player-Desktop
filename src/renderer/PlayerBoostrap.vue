@@ -74,7 +74,7 @@ const traceRecentAlbum = (album) => {
 /* 歌词获取 */
 const loadLyric = (track) => {
     if (!track || Track.hasLyric(track)) {
-        EventBus.emit('track-lyricLoaded', track)
+        if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
         return
     }
     const platform = track.platform
@@ -82,10 +82,12 @@ const loadLyric = (track) => {
     if (!vendor || !vendor.lyric
         || Playlist.isFMRadioType(track)
         || Playlist.isAnchorRadioType(track)) {
-        EventBus.emit('track-lyricLoaded', track)
+        if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
         return
     }
-    vendor.lyric(track.id, track).then(result => updateLyric(track, result))
+    vendor.lyric(track.id, track).then(result => {
+        if (isCurrentTrack(track)) updateLyric(track, result)
+    })
 }
 
 const updateLyric = (track, lyric) => {

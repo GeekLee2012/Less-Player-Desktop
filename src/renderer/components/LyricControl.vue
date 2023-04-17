@@ -18,6 +18,7 @@ const props = defineProps({
 
 const { playMv, loadLyric, currentTimeState } = inject('player')
 
+const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
 const { lyric } = storeToRefs(useSettingStore())
 
@@ -176,10 +177,7 @@ EventBus.on('lyric-lineHeight', setupLyricLines)
 EventBus.on('lyric-lineSpacing', setupLyricLines)
 EventBus.on('lyric-alignment', setupLyricAlignment)
 
-const isHeaderVisible = () => {
-    const { metaPos } = lyric.value
-    return metaPos == 0
-}
+const isHeaderVisible = () => (lyric.value.metaPos == 0)
 
 onMounted(() => {
     loadLyric(props.track)
@@ -187,6 +185,8 @@ onMounted(() => {
 })
 
 watch(currentTimeState, (nv, ov) => {
+    //TODO 暂时简单处理，播放页隐藏时直接返回
+    if (!playingViewShow.value) return
     try {
         renderAndScrollLyric(nv)
     } catch (error) {
@@ -194,7 +194,9 @@ watch(currentTimeState, (nv, ov) => {
     }
 })
 
-watch(() => props.track, (nv, ov) => loadLyric(props.track))
+watch(() => props.track, (nv, ov) => {
+    loadLyric(props.track)
+}, { immediate: true })
 </script>
 
 <template>
@@ -212,7 +214,7 @@ watch(() => props.track, (nv, ov) => loadLyric(props.track))
                         </g>
                     </svg>
                 </span>
-                {{ track.title }}
+                <span v-html="track.title"></span>
             </div>
             <div class="audio-artist spacing">
                 <b>歌手:</b>

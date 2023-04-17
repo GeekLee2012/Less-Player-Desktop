@@ -173,7 +173,7 @@ const updateCover = async () => {
     border-radius: 2px;
     background-color: var(--input-bg);
     color: var(--input-text-color);
-    font-size: 15px;
+    /*font-size: 15px; */
 }
 
 #user-info-edit-view .center .form-row input {
