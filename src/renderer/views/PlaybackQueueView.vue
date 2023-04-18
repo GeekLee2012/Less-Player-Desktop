@@ -13,7 +13,7 @@ const { resetQueue } = usePlayStore()
 const { showToast, hidePlaybackQueueView, hidePlayingView, hideAllCtxMenus } = useAppCommonStore()
 
 const targetPlaying = () => {
-    if (queueTracksSize < 1) return
+    if (queueTracksSize.value < 1) return
     const queueItemsWrap = document.querySelector('.playback-queue-view .center')
     const clientHeight = queueItemsWrap.clientHeight
     const scrollHeight = queueItemsWrap.scrollHeight
@@ -29,13 +29,21 @@ const onQueueEmpty = () => {
 }
 
 const clearAll = () => {
+    if (queueTracksSize.value < 1) return
     resetQueue()
     onQueueEmpty()
 }
 
+const queueState = () => {
+    const total = queueTracks.value.length
+    const current = Math.min(Math.max(playingIndex.value + 1, 0), total)
+    return total > 0 ? (current > 0 ? `${current} / ${total}首` : `共${total}首`) : '共0首'
+}
+
 EventBus.on("playbackQueue-empty", onQueueEmpty)
 
-const pbqRef = ref(null), listRef = ref(null)
+const pbqRef = ref(null)
+const listRef = ref(null)
 onMounted(() => {
     if (pbqRef.value) pbqRef.value.addEventListener('click', hideAllCtxMenus)
     if (listRef.value) listRef.value.addEventListener('scroll', hideAllCtxMenus)
@@ -48,7 +56,8 @@ onMounted(() => {
         <div class="header">
             <div class="title">当前播放</div>
             <div class="detail">
-                <div class="subtext">共{{ queueTracks.length }}首</div>
+                <!--<div class="subtext">共{{ queueTracks.length }}首</div>-->
+                <div class="subtext" v-html="queueState()"></div>
                 <div class="action">
                     <div class="target-btn text-btn" @click="targetPlaying">
                         <svg width="16" height="15" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -77,6 +86,17 @@ onMounted(() => {
                                 transform="translate(-833 -413)" />
                         </svg>
                         <span>清空</span>
+                    </div>
+                    <div class="more-btn" v-show="false">
+                        <svg width="14" height="14" viewBox="0 0 106.42 666" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path d="M0,53a53.21,53.21,0,1,1,53.14,53.41A53,53,0,0,1,0,53Z" />
+                                    <path d="M106.42,309.4A53.21,53.21,0,1,1,53.28,256,53,53,0,0,1,106.42,309.4Z" />
+                                    <path d="M106.42,565.42A53.21,53.21,0,1,1,53.3,512,53,53,0,0,1,106.42,565.42Z" />
+                                </g>
+                            </g>
+                        </svg>
                     </div>
                 </div>
             </div>
@@ -141,6 +161,16 @@ onMounted(() => {
 }
 
 .playback-queue-view .text-btn:hover svg {
+    fill: var(--hl-color);
+}
+
+.playback-queue-view .more-btn {
+    cursor: pointer;
+    margin-top: 4px;
+    margin-left: 15px;
+}
+
+.playback-queue-view .more-btn:hover svg {
     fill: var(--hl-color);
 }
 

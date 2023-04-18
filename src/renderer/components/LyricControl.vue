@@ -1,9 +1,9 @@
 <script setup>
-import { watch, ref, onMounted, inject, onUnmounted } from 'vue';
+import { watch, ref, onMounted, inject, onUnmounted, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
-import { toMMssSSS } from '../../common/Times';
+import { toMMssSSS, toMmss, toMillis } from '../../common/Times';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { usePlayStore } from '../store/playStore';
@@ -16,33 +16,42 @@ const props = defineProps({
 })
 
 
-const { playMv, loadLyric, currentTimeState } = inject('player')
+const { playMv, loadLyric, currentTimeState, seekTrack } = inject('player')
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
 const { lyric } = storeToRefs(useSettingStore())
+
 
 const currentIndex = ref(-1)
 const hasLyric = ref(false)
 const lyricData = ref(Track.lyricData(props.track))
 let presetOffset = Track.lyricOffset(props.track)
 
-let destScrollTop = -1
+let destScrollTop = 0
 let rafId = null
 
-let isUserMouseWheel = false
+let isUserMouseWheel = ref(false)
 let userMouseWheelCancelTimer = null
+let currentSecs = -1
+
+const setLyricExist = (value) => hasLyric.value = value
+const setLyricData = (value) => lyricData.value = value
+const setPresetOffset = (value) => presetOffset = value
+const setLyricCurrentIndex = (value) => currentIndex.value = value
+const setUserMouseWheel = (value) => isUserMouseWheel.value = value
 
 const renderAndScrollLyric = (secs) => {
     if (!hasLyric.value) return
+    if (currentSecs == secs) return
+    currentSecs = secs
 
     const userOffset = lyric.value.offset / 1000
     secs = Math.max(0, (secs + presetOffset + userOffset))
     const MMssSSS = toMMssSSS(secs * 1000)
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     const lines = lyricWrap.querySelectorAll('.line')
-    //Highlight 
-    //TODO算法存在Bug
+    //Highlight
     let index = -1
     for (var i = 0; i < lines.length; i++) {
         const time = lines[i].getAttribute('time-key')
@@ -55,10 +64,14 @@ const renderAndScrollLyric = (secs) => {
 
     setupLyricLines()
 
-    if (index < 0) return
-    currentIndex.value = index
+    if (index < 0 || isUserMouseWheel.value) return
+    setLyricCurrentIndex(index)
+
     //Scroll
-    if (isUserMouseWheel) return
+    /*
+    //算法1
+    //当歌词存在换行时，无法保证准确定位
+    //且当前高亮行也无法保证在可视区居中
     const scrollIndex = index > 1 ? (index - 1) : 0
     const scrollHeight = lyricWrap.scrollHeight
     const clientHeight = lyricWrap.clientHeight
@@ -66,7 +79,14 @@ const renderAndScrollLyric = (secs) => {
     destScrollTop = maxScrollTop * (scrollIndex / (lines.length - 1))
     lyricWrap.scrollTop = destScrollTop
     //smoothScroll(lyricWrap, 300)
+    */
 
+    //算法2：依赖offsetParent定位
+    //基本保证准确定位，且当前高亮行也基本法保证在可视区居中
+    //offsetTop：元素到offsetParent顶部的距离
+    //offsetParent：距离元素最近的一个具有定位的祖宗元素（relative，absolute，fixed），若祖宗都不符合条件，offsetParent为body
+    destScrollTop = lines[index].offsetTop - lyricWrap.clientHeight / 2
+    lyricWrap.scrollTop = Math.max(destScrollTop, 0)
 }
 
 //参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
@@ -97,6 +117,7 @@ function smoothScroll(target, duration) {
 }
 
 const reloadLyricData = (track) => {
+    let isExist = false
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
         const lyricData = track.lyric.data
         let isValidLyric = true
@@ -114,23 +135,29 @@ const reloadLyricData = (track) => {
                 line = linesIter.next()
             }
         }
-        hasLyric.value = isValidLyric
-    } else {
-        hasLyric.value = false
+        isExist = isValidLyric
     }
-    lyricData.value = Track.lyricData(track)
-    presetOffset = Track.lyricOffset(track)
-
-    setTimeout(setupLyricLines, 300)
+    //重置数据
+    setLyricExist(isExist)
+    setLyricData(Track.lyricData(track))
+    setPresetOffset(Track.lyricOffset(track))
+    setLyricCurrentIndex(-1)
+    //重置滚动条位置
+    const lyricWrap = document.querySelector(".lyric-ctl .center")
+    if (lyricWrap) lyricWrap.scrollTop = 0
+    //重新设置样式
+    nextTick(setupLyricLines)
+    //setTimeout(setupLyricLines, 300)
 }
 
 const onUserMouseWheel = (e) => {
     //e.preventDefault()
-    isUserMouseWheel = true
+    setUserMouseWheel(true)
     if (userMouseWheelCancelTimer) clearTimeout(userMouseWheelCancelTimer)
     userMouseWheelCancelTimer = setTimeout(() => {
-        isUserMouseWheel = false
+        setUserMouseWheel(false)
     }, 3000)
+    updateScrollLocatorTime()
 }
 
 const setLyricLineStyle = (line) => {
@@ -166,6 +193,8 @@ const setupLyricAlignment = () => {
     if (artistEls) artistEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
     if (albumEls) albumEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
     if (noLyricEls) noLyricEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
+
+    setupLyricScrollLocator()
 }
 
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
@@ -178,6 +207,64 @@ EventBus.on('lyric-lineSpacing', setupLyricLines)
 EventBus.on('lyric-alignment', setupLyricAlignment)
 
 const isHeaderVisible = () => (lyric.value.metaPos == 0)
+
+const scrollLocatorTime = ref(0)
+const scrollLocatorTimeText = ref('00:00')
+const scrollLocatorCurrentIndex = ref(-1)
+
+const setScrollLocatorTime = (value) => scrollLocatorTime.value = value
+const setScrollLocatorTimeText = (value) => scrollLocatorTimeText.value = value
+const setScrollLocatorCurrentIndex = (value) => scrollLocatorCurrentIndex.value = value
+
+const setupLyricScrollLocator = () => {
+    const locatorEl = document.querySelector('.lyric-ctl .scroll-locator')
+    if (!locatorEl) return
+    const { clientHeight, clientWidth } = document.documentElement
+    locatorEl.style.top = clientHeight / 2 + 'px'
+
+    const lyricEl = document.querySelector('.lyric-ctl .center')
+    let leftAlignPos = clientWidth / 2 - 100
+    if (lyricEl) leftAlignPos = Math.max(lyricEl.clientWidth, leftAlignPos)
+
+    const { alignment } = lyric.value
+    //const flexAligns = ['flex-start', 'center', 'flex-end']
+    const locatorPositions = ['80px', '80px', leftAlignPos + 'px']
+    locatorEl.style.right = locatorPositions[alignment]
+    //locatorEl.style.justifyContent = flexAligns[alignment]
+}
+
+const updateScrollLocatorTime = () => {
+    const locatorEl = document.querySelector('.lyric-ctl .scroll-locator')
+    if (!locatorEl) return
+    const lyricEl = document.querySelector('.lyric-ctl .center')
+    if (!lyricEl) return
+    const x = lyricEl.offsetLeft + 88
+    const y = locatorEl.offsetTop
+    const pointEl = document.elementFromPoint(x, y)
+    if (!pointEl) return
+    const timekey = pointEl.getAttribute('time-key')
+    if (!timekey) return
+    //Time
+    setScrollLocatorTime(timekey)
+    setScrollLocatorTimeText(timekey.split('.')[0])
+    //Hightlight
+    const index = pointEl.getAttribute('index')
+    setScrollLocatorCurrentIndex(index)
+}
+
+const seekFromLyric = () => {
+    //不再多加判断，由用户自己决定吧
+    //if (currentIndex.value == scrollLocatorCurrentIndex.value) return
+    const { duration } = props.track
+    if (duration <= 0) return
+    const current = toMillis(scrollLocatorTime.value)
+    if (current < 0) return
+    const percent = current / duration
+    seekTrack(percent)
+    setUserMouseWheel(false)
+}
+
+EventBus.on('app-resize', setupLyricScrollLocator)
 
 onMounted(() => {
     loadLyric(props.track)
@@ -236,11 +323,23 @@ watch(() => props.track, (nv, ov) => {
             <div v-show="!hasLyric" class="no-lyric">
                 <label>暂无歌词，请继续欣赏音乐吧~</label>
             </div>
-            <div v-show="hasLyric" v-for="(item, index) in lyricData" class="line" :time-key="item[0]" :class="{
-                first: index == 0,
-                last: index == (lyricData.size - 1),
-                current: index == currentIndex
-            }" v-html="item[1]">
+            <div v-show="hasLyric" v-for="(item, index) in lyricData" class="line" :time-key="item[0]" :index="index"
+                :class="{
+                    first: index == 0,
+                    last: index == (lyricData.size - 1),
+                    current: index == currentIndex,
+                    locatorCurrent: (index == scrollLocatorCurrentIndex && isUserMouseWheel)
+                }" v-html="item[1]">
+            </div>
+        </div>
+        <div class="scroll-locator" v-show="hasLyric && isUserMouseWheel">
+            <span class="time-text" v-html="scrollLocatorTimeText"></span>
+            <div class="play-btn" @click="seekFromLyric">
+                <svg width="9" height="9" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <path
+                        d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
+                </svg>
             </div>
         </div>
     </div>
@@ -307,6 +406,7 @@ watch(() => props.track, (nv, ov) => {
 }
 
 .lyric-ctl .center {
+    position: relative;
     height: 399px;
     overflow: auto;
     margin-top: 15px;
@@ -337,15 +437,20 @@ watch(() => props.track, (nv, ov) => {
     -webkit-background-clip: text;
     color: transparent;
     font-size: 21px;
-    font-weight: bold;
+    font-weight: bold !important;
 }
 
+/*TODO 窗口大小变化后，无法自适应 */
 .lyric-ctl .center .first {
-    margin-top: 125px;
+    margin-top: 168px !important;
 }
 
 .lyric-ctl .center .last {
-    margin-bottom: 135px;
+    margin-bottom: 233px !important;
+}
+
+.lyric-ctl .center .locatorCurrent {
+    font-weight: bold !important;
 }
 
 .lyric-ctl .no-lyric {
@@ -354,7 +459,57 @@ watch(() => props.track, (nv, ov) => {
     align-items: center;
     justify-content: flex-start;
     font-size: 21px;
-    font-weight: bold;
+    font-weight: bold !important;
     color: var(--text-lyric-color);
+}
+
+.lyric-ctl .scroll-locator {
+    position: fixed;
+    right: 80px;
+    top: 360px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.lyric-ctl .scroll-locator .time-text {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/*
+.lyric-ctl .scroll-locator .time-text::before {
+    content: '';
+    display: inline-block;
+    width: 366px;
+    height: 1px;
+    margin-right: 10px;
+    margin-bottom: 3px;
+    border-bottom: 1px dashed var(--hl-color);
+}
+*/
+
+.lyric-ctl .scroll-locator .play-btn {
+    /*margin-top: 16px;*/
+    border-radius: 10rem;
+    width: 18px;
+    height: 18px;
+    background: var(--btn-bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+}
+
+.lyric-ctl .scroll-locator .play-btn:hover {
+    background: var(--btn-hover-bg);
+}
+
+.lyric-ctl .scroll-locator .play-btn svg {
+    margin-left: 1px;
+    fill: var(--svg-btn-color) !important;
 }
 </style>

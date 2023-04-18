@@ -1,5 +1,5 @@
 <script setup>
-import { inject, provide, onMounted, watch, ref, } from 'vue';
+import { inject, provide, onMounted, watch, ref, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -39,6 +39,10 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
 const { getCurrentThemeHlColor } = useSettingStore()
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
+
+const trackStarted = ref(false)
+
+const setTrackStarted = (value) => trackStarted.value = value
 
 /* 记录最近播放 */
 //歌曲、电台
@@ -446,13 +450,17 @@ EventBus.on('track-state', state => {
     switch (state) {
         case PLAY_STATE.PLAYING:
             setPlaying(true)
-            break;
+            setTrackStarted(true)
+            break
         case PLAY_STATE.PAUSE:
             setPlaying(false)
-            break;
+            break
         case PLAY_STATE.END:
             playNextTrack()
-            break;
+            break
+        case PLAY_STATE.INIT:
+            setTrackStarted(false)
+            break
         default:
             break
     }
@@ -487,7 +495,25 @@ EventBus.on('track-nextPlaylistRadioTrack', track =>
     playNextPlaylistRadioTrack(track.platform, track.channel, track))
 
 //播放进度
-const seekTrack = (percent) => EventBus.emit('track-seek', percent)
+const seekTrack = (percent) => {
+    let delay = 0
+    if (!isPlaying()) {
+        if (trackStarted.value) {
+            togglePlay()
+            delay = 88
+        } else {
+            playTrackDirectly(currentTrack.value)
+            delay = 366
+        }
+    }
+    if (delay > 0) {
+        setTimeout(() => doSeekTrack(percent), delay)
+    } else {
+        doSeekTrack(percent)
+    }
+}
+
+const doSeekTrack = (percent) => EventBus.emit('track-seek', percent)
 
 //播放MV
 const playMv = (track) => {

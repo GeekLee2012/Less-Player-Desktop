@@ -80,6 +80,7 @@ export class Player {
             }
         })
         this.tryUnlockHowlAudios()
+        this.notifyStateChanged(PLAY_STATE.INIT)
         return this.sound
     }
 

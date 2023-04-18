@@ -22,7 +22,7 @@ const { setExploreMode, setArtistExploreMode,
     setRadioExploreMode, setUserHomeExploreMode,
     hideAllCtxMenus, hidePlayingView,
     updateCommonCtxItem, hidePlaybackQueueView,
-    setPlaylistExploreMode, } = useAppCommonStore()
+    setPlaylistExploreMode, hideVideoPlayingView } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -71,6 +71,7 @@ const hideRelativeComponents = (to) => {
     //const path = to.path
     //TODO
     hidePlayingView()
+    hideVideoPlayingView()
     hideAllCtxMenus()
     updateCommonCtxItem(null)
 }
@@ -93,10 +94,7 @@ const createCommonRoute = (toPath, onRouteReady) => ({
 
 const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
-const resolveRoute = (route) => {
-    if (typeof (route) == 'object') return route
-    return { toPath: route.toString() }
-}
+const resolveRoute = (route) => (typeof (route) == 'object' ? route : { toPath: route.toString() })
 
 //TODO Reject是否需要实现待考虑
 const visitRoute = (route) => {
@@ -149,7 +147,7 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
     let id = item.id
     const platformValid = isArtistDetailVisitable(platform)
     let idValid = valiadateArtistId(id)
-    //TODO 二次确认数据，太别扭啦，后续改掉
+    //TODO 二次确认数据，太别扭啦
     if (!idValid && updatedArtist) {
         if (updatedArtist.trackId == props.trackId
             && updatedArtist.artist.length > 0
@@ -267,6 +265,4 @@ provide('appRoute', {
     <slot></slot>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

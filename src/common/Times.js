@@ -69,14 +69,17 @@ export const toYyyymmddHhMmSs = (timestamp, sp1, sp2, sp3) => {
 }
 
 
-export const toMillis = (mmss) => {
+export const toMillis = (mmssMMM) => {
     try {
-        const timeParts = mmss.split(":")
+        let timeParts = mmssMMM.split(':')
         const minutes = parseInt(timeParts[0].trim())
-        const seconds = parseInt(timeParts[1].trim())
-        return (minutes * 60 + seconds) * 1000
+        timeParts = timeParts[1].split('.')
+        const seconds = parseInt(timeParts[0].trim())
+        let millis = 0
+        if (timeParts.length > 1) millis = parseInt(timeParts[1].trim())
+        return (minutes * 60 + seconds) * 1000 + millis
     } catch (error) {
-        console.log(mmss, "\n", error)
+        console.log(mmssMMM, "\n", error)
     }
     return -1
 }

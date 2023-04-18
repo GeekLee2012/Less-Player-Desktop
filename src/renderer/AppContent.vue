@@ -224,6 +224,7 @@ onMounted(() => {
   window.addEventListener('resize', e => {
     //自适应视频页面大小
     setVideoViewSize()
+    EventBus.emit('app-resize')
   })
 
   //点击事件监听
