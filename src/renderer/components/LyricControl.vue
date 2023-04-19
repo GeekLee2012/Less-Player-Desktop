@@ -471,6 +471,7 @@ watch(() => props.track, () => {
 
 .lyric-ctl .no-lyric {
     flex: 1;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: flex-start;
