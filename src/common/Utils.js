@@ -26,6 +26,10 @@ export const useUseCustomTrafficLight = () => {
     return tryCall(() => (electronAPI.useCustomTrafficLight), false)
 }
 
+export const isDevEnv = () => {
+    return tryCall(() => (electronAPI.isDevEnv), null)
+}
+
 export const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz'
 export const ALPHABET_NUMS = ALPHABETS + '01234567890'
 

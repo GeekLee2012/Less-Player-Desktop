@@ -237,7 +237,8 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 }
 
 .radio-category-view .header .cate-title {
-    font-size: 21px !important;
+    /*font-size: 21px;*/
+    font-size: var(--text-main3-title-size);
 }
 
 .radio-category-view .fl-item {

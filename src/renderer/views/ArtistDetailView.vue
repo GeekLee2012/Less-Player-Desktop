@@ -373,8 +373,8 @@ watch([platform, artistId], reloadAll, { immediate: true })
                 <div class="title" v-html="artistName"></div>
                 <div class="alias" v-html="artistAlias"></div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
-                        v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)"
+                        text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
                         v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
                     <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
@@ -391,8 +391,8 @@ watch([platform, artistId], reloadAll, { immediate: true })
                         style="width: 168px; height: 36px; display: inline-block;"></div>
                 </div>
                 <div class="action" v-show="!isLoadingDetail">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
-                        v-show="isAvailableTab(0)" text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)"
+                        text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
                         v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
                     <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
@@ -440,7 +440,8 @@ watch([platform, artistId], reloadAll, { immediate: true })
     margin-top: 5px;
     margin-bottom: 20px;
     margin-bottom: 39px;
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
     height: 39px;
 
@@ -494,7 +495,8 @@ watch([platform, artistId], reloadAll, { immediate: true })
 #artist-detail-view .tab-tip {
     position: absolute;
     right: 10px;
-    font-size: 16px;
+    /*font-size: 16px;
+    font-size: var(--text-sub-size);*/
     background: linear-gradient(to top right, #1ca388, #28c83f);
     background: var(--hl-text-bg);
     -webkit-background-clip: text;

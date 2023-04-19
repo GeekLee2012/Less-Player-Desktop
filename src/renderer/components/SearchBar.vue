@@ -93,7 +93,7 @@ const clear = () => {
 }
 
 .search-bar .keyword {
-    /*font-size: 15px; */
+    font-size: var(--text-size);
     padding-left: 5px;
     padding-right: 6px;
     outline: 0;
@@ -119,7 +119,9 @@ const clear = () => {
     cursor: pointer;
 }
 
+/* 
 .search-bar .keyword::-webkit-input-placeholder {
-    /* color: var(--searchbar-placeholder-color); */
+    color: var(--searchbar-placeholder-color);
 }
+*/
 </style>

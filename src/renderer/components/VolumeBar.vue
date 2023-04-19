@@ -6,7 +6,7 @@ import { usePlayStore } from '../store/playStore';
 import { storeToRefs } from 'pinia';
 
 
-
+//TODO 暂时先这样吧，早期写得比较乱
 const status = ref(1)
 const sliderRef = ref(null)
 const { updateVolume } = usePlayStore()
@@ -74,10 +74,12 @@ defineExpose({
     -webkit-app-region: none;
 }
 
+/* 
 .volume-bar .volume-status,
 .volume-bar .volume-value {
-    /* margin: auto; */
+    margin: auto; 
 }
+*/
 
 .volume-bar .volume-status {
     margin-top: 3px;

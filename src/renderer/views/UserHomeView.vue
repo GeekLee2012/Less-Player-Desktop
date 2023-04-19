@@ -178,6 +178,8 @@ const switchSubTab = () => {
         currentTabView.value = PlaylistsControl
     }
     subTabTipText.value = typeTabs[activeSubTab.value].text.replace('0', tabData.length)
+    //TODO 偷下懒
+    tabTipText.value = subTabTipText.value
 }
 
 const visitBatchActionView = () => {
@@ -325,7 +327,7 @@ EventBus.on("userHome-refresh", refresh)
                 <span class="sub-tab" v-for="(tab, index) in typeTabs" :class="{ active: activeSubTab == index }"
                     @click="visitSubTab(index)" v-html="tab.name">
                 </span>
-                <span class="tab-tip" v-html="subTabTipText"></span>
+                <!--<span class="tab-tip" v-html="subTabTipText"></span>-->
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
                 :dataType="dataType">
@@ -379,7 +381,8 @@ EventBus.on("userHome-refresh", refresh)
 
 #user-profile-view .header .title {
     text-align: left;
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
     margin-left: 10px;
     overflow: hidden;
@@ -395,6 +398,7 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile-view .header .about {
     text-align: left;
     margin-bottom: 39px;
+    line-height: var(--text-line-height);
     /* font-size: 15px; */
     color: var(--text-sub-color);
     overflow: hidden;
@@ -447,7 +451,8 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile-view .tab-tip {
     position: absolute;
     right: 10px;
-    font-size: var(--tab-title-text-size);
+    /*font-size: var(--tab-title-text-size);
+    font-size: var(--text-sub-size);*/
     font-weight: 520;
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
@@ -468,7 +473,8 @@ EventBus.on("userHome-refresh", refresh)
 }
 
 #user-profile-view .sub-tab {
-    font-size: 14px;
+    /*font-size: 14px;*/
+    font-size: var(--text-sub-size);
     font-weight: 520;
     padding-left: 6px;
     padding-right: 6px;

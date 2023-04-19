@@ -100,7 +100,8 @@ EventBus.on('artistCategory-resetScroll', () => {
 }
 
 .artist-category-view .header .cate-title {
-    font-size: 21px;
+    /*font-size: 21px;*/
+    font-size: var(--text-main3-title-size);
     font-weight: bold;
     /*
     background: var(--btn-bg);

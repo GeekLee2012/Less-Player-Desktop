@@ -214,8 +214,8 @@ watch([platform, albumId], reloadAll, { immediate: true })
                     <div class="info-row">
                         <span class="col1"><b>发行时间:</b> {{ publishTime || '未知' }} </span>
                         <!--
-                        <span class="col2"><b>发行公司:</b> {{ company }} </span>
-                        -->
+                                        <span class="col2"><b>发行公司:</b> {{ company }} </span>
+                                        -->
                     </div>
                     <div class="info-row">
                         <span class="col2"><b>发行公司:</b> {{ company || '未知' }}</span>
@@ -278,7 +278,8 @@ watch([platform, albumId], reloadAll, { immediate: true })
 #album-detail-view .header .title {
     text-align: left;
     margin-top: 5px;
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
 
     overflow: hidden;
@@ -301,7 +302,7 @@ watch([platform, albumId], reloadAll, { immediate: true })
 #album-detail-view .header .info {
     margin-top: 15px;
     margin-bottom: 20px;
-    font-size: 16px;
+    /*font-size: 16px;*/
     text-align: left;
 }
 
@@ -366,7 +367,8 @@ watch([platform, albumId], reloadAll, { immediate: true })
 #album-detail-view .tab-tip {
     position: absolute;
     right: 10px;
-    font-size: 16px;
+    /*font-size: 16px;
+    font-size: var(--text-sub-size);*/
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

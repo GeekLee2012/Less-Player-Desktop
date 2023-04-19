@@ -356,8 +356,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
         <div class="center">
             <div class="action">
                 <div class="checkbox" :class="{ btnDisabled: (tabData.length < 1) }">
-                    <svg @click="toggleSelectAll" v-show="!checkedAll" width="16" height="16"
-                        viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
+                    <svg @click="toggleSelectAll" v-show="!checkedAll" width="16" height="16" viewBox="0 0 731.64 731.66"
+                        xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -376,8 +376,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                     </svg>
                     <span @click="toggleSelectAll">{{ (checkedAll ? "取消全选" : "全选") }}</span>
                 </div>
-                <SvgTextButton :isDisabled="checkedData.length < 1" text="播放" class="spacing"
-                    v-show="actionShowCtl.playBtn" :leftAction="playChecked" :rightAction="addToQueue">
+                <SvgTextButton :isDisabled="checkedData.length < 1" text="播放" class="spacing" v-show="actionShowCtl.playBtn"
+                    :leftAction="playChecked" :rightAction="addToQueue">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 0 139 139" xml:space="preserve"
                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -436,15 +436,15 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                     </template>
                 </SvgTextButton>
                 <!--
-                <SvgTextButton :isDisabled="checkedData.length < 1" 
-                    text="添加到当前播放" class="spacing addToBtn"
-                    v-show="actionShowCtl.addToQueueBtn" 
-                    :leftAction="addToQueue" >
-                    <template #left-img>
-                        <svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>
-                    </template>
-                </SvgTextButton>
-                -->
+                            <SvgTextButton :isDisabled="checkedData.length < 1" 
+                                text="添加到当前播放" class="spacing addToBtn"
+                                v-show="actionShowCtl.addToQueueBtn" 
+                                :leftAction="addToQueue" >
+                                <template #left-img>
+                                    <svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>
+                                </template>
+                            </SvgTextButton>
+                            -->
                 <SvgTextButton :isDisabled="checkedData.length < 1" text="删除" class="spacing"
                     v-show="actionShowCtl.deleteBtn" :leftAction="removeChecked">
                     <template #left-img>
@@ -504,7 +504,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 
 #batch-action-view .header .title-wrap {
     text-align: left;
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
     position: relative;
 }
@@ -515,7 +516,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     right: 10px;
     text-align: right;
     margin-left: 25px;
-    font-size: 23px;
+    /*font-size: 23px;*/
+    font-size: var(--text-main2-title-size);
     font-weight: bold;
 }
 
@@ -598,6 +600,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     text-align: left;
     margin: 0px 20px;
     width: 65px;
+    width: 80px;
     cursor: pointer;
 }
 

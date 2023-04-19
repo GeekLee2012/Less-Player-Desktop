@@ -175,7 +175,8 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 }
 
 .playlist-category-view .header .cate-title {
-    font-size: 21px !important;
+    /*font-size: 21px;*/
+    font-size: var(--text-main3-title-size);
 }
 
 .playlist-category-view .fl-item {

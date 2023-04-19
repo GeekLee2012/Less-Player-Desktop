@@ -61,7 +61,6 @@ EventBus.on("refreshFavorite", checkFavorite)
 
 onMounted(() => {
     //setDisactived(false)
-    //EventBus.emit('playingView-changed')
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 

@@ -40,9 +40,9 @@ const { getCurrentThemeHlColor } = useSettingStore()
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
 
-const trackStarted = ref(false)
+const playState = ref(PLAY_STATE.NONE)
 
-const setTrackStarted = (value) => trackStarted.value = value
+const setPlayState = (value) => playState.value = value
 
 /* 记录最近播放 */
 //歌曲、电台
@@ -447,19 +447,16 @@ EventBus.on('track-play', track => {
 
 EventBus.on('track-error', onPlayerErrorRetry)
 EventBus.on('track-state', state => {
+    setPlayState(state)
     switch (state) {
         case PLAY_STATE.PLAYING:
             setPlaying(true)
-            setTrackStarted(true)
             break
         case PLAY_STATE.PAUSE:
             setPlaying(false)
             break
         case PLAY_STATE.END:
             playNextTrack()
-            break
-        case PLAY_STATE.INIT:
-            setTrackStarted(false)
             break
         default:
             break
@@ -494,23 +491,18 @@ EventBus.on("track-freqUnit8Data", freqData => {
 EventBus.on('track-nextPlaylistRadioTrack', track =>
     playNextPlaylistRadioTrack(track.platform, track.channel, track))
 
-//播放进度
+//TODO 播放进度
 const seekTrack = (percent) => {
-    let delay = 0
+    let delay = 36
     if (!isPlaying()) {
-        if (trackStarted.value) {
+        if (playState.value == PLAY_STATE.PAUSE) {
             togglePlay()
-            delay = 88
         } else {
             playTrackDirectly(currentTrack.value)
             delay = 366
         }
     }
-    if (delay > 0) {
-        setTimeout(() => doSeekTrack(percent), delay)
-    } else {
-        doSeekTrack(percent)
-    }
+    setTimeout(() => doSeekTrack(percent), delay)
 }
 
 const doSeekTrack = (percent) => EventBus.emit('track-seek', percent)
@@ -617,6 +609,7 @@ provide('player', {
     mmssCurrentTime,
     currentTimeState,
     progressState,
+    playState,
 })
 </script>
 

@@ -73,7 +73,7 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 歌词 */
         lyric: {
-            fontSize: 18,   //普通字号
+            fontSize: 21,   //普通字号
             hlFontSize: 21, //高亮字号
             fontWeight: 400,
             lineHeight: 28,
@@ -390,7 +390,7 @@ export const useSettingStore = defineStore('setting', {
             this.setupFontWeight()
         },
         setLyricFontSize(value) {
-            const fontSize = parseInt(value || 18)
+            const fontSize = parseInt(value || 21)
             if (fontSize < 10 || fontSize > 100) return
             this.lyric.fontSize = fontSize
             this.setupLyricFontSize()

@@ -289,8 +289,8 @@ watch(sources, () => {
             <div class="title">数据备份</div>
             <div class="action">
                 <div class="checkallbox">
-                    <svg @click="toggleCheckAll" v-show="!isCheckedAll" width="16" height="16"
-                        viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
+                    <svg @click="toggleCheckAll" v-show="!isCheckedAll" width="16" height="16" viewBox="0 0 731.64 731.66"
+                        xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -321,12 +321,10 @@ watch(sources, () => {
                     :isParent="hasChildren(item)">
                     <template #suffix>
                         <div class="length" v-show="item.showSuffix">
-                            <span v-show="item.id == 'customPlaylists'">{{ '(' + getCustomPlaylists.length +
-        ')'
-}}</span>
+                            <span v-show="item.id == 'customPlaylists'">{{ '(' + getCustomPlaylists.length + ')' }}</span>
                             <span v-show="item.id != 'customPlaylists'">({{ checkedLength[item.id] }} / {{ item.children
-        ? item.children.length : 0
-}})</span>
+                                ? item.children.length : 0
+                            }})</span>
                         </div>
                     </template>
                     <template #children>
@@ -361,7 +359,8 @@ watch(sources, () => {
 
 #data-backup-view .header .title {
     text-align: left;
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
     padding-bottom: 15px;
     margin-bottom: 15px;
@@ -395,6 +394,7 @@ watch(sources, () => {
     text-align: left;
     margin: 0px 20px;
     width: 65px;
+    width: 80px;
     cursor: pointer;
 }
 

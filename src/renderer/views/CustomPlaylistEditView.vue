@@ -111,7 +111,7 @@ onMounted(() => loadCustomPlaylist())
                     <div @keydown.stop="">
                         <textarea :value="detail.about" ref="aboutRef" maxlength="520"
                             placeholder="你想用歌单诉说什么，一起分享一下吧~ 最多允许输入520个字符哦">
-                        </textarea>
+                                </textarea>
                     </div>
                 </div>
                 <div class="action">
@@ -142,7 +142,8 @@ onMounted(() => loadCustomPlaylist())
 #custom-playlist-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
 }
 
@@ -201,7 +202,8 @@ onMounted(() => loadCustomPlaylist())
     border-radius: 2px;
     background-color: var(--input-bg);
     color: var(--input-text-color);
-    font-size: 15px;
+    /*font-size: 15px; */
+    font-size: var(--text-size);
 }
 
 #custom-playlist-edit-view .center .form-row input {

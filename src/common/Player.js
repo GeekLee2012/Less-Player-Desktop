@@ -54,10 +54,11 @@ export class Player {
             html5: true,
             autoplay: false,
             preload: false,
+            pool: 1,
             onplay: function () {
                 self.retry = 0
                 if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
-                self.animationFrameId = requestAnimationFrame(self.__step.bind(self))
+                self.animationFrameId = requestAnimationFrame(self._step.bind(self))
                 self.notifyStateChanged(PLAY_STATE.PLAYING)
             },
             onpause: function () {
@@ -70,7 +71,7 @@ export class Player {
             onseek: function () {
                 self.seeking = true
                 if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
-                self.animationFrameId = requestAnimationFrame(self.__step.bind(self))
+                self.animationFrameId = requestAnimationFrame(self._step.bind(self))
             },
             onloaderror: function () {
                 self.retryPlay(1)
@@ -135,7 +136,7 @@ export class Player {
 
     restore(track) {
         this.setCurrent(track)
-        //this.createSound()
+        this.createSound()
     }
 
     volume(value) {
@@ -149,7 +150,7 @@ export class Player {
         if (duration) sound.seek(duration * percent)
     }
 
-    __step() {
+    _step() {
         const sound = this.getSound()
         if (!sound) return
         if (!sound.playing() && !this.seeking) return
@@ -163,7 +164,7 @@ export class Player {
             this.retryPlay(1)
         }
         if (this.animationFrameId > 0) cancelAnimationFrame(this.animationFrameId)
-        this.animationFrameId = requestAnimationFrame(this.__step.bind(this))
+        this.animationFrameId = requestAnimationFrame(this._step.bind(this))
     }
 
     on(event, handler) {

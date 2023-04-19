@@ -200,8 +200,9 @@ const showContextMenu = (event) => {
 }
 
 .custom-playlist-item .title-wrap .size {
-    font-size: var(--text-sub-size);
-    font-size: 13px;
+    /*font-size: var(--text-sub-size);
+    font-size: 13px;*/
+    font-size: var(--tip-text-size);
     font-weight: 520;
     color: var(--text-sub-color);
 }

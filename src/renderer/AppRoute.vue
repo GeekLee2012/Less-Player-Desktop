@@ -10,6 +10,7 @@ import { useAppCommonStore } from './store/appCommonStore';
 import { usePlatformStore } from './store/platformStore';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useSettingStore } from './store/settingStore';
+import { isDevEnv } from '../common/Utils';
 
 
 
@@ -22,7 +23,9 @@ const { setExploreMode, setArtistExploreMode,
     setRadioExploreMode, setUserHomeExploreMode,
     hideAllCtxMenus, hidePlayingView,
     updateCommonCtxItem, hidePlaybackQueueView,
-    setPlaylistExploreMode, hideVideoPlayingView } = useAppCommonStore()
+    setPlaylistExploreMode, hideVideoPlayingView,
+    hideLyricToolbar, hideRandomMusicToolbar,
+    hideSoundEffectView } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -31,7 +34,7 @@ const { switchToFallbackLayout } = useSettingStore()
 const router = useRouter()
 const setupRouter = () => {
     router.beforeResolve((to, from) => {
-        console.log("[ ROUTE ] ==>>> " + to.path)
+        if (isDevEnv()) console.log("[ ROUTE ] ==>>> " + to.path)
         autoSwitchExploreMode(to)
         highlightPlatform(to)
         highlightNavigationCustomPlaylist(to, from)
@@ -74,6 +77,10 @@ const hideRelativeComponents = (to) => {
     hideVideoPlayingView()
     hideAllCtxMenus()
     updateCommonCtxItem(null)
+
+    hideLyricToolbar()
+    hideRandomMusicToolbar()
+    hideSoundEffectView()
 }
 
 const createCommonRoute = (toPath, onRouteReady) => ({
@@ -81,7 +88,8 @@ const createCommonRoute = (toPath, onRouteReady) => ({
     onRouteReady,
     //不完全等价 router.beforeResovle()
     beforeRoute: (toPath) => {
-        hidePlayingView()
+        //hidePlayingView()
+        hideRelativeComponents()
         if (isSimpleLayout.value) switchToFallbackLayout()
         if (!toPath.includes('/artist/')) hidePlaybackQueueView()
         if (toPath.includes('/theme') ||

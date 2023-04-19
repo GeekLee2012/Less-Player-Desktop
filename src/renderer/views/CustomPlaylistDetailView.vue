@@ -214,17 +214,19 @@ onUpdated(() => {
 #custom-playlist-detail-view .header .title,
 #custom-playlist-detail-view .header .about {
     text-align: left;
-    margin-bottom: 13px;
+    margin-bottom: 10px;
 }
 
 #custom-playlist-detail-view .header .title {
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
 }
 
 #custom-playlist-detail-view .header .about {
-    height: 108px;
-    line-height: 21px;
+    height: 113px;
+    /*line-height: 21px;*/
+    line-height: var(--text-line-height);
     color: var(--text-sub-color);
     overflow: hidden;
     word-wrap: break-all;
@@ -235,7 +237,7 @@ onUpdated(() => {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 5;
     margin-bottom: 10px;
-    font-size: 15px;
+    /*font-size: 15px;*/
 }
 
 #custom-playlist-detail-view .right .edit {
@@ -259,7 +261,8 @@ onUpdated(() => {
 }
 
 #custom-playlist-detail-view .time {
-    font-size: 13px;
+    /*font-size: 13px;*/
+    font-size: var(--tip-text-size);
     font-weight: 520;
     color: var(--text-sub-color);
     text-align: left;

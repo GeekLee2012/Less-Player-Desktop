@@ -60,6 +60,7 @@ const toggleFavorite = () => {
     showToast(text)
 }
 
+//TODO 早期写得比较乱
 const checkFavorite = () => {
     //if(playingIndex.value < 0) return 
     const { id, platform } = currentTrack.value
@@ -75,7 +76,6 @@ EventBus.on("refreshFavorite", checkFavorite)
 
 onMounted(() => {
     EventBus.emit("app-adjustWinCtlBtns")
-    EventBus.emit('playingView-changed')
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 

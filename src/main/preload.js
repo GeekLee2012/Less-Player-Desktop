@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
 */
 
 const { contextBridge, ipcRenderer } = require('electron')
-const { isMacOS, isWinOS, useCustomTrafficLight } = require('./env')
+const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv } = require('./env')
 
 contextBridge.exposeInMainWorld('electronAPI', {
   //ipcRenderer,
@@ -26,5 +26,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   isMacOS,
   isWinOS,
+  isDevEnv,
   useCustomTrafficLight
 })

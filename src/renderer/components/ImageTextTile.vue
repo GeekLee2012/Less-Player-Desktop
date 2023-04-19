@@ -75,11 +75,11 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
             </div>
         </div>
         <!-- 目前体验不好
-        <picture>
-            <source type="image/webp" :srcset="cover">
-            <img class="cover" v-lazy="cover" /> 
-        </picture>
-        -->
+            <picture>
+                <source type="image/webp" :srcset="cover">
+                <img class="cover" v-lazy="cover" /> 
+            </picture>
+            -->
         <div class="title" v-html="title"></div>
         <div class="subtitle" v-show="subtitle" v-html="subtitle"></div>
     </div>
@@ -110,7 +110,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     margin-top: 12px;
     text-align: left;
     cursor: pointer;
-    line-height: 23px;
+    line-height: var(--text-line-height);
 
     overflow: hidden;
     text-overflow: ellipsis;

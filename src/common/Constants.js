@@ -2,6 +2,7 @@
 const FILE_PREFIX = 'file:///'
 
 export const PLAY_STATE = {
+    NONE: -1,
     INIT: 0,
     PLAYING: 1,
     PAUSE: 2,

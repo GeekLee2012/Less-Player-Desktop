@@ -30,6 +30,8 @@ watch(() => props.value, (nv, ov) => {
     updateProgress(nv)
 })
 
+onMounted(() => updateProgress(props.value))
+
 defineExpose({ updateProgress })
 </script>
 

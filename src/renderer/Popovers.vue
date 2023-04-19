@@ -144,6 +144,7 @@ const setupPlayingView = (index) => {
   index = index || playingViewThemeIndex.value
   const playingViewThemes = [PlayingView, VisualPlayingView]
   currentPlayingView.value = playingViewThemes[index]
+  EventBus.emit('playingView-changed')
 }
 
 onMounted(() => {
@@ -196,10 +197,12 @@ onMounted(() => {
   </transition>
 
   <!-- 顶层浮动窗口 -->
-  <transition name="fade-y">
-    <component id="playing-view" v-show="playingViewShow" :is="currentPlayingView">
-    </component>
-  </transition>
+  <keep-alive max="1">
+    <transition name="fade-y">
+      <component id="playing-view" v-show="playingViewShow" :is="currentPlayingView">
+      </component>
+    </transition>
+  </keep-alive>
 
   <PlaybackQueueView id="playback-queue-view" v-show="playbackQueueViewShow">
   </PlaybackQueueView>

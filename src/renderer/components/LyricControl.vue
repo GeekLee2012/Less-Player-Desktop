@@ -9,6 +9,8 @@ import AlbumControl from './AlbumControl.vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
+import { PLAY_STATE } from '../../common/Constants';
+
 
 
 const props = defineProps({
@@ -16,7 +18,7 @@ const props = defineProps({
 })
 
 
-const { playMv, loadLyric, currentTimeState, seekTrack } = inject('player')
+const { playMv, loadLyric, currentTimeState, seekTrack, playState } = inject('player')
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
@@ -31,20 +33,21 @@ let presetOffset = Track.lyricOffset(props.track)
 let destScrollTop = 0
 let rafId = null
 
-let isUserMouseWheel = ref(false)
+const isUserMouseWheel = ref(false)
 let userMouseWheelCancelTimer = null
-let currentSecs = -1
+const isSeeking = ref(false)
 
 const setLyricExist = (value) => hasLyric.value = value
 const setLyricData = (value) => lyricData.value = value
 const setPresetOffset = (value) => presetOffset = value
 const setLyricCurrentIndex = (value) => currentIndex.value = value
 const setUserMouseWheel = (value) => isUserMouseWheel.value = value
+const setSeeking = (value) => isSeeking.value = value
+
 
 const renderAndScrollLyric = (secs) => {
     if (!hasLyric.value) return
-    if (currentSecs == secs) return
-    currentSecs = secs
+    if (isSeeking.value) return
 
     const userOffset = lyric.value.offset / 1000
     secs = Math.max(0, (secs + presetOffset + userOffset))
@@ -64,9 +67,9 @@ const renderAndScrollLyric = (secs) => {
 
     setupLyricLines()
 
-    if (index < 0 || isUserMouseWheel.value) return
+    if (index < 0) return
     setLyricCurrentIndex(index)
-
+    if (isUserMouseWheel.value || isSeeking.value) return
     //Scroll
     /*
     //算法1
@@ -87,6 +90,14 @@ const renderAndScrollLyric = (secs) => {
     //offsetParent：距离元素最近的一个具有定位的祖宗元素（relative，absolute，fixed），若祖宗都不符合条件，offsetParent为body
     destScrollTop = lines[index].offsetTop - lyricWrap.clientHeight / 2
     lyricWrap.scrollTop = Math.max(destScrollTop, 0)
+}
+
+const safeRenderAndScrollLyric = (secs) => {
+    try {
+        renderAndScrollLyric(secs)
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 //参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
@@ -142,6 +153,7 @@ const reloadLyricData = (track) => {
     setLyricData(Track.lyricData(track))
     setPresetOffset(Track.lyricOffset(track))
     setLyricCurrentIndex(-1)
+    setSeeking(false)
     //重置滚动条位置
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     if (lyricWrap) lyricWrap.scrollTop = 0
@@ -197,15 +209,6 @@ const setupLyricAlignment = () => {
     setupLyricScrollLocator()
 }
 
-EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
-EventBus.on('lyric-userMouseWheel', onUserMouseWheel)
-EventBus.on('lyric-fontSize', setupLyricLines)
-EventBus.on('lyric-hlFontSize', setupLyricLines)
-EventBus.on('lyric-fontWeight', setupLyricLines)
-EventBus.on('lyric-lineHeight', setupLyricLines)
-EventBus.on('lyric-lineSpacing', setupLyricLines)
-EventBus.on('lyric-alignment', setupLyricAlignment)
-
 const isHeaderVisible = () => (lyric.value.metaPos == 0)
 
 const scrollLocatorTime = ref(0)
@@ -259,29 +262,42 @@ const seekFromLyric = () => {
     if (duration <= 0) return
     const current = toMillis(scrollLocatorTime.value)
     if (current < 0) return
+    setSeeking(true)
     const percent = current / duration
     seekTrack(percent)
     setUserMouseWheel(false)
+    setSeeking(false)
 }
 
+//TODO 暂停状态下，歌词状态没有同步
+const restoreLyricPausedState = () => {
+    if (playState.value == PLAY_STATE.PAUSE) safeRenderAndScrollLyric(currentTimeState.value)
+}
+
+//EventBus事件
+EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
+EventBus.on('lyric-userMouseWheel', onUserMouseWheel)
+EventBus.on('lyric-fontSize', setupLyricLines)
+EventBus.on('lyric-hlFontSize', setupLyricLines)
+EventBus.on('lyric-fontWeight', setupLyricLines)
+EventBus.on('lyric-lineHeight', setupLyricLines)
+EventBus.on('lyric-lineSpacing', setupLyricLines)
+EventBus.on('lyric-alignment', setupLyricAlignment)
 EventBus.on('app-resize', setupLyricScrollLocator)
+EventBus.on('playingView-changed', restoreLyricPausedState)
 
 onMounted(() => {
-    loadLyric(props.track)
+    //loadLyric(props.track)
     setupLyricAlignment()
 })
 
 watch(currentTimeState, (nv, ov) => {
     //TODO 暂时简单处理，播放页隐藏时直接返回
     if (!playingViewShow.value) return
-    try {
-        renderAndScrollLyric(nv)
-    } catch (error) {
-        console.log(error)
-    }
+    safeRenderAndScrollLyric(nv)
 })
 
-watch(() => props.track, (nv, ov) => {
+watch(() => props.track, () => {
     loadLyric(props.track)
 }, { immediate: true })
 </script>

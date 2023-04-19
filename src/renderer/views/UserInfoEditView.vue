@@ -115,7 +115,8 @@ const updateCover = async () => {
 #user-info-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
 }
 
@@ -159,7 +160,7 @@ const updateCover = async () => {
 }
 
 #user-info-edit-view .center .form-row span {
-    font-size: 16px;
+    /*font-size: 16px;*/
     color: var(--text-color);
     margin-bottom: 8px;
 }
@@ -174,6 +175,7 @@ const updateCover = async () => {
     background-color: var(--input-bg);
     color: var(--input-text-color);
     /*font-size: 15px; */
+    font-size: var(--text-size);
 }
 
 #user-info-edit-view .center .form-row input {

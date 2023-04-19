@@ -187,7 +187,8 @@ onMounted(() => {
 
 .playback-queue-view .header .title {
     text-align: left;
-    font-size: 23px;
+    /*font-size: 23px;*/
+    font-size: var(--text-main2-title-size);
     font-weight: bold;
     background: var(--hl-text-bg);
     -webkit-background-clip: text;

@@ -77,35 +77,60 @@ watch(theme, () => setupAppTheme(), { deep: true })
 :root[fsLevel="standard"] {
   --text-size: 15px;
   --text-sub-size: 14px;
+  --tip-text-size: 13px;
   --tab-title-text-size: 17px;
   --setting-cate-subtitle-width: 225px;
+  --text-line-height: 23px;
+  /* 主标题 */
+  --text-main-title-size: 30px;
+  /* 标题 - 批量操作页、当前播放列表 */
+  --text-main2-title-size: 23px;
+  /* 标题 - 全部分类界面 */
+  --text-main3-title-size: 21px;
+  /* 标题 - 左导航 */
+  --text-main4-title-size: 19px;
+  /* 行高 - 左导航 */
+  --main-left-nav-line-height: 32px;
 }
 
 :root[fsLevel="small"] {
   --text-size: 14px;
   --text-sub-size: 13px;
+  --tip-text-size: 12px;
   --tab-title-text-size: 16px;
+  --text-line-height: 22px;
+  --main-left-nav-line-height: 31.5px;
 }
 
 :root[fsLevel="medium"] {
   --text-size: 16px;
   --text-sub-size: 15px;
+  --tip-text-size: 14px;
   --tab-title-text-size: 18px;
   --setting-cate-subtitle-width: 255px;
+  --text-line-height: 23.3px;
+  --main-left-nav-line-height: 32.5px;
 }
 
 :root[fsLevel="large"] {
   --text-size: 17px;
   --text-sub-size: 16px;
+  --tip-text-size: 15px;
   --tab-title-text-size: 19px;
   --setting-cate-subtitle-width: 255px;
+  --text-line-height: 23.5px;
+  --main-left-nav-line-height: 33px;
 }
 
 :root[fsLevel="larger"] {
   --text-size: 19px;
   --text-sub-size: 18px;
+  --tip-text-size: 15px;
   --tab-title-text-size: 21px;
-  --setting-cate-subtitle-width: 275px;
+  --setting-cate-subtitle-width: 260px;
+  --text-line-height: 23.6px;
+  --text-main4-title-size: 21.5px;
+  --main-left-nav-line-height: 33.5px;
 }
 
 :root[theme='dark'] {

@@ -37,7 +37,8 @@ const { showToast, toggleSoundEffectView,
     setSpectrumIndex, toggleLyricToolbar,
     toggleRandomMusicToolbar, showFailToast,
     setCurrentMusicCategoryName, setCurrentTraceId,
-    isCurrentTraceId } = useAppCommonStore()
+    isCurrentTraceId, hideLyricToolbar,
+    hideRandomMusicToolbar, hideSoundEffectView } = useAppCommonStore()
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { lyric, isSimpleLayout } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -761,6 +762,13 @@ const updatePlatformShortName = () => {
     platformShortName.value = shortName || 'ALL'
 }
 
+const quitSimpleLayout = () => {
+    hideLyricToolbar()
+    hideRandomMusicToolbar()
+    hideSoundEffectView()
+    switchToFallbackLayout()
+}
+
 /* EventBus事件 */
 EventBus.on('track-lyricLoaded', track => checkLyricValid(track))
 EventBus.on('lyric-fontSize', setupLyricLines)
@@ -873,7 +881,7 @@ watch([textColorIndex], setupTextColor)
                         @click="switchTextColor">
                         T
                     </span>
-                    <span @click="switchToFallbackLayout" class="spacing">
+                    <span @click="quitSimpleLayout" class="spacing">
                         <svg width="17" height="16" viewBox="0 0 1019 1019" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">

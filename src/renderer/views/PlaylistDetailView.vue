@@ -246,7 +246,8 @@ EventBus.on("refresh-favorite", checkFavorite)
 }
 
 #playlist-detail-view .header .title {
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: var(--text-main-title-size);
     font-weight: bold;
     margin-bottom: 3px;
 
@@ -262,11 +263,10 @@ EventBus.on("refresh-favorite", checkFavorite)
 
 #playlist-detail-view .header .about {
     height: 139px;
-    line-height: 23px;
+    /*line-height: 23px;*/
+    line-height: var(--text-line-height);
     color: var(--text-sub-color);
-
     /* font-size: 15px; */
-
     overflow: hidden;
     word-wrap: break-all;
     white-space: pre-wrap;
