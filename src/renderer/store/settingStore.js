@@ -32,9 +32,12 @@ const FONTSIZE_LEVELS = [{
     name: '中等'
 }, {
     id: 'large',
-    name: '较大'
+    name: '大'
 }, {
     id: 'larger',
+    name: '较大'
+}, {
+    id: 'largest',
     name: '更大'
 }]
 

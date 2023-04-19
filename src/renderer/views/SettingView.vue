@@ -345,7 +345,7 @@ onMounted(checkForUpdate)
                         </div>
                     </div>
                     <div class="last">
-                        <span style="margin-right: 36px;">字体大小：</span>
+                        <span style="margin-right: 8px;">字体大小：</span>
                         <span v-for="(item, index) in allFontSizeLevels()" class="fslevel-item"
                             :class="{ active: index == common.fontSizeLevel }" @click="setFontSizeLevel(index)">
                             {{ item.name }}
@@ -898,6 +898,10 @@ onMounted(checkForUpdate)
 
 #setting-view .layout .content .layout-item {
     width: 88px !important;
+}
+
+#setting-view .common .content .fslevel-item {
+    width: 58px !important;
 }
 
 #setting-view .layout .content .layout-item:hover,

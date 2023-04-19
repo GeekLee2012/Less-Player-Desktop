@@ -123,6 +123,17 @@ watch(theme, () => setupAppTheme(), { deep: true })
 }
 
 :root[fsLevel="larger"] {
+  --text-size: 18px;
+  --text-sub-size: 17px;
+  --tip-text-size: 15px;
+  --tab-title-text-size: 20px;
+  --setting-cate-subtitle-width: 260px;
+  --text-line-height: 23.6px;
+  --text-main4-title-size: 21.5px;
+  --main-left-nav-line-height: 33.5px;
+}
+
+:root[fsLevel="largest"] {
   --text-size: 19px;
   --text-sub-size: 18px;
   --tip-text-size: 15px;

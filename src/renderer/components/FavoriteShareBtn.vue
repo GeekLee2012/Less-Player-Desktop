@@ -16,8 +16,7 @@ const getTextByStatus = () => {
 <template>
     <SvgTextButton class="favorite-share-btn" :text="getTextByStatus()">
         <template #left-img>
-            <svg v-show="!favorited" width="17" height="17" viewBox="0 0 1024 937.46"
-                xmlns="http://www.w3.org/2000/svg">
+            <svg v-show="!favorited" width="17" height="17" viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path
@@ -49,7 +48,7 @@ const getTextByStatus = () => {
 
 <style>
 .favorite-share-btn .left-btn {
-    width: 108px;
+    width: 118px;
     /*justify-content: flex-start !important;*/
 }
 </style>
