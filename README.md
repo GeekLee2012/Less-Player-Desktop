@@ -1,18 +1,27 @@
-## Less Player 是一款基于Electron + Vue3开发的播放器  
-### 欢迎喜欢的朋友一起学习、交流、参与开发  
-### 本项目仅供学习交流，禁止非法商业用途，请支持正版  
+# Less Player  
   
-#### 前言  
+[![GitHub release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
+[![GitHub license](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)  
+<!--
+![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/GeekLee2012/Less-Player-Desktop.svg)](http://isitmaintained.com/project/GeekLee2012/Less-Player-Desktop "Percentage of issues still open")
+-->
+
+一款基于Electron + Vue3开发的播放器。
+
+<b>`郑重声明：`本项目仅供学习交流，禁止非法商业用途，请支持正版！</b>   
+  
+### 前言  
 * 项目名字：源于Less is More（少即是多）
 * 开发模式：渐进模式，边学习边开发（学以致用）  
   
-#### 开发/测试环境
+### 开发/测试环境
 * OS：macOS Big Sur（开发、测试）、Windows 10（虚拟机，仅测试）  
 * IDE：Visual Studio Code v1.71.0  
 * Nodejs：v16.17.0 LTS  
 * 其他：详见package.json  
   
-#### 功能简介
+### 功能简介
 * 普通功能：播放/暂停、上/下一首、进度条/播放时间、播放模式、音量控制、歌词等   
 * 支持主流在线音频平台：QQ音乐、网易云、酷我、酷狗、豆瓣、云听等   
 * 支持本地歌曲播放, 支持音频类型：mp3、flac、ogg、wav、aac、m4a    
@@ -21,16 +30,16 @@
   
 *PS：目前所有操作暂无确认功能，任何删除清空操作（带垃圾桶图标的按钮）请谨慎！其实也没这么夸张，哈哈~*  
   
-#### 预览图  
-![snap 11.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2011.png)  
-![snap 12.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2012.png)  
-![snap 13.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2013.png)  
+### 预览图  
+![Github snap 11.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2011.png)  
+![Github snap 12.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2012.png)  
+![Github snap 13.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2013.png)  
   
-![snap 01.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2001.png)  
-![snap 02.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2002.png)  
-![snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2003.png)  
+![Gitee snap 01.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2001.png)  
+![Gitee snap 02.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2002.png)  
+![Gitee snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2003.png)  
    
-#### For开发者  
+### For开发者  
 * 请先下载安装最新版（或最新LTS版本） Nodejs  
   
 * 安装依赖  
@@ -46,13 +55,14 @@
   `npm run build`  
   `npm run pack`  
   
-#### 项目相关
+### 项目相关
 * 常见问题：[FAQ.md](FAQ.md)  
 * 更新日志：[CHANGELOG.md](CHANGELOG.md) 
 * 待办事项：[TODO.md](TODO.md)  
   
-#### 发行版  
+### 发行版  
 * 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
 * Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)
   
-#### 其他  
+### 其他  
+* 再次声明：本项目仅供学习交流，禁止非法商业用途，请支持正版！ 
