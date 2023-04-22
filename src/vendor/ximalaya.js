@@ -4,17 +4,12 @@ import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { toYyyymmdd } from "../common/Times";
-import CryptoJS from 'crypto-js';
 
 
 
 const parseJson = (jsonp, callbackName) => {
     jsonp = jsonp.split(callbackName + '(')[1].trim()
     return JSON.parse(jsonp.substring(0, jsonp.length - 1))
-}
-
-const getSign = (src) => {
-    return CryptoJS.HmacMD5(src, "fpMn12&38f_2e").toString()
 }
 
 export class Ximalaya {
@@ -130,20 +125,22 @@ export class Ximalaya {
     //歌曲播放详情：url、cover、lyric等
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
+            /*
             const src = "/audiostream/redirect/"
                 + track.pid + "/" + id
                 + "?access_token=&device_id=MOBILESITE&qingting_id=&t=" + Date.now()
             const url = "https://audio.qtfm.cn" + src + "&sign=" + getSign(src)
             const result = new Track(id, Ximalaya.CODE)
             result.url = url
-            resolve(result)
+            */
+            resolve(new Track(id, Ximalaya.CODE))
         })
     }
 
     //歌词
-    static lyric(id) {
+    static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            resolve(new Lyric())
+            resolve(resolve({ id, platform: Ximalaya.CODE, lyric: new Lyric(), trans: null }))
         })
     }
 

@@ -6,7 +6,7 @@ import { toMillis, toYmd } from "../common/Times";
 import { Lyric } from "../common/Lyric";
 import forge from 'node-forge';
 import { Album } from "../common/Album";
-import { randomText } from "../common/Utils";
+import { isBlank, randomText, toUtf8 } from "../common/Utils";
 import CryptoJS from 'crypto-js';
 
 
@@ -35,9 +35,9 @@ const rsaEncrypt = (src, publicKey, modulus) => {
 }
 
 const aesEncrypt = (src, secKey, iv) => {
-    secKey = CryptoJS.enc.Utf8.parse(secKey)
-    iv = CryptoJS.enc.Utf8.parse(iv)
-    src = CryptoJS.enc.Utf8.parse(src)
+    secKey = toUtf8(secKey)
+    iv = toUtf8(iv)
+    src = toUtf8(src)
     const buffer = CryptoJS.AES.encrypt(src, secKey,
         { iv, mode: CryptoJS.mode.CBC })
     return buffer.toString()
@@ -287,14 +287,14 @@ export class NetEase {
             const url = "https://music.163.com/weapi/song/lyric?csrf_token="
             const param = lyricParam(id);
             const reqBody = weapi(param)
+            const result = { id, platform: NetEase.CODE, lyric: null, trans: null }
             postJson(url, reqBody).then(json => {
-                const lyric = json.lrc.lyric
-                if (lyric) {
-                    const result = Lyric.parseFromText(lyric)
-                    resolve(result)
-                } else {
-                    resolve(new Lyric())
+                Object.assign(result, { lyric: Lyric.parseFromText(json.lrc.lyric) })
+                const tlyric = json.tlyric
+                if (tlyric) {
+                    if (!isBlank(tlyric.lyric)) Object.assign(result, { trans: Lyric.parseFromText(tlyric.lyric) })
                 }
+                resolve(result)
             })
         })
     }

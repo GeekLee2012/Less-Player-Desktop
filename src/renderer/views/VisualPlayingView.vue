@@ -41,6 +41,7 @@ const filterStyle = reactive({})
 
 const setDisactived = (value) => {
     disactived.value = value
+    EventBus.emit('playingView-changed')
 }
 
 const { addFavoriteTrack, removeFavoriteSong,

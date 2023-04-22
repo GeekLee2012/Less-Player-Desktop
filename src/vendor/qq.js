@@ -4,12 +4,13 @@ import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
-import CryptoJS from 'crypto-js';
+import { base64Encode, base64Decode } from "../common/Utils";
 
 
 
 //@param ignore 是否忽略&字符
 const escapeHtml = (text, ignore) => {
+    if (!text) return null
     const regex = ignore ? (/#\d+;/g) : (/[&]#\d+;/g)
     return text.replace(regex, '')
         .replace(/&apos;/g, "'")
@@ -360,6 +361,53 @@ const getWeek = (dt) => {
     return num
 }
 
+//新版本歌词信息
+const lyricExtReqBody = (id, track) => {
+    const { title, artist, album, duration, songID } = track
+    const songName = base64Encode(title)
+    const singerName = base64Encode(artist[0].name)
+    const albumName = base64Encode(album.name)
+    const interval = parseInt(duration / 1000)
+    return {
+        data: JSON.stringify({
+            comm: {
+                "tmeAppID": "qqmusic",
+                "authst": "",
+                "uid": "5019772269",
+                "gray": "1",
+                "OpenUDID": "2057708153c9fc13f0e801c14d39af5fccdfdc60",
+                "ct": "6",
+                "patch": "2",
+                "sid": "202304202127285019772269",
+                "wid": "2722428046011261952",
+                "cv": "80605",
+                //"gzip" : "1",
+                "qq": "",
+                "nettype": "2"
+            },
+            req_1: moduleReq('music.musichallSong.PlayLyricInfo', 'GetPlayLyricInfo',
+                {
+                    "trans_t": 0,
+                    "roma_t": 0,
+                    "crypt": 0,
+                    "lrc_t": 0,
+                    interval,
+                    "trans": 1,
+                    "ct": 6,
+                    singerName,
+                    "type": 0,
+                    "qrc_t": 0,
+                    "cv": 80605,
+                    "roma": 1,
+                    songID,
+                    "qrc": 0,
+                    albumName,
+                    songName
+                })
+        })
+    }
+}
+
 /* 旧版API */
 //参考： https://github.com/jsososo/QQMusicApi/
 export class QQ {
@@ -456,6 +504,7 @@ export class QQ {
                     const cover = getAlbumCover(song.album.mid)
                     const track = new Track(song.mid, QQ.CODE, song.name, artist, album, duration, cover)
                     track.pid = id
+                    track.songID = song.id
                     result.addTrack(track)
                 })
                 resolve(result)
@@ -608,6 +657,7 @@ export class QQ {
                     track.pid = id
                     track.payPlay = (song.pay.payplay == 1)
                     track.payDownload = (song.pay.paydownload == 1)
+                    track.songID = song.songid
                     result.addTrack(track)
                 })
                 resolve(result)
@@ -656,20 +706,40 @@ export class QQ {
     }
 
     //歌词
-    static lyric(id) {
+    static lyric(id, track) {
         return new Promise((resolve, reject) => {
             const url = "http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg"
             const reqBody = lyricReqBody(id)
+            const result = { id, platform: QQ.CODE, lyric: null, trans: null }
             getJson(url, reqBody).then(json => {
-                let lyric = json.lyric
-                if (lyric) {
-                    lyric = CryptoJS.enc.Base64.parse(lyric).toString(CryptoJS.enc.Utf8)
-                    lyric = escapeHtml(lyric)
-                    const result = Lyric.parseFromText(lyric)
-                    resolve(result)
-                } else {
-                    resolve(new Lyric())
+                const lyric = json.lyric
+                const trans = json.trans
+                //lyric = escapeHtml(lyric)
+                Object.assign(result, { lyric: Lyric.parseFromText(base64Decode(lyric)) })
+                if (trans) {
+                    Object.assign(result, { trans: Lyric.parseFromText(base64Decode(trans)) })
                 }
+                resolve(result)
+            })
+        })
+    }
+
+    //TODO 暂时不需要启用新版歌词
+    static lyricExt(id, track) {
+        return new Promise((resolve, reject) => {
+            const url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
+            const reqBody = lyricExtReqBody(id, track)
+            const result = { id, platform: QQ.CODE, lyric: null, trans: null }
+            getJson(url, reqBody).then(json => {
+                console.log(json)
+                const lyric = json.req_1.data.lyric
+                const trans = json.req_1.data.trans
+
+                Object.assign(result, { lyric: Lyric.parseFromText(base64Decode(lyric)) })
+                if (trans) {
+                    Object.assign(result, { trans: Lyric.parseFromText(base64Decode(trans)) })
+                }
+                resolve(result)
             })
         })
     }

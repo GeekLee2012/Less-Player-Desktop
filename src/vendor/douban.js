@@ -174,15 +174,9 @@ export class DouBan {
                 ssid: track.ssid
             }
             getJson(url, reqBody).then(json => {
-                let lyric = json.lyric
-
-                const result = new Lyric()
-                if (lyric) {
-                    const result = Lyric.parseFromText(lyric)
-                    resolve(result)
-                } else {
-                    resolve(new Lyric())
-                }
+                const result = { id, platform: DouBan.CODE, lyric: null, trans: null }
+                Object.assign(result, { lyric: Lyric.parseFromText(json.lyric) })
+                resolve(result)
             })
         })
     }

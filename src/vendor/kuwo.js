@@ -234,12 +234,13 @@ export class KuWo {
     }
 
     //歌词
-    static lyric(id) {
+    static lyric(id, track) {
         return new Promise((resolve, reject) => {
             const url = "http://m.kuwo.cn/newh5/singles/songinfoandlrc"
                 + "?musicId=" + id + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
-                const result = new Lyric()
+                console.log(json)
+                const result = { id, platform: KuWo.CODE, lyric: new Lyric(), trans: null }
                 if (!json.data) {
                     resolve(result)
                     return
@@ -249,7 +250,7 @@ export class KuWo {
                     lrclist.forEach(lineObj => {
                         const mmssSSS = toMMssSSS(lineObj.time * 1000)
                         const text = lineObj.lineLyric
-                        result.addLine(mmssSSS, text)
+                        result.lyric.addLine(mmssSSS, text)
                     })
                 }
                 resolve(result)

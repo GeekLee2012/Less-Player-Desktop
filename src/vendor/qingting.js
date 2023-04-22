@@ -3,7 +3,7 @@ import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
-import CryptoJS from 'crypto-js';
+import { hmacMd5 } from "../common/Utils";
 
 
 
@@ -13,7 +13,7 @@ const parseJson = (jsonp, callbackName) => {
 }
 
 const getSign = (src) => {
-    return CryptoJS.HmacMD5(src, "fpMn12&38f_2e").toString()
+    return hmacMd5(src, "fpMn12&38f_2e")
 }
 
 export class Qingting {
@@ -118,9 +118,9 @@ export class Qingting {
     }
 
     //歌词
-    static lyric(id) {
+    static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            resolve(new Lyric())
+            resolve({ id, platform: Qingting.CODE, lyric: new Lyric(), trans: null })
         })
     }
 

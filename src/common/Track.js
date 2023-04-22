@@ -10,7 +10,9 @@ import { toMmss } from './Times';
  * isFMRadio: 是否为广播电台(当歌单类型为电台时); 
  */
 export class Track {
-    constructor(id, platform, title, artist, album, duration, cover, url, type, pid, mv, payPlay, payDownload) {
+    constructor(id, platform, title, artist, album,
+        duration, cover, url, type,
+        pid, mv, payPlay, payDownload) {
         this.id = toTrimString(id)
         this.platform = platform
         this.title = toTrimString(title)
@@ -25,6 +27,7 @@ export class Track {
         this.cover = cover
         this.url = toTrimString(url)
         this.lyric = new Lyric()
+        this.lyricTrans = null
         this.type = type || 0 //与 Playlist中的type一致
         this.pid = toTrimString(pid) //playlistId
         //额外信息，当内容存在时显示，同时分别隐藏 artist、album
@@ -129,6 +132,14 @@ export class Track {
 
     static lyricOffset(track) {
         return track && track.lyric ? (track.lyric.offset || 0) : 0
+    }
+
+    static hasLyricTrans(track) {
+        return track && track.lyricTrans && Lyric.hasData(track.lyricTrans)
+    }
+
+    static lyricTransData(track) {
+        return track && track.lyricTrans ? track.lyricTrans.data : null
     }
 
     /*

@@ -4,8 +4,7 @@ import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
-import CryptoJS from 'crypto-js';
-
+import { base64Decode, md5, toUtf8 } from "../common/Utils";
 
 
 const REQ_ID = 'e2db8a61-afdb-11ec-9d7b-c9324a8678ec'
@@ -23,7 +22,8 @@ const signParam = (param) => {
 }
 
 const getSignature = (param) => {
-    return CryptoJS.MD5(signParam(param)).toString().toUpperCase()
+    const sign = md5(signParam(param)) || ''
+    return sign.toUpperCase()
 }
 
 const getDataUrl = (hash, albumId) => {
@@ -442,10 +442,9 @@ export class KuGou {
     }
 
     //歌词
-    static lyric(id) {
+    static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            const result = new Lyric()
-            resolve(result)
+            resolve({ id, platform: KuGou.CODE, lyric: null, trans: null })
         })
     }
 

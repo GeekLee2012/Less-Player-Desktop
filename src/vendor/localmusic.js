@@ -24,22 +24,20 @@ export class LocalMusic {
     //歌词
     static lyric(id, track) {
         return new Promise(async (resolve, reject) => {
-            if (!ipcRenderer) {
-                resolve(null)
-                return
-            }
+            const result = { id, platform: LocalMusic.CODE, lyric: new Lyric(), trans: null }
             try {
-                let url = track.url
-                if (url.includes(FILE_PREFIX)) {
-                    url = url.replace(FILE_PREFIX, '')
+                if (ipcRenderer) {
+                    let url = track.url
+                    if (url.includes(FILE_PREFIX)) {
+                        url = url.replace(FILE_PREFIX, '')
+                    }
+                    const text = await ipcRenderer.invoke('lyric-load', url)
+                    Object.assign(result, { lyric: Lyric.parseFromText(text) })
                 }
-                const text = await ipcRenderer.invoke('lyric-load', url)
-                const result = Lyric.parseFromText(text)
-                resolve(result)
             } catch (error) {
                 console.log(error)
-                resolve(null)
             }
+            resolve(result)
         })
     }
 

@@ -1,4 +1,5 @@
 //import analyze from 'rgbaster';
+import CryptoJS from 'crypto-js';
 
 
 const tryCall = (call, fallbackValue) => {
@@ -57,6 +58,10 @@ export const toTrimString = (value) => {
     return (value || '').toString().trim()
 }
 
+export const isBlank = (text) => {
+    return toTrimString(text).length < 1
+}
+
 /*
 export const useRgbaster = async (src, opts) => {
     return new Promise((resolve, reject) => {
@@ -81,4 +86,24 @@ export const useRgbaster = async (src, opts) => {
 export const nextInt = (max) => {
     const limit = max < 1024 ? 1024 : max
     return Math.floor(Math.random() * limit) % max
+}
+
+export const toUtf8 = (text) => {
+    return CryptoJS.enc.Utf8.parse(text)
+}
+
+export const base64Encode = (text) => {
+    return text ? CryptoJS.enc.Base64.stringify(toUtf8(text)) : null
+}
+
+export const base64Decode = (text) => {
+    return text ? CryptoJS.enc.Base64.parse(text).toString(CryptoJS.enc.Utf8) : null
+}
+
+export const md5 = (text) => {
+    return text ? CryptoJS.MD5(text).toString() : null
+}
+
+export const hmacMd5 = (text) => {
+    return text ? CryptoJS.HmacMD5(text).toString() : null
 }

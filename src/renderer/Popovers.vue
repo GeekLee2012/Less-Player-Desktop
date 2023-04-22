@@ -144,7 +144,7 @@ const setupPlayingView = (index) => {
   index = index || playingViewThemeIndex.value
   const playingViewThemes = [PlayingView, VisualPlayingView]
   currentPlayingView.value = playingViewThemes[index]
-  EventBus.emit('playingView-changed')
+  //EventBus.emit('playingView-changed')
 }
 
 onMounted(() => {

@@ -12,6 +12,7 @@ import { useIpcRenderer } from '../common/Utils';
 import { PLAY_STATE, TRAY_ACTION } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
 import { toMmss } from '../common/Times';
+import { Lyric } from '../common/Lyric';
 
 
 
@@ -94,8 +95,8 @@ const loadLyric = (track) => {
     })
 }
 
-const updateLyric = (track, lyric) => {
-    if (track || lyric) Object.assign(track, { lyric })
+const updateLyric = (track, { lyric, trans }) => {
+    if (track || Lyric.hasData(lyric)) Object.assign(track, { lyric })
     EventBus.emit('track-lyricLoaded', track)
 }
 
@@ -180,7 +181,7 @@ const bootstrapTrack = (track) => {
         }
         setAutoPlaying(false)
         //设置歌词
-        if (Track.hasLyric(result)) updateLyric(track, lyric)
+        if (Track.hasLyric(result)) updateLyric(track, { lyric })
         //设置封面
         if (Track.hasCover(result)) Object.assign(track, { cover })
         //设置歌手信息
@@ -466,6 +467,14 @@ EventBus.on('track-state', state => {
 const mmssCurrentTime = ref('00:00')
 const currentTimeState = ref(0) //单位: 秒
 const progressState = ref(0)
+
+const resetPlayState = () => {
+    currentTimeState.value = 0
+    mmssCurrentTime.value = '00:00'
+    progressState.value = 0
+    setPlayState(PLAY_STATE.NONE)
+}
+
 EventBus.on('track-pos', secs => {
     if (videoPlayingViewShow.value) {
         if (isPlaying()) togglePlay()
@@ -585,7 +594,10 @@ onMounted(() => {
 })
 
 watch(queueTracksSize, (nv, ov) => {
-    if (nv < 1) EventBus.emit('playbackQueue-empty')
+    if (nv < 1) {
+        resetPlayState()
+        EventBus.emit('playbackQueue-empty')
+    }
 })
 
 //TODO

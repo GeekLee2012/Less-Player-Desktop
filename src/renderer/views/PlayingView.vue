@@ -76,6 +76,7 @@ EventBus.on("refreshFavorite", checkFavorite)
 
 onMounted(() => {
     EventBus.emit("app-adjustWinCtlBtns")
+    EventBus.emit('playingView-changed')
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 
