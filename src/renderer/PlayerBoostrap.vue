@@ -78,25 +78,31 @@ const traceRecentAlbum = (album) => {
 
 /* 歌词获取 */
 const loadLyric = (track) => {
-    if (!track || Track.hasLyric(track)) {
-        if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
+    if (!track) {
+        if (isCurrentTrack(track)) EventBus.emit('track-noLryic', track)
         return
     }
+    if (!isCurrentTrack(track)) return
+    if (Track.hasLyric(track)) return
+    //检查有效性
     const platform = track.platform
     const vendor = getVendor(platform)
     if (!vendor || !vendor.lyric
         || Playlist.isFMRadioType(track)
         || Playlist.isAnchorRadioType(track)) {
-        if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
+        if (isCurrentTrack(track)) EventBus.emit('track-noLryic', track)
         return
     }
+    //获取歌词
     vendor.lyric(track.id, track).then(result => {
+        //再次确认，可能歌曲已经被切走
         if (isCurrentTrack(track)) updateLyric(track, result)
     })
 }
 
 const updateLyric = (track, { lyric, trans }) => {
     if (track || Lyric.hasData(lyric)) Object.assign(track, { lyric })
+    if (track || Lyric.hasData(trans)) Object.assign(track, { lyricTrans: trans })
     EventBus.emit('track-lyricLoaded', track)
 }
 

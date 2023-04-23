@@ -84,6 +84,7 @@ export const useSettingStore = defineStore('setting', {
             offset: 0, //时间补偿值，快慢
             metaPos: 0, //歌曲信息, 0:默认, 1:隐藏, 2:顶部
             alignment: 0, //对齐方式, 0:左, 1:中, 2:右
+            trans: false
         },
         /* 缓存 */
         cache: {
@@ -221,6 +222,9 @@ export const useSettingStore = defineStore('setting', {
         },
         lyricMetaPos() {
             return this.lyric.metaPos
+        },
+        lyricTransActived() {
+            return this.lyric.trans
         },
         isHttpProxyEnable() {
             return this.network.httpProxy.enable
@@ -476,6 +480,9 @@ export const useSettingStore = defineStore('setting', {
         setupLyricAlignment() {
             const alignment = this.lyric.alignment || 0
             EventBus.emit('lyric-alignment', alignment)
+        },
+        toggleLyricTrans() {
+            this.lyric.trans = !this.lyric.trans
         },
         toggleHttpProxy() {
             this.network.httpProxy.enable = !this.network.httpProxy.enable

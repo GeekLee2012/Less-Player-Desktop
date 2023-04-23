@@ -223,11 +223,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-bg: var(--btn-hover-bg);
   --back2top-btn-svg-color: #fff;
   /* 音效 */
-  --aeview-bg: #363636;
-  --aeview-left-bg: #414141;
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: #3e3e3e;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: #363636;
+  --seview-left-bg: #414141;
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: #3e3e3e;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='white'] {
@@ -311,11 +311,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: #eee;
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: #eee;
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='light'] {
@@ -406,11 +406,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: var(--svg-btn-color);
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: var(--main-left-bg);
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: var(--main-left-bg);
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='pink'] {
@@ -494,11 +494,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: #eee;
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: #eee;
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='pink2'] {
@@ -584,11 +584,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: #292929;
-  --aeview-left-bg: #313131;
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: #2f2f2f;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: #292929;
+  --seview-left-bg: #313131;
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: #2f2f2f;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='pink-red'] {
@@ -678,12 +678,12 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: var(--svg-btn-color);
 
   /* 音效 */
-  --aeview-bg: var(--main-left-bg);
-  --aeview-bg: var(--app-bg);
-  --aeview-left-bg: #16161625;
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: #16161616;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--main-left-bg);
+  --seview-bg: var(--app-bg);
+  --seview-left-bg: #16161625;
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: #16161616;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='red'] {
@@ -770,11 +770,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: #eee;
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: #eee;
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='red2'] {
@@ -865,11 +865,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--ctx-menu-bg);
-  --aeview-left-bg: #21252b88;
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: #21252b66;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--ctx-menu-bg);
+  --seview-left-bg: #21252b88;
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: #21252b66;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='green'] {
@@ -961,11 +961,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: var(--svg-btn-color);
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: #64903f25;
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: #f3f3f366;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: #64903f25;
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: #f3f3f366;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='green2'] {
@@ -1059,12 +1059,12 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: var(--svg-btn-color);
 
   /* 音效 */
-  --aeview-bg: var(--ctx-menu-bg);
-  --aeview-left-bg: #919343;
-  --aeview-left-bg: #c1c373;
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--ctx-menu-bg);
+  --seview-left-bg: #919343;
+  --seview-left-bg: #c1c373;
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='blue'] {
@@ -1153,11 +1153,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--app-bg);
-  --aeview-left-bg: #ffffff66;
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #ffffffcb;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--app-bg);
+  --seview-left-bg: #ffffff66;
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #ffffffcb;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='blue2'] {
@@ -1248,11 +1248,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--app-bg);
-  --aeview-left-bg: #ffffff36;
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: #ffffff25;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--app-bg);
+  --seview-left-bg: #ffffff36;
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: #ffffff25;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='blue3'] {
@@ -1337,11 +1337,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: var(--main-left-bg);
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: var(--main-left-bg);
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='yellow'] {
@@ -1429,11 +1429,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: #eee;
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: #eee;
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='yellow2'] {
@@ -1526,11 +1526,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: #fff;
-  --aeview-left-bg: var(--app-bg);
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: #fff;
+  --seview-left-bg: var(--app-bg);
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='black'] {
@@ -1614,11 +1614,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: var(--main-left-bg);
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: var(--main-left-bg);
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='purple'] {
@@ -1707,11 +1707,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: #eee;
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: #eee;
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='purple2'] {
@@ -1806,11 +1806,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--ctx-menu-bg);
-  --aeview-left-bg: var(--app-bg);
-  --aeview-border: 1px solid var(--main-left-border-color);
-  --aeview-list-item-bg: var(--app-bg);
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--ctx-menu-bg);
+  --seview-left-bg: var(--app-bg);
+  --seview-border: 1px solid var(--main-left-border-color);
+  --seview-list-item-bg: var(--app-bg);
+  --seview-list-item-color: var(--text-color);
 }
 
 :root[theme='purple3'] {
@@ -1899,11 +1899,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --back2top-btn-svg-color: #fff;
 
   /* 音效 */
-  --aeview-bg: var(--bg-color);
-  --aeview-left-bg: var(--main-left-bg);
-  --aeview-border: 1px solid #eee;
-  --aeview-list-item-bg: #f3f3f3;
-  --aeview-list-item-color: var(--text-color);
+  --seview-bg: var(--bg-color);
+  --seview-left-bg: var(--main-left-bg);
+  --seview-border: 1px solid #eee;
+  --seview-list-item-bg: #f3f3f3;
+  --seview-list-item-color: var(--text-color);
 }
 
 /*

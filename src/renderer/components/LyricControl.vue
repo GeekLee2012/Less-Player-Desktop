@@ -22,13 +22,15 @@ const { playMv, loadLyric, currentTimeState, seekTrack, playState } = inject('pl
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
-const { lyric } = storeToRefs(useSettingStore())
+const { lyric, lyricTransActived } = storeToRefs(useSettingStore())
+const { toggleLyricTrans } = useSettingStore()
 
 
 const currentIndex = ref(-1)
 const hasLyric = ref(false)
 const lyricData = ref(Track.lyricData(props.track))
 let presetOffset = Track.lyricOffset(props.track)
+const lyricTransData = ref(Track.lyricTransData(props.track))
 
 let destScrollTop = 0
 let rafId = null
@@ -43,6 +45,7 @@ const setPresetOffset = (value) => presetOffset = value
 const setLyricCurrentIndex = (value) => currentIndex.value = value
 const setUserMouseWheel = (value) => isUserMouseWheel.value = value
 const setSeeking = (value) => isSeeking.value = value
+const setLyricTransData = (value) => lyricTransData.value = value
 
 
 const renderAndScrollLyric = (secs) => {
@@ -151,6 +154,7 @@ const reloadLyricData = (track) => {
     //重置数据
     setLyricExist(isExist)
     setLyricData(Track.lyricData(track))
+    setLyricTransData(Track.lyricTransData(track))
     setPresetOffset(Track.lyricOffset(track))
     setLyricCurrentIndex(-1)
     setSeeking(false)
@@ -158,7 +162,10 @@ const reloadLyricData = (track) => {
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     if (lyricWrap) lyricWrap.scrollTop = 0
     //重新设置样式
-    nextTick(setupLyricLines)
+    nextTick(() => {
+        setupLyricLines()
+        setupLyricTrans()
+    })
     //setTimeout(setupLyricLines, 300)
 }
 
@@ -189,8 +196,8 @@ const setLyricLineStyle = (line) => {
 }
 
 const setupLyricLines = () => {
-    const els = document.querySelectorAll(".lyric-ctl .center .line")
-    if (els) els.forEach(el => setLyricLineStyle(el))
+    const lines = document.querySelectorAll(".lyric-ctl .center .line")
+    if (lines) lines.forEach(line => setLyricLineStyle(line))
 }
 
 const setupLyricAlignment = () => {
@@ -274,8 +281,33 @@ const restoreLyricPausedState = () => {
     if (playState.value == PLAY_STATE.PAUSE) safeRenderAndScrollLyric(currentTimeState.value)
 }
 
+//歌词翻译
+const setupLyricTrans = () => {
+    const lines = document.querySelectorAll(".lyric-ctl .center .line")
+    if (lines) {
+        try {
+            lines.forEach((line, index) => {
+                const timeKey = line.getAttribute('time-key')
+                if (!timeKey) return
+                let transTimeKey = toMMssSSS(toMillis(timeKey) + 1)
+                if (transTimeKey) transTimeKey = transTimeKey.replace(/\.0/g, '.')
+                const transEl = line.querySelector('.trans-text')
+                if (!transEl) return
+                transEl.innerHTML = null //重置
+                const transMap = lyricTransData.value
+                if (!transMap) return
+                const transText = transMap.get(timeKey) || transMap.get(transTimeKey)
+                if (transText && transText != '//') transEl.innerHTML = transText
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+}
+
 //EventBus事件
 EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
+EventBus.on('track-noLyric', track => reloadLyricData(track))
 EventBus.on('lyric-userMouseWheel', onUserMouseWheel)
 EventBus.on('lyric-fontSize', setupLyricLines)
 EventBus.on('lyric-hlFontSize', setupLyricLines)
@@ -341,11 +373,13 @@ watch(() => props.track, () => {
             </div>
             <div v-show="hasLyric" v-for="(item, index) in lyricData" class="line" :time-key="item[0]" :index="index"
                 :class="{
-                    first: index == 0,
-                    last: index == (lyricData.size - 1),
-                    current: index == currentIndex,
-                    locatorCurrent: (index == scrollLocatorCurrentIndex && isUserMouseWheel)
-                }" v-html="item[1]">
+                        first: index == 0,
+                        last: index == (lyricData.size - 1),
+                        current: index == currentIndex,
+                        locatorCurrent: (index == scrollLocatorCurrentIndex && isUserMouseWheel)
+                    }">
+                <div class="text" :time-key="item[0]" :index="index" v-html="item[1]"></div>
+                <div class="trans-text" v-show="lyricTransActived"></div>
             </div>
         </div>
         <div class="scroll-locator" v-show="hasLyric && isUserMouseWheel">
@@ -357,6 +391,9 @@ watch(() => props.track, () => {
                         d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
                 </svg>
             </div>
+        </div>
+        <div class="trans-btn" v-show="Track.hasLyricTrans(track)">
+            <span :class="{ active: lyricTransActived }" @click="toggleLyricTrans">译</span>
         </div>
     </div>
 </template>
@@ -458,14 +495,17 @@ watch(() => props.track, () => {
 
 /*TODO 窗口大小变化后，无法自适应 */
 .lyric-ctl .center .first {
-    margin-top: 168px !important;
+    /*margin-top: 168px !important;*/
+    margin-top: 258px !important;
 }
 
 .lyric-ctl .center .last {
-    margin-bottom: 233px !important;
+    /*margin-bottom: 233px !important;*/
+    margin-bottom: 366px !important;
 }
 
-.lyric-ctl .center .locatorCurrent {
+.lyric-ctl .center .locatorCurrent,
+.lyric-ctl .center .locatorCurrent .text {
     font-weight: bold !important;
 }
 
@@ -528,5 +568,30 @@ watch(() => props.track, () => {
 .lyric-ctl .scroll-locator .play-btn svg {
     margin-left: 1px;
     fill: var(--svg-btn-color) !important;
+}
+
+.lyric-ctl .center .line .trans-text {
+    color: var(--text-lyric-color) !important;
+}
+
+.lyric-ctl .trans-btn {
+    position: fixed;
+    right: 35px;
+    bottom: 99px;
+}
+
+.lyric-ctl .trans-btn span {
+    border: 1px solid var(--text-sub-color);
+    border-radius: 3px;
+    padding: 1px 2px;
+    font-size: var(--text-sub-size);
+    cursor: pointer;
+    color: var(--text-sub-color);
+}
+
+.lyric-ctl .trans-btn .active,
+.lyric-ctl .trans-btn span:hover {
+    color: var(--hl-color);
+    border-color: var(--hl-color);
 }
 </style>
