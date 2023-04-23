@@ -83,7 +83,10 @@ const loadLyric = (track) => {
         return
     }
     if (!isCurrentTrack(track)) return
-    if (Track.hasLyric(track)) return
+    if (Track.hasLyric(track)) {
+        EventBus.emit('track-lyricLoaded', track)
+        return
+    }
     //检查有效性
     const platform = track.platform
     const vendor = getVendor(platform)

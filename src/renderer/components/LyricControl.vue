@@ -306,8 +306,8 @@ const setupLyricTrans = () => {
 }
 
 //EventBus事件
-EventBus.on('track-lyricLoaded', track => reloadLyricData(track))
-EventBus.on('track-noLyric', track => reloadLyricData(track))
+EventBus.on('track-lyricLoaded', reloadLyricData)
+EventBus.on('track-noLyric', reloadLyricData)
 EventBus.on('lyric-userMouseWheel', onUserMouseWheel)
 EventBus.on('lyric-fontSize', setupLyricLines)
 EventBus.on('lyric-hlFontSize', setupLyricLines)
@@ -329,9 +329,7 @@ watch(currentTimeState, (nv, ov) => {
     safeRenderAndScrollLyric(nv)
 })
 
-watch(() => props.track, () => {
-    loadLyric(props.track)
-}, { immediate: true })
+watch(() => props.track, loadLyric, { immediate: true })
 </script>
 
 <template>
