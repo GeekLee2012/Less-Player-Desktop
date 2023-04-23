@@ -118,9 +118,9 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
                 <div class="cate-title">{{ cate.name }}</div>
                 <div class="cate-item-wrap">
                     <div v-for="(item, col) in cate.data" class="fl-item" :class="{
-                        current: (row == currentCategoryItem.row
-                            && col == currentCategoryItem.col)
-                    }" @click="visitCateItem(item, row, col)" v-html="item.key">
+                            current: (row == currentCategoryItem.row
+                                && col == currentCategoryItem.col)
+                        }" @click="visitCateItem(item, row, col)" v-html="item.key">
                     </div>
                 </div>
             </div>
@@ -142,6 +142,7 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 <style scoped>
 .radio-category-view {
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 .radio-category-view .header,

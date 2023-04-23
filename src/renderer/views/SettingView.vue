@@ -724,6 +724,7 @@ onMounted(checkForUpdate)
     flex-direction: column;
     text-align: left;
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 #setting-view .tip-text {

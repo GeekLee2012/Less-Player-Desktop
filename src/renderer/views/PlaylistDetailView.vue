@@ -226,6 +226,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     flex-direction: column;
     padding: 28px 33px 10px 33px;
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 #playlist-detail-view .header {

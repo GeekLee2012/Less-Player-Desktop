@@ -66,7 +66,7 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 
 <style scoped>
 .random-music-toolbar {
-    background: var(--aeview-bg);
+    background: var(--seview-bg);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -95,7 +95,7 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
     display: flex;
     flex-direction: row;
     align-items: center;
-    border-bottom: var(--aeview-border);
+    border-bottom: var(--seview-border);
     padding: 8px 10px;
     border-radius: 5px 5px 0px 0px;
 }
@@ -109,12 +109,12 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 .random-music-toolbar .center {
     display: flex;
     flex: 1;
-    background: var(--aeview-bg);
+    background: var(--seview-bg);
     overflow: hidden;
 }
 
 .random-music-toolbar .center .nav-wrap {
-    background: var(--aeview-left-bg);
+    background: var(--seview-left-bg);
     width: 56px;
     overflow: hidden;
 }

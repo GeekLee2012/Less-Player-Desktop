@@ -65,8 +65,7 @@ const getLyricOffsetText = () => {
             </div>
             <div class="row text v-spacing">对齐方式：</div>
             <div class="row">
-                <SingleSelectionControl :data="['左边', '中间', '右边']" :value="lyric.alignment"
-                    :onChanged="setLyricAlignment">
+                <SingleSelectionControl :data="['左边', '中间', '右边']" :value="lyric.alignment" :onChanged="setLyricAlignment">
                 </SingleSelectionControl>
             </div>
             <div class="row text v-spacing">字号 (普通)：</div>
@@ -96,12 +95,11 @@ const getLyricOffsetText = () => {
             </div>
             <div class="row text v-spacing">快慢 (毫秒)：</div>
             <div class="row">
-                <input type="number" placeholder="正快负慢" :value="getLyricOffsetText()" min="-99999" max="99999"
-                    step="100" @input="updateLyricOffset" />
+                <input type="number" placeholder="正快负慢" :value="getLyricOffsetText()" min="-99999" max="99999" step="100"
+                    @input="updateLyricOffset" />
             </div>
             <div class="row text-btn v-spacing" @click="resetLyricSetting">
-                <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"
-                    xmlns="http://www.w3.org/2000/svg">
+                <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z"
                         transform="translate(-833 -413)" />
@@ -149,7 +147,7 @@ const getLyricOffsetText = () => {
     border-bottom: 1px solid var(--border-color);
     padding: 8px 10px;
     border-radius: 5px 5px 0px 0px;
-    background: var(--aeview-left-bg);
+    background: var(--seview-left-bg);
 }
 
 .lyric-toolbar .header .title {

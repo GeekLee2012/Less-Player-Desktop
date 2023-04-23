@@ -103,6 +103,7 @@ const updateCover = async () => {
     padding: 25px 33px 15px 33px;
     flex: 1;
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 #user-info-edit-view .header {

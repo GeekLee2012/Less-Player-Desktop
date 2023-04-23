@@ -91,9 +91,9 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
                 <div class="cate-title">{{ cate.name }}</div>
                 <div class="cate-item-wrap">
                     <div v-for="(item, col) in cate.data" class="fl-item" :class="{
-                        current: (row == currentCategoryItem.row
-                            && col == currentCategoryItem.col)
-                    }" @click="visitCateItem(item, row, col)" v-html="item.key">
+                            current: (row == currentCategoryItem.row
+                                && col == currentCategoryItem.col)
+                        }" @click="visitCateItem(item, row, col)" v-html="item.key">
                     </div>
                 </div>
             </div>
@@ -104,6 +104,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 <style scoped>
 .playlist-category-view {
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 .playlist-category-view .header,

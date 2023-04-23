@@ -81,6 +81,7 @@ EventBus.on('artistCategory-resetScroll', () => {
 <style scoped>
 .artist-category-view {
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 .artist-category-view .header,

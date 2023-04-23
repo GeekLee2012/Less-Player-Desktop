@@ -236,7 +236,9 @@ const setBatchViewListSize = () => {
     if (!mainContent) return
     const el = document.querySelector('#batch-action-view .content')
     const { clientHeight } = mainContent, padding = 52
-    const height = (clientHeight - 133 - padding)
+    //const height = (clientHeight - 133 - padding)
+    //header 87, margin 15, action 31
+    const height = (clientHeight - 87 - 15 - 31)
     if (el) el.style.height = height + "px"
 }
 

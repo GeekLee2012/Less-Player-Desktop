@@ -96,9 +96,10 @@ onMounted(resetBack2TopBtn)
 #local-music-view {
     display: flex;
     flex-direction: column;
+    flex: 1;
     padding: 28px 33px 10px 33px;
     overflow: scroll;
-    flex: 1;
+    overflow-x: hidden;
 }
 
 #local-music-view .header {

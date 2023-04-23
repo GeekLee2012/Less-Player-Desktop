@@ -167,9 +167,10 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 #search-view {
     display: flex;
     flex-direction: column;
+    flex: 1;
     padding: 20px 33px 15px 33px;
     overflow: scroll;
-    flex: 1;
+    overflow-x: hidden;
 }
 
 #search-view .header {

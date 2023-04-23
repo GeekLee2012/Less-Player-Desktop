@@ -166,7 +166,8 @@ EventBus.on("playlistSquare-refresh", refreshData)
 
 <template>
     <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
-        <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories"></PlaylistCategoryBar>
+        <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories">
+        </PlaylistCategoryBar>
         <PlaylistsControl :data="playlists" :loading="isLoadingContent"></PlaylistsControl>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
@@ -176,5 +177,6 @@ EventBus.on("playlistSquare-refresh", refreshData)
 .playlist-square-view {
     padding: 25px 33px 15px 33px;
     overflow: scroll;
+    overflow-x: hidden;
 }
 </style>

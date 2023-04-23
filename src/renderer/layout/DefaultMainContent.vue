@@ -19,5 +19,6 @@ const excludes = ['LocalMusicView', 'CustomPlaylistEditView',
     display: flex;
     flex: 1;
     overflow: auto;
+    overflow-x: hidden;
 }
 </style>

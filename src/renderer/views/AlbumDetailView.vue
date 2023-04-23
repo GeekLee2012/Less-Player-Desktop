@@ -262,6 +262,7 @@ watch([platform, albumId], reloadAll, { immediate: true })
     padding: 25px 33px 15px 33px;
     flex: 1;
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 #album-detail-view .header {

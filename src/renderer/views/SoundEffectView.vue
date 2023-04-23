@@ -125,7 +125,7 @@ const switchIR = (item, index) => {
     flex-direction: column;
     overflow: hidden;
     border-radius: 15px;
-    background: var(--aeview-bg);
+    background: var(--seview-bg);
     -webkit-app-region: none;
 }
 
@@ -151,8 +151,8 @@ const switchIR = (item, index) => {
 
 .sound-effect-view .header {
     padding: 12px;
-    border-bottom: var(--aeview-border);
-    background: var(--aeview-bg);
+    border-bottom: var(--seview-border);
+    background: var(--seview-bg);
 }
 
 .sound-effect-view .header .action {
@@ -186,15 +186,15 @@ const switchIR = (item, index) => {
 
 .sound-effect-view .center {
     flex: 1;
-    background: var(--aeview-bg);
+    background: var(--seview-bg);
     overflow: hidden;
 }
 
 .sound-effect-view .center .left {
     width: 108px;
     min-width: 68px;
-    background: var(--aeview-left-bg);
-    /* border-right: var(--aeview-border); */
+    background: var(--seview-left-bg);
+    /* border-right: var(--seview-border); */
 }
 
 .sound-effect-view .center .left .nav-item {
@@ -240,8 +240,8 @@ const switchIR = (item, index) => {
     border-radius: 3px;
     border: 2px solid transparent;
     background-color: #f3f3f3;
-    background: var(--aeview-list-item-bg);
-    color: var(--aeview-list-item-color);
+    background: var(--seview-list-item-bg);
+    color: var(--seview-list-item-color);
 }
 
 .sound-effect-view .center .presets .active {
@@ -296,8 +296,8 @@ const switchIR = (item, index) => {
     border-radius: 3px;
     border: 2px solid transparent;
     background-color: #f3f3f3;
-    background: var(--aeview-list-item-bg);
-    color: var(--aeview-list-item-color);
+    background: var(--seview-list-item-bg);
+    color: var(--seview-list-item-color);
     /* cursor: pointer; */
 }
 

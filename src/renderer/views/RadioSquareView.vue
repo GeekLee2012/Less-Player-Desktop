@@ -185,5 +185,6 @@ EventBus.on("radioSquare-refresh", refreshData)
 .radio-square-view {
     padding: 25px 33px 15px 33px;
     overflow: scroll;
+    overflow-x: hidden;
 }
 </style>

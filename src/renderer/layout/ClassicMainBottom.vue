@@ -129,6 +129,7 @@ watch([currentTrack, playingViewShow], checkFavorite)
     flex-direction: column;
     height: var(--main-play-nav-height);
     -webkit-app-region: none;
+    padding-top: 8px;
 }
 
 .classic-main-bottom .spacing {
