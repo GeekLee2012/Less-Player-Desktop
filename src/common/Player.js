@@ -76,6 +76,8 @@ export class Player {
             },
             onseek: function () {
                 self.seeking = true
+                self.animationFrameCnt = 0
+
                 if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
                 self.animationFrameId = requestAnimationFrame(self._step.bind(self))
             },

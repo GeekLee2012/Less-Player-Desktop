@@ -68,10 +68,11 @@ const renderAndScrollLyric = (secs) => {
         }
     }
 
-    setupLyricLines()
+    nextTick(setupLyricLines)
 
     if (index < 0) return
     setLyricCurrentIndex(index)
+
     if (isUserMouseWheel.value || isSeeking.value) return
     //Scroll
     /*
@@ -274,6 +275,7 @@ const seekFromLyric = () => {
     seekTrack(percent)
     setUserMouseWheel(false)
     setSeeking(false)
+    setScrollLocatorCurrentIndex(-1)
 }
 
 //TODO 暂停状态下，歌词状态没有同步
