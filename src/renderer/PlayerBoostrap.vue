@@ -37,7 +37,8 @@ const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
     theme, layout, isStoreRecentPlay, isSimpleLayout } = storeToRefs(useSettingStore())
-const { getCurrentThemeHlColor } = useSettingStore()
+const { getCurrentThemeHlColor, setupStateRefreshFrequency,
+    setupSpectrumRefreshFrequency } = useSettingStore()
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
 
@@ -79,12 +80,12 @@ const traceRecentAlbum = (album) => {
 /* 歌词获取 */
 const loadLyric = (track) => {
     if (!track) {
-        if (isCurrentTrack(track)) EventBus.emit('track-noLryic', track)
+        if (isCurrentTrack(track)) EventBus.emit('track-noLyric', track)
         return
     }
     if (!isCurrentTrack(track)) return
     if (Track.hasLyric(track)) {
-        EventBus.emit('track-lyricLoaded', track)
+        if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
         return
     }
     //检查有效性
@@ -93,7 +94,7 @@ const loadLyric = (track) => {
     if (!vendor || !vendor.lyric
         || Playlist.isFMRadioType(track)
         || Playlist.isAnchorRadioType(track)) {
-        if (isCurrentTrack(track)) EventBus.emit('track-noLryic', track)
+        if (isCurrentTrack(track)) EventBus.emit('track-noLyric', track)
         return
     }
     //获取歌词
@@ -600,6 +601,9 @@ registryIpcRendererListeners()
 onMounted(() => {
     setupRadioPlayer()
     restoreTrack()
+
+    setupStateRefreshFrequency()
+    setupSpectrumRefreshFrequency()
 })
 
 watch(queueTracksSize, (nv, ov) => {

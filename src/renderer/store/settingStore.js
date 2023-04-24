@@ -73,6 +73,10 @@ export const useSettingStore = defineStore('setting', {
             listenNumShow: false,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: false,
+            //歌曲进度更新频度，默认为30，范围：1 - 120
+            stateRefreshFrequency: 60,
+            //歌曲频谱刷新频度，默认为3，范围：1 - 30
+            spectrumRefreshFrequency: 3,
         },
         /* 歌词 */
         lyric: {
@@ -234,6 +238,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isRadioModeShortcutEnable() {
             return this.navigation.radioModeShortcut
+        },
+        isAnimationLowDelayEnable() {
+            return this.track.animationLowDelay
         }
     },
     actions: {
@@ -309,6 +316,18 @@ export const useSettingStore = defineStore('setting', {
         toggleVipFlagShow() {
             this.track.vipFlagShow = !this.track.vipFlagShow
         },
+        setStateRefreshFrequency(value) {
+            const freq = parseInt(value || 60)
+            if (freq < 1 || freq > 120) return
+            this.track.stateRefreshFrequency = freq
+            this.setupStateRefreshFrequency()
+        },
+        setSpectrumRefreshFrequency(value) {
+            const freq = parseInt(value || 3)
+            if (freq < 1 || freq > 30) return
+            this.track.spectrumRefreshFrequency = freq
+            this.setupSpectrumRefreshFrequency()
+        },
         toggleTrayShow() {
             this.tray.show = !this.tray.show
             this.setupTray()
@@ -371,6 +390,7 @@ export const useSettingStore = defineStore('setting', {
             if (value.includes(" ")) value = '"' + value + '"'
             return value
         },
+        //TODO 算法有问题
         formatFontFamily(value) {
             let fontFamily = (value || '').trim()
             const fonts = fontFamily.split(',')
@@ -525,6 +545,12 @@ export const useSettingStore = defineStore('setting', {
                 Object.assign(proxy, { socks: { host, port, username, password } })
             }
             if (ipcRenderer) ipcRenderer.send('app-setGlobalProxy', proxy)
+        },
+        setupStateRefreshFrequency() {
+            EventBus.emit('track-stateRefreshFrequency', this.track.stateRefreshFrequency || 60)
+        },
+        setupSpectrumRefreshFrequency() {
+            EventBus.emit('track-spectrumRefreshFrequency', this.track.spectrumRefreshFrequency || 3)
         },
     },
     persist: {

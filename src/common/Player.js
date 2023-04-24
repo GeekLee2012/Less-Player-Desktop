@@ -19,6 +19,9 @@ export class Player {
         this.pendingSoundEffect = null
         this.animationFrameId = 0
         this.seeking = false
+        this.animationFrameCnt = 0 //动画帧数计数器，控制事件触发频率，降低CPU占用
+        this.stateRefreshFrequency = 60 //歌曲进度更新频度
+        this.spectrumRefreshFrequency = 3 //歌曲频谱更新频度
     }
 
     static get() {
@@ -40,6 +43,8 @@ export class Player {
             .on('playbackQueue-empty', () => player.setCurrent(null))
             .on('track-updateEQ', (values) => player.updateEQ(values))
             .on('track-updateIR', (source) => player.updateIR(source))
+            .on('track-stateRefreshFrequency', (value) => player.stateRefreshFrequency = value)
+            .on('track-spectrumRefreshFrequency', (value) => player.spectrumRefreshFrequency = value)
     }
 
     isTrackAvailable() {
@@ -57,6 +62,7 @@ export class Player {
             pool: 1,
             onplay: function () {
                 self.retry = 0
+                self.animationFrameCnt = 0
                 if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
                 self.animationFrameId = requestAnimationFrame(self._step.bind(self))
                 self.notifyStateChanged(PLAY_STATE.PLAYING)
@@ -156,7 +162,7 @@ export class Player {
         if (!sound.playing() && !this.seeking) return
         if (this.seeking) this.seeking = false
         const seek = sound.seek() || 0
-        EventBus.emit('track-pos', seek)
+        if (this.isStateRefreshEnabled()) EventBus.emit('track-pos', seek)
         try {
             this.resolveSound()
         } catch (error) {
@@ -165,6 +171,7 @@ export class Player {
         }
         if (this.animationFrameId > 0) cancelAnimationFrame(this.animationFrameId)
         this.animationFrameId = requestAnimationFrame(this._step.bind(this))
+        this._countAnimationFrame()
     }
 
     on(event, handler) {
@@ -201,7 +208,7 @@ export class Player {
         const analyser = this.webAudioApi.getAnalyser()
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
-        EventBus.emit('track-freqUnit8Data', freqData)
+        if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-freqUnit8Data', freqData)
     }
 
     tryUnlockHowlAudios() {
@@ -240,5 +247,17 @@ export class Player {
         } else {
             this.updateEQ(this.pendingSoundEffect)
         }
+    }
+
+    _countAnimationFrame() {
+        this.animationFrameCnt = (this.animationFrameCnt + 1) % 1024
+    }
+
+    isStateRefreshEnabled() {
+        return this.animationFrameCnt % this.stateRefreshFrequency == 0
+    }
+
+    isSpectrumRefreshEnabled() {
+        return this.animationFrameCnt % this.spectrumRefreshFrequency == 0
     }
 }

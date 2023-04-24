@@ -49,7 +49,9 @@ const { setThemeIndex,
     resetProxies,
     setupAppGlobalProxy,
     allFontSizeLevels,
-    setFontSizeLevel
+    setFontSizeLevel,
+    setStateRefreshFrequency,
+    setSpectrumRefreshFrequency,
 } = useSettingStore()
 
 const { showToast } = useAppCommonStore()
@@ -95,6 +97,14 @@ const updateFontFamily = (e) => {
 
 const updateFontWeight = (e) => {
     setFontWeight(e.target.value)
+}
+
+const updateStateRefreshFrequency = (e) => {
+    setStateRefreshFrequency(e.target.value)
+}
+
+const updateSpectrumRefreshFrequency = (e) => {
+    setSpectrumRefreshFrequency(e.target.value)
 }
 
 /* 应用更新升级 */
@@ -309,11 +319,11 @@ onMounted(checkForUpdate)
             <div class="common row">
                 <span class="cate-name">通用</span>
                 <div class="content">
+                    <div class="tip-text">提示：当前应用，所有输入框，Enter键生效或焦点离开后自动生效</div>
                     <div class="window-zoom">
                         <div class="zoom-title">窗口缩放 (%)：
                             <input type="number" min="50" max="300" step="1" :value="common.winZoom"
-                                @keydown.enter="updateWinZoom" @focusout="updateWinZoom" />
-                            <div class="tip-text spacing">提示：范围50 - 300，Enter键或焦点离开输入框时生效</div>
+                                placeholder="范围50 - 300，默认100" @keydown.enter="updateWinZoom" @focusout="updateWinZoom" />
                         </div>
                         <div>
                             <input type="range" min="50" max="300" :value="common.winZoom" step="2" @input="updateWinZoom"
@@ -336,7 +346,7 @@ onMounted(checkForUpdate)
                         <div class="spacing">
                             <span>字重:</span>
                             <input type="number" :value="common.fontWeight" placeholder="粗细，范围100-1000，默认400" min="100"
-                                max="1000" step="10" @input="updateFontWeight" @focusout="updateFontWeight"
+                                max="1000" step="10" @input="updateFontWeight" @focusout="updateSpectrumRefreshFrequency"
                                 list="fontweight-suggests" />
                             <datalist id="fontweight-suggests">
                                 <option v-for="(item, index) in fontWeights" :value="item">
@@ -384,11 +394,23 @@ onMounted(checkForUpdate)
                         <ToggleControl @click="toggleListenNumShow" :value="track.listenNumShow">
                         </ToggleControl>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">播放歌曲时，防止系统睡眠：</span>
                         <ToggleControl @click="togglePlayingWithoutSleeping" :value="track.playingWithoutSleeping">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：不会影响系统熄屏、锁屏</div>
+                    </div>
+                    <div class="tip-text">提示：当前应用，更新频度，指每多少个动画帧更新一次；频度值越小，动画越流畅，CPU占用越高</div>
+                    <div>
+                        <span class="cate-subtitle">歌曲（歌词）进度更新频度：</span>
+                        <input type="number" :value="track.stateRefreshFrequency" placeholder="范围1 - 120，默认60，推荐10 - 60"
+                            min="1" max="120" step="1" @input="updateStateRefreshFrequency"
+                            @focusout="updateStateRefreshFrequency" />
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">歌曲频谱更新频度：</span>
+                        <input type="number" :value="track.spectrumRefreshFrequency" placeholder="范围1 - 30，默认3" min="1"
+                            max="30" step="1" @input="updateSpectrumRefreshFrequency" @focusout="updateFontWeight" />
                     </div>
                 </div>
             </div>
@@ -881,8 +903,8 @@ onMounted(checkForUpdate)
     background-color: var(--input-bg);
     margin-left: 15px;
     color: var(--text-color);
-    text-align: center;
-    min-width: 66px;
+    /*text-align: center;
+    min-width: 66px; */
 }
 
 #setting-view .layout .content .layout-item,
@@ -1025,7 +1047,9 @@ onMounted(checkForUpdate)
     flex: 1;
 }
 
-#setting-view .font input,
+#setting-view .common input[type='text'],
+#setting-view .common input[type='number'],
+#setting-view .track input[type='number'],
 #setting-view .network input {
     border-radius: 3px;
     padding: 8px;

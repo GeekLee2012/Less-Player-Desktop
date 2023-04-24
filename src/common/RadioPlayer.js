@@ -15,6 +15,9 @@ export class RadioPlayer {
         this.webAudioApi = null
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
         this.pendingSoundEffect = null
+        this.animationFrameCnt = 0 //动画帧数计数器，控制事件触发频率，降低CPU占用
+        this.stateRefreshFrequency = 60 //歌曲进度更新频度
+        this.spectrumRefreshFrequency = 3 //歌曲频谱更新频度
     }
 
     static get() {
@@ -36,6 +39,8 @@ export class RadioPlayer {
             .on('track-restore', channel => player.setChannel(channel))
             .on('track-updateEQ', (values) => player.updateEQ(values))
             .on('track-updateIR', (source) => player.updateIR(source))
+            .on('track-stateRefreshFrequency', (value) => player.stateRefreshFrequency = value)
+            .on('track-spectrumRefreshFrequency', (value) => player.spectrumRefreshFrequency = value)
     }
 
     //播放
@@ -55,6 +60,7 @@ export class RadioPlayer {
             self.setState(true)
             self.channelChanged = false
             lastPlayTime = Date.now()
+            this.animationFrameCnt = 0
             requestAnimationFrame(self.__step.bind(self))
         })
     }
@@ -105,9 +111,10 @@ export class RadioPlayer {
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
         const currentSecs = currentTime / 1000
-        EventBus.emit('track-pos', currentSecs)
+        if (this.isStateRefreshEnabled()) EventBus.emit('track-pos', currentSecs)
         this.resolveSound()
         requestAnimationFrame(this.__step.bind(this))
+        this._countAnimationFrame()
     }
 
     on(event, handler) {
@@ -128,7 +135,7 @@ export class RadioPlayer {
         const analyser = this.webAudioApi.getAnalyser()
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
-        EventBus.emit('track-freqUnit8Data', freqData)
+        if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-freqUnit8Data', freqData)
     }
 
     updateEQ(values) {
@@ -160,4 +167,15 @@ export class RadioPlayer {
         }
     }
 
+    _countAnimationFrame() {
+        this.animationFrameCnt = (this.animationFrameCnt + 1) % 1024
+    }
+
+    isStateRefreshEnabled() {
+        return this.animationFrameCnt % this.stateRefreshFrequency == 0
+    }
+
+    isSpectrumRefreshEnabled() {
+        return this.animationFrameCnt % this.spectrumRefreshFrequency == 0
+    }
 }

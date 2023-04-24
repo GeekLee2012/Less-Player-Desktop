@@ -332,6 +332,7 @@ const createWindow = () => {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
+      //nodeIntegrationInWorker: true,
       webSecurity: false  //TODO 有风险，暂时保留此方案，留待后期调整
     }
   })

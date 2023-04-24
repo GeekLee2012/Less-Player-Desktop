@@ -332,9 +332,11 @@ EventBus.on('app-layout-default', setupDefaultLayout)
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)
 watch([soundEffectViewShow], setSoundEffectViewAlignment)
-watch([playingViewShow], () => {
+watch([playingViewShow], (nv, ov) => {
     hideLyricToolbar()
     setPlayingViewSize()
+    //TODO
+    EventBus.emit('lyric-alignment')
 })
 watch(lyricToolbarShow, setLyricToolbarPos)
 watch(lyricMetaPos, () => {

@@ -316,12 +316,17 @@ EventBus.on('lyric-lineHeight', setupLyricLines)
 EventBus.on('lyric-lineSpacing', setupLyricLines)
 EventBus.on('lyric-alignment', setupLyricAlignment)
 EventBus.on('app-resize', setupLyricScrollLocator)
-EventBus.on('playingView-changed', restoreLyricPausedState)
-
-onMounted(() => {
-    //loadLyric(props.track)
+EventBus.on('playingView-changed', () => {
+    restoreLyricPausedState()
     setupLyricAlignment()
 })
+
+/*
+onMounted(() => {
+    //loadLyric(props.track)
+    //setupLyricAlignment()
+})
+*/
 
 watch(currentTimeState, (nv, ov) => {
     //TODO 暂时简单处理，播放页隐藏时直接返回
