@@ -100,6 +100,10 @@ export class Track {
         return artistName
     }
 
+    static albumName(track) {
+        return track && track.album ? track.album.name.trim() : null
+    }
+
     static hasLyric(track) {
         return track && track.lyric && Lyric.hasData(track.lyric)
     }

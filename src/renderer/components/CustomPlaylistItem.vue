@@ -64,8 +64,8 @@ const showContextMenu = (event) => {
             <img v-lazy="data.cover" />
         </div>
         <div class="title-wrap spacing1">
-            <div class="content">
-                <div class="title"><span v-html="data.title" @click="visitItem"></span></div>
+            <div class="content" @click="visitItem">
+                <div class="title"><span v-html="data.title"></span></div>
                 <div class="size">{{ data.data.length }} 首歌曲</div>
             </div>
             <div class="action">
@@ -181,6 +181,8 @@ const showContextMenu = (event) => {
     flex-direction: column;
     justify-content: center;
     height: 100%;
+    cursor: pointer;
+    margin-right: 8px;
 }
 
 .custom-playlist-item .content>div {
@@ -196,7 +198,7 @@ const showContextMenu = (event) => {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     margin-bottom: 6px;
-    cursor: pointer;
+    /*cursor: pointer;*/
 }
 
 .custom-playlist-item .title-wrap .size {

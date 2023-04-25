@@ -55,7 +55,6 @@ const toggleProgress = () => {
 const updateProgressByWidth = (width) => {
     const totalWidth = sliderCtlRef.value.offsetWidth
     let percent = width / totalWidth
-    //console.log("percent: " + percent)
     updateProgress(percent)
 }
 

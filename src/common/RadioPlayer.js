@@ -37,10 +37,10 @@ export class RadioPlayer {
             .on('playbackQueue-empty', () => player.setChannel(null))
             .on('track-play', () => player.setChannel(null))
             .on('track-restore', channel => player.setChannel(channel))
-            .on('track-updateEQ', (values) => player.updateEQ(values))
-            .on('track-updateIR', (source) => player.updateIR(source))
-            .on('track-stateRefreshFrequency', (value) => player.stateRefreshFrequency = value)
-            .on('track-spectrumRefreshFrequency', (value) => player.spectrumRefreshFrequency = value)
+            .on('track-updateEQ', values => player.updateEQ(values))
+            .on('track-updateIR', source => player.updateIR(source))
+            .on('track-stateRefreshFrequency', value => player.stateRefreshFrequency = value)
+            .on('track-spectrumRefreshFrequency', value => player.spectrumRefreshFrequency = value)
     }
 
     //播放
@@ -113,8 +113,8 @@ export class RadioPlayer {
         const currentSecs = currentTime / 1000
         if (this.isStateRefreshEnabled()) EventBus.emit('track-pos', currentSecs)
         this.resolveSound()
-        requestAnimationFrame(this.__step.bind(this))
         this._countAnimationFrame()
+        requestAnimationFrame(this.__step.bind(this))
     }
 
     on(event, handler) {
@@ -135,7 +135,7 @@ export class RadioPlayer {
         const analyser = this.webAudioApi.getAnalyser()
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
-        if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-freqUnit8Data', freqData)
+        if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-spectrumData', freqData)
     }
 
     updateEQ(values) {

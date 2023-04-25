@@ -52,18 +52,20 @@ const renderAndScrollLyric = (secs) => {
     if (!hasLyric.value) return
     if (isSeeking.value) return
 
-    const userOffset = lyric.value.offset / 1000
-    secs = Math.max(0, (secs + presetOffset + userOffset))
-    const MMssSSS = toMMssSSS(secs * 1000)
+    const userOffset = lyric.value.offset
+    const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
+
+    //Highlight
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     const lines = lyricWrap.querySelectorAll('.line')
-    //Highlight
+
     let index = -1
     for (var i = 0; i < lines.length; i++) {
-        const time = lines[i].getAttribute('time-key')
-        if (MMssSSS >= time) {
+        const timeKey = lines[i].getAttribute('time-key')
+        const lineTime = toMillis(timeKey)
+        if (trackTime >= lineTime) {
             index = i
-        } else if (MMssSSS < time) {
+        } else if (trackTime < lineTime) {
             break
         }
     }
@@ -75,10 +77,11 @@ const renderAndScrollLyric = (secs) => {
 
     if (isUserMouseWheel.value || isSeeking.value) return
     //Scroll
-    /*
-    //算法1
+
+    ////算法1: 基于百分比定位 ////
     //当歌词存在换行时，无法保证准确定位
     //且当前高亮行也无法保证在可视区居中
+    /*
     const scrollIndex = index > 1 ? (index - 1) : 0
     const scrollHeight = lyricWrap.scrollHeight
     const clientHeight = lyricWrap.clientHeight
@@ -88,12 +91,22 @@ const renderAndScrollLyric = (secs) => {
     //smoothScroll(lyricWrap, 300)
     */
 
-    //算法2：依赖offsetParent定位
-    //基本保证准确定位，且当前高亮行也基本法保证在可视区居中
+    ////算法2：歌词可视区居中，依赖offsetParent定位 ////
+    //基本保证：准确定位，当前高亮行基本在歌词可视区居中
     //offsetTop：元素到offsetParent顶部的距离
     //offsetParent：距离元素最近的一个具有定位的祖宗元素（relative，absolute，fixed），若祖宗都不符合条件，offsetParent为body
+    /* 
     destScrollTop = lines[index].offsetTop - lyricWrap.clientHeight / 2
     lyricWrap.scrollTop = Math.max(destScrollTop, 0)
+    */
+
+    ////算法3：依赖offsetParent定位；与算法2相似，只是参考系不同而已 ////
+    //基本保证：准确定位，当前高亮行在播放页垂直居中，且基本与ScrollLocator平行
+    //绝对意义上来说，并不垂直居中，也并不平行，因为歌词行自身有一定高度
+    const { offsetTop } = lyricWrap
+    const { clientHeight } = document.documentElement
+    destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
+    lyricWrap.scrollTop = destScrollTop
 }
 
 const safeRenderAndScrollLyric = (secs) => {
@@ -219,6 +232,7 @@ const setupLyricAlignment = () => {
 
 const isHeaderVisible = () => (lyric.value.metaPos == 0)
 
+//播放到指定歌词行，即通过歌词调整歌曲进度
 const scrollLocatorTime = ref(0)
 const scrollLocatorTimeText = ref('00:00')
 const scrollLocatorCurrentIndex = ref(-1)
@@ -230,6 +244,8 @@ const setScrollLocatorCurrentIndex = (value) => scrollLocatorCurrentIndex.value 
 const setupLyricScrollLocator = () => {
     const locatorEl = document.querySelector('.lyric-ctl .scroll-locator')
     if (!locatorEl) return
+    const lyricWrap = document.querySelector(".lyric-ctl .center")
+    if (!lyricWrap) return
     const { clientHeight, clientWidth } = document.documentElement
     locatorEl.style.top = clientHeight / 2 + 'px'
 
@@ -270,10 +286,11 @@ const seekFromLyric = () => {
     if (duration <= 0) return
     const current = toMillis(scrollLocatorTime.value)
     if (current < 0) return
+
+    setUserMouseWheel(false)
     setSeeking(true)
     const percent = current / duration
     seekTrack(percent)
-    setUserMouseWheel(false)
     setSeeking(false)
     setScrollLocatorCurrentIndex(-1)
 }

@@ -84,7 +84,7 @@ const setImageTextTileSize = () => {
         }
     }
     tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
-    //console.log(clientWidth, limit, tileWidth)
+
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 1
     tileCovers.forEach(item => {

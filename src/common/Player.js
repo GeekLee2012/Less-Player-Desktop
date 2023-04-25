@@ -13,12 +13,13 @@ export class Player {
     constructor(track) {
         this.currentTrack = track
         this.sound = null
+        this.playState = PLAY_STATE.NONE
         this.retry = 0
         this.webAudioApi = null
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
         this.pendingSoundEffect = null
         this.animationFrameId = 0
-        this.seeking = false
+        this.seekPendingMark = 0 //percent
         this.animationFrameCnt = 0 //动画帧数计数器，控制事件触发频率，降低CPU占用
         this.stateRefreshFrequency = 60 //歌曲进度更新频度
         this.spectrumRefreshFrequency = 3 //歌曲频谱更新频度
@@ -41,10 +42,11 @@ export class Player {
             .on('volume-set', volume => player.volume(volume))
             .on('radio-play', () => player.setCurrent(null))
             .on('playbackQueue-empty', () => player.setCurrent(null))
-            .on('track-updateEQ', (values) => player.updateEQ(values))
-            .on('track-updateIR', (source) => player.updateIR(source))
-            .on('track-stateRefreshFrequency', (value) => player.stateRefreshFrequency = value)
-            .on('track-spectrumRefreshFrequency', (value) => player.spectrumRefreshFrequency = value)
+            .on('track-updateEQ', values => player.updateEQ(values))
+            .on('track-updateIR', source => player.updateIR(source))
+            .on('track-stateRefreshFrequency', value => player.stateRefreshFrequency = value)
+            .on('track-spectrumRefreshFrequency', value => player.spectrumRefreshFrequency = value)
+            .on('track-markSeekPending', value => player.seekPendingMark = value)
     }
 
     isTrackAvailable() {
@@ -63,11 +65,19 @@ export class Player {
             onplay: function () {
                 self.retry = 0
                 self.animationFrameCnt = 0
-                if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
-                self.animationFrameId = requestAnimationFrame(self._step.bind(self))
+
                 self.notifyStateChanged(PLAY_STATE.PLAYING)
+
+                if (self.seekPendingMark) { //存在未处理seek事件
+                    self.seek(self.seekPendingMark)
+                    self.seekPendingMark = 0
+                } else { //正常情况
+                    if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
+                    self.animationFrameId = requestAnimationFrame(self._step.bind(self))
+                }
             },
             onpause: function () {
+                self.animationFrameCnt = 0
                 if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
                 self.notifyStateChanged(PLAY_STATE.PAUSE)
             },
@@ -75,9 +85,8 @@ export class Player {
                 self.notifyStateChanged(PLAY_STATE.END)
             },
             onseek: function () {
-                self.seeking = true
+                //重置动画帧
                 self.animationFrameCnt = 0
-
                 if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
                 self.animationFrameId = requestAnimationFrame(self._step.bind(self))
             },
@@ -161,19 +170,21 @@ export class Player {
     _step() {
         const sound = this.getSound()
         if (!sound) return
-        if (!sound.playing() && !this.seeking) return
-        if (this.seeking) this.seeking = false
+        if (!sound.playing() && this.playState != PLAY_STATE.PLAYING) return
+        //当前时间
         const seek = sound.seek() || 0
         if (this.isStateRefreshEnabled()) EventBus.emit('track-pos', seek)
+        //声音处理
         try {
             this.resolveSound()
         } catch (error) {
             console.log(error)
             this.retryPlay(1)
         }
+        this._countAnimationFrame()
+        //循环动画
         if (this.animationFrameId > 0) cancelAnimationFrame(this.animationFrameId)
         this.animationFrameId = requestAnimationFrame(this._step.bind(this))
-        this._countAnimationFrame()
     }
 
     on(event, handler) {
@@ -182,7 +193,8 @@ export class Player {
     }
 
     notifyStateChanged(state) {
-        EventBus.emit('track-state', state)
+        this.playState = state
+        EventBus.emit('track-state', this.playState)
     }
 
     notifyError(isRetry) {
@@ -210,16 +222,13 @@ export class Player {
         const analyser = this.webAudioApi.getAnalyser()
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
-        if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-freqUnit8Data', freqData)
+        if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-spectrumData', freqData)
     }
 
     tryUnlockHowlAudios() {
         const audios = Howler._html5AudioPool
-        if (!audios) return
         // Unlock CORS
-        audios.forEach(audio => {
-            audio.crossOrigin = 'anonymous'
-        })
+        if (audios) audios.forEach(audio => audio.crossOrigin = 'anonymous')
     }
 
     updateEQ(values) {

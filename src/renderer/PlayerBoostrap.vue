@@ -319,7 +319,7 @@ const playAlbum = (album, text) => {
 
 
 /* 频谱 */
-let cachedFreqData = null, spectrumColor = null, stroke = null
+let cachedSpectrumFreqData = null, spectrumColor = null, stroke = null
 const drawSpectrum = (canvas, freqData, alignment) => {
     spectrumColor = getCurrentThemeHlColor()
     stroke = spectrumColor
@@ -408,12 +408,12 @@ const drawCanvasSpectrum = () => {
     switch (index) {
         case 1:
         case 3:
-            drawGridSpectrum(canvas, cachedFreqData, alignment)
+            drawGridSpectrum(canvas, cachedSpectrumFreqData, alignment)
             break
         case 2:
             alignment = 'center'
         default:
-            drawSpectrum(canvas, cachedFreqData, alignment)
+            drawSpectrum(canvas, cachedSpectrumFreqData, alignment)
             break
     }
 }
@@ -437,15 +437,40 @@ const getVideoDetail = (platform, id) => {
     })
 }
 
+const setupCurrentMediaSession = () => {
+    if ("mediaSession" in navigator) {
+        const track = currentTrack.value
+        if (!track) return
+        const { title, cover } = track
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title,
+            artist: Track.artistName(track),
+            album: Track.albumName(track),
+            artwork: [{
+                src: cover,
+                sizes: "500x500",
+                type: "image/png",
+            }]
+        })
+
+        navigator.mediaSession.setActionHandler("previoustrack", playPrevTrack)
+        navigator.mediaSession.setActionHandler("nexttrack", playNextTrack)
+    }
+}
 
 /* EventBus事件 */
 //FM广播
 EventBus.on('radio-play', traceRecentTrack)
-EventBus.on('radio-state', setPlaying)
+EventBus.on('radio-state', playing => {
+    setPlaying(playing)
+    if (playing) setupCurrentMediaSession()
+})
 //普通歌曲
 EventBus.on('track-changed', track => {
     bootstrapTrack(track).then(track => {
-        if (isCurrentTrack(track)) playTrackDirectly(track)
+        if (isCurrentTrack(track)) {
+            playTrackDirectly(track)
+        }
     }, reason => {
         if (reason == 'noUrl') handleUnplayableTrack(track)
     })
@@ -458,6 +483,11 @@ EventBus.on('track-play', track => {
 
 EventBus.on('track-error', onPlayerErrorRetry)
 EventBus.on('track-state', state => {
+    //播放刚开始时，更新MediaSession
+    if (playState.value == PLAY_STATE.INIT && state == PLAY_STATE.PLAYING) {
+        setupCurrentMediaSession()
+    }
+
     setPlayState(state)
     switch (state) {
         case PLAY_STATE.PLAYING:
@@ -498,8 +528,8 @@ EventBus.on('track-pos', secs => {
     progressState.value = duration > 0 ? (currentTime / duration) : 0
 })
 
-EventBus.on("track-freqUnit8Data", freqData => {
-    cachedFreqData = freqData
+EventBus.on("track-spectrumData", freqData => {
+    cachedSpectrumFreqData = freqData
     //简约布局、可视化播放页
     if (isSimpleLayout.value || (playingViewShow.value && playingViewThemeIndex.value == 1)) {
         drawCanvasSpectrum()
@@ -510,21 +540,25 @@ EventBus.on("track-freqUnit8Data", freqData => {
 EventBus.on('track-nextPlaylistRadioTrack', track =>
     playNextPlaylistRadioTrack(track.platform, track.channel, track))
 
-//TODO 播放进度
+
+//播放进度
 const seekTrack = (percent) => {
-    let delay = 36
-    if (!isPlaying()) {
+    if (isPlaying()) {
+        seekTrackDirectly(percent)
+    } else { //非播放状态
+        markTrackSeekPending(percent)
+        //播放歌曲
         if (playState.value == PLAY_STATE.PAUSE) {
             togglePlay()
         } else {
             playTrackDirectly(currentTrack.value)
-            delay = 366
         }
     }
-    setTimeout(() => doSeekTrack(percent), delay)
+    //setTimeout(() => seekTrackDirectly(percent), delay)
 }
 
-const doSeekTrack = (percent) => EventBus.emit('track-seek', percent)
+const seekTrackDirectly = (percent) => EventBus.emit('track-seek', percent)
+const markTrackSeekPending = (percent) => EventBus.emit('track-markSeekPending', percent)
 
 //播放MV
 const playMv = (track) => {

@@ -40,7 +40,7 @@ export class United {
             let result = null
             const top = 3
 
-            console.log('<------ Transfer Begin ------>')
+            //console.log('<------ Transfer Begin ------>')
             whereDreamBegins:
             for (var i = 0; i < vendors.length; i++) {
                 const vendor = vendors[i]
@@ -62,7 +62,7 @@ export class United {
                     break whereDreamBegins
                 }
             }
-            console.log('<------ Transfer End ------>')
+            //console.log('<------ Transfer End ------>')
             resolve(track)
         })
     }

@@ -731,7 +731,6 @@ export class QQ {
             const reqBody = lyricExtReqBody(id, track)
             const result = { id, platform: QQ.CODE, lyric: null, trans: null }
             getJson(url, reqBody).then(json => {
-                console.log(json)
                 const lyric = json.req_1.data.lyric
                 const trans = json.req_1.data.trans
 

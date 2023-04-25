@@ -75,7 +75,7 @@ const init = () => {
           url: item.getURL(),
           savePath
         })
-        console.log("[ Download - Done ]")
+        //console.log("[ Download - Done ]")
       })
     })
   })

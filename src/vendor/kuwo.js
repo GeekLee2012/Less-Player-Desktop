@@ -239,7 +239,6 @@ export class KuWo {
             const url = "http://m.kuwo.cn/newh5/singles/songinfoandlrc"
                 + "?musicId=" + id + "&httpsStatus=1&reqId=" + randomReqId()
             getJson(url, null, CONFIG).then(json => {
-                console.log(json)
                 const result = { id, platform: KuWo.CODE, lyric: new Lyric(), trans: null }
                 if (!json.data) {
                     resolve(result)

@@ -400,17 +400,17 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                         <div class="tip-text spacing">提示：不会影响系统熄屏、锁屏</div>
                     </div>
-                    <div class="tip-text">提示：当前应用，更新频度，指每多少个动画帧更新一次；频度值越小，动画越流畅，CPU占用越高</div>
+                    <div class="tip-text">提示：当前应用，更新频度指每多少个动画帧更新一次；频度值越小，动画越流畅，CPU占用越高</div>
                     <div>
                         <span class="cate-subtitle">歌曲（歌词）进度更新频度：</span>
-                        <input type="number" :value="track.stateRefreshFrequency" placeholder="范围1 - 120，默认60，推荐10 - 60"
-                            min="1" max="120" step="1" @input="updateStateRefreshFrequency"
+                        <input type="number" :value="track.stateRefreshFrequency" placeholder="屏幕刷新率，范围1-1024，默认60" min="1"
+                            max="1024" step="1" @input="updateStateRefreshFrequency"
                             @focusout="updateStateRefreshFrequency" />
                     </div>
                     <div class="last">
                         <span class="cate-subtitle">歌曲频谱更新频度：</span>
-                        <input type="number" :value="track.spectrumRefreshFrequency" placeholder="范围1 - 30，默认3" min="1"
-                            max="30" step="1" @input="updateSpectrumRefreshFrequency" @focusout="updateFontWeight" />
+                        <input type="number" :value="track.spectrumRefreshFrequency" placeholder="范围1 - 256，默认3" min="1"
+                            max="256" step="1" @input="updateSpectrumRefreshFrequency" @focusout="updateFontWeight" />
                     </div>
                 </div>
             </div>

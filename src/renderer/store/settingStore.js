@@ -318,13 +318,13 @@ export const useSettingStore = defineStore('setting', {
         },
         setStateRefreshFrequency(value) {
             const freq = parseInt(value || 60)
-            if (freq < 1 || freq > 120) return
+            if (freq < 1 || freq > 1024) return
             this.track.stateRefreshFrequency = freq
             this.setupStateRefreshFrequency()
         },
         setSpectrumRefreshFrequency(value) {
             const freq = parseInt(value || 3)
-            if (freq < 1 || freq > 30) return
+            if (freq < 1 || freq > 256) return
             this.track.spectrumRefreshFrequency = freq
             this.setupSpectrumRefreshFrequency()
         },
