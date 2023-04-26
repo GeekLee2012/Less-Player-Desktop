@@ -31,6 +31,7 @@ const { setThemeIndex,
     toggleVipTransfer,
     toggleVipFlagShow,
     toggleCategoryBarRandom,
+    togglePlaylistCategoryBarFlowBtnShow,
     toggleListenNumShow,
     togglePlayingWithoutSleeping,
     toggleStorePlayState,
@@ -386,7 +387,13 @@ onMounted(checkForUpdate)
                     </div>
                     <div>
                         <span class="cate-subtitle">歌单分类栏，随机显示分类：</span>
-                        <ToggleControl @click="toggleCategoryBarRandom" :value="track.categoryBarRandom">
+                        <ToggleControl @click="toggleCategoryBarRandom" :value="track.playlistCategoryBarRandom">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">歌单分类浮动按钮：</span>
+                        <ToggleControl @click="togglePlaylistCategoryBarFlowBtnShow"
+                            :value="track.playlistCategoryBarFlowBtnShow">
                         </ToggleControl>
                     </div>
                     <div>

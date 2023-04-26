@@ -69,13 +69,14 @@ export const useSettingStore = defineStore('setting', {
             vipTransfer: false,
             vipFlagShow: false,
             //歌单分类栏随机显示
-            categoryBarRandom: false,
+            playlistCategoryBarRandom: false,
+            playlistCategoryBarFlowBtnShow: false,
             listenNumShow: false,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: false,
-            //歌曲进度更新频度，默认为30，范围：1 - 120
+            //歌曲进度更新频度，默认为60，范围：1 - 1024
             stateRefreshFrequency: 60,
-            //歌曲频谱刷新频度，默认为3，范围：1 - 30
+            //歌曲频谱刷新频度，默认为3，范围：1 - 256
             spectrumRefreshFrequency: 3,
         },
         /* 歌词 */
@@ -88,7 +89,7 @@ export const useSettingStore = defineStore('setting', {
             offset: 0, //时间补偿值，快慢
             metaPos: 0, //歌曲信息, 0:默认, 1:隐藏, 2:顶部
             alignment: 0, //对齐方式, 0:左, 1:中, 2:右
-            trans: false
+            trans: true //翻译
         },
         /* 缓存 */
         cache: {
@@ -196,8 +197,11 @@ export const useSettingStore = defineStore('setting', {
         blackHole: null, //黑洞state，永远不需要持久化
     }),
     getters: {
-        isPlaylistCategoryBarRandom(state) {
-            return this.track.categoryBarRandom
+        isPlaylistCategoryBarRandom() {
+            return this.track.playlistCategoryBarRandom
+        },
+        isPlaylistCategoryBarFlowBtnShow() {
+            return this.track.playlistCategoryBarFlowBtnShow
         },
         isStorePlayStateBeforeQuit(state) {
             return this.cache.storePlayState
@@ -304,7 +308,10 @@ export const useSettingStore = defineStore('setting', {
             this.track.vipTransfer = !this.track.vipTransfer
         },
         toggleCategoryBarRandom() {
-            this.track.categoryBarRandom = !this.track.categoryBarRandom
+            this.track.playlistCategoryBarRandom = !this.track.playlistCategoryBarRandom
+        },
+        togglePlaylistCategoryBarFlowBtnShow() {
+            this.track.playlistCategoryBarFlowBtnShow = !this.track.playlistCategoryBarFlowBtnShow
         },
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping

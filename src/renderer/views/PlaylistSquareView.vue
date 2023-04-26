@@ -7,11 +7,13 @@ import PlaylistCategoryBar from '../components/PlaylistCategoryBar.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
+import PlaylistCategoryFlowBtn from '../components/PlaylistCategoryFlowBtn.vue';
 
 
 
 const squareContentRef = ref(null)
 const back2TopBtnRef = ref(null)
+const playlistCategoryFlowBtnRef = ref(null)
 
 //全部分类
 const categories = reactive([])
@@ -126,9 +128,11 @@ const restoreScrollState = () => {
     if (squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
 }
 
-const resetBack2TopBtn = () => {
+const resetFlowBtns = () => {
+    if (playlistCategoryFlowBtnRef.value) playlistCategoryFlowBtnRef.value.setScrollTarget(squareContentRef.value)
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
 }
+
 
 //TODO 后期需要梳理优化
 /*-------------- 各种监听 --------------*/
@@ -144,7 +148,7 @@ onActivated(() => {
 const resetCommom = () => {
     resetPagination()
     resetScrollState()
-    resetBack2TopBtn()
+    resetFlowBtns()
 }
 
 const refreshData = () => {
@@ -169,6 +173,8 @@ EventBus.on("playlistSquare-refresh", refreshData)
         <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories">
         </PlaylistCategoryBar>
         <PlaylistsControl :data="playlists" :loading="isLoadingContent"></PlaylistsControl>
+        <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef">
+        </PlaylistCategoryFlowBtn>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>

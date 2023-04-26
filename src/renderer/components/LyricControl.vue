@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref, onMounted, inject, onUnmounted, nextTick } from 'vue';
+import { watch, ref, onMounted, inject, onUnmounted, nextTick, onUpdated } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
@@ -12,11 +12,10 @@ import { useSettingStore } from '../store/settingStore';
 import { PLAY_STATE } from '../../common/Constants';
 
 
-
 const props = defineProps({
-    track: Object //Track
+    track: Object, //Track
+    currentTime: Number
 })
-
 
 const { playMv, loadLyric, currentTimeState, seekTrack, playState } = inject('player')
 
@@ -24,7 +23,7 @@ const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
 const { lyric, lyricTransActived } = storeToRefs(useSettingStore())
 const { toggleLyricTrans } = useSettingStore()
-
+//const { currentTrack } = storeToRefs(usePlayStore())
 
 const currentIndex = ref(-1)
 const hasLyric = ref(false)
@@ -33,7 +32,7 @@ let presetOffset = Track.lyricOffset(props.track)
 const lyricTransData = ref(Track.lyricTransData(props.track))
 
 let destScrollTop = 0
-let rafId = null
+let scrollAnimationFrameId = null
 
 const isUserMouseWheel = ref(false)
 let userMouseWheelCancelTimer = null
@@ -72,8 +71,11 @@ const renderAndScrollLyric = (secs) => {
 
     nextTick(setupLyricLines)
 
-    if (index < 0) return
-    setLyricCurrentIndex(index)
+    if (index >= 0) {
+        setLyricCurrentIndex(index)
+    } else {
+        index = 0
+    }
 
     if (isUserMouseWheel.value || isSeeking.value) return
     //Scroll
@@ -106,7 +108,9 @@ const renderAndScrollLyric = (secs) => {
     const { offsetTop } = lyricWrap
     const { clientHeight } = document.documentElement
     destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
-    lyricWrap.scrollTop = destScrollTop
+    //lyricWrap.scrollTop = destScrollTop
+    //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
+    smoothScroll(lyricWrap, 288)
 }
 
 const safeRenderAndScrollLyric = (secs) => {
@@ -125,25 +129,38 @@ function easeInOutQuad(currentTime, startValue, changeValue, duration) {
     return -changeValue / 2 * (currentTime * (currentTime - 2) - 1) + startValue;
 }
 
-//TODO
-function smoothScroll(target, duration) {
-    let currentTime = 0, step = 5
-    const currentScrollTop = target.scrollTop
-    const distance = destScrollTop - currentScrollTop
+//TODO 平滑滚动，算法基本可行，但感觉有点呆！暂时先这样吧
+function smoothScroll(target, duration, step) {
+    if (!target) return
+    step = step || 6
+    const startScrollTop = target.scrollTop
+    const distance = destScrollTop - startScrollTop
 
+    let current = 0
     const easeInOutScroll = () => {
-        if (currentTime >= duration) {
-            cancelAnimationFrame(rafId)
+        if (current >= duration) {
+            cancelAnimationFrame(scrollAnimationFrameId)
             return
         }
-        const calcScrollTop = easeInOutQuad(currentTime, currentScrollTop, distance, duration)
-        currentTime += step
-        target.scrollTop = calcScrollTop
-        rafId = requestAnimationFrame(easeInOutScroll)
+        const calcScrollTop = easeInOutQuad(current, startScrollTop, distance, duration)
+        if (target) target.scrollTop = calcScrollTop
+        current += step
+        cancelAnimationFrame(scrollAnimationFrameId)
+        scrollAnimationFrameId = requestAnimationFrame(easeInOutScroll)
     }
     easeInOutScroll()
 }
 
+//TODO
+const resetDefaultLyricScrollTop = () => {
+    const lyricWrap = document.querySelector(".lyric-ctl .center")
+    if (!lyricWrap) return
+    //const { offsetTop } = lyricWrap
+    //const { clientHeight } = document.documentElement
+    lyricWrap.scrollTop = 129
+}
+
+//重新加载歌词
 const reloadLyricData = (track) => {
     let isExist = false
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
@@ -173,12 +190,12 @@ const reloadLyricData = (track) => {
     setLyricCurrentIndex(-1)
     setSeeking(false)
     //重置滚动条位置
-    const lyricWrap = document.querySelector(".lyric-ctl .center")
-    if (lyricWrap) lyricWrap.scrollTop = 0
+    //resetDefaultLyricScrollTop()
     //重新设置样式
     nextTick(() => {
-        setupLyricLines()
+        //setupLyricLines()
         setupLyricTrans()
+        safeRenderAndScrollLyric(props.currentTime)
     })
     //setTimeout(setupLyricLines, 300)
 }
@@ -244,11 +261,10 @@ const setScrollLocatorCurrentIndex = (value) => scrollLocatorCurrentIndex.value 
 const setupLyricScrollLocator = () => {
     const locatorEl = document.querySelector('.lyric-ctl .scroll-locator')
     if (!locatorEl) return
-    const lyricWrap = document.querySelector(".lyric-ctl .center")
-    if (!lyricWrap) return
-    const { clientHeight, clientWidth } = document.documentElement
-    locatorEl.style.top = clientHeight / 2 + 'px'
+    //const { clientHeight, clientWidth } = document.documentElement
+    //locatorEl.style.top = (clientHeight / 2) + 'px'
 
+    const { clientWidth } = document.documentElement
     const lyricEl = document.querySelector('.lyric-ctl .center')
     let leftAlignPos = clientWidth / 2 - 100
     if (lyricEl) leftAlignPos = Math.max(lyricEl.clientWidth, leftAlignPos)
@@ -297,7 +313,13 @@ const seekFromLyric = () => {
 
 //TODO 暂停状态下，歌词状态没有同步
 const restoreLyricPausedState = () => {
-    if (playState.value == PLAY_STATE.PAUSE) safeRenderAndScrollLyric(currentTimeState.value)
+    if (playState.value == PLAY_STATE.PAUSE) safeRenderAndScrollLyric(props.currentTime)
+}
+
+const getTransTimeKey = (mmssSSS, offset) => {
+    let transTimeKey = toMMssSSS(toMillis(mmssSSS) + (offset || 0))
+    //if (transTimeKey) transTimeKey = transTimeKey.replace(/\.0/g, '.')
+    return transTimeKey || mmssSSS
 }
 
 //歌词翻译
@@ -308,14 +330,23 @@ const setupLyricTrans = () => {
             lines.forEach((line, index) => {
                 const timeKey = line.getAttribute('time-key')
                 if (!timeKey) return
-                let transTimeKey = toMMssSSS(toMillis(timeKey) + 1)
-                if (transTimeKey) transTimeKey = transTimeKey.replace(/\.0/g, '.')
                 const transEl = line.querySelector('.trans-text')
                 if (!transEl) return
                 transEl.innerHTML = null //重置
                 const transMap = lyricTransData.value
                 if (!transMap) return
-                const transText = transMap.get(timeKey) || transMap.get(transTimeKey)
+                //TODO 算法简单粗暴，最坏情况11次尝试！！！
+                const transText = transMap.get(getTransTimeKey(timeKey))
+                    || transMap.get(getTransTimeKey(timeKey, 10))
+                    || transMap.get(getTransTimeKey(timeKey, -10))
+                    || transMap.get(getTransTimeKey(timeKey, 20))
+                    || transMap.get(getTransTimeKey(timeKey, -20))
+                    || transMap.get(getTransTimeKey(timeKey, 30))
+                    || transMap.get(getTransTimeKey(timeKey, -30))
+                    || transMap.get(getTransTimeKey(timeKey, 40))
+                    || transMap.get(getTransTimeKey(timeKey, -40))
+                    || transMap.get(getTransTimeKey(timeKey, 50))
+                    || transMap.get(getTransTimeKey(timeKey, -50))
                 if (transText && transText != '//') transEl.innerHTML = transText
             })
         } catch (error) {
@@ -336,22 +367,15 @@ EventBus.on('lyric-lineSpacing', setupLyricLines)
 EventBus.on('lyric-alignment', setupLyricAlignment)
 EventBus.on('app-resize', setupLyricScrollLocator)
 EventBus.on('playingView-changed', () => {
-    restoreLyricPausedState()
+    //restoreLyricPausedState()
     setupLyricAlignment()
 })
 
-/*
-onMounted(() => {
-    //loadLyric(props.track)
-    //setupLyricAlignment()
-})
-*/
-
-watch(currentTimeState, (nv, ov) => {
+watch(() => props.currentTime, (nv, ov) => {
     //TODO 暂时简单处理，播放页隐藏时直接返回
     if (!playingViewShow.value) return
     safeRenderAndScrollLyric(nv)
-})
+}, { immediate: true })
 
 watch(() => props.track, loadLyric, { immediate: true })
 </script>
@@ -545,7 +569,7 @@ watch(() => props.track, loadLyric, { immediate: true })
 .lyric-ctl .scroll-locator {
     position: fixed;
     right: 80px;
-    top: 360px;
+    top: 50%;
     z-index: 1;
     display: flex;
     align-items: center;
@@ -603,12 +627,14 @@ watch(() => props.track, loadLyric, { immediate: true })
 }
 
 .lyric-ctl .trans-btn span {
-    border: 1px solid var(--text-sub-color);
+    border: 1.25px solid var(--text-sub-color);
     border-radius: 3px;
     padding: 1px 2px;
-    font-size: var(--text-sub-size);
+    font-size: var(--tip-text-size);
+    font-size: var(--text-size);
     cursor: pointer;
     color: var(--text-sub-color);
+    font-weight: bold;
 }
 
 .lyric-ctl .trans-btn .active,

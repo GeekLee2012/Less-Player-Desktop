@@ -17,7 +17,7 @@ import { toMmss } from '../../common/Times';
 
 
 
-const { seekTrack, playMv, progressState, mmssCurrentTime } = inject('player')
+const { seekTrack, playMv, progressState, mmssCurrentTime, currentTimeState } = inject('player')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -276,7 +276,7 @@ onUnmounted(() => {
                     </div>
                 </div>
                 <div class="lyric-wrap">
-                    <LyricControl :track="currentTrack" @mousewheel="onUserMouseWheel">
+                    <LyricControl :track="currentTrack" :currentTime="currentTimeState" @mousewheel="onUserMouseWheel">
                     </LyricControl>
                 </div>
             </div>

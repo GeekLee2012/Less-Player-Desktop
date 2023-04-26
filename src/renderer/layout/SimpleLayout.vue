@@ -903,7 +903,7 @@ watch([textColorIndex], setupTextColor)
                     :trackId="currentTrack.id" class="audio-artist">
                 </ArtistControl>
             </div>
-            <div class="audio-time-wrap">
+            <div class="audio-time-wrap" v-show="lyric.metaPos != 1">
                 <span class="t-current" v-html="mmssCurrentTime"></span>
                 <span class="t-duration" v-html="Track.mmssDuration(currentTrack)"></span>
             </div>

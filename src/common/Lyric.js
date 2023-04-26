@@ -107,8 +107,18 @@ export class Lyric {
     }
 
     static __unifyTime(time) {
-        //TODO .x和.xx格式未做处理
-        return (time.indexOf('.') != -1) ? time : (time + '.000')
+        const timeParts = time.split('.')
+        if (timeParts.length >= 2) {
+            const millisPart = timeParts[1].trim()
+            if (millisPart.length == 2) { //10ms
+                return time + '0'
+            } else if (millisPart.length == 1) { //格式错误，暂时当成ms处理
+                return timeParts[0].trim() + '.00' + millisPart
+            } else if (millisPart.length >= 3) { //格式错误，暂时截断，然后当成ms处理
+                return timeParts[0].trim() + '.' + millisPart.substring(0, 3)
+            }
+        }
+        return time + '.000'
     }
 
     static hasData(lyric) {

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, shallowRef, watch } from 'vue';
+import { nextTick, onMounted, reactive, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
@@ -144,7 +144,8 @@ const setupPlayingView = (index) => {
   index = index || playingViewThemeIndex.value
   const playingViewThemes = [PlayingView, VisualPlayingView]
   currentPlayingView.value = playingViewThemes[index]
-  //EventBus.emit('playingView-changed')
+  //重置动画计数器，让歌曲进度直接刷新
+  //nextTick(() => EventBus.emit('track-resetAnimFrameCnt'))
 }
 
 onMounted(() => {
@@ -197,12 +198,10 @@ onMounted(() => {
   </transition>
 
   <!-- 顶层浮动窗口 -->
-  <keep-alive max="1">
-    <transition name="fade-y">
-      <component id="playing-view" v-show="playingViewShow" :is="currentPlayingView">
-      </component>
-    </transition>
-  </keep-alive>
+  <transition name="fade-y">
+    <component id="playing-view" v-show="playingViewShow" :is="currentPlayingView">
+    </component>
+  </transition>
 
   <PlaybackQueueView id="playback-queue-view" v-show="playbackQueueViewShow">
   </PlaybackQueueView>

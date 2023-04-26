@@ -47,6 +47,7 @@ export class Player {
             .on('track-stateRefreshFrequency', value => player.stateRefreshFrequency = value)
             .on('track-spectrumRefreshFrequency', value => player.spectrumRefreshFrequency = value)
             .on('track-markSeekPending', value => player.seekPendingMark = value)
+        //.on('track-resetAnimFrameCnt', () => player.animationFrameCnt = 0)
     }
 
     isTrackAvailable() {
