@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useSettingStore } from '../store/settingStore';
-
+import { smoothScroll } from '../../common/Utils';
 
 
 const props = defineProps({
@@ -44,40 +44,10 @@ const bindScrollListener = () => {
     scrollTarget.addEventListener('scroll', showAsNeeded)
 }
 
-//参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
-function easeInOutQuad(currentTime, startValue, changeValue, duration) {
-    currentTime /= duration / 2;
-    if (currentTime < 1) return changeValue / 2 * currentTime * currentTime + startValue;
-    currentTime--;
-    return -changeValue / 2 * (currentTime * (currentTime - 2) - 1) + startValue;
-}
-
-let rafId = null
-
-//TODO
-function smoothScroll(target, duration, destScrollTop) {
-    let currentTime = 0, step = 5
-    const currentScrollTop = target.scrollTop
-    const distance = destScrollTop - currentScrollTop
-
-    const easeInOutScroll = () => {
-        if (currentTime >= duration) {
-            target.scrollTop = destScrollTop
-            cancelAnimationFrame(rafId)
-            return
-        }
-        const calcScrollTop = easeInOutQuad(currentTime, currentScrollTop, distance, duration)
-        currentTime += step
-        target.scrollTop = calcScrollTop
-        rafId = requestAnimationFrame(easeInOutScroll)
-    }
-    easeInOutScroll()
-}
-
 const scrollToTop = () => {
     if (!scrollTarget) return
     //scrollTarget.scrollTop = 0
-    smoothScroll(scrollTarget, 300, 0)
+    smoothScroll(scrollTarget, 0, 520, 8)
 }
 
 defineExpose({

@@ -5,6 +5,7 @@ import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
+import { smoothScroll } from '../../common/Utils';
 
 
 
@@ -15,10 +16,13 @@ const { showToast, hidePlaybackQueueView, hidePlayingView, hideAllCtxMenus } = u
 const targetPlaying = () => {
     if (queueTracksSize.value < 1) return
     const queueItemsWrap = document.querySelector('.playback-queue-view .center')
-    const clientHeight = queueItemsWrap.clientHeight
-    const scrollHeight = queueItemsWrap.scrollHeight
-    const maxScroll = scrollHeight - clientHeight
-    queueItemsWrap.scrollTop = maxScroll * (playingIndex.value / (queueTracksSize.value - 1))
+    const queueItems = document.querySelectorAll('.playback-queue-view .center .item')
+    //const { clientHeight, scrollHeight } = queueItemsWrap
+    //const maxScroll = scrollHeight - clientHeight
+    //queueItemsWrap.scrollTop = maxScroll * (playingIndex.value / (queueTracksSize.value - 1))
+    const { clientHeight } = document.documentElement
+    const destScrollTop = queueItems[playingIndex.value].offsetTop - (clientHeight / 2 - queueItemsWrap.offsetTop)
+    smoothScroll(queueItemsWrap, destScrollTop, 314, 8)
 }
 
 const onQueueEmpty = () => {
@@ -103,7 +107,7 @@ onMounted(() => {
         </div>
         <div class="center" ref="listRef">
             <template v-for="(item, index) in queueTracks">
-                <PlaybackQueueItem :data="item" :active="playingIndex == index">
+                <PlaybackQueueItem class="item" :data="item" :active="playingIndex == index">
                 </PlaybackQueueItem>
             </template>
         </div>
@@ -196,6 +200,7 @@ onMounted(() => {
 }
 
 .playback-queue-view .center {
+    position: relative;
     flex: 1;
     overflow: scroll;
 }

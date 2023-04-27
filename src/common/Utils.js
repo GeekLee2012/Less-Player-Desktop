@@ -107,3 +107,33 @@ export const md5 = (text) => {
 export const hmacMd5 = (text) => {
     return text ? CryptoJS.HmacMD5(text).toString() : null
 }
+
+//参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
+const easeInOutQuad = (currentTime, startValue, changeValue, duration) => {
+    currentTime /= duration / 2;
+    if (currentTime < 1) return changeValue / 2 * currentTime * currentTime + startValue;
+    currentTime--;
+    return -changeValue / 2 * (currentTime * (currentTime - 2) - 1) + startValue;
+}
+
+//TODO 平滑滚动，算法基本可行，但感觉有点呆！暂时先这样吧
+export const smoothScroll = (target, destScrollTop, duration, step) => {
+    if (!target) return
+    step = step || 6
+    const startScrollTop = target.scrollTop
+    const distance = destScrollTop - startScrollTop
+
+    let current = 0, scrollAnimationFrameId = null
+    const easeInOutScroll = () => {
+        if (current >= duration) {
+            cancelAnimationFrame(scrollAnimationFrameId)
+            return
+        }
+        const calcScrollTop = easeInOutQuad(current, startScrollTop, distance, duration)
+        if (target) target.scrollTop = calcScrollTop
+        current += step
+        cancelAnimationFrame(scrollAnimationFrameId)
+        scrollAnimationFrameId = requestAnimationFrame(easeInOutScroll)
+    }
+    easeInOutScroll()
+}

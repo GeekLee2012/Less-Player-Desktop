@@ -10,6 +10,8 @@ import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import { PLAY_STATE } from '../../common/Constants';
+import { smoothScroll } from '../../common/Utils';
+
 
 
 const props = defineProps({
@@ -31,8 +33,6 @@ const lyricData = ref(Track.lyricData(props.track))
 let presetOffset = Track.lyricOffset(props.track)
 const lyricTransData = ref(Track.lyricTransData(props.track))
 
-let destScrollTop = 0
-let scrollAnimationFrameId = null
 
 const isUserMouseWheel = ref(false)
 let userMouseWheelCancelTimer = null
@@ -88,7 +88,7 @@ const renderAndScrollLyric = (secs) => {
     const scrollHeight = lyricWrap.scrollHeight
     const clientHeight = lyricWrap.clientHeight
     const maxScrollTop = scrollHeight - clientHeight
-    destScrollTop = maxScrollTop * (scrollIndex / (lines.length - 1))
+    const destScrollTop = maxScrollTop * (scrollIndex / (lines.length - 1))
     lyricWrap.scrollTop = destScrollTop
     //smoothScroll(lyricWrap, 300)
     */
@@ -98,7 +98,7 @@ const renderAndScrollLyric = (secs) => {
     //offsetTop：元素到offsetParent顶部的距离
     //offsetParent：距离元素最近的一个具有定位的祖宗元素（relative，absolute，fixed），若祖宗都不符合条件，offsetParent为body
     /* 
-    destScrollTop = lines[index].offsetTop - lyricWrap.clientHeight / 2
+    const destScrollTop = lines[index].offsetTop - lyricWrap.clientHeight / 2
     lyricWrap.scrollTop = Math.max(destScrollTop, 0)
     */
 
@@ -107,10 +107,10 @@ const renderAndScrollLyric = (secs) => {
     //绝对意义上来说，并不垂直居中，也并不平行，因为歌词行自身有一定高度
     const { offsetTop } = lyricWrap
     const { clientHeight } = document.documentElement
-    destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
+    const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
     //lyricWrap.scrollTop = destScrollTop
     //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
-    smoothScroll(lyricWrap, 288)
+    smoothScroll(lyricWrap, destScrollTop, 288)
 }
 
 const safeRenderAndScrollLyric = (secs) => {
@@ -119,36 +119,6 @@ const safeRenderAndScrollLyric = (secs) => {
     } catch (error) {
         console.log(error)
     }
-}
-
-//参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
-function easeInOutQuad(currentTime, startValue, changeValue, duration) {
-    currentTime /= duration / 2;
-    if (currentTime < 1) return changeValue / 2 * currentTime * currentTime + startValue;
-    currentTime--;
-    return -changeValue / 2 * (currentTime * (currentTime - 2) - 1) + startValue;
-}
-
-//TODO 平滑滚动，算法基本可行，但感觉有点呆！暂时先这样吧
-function smoothScroll(target, duration, step) {
-    if (!target) return
-    step = step || 6
-    const startScrollTop = target.scrollTop
-    const distance = destScrollTop - startScrollTop
-
-    let current = 0
-    const easeInOutScroll = () => {
-        if (current >= duration) {
-            cancelAnimationFrame(scrollAnimationFrameId)
-            return
-        }
-        const calcScrollTop = easeInOutQuad(current, startScrollTop, distance, duration)
-        if (target) target.scrollTop = calcScrollTop
-        current += step
-        cancelAnimationFrame(scrollAnimationFrameId)
-        scrollAnimationFrameId = requestAnimationFrame(easeInOutScroll)
-    }
-    easeInOutScroll()
 }
 
 //TODO
