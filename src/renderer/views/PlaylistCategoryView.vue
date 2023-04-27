@@ -76,7 +76,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     <div class="playlist-category-view" @click.stop="">
         <div class="header">
             <div class="cate-title">全部分类</div>
-            <div class="fl-item" v-html="currentCategoryItem.data.key"></div>
+            <div class="fl-item current" v-html="currentCategoryItem.data.key"></div>
         </div>
         <div class="center">
             <div class="fl-row" v-show="orders && orders.length > 0">
@@ -196,8 +196,12 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     color: var(--text-color);
 }
 
+.playlist-category-view .header .current {
+    font-weight: bold;
+}
 
-.playlist-category-view .current {
+
+.playlist-category-view .center .current {
     border-radius: 10rem;
     background: var(--btn-bg) !important;
     color: var(--svg-btn-color) !important;

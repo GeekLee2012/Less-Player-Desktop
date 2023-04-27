@@ -738,7 +738,7 @@ export class QQ {
             return QQ.toplistDetail(id, offset, limit, page)
         }
         return new Promise((resolve, reject) => {
-            const result = new Playlist()
+            const result = new Playlist(id, QQ.CODE)
             const url = "http://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg"
             const reqBody = {
                 format: 'json',
@@ -749,9 +749,8 @@ export class QQ {
             }
             getJson(url, reqBody).then(json => {
                 const playlist = json.cdlist[0]
-                result.id = id
+
                 result.dissid = playlist.dissid
-                result.platform = QQ.CODE
                 result.title = playlist.dissname
                 result.cover = getPlaylistCover(playlist.logo)
                 result.about = playlist.desc
@@ -778,23 +777,21 @@ export class QQ {
     //歌曲播放详情：url、cover、lyric等
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
-            let url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
+            const result = new Track(id, QQ.CODE)
+            const url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = {
                 format: 'json',
                 data: JSON.stringify({
-                    songinfo: moduleReq('music.pf_song_detail_svr', 'get_song_detail_yqq',
-                        {
-                            song_mid: id
-                        })
+                    songinfo: moduleReq('music.pf_song_detail_svr', 'get_song_detail_yqq', { song_mid: id })
                 })
             }
             getJson(url, reqBody).then(json => {
                 const trackInfo = json.songinfo.data.track_info
                 QQ.getVKeyJson(trackInfo).then(json => {
-                    const data = json.req_1.data;
+                    const { data } = json.req_1;
                     const urlInfo = data.midurlinfo[0]
                     const vkey = urlInfo.vkey.trim()
-                    const result = new Track(id, QQ.CODE)
+
                     if (vkey.length > 0) {
                         result.url = data.sip[0] + urlInfo.purl
                     }
@@ -807,20 +804,19 @@ export class QQ {
     //获取VKey、purl和sip服务器等信息
     static getVKeyJson(trackInfo) {
         return new Promise((resolve, reject) => {
-            let url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = vkeyReqBody(trackInfo)
-            getJson(url, reqBody).then(json => {
-                resolve(json)
-            })
+            getJson(url, reqBody).then(json => resolve(json))
         })
     }
 
     //歌词
     static lyric(id, track) {
         return new Promise((resolve, reject) => {
+            const result = { id, platform: QQ.CODE, lyric: null, trans: null }
+
             const url = "http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg"
             const reqBody = lyricReqBody(id)
-            const result = { id, platform: QQ.CODE, lyric: null, trans: null }
             getJson(url, reqBody).then(json => {
                 const lyric = json.lyric
                 const trans = json.trans
@@ -856,7 +852,9 @@ export class QQ {
     //歌手详情：Name、Cover、简介(如果有)、热门歌曲等
     static artistDetail(id) {
         return new Promise((resolve, reject) => {
-            const url = "https://y.qq.com/n/ryqq/singer/" + id
+            const result = { id, title: '未知歌手', cover: 'default_cover.png', data: [], about: '' }
+
+            const url = `https://y.qq.com/n/ryqq/singer/${id}`
             getDoc(url).then(doc => {
                 const scriptEls = doc.querySelectorAll("script")
                 const key = "window.__INITIAL_DATA__"
@@ -868,7 +866,7 @@ export class QQ {
                     scriptText = scriptText.trim()
                     if (scriptText.includes(key)) break
                 }
-                const result = { id, title: '未知歌手', cover: 'default_cover.png', data: [], about: '' }
+
                 if (scriptText) {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')
@@ -1091,7 +1089,7 @@ export class QQ {
     }
 
     //歌手分类名称映射
-    static tagsMap() {
+    static artistTagsMap() {
         return {
             index: '字母',
             area: '地区',
@@ -1123,10 +1121,10 @@ export class QQ {
             }
             getJson(url, reqBody).then(json => {
                 const tags = json.req_1.data.tags
-                const tagsMap = QQ.tagsMap()
+                const artistTagsMap = QQ.artistTagsMap()
                 const keys = ['area', 'sex', 'genre']
                 keys.forEach(key => {
-                    const category = new Category(tagsMap[key])
+                    const category = new Category(artistTagsMap[key])
                     const list = tags[key]
                     list.forEach(item => {
                         category.add(item.name, item.id)
@@ -1146,10 +1144,10 @@ export class QQ {
     static parseArtistCate(cate) {
         const result = { area: -100, sex: -100, genre: -100, index: -100 }
         const source = {}
-        const tagsMap = QQ.tagsMap()
+        const artistTagsMap = QQ.artistTagsMap()
         for (var key in cate) {
-            for (var tag in tagsMap) {
-                if (key == tagsMap[tag]) {
+            for (var tag in artistTagsMap) {
+                if (key == artistTagsMap[tag]) {
                     source[tag] = cate[key].item.value
                 }
             }

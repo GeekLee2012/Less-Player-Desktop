@@ -370,6 +370,11 @@ export class KuWo {
 
     //搜索: 歌曲
     static searchSongs(keyword, offset, limit, page) {
+        return KuWo.searchSongs_v0(keyword, offset, limit, page)
+    }
+
+    //搜索: 歌曲
+    static searchSongs_v0(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
             keyword = keyword.trim()
             const url = "https://www.kuwo.cn/api/www/search/searchMusicBykeyWord"
@@ -386,12 +391,48 @@ export class KuWo {
                         if (item.hasmv) track.mv = item.rid
                         return track
                     })
-                    if (data && data.length > 0) result.push(...data)
+                    if (data && data.length > 0) result.data.push(...data)
                 }
                 resolve(result)
             }).catch(error => resolve(result))
         })
     }
+
+    //搜索: 歌曲
+    static searchSongs_v1(keyword, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            keyword = keyword.trim()
+            const url = 'http://search.kuwo.cn/r.s'
+                + '?user=7cd972c0119949e98ebd20f18d508f62&idfa=&'
+                + 'openudid=2057708153c9fc13f0e801c14d39af5fccdfdc60'
+                + '&uuid=7cd972c0119949e98ebd20f18d508f62'
+                + '&prod=kwplayer_mc_1.7.3&corp=kuwo'
+                + '&source=kwplayer_mc_1.7.3&uid=2557120276'
+                + '&ver=kwplayer_mc_1.7.3&loginid=0'
+                + '&client=kt&cluster=0&strategy=2012'
+                + '&ver=mbox&show_copyright_off=1'
+                + '&encoding=utf8&rformat=json'
+                + '&mobi=1&vipver=1'
+                + `&pn=0&rn=${limit}`
+                + `&all=${keyword}&ft=music`
+            const result = { platform: KuWo.CODE, offset, limit, page, data: [] }
+            getJson(url, null, CONFIG).then(json => {
+                const list = json.abslist
+                const data = list.map(item => {
+                    const artist = [{ id: item.ARTISTID, name: item.ARTIST }]
+                    const album = { id: item.ALBUMID, name: item.ALBUM }
+                    const duration = parseInt(item.DURATION) * 1000
+                    const id = item.MUSICRID.replace('MUSIC_', '')
+                    const track = new Track(id, KuWo.CODE, item.SONGNAME, artist, album, duration)
+                    if (item.MVFLAG == "1") track.mv = id
+                    return track
+                })
+                if (data && data.length > 0) result.data.push(...data)
+                resolve(result)
+            }).catch(error => resolve(result))
+        })
+    }
+
 
     //搜索: 歌单
     static searchPlaylists(keyword, offset, limit, page) {

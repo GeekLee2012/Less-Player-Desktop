@@ -83,7 +83,7 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
     <div class="radio-category-view" @click.stop="">
         <div class="header">
             <div class="cate-title">全部分类</div>
-            <div class="fl-item" v-show="!multiSelectMode" v-html="currentCategoryItem.data.key"></div>
+            <div class="fl-item current" v-show="!multiSelectMode" v-html="currentCategoryItem.data.key"></div>
             <div class="action" v-show="multiSelectMode">
                 <div class="reset-btn text-btn" @click="resetCurrentCategoryItems">
                     <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"
@@ -259,7 +259,11 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 }
 
 
-.radio-category-view .current {
+.radio-category-view .header .current {
+    font-weight: bold;
+}
+
+.radio-category-view .center .current {
     border-radius: 10rem;
     background: var(--btn-bg) !important;
     color: var(--svg-btn-color) !important;

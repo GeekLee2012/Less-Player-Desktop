@@ -68,7 +68,7 @@ const setImageTextTileSize = () => {
     const tileHMargin = 13
     const mainMargin = 33
     const scrollBarWidth = 6
-    const limits = [5, 4] //TODO 宽屏、超宽屏，需更好兼容性
+    const limits = [8, 7, 6, 5, 4] //TODO 宽屏、超宽屏，需更好兼容性
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const { clientWidth } = mainContent

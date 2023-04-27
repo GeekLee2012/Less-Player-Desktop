@@ -447,7 +447,7 @@ const setupCurrentMediaSession = () => {
             artist: Track.artistName(track),
             album: Track.albumName(track),
             artwork: [{
-                src: cover,
+                src: cover || 'default_cover.png',
                 sizes: "500x500",
                 type: "image/png",
             }]

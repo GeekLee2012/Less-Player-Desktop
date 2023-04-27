@@ -65,21 +65,18 @@ export class Player {
             pool: 1,
             onplay: function () {
                 self.retry = 0
-                self.animationFrameCnt = 0
-
                 self.notifyStateChanged(PLAY_STATE.PLAYING)
 
                 if (self.seekPendingMark) { //存在未处理seek事件
+                    self.animationFrameCnt = 0
                     self.seek(self.seekPendingMark)
                     self.seekPendingMark = 0
                 } else { //正常情况
-                    if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
-                    self.animationFrameId = requestAnimationFrame(self._step.bind(self))
+                    self._rewindAnimationFrame(self._step.bind(self))
                 }
             },
             onpause: function () {
-                self.animationFrameCnt = 0
-                if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
+                self._stopAnimationFrame()
                 self.notifyStateChanged(PLAY_STATE.PAUSE)
             },
             onend: function () {
@@ -87,9 +84,7 @@ export class Player {
             },
             onseek: function () {
                 //重置动画帧
-                self.animationFrameCnt = 0
-                if (self.animationFrameId > 0) cancelAnimationFrame(self.animationFrameId)
-                self.animationFrameId = requestAnimationFrame(self._step.bind(self))
+                self._rewindAnimationFrame(self._step.bind(self))
             },
             onloaderror: function () {
                 self.retryPlay(1)
@@ -184,8 +179,7 @@ export class Player {
         }
         this._countAnimationFrame()
         //循环动画
-        if (this.animationFrameId > 0) cancelAnimationFrame(this.animationFrameId)
-        this.animationFrameId = requestAnimationFrame(this._step.bind(this))
+        this._rewindAnimationFrame(this._step.bind(this), true)
     }
 
     on(event, handler) {
@@ -271,5 +265,15 @@ export class Player {
 
     isSpectrumRefreshEnabled() {
         return this.animationFrameCnt % this.spectrumRefreshFrequency == 0
+    }
+
+    _stopAnimationFrame(noReset) {
+        if (this.animationFrameId > 0) cancelAnimationFrame(this.animationFrameId)
+        if (!noReset) this.animationFrameCnt = 0
+    }
+
+    _rewindAnimationFrame(callback, noReset) {
+        this._stopAnimationFrame(noReset)
+        this.animationFrameId = requestAnimationFrame(callback)
     }
 }
