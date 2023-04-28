@@ -435,7 +435,7 @@ EventBus.on("commonCtxMenu-init", dataType => {
                     <div v-html="item.icon"></div>
                     <div><span>{{ item.name }}</span></div>
                 </div>
-                <div class="separator" v-show="item.separator"></div>
+                <div class="separator" v-show="item.separator && false"></div>
             </template>
         </div>
         <div class="padding"></div>

@@ -63,7 +63,7 @@ const getAlphabetData = () => {
                 </template>
             </div>
         </div>
-        <CategoryBarLoadingMask :count="16" v-if="loading"></CategoryBarLoadingMask>
+        <CategoryBarLoadingMask :count="20" v-if="loading"></CategoryBarLoadingMask>
     </div>
 </template>
 

@@ -53,6 +53,7 @@ const { setThemeIndex,
     setFontSizeLevel,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
+    togglePlaybackQueueAutoPositionOnShow,
 } = useSettingStore()
 
 const { showToast } = useAppCommonStore()
@@ -241,7 +242,7 @@ const checkForUpdate = () => {
         lastVersion.value = result
         setLastRelease(currentVersion >= result)
         //只针对macOS平台，检查是否已经下载好更新
-        if (isMacOS()) checkDownloaded()
+        //if (isMacOS()) checkDownloaded()
     })
 }
 
@@ -399,6 +400,12 @@ onMounted(checkForUpdate)
                     <div>
                         <span class="cate-subtitle">歌单显示播放量：</span>
                         <ToggleControl @click="toggleListenNumShow" :value="track.listenNumShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">当前播放列表自动定位：</span>
+                        <ToggleControl @click="togglePlaybackQueueAutoPositionOnShow"
+                            :value="track.playbackQueueAutoPositionOnShow">
                         </ToggleControl>
                     </div>
                     <div>
@@ -659,13 +666,14 @@ onMounted(checkForUpdate)
             <div class="version row">
                 <span class="cate-name">版本</span>
                 <div class="content">
-                    <div>
-                        <div>{{ packageCfg.version }}</div>
+                    <div :class="{ last: isLastRelease }">
+                        <div><span v-html="packageCfg.version"></span></div>
                         <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing link">更新日志</a>
                         <!--<div class="tip-text spacing">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
                     </div>
-                    <div class="tip-text" :class="{ last: isLastRelease }">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>
-                    <div class="last" v-show="!isLastRelease">
+                    <!--<div class="tip-text" :class="{ last: isLastRelease }">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
+                    <div :class="{ last: !isLastRelease }" v-show="!isLastRelease">
+                        <!--
                         <SvgTextButton v-show="!isLastRelease && isUnstarted()" text="下载更新" :leftAction="startDownload">
                         </SvgTextButton>
                         <SvgTextButton v-show="isDownloading()" text="取消下载" :leftAction="cancelDownload">
@@ -686,6 +694,14 @@ onMounted(checkForUpdate)
                         </div>
                         <div v-show="isDownloaded()" class="download-wrap spacing">
                             <span v-html="downloadProgress"></span>
+                        </div>
+                        -->
+                        <div>
+                            <span class="newflag">最新版本</span>
+                            <span class="spacing">
+                                <a href="#" @click.prevent="visitLink(getTagReleasePageUrl(lastVersion))" class="link"
+                                    v-html="lastVersion"></a>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -1075,5 +1091,16 @@ onMounted(checkForUpdate)
 #setting-view .version .download-wrap .progress-bar {
     width: 211px;
     height: 5px;
+}
+
+#setting-view .version .newflag {
+    color: var(--hl-color);
+    border-radius: 3px;
+    border: 1.3px solid var(--hl-color);
+    padding: 1px 3px;
+    /*font-size: 12px;*/
+    font-size: var(--tip-text-size);
+    font-weight: 600;
+    margin-right: 5px;
 }
 </style>

@@ -1,8 +1,9 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
+import { useSettingStore } from '../store/settingStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { smoothScroll } from '../../common/Utils';
@@ -12,6 +13,8 @@ import { smoothScroll } from '../../common/Utils';
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue } = usePlayStore()
 const { showToast, hidePlaybackQueueView, hidePlayingView, hideAllCtxMenus } = useAppCommonStore()
+const { isPlaybackQueueAutoPositionOnShow } = storeToRefs(useSettingStore())
+const { playbackQueueViewShow } = storeToRefs(useAppCommonStore())
 
 const targetPlaying = () => {
     if (queueTracksSize.value < 1) return
@@ -45,6 +48,20 @@ const queueState = () => {
 }
 
 EventBus.on("playbackQueue-empty", onQueueEmpty)
+EventBus.on("playbackQueue-targetPlaying", targetPlaying)
+
+let isUserMouseWheel = false
+let isPendingTargetPlaying = false
+let userMouseWheelTimer = null
+const onUserMouseWheel = () => {
+    isUserMouseWheel = true
+    if (userMouseWheelTimer) clearTimeout(userMouseWheelTimer)
+    userMouseWheelTimer = setTimeout(() => {
+        isUserMouseWheel = false
+        if (isPendingTargetPlaying) targetPlaying()
+        isPendingTargetPlaying = false
+    }, 3000)
+}
 
 const pbqRef = ref(null)
 const listRef = ref(null)
@@ -52,6 +69,22 @@ onMounted(() => {
     if (pbqRef.value) pbqRef.value.addEventListener('click', hideAllCtxMenus)
     if (listRef.value) listRef.value.addEventListener('scroll', hideAllCtxMenus)
 })
+/*
+onUnmounted(() => {
+    if (pbqRef.value) pbqRef.value.removeEventListener('click', hideAllCtxMenus)
+    if (listRef.value) listRef.value.removeEventListener('scroll', hideAllCtxMenus)
+})
+*/
+
+watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
+    if (isShow && isPlaybackQueueAutoPositionOnShow.value) {
+        if (isUserMouseWheel) {
+            isPendingTargetPlaying = true
+        } else {
+            nextTick(targetPlaying)
+        }
+    }
+}, { immediate: true })
 </script>
 
 <template>
@@ -105,7 +138,7 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div class="center" ref="listRef">
+        <div class="center" ref="listRef" :onmousewheel="onUserMouseWheel">
             <template v-for="(item, index) in queueTracks">
                 <PlaybackQueueItem class="item" :data="item" :active="playingIndex == index">
                 </PlaybackQueueItem>

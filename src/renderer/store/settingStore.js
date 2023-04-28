@@ -71,6 +71,7 @@ export const useSettingStore = defineStore('setting', {
             //歌单分类栏随机显示
             playlistCategoryBarRandom: false,
             playlistCategoryBarFlowBtnShow: false,
+            playbackQueueAutoPositionOnShow: false,
             listenNumShow: false,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: false,
@@ -245,6 +246,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isAnimationLowDelayEnable() {
             return this.track.animationLowDelay
+        },
+        isPlaybackQueueAutoPositionOnShow() {
+            return this.track.playbackQueueAutoPositionOnShow
         }
     },
     actions: {
@@ -316,6 +320,9 @@ export const useSettingStore = defineStore('setting', {
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping
             this.setupAppSuspension()
+        },
+        togglePlaybackQueueAutoPositionOnShow() {
+            this.track.playbackQueueAutoPositionOnShow = !this.track.playbackQueueAutoPositionOnShow
         },
         toggleListenNumShow() {
             this.track.listenNumShow = !this.track.listenNumShow

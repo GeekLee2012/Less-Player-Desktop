@@ -32,7 +32,7 @@ const visitItem = (item) => {
                 :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>
         </PaginationTiles>
-        <ImageTextTileLoadingMask :count="16" v-show="loading">
+        <ImageTextTileLoadingMask :count="20" v-show="loading">
         </ImageTextTileLoadingMask>
     </div>
 </template>

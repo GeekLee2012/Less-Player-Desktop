@@ -103,7 +103,7 @@ EventBus.on('playlistCategory-update', () => {
                 </span>
             </template>
         </div>
-        <CategoryBarLoadingMask :count="16" v-show="loading"></CategoryBarLoadingMask>
+        <CategoryBarLoadingMask :count="20" v-show="loading"></CategoryBarLoadingMask>
     </div>
 </template>
 

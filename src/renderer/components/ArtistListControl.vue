@@ -28,7 +28,7 @@ const visitItem = (item) => {
             <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title" @click="visitItem(item)">
             </ImageTextTile>
         </PaginationTiles>
-        <ImageTextTileLoadingMask :count="16" v-show="loading"></ImageTextTileLoadingMask>
+        <ImageTextTileLoadingMask :count="20" v-show="loading"></ImageTextTileLoadingMask>
     </div>
 </template>
 

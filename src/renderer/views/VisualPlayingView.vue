@@ -80,7 +80,6 @@ const checkFavorite = () => {
     favorited.value = isFavoriteRadio(id, platform) || isFavoriteSong(id, platform)
 }
 
-
 /*
 const randomRgbColor = () => {
     var red = Math.random() * 255
@@ -90,7 +89,7 @@ const randomRgbColor = () => {
 }
 
 const roundedRect = (ctx, x, y, width, height, radius) => {
-    if(height < radius * 2) return 
+    if (height < radius * 2) return
     ctx.beginPath();
     ctx.moveTo(x, y + radius);
     ctx.lineTo(x, y + height - radius);
@@ -122,12 +121,6 @@ const setBackgroudEffect = () => {
 */
 
 const onUserMouseWheel = (e) => EventBus.emit('lyric-userMouseWheel', e)
-
-const queueStatus = () => {
-    const total = queueTracksSize.value
-    const current = playingIndex.value + 1
-    return total > 0 ? `${current} / ${total}` : ''
-}
 
 EventBus.on("userProfile-reset", checkFavorite)
 EventBus.on("refreshFavorite", checkFavorite)
@@ -281,7 +274,6 @@ onUnmounted(() => {
                 </div>
             </div>
             <div class="bottom">
-                <div v-show="false" v-html="queueStatus()"></div>
             </div>
         </div>
     </div>
@@ -535,7 +527,5 @@ onUnmounted(() => {
 
 .visual-playing-view .bottom {
     height: 56px;
-    font-size: 14px;
-    color: var(--text-sub-color);
 }
 </style>

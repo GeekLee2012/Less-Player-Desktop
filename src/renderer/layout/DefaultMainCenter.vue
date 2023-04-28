@@ -73,9 +73,11 @@ const setImageTextTileSize = () => {
     if (!mainContent) return
     const { clientWidth } = mainContent
     const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
+    /*
     const tileCovers = document.querySelectorAll(".image-text-tile .cover")
     const tileTitles = document.querySelectorAll(".image-text-tile .title")
     const tileSubtitles = document.querySelectorAll(".image-text-tile .subtitle")
+    */
     let tileWidth = tileMinWidth, limit = 4
     for (var i = 0; i < limits.length; i++) {
         if (clientWidth >= minWidths[i]) {
@@ -87,6 +89,8 @@ const setImageTextTileSize = () => {
 
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 1
+    document.documentElement.style.setProperty('--image-text-tile-cover-size', `${tileWidth}px`)
+    /*
     tileCovers.forEach(item => {
         item.style.width = tileWidth + "px"
         item.style.height = tileWidth + "px"
@@ -97,6 +101,40 @@ const setImageTextTileSize = () => {
     tileSubtitles.forEach(item => {
         item.style.width = tileWidth + "px"
     })
+    */
+}
+/*
+let dynamicSizeStyleElem = null
+const setImageTextTileSize0 = () => {
+    const tileMinWidth = 173
+    const tileHMargin = 13
+    const mainMargin = 33
+    const scrollBarWidth = 6
+    const limits = [8, 7, 6, 5, 4] //TODO 宽屏、超宽屏，需更好兼容性
+    const mainContent = document.getElementById('default-main-content')
+    if (!mainContent) return
+    const { clientWidth } = mainContent
+    const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
+    let tileWidth = tileMinWidth, limit = 4
+    for (var i = 0; i < limits.length; i++) {
+        if (clientWidth >= minWidths[i]) {
+            limit = limits[i]
+            break
+        }
+    }
+    tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
+
+    //浮点数运算有误差，保险起见，设置一个误差值
+    tileWidth = parseInt(tileWidth) - 1
+    if (!dynamicSizeStyleElem) {
+        dynamicSizeStyleElem = document.createElement('style')
+        dynamicSizeStyleElem.setAttribute('type', 'text/css')
+        document.head.appendChild(dynamicSizeStyleElem)
+
+    }
+    dynamicSizeStyleElem.innerHTML = `.dynamic-width{width:${tileWidth}px !important;}\n`
+        + `.dynamic-height{height:${tileWidth}px !important;\n}`
+        + `.dynamic-size{width:${tileWidth}px !important;height:${tileWidth}px !important;line-height:${tileWidth}px !important;}\n`
 }
 
 const setImageTextTileLoadingMaskSize = () => {
@@ -105,7 +143,7 @@ const setImageTextTileLoadingMaskSize = () => {
     const mainMargin = 33;
     const titleHeight = 28, titleMarginTop = 5;
     const scrollBarWidth = 6
-    const limits = [5, 4]
+    const limits = [8, 7, 6, 5, 4]
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const { clientWidth } = mainContent
@@ -141,10 +179,10 @@ const setImageTextTileLoadingMaskSize = () => {
         item.style.width = tileWidth + "px"
     })
 }
-
+*/
 const setImageTextTileComponentSize = () => {
     setImageTextTileSize()
-    setImageTextTileLoadingMaskSize()
+    //setImageTextTileLoadingMaskSize()
 }
 
 const setPlayingCoverSize = () => {
@@ -170,12 +208,12 @@ const setPlayingLyricCtlSize = () => {
         marginTop = 0
     }
     const el = document.querySelector(".playing-view .lyric-ctl .center")
-    const noLyricEl = document.querySelector(".playing-view .no-lyric")
+    //const noLyricEl = document.querySelector(".playing-view .no-lyric")
     if (el) {
         el.style.height = height + "px"
         el.style.marginTop = marginTop + "px"
     }
-    if (noLyricEl) noLyricEl.style.height = height + "px"
+    //if (noLyricEl) noLyricEl.style.height = height + "px"
 }
 
 const setVisualPlayingViewCenterSize = () => {
@@ -286,6 +324,33 @@ const setupDefaultLayout = () => {
     }
 }
 
+const setThemeViewItemsSize = () => {
+    const tileMinWidth = 160
+    const tileHMargin = 25
+    const scrollBarWidth = 6
+    const limits = [8, 7, 6, 5, 4] //TODO 宽屏、超宽屏，需更好兼容性
+    const mainContent = document.querySelector('#themes-view .center .content')
+    if (!mainContent) return
+    const { clientWidth } = mainContent
+    const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin) + scrollBarWidth)
+
+    let tileWidth = tileMinWidth, limit = 4
+    for (var i = 0; i < limits.length; i++) {
+        if (clientWidth >= minWidths[i]) {
+            limit = limits[i]
+            break
+        }
+    }
+    tileWidth = (clientWidth - scrollBarWidth) / limit - tileHMargin
+
+    //浮点数运算有误差，保险起见，设置一个误差值
+    tileWidth = parseInt(tileWidth) - 3
+
+    const height = tileWidth * 95 / 160
+    document.documentElement.style.setProperty('--theme-preview-tile-width', `${tileWidth}px`)
+    document.documentElement.style.setProperty('--theme-preview-tile-height', `${height}px`)
+}
+
 onActivated(setupDefaultLayout)
 
 onMounted(() => {
@@ -308,11 +373,13 @@ onMounted(() => {
         //setVideoViewSize()
         //音效窗口自动居中
         setSoundEffectViewAlignment()
+        //主题页
+        setThemeViewItemsSize()
 
         //隐藏上下文菜单
         hideAllCtxMenus()
         //TODO 窗口缩放Bug，放在最后执行确保缩放
-        setupWindowZoom(true)
+        //setupWindowZoom(true)
     })
 
     //点击事件监听
@@ -323,8 +390,8 @@ onMounted(() => {
 
 })
 
-
-EventBus.on('imageTextTiles-update', setImageTextTileComponentSize)
+//EventBus.on('imageTextTiles-update', setImageTextTileComponentSize)
+//EventBus.on('imageTextTiles-mounted', setImageTextTileComponentSize)
 EventBus.on('batchView-show', setBatchViewListSize)
 EventBus.on('playingView-changed', setPlayingViewSize)
 EventBus.on('app-layout-default', setupDefaultLayout)

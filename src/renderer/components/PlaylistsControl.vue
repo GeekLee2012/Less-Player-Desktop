@@ -61,7 +61,7 @@ const getListenNumText = (item) => {
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>
         </PaginationTiles>
-        <ImageTextTileLoadingMask :count="16" v-show="loading"></ImageTextTileLoadingMask>
+        <ImageTextTileLoadingMask :count="20" v-show="loading"></ImageTextTileLoadingMask>
     </div>
 </template>
 

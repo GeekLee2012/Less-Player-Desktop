@@ -28,9 +28,11 @@ const setChecked = (value) => {
     isChecked.value = value
 }
 
+/*
 onMounted(() => {
-    EventBus.emit("imageTextTiles-update")
+    EventBus.emit("imageTextTiles-mounted")
 })
+*/
 
 watch(() => props.checked, (nv, ov) => {
     if (props.ignoreCheckAllEvent) return
@@ -88,13 +90,12 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 <style scoped>
 .image-text-tile {
     margin: 15px 13px;
-    --cover-size: 173px;
 }
 
 .image-text-tile .cover {
-    width: var(--cover-size);
-    height: var(--cover-size);
-    line-height: var(--cover-size);
+    width: var(--image-text-tile-cover-size);
+    height: var(--image-text-tile-cover-size);
+    line-height: var(--image-text-tile-cover-size);
     border-radius: 6px;
     cursor: pointer;
     box-shadow: 0px 0px 3px #161616;
@@ -106,7 +107,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .title {
-    width: var(--cover-size);
+    width: var(--image-text-tile-cover-size);
     margin-top: 12px;
     text-align: left;
     cursor: pointer;
@@ -126,7 +127,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .subtitle {
-    width: var(--cover-size);
+    width: var(--image-text-tile-cover-size);
     text-align: left;
     line-height: 25px;
     color: #989898;
@@ -188,13 +189,13 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     border-radius: 10rem;
     width: 43px;
     height: 43px;
-    background: linear-gradient(to top right, #28c83f, #1ca388);
     background: var(--btn-bg);
     cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 .image-text-tile .cover-wrap .play-btn:hover {

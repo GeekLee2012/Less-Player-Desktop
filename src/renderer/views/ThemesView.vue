@@ -105,8 +105,10 @@ const { setThemeIndex } = useSettingStore()
 }
 
 #themes-view .center .row .content .preview {
-    width: 160px;
-    height: 95px;
+    /*width: 160px;
+    height: 95px;*/
+    width: var(--theme-preview-tile-width);
+    height: var(--theme-preview-tile-height);
     border-radius: 8px;
     border: 2px solid transparent;
     cursor: pointer;

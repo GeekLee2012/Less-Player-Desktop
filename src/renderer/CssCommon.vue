@@ -5,6 +5,10 @@
   --scrollbar-width: 6px;
   --play-meta-height: 77px;
   --main-play-nav-height: 80px;
+  --image-text-tile-cover-size: 173px;
+  --image-text-tile-mask-width: var(--image-text-tile-cover-size);
+  --theme-preview-tile-width: 160px;
+  --theme-preview-tile-height: 95px;
 }
 
 .btnDisabled {

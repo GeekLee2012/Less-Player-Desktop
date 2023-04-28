@@ -5,9 +5,11 @@ const props = defineProps({
     count: Number
 })
 
+/*
 onMounted(() => {
-    EventBus.emit("imageTextTiles-update")
+    EventBus.emit("imageTextTiles-mounted")
 })
+*/
 </script>
 
 <template>
@@ -24,18 +26,17 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    --tile-width: 173px;
 }
 
 .tiles-loading-mask .tile {
-    width: var(--tile-width);
+    width: var(--image-text-tile-mask-width);
     height: 206px;
     margin: 15px 13px;
 }
 
 .tiles-loading-mask .tile .cover {
     width: 100%;
-    height: var(--tile-width);
+    height: var(--image-text-tile-mask-width);
     border-radius: 6px;
 }
 
