@@ -418,7 +418,7 @@ const initAppMenuTemplate = () => {
       edit: '编辑'
     }
   }
-  const menuText = TEXT_CONFIG[locale] || TEXT_CONFIG('zh-CN')
+  const menuText = TEXT_CONFIG[locale] || TEXT_CONFIG['zh-CN']
   let menuItems = [{ role: 'about', label: menuText.about },
   { role: 'toggleDevTools', label: menuText.devTools },
   { role: 'quit', label: menuText.quit },]
