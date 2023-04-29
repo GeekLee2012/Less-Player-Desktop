@@ -313,7 +313,6 @@ onUnmounted(() => {
     font-weight: bold;
     color: var(--text-sub-color);
     text-align: left;
-
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;

@@ -93,11 +93,11 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 歌词 */
         lyric: {
-            fontSize: 21,   //普通字号
-            hlFontSize: 21, //高亮字号
+            fontSize: 23,   //普通字号
+            hlFontSize: 23, //高亮字号
             fontWeight: 400,
             lineHeight: 28,
-            lineSpacing: 26,
+            lineSpacing: 28,
             offset: 0, //时间补偿值，快慢
             metaPos: 0, //歌曲信息, 0:默认, 1:隐藏, 2:顶部
             alignment: 0, //对齐方式, 0:左, 1:中, 2:右
@@ -464,13 +464,13 @@ export const useSettingStore = defineStore('setting', {
             this.setupFontWeight()
         },
         setLyricFontSize(value) {
-            const fontSize = parseInt(value || 21)
+            const fontSize = parseInt(value || 23)
             if (fontSize < 10 || fontSize > 100) return
             this.lyric.fontSize = fontSize
             this.setupLyricFontSize()
         },
         setLyricHighlightFontSize(value) {
-            const fontSize = parseInt(value || 21)
+            const fontSize = parseInt(value || 23)
             if (fontSize < 10 || fontSize > 100) return
             this.lyric.hlFontSize = fontSize
             this.setupLyricHighlightFontSize()
@@ -488,7 +488,7 @@ export const useSettingStore = defineStore('setting', {
             this.setupLyricLineHeight()
         },
         setLyricLineSpacing(value) {
-            const lineSpacing = parseInt(value || 26)
+            const lineSpacing = parseInt(value || 28)
             if (lineSpacing < 0 || lineSpacing > 100) return
             this.lyric.lineSpacing = lineSpacing
             this.setupLyricLineSpacing()

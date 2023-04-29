@@ -102,14 +102,14 @@ const renderAndScrollLyric = (secs) => {
     lyricWrap.scrollTop = Math.max(destScrollTop, 0)
     */
 
-    ////算法3：依赖offsetParent定位；与算法2相似，只是参考系不同而已 ////
+    ////算法3：播放页垂直居中，依赖offsetParent定位；与算法2相似，只是参考系不同而已 ////
     //基本保证：准确定位，当前高亮行在播放页垂直居中，且基本与ScrollLocator平行
     //绝对意义上来说，并不垂直居中，也并不平行，因为歌词行自身有一定高度
     const { offsetTop } = lyricWrap
     const { clientHeight } = document.documentElement
     const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
     //lyricWrap.scrollTop = destScrollTop
-    //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
+    //暂时随意设置时间值300ms左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
     smoothScroll(lyricWrap, destScrollTop, 288)
 }
 

@@ -379,7 +379,7 @@ onMounted(() => {
         //隐藏上下文菜单
         hideAllCtxMenus()
         //TODO 窗口缩放Bug，放在最后执行确保缩放
-        //setupWindowZoom(true)
+        setupWindowZoom(true)
     })
 
     //点击事件监听
