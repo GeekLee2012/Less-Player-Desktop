@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, shallowRef, inject, watch, triggerRef, ref } from 'vue';
+import { onMounted, shallowRef, inject, watch, triggerRef, ref, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
@@ -118,31 +118,24 @@ const setupLayout = (isInit) => {
   //triggerRef(currentAppLayout)
 }
 
-//TODO 暂时弃用macOS自带交通灯控件
-const setupWindowCtlButton = () => {
-  const visible = !useCustomTrafficLight && !isSimpleLayout.value
-  if (ipcRenderer) ipcRenderer.send('app-winBtn', visible)
-}
-
-//TODO 方式有些别扭
-const adjustWinCtlBtns = () => {
-  const wrapEls = document.querySelectorAll('.header .win-ctl-wrap')
-  if (!wrapEls || wrapEls.length < 1) return
+const setupTrafficLightWinCtlBtn = () => {
   const zoom = Number(getWindowZoom.value)
   const scale = 100 / zoom
-  const wrapWidth = 105 * scale
-  wrapEls.forEach(el => el.style.width = wrapWidth + 'px')
-  const collapseBtnSvgEls = document.querySelectorAll('.header .win-ctl-wrap .collapse-btn svg')
-  const collapseBtnSvgSize = 18 * scale
-  if (collapseBtnSvgEls) {
-    collapseBtnSvgEls.forEach(el => {
-      el.style.width = collapseBtnSvgSize + 'px'
-      el.style.height = collapseBtnSvgSize + 'px'
-      el.style.paddingLeft = 5 * scale + 'px'
-    })
-  }
+  const ctlBtnSize = 13 * scale
+  const maxBtnSize = 8 * scale
+  const collapseBtnSize = 18 * scale
+  const winCtlMarginLeft = 15 * scale
+  const ctlBtnMarginRight = 8 * scale
+
+  document.documentElement.style.setProperty('--win-ctl-btn-size', `${ctlBtnSize}px`)
+  document.documentElement.style.setProperty('--win-ctl-max-btn-size', `${maxBtnSize}px`)
+  document.documentElement.style.setProperty('--win-ctl-collapse-btn-size', `${collapseBtnSize}px`)
+
+  document.documentElement.style.setProperty('--win-ctl-margin-left', `${winCtlMarginLeft}px`)
+  document.documentElement.style.setProperty('--win-ctl-btn-margin-right', `${ctlBtnMarginRight}px`)
 }
 
+//TODO
 const setVideoViewSize = () => {
   const { clientWidth, clientHeight } = document.documentElement
   const els = document.querySelectorAll(".video-holder")
@@ -192,16 +185,8 @@ const restoreSetting = () => {
   setupTray()
   setupGlobalShortcut()
   setupLayout(true)
+  setupWindowZoom()
 }
-
-EventBus.on("app-zoom", adjustWinCtlBtns)
-EventBus.on("app-adjustWinCtlBtns", adjustWinCtlBtns)
-EventBus.on("app-layout", setupLayout)
-EventBus.on("app-elementAlignCenter", value => {
-  const { selector, width, height, offsetLeft, offsetTop } = value
-  setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
-})
-EventBus.on('setting-restore', restoreSetting)
 
 //注册ipcRenderer消息监听器
 const registryIpcRendererListeners = () => {
@@ -215,6 +200,15 @@ const initialize = () => {
   restoreSetting()
   registryIpcRendererListeners()
 }
+
+EventBus.on("app-zoom", setupTrafficLightWinCtlBtn)
+EventBus.on("app-layout", setupLayout)
+EventBus.on("app-elementAlignCenter", value => {
+  const { selector, width, height, offsetLeft, offsetTop } = value
+  setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
+})
+EventBus.on('setting-restore', restoreSetting)
+EventBus.on('setting-reset', restoreSetting)
 
 //直接在setup()时初始化，不需要等待其他生命周期
 initialize()
@@ -238,9 +232,6 @@ onMounted(() => {
   //setupWindowCtlButton()
   registryDefaultLocalKeys()
 })
-
-//watch([ videoPlayingViewShow ], setVideoViewSize)
-watch([playingViewShow, playingViewThemeIndex, videoPlayingViewShow], adjustWinCtlBtns)
 </script>
 
 <template>

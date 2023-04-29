@@ -1394,7 +1394,7 @@ watch([textColorIndex], setupTextColor)
 }
 
 
-/* */
+/* 
 .simple-layout .win-traffic-light-btn {
     width: 56px !important;
 }
@@ -1409,6 +1409,7 @@ watch([textColorIndex], setupTextColor)
     width: 18px !important;
     height: 18px !important;
 }
+*/
 
 /* Popovers */
 .simple-layout #playback-queue-view {
@@ -1434,6 +1435,7 @@ watch([textColorIndex], setupTextColor)
     display: none;
 }
 
+/*
 .simple-layout #video-playing-view .win-ctl-wrap {
     width: 105px !important;
 }
@@ -1441,4 +1443,5 @@ watch([textColorIndex], setupTextColor)
 .simple-layout #video-playing-view .win-traffic-light-btn .max-btn {
     display: none;
 }
+*/
 </style>

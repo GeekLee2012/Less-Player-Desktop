@@ -445,7 +445,7 @@ EventBus.on("userHome-refresh", refresh)
     padding-left: 6px;
     padding-right: 6px;
     margin-right: 15px;
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
     cursor: pointer;
 }
 

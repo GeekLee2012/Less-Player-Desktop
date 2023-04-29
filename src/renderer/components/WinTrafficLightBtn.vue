@@ -1,21 +1,17 @@
 <script setup>
-import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
-import EventBus from '../../common/EventBus';
-import { useIpcRenderer, isWinOS } from '../../common/Utils';
+import { ref } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useSettingStore } from '../store/settingStore';
-
 
 
 const props = defineProps({
     hideMinBtn: Boolean,
-    hideMaxBtn: Boolean
+    hideMaxBtn: Boolean,
+    showCollapseBtn: Boolean,
+    collapseAction: Function
 })
 
 const { quit, minimize, maximize } = useAppCommonStore()
 const isMinBtnDisabled = ref(false)
-const { getWindowZoom, isSimpleLayout } = storeToRefs(useSettingStore())
 
 const setMinBtnDisabled = (value) => {
     isMinBtnDisabled.value = value
@@ -25,49 +21,6 @@ const doMinimize = () => {
     if (isMinBtnDisabled.value) return
     minimize()
 }
-
-const ipcRenderer = useIpcRenderer()
-
-//TODO
-const adjustTrafficLightCtlBtn = () => {
-    const els = document.querySelectorAll('.win-traffic-light-btn')
-    if (!els) return
-    const zoom = Number(getWindowZoom.value)
-    const scale = 100 / zoom
-    /*
-    const orginWidth = 56
-    let width = orginWidth * scale
-    els.forEach(el => {
-        el.style.width = width + "px"
-    })
-    */
-
-    const btnEls = document.querySelectorAll('.win-traffic-light-btn .ctl-btn')
-    const orginBtnSize = 13, orginBtnMarginRight = 8
-    let btnSize = orginBtnSize * scale
-    let btnMarginRight = orginBtnMarginRight * scale
-    if (!btnEls) return
-    btnEls.forEach(btnEl => {
-        btnEl.style.width = btnSize + "px"
-        btnEl.style.height = btnSize + "px"
-        btnEl.style.marginRight = btnMarginRight + "px"
-    })
-
-    const orginSvgSize = 8
-    let svgSize = orginSvgSize * scale
-    const maxBtnSvgEls = document.querySelectorAll('.win-traffic-light-btn .max-btn svg')
-    if (!maxBtnSvgEls) return
-    maxBtnSvgEls.forEach(svgEl => {
-        svgEl.style.width = svgSize + "px"
-        svgEl.style.height = svgSize + "px"
-    })
-}
-
-EventBus.on("app-zoom", adjustTrafficLightCtlBtn)
-
-onMounted(() => {
-    adjustTrafficLightCtlBtn()
-})
 </script>
 
 <template>
@@ -80,8 +33,7 @@ onMounted(() => {
                 </g>
             </svg>
         </div>
-        <div @click="doMinimize" v-show="!hideMinBtn" class="ctl-btn min-btn"
-            :class="{ btnDisabled: isMinBtnDisabled }">
+        <div @click="doMinimize" v-show="!hideMinBtn" class="ctl-btn min-btn" :class="{ btnDisabled: isMinBtnDisabled }">
             <svg viewBox="0 0 256 256" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
                 <path
@@ -89,11 +41,25 @@ onMounted(() => {
             </svg>
         </div>
         <div @click="maximize" v-show="!hideMaxBtn" class="ctl-btn max-btn">
-            <svg width="8" height="8" viewBox="0 0 25 24" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 25 24" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path class="cls-1" d="M2,18V2H18" />
                         <path class="cls-1" d="M23,6V22H7" />
+                    </g>
+                </g>
+            </svg>
+        </div>
+        <div class="collapse-btn" v-show="showCollapseBtn" @click="collapseAction">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 66 640.13 352.15">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="Layer_1-2" data-name="Layer 1">
+                        <g id="Layer_2-2" data-name="Layer 2">
+                            <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                <path
+                                    d="M319.64,76.3c-1.91,2.59-3,4.52-4.51,6Q186,211.6,56.78,340.8c-8.31,8.34-17.87,12.87-29.65,10.88-12.51-2.12-21.24-9.34-25.29-21.48-4.12-12.35-1.23-23.43,7.71-32.7C19.73,287,30.24,276.72,40.61,266.35L289.12,17.84c2.94-2.94,5.74-6,8.75-8.91a32.1,32.1,0,0,1,44.28-.15c3.15,3,6.05,6.2,9.11,9.26Q490,156.79,628.78,295.5c10.11,10.1,14.13,21.64,9.33,35.44a31.75,31.75,0,0,1-48.49,15.2,58.8,58.8,0,0,1-7.07-6.31Q453.85,211.22,325.2,82.51C323.68,81,322.32,79.3,319.64,76.3Z" />
+                            </g>
+                        </g>
                     </g>
                 </g>
             </svg>
@@ -113,11 +79,15 @@ onMounted(() => {
 }
 
 .win-traffic-light-btn .ctl-btn {
-    /* width: 16px; */
+    /* width: 16px;
     width: 13px;
     height: 13px;
-    border-radius: 100rem;
     margin-right: 8px;
+     */
+    width: var(--win-ctl-btn-size);
+    height: var(--win-ctl-btn-size);
+    margin-right: var(--win-ctl-btn-margin-right);
+    border-radius: 100rem;
     -webkit-app-region: none;
     cursor: pointer;
     display: flex;
@@ -133,7 +103,7 @@ onMounted(() => {
     background-color: #fc605c;
 }
 
-.win-traffic-light-btn svg {
+.win-traffic-light-btn .ctl-btn svg {
     fill: #555;
     stroke-width: 3.6px;
     stroke: #555;
@@ -141,7 +111,7 @@ onMounted(() => {
     visibility: hidden;
 }
 
-.win-traffic-light-btn:hover svg {
+.win-traffic-light-btn:hover .ctl-btn svg {
     visibility: visible;
 }
 
@@ -160,6 +130,30 @@ onMounted(() => {
 
 .win-traffic-light-btn .max-btn {
     background-color: #34c648;
-    margin-right: 0px !important;
+    /*margin-right: 0px !important;*/
+}
+
+.win-traffic-light-btn .max-btn svg {
+    width: var(--win-ctl-max-btn-size);
+    height: var(--win-ctl-max-btn-size);
+}
+
+.win-traffic-light-btn .collapse-btn {
+    cursor: pointer;
+    margin-right: 8px;
+    -webkit-app-region: none;
+    /*display: flex;
+    align-items: center;*/
+}
+
+.win-traffic-light-btn .collapse-btn svg {
+    fill: var(--svg-color);
+    width: var(--win-ctl-collapse-btn-size);
+    height: var(--win-ctl-collapse-btn-size);
+}
+
+.win-traffic-light-btn .collapse-btn:hover svg {
+    fill: var(--svg-hover-color);
+    cursor: pointer;
 }
 </style>

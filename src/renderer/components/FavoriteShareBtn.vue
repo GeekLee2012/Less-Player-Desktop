@@ -48,7 +48,7 @@ const getTextByStatus = () => {
 
 <style>
 .favorite-share-btn .left-btn {
-    width: 118px;
+    min-width: 118px;
     /*justify-content: flex-start !important;*/
 }
 </style>

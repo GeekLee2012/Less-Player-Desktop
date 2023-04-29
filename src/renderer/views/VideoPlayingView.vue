@@ -27,7 +27,6 @@ const quitVideo = () => {
 EventBus.on("app-beforeRoute", quitVideo)
 
 onActivated(() => {
-    EventBus.emit("app-adjustWinCtlBtns")
     initVideoPlayer()
 })
 </script>
@@ -36,7 +35,10 @@ onActivated(() => {
     <div class="video-playing-view">
         <div class="header">
             <div class="win-ctl-wrap">
-                <WinTrafficLightBtn v-show="useCustomTrafficLight || isSimpleLayout"></WinTrafficLightBtn>
+                <WinTrafficLightBtn v-show="useCustomTrafficLight" :hideMaxBtn="isSimpleLayout" :showCollapseBtn="true"
+                    :collapseAction="quitVideo">
+                </WinTrafficLightBtn>
+                <!--
                 <div class="close-btn" @click="minimize" v-show="false">
                     <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 593.14 593.11">
                         <path
@@ -58,6 +60,7 @@ onActivated(() => {
                         </g>
                     </svg>
                 </div>
+                -->
             </div>
         </div>
         <div class="center">
@@ -93,9 +96,11 @@ onActivated(() => {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    width: 105px;
+    /*width: 105px;*/
+    margin-left: var(--win-ctl-margin-left);
 }
 
+/*
 .video-playing-view .close-btn {
     width: 14px;
     height: 14px;
@@ -112,6 +117,7 @@ onActivated(() => {
     display: flex;
     align-items: center;
 }
+*/
 
 .video-playing-view .header svg {
     fill: var(--svg-color);

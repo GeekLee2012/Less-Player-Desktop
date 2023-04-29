@@ -11,7 +11,7 @@ import EventBus from '../common/EventBus';
 const { theme } = storeToRefs(useSettingStore())
 const { getCurrentThemeId, setupFontFamily,
   setupFontWeight, allFontSizeLevels,
-  currentFontSizeLevel
+  currentFontSizeLevel, currentFontSize,
 } = useSettingStore()
 
 //设置主题
@@ -36,6 +36,41 @@ const updateFontWeight = (value) => {
 }
 
 //设置字体大小
+const setupFontSize = (fontSize) => {
+  fontSize = fontSize || currentFontSize()
+  /*
+  --text-size: 15.5px;
+  --text-sub-size: 14px;
+  --tip-text-size: 13.5px;
+  --tab-title-text-size: 17px;
+  --setting-cate-subtitle-width: 225px;
+  --text-line-height: 23px;
+  //主标题 
+  --text-main-title-size: 30px;
+  //标题 - 批量操作页、当前播放列表
+  --text-main2-title-size: 23px;
+  //标题 - 全部分类界面
+  --text-main3-title-size: 21px;
+  //标题 - 左导航
+  --text-main4-title-size: 19px;
+  //行高 - 左导航
+  --main-left-nav-line-height: 32px;
+  */
+  const changes = {
+    '--text-size': fontSize,
+    '--text-sub-size': (fontSize - 1),
+    '--tip-text-size': (fontSize - 1.5),
+    '--tab-title-text-size': (fontSize + 1.5),
+    '--text-main4-title-size': Math.min((fontSize + 3.5), 28),
+    '--setting-cate-subtitle-width': Math.min((fontSize / 15.5 * 225), 239),
+    '--main-left-nav-line-height': (fontSize / 15.5 * 32)
+  }
+  for (const [key, value] of Object.entries(changes)) {
+    document.documentElement.style.setProperty(key, `${value}px`)
+  }
+}
+
+//设置字体大小
 const setupFontSizeLevel = (index) => {
   const attrName = 'fsLevel'
   const fontSizeLevels = allFontSizeLevels()
@@ -47,15 +82,22 @@ const setupFontSizeLevel = (index) => {
   }
 }
 
-EventBus.on('setting-fontFamily', updateFontFamily)
-EventBus.on('setting-fontWeight', updateFontWeight)
-EventBus.on('setting-fontSizeLevel', setupFontSizeLevel)
-
-onMounted(() => {
+//设置字体样式
+const setupFontStyle = () => {
   setupFontFamily()
   setupFontWeight()
-  setupFontSizeLevel()
-})
+  setupFontSize()
+}
+
+EventBus.on('setting-fontFamily', updateFontFamily)
+EventBus.on('setting-fontWeight', updateFontWeight)
+//EventBus.on('setting-fontSizeLevel', setupFontSizeLevel)
+EventBus.on('setting-fontSize', setupFontSize)
+EventBus.on('setting-reset', setupFontStyle)
+EventBus.on('setting-restore', setupFontStyle)
+
+
+onMounted(setupFontStyle)
 watch(theme, () => setupAppTheme(), { deep: true })
 </script>
 
@@ -66,66 +108,59 @@ watch(theme, () => setupAppTheme(), { deep: true })
 </template>
 
 <style>
-:root {
-  --text-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
-  --app-bg: transparent;
-  font-family: var(--text-font-family);
-}
-
+/*
 :root,
 :root[fsLevel="default"],
 :root[fsLevel="standard"] {
-  --text-size: 15px;
+  --text-size: 15.5px;
   --text-sub-size: 14px;
-  --tip-text-size: 13px;
+  --tip-text-size: 13.5px;
   --tab-title-text-size: 17px;
   --setting-cate-subtitle-width: 225px;
   --text-line-height: 23px;
-  /* 主标题 */
   --text-main-title-size: 30px;
-  /* 标题 - 批量操作页、当前播放列表 */
   --text-main2-title-size: 23px;
-  /* 标题 - 全部分类界面 */
   --text-main3-title-size: 21px;
-  /* 标题 - 左导航 */
   --text-main4-title-size: 19px;
-  /* 行高 - 左导航 */
   --main-left-nav-line-height: 32px;
 }
 
 :root[fsLevel="small"] {
-  --text-size: 14px;
+  --text-size: 14.5px;
   --text-sub-size: 13px;
-  --tip-text-size: 12px;
+  --tip-text-size: 12.5px;
   --tab-title-text-size: 16px;
   --text-line-height: 22px;
   --main-left-nav-line-height: 31.5px;
+  --text-main4-title-size: 18px;
 }
 
 :root[fsLevel="medium"] {
-  --text-size: 16px;
+  --text-size: 16.5px;
   --text-sub-size: 15px;
-  --tip-text-size: 14px;
+  --tip-text-size: 14.5px;
   --tab-title-text-size: 18px;
   --setting-cate-subtitle-width: 255px;
   --text-line-height: 23.3px;
   --main-left-nav-line-height: 32.5px;
+  --text-main4-title-size: 20px;
 }
 
 :root[fsLevel="large"] {
-  --text-size: 17px;
+  --text-size: 17.5px;
   --text-sub-size: 16px;
-  --tip-text-size: 15px;
+  --tip-text-size: 15.5px;
   --tab-title-text-size: 19px;
   --setting-cate-subtitle-width: 255px;
   --text-line-height: 23.5px;
   --main-left-nav-line-height: 33px;
+  --text-main4-title-size: 21px;
 }
 
 :root[fsLevel="larger"] {
-  --text-size: 18px;
+  --text-size: 18.5px;
   --text-sub-size: 17px;
-  --tip-text-size: 15px;
+  --tip-text-size: 15.5px;
   --tab-title-text-size: 20px;
   --setting-cate-subtitle-width: 260px;
   --text-line-height: 23.6px;
@@ -134,16 +169,16 @@ watch(theme, () => setupAppTheme(), { deep: true })
 }
 
 :root[fsLevel="largest"] {
-  --text-size: 19px;
+  --text-size: 19.5px;
   --text-sub-size: 18px;
-  --tip-text-size: 15px;
+  --tip-text-size: 15.5px;
   --tab-title-text-size: 21px;
   --setting-cate-subtitle-width: 260px;
   --text-line-height: 23.6px;
-  --text-main4-title-size: 21.5px;
+  --text-main4-title-size: 23px;
   --main-left-nav-line-height: 33.5px;
 }
-
+*/
 :root[theme='dark'] {
   /* 全局背景 */
   --bg-color: #313131;

@@ -424,9 +424,9 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     position: relative;
 }
 
-#main-left .add-custom-btn,
-#main-left .collapse-btn,
-#main-left .expand-btn {
+#main-left .center .add-custom-btn,
+#main-left .center .collapse-btn,
+#main-left .center .expand-btn {
     fill: var(--text-sub-color);
     cursor: pointer;
     position: absolute;
@@ -435,13 +435,13 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     top: 4px;
 }
 
-#main-left .collapse-btn,
-#main-left .expand-btn {
+#main-left .center .collapse-btn,
+#main-left .center .expand-btn {
     /* right: 22px; */
     right: 26px;
 }
 
-#main-left .add-custom-btn:hover {
+#main-left .center .add-custom-btn:hover {
     fill: var(--hl-color);
 }
 

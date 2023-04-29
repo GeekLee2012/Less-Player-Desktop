@@ -8,37 +8,47 @@ import { useThemeStore } from './themeStore';
 const ipcRenderer = useIpcRenderer()
 
 const QUALITIES = [{
-    id: 'NQ',
-    name: '普通'
+    id: 'standard',
+    name: '标准'
 }, {
-    id: 'HQ',
-    name: '高'
+    id: 'high',
+    name: '高品'
 }, {
-    id: 'SQ',
+    id: 'sq',
     name: '无损'
+}, {
+    id: 'hi-res',
+    name: 'Hi-Res'
 }]
 
 const FONTSIZE_LEVELS = [{
     id: 'default',
-    name: '默认'
+    name: '默认',
+    value: 15.5
 }, {
     id: 'small',
-    name: '较小'
+    name: '小',
+    value: 14.5
 }, {
     id: 'standard',
-    name: '标准'
+    name: '标准',
+    value: 15.5
 }, {
     id: 'medium',
-    name: '中等'
+    name: '中等',
+    value: 16.5
 }, {
     id: 'large',
-    name: '大'
+    name: '大',
+    value: 17.5
 }, {
     id: 'larger',
-    name: '较大'
+    name: '较大',
+    value: 18.5
 }, {
     id: 'largest',
-    name: '更大'
+    name: '更大',
+    value: 19.5
 }]
 
 //TODO 本地缓存导致Store State数据不一致
@@ -46,26 +56,27 @@ export const useSettingStore = defineStore('setting', {
     state: () => ({
         /* 主题 */
         theme: {
-            index: 0,
+            index: 1,
             type: 0,
         },
         layout: {
-            index: 0,
-            fallbackIndex: 0
+            index: 1,
+            fallbackIndex: 1
         },
         common: {
-            winZoom: 100,
+            winZoom: 85,
             fontFamily: '',
             fontWeight: 400,
-            fontSizeLevel: 1,
+            fontSizeLevel: 3,
+            fontSize: 17.5
         },
         /* 播放歌曲 */
         track: {
-            //音质级别：NQ(普通)、HQ（高音质）、SQ（超高、无损）
+            //音质
             quality: {
                 index: 0,
             },
-            //VIP收费歌曲，是否自动切换到免费歌曲（可能来自不同平台），默认暂停播放
+            //VIP收费歌曲，是否自动切换到免费歌曲（可能来自不同平台）
             vipTransfer: false,
             vipFlagShow: false,
             //歌单分类栏随机显示
@@ -289,11 +300,31 @@ export const useSettingStore = defineStore('setting', {
         },
         setWindowZoom(value) {
             if (!value) return
-            const zoom = Number(value || 100)
+            const zoom = Number(value || 85)
             if (zoom < 50 || zoom > 300) return
             if (this.common.winZoom == zoom) return
             this.common.winZoom = zoom
             this.setupWindowZoom()
+        },
+        currentFontSize() {
+            return this.common.fontSize
+        },
+        setFontSize(fontSize, byPresetLevel) {
+            fontSize = Number(fontSize || 15.5)
+            if (fontSize < 10 || fontSize > 25) return
+            this.common.fontSize = fontSize
+            if (!byPresetLevel) { //使用预设大小时，自动更新预设大小等级
+                const levels = this.allFontSizeLevels()
+                let index = -1
+                for (var i = 0; i < levels.length; i++) {
+                    if (levels[i].value == fontSize) {
+                        index = i
+                        break
+                    }
+                }
+                this.common.fontSizeLevel = index
+            }
+            EventBus.emit('setting-fontSize', this.common.fontSize)
         },
         allFontSizeLevels() {
             return FONTSIZE_LEVELS.slice(1)
@@ -303,7 +334,9 @@ export const useSettingStore = defineStore('setting', {
         },
         setFontSizeLevel(index) {
             this.common.fontSizeLevel = index
-            EventBus.emit('setting-fontSizeLevel', this.common.fontSizeLevel)
+            const currentLevel = this.allFontSizeLevels()[index]
+            if (currentLevel) this.setFontSize(currentLevel.value, true)
+            //EventBus.emit('setting-fontSizeLevel', this.common.fontSizeLevel)
         },
         setTrackQualityIndex(index) {
             this.track.quality.index = index

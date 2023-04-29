@@ -403,17 +403,33 @@ const setupAppLayout = (layout, zoom, isInit) => {
 
 //菜单模板
 const initAppMenuTemplate = () => {
-  let menuItems = [{ role: 'about' },
-  { role: 'toggleDevTools' },
-  { role: 'quit' },]
-  if (!isDevEnv) menuItems = [{ role: 'quit' }]
+  const locale = app.getLocale()
+  const TEXT_CONFIG = {
+    'en-US': {
+      about: 'About',
+      devTools: 'Developer Tools',
+      quit: 'Quit',
+      edit: 'Edit'
+    },
+    'zh-CN': {
+      about: '关于',
+      devTools: '开发者工具',
+      quit: '退出',
+      edit: '编辑'
+    }
+  }
+  const menuText = TEXT_CONFIG[locale]
+  let menuItems = [{ role: 'about', label: menuText.about },
+  { role: 'toggleDevTools', label: menuText.devTools },
+  { role: 'quit', label: menuText.quit },]
+  if (!isDevEnv) menuItems.splice(1, 1)
   const appName = app.name.replace('-', '')
   const template = [
     ...[{
       label: appName,
       submenu: menuItems,
     }, {
-      label: 'Edit',
+      label: menuText.edit,
       submenu: [
         { role: 'undo' },
         { role: 'redo' },
@@ -505,7 +521,7 @@ const toggleWinOSFullScreen = () => {
 
 const setupAppWindowZoom = (zoom, noResize) => {
   if (!zoom) return
-  zoom = Number(zoom) || 100
+  zoom = Number(zoom) || 85
   const zoomFactor = parseFloat(zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return
   mainWin.webContents.setZoomFactor(zoomFactor)

@@ -539,7 +539,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 #batch-action-view .header .tab {
     font-size: var(--tab-title-text-size);
     padding: 6px 15px;
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
     cursor: pointer;
 }
 
@@ -599,8 +599,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 #batch-action-view .action .checkbox>span {
     text-align: left;
     margin: 0px 20px;
-    width: 65px;
-    width: 80px;
+    /*width: 65px;*/
+    min-width: 80px;
     cursor: pointer;
 }
 

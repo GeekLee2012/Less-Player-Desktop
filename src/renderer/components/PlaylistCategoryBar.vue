@@ -87,7 +87,7 @@ EventBus.on('playlistCategory-update', () => {
 <template>
     <div class="playlist-category-bar">
         <div v-show="!loading">
-            <svg @click.stop="toggleCategory" width="15" height="15" viewBox="0 0 29.3 29.3">
+            <svg @click.stop="toggleCategory" width="16" height="16" viewBox="0 0 29.3 29.3">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path

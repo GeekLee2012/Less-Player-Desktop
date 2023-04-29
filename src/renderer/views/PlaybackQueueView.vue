@@ -180,7 +180,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
 
 .playback-queue-view .text-btn {
     text-align: left;
-    font-size: 14px;
+    font-size: var(--text-sub-size);
     display: flex;
     align-items: center;
     justify-items: center;

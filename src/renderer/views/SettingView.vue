@@ -10,6 +10,8 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useIpcRenderer, isMacOS, isWinOS } from '../../common/Utils';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { getDoc } from '../../common/HttpClient';
+import { usePlayStore } from '../store/playStore';
+import EventBus from '../../common/EventBus';
 
 
 
@@ -51,6 +53,7 @@ const { setThemeIndex,
     setupAppGlobalProxy,
     allFontSizeLevels,
     setFontSizeLevel,
+    setFontSize,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
@@ -68,21 +71,37 @@ const resetData = async () => {
     if (!ipcRenderer) return
     const ok = await ipcRenderer.invoke('show-confirm', {
         title: "确认",
-        msg: "数据重置，将会清空我的主页、恢复默认设置。确定要继续吗？"
+        msg: "数据重置，将会清空我的主页、恢复默认设置、当前播放等全部数据。  确定要继续吗？"
     })
     if (!ok) return
-    const userProfileStore = useUserProfileStore()
     const settingStore = useSettingStore()
+    const appCommonStore = useAppCommonStore()
+    const playStore = usePlayStore()
+    const userProfileStore = useUserProfileStore()
 
+    appCommonStore.$reset()
+    playStore.$reset()
     userProfileStore.$reset()
     settingStore.$reset()
 
-    const storeKeys = ['userProfile', 'setting']
+    const storeKeys = ['player', 'appCommon', 'userProfile', 'setting']
     storeKeys.forEach(key => {
         localStorage.removeItem(key)
     })
-
+    EventBus.emit('setting-reset')
     showToast("数据已重置成功!")
+}
+
+/* 数据 - 恢复默认设置 */
+const resetSettingData = () => {
+    const settingStore = useSettingStore()
+    settingStore.$reset()
+    const storeKeys = ['setting']
+    storeKeys.forEach(key => {
+        localStorage.removeItem(key)
+    })
+    EventBus.emit('setting-reset')
+    showToast("已恢复默认设置!")
 }
 
 /* 通用设置 */
@@ -95,6 +114,10 @@ const updateWinZoom = (e) => {
 
 const updateFontFamily = (e) => {
     setFontFamily(e.target.value)
+}
+
+const updateFontSize = (e) => {
+    setFontSize(e.target.value)
 }
 
 const updateFontWeight = (e) => {
@@ -257,8 +280,8 @@ const showPathInFolder = async () => {
 }
 
 //TODO test功能暂未实现
-const testAndSetupProxy = () => {
-    setupProxy('网络代理配置已保存')
+const applySetupProxy = () => {
+    setupProxy('网络代理配置已更新')
 }
 
 const setupProxy = (text) => {
@@ -324,8 +347,9 @@ onMounted(checkForUpdate)
                     <div class="tip-text">提示：当前应用，所有输入框，Enter键生效或焦点离开后自动生效</div>
                     <div class="window-zoom">
                         <div class="zoom-title">窗口缩放 (%)：
-                            <input type="number" min="50" max="300" step="1" :value="common.winZoom"
-                                placeholder="范围50 - 300，默认100" @keydown.enter="updateWinZoom" @focusout="updateWinZoom" />
+                            <input type="number" min="50" max="300" step="0.01" :value="common.winZoom"
+                                placeholder="范围50-300，默认100，支持2位小数点" @keydown.enter="updateWinZoom"
+                                @focusout="updateWinZoom" />
                         </div>
                         <div>
                             <input type="range" min="50" max="300" :value="common.winZoom" step="2" @input="updateWinZoom"
@@ -340,28 +364,30 @@ onMounted(checkForUpdate)
                         </div>
                     </div>
                     <div class="font" @keydown.stop="">
-                        <div>
-                            <span>字体: </span>
-                            <input type="text" :value="common.fontFamily" placeholder="FontFamily, 格式：请参考CSS"
-                                @keydown.enter="updateFontFamily" @focusout="updateFontFamily" />
-                        </div>
-                        <div class="spacing">
-                            <span>字重:</span>
-                            <input type="number" :value="common.fontWeight" placeholder="粗细，范围100-1000，默认400" min="100"
-                                max="1000" step="10" @input="updateFontWeight" @focusout="updateSpectrumRefreshFrequency"
-                                list="fontweight-suggests" />
-                            <datalist id="fontweight-suggests">
-                                <option v-for="(item, index) in fontWeights" :value="item">
-                                </option>
-                            </datalist>
-                        </div>
+                        <span>字体名称：</span>
+                        <input type="text" :value="common.fontFamily" placeholder="字体名称，格式请参考CSS - FontFamily"
+                            @keydown.enter="updateFontFamily" @focusout="updateFontFamily" />
                     </div>
-                    <div class="last">
-                        <span style="margin-right: 8px;">字体大小：</span>
+                    <div>
+                        <span>字体大小：</span>
+                        <input type="number" :value="common.fontSize" placeholder="字体大小，范围10-25，默认15.5" min="10" max="25"
+                            step="0.1" @keydown.enter="updateFontSize" @focusout="updateFontSize" />
+                    </div>
+                    <div>
+                        <span style="margin-right: 8px;">预设大小：</span>
                         <span v-for="(item, index) in allFontSizeLevels()" class="fslevel-item"
                             :class="{ active: index == common.fontSizeLevel }" @click="setFontSizeLevel(index)">
                             {{ item.name }}
                         </span>
+                    </div>
+                    <div class="last">
+                        <span>字体粗细：</span>
+                        <input type="number" :value="common.fontWeight" placeholder="字体粗细，范围100-1000，默认400" min="100"
+                            max="1000" step="10" @keydown.enter="updateFontWeight" @focusout="updateFontWeight" />
+                        <datalist id="fontweight-suggests" v-if="false">
+                            <option v-for="(item, index) in fontWeights" :value="item">
+                            </option>
+                        </datalist>
                     </div>
                 </div>
             </div>
@@ -376,7 +402,7 @@ onMounted(checkForUpdate)
                         </span>
                     </div>
                     <div>
-                        <span class="cate-subtitle">VIP歌曲尝试切换为免费版本：</span>
+                        <span class="cate-subtitle">VIP歌曲试切换为免费版本：</span>
                         <ToggleControl @click="toggleVipTransfer" :value="track.vipTransfer">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：目前无法支持</div>
@@ -414,7 +440,7 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                         <div class="tip-text spacing">提示：不会影响系统熄屏、锁屏</div>
                     </div>
-                    <div class="tip-text">提示：当前应用，更新频度指每多少个动画帧更新一次；频度值越小，动画越流畅，CPU占用越高</div>
+                    <div class="tip-text">提示：当前应用，更新频度指每多少个动画帧更新一次；频度越小，动画越流畅，CPU占用越高</div>
                     <div>
                         <span class="cate-subtitle">歌曲（歌词）进度更新频度：</span>
                         <input type="number" :value="track.stateRefreshFrequency" placeholder="屏幕刷新率，范围1-1024，默认60" min="1"
@@ -424,7 +450,8 @@ onMounted(checkForUpdate)
                     <div class="last">
                         <span class="cate-subtitle">歌曲频谱更新频度：</span>
                         <input type="number" :value="track.spectrumRefreshFrequency" placeholder="范围1 - 256，默认3" min="1"
-                            max="256" step="1" @input="updateSpectrumRefreshFrequency" @focusout="updateFontWeight" />
+                            max="256" step="1" @input="updateSpectrumRefreshFrequency"
+                            @focusout="updateSpectrumRefreshFrequency" />
                     </div>
                 </div>
             </div>
@@ -549,9 +576,10 @@ onMounted(checkForUpdate)
             <div class="network row">
                 <span class="cate-name">网络</span>
                 <div class="content" @keydown.stop="">
+                    <div class="tip-text">提示：国内网络下，一般无需配置；开启代理后，若配置不当，当前应用将无法正常联网</div>
                     <div>网络代理配置：
                         <div class="spacing">
-                            <SvgTextButton text="测试并保存" :leftAction="testAndSetupProxy" :rightAction="closeProxy">
+                            <SvgTextButton text="应用更改" :leftAction="applySetupProxy" :rightAction="closeProxy">
                                 <template #left-img>
                                 </template>
                                 <template #right-img>
@@ -573,9 +601,8 @@ onMounted(checkForUpdate)
                                 </template>
                             </SvgTextButton>
                         </div>
-                        <div class="tip-text spacing">提示：开启代理并配置后，请先保存才能生效哦</div>
                     </div>
-                    <div class="tip-text">提示：国内网络下，一般无需配置；开启代理后，若配置不当，当前应用将无法正常联网</div>
+                    <div class="tip-text">提示：开启代理，并修改配置后，请点击“应用更改”按钮，新配置才会生效哦</div>
                     <div>
                         <span class="cate-subtitle">HTTP代理模式：</span>
                         <ToggleControl @click="toggleHttpProxyShow" v-model="network.httpProxy.enable"
@@ -640,6 +667,8 @@ onMounted(checkForUpdate)
                             <template #right-text>
                                 <div class="text">还原</div>
                             </template>
+                        </SvgTextButton>
+                        <SvgTextButton text="恢复默认设置" :leftAction="resetSettingData" class="spacing">
                         </SvgTextButton>
                         <SvgTextButton text="重置" :leftAction="resetData" class="spacing">
                             <template #left-img>
@@ -810,7 +839,7 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .center .row>.cate-name {
-    font-size: 17px;
+    font-size: var(--tab-title-text-size);
     margin-left: 10px;
     width: 110px;
 }
@@ -830,6 +859,13 @@ onMounted(checkForUpdate)
 
 #setting-view .content>div .cate-subtitle {
     width: var(--setting-cate-subtitle-width);
+    margin-right: 25px;
+}
+
+#setting-view .navigation .cate-subtitle,
+#setting-view .keys .cate-subtitle,
+#setting-view .network .cate-subtitle {
+    width: 225px !important;
 }
 
 #setting-view .content .last {
@@ -879,6 +915,8 @@ onMounted(checkForUpdate)
     line-height: var(--size);
     border-radius: 5px;
     visibility: hidden;
+    font-size: 16px;
+    margin: 0px !important;
 }
 
 #setting-view .theme .content div:hover span {
@@ -933,7 +971,7 @@ onMounted(checkForUpdate)
 #setting-view .layout .content .layout-item,
 #setting-view .common .content .fslevel-item,
 #setting-view .track .content .quality-item {
-    width: 68px;
+    min-width: 68px;
     padding: 6px;
     text-align: center;
     border-radius: 10rem;
@@ -943,11 +981,12 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .layout .content .layout-item {
-    width: 88px !important;
+    width: auto;
+    min-width: 93px;
 }
 
 #setting-view .common .content .fslevel-item {
-    width: 58px !important;
+    min-width: 56px !important;
 }
 
 #setting-view .layout .content .layout-item:hover,
@@ -1079,8 +1118,13 @@ onMounted(checkForUpdate)
     border: 1px solid var(--input-border-color);
     background-color: var(--input-bg);
     margin-left: 10px;
-    min-width: 223px;
+    min-width: 258px;
     color: var(--text-color);
+}
+
+#setting-view .network input {
+    min-width: 235px !important;
+    width: 235px
 }
 
 #setting-view .version .download-wrap {

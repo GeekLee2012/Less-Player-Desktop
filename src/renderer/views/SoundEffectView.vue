@@ -177,7 +177,7 @@ const switchIR = (item, index) => {
 
 .sound-effect-view .header .title {
     margin-right: 30px;
-    font-size: 16px;
+    font-size: var(--text-size);
 }
 
 .sound-effect-view .header .toggle-ctl {
