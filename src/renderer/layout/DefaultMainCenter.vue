@@ -355,7 +355,7 @@ onActivated(setupDefaultLayout)
 
 onMounted(() => {
     //窗口大小变化事件监听
-    window.addEventListener('resize', e => {
+    window.addEventListener('resize', event => {
         if (!isDefaultLayout.value) return
         //自适应播放元信息组件大小
         setPlayMetaSize()

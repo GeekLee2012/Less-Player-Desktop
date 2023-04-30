@@ -127,17 +127,15 @@ export class DouBan {
             const url = "https://fm.douban.com/j/v2/songlist/" + id + "?kbps=192"
             const result = new Playlist(id, DouBan.CODE)
             getJson(url).then(json => {
-                //const result = new Playlist(id, DouBan.CODE, json.cover, json.title, url, json.intro)
-                //result.total = json.count
+                const { cover, title, intro, count, songs } = json
                 Object.assign(result, {
-                    cover: json.cover,
-                    title: json.title,
-                    about: json.intro,
-                    total: json.count,
+                    cover,
+                    title,
+                    about: intro,
+                    total: count,
                     url
                 })
-                const list = json.songs
-                list.forEach(item => {
+                songs.forEach(item => {
                     const artist = item.singers.map(ar => ({ id: ar.id, name: ar.name }))
                     const album = { id: item.aid, name: item.albumtitle }
                     const duration = item.length * 1000
@@ -156,10 +154,11 @@ export class DouBan {
     //歌曲播放详情：url、cover、lyric等
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
-            const url = "https://fm.douban.com/j/v2/lyric" + "?sid=" + id + "&ssid=" + track.ssid
+            const { ssid } = track
+            const url = `https://fm.douban.com/j/v2/lyric?sid=${id}&ssid=${ssid}`
             getJson(url).then(json => {
-                const lyricText = json.lyric
-                track.lyric = Lyric.parseFromText(lyricText)
+                const { lyric } = json
+                track.lyric = Lyric.parseFromText(lyric)
                 resolve(track)
             }).catch(error => resolve(track))
         })

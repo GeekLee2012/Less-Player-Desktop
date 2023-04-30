@@ -16,8 +16,7 @@ const { getCurrentThemeId, setupFontFamily,
 
 //设置主题
 const setupAppTheme = (themeId) => {
-  themeId = themeId || getCurrentThemeId() || 'dark'
-  themeId = themeId.trim()
+  themeId = (themeId || getCurrentThemeId() || 'white').trim()
   document.documentElement.setAttribute('theme', themeId)
 }
 

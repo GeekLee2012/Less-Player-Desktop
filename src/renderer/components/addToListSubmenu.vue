@@ -69,8 +69,6 @@ const handleClick = (item, mode) => {
         const { id } = commonCtxItem.value
         success = moveToCustomPlaylist(item.id, id, track)
         text = "歌曲已移动成功！"
-    } else if (mode == 2) {
-        success = addToCustomPlaylist(item.id, track)
     } else if (mode == 3) { //添加当前播放列表
         //TODO 暂时先简单处理，不考虑异常情况
         const queue = toRaw(queueTracks.value)
@@ -80,6 +78,8 @@ const handleClick = (item, mode) => {
         })
         success = true
         text = "全部歌曲已添加成功！"
+    } else {
+        success = addToCustomPlaylist(item.id, track)
     }
     text = success ? text : "歌曲已存在！"
     setCommonNotificationType(success ? 0 : 1)

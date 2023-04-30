@@ -109,7 +109,7 @@ const renderAndScrollLyric = (secs) => {
     const { clientHeight } = document.documentElement
     const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
     //lyricWrap.scrollTop = destScrollTop
-    //暂时随意设置时间值300ms左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
+    //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
     smoothScroll(lyricWrap, destScrollTop, 288)
 }
 
@@ -455,17 +455,16 @@ watch(() => props.track, loadLyric, { immediate: true })
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-}
 
-.lyric-ctl .audio-title {
     font-size: 28px;
+    font-size: var(--text-main-title-size);
     font-weight: bold;
     margin-bottom: 6px;
 }
 
 .lyric-ctl .audio-artist,
 .lyric-ctl .audio-album {
-    font-size: 18px;
+    /*font-size: 18px;*/
     font-weight: bold;
     color: var(--text-sub-color);
     display: flex;
@@ -496,9 +495,9 @@ watch(() => props.track, loadLyric, { immediate: true })
 }
 
 .lyric-ctl .center .line {
-    font-size: 18px;
+    font-size: 22px;
     line-height: 28px;
-    margin-top: 26px;
+    margin-top: 28px;
     color: #ccc;
     color: var(--text-lyric-color);
 }
@@ -507,7 +506,7 @@ watch(() => props.track, loadLyric, { immediate: true })
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
-    font-size: 21px;
+    font-size: 22px;
     font-weight: bold !important;
 }
 
@@ -533,7 +532,7 @@ watch(() => props.track, loadLyric, { immediate: true })
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    font-size: 21px;
+    font-size: 23px;
     font-weight: bold !important;
     color: var(--text-lyric-color);
 }

@@ -450,7 +450,7 @@ const sendToRenderer = (channel, args) => {
   try {
     if (mainWin && mainWin.webContents) mainWin.webContents.send(channel, args)
   } catch (error) {
-    console.log(error)
+    if (isDevEnv) console.log(error)
   }
 }
 
@@ -504,7 +504,7 @@ const setWindowButtonVisibility = (visible) => {
   try {
     if (mainWin) mainWin.setWindowButtonVisibility(visible)
   } catch (error) {
-    console.log(error)
+    if (isDevEnv) console.log(error)
   }
 }
 
@@ -580,7 +580,7 @@ const setupAppGlobalProxy = (data) => {
       proxyBypassRules: 'localhost'
     })
   }
-  console.log('ProxyConfig: ', config)
+  if (isDevEnv) console.log('ProxyConfig: ', config)
   session.defaultSession.setProxy(config)
 }
 

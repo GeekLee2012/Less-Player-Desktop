@@ -26,14 +26,6 @@ const getSignature = (param) => {
     return sign.toUpperCase()
 }
 
-const getDataUrl = (hash, albumId) => {
-    return "https://wwwapi.kugou.com/yy/index.php?r=play/getdata"
-        + "&hash=" + hash + "&dfid=" + COOKIES.kg_dfid
-        + "&appid=1014" + "&mid=" + COOKIES.kg_mid
-        + "&platid=4" + "&album_id=" + albumId
-        + "&_="
-}
-
 const getCustomCover = (origin) => {
     if (!origin) return origin
     //http://c1.kgimg.com/custom/150/20201207/20201207134716994336.jpg
@@ -347,7 +339,6 @@ export class KuGou {
                 }
                 if (scriptText) {
                     const json = Function(scriptText + ' return data')()
-
                     json.forEach(item => {
                         const artist = []
                         const album = { id: item.album_id, name: item.album_name }
@@ -365,6 +356,7 @@ export class KuGou {
                         track.hash = item.hash
                         track.pid = id
                         track.payPlay = (item.vip != 0)
+                        track.highHash = [item.hash_flac, item.hash_320, item.hash_128]
                         result.addTrack(track)
                     })
                 }
@@ -374,7 +366,7 @@ export class KuGou {
     }
 
     //歌单详情
-    static playlistDetailMac(id, offset, limit, page) {
+    static playlistDetail_v0(id, offset, limit, page) {
         id = (id + '').trim()
         if (id.startsWith(KuGou.TOPLIST_PREFIX)) return KuGou.toplistDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
@@ -425,10 +417,40 @@ export class KuGou {
 
     //歌曲播放详情：url、cover、lyric等
     static playDetail(id, track) {
-        return new Promise((resolve, reject) => {
-            const url = getDataUrl(track.hash, track.album.id)
+        return new Promise(async (resolve, reject) => {
+            const { hash, album, highHash } = track
+            const albumId = album.id
+            const { kg_dfid, kg_mid } = COOKIES
+            const hashList = []
+            hashList.push(...highHash)
+            hashList.push(hash)
+
+            const result = new Track(id, KuGou.CODE)
+            for (var i = 0; i < hashList.length; i++) {
+                const _hash = hashList[i]
+                if (!_hash) continue
+                const url = "https://wwwapi.kugou.com/yy/index.php?r=play/getdata"
+                    + `&hash=${_hash}&dfid=${kg_dfid}&appid=1014&mid=${kg_mid}&platid=4&album_id=${albumId}&_=`
+                const json = await getJson(url)
+                const { play_url, img, lyrics, authors } = json.data
+                if ((play_url || '').trim().length > 0) {
+                    Object.assign(result, {
+                        url: play_url,
+                        cover: img,
+                        lyric: Lyric.parseFromText(lyrics)
+                    })
+                    if (authors) {
+                        result.artist = authors.map(ar => ({ id: ar.author_id, name: ar.author_name }))
+                    }
+                    break
+                }
+            }
+            resolve(result)
+            /*
+            const url = "https://wwwapi.kugou.com/yy/index.php?r=play/getdata"
+                + `&hash=${tryHash}&dfid=${kg_dfid}&appid=1014&mid=${kg_mid}&platid=4&album_id=${albumId}&_=`
+            const result = new Track(id, KuGou.CODE)
             getJson(url).then(json => {
-                const result = new Track(id, KuGou.CODE)
                 result.url = json.data.play_url
                 result.cover = json.data.img
                 const lyricText = json.data.lyrics
@@ -438,6 +460,7 @@ export class KuGou {
                 }
                 resolve(result)
             })
+            */
         })
     }
 

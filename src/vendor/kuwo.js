@@ -217,15 +217,13 @@ export class KuWo {
     }
 
     //歌曲播放详情：url、cover、lyric等
-    static playDetail(id) {
+    static playDetail(id, track) {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/v1/www/music/playUrl"
                 + "?mid=" + id + "&type=music" + "&httpsStatus=1&reqId=" + randomReqId()
             const result = new Track(id, KuWo.CODE)
             getJson(url, null, CONFIG).then(json => {
-                if (json.data) {
-                    result.url = json.data.url
-                }
+                if (json.data) Object.assign(result, { url: json.data.url })
                 resolve(result)
             }).catch(error => {
                 resolve(result)

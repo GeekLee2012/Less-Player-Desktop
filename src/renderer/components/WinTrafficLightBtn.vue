@@ -21,12 +21,18 @@ const doMinimize = () => {
     if (isMinBtnDisabled.value) return
     minimize()
 }
+
+const isMaximized = ref(false)
+const toggleMaximize = () => {
+    isMaximized.value = !isMaximized.value
+    maximize()
+}
 </script>
 
 <template>
     <div class="win-traffic-light-btn">
         <div @click="quit" class="ctl-btn close-btn">
-            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="-1 -1 32 32" xmlns="http://www.w3.org/2000/svg">
                 <g id="cross">
                     <line class="cls-1" x1="7" x2="25" y1="7" y2="25" />
                     <line class="cls-1" x1="7" x2="25" y1="25" y2="7" />
@@ -40,12 +46,24 @@ const doMinimize = () => {
                     d="M208,134.4H48c-3.534,0-6.4-2.866-6.4-6.4s2.866-6.4,6.4-6.4h160c3.534,0,6.4,2.866,6.4,6.4S211.534,134.4,208,134.4z" />
             </svg>
         </div>
-        <div @click="maximize" v-show="!hideMaxBtn" class="ctl-btn max-btn">
-            <svg viewBox="0 0 25 24" xmlns="http://www.w3.org/2000/svg">
+        <div @click="toggleMaximize" v-show="!hideMaxBtn" class="ctl-btn max-btn">
+            <svg v-show="!isMaximized" viewBox="-3 -3 30 30" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path class="cls-1" d="M2,18V2H18" />
                         <path class="cls-1" d="M23,6V22H7" />
+                    </g>
+                </g>
+            </svg>
+            <svg v-show="isMaximized" viewBox="0 0 35.82 35.82" xmlns="http://www.w3.org/2000/svg">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="Layer_1-2" data-name="Layer 1">
+                        <g id="Layer_2-2" data-name="Layer 2">
+                            <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                <path d="M19.82,35.82v-16h16" />
+                                <path d="M15,0l1,16H0" />
+                            </g>
+                        </g>
                     </g>
                 </g>
             </svg>

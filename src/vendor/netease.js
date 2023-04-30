@@ -52,41 +52,12 @@ const weapi = (text) => {
     return { params, encSecKey }
 }
 
-const playlistParam = (id) => {
-    return {
-        id,
-        offset: 0,
-        total: true,
-        limit: 1000,
-        n: 1000,
-        csrf_token: ""
-    }
-}
-
 const trackIdsParam = (ids) => {
     const c = []
     ids.forEach(id => {
         c.push({ id })
     })
     return { c: JSON.stringify(c), ids: JSON.stringify(ids) }
-}
-
-const playParam = (id) => {
-    return {
-        ids: [id],
-        level: "standard",
-        encodeType: "aac",
-        csrf_token: ""
-    }
-}
-
-const lyricParam = (id) => {
-    return {
-        id,
-        lv: -1,
-        tv: -1,
-        csrf_token: ''
-    }
 }
 
 const searchParam = (keyword, type) => {
@@ -225,7 +196,14 @@ export class NetEase {
         return new Promise((resolve, reject) => {
             const result = new Playlist()
             let url = "https://music.163.com/weapi/v3/playlist/detail"
-            let param = playlistParam(id)
+            let param = {
+                id,
+                offset: 0,
+                total: true,
+                limit: 1000,
+                n: 1000,
+                csrf_token: ""
+            }
             let reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
                 const playlist = json.playlist
@@ -269,7 +247,12 @@ export class NetEase {
         return new Promise((resolve, reject) => {
             NetEase.resolveAnchorRadio(id, track).then(resolvedId => {
                 const url = "https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token="
-                const param = playParam(resolvedId)
+                const param = {
+                    ids: [resolvedId],
+                    level: 'standard',
+                    encodeType: 'flac', //aac
+                    csrf_token: ''
+                }
                 const reqBody = weapi(param)
                 postJson(url, reqBody).then(json => {
                     const result = new Track(id)
@@ -285,7 +268,12 @@ export class NetEase {
     static lyric(id, track) {
         return new Promise((resolve, reject) => {
             const url = "https://music.163.com/weapi/song/lyric?csrf_token="
-            const param = lyricParam(id);
+            const param = {
+                id,
+                lv: -1,
+                tv: -1,
+                csrf_token: ''
+            }
             const reqBody = weapi(param)
             const result = { id, platform: NetEase.CODE, lyric: null, trans: null }
             postJson(url, reqBody).then(json => {

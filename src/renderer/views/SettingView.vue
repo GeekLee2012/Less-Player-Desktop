@@ -348,7 +348,7 @@ onMounted(checkForUpdate)
                     <div class="window-zoom">
                         <div class="zoom-title">窗口缩放 (%)：
                             <input type="number" min="50" max="300" step="0.01" :value="common.winZoom"
-                                placeholder="范围50-300，默认100，支持2位小数点" @keydown.enter="updateWinZoom"
+                                placeholder="范围50-300，默认85，支持2位小数点" @keydown.enter="updateWinZoom"
                                 @focusout="updateWinZoom" />
                         </div>
                         <div>

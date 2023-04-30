@@ -62,12 +62,12 @@ const getTrackTypeMeta = (typeName) => {
     }[typeName]
 }
 
-const vkeyReqData = (trackInfo) => {
+const vkeyReqData = (trackInfo, type) => {
     //TODO
     const mediaId = trackInfo.mid
     const songtype = [trackInfo.type]
-    const filename = ['m4a'].map(typeName => {
-        const typeMeta = getTrackTypeMeta(typeName)
+    const filename = [type].map(item => {
+        const typeMeta = getTrackTypeMeta(item)
         return typeMeta.prefix + mediaId + mediaId + typeMeta.ext
     })
 
@@ -93,7 +93,7 @@ const vkeyReqData = (trackInfo) => {
     }
 }
 
-const vkeyReqBody = (trackInfo) => {
+const vkeyReqBody = (trackInfo, type) => {
     return {
         '-': 'getplaysongvkey',
         'g_tk': 5381,
@@ -105,7 +105,7 @@ const vkeyReqBody = (trackInfo) => {
         notice: 1,
         platform: 'yqq.json',
         needNewCode: 0,
-        data: JSON.stringify(vkeyReqData(trackInfo))
+        data: JSON.stringify(vkeyReqData(trackInfo, type))
     }
 }
 
@@ -782,13 +782,28 @@ export class QQ {
             const reqBody = {
                 format: 'json',
                 data: JSON.stringify({
-                    songinfo: moduleReq('music.pf_song_detail_svr', 'get_song_detail_yqq', { song_mid: id })
+                    req_1: moduleReq('music.pf_song_detail_svr', 'get_song_detail_yqq', { song_mid: id })
                 })
             }
-            getJson(url, reqBody).then(json => {
-                const trackInfo = json.songinfo.data.track_info
+            getJson(url, reqBody).then(async (json) => {
+                const trackInfo = json.req_1.data.track_info
+                const types = ['320', '128', 'm4a']
+                for (var i = 0; i < types.length; i++) {
+                    const vkeyJson = await QQ.getVKeyJson(trackInfo, types[i])
+                    const { midurlinfo, sip } = vkeyJson.req_1.data
+                    const urlInfo = midurlinfo[0]
+                    const { vkey } = urlInfo
+
+                    if ((vkey || '').trim().length > 0) {
+                        result.url = sip[0] + urlInfo.purl
+                        break
+                    }
+                }
+                resolve(result)
+
+                /*
                 QQ.getVKeyJson(trackInfo).then(json => {
-                    const { data } = json.req_1;
+                    const { data } = json.req_1
                     const urlInfo = data.midurlinfo[0]
                     const vkey = urlInfo.vkey.trim()
 
@@ -797,15 +812,16 @@ export class QQ {
                     }
                     resolve(result)
                 })
+                */
             })
         })
     }
 
     //获取VKey、purl和sip服务器等信息
-    static getVKeyJson(trackInfo) {
+    static getVKeyJson(trackInfo, type) {
         return new Promise((resolve, reject) => {
             const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
-            const reqBody = vkeyReqBody(trackInfo)
+            const reqBody = vkeyReqBody(trackInfo, type)
             getJson(url, reqBody).then(json => resolve(json))
         })
     }
@@ -962,12 +978,11 @@ export class QQ {
                     scriptText = scriptText.trim()
                     if (scriptText.includes(key)) break
                 }
-                const result = new Album(id, QQ.CODE, '山川湖海，日月星辰', 'default_cover.png')
+                const result = new Album(id, QQ.CODE)
                 if (scriptText) {
                     scriptText = scriptText.split(key)[1].trim().substring(1)
                     scriptText = scriptText.replace(/:undefined,/g, ':"",')
                     const json = JSON.parse(scriptText)
-
 
                     const detail = json.detail
                     result.title = detail.albumName

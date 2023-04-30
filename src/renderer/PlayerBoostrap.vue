@@ -113,7 +113,7 @@ const updateLyric = (track, { lyric, trans }) => {
 
 //处理不可播放歌曲
 const AUTO_PLAY_NEXT_MSG = '当前歌曲无法播放<br>即将为您播放下一曲'
-const NO_NEXT_MSG = '当前歌曲无法播放<br>且列表已无其他歌曲'
+const NO_NEXT_MSG = '当前歌曲无法播放<br>列表无其他可播放歌曲'
 const OVERTRY_MSG = '尝试播放次数太多<br>请手动播放其他歌曲吧'
 //连跳计数器
 let autoSkipCnt = 0
@@ -139,7 +139,9 @@ const handleUnplayableTrack = (track) => {
     if (isPlaylistRadio) { //普通歌单电台
         toastAndPlayNext(track)
         return
-    } else if (queueSize < 2) { //非电台歌曲，且没有下一曲
+    } else if (autoSkipCnt >= queueSize) { //非电台歌曲，且没有下一曲
+        resetPlayState()
+        resetAutoSkip()
         showFailToast(NO_NEXT_MSG)
         return
     }
@@ -150,6 +152,7 @@ const handleUnplayableTrack = (track) => {
         toastAndPlayNext(track)
         return
     }
+    resetPlayState()
     //10连跳啦，暂停一下吧
     resetAutoSkip()
     showFailToast(OVERTRY_MSG)
@@ -490,6 +493,9 @@ EventBus.on('track-state', state => {
 
     setPlayState(state)
     switch (state) {
+        case PLAY_STATE.INIT:
+            resetPlayState()
+            break
         case PLAY_STATE.PLAYING:
             setPlaying(true)
             break
