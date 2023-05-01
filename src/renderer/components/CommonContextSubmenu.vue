@@ -60,7 +60,7 @@ const resetScroll = () => {
     /*padding: 15px 0px;
     max-height: 297px;
     border: 1px solid var(--border-color);*/
-    box-shadow: 0px 0px 8px var(--ctx-menu-border-color);
+    box-shadow: 0px 0px 6px var(--ctx-menu-border-color);
 }
 
 .common-ctx-submenu .padding {

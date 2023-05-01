@@ -32,7 +32,7 @@ const onQueueEmpty = () => {
     showToast("播放列表已被清空！", () => {
         hidePlaybackQueueView()
         hidePlayingView()
-    }, 666)
+    })
 }
 
 const clearAll = () => {

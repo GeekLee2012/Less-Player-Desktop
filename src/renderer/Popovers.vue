@@ -269,6 +269,7 @@ onMounted(() => {
   top: 202px;
   right: 30px;
   z-index: 99;
+  box-shadow: var(--pbq-box-shadow);
 }
 
 #random-music-toolbar {

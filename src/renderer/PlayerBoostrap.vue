@@ -494,7 +494,7 @@ EventBus.on('track-state', state => {
     setPlayState(state)
     switch (state) {
         case PLAY_STATE.INIT:
-            resetPlayState()
+            resetPlayState(true)
             break
         case PLAY_STATE.PLAYING:
             setPlaying(true)
@@ -514,11 +514,11 @@ const mmssCurrentTime = ref('00:00')
 const currentTimeState = ref(0) //单位: 秒
 const progressState = ref(0)
 
-const resetPlayState = () => {
+const resetPlayState = (ignore) => {
     currentTimeState.value = 0
     mmssCurrentTime.value = '00:00'
     progressState.value = 0
-    setPlayState(PLAY_STATE.NONE)
+    if (!ignore) setPlayState(PLAY_STATE.NONE)
 }
 
 EventBus.on('track-pos', secs => {

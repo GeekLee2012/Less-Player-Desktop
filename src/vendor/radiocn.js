@@ -18,6 +18,10 @@ export class RadioCN {
     static CODE = 'radiocn'
     static RADIO_PREFIX = 'FM_'
     static CNR_CODE = RadioCN.RADIO_PREFIX + '3225'
+    static BJ_CODE = RadioCN.RADIO_PREFIX + '3226'
+    static SH_CODE = RadioCN.RADIO_PREFIX + '3228'
+    static JS_CODE = RadioCN.RADIO_PREFIX + '3232'
+    static GD_CODE = RadioCN.RADIO_PREFIX + '3240'
 
     //全部分类
     static categories() {
@@ -30,11 +34,16 @@ export class RadioCN {
                 const anchorRadioCategories = values[0]
                 const fmRadioCategories = values[1]
 
-                const defaultCategory = new Category("默认")
+                const defaultCategory = new Category("推荐")
                 defaultCategory.add('国家电台', RadioCN.CNR_CODE)
+                //defaultCategory.add('北京', RadioCN.BJ_CODE)
+                //defaultCategory.add('上海', RadioCN.SH_CODE)
+                defaultCategory.add('江苏电台', RadioCN.JS_CODE)
+                defaultCategory.add('广东电台', RadioCN.GD_CODE)
                 result.data.push(defaultCategory)
                 result.data.push(...anchorRadioCategories.data)
                 result.data.push(...fmRadioCategories.data)
+                console.log(result)
                 resolve(result)
             }).catch(error => resolve(result))
         })

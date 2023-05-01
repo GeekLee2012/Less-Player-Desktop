@@ -453,7 +453,7 @@ EventBus.on("commonCtxMenu-init", dataType => {
     background: var(--ctx-menu-bg);
     border-radius: 8px;
     /*border: 1px solid var(--border-color);*/
-    box-shadow: 0px 0px 3px var(--ctx-menu-border-color);
+    box-shadow: 0px 0px 6px var(--ctx-menu-border-color);
     max-height: 386px;
 }
 

@@ -99,9 +99,7 @@ const loadMoreContent = () => {
 
 const scrollToLoad = () => {
     if (isLoadingContent.value) return
-    const scrollTop = squareContentRef.value.scrollTop
-    const scrollHeight = squareContentRef.value.scrollHeight
-    const clientHeight = squareContentRef.value.clientHeight
+    const { scrollTop, scrollHeight, clientHeight } = squareContentRef.value
     markScrollState()
     const allowedError = 10 //允许误差
     if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {

@@ -157,7 +157,7 @@ watch(() => props.keyword, (nv, ov) => loadTab())
                 <span class="tip" v-html="tabTipText"></span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
-                :loading="isLoading" ß>
+                :loading="isLoading">
             </component>
         </div>
     </div>

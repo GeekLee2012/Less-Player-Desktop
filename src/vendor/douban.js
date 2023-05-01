@@ -21,7 +21,7 @@ export class DouBan {
     static categories() {
         return new Promise((resolve, reject) => {
             const result = { platform: DouBan.CODE, data: [], orders: [] }
-            const defaultCategory = new Category("默认")
+            const defaultCategory = new Category("推荐")
             defaultCategory.add("兆赫MHz", "MHz")
             //defaultCategory.add("为你推荐", '1')
             const songlistCategory = new Category('歌单')

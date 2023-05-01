@@ -310,7 +310,7 @@ export const useSettingStore = defineStore('setting', {
             return this.common.fontSize
         },
         setFontSize(fontSize, byPresetLevel) {
-            fontSize = Number(fontSize || 15.5)
+            fontSize = Number(fontSize || 17.5)
             if (fontSize < 10 || fontSize > 25) return
             this.common.fontSize = fontSize
             if (!byPresetLevel) { //使用预设大小时，自动更新预设大小等级

@@ -216,14 +216,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 边框 */
   --main-left-border-color: #181818;
   --ctx-menu-bg: #464646;
-  --ctx-menu-border-color: #181818;
+  --ctx-menu-border-color: #111;
   --border-color: #363636;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: #363636;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #000;
 
   /* 搜索框 */
   --searchbar-bg: #fff;
@@ -304,13 +304,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --main-left-border-color: #ddd;
   --ctx-menu-bg: var(--bg-color);
   --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: #f4f4f4;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: #f8f8f8;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #fff;
@@ -399,13 +400,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --main-left-border-color: #ddd;
   --ctx-menu-bg: var(--bg-color);
   --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: #faf4f6;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to right, #676163, #e7e1e3) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #e7e1e3;
@@ -487,14 +489,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 边框 */
   --main-left-border-color: #ddd;
   --ctx-menu-bg: var(--bg-color);
-  --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: #f4f4f4;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: #f8f8f8;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to right, #e6399b, #e667af) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #e8e8e8;
@@ -540,8 +542,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --bg-color: #252025;
   --app-bg: var(--bg-color);
   /* 文本 */
-  --text-color: #eaeaea;
-  --text-sub-color: #989898;
+  --text-color: #cdcdcd;
+  --text-sub-color: #888;
   --text-subtitle-color: #666;
   --hl-color: #fc589c;
   --hl-text-bg: linear-gradient(to top right, #fc589c, #e6399b);
@@ -581,7 +583,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to right, #e6399b, #fc589c) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #000;
+  --pbq-box-shadow: 0px 0px 6px #000;
 
   /* 搜索框 */
   --searchbar-bg: #eee;
@@ -677,7 +679,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: #fff;
   --pbq-hl-border: linear-gradient(to top right, #f84860, #fc7688) 0 0 0 2;
   --pbq-hl-border: linear-gradient(to top right, #fff, #fff) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框  */
   --searchbar-bg: #fff;
@@ -760,16 +762,16 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --list-item-hover: #f7314d0f !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
-  --main-left-border-color: #31313159;
+  --main-left-border-color: #ccc;
   --ctx-menu-bg: #fff;
-  --ctx-menu-border-color: #181818;
+  --ctx-menu-border-color: #999;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: #f7314d;
   --pbq-hl-border: linear-gradient(to top right, #f7314d, #f84860) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框  */
   --searchbar-bg: #fff;
@@ -818,7 +820,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --app-bg: var(--bg-color);
   /* 文本 */
   --text-color: #ccc;
-  --text-sub-color: #ababab;
+  --text-sub-color: #989898;
   --text-subtitle-color: #666;
   --hl-color: #d53943;
   --hl-text-bg: linear-gradient(to top right, #f84860, #f9453f);
@@ -853,7 +855,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --list-item-hover: #f9453f33 !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
-  --main-left-border-color: #000;
+  --main-left-border-color: #0b0b0b;
   --ctx-menu-bg: #31353b;
   --ctx-menu-border-color: #000;
   --border-color: transparent;
@@ -862,7 +864,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: #f9453f;
   --pbq-hl-border: linear-gradient(to top right, #f9453f, #f84860) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #000;
+  --pbq-box-shadow: 0px 0px 6px #000;
 
   /* 搜索框  */
   --searchbar-bg: #ddd;
@@ -948,9 +950,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --list-item-hover: #ffffff36 !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
-  --main-left-border-color: #ababab;
+  --main-left-border-color: #bcbcbc;
   --ctx-menu-bg: #f1eee7;
-  --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
@@ -958,7 +960,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: var(--hl-color);
   --pbq-hl-text-color: #64903f;
   --pbq-hl-border: linear-gradient(to top right, #64903f, #cfdec3) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #f1eee7;
@@ -1047,14 +1049,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 边框 */
   --main-left-border-color: #91934356;
   --ctx-menu-bg: #fffffff8;
-  --ctx-menu-border-color: #111;
+  --ctx-menu-border-color: #000;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-color);
   --pbq-hl-border: linear-gradient(to top right, #919343, #e1e0a7) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #000;
 
   /* 搜索框 */
   --searchbar-bg: #91934336;
@@ -1140,16 +1142,16 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --list-item-hover: #ffffff66 !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
-  --main-left-border-color: #888;
+  --main-left-border-color: #bababa;
   --ctx-menu-bg: var(--bg-color);
-  --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #2783fb, #2783fb) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #56ccf266;
@@ -1235,8 +1237,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
   --main-left-border-color: #878b82;
+  --main-left-border-color: #ababab;
   --ctx-menu-bg: var(--bg-color);
-  --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
@@ -1244,7 +1247,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: #273b42;
   --pbq-hl-text-color: #172b32;
   --pbq-hl-border: linear-gradient(to top right, #395a62, #273b42) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #fff;
@@ -1335,7 +1338,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --pbq-hl-text-color: #182626;
   --pbq-hl-text-color: #fff;
   --pbq-hl-border: linear-gradient(to top right, #fff, #fff) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: var(--bg-color);
@@ -1417,16 +1420,16 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --list-item-hover: #ffb30025;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
-  --main-left-border-color: #ccc;
+  --main-left-border-color: #ddd;
   --ctx-menu-bg: var(--bg-color);
-  --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #ffb300, #ffb300) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #ffb30066;
@@ -1516,14 +1519,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --main-left-border-color: #181818;
   --main-left-border-color: #ccc;
   --ctx-menu-bg: #f9f3e9;
-  --ctx-menu-border-color: #181818;
+  --ctx-menu-border-color: #999;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #fc9b29, #fc9b29) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #fff;
@@ -1605,14 +1608,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 边框 */
   --main-left-border-color: #ccc;
   --ctx-menu-bg: var(--bg-color);
-  --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #000, #000) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #111;
 
   /* 搜索框 */
   --searchbar-bg: #fff;
@@ -1696,14 +1699,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 边框 */
   --main-left-border-color: #ccc;
   --ctx-menu-bg: var(--bg-color);
-  --ctx-menu-border-color: #ababab;
+  --ctx-menu-border-color: #999;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #9c27b0, #9c27b0) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #ffb30066;
@@ -1790,17 +1793,17 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --list-item-hover: #fdfdf225;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
-  --main-left-border-color: #181818;
+  --main-left-border-color: #333;
   --ctx-menu-bg: #e5bc8c;
   --ctx-menu-bg: #57457e;
-  --ctx-menu-border-color: #181818;
+  --ctx-menu-border-color: #222;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: #e5bc8c;
   --pbq-hl-border: linear-gradient(to top right, #e5bc8c, #e5bc8c) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #222;
 
   /* 搜索框 */
   --searchbar-bg: #fdfdf2;
@@ -1888,14 +1891,14 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 边框 */
   --main-left-border-color: #181818;
   --ctx-menu-bg: #5f3d70;
-  --ctx-menu-border-color: #181818;
+  --ctx-menu-border-color: #111;
   --border-color: transparent;
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-color);
   --pbq-hl-border: linear-gradient(to top right, #ff0307, #ff0307) 0 0 0 2;
-  --pbq-box-shadow: 0px 0px 10px #161616;
+  --pbq-box-shadow: 0px 0px 6px #666;
 
   /* 搜索框 */
   --searchbar-bg: #fdfdf2;

@@ -1022,14 +1022,33 @@ export class QQ {
         })
     }
 
+    static doMultiPageSearch({ keyword, type, offset, limit, page, count }, { getList, mapItem }) {
+        return new Promise(async (resolve, reject) => {
+            count = count || 2
+            const result = { platform: QQ.CODE, offset, limit, page, data: [] }
+            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            for (var i = 0; i < count; i++) {
+                const reqBody = JSON.stringify(searchParamNew(keyword, type, offset, limit, (page + i)))
+                const json = await postJson(url, reqBody)
+                const { list } = getList(json)
+                const hitNum = list ? list.length : 0
+                if (hitNum < 1) break
+                const data = list.map(item => mapItem(item))
+                const dataSize = data ? data.length : 0
+                if (dataSize > 0) result.data.push(...data)
+                if (dataSize < 30) break
+            }
+            resolve(result)
+        })
+    }
+
     //搜索: 歌曲
     static searchSongs(keyword, offset, limit, page) {
-        return new Promise((resolve, reject) => {
-            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
-            const reqBody = JSON.stringify(searchParamNew(keyword, 0, offset, limit, page))
-            postJson(url, reqBody).then(json => {
-                const list = json.req_1.data.body.song.list
-                const data = list.map(item => {
+        //const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+        return QQ.doMultiPageSearch({ keyword, type: 0, offset, limit, page },
+            {
+                getList: json => json.req_1.data.body.song,
+                mapItem: item => {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     const album = { id: item.album.mid, name: item.album.name }
                     const duration = item.interval * 1000
@@ -1039,68 +1058,48 @@ export class QQ {
                     track.payPlay = (item.pay.pay_play == 1)
                     track.payDownload = (item.pay.pay_down == 1)
                     return track
-                })
-                const result = { platform: QQ.CODE, offset, limit, page, data }
-                resolve(result)
+                }
             })
-        })
     }
 
     //搜索: 歌单
     static searchPlaylists(keyword, offset, limit, page) {
-        return new Promise((resolve, reject) => {
-            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
-            const reqBody = JSON.stringify(searchParamNew(keyword, 3, offset, limit, page))
-            postJson(url, reqBody).then(json => {
-                const list = json.req_1.data.body.songlist.list
-                const data = list.map(item => {
+        return QQ.doMultiPageSearch({ keyword, type: 3, offset, limit, page },
+            {
+                getList: json => json.req_1.data.body.songlist,
+                mapItem: item => {
                     const playlist = new Playlist(item.dissid, QQ.CODE, item.imgurl, item.dissname)
                     //playlist.about = item.introduction
                     return playlist
-                })
-                const result = { platform: QQ.CODE, offset, limit, page, data }
-                resolve(result)
+                }
             })
-        })
     }
 
     //搜索: 专辑
     static searchAlbums(keyword, offset, limit, page) {
-        return new Promise((resolve, reject) => {
-            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
-            const reqBody = JSON.stringify(searchParamNew(keyword, 2, offset, limit, page))
-            postJson(url, reqBody).then(json => {
-                const list = json.req_1.data.body.album.list
-                const data = list.map(item => {
+        return QQ.doMultiPageSearch({ keyword, type: 2, offset, limit, page },
+            {
+                getList: json => json.req_1.data.body.album,
+                mapItem: item => {
                     const album = new Album(item.albumMID, QQ.CODE, item.albumName, item.albumPic)
                     album.publishTime = item.publicTime
                     return album
-                })
-                const result = { platform: QQ.CODE, offset, limit, page, data }
-                resolve(result)
+                }
             })
-        })
     }
 
     //搜索: 歌手
     static searchArtists(keyword, offset, limit, page) {
-        return new Promise((resolve, reject) => {
-            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
-            const reqBody = JSON.stringify(searchParamNew(keyword, 1, offset, limit, page))
-            postJson(url, reqBody).then(json => {
-                const list = json.req_1.data.body.singer.list
-                const result = { platform: QQ.CODE, offset, limit, page, data: [] }
-                if (list) {
-                    result.data = list.map(item => ({
-                        id: item.singerMID,
-                        platform: QQ.CODE,
-                        title: item.singerName,
-                        cover: item.singerPic
-                    }))
-                }
-                resolve(result)
+        return QQ.doMultiPageSearch({ keyword, type: 1, offset, limit, page },
+            {
+                getList: json => json.req_1.data.body.singer,
+                mapItem: item => ({
+                    id: item.singerMID,
+                    platform: QQ.CODE,
+                    title: item.singerName,
+                    cover: item.singerPic
+                })
             })
-        })
     }
 
     //歌手分类名称映射

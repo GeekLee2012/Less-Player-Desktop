@@ -73,8 +73,8 @@ const searchParam = (keyword, type) => {
     }
 }
 
-const DEFAULT_CATE = new Category("默认")
-DEFAULT_CATE.add("全部", '')
+const DEFAULT_CATE = new Category("推荐")
+DEFAULT_CATE.add("默认", '')
 
 export class NetEase {
     static CODE = 'netease'

@@ -77,13 +77,15 @@ export class KuGou {
                 const menulist = doc.querySelectorAll('.pc_specail_menu')
                     || doc.querySelectorAll('.pc_special_menu')
                 menulist.forEach(menu => {
-                    const cateName = menu.querySelector('h3').textContent
+                    let cateName = menu.querySelector('h3').textContent
+                    if (cateName == '默认') cateName = '推荐'
                     const category = new Category(cateName)
                     const list = menu.querySelectorAll('.pc_specail_menu_content a')
                         || menu.querySelectorAll('.pc_special_menu_content a')
                     list.forEach(item => {
-                        const name = item.textContent
+                        let name = item.textContent
                         const value = item.getAttribute('href').split('&c=')[1].split("'")[0]
+                        if (name == '全部') name = '默认'
                         category.add(name, value)
                     })
                     result.data.push(category)
