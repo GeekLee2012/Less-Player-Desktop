@@ -168,7 +168,8 @@ export class RadioPlayer {
     }
 
     _countAnimationFrame() {
-        this.animationFrameCnt = (this.animationFrameCnt + 1) % 1024
+        const max = this.stateRefreshFrequency || 1024
+        this.animationFrameCnt = (this.animationFrameCnt + 1) % max
     }
 
     isStateRefreshEnabled() {

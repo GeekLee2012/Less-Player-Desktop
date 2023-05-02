@@ -14,6 +14,7 @@ export class Player {
         this.currentTrack = track
         this.sound = null
         this.playState = PLAY_STATE.NONE
+        this.currentTime = 0
         this.retry = 0
         this.webAudioApi = null
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
@@ -94,6 +95,7 @@ export class Player {
             }
         })
         this.tryUnlockHowlAudios()
+        this.currentTime = 0
         this.notifyStateChanged(PLAY_STATE.INIT)
         return this.sound
     }
@@ -168,8 +170,8 @@ export class Player {
         if (!sound) return
         if (!sound.playing() && this.playState != PLAY_STATE.PLAYING) return
         //当前时间
-        const seek = sound.seek() || 0
-        if (this.isStateRefreshEnabled()) EventBus.emit('track-pos', seek)
+        this.currentTime = sound.seek() || 0
+        if (this.isStateRefreshEnabled()) EventBus.emit('track-pos', this.currentTime)
         //声音处理
         try {
             this.resolveSound()
@@ -193,11 +195,15 @@ export class Player {
     }
 
     notifyError(isRetry) {
-        EventBus.emit('track-error', isRetry ? this.currentTrack : null)
+        EventBus.emit('track-error', {
+            retry: isRetry,
+            track: this.currentTrack,
+            currentTime: this.currentTime
+        })
     }
 
-    retryPlay(times) {
-        this.notifyError(this.retry < times)
+    retryPlay(maxRetry) {
+        this.notifyError(this.retry < maxRetry)
         ++this.retry
     }
 
@@ -256,7 +262,8 @@ export class Player {
     }
 
     _countAnimationFrame() {
-        this.animationFrameCnt = (this.animationFrameCnt + 1) % 1024
+        const max = this.stateRefreshFrequency || 1024
+        this.animationFrameCnt = (this.animationFrameCnt + 1) % max
     }
 
     isStateRefreshEnabled() {

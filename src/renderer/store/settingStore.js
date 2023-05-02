@@ -431,10 +431,10 @@ export const useSettingStore = defineStore('setting', {
         allQualities() {
             return QUALITIES
         },
-        resolveFont(value) {
+        resolveFont(value, noWrap) {
             value = (value || '').trim()
-            value = value.replaceAll("'", "").replaceAll('"', '')
-            if (value.includes(" ")) value = '"' + value + '"'
+            value = value.replace(/'/g, '').replace(/"/g, '')
+            if (value.includes(" ") && !noWrap) value = '"' + value + '"'
             return value
         },
         //TODO 算法有问题

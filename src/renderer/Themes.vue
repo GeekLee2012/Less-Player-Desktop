@@ -1,5 +1,5 @@
 <script setup>
-import { inject, onBeforeMount, onMounted, watch } from 'vue';
+import { onMounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import CssReset from './CssReset.vue';
@@ -23,15 +23,22 @@ const setupAppTheme = (themeId) => {
 //直接在setup()时执行，不需要等待其他生命周期
 setupAppTheme(getCurrentThemeId())
 
-
+/*
 const updateFontFamily = (value) => {
   value = value.trim()
   const fontFamily = value.length > 2 ? value : "var(--text-font-family)"
   document.documentElement.style.fontFamily = fontFamily
 }
+*/
+
+const updateFontFamily = (value) => {
+  //const presetFontFamily = document.documentElement.style.getPropertyValue('--text-preset-font-family')
+  const fontFamily = value.trim()
+  document.documentElement.style.setProperty('font-family', fontFamily)
+}
 
 const updateFontWeight = (value) => {
-  document.documentElement.style.fontWeight = value
+  document.documentElement.style.setProperty('font-weight', value)
 }
 
 //设置字体大小

@@ -218,10 +218,11 @@ const addAndPlayTracks = (tracks, needReset, text, traceId) => {
 }
 
 //接收播放器错误通知，重试播放
-const onPlayerErrorRetry = (track) => {
-    if (!track) { //超出最大重试次数
-        playNextTrack()
-    } else {
+const onPlayerErrorRetry = ({ retry, track, currentTime }) => {
+    if (!retry) { //超出最大重试次数
+        handleUnplayableTrack(track)
+    } else if (track) {
+        //TODO 暂时重头开始播放
         EventBus.emit('track-changed', track)
     }
 }

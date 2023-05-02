@@ -2,7 +2,8 @@
 
 <style>
 :root {
-  --text-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
+  --text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
+  --text-font-family: var(--text-preset-font-family);
   font-family: var(--text-font-family);
 
   --scrollbar-width: 6px;

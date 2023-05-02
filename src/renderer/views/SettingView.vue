@@ -54,6 +54,7 @@ const { setThemeIndex,
     allFontSizeLevels,
     setFontSizeLevel,
     setFontSize,
+    resolveFont,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
@@ -365,8 +366,9 @@ onMounted(checkForUpdate)
                     </div>
                     <div class="font" @keydown.stop="">
                         <span>字体名称：</span>
-                        <input type="text" :value="common.fontFamily" placeholder="字体名称，格式请参考CSS - FontFamily"
-                            @keydown.enter="updateFontFamily" @focusout="updateFontFamily" />
+                        <input type="text" :value="resolveFont(common.fontFamily, true)"
+                            placeholder="字体名称，格式请参考CSS - FontFamily" @keydown.enter="updateFontFamily"
+                            @focusout="updateFontFamily" />
                     </div>
                     <div>
                         <span>字体大小：</span>
