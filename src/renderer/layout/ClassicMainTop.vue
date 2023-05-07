@@ -121,7 +121,7 @@ const toggleRadioMode = () => {
 }
 
 .classic-main-top .search-bar .keyword {
-    width: 139px;
+    width: 168px;
 }
 
 .classic-main-top .action {

@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, ref, watch, toRaw, inject } from 'vue';
+import { onActivated, ref, watch, toRaw, inject, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
@@ -12,15 +12,18 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { toMMssSSS } from '../../common/Times';
-import { isMacOS, nextInt, randomTextWithinAlphabet } from '../../common/Utils';
+import { toMillis } from '../../common/Times';
+import { isMacOS, isDevEnv, nextInt, randomTextWithinAlphabet } from '../../common/Utils';
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 
 
 
-const { seekTrack, playPlaylist, playMv, progressState, mmssCurrentTime, currentTimeState } = inject('player')
+const { seekTrack, playPlaylist,
+    playMv, progressState,
+    mmssCurrentTime, currentTimeState,
+    favoritedState, toggleFavoritedState } = inject('player')
 
 const volumeBarRef = ref(null)
 const textColorIndex = ref(0)
@@ -57,42 +60,6 @@ const setSpectrumCanvasShow = () => {
 
 const setTextColorIndex = (value) => {
     textColorIndex.value = value
-}
-
-const { addFavoriteTrack, removeFavoriteSong,
-    isFavoriteSong, addFavoriteRadio,
-    removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
-const favorited = ref(false)
-
-const toggleFavorite = () => {
-    if (playingIndex.value < 0) return
-    favorited.value = !favorited.value
-    const { id, platform } = currentTrack.value
-    const isFMRadioType = Playlist.isFMRadioType(currentTrack.value)
-    let text = "歌曲收藏成功！"
-    if (favorited.value) {
-        if (isFMRadioType) {
-            addFavoriteRadio(currentTrack.value)
-            text = "FM电台收藏成功！"
-        } else {
-            addFavoriteTrack(currentTrack.value)
-        }
-    } else {
-        text = "歌曲已取消收藏！"
-        if (isFMRadioType) {
-            text = "FM电台已取消收藏！"
-            removeFavoriteRadio(id, platform)
-        } else {
-            removeFavoriteSong(id, platform)
-        }
-    }
-    showToast(text)
-}
-
-const checkFavorite = () => {
-    //if(playingIndex.value < 0) return 
-    const { id, platform } = currentTrack.value
-    favorited.value = isFavoriteRadio(id, platform) || isFavoriteSong(id, platform)
 }
 
 /*
@@ -184,7 +151,13 @@ const checkLyricValid = () => {
 }
 
 let lineIndex1 = 0, lineIndex2 = 1
+const NO_LYRIC_TEXTS = ['暂时没有歌词', '请继续欣赏音乐吧']
+const line1Text = ref(NO_LYRIC_TEXTS[0])
+const line2Text = ref(NO_LYRIC_TEXTS[1])
 const hlLineIndex = ref(-1)
+
+const setLine1Text = (value) => line1Text.value = value
+const setLine2Text = (value) => line2Text.value = value
 const setHlLineIndex = (value) => hlLineIndex.value = value
 
 const renderLyric = (secs) => {
@@ -193,14 +166,14 @@ const renderLyric = (secs) => {
         return
     }
     if (!isLyricShow.value) return
-
-    const presetOffset = Track.lyricOffset(currentTrack.value)
-    const userOffset = lyric.value.offset / 1000
-    secs = Math.max(0, (secs + presetOffset + userOffset))
-    const MMssSSS = toMMssSSS(secs * 1000)
     const lyricWrap = document.querySelector(".simple-layout .lyric-ctl")
     if (!lyricWrap) return
 
+    const presetOffset = Track.lyricOffset(currentTrack.value)
+    const userOffset = lyric.value.offset
+    const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
+
+    //TOOD
     const lyricData = Track.lyricData(currentTrack.value)
     const lyricKeys = Array.from(lyricData.keys())
     const lyricValues = Array.from(lyricData.values())
@@ -208,44 +181,48 @@ const renderLyric = (secs) => {
 
     let index = 0
     for (var i = 0; i < lineNums; i++) {
-        const key = lyricKeys[i]
-        if (MMssSSS >= key) {
+        const timeKey = lyricKeys[i]
+        const lineTime = toMillis(timeKey)
+        if (trackTime >= lineTime) {
             index = i
-        } else if (MMssSSS < key) {
+        } else if (trackTime < lineTime) {
             break
         }
     }
-    if (index != lineIndex1 && index != lineIndex2) {
-        lineIndex1 = index
-        lineIndex2 = index + 1
-    }
-    lineIndex1 = Math.min(lineNums - 1, lineIndex1)
-    lineIndex2 = Math.min(lineNums, lineIndex2)
 
-    const line0Text = lyricValues[lineIndex1]
-    const line1Text = lyricValues[lineIndex2]
+    //const isOddNum = (lineNums % 2 != 0)
+    const isOddIndex = (index % 2 != 0)
+    if (index != lineIndex1 && index != lineIndex2) {
+        if (isOddIndex) {
+            lineIndex1 = index
+            lineIndex2 = index + 1
+        } else {
+            lineIndex1 = index - 1
+            lineIndex2 = index
+        }
+    }
+
+    //lineIndex1 = Math.min(lineNums - 1, lineIndex1)
+    //lineIndex2 = Math.min(lineNums, lineIndex2)
 
     //歌词内容
-    const lines = lyricWrap.querySelectorAll('.line')
-    lines[0].innerHTML = line0Text
-    lines[1].innerHTML = line1Text || '&nbsp;'
+    setLine1Text(lyricValues[lineIndex1])
+    setLine2Text(lyricValues[lineIndex2] || '&nbsp;')
 
+    nextTick(setupLyricLines)
     //高亮行
     if (index == lineIndex1) setHlLineIndex(0)
     else if (index == lineIndex2) setHlLineIndex(1)
-    setupLyricLines()
 }
 
 const resetLyric = () => {
     lineIndex1 = 0
     lineIndex2 = 1
+    nextTick(setupLyricLines)
     setHlLineIndex(-1)
     //默认歌词内容
-    const lines = document.querySelectorAll('.simple-layout .lyric-ctl .line')
-    if (lines) {
-        lines[0].innerHTML = '暂时没有歌词'
-        lines[1].innerHTML = '请继续欣赏音乐吧'
-    }
+    setLine1Text(NO_LYRIC_TEXTS[0])
+    setLine2Text(NO_LYRIC_TEXTS[1])
 }
 
 const setupLyricLines = () => {
@@ -260,8 +237,7 @@ const setupLyricLines = () => {
         el.style.lineHeight = lineHeight + "px"
         //if(index > 0) el.style.marginTop = lineSpacing + "px"
 
-        const classAttr = el.getAttribute('class')
-        if (classAttr.includes('current')) { //高亮行
+        if (el.classList.contains('current-line')) { //高亮行
             el.style.fontSize = hlFontSize + "px"
             el.style.fontWeight = 'bold'
         } else { //普通行
@@ -471,7 +447,7 @@ const pickPlaylist = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
-        console.log(`获取歌单失败：${platform} - ${cateName}, TraceId: ${traceId}`)
+        //if (isDevEnv) console.log(`获取歌单失败：${platform} - ${cateName}, TraceId: ${traceId}`)
         showCurrentTracFailToast(traceId)
         return
     }
@@ -485,7 +461,7 @@ const pickPlaylist = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.square(cate, offset, limit, page, order)
-        console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+        //if (isDevEnv) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -597,7 +573,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
-        console.log(`获取主播电台失败：${platform} - ${cateName}`)
+        //if (isDevEnv) console.log(`获取主播电台失败：${platform} - ${cateName}`)
         showCurrentTracFailToast(traceId)
         return
     }
@@ -612,7 +588,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.radioSquare(cate, offset, limit, page, order)
-        console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+        //if (isDevEnv) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -735,7 +711,7 @@ const pickFMRadio = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.radioSquare(cate, offset, limit, page, order)
-        console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+        //if (isDevEnv) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -782,7 +758,6 @@ EventBus.on('lyric-alignment', setupLyricAlignment)
 onActivated(() => {
     setupTextColor()
     updatePlatformShortName()
-    checkFavorite()
 
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
@@ -801,7 +776,6 @@ watch(currentTimeState, (nv, ov) => {
 watch(currentTrack, (nv, ov) => {
     if (!nv) return
     updatePlatformShortName()
-    checkFavorite()
     resetLyric()
     checkLyricValid()
 })
@@ -917,8 +891,8 @@ watch([textColorIndex], setupTextColor)
             </div>
             <div class="action" v-show="!isLyricShow">
                 <div class="btm-left">
-                    <div @click="toggleFavorite">
-                        <svg v-show="!favorited" width="18" height="19" viewBox="0 0 1024 937.46"
+                    <div @click="toggleFavoritedState">
+                        <svg v-show="!favoritedState" width="18" height="19" viewBox="0 0 1024 937.46"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -927,7 +901,7 @@ watch([textColorIndex], setupTextColor)
                                 </g>
                             </g>
                         </svg>
-                        <svg v-show="favorited" class="love-btn" width="18" height="19" viewBox="0 0 1024 937.53"
+                        <svg v-show="favoritedState" class="love-btn" width="18" height="19" viewBox="0 0 1024 937.53"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -979,8 +953,8 @@ watch([textColorIndex], setupTextColor)
                 </div>
             </div>
             <div class="lyric-ctl" v-show="isLyricShow">
-                <div class="line" :class="{ current: (hlLineIndex == 0) }">暂时没有歌词</div>
-                <div class="line v-spacing" :class="{ current: (hlLineIndex == 1) }">请继续欣赏音乐吧</div>
+                <div class="line" :class="{ 'current-line': (hlLineIndex == 0) }" v-html="line1Text"></div>
+                <div class="line v-spacing" :class="{ 'current-line': (hlLineIndex == 1) }" v-html="line2Text"></div>
             </div>
         </div>
         <Popovers></Popovers>
@@ -1369,7 +1343,7 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout>.bottom .lyric-ctl .line {
-    font-size: 18px;
+    font-size: 22px;
     line-height: 30px;
 
     overflow: hidden;
@@ -1381,7 +1355,7 @@ watch([textColorIndex], setupTextColor)
     width: 100%;
 }
 
-.simple-layout>.bottom .lyric-ctl .current {
+.simple-layout>.bottom .lyric-ctl .current-line {
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;

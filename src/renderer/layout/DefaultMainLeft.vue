@@ -422,7 +422,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     cursor: pointer;
     padding: 3px 6px;
     /*font-size: 19px;*/
-    font-size: var(--text-main4-title-size);
+    font-size: var(--text-main3-title-size);
     font-weight: bold;
     color: var(--text-sub-color);
     margin-right: 23%;

@@ -9,7 +9,7 @@ const ipcRenderer = useIpcRenderer()
 const PRESET_THEMES = [{
     id: 'dark',
     name: '默认1',
-    color: '#313131',
+    color: '#555',
     hlColor: '#28c83f',
     dark: true
 }, {

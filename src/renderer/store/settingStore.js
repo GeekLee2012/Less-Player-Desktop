@@ -85,7 +85,7 @@ export const useSettingStore = defineStore('setting', {
             playbackQueueAutoPositionOnShow: false,
             listenNumShow: false,
             //播放歌曲时，防止系统睡眠
-            playingWithoutSleeping: false,
+            playingWithoutSleeping: true,
             //歌曲进度更新频度，默认为60，范围：1 - 1024
             stateRefreshFrequency: 60,
             //歌曲频谱刷新频度，默认为3，范围：1 - 256
@@ -101,7 +101,8 @@ export const useSettingStore = defineStore('setting', {
             offset: 0, //时间补偿值，快慢
             metaPos: 0, //歌曲信息, 0:默认, 1:隐藏, 2:顶部
             alignment: 0, //对齐方式, 0:左, 1:中, 2:右
-            trans: true //翻译
+            trans: true, //翻译
+            roma: true //发音
         },
         /* 缓存 */
         cache: {
@@ -245,6 +246,9 @@ export const useSettingStore = defineStore('setting', {
         },
         lyricTransActived() {
             return this.lyric.trans
+        },
+        lyricRomaActived() {
+            return this.lyric.roma
         },
         isHttpProxyEnable() {
             return this.network.httpProxy.enable
@@ -550,6 +554,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleLyricTrans() {
             this.lyric.trans = !this.lyric.trans
+        },
+        toggleLyricRoma() {
+            this.lyric.roma = !this.lyric.roma
         },
         toggleHttpProxy() {
             this.network.httpProxy.enable = !this.network.httpProxy.enable

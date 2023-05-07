@@ -100,40 +100,48 @@ export const base64Decode = (text) => {
     return text ? CryptoJS.enc.Base64.parse(text).toString(CryptoJS.enc.Utf8) : null
 }
 
+export const hexDecode = (text) => {
+    return text ? CryptoJS.enc.Hex.parse(text).toString() : null
+}
+
 export const md5 = (text) => {
     return text ? CryptoJS.MD5(text).toString() : null
 }
 
-export const hmacMd5 = (text) => {
-    return text ? CryptoJS.HmacMD5(text).toString() : null
+export const hmacMd5 = (text, key) => {
+    return text ? CryptoJS.HmacMD5(text, key).toString() : null
 }
 
 //参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
 const easeInOutQuad = (currentTime, startValue, changeValue, duration) => {
-    currentTime /= duration / 2;
-    if (currentTime < 1) return changeValue / 2 * currentTime * currentTime + startValue;
-    currentTime--;
-    return -changeValue / 2 * (currentTime * (currentTime - 2) - 1) + startValue;
+    currentTime /= duration / 2
+    if (currentTime < 1) return changeValue / 2 * currentTime * currentTime + startValue
+    currentTime--
+    return -changeValue / 2 * (currentTime * (currentTime - 2) - 1) + startValue
 }
 
-//TODO 平滑滚动，算法基本可行，但感觉有点呆！暂时先这样吧
-export const smoothScroll = (target, destScrollTop, duration, step) => {
-    if (!target) return
+//TODO 平滑算法，基本可行，但感觉有点呆！暂时先这样吧
+export const smoothAnimation = (target, animationAlgoFn, start, dest, duration, step, updateAction) => {
+    if (!target || !animationAlgoFn || !updateAction) return
     step = step || 6
-    const startScrollTop = target.scrollTop
-    const distance = destScrollTop - startScrollTop
+    const distance = dest - start
 
-    let current = 0, scrollAnimationFrameId = null
-    const easeInOutScroll = () => {
+    let current = 0, animationFrameId = 0
+    const updateAnimation = () => {
         if (current >= duration) {
-            cancelAnimationFrame(scrollAnimationFrameId)
+            cancelAnimationFrame(animationFrameId)
             return
         }
-        const calcScrollTop = easeInOutQuad(current, startScrollTop, distance, duration)
-        if (target) target.scrollTop = calcScrollTop
+        const updateValue = animationAlgoFn(current, start, distance, duration)
+        if (target) updateAction(updateValue)
         current += step
-        cancelAnimationFrame(scrollAnimationFrameId)
-        scrollAnimationFrameId = requestAnimationFrame(easeInOutScroll)
+        cancelAnimationFrame(animationFrameId)
+        animationFrameId = requestAnimationFrame(updateAnimation)
     }
-    easeInOutScroll()
+    updateAnimation()
+}
+
+//平滑滚动
+export const smoothScroll = (target, dest, duration, step) => {
+    smoothAnimation(target, easeInOutQuad, target.scrollTop, dest, duration, step, (value => target.scrollTop = value))
 }

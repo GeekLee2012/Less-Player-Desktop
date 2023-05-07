@@ -345,7 +345,7 @@ onMounted(checkForUpdate)
             <div class="common row">
                 <span class="cate-name">通用</span>
                 <div class="content">
-                    <div class="tip-text">提示：当前应用，所有输入框，Enter键生效或焦点离开后自动生效</div>
+                    <div class="tip-text">提示：当前应用，所有输入框，按Enter键生效，或光标焦点离开后自动生效</div>
                     <div class="window-zoom">
                         <div class="zoom-title">窗口缩放 (%)：
                             <input type="number" min="50" max="300" step="0.01" :value="common.winZoom"
@@ -442,7 +442,10 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                         <div class="tip-text spacing">提示：不会影响系统熄屏、锁屏</div>
                     </div>
-                    <div class="tip-text">提示：当前应用，更新频度指每多少个动画帧更新一次；频度越小，动画越流畅，CPU占用越高</div>
+                    <div class="tip-text">提示：当前应用，更新频度是指每多少个动画帧更新一次；
+                        频度越小，动画越流畅，而CPU占用越高；
+                        歌曲进度更新频度，一般与屏幕刷新率保持一致
+                    </div>
                     <div>
                         <span class="cate-subtitle">歌曲（歌词）进度更新频度：</span>
                         <input type="number" :value="track.stateRefreshFrequency" placeholder="屏幕刷新率，范围1-1024，默认60" min="1"
@@ -812,7 +815,7 @@ onMounted(checkForUpdate)
 #setting-view .title {
     margin-left: 35px;
     margin-right: 35px;
-    padding-top: 25px;
+    padding-top: 20px;
     /*font-size: 30px;*/
     font-size: var(--text-main-title-size);
     font-weight: bold;
@@ -965,7 +968,7 @@ onMounted(checkForUpdate)
     border: 1px solid var(--input-border-color);
     background-color: var(--input-bg);
     margin-left: 15px;
-    color: var(--text-color);
+    color: var(--input-text-color);
     /*text-align: center;
     min-width: 66px; */
 }
@@ -1122,6 +1125,7 @@ onMounted(checkForUpdate)
     margin-left: 10px;
     min-width: 258px;
     color: var(--text-color);
+    color: var(--input-text-color);
 }
 
 #setting-view .network input {

@@ -48,6 +48,8 @@
    
 ### For开发者  
 * 请先下载安装最新版（或最新LTS版本） Nodejs  
+
+* 如有问题，建议先查看文档：[FAQ.md](FAQ.md) 
   
 * 安装依赖  
   `npm install`

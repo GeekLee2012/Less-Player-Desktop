@@ -345,7 +345,7 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile-view {
     display: flex;
     flex-direction: column;
-    padding: 25px 33px 15px 33px;
+    padding: 20px 33px 15px 33px;
     flex: 1;
     overflow: scroll;
     overflow-x: hidden;
@@ -400,7 +400,7 @@ EventBus.on("userHome-refresh", refresh)
     text-align: left;
     margin-bottom: 39px;
     line-height: var(--text-line-height);
-    /* font-size: 15px; */
+    font-size: var(--text-sub-size);
     color: var(--text-sub-color);
     overflow: hidden;
     word-wrap: break-all;
@@ -435,15 +435,15 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile-view .tab-nav {
     position: relative;
     display: flex;
-    height: 30px;
+    height: 36px;
     margin-bottom: 5px;
     border-bottom: 1px solid var(--border-color);
 }
 
 #user-profile-view .tab {
     font-size: var(--tab-title-text-size);
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
     margin-right: 15px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
@@ -469,8 +469,8 @@ EventBus.on("userHome-refresh", refresh)
     position: relative;
     display: flex;
     height: 20px;
-    margin-top: 15px;
-    margin-bottom: 3px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 #user-profile-view .sub-tab {

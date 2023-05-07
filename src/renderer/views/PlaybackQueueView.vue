@@ -163,7 +163,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     margin-top: 8px;
     margin-left: 3px;
     text-align: left;
-    font-size: var(--text-sub-size);
+    font-size: var(--tip-text-size);
     display: flex;
 }
 
@@ -180,7 +180,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
 
 .playback-queue-view .text-btn {
     text-align: left;
-    font-size: var(--text-sub-size);
+    font-size: var(--tip-text-size);
     display: flex;
     align-items: center;
     justify-items: center;

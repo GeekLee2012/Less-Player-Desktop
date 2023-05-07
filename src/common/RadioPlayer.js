@@ -28,7 +28,7 @@ export class RadioPlayer {
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = RadioPlayer.get()
-        return player.on('radio-init', node => player.createWebAudioApi(node))
+        return player.on('radio-init', node => player._createWebAudioApi(node))
             .on('radio-channelChange', channel => player.setChannel(channel))
             .on('radio-play', channel => player.playChannel(channel))
             .on('radio-togglePlay', () => player.togglePlay())
@@ -84,7 +84,7 @@ export class RadioPlayer {
 
     setState(state) {
         this.playing = state
-        EventBus.emit('radio-state', state)
+        this.notify('radio-state', state)
     }
 
     setChannel(channel) {
@@ -111,8 +111,8 @@ export class RadioPlayer {
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
         const currentSecs = currentTime / 1000
-        if (this.isStateRefreshEnabled()) EventBus.emit('track-pos', currentSecs)
-        this.resolveSound()
+        if (this.isStateRefreshEnabled()) this.notify('track-pos', currentSecs)
+        this._resolveSound()
         this._countAnimationFrame()
         requestAnimationFrame(this.__step.bind(this))
     }
@@ -122,20 +122,26 @@ export class RadioPlayer {
         return this
     }
 
-    createWebAudioApi(node) {
+    notify(event, args) {
+        EventBus.emit(event, args)
+        return this
+    }
+
+    _createWebAudioApi(node) {
         if (!node) return
         audioNode = node
         if (this.webAudioApi) return
         this.webAudioApi = WebAudioApi.create(new AudioContext(), audioNode)
     }
 
-    resolveSound() {
+    _resolveSound() {
         if (!this.webAudioApi) return
-        this.resolvePendingSoundEffect()
+        this._resolvePendingSoundEffect()
         const analyser = this.webAudioApi.getAnalyser()
+        if (!analyser) return
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
-        if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-spectrumData', freqData)
+        if (this.isSpectrumRefreshEnabled()) this.notify('track-spectrumData', freqData)
     }
 
     updateEQ(values) {
@@ -158,7 +164,7 @@ export class RadioPlayer {
         }
     }
 
-    resolvePendingSoundEffect() {
+    _resolvePendingSoundEffect() {
         if (!this.pendingSoundEffect) return
         if (this.pendingSoundEffectType === 1) {
             this.updateIR(this.pendingSoundEffect)

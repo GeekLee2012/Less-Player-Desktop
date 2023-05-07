@@ -4,7 +4,7 @@ import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
-import { base64Encode, base64Decode } from "../common/Utils";
+import { base64Encode, base64Decode, hexDecode } from "../common/Utils";
 
 
 
@@ -106,22 +106,6 @@ const vkeyReqBody = (trackInfo, type) => {
         platform: 'yqq.json',
         needNewCode: 0,
         data: JSON.stringify(vkeyReqData(trackInfo, type))
-    }
-}
-
-const lyricReqBody = (id) => {
-    return {
-        songmid: id,
-        pcachetime: Date.now(),
-        g_tk: 5381,
-        loginUin: 0,
-        hostUin: 0,
-        format: 'json',
-        inCharset: 'utf8',
-        outCharset: 'utf8',
-        notice: 0,
-        platform: 'yqq',
-        needNewCode: 0
     }
 }
 
@@ -828,14 +812,26 @@ export class QQ {
 
     //歌词
     static lyric(id, track) {
+        if (id) return QQ.lyricExt(id, track)
         return new Promise((resolve, reject) => {
             const result = { id, platform: QQ.CODE, lyric: null, trans: null }
 
             const url = "http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg"
-            const reqBody = lyricReqBody(id)
+            const reqBody = {
+                songmid: id,
+                pcachetime: Date.now(),
+                g_tk: 5381,
+                loginUin: 0,
+                hostUin: 0,
+                format: 'json',
+                inCharset: 'utf8',
+                outCharset: 'utf8',
+                notice: 0,
+                platform: 'yqq',
+                needNewCode: 0
+            }
             getJson(url, reqBody).then(json => {
-                const lyric = json.lyric
-                const trans = json.trans
+                const { lyric, trans } = json
                 //lyric = escapeHtml(lyric)
                 Object.assign(result, { lyric: Lyric.parseFromText(base64Decode(lyric)) })
                 if (trans) {
@@ -846,17 +842,18 @@ export class QQ {
         })
     }
 
-    //TODO 暂时不需要启用新版歌词
+    //新版歌词 - 翻译、罗马发音等
     static lyricExt(id, track) {
         return new Promise((resolve, reject) => {
             const url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = lyricExtReqBody(id, track)
             const result = { id, platform: QQ.CODE, lyric: null, trans: null }
             getJson(url, reqBody).then(json => {
-                const lyric = json.req_1.data.lyric
-                const trans = json.req_1.data.trans
-
+                const { lyric, roma, trans } = json.req_1.data
                 Object.assign(result, { lyric: Lyric.parseFromText(base64Decode(lyric)) })
+                if (roma) { //TODO
+                    Object.assign(result, { roma: Lyric.parseFromText(hexDecode(roma)) })
+                }
                 if (trans) {
                     Object.assign(result, { trans: Lyric.parseFromText(base64Decode(trans)) })
                 }

@@ -91,9 +91,9 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
                 <div class="cate-title">{{ cate.name }}</div>
                 <div class="cate-item-wrap">
                     <div v-for="(item, col) in cate.data" class="fl-item" :class="{
-                            current: (row == currentCategoryItem.row
-                                && col == currentCategoryItem.col)
-                        }" @click="visitCateItem(item, row, col)" v-html="item.key">
+                        current: (row == currentCategoryItem.row
+                            && col == currentCategoryItem.col)
+                    }" @click="visitCateItem(item, row, col)" v-html="item.key">
                     </div>
                 </div>
             </div>
@@ -124,9 +124,11 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     border-bottom: var(--category-view-border);
 }
 
+/*
 .playlist-category-view .header .cate-title {
-    margin-right: 1px;
+   margin-right: 1px;
 }
+*/
 
 .playlist-category-view .header .fl-item,
 .playlist-category-view .header .fl-item:hover {
@@ -162,7 +164,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 }
 
 .playlist-category-view .cate-title {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
     /*
     background: linear-gradient(to top right, #28c83f, #1ca388);
@@ -170,13 +172,14 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     color: transparent;
     */
     color: var(--text-sub-color);
-    min-width: 36px;
+    min-width: 39px;
     margin-top: 15px;
     margin-right: 20px;
 }
 
 .playlist-category-view .header .cate-title {
     /*font-size: 21px;*/
+    margin-bottom: 3px;
     font-size: var(--text-main3-title-size);
 }
 
@@ -189,6 +192,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     cursor: pointer;
     color: var(--text-color);
     border-radius: 10rem;
+    font-size: var(--text-sub-size);
 }
 
 .playlist-category-view .fl-item:hover {

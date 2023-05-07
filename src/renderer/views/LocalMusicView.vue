@@ -97,7 +97,7 @@ onMounted(resetBack2TopBtn)
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 28px 33px 10px 33px;
+    padding: 20px 33px 10px 33px;
     overflow: scroll;
     overflow-x: hidden;
 }

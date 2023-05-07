@@ -67,6 +67,7 @@ const getListenNumText = (item) => {
 
 <style scoped>
 .playlists-ctl {
-    margin-top: 15px;
+    /* margin-top: 15px; */
+    margin-top: 5px;
 }
 </style>

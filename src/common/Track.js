@@ -28,6 +28,7 @@ export class Track {
         this.url = toTrimString(url)
         this.lyric = new Lyric()
         this.lyricTrans = null
+        this.lyricRoma = null
         this.type = type || 0 //与 Playlist中的type一致
         this.pid = toTrimString(pid) //playlistId
         //额外信息，当内容存在时显示，同时分别隐藏 artist、album
@@ -144,6 +145,14 @@ export class Track {
 
     static lyricTransData(track) {
         return track && track.lyricTrans ? track.lyricTrans.data : null
+    }
+
+    static hasLyricRoma(track) {
+        return track && track.lyricRoma && Lyric.hasData(track.lyricRoma)
+    }
+
+    static lyricRomaData(track) {
+        return track && track.lyricRoma ? track.lyricRoma.data : null
     }
 
     /*

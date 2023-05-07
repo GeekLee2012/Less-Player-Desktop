@@ -127,7 +127,7 @@ onMounted(() => loadCustomPlaylist())
 #custom-playlist-edit-view {
     display: flex;
     flex-direction: column;
-    padding: 25px 33px 15px 33px;
+    padding: 20px 33px 15px 33px;
     flex: 1;
     overflow: scroll;
 }
@@ -178,7 +178,7 @@ onMounted(() => loadCustomPlaylist())
 }
 
 #custom-playlist-edit-view .center .form-row {
-    margin-bottom: 18px;
+    margin-bottom: 17px;
 }
 
 #custom-playlist-edit-view .center .form-row div {
@@ -211,7 +211,7 @@ onMounted(() => loadCustomPlaylist())
 }
 
 #custom-playlist-edit-view .center .form-row textarea {
-    height: 300px;
+    height: 280px;
     padding: 8px;
 }
 

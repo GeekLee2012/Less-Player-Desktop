@@ -97,9 +97,9 @@ EventBus.on('playlistCategory-update', () => {
             </svg>
             <template v-for="item in getFlatData()" v-show="data.length > 0">
                 <span @click="visitCateItem(item, item.row, item.col)" :class="{
-                        active: (item.row == currentCategoryItem.row
-                            && item.col == currentCategoryItem.col)
-                    }" v-html="item.key" :data="item.value">
+                    active: (item.row == currentCategoryItem.row
+                        && item.col == currentCategoryItem.col)
+                }" v-html="item.key" :data="item.value">
                 </span>
             </template>
         </div>

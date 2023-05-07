@@ -346,7 +346,7 @@ watch(sources, () => {
 
 <style>
 #data-backup-view {
-    padding: 25px 0px 15px 0px;
+    padding: 20px 0px 15px 0px;
     flex: 1;
     display: flex;
     flex-direction: column;

@@ -4,67 +4,24 @@ import { storeToRefs } from 'pinia';
 import PlayMeta from '../components/PlayMeta.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
-import { useUserProfileStore } from '../store/userProfileStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
-import EventBus from '../../common/EventBus';
-import { Playlist } from '../../common/Playlist';
 
 
 
-const { seekTrack, progressState } = inject('player')
+const { seekTrack, progressState,
+    favoritedState, toggleFavoritedState } = inject('player')
 
 const volumeBarRef = ref(null)
 
-const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
+const { volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
-const { playingViewShow, } = storeToRefs(useAppCommonStore())
-const { showToast, toggleSoundEffectView } = useAppCommonStore()
+const { toggleSoundEffectView } = useAppCommonStore()
 
-
-const { addFavoriteTrack, removeFavoriteSong,
-    isFavoriteSong, addFavoriteRadio,
-    removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
-const favorited = ref(false)
-const toggleFavorite = () => {
-    if (playingIndex.value < 0) return
-    favorited.value = !favorited.value
-    const { id, platform } = currentTrack.value
-    const isFMRadioType = Playlist.isFMRadioType(currentTrack.value)
-    let text = "歌曲收藏成功！"
-    if (favorited.value) {
-        if (isFMRadioType) {
-            addFavoriteRadio(currentTrack.value)
-            text = "FM电台收藏成功！"
-        } else {
-            addFavoriteTrack(currentTrack.value)
-        }
-    } else {
-        text = "歌曲已取消收藏！"
-        if (isFMRadioType) {
-            text = "FM电台已取消收藏！"
-            removeFavoriteRadio(id, platform)
-        } else {
-            removeFavoriteSong(id, platform)
-        }
-    }
-    showToast(text)
-}
-
-const checkFavorite = () => {
-    //if(playingIndex.value < 0) return 
-    const { id, platform } = currentTrack.value
-    favorited.value = isFavoriteRadio(id, platform) || isFavoriteSong(id, platform)
-}
-
-EventBus.on("userProfile-reset", checkFavorite)
-EventBus.on("refreshFavorite", checkFavorite)
 
 onMounted(() => {
     //setDisactived(false)
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
-
-watch([currentTrack, playingViewShow], checkFavorite)
 </script>
 
 <template>
@@ -80,8 +37,8 @@ watch([currentTrack, playingViewShow], checkFavorite)
                 <div class="volume-wrap">
                     <VolumeBar ref="volumeBarRef"></VolumeBar>
                 </div>
-                <div class="spacing" @click="toggleFavorite">
-                    <svg v-show="!favorited" width="18" height="17" viewBox="0 0 1024 937.46"
+                <div class="spacing" @click="toggleFavoritedState">
+                    <svg v-show="!favoritedState" width="18" height="17" viewBox="0 0 1024 937.46"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -90,7 +47,7 @@ watch([currentTrack, playingViewShow], checkFavorite)
                             </g>
                         </g>
                     </svg>
-                    <svg v-show="favorited" class="love-btn" width="18" height="17" viewBox="0 0 1024 937.53"
+                    <svg v-show="favoritedState" class="love-btn" width="18" height="17" viewBox="0 0 1024 937.53"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">

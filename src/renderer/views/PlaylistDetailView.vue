@@ -224,7 +224,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 28px 33px 10px 33px;
+    padding: 20px 33px 10px 33px;
     overflow: scroll;
     overflow-x: hidden;
 }
@@ -266,6 +266,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     height: 139px;
     /*line-height: 23px;*/
     line-height: var(--text-line-height);
+    font-size: var(--text-sub-size);
     color: var(--text-sub-color);
     /* font-size: 15px; */
     overflow: hidden;
@@ -275,7 +276,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 6;
+    -webkit-line-clamp: 5;
 }
 
 #playlist-detail-view .header .cover {

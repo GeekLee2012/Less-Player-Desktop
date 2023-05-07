@@ -42,7 +42,7 @@ const handleRightClick = (event) => {
     flex-direction: row;
     align-items: center;
     border-radius: 10rem;
-    height: 32px;
+    height: 36px;
     color: var(--svg-text-color);
 }
 

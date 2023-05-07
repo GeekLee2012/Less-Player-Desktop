@@ -1,5 +1,5 @@
 <script setup>
-import { inject, provide, onMounted, watch, ref, nextTick } from 'vue';
+import { inject, provide, onMounted, watch, ref, nextTick, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -18,7 +18,7 @@ import { Lyric } from '../common/Lyric';
 
 const ipcRenderer = useIpcRenderer()
 
-const { currentTrack, queueTracksSize } = storeToRefs(usePlayStore())
+const { currentTrack, queueTracksSize, playingIndex } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack,
     setAutoPlaying, playPrevTrack,
     togglePlay, switchPlayMode,
@@ -34,11 +34,15 @@ const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId } = useAppCommonStore()
 const { addRecentSong, addRecentRadio,
-    addRecentPlaylist, addRecentAlbum } = useUserProfileStore()
+    addRecentPlaylist, addRecentAlbum,
+    addFavoriteTrack, removeFavoriteSong,
+    isFavoriteSong, addFavoriteRadio,
+    removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
     theme, layout, isStoreRecentPlay, isSimpleLayout } = storeToRefs(useSettingStore())
 const { getCurrentThemeHlColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency } = useSettingStore()
+
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
 
@@ -104,8 +108,9 @@ const loadLyric = (track) => {
     })
 }
 
-const updateLyric = (track, { lyric, trans }) => {
+const updateLyric = (track, { lyric, roma, trans }) => {
     if (track || Lyric.hasData(lyric)) Object.assign(track, { lyric })
+    if (track || Lyric.hasData(roma)) Object.assign(track, { lyricRoma: roma })
     if (track || Lyric.hasData(trans)) Object.assign(track, { lyricTrans: trans })
     EventBus.emit('track-lyricLoaded', track)
 }
@@ -496,6 +501,7 @@ EventBus.on('track-state', state => {
     switch (state) {
         case PLAY_STATE.INIT:
             resetPlayState(true)
+            checkFavoritedState()
             break
         case PLAY_STATE.PLAYING:
             setPlaying(true)
@@ -591,6 +597,53 @@ const restoreTrack = () => {
     })
 }
 
+//歌曲收藏
+const favoritedState = ref(false)
+const setFavoritedState = (value) => favoritedState.value = value
+
+const toggleFavoritedState = () => {
+    if (playingIndex.value < 0) {
+        setFavoritedState(false)
+        return
+    }
+    setFavoritedState(!favoritedState.value)
+    const track = currentTrack.value
+    const { id, platform } = track
+    const isFMRadioType = Playlist.isFMRadioType(track)
+    let text = "歌曲收藏成功！"
+    if (favoritedState.value) {
+        if (isFMRadioType) {
+            addFavoriteRadio(track)
+            text = "FM电台收藏成功！"
+        } else {
+            addFavoriteTrack(track)
+        }
+    } else {
+        text = "歌曲已取消收藏！"
+        if (isFMRadioType) {
+            text = "FM电台已取消收藏！"
+            removeFavoriteRadio(id, platform)
+        } else {
+            removeFavoriteSong(id, platform)
+        }
+    }
+    showToast(text)
+}
+
+const checkFavoritedState = () => {
+    const track = currentTrack.value
+    if (!track) {
+        setFavoritedState(false)
+        return
+    }
+    const { id, platform } = track
+    const favorited = isFavoriteSong(id, platform) || isFavoriteRadio(id, platform)
+    setFavoritedState(favorited)
+}
+//TODO 
+EventBus.on("userProfile-reset", checkFavoritedState)
+EventBus.on("track-refreshFavoritedState", checkFavoritedState)
+
 //注册ipcRenderer消息监听器
 const registryIpcRendererListeners = () => {
     if (!ipcRenderer) return
@@ -676,6 +729,8 @@ provide('player', {
     currentTimeState,
     progressState,
     playState,
+    favoritedState,
+    toggleFavoritedState,
 })
 </script>
 

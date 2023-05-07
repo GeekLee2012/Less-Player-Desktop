@@ -63,11 +63,6 @@ const playItemLater = () => {
     toastAndHideMenu("下一曲将为您播放！")
 }
 
-//TODO
-const refreshFavorite = () => {
-    EventBus.emit("refreshFavorite")
-}
-
 const addFavoriteItem = () => {
     const track = commonCtxMenuCacheItem.value
     let text = "歌曲收藏成功！"
@@ -78,7 +73,6 @@ const addFavoriteItem = () => {
         addFavoriteTrack(track)
     }
     toastAndHideMenu(text)
-    refreshFavorite()
 }
 
 //TODO
@@ -466,13 +460,14 @@ EventBus.on("commonCtxMenu-init", dataType => {
 }
 
 .common-ctx-menu .menuItem {
-    width: 139px;
+    width: 168px;
     display: flex;
     flex-direction: row;
     align-items: center;
     /* font-size: 14px; */
+    font-size: var(--text-sub-size);
     padding: 9px 20px;
-    height: 20px;
+    height: 23px;
 }
 
 .common-ctx-menu .menuItem:hover {

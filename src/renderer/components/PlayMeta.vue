@@ -138,7 +138,8 @@ onMounted(() => {
 }
 
 .play-meta .audio-title {
-    font-size: 14;
+    /*font-size: 14;*/
+    font-size: var(--text-sub-size);
     text-align: left;
 
     vertical-align: bottom;

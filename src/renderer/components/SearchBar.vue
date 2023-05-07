@@ -2,6 +2,10 @@
 import { inject, ref } from 'vue';
 
 
+const props = defineProps({
+    miniMode: Boolean
+})
+
 
 const { visitSearch } = inject('appRoute')
 
@@ -26,9 +30,10 @@ const clear = () => {
 </script>
 
 <template>
-    <div class="search-bar" @keydown.enter="visitSearchView" @keydown.stop="">
+    <div class="search-bar" :class="{ 'mini-search-bar': miniMode }" @keydown.enter="visitSearchView" @keydown.stop="">
         <div class="search-btn" @click="visitSearchView">
-            <svg width="15" height="15" viewBox="0 0 726.24 726.5" xmlns="http://www.w3.org/2000/svg">
+            <svg :width="miniMode ? 20 : 15" :height="miniMode ? 20 : 15" viewBox="0 0 726.24 726.5"
+                xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path
@@ -52,7 +57,7 @@ const clear = () => {
 <style scoped>
 .search-bar {
     display: flex;
-    height: 28px;
+    height: 32px;
     -webkit-app-region: none;
 }
 
@@ -60,7 +65,7 @@ const clear = () => {
 .search-bar .keyword,
 .search-bar .clear-btn {
     border: 1px solid var(--searchbar-border-color);
-    height: 28px;
+    height: 32px;
 }
 
 .search-bar .search-btn {
@@ -84,7 +89,7 @@ const clear = () => {
     margin-left: 3px;
     */
     margin-top: 1px;
-    margin-left: 3px;
+    margin-left: 5px;
     fill: var(--search-btn-svg-color);
 }
 
@@ -97,7 +102,7 @@ const clear = () => {
     padding-left: 5px;
     padding-right: 6px;
     outline: 0;
-    width: 115px;
+    width: 123px;
     border-left: 0px;
     border-right: 0px;
     background: var(--searchbar-bg);
@@ -106,14 +111,14 @@ const clear = () => {
 
 .search-bar .clear-btn {
     border-radius: 0 10rem 10rem 0;
-    width: 18px;
+    width: 22px;
     border-left: 0px;
     background: var(--searchbar-bg);
 }
 
 .search-bar .clear-btn svg {
-    margin-top: 9.5px;
-    margin-right: 5px;
+    margin-top: 11.25px;
+    margin-right: 6px;
     fill: #666;
     visibility: visible;
     cursor: pointer;
@@ -124,4 +129,18 @@ const clear = () => {
     color: var(--searchbar-placeholder-color);
 }
 */
+
+.mini-search-bar {
+    width: 32px;
+}
+
+.mini-search-bar .keyword {
+    display: none;
+}
+
+.mini-search-bar .search-btn,
+.mini-search-bar .keyword,
+.mini-search-bar .clear-btn {
+    border: 1px solid transparent;
+}
 </style>

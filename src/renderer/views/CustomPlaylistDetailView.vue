@@ -196,7 +196,7 @@ onUpdated(() => {
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 28px 33px 10px 33px;
+    padding: 20px 33px 10px 33px;
     overflow: scroll;
     overflow-x: hidden;
 }

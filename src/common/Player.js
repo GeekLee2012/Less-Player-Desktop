@@ -51,12 +51,12 @@ export class Player {
         //.on('track-resetAnimFrameCnt', () => player.animationFrameCnt = 0)
     }
 
-    isTrackAvailable() {
+    _isTrackAvailable() {
         return Track.hasUrl(this.currentTrack)
     }
 
     createSound() {
-        if (!this.isTrackAvailable()) return null
+        if (!this._isTrackAvailable()) return null
         var self = this
         this.sound = new Howl({
             src: [this.currentTrack.url],
@@ -88,20 +88,20 @@ export class Player {
                 self._rewindAnimationFrame(self._step.bind(self))
             },
             onloaderror: function () {
-                self.retryPlay(1)
+                self._retryPlay(1)
             },
             onplayerror: function () {
-                self.retryPlay(1)
+                self._retryPlay(1)
             }
         })
-        this.tryUnlockHowlAudios()
+        this._tryUnlockHowlAudios()
         this.currentTime = 0
         this.notifyStateChanged(PLAY_STATE.INIT)
         return this.sound
     }
 
     getSound() {
-        return this.isTrackAvailable() ? this.sound : null
+        return this._isTrackAvailable() ? this.sound : null
     }
 
     //播放
@@ -168,16 +168,19 @@ export class Player {
     _step() {
         const sound = this.getSound()
         if (!sound) return
-        if (!sound.playing() && this.playState != PLAY_STATE.PLAYING) return
+        if (!sound.playing() && this.playState != PLAY_STATE.PLAYING) {
+            this._stopAnimationFrame()
+            return
+        }
         //当前时间
         this.currentTime = sound.seek() || 0
-        if (this.isStateRefreshEnabled()) EventBus.emit('track-pos', this.currentTime)
+        if (this.isStateRefreshEnabled()) this.notify('track-pos', this.currentTime)
         //声音处理
         try {
-            this.resolveSound()
+            this._resolveSound()
         } catch (error) {
             console.log(error)
-            this.retryPlay(1)
+            this._retryPlay(1)
         }
         this._countAnimationFrame()
         //循环动画
@@ -189,25 +192,30 @@ export class Player {
         return this
     }
 
-    notifyStateChanged(state) {
-        this.playState = state
-        EventBus.emit('track-state', this.playState)
+    notify(event, args) {
+        EventBus.emit(event, args)
+        return this
     }
 
-    notifyError(isRetry) {
-        EventBus.emit('track-error', {
+    notifyStateChanged(state) {
+        this.playState = state
+        this.notify('track-state', this.playState)
+    }
+
+    _notifyError(isRetry) {
+        this.notify('track-error', {
             retry: isRetry,
             track: this.currentTrack,
             currentTime: this.currentTime
         })
     }
 
-    retryPlay(maxRetry) {
-        this.notifyError(this.retry < maxRetry)
+    _retryPlay(maxRetry) {
+        this._notifyError(this.retry < maxRetry)
         ++this.retry
     }
 
-    createWebAudioApi() {
+    _createWebAudioApi() {
         if (this.webAudioApi) return
         const audioCtx = Howler.ctx
         if (!audioCtx) return
@@ -216,17 +224,18 @@ export class Player {
         this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
     }
 
-    resolveSound() {
-        this.createWebAudioApi()
+    _resolveSound() {
+        this._createWebAudioApi()
         if (!this.webAudioApi) return
-        this.resolvePendingSoundEffect()
+        this._resolvePendingSoundEffect()
         const analyser = this.webAudioApi.getAnalyser()
+        if (!analyser) return
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
         if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-spectrumData', freqData)
     }
 
-    tryUnlockHowlAudios() {
+    _tryUnlockHowlAudios() {
         const audios = Howler._html5AudioPool
         // Unlock CORS
         if (audios) audios.forEach(audio => audio.crossOrigin = 'anonymous')
@@ -252,7 +261,7 @@ export class Player {
         }
     }
 
-    resolvePendingSoundEffect() {
+    _resolvePendingSoundEffect() {
         if (!this.pendingSoundEffect) return
         if (this.pendingSoundEffectType === 1) {
             this.updateIR(this.pendingSoundEffect)

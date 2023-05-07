@@ -118,9 +118,9 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
                 <div class="cate-title">{{ cate.name }}</div>
                 <div class="cate-item-wrap">
                     <div v-for="(item, col) in cate.data" class="fl-item" :class="{
-                            current: (row == currentCategoryItem.row
-                                && col == currentCategoryItem.col)
-                        }" @click="visitCateItem(item, row, col)" v-html="item.key">
+                        current: (row == currentCategoryItem.row
+                            && col == currentCategoryItem.col)
+                    }" @click="visitCateItem(item, row, col)" v-html="item.key">
                     </div>
                 </div>
             </div>
@@ -163,7 +163,8 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 }
 
 .radio-category-view .header .cate-title {
-    margin-right: 1px;
+    /*margin-right: 1px;*/
+    color: var(--text-sub-color);
 }
 
 .radio-category-view .header .fl-item,
@@ -229,10 +230,10 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 }
 
 .radio-category-view .cate-title {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
     color: var(--text-sub-color);
-    min-width: 36px;
+    min-width: 39px;
     margin-top: 15px;
     margin-right: 20px;
 }
@@ -250,6 +251,7 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
     margin-right: 10px;
     cursor: pointer;
     color: var(--text-color);
+    font-size: var(--text-sub-size);
     border-radius: 10rem;
 }
 

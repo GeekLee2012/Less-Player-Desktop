@@ -259,7 +259,7 @@ watch([platform, albumId], reloadAll, { immediate: true })
 #album-detail-view {
     display: flex;
     flex-direction: column;
-    padding: 25px 33px 15px 33px;
+    padding: 20px 33px 15px 33px;
     flex: 1;
     overflow: scroll;
     overflow-x: hidden;
@@ -346,15 +346,15 @@ watch([platform, albumId], reloadAll, { immediate: true })
 #album-detail-view .tab-nav {
     position: relative;
     display: flex;
-    height: 30px;
+    height: 36px;
     margin-bottom: 3px;
     border-bottom: 1px solid var(--border-color);
 }
 
 #album-detail-view .tab {
     font-size: var(--tab-title-text-size);
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: 15px;
+    padding-right: 15px;
     margin-right: 15px;
     border-bottom: 3px solid transparent;
     cursor: pointer;

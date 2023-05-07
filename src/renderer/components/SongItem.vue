@@ -216,7 +216,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     line-height: 50px;
     line-height: 59px;
     vertical-align: middle;
-    font-size: var(--text-size);
+    /*font-size: var(--text-size);*/
 }
 
 .song-item .spacing {

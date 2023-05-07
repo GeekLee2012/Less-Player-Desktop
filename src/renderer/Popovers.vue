@@ -42,7 +42,7 @@ const getCtxMenuAutoHeight = () => {
   return itemHeight * (total - spNums) + 7.5 * spNums + 2 * padding
 }
 
-const menuWidth = 179
+const menuWidth = 208
 
 const adjustMenuPosition = (event) => {
   const { x, y, clientX, clientY } = event
@@ -71,7 +71,7 @@ const setMenuPosition = (event) => {
 }
 
 const getCtxSubmenuAutoHeight = () => {
-  const itemHeight = 38, padding = 15
+  const itemHeight = 41, padding = 15
   return itemHeight * submenuItemNums + 2 * padding
 }
 

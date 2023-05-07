@@ -17,7 +17,10 @@ import { toMmss } from '../../common/Times';
 
 
 
-const { seekTrack, playMv, progressState, mmssCurrentTime, currentTimeState } = inject('player')
+const { seekTrack, playMv,
+    progressState, mmssCurrentTime,
+    currentTimeState, favoritedState,
+    toggleFavoritedState } = inject('player')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -44,41 +47,6 @@ const setDisactived = (value) => {
     EventBus.emit('playingView-changed')
 }
 
-const { addFavoriteTrack, removeFavoriteSong,
-    isFavoriteSong, addFavoriteRadio,
-    removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
-const favorited = ref(false)
-
-const toggleFavorite = () => {
-    if (playingIndex.value < 0) return
-    favorited.value = !favorited.value
-    const { id, platform } = currentTrack.value
-    const isFMRadioType = Playlist.isFMRadioType(currentTrack.value)
-    let text = "歌曲收藏成功！"
-    if (favorited.value) {
-        if (isFMRadioType) {
-            addFavoriteRadio(currentTrack.value)
-            text = "FM电台收藏成功！"
-        } else {
-            addFavoriteTrack(currentTrack.value)
-        }
-    } else {
-        text = "歌曲已取消收藏！"
-        if (isFMRadioType) {
-            text = "FM电台已取消收藏！"
-            removeFavoriteRadio(id, platform)
-        } else {
-            removeFavoriteSong(id, platform)
-        }
-    }
-    showToast(text)
-}
-
-const checkFavorite = () => {
-    //if(playingIndex.value < 0) return 
-    const { id, platform } = currentTrack.value
-    favorited.value = isFavoriteRadio(id, platform) || isFavoriteSong(id, platform)
-}
 
 /*
 const randomRgbColor = () => {
@@ -122,13 +90,12 @@ const setBackgroudEffect = () => {
 
 const onUserMouseWheel = (e) => EventBus.emit('lyric-userMouseWheel', e)
 
-EventBus.on("userProfile-reset", checkFavorite)
-EventBus.on("refreshFavorite", checkFavorite)
 
+/*
 watch([currentTrack, playingViewShow], () => {
-    checkFavorite()
     //setBackgroudEffect()
 })
+*/
 
 onMounted(() => {
     setDisactived(false)
@@ -190,8 +157,8 @@ onUnmounted(() => {
                     </div>
                     <div class="action">
                         <div class="btm-left">
-                            <div @click="toggleFavorite">
-                                <svg v-show="!favorited" width="20" height="20" viewBox="0 0 1024 937.46"
+                            <div @click="toggleFavoritedState">
+                                <svg v-show="!favoritedState" width="20" height="20" viewBox="0 0 1024 937.46"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">
@@ -200,8 +167,8 @@ onUnmounted(() => {
                                         </g>
                                     </g>
                                 </svg>
-                                <svg v-show="favorited" class="love-btn" width="20" height="20" viewBox="0 0 1024 937.53"
-                                    xmlns="http://www.w3.org/2000/svg">
+                                <svg v-show="favoritedState" class="love-btn" width="20" height="20"
+                                    viewBox="0 0 1024 937.53" xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">
                                             <path

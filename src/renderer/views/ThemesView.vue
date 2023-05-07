@@ -18,9 +18,9 @@ const { setThemeIndex } = useSettingStore()
                 <div class="cate-name">推荐</div>
                 <div class="content">
                     <div class="item" v-for="(item, index) in getPresetThemes()" :class="{
-                            active: index == theme.index,
-                            lightText: item.dark
-                        }">
+                        active: index == theme.index,
+                        lightText: item.dark
+                    }">
                         <div @click="setThemeIndex(index)" class="preview" :style="{ background: item.color }">
                             <svg v-show="(index == theme.index)" class="checked-svg" width="18" height="18"
                                 viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
@@ -61,7 +61,7 @@ const { setThemeIndex } = useSettingStore()
     margin-left: 35px;
     margin-right: 35px;
     margin-bottom: 25px;
-    padding-top: 25px;
+    padding-top: 20px;
     /*font-size: 30px;*/
     font-size: var(--text-main-title-size);
     font-weight: bold;

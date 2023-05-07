@@ -73,13 +73,14 @@ const resetScroll = () => {
 }
 
 .common-ctx-submenu .menuItem {
-    width: 139px;
+    width: 168px;
     display: flex;
     flex-direction: row;
     align-items: center;
     /*font-size: 14px;*/
+    font-size: var(--text-sub-size);
     padding: 9px 20px;
-    height: 20px;
+    height: 23px;
 }
 
 .common-ctx-submenu .menuItem:hover {

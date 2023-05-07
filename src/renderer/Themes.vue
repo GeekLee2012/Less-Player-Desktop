@@ -188,11 +188,13 @@ watch(theme, () => setupAppTheme(), { deep: true })
 :root[theme='dark'] {
   /* 全局背景 */
   --bg-color: #313131;
+  --bg-color: #48484a;
   --app-bg: var(--bg-color);
   /* 文本 */
   --text-color: #eaeaea;
-  --text-sub-color: #989898;
-  --text-subtitle-color: #666;
+  --text-color: #d5d5d5;
+  --text-sub-color: #a5a5a5;
+  --text-subtitle-color: #787878;
   --hl-color: #28c83f;
   --hl-text-bg: linear-gradient(to top right, #28c83f, #1ca388);
   --hl-title-color: var(--hl-color);
@@ -200,40 +202,44 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --text-lyric-color: #ccc;
   /* 按钮 */
   --svg-color: #eaeaea;
+  --svg-color: #fff;
   --svg-hover-color: var(--hl-color);
   --svg-text-color: #eaeaea;
   --svg-btn-color: #fff;
   --btn-bg: linear-gradient(to right, #1ca388, #28c83f);
   --btn-hover-bg: linear-gradient(to top right, #2edfa3, #28c83f) !important;
 
-  --toggle-btn-bg: #989898;
+  --toggle-btn-bg: #999;
   --toggle-thumb-bg: #ccc;
   --toggle-btn-border-color: #ccc;
   --toggle-btn-active-bg: var(--hl-color);
   --toggle-active-thumb-bg: #fff;
   /* 进度条 */
-  --progress-track-bg: linear-gradient(to right, #464646, #666) !important;
+  --progress-track-bg: linear-gradient(to right, #666, #666) !important;
   --progress-bg: linear-gradient(to top right, #2edfa3, #28c83f);
   --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
   --scrollbar-thumb-bg: #666;
+  --scrollbar-thumb-bg: #9b9b9c;
   /* 列表项 hover */
-  --list-item-hover: #464646 !important;
+  --list-item-hover: #464646;
+  --list-item-hover: #666 !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
-  --main-left-border-color: #181818;
+  --main-left-border-color: #333;
   --ctx-menu-bg: #464646;
-  --ctx-menu-border-color: #111;
-  --border-color: #363636;
+  --ctx-menu-bg: #555;
+  --ctx-menu-border-color: #222;
+  --border-color: #414141;
   /* 设置页，每一分类栏底部分隔线颜色 */
-  --setting-bottom-border-color: #363636;
+  --setting-bottom-border-color: #464646;
   /* 当前播放列表 左侧边框高亮颜色 */
   --pbq-hl-text-color: var(--hl-text-bg);
   --pbq-hl-border: linear-gradient(to top right, #28c83f, #1ca388) 0 0 0 2;
   --pbq-box-shadow: 0px 0px 6px #000;
 
   /* 搜索框 */
-  --searchbar-bg: #fff;
+  --searchbar-bg: #eee;
   --search-btn-bg: var(--btn-hover-bg);
   --search-btn-svg-color: var(--svg-btn-color);
   --searchbar-text-color: #555;
@@ -249,25 +255,25 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --loading-mask-bg: linear-gradient(90deg, #414141 8%, #515151 18%, #414141 33%);
   --error-color: red;
 
-  --checkbox-bg: #fff;
+  --checkbox-bg: #eee;
   --logo-bg: var(--btn-bg);
   --logo-text-bg: #fff;
   --logo-text-color: #1ca388;
 
   --category-view-border: 0.5px solid var(--main-left-border-color);
-  --input-bg: #464646;
-  --input-text-color: var(--text-color);
+  --input-bg: #eee;
+  --input-text-color: #555;
   --input-border-color: var(--main-left-border-color);
-  --input-border-color: #363636;
+  /* --input-border-color: #111; */
   --input-placeholder-color: #888;
 
   --back2top-btn-bg: var(--btn-hover-bg);
   --back2top-btn-svg-color: #fff;
   /* 音效 */
-  --seview-bg: #363636;
-  --seview-left-bg: #414141;
+  --seview-bg: #505050;
+  --seview-left-bg: var(--app-bg);
   --seview-border: 1px solid var(--main-left-border-color);
-  --seview-list-item-bg: #3e3e3e;
+  --seview-list-item-bg: #666;
   --seview-list-item-color: var(--text-color);
 }
 
@@ -277,7 +283,9 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --app-bg: var(--bg-color);
   /* 文本 */
   --text-color: #212121;
+  --text-color: #272727;
   --text-sub-color: #666;
+  --text-sub-color: #808080;
   --text-subtitle-color: #a0a0a0;
   --hl-color: #28c83f;
   --hl-color: #31c27c;
@@ -287,6 +295,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --text-lyric-color: #666;
   /* 按钮 */
   --svg-color: #414141;
+  --svg-color: #272727;
   --svg-hover-color: var(--hl-color);
   --svg-text-color: #fff;
   --svg-btn-color: #fff;
@@ -303,7 +312,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --progress-bg: linear-gradient(to top right, #1ca388, #28c83f);
   --slider-thumb-bg: var(--svg-color);
   /*滚动条*/
-  --scrollbar-thumb-bg: #999;
+  --scrollbar-thumb-bg: #787878;
   /* 列表项 hover */
   --list-item-hover: #eee !important;
   --list-item-active-bg: var(--btn-bg);
@@ -1483,6 +1492,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 :root[theme='yellow2'] {
   /* 全局背景 */
   --bg-color: #f9f3e9;
+  --bg-color: #f7f1e4;
   --app-bg: var(--bg-color);
   /* 文本 */
   --text-color: #fff;

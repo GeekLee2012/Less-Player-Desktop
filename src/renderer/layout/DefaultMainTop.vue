@@ -80,7 +80,8 @@ const { playing } = storeToRefs(usePlayStore())
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    margin-right: 28px;
 }
 
 .default-main-top #userhome-btn {

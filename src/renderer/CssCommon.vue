@@ -4,7 +4,6 @@
 :root {
   --text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
   --text-font-family: var(--text-preset-font-family);
-  font-family: var(--text-font-family);
 
   --scrollbar-width: 6px;
   --play-meta-height: 77px;
@@ -20,11 +19,12 @@
   --tip-text-size: 13.5px;
   --tab-title-text-size: 17px;
   --setting-cate-subtitle-width: 225px;
-  --text-line-height: 23px;
+  --text-line-height: 27px;
+  --text-letter-spacing: 0.25px;
   /* 主标题 */
   --text-main-title-size: 30px;
   /* 标题 - 批量操作页、当前播放列表 */
-  --text-main2-title-size: 23px;
+  --text-main2-title-size: 25px;
   /* 标题 - 全部分类界面 */
   --text-main3-title-size: 21px;
   /* 标题 - 左导航 */
@@ -39,6 +39,8 @@
   --win-ctl-collapse-btn-size: 18px;
   --win-ctl-btn-margin-right: 8px;
 
+  font-family: var(--text-font-family);
+  letter-spacing: var(--text-letter-spacing);
 }
 
 .btnDisabled {

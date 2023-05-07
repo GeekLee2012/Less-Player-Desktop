@@ -23,8 +23,8 @@ const { playMv, loadLyric, currentTimeState, seekTrack, playState } = inject('pl
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
-const { lyric, lyricTransActived } = storeToRefs(useSettingStore())
-const { toggleLyricTrans } = useSettingStore()
+const { lyric, lyricTransActived, lyricRomaActived } = storeToRefs(useSettingStore())
+const { toggleLyricTrans, toggleLyricRoma } = useSettingStore()
 //const { currentTrack } = storeToRefs(usePlayStore())
 
 const currentIndex = ref(-1)
@@ -32,6 +32,7 @@ const hasLyric = ref(false)
 const lyricData = ref(Track.lyricData(props.track))
 let presetOffset = Track.lyricOffset(props.track)
 const lyricTransData = ref(Track.lyricTransData(props.track))
+const lyricRomaData = ref(Track.lyricRomaData(props.track))
 
 
 const isUserMouseWheel = ref(false)
@@ -45,17 +46,22 @@ const setLyricCurrentIndex = (value) => currentIndex.value = value
 const setUserMouseWheel = (value) => isUserMouseWheel.value = value
 const setSeeking = (value) => isSeeking.value = value
 const setLyricTransData = (value) => lyricTransData.value = value
+const setLyricRomaData = (value) => lyricRomaData.value = value
 
 
+let nextLineMillis = -1
 const renderAndScrollLyric = (secs) => {
     if (!hasLyric.value) return
     if (isSeeking.value) return
 
     const userOffset = lyric.value.offset
     const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
+    //时机未到，就不要耗资源了，CPU省点用
+    //if (trackTime < nextLineMillis) return
 
     //Highlight
     const lyricWrap = document.querySelector(".lyric-ctl .center")
+    if (!lyricWrap) return
     const lines = lyricWrap.querySelectorAll('.line')
 
     let index = -1
@@ -71,14 +77,22 @@ const renderAndScrollLyric = (secs) => {
 
     nextTick(setupLyricLines)
 
+    //有点用的缓存，但不多，也能接受；目前有点副作用
+    /*
+    const nextLine = lines[index + 1]
+    nextLineMillis = nextLine ? toMillis(nextLine.getAttribute('time-key')) : Number.MAX_VALUE
+    */
+
     if (index >= 0) {
         setLyricCurrentIndex(index)
     } else {
         index = 0
     }
 
+    //是否为用户手动滚动歌词
     if (isUserMouseWheel.value || isSeeking.value) return
-    //Scroll
+
+    //Scroll 滚动算法
 
     ////算法1: 基于百分比定位 ////
     //当歌词存在换行时，无法保证准确定位
@@ -108,7 +122,6 @@ const renderAndScrollLyric = (secs) => {
     const { offsetTop } = lyricWrap
     const { clientHeight } = document.documentElement
     const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
-    //lyricWrap.scrollTop = destScrollTop
     //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
     smoothScroll(lyricWrap, destScrollTop, 288)
 }
@@ -153,9 +166,11 @@ const reloadLyricData = (track) => {
         isExist = isValidLyric
     }
     //重置数据
+    nextLineMillis = -1
     setLyricExist(isExist)
     setLyricData(Track.lyricData(track))
     setLyricTransData(Track.lyricTransData(track))
+    setLyricRomaData(Track.lyricRomaData(track))
     setPresetOffset(Track.lyricOffset(track))
     setLyricCurrentIndex(-1)
     setSeeking(false)
@@ -164,8 +179,8 @@ const reloadLyricData = (track) => {
     //重新设置样式
     nextTick(() => {
         //setupLyricLines()
-        setupLyricTrans()
-        safeRenderAndScrollLyric(props.currentTime)
+        setupLyricExtra()
+        safeRenderAndScrollLyric(props.currentTime, true)
     })
     //setTimeout(setupLyricLines, 300)
 }
@@ -186,8 +201,8 @@ const setLyricLineStyle = (line) => {
     line.style.lineHeight = lineHeight + "px"
     line.style.marginTop = lineSpacing + "px"
 
-    const classAttr = line.getAttribute('class')
-    if (classAttr.includes('current')) { //高亮行
+    //const classAttr = line.getAttribute('class')
+    if (line.classList.contains('current')) { //高亮行
         line.style.fontSize = hlFontSize + "px"
         line.style.fontWeight = 'bold'
     } else { //普通行
@@ -286,14 +301,15 @@ const restoreLyricPausedState = () => {
     if (playState.value == PLAY_STATE.PAUSE) safeRenderAndScrollLyric(props.currentTime)
 }
 
-const getTransTimeKey = (mmssSSS, offset) => {
-    let transTimeKey = toMMssSSS(toMillis(mmssSSS) + (offset || 0))
-    //if (transTimeKey) transTimeKey = transTimeKey.replace(/\.0/g, '.')
-    return transTimeKey || mmssSSS
+//额外歌词对应的时间，如翻译、发音
+const getExtraTimeKey = (mmssSSS, offset) => {
+    return toMMssSSS(toMillis(mmssSSS) + (offset || 0))
+        || mmssSSS
 }
 
 //歌词翻译
 const setupLyricTrans = () => {
+    if (!Track.hasLyricTrans(props.track)) return
     const lines = document.querySelectorAll(".lyric-ctl .center .line")
     if (lines) {
         try {
@@ -306,23 +322,62 @@ const setupLyricTrans = () => {
                 const transMap = lyricTransData.value
                 if (!transMap) return
                 //TODO 算法简单粗暴，最坏情况11次尝试！！！
-                const transText = transMap.get(getTransTimeKey(timeKey))
-                    || transMap.get(getTransTimeKey(timeKey, 10))
-                    || transMap.get(getTransTimeKey(timeKey, -10))
-                    || transMap.get(getTransTimeKey(timeKey, 20))
-                    || transMap.get(getTransTimeKey(timeKey, -20))
-                    || transMap.get(getTransTimeKey(timeKey, 30))
-                    || transMap.get(getTransTimeKey(timeKey, -30))
-                    || transMap.get(getTransTimeKey(timeKey, 40))
-                    || transMap.get(getTransTimeKey(timeKey, -40))
-                    || transMap.get(getTransTimeKey(timeKey, 50))
-                    || transMap.get(getTransTimeKey(timeKey, -50))
+                const transText = transMap.get(getExtraTimeKey(timeKey))
+                    || transMap.get(getExtraTimeKey(timeKey, 10))
+                    || transMap.get(getExtraTimeKey(timeKey, -10))
+                    || transMap.get(getExtraTimeKey(timeKey, 20))
+                    || transMap.get(getExtraTimeKey(timeKey, -20))
+                    || transMap.get(getExtraTimeKey(timeKey, 30))
+                    || transMap.get(getExtraTimeKey(timeKey, -30))
+                    || transMap.get(getExtraTimeKey(timeKey, 40))
+                    || transMap.get(getExtraTimeKey(timeKey, -40))
+                    || transMap.get(getExtraTimeKey(timeKey, 50))
+                    || transMap.get(getExtraTimeKey(timeKey, -50))
                 if (transText && transText != '//') transEl.innerHTML = transText
             })
         } catch (error) {
             console.log(error)
         }
     }
+}
+
+//歌词发音
+const setupLyricRoma = () => {
+    if (!Track.hasLyricRoma(props.track)) return
+    const lines = document.querySelectorAll(".lyric-ctl .center .line")
+    if (lines) {
+        try {
+            lines.forEach((line, index) => {
+                const timeKey = line.getAttribute('time-key')
+                if (!timeKey) return
+                const romaEl = line.querySelector('.roma-text')
+                if (!romaEl) return
+                romaEl.innerHTML = null //重置
+                const romaMap = lyricRomaData.value
+                if (!romaMap) return
+                //TODO 算法简单粗暴，最坏情况11次尝试！！！
+                const romaText = romaMap.get(getExtraTimeKey(timeKey))
+                    || romaMap.get(getExtraTimeKey(timeKey, 10))
+                    || romaMap.get(getExtraTimeKey(timeKey, -10))
+                    || romaMap.get(getExtraTimeKey(timeKey, 20))
+                    || romaMap.get(getExtraTimeKey(timeKey, -20))
+                    || romaMap.get(getExtraTimeKey(timeKey, 30))
+                    || romaMap.get(getExtraTimeKey(timeKey, -30))
+                    || romaMap.get(getExtraTimeKey(timeKey, 40))
+                    || romaMap.get(getExtraTimeKey(timeKey, -40))
+                    || romaMap.get(getExtraTimeKey(timeKey, 50))
+                    || romaMap.get(getExtraTimeKey(timeKey, -50))
+                if (romaText && romaText != '//') romaEl.innerHTML = romaText
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+}
+
+const setupLyricExtra = () => {
+    setupLyricTrans()
+    setupLyricRoma()
 }
 
 //EventBus事件
@@ -391,13 +446,14 @@ watch(() => props.track, loadLyric, { immediate: true })
             </div>
             <div v-show="hasLyric" v-for="(item, index) in lyricData" class="line" :time-key="item[0]" :index="index"
                 :class="{
-                        first: index == 0,
-                        last: index == (lyricData.size - 1),
-                        current: index == currentIndex,
-                        locatorCurrent: (index == scrollLocatorCurrentIndex && isUserMouseWheel)
-                    }">
+                    first: index == 0,
+                    last: index == (lyricData.size - 1),
+                    current: index == currentIndex,
+                    locatorCurrent: (index == scrollLocatorCurrentIndex && isUserMouseWheel)
+                }">
                 <div class="text" :time-key="item[0]" :index="index" v-html="item[1]"></div>
                 <div class="trans-text" v-show="lyricTransActived"></div>
+                <div class="roma-text" v-show="lyricRomaActived"></div>
             </div>
         </div>
         <div class="scroll-locator" v-show="hasLyric && isUserMouseWheel">
@@ -410,8 +466,11 @@ watch(() => props.track, loadLyric, { immediate: true })
                 </svg>
             </div>
         </div>
-        <div class="trans-btn" v-show="Track.hasLyricTrans(track)">
+        <div class="trans-btn extra-btn" v-show="Track.hasLyricTrans(track)">
             <span :class="{ active: lyricTransActived }" @click="toggleLyricTrans">译</span>
+        </div>
+        <div class="roma-btn extra-btn" v-show="Track.hasLyricRoma(track)">
+            <span :class="{ active: lyricRomaActived }" @click="toggleLyricRoma">音</span>
         </div>
     </div>
 </template>
@@ -591,13 +650,13 @@ watch(() => props.track, loadLyric, { immediate: true })
     color: var(--text-lyric-color) !important;
 }
 
-.lyric-ctl .trans-btn {
+.lyric-ctl .extra-btn {
     position: fixed;
     right: 35px;
     bottom: 99px;
 }
 
-.lyric-ctl .trans-btn span {
+.lyric-ctl .extra-btn span {
     border: 1.25px solid var(--text-sub-color);
     border-radius: 3px;
     padding: 1px 2px;
@@ -608,8 +667,8 @@ watch(() => props.track, loadLyric, { immediate: true })
     font-weight: bold;
 }
 
-.lyric-ctl .trans-btn .active,
-.lyric-ctl .trans-btn span:hover {
+.lyric-ctl .extra-btn .active,
+.lyric-ctl .extra-btn span:hover {
     color: var(--hl-color);
     border-color: var(--hl-color);
 }

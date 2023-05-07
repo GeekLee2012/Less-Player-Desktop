@@ -19,7 +19,7 @@ const togglePlaybackQueue = () => {
 <template>
     <div class="play-ctl">
         <div class="play-mode-btn" @click="switchPlayMode">
-            <svg v-show="playMode ==  0" width="20" height="20" viewBox="5 0 20 30" xmlns="http://www.w3.org/2000/svg">
+            <svg v-show="playMode == 0" width="20" height="20" viewBox="5 0 20 30" xmlns="http://www.w3.org/2000/svg">
                 <title />
                 <g data-name="Layer 2" id="Layer_2">
                     <g id="Interface-Solid">
@@ -32,8 +32,7 @@ const togglePlaybackQueue = () => {
                     </g>
                 </g>
             </svg>
-            <svg v-show="playMode ==  1" width="20" height="20" viewBox="0 0 30 29.99936"
-                xmlns="http://www.w3.org/2000/svg">
+            <svg v-show="playMode == 1" width="20" height="20" viewBox="0 0 30 29.99936" xmlns="http://www.w3.org/2000/svg">
                 <title />
                 <g data-name="Layer 2" id="Layer_2">
                     <g id="Interface-Solid">
@@ -48,7 +47,7 @@ const togglePlaybackQueue = () => {
                     </g>
                 </g>
             </svg>
-            <svg v-show="playMode ==  2" width="20" height="20" viewBox="0 0 895.9 896.32"
+            <svg v-show="playMode == 2" width="20" height="20" viewBox="0 0 895.9 896.32"
                 xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
@@ -163,8 +162,8 @@ const togglePlaybackQueue = () => {
 .play-ctl .play-btn {
     /*margin-top: 16px;*/
     border-radius: 10rem;
-    width: 39px;
-    height: 39px;
+    width: 41px;
+    height: 41px;
     background: var(--btn-bg);
     cursor: pointer;
 }
@@ -177,7 +176,7 @@ const togglePlaybackQueue = () => {
 .play-ctl .play-btn svg {
     /* margin-top: 9px;*/
     margin-top: 1px;
-    margin-left: 3px;
+    margin-left: 2px;
     fill: var(--svg-btn-color) !important;
 }
 

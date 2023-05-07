@@ -39,6 +39,6 @@ const visitItem = (item) => {
 
 <style scoped>
 .albumlist-ctl .image-text-tile {
-    margin-top: 25px;
+    /* margin-top: 25px; */
 }
 </style>

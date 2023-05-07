@@ -137,8 +137,9 @@ const registryGlobalShortcuts = () => {
     'Shift+Q': 'togglePlaybackQueue',
     // 打开 / 关闭歌词设置
     'Shift+L': 'toggleLyricToolbar',
-    // 打开
-    'Shift+I': openDevTools
+    // 打开 开发者工具
+    'Control+Alt+Shift+I': openDevTools,
+    'Command+Alt+Shift+I': openDevTools
   }
 
   const activeWindowValues = ['visitSetting', 'togglePlaybackQueue', 'toggleLyricToolbar']
@@ -368,7 +369,9 @@ const createWindow = () => {
       "*://*.douban.com/*",
       "*://*.doubanio.com/*",
       "*://*.ridio.cn/*",
-      "*://*.cnr.cn/*"
+      "*://*.cnr.cn/*",
+      "*://*.qingting.fm/*",
+      "*://*.qtfm.cn/*"
     ]
   }
   const webSession = mainWindow.webContents.session
@@ -642,7 +645,7 @@ const overrideRequest = (details) => {
   } else if (url.includes("radio.cn") || url.includes("cnr.cn")) {
     origin = "http://www.radio.cn/"
     referer = origin
-  } else if (url.includes("qingting")) {
+  } else if (url.includes("qingting") || url.includes("qtfm.cn")) {
     origin = "https://www.qingting.fm/"
     referer = origin
   } else if (url.includes("ximalaya")) {

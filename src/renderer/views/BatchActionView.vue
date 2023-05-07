@@ -406,7 +406,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                 <SvgTextButton :isDisabled="checkedData.length < 1" text="添加到" class="spacing addToBtn"
                     v-show="actionShowCtl.addToBtn" :leftAction="toggleAddCheckedMenu">
                     <template #left-img>
-                        <svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="16" height="16" viewBox="0 -50 768.02 554.57" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path
@@ -479,7 +479,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 
 <style>
 #batch-action-view {
-    padding: 25px 0px 15px 0px;
+    padding: 20px 0px 15px 0px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -538,7 +538,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 
 #batch-action-view .header .tab {
     font-size: var(--tab-title-text-size);
-    padding: 6px 15px;
+    padding: 8px 15px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
@@ -546,7 +546,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 #batch-action-view .header .active {
     color: var(--hl-color);
     font-weight: bold;
-    border-bottom: 2px solid var(--hl-color);
+    border-bottom: 3px solid var(--hl-color);
 }
 
 #batch-action-view .header .tab-tip {

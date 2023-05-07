@@ -108,7 +108,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 .image-text-tile .title {
     width: var(--image-text-tile-cover-size);
-    margin-top: 12px;
+    margin-top: 10px;
     text-align: left;
     cursor: pointer;
     line-height: var(--text-line-height);

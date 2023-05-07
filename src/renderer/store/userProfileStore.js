@@ -177,9 +177,11 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         removeFavoriteSong(id, platform) {
             this.removeItem(this.favorites.songs, { id, platform })
+            EventBus.emit("track-refreshFavoritedState")
         },
         removeFavoriteRadio(id, platform) {
             this.removeItem(this.favorites.radios, { id, platform })
+            EventBus.emit("track-refreshFavoritedState")
         },
         isFavoritePlaylist(id, platform) {
             return this.findItemIndex(this.favorites.playlists, { id, platform }) > -1

@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, onMounted, shallowRef, watch } from 'vue';
+import { nextTick, onActivated, onMounted, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -45,7 +45,7 @@ const setSearchBarSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     //const hScaleRatio = clientHeight / minAppHeight
-    const size = 115 * Math.max(wScaleRatio, 1)
+    const size = 123 * Math.max(wScaleRatio, 1)
     const el = document.querySelector(".default-main-top .search-bar .keyword")
     if (el) el.style.width = size + "px"
 }
@@ -360,7 +360,7 @@ onMounted(() => {
         //自适应播放元信息组件大小
         setPlayMetaSize()
         //自适应搜索框大小
-        setSearchBarSize()
+        //setSearchBarSize()
         //自适应ImageTextTile组件大小
         setImageTextTileComponentSize()
         //自适应分类列表大小
@@ -380,6 +380,7 @@ onMounted(() => {
         hideAllCtxMenus()
         //TODO 窗口缩放Bug，放在最后执行确保缩放
         setupWindowZoom(true)
+        //nextTick(() => setupWindowZoom(true))
     })
 
     //点击事件监听

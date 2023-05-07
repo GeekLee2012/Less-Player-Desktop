@@ -100,7 +100,7 @@ const updateCover = async () => {
 #user-info-edit-view {
     display: flex;
     flex-direction: column;
-    padding: 25px 33px 15px 33px;
+    padding: 20px 33px 15px 33px;
     flex: 1;
     overflow: scroll;
     overflow-x: hidden;
@@ -151,7 +151,7 @@ const updateCover = async () => {
 }
 
 #user-info-edit-view .center .form-row {
-    margin-bottom: 18px;
+    margin-bottom: 17px;
 }
 
 #user-info-edit-view .center .form-row div {
@@ -184,7 +184,7 @@ const updateCover = async () => {
 }
 
 #user-info-edit-view .center .form-row textarea {
-    height: 300px;
+    height: 280px;
     padding: 8px;
 }
 

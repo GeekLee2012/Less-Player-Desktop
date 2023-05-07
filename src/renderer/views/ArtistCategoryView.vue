@@ -104,6 +104,7 @@ EventBus.on('artistCategory-resetScroll', () => {
     /*font-size: 21px;*/
     font-size: var(--text-main3-title-size);
     font-weight: bold;
+    color: var(--text-sub-color);
     /*
     background: var(--btn-bg);
     -webkit-background-clip: text;
@@ -126,6 +127,7 @@ EventBus.on('artistCategory-resetScroll', () => {
     justify-items: center;
     cursor: pointer;
     margin-left: 20px;
+    font-size: var(--tip-text-size);
 }
 
 .artist-category-view .text-btn svg {
@@ -153,16 +155,15 @@ EventBus.on('artistCategory-resetScroll', () => {
 }
 
 .artist-category-view .center .cate-title {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
     /*
     background: linear-gradient(to top right, #28c83f, #1ca388);
     -webkit-background-clip: text;
     color: transparent;
     */
-    color: #ddd;
     color: var(--text-sub-color);
-    min-width: 36px;
+    min-width: 39px;
     margin-top: 15px;
     margin-right: 20px;
 }
@@ -179,8 +180,8 @@ EventBus.on('artistCategory-resetScroll', () => {
     margin-right: 10px;
     float: left;
     cursor: pointer;
-    color: #bcbcbc;
     color: var(--text-color);
+    font-size: var(--text-sub-size);
     border-radius: 10rem;
 }
 

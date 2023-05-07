@@ -40,6 +40,4 @@ EventBus.on("artistListSubmenu-init", initData)
     </CommonContextSubmenu>
 </template>
 
-<style>
-
-</style>
+<style></style>

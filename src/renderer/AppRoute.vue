@@ -93,6 +93,7 @@ const createCommonRoute = (toPath, onRouteReady) => ({
         if (isSimpleLayout.value) switchToFallbackLayout()
         if (!toPath.includes('/artist/')) hidePlaybackQueueView()
         if (toPath.includes('/theme') ||
+            toPath.includes('/search') ||
             toPath.includes('/setting')) {
             if (isUserHomeMode.value) setPlaylistExploreMode()
         }

@@ -213,7 +213,7 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 #search-view .platform .item {
     margin-right: 20px;
     border-radius: 10rem;
-    padding: 6px 15px;
+    padding: 8px 18px;
     /* border: 1px solid var(--border-color); */
     cursor: pointer;
 }
@@ -234,17 +234,17 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 #search-view .tab-nav {
     display: flex;
     position: relative;
-    height: 30px;
+    height: 32px;
     margin-bottom: 3px;
     border-bottom: 1px solid var(--border-color);
 }
 
 #search-view .tab {
     font-size: 16px;
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
     margin-right: 15px;
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
     cursor: pointer;
 }
 

@@ -18,7 +18,8 @@ const { backward, forward } = inject('appRoute')
                 </g>
             </g>
         </svg>
-        <svg @click="forward" width="18" height="18" viewBox="0 0 455.71 818.08" xmlns="http://www.w3.org/2000/svg">
+        <svg @click="forward" width="18" height="18" class="spacing" viewBox="0 0 455.71 818.08"
+            xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
                 <g id="Layer_1-2" data-name="Layer 1">
                     <g id="Layer_2-2" data-name="Layer 2">
@@ -39,10 +40,13 @@ const { backward, forward } = inject('appRoute')
     align-items: center;
 }
 
+.navigator .spacing {
+    margin-left: 15px;
+}
+
 .navigator svg {
     fill: var(--svg-color);
     cursor: pointer;
-    margin-right: 10px;
     -webkit-app-region: none;
 }
 

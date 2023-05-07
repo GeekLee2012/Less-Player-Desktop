@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
+import { smoothAnimation } from '../../common/Utils';
 
 
 
@@ -9,7 +10,8 @@ const barValueRef = ref(null)
 const props = defineProps({
     value: Number,
     seekable: Boolean,
-    onseek: Function
+    onseek: Function,
+    smooth: Boolean
 })
 
 const seek = (e) => {
@@ -21,13 +23,33 @@ const seek = (e) => {
     if (props.onseek) props.onseek(percent)
 }
 
-const updateProgress = (percent) => {
+//太耗性能，玩不起
+const smoothUpdate = (dest, start) => {
+    const target = barValueRef.value
+    smoothAnimation(target, start, dest, 300, 10, (value => {
+        target.style.width = value + "%"
+    }))
+}
+
+const updateProgress = (percent, prevPercent) => {
     percent = percent * 100
     barValueRef.value.style.width = percent + "%"
 }
+/*
+const updateProgress = (percent, prevPercent) => {
+    prevPercent = prevPercent || percent
+    percent = percent * 100
+    prevPercent = prevPercent * 100
+    if (props.smooth) {
+        smoothUpdate(percent, prevPercent)
+    } else {
+        barValueRef.value.style.width = percent + "%"
+    }
+}
+*/
 
 watch(() => props.value, (nv, ov) => {
-    updateProgress(nv)
+    updateProgress(nv, ov)
 })
 
 onMounted(() => updateProgress(props.value))

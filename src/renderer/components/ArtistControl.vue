@@ -32,8 +32,8 @@ EventBus.on('track-artistUpdated', data => {
 <template>
     <div class="artist-ctl" v-show="data && data.length > 0">
         <template v-for="(item, index) in data">
-            <span @click="visitArtistDetail(platform, item, index)" class="artist-item"
-                :class="{ visitable: visitable }" v-html="item.name">
+            <span @click="visitArtistDetail(platform, item, index)" class="artist-item" :class="{ visitable: visitable }"
+                v-html="item.name">
             </span>
             <template v-if="index < (data.length - 1)">、</template>
         </template>
