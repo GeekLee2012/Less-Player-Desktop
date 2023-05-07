@@ -64,14 +64,19 @@
   `npm run build`  
   `npm run pack`  
   
-### 项目相关
-* 常见问题：[FAQ.md](FAQ.md)  
-* 更新日志：[CHANGELOG.md](CHANGELOG.md) 
-* 待办事项：[TODO.md](TODO.md)  
-  
 ### 发行版  
 * 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
 * Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)
+
+### For普通用户
+* 最新开发测试版，愿意尝鲜的朋友，请访问以下资源库：
+* [Github资源库](https://github.com/GeekLee2012/Resources/releases/)  
+* [Gitee资源库](https://gitee.com/rive08/resources/releases/)  
+
+### 项目相关文档
+* 常见问题：[FAQ.md](FAQ.md)  
+* 更新日志：[CHANGELOG.md](CHANGELOG.md) 
+* 待办事项：[TODO.md](TODO.md)  
   
 ### 其他  
 * 再次声明：本项目仅供学习交流，禁止非法商业用途，请支持正版！ 
