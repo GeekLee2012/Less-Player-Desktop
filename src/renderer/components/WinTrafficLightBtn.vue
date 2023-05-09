@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import { storeToRefs } from 'pinia';
-import { isMacOS } from '../../common/Utils';
 
 
 const props = defineProps({

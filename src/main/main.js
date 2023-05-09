@@ -180,7 +180,8 @@ const registryGlobalListeners = () => {
     app.quit()
   }).on('app-min', (event, isHideToTray) => {
     if (isHideToTray) {
-      app.hide()
+      if (isMacOS) app.hide()
+      else mainWin.hide()
       setupTray(true)
       return
     }

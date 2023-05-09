@@ -16,7 +16,7 @@ import AppContent from "./AppContent.vue";
 html,
 body,
 #app {
-  background: transparent;
+  background: #fff;
   height: 100%;
   font-size: var(--text-size);
   color: var(--text-color);

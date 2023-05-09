@@ -802,7 +802,7 @@ watch([textColorIndex], setupTextColor)
 
 <template>
     <div class="simple-layout">
-        <div class="center" @contextmenu="toggleRandomMusicToolbar()">
+        <div class="center" @contextmenu.stop="toggleRandomMusicToolbar()">
             <div class="top" :class="{ 'top-fixed': !isMacOS() }">
                 <div class="left">
                     <div class="win-ctl-wrap">
