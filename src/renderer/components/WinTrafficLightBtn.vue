@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { useSettingStore } from '../store/settingStore';
+import { storeToRefs } from 'pinia';
+import { isMacOS } from '../../common/Utils';
 
 
 const props = defineProps({
@@ -11,6 +14,7 @@ const props = defineProps({
 })
 
 const { quit, minimize, maximize } = useAppCommonStore()
+const { isHideToTrayOnMinimized } = storeToRefs(useSettingStore())
 const isMinBtnDisabled = ref(false)
 
 const setMinBtnDisabled = (value) => {
@@ -19,7 +23,7 @@ const setMinBtnDisabled = (value) => {
 
 const doMinimize = () => {
     if (isMinBtnDisabled.value) return
-    minimize()
+    minimize(isHideToTrayOnMinimized.value)
 }
 
 const isMaximized = ref(false)
@@ -32,7 +36,7 @@ const toggleMaximize = () => {
 <template>
     <div class="win-traffic-light-btn">
         <div @click="quit" class="ctl-btn close-btn">
-            <svg viewBox="-1 -1 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 -1 32 32" xmlns="http://www.w3.org/2000/svg">
                 <g id="cross">
                     <line class="cls-1" x1="7" x2="25" y1="7" y2="25" />
                     <line class="cls-1" x1="7" x2="25" y1="25" y2="7" />

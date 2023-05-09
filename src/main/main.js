@@ -47,7 +47,7 @@ const init = () => {
     //registryGlobalShortcuts()
     //全局UserAgent
     app.userAgentFallback = USER_AGENTS[nextInt(USER_AGENTS.length)]
-    mainWin = createWindow()
+    mainWin = createMainWindow()
 
     session.defaultSession.on('will-download', (event, item, webContents) => {
       //event.preventDefault()
@@ -84,7 +84,7 @@ const init = () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-      mainWin = createWindow()
+      mainWin = createMainWindow()
     }
     sendToRenderer('app-active')
   })
@@ -97,7 +97,7 @@ const init = () => {
   // for applications and their menu bar to stay active until the user quits
   // explicitly with Cmd + Q.
   app.on('window-all-closed', (event) => {
-    if (!isDevEnv) app.quit()
+    if (!isDevEnv || !isMacOS) app.quit()
   })
 
   app.on('before-quit', (event) => {
@@ -156,17 +156,34 @@ const registryGlobalShortcuts = () => {
   }
 }
 
+//在菜单栏显示
+const setupTray = (isShow) => {
+  if (isShow) {
+    if (appTray) appTray.destroy()
+    appTray = new Tray(path.join(__dirname, APP_ICON))
+    appTray.setContextMenu(Menu.buildFromTemplate(initTrayMenuTemplate()))
+  } else if (appTray) {
+    appTray.destroy()
+    appTray = null
+  }
+}
+
 //全局事件监听
 const registryGlobalListeners = () => {
   //主进程事件监听
   ipcMain.on('app-quit', () => {
-    if (isDevEnv && isMacOS) {
+    if (isDevEnv || isMacOS) {
       mainWin.close()
       return
     }
     cleanupBeforeQuit()
     app.quit()
-  }).on('app-min', () => {
+  }).on('app-min', (event, isHideToTray) => {
+    if (isHideToTray) {
+      app.hide()
+      setupTray(true)
+      return
+    }
     if (mainWin.isFullScreen()) mainWin.setFullScreen(false)
     if (mainWin.isMaximized() || mainWin.isNormal()) mainWin.minimize()
   }).on('app-max', () => {
@@ -185,15 +202,8 @@ const registryGlobalListeners = () => {
       powerSaveBlocker.stop(powerSaveBlockerId)
       powerSaveBlockerId = -1
     }
-  }).on('app-tray', (e, value) => {
-    if (value === true) {
-      if (appTray) appTray.destroy()
-      appTray = new Tray(path.join(__dirname, APP_ICON))
-      appTray.setContextMenu(Menu.buildFromTemplate(initTrayMenuTemplate()))
-    } else if (appTray) {
-      appTray.destroy()
-      appTray = null
-    }
+  }).on('app-tray', (e, isShow) => {
+    setupTray(isShow)
   }).on('app-zoom', (e, { zoom, noResize }) => {
     setupAppWindowZoom(zoom, noResize)
   }).on('app-winBtn', (e, value) => {
@@ -314,18 +324,17 @@ const registryGlobalListeners = () => {
     })
     return (result && result.length > 0) ? (downloadDir + result[0]) : null
   })
-
 }
 
 //创建浏览窗口
-const createWindow = () => {
-  const { appWidth, appHeight } = appLayoutConfig[appLayout]
+const createMainWindow = () => {
+  const { appWidth: width, appHeight: height } = appLayoutConfig[appLayout]
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: appWidth,
-    height: appHeight,
-    minWidth: appWidth,
-    minHeight: appHeight,
+    width,
+    height,
+    minWidth: width,
+    minHeight: height,
     titleBarStyle: 'hidden',
     //trafficLightPosition: { x: 20, y: 18 },
     transparent: true,
@@ -337,7 +346,6 @@ const createWindow = () => {
       webSecurity: false  //TODO 有风险，暂时保留此方案，留待后期调整
     }
   })
-
   if (isDevEnv) {
     mainWindow.loadURL("http://localhost:3000/")
     // Open the DevTools.
@@ -467,7 +475,7 @@ const initTrayMenuTemplate = () => {
   const template = [{
     label: '听你想听，爱你所爱',
     click: () => {
-      sendTrayAction(4, true)
+      sendTrayAction(-1, true)
     }
   }, {
     type: 'separator'
@@ -482,7 +490,12 @@ const initTrayMenuTemplate = () => {
     click: () => sendTrayAction(3)
   }, {
     type: 'separator'
-  }, {
+  }, /*{
+    label: '首页',
+    click: () => {
+      sendTrayAction(4, true)
+    }
+  },*/ {
     label: '我的主页',
     click: () => {
       sendTrayAction(5, true)

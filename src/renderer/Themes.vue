@@ -184,7 +184,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --text-main4-title-size: 23px;
   --main-left-nav-line-height: 33.5px;
 }
+@media (prefers-color-scheme: light) {}
+
+@media (prefers-color-scheme: dark) {}
 */
+
 :root[theme='dark'] {
   /* 全局背景 */
   --bg-color: #313131;
@@ -200,6 +204,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #ccc;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #eaeaea;
   --svg-color: #fff;
@@ -293,6 +298,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #414141;
   --svg-color: #272727;
@@ -387,6 +393,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: #888;
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #676163;
   --svg-hover-color: #888;
@@ -479,6 +486,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #414141;
   --svg-hover-color: var(--hl-color);
@@ -566,6 +574,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #ccc;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #eaeaea;
   --svg-hover-color: var(--hl-color);
@@ -657,6 +666,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #eee;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #fff;
   --svg-hover-color: var(--hl-color);
@@ -753,6 +763,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #212121;
   --svg-hover-color: var(--hl-color);
@@ -844,6 +855,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #ccc;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #ccc;
   --svg-hover-color: var(--hl-color);
@@ -941,6 +953,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #282828cb;
   --svg-hover-color: var(--hl-color);
@@ -1039,6 +1052,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #919343;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #e1e0a7;
   --svg-color: #919343;
@@ -1134,6 +1148,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #666;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #313131;
   --svg-color: #161616;
@@ -1228,6 +1243,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #395a62;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #395a62;
   --svg-hover-color: #273b42;
@@ -1321,6 +1337,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #3a3332;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #132322;
   --svg-hover-color: #233332;
@@ -1410,6 +1427,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #888;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #000;
   --svg-hover-color: var(--hl-color);
@@ -1505,6 +1523,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #888;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #fff;
   --svg-color: #000;
@@ -1600,6 +1619,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #999;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #000;
   --svg-text-color: #fff;
@@ -1688,6 +1708,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #888;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #000;
   --svg-hover-color: var(--hl-color);
@@ -1781,7 +1802,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-text-bg: #fdfdf2;
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
-  --text-lyric-color: #999;
+  --text-lyric-color: #fff;
+  --text-lyric-hl-color: var(--hl-color);
   /* 按钮 */
   --svg-color: #fdfdf2;
   --svg-hover-color: var(--hl-color);
@@ -1881,6 +1903,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --hl-title-color: var(--hl-color);
   /* 歌词文本颜色 */
   --text-lyric-color: #ccc;
+  --text-lyric-hl-color: var(--hl-text-bg);
   /* 按钮 */
   --svg-color: #fdfdf2;
   --svg-hover-color: var(--hl-color);

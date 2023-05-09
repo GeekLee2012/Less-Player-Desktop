@@ -42,7 +42,7 @@
     "@vitejs/plugin-vue": "^2.3.0",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
-    "electron": ">=18.0.0",
+    "electron": ">=22.0.0",
     "electron-builder": ">=22.14.13",
     "vite": "^2.9.0",
     "wait-on": "^6.0.1"
@@ -56,7 +56,8 @@
       "output": "output"
     },
     "mac": {
-      "icon": "dist/icon.icns"
+      "icon": "dist/icon.icns",
+      "category": "public.app-category.music"
     },
     "win": {
       "icon": "dist/favicon.ico"

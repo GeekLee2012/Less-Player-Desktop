@@ -277,8 +277,8 @@ export class NetEase {
             const reqBody = weapi(param)
             const result = { id, platform: NetEase.CODE, lyric: null, trans: null }
             postJson(url, reqBody).then(json => {
-                Object.assign(result, { lyric: Lyric.parseFromText(json.lrc.lyric) })
-                const tlyric = json.tlyric
+                const { lrc, tlyric } = json
+                Object.assign(result, { lyric: Lyric.parseFromText(lrc.lyric) })
                 if (tlyric) {
                     if (!isBlank(tlyric.lyric)) Object.assign(result, { trans: Lyric.parseFromText(tlyric.lyric) })
                 }

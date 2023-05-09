@@ -8,11 +8,12 @@ import { useUserProfileStore } from './store/userProfileStore';
 import { useSettingStore } from './store/settingStore';
 import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
-import { useIpcRenderer } from '../common/Utils';
+import { isDevEnv, useIpcRenderer } from '../common/Utils';
 import { PLAY_STATE, TRAY_ACTION } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
 import { toMmss } from '../common/Times';
 import { Lyric } from '../common/Lyric';
+import { United } from '../vendor/united';
 
 
 
@@ -39,9 +40,10 @@ const { addRecentSong, addRecentRadio,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
-    theme, layout, isStoreRecentPlay, isSimpleLayout } = storeToRefs(useSettingStore())
+    theme, layout, isStoreRecentPlay,
+    isSimpleLayout, isVipTransferEnable } = storeToRefs(useSettingStore())
 const { getCurrentThemeHlColor, setupStateRefreshFrequency,
-    setupSpectrumRefreshFrequency } = useSettingStore()
+    setupSpectrumRefreshFrequency, setupTray } = useSettingStore()
 
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
@@ -120,6 +122,10 @@ const updateLyric = (track, { lyric, roma, trans }) => {
 const AUTO_PLAY_NEXT_MSG = '当前歌曲无法播放<br>即将为您播放下一曲'
 const NO_NEXT_MSG = '当前歌曲无法播放<br>列表无其他可播放歌曲'
 const OVERTRY_MSG = '尝试播放次数太多<br>请手动播放其他歌曲吧'
+const TRY_TRANSFRER_MSG = '当前歌曲无法播放<br>即将尝试切换其他版本'
+const TRANSFRER_OK_MSG = '版本切换已完成<br>即将为您播放歌曲'
+const TRANSFRER_FAIL_MSG = '没有其他版本切换<br>即将为您播放下一曲'
+
 //连跳计数器
 let autoSkipCnt = 0
 //重置连跳计数
@@ -127,10 +133,10 @@ const resetAutoSkip = () => autoSkipCnt = 0
 
 
 //提示并播放下一曲
-const toastAndPlayNext = (track) => {
+const toastAndPlayNext = (track, msg) => {
     //前提条件：必须是当前歌曲
     if (isCurrentTrack(track)) {
-        showFailToast(AUTO_PLAY_NEXT_MSG, () => {
+        showFailToast(msg || AUTO_PLAY_NEXT_MSG, () => {
             if (isCurrentTrack(track)) playNextTrack()
         })
     }
@@ -138,11 +144,11 @@ const toastAndPlayNext = (track) => {
 
 //用户手动干预，即主动点击上/下一曲时，产生体验上的Bug
 //目前实现方式已稍作处理
-const handleUnplayableTrack = (track) => {
+const handleUnplayableTrack = (track, msg) => {
     const queueSize = queueTracksSize.value
     const isPlaylistRadio = Playlist.isNormalRadioType(track)
     if (isPlaylistRadio) { //普通歌单电台
-        toastAndPlayNext(track)
+        toastAndPlayNext(track, msg)
         return
     } else if (autoSkipCnt >= queueSize) { //非电台歌曲，且没有下一曲
         resetPlayState()
@@ -154,7 +160,7 @@ const handleUnplayableTrack = (track) => {
     //频繁切换下一曲，体验不好，对音乐平台也不友好
     if (autoSkipCnt < 9) {
         ++autoSkipCnt
-        toastAndPlayNext(track)
+        toastAndPlayNext(track, msg)
         return
     }
     resetPlayState()
@@ -199,7 +205,7 @@ const bootstrapTrack = (track) => {
         }
         setAutoPlaying(false)
         //设置歌词
-        if (Track.hasLyric(result)) updateLyric(track, { lyric })
+        if (Track.hasLyric(result) && !Track.isCandidate(track)) updateLyric(track, { lyric })
         //设置封面
         if (Track.hasCover(result)) Object.assign(track, { cover })
         //设置歌手信息
@@ -480,8 +486,25 @@ EventBus.on('track-changed', track => {
         if (isCurrentTrack(track)) {
             playTrackDirectly(track)
         }
-    }, reason => {
-        if (reason == 'noUrl') handleUnplayableTrack(track)
+    }, async (reason) => {
+        if (reason == 'noUrl') {
+            //TODO
+            if (!isVipTransferEnable.value) {
+                handleUnplayableTrack(track)
+                return
+            }
+            showFailToast(TRY_TRANSFRER_MSG)
+            const candidate = await United.transferTrack(track)
+            if (!Track.hasUrl(candidate)) {
+                handleUnplayableTrack(track, TRANSFRER_FAIL_MSG)
+                return
+            }
+            if (!isCurrentTrack(track)) return
+            if (isDevEnv) console.log(candidate)
+            const { url, lyric, lyricTrans, lyricRoma, duration, isCandidate } = candidate
+            Object.assign(track, { url, lyric, lyricTrans, lyricRoma, duration, isCandidate })
+            showToast(TRANSFRER_OK_MSG, () => playTrackDirectly(candidate))
+        }
     })
 })
 EventBus.on('track-play', track => {
@@ -652,6 +675,9 @@ const registryIpcRendererListeners = () => {
         //TODO 视频播放中，暂时不允许中断
         if (videoPlayingViewShow.value) return
         switch (value) {
+            case TRAY_ACTION.RESTORE:
+                setupTray()
+                break
             case TRAY_ACTION.PLAY:
             case TRAY_ACTION.PAUSE:
                 togglePlay()
@@ -664,12 +690,15 @@ const registryIpcRendererListeners = () => {
                 break
             case TRAY_ACTION.HOME:
                 visitHome()
+                setupTray()
                 break
             case TRAY_ACTION.USERHOME:
                 visitUserHome()
+                setupTray()
                 break
             case TRAY_ACTION.SETTING:
                 visitSetting()
+                setupTray()
                 break
         }
     })

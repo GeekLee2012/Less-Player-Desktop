@@ -41,6 +41,11 @@ npm doctor
 ``` 
 npm install --verbose
 ``` 
+
+6、更新命令（依赖更新）
+``` 
+npm update
+``` 
   
 > 如何为Linux平台或x86平台编译打包  
 * 修改配置package.json中内容  

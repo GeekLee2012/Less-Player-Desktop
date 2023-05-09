@@ -39,6 +39,8 @@ export class Track {
         //VIP付费信息
         this.payPlay = payPlay
         this.payDownload = payDownload
+        //是否为替换版本
+        this.isCandidate = false
     }
 
     mmssDuration() {
@@ -83,7 +85,7 @@ export class Track {
     }
 
     static isVip(track) {
-        return Track.isVip(this)
+        return track && track.payPlay
     }
 
     static title(track) {
@@ -128,7 +130,7 @@ export class Track {
     }
 
     static firstArtistName(track) {
-        return track ? track.artistName().split('、')[0] : ""
+        return track ? Track.artistName(track).split('、')[0].split('&')[0] : ''
     }
 
     static lyricData(track) {
@@ -202,6 +204,10 @@ export class Track {
 
     static isM3U8(track) {
         return Track.hasUrl(track) && track.url.includes(".m3u8")
+    }
+
+    static isCandidate(track) {
+        return track && track.isCandidate
     }
 
 }

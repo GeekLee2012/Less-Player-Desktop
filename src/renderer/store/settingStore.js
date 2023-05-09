@@ -110,9 +110,10 @@ export const useSettingStore = defineStore('setting', {
             storeLocalMusic: false, //退出后记录已经添加的本地歌曲
             storeRecentPlay: true,  //记录最近播放
         },
-        /* 菜单栏、系统托盘 */
+        /* 菜单栏、Windows平台为系统托盘 */
         tray: {
-            show: false, //是否在系统托盘显示
+            show: false, //是否在菜单栏显示
+            showOnMinimized: false, //是否最小化到菜单栏
         },
         /* 导航栏 */
         navigation: {
@@ -210,6 +211,9 @@ export const useSettingStore = defineStore('setting', {
         blackHole: null, //黑洞state，永远不需要持久化
     }),
     getters: {
+        isVipTransferEnable() {
+            return this.track.vipTransfer
+        },
         isPlaylistCategoryBarRandom() {
             return this.track.playlistCategoryBarRandom
         },
@@ -264,6 +268,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isPlaybackQueueAutoPositionOnShow() {
             return this.track.playbackQueueAutoPositionOnShow
+        },
+        isHideToTrayOnMinimized() {
+            return this.tray.showOnMinimized
         }
     },
     actions: {
@@ -382,6 +389,9 @@ export const useSettingStore = defineStore('setting', {
         toggleTrayShow() {
             this.tray.show = !this.tray.show
             this.setupTray()
+        },
+        toggleTrayShowOnMinimized() {
+            this.tray.showOnMinimized = !this.tray.showOnMinimized
         },
         toggleCustomPlaylistsShow() {
             this.navigation.customPlaylistsShow = !this.navigation.customPlaylistsShow

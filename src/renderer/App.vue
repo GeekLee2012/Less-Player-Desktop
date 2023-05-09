@@ -16,10 +16,7 @@ import AppContent from "./AppContent.vue";
 html,
 body,
 #app {
-  background-color: var(--bg-color);
-  background: var(--app-bg);
-  background-position: center;
-  background-size: cover;
+  background: transparent;
   height: 100%;
   font-size: var(--text-size);
   color: var(--text-color);
@@ -27,6 +24,10 @@ body,
 }
 
 #app {
+  background-color: var(--bg-color);
+  background: var(--app-bg);
+  background-position: center;
+  background-size: cover;
   display: flex;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

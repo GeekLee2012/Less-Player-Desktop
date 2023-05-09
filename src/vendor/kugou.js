@@ -424,7 +424,7 @@ export class KuGou {
             const albumId = album.id
             const { kg_dfid, kg_mid } = COOKIES
             const hashList = []
-            hashList.push(...highHash)
+            if (highHash) hashList.push(...highHash)
             hashList.push(hash)
 
             const result = new Track(id, KuGou.CODE)
@@ -613,7 +613,7 @@ export class KuGou {
                 let jsonText = jsonp.split(callbackFn + "(")[1].trim()
                 jsonText = jsonText.substring(0, jsonText.length - 1)
                 const json = JSON.parse(jsonText)
-
+                console.log(json)
                 const data = json.data.lists.map(item => {
                     const artist = item.Singers
                     const album = { id: item.AlbumID, name: item.AlbumName }
@@ -621,6 +621,7 @@ export class KuGou {
                     const track = new Track(item.ID, KuGou.CODE, item.SongName, artist, album, duration, item.pic)
                     track.hash = item.FileHash
                     track.mv = item.MvHash
+                    track.highHash = [/*item.ResFileHash,*/ item.SQFileHash, item.HQFileHash]
                     return track
                 })
                 const result = { platform: KuGou.CODE, offset, limit, page, data }

@@ -40,6 +40,7 @@ const { setThemeIndex,
     toggleStoreLocalMusic,
     toggleStoreRecentPlay,
     toggleTrayShow,
+    toggleTrayShowOnMinimized,
     toggleCustomPlaylistsShow,
     toggleFavoritePlaylistsShow,
     toggleFollowArtistsShow,
@@ -72,7 +73,7 @@ const resetData = async () => {
     if (!ipcRenderer) return
     const ok = await ipcRenderer.invoke('show-confirm', {
         title: "确认",
-        msg: "数据重置，将会清空我的主页、恢复默认设置、当前播放等全部数据。  确定要继续吗？"
+        msg: "数据重置，将会清空我的主页、当前播放等全部数据，同时恢复默认设置。  确定要继续吗？"
     })
     if (!ok) return
     const settingStore = useSettingStore()
@@ -397,7 +398,7 @@ onMounted(checkForUpdate)
                 <span class="cate-name">播放歌曲</span>
                 <div class="content">
                     <div>
-                        <span class="cate-subtitle">优先音质（目前无法支持）：</span>
+                        <span class="cate-subtitle">优先音质（暂不支持）：</span>
                         <span v-for="(item, index) in allQualities()" class="quality-item"
                             :class="{ active: index == track.quality.index }" @click="setTrackQualityIndex(index)">
                             {{ item.name }}
@@ -407,7 +408,7 @@ onMounted(checkForUpdate)
                         <span class="cate-subtitle">VIP歌曲试切换为免费版本：</span>
                         <ToggleControl @click="toggleVipTransfer" :value="track.vipTransfer">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：目前无法支持</div>
+                        <div class="tip-text spacing">提示：实验性功能，匹配准确度无法保证</div>
                     </div>
                     <div>
                         <span class="cate-subtitle">歌曲显示VIP标识：</span>
@@ -415,7 +416,7 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">歌单分类栏，随机显示分类：</span>
+                        <span class="cate-subtitle">歌单分类栏，随机显示：</span>
                         <ToggleControl @click="toggleCategoryBarRandom" :value="track.playlistCategoryBarRandom">
                         </ToggleControl>
                     </div>
@@ -440,10 +441,10 @@ onMounted(checkForUpdate)
                         <span class="cate-subtitle">播放歌曲时，防止系统睡眠：</span>
                         <ToggleControl @click="togglePlayingWithoutSleeping" :value="track.playingWithoutSleeping">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：不会影响系统熄屏、锁屏</div>
+                        <div class="tip-text spacing">提示：不影响系统正常熄屏、锁屏</div>
                     </div>
                     <div class="tip-text">提示：当前应用，更新频度是指每多少个动画帧更新一次；
-                        频度越小，动画越流畅，而CPU占用越高；
+                        频度越小，动画越流畅，<br>而CPU占用越高；
                         歌曲进度更新频度，一般与屏幕刷新率保持一致
                     </div>
                     <div>
@@ -463,6 +464,7 @@ onMounted(checkForUpdate)
             <div class="cache row">
                 <span class="cate-name">缓存</span>
                 <div class="content">
+                    <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的进度</div>
                     <div>
                         <span class="cate-subtitle">应用退出前，保存播放状态：</span>
                         <ToggleControl @click="toggleStorePlayState" :value="cache.storePlayState">
@@ -483,9 +485,16 @@ onMounted(checkForUpdate)
             <div class="menu row">
                 <span class="cate-name">菜单栏</span>
                 <div class="content">
-                    <div class="last">
-                        <span class="cate-subtitle">在菜单栏（系统托盘）显示：</span>
+                    <div class="tip-text">提示：macOS平台下的菜单栏，在Windows平台为系统托盘
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">在菜单栏显示应用图标：</span>
                         <ToggleControl @click="toggleTrayShow" :value="tray.show">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">最小化到菜单栏：</span>
+                        <ToggleControl @click="toggleTrayShowOnMinimized" :value="tray.showOnMinimized">
                         </ToggleControl>
                     </div>
                 </div>
@@ -509,8 +518,8 @@ onMounted(checkForUpdate)
                         <ToggleControl @click="toggleFollowArtistsShow" :value="navigation.followArtistsShow">
                         </ToggleControl>
                     </div>
-                    <br />
-                    <div>顶部导航栏显示（快捷入口）：</div>
+                    <div class="tip-text">提示：顶部导航栏显示快捷入口，仅在“经典主流”布局下生效</div>
+                    <div>顶部导航栏显示快捷入口：</div>
                     <div class="last">
                         <span class="cate-subtitle">相约电波：</span>
                         <ToggleControl @click="toggleRadioModeShortcut" :value="navigation.radioModeShortcut">

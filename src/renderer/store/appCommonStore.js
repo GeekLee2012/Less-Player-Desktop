@@ -139,8 +139,8 @@ export const useAppCommonStore = defineStore('appCommon', {
         quit() {
             if (ipcRenderer) ipcRenderer.send('app-quit')
         },
-        minimize() {
-            if (ipcRenderer) ipcRenderer.send('app-min')
+        minimize(isToTray) {
+            if (ipcRenderer) ipcRenderer.send('app-min', isToTray)
         },
         maximize() {
             if (ipcRenderer) ipcRenderer.send('app-max')

@@ -64,12 +64,15 @@
   `npm run build`  
   `npm run pack`  
   
+* 更新依赖  
+  `npm update`
+  
 ### 发行版  
 * 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
 * Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)
 
 ### For普通用户
-* 最新开发测试版，愿意尝鲜的朋友，请访问以下资源库：
+* 最新开发测试版，欢迎愿意尝鲜的朋友体验！请访问以下资源库：
 * [Github资源库](https://github.com/GeekLee2012/Resources/releases/)  
 * [Gitee资源库](https://gitee.com/rive08/resources/releases/)  
 

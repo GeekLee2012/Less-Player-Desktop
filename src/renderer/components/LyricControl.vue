@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref, onMounted, inject, onUnmounted, nextTick, onUpdated } from 'vue';
+import { watch, ref, onMounted, inject, onUnmounted, nextTick, onUpdated, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
@@ -301,84 +301,48 @@ const restoreLyricPausedState = () => {
     if (playState.value == PLAY_STATE.PAUSE) safeRenderAndScrollLyric(props.currentTime)
 }
 
+
+const isExtraTextActived = computed(() => {
+    const { track } = props
+    return (Track.hasLyricTrans(track) && lyricTransActived.value)
+        || (Track.hasLyricRoma(track) && lyricRomaActived.value)
+})
+
 //额外歌词对应的时间，如翻译、发音
 const getExtraTimeKey = (mmssSSS, offset) => {
     return toMMssSSS(toMillis(mmssSSS) + (offset || 0))
         || mmssSSS
 }
 
-//歌词翻译
-const setupLyricTrans = () => {
-    if (!Track.hasLyricTrans(props.track)) return
-    const lines = document.querySelectorAll(".lyric-ctl .center .line")
-    if (lines) {
-        try {
-            lines.forEach((line, index) => {
-                const timeKey = line.getAttribute('time-key')
-                if (!timeKey) return
-                const transEl = line.querySelector('.trans-text')
-                if (!transEl) return
-                transEl.innerHTML = null //重置
-                const transMap = lyricTransData.value
-                if (!transMap) return
-                //TODO 算法简单粗暴，最坏情况11次尝试！！！
-                const transText = transMap.get(getExtraTimeKey(timeKey))
-                    || transMap.get(getExtraTimeKey(timeKey, 10))
-                    || transMap.get(getExtraTimeKey(timeKey, -10))
-                    || transMap.get(getExtraTimeKey(timeKey, 20))
-                    || transMap.get(getExtraTimeKey(timeKey, -20))
-                    || transMap.get(getExtraTimeKey(timeKey, 30))
-                    || transMap.get(getExtraTimeKey(timeKey, -30))
-                    || transMap.get(getExtraTimeKey(timeKey, 40))
-                    || transMap.get(getExtraTimeKey(timeKey, -40))
-                    || transMap.get(getExtraTimeKey(timeKey, 50))
-                    || transMap.get(getExtraTimeKey(timeKey, -50))
-                if (transText && transText != '//') transEl.innerHTML = transText
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-}
-
-//歌词发音
-const setupLyricRoma = () => {
-    if (!Track.hasLyricRoma(props.track)) return
-    const lines = document.querySelectorAll(".lyric-ctl .center .line")
-    if (lines) {
-        try {
-            lines.forEach((line, index) => {
-                const timeKey = line.getAttribute('time-key')
-                if (!timeKey) return
-                const romaEl = line.querySelector('.roma-text')
-                if (!romaEl) return
-                romaEl.innerHTML = null //重置
-                const romaMap = lyricRomaData.value
-                if (!romaMap) return
-                //TODO 算法简单粗暴，最坏情况11次尝试！！！
-                const romaText = romaMap.get(getExtraTimeKey(timeKey))
-                    || romaMap.get(getExtraTimeKey(timeKey, 10))
-                    || romaMap.get(getExtraTimeKey(timeKey, -10))
-                    || romaMap.get(getExtraTimeKey(timeKey, 20))
-                    || romaMap.get(getExtraTimeKey(timeKey, -20))
-                    || romaMap.get(getExtraTimeKey(timeKey, 30))
-                    || romaMap.get(getExtraTimeKey(timeKey, -30))
-                    || romaMap.get(getExtraTimeKey(timeKey, 40))
-                    || romaMap.get(getExtraTimeKey(timeKey, -40))
-                    || romaMap.get(getExtraTimeKey(timeKey, 50))
-                    || romaMap.get(getExtraTimeKey(timeKey, -50))
-                if (romaText && romaText != '//') romaEl.innerHTML = romaText
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-}
-
+//歌词翻译、罗马发音
 const setupLyricExtra = () => {
-    setupLyricTrans()
-    setupLyricRoma()
+    const lines = document.querySelectorAll(".lyric-ctl .center .line")
+    if (lines) {
+        try {
+            lines.forEach((line, index) => {
+                const timeKey = line.getAttribute('time-key')
+                if (!timeKey) return
+                const extraTextEl = line.querySelector('.extra-text')
+                if (!extraTextEl) return
+                extraTextEl.innerHTML = null //重置
+                const extraTextMap = lyricTransData.value || lyricRomaData.value
+                if (!extraTextMap) return
+
+                let extraText = null
+                //算法简单粗暴，最坏情况11次尝试！！！
+                const timeErrors = [0, 10, -10, 20, -20, 30, -30, 40, -40, 50, -50]
+                for (var i = 0; i < timeErrors.length; i++) {
+                    extraText = extraTextMap.get(getExtraTimeKey(timeKey, timeErrors[i]))
+                    if (extraText) break
+                }
+                if (extraText && extraText != '//') extraTextEl.innerHTML = extraText
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }
+
 
 //EventBus事件
 EventBus.on('track-lyricLoaded', reloadLyricData)
@@ -452,8 +416,7 @@ watch(() => props.track, loadLyric, { immediate: true })
                     locatorCurrent: (index == scrollLocatorCurrentIndex && isUserMouseWheel)
                 }">
                 <div class="text" :time-key="item[0]" :index="index" v-html="item[1]"></div>
-                <div class="trans-text" v-show="lyricTransActived"></div>
-                <div class="roma-text" v-show="lyricRomaActived"></div>
+                <div class="extra-text" v-show="isExtraTextActived"></div>
             </div>
         </div>
         <div class="scroll-locator" v-show="hasLyric && isUserMouseWheel">
@@ -562,7 +525,7 @@ watch(() => props.track, loadLyric, { immediate: true })
 }
 
 .lyric-ctl .center .current {
-    background: var(--hl-text-bg);
+    background: var(--text-lyric-hl-color);
     -webkit-background-clip: text;
     color: transparent;
     font-size: 22px;
@@ -646,7 +609,7 @@ watch(() => props.track, loadLyric, { immediate: true })
     fill: var(--svg-btn-color) !important;
 }
 
-.lyric-ctl .center .line .trans-text {
+.lyric-ctl .center .line .extra-text {
     color: var(--text-lyric-color) !important;
 }
 
