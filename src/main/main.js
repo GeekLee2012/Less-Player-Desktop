@@ -628,23 +628,23 @@ const overrideRequest = (details) => {
   let cookie = null
   let userAgent = null
   let xrouter = null
+  let csrf = null
 
   const url = details.url
   if (url.includes("qq.com")) {
     origin = "https://y.qq.com/"
     referer = origin
-  } else if (url.includes("music.163.com") || url.includes("126.net")) {
+  } else if (url.includes("163.com") || url.includes("126.net")) {
     origin = "https://music.163.com/"
     referer = origin
     //if(url.includes("/dj/program/listen")) referer = null
   } else if (url.includes("kuwo")) {
-    const CSRF = randomTextWithinAlphabetNums(11).toUpperCase()
+    csrf = randomTextWithinAlphabetNums(11).toUpperCase()
     origin = "https://www.kuwo.cn/"
     referer = origin
     cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; "
       + "_ga=GA1.2.1036906485.1647595722; "
-      + "kw_token=" + CSRF
-    details.requestHeaders['CSRF'] = CSRF
+      + "kw_token=" + csrf
   } else if (url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
@@ -677,6 +677,7 @@ const overrideRequest = (details) => {
   if (referer) details.requestHeaders['Referer'] = referer
   if (cookie) details.requestHeaders['Cookie'] = cookie
   if (xrouter) details.requestHeaders['x-router'] = xrouter
+  if (csrf) details.requestHeaders['CSRF'] = csrf
 
 }
 

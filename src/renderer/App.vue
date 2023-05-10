@@ -16,11 +16,12 @@ import AppContent from "./AppContent.vue";
 html,
 body,
 #app {
-  background: #fff;
+  background: transparent;
   height: 100%;
   font-size: var(--text-size);
   color: var(--text-color);
   overflow: hidden;
+  border-radius: var(--macstyle-border-radius);
 }
 
 #app {

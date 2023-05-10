@@ -76,15 +76,15 @@ const updateCover = async () => {
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="user.nickname" ref="titleRef" :class="{ invalid }" maxlength="20"
-                            placeholder="请输入用户昵称，最多允许输入20个字符哦">
+                        <input type="text" :value="user.nickname" ref="titleRef" :class="{ invalid }" maxlength="64"
+                            placeholder="请输入用户昵称，最多允许输入64个字符哦">
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介 / 说说</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="user.about" ref="aboutRef" maxlength="99"
-                            placeholder="今天想要对自己说些什么呀~ 最多允许输入99个字符哦"></textarea>
+                        <textarea :value="user.about" ref="aboutRef" maxlength="512"
+                            placeholder="今天想要对自己说些什么呀~ 最多允许输入512个字符哦"></textarea>
                     </div>
                 </div>
                 <div class="action">

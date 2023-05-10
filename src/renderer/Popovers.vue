@@ -236,6 +236,8 @@ onMounted(() => {
   z-index: 99;
   background: var(--app-bg);
   box-shadow: var(--pbq-box-shadow);
+  border-top-right-radius: var(--macstyle-border-radius);
+  border-bottom-right-radius: var(--macstyle-border-radius);
 }
 
 #playing-view,
@@ -247,6 +249,7 @@ onMounted(() => {
   height: 100%;
   z-index: 99;
   background: var(--app-bg);
+  border-radius: var(--macstyle-border-radius);
 }
 
 #video-playing-view {

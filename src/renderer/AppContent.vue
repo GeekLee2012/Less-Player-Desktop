@@ -9,7 +9,7 @@ import Themes from './Themes.vue';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import EventBus from '../common/EventBus';
-import { useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
+import { isMacOS, useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
 
 
 
@@ -196,7 +196,14 @@ const registryIpcRendererListeners = () => {
   ipcRenderer.on('app-quit', setupCache)
 }
 
+const setupMacStyle = () => {
+  const borderRadius = isMacOS() ? 0 : 12
+  document.documentElement.style.setProperty('--macstyle-border-radius', `${borderRadius}px`)
+  //TODO 边框阴影效果, 再看看情况
+}
+
 const initialize = () => {
+  setupMacStyle()
   restoreSetting()
   registryIpcRendererListeners()
 }

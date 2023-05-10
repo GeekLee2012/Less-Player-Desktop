@@ -5,6 +5,7 @@
   --text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
   --text-font-family: var(--text-preset-font-family);
 
+  --macstyle-border-radius: 0px;
   --scrollbar-width: 6px;
   --play-meta-height: 77px;
   --main-play-nav-height: 80px;

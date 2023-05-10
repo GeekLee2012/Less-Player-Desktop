@@ -198,8 +198,12 @@ const onUserMouseWheel = (e) => {
 const setLyricLineStyle = (line) => {
     const { fontSize, hlFontSize, fontWeight, lineHeight, lineSpacing } = lyric.value
 
-    line.style.lineHeight = lineHeight + "px"
-    line.style.marginTop = lineSpacing + "px"
+    const textEl = line.querySelector('.text')
+    const extraTextEl = line.querySelector('.extra-text')
+
+    textEl.style.lineHeight = `${lineHeight}px`
+    textEl.style.marginTop = `${lineSpacing}px`
+    extraTextEl.style.lineHeight = `${lineHeight}px`
 
     //const classAttr = line.getAttribute('class')
     if (line.classList.contains('current')) { //高亮行
@@ -610,6 +614,7 @@ watch(() => props.track, loadLyric, { immediate: true })
 }
 
 .lyric-ctl .center .line .extra-text {
+    /*margin-top: 3px;*/
     color: var(--text-lyric-color) !important;
 }
 
