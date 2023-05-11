@@ -9,7 +9,10 @@ on:
 
 jobs:
   publish:
-    runs-on: windows-latest
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-12.6]
     permissions:
       contents: write
       packages: write
@@ -26,7 +29,8 @@ jobs:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       
       - name: Clean output
-        run: npx rimraf "out/!(*.exe|*.dmg|*.AppImage|*.zip)"
+        run: | 
+          npx rimraf "output/!(*.exe|*.dmg|*.AppImage|*.zip)"
           
       - name: Release
         uses: softprops/action-gh-release@v1
