@@ -11,7 +11,7 @@ jobs:
   publish:
     runs-on: windows-latest
     permissions:
-      contents: read|write
+      contents: write
       packages: write
     steps:
       - uses: actions/checkout@v3
