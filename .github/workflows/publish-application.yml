@@ -28,7 +28,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: output/
+          files: "output/**"
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
