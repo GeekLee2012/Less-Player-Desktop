@@ -28,9 +28,15 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       
-      - name: Clean output
+      - name: Clean Windows output 
+        if: ${{ matrix.os.contains('win') }}
         run: | 
-          npx rimraf "output/!(*.exe|*.dmg|*.AppImage|*.zip)"
+          npx rimraf "output/!(*.exe)"
+      
+      - name: Clean macOS output 
+        if: ${{ matrix.os.contains('mac') }}
+        run: | 
+          npx rimraf "output/!(*.dmg)"
           
       - name: Release
         uses: softprops/action-gh-release@v1
