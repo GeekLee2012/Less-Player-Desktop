@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [windows-latest, macos-12.6]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
     permissions:
       contents: write
       packages: write
@@ -33,6 +33,11 @@ jobs:
         run: | 
           npx rimraf "output/!(*.exe)"
       
+      - name: Clean Linux output 
+        if: ${{ !contains(matrix.os, 'win') && !contains(matrix.os, 'mac') }}
+        run: | 
+          npx rimraf "output/!(*.AppImage)"
+          
       - name: Clean macOS output 
         if: ${{ contains(matrix.os, 'mac') }}
         run: | 
