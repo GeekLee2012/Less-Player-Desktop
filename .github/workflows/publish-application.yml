@@ -24,6 +24,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      
+      - name: Clean output
+        run: npx rimraf "out/!(*.exe|*.dmg|*.AppImage|*.zip)"
           
       - name: Release
         uses: softprops/action-gh-release@v1
