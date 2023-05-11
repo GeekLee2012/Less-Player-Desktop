@@ -32,6 +32,6 @@ jobs:
           files: output/
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GITHUB_REPOSITORY: GeekLee2012/Less-Player-Desktop
           
