@@ -29,18 +29,17 @@ jobs:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       
       - name: Clean Windows output 
-        if: ${{ matrix.os.contains('win') }}
+        if: ${{ contains(matrix.os, 'win') }}
         run: | 
           npx rimraf "output/!(*.exe)"
       
       - name: Clean macOS output 
-        if: ${{ matrix.os.contains('mac') }}
+        if: ${{ contains(matrix.os, 'mac') }}
         run: | 
           npx rimraf "output/!(*.dmg)"
           
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: "output/**"
           token: ${{ secrets.GITHUB_TOKEN }}
