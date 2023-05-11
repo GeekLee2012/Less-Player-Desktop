@@ -8,14 +8,14 @@ on:
     types: [created]
 
 jobs:
-  dist:
+  publish:
     runs-on: windows-latest
     permissions:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@main
-      - uses: actions/setup-node@main
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
           registry-url: https://npm.pkg.github.com/
@@ -25,7 +25,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          path: output
+      - name: Release
+        uses: fnkr/github-action-ghr@v1
+        env:
+          GHR_COMPRESS: zip
+          GHR_PATH: output/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
