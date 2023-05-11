@@ -8,7 +8,7 @@ on:
     types: [created]
 
 jobs:
-  publish:
+  dist:
     runs-on: windows-latest
     permissions:
       contents: read
@@ -24,3 +24,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          path: output
