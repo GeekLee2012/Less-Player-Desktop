@@ -21,13 +21,16 @@ jobs:
           registry-url: https://npm.pkg.github.com/
       - run: npm install
       - run: npm run dist
+      
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: output/
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_REPOSITORY: GeekLee2012/Less-Player-Desktop
           
-      - name: Release
-        uses: fnkr/github-action-ghr@v1
-        env:
-          GHR_COMPRESS: zip
-          GHR_PATH: output/
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
