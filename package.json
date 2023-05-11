@@ -17,7 +17,15 @@
     "dev": "cross-env NODE_ENV=dev concurrently vite \"electron .\"",
     "dist": "cross-env NODE_ENV=prod vite build && electron-builder",
     "build": "cross-env NODE_ENV=prod vite build",
-    "pack": "cross-env NODE_ENV=prod electron-builder"
+    "pack": "cross-env NODE_ENV=prod electron-builder",
+    "dist:mac": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64",
+    "dist:mac-arm64": "cross-env NODE_ENV=prod vite build && electron-builder --mac --arm64",
+    "dist:win": "cross-env NODE_ENV=prod vite build && electron-builder --win --x64",
+    "dist:win-arm64": "cross-env NODE_ENV=prod vite build && electron-builder --win --arm64",
+    "dist:win32": "cross-env NODE_ENV=prod vite build && electron-builder --win --ia32",
+    "dist:linux": "cross-env NODE_ENV=prod vite build && electron-builder --linux --x64",
+    "dist:linux-arm64": "cross-env NODE_ENV=prod vite build && electron-builder --linux --arm64",
+    "dist:x64": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && cross-env PACK_HISTORY=keep electron-builder --win --x64 && cross-env PACK_HISTORY=keep electron-builder --linux --x64"
   },
   "dependencies": {
     "axios": "^0.26.1",
@@ -55,6 +63,10 @@
     "directories": {
       "output": "output"
     },
+    "files": [
+      "**/*",
+      "!**/public/*"
+    ],
     "mac": {
       "icon": "dist/icon.icns",
       "category": "public.app-category.music"
@@ -72,13 +84,10 @@
       "target": [
         {
           "target": "AppImage"
-        },
-        {
-          "target": "deb"
         }
       ],
       "icon": "dist/icon@256X256.icns",
-      "category": "Audio Video"
+      "category": "Audio"
     }
   }
 }

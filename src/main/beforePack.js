@@ -1,4 +1,5 @@
 const { rm } = require('fs/promises');
+const isKeepHistory = (process.env['PACK_HISTORY'] === 'keep')
 
 exports.default = async function (context) {
     console.log("------------------ Before Pack Hook ------------------")
@@ -12,6 +13,6 @@ exports.default = async function (context) {
         return
     }
     const option = { recursive: true, force: true, maxRetries: 3 }
-    rm(outDir, option) //Nodejs之从入门到删系统跑路......
+    if (!isKeepHistory) rm(outDir, option) //Nodejs之从入门到删系统跑路......
     console.log("------------------ End Hook ------------------")
 }

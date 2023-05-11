@@ -124,7 +124,8 @@ export class NetEase {
                     const listenNumEl = el.querySelector(".bottom .nb")
 
                     if (coverEl) {
-                        cover = coverEl.getAttribute("src").replace("140y140", "500y500")
+                        cover = coverEl.getAttribute("src").split("?")[0]
+                        //cover = coverEl.getAttribute("src").replace("140y140", "500y500")
                     }
 
                     if (titleEl) {
