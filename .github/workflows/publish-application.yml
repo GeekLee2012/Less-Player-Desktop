@@ -31,7 +31,7 @@ jobs:
       - name: Clean Windows output 
         if: ${{ contains(matrix.os, 'win') }}
         run: | 
-          npx rimraf "output/!(*.exe)"
+          npx rimraf "output/!(*.exe|*.zip)"
       
       - name: Clean Linux output 
         if: ${{ !contains(matrix.os, 'win') && !contains(matrix.os, 'mac') }}
