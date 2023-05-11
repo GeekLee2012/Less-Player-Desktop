@@ -31,10 +31,11 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: output/*.exe
-                  output/*.zip
-                  output/*.dmg
-                  output/*.AppImage
+          files: |
+              output/*.exe
+              output/*.zip
+              output/*.dmg
+              output/*.AppImage
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
