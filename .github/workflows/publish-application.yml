@@ -9,10 +9,10 @@ on:
 
 jobs:
   publish:
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest,windows-latest,macOS-latest]
     permissions:
       contents: write
       packages: write
@@ -23,10 +23,24 @@ jobs:
           node-version: 18
           registry-url: https://npm.pkg.github.com/
       - run: npm install
-      - run: npm run dist
+
+      - run: npm run dist:mac-release
+        if: ${{ contains(matrix.os, 'mac') }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - run: npm run dist:win-release
+        if: ${{ contains(matrix.os, 'win') }}
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      
+      - run: npm run dist:linux-release
+        if: ${{ !contains(matrix.os, 'mac') && !contains(matrix.os, 'win') }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -38,6 +52,6 @@ jobs:
               output/*.AppImage
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: GeekLee2012/Less-Player-Desktop
           
