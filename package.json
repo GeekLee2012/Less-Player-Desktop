@@ -1,7 +1,7 @@
 {
   "name": "less-player",
   "private": true,
-  "version": "0.1.15-dev-2",
+  "version": "0.1.15-dev-3",
   "description": "Less Player, Less is More ! ",
   "author": {
     "name": "RIVE2012",
@@ -25,7 +25,11 @@
     "dist:win32": "cross-env NODE_ENV=prod vite build && electron-builder --win --ia32",
     "dist:linux": "cross-env NODE_ENV=prod vite build && electron-builder --linux --x64",
     "dist:linux-arm64": "cross-env NODE_ENV=prod vite build && electron-builder --linux --arm64",
-    "dist:x64": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && cross-env PACK_HISTORY=keep electron-builder --win --x64 && cross-env PACK_HISTORY=keep electron-builder --linux --x64"
+    "dist:x64": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && cross-env PACK_HISTORY=keep electron-builder --win --x64 && cross-env PACK_HISTORY=keep electron-builder --linux --x64",
+    "dist:mac-release": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && electron-builder --mac --arm64",
+    "dist:win-release": "cross-env NODE_ENV=prod vite build && electron-builder --win --x64 && electron-builder --win --arm64 && electron-builder --win --ia32",
+    "dist:linux-release": "cross-env NODE_ENV=prod vite build && electron-builder --linux --x64 && electron-builder --linux --arm64",
+    "dist:release": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && cross-env PACK_HISTORY=keep electron-builder --win --x64 && cross-env PACK_HISTORY=keep electron-builder --linux --x64 && electron-builder --mac --arm64 && cross-env PACK_HISTORY=keep electron-builder --win --arm64 && cross-env PACK_HISTORY=keep electron-builder --linux --arm64 && cross-env PACK_HISTORY=keep electron-builder --win --ia32"
   },
   "dependencies": {
     "axios": "^0.26.1",
@@ -65,15 +69,23 @@
     },
     "files": [
       "**/*",
-      "!**/public/*"
+      "!public/*",
+      "!**/*.md",
+      "!**/{npmrc,.npmrc,vite.config.js}",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}"
     ],
     "mac": {
-      "artifactName": "${productName} v${version}-${os}-${arch}.${ext}",
+      "artifactName": "${productName}.v${version}.${os}-${arch}.${ext}",
       "icon": "dist/icon.icns",
       "category": "public.app-category.music"
     },
     "win": {
-      "artifactName": "${productName} v${version}-${os}-${arch}.${ext}",
+      "artifactName": "${productName}.v${version}.${os}-${arch}.${ext}",
       "target": [
         {
           "target": "nsis"
@@ -91,7 +103,7 @@
       "deleteAppDataOnUninstall": true
     },
     "linux": {
-      "artifactName": "${productName} v${version}-${os}-${arch}.${ext}",
+      "artifactName": "${productName}.v${version}.${os}-${arch}.${ext}",
       "target": [
         {
           "target": "AppImage"
