@@ -41,6 +41,7 @@ const { hideColorPickerToolbar } = useAppCommonStore()
     height: 365px;
     border-radius: 5px;
     background: var(--bg-color);
+    -webkit-app-region: none;
 }
 
 .color-picker-toolbar .header {

@@ -33,7 +33,9 @@ const { playingViewShow, videoPlayingViewShow,
   commonNotificationShow } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
-  hideAllCategoryViews, showToast } = useAppCommonStore()
+  hideAllCategoryViews, showToast, hideLyricToolbar,
+  hideSoundEffectView, hideCustomThemeEditView,
+  hideColorPickerToolbar } = useAppCommonStore()
 
 const isReservedPath = (path) => {
   const reservedPaths = ['id', 'name', 'binding', 'gBinding']
@@ -106,6 +108,7 @@ const setupCache = () => {
 }
 
 const setupLayout = (isInit) => {
+  hideAllPopoverViewsAndToolbars()
   let channel = 'app-layout-default'
   if (isSimpleLayout.value) {
     currentAppLayout.value = SimpleLayout
@@ -156,6 +159,15 @@ const hideAllPopoverViews = () => {
   hideAllCtxMenus()
   //隐藏未正确关闭的Toast
   hideEmptyToast()
+}
+
+const hideAllPopoverViewsAndToolbars = () => {
+  hideAllPopoverViews()
+
+  hideLyricToolbar()
+  hideSoundEffectView()
+  hideCustomThemeEditView()
+  hideColorPickerToolbar()
 }
 
 const hideEmptyToast = () => {
