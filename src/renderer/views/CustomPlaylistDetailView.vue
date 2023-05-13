@@ -225,7 +225,7 @@ onUpdated(() => {
 }
 
 #custom-playlist-detail-view .header .about {
-    height: 113px;
+    min-height: 99px;
     /*line-height: 21px;*/
     line-height: var(--text-line-height);
     color: var(--text-sub-color);

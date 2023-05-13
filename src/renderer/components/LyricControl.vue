@@ -486,6 +486,8 @@ watch(() => props.track, loadLyric, { immediate: true })
     font-size: var(--text-main-title-size);
     font-weight: bold;
     margin-bottom: 6px;
+
+    word-wrap: break-word;
 }
 
 .lyric-ctl .audio-artist,
@@ -526,6 +528,8 @@ watch(() => props.track, loadLyric, { immediate: true })
     margin-top: 28px;
     color: #ccc;
     color: var(--text-lyric-color);
+    word-break: break-word;
+    /*word-wrap: break-word;*/
 }
 
 .lyric-ctl .center .current {

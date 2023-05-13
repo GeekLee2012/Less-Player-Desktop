@@ -280,8 +280,8 @@ EventBus.on("refresh-favorite", checkFavorite)
 }
 
 #playlist-detail-view .header .cover {
-    width: 233px;
-    height: 233px;
+    width: 236px;
+    height: 236px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }

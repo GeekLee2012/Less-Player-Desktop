@@ -613,7 +613,6 @@ export class KuGou {
                 let jsonText = jsonp.split(callbackFn + "(")[1].trim()
                 jsonText = jsonText.substring(0, jsonText.length - 1)
                 const json = JSON.parse(jsonText)
-                console.log(json)
                 const data = json.data.lists.map(item => {
                     const artist = item.Singers
                     const album = { id: item.AlbumID, name: item.AlbumName }

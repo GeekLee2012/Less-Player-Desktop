@@ -56,7 +56,7 @@ const setCategoryViewSize = () => {
     const artistCategory = document.querySelector('#artist-category-view')
     const radioCategory = document.querySelector('#radio-category-view')
     if (!mainContent) return
-    const { clientHeight } = mainContent, padding = 30
+    const { clientHeight } = mainContent, padding = 0
     const height = (clientHeight - padding)
     if (playlistCategory) playlistCategory.style.height = height + "px"
     if (artistCategory) artistCategory.style.height = height + "px"
@@ -189,17 +189,23 @@ const setPlayingCoverSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    let size = 333 * Math.min(wScaleRatio, hScaleRatio)
-    const el = document.querySelector(".playing-view .cover img")
-    if (!el) return
-    el.style.width = size + "px"
-    el.style.height = size + "px"
+    let size = 356 * Math.min(wScaleRatio, hScaleRatio)
+    const coverEl = document.querySelector(".playing-view .cover")
+    if (!coverEl) return
+    coverEl.style.marginRight = 41 * Math.min(wScaleRatio, hScaleRatio) + 'px'
+    const imgEl = coverEl.querySelector("img")
+    if (!imgEl) return
+    imgEl.style.width = `${size + 3}px`
+    imgEl.style.height = `${size + 3}px`
 }
 
 const setPlayingLyricCtlSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
+    const lyricWrapEl = document.querySelector(".playing-view .lyric-wrap")
+    if (!lyricWrapEl) return
+    lyricWrapEl.style.marginLeft = 41 * Math.min(wScaleRatio, hScaleRatio) + 'px'
     const padding = 56 + 86 + 36
     let height = 399 * Math.min(hScaleRatio, hScaleRatio)
     let marginTop = 15
@@ -207,11 +213,11 @@ const setPlayingLyricCtlSize = () => {
         height = clientHeight - padding
         marginTop = 0
     }
-    const el = document.querySelector(".playing-view .lyric-ctl .center")
+    const lyricContentEl = document.querySelector(".playing-view .lyric-ctl .center")
     //const noLyricEl = document.querySelector(".playing-view .no-lyric")
-    if (el) {
-        el.style.height = height + "px"
-        el.style.marginTop = marginTop + "px"
+    if (lyricContentEl) {
+        lyricContentEl.style.height = `${height}px`
+        lyricContentEl.style.marginTop = `${marginTop}px`
     }
     //if (noLyricEl) noLyricEl.style.height = height + "px"
 }
@@ -225,7 +231,7 @@ const setVisualPlayingViewCenterSize = () => {
     const el = document.querySelector(".visual-playing-view .center")
     if (!el) return
     //el.style.width = width + "px"
-    el.style.height = height + "px"
+    el.style.height = `${height}px`
 }
 
 const setVisualPlayingViewLyricCtlSize = () => {
@@ -234,15 +240,15 @@ const setVisualPlayingViewLyricCtlSize = () => {
     const hScaleRatio = clientHeight / minAppHeight
     //const height = 435 * Math.min(hScaleRatio, hScaleRatio)
     const padding = hScaleRatio >= 1.25 ? 50 : 0
-    let height = 435 * Math.min(hScaleRatio, hScaleRatio) + padding
+    let height = 439 * Math.min(hScaleRatio, hScaleRatio) + padding
     if (lyricMetaPos.value > 0) {
         const centerEl = document.querySelector(".visual-playing-view .center")
         if (centerEl) height = (centerEl.clientHeight || 628)
     }
     const el = document.querySelector(".visual-playing-view .lyric-ctl .center")
     const noLyricEl = document.querySelector(".visual-playing-view .no-lyric")
-    if (el) el.style.height = height + "px"
-    if (noLyricEl) noLyricEl.style.height = height + "px"
+    if (el) el.style.height = `${height}px`
+    if (noLyricEl) noLyricEl.style.height = `${height}px`
 }
 
 const setVisualPlayingViewCoverSize = () => {
@@ -252,8 +258,8 @@ const setVisualPlayingViewCoverSize = () => {
     const size = 365 * Math.min(wScaleRatio, hScaleRatio)
     const el = document.querySelector(".visual-playing-view .cover img")
     if (!el) return
-    el.style.width = size + "px"
-    el.style.height = size + "px"
+    el.style.width = `${size}px`
+    el.style.height = `${size}px`
 }
 
 const setVisualPlayingViewCanvasSize = () => {
@@ -262,10 +268,11 @@ const setVisualPlayingViewCanvasSize = () => {
     const hScaleRatio = clientHeight / minAppHeight
     const width = 404 * Math.min(wScaleRatio, hScaleRatio)
     const height = 66 * Math.min(wScaleRatio, hScaleRatio)
-    const el = document.querySelector(".visual-playing-view .center canvas")
-    if (!el) return
-    el.width = width
-    el.height = height
+    const canvasEl = document.querySelector(".visual-playing-view .center canvas")
+    if (!canvasEl) return
+    //canvasEl.width = width
+    //canvasEl.height = height
+    canvasEl.style.height = `${height}px`
 }
 
 //TODO
@@ -329,9 +336,10 @@ const setThemeViewItemsSize = () => {
     const tileHMargin = 25
     const scrollBarWidth = 6
     const limits = [8, 7, 6, 5, 4] //TODO 宽屏、超宽屏，需更好兼容性
-    const mainContent = document.querySelector('#themes-view .center .content')
+    const mainContent = document.querySelector('#themes-view .center')
     if (!mainContent) return
     const { clientWidth } = mainContent
+    if (!clientWidth) return
     const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin) + scrollBarWidth)
 
     let tileWidth = tileMinWidth, limit = 4
@@ -346,9 +354,9 @@ const setThemeViewItemsSize = () => {
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 3
 
-    const height = tileWidth * 95 / 160
+    const tileHeight = tileWidth * 95 / 160
     document.documentElement.style.setProperty('--theme-preview-tile-width', `${tileWidth}px`)
-    document.documentElement.style.setProperty('--theme-preview-tile-height', `${height}px`)
+    document.documentElement.style.setProperty('--theme-preview-tile-height', `${tileHeight}px`)
 }
 
 onActivated(setupDefaultLayout)
@@ -449,7 +457,7 @@ watch(lyricMetaPos, () => {
     flex-direction: column;
     flex: 1;
     overflow: hidden;
-    background: var(--default-main-center-bg);
+    background: var(--content-bg-color);
 }
 
 #default-main-center,
@@ -467,9 +475,10 @@ watch(lyricMetaPos, () => {
     right: 0px;
     width: 404px;
     width: 40.4%;
-    padding-bottom: 30px;
     z-index: 55;
-    background: var(--app-bg);
+    background: var(--bg-color);
+    background-color: var(--bg-color);
+    background-image: var(--app-bg);
     box-shadow: 0px 0px 10px #161616;
 }
 

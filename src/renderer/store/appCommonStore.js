@@ -17,6 +17,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         playingViewShow: false,
         videoPlayingViewShow: false,
         soundEffectViewShow: false,
+        customThemeEditViewShow: false,
         //探索模式，歌单、歌手
         exploreModes: ['playlists', 'artists', 'radios', 'userhome'],
         exploreModeIndex: 0,
@@ -44,6 +45,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         currentMusicCategoryName: null,
         //当前调用链路追踪ID
         currentTraceId: null,
+        colorPickerToolbarShow: false,
     }),
     getters: {
         isPlaylistMode() {
@@ -132,6 +134,12 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleSoundEffectView() {
             this.soundEffectViewShow = !this.soundEffectViewShow
+        },
+        hideCustomThemeEditView() {
+            this.customThemeEditViewShow = false
+        },
+        toggleCustomThemeEditViewShow() {
+            this.customThemeEditViewShow = !this.customThemeEditViewShow
         },
         toggleCoverMask() {
             this.coverMaskShow = !this.coverMaskShow
@@ -300,6 +308,12 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         isCurrentTraceId(id) {
             return this.currentTraceId == id
+        },
+        toggleColorPickerToolbar() {
+            this.colorPickerToolbarShow = !this.colorPickerToolbarShow
+        },
+        hideColorPickerToolbar() {
+            this.colorPickerToolbarShow = false
         }
     },
     persist: {
@@ -309,7 +323,8 @@ export const useAppCommonStore = defineStore('appCommon', {
                 //key: 'appCommon',
                 storage: localStorage,
                 paths: ['playingViewThemeIndex', 'spectrumIndex',
-                    'randomMusicPlatformCodes', 'randomMusicTypeCodes', 'currentMusicCategoryName']
+                    'randomMusicPlatformCodes', 'randomMusicTypeCodes',
+                    'currentMusicCategoryName']
             },
         ],
     },

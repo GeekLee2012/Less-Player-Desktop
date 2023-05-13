@@ -398,7 +398,8 @@ EventBus.on("userHome-refresh", refresh)
 
 #user-profile-view .header .about {
     text-align: left;
-    margin-bottom: 39px;
+    min-height: 80px;
+    margin-bottom: 15px;
     line-height: var(--text-line-height);
     font-size: var(--text-sub-size);
     color: var(--text-sub-color);
@@ -413,8 +414,6 @@ EventBus.on("userHome-refresh", refresh)
 }
 
 #user-profile-view .header .cover {
-    width: 168px;
-    height: 168px;
     width: 202px;
     height: 202px;
     border-radius: 10rem;
@@ -437,7 +436,7 @@ EventBus.on("userHome-refresh", refresh)
     display: flex;
     height: 36px;
     margin-bottom: 5px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid transparent;
 }
 
 #user-profile-view .tab {

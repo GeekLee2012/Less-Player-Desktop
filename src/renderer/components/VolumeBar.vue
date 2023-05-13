@@ -94,8 +94,8 @@ defineExpose({
 .volume-bar .st-slient,
 .volume-bar .st-small,
 .volume-bar .st-large {
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
 }
 
 .volume-bar .volume-status:hover svg {

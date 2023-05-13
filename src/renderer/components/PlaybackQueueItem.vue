@@ -132,7 +132,7 @@ const showContextMenu = (event) => {
 }
 
 .current .item-wrap {
-    border-image: var(--pbq-hl-border)
+    border-image: var(--pbq-hl-border);
 }
 
 .current .title,

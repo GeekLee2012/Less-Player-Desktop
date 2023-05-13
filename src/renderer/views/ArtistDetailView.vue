@@ -438,13 +438,12 @@ watch([platform, artistId], reloadAll, { immediate: true })
 
 #artist-detail-view .header .title {
     text-align: left;
-    margin-top: 5px;
-    margin-bottom: 20px;
-    margin-bottom: 39px;
+    margin-top: 8px;
+    margin-bottom: 108px;
     /*font-size: 30px;*/
     font-size: var(--text-main-title-size);
     font-weight: bold;
-    height: 39px;
+    min-height: 39px;
 
     overflow: hidden;
     word-wrap: break-all;
@@ -461,8 +460,8 @@ watch([platform, artistId], reloadAll, { immediate: true })
 }
 
 #artist-detail-view .header .cover {
-    width: 233px;
-    height: 233px;
+    width: 236px;
+    height: 236px;
     border-radius: 10rem;
     box-shadow: 0px 0px 1px #161616;
 }
@@ -481,7 +480,7 @@ watch([platform, artistId], reloadAll, { immediate: true })
     display: flex;
     height: 36px;
     margin-bottom: 3px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid transparent;
 }
 
 #artist-detail-view .tab {

@@ -44,6 +44,16 @@
   letter-spacing: var(--text-letter-spacing);
 }
 
+.text-input-ctl {
+  border-radius: 3px;
+  padding: 8px;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg);
+  min-width: 258px;
+  color: var(--text-color);
+  color: var(--input-text-color);
+}
+
 .btnDisabled {
   opacity: 0.33;
 }

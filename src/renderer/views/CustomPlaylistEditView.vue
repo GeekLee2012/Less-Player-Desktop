@@ -102,15 +102,15 @@ onMounted(() => loadCustomPlaylist())
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="25"
-                            placeholder="请输入歌单名称，最多允许输入25个字符哦" />
+                        <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
+                            placeholder="请输入歌单名称，最多允许输入99个字符哦" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="detail.about" ref="aboutRef" maxlength="520"
-                            placeholder="你想用歌单诉说什么，一起分享一下吧~ 最多允许输入520个字符哦">
+                        <textarea :value="detail.about" ref="aboutRef" maxlength="1024"
+                            placeholder="你想用歌单诉说什么，一起分享一下吧~ 最多允许输入1024个字符哦">
                                 </textarea>
                     </div>
                 </div>

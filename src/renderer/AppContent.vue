@@ -143,6 +143,7 @@ const setVideoViewSize = () => {
   els.forEach(el => {
     el.style.width = clientWidth + "px"
     el.style.height = (clientHeight - 56) + "px"
+    el.style.maxHeight = (clientHeight - 56) + "px"
   })
 }
 

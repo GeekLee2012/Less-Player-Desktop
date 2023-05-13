@@ -38,7 +38,7 @@ onMounted(() => {
                     <VolumeBar ref="volumeBarRef"></VolumeBar>
                 </div>
                 <div class="spacing" @click="toggleFavoritedState">
-                    <svg v-show="!favoritedState" width="18" height="17" viewBox="0 0 1024 937.46"
+                    <svg v-show="!favoritedState" width="18" height="19" viewBox="0 0 1024 937.46"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -58,7 +58,7 @@ onMounted(() => {
                     </svg>
                 </div>
                 <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
-                    <svg width="17" height="16" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="17" height="17" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
