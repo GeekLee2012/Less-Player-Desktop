@@ -127,7 +127,7 @@ const updateTabData = (data) => {
     if (typeof (data) == 'string') {
         tabData.push(data)
         updateTabTipText(0)
-    } else {
+    } else if (data) {
         tabData.push(...data)
         updateTabTipText(tabData.length)
     }
@@ -146,7 +146,11 @@ const getArtistDetail = async () => {
     const result = await vendor.artistDetail(id)
     if (!result) return
     updateArtist(result.title, result.cover)
-    if (result.about) updateAbout(result.about)
+    let { about } = result
+    if (!about) {
+        about = await vendor.artistDetailAbout(id)
+    }
+    if (about) updateAbout(about)
     if (result.hotSongs) updateHotSongs(result.hotSongs)
     Object.assign(detail, result)
     setLoadingDetail(false)
@@ -355,6 +359,20 @@ const loadAll = async () => {
     visitTab(0)
 }
 
+const trimExtraHtml = (text) => {
+    const title = artistName.value + '简介'
+    const titleRegex = new RegExp(title)
+    text = (text || '').trim()
+    //text.replace(/<[/]?[\w\d\s"'\0\x21-\x2f\x3a-\x40\x5b-\x60\x7B-\x7F]*>/g, '')
+    return text.replace(/<[/\w\d\s"'\0\x21-\x2f\x3a-\x40\x5b-\x60\x7B-\x7F]*>/g, '。')
+        .replace(/<[\w\d\s"'\0\x21-\x2f\x3a-\x40\x5b-\x60\x7B-\x7F]*>/g, '')
+        .replace(/(&[a-zA-Z]+;)/g, '')
+        .replace(titleRegex, '')
+        .replace(/。。/g, '。')
+        .replace(/^。/g, '')
+        .trim()
+}
+
 /* 生命周期、监听 */
 //TODO 需要梳理优化，容易出现重复加载Bug
 onActivated(() => {
@@ -372,6 +390,7 @@ watch([platform, artistId], reloadAll, { immediate: true })
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="artistName"></div>
                 <div class="alias" v-html="artistAlias"></div>
+                <div class="about">{{ trimExtraHtml(about) }}</div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)"
                         text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
@@ -386,6 +405,11 @@ watch([platform, artistId], reloadAll, { immediate: true })
                     <div class="loading-mask" style="width: 36%; height: 39px; display: inline-block;"></div>
                 </div>
                 <div class="title" v-html="artistName" v-show="!isLoadingDetail"></div>
+                <div class="about" v-show="isLoadingDetail">
+                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 23px; display: inline-block;">
+                    </div>
+                </div>
+                <div class="about" v-show="!isLoadingDetail">{{ trimExtraHtml(about) }}</div>
                 <div class="action" v-show="isLoadingDetail">
                     <div class="loading-mask spacing" v-for="i in 2"
                         style="width: 168px; height: 36px; display: inline-block;"></div>
@@ -439,7 +463,8 @@ watch([platform, artistId], reloadAll, { immediate: true })
 #artist-detail-view .header .title {
     text-align: left;
     margin-top: 8px;
-    margin-bottom: 108px;
+    margin-bottom: 10px;
+    /*margin-bottom: 108px;*/
     /*font-size: 30px;*/
     font-size: var(--text-main-title-size);
     font-weight: bold;
@@ -457,6 +482,25 @@ watch([platform, artistId], reloadAll, { immediate: true })
 
 #artist-detail-view .header .alias {
     display: none;
+}
+
+#artist-detail-view .header .about {
+    height: 114px;
+    margin-bottom: 8px;
+    /*line-height: 23px;*/
+    line-height: var(--text-line-height);
+    font-size: var(--text-sub-size) !important;
+    color: var(--text-sub-color);
+    /* font-size: 15px; */
+    overflow: hidden;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    line-break: anywhere;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    text-align: left;
 }
 
 #artist-detail-view .header .cover {

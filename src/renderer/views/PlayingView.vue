@@ -178,6 +178,10 @@ onMounted(() => {
     overflow: hidden;
 }
 
+.playing-view-bg {
+    background: var(--playing-view-bg);
+}
+
 .playing-view .spacing {
     margin-left: 15px;
 }

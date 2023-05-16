@@ -221,7 +221,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --main-left-border-color: none;
   --default-main-center-bg: #ffffffcb;
   --playing-view-bg: #ffffffcb;
-  --content-bg-color: #ffffffff;
+  --content-bg-color: #ffffffdc;
   --content-bg-color2: #eeeeee88;
   --category-view-header-bg: none;
   --border-color: #eee;

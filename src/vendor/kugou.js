@@ -608,7 +608,7 @@ export class KuGou {
                 + "&clienttime=" + now + "&mid=" + now + "&uuid=" + now + "&dfid=-"
             const signature = getSignature(param)
             const url = "https://complexsearch.kugou.com/v2/search/song" + "?" + param + "&signature=" + signature
-
+            const result = { platform: KuGou.CODE, offset, limit, page, data: [] }
             getJson(url).then(jsonp => {
                 let jsonText = jsonp.split(callbackFn + "(")[1].trim()
                 jsonText = jsonText.substring(0, jsonText.length - 1)
@@ -623,9 +623,9 @@ export class KuGou {
                     track.highHash = [/*item.ResFileHash,*/ item.SQFileHash, item.HQFileHash]
                     return track
                 })
-                const result = { platform: KuGou.CODE, offset, limit, page, data }
+                if (data && data.length > 0) result.data.push(...data)
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 

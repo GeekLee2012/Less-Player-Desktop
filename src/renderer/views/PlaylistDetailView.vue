@@ -270,7 +270,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     color: var(--text-sub-color);
     /* font-size: 15px; */
     overflow: hidden;
-    word-wrap: break-all;
+    word-wrap: break-word;
     white-space: pre-wrap;
     line-break: anywhere;
     text-overflow: ellipsis;

@@ -131,6 +131,7 @@ const showContextMenu = (event) => {
 }
 
 .custom-playlist-item:hover {
+    border-radius: 3px;
     background-color: var(--list-item-hover);
 }
 

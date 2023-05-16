@@ -35,7 +35,8 @@ const { commonNotificationShow, commonNotificationText,
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
-  hideAllCtxMenus } = useAppCommonStore()
+  hideAllCtxMenus, toggleColorPickerToolbar,
+  showColorPickerToolbar } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 
 const getCtxMenuAutoHeight = () => {
@@ -69,8 +70,8 @@ const adjustMenuPosition = (event) => {
 
 const setMenuPosition = (event) => {
   ctxMenuPos = adjustMenuPosition(event)
-  ctxMenuPosStyle.left = ctxMenuPos.x + "px !important"
-  ctxMenuPosStyle.top = ctxMenuPos.y + "px !important"
+  ctxMenuPosStyle.left = ctxMenuPos.x + 'px !important'
+  ctxMenuPosStyle.top = ctxMenuPos.y + 'px !important'
 }
 
 const getCtxSubmenuAutoHeight = () => {
@@ -103,40 +104,67 @@ const setSubmenuPosition = (event) => {
   const pos = adjustSubmenuPosition(event)
   //const padding = submenuItemNums > 7 ? 5 : 0
   const padding = 5
-  ctxSubmenuPosStyle.left = ctxMenuPos.x - menuWidth - padding + "px !important"
-  ctxSubmenuPosStyle.top = pos.y + "px !important"
+  ctxSubmenuPosStyle.left = ctxMenuPos.x - menuWidth - padding + 'px !important'
+  ctxSubmenuPosStyle.top = pos.y + 'px !important'
 }
 
-EventBus.on("commonCtxMenu-show", e => {
+EventBus.on('commonCtxMenu-show', ({ event, value }) => {
   hideCommonCtxMenu(true) //强制取消上次的显示
   hideAddToListSubmenu()
   hideArtistListSubmenu()
-  setMenuPosition(e.event)
-  showCommonCtxMenu(e.value)
+  setMenuPosition(event)
+  showCommonCtxMenu(value)
 })
 
 const bindEventListeners = () => {
-  EventBus.on("addToListSubmenu-show", e => {
+  EventBus.on('addToListSubmenu-show', e => {
     submenuItemNums = customPlaylists.value.length + 2
     setSubmenuPosition(e)
     showAddToListSubmenu()
   })
 
-  EventBus.on("artistListSubmenu-show", e => {
+  EventBus.on('artistListSubmenu-show', e => {
     const { artist } = commonCtxMenuCacheItem.value
     submenuItemNums = artist.length
     setSubmenuPosition(e)
     showArtistListSubmenu()
   })
 
-  EventBus.on("addToListSubmenu-hide", () => {
+  EventBus.on('addToListSubmenu-hide', () => {
     hideAddToListSubmenu()
   })
 
-  EventBus.on("artistListSubmenu-hide", () => {
+  EventBus.on('artistListSubmenu-hide', () => {
     hideArtistListSubmenu()
   })
 
+  EventBus.on('color-picker-toolbar-show', ({ event: mouseEvent }) => {
+    //根据鼠标点击位置，确定弹出位置
+    const tbWidth = 218, tbHeight = 369
+    const { x, y, offsetX, offsetY } = mouseEvent
+    const pickerEl = document.querySelector('#color-picker-toolbar')
+    const { clientHeight, clientWidth } = document.documentElement
+    if (!pickerEl) return
+    const padding = 25
+    let top = Math.max(y + (18 - offsetY) - tbHeight / 2, padding)
+    top = Math.min(top, clientHeight - tbHeight - padding)
+    let left = Math.max(x + padding, padding)
+    left = Math.min(left, clientWidth - tbWidth - padding)
+    pickerEl.style.top = `${top}px`
+    pickerEl.style.left = `${left}px`
+
+    showColorPickerToolbar()
+  })
+
+  EventBus.on('app-resize', setupCustomThemeEditViewPos)
+}
+
+const setupCustomThemeEditViewPos = () => {
+  EventBus.emit('app-elementAlignCenter', {
+    selector: '#custom-theme-edit-view',
+    width: 768,
+    height: 520
+  })
 }
 
 //TODO
@@ -155,6 +183,8 @@ onMounted(() => {
   bindEventListeners()
   setupPlayingView()
 })
+
+watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
 </script>
 
 <template>
@@ -307,8 +337,8 @@ onMounted(() => {
   position: absolute;
   right: 30px;
   bottom: 80px;
-  width: 825px;
-  height: 555px;
+  width: 768px;
+  height: 520px;
   z-index: 99;
   background-color: var(--bg-color);
   /*background-image: var(--app-bg);*/

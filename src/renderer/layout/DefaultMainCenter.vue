@@ -33,12 +33,12 @@ const setPlayMetaSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const width = 211 * Math.max(wScaleRatio, 1)
-    const titleWrapEl = document.querySelector(".play-meta .title-wrap")
-    const audioTitleEl = document.querySelector(".play-meta .audio-title")
-    const timeVolWrapEl = document.querySelector(".play-meta .time-volume-wrap")
-    if (titleWrapEl) titleWrapEl.style.width = width + "px"
-    if (audioTitleEl) audioTitleEl.style.width = width + "px"
-    if (timeVolWrapEl) timeVolWrapEl.style.width = width + "px"
+    const titleWrapEl = document.querySelector('.play-meta .title-wrap')
+    const audioTitleEl = document.querySelector('.play-meta .audio-title')
+    const timeVolWrapEl = document.querySelector('.play-meta .time-volume-wrap')
+    if (titleWrapEl) titleWrapEl.style.width = width + 'px'
+    if (audioTitleEl) audioTitleEl.style.width = width + 'px'
+    if (timeVolWrapEl) timeVolWrapEl.style.width = width + 'px'
 }
 
 const setSearchBarSize = () => {
@@ -46,8 +46,8 @@ const setSearchBarSize = () => {
     const wScaleRatio = clientWidth / minAppWidth
     //const hScaleRatio = clientHeight / minAppHeight
     const size = 123 * Math.max(wScaleRatio, 1)
-    const el = document.querySelector(".default-main-top .search-bar .keyword")
-    if (el) el.style.width = size + "px"
+    const el = document.querySelector('.default-main-top .search-bar .keyword')
+    if (el) el.style.width = size + 'px'
 }
 
 const setCategoryViewSize = () => {
@@ -58,9 +58,9 @@ const setCategoryViewSize = () => {
     if (!mainContent) return
     const { clientHeight } = mainContent, padding = 0
     const height = (clientHeight - padding)
-    if (playlistCategory) playlistCategory.style.height = height + "px"
-    if (artistCategory) artistCategory.style.height = height + "px"
-    if (radioCategory) radioCategory.style.height = height + "px"
+    if (playlistCategory) playlistCategory.style.height = height + 'px'
+    if (artistCategory) artistCategory.style.height = height + 'px'
+    if (radioCategory) radioCategory.style.height = height + 'px'
 }
 
 const setImageTextTileSize = () => {
@@ -74,9 +74,9 @@ const setImageTextTileSize = () => {
     const { clientWidth } = mainContent
     const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
     /*
-    const tileCovers = document.querySelectorAll(".image-text-tile .cover")
-    const tileTitles = document.querySelectorAll(".image-text-tile .title")
-    const tileSubtitles = document.querySelectorAll(".image-text-tile .subtitle")
+    const tileCovers = document.querySelectorAll('.image-text-tile .cover')
+    const tileTitles = document.querySelectorAll('.image-text-tile .title')
+    const tileSubtitles = document.querySelectorAll('.image-text-tile .subtitle')
     */
     let tileWidth = tileMinWidth, limit = 4
     for (var i = 0; i < limits.length; i++) {
@@ -92,14 +92,14 @@ const setImageTextTileSize = () => {
     document.documentElement.style.setProperty('--image-text-tile-cover-size', `${tileWidth}px`)
     /*
     tileCovers.forEach(item => {
-        item.style.width = tileWidth + "px"
-        item.style.height = tileWidth + "px"
+        item.style.width = tileWidth + 'px'
+        item.style.height = tileWidth + 'px'
     })
     tileTitles.forEach(item => {
-        item.style.width = tileWidth + "px"
+        item.style.width = tileWidth + 'px'
     })
     tileSubtitles.forEach(item => {
-        item.style.width = tileWidth + "px"
+        item.style.width = tileWidth + 'px'
     })
     */
 }
@@ -148,9 +148,9 @@ const setImageTextTileLoadingMaskSize = () => {
     if (!mainContent) return
     const { clientWidth } = mainContent
     const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
-    const tiles = document.querySelectorAll(".tiles-loading-mask .tile")
-    const tileCovers = document.querySelectorAll(".tiles-loading-mask .tile .cover")
-    const tileTitles = document.querySelectorAll(".tiles-loading-mask .tile .title")
+    const tiles = document.querySelectorAll('.tiles-loading-mask .tile')
+    const tileCovers = document.querySelectorAll('.tiles-loading-mask .tile .cover')
+    const tileTitles = document.querySelectorAll('.tiles-loading-mask .tile .title')
     let tileWidth = tileMinWidth, limit = 4, isLastVisible = true
     for (var i = 0; i < limits.length; i++) {
         if (clientWidth >= minWidths[i]) {
@@ -165,18 +165,18 @@ const setImageTextTileLoadingMaskSize = () => {
     tileWidth = parseInt(tileWidth) - 2
     for (var i = 0; i < tiles.length; i++) {
         const item = tiles[i]
-        item.style.width = tileWidth + "px"
-        item.style.height = tileWidth + titleHeight + titleMarginTop + "px"
+        item.style.width = tileWidth + 'px'
+        item.style.height = tileWidth + titleHeight + titleMarginTop + 'px'
         if (i == (tiles.length - 1)) {
-            item.style.display = isLastVisible ? "block" : "none"
+            item.style.display = isLastVisible ? 'block' : 'none'
         }
     }
     tileCovers.forEach(item => {
-        item.style.width = tileWidth + "px"
-        item.style.height = tileWidth + "px"
+        item.style.width = tileWidth + 'px'
+        item.style.height = tileWidth + 'px'
     })
     tileTitles.forEach(item => {
-        item.style.width = tileWidth + "px"
+        item.style.width = tileWidth + 'px'
     })
 }
 */
@@ -190,10 +190,10 @@ const setPlayingCoverSize = () => {
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
     let size = 356 * Math.min(wScaleRatio, hScaleRatio)
-    const coverEl = document.querySelector(".playing-view .cover")
+    const coverEl = document.querySelector('.playing-view .cover')
     if (!coverEl) return
     coverEl.style.marginRight = 41 * Math.min(wScaleRatio, hScaleRatio) + 'px'
-    const imgEl = coverEl.querySelector("img")
+    const imgEl = coverEl.querySelector('img')
     if (!imgEl) return
     imgEl.style.width = `${size + 3}px`
     imgEl.style.height = `${size + 3}px`
@@ -203,7 +203,7 @@ const setPlayingLyricCtlSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    const lyricWrapEl = document.querySelector(".playing-view .lyric-wrap")
+    const lyricWrapEl = document.querySelector('.playing-view .lyric-wrap')
     if (!lyricWrapEl) return
     lyricWrapEl.style.marginLeft = 41 * Math.min(wScaleRatio, hScaleRatio) + 'px'
     const padding = 56 + 86 + 36
@@ -213,13 +213,13 @@ const setPlayingLyricCtlSize = () => {
         height = clientHeight - padding
         marginTop = 0
     }
-    const lyricContentEl = document.querySelector(".playing-view .lyric-ctl .center")
-    //const noLyricEl = document.querySelector(".playing-view .no-lyric")
+    const lyricContentEl = document.querySelector('.playing-view .lyric-ctl .center')
+    //const noLyricEl = document.querySelector('.playing-view .no-lyric')
     if (lyricContentEl) {
         lyricContentEl.style.height = `${height}px`
         lyricContentEl.style.marginTop = `${marginTop}px`
     }
-    //if (noLyricEl) noLyricEl.style.height = height + "px"
+    //if (noLyricEl) noLyricEl.style.height = height + 'px'
 }
 
 const setVisualPlayingViewCenterSize = () => {
@@ -228,9 +228,9 @@ const setVisualPlayingViewCenterSize = () => {
     const hScaleRatio = clientHeight / minAppHeight
     const padding = 56 * 2
     const height = clientHeight - padding
-    const el = document.querySelector(".visual-playing-view .center")
+    const el = document.querySelector('.visual-playing-view .center')
     if (!el) return
-    //el.style.width = width + "px"
+    //el.style.width = width + 'px'
     el.style.height = `${height}px`
 }
 
@@ -242,11 +242,11 @@ const setVisualPlayingViewLyricCtlSize = () => {
     const padding = hScaleRatio >= 1.25 ? 50 : 0
     let height = 439 * Math.min(hScaleRatio, hScaleRatio) + padding
     if (lyricMetaPos.value > 0) {
-        const centerEl = document.querySelector(".visual-playing-view .center")
+        const centerEl = document.querySelector('.visual-playing-view .center')
         if (centerEl) height = (centerEl.clientHeight || 628)
     }
-    const el = document.querySelector(".visual-playing-view .lyric-ctl .center")
-    const noLyricEl = document.querySelector(".visual-playing-view .no-lyric")
+    const el = document.querySelector('.visual-playing-view .lyric-ctl .center')
+    const noLyricEl = document.querySelector('.visual-playing-view .no-lyric')
     if (el) el.style.height = `${height}px`
     if (noLyricEl) noLyricEl.style.height = `${height}px`
 }
@@ -256,7 +256,7 @@ const setVisualPlayingViewCoverSize = () => {
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
     const size = 365 * Math.min(wScaleRatio, hScaleRatio)
-    const el = document.querySelector(".visual-playing-view .cover img")
+    const el = document.querySelector('.visual-playing-view .cover img')
     if (!el) return
     el.style.width = `${size}px`
     el.style.height = `${size}px`
@@ -268,7 +268,7 @@ const setVisualPlayingViewCanvasSize = () => {
     const hScaleRatio = clientHeight / minAppHeight
     const width = 404 * Math.min(wScaleRatio, hScaleRatio)
     const height = 66 * Math.min(wScaleRatio, hScaleRatio)
-    const canvasEl = document.querySelector(".visual-playing-view .center canvas")
+    const canvasEl = document.querySelector('.visual-playing-view .center canvas')
     if (!canvasEl) return
     //canvasEl.width = width
     //canvasEl.height = height
@@ -284,7 +284,7 @@ const setBatchViewListSize = () => {
     //const height = (clientHeight - 133 - padding)
     //header 87, margin 15, action 31
     const height = (clientHeight - 87 - 15 - 31)
-    if (el) el.style.height = height + "px"
+    if (el) el.style.height = height + 'px'
 }
 
 //自适应播放页组件大小
@@ -407,8 +407,8 @@ EventBus.on('app-layout-default', setupDefaultLayout)
 
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)
-watch([soundEffectViewShow], setSoundEffectViewAlignment)
-watch([playingViewShow], (nv, ov) => {
+watch(soundEffectViewShow, setSoundEffectViewAlignment)
+watch(playingViewShow, (nv, ov) => {
     hideLyricToolbar()
     setPlayingViewSize()
     //TODO

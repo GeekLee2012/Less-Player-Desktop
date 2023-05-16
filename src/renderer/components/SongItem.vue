@@ -205,6 +205,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .song-item:hover {
+    border-radius: 3px;
     background: var(--list-item-hover);
 }
 

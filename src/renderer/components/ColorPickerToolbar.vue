@@ -1,10 +1,111 @@
 <script setup>
+import { nextTick, onMounted, ref } from 'vue';
 import { ColorPicker } from 'vue-color-kit';
 import 'vue-color-kit/dist/vue-color-kit.css';
 import { useAppCommonStore } from '../store/appCommonStore';
 
 
+
 const { hideColorPickerToolbar } = useAppCommonStore()
+
+const colorPickerRef = ref(null)
+
+// vue-color-kit对外开放API太少
+// 且只支持HEX，不支持HEXA
+// 做些hack小动作，实属无奈，不得已而为之
+const VueColorKitHack = {
+    hexaInput: null,
+    rgbaInput: null,
+    isFromHexaInput: false,
+    reformatHexaInput() {
+        const { value } = this.hexaInput
+        let _value = value.trim()
+        if (!_value.startsWith('#')) _value = '#' + _value
+        if (_value.length == 4) {
+            const parts = _value.split('')
+            _value = `#${parts[1]}${parts[1]}${parts[2]}${parts[2]}${parts[3]}${parts[3]}`
+        }
+        Object.assign(this.hexaInput, { value: _value.toUpperCase() })
+    },
+    updateRgbaInput() {
+        const { value } = this.hexaInput
+        if (!value) return
+        let _value = value.trim()
+        if (!_value.startsWith('#')) return
+        if (_value.length == 4) {
+            const parts = _value.split('')
+            _value = `#${parts[1]}${parts[1]}${parts[2]}${parts[2]}${parts[3]}${parts[3]}`
+        }
+        if (_value.length < 7 || _value.length == 8) {
+            return
+        }
+        if (/(#[0-9A-Fa-f]{6,8})/g.test(_value)) {
+            _value = _value.substring(1)
+            const rStr = _value.substring(0, 2)
+            const gStr = _value.substring(2, 4)
+            const bStr = _value.substring(4, 6)
+            const aStr = _value.length > 6 ? _value.substring(6, 8) : 'FF'
+            const r = Number.parseInt(`0x${rStr}`, 16)
+            const g = Number.parseInt(`0x${gStr}`, 16)
+            const b = Number.parseInt(`0x${bStr}`, 16)
+            let a = (Number.parseInt(`0x${aStr}`, 16) / 255).toFixed(2).replace('.00', '')
+            if (a.endsWith('0') && a.length > 1) a = a.substring(0, a.length - 1)
+            Object.assign(this.rgbaInput, { value: `${r}, ${g}, ${b}, ${a}` })
+            colorPickerRef.value.selectColor(this.rgbaInput.value)
+        }
+    },
+    setHexaInput(elem) {
+        this.hexaInput = elem
+
+        this.hexaInput.oninput = () => {
+            this.isFromHexaInput = true
+            this.updateRgbaInput()
+        }
+        this.hexaInput.onblur = () => {
+            this.reformatHexaInput()
+            this.updateRgbaInput()
+            this.isFromHexaInput = false
+        }
+        this.hexaInput.onkeyup = (event) => {
+            event.stopPropagation()
+            if (event.key.toLowerCase() === 'enter') {
+                this.reformatHexaInput()
+                this.updateRgbaInput()
+            }
+        }
+    },
+    setRgbaInput(elem) {
+        this.rgbaInput = elem
+    },
+    hack() {
+        const colorTypes = document.querySelectorAll('.color-type')
+        if (colorTypes.length < 2) return
+
+        const [hexEl, rgbaEl] = colorTypes
+        const hexaEl = hexEl.cloneNode(true)
+        hexEl.style.display = 'none' //鸟尽弓藏
+        rgbaEl.parentElement.insertBefore(hexaEl, rgbaEl)
+
+        //设置名称
+        hexaEl.querySelector('span').innerHTML = 'HEXA'
+
+        this.setHexaInput(hexaEl.querySelector('input'))
+        this.setRgbaInput(rgbaEl.querySelector('input'))
+    },
+    changeColor({ rgba, hsv, hex }) {
+        if (!this.isFromHexaInput) {
+            const alpha = parseInt(255 * rgba.a)
+            const hexAlpha = Number(alpha).toString(16).toUpperCase().replace('FF', '').replace('0', '00')
+            nextTick(() => Object.assign(this.hexaInput, { value: `${hex}${hexAlpha}` }))
+        }
+    }
+}
+
+const onColorChanged = ({ rgba, hsv, hex }) => {
+    VueColorKitHack.changeColor({ rgba, hsv, hex })
+}
+
+onMounted(() => VueColorKitHack.hack())
 </script>
 
 <template>
@@ -31,14 +132,14 @@ const { hideColorPickerToolbar } = useAppCommonStore()
                 </svg>
             </div>
         </div>
-        <ColorPicker theme="light" :sucker-hide="false" />
+        <ColorPicker theme="light" ref="colorPickerRef" :sucker-hide="false" @changeColor="onColorChanged" />
     </div>
 </template>
 
 <style scoped>
 .color-picker-toolbar {
     width: 218px;
-    height: 365px;
+    height: 369px;
     border-radius: 5px;
     background: var(--bg-color);
     -webkit-app-region: none;
@@ -48,8 +149,9 @@ const { hideColorPickerToolbar } = useAppCommonStore()
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 3px 10px;
+    padding: 5px 10px;
     border-radius: 5px;
+    background-color: var(--content-bg-color2);
 }
 
 .color-picker-toolbar .header .title {
@@ -62,5 +164,9 @@ const { hideColorPickerToolbar } = useAppCommonStore()
 
 .color-picker-toolbar .header .btn {
     cursor: pointer;
+}
+
+.color-picker-toolbar .header .btn:hover {
+    fill: var(--hl-color);
 }
 </style>

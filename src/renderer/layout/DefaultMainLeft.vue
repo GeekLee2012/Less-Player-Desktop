@@ -39,6 +39,7 @@ let isUserMouseWheel = ref(false), userMouseWheelCancelTimer = null
 const updatePlatformIndex = (index, isSwitchMode) => {
     updateCurrentPlatform(index)
     activeCustomPlaylistIndex.value = -1
+    activeFavoritePlaylistIndex.value = -1
     activeArtistIndex.value = -1
 
     const platform = currentPlatformCode.value
@@ -70,6 +71,7 @@ const toggleRadioMode = () => {
 
 const visitCustomItem = (item, index) => {
     activeCustomPlaylistIndex.value = index
+    activeFavoritePlaylistIndex.value = -1
     updateCurrentPlatform(-1)
     visitCustomPlaylist(item.id)
 }
@@ -91,6 +93,7 @@ const visitArtistItem = (item, index) => {
 
 const visitFavourteItem = (item, index) => {
     activeCustomPlaylistIndex.value = -1
+    //activeFavoritePlaylistIndex.value = index
     const { id, platform } = item
     visitFavoritePlaylist(platform, id)
 }
@@ -108,11 +111,11 @@ const onUserMouseWheel = () => {
 }
 
 const isSubtitleVisible = () => {
+    const { customPlaylistsShow, favoritePlaylistsShow, followArtistsShow } = navigation.value
     if (isPlaylistMode.value) {
-        return navigation.value.customPlaylistsShow
-            || navigation.value.favoritePlaylistsShow
+        return customPlaylistsShow || favoritePlaylistsShow
     } else if (isArtistMode.value) {
-        return navigation.value.followArtistsShow
+        return followArtistsShow
     }
     return false
 }
@@ -436,7 +439,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 #explore-mode .exit-btn {
     position: absolute;
     top: 8px;
-    right: 20px;
+    right: 13px;
 }
 
 #explore-mode .exit-btn:hover svg {
@@ -514,6 +517,11 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 
 #main-left li:hover {
     background: var(--list-item-hover);
+}
+
+#custom-playlist-list li,
+#favorite-playlist-list li {
+    font-size: var(--text-sub-size);
 }
 
 #favorite-playlist-list li {

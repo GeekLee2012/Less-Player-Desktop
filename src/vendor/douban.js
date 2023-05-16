@@ -286,15 +286,16 @@ export class DouBan {
     static searchPlaylists(keyword, offset, limit, page) {
         return new Promise((resolve, reject) => {
             const url = "https://fm.douban.com/j/v2/query/songlist?q=" + keyword + "&limit=" + limit
+            const result = { platform: DouBan.CODE, offset, limit, page, data: [] }
             getJson(url).then(json => {
                 const list = json.items
                 const data = list.map(item => {
                     const playlist = new Playlist(item.id, DouBan.CODE, item.cover, item.title)
                     return playlist
                 })
-                const result = { platform: DouBan.CODE, offset, limit, page, data }
+                if (data && data.length > 0) result.data.push(...data)
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 

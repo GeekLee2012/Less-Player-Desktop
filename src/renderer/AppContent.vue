@@ -56,9 +56,9 @@ const deepInState = (state, cache) => {
 //注册默认应用级别快捷键
 const registryDefaultLocalKeys = () => {
   //按键事件监听
-  window.addEventListener('keydown', e => {
+  window.addEventListener('keydown', event => {
     //Space键
-    if (e.key == ' ') e.preventDefault()
+    if (event.key == ' ') e.preventDefault()
   })
 
   // 播放或暂停

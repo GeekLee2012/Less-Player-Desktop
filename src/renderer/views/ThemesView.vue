@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingStore } from '../store/settingStore';
@@ -19,6 +19,9 @@ const switchTab = (index) => {
     setCurrnetTabIndex(index)
 }
 
+const showCustomThemeEditView = () => {
+    toggleCustomThemeEditViewShow()
+}
 </script>
 
 <template>
@@ -49,7 +52,7 @@ const switchTab = (index) => {
                                 </g>
                             </svg>
                         </div>
-                        <div @click="setThemeIndex(index)" class="text">{{ item.name }}</div>
+                        <div @click="setThemeIndex(index)" class="name" v-html="item.name"></div>
                     </div>
                 </div>
             </div>
@@ -68,7 +71,7 @@ const switchTab = (index) => {
                                 </g>
                             </svg>
                         </div>
-                        <div class="text" @click="toggleCustomThemeEditViewShow">新建主题</div>
+                        <div class="name" @click="showCustomThemeEditView">新建主题</div>
                     </div>
                 </div>
             </div>
@@ -91,9 +94,14 @@ const switchTab = (index) => {
     margin-left: 33px;
 }
 
+#themes-view .header {
+    padding-left: 35px;
+    padding-right: 35px;
+    margin-bottom: 10px;
+}
+
+
 #themes-view .header .title {
-    margin-left: 35px;
-    margin-right: 35px;
     margin-bottom: 35px;
     padding-top: 20px;
     /*font-size: 30px;*/
@@ -103,14 +111,12 @@ const switchTab = (index) => {
 
 #themes-view .tabs {
     text-align: left;
-    margin-left: 35px;
-    margin-right: 35px;
     padding-bottom: 5px;
     position: relative;
 }
 
 #themes-view .tab {
-    font-weight: bold;
+    /*font-weight: bold;*/
     font-size: var(--tab-title-text-size);
     padding: 8px 15px;
     border-bottom: 3px solid transparent;
@@ -178,14 +184,23 @@ const switchTab = (index) => {
     fill: var(--text-sub-color);
 }
 
-#themes-view .center .row .content .text {
+#themes-view .center .row .content .name {
+    width: var(--theme-preview-tile-width);
+    line-height: var(--text-line-height);
     margin-top: 8px;
     margin-left: 3px;
-    cursor: pointer;
     text-align: left;
+    cursor: pointer;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
-#themes-view .center .row .content .text:hover {
+#themes-view .center .row .content .name:hover {
     color: var(--hl-color);
 }
 

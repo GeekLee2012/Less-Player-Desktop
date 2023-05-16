@@ -123,16 +123,16 @@ const easeInOutQuad = (currentTime, startValue, changeValue, duration) => {
 //TODO 平滑算法，基本可行，但感觉有点呆！暂时先这样吧
 export const smoothAnimation = (target, animationAlgoFn, start, dest, duration, step, updateAction) => {
     if (!target || !animationAlgoFn || !updateAction) return
-    step = step || 6
+    step = step || 5
     const distance = dest - start
 
     let current = 0, animationFrameId = 0
     const updateAnimation = () => {
-        if (current >= duration) {
+        if (current > duration) {
             cancelAnimationFrame(animationFrameId)
             return
         }
-        const updateValue = animationAlgoFn(current, start, distance, duration)
+        let updateValue = animationAlgoFn(current, start, distance, duration)
         if (target) updateAction(updateValue)
         current += step
         cancelAnimationFrame(animationFrameId)

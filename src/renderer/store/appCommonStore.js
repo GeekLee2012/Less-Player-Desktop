@@ -314,6 +314,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         hideColorPickerToolbar() {
             this.colorPickerToolbarShow = false
+        },
+        showColorPickerToolbar() {
+            this.colorPickerToolbarShow = true
         }
     },
     persist: {

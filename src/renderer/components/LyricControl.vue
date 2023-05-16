@@ -23,12 +23,12 @@ const { playMv, loadLyric, currentTimeState, seekTrack, playState } = inject('pl
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
-const { lyric, lyricTransActived, lyricRomaActived } = storeToRefs(useSettingStore())
-const { toggleLyricTrans, toggleLyricRoma } = useSettingStore()
+const { lyric, lyricTransActived, lyricRomaActived, } = storeToRefs(useSettingStore())
+const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 //const { currentTrack } = storeToRefs(usePlayStore())
 
 const currentIndex = ref(-1)
-const hasLyric = ref(false)
+//const hasLyric = ref(false)
 const lyricData = ref(Track.lyricData(props.track))
 let presetOffset = Track.lyricOffset(props.track)
 const lyricTransData = ref(Track.lyricTransData(props.track))
@@ -38,8 +38,9 @@ const lyricRomaData = ref(Track.lyricRomaData(props.track))
 const isUserMouseWheel = ref(false)
 let userMouseWheelCancelTimer = null
 const isSeeking = ref(false)
+const lyricExistState = ref(-1)
 
-const setLyricExist = (value) => hasLyric.value = value
+//const setLyricExist = (value) => hasLyric.value = value
 const setLyricData = (value) => lyricData.value = value
 const setPresetOffset = (value) => presetOffset = value
 const setLyricCurrentIndex = (value) => currentIndex.value = value
@@ -47,11 +48,13 @@ const setUserMouseWheel = (value) => isUserMouseWheel.value = value
 const setSeeking = (value) => isSeeking.value = value
 const setLyricTransData = (value) => lyricTransData.value = value
 const setLyricRomaData = (value) => lyricRomaData.value = value
+const setLyricExistState = (value) => lyricExistState.value = value
+const isLyricReady = () => lyricExistState.value == 1
 
 
 let nextLineMillis = -1
 const renderAndScrollLyric = (secs) => {
-    if (!hasLyric.value) return
+    if (!isLyricReady()) return
     if (isSeeking.value) return
 
     const userOffset = lyric.value.offset
@@ -123,7 +126,9 @@ const renderAndScrollLyric = (secs) => {
     const { clientHeight } = document.documentElement
     const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
     //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
-    smoothScroll(lyricWrap, destScrollTop, 288)
+    const frequency = getStateRefreshFrequency()
+    const duration = 300 * frequency / 60
+    smoothScroll(lyricWrap, destScrollTop, duration)
 }
 
 const safeRenderAndScrollLyric = (secs) => {
@@ -141,6 +146,20 @@ const resetDefaultLyricScrollTop = () => {
     //const { offsetTop } = lyricWrap
     //const { clientHeight } = document.documentElement
     lyricWrap.scrollTop = 129
+}
+
+const resetLyricState = (track, state) => {
+    state = state >= -1 ? state : -1
+    //重置状态
+    nextLineMillis = -1
+    //setLyricExist(isExist)
+    setLyricExistState(state)
+    setLyricData(Track.lyricData(track))
+    setLyricTransData(Track.lyricTransData(track))
+    setLyricRomaData(Track.lyricRomaData(track))
+    setPresetOffset(Track.lyricOffset(track))
+    setLyricCurrentIndex(-1)
+    setSeeking(false)
 }
 
 //重新加载歌词
@@ -166,14 +185,7 @@ const reloadLyricData = (track) => {
         isExist = isValidLyric
     }
     //重置数据
-    nextLineMillis = -1
-    setLyricExist(isExist)
-    setLyricData(Track.lyricData(track))
-    setLyricTransData(Track.lyricTransData(track))
-    setLyricRomaData(Track.lyricRomaData(track))
-    setPresetOffset(Track.lyricOffset(track))
-    setLyricCurrentIndex(-1)
-    setSeeking(false)
+    resetLyricState(track, isExist ? 1 : 0)
     //重置滚动条位置
     //resetDefaultLyricScrollTop()
     //重新设置样式
@@ -200,6 +212,8 @@ const setLyricLineStyle = (line) => {
 
     const textEl = line.querySelector('.text')
     const extraTextEl = line.querySelector('.extra-text')
+
+    if (!textEl || !textEl.style) return
 
     textEl.style.lineHeight = `${lineHeight}px`
     textEl.style.marginTop = `${lineSpacing}px`
@@ -372,7 +386,11 @@ watch(() => props.currentTime, (nv, ov) => {
     safeRenderAndScrollLyric(nv)
 }, { immediate: true })
 
-watch(() => props.track, loadLyric, { immediate: true })
+watch(() => props.track, (nv, ov) => {
+    if (!nv) return
+    resetLyricState(nv)
+    loadLyric(nv)
+}, { immediate: true })
 </script>
 
 <template>
@@ -409,21 +427,24 @@ watch(() => props.track, loadLyric, { immediate: true })
             </div>
         </div>
         <div class="center" ref="lyricWrapRef">
-            <div v-show="!hasLyric" class="no-lyric">
+            <div v-show="lyricExistState == -1" class="no-lyric">
+                <label>歌词加载中，请先欣赏音乐吧~</label>
+            </div>
+            <div v-show="lyricExistState == 0" class="no-lyric">
                 <label>暂无歌词，请继续欣赏音乐吧~</label>
             </div>
-            <div v-show="hasLyric" v-for="(item, index) in lyricData" class="line" :time-key="item[0]" :index="index"
-                :class="{
+            <div v-show="lyricExistState == 1" v-for="([key, value], index) in lyricData" class="line" :time-key="key"
+                :index="index" :class="{
                     first: index == 0,
                     last: index == (lyricData.size - 1),
                     current: index == currentIndex,
                     locatorCurrent: (index == scrollLocatorCurrentIndex && isUserMouseWheel)
                 }">
-                <div class="text" :time-key="item[0]" :index="index" v-html="item[1]"></div>
+                <div class="text" :time-key="key" :index="index" v-html="value"></div>
                 <div class="extra-text" v-show="isExtraTextActived"></div>
             </div>
         </div>
-        <div class="scroll-locator" v-show="hasLyric && isUserMouseWheel">
+        <div class="scroll-locator" v-show="(lyricExistState == 1) && isUserMouseWheel">
             <span class="time-text" v-html="scrollLocatorTimeText"></span>
             <div class="play-btn" @click="seekFromLyric">
                 <svg width="9" height="9" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
