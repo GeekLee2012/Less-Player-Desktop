@@ -58,7 +58,7 @@ const registryDefaultLocalKeys = () => {
   //按键事件监听
   window.addEventListener('keydown', event => {
     //Space键
-    if (event.key == ' ') e.preventDefault()
+    if (event.key == ' ') event.preventDefault()
   })
 
   // 播放或暂停

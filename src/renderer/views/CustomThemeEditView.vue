@@ -113,7 +113,7 @@ const uploadImage = async () => {
                 <div class="row first">
                     <div class="cate-name">主题名称</div>
                     <div class="row-content">
-                        <div class="item">
+                        <div class="item" @keydown.stop="">
                             <input type="text" class="text-input-ctl" maxlength="64" placeholder="主题名称，最多允许输入64个字符哦" />
                         </div>
                     </div>

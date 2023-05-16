@@ -50,6 +50,7 @@
   border: 1px solid var(--input-border-color);
   background-color: var(--input-bg);
   min-width: 258px;
+  font-size: var(--text-size);
   color: var(--text-color);
   color: var(--input-text-color);
 }
