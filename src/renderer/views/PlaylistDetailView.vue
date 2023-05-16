@@ -270,7 +270,7 @@ EventBus.on("refresh-favorite", checkFavorite)
     color: var(--text-sub-color);
     /* font-size: 15px; */
     overflow: hidden;
-    word-wrap: break-all;
+    word-wrap: break-word;
     white-space: pre-wrap;
     line-break: anywhere;
     text-overflow: ellipsis;
@@ -280,8 +280,8 @@ EventBus.on("refresh-favorite", checkFavorite)
 }
 
 #playlist-detail-view .header .cover {
-    width: 233px;
-    height: 233px;
+    width: 236px;
+    height: 236px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }

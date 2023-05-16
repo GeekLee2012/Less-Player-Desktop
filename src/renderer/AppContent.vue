@@ -33,7 +33,9 @@ const { playingViewShow, videoPlayingViewShow,
   commonNotificationShow } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
-  hideAllCategoryViews, showToast } = useAppCommonStore()
+  hideAllCategoryViews, showToast, hideLyricToolbar,
+  hideSoundEffectView, hideCustomThemeEditView,
+  hideColorPickerToolbar } = useAppCommonStore()
 
 const isReservedPath = (path) => {
   const reservedPaths = ['id', 'name', 'binding', 'gBinding']
@@ -54,9 +56,9 @@ const deepInState = (state, cache) => {
 //注册默认应用级别快捷键
 const registryDefaultLocalKeys = () => {
   //按键事件监听
-  window.addEventListener('keydown', e => {
+  window.addEventListener('keydown', event => {
     //Space键
-    if (e.key == ' ') e.preventDefault()
+    if (event.key == ' ') e.preventDefault()
   })
 
   // 播放或暂停
@@ -106,6 +108,7 @@ const setupCache = () => {
 }
 
 const setupLayout = (isInit) => {
+  hideAllPopoverViewsAndToolbars()
   let channel = 'app-layout-default'
   if (isSimpleLayout.value) {
     currentAppLayout.value = SimpleLayout
@@ -143,6 +146,7 @@ const setVideoViewSize = () => {
   els.forEach(el => {
     el.style.width = clientWidth + "px"
     el.style.height = (clientHeight - 56) + "px"
+    el.style.maxHeight = (clientHeight - 56) + "px"
   })
 }
 
@@ -155,6 +159,15 @@ const hideAllPopoverViews = () => {
   hideAllCtxMenus()
   //隐藏未正确关闭的Toast
   hideEmptyToast()
+}
+
+const hideAllPopoverViewsAndToolbars = () => {
+  hideAllPopoverViews()
+
+  hideLyricToolbar()
+  hideSoundEffectView()
+  hideCustomThemeEditView()
+  hideColorPickerToolbar()
 }
 
 const hideEmptyToast = () => {

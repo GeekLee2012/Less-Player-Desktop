@@ -447,7 +447,7 @@ const pickPlaylist = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
-        //if (isDevEnv) console.log(`获取歌单失败：${platform} - ${cateName}, TraceId: ${traceId}`)
+        //if (isDevEnv()) console.log(`获取歌单失败：${platform} - ${cateName}, TraceId: ${traceId}`)
         showCurrentTracFailToast(traceId)
         return
     }
@@ -461,7 +461,7 @@ const pickPlaylist = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.square(cate, offset, limit, page, order)
-        //if (isDevEnv) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+        //if (isDevEnv()) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -573,7 +573,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
-        //if (isDevEnv) console.log(`获取主播电台失败：${platform} - ${cateName}`)
+        //if (isDevEnv()) console.log(`获取主播电台失败：${platform} - ${cateName}`)
         showCurrentTracFailToast(traceId)
         return
     }
@@ -588,7 +588,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.radioSquare(cate, offset, limit, page, order)
-        //if (isDevEnv) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+        //if (isDevEnv()) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -711,7 +711,7 @@ const pickFMRadio = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.radioSquare(cate, offset, limit, page, order)
-        //if (isDevEnv) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+        //if (isDevEnv()) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -780,18 +780,19 @@ watch(currentTrack, (nv, ov) => {
     checkLyricValid()
 })
 
-watch([soundEffectViewShow], () => {
+watch(soundEffectViewShow, () => {
     EventBus.emit('app-elementAlignCenter', {
         selector: '.simple-layout #sound-effect-view',
         width: 404,
         height: 366,
+        offsetTop: -20
     })
 })
-watch([randomMusicToolbarShow], () => {
+watch(randomMusicToolbarShow, () => {
     EventBus.emit('app-elementAlignCenter', {
         selector: '.simple-layout #random-music-toolbar',
-        width: 299,
-        height: 404,
+        width: 365,
+        height: 413,
         offsetLeft: 0,
         offsetTop: -15
     })
@@ -892,7 +893,7 @@ watch([textColorIndex], setupTextColor)
             <div class="action" v-show="!isLyricShow">
                 <div class="btm-left">
                     <div @click="toggleFavoritedState">
-                        <svg v-show="!favoritedState" width="18" height="19" viewBox="0 0 1024 937.46"
+                        <svg v-show="!favoritedState" width="18" height="18" viewBox="0 -50 1024 937.46"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -974,6 +975,7 @@ watch([textColorIndex], setupTextColor)
     --bottom-height: 88px;
     width: var(--layout-width);
     overflow: hidden;
+    background: var(--content-bg-color)
 }
 
 .simple-layout .spacing {
@@ -1025,7 +1027,7 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout>.center .top:hover {
-    background: var(--app-bg);
+    background-color: var(--bg-color);
     opacity: 0.85;
 }
 
@@ -1392,15 +1394,15 @@ watch([textColorIndex], setupTextColor)
 
 .simple-layout #sound-effect-view {
     width: 404px;
-    height: 366px;
+    height: 386px;
 }
 
 .simple-layout #sound-effect-view .left {
-    width: 68px;
+    width: 88px;
 }
 
 .simple-layout #sound-effect-view .center .content {
-    height: 295px;
+    height: 299px;
     padding-top: 5px;
     overflow-y: scroll;
 }

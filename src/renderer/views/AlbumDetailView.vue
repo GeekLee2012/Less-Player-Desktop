@@ -294,15 +294,15 @@ watch([platform, albumId], reloadAll, { immediate: true })
 }
 
 #album-detail-view .header .cover {
-    width: 233px;
-    height: 233px;
+    width: 236px;
+    height: 236px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }
 
 #album-detail-view .header .info {
-    margin-top: 15px;
-    margin-bottom: 20px;
+    margin-top: 20px;
+    margin-bottom: 31px;
     /*font-size: 16px;*/
     text-align: left;
 }
@@ -348,7 +348,7 @@ watch([platform, albumId], reloadAll, { immediate: true })
     display: flex;
     height: 36px;
     margin-bottom: 3px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid transparent;
 }
 
 #album-detail-view .tab {

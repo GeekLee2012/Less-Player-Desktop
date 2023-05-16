@@ -348,10 +348,12 @@ onMounted(checkForUpdate)
                 <div class="content">
                     <div class="tip-text">提示：当前应用，所有输入框，按Enter键生效，或光标焦点离开后自动生效</div>
                     <div class="window-zoom">
-                        <div class="zoom-title">窗口缩放 (%)：
+                        <div class="zoom-title">
+                            <span>窗口缩放：</span>
                             <input type="number" min="50" max="300" step="0.01" :value="common.winZoom"
                                 placeholder="范围50-300，默认85，支持2位小数点" @keydown.enter="updateWinZoom"
                                 @focusout="updateWinZoom" />
+                            <span>%</span>
                         </div>
                         <div>
                             <input type="range" min="50" max="300" :value="common.winZoom" step="2" @input="updateWinZoom"
@@ -444,7 +446,7 @@ onMounted(checkForUpdate)
                         <div class="tip-text spacing">提示：不影响系统正常熄屏、锁屏</div>
                     </div>
                     <div class="tip-text">提示：当前应用，更新频度是指每多少个动画帧更新一次；
-                        频度越小，动画越流畅，<br>而CPU占用越高；
+                        频度越小，动画可能越流畅，<br>而CPU占用越高；
                         歌曲进度更新频度，一般与屏幕刷新率保持一致
                     </div>
                     <div>
@@ -626,7 +628,7 @@ onMounted(checkForUpdate)
                     <div class="http-proxy" v-show="network.httpProxy.enable">
                         <div>
                             <span>主机: </span>
-                            <input type="text" placeholder="IP或域名" v-model="network.httpProxy.host" />
+                            <input type="text" placeholder="IP、域名" v-model="network.httpProxy.host" />
                         </div>
                         <div class="spacing">
                             <span>端口:</span>
@@ -653,7 +655,7 @@ onMounted(checkForUpdate)
                     <div class="socks-proxy" v-show="network.socksProxy.enable">
                         <div>
                             <span>主机: </span>
-                            <input type="text" placeholder="IP或域名" v-model="network.socksProxy.host" />
+                            <input type="text" placeholder="IP、域名" v-model="network.socksProxy.host" />
                         </div>
                         <div class="spacing">
                             <span>端口:</span>
@@ -829,8 +831,7 @@ onMounted(checkForUpdate)
     font-size: var(--text-main-title-size);
     font-weight: bold;
     padding-bottom: 20px;
-    border-bottom: 2px solid var(--setting-bottom-border-color);
-    /* border-bottom: 2px solid transparent; */
+    border-bottom: 2px solid transparent;
 }
 
 #setting-view .center {
@@ -844,8 +845,7 @@ onMounted(checkForUpdate)
     flex-direction: row;
     padding-top: 35px;
     padding-bottom: 35px;
-    border-bottom: 2px solid var(--setting-bottom-border-color);
-    /* border-bottom: 2px solid transparent; */
+    border-bottom: 1px solid var(--border-color);
 }
 
 #setting-view .center .last-row {
@@ -966,17 +966,20 @@ onMounted(checkForUpdate)
     align-items: center;
 }
 
+/*
 #setting-view .common .window-zoom .zoom-title span {
     margin-left: 18px;
     padding-top: 2px;
 }
+*/
 
 #setting-view .common .window-zoom .zoom-title input {
     border-radius: 3px;
     padding: 8px;
     border: 1px solid var(--input-border-color);
     background-color: var(--input-bg);
-    margin-left: 15px;
+    /*margin-left: 15px;*/
+    margin-right: 15px;
     color: var(--input-text-color);
     /*text-align: center;
     min-width: 66px; */

@@ -500,10 +500,12 @@ EventBus.on('track-changed', track => {
                 return
             }
             if (!isCurrentTrack(track)) return
-            if (isDevEnv) console.log(candidate)
+            if (isDevEnv()) console.log(candidate)
             const { url, lyric, lyricTrans, lyricRoma, duration, isCandidate } = candidate
             Object.assign(track, { url, lyric, lyricTrans, lyricRoma, duration, isCandidate })
-            showToast(TRANSFRER_OK_MSG, () => playTrackDirectly(candidate))
+            showToast(TRANSFRER_OK_MSG, () => {
+                if (isCurrentTrack(track)) playTrackDirectly(track)
+            })
         }
     })
 })

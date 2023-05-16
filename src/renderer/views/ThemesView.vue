@@ -1,21 +1,41 @@
 <script setup>
+import { ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingStore } from '../store/settingStore';
-import { storeToRefs } from 'pinia';
+import { useAppCommonStore } from '../store/appCommonStore';
+
+
 
 const { getPresetThemes } = useThemeStore()
+const { toggleCustomThemeEditViewShow, hideCustomThemeEditView } = useAppCommonStore()
 const { theme } = storeToRefs(useSettingStore())
 const { setThemeIndex } = useSettingStore()
+
+const currentTabIndex = ref(0)
+const setCurrnetTabIndex = (value) => currentTabIndex.value = value
+
+const switchTab = (index) => {
+    setCurrnetTabIndex(index)
+}
+
+const showCustomThemeEditView = () => {
+    toggleCustomThemeEditViewShow()
+}
 </script>
 
 <template>
     <div id="themes-view">
         <div class="header">
             <div class="title">主题</div>
+            <div class="tabs">
+                <span class="tab" :class="{ active: currentTabIndex == 0 }" @click="switchTab(0)">推荐</span>
+                <span class="tab spacing" :class="{ active: currentTabIndex == 1 }" @click="switchTab(1)">自定义</span>
+            </div>
         </div>
         <div class="center">
-            <div class="row">
-                <div class="cate-name">推荐</div>
+            <div class="row" v-show="currentTabIndex == 0">
+                <!--<div class="cate-name">推荐</div>-->
                 <div class="content">
                     <div class="item" v-for="(item, index) in getPresetThemes()" :class="{
                         active: index == theme.index,
@@ -32,14 +52,27 @@ const { setThemeIndex } = useSettingStore()
                                 </g>
                             </svg>
                         </div>
-                        <div @click="setThemeIndex(index)" class="text">{{ item.name }}</div>
+                        <div @click="setThemeIndex(index)" class="name" v-html="item.name"></div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="cate-name">自定义</div>
+            <div class="row" v-show="currentTabIndex == 1">
+                <!--<div class="cate-name">自定义</div>-->
                 <div class="content">
-
+                    <div class="item">
+                        <div class="preview create-action" @click="toggleCustomThemeEditViewShow">
+                            <svg class="add-custom-btn" @click="" width="32" height="32" viewBox="0 0 682.65 682.74"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M298.59,384.15h-7.06q-123.24,0-246.49,0c-21.63,0-38.69-12.57-43.64-31.94-7-27.56,13.21-53.29,42.33-53.51,25.33-.18,50.66,0,76,0H298.59v-6.44q0-123.49,0-247c0-20.39,10.77-36.44,28.49-42.71C355-7.34,383.55,13,384,43.16c.26,16.33,0,32.67,0,49V298.65h6.82q123.49,0,247,0c21.52,0,38.61,12.77,43.43,32.19,6.75,27.26-13.06,52.7-41.62,53.25-11.16.22-22.33,0-33.49,0H384.09v6.69q0,123.5,0,247c0,21.59-12.66,38.65-32.06,43.53-27.59,6.95-53.24-13.31-53.39-42.46-.17-32.66,0-65.33,0-98V384.15Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="name" @click="showCustomThemeEditView">新建主题</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -57,16 +90,43 @@ const { setThemeIndex } = useSettingStore()
     --active-color: #ffd700;
 }
 
+#themes-view .spacing {
+    margin-left: 33px;
+}
+
+#themes-view .header {
+    padding-left: 35px;
+    padding-right: 35px;
+    margin-bottom: 10px;
+}
+
+
 #themes-view .header .title {
-    margin-left: 35px;
-    margin-right: 35px;
-    margin-bottom: 25px;
+    margin-bottom: 35px;
     padding-top: 20px;
     /*font-size: 30px;*/
     font-size: var(--text-main-title-size);
     font-weight: bold;
-    padding-bottom: 20px;
-    border-bottom: 2px solid var(--setting-bottom-border-color);
+}
+
+#themes-view .tabs {
+    text-align: left;
+    padding-bottom: 5px;
+    position: relative;
+}
+
+#themes-view .tab {
+    /*font-weight: bold;*/
+    font-size: var(--tab-title-text-size);
+    padding: 8px 15px;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+}
+
+#themes-view .header .active {
+    color: var(--hl-color);
+    font-weight: bold;
+    border-bottom: 3px solid var(--hl-color);
 }
 
 #themes-view .center {
@@ -87,11 +147,6 @@ const { setThemeIndex } = useSettingStore()
 
 #themes-view .center .content .active .preview {
     border-color: var(--active-color) !important;
-}
-
-#themes-view .center .row .cate-name {
-    font-size: 20px;
-    font-weight: bold;
 }
 
 #themes-view .center .row .content {
@@ -117,13 +172,35 @@ const { setThemeIndex } = useSettingStore()
     overflow: hidden;
 }
 
-#themes-view .center .row .content .text {
-    margin-top: 8px;
-    margin-left: 3px;
-    cursor: pointer;
+#themes-view .center .row .content .create-action {
+    border: 2px dashed var(--text-sub-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bg-color);
 }
 
-#themes-view .center .row .content .text:hover {
+#themes-view .center .row .content .create-action svg {
+    fill: var(--text-sub-color);
+}
+
+#themes-view .center .row .content .name {
+    width: var(--theme-preview-tile-width);
+    line-height: var(--text-line-height);
+    margin-top: 8px;
+    margin-left: 3px;
+    text-align: left;
+    cursor: pointer;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+#themes-view .center .row .content .name:hover {
     color: var(--hl-color);
 }
 

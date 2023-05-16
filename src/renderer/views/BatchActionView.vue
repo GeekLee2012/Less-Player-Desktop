@@ -532,6 +532,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     text-align: left;
     padding-bottom: 5px;
     border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid transparent;
     margin-top: 15px;
     position: relative;
 }

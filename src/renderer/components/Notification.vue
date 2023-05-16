@@ -29,23 +29,25 @@
 .ntf-dialog-mask {
     position: absolute;
     margin: auto;
+    border-radius: 12px;
+    background-color: var(--bg-color);
+    background-image: var(--app-bg);
+    overflow: hidden;
+    box-shadow: var(--pbq-box-shadow);
 }
 
 .ntf-dialog {
-    width: 258px;
-    height: 159px;
-    border-radius: 12px;
-    background: var(--ntf-bg);
+    width: 265px;
+    height: 163px;
+    background: var(--content-bg-color);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0px 0px 10px var(--ntf-border-color);
 }
 
 .ntf-text {
     font-size: 20px;
-    color: var(--ntf-text-color);
 }
 
 .ntf-text p {
@@ -53,6 +55,6 @@
 }
 
 .ntf-text svg {
-    fill: var(--ntf-text-color);
+    fill: var(--text-color);
 }
 </style>

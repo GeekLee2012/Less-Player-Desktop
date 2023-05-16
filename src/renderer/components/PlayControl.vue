@@ -19,7 +19,7 @@ const togglePlaybackQueue = () => {
 <template>
     <div class="play-ctl">
         <div class="play-mode-btn" @click="switchPlayMode">
-            <svg v-show="playMode == 0" width="20" height="20" viewBox="5 0 20 30" xmlns="http://www.w3.org/2000/svg">
+            <svg v-show="playMode == 0" width="21" height="21" viewBox="5 0 20 30" xmlns="http://www.w3.org/2000/svg">
                 <title />
                 <g data-name="Layer 2" id="Layer_2">
                     <g id="Interface-Solid">
@@ -32,7 +32,7 @@ const togglePlaybackQueue = () => {
                     </g>
                 </g>
             </svg>
-            <svg v-show="playMode == 1" width="20" height="20" viewBox="0 0 30 29.99936" xmlns="http://www.w3.org/2000/svg">
+            <svg v-show="playMode == 1" width="21" height="21" viewBox="0 0 30 29.99936" xmlns="http://www.w3.org/2000/svg">
                 <title />
                 <g data-name="Layer 2" id="Layer_2">
                     <g id="Interface-Solid">
@@ -47,7 +47,7 @@ const togglePlaybackQueue = () => {
                     </g>
                 </g>
             </svg>
-            <svg v-show="playMode == 2" width="20" height="20" viewBox="0 0 895.9 896.32"
+            <svg v-show="playMode == 2" width="21" height="21" viewBox="0 0 895.9 896.32"
                 xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
@@ -61,7 +61,7 @@ const togglePlaybackQueue = () => {
             <!--
             <svg width="18" height="18" viewBox="0 0 24 28.01" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><g id="Layer_2-2" data-name="Layer 2"><path d="M1.2,28a1.12,1.12,0,0,0,1.2-1V16L22.09,27.81a1.37,1.37,0,0,0,1.68-.21A.92.92,0,0,0,24,27V1a1.11,1.11,0,0,0-1.2-1,1.45,1.45,0,0,0-.71.19L2.4,12V1A1.12,1.12,0,0,0,1.2,0,1.12,1.12,0,0,0,0,1V27A1.12,1.12,0,0,0,1.2,28Z"/></g></g></g></svg>
             -->
-            <svg width="16" height="16" viewBox="0 0 892.88 974.69" xmlns="http://www.w3.org/2000/svg">
+            <svg width="17" height="17" viewBox="0 0 892.88 974.69" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path
@@ -97,7 +97,7 @@ const togglePlaybackQueue = () => {
             <!--
             <svg width="18" height="18" viewBox="0 0 24 28.01" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><g id="Layer_2-2" data-name="Layer 2"><path d="M22.8,0a1.12,1.12,0,0,0-1.2,1V12L1.91.19A1.37,1.37,0,0,0,.23.41.89.89,0,0,0,0,1V27a1.12,1.12,0,0,0,1.2,1,1.36,1.36,0,0,0,.71-.2L21.6,16V27A1.22,1.22,0,0,0,24,27V1A1.12,1.12,0,0,0,22.8,0Z"/></g></g></g></svg>
             -->
-            <svg width="16" height="16" viewBox="0 0 892.89 974.72" xmlns="http://www.w3.org/2000/svg">
+            <svg width="17" height="17" viewBox="0 0 892.89 974.72" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path
@@ -109,7 +109,7 @@ const togglePlaybackQueue = () => {
             </svg>
         </div>
         <div class="playlist-btn spacing" @click.stop="togglePlaybackQueue">
-            <svg width="17" height="16" viewBox="0 0 682.28 597.06" xmlns="http://www.w3.org/2000/svg">
+            <svg width="17" height="17" viewBox="0 0 682.28 597.06" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path
@@ -145,7 +145,7 @@ const togglePlaybackQueue = () => {
 }
 
 .play-ctl .spacing {
-    margin-left: 15px;
+    margin-left: 20px;
 }
 
 .play-ctl svg {

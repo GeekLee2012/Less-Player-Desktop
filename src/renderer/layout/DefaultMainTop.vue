@@ -49,7 +49,7 @@ const { playing } = storeToRefs(usePlayStore())
     </div>
 </template>
 
-<style scoped>
+<style>
 .default-main-top,
 #play-nav {
     display: flex;
@@ -73,6 +73,10 @@ const { playing } = storeToRefs(usePlayStore())
     align-items: center;
     justify-content: center;
     margin: 0px 15px;
+}
+
+.default-main-top #play-nav .play-ctl-wrap .spacing {
+    margin-left: 15px;
 }
 
 .default-main-top #play-nav .top-right {

@@ -36,14 +36,14 @@ const setCurrentIndex = (index) => {
     align-items: center;
     justify-content: center;
     flex: 1;
-    --item-border-color: var(--input-border-color);
+    --item-border-color: 1px solid var(--input-border-color);
 }
 
 .single-selection-ctl .item {
     border-width: 0px;
-    border-left: 1px solid var(--item-border-color);
-    border-top: 1px solid var(--item-border-color);
-    border-bottom: 1px solid var(--item-border-color);
+    border-left: var(--item-border-color);
+    border-top: var(--item-border-color);
+    border-bottom: var(--item-border-color);
     padding: 4px 6px;
     cursor: pointer;
     font-size: 13px;

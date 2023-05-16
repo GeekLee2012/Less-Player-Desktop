@@ -421,18 +421,20 @@ EventBus.on("commonCtxMenu-init", dataType => {
 
 <template>
     <div class="common-ctx-menu" :style="posStyle" @click.stop="">
-        <div class="padding"></div>
-        <div class="center">
-            <template v-for="(item, index) in data">
-                <div class="menuItem" @mouseenter="(event) => showSubmenu(item, index, event)"
-                    @click="(event) => visitMenuItem(item, index, event)" v-show="!item.separator">
-                    <div v-html="item.icon"></div>
-                    <div><span>{{ item.name }}</span></div>
-                </div>
-                <div class="separator" v-show="item.separator && false"></div>
-            </template>
+        <div class="container">
+            <div class="padding"></div>
+            <div class="center">
+                <template v-for="(item, index) in data">
+                    <div class="menuItem" @mouseenter="(event) => showSubmenu(item, index, event)"
+                        @click="(event) => visitMenuItem(item, index, event)" v-show="!item.separator">
+                        <div v-html="item.icon"></div>
+                        <div><span>{{ item.name }}</span></div>
+                    </div>
+                    <div class="separator" v-show="item.separator && false"></div>
+                </template>
+            </div>
+            <div class="padding"></div>
         </div>
-        <div class="padding"></div>
     </div>
 </template>
 
@@ -441,14 +443,26 @@ EventBus.on("commonCtxMenu-init", dataType => {
     position: absolute;
     z-index: 101;
     display: flex;
+    /*flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-color);
+    background-image: var(--app-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);*/
+    box-shadow: 0px 0px 6px var(--ctx-menu-border-color);
+    max-height: 386px;
+    border-radius: 8px;
+}
+
+.common-ctx-menu .container {
+    display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--ctx-menu-bg);
     border-radius: 8px;
-    /*border: 1px solid var(--border-color);*/
-    box-shadow: 0px 0px 6px var(--ctx-menu-border-color);
-    max-height: 386px;
+    background: var(--content-bg-color);
 }
 
 .common-ctx-menu .padding {

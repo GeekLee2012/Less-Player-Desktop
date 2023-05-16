@@ -13,6 +13,8 @@ import PlayingView from './views/PlayingView.vue';
 import VisualPlayingView from './views/VisualPlayingView.vue';
 import SoundEffectView from './views/SoundEffectView.vue';
 import EventBus from '../common/EventBus';
+import CustomThemeEditView from './views/CustomThemeEditView.vue';
+import ColorPickerToolbar from './components/ColorPickerToolbar.vue';
 
 
 
@@ -28,11 +30,13 @@ const { commonNotificationShow, commonNotificationText,
   commonCtxMenuCacheItem, playbackQueueViewShow,
   playingViewShow, videoPlayingViewShow,
   playingViewThemeIndex, soundEffectViewShow,
-  lyricToolbarShow, randomMusicToolbarShow } = storeToRefs(useAppCommonStore())
+  lyricToolbarShow, randomMusicToolbarShow,
+  customThemeEditViewShow, colorPickerToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
-  hideAllCtxMenus } = useAppCommonStore()
+  hideAllCtxMenus, toggleColorPickerToolbar,
+  showColorPickerToolbar } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 
 const getCtxMenuAutoHeight = () => {
@@ -66,8 +70,8 @@ const adjustMenuPosition = (event) => {
 
 const setMenuPosition = (event) => {
   ctxMenuPos = adjustMenuPosition(event)
-  ctxMenuPosStyle.left = ctxMenuPos.x + "px !important"
-  ctxMenuPosStyle.top = ctxMenuPos.y + "px !important"
+  ctxMenuPosStyle.left = ctxMenuPos.x + 'px !important'
+  ctxMenuPosStyle.top = ctxMenuPos.y + 'px !important'
 }
 
 const getCtxSubmenuAutoHeight = () => {
@@ -100,40 +104,67 @@ const setSubmenuPosition = (event) => {
   const pos = adjustSubmenuPosition(event)
   //const padding = submenuItemNums > 7 ? 5 : 0
   const padding = 5
-  ctxSubmenuPosStyle.left = ctxMenuPos.x - menuWidth - padding + "px !important"
-  ctxSubmenuPosStyle.top = pos.y + "px !important"
+  ctxSubmenuPosStyle.left = ctxMenuPos.x - menuWidth - padding + 'px !important'
+  ctxSubmenuPosStyle.top = pos.y + 'px !important'
 }
 
-EventBus.on("commonCtxMenu-show", e => {
+EventBus.on('commonCtxMenu-show', ({ event, value }) => {
   hideCommonCtxMenu(true) //强制取消上次的显示
   hideAddToListSubmenu()
   hideArtistListSubmenu()
-  setMenuPosition(e.event)
-  showCommonCtxMenu(e.value)
+  setMenuPosition(event)
+  showCommonCtxMenu(value)
 })
 
 const bindEventListeners = () => {
-  EventBus.on("addToListSubmenu-show", e => {
+  EventBus.on('addToListSubmenu-show', e => {
     submenuItemNums = customPlaylists.value.length + 2
     setSubmenuPosition(e)
     showAddToListSubmenu()
   })
 
-  EventBus.on("artistListSubmenu-show", e => {
+  EventBus.on('artistListSubmenu-show', e => {
     const { artist } = commonCtxMenuCacheItem.value
     submenuItemNums = artist.length
     setSubmenuPosition(e)
     showArtistListSubmenu()
   })
 
-  EventBus.on("addToListSubmenu-hide", () => {
+  EventBus.on('addToListSubmenu-hide', () => {
     hideAddToListSubmenu()
   })
 
-  EventBus.on("artistListSubmenu-hide", () => {
+  EventBus.on('artistListSubmenu-hide', () => {
     hideArtistListSubmenu()
   })
 
+  EventBus.on('color-picker-toolbar-show', ({ event: mouseEvent }) => {
+    //根据鼠标点击位置，确定弹出位置
+    const tbWidth = 218, tbHeight = 369
+    const { x, y, offsetX, offsetY } = mouseEvent
+    const pickerEl = document.querySelector('#color-picker-toolbar')
+    const { clientHeight, clientWidth } = document.documentElement
+    if (!pickerEl) return
+    const padding = 25
+    let top = Math.max(y + (18 - offsetY) - tbHeight / 2, padding)
+    top = Math.min(top, clientHeight - tbHeight - padding)
+    let left = Math.max(x + padding, padding)
+    left = Math.min(left, clientWidth - tbWidth - padding)
+    pickerEl.style.top = `${top}px`
+    pickerEl.style.left = `${left}px`
+
+    showColorPickerToolbar()
+  })
+
+  EventBus.on('app-resize', setupCustomThemeEditViewPos)
+}
+
+const setupCustomThemeEditViewPos = () => {
+  EventBus.emit('app-elementAlignCenter', {
+    selector: '#custom-theme-edit-view',
+    width: 768,
+    height: 520
+  })
 }
 
 //TODO
@@ -152,17 +183,20 @@ onMounted(() => {
   bindEventListeners()
   setupPlayingView()
 })
+
+watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
 </script>
 
 <template>
   <div id="popovers">
-    <CommonContextMenu v-show="commonCtxMenuShow" :posStyle="ctxMenuPosStyle" :data="commonCtxMenuData">
+    <CommonContextMenu v-show="commonCtxMenuShow" :class="{ 'custom-theme-bg': true }" :posStyle="ctxMenuPosStyle"
+      :data="commonCtxMenuData">
     </CommonContextMenu>
 
-    <AddToListSubmenu v-show="addToListSubmenuShow" :posStyle="ctxSubmenuPosStyle">
+    <AddToListSubmenu v-show="addToListSubmenuShow" :class="{ 'custom-theme-bg': true }" :posStyle="ctxSubmenuPosStyle">
     </AddToListSubmenu>
 
-    <ArtistListSubmenu v-show="artistListSubmenuShow" :posStyle="ctxSubmenuPosStyle">
+    <ArtistListSubmenu v-show="artistListSubmenuShow" :class="{ 'custom-theme-bg': true }" :posStyle="ctxSubmenuPosStyle">
     </ArtistListSubmenu>
 
     <!-- 通用通知 -->
@@ -200,12 +234,14 @@ onMounted(() => {
 
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
-      <component id="playing-view" v-show="playingViewShow" :is="currentPlayingView">
+      <component id="playing-view" :class="{ 'custom-theme-bg': true }" v-show="playingViewShow" :is="currentPlayingView">
       </component>
     </transition>
 
-    <PlaybackQueueView id="playback-queue-view" v-show="playbackQueueViewShow">
-    </PlaybackQueueView>
+    <transition name="fade-ex">
+      <PlaybackQueueView id="playback-queue-view" :class="{ 'custom-theme-bg': true }" v-show="playbackQueueViewShow">
+      </PlaybackQueueView>
+    </transition>
 
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
@@ -213,14 +249,19 @@ onMounted(() => {
       </VideoPlayingView>
     </transition>
 
-    <SoundEffectView id="sound-effect-view" v-show="soundEffectViewShow">
+    <SoundEffectView id="sound-effect-view" :class="{ 'custom-theme-bg': true }" v-show="soundEffectViewShow">
     </SoundEffectView>
 
-    <LyricToolbar id="lyric-toolbar" v-show="lyricToolbarShow">
+    <LyricToolbar id="lyric-toolbar" :class="{ 'custom-theme-bg': true }" v-show="lyricToolbarShow">
     </LyricToolbar>
 
-    <RandomMusicToolbar id="random-music-toolbar" v-show="randomMusicToolbarShow">
+    <RandomMusicToolbar id="random-music-toolbar" :class="{ 'custom-theme-bg': true }" v-show="randomMusicToolbarShow">
     </RandomMusicToolbar>
+
+    <CustomThemeEditView id="custom-theme-edit-view" v-show="customThemeEditViewShow">
+    </CustomThemeEditView>
+
+    <ColorPickerToolbar id="color-picker-toolbar" v-show="colorPickerToolbarShow" />
   </div>
 </template>
 
@@ -234,7 +275,8 @@ onMounted(() => {
   width: 33.5%;
   height: 100%;
   z-index: 99;
-  background: var(--app-bg);
+  /*background-color: var(--bg-color);
+  background-image: var(--app-bg);*/
   box-shadow: var(--pbq-box-shadow);
   border-top-right-radius: var(--macstyle-border-radius);
   border-bottom-right-radius: var(--macstyle-border-radius);
@@ -248,7 +290,10 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   z-index: 99;
-  background: var(--app-bg);
+  /*background-color: var(--bg-color);
+  background-image: var(--app-bg);*/
+  background-position: center;
+  background-size: cover;
   border-radius: var(--macstyle-border-radius);
 }
 
@@ -263,7 +308,8 @@ onMounted(() => {
   width: 725px;
   height: 550px;
   z-index: 99;
-  background: var(--app-bg);
+  /*background-color: var(--bg-color);
+  background-image: var(--app-bg);*/
   box-shadow: var(--pbq-box-shadow);
 }
 
@@ -272,6 +318,8 @@ onMounted(() => {
   top: 202px;
   right: 30px;
   z-index: 99;
+  /*background-color: var(--bg-color);
+  background-image: var(--app-bg);*/
   box-shadow: var(--pbq-box-shadow);
 }
 
@@ -280,6 +328,28 @@ onMounted(() => {
   bottom: 128px;
   right: 30px;
   z-index: 99;
+  /*background-color: var(--bg-color);
+  background-image: var(--app-bg);*/
+  box-shadow: var(--pbq-box-shadow);
+}
+
+#custom-theme-edit-view {
+  position: absolute;
+  right: 30px;
+  bottom: 80px;
+  width: 768px;
+  height: 520px;
+  z-index: 99;
+  background-color: var(--bg-color);
+  /*background-image: var(--app-bg);*/
+  box-shadow: var(--pbq-box-shadow);
+}
+
+#color-picker-toolbar {
+  position: absolute;
+  left: 50%;
+  bottom: 125px;
+  z-index: 100;
   box-shadow: var(--pbq-box-shadow);
 }
 </style>

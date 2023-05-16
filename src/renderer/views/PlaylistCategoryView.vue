@@ -74,26 +74,29 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 
 <template>
     <div class="playlist-category-view" @click.stop="">
-        <div class="header">
-            <div class="cate-title">全部分类</div>
-            <div class="fl-item current" v-html="currentCategoryItem.data.key"></div>
-        </div>
-        <div class="center">
-            <div class="fl-row" v-show="orders && orders.length > 0">
-                <div class="cate-title">排序</div>
-                <div class="cate-item-wrap">
-                    <div v-for="(item, index) in orders" class="fl-item" :class="{ current: (currentOrder.index == index) }"
-                        @click="visitByOrder(item, index)" v-html="item.key">
+        <div class="container">
+            <div class="header">
+                <div class="cate-title">全部分类</div>
+                <div class="fl-item current" v-html="currentCategoryItem.data.key"></div>
+            </div>
+            <div class="center">
+                <div class="fl-row" v-show="orders && orders.length > 0">
+                    <div class="cate-title">排序</div>
+                    <div class="cate-item-wrap">
+                        <div v-for="(item, index) in orders" class="fl-item"
+                            :class="{ current: (currentOrder.index == index) }" @click="visitByOrder(item, index)"
+                            v-html="item.key">
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div v-for="(cate, row) in categories" class="fl-row">
-                <div class="cate-title">{{ cate.name }}</div>
-                <div class="cate-item-wrap">
-                    <div v-for="(item, col) in cate.data" class="fl-item" :class="{
-                        current: (row == currentCategoryItem.row
-                            && col == currentCategoryItem.col)
-                    }" @click="visitCateItem(item, row, col)" v-html="item.key">
+                <div v-for="(cate, row) in categories" class="fl-row">
+                    <div class="cate-title">{{ cate.name }}</div>
+                    <div class="cate-item-wrap">
+                        <div v-for="(item, col) in cate.data" class="fl-item" :class="{
+                            current: (row == currentCategoryItem.row
+                                && col == currentCategoryItem.col)
+                        }" @click="visitCateItem(item, row, col)" v-html="item.key">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -103,8 +106,19 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 
 <style scoped>
 .playlist-category-view {
+    display: flex;
+    overflow: hidden;
+    overflow-x: hidden;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.playlist-category-view .container {
     overflow: scroll;
     overflow-x: hidden;
+    padding-bottom: 30px;
+    flex: 1;
+    background: var(--content-bg-color);
 }
 
 .playlist-category-view .header,
@@ -114,21 +128,22 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 }
 
 .playlist-category-view .header {
-    margin-top: 5px;
+    /*margin-top: 5px;*/
     margin-bottom: 5px;
     padding-bottom: 10px;
     padding-left: 33px;
     padding-right: 33px;
+    border-bottom: 1px solid var(--border-color);
     /* border-bottom: 0.5px solid var(--category-view-border); */
-    border-bottom: 0.5px solid #565656;
-    border-bottom: var(--category-view-border);
+    /*background: var(--category-view-header-bg);
+    background: var(--content-bg-color2);*/
 }
 
-/*
 .playlist-category-view .header .cate-title {
-   margin-right: 1px;
+    /*margin-right: 1px;*/
+    flex: 1;
 }
-*/
+
 
 .playlist-category-view .header .fl-item,
 .playlist-category-view .header .fl-item:hover {
@@ -137,12 +152,14 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     background: var(--hl-text-bg);
     -webkit-background-clip: text;
     color: transparent;
+    font-size: var(--text-size);
+    margin-right: 0px;
     /*
     padding-top: 8px;
     margin-left: 30px;
-    */
-    position: absolute;
+    position: relative;
     right: 30px;
+    */
 }
 
 .playlist-category-view .center {

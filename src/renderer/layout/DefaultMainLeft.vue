@@ -39,6 +39,7 @@ let isUserMouseWheel = ref(false), userMouseWheelCancelTimer = null
 const updatePlatformIndex = (index, isSwitchMode) => {
     updateCurrentPlatform(index)
     activeCustomPlaylistIndex.value = -1
+    activeFavoritePlaylistIndex.value = -1
     activeArtistIndex.value = -1
 
     const platform = currentPlatformCode.value
@@ -70,6 +71,7 @@ const toggleRadioMode = () => {
 
 const visitCustomItem = (item, index) => {
     activeCustomPlaylistIndex.value = index
+    activeFavoritePlaylistIndex.value = -1
     updateCurrentPlatform(-1)
     visitCustomPlaylist(item.id)
 }
@@ -91,6 +93,7 @@ const visitArtistItem = (item, index) => {
 
 const visitFavourteItem = (item, index) => {
     activeCustomPlaylistIndex.value = -1
+    //activeFavoritePlaylistIndex.value = index
     const { id, platform } = item
     visitFavoritePlaylist(platform, id)
 }
@@ -108,11 +111,11 @@ const onUserMouseWheel = () => {
 }
 
 const isSubtitleVisible = () => {
+    const { customPlaylistsShow, favoritePlaylistsShow, followArtistsShow } = navigation.value
     if (isPlaylistMode.value) {
-        return navigation.value.customPlaylistsShow
-            || navigation.value.favoritePlaylistsShow
+        return customPlaylistsShow || favoritePlaylistsShow
     } else if (isArtistMode.value) {
-        return navigation.value.followArtistsShow
+        return followArtistsShow
     }
     return false
 }
@@ -273,10 +276,6 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
             <div id="favorite-playlist-list" v-show="isPlaylistMode && navigation.favoritePlaylistsShow">
                 <div class="subtitle">
                     <span>收藏的歌单</span>
-                    <!--
-                                                                                                                    <svg v-show="isFavoritePlaylistsCollapsed" class="expand-btn" @click="setFavoritePlaylistsCollapsed(false)" width="11" height="11" viewBox="0 0 763.32 424.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M380.47,322.11c27.6-27.5,54-53.68,80.23-80Q575,127.75,689.38,13.4C708.7-5.81,735-2.92,750.83,12.91c17,17,16.57,43.39-.9,60.87L414.1,409.61c-19.89,19.89-45,20-64.9.08Q180.9,241.45,12.66,73.15A42.53,42.53,0,1,1,72.85,13Q224.7,164.87,376.48,316.73A46.1,46.1,0,0,1,380.47,322.11Z"/></g></g></svg>
-                                                                                                                    <svg v-show="!isFavoritePlaylistsCollapsed" class="collapse-btn" @click="setFavoritePlaylistsCollapsed(true)" width="11" height="11" viewBox="0 0 640.13 352.15" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><g id="Layer_2-2" data-name="Layer 2"><g id="Layer_1-2-2" data-name="Layer 1-2"><path d="M319.64,76.3c-1.91,2.59-3,4.52-4.51,6Q186,211.6,56.78,340.8c-8.31,8.34-17.87,12.87-29.65,10.88-12.51-2.12-21.24-9.34-25.29-21.48-4.12-12.35-1.23-23.43,7.71-32.7C19.73,287,30.24,276.72,40.61,266.35L289.12,17.84c2.94-2.94,5.74-6,8.75-8.91a32.1,32.1,0,0,1,44.28-.15c3.15,3,6.05,6.2,9.11,9.26Q490,156.79,628.78,295.5c10.11,10.1,14.13,21.64,9.33,35.44a31.75,31.75,0,0,1-48.49,15.2,58.8,58.8,0,0,1-7.07-6.31Q453.85,211.22,325.2,82.51C323.68,81,322.32,79.3,319.64,76.3Z"/></g></g></g></g></svg>
-                                                                                                                    -->
                     <svg v-show="isFavoritePlaylistsCollapsed" class="expand-btn"
                         @click="setFavoritePlaylistsCollapsed(false)" width="11" height="11" viewBox="0 0 455.71 818.08"
                         xmlns="http://www.w3.org/2000/svg">
@@ -337,7 +336,8 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    box-shadow: 0px 0px 3px var(--main-left-border-color);
+    /*box-shadow: 0px 0px 3px var(--main-left-border-color);*/
+    border-right: 1px solid var(--main-left-border-color);
     background: var(--main-left-bg);
 }
 
@@ -439,7 +439,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 #explore-mode .exit-btn {
     position: absolute;
     top: 8px;
-    right: 20px;
+    right: 13px;
 }
 
 #explore-mode .exit-btn:hover svg {
@@ -517,6 +517,11 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 
 #main-left li:hover {
     background: var(--list-item-hover);
+}
+
+#custom-playlist-list li,
+#favorite-playlist-list li {
+    font-size: var(--text-sub-size);
 }
 
 #favorite-playlist-list li {

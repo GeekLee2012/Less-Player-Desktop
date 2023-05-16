@@ -431,6 +431,7 @@ export class NetEase {
             const url = "https://music.163.com/weapi/cloudsearch/get/web"
             const param = searchParam(keyword, 1)
             const reqBody = weapi(param)
+            const result = { platform: NetEase.CODE, offset, limit, page, data: [] }
             postJson(url, reqBody).then(json => {
                 const list = json.result.songs
                 const data = list.map(item => {
@@ -440,9 +441,9 @@ export class NetEase {
                     track.mv = item.mv
                     return track
                 })
-                const result = { platform: NetEase.CODE, offset, limit, page, data }
+                if (data && data.length > 0) result.data.push(...data)
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 

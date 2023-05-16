@@ -25,8 +25,8 @@ body,
 }
 
 #app {
+  background-image: var(--app-bg);
   background-color: var(--bg-color);
-  background: var(--app-bg);
   background-position: center;
   background-size: cover;
   display: flex;

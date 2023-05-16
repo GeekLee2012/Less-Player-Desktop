@@ -115,75 +115,6 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
 <style>
 /*
-:root,
-:root[fsLevel="default"],
-:root[fsLevel="standard"] {
-  --text-size: 15.5px;
-  --text-sub-size: 14px;
-  --tip-text-size: 13.5px;
-  --tab-title-text-size: 17px;
-  --setting-cate-subtitle-width: 225px;
-  --text-line-height: 23px;
-  --text-main-title-size: 30px;
-  --text-main2-title-size: 23px;
-  --text-main3-title-size: 21px;
-  --text-main4-title-size: 19px;
-  --main-left-nav-line-height: 32px;
-}
-
-:root[fsLevel="small"] {
-  --text-size: 14.5px;
-  --text-sub-size: 13px;
-  --tip-text-size: 12.5px;
-  --tab-title-text-size: 16px;
-  --text-line-height: 22px;
-  --main-left-nav-line-height: 31.5px;
-  --text-main4-title-size: 18px;
-}
-
-:root[fsLevel="medium"] {
-  --text-size: 16.5px;
-  --text-sub-size: 15px;
-  --tip-text-size: 14.5px;
-  --tab-title-text-size: 18px;
-  --setting-cate-subtitle-width: 255px;
-  --text-line-height: 23.3px;
-  --main-left-nav-line-height: 32.5px;
-  --text-main4-title-size: 20px;
-}
-
-:root[fsLevel="large"] {
-  --text-size: 17.5px;
-  --text-sub-size: 16px;
-  --tip-text-size: 15.5px;
-  --tab-title-text-size: 19px;
-  --setting-cate-subtitle-width: 255px;
-  --text-line-height: 23.5px;
-  --main-left-nav-line-height: 33px;
-  --text-main4-title-size: 21px;
-}
-
-:root[fsLevel="larger"] {
-  --text-size: 18.5px;
-  --text-sub-size: 17px;
-  --tip-text-size: 15.5px;
-  --tab-title-text-size: 20px;
-  --setting-cate-subtitle-width: 260px;
-  --text-line-height: 23.6px;
-  --text-main4-title-size: 21.5px;
-  --main-left-nav-line-height: 33.5px;
-}
-
-:root[fsLevel="largest"] {
-  --text-size: 19.5px;
-  --text-sub-size: 18px;
-  --tip-text-size: 15.5px;
-  --tab-title-text-size: 21px;
-  --setting-cate-subtitle-width: 260px;
-  --text-line-height: 23.6px;
-  --text-main4-title-size: 23px;
-  --main-left-nav-line-height: 33.5px;
-}
 @media (prefers-color-scheme: light) {}
 
 @media (prefers-color-scheme: dark) {}
@@ -286,6 +217,15 @@ watch(theme, () => setupAppTheme(), { deep: true })
   /* 全局背景 */
   --bg-color: #fff;
   --app-bg: var(--bg-color);
+  --main-left-bg: #f8f8f8ff;
+  --main-left-border-color: none;
+  --default-main-center-bg: #ffffffcb;
+  --playing-view-bg: #ffffffcb;
+  --content-bg-color: #ffffffdc;
+  --content-bg-color2: #eeeeee88;
+  --category-view-header-bg: none;
+  --border-color: #eee;
+
   /* 文本 */
   --text-color: #212121;
   --text-color: #272727;
@@ -310,7 +250,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   --toggle-btn-bg: #989898;
   --toggle-thumb-bg: #ccc;
-  --toggle-btn-border-color: #ccc;
+  --toggle-btn-border-color: var(--border-color);
   --toggle-btn-active-bg: var(--hl-color);
   --toggle-active-thumb-bg: #fff;
   /* 进度条 */
@@ -323,11 +263,11 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --list-item-hover: #eee !important;
   --list-item-active-bg: var(--btn-bg);
   /* 边框 */
-  --main-left-border-color: #ddd;
+  /*--main-left-border-color: #ddd;*/
   --ctx-menu-bg: var(--bg-color);
   --ctx-menu-border-color: #ababab;
   --ctx-menu-border-color: #999;
-  --border-color: #f4f4f4;
+  /*--border-color: #f4f4f4;*/
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: #f8f8f8;
   /* 当前播放列表 左侧边框高亮颜色 */
@@ -340,7 +280,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --search-btn-bg: #fff;
   --search-btn-svg-color: var(--svg-color);
   --searchbar-text-color: #313131;
-  --searchbar-border-color: #313131;
+  --searchbar-border-color: #333;
 
   --search-btn-hover-bg: var(--search-btn-bg);
   --search-btn-hover-svg-color: var(--hl-color);
@@ -358,10 +298,10 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --logo-text-bg: #fff;
   --logo-text-color: #1ca388;
 
-  --category-view-border: 0.5px solid var(--main-left-border-color);
+  /*--category-view-border: 0.5px solid var(--main-left-border-color);*/
   --input-bg: var(--bg-color);
   --input-text-color: var(--text-color);
-  --input-border-color: var(--main-left-border-color);
+  --input-border-color: #ccc;
   --input-placeholder-color: #888;
 
   --back2top-btn-bg: var(--btn-hover-bg);
@@ -369,7 +309,8 @@ watch(theme, () => setupAppTheme(), { deep: true })
 
   /* 音效 */
   --seview-bg: var(--bg-color);
-  --seview-left-bg: #eee;
+  --seview-bg: #ffffffcb;
+  --seview-left-bg: #ffffff99;
   --seview-border: 1px solid #eee;
   --seview-list-item-bg: #f3f3f3;
   --seview-list-item-color: var(--text-color);
@@ -424,7 +365,7 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --ctx-menu-bg: var(--bg-color);
   --ctx-menu-border-color: #ababab;
   --ctx-menu-border-color: #999;
-  --border-color: #faf4f6;
+  /*--border-color: #faf4f6;*/
   /* 设置页，每一分类栏底部分隔线颜色 */
   --setting-bottom-border-color: transparent;
   /* 当前播放列表 左侧边框高亮颜色 */
@@ -1983,16 +1924,12 @@ watch(theme, () => setupAppTheme(), { deep: true })
   --seview-list-item-color: var(--text-color);
 }
 
-/*
-svg {
-    fill: var(--svg-color);
-    cursor: pointer;
+
+.custom-theme-bg {
+  background-color: var(--bg-color);
+  background-image: var(--app-bg);
 }
 
-svg:hover {
-    fill: var(--svg-hover-color);
-}
-*/
 
 /* 滚动条 */
 ::-webkit-scrollbar-thumb {

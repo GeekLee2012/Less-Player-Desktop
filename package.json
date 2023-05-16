@@ -57,6 +57,7 @@
     "electron": "^22.0.0",
     "electron-builder": ">=22.14.13",
     "vite": "^2.9.0",
+    "vue-color-kit": "^1.0.5",
     "wait-on": "^6.0.1"
   },
   "build": {

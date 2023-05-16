@@ -237,6 +237,7 @@ watch(() => props.keyword, (nv, ov) => loadTab())
     height: 32px;
     margin-bottom: 3px;
     border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid transparent;
 }
 
 #search-view .tab {

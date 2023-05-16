@@ -86,6 +86,7 @@ onActivated(() => {
 
 .video-playing-view .header {
     height: 56px;
+    min-height: 56px;
     display: flex;
     -webkit-app-region: drag;
     z-index: 89;

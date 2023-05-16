@@ -110,7 +110,7 @@ onUnmounted(() => {
 
 <template>
     <div class="visual-playing-view" :style="viewStyle">
-        <div class="wrap" :style="filterStyle">
+        <div class="container" :style="filterStyle">
             <div class="header">
                 <div class="win-ctl-wrap">
                     <WinTrafficLightBtn v-show="useCustomTrafficLight" :showCollapseBtn="true"
@@ -185,7 +185,7 @@ onUnmounted(() => {
                         </div>
                         <div class="btm-right">
                             <div class="theme" @click="switchPlayingViewTheme">
-                                <svg width="18" height="18" viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="17" height="17" viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">
                                             <path class="cls-1"
@@ -242,8 +242,11 @@ onUnmounted(() => {
     overflow: hidden;
 }
 
-.visual-playing-view .wrap {
+.visual-playing-view .container {
+    display: flex;
     flex: 1;
+    flex-direction: column;
+    background: var(--content-bg-color);
 }
 
 .visual-playing-view .spacing {
@@ -338,21 +341,28 @@ onUnmounted(() => {
 
 .visual-playing-view .center .left,
 .visual-playing-view .center .lyric-wrap {
-    flex: 1;
+    /*flex: 1;*/
+    width: 50%;
+    max-width: 50%;
+}
+
+.visual-playing-view .center .lyric-wrap {
+    /*padding-right: 33px;*/
+    margin-left: 28px;
 }
 
 .visual-playing-view .center .left {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-top: 30px;
-    margin-right: 30px;
+    margin-top: 33px;
+    margin-right: 28px;
 }
 
 .visual-playing-view .cover img {
     width: 365px;
     height: 365px;
-    border: 5px solid #292929;
+    border: 6px solid #292929;
     border-radius: 99rem;
     animation: rotate 10s linear infinite;
     animation-play-state: paused;
@@ -457,10 +467,6 @@ onUnmounted(() => {
 
 .visual-playing-view .action .love-btn {
     fill: var(--svg-hover-color) !important;
-}
-
-.visual-playing-view .center .lyric-wrap {
-    margin: 0px 0px 0px 30px;
 }
 
 .visual-playing-view .bottom {

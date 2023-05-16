@@ -616,6 +616,9 @@ export const useSettingStore = defineStore('setting', {
         setupSpectrumRefreshFrequency() {
             EventBus.emit('track-spectrumRefreshFrequency', this.track.spectrumRefreshFrequency || 3)
         },
+        getStateRefreshFrequency() {
+            return this.track.stateRefreshFrequency
+        }
     },
     persist: {
         enabled: true,

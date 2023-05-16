@@ -33,17 +33,19 @@ const resetScroll = () => {
 
 <template>
     <div class="common-ctx-submenu" :style="posStyle" @click.stop="" @mouseleave="hideAllSubmenus">
-        <div class="padding"></div>
-        <div class="center" ref="submenuListRef">
-            <template v-for="(item, index) in data">
-                <div class="menuItem" @click="(event) => handleMenuItem(item, index, event)" v-show="!item.separator">
-                    <div v-html="item.icon" v-show="item.icon"></div>
-                    <div><span>{{ item.name }}</span></div>
-                </div>
-                <div class="separator" v-show="item.separator && false"></div>
-            </template>
+        <div class="container">
+            <div class="padding"></div>
+            <div class="center" ref="submenuListRef">
+                <template v-for="(item, index) in data">
+                    <div class="menuItem" @click="(event) => handleMenuItem(item, index, event)" v-show="!item.separator">
+                        <div v-html="item.icon" v-show="item.icon"></div>
+                        <div><span>{{ item.name }}</span></div>
+                    </div>
+                    <div class="separator" v-show="item.separator && false"></div>
+                </template>
+            </div>
+            <div class="padding"></div>
         </div>
-        <div class="padding"></div>
     </div>
 </template>
 
@@ -52,15 +54,26 @@ const resetScroll = () => {
     position: absolute;
     z-index: 101;
     display: flex;
-    flex-direction: column;
+    /*flex-direction: column;
     align-items: center;
-    /*justify-content: center;*/
+    justify-content: center;
     background: var(--ctx-menu-bg);
+    background-color: var(--bg-color);
+    background-image: var(--app-bg);
+    */
     border-radius: 8px;
     /*padding: 15px 0px;
     max-height: 297px;
     border: 1px solid var(--border-color);*/
     box-shadow: 0px 0px 6px var(--ctx-menu-border-color);
+}
+
+.common-ctx-submenu .container {
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--content-bg-color);
 }
 
 .common-ctx-submenu .padding {

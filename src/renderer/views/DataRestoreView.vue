@@ -434,6 +434,7 @@ watch(sourcesCategories, () => {
     padding-bottom: 15px;
     margin-bottom: 15px;
     border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid transparent;
     position: relative;
 }
 
