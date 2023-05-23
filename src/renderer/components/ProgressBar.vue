@@ -68,7 +68,7 @@ defineExpose({ updateProgress })
     height: 3px;
     border-radius: 10rem;
     /*background: linear-gradient(to right, #464646, #666) !important;*/
-    background: var(--progress-track-bg);
+    background: var(--others-progressbar-bg-color);
     -webkit-app-region: none;
 }
 
@@ -76,8 +76,7 @@ defineExpose({ updateProgress })
     width: 0%;
     height: 100%;
     border-radius: 10rem;
-    background: var(--hl-text-bg);
-    background: var(--progress-bg);
+    background: var(--content-text-highlight-color);
 }
 
 .handcur {

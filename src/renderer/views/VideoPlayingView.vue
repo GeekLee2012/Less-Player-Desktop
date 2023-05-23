@@ -71,7 +71,7 @@ onActivated(() => {
     </div>
 </template>
 
-<style scoped>
+<style>
 .video-playing-view {
     display: flex;
     flex-direction: column;
@@ -98,7 +98,7 @@ onActivated(() => {
     justify-content: flex-end;
     align-items: center;
     /*width: 105px;*/
-    margin-left: var(--win-ctl-margin-left);
+    margin-left: var(--others-win-ctl-margin-left);
 }
 
 /*
@@ -118,18 +118,22 @@ onActivated(() => {
     display: flex;
     align-items: center;
 }
-*/
 
 .video-playing-view .header svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     fill: #fff !important;
 }
+*/
 
 .video-playing-view .header svg:hover,
+.video-playing-view .collapse-btn:hover,
 .video-playing-view .collapse-btn:hover svg {
-    fill: var(--hl-color);
-    fill: var(--svg-hover-color);
+    fill: var(--content-text-highlight-color) !important;
     cursor: pointer;
+}
+
+.video-playing-view .collapse-btn svg {
+    fill: #fff !important;
 }
 
 .video-playing-view .center {

@@ -30,7 +30,7 @@ const { playingViewShow, spectrumIndex,
 const { hidePlayingView, minimize, showToast,
     switchPlayingViewTheme, switchSpectrumIndex,
     toggleSoundEffectView } = useAppCommonStore()
-const { getCurrentThemeHlColor } = useSettingStore()
+const { getCurrentThemeHighlightColor } = useSettingStore()
 const { currentTrack, playingIndex,
     playing, volume, queueTracksSize } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
@@ -238,7 +238,7 @@ onUnmounted(() => {
 <style scoped>
 .visual-playing-view {
     display: flex;
-    flex-direction: column;
+    /*flex-direction: column;*/
     overflow: hidden;
 }
 
@@ -247,6 +247,7 @@ onUnmounted(() => {
     flex: 1;
     flex-direction: column;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .visual-playing-view .spacing {
@@ -267,7 +268,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-left: var(--win-ctl-margin-left);
+    margin-left: var(--others-win-ctl-margin-left);
 }
 
 .visual-playing-view .meta-wrap {
@@ -291,7 +292,7 @@ onUnmounted(() => {
 .visual-playing-view .meta-wrap .audio-title,
 .visual-playing-view .meta-wrap .audio-artist {
     font-weight: bold;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -314,7 +315,7 @@ onUnmounted(() => {
 }
 
 .visual-playing-view svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
@@ -323,8 +324,7 @@ onUnmounted(() => {
 .visual-playing-view .equalizer svg:hover,
 .visual-playing-view .active svg,
 .visual-playing-view .collapse-btn:hover svg {
-    fill: var(--hl-color);
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
     cursor: pointer;
 }
 
@@ -426,11 +426,11 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .action svg:hover {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .visual-playing-view .action .love-btn {
-    fill: var(--svg-hover-color) !important;
+    fill: var(--content-text-highlight-color) !important;
 }
 
 .visual-playing-view .action .btm-left,
@@ -466,7 +466,7 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .action .love-btn {
-    fill: var(--svg-hover-color) !important;
+    fill: var(--content-text-highlight-color) !important;
 }
 
 .visual-playing-view .bottom {

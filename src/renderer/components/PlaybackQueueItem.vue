@@ -53,21 +53,23 @@ const showContextMenu = (event) => {
 </script>
 
 <template>
-    <div class="playback-queue-item" :class="{ current: active }" @dblclick="" @contextmenu="showContextMenu">
+    <div class="playback-queue-item" :class="{ 'playback-queue-item-active': active }" @dblclick=""
+        @contextmenu="showContextMenu">
         <div class="item-wrap">
             <div class="left">
                 <img class="cover" v-lazy="data.cover" />
             </div>
             <div class="right">
                 <div class="data">
-                    <div class="title" v-html="data.title"></div>
+                    <div class="title" :class="{ 'content-text-highlight': active }" v-html="data.title"></div>
                     <div class="bottom">
-                        <div class="artist">
+                        <div class="artist" :class="{ 'content-text-highlight': active }">
                             <ArtistControl :visitable="true" :platform="data.platform" :data="data.artist"
                                 :trackId="data.id">
                             </ArtistControl>
                         </div>
-                        <span class="duration">{{ Track.mmssDuration(data) }}</span>
+                        <span class="duration" :class="{ 'content-text-highlight': active }">{{ Track.mmssDuration(data)
+                        }}</span>
                     </div>
                 </div>
                 <div class="action">
@@ -124,25 +126,21 @@ const showContextMenu = (event) => {
 }
 
 .playback-queue-item:hover {
-    background: var(--list-item-hover);
+    background: var(--content-list-item-hover-bg-color);
 }
 
 .playback-queue-item .spacing {
     margin-left: 12px;
 }
 
-.current .item-wrap {
-    border-image: var(--pbq-hl-border);
+.playback-queue-item-active .item-wrap {
+    border-image: var(--content-border-image) 0 0 0 2;
 }
 
-.current .title,
-.current .artist,
-.current .duration {
-    background: var(--hl-text-bg);
-    background: var(--pbq-hl-text-color);
-    -webkit-background-clip: text;
-    color: transparent !important;
-    font-weight: 520;
+.playback-queue-item-active .title,
+.playback-queue-item-active .artist,
+.playback-queue-item-active .duration {
+    font-weight: bold;
 }
 
 .playback-queue-item .cover {
@@ -198,7 +196,7 @@ const showContextMenu = (event) => {
 
 .playback-queue-item .artist,
 .playback-queue-item .duration {
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     /*
     font-size: 14px;
     bottom: 10px;
@@ -209,7 +207,7 @@ const showContextMenu = (event) => {
 }
 
 .playback-queue-item .duration {
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
 }
 
 .playback-queue-item .artist {
@@ -225,7 +223,7 @@ const showContextMenu = (event) => {
 }
 
 .playback-queue-item .artist span:hover {
-    background: var(--hl-text-bg);
+    background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
     color: transparent;
 }
@@ -249,18 +247,17 @@ const showContextMenu = (event) => {
     padding-left: 15px;
     padding-right: 15px;
 
-    /*background: var(--list-item-hover);*/
+    /*background: var(--content-list-item-hover-bg-color);*/
     visibility: hidden;
 }
 
 .playback-queue-item .action svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 .playback-queue-item .action svg:hover {
-    fill: var(--hl-color);
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .playback-queue-item:hover .title,

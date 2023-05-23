@@ -84,7 +84,8 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
         <div class="container">
             <div class="header">
                 <div class="cate-title">全部分类</div>
-                <div class="fl-item current" v-show="!multiSelectMode" v-html="currentCategoryItem.data.key"></div>
+                <div class="fl-item content-text-highlight" v-show="!multiSelectMode" v-html="currentCategoryItem.data.key">
+                </div>
                 <div class="action" v-show="multiSelectMode">
                     <div class="reset-btn text-btn" @click="resetCurrentCategoryItems">
                         <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"
@@ -157,6 +158,7 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
     padding-bottom: 30px;
     flex: 1;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .radio-category-view .header,
@@ -172,26 +174,19 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
     padding-left: 33px;
     padding-right: 33px;
     border-bottom: 1px solid var(--border-color);
-    /*background: var(--category-view-header-bg);
-    background: var(--content-bg-color2);
-    */
 }
 
 .radio-category-view .header .cate-title {
     /*margin-right: 1px;*/
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     flex: 1;
 }
 
 .radio-category-view .header .fl-item,
 .radio-category-view .header .fl-item:hover {
     cursor: default;
-    /*font-size: 18px;*/
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
     margin-right: 0px;
-    font-size: var(--text-size);
+    font-size: var(--content-text-size);
     /*
     padding-top: 8px;
     margin-left: 30px;
@@ -221,13 +216,13 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 
 .radio-category-view .text-btn svg {
     margin-right: 5px;
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .radio-category-view .text-btn:hover,
 .radio-category-view .text-btn:hover svg {
-    color: var(--hl-color);
-    fill: var(--hl-color);
+    color: var(--content-text-highlight-color);
+    fill: var(--content-highlight-color);
 }
 
 .radio-category-view .center {
@@ -251,7 +246,7 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 .radio-category-view .cate-title {
     font-size: 19px;
     font-weight: bold;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     min-width: 39px;
     margin-top: 15px;
     margin-right: 20px;
@@ -259,7 +254,7 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 
 .radio-category-view .header .cate-title {
     /*font-size: 21px;*/
-    font-size: var(--text-main3-title-size);
+    font-size: var(--content-text-module-title2-size);
 }
 
 .radio-category-view .fl-item {
@@ -269,14 +264,14 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
     margin-top: 10px;
     margin-right: 10px;
     cursor: pointer;
-    color: var(--text-color);
-    font-size: var(--text-sub-size);
+    color: var(--content-text-color);
+    font-size: var(--content-text-subtitle-size);
     border-radius: 10rem;
 }
 
 .radio-category-view .fl-item:hover {
-    background-color: var(--list-item-hover);
-    color: var(--text-color);
+    background-color: var(--content-list-item-hover-bg-color);
+    color: var(--content-text-color);
 }
 
 
@@ -286,7 +281,7 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
 
 .radio-category-view .center .current {
     border-radius: 10rem;
-    background: var(--btn-bg) !important;
-    color: var(--svg-btn-color) !important;
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
 }
 </style>

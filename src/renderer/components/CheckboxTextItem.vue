@@ -116,11 +116,11 @@ EventBus.on("checkeboxTextItem-refresh", (data) => {
 
 .checkbox-text-item .checkbox svg {
     margin-bottom: -2px;
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .checkbox-text-item .checkbox .checked-svg {
-    fill: var(--hl-color) !important;
+    fill: var(--content-highlight-color) !important;
 }
 
 .checkbox-text-item .children-wrap {
@@ -133,6 +133,6 @@ EventBus.on("checkeboxTextItem-refresh", (data) => {
 }
 
 .checkbox-text-item .action svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 </style>

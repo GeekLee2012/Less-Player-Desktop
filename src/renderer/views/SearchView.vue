@@ -141,7 +141,7 @@ watch(() => props.keyword, (nv, ov) => loadTab())
     <div id="search-view" @scroll="onScroll">
         <div class="header">
             <div class="keyword">
-                <b>搜 </b><span class="text">{{ keyword }}</span>
+                <b>搜 </b><span class="text content-text-highlight">{{ keyword }}</span>
             </div>
             <div class="platform">
                 <span class="item" :class="{ active: currentPlatformIndex == index }" v-for="(item, index) in platforms"
@@ -151,10 +151,10 @@ watch(() => props.keyword, (nv, ov) => loadTab())
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" :class="{ active: activeTab == index }" v-for="(tab, index) in tabs"
-                    @click="visitTab(index)" v-html="tab.name">
+                <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
+                    v-for="(tab, index) in tabs" @click="visitTab(index)" v-html="tab.name">
                 </span>
-                <span class="tip" v-html="tabTipText"></span>
+                <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
                 :loading="isLoading">
@@ -192,10 +192,7 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 }
 
 #search-view .keyword .text {
-    background: var(--hl-text-bg);
-    background: var(--hl-color);
-    -webkit-background-clip: text;
-    color: transparent;
+
 
     overflow: hidden;
     text-overflow: ellipsis;
@@ -219,29 +216,29 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 }
 
 #search-view .platform .item:hover {
-    color: var(--text-color);
-    background: var(--list-item-hover);
+    color: var(--content-text-color);
+    background: var(--content-list-item-hover-bg-color);
 }
 
 #search-view .platform .active {
-    border-color: var(--hl-color);
-    /* background: var(--hl-text-bg) !important;
-    color: var(--svg-btn-color) !important; */
-    background: var(--btn-bg) !important;
-    color: var(--svg-btn-color) !important;
+    border-color: var(--content-highlight-color);
+    /* background: var(--content-text-highlight-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important; */
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
 }
 
 #search-view .tab-nav {
     display: flex;
     position: relative;
-    height: 32px;
+    height: 33px;
     margin-bottom: 3px;
     border-bottom: 1px solid var(--border-color);
     border-bottom: 1px solid transparent;
 }
 
 #search-view .tab {
-    font-size: 16px;
+    font-size: var(--content-text-tab-title-size);
     padding-left: 12px;
     padding-right: 12px;
     margin-right: 15px;
@@ -250,18 +247,13 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 }
 
 #search-view .tab-nav .active {
-    border-color: var(--hl-color);
+    font-weight: bold;
+    border-color: var(--content-highlight-color);
 }
 
-#search-view .tab-nav .tip {
-    /* font-size: 15px; */
+#search-view .tab-nav .tab-tip {
     position: absolute;
     right: 10px;
-
-    /*background: var(--hl-text-bg);*/
-    background: var(--btn-bg);
-    background: var(--hl-color);
-    -webkit-background-clip: text;
-    color: transparent;
+    font-weight: bold;
 }
 </style>

@@ -128,11 +128,13 @@ const showContextMenu = (event) => {
     flex-direction: row;
     flex: 1;
     margin-bottom: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .custom-playlist-item:hover {
     border-radius: 3px;
-    background-color: var(--list-item-hover);
+    background-color: var(--content-list-item-hover-bg-color);
 }
 
 .custom-playlist-item>div {
@@ -203,11 +205,11 @@ const showContextMenu = (event) => {
 }
 
 .custom-playlist-item .title-wrap .size {
-    /*font-size: var(--text-sub-size);
+    /*font-size: var(--content-text-subtitle-size);
     font-size: 13px;*/
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
     font-weight: 520;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
 }
 
 .custom-playlist-item .action {
@@ -227,18 +229,17 @@ const showContextMenu = (event) => {
     padding-left: 10px;
     padding-right: 10px;
 
-    /*background: var(--list-item-hover);*/
+    /*background: var(--content-list-item-hover-bg-color);*/
     visibility: hidden;
 }
 
 .custom-playlist-item .action svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 .custom-playlist-item .action svg:hover {
-    fill: var(--hl-color);
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .custom-playlist-item .title-wrap:hover .action {

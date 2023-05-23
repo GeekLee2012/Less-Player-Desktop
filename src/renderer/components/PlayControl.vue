@@ -132,7 +132,7 @@ const togglePlaybackQueue = () => {
 <style scoped>
 .play-ctl {
     display: flex;
-    height: var(--play-meta-height);
+    height: var(--others-playmeta-height);
     align-items: center;
 }
 
@@ -149,14 +149,13 @@ const togglePlaybackQueue = () => {
 }
 
 .play-ctl svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
     -webkit-app-region: no-drag;
 }
 
 .play-ctl svg:hover {
-    fill: var(--hl-color);
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .play-ctl .play-btn {
@@ -164,25 +163,25 @@ const togglePlaybackQueue = () => {
     border-radius: 10rem;
     width: 41px;
     height: 41px;
-    background: var(--btn-bg);
+    background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
 }
 
 .play-ctl .play-btn:hover {
     /*background: linear-gradient(to top right, #2edfa3, #28c83f) !important;*/
-    background: var(--btn-hover-bg);
+    background: var(--button-icon-text-btn-hover-bg-color);
 }
 
 .play-ctl .play-btn svg {
     /* margin-top: 9px;*/
     margin-top: 1px;
     margin-left: 2px;
-    fill: var(--svg-btn-color) !important;
+    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
 .play-ctl .play-btn .paused {
     /* margin-top: 6px;*/
     margin-left: 0px;
-    fill: var(--svg-btn-color) !important;
+    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 </style>

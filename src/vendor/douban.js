@@ -21,18 +21,21 @@ export class DouBan {
     static categories() {
         return new Promise((resolve, reject) => {
             const result = { platform: DouBan.CODE, data: [], orders: [] }
-            const defaultCategory = new Category("推荐")
-            defaultCategory.add("兆赫MHz", "MHz")
-            //defaultCategory.add("为你推荐", '1')
-            const songlistCategory = new Category('歌单')
-            result.data.push(defaultCategory)
-            result.data.push(songlistCategory)
 
             const url = "https://fm.douban.com/j/v2/songlist/explore/genres"
             getJson(url).then(json => {
-                json.forEach(item => {
-                    songlistCategory.add(item.name, item.id + '')
-                })
+                if (typeof (json) == 'object') { //数据异常，不是json对象
+                    const defaultCategory = new Category("推荐")
+                    defaultCategory.add("兆赫MHz", "MHz")
+                    //defaultCategory.add("为你推荐", '1')
+                    const songlistCategory = new Category('歌单')
+                    result.data.push(defaultCategory)
+                    result.data.push(songlistCategory)
+
+                    json.forEach(item => {
+                        songlistCategory.add(item.name, item.id + '')
+                    })
+                }
                 resolve(result)
             }).catch(error => resolve(result))
         })

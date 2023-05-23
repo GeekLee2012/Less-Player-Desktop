@@ -57,7 +57,7 @@ const { playing } = storeToRefs(usePlayStore())
 
 .default-main-top {
     flex-direction: column;
-    height: var(--main-play-nav-height);
+    height: var(--others-playnav-height);
     -webkit-app-region: drag;
     /* background: #faf4f6; */
 }
@@ -98,7 +98,7 @@ const { playing } = storeToRefs(usePlayStore())
 
 .default-main-top #userhome-btn svg {
     margin-top: 4px;
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .default-main-top #setting-btn {
@@ -110,12 +110,11 @@ const { playing } = storeToRefs(usePlayStore())
 
 .default-main-top #setting-btn svg {
     margin-top: 4px;
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .default-main-top #userhome-btn svg:hover,
 .default-main-top #setting-btn svg:hover {
-    fill: var(--hl-color);
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 </style>

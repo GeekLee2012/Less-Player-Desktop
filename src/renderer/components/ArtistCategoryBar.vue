@@ -95,8 +95,8 @@ const getAlphabetData = () => {
     vertical-align: middle;
     text-align: center;
     line-height: 36px;
-    color: var(--text-color);
-    font-size: var(--text-size);
+    color: var(--content-text-color);
+    font-size: var(--content-text-size);
     cursor: pointer;
     border-radius: 10rem;
     /*border: 0.1px solid transparent;*/
@@ -104,24 +104,24 @@ const getAlphabetData = () => {
 }
 
 .artist-category-bar .row span:hover {
-    background-color: var(--list-item-hover);
-    color: var(--text-color);
+    background-color: var(--content-list-item-hover-bg-color);
+    color: var(--content-text-color);
 }
 
 .artist-category-bar svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     margin-right: 15px;
     cursor: pointer;
     transform: translateY(3px);
 }
 
 .artist-category-bar svg:hover {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 .artist-category-bar .active {
-    border-color: var(--hl-color);
-    background: var(--btn-bg) !important;
-    color: var(--svg-btn-color) !important;
+    border-color: var(--content-highlight-color);
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
 }
 </style>

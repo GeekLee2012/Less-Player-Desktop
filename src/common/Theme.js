@@ -8,29 +8,41 @@ export class Theme {
         this.author = null
         this.created = null
         this.updated = null
+        this.previewBg = null //预览
         /*应用背景*/
         this.appBackground = {
             bgColor: null,
-            bgImage: [],
-            //仅支持线性渐变
-            bgImageGradient: {
-                sideOrCorner: null,
-                angle: null,
-                colorStops: []
-            }
+            bgImage: null,
+            bgImageGradient: null //仅支持线性渐变
+        }
+
+        /*应用背景适用场景*/
+        this.appBackgroundScope = {
+            playingView: true,
+            playbackQueue: false,
+            categoryView: false,
+            contextMenu: false,
+            toast: false,
+            soundEffectView: false,
+            lyricToolbar: false,
+            randomMusicToolbar: false
         }
 
         /*内容*/
         this.content = {
             textColor: null,
+            textHighlightColor: null,
+            highlightColor: null, //非文字类高亮，如图标、下边框等
             //titleTextColor: null,
             subtitleTextColor: null,
-            secondaryTextColor: null,
+            secondaryTextColor: null, //次要文字颜色
             bgColor: null,
-            highlightColor: null,
-            headerBgColor: null,
+            headerNavBgColor: null,
             loadingMaskColor: null,
-            listItemHoverBgColor: null
+            listItemHoverBgColor: null,
+            leftNavBgColor: null,
+            inputsBgColor: null,
+            inputsTextColor: null
         }
 
         /*边框*/
@@ -44,19 +56,24 @@ export class Theme {
         /*按钮*/
         this.button = {
             iconBtnColor: null,
+            //iconBtnHoverColor: null,
             iconTextBtnTextColor: null,
             iconTextBtnIconColor: null,
             iconTextBtnBgColor: null,
             iconTextBtnHoverBgColor: null,
-            toggleBtnBgColor: null
+            toggleBtnBgColor: null,
+            toggleBtnThumbColor: null
         }
 
         /*搜索栏*/
         this.searchBar = {
             borderColor: null,
             bgColor: null,
+            textColor: null,
             searchBtnBgColor: null,
+            searchBtnHoverBgColor: null,
             searchBtnIconColor: null,
+            searchBtnHoverIconColor: null,
             clearBtnIconColor: null
         }
 
@@ -73,10 +90,11 @@ export class Theme {
             scrollBarColor: null,
             progressBarBgColor: null,
             volumeBarThumbColor: null,
-            checkboxBgColor: null
+            //checkboxBgColor: null
         }
     }
 
+    /*
     static getAppBgImageLinearGradientText(theme) {
         if (!theme) return null
         const { appBackground } = theme
@@ -94,5 +112,6 @@ export class Theme {
         }
         return `linear-gradient(${colors})`
     }
+    */
 
 }

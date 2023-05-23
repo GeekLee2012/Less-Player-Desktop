@@ -130,12 +130,12 @@ const setupTrafficLightWinCtlBtn = () => {
   const winCtlMarginLeft = 15 * scale
   const ctlBtnMarginRight = 8 * scale
 
-  document.documentElement.style.setProperty('--win-ctl-btn-size', `${ctlBtnSize}px`)
-  document.documentElement.style.setProperty('--win-ctl-max-btn-size', `${maxBtnSize}px`)
-  document.documentElement.style.setProperty('--win-ctl-collapse-btn-size', `${collapseBtnSize}px`)
+  document.documentElement.style.setProperty('--others-win-ctl-btn-size', `${ctlBtnSize}px`)
+  document.documentElement.style.setProperty('--others-win-ctl-max-btn-size', `${maxBtnSize}px`)
+  document.documentElement.style.setProperty('--others-win-ctl-collapse-btn-size', `${collapseBtnSize}px`)
 
-  document.documentElement.style.setProperty('--win-ctl-margin-left', `${winCtlMarginLeft}px`)
-  document.documentElement.style.setProperty('--win-ctl-btn-margin-right', `${ctlBtnMarginRight}px`)
+  document.documentElement.style.setProperty('--others-win-ctl-margin-left', `${winCtlMarginLeft}px`)
+  document.documentElement.style.setProperty('--others-win-ctl-btn-margin-right', `${ctlBtnMarginRight}px`)
 }
 
 //TODO
@@ -211,7 +211,7 @@ const registryIpcRendererListeners = () => {
 
 const setupMacStyle = () => {
   const borderRadius = isMacOS() ? 0 : 12
-  document.documentElement.style.setProperty('--macstyle-border-radius', `${borderRadius}px`)
+  document.documentElement.style.setProperty('--border-macstyle-border-radius', `${borderRadius}px`)
   //TODO 边框阴影效果, 再看看情况
 }
 

@@ -244,7 +244,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                 </div>
             </div>
             <div id="platform-list">
-                <div class="subtitle" v-show="isSubtitleVisible()">
+                <div class="secondary-text" v-show="isSubtitleVisible()">
                     <span>音乐平台</span>
                 </div>
                 <ul>
@@ -254,7 +254,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                 </ul>
             </div>
             <div id="custom-playlist-list" v-show="isPlaylistMode && navigation.customPlaylistsShow">
-                <div class="subtitle">
+                <div class="secondary-text">
                     <span>创建的歌单</span>
                     <svg class="add-custom-btn" @click="() => visitCustomPlaylistCreate()" width="11" height="11"
                         viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg">
@@ -274,7 +274,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                 </ul>
             </div>
             <div id="favorite-playlist-list" v-show="isPlaylistMode && navigation.favoritePlaylistsShow">
-                <div class="subtitle">
+                <div class="secondary-text">
                     <span>收藏的歌单</span>
                     <svg v-show="isFavoritePlaylistsCollapsed" class="expand-btn"
                         @click="setFavoritePlaylistsCollapsed(false)" width="11" height="11" viewBox="0 0 455.71 818.08"
@@ -309,7 +309,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                 </ul>
             </div>
             <div id="follow-artist-list" v-show="isArtistMode && navigation.followArtistsShow">
-                <div class="subtitle">
+                <div class="secondary-text">
                     <span>关注的歌手</span>
                 </div>
                 <ul>
@@ -336,9 +336,9 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /*box-shadow: 0px 0px 3px var(--main-left-border-color);*/
-    border-right: 1px solid var(--main-left-border-color);
-    background: var(--main-left-bg);
+    /*box-shadow: 0px 0px 3px var(--border-left-nav-border-color);*/
+    border-right: 1px solid var(--border-left-nav-border-color);
+    background: var(--content-left-nav-bg-color);
 }
 
 #main-left ::-webkit-scrollbar-thumb {
@@ -347,15 +347,15 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 }
 
 .mousewheelViewpoint ::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb-bg) !important;
-    border: 1px solid var(--scrollbar-thumb-bg) !important;
+    background: var(--others-scrollbar-color) !important;
+    border: 1px solid var(--others-scrollbar-color) !important;
 }
 
-#main-left .subtitle {
+#main-left .secondary-text {
     /*font-size: 13px;*/
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
     text-align: left;
-    color: var(--text-subtitle-color);
+    color: var(--content-secondary-text-color);
     padding-left: 22%;
     padding-left: 19.5%;
     margin-bottom: 10px;
@@ -402,12 +402,12 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /* color: var(--text-sub-color); */
+    /* color: var(--content-subtitle-text-color); */
 }
 
 #explore-mode svg,
 #custom-playlist-list svg {
-    fill: var(--text-sub-color);
+    fill: var(--content-subtitle-text-color);
     margin-right: 6px;
 }
 
@@ -421,19 +421,20 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     align-items: center;
     cursor: pointer;
     padding: 3px 6px;
-    /*font-size: 19px;*/
-    font-size: var(--text-main3-title-size);
+    font-size: var(--content-text-module-title2-size);
     font-weight: bold;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     margin-right: 23%;
 }
 
 #explore-mode .mode-item:hover span {
-    color: var(--hl-title-color);
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    color: transparent;
 }
 
 #explore-mode .mode-item:hover svg {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 #explore-mode .exit-btn {
@@ -443,7 +444,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 }
 
 #explore-mode .exit-btn:hover svg {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
     cursor: pointer;
 }
 
@@ -452,11 +453,11 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 }
 
 #explore-mode .excluded-mode-item:hover span {
-    color: var(--text-sub-color) !important;
+    color: var(--content-subtitle-text-color) !important;
 }
 
 #explore-mode .excluded-mode-item:hover svg {
-    fill: var(--svg-color) !important;
+    fill: var(--button-icon-btn-color) !important;
 }
 
 #custom-playlist-list,
@@ -469,7 +470,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 #main-left .center .add-custom-btn,
 #main-left .center .collapse-btn,
 #main-left .center .expand-btn {
-    fill: var(--text-sub-color);
+    fill: var(--content-subtitle-text-color);
     cursor: pointer;
     position: absolute;
     /* right: 15px; */
@@ -484,13 +485,13 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 }
 
 #main-left .center .add-custom-btn:hover {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 #main-left ul {
     list-style: none;
     text-align: left;
-    line-height: var(--main-left-nav-line-height);
+    line-height: var(--content-left-nav-line-height);
     padding-left: 13%;
     padding-left: 10%;
 }
@@ -516,12 +517,12 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 }
 
 #main-left li:hover {
-    background: var(--list-item-hover);
+    background: var(--content-list-item-hover-bg-color);
 }
 
 #custom-playlist-list li,
 #favorite-playlist-list li {
-    font-size: var(--text-sub-size);
+    font-size: var(--content-text-subtitle-size);
 }
 
 #favorite-playlist-list li {
@@ -532,8 +533,8 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 }
 
 #main-left .active {
-    background: var(--list-item-active-bg) !important;
-    color: var(--svg-btn-color);
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color);
 }
 
 #main-left .bottom {
@@ -555,8 +556,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     border-radius: 10rem 0 10rem 10rem;
     border: 0px solid;
     font-weight: bold;
-    background: var(--logo-bg);
-    /*color: var(--logo-color);*/
+    background: var(--app-logo-bg-color);
 }
 
 #app-logo span {
@@ -566,8 +566,8 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     font-size: 13px;
     justify-content: center;
     border-radius: 10rem;
-    background: var(--logo-text-bg);
-    color: var(--logo-text-color);
+    background: var(--app-logo-inner-bg-color);
+    color: var(--app-logo-inner-text-color);
 }
 
 #app-name {
@@ -577,7 +577,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     margin-left: 10px;
     font-size: 18px;
     font-weight: bold;
-    background: var(--logo-bg);
+    background: var(--app-logo-app-name-text-color);
     -webkit-background-clip: text;
     color: transparent;
 }

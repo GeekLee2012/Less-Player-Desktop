@@ -93,13 +93,13 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .cover {
-    width: var(--image-text-tile-cover-size);
-    height: var(--image-text-tile-cover-size);
-    line-height: var(--image-text-tile-cover-size);
+    width: var(--others-image-text-tile-cover-size);
+    height: var(--others-image-text-tile-cover-size);
+    line-height: var(--others-image-text-tile-cover-size);
     border-radius: 6px;
     cursor: pointer;
     box-shadow: 0px 0px 3px #161616;
-    background-color: var(--text-color);
+    background-color: var(--content-text-color);
 }
 
 .image-text-tile .cover-wrap:hover {
@@ -107,11 +107,11 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .title {
-    width: var(--image-text-tile-cover-size);
+    width: var(--others-image-text-tile-cover-size);
     margin-top: 10px;
     text-align: left;
     cursor: pointer;
-    line-height: var(--text-line-height);
+    line-height: var(--content-text-line-height);
 
     overflow: hidden;
     text-overflow: ellipsis;
@@ -122,13 +122,13 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .title:hover {
-    background: var(--btn-bg);
+    background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
     color: transparent;
 }
 
 .image-text-tile .subtitle {
-    width: var(--image-text-tile-cover-size);
+    width: var(--others-image-text-tile-cover-size);
     text-align: left;
     line-height: 25px;
     color: #989898;
@@ -143,7 +143,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
     -webkit-app-region: no-drag;
 }
@@ -173,7 +173,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     left: 10px;
     width: 25px;
     height: 25px;
-    background: var(--checkbox-bg);
+    /*background: var(--others-checkbox-bg-color);*/
+    background: var(--app-bg-color);
     border-radius: 6px;
     display: flex;
     justify-content: flex-start;
@@ -183,14 +184,14 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 .image-text-tile .cover-mask .checkbox {}
 
 .image-text-tile .checkbox svg {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 .image-text-tile .cover-wrap .play-btn {
     border-radius: 10rem;
     width: 43px;
     height: 43px;
-    background: var(--btn-bg);
+    background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -200,12 +201,12 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .cover-wrap .play-btn:hover {
-    background: var(--btn-hover-bg);
+    background: var(--button-icon-text-btn-hover-bg-color);
 }
 
 .image-text-tile .cover-wrap .play-btn svg {
     margin-top: 1px;
     margin-left: 2px;
-    fill: var(--svg-btn-color) !important;
+    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 </style>

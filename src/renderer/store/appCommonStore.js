@@ -18,6 +18,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         videoPlayingViewShow: false,
         soundEffectViewShow: false,
         customThemeEditViewShow: false,
+        workingCustomTheme: null, //当前工作区的自定义主题，即正在编辑的主题
         //探索模式，歌单、歌手
         exploreModes: ['playlists', 'artists', 'radios', 'userhome'],
         exploreModeIndex: 0,
@@ -46,6 +47,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         //当前调用链路追踪ID
         currentTraceId: null,
         colorPickerToolbarShow: false,
+        gradientColorToolbarShow: false,
     }),
     getters: {
         isPlaylistMode() {
@@ -135,11 +137,13 @@ export const useAppCommonStore = defineStore('appCommon', {
         toggleSoundEffectView() {
             this.soundEffectViewShow = !this.soundEffectViewShow
         },
+        showCustomThemeEditView(customTheme) {
+            this.customThemeEditViewShow = true
+            this.workingCustomTheme = customTheme
+        },
         hideCustomThemeEditView() {
             this.customThemeEditViewShow = false
-        },
-        toggleCustomThemeEditViewShow() {
-            this.customThemeEditViewShow = !this.customThemeEditViewShow
+            this.workingCustomTheme = null
         },
         toggleCoverMask() {
             this.coverMaskShow = !this.coverMaskShow
@@ -317,7 +321,16 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         showColorPickerToolbar() {
             this.colorPickerToolbarShow = true
-        }
+        },
+        toggleGradientColorToolbar() {
+            this.gradientColorToolbarShow = !this.gradientColorToolbarShow
+        },
+        hideGradientColorToolbar() {
+            this.gradientColorToolbarShow = false
+        },
+        showGradientColorToolbar() {
+            this.gradientColorToolbarShow = true
+        },
     },
     persist: {
         enabled: true,

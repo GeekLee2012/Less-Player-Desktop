@@ -57,15 +57,12 @@ const resetScroll = () => {
     /*flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--ctx-menu-bg);
-    background-color: var(--bg-color);
-    background-image: var(--app-bg);
     */
     border-radius: 8px;
     /*padding: 15px 0px;
     max-height: 297px;
     border: 1px solid var(--border-color);*/
-    box-shadow: 0px 0px 6px var(--ctx-menu-border-color);
+    box-shadow: 0px 0px 6px var(--border-popovers-border-color);
 }
 
 .common-ctx-submenu .container {
@@ -74,6 +71,7 @@ const resetScroll = () => {
     flex-direction: column;
     align-items: center;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .common-ctx-submenu .padding {
@@ -91,19 +89,19 @@ const resetScroll = () => {
     flex-direction: row;
     align-items: center;
     /*font-size: 14px;*/
-    font-size: var(--text-sub-size);
+    font-size: var(--content-text-subtitle-size);
     padding: 9px 20px;
     height: 23px;
 }
 
 .common-ctx-submenu .menuItem:hover {
-    background-color: var(--text-sub-color);
-    background: var(--btn-bg);
-    color: var(--svg-btn-color);
+    background-color: var(--content-subtitle-text-color);
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-icon-color);
 }
 
 .common-ctx-submenu .menuItem:hover svg {
-    fill: var(--svg-btn-color);
+    fill: var(--button-icon-text-btn-icon-color);
 }
 
 .common-ctx-submenu .menuItem>div {
@@ -114,7 +112,7 @@ const resetScroll = () => {
 
 .common-ctx-submenu .menuItem svg {
     margin-right: 15px;
-    fill: var(--text-color);
+    fill: var(--content-text-color);
 }
 
 .common-ctx-submenu .menuItem span {

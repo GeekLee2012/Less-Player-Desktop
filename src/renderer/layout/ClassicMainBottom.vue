@@ -84,7 +84,7 @@ onMounted(() => {
 
 .classic-main-bottom {
     flex-direction: column;
-    height: var(--main-play-nav-height);
+    height: var(--others-playnav-height);
     -webkit-app-region: none;
     padding-top: 8px;
 }
@@ -136,13 +136,13 @@ onMounted(() => {
 }
 
 .classic-main-bottom svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 .classic-main-bottom svg:hover,
 .classic-main-bottom .active svg {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .classic-main-bottom .volume-bar {
@@ -155,6 +155,6 @@ onMounted(() => {
 }
 
 .classic-main-bottom .love-btn {
-    fill: var(--svg-hover-color) !important;
+    fill: var(--content-text-highlight-color) !important;
 }
 </style>

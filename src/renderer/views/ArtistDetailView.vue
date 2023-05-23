@@ -114,7 +114,7 @@ const toggleFollow = () => {
         addFollowArtist(props.id, props.platform, title, cover)
     } else {
         removeFollowArtist(props.id, props.platform)
-        text = "歌手已被取消关注！"
+        text = "歌手已取消关注！"
     }
     showToast(text)
 }
@@ -426,10 +426,10 @@ watch([platform, artistId], reloadAll, { immediate: true })
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" :class="{ active: activeTab == index }" v-for="(tab, index) in tabs"
-                    @click="visitTab(index, true)" v-html="tab.name">
+                <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
+                    v-for="(tab, index) in tabs" @click="visitTab(index, true)" v-html="tab.name">
                 </span>
-                <span class="tab-tip" v-html="tabTipText"></span>
+                <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
             <component :is="currentTabView" :data="tabData" :platform="platform" :artistVisitable="true"
                 :albumVisitable="true" :loading="isLoading">
@@ -466,7 +466,7 @@ watch([platform, artistId], reloadAll, { immediate: true })
     margin-bottom: 10px;
     /*margin-bottom: 108px;*/
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
     min-height: 39px;
 
@@ -488,13 +488,13 @@ watch([platform, artistId], reloadAll, { immediate: true })
     height: 114px;
     margin-bottom: 8px;
     /*line-height: 23px;*/
-    line-height: var(--text-line-height);
-    font-size: var(--text-sub-size) !important;
-    color: var(--text-sub-color);
+    line-height: var(--content-text-line-height);
+    font-size: var(--content-text-subtitle-size) !important;
+    color: var(--content-subtitle-text-color);
     /* font-size: 15px; */
     overflow: hidden;
     word-wrap: break-word;
-    white-space: pre-wrap;
+    /*white-space: pre-wrap;*/
     line-break: anywhere;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -528,7 +528,7 @@ watch([platform, artistId], reloadAll, { immediate: true })
 }
 
 #artist-detail-view .tab {
-    font-size: var(--tab-title-text-size);
+    font-size: var(--content-text-tab-title-size);
     padding-left: 15px;
     padding-right: 15px;
     margin-right: 15px;
@@ -539,17 +539,12 @@ watch([platform, artistId], reloadAll, { immediate: true })
 #artist-detail-view .tab-tip {
     position: absolute;
     right: 10px;
-    /*font-size: 16px;
-    font-size: var(--text-sub-size);*/
-    background: linear-gradient(to top right, #1ca388, #28c83f);
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
+    font-weight: bold;
 }
 
 #artist-detail-view .tab-nav .active {
-    border-color: #28c83f;
-    border-color: var(--hl-color);
+    font-weight: bold;
+    border-color: var(--content-highlight-color);
 }
 
 #artist-detail-view .songlist {

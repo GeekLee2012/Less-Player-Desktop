@@ -243,10 +243,10 @@ watch([platform, albumId], reloadAll, { immediate: true })
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" :class="{ active: activeTab == index }" v-for="(tab, index) in tabs"
-                    @click="visitTab(index, true)" v-html="tab.name">
+                <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
+                    v-for="(tab, index) in tabs" @click="visitTab(index, true)" v-html="tab.name">
                 </span>
-                <span class="tab-tip" v-html="tabTipText"></span>
+                <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
                 :loading="isLoading">
@@ -280,13 +280,13 @@ watch([platform, albumId], reloadAll, { immediate: true })
     text-align: left;
     margin-top: 5px;
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
 
     overflow: hidden;
-    word-wrap: break-all;
-    white-space: pre-wrap;
-    line-break: anywhere;
+    word-wrap: break-word;
+    /*white-space: pre-wrap;
+    line-break: anywhere;*/
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -313,7 +313,7 @@ watch([platform, albumId], reloadAll, { immediate: true })
 
 #album-detail-view .header .info-row span {
     color: #ababab;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
 }
 
 #album-detail-view .header .info-row b {
@@ -352,7 +352,7 @@ watch([platform, albumId], reloadAll, { immediate: true })
 }
 
 #album-detail-view .tab {
-    font-size: var(--tab-title-text-size);
+    font-size: var(--content-text-tab-title-size);
     padding-left: 15px;
     padding-right: 15px;
     margin-right: 15px;
@@ -361,18 +361,14 @@ watch([platform, albumId], reloadAll, { immediate: true })
 }
 
 #album-detail-view .tab-nav .active {
-    border-color: #28c83f;
-    border-color: var(--hl-color);
+    font-weight: bold;
+    border-color: var(--content-highlight-color);
 }
 
 #album-detail-view .tab-tip {
     position: absolute;
     right: 10px;
-    /*font-size: 16px;
-    font-size: var(--text-sub-size);*/
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
+    font-weight: bold;
 }
 
 #album-detail-view .songlist {

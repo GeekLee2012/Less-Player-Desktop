@@ -1,56 +1,176 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { useThemeStore } from '../store/themeStore';
+import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import ColorInputControl from '../components/ColorInputControl.vue';
 import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from '../../common/Utils';
+import { Theme } from '../../common/Theme';
 
 
 
 const ipcRenderer = useIpcRenderer()
+const { workingCustomTheme } = storeToRefs(useAppCommonStore())
+const { hideCustomThemeEditView, showToast } = useAppCommonStore()
+const { saveCustomTheme } = useThemeStore()
+const { isCurrentTheme } = useSettingStore()
 
-const { hideCustomThemeEditView, toggleColorPickerToolbar, showColorPickerToolbar } = useAppCommonStore()
+const blankTheme = new Theme()
+const customTheme = reactive(blankTheme)
 
-const showColorPicker = (event) => {
-    EventBus.emit('color-picker-toolbar-show', { event })
+//预览主题
+const isPreviewMode = ref(false)
+const setPreviewMode = (value) => isPreviewMode.value = value
+const toggleCustomThemePreview = () => {
+    setPreviewMode(!isPreviewMode.value)
+    const theme = isPreviewMode.value ? customTheme : null
+    EventBus.emit('theme-applyTheme', theme)
 }
 
-const isPreview = ref(false)
-const setPreview = (value) => isPreview.value = value
-const togglePreview = () => {
-    setPreview(!isPreview.value)
-}
-
-const appBgImageSrc = ref(null)
-const setAppBgImageSrc = (value) => appBgImageSrc.value = value
-//TODO 使用本地文件图片，不利于迁移共享
+//TODO 使用本地文件图片，存在迁移共享问题
 const uploadImage = async () => {
     if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-image')
-    if (result && result.length > 0) setAppBgImageSrc(result[0])
+    if (result && result.length > 0) setupAppBgImage(result[0])
 }
+
+const isFormInvalid = ref(false)
+const setFormInvalid = (value) => isFormInvalid.value = value
+//保存主题
+const saveTheme = () => {
+    const themeName = (customTheme.name || '').trim()
+    setFormInvalid(themeName.length < 1)
+    if (isFormInvalid.value) return
+
+    const theme = JSON.parse(JSON.stringify(customTheme))
+    saveCustomTheme(theme)
+    showToast('主题保存成功！')
+    hideCustomThemeEditView()
+    if (isCurrentTheme(theme)) EventBus.emit('theme-applyTheme')
+}
+
+//主题另存为
+const saveThemeAs = () => {
+    const themeName = (customTheme.name || '').trim()
+    setFormInvalid(themeName.length < 1)
+    if (isFormInvalid.value) return
+
+    const theme = JSON.parse(JSON.stringify(customTheme))
+    theme.id = null
+    saveCustomTheme(theme)
+    showToast('主题另存为操作成功！')
+    hideCustomThemeEditView()
+}
+
+const resetTheme = (event) => {
+    const isUserAction = event ? true : false
+    const copiedTheme = JSON.parse(JSON.stringify(workingCustomTheme.value || new Theme()))
+    const theme = copiedTheme
+    Object.keys(customTheme).forEach(key => Reflect.deleteProperty(customTheme, key))
+    Object.assign(customTheme, { ...theme }) //注意，此处Object.assign()有坑
+    if (isUserAction) showToast('主题重置成功！')
+}
+
+//TODO 主题相关设置，写得太繁琐
+const setupThemeName = (event) => {
+    const { target } = event
+    const name = (target.value || '').trim()
+    Object.assign(customTheme, { name })
+    setFormInvalid(name.length < 1)
+}
+const setupAppBackground = (value) => Object.assign(customTheme.appBackground, { bgColor: value })
+const setupAppBgImage = (value) => Object.assign(customTheme.appBackground, { bgImage: value })
+const setupAppBgImageGradient = (value) => Object.assign(customTheme.appBackground, { bgImageGradient: value })
+
+const toggleAppBgScopePlayingView = () => Object.assign(customTheme.appBackgroundScope, { playingView: !customTheme.appBackgroundScope.playingView })
+const toggleAppBgScopePlaybackQueue = () => Object.assign(customTheme.appBackgroundScope, { playbackQueue: !customTheme.appBackgroundScope.playbackQueue })
+const toggleAppBgScopeCategoryView = () => Object.assign(customTheme.appBackgroundScope, { categoryView: !customTheme.appBackgroundScope.categoryView })
+const toggleAppBgScopeContextMenu = () => Object.assign(customTheme.appBackgroundScope, { contextMenu: !customTheme.appBackgroundScope.contextMenu })
+const toggleAppBgScopeToast = () => Object.assign(customTheme.appBackgroundScope, { toast: !customTheme.appBackgroundScope.toast })
+const toggleAppBgScopeSoundEffectView = () => Object.assign(customTheme.appBackgroundScope, { soundEffectView: !customTheme.appBackgroundScope.soundEffectView })
+const toggleAppBgScopeLyricToolbar = () => Object.assign(customTheme.appBackgroundScope, { lyricToolbar: !customTheme.appBackgroundScope.lyricToolbar })
+const toggleAppBgScopeRandomMusicToolbar = () => Object.assign(customTheme.appBackgroundScope, { randomMusicToolbar: !customTheme.appBackgroundScope.randomMusicToolbar })
+
+const setupContentTextColor = (value) => Object.assign(customTheme.content, { textColor: value })
+const setupContentSubtitleTextColor = (value) => Object.assign(customTheme.content, { subtitleTextColor: value })
+const setupContentSecondaryTextColor = (value) => Object.assign(customTheme.content, { secondaryTextColor: value })
+const setupContentBgColor = (value) => Object.assign(customTheme.content, { bgColor: value })
+const setupContentTextHighlightColor = (value) => Object.assign(customTheme.content, { textHighlightColor: value })
+const setupContentHighlightColor = (value) => Object.assign(customTheme.content, { highlightColor: value })
+const setupContentHeaderNavBgColor = (value) => Object.assign(customTheme.content, { headerNavBgColor: value })
+const setupContentLoadingMaskColor = (value) => Object.assign(customTheme.content, { loadingMaskColor: value })
+const setupContentListItemHoverBgColor = (value) => Object.assign(customTheme.content, { listItemHoverBgColor: value })
+const setupContentLeftNavBgColor = (value) => Object.assign(customTheme.content, { leftNavBgColor: value })
+const setupContentInputsTextColor = (value) => Object.assign(customTheme.content, { inputsTextColor: value })
+const setupContentInputsBgColor = (value) => Object.assign(customTheme.content, { inputsBgColor: value })
+
+
+const setupBorderColor = (value) => Object.assign(customTheme.border, { borderColor: value })
+const setupBorderLeftNavBorderColor = (value) => Object.assign(customTheme.border, { leftNavBorderColor: value })
+const setupBorderPopoversBorderColor = (value) => Object.assign(customTheme.border, { popoversBorderColor: value })
+const setupBorderInputsBorderColor = (value) => Object.assign(customTheme.border, { inputsBorderColor: value })
+
+
+const setupButtonIconBtnColor = (value) => Object.assign(customTheme.button, { iconBtnColor: value })
+const setupButtonIconBtnHoverColor = (value) => Object.assign(customTheme.button, { iconBtnHoverColor: value })
+const setupButtonIconTextBtnTextColor = (value) => Object.assign(customTheme.button, { iconTextBtnTextColor: value })
+const setupButtonIconTextBtnIconColor = (value) => Object.assign(customTheme.button, { iconTextBtnIconColor: value })
+const setupButtonIconTextBtnBgColor = (value) => Object.assign(customTheme.button, { iconTextBtnBgColor: value })
+const setupButtonIconTextBtnHoverBgColor = (value) => Object.assign(customTheme.button, { iconTextBtnHoverBgColor: value })
+const setupButtonToggleBtnBgColor = (value) => Object.assign(customTheme.button, { toggleBtnBgColor: value })
+const setupButtonToggleBtnThumbColor = (value) => Object.assign(customTheme.button, { toggleBtnThumbColor: value })
+
+
+const setupSearchBarBorderColor = (value) => Object.assign(customTheme.searchBar, { borderColor: value })
+const setupSearchBarBgColor = (value) => Object.assign(customTheme.searchBar, { bgColor: value })
+const setupSearchBarTextColor = (value) => Object.assign(customTheme.searchBar, { textColor: value })
+const setupSearchBarSearchBtnBgColor = (value) => Object.assign(customTheme.searchBar, { searchBtnBgColor: value })
+const setupSearchBarSearchBtnHoverBgColor = (value) => Object.assign(customTheme.searchBar, { searchBtnHoverBgColor: value })
+const setupSearchBarSearchBtnIconColor = (value) => Object.assign(customTheme.searchBar, { searchBtnIconColor: value })
+const setupSearchBarSearchBtnHoverIconColor = (value) => Object.assign(customTheme.searchBar, { searchBtnHoverIconColor: value })
+const setupSearchBarClearBtnIconColor = (value) => Object.assign(customTheme.searchBar, { clearBtnIconColor: value })
+
+
+const setupAppLogoBgColor = (value) => Object.assign(customTheme.appLogo, { bgColor: value })
+const setupAppLogoInnerBgColor = (value) => Object.assign(customTheme.appLogo, { innerBgColor: value })
+const setupAppLogoInnerTextColor = (value) => Object.assign(customTheme.appLogo, { innerTextColor: value })
+const setupAppLogoAppNameTextColor = (value) => Object.assign(customTheme.appLogo, { appNameTextColor: value })
+
+
+const setupOthersScrollBarColor = (value) => Object.assign(customTheme.others, { scrollBarColor: value })
+const setupOthersProgressBarBgColor = (value) => Object.assign(customTheme.others, { progressBarBgColor: value })
+const setupOthersVolumeBarThumbColor = (value) => Object.assign(customTheme.others, { volumeBarThumbColor: value })
+const setupOthersCheckboxBgColor = (value) => Object.assign(customTheme.others, { checkboxBgColor: value })
+
+watch(workingCustomTheme, (nv, ov) => {
+    resetTheme()
+    setFormInvalid(false)
+}, { immediate: true })
 </script>
 
 <template>
-    <div class="custom-theme-edit-view" :class="{ 'custom-theme-preview-mode': isPreview }"
+    <div class="custom-theme-edit-view" :class="{ 'custom-theme-preview-mode': isPreviewMode }"
         v-gesture-dnm="{ trigger: '.header' }">
         <div class="container">
             <div class="header">
                 <div class="action left-action">
-                    <svg @click="hideCustomThemeEditView" width="12" height="12" viewBox="0 0 593.14 593.11"
-                        data-name="Layer 1" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z"
-                            transform="translate(-663.4 -243.46)" />
-                    </svg>
+                    <div class="close-btn btn" @click="hideCustomThemeEditView">
+                        <svg v-show="!isPreviewMode" width="12" height="12" viewBox="0 0 593.14 593.11" data-name="Layer 1"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z"
+                                transform="translate(-663.4 -243.46)" />
+                        </svg>
+                    </div>
                 </div>
                 <div class="title-wrap">
                     <div class="title">自定义主题</div>
                 </div>
                 <div class="action right-action">
-                    <div class="preview-btn text-btn" v-show="!isPreview" @click="togglePreview">
+                    <div class="preview-btn btn text-btn" v-show="!isPreviewMode" @click="toggleCustomThemePreview">
                         <svg width="17" height="17" viewBox="0 -60 1024 712.45" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -63,7 +183,7 @@ const uploadImage = async () => {
                         </svg>
                         <span>预览</span>
                     </div>
-                    <div class="no-preview-btn text-btn" v-show="isPreview" @click="togglePreview">
+                    <div class="no-preview-btn btn text-btn" v-show="isPreviewMode" @click="toggleCustomThemePreview">
                         <svg width="18" height="18" viewBox="0 0 938.9 853.33" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -78,7 +198,7 @@ const uploadImage = async () => {
                         </svg>
                         <span>取消预览</span>
                     </div>
-                    <div class="clear-btn text-btn" @click="">
+                    <div class="clear-btn btn text-btn" v-show="!isPreviewMode" @click="resetTheme">
                         <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -96,7 +216,19 @@ const uploadImage = async () => {
                         </svg>
                         <span>重置</span>
                     </div>
-                    <div class="save-btn text-btn" @click="">
+                    <div class="save-btn btn text-btn" v-show="!isPreviewMode" @click="saveThemeAs">
+                        <svg width="15" height="15" viewBox="0 0 853.61 853.59" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M426.39,853.55h-199c-32.66,0-65.33.12-98,0C69.66,853.23,19.5,815.14,4.57,758.06A138.7,138.7,0,0,1,.21,723.51Q-.18,426.78.06,130.05c0-64,42.59-115.66,105-127.71A135.26,135.26,0,0,1,130.43.14q232-.19,464-.14c13.93,0,25.46,4.72,35.34,14.64Q733.72,118.89,838,222.83c10.58,10.53,15.62,22.58,15.61,37.48-.13,154,.12,308-.2,462-.1,53.18-24.09,92.8-71.21,117.81-18.61,9.87-38.86,13.47-59.83,13.47Q574.38,853.52,426.39,853.55Zm-170-640h6.94q143.49,0,287,0c3,0,6,0,9,.23,22.36,1.7,40.48,23.55,38,45.78-2.61,23.46-20.15,39.22-43.88,39.22q-168.49,0-337,0c-27.74,0-45.64-17.9-45.64-45.63q0-80.73,0-161.48V85.85c-16.65,0-32.66-.59-48.59.31-6,.33-12.33,3.23-17.49,6.55-13.7,8.82-19.26,22-19.25,38.28q.18,295.72.08,591.45c0,1.67,0,3.33.06,5,.74,18.92,14,35.43,32.57,39.27,7.24,1.5,14.89,1.14,22.36,1.29,9.94.19,19.88,0,30.26,0v-6.49q0-144.49,0-289c0-28,17.85-45.78,46-45.78h420c28.4,0,46,17.71,46,46.22V768c13.88,0,27,0,40.19,0,27.25,0,45-17.78,45-45q0-222.22.08-444.46a10.66,10.66,0,0,0-3.39-8.3q-90.8-90.57-181.37-181.34A10.63,10.63,0,0,0,575,85.48q-156.49.12-313,.07h-5.71Zm340.86,554.3V512.5H256.41V767.85Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        <span>另存为</span>
+                    </div>
+                    <div class="save-btn btn text-btn" v-show="!isPreviewMode && customTheme.id !== 'CUSTDEMO'"
+                        @click="saveTheme">
                         <svg width="15" height="15" viewBox="0 0 853.61 853.59" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -114,23 +246,30 @@ const uploadImage = async () => {
                     <div class="cate-name">主题名称</div>
                     <div class="row-content">
                         <div class="item" @keydown.stop="">
-                            <input type="text" class="text-input-ctl" maxlength="64" placeholder="主题名称，最多允许输入64个字符哦" />
+                            <input type="text" class="text-input-ctl" :class="{ invalid: isFormInvalid }" maxlength="64"
+                                placeholder="主题名称，最多允许输入64个字符哦" :value="customTheme.name" @change="setupThemeName"
+                                @blur="setupThemeName" />
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="cate-name">应用背景</div>
                     <div class="row-content">
+                        <div class="tip-text">提示：颜色控件，左右均可点击；左边为输入模式，右边为输入值<br>
+                            不想设置颜色，请切换为HEXA / RGBA模式，直接删除颜色值即可<br>
+                            当前应用，所有输入框，按Enter键生效，或光标失去焦点时自动生效
+                        </div>
                         <div class="item" @click="">
                             <div class="name">背景颜色：</div>
-                            <ColorInputControl :color="'#FFF'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.appBackground.bgColor" :onChanged="setupAppBackground">
+                            </ColorInputControl>
                         </div>
                         <div class="item img-item">
                             <div class="name">背景图片：</div>
-                            <div class="preview" v-show="appBgImageSrc">
-                                <img :src="appBgImageSrc" />
+                            <div class="preview" v-show="customTheme.appBackground.bgImage">
+                                <img :src="customTheme.appBackground.bgImage" />
                                 <div class="action">
-                                    <div class="reset-img-btn text-btn" @click="() => setAppBgImageSrc(null)">
+                                    <div class="remove-btn text-btn" @click="() => setupAppBgImage(null)">
                                         <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -162,7 +301,7 @@ const uploadImage = async () => {
                                     </div>
                                 </div>
                             </div>
-                            <div class="upload-action" v-show="!appBgImageSrc" @click="uploadImage">
+                            <div class="upload-action" v-show="!customTheme.appBackground.bgImage" @click="uploadImage">
                                 <svg class="add-custom-btn" @click="" width="28" height="28" viewBox="0 0 682.65 682.74"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
@@ -175,8 +314,62 @@ const uploadImage = async () => {
                             </div>
                         </div>
                         <div class="item">
-                            <div class="name">背景图片叠加渐变：</div>
-                            <ColorInputControl useGradient="true"></ColorInputControl>
+                            <div class="name">背景渐变：</div>
+                            <ColorInputControl :value="customTheme.appBackground.bgImageGradient" :gradientMode="true"
+                                :onChanged="setupAppBgImageGradient">
+                            </ColorInputControl>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="cate-name">背景范围</div>
+                    <div class="row-content">
+                        <div class="item">
+                            <div class="name">播放页：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.playingView"
+                                @click="toggleAppBgScopePlayingView">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">当前播放（列表）：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.playbackQueue"
+                                @click="toggleAppBgScopePlaybackQueue">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">全部分类（列表）：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.categoryView"
+                                @click="toggleAppBgScopeCategoryView">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">右键菜单：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.contextMenu"
+                                @click="toggleAppBgScopeContextMenu">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">Toast消息：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.toast" @click="toggleAppBgScopeToast">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">音效设置（工具栏）：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.soundEffectView"
+                                @click="toggleAppBgScopeSoundEffectView">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">歌词设置（工具栏）：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.lyricToolbar"
+                                @click="toggleAppBgScopeLyricToolbar">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">随机设置（工具栏）：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.randomMusicToolbar"
+                                @click="toggleAppBgScopeRandomMusicToolbar">
+                            </ToggleControl>
                         </div>
                     </div>
                 </div>
@@ -185,39 +378,73 @@ const uploadImage = async () => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">文字颜色：</div>
-                            <ColorInputControl :color="'#272727'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.content.textColor" :colorMode="true"
+                                :onChanged="setupContentTextColor">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">文字高亮颜色：</div>
+                            <ColorInputControl :value="customTheme.content.textHighlightColor"
+                                :onChanged="setupContentTextHighlightColor">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">非文字类高亮颜色：</div>
+                            <ColorInputControl :value="customTheme.content.highlightColor"
+                                :onChanged="setupContentHighlightColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">副标题类文字颜色：</div>
-                            <ColorInputControl :color="'#808080'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.content.subtitleTextColor" :colorMode="true"
+                                :onChanged="setupContentSubtitleTextColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">次要 / 提示类文字颜色：</div>
-                            <ColorInputControl :color="'#a0a0a0'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.content.secondaryTextColor" :colorMode="true"
+                                :onChanged="setupContentSecondaryTextColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">内容区背景颜色：</div>
-                            <ColorInputControl :color="'#ffffffdc'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.content.bgColor" :onChanged="setupContentBgColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
-                            <div class="name">内容高亮颜色：</div>
-                            <ColorInputControl :color="'#31c27c'"></ColorInputControl>
-                        </div>
-                        <div class="item">
-                            <div class="name">标题类内容区背景颜色：</div>
-                            <ColorInputControl :color="'#eeeeee88'"></ColorInputControl>
+                            <div class="name">标题导航类内容区背景颜色：</div>
+                            <ColorInputControl :value="customTheme.content.headerNavBgColor"
+                                :onChanged="setupContentHeaderNavBgColor"></ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">左侧导航栏背景颜色：</div>
-                            <ColorInputControl :color="'#F8F8F8FF'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.content.leftNavBgColor"
+                                :onChanged="setupContentLeftNavBgColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">内容区加载时遮罩颜色：</div>
-                            <ColorInputControl></ColorInputControl>
+                            <ColorInputControl :value="customTheme.content.loadingMaskColor"
+                                :onChanged="setupContentLoadingMaskColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">列表项类光标悬停时背景颜色：</div>
-                            <ColorInputControl></ColorInputControl>
+                            <ColorInputControl :value="customTheme.content.listItemHoverBgColor"
+                                :onChanged="setupContentListItemHoverBgColor">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">输入框类文字颜色：</div>
+                            <ColorInputControl :value="customTheme.content.inputsTextColor" :colorMode="true"
+                                :onChanged="setupContentInputsTextColor">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">输入框类背景颜色：</div>
+                            <ColorInputControl :value="customTheme.content.inputsBgColor" :colorMode="true"
+                                :onChanged="setupContentInputsBgColor">
+                            </ColorInputControl>
                         </div>
                     </div>
                 </div>
@@ -226,19 +453,27 @@ const uploadImage = async () => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">边框 / 分隔线类颜色：</div>
-                            <ColorInputControl :color="'#DDDDDD'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.border.borderColor" :colorMode="true"
+                                :onChanged="setupBorderColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">左侧导航栏边框颜色：</div>
-                            <ColorInputControl></ColorInputControl>
+                            <ColorInputControl :value="customTheme.border.leftNavBorderColor" :colorMode="true"
+                                :onChanged="setupBorderLeftNavBorderColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">弹窗类边框颜色：</div>
-                            <ColorInputControl :color="'#666666'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.border.popoversBorderColor" :colorMode="true"
+                                :onChanged="setupBorderPopoversBorderColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">输入框类边框颜色：</div>
-                            <ColorInputControl :color="'#CCCCCC'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.border.inputsBorderColor" :colorMode="true"
+                                :onChanged="setupBorderInputsBorderColor">
+                            </ColorInputControl>
                         </div>
                     </div>
                 </div>
@@ -247,34 +482,52 @@ const uploadImage = async () => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">图标按钮颜色：</div>
-                            <ColorInputControl :color="'#272727'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.button.iconBtnColor" :colorMode="true"
+                                :onChanged="setupButtonIconBtnColor">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item" v-show="false">
+                            <div class="name">图标按钮光标悬停时颜色：</div>
+                            <ColorInputControl :value="customTheme.button.iconBtnHoverColor" :colorMode="true"
+                                :onChanged="setupButtonIconBtnHoverColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">胶囊按钮背景颜色：</div>
-                            <ColorInputControl></ColorInputControl>
+                            <ColorInputControl :value="customTheme.button.iconTextBtnBgColor"
+                                :onChanged="setupButtonIconTextBtnBgColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">胶囊按钮文字颜色：</div>
-                            <ColorInputControl :color="'#ffffff'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.button.iconTextBtnTextColor" :colorMode="true"
+                                :onChanged="setupButtonIconTextBtnTextColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">胶囊按钮图标颜色：</div>
-                            <ColorInputControl :color="'#ffffff'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.button.iconTextBtnIconColor" :colorMode="true"
+                                :onChanged="setupButtonIconTextBtnIconColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">胶囊按钮光标悬停时背景颜色：</div>
-                            <ColorInputControl></ColorInputControl>
+                            <ColorInputControl :value="customTheme.button.iconTextBtnHoverBgColor"
+                                :onChanged="setupButtonIconTextBtnHoverBgColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">开关按钮背景颜色：</div>
-                            <ColorInputControl :color="'#989898'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.button.toggleBtnBgColor" :colorMode="true"
+                                :onChanged="setupButtonToggleBtnBgColor">
+                            </ColorInputControl>
                         </div>
-                        <!--
-                        <div class="item" >
+                        <div class="item">
                             <div class="name">开关按钮滑块颜色：</div>
-                            <ColorInputControl></ColorInputControl>
+                            <ColorInputControl :value="customTheme.button.toggleBtnThumbColor" :colorMode="true"
+                                :onChanged="setupButtonToggleBtnThumbColor">
+                            </ColorInputControl>
                         </div>
-                        -->
                     </div>
                 </div>
                 <div class="row">
@@ -282,23 +535,50 @@ const uploadImage = async () => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">边框颜色：</div>
-                            <ColorInputControl :color="'#333'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.searchBar.borderColor" :colorMode="true"
+                                :onChanged="setupSearchBarBorderColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">背景颜色：</div>
-                            <ColorInputControl :color="'#fff'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.searchBar.bgColor" :onChanged="setupSearchBarBgColor">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">文字颜色：</div>
+                            <ColorInputControl :value="customTheme.searchBar.textColor"
+                                :onChanged="setupSearchBarTextColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">搜索按钮背景颜色：</div>
-                            <ColorInputControl :color="'#fff'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.searchBar.searchBtnBgColor"
+                                :onChanged="setupSearchBarSearchBtnBgColor">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">搜索按钮光标悬停时背景颜色：</div>
+                            <ColorInputControl :value="customTheme.searchBar.searchBtnHoverBgColor"
+                                :onChanged="setupSearchBarSearchBtnHoverBgColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">搜索按钮图标颜色：</div>
-                            <ColorInputControl :color="'#272727'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.searchBar.searchBtnIconColor" :colorMode="true"
+                                :onChanged="setupSearchBarSearchBtnIconColor">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">搜索按钮光标悬停时图标颜色：</div>
+                            <ColorInputControl :value="customTheme.searchBar.searchBtnHoverIconColor" :colorMode="true"
+                                :onChanged="setupSearchBarSearchBtnHoverIconColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">清除按钮图标颜色：</div>
-                            <ColorInputControl :color="'#666'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.searchBar.clearBtnIconColor" :colorMode="true"
+                                :onChanged="setupSearchBarClearBtnIconColor">
+                            </ColorInputControl>
                         </div>
                     </div>
                 </div>
@@ -307,19 +587,26 @@ const uploadImage = async () => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">背景颜色：</div>
-                            <ColorInputControl :color="'#31c27c'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.appLogo.bgColor" :onChanged="setupAppLogoBgColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">内部小圆圈背景颜色：</div>
-                            <ColorInputControl :color="'#fff'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.appLogo.innerBgColor"
+                                :onChanged="setupAppLogoInnerBgColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">内部L字颜色：</div>
-                            <ColorInputControl :color="'#31c27c'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.appLogo.innerTextColor" :colorMode="true"
+                                :onChanged="setupAppLogoInnerTextColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">右边文字颜色：</div>
-                            <ColorInputControl :color="'#31c27c'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.appLogo.appNameTextColor"
+                                :onChanged="setupAppLogoAppNameTextColor">
+                            </ColorInputControl>
                         </div>
                     </div>
                 </div>
@@ -328,19 +615,27 @@ const uploadImage = async () => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">滚动条颜色：</div>
-                            <ColorInputControl :color="'#787878'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.others.scrollBarColor"
+                                :onChanged="setupOthersScrollBarColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">进度条背景颜色：</div>
-                            <ColorInputControl :color="'#CCC'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.others.progressBarBgColor"
+                                :onChanged="setupOthersProgressBarBgColor">
+                            </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">音量滑块颜色：</div>
-                            <ColorInputControl :color="'#272727'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.others.volumeBarThumbColor"
+                                :onChanged="setupOthersVolumeBarThumbColor">
+                            </ColorInputControl>
                         </div>
-                        <div class="item">
+                        <div class="item" v-show="false">
                             <div class="name">复选框背景颜色：</div>
-                            <ColorInputControl :color="'#FFF'"></ColorInputControl>
+                            <ColorInputControl :value="customTheme.others.checkboxBgColor"
+                                :onChanged="setupOthersCheckboxBgColor">
+                            </ColorInputControl>
                         </div>
                     </div>
                 </div>
@@ -355,7 +650,6 @@ const uploadImage = async () => {
     /*flex-direction: column;*/
     overflow: hidden;
     border-radius: 15px;
-    /*background: var(--seview-bg);*/
     -webkit-app-region: none;
 }
 
@@ -363,10 +657,19 @@ const uploadImage = async () => {
     display: flex;
     flex: 1;
     flex-direction: column;
+    background: var(--content-bg-color);
 }
 
 .custom-theme-preview-mode {
     height: 50px !important;
+}
+
+.custom-theme-preview-mode .header .no-preview-btn {
+    margin-right: 25px;
+}
+
+.custom-theme-preview-mode .header {
+    border-bottom: 1px solid transparent !important;
 }
 
 .custom-theme-edit-view .spacing {
@@ -386,12 +689,13 @@ const uploadImage = async () => {
 }
 
 .custom-theme-edit-view .header {
-    padding: 0px 12px;
+    padding: 0px 15px 0px 3px;
     height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: var(--content-bg-color2);
+    background: var(--content-header-nav-bg-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .custom-theme-edit-view .header .action {
@@ -401,22 +705,28 @@ const uploadImage = async () => {
 }
 
 .custom-theme-edit-view .header .action svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
-.custom-theme-edit-view .header .action svg:hover {
-    fill: var(--svg-hover-color);
+.custom-theme-edit-view .header .action .btn:hover,
+.custom-theme-edit-view .header .action .btn:hover svg {
+    fill: var(--content-highlight-color);
+    cursor: pointer;
+}
+
+.custom-theme-edit-view .header .action .close-btn {
+    width: 30px;
 }
 
 .custom-theme-edit-view .header .title-wrap {
-    margin-left: 20px;
+    margin-left: 6px;
     flex: 1;
     display: flex;
 }
 
 .custom-theme-edit-view .header .title {
-    font-size: var(--text-size);
+    font-size: var(--content-text-size);
 }
 
 .custom-theme-edit-view .header #toggle-ctl {
@@ -426,7 +736,7 @@ const uploadImage = async () => {
 
 .custom-theme-edit-view .text-btn {
     text-align: left;
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
     display: flex;
     align-items: center;
     justify-items: center;
@@ -436,15 +746,22 @@ const uploadImage = async () => {
 
 .custom-theme-edit-view .text-btn svg {
     margin-right: 3px;
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .custom-theme-edit-view .text-btn:hover {
-    color: var(--hl-color);
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    color: transparent !important;
 }
 
 .custom-theme-edit-view .text-btn:hover svg {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
+}
+
+.custom-theme-edit-view .tip-text {
+    margin-bottom: 15px;
+    text-align: left;
 }
 
 
@@ -469,11 +786,11 @@ const uploadImage = async () => {
     flex-direction: row;
     align-items: flex-start;
     margin-bottom: 36px;
-    border-bottom: 1px solid var(--border-color);
+    /*border-bottom: 1px solid var(--border-color);*/
 }
 
 .custom-theme-edit-view .center .last {
-    margin-bottom: 68px;
+    margin-bottom: 52px;
     border: 1px solid transparent;
 }
 
@@ -482,12 +799,12 @@ const uploadImage = async () => {
 }
 
 .custom-theme-edit-view .center .row .cate-name {
-    font-size: var(--tab-title-text-size);
+    font-size: var(--content-text-tab-title-size);
     width: 118px;
     text-align: left;
     margin-right: 10px;
     margin-top: 3px;
-    /*color: var(--text-sub-color);*/
+    /*color: var(--content-subtitle-text-color);*/
 }
 
 .custom-theme-edit-view .center .row-content {
@@ -519,10 +836,10 @@ const uploadImage = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    fill: var(--text-sub-color);
+    fill: var(--content-subtitle-text-color);
     border-radius: 6px;
     margin-bottom: 6px;
-    border: 1px solid var(--input-border-color);
+    border: 1px solid var(--border-inputs-border-color);
     cursor: pointer;
 }
 
@@ -534,5 +851,9 @@ const uploadImage = async () => {
     display: flex;
     /*justify-content: center;
     align-items: center;*/
+}
+
+.custom-theme-edit-view .invalid {
+    border-color: var(--content-error-color) !important;
 }
 </style>

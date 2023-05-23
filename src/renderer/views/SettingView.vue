@@ -326,8 +326,8 @@ onMounted(checkForUpdate)
                 <span class="cate-name"><b @click="visitThemes">主题</b></span>
                 <div class="content">
                     <div class="last" v-for="(item, index) in presetThemes()"
-                        :class="{ active: index == theme.index, lightText: item.dark }" :style="{ background: item.color }"
-                        @click="setThemeIndex(index)">
+                        :class="{ active: index == theme.index && theme.type === 0 }"
+                        :style="{ background: item.previewBg }" @click="setThemeIndex(index)">
                         <span class="cate-subtitle">{{ item.name }}</span>
                     </div>
                 </div>
@@ -351,8 +351,7 @@ onMounted(checkForUpdate)
                         <div class="zoom-title">
                             <span>窗口缩放：</span>
                             <input type="number" min="50" max="300" step="0.01" :value="common.winZoom"
-                                placeholder="范围50-300，默认85，支持2位小数点" @keydown.enter="updateWinZoom"
-                                @focusout="updateWinZoom" />
+                                placeholder="50-300，默认85，支持2位小数" @keydown.enter="updateWinZoom" @focusout="updateWinZoom" />
                             <span>%</span>
                         </div>
                         <div>
@@ -369,13 +368,12 @@ onMounted(checkForUpdate)
                     </div>
                     <div class="font" @keydown.stop="">
                         <span>字体名称：</span>
-                        <input type="text" :value="resolveFont(common.fontFamily, true)"
-                            placeholder="字体名称，格式请参考CSS - FontFamily" @keydown.enter="updateFontFamily"
-                            @focusout="updateFontFamily" />
+                        <input type="text" :value="resolveFont(common.fontFamily, true)" placeholder="请参考CSS - FontFamily"
+                            @keydown.enter="updateFontFamily" @focusout="updateFontFamily" />
                     </div>
                     <div>
                         <span>字体大小：</span>
-                        <input type="number" :value="common.fontSize" placeholder="字体大小，范围10-25，默认15.5" min="10" max="25"
+                        <input type="number" :value="common.fontSize" placeholder="10-25，默认15.5" min="10" max="25"
                             step="0.1" @keydown.enter="updateFontSize" @focusout="updateFontSize" />
                     </div>
                     <div>
@@ -387,8 +385,8 @@ onMounted(checkForUpdate)
                     </div>
                     <div class="last">
                         <span>字体粗细：</span>
-                        <input type="number" :value="common.fontWeight" placeholder="字体粗细，范围100-1000，默认400" min="100"
-                            max="1000" step="10" @keydown.enter="updateFontWeight" @focusout="updateFontWeight" />
+                        <input type="number" :value="common.fontWeight" placeholder="100-1000，默认400" min="100" max="1000"
+                            step="10" @keydown.enter="updateFontWeight" @focusout="updateFontWeight" />
                         <datalist id="fontweight-suggests" v-if="false">
                             <option v-for="(item, index) in fontWeights" :value="item">
                             </option>
@@ -451,13 +449,13 @@ onMounted(checkForUpdate)
                     </div>
                     <div>
                         <span class="cate-subtitle">歌曲（歌词）进度更新频度：</span>
-                        <input type="number" :value="track.stateRefreshFrequency" placeholder="屏幕刷新率，范围1-1024，默认60" min="1"
+                        <input type="number" :value="track.stateRefreshFrequency" placeholder="屏幕刷新率，1-1024，默认60" min="1"
                             max="1024" step="1" @input="updateStateRefreshFrequency"
                             @focusout="updateStateRefreshFrequency" />
                     </div>
                     <div class="last">
                         <span class="cate-subtitle">歌曲频谱更新频度：</span>
-                        <input type="number" :value="track.spectrumRefreshFrequency" placeholder="范围1 - 256，默认3" min="1"
+                        <input type="number" :value="track.spectrumRefreshFrequency" placeholder="1-256，默认3" min="1"
                             max="256" step="1" @input="updateSpectrumRefreshFrequency"
                             @focusout="updateSpectrumRefreshFrequency" />
                     </div>
@@ -817,18 +815,19 @@ onMounted(checkForUpdate)
     overflow-x: hidden;
 }
 
+/*
 #setting-view .tip-text {
-    /*font-size: 13.5px;*/
-    font-size: var(--tip-text-size);
-    color: var(--text-sub-color);
+    font-size: var(--content-text-tip-text-size);
+    color: var(--content-subtitle-text-color);
 }
+*/
 
 #setting-view .title {
     margin-left: 35px;
     margin-right: 35px;
     padding-top: 20px;
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
     padding-bottom: 20px;
     border-bottom: 2px solid transparent;
@@ -853,7 +852,7 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .center .row>.cate-name {
-    font-size: var(--tab-title-text-size);
+    font-size: var(--content-text-tab-title-size);
     margin-left: 10px;
     width: 110px;
 }
@@ -872,7 +871,7 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .content>div .cate-subtitle {
-    width: var(--setting-cate-subtitle-width);
+    width: var(--content-setting-cate-subtitle-width);
     margin-right: 25px;
 }
 
@@ -897,7 +896,7 @@ onMounted(checkForUpdate)
 #setting-view .theme .cate-name b:hover {
     cursor: pointer;
     font-weight: bold;
-    color: var(--hl-color);
+    color: var(--content-text-highlight-color);
 }
 
 #setting-view .theme .content {
@@ -925,9 +924,11 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .theme .content div span {
-    background-color: #16161656;
-    line-height: var(--size);
-    border-radius: 5px;
+    background-color: var(--app-bg-color);
+    opacity: 0.68;
+    line-height: 51px;
+    border-radius: 2px;
+    overflow: hidden;
     visibility: hidden;
     font-size: 16px;
     margin: 0px !important;
@@ -976,11 +977,11 @@ onMounted(checkForUpdate)
 #setting-view .common .window-zoom .zoom-title input {
     border-radius: 3px;
     padding: 8px;
-    border: 1px solid var(--input-border-color);
-    background-color: var(--input-bg);
+    border: 1px solid var(--border-inputs-border-color);
+    background-color: var(--content-inputs-bg-color);
     /*margin-left: 15px;*/
     margin-right: 15px;
-    color: var(--input-text-color);
+    color: var(--content-inputs-text-color);
     /*text-align: center;
     min-width: 66px; */
 }
@@ -1010,14 +1011,14 @@ onMounted(checkForUpdate)
 #setting-view .common .content .fslevel-item:hover,
 #setting-view .track .content .quality-item:hover {
     background-color: var(--border-color);
-    background-color: var(--list-item-hover);
+    background-color: var(--content-list-item-hover-bg-color);
 }
 
 #setting-view .layout .content .active,
 #setting-view .common .content .active,
 #setting-view .track .content .active {
-    background: var(--btn-bg) !important;
-    color: var(--svg-btn-color) !important;
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
     /*border: 1px solid var(--border-color);*/
 }
 
@@ -1042,7 +1043,7 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .repository svg {
-    fill: var(--text-color);
+    fill: var(--content-text-color);
     cursor: pointer;
 }
 
@@ -1050,7 +1051,7 @@ onMounted(checkForUpdate)
 #setting-view .license .link {
     text-decoration: underline;
     cursor: pointer;
-    color: var(--text-color);
+    color: var(--content-text-color);
     padding-left: 5px;
 }
 
@@ -1070,7 +1071,7 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .link {
-    color: var(--text-color);
+    color: var(--content-text-color);
 }
 
 
@@ -1106,13 +1107,14 @@ onMounted(checkForUpdate)
     -webkit-appearance: none;
     height: 22px;
     width: 6px;
-    background: var(--hl-color);
+    /*background: var(--content-text-highlight-color);*/
+    background: var(--content-highlight-color);
     border-radius: 10rem;
     margin-top: -8px;
 }
 
 #setting-view input[type=range]::-webkit-slider-runnable-track {
-    background: var(--progress-track-bg);
+    background: var(--others-progressbar-bg-color);
     border-radius: 10rem;
     height: 6px;
 }
@@ -1132,12 +1134,11 @@ onMounted(checkForUpdate)
 #setting-view .network input {
     border-radius: 3px;
     padding: 8px;
-    border: 1px solid var(--input-border-color);
-    background-color: var(--input-bg);
+    border: 1px solid var(--border-inputs-border-color);
+    background-color: var(--content-inputs-bg-color);
     margin-left: 10px;
     min-width: 258px;
-    color: var(--text-color);
-    color: var(--input-text-color);
+    color: var(--content-inputs-text-color);
 }
 
 #setting-view .network input {
@@ -1156,12 +1157,12 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .version .newflag {
-    color: var(--hl-color);
+    color: var(--content-text-highlight-color);
     border-radius: 3px;
-    border: 1.3px solid var(--hl-color);
+    border: 1.3px solid var(--content-text-highlight-color);
     padding: 1px 3px;
     /*font-size: 12px;*/
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
     font-weight: 600;
     margin-right: 5px;
 }

@@ -271,6 +271,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isHideToTrayOnMinimized() {
             return this.tray.showOnMinimized
+        },
+        currentTheme() {
+            return this.getCurrentTheme()
         }
     },
     actions: {
@@ -294,6 +297,17 @@ export const useSettingStore = defineStore('setting', {
             const { getPresetThemes } = useThemeStore()
             return getPresetThemes()
         },
+        getCurrentTheme() {
+            const { getTheme } = useThemeStore()
+            const { type, index } = this.theme
+            return getTheme(type, index)
+        },
+        isCurrentTheme(theme) {
+            if (!theme || !theme.id) return false
+            const current = this.getCurrentTheme()
+            return current.id === theme.id
+        },
+        /*
         getCurrentThemeId() {
             const { getTheme } = useThemeStore()
             const { type, index } = this.theme
@@ -304,10 +318,11 @@ export const useSettingStore = defineStore('setting', {
             const { type, index } = this.theme
             return getTheme(type, index).color
         },
-        getCurrentThemeHlColor() {
+        */
+        getCurrentThemeHighlightColor() {
             const { getTheme } = useThemeStore()
             const { type, index } = this.theme
-            return getTheme(type, index).hlColor
+            return getTheme(type, index).content.highlightColor
         },
         setWindowZoom(value) {
             if (!value) return

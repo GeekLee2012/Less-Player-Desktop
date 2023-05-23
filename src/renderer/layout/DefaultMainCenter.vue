@@ -8,9 +8,6 @@ import DefaultMainContent from './DefaultMainContent.vue';
 import DefaultMainBottom from './DefaultMainBottom.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
-import PlaylistCategoryView from '../views/PlaylistCategoryView.vue';
-import ArtistCategoryView from '../views/ArtistCategoryView.vue';
-import RadioCategoryView from '../views/RadioCategoryView.vue';
 import EventBus from '../../common/EventBus';
 
 
@@ -89,7 +86,7 @@ const setImageTextTileSize = () => {
 
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 1
-    document.documentElement.style.setProperty('--image-text-tile-cover-size', `${tileWidth}px`)
+    document.documentElement.style.setProperty('--others-image-text-tile-cover-size', `${tileWidth}px`)
     /*
     tileCovers.forEach(item => {
         item.style.width = tileWidth + 'px'
@@ -355,8 +352,8 @@ const setThemeViewItemsSize = () => {
     tileWidth = parseInt(tileWidth) - 3
 
     const tileHeight = tileWidth * 95 / 160
-    document.documentElement.style.setProperty('--theme-preview-tile-width', `${tileWidth}px`)
-    document.documentElement.style.setProperty('--theme-preview-tile-height', `${tileHeight}px`)
+    document.documentElement.style.setProperty('--others-theme-preview-tile-width', `${tileWidth}px`)
+    document.documentElement.style.setProperty('--others-theme-preview-tile-height', `${tileHeight}px`)
 }
 
 onActivated(setupDefaultLayout)
@@ -429,25 +426,6 @@ watch(lyricMetaPos, () => {
         </DefaultMainContent>
         <component id="default-main-bottom" :is="currentMainBottom">
         </component>
-
-        <!-- 浮层(Component、View)-->
-        <transition name="fade-ex">
-            <PlaylistCategoryView id="playlist-category-view" :class="{ autolayout: isDefaultClassicLayout }"
-                v-show="playlistCategoryViewShow">
-            </PlaylistCategoryView>
-        </transition>
-
-        <transition name="fade-ex">
-            <ArtistCategoryView id="artist-category-view" :class="{ autolayout: isDefaultClassicLayout }"
-                v-show="artistCategoryViewShow">
-            </ArtistCategoryView>
-        </transition>
-
-        <transition name="fade-ex">
-            <RadioCategoryView id="radio-category-view" :class="{ autolayout: isDefaultClassicLayout }"
-                v-show="radioCategoryViewShow">
-            </RadioCategoryView>
-        </transition>
     </div>
 </template>
 
@@ -467,42 +445,8 @@ watch(lyricMetaPos, () => {
     z-index: 0;
 }
 
-#playlist-category-view,
-#artist-category-view,
-#radio-category-view {
-    position: fixed;
-    top: 85px;
-    right: 0px;
-    width: 404px;
-    width: 40.4%;
-    z-index: 55;
-    background: var(--bg-color);
-    background-color: var(--bg-color);
-    background-image: var(--app-bg);
-    box-shadow: 0px 0px 10px #161616;
-}
-
 #default-main-center .autolayout {
     top: 60px;
-}
-
-/* 可以为进入和离开动画设置不同的持续时间和动画函数 */
-.fade-ex-enter-active,
-.fade-ex-leave-active {
-    transition: all 0.3s ease;
-}
-
-/*
-.fade-ex-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-*/
-
-.fade-ex-enter-from,
-.fade-ex-leave-to {
-    transform: translateX(404px);
-    transform: translateX(40.4%);
-    opacity: 0;
 }
 
 /* TODO */

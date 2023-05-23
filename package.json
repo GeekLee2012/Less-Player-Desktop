@@ -70,15 +70,14 @@
     },
     "files": [
       "**/*",
-      "!public/*",
+      "!public/impulse/*",
+      "!public/bg_blue.jpg",
+      "!public/deco_1001.png",
+      "!public/deco_1002.png",
+      "!public/deco_1003.png",
+      "!public/default_cover.png",
       "!**/*.md",
-      "!**/{npmrc,.npmrc,vite.config.js}",
-      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
-      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
-      "!**/node_modules/*.d.ts",
-      "!**/node_modules/.bin",
-      "!**/._*",
-      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}"
+      "!**/{npmrc,.npmrc,vite.config.js,package-lock.json}"
     ],
     "mac": {
       "artifactName": "${productName}.v${version}.${os}-${arch}.${ext}",

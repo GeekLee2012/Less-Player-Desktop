@@ -43,11 +43,11 @@ const handleRightClick = (event) => {
     align-items: center;
     border-radius: 10rem;
     height: 36px;
-    color: var(--svg-text-color);
+    color: var(--button-icon-text-btn-text-color);
 }
 
 .svg-text-btn svg {
-    fill: var(--svg-btn-color);
+    fill: var(--button-icon-text-btn-icon-color);
 }
 
 .svg-text-btn .left-btn,
@@ -56,13 +56,13 @@ const handleRightClick = (event) => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: var(--btn-bg);
+    background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
 }
 
 .svg-text-btn .left-btn:hover,
 .svg-text-btn .right-btn:hover {
-    background: var(--btn-hover-bg);
+    background: var(--button-icon-text-btn-hover-bg-color);
 }
 
 .svg-text-btn .left-btn {
@@ -86,7 +86,7 @@ const handleRightClick = (event) => {
 
 .btnDisabled .left-btn:hover,
 .btnDisabled .right-btn:hover {
-    background: var(--btn-bg);
+    background: var(--button-icon-text-btn-bg-color);
 }
 
 .svg-text-btn .left-btn .text {

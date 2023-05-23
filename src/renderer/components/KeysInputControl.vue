@@ -18,12 +18,12 @@ const props = defineProps({
 }
 
 .keys-input-ctl input {
-    border: 1px solid var(--input-border-color);
+    border: 1px solid var(--border-inputs-border-color);
     /*border-bottom: 1px solid #eee;*/
-    background-color: var(--input-bg);
+    background-color: var(--content-inputs-bg-color);
     border-radius: 3px;
     padding: 5px;
-    color: var(--input-text-color);
+    color: var(--content-inputs-text-color);
     cursor: default;
 }
 </style>

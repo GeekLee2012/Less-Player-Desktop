@@ -123,34 +123,34 @@ EventBus.on('radioCategory-update', () => {
     vertical-align: middle;
     text-align: center;
     line-height: 36px;
-    font-size: var(--text-size);
+    font-size: var(--content-text-size);
     cursor: pointer;
     white-space: nowrap;
     border-radius: 10rem;
     /*border: 1px solid transparent;*/
-    color: var(--text-color);
+    color: var(--content-text-color);
 }
 
 .radio-category-bar span:hover {
-    background: var(--list-item-hover);
-    color: var(--text-color);
+    background: var(--content-list-item-hover-bg-color);
+    color: var(--content-text-color);
 }
 
 .radio-category-bar svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     margin-right: 15px;
     cursor: pointer;
     transform: translateY(3px);
 }
 
 .radio-category-bar svg:hover {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 .radio-category-bar .active {
-    border-color: var(--hl-color);
+    border-color: var(--content-highlight-color);
     border-color: transparent;
-    background: var(--btn-bg) !important;
-    color: var(--svg-btn-color) !important;
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
 }
 </style>

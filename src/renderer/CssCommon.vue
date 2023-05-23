@@ -2,57 +2,75 @@
 
 <style>
 :root {
-  --text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
-  --text-font-family: var(--text-preset-font-family);
-
-  --macstyle-border-radius: 0px;
-  --scrollbar-width: 6px;
-  --play-meta-height: 77px;
-  --main-play-nav-height: 80px;
-  --image-text-tile-cover-size: 173px;
-  --image-text-tile-mask-width: var(--image-text-tile-cover-size);
-  --theme-preview-tile-width: 160px;
-  --theme-preview-tile-height: 95px;
   --app-bg: transparent;
 
-  --text-size: 15.5px;
-  --text-sub-size: 14px;
-  --tip-text-size: 13.5px;
-  --tab-title-text-size: 17px;
-  --setting-cate-subtitle-width: 225px;
-  --text-line-height: 27px;
-  --text-letter-spacing: 0.25px;
+  --content-text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
+  --content-text-font-family: var(--content-text-preset-font-family);
+
+  --content-text-size: 15.5px;
+  --content-text-subtitle-size: 14px;
+  --content-text-tip-text-size: 13.5px;
+  --content-text-tab-title-size: 17px;
+  --content-setting-cate-subtitle-width: 225px;
+  --content-text-line-height: 27px;
+  --content-text-letter-spacing: 0.25px;
   /* 主标题 */
-  --text-main-title-size: 30px;
+  --content-text-module-title-size: 30px;
   /* 标题 - 批量操作页、当前播放列表 */
-  --text-main2-title-size: 25px;
+  --content-text-module-subtitle-size: 25px;
   /* 标题 - 全部分类界面 */
-  --text-main3-title-size: 21px;
+  --content-text-module-title2-size: 21px;
   /* 标题 - 左导航 */
-  --text-main4-title-size: 19px;
+  --content-text-module-title3-size: 19px;
   /* 行高 - 左导航 */
-  --main-left-nav-line-height: 32px;
+  --content-left-nav-line-height: 32px;
+  --content-error-color: red;
 
+  /*边框 */
+  --border-macstyle-border-radius: 0px;
+
+  --others-scrollbar-width: 6px;
   /*--win-ctl-width: 105px;*/
-  --win-ctl-margin-left: 15px;
-  --win-ctl-btn-size: 13px;
-  --win-ctl-max-btn-size: 8px;
-  --win-ctl-collapse-btn-size: 18px;
-  --win-ctl-btn-margin-right: 8px;
+  --others-win-ctl-margin-left: 15px;
+  --others-win-ctl-btn-size: 13px;
+  --others-win-ctl-max-btn-size: 8px;
+  --others-win-ctl-collapse-btn-size: 18px;
+  --others-win-ctl-btn-margin-right: 8px;
 
-  font-family: var(--text-font-family);
-  letter-spacing: var(--text-letter-spacing);
+  --others-playmeta-height: 77px;
+  --others-playnav-height: 80px;
+  --others-image-text-tile-cover-size: 173px;
+  --others-image-text-tile-mask-width: var(--others-image-text-tile-cover-size);
+  --others-theme-preview-tile-width: 160px;
+  --others-theme-preview-tile-height: 95px;
+
+  /* 主题相关 */
+  --border-popovers-border-color: #666;
+  --box-shadow: 0px 0px 6px var(--border-popovers-border-color);
+  --searchbar-clear-btn-icon-color: #666;
+
+  font-family: var(--content-text-font-family);
+  letter-spacing: var(--content-text-letter-spacing);
+}
+
+.content-text-highlight {
+  background: var(--content-text-highlight-color);
+  -webkit-background-clip: text;
+  color: transparent !important;
+}
+
+input {
+  font-size: var(--content-text-subtitle-size);
 }
 
 .text-input-ctl {
   border-radius: 3px;
   padding: 8px;
-  border: 1px solid var(--input-border-color);
-  background-color: var(--input-bg);
+  border: 1px solid var(--border-inputs-border-color);
+  background-color: var(--content-inputs-bg-color);
   min-width: 258px;
-  font-size: var(--text-size);
-  color: var(--text-color);
-  color: var(--input-text-color);
+  /*font-size: var(--content-text-size);*/
+  color: var(--content-inputs-text-color);
 }
 
 .btnDisabled {
@@ -60,7 +78,7 @@
 }
 
 ::-webkit-scrollbar {
-  width: var(--scrollbar-width);
+  width: var(--others-scrollbar-width);
 }
 
 ::-webkit-scrollbar-track {
@@ -68,11 +86,36 @@
 }
 
 .warning {
-  fill: red !important;
-  color: red !important;
+  fill: var(--content-error-color) !important;
+  color: var(--content-error-color) !important;
+}
+
+.tip-text {
+  /*font-size: 13.5px;*/
+  font-size: var(--content-text-tip-text-size);
+  color: var(--content-subtitle-text-color);
 }
 
 /*TODO 试验性CSS */
+/* 可以为进入和离开动画设置不同的持续时间和动画函数 */
+.fade-ex-enter-active,
+.fade-ex-leave-active {
+  transition: all 0.3s ease;
+}
+
+/*
+.fade-ex-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+*/
+
+.fade-ex-enter-from,
+.fade-ex-leave-to {
+  transform: translateX(404px);
+  transform: translateX(40.4%);
+  opacity: 0;
+}
+
 /* fade-y */
 .fade-y-enter-active,
 .fade-y-leave-active {

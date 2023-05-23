@@ -143,7 +143,7 @@ onMounted(() => loadCustomPlaylist())
     text-align: left;
     margin-top: 5px;
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
 
@@ -157,13 +157,13 @@ onMounted(() => loadCustomPlaylist())
     width: 175px;
     height: 175px;
     border-radius: 6px;
-    /* border: 1px solid var(--main-left-border-color); */
+    /* border: 1px solid var(--border-left-nav-border-color); */
     box-shadow: 0px 0px 1px #161616;
 }
 
 #custom-playlist-edit-view .center .cover-eidt-btn {
-    background: var(--btn-bg);
-    color: var(--svg-text-color);
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-text-color);
     padding: 5px;
     border-radius: 3px;
     cursor: pointer;
@@ -188,22 +188,22 @@ onMounted(() => loadCustomPlaylist())
 }
 
 #custom-playlist-edit-view .center .form-row span {
-    font-size: 16px;
-    color: var(--text-color);
+    font-size: var(--content-text-subtitle-size);
+    color: var(--content-text-color);
     margin-bottom: 8px;
 }
 
 #custom-playlist-edit-view .center .form-row input,
 #custom-playlist-edit-view .center .form-row textarea {
     flex: 1;
-    border: 1px solid var(--input-border-color);
+    border: 1px solid var(--border-inputs-border-color);
     outline: none;
-    padding: 3px 6px;
+    padding: 5px 8px;
     border-radius: 2px;
-    background-color: var(--input-bg);
-    color: var(--input-text-color);
+    background-color: var(--content-inputs-bg-color);
+    color: var(--content-inputs-text-color);
     /*font-size: 15px; */
-    font-size: var(--text-size);
+    font-size: var(--content-text-size);
 }
 
 #custom-playlist-edit-view .center .form-row input {
@@ -225,17 +225,19 @@ onMounted(() => loadCustomPlaylist())
 }
 
 #custom-playlist-edit-view .required {
-    color: var(--hl-color) !important;
+    color: var(--content-text-highlight-color) !important;
     font-weight: bold;
     font-size: 20px;
 }
 
 #custom-playlist-edit-view .invalid {
-    border-color: var(--error-color) !important;
+    border-color: var(--content-error-color) !important;
     border-width: 3px;
 }
 
+/*
 #custom-playlist-edit-view ::-webkit-input-placeholder {
     color: var(--input-placeholder-color);
 }
+*/
 </style>

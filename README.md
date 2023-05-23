@@ -17,9 +17,9 @@
 * 开发模式：渐进模式，边学习边开发（学以致用）  
   
 ### 开发/测试环境
-* OS：macOS Big Sur（开发、测试）、Windows 10（虚拟机，仅测试）  
-* IDE：Visual Studio Code v1.71.0  
-* Nodejs：v16.17.0 LTS  
+* OS：macOS Monterey（开发、测试）、Windows 10（虚拟机，仅测试）  
+* IDE：Visual Studio Code
+* Nodejs：v16.17.0 LTS +  
 * 其他：详见package.json  
   
 ### 功能特性
@@ -73,10 +73,12 @@
 * Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)
 
 ### For普通用户
-* 最新开发测试版，欢迎愿意尝鲜的朋友体验！请访问以下资源库：
-* [Github资源库](https://github.com/GeekLee2012/Resources/releases/)  
-* [Gitee资源库](https://gitee.com/rive08/resources/releases/)  
-
+* 最新开发测试版，会在项目自身仓库，不定期打包发布，欢迎愿意尝鲜的朋友体验！
+* 以下资源库，暂时不再使用（因为分开单独管理，并没有解决任何问题）：
+* [Github资源库（废弃）](https://github.com/GeekLee2012/Resources/releases/)  
+* [Gitee资源库（废弃）](https://gitee.com/rive08/resources/releases/)  
+* PS: 变动带来的不便，请朋友们谅解！有时我也想做一些尝试，至于结果也并非总在预料之中。 
+  
 ### 项目相关文档
 * 常见问题：[FAQ.md](FAQ.md)  
 * 更新日志：[CHANGELOG.md](CHANGELOG.md) 

@@ -80,7 +80,7 @@ onMounted(() => {
 <style>
 .play-meta {
     display: flex;
-    height: var(--play-meta-height);
+    height: var(--others-playmeta-height);
     align-items: center;
 }
 
@@ -99,17 +99,17 @@ onMounted(() => {
 
 .play-meta .cover-wrap {
     position: relative;
-    width: var(--play-meta-height);
-    height: var(--play-meta-height);
+    width: var(--others-playmeta-height);
+    height: var(--others-playmeta-height);
     box-shadow: 0px 0px 1px #161616;
-    box-shadow: 0px 0px 1px var(--main-left-border-color);
+    box-shadow: 0px 0px 1px var(--border-left-nav-border-color);
 }
 
 .play-meta .audio-cover,
 .play-meta .cover-mask {
     /*width: 100%;*/
-    width: var(--play-meta-height);
-    height: var(--play-meta-height);
+    width: var(--others-playmeta-height);
+    height: var(--others-playmeta-height);
     cursor: pointer;
     -webkit-user-drag: none;
     -webkit-app-region: no-drag;
@@ -121,7 +121,7 @@ onMounted(() => {
 }
 
 .play-meta .audio-cover {
-    background-color: var(--text-color);
+    background-color: var(--content-text-color);
 }
 
 .play-meta .cover-mask {
@@ -129,17 +129,17 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--ntf-bg);
-    opacity: 0.68;
+    background-color: var(--app-bg-color);
+    opacity: 0.8;
 }
 
 .play-meta .cover-mask svg {
-    fill: var(--svg-color) !important;
+    fill: var(--button-icon-btn-color) !important;
 }
 
 .play-meta .audio-title {
     /*font-size: 14;*/
-    font-size: var(--text-sub-size);
+    font-size: var(--content-text-subtitle-size);
     text-align: left;
 
     vertical-align: bottom;
@@ -157,11 +157,11 @@ onMounted(() => {
 }
 
 .play-meta .favorite-btn svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .play-meta .favorite-btn:hover svg {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 .play-meta .time-volume-wrap {
@@ -178,9 +178,9 @@ onMounted(() => {
 }
 
 .play-meta .audio-time {
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     font-size: 14px;
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
     text-align: left;
     flex: 1;
 }

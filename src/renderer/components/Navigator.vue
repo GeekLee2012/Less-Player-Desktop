@@ -45,13 +45,13 @@ const { backward, forward } = inject('appRoute')
 }
 
 .navigator svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
     -webkit-app-region: none;
 }
 
 .navigator svg:hover {
     fill: #28c83f;
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 </style>

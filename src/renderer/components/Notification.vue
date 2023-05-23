@@ -5,7 +5,7 @@
 <template>
     <div class="ntf">
         <div class="ntf-dialog-mask">
-            <div class="ntf-dialog">
+            <div class="ntf-dialog container">
                 <div class="ntf-text">
                     <slot name="text"></slot>
                 </div>
@@ -30,16 +30,15 @@
     position: absolute;
     margin: auto;
     border-radius: 12px;
-    background-color: var(--bg-color);
-    background-image: var(--app-bg);
     overflow: hidden;
-    box-shadow: var(--pbq-box-shadow);
+    box-shadow: var(--box-shadow);
 }
 
 .ntf-dialog {
     width: 265px;
     height: 163px;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -55,6 +54,6 @@
 }
 
 .ntf-text svg {
-    fill: var(--text-color);
+    fill: var(--content-text-color);
 }
 </style>

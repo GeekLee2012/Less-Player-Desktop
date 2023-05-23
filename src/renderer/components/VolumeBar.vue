@@ -88,7 +88,7 @@ defineExpose({
 }
 
 .volume-bar .volume-status svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .volume-bar .st-slient,
@@ -99,8 +99,8 @@ defineExpose({
 }
 
 .volume-bar .volume-status:hover svg {
-    fill: var(--hl-color);
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
+    fill: var(--content-highlight-color);
 }
 
 .volume-bar .volume-value {

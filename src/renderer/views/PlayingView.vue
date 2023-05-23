@@ -174,12 +174,8 @@ onMounted(() => {
 <style scoped>
 .playing-view {
     display: flex;
-    flex-direction: column;
+    /*flex-direction: column;*/
     overflow: hidden;
-}
-
-.playing-view-bg {
-    background: var(--playing-view-bg);
 }
 
 .playing-view .spacing {
@@ -191,6 +187,7 @@ onMounted(() => {
     flex: 1;
     flex-direction: column;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .playing-view .header {
@@ -207,7 +204,7 @@ onMounted(() => {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-left: var(--win-ctl-margin-left);
+    margin-left: var(--others-win-ctl-margin-left);
 }
 
 .playing-view .meta-wrap {
@@ -231,7 +228,7 @@ onMounted(() => {
 .playing-view .meta-wrap .audio-title,
 .playing-view .meta-wrap .audio-artist {
     font-weight: bold;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     text-align: left;
 
     overflow: hidden;
@@ -259,7 +256,7 @@ onMounted(() => {
 }
 
 .playing-view svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
@@ -268,7 +265,7 @@ onMounted(() => {
 .playing-view .equalizer svg:hover,
 .playing-view .active svg,
 .playing-view .collapse-btn:hover svg {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
     cursor: pointer;
 }
 
@@ -326,15 +323,15 @@ onMounted(() => {
 }
 
 .playing-view .bottom .action .btm-left svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 .playing-view .bottom .action .btm-left svg:hover {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .playing-view .bottom .action .love-btn {
-    fill: var(--svg-hover-color) !important;
+    fill: var(--content-text-highlight-color) !important;
 }
 </style>

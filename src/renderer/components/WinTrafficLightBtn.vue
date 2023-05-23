@@ -105,9 +105,9 @@ const toggleMaximize = () => {
     height: 13px;
     margin-right: 8px;
      */
-    width: var(--win-ctl-btn-size);
-    height: var(--win-ctl-btn-size);
-    margin-right: var(--win-ctl-btn-margin-right);
+    width: var(--others-win-ctl-btn-size);
+    height: var(--others-win-ctl-btn-size);
+    margin-right: var(--others-win-ctl-btn-margin-right);
     border-radius: 100rem;
     -webkit-app-region: none;
     cursor: pointer;
@@ -155,26 +155,28 @@ const toggleMaximize = () => {
 }
 
 .win-traffic-light-btn .max-btn svg {
-    width: var(--win-ctl-max-btn-size);
-    height: var(--win-ctl-max-btn-size);
+    width: var(--others-win-ctl-max-btn-size);
+    height: var(--others-win-ctl-max-btn-size);
 }
 
 .win-traffic-light-btn .collapse-btn {
     cursor: pointer;
-    margin-right: 8px;
+    /*margin-right: 8px;*/
     -webkit-app-region: none;
+    padding-right: 8px;
     /*display: flex;
     align-items: center;*/
 }
 
 .win-traffic-light-btn .collapse-btn svg {
-    fill: var(--svg-color);
-    width: var(--win-ctl-collapse-btn-size);
-    height: var(--win-ctl-collapse-btn-size);
+    fill: var(--button-icon-btn-color);
+    width: var(--others-win-ctl-collapse-btn-size);
+    height: var(--others-win-ctl-collapse-btn-size);
 }
 
+.win-traffic-light-btn .collapse-btn:hover,
 .win-traffic-light-btn .collapse-btn:hover svg {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
     cursor: pointer;
 }
 </style>

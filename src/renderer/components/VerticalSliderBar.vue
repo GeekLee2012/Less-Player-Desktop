@@ -134,7 +134,7 @@ watch(() => props.value, (nv, ov) => updateProgress(nv, true))
     width: 3px;
     height: 100%;
     border-radius: 10rem;
-    background: var(--progress-track-bg);
+    background: var(--others-progressbar-bg-color);
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -147,7 +147,7 @@ watch(() => props.value, (nv, ov) => updateProgress(nv, true))
     width: 3px;
     height: 50%;
     border-radius: 10rem;
-    background: var(--progress-bg);
+    background: var(--content-text-highlight-color);
     z-index: 1;
     position: absolute;
 }
@@ -156,8 +156,8 @@ watch(() => props.value, (nv, ov) => updateProgress(nv, true))
     width: 10px;
     height: 10px;
     border-radius: 10rem;
-    background-color: var(--slider-thumb-bg);
-    background: var(--progress-bg);
+    background-color: var(--others-volumebar-thumb-color);
+    background: var(--content-text-highlight-color);
     z-index: 2;
     position: absolute;
     top: 50%;

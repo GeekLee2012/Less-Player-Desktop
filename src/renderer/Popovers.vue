@@ -1,8 +1,12 @@
 <script setup>
-import { nextTick, onMounted, reactive, shallowRef, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
+import { useSettingStore } from './store/settingStore';
+import PlaylistCategoryView from './views/PlaylistCategoryView.vue';
+import ArtistCategoryView from './views/ArtistCategoryView.vue';
+import RadioCategoryView from './views/RadioCategoryView.vue';
 import Notification from './components/Notification.vue';
 import CommonContextMenu from './components/CommonContextMenu.vue';
 import AddToListSubmenu from './components/addToListSubmenu.vue';
@@ -15,6 +19,7 @@ import SoundEffectView from './views/SoundEffectView.vue';
 import EventBus from '../common/EventBus';
 import CustomThemeEditView from './views/CustomThemeEditView.vue';
 import ColorPickerToolbar from './components/ColorPickerToolbar.vue';
+import GradientColorToolbar from './components/GradientColorToolbar.vue';
 
 
 
@@ -22,6 +27,8 @@ const currentPlayingView = shallowRef(null)
 const ctxMenuPosStyle = reactive({ left: -999, top: -999 })
 const ctxSubmenuPosStyle = reactive({ left: -999, top: -999 })
 let ctxMenuPos = null, submenuItemNums = 0
+const colorPickerToolbarRef = ref(null)
+const gradientColorToolbarRef = ref(null)
 
 const { commonNotificationShow, commonNotificationText,
   commonNotificationType, commonCtxMenuShow,
@@ -31,13 +38,20 @@ const { commonNotificationShow, commonNotificationText,
   playingViewShow, videoPlayingViewShow,
   playingViewThemeIndex, soundEffectViewShow,
   lyricToolbarShow, randomMusicToolbarShow,
-  customThemeEditViewShow, colorPickerToolbarShow } = storeToRefs(useAppCommonStore())
+  customThemeEditViewShow, colorPickerToolbarShow,
+  gradientColorToolbarShow, playlistCategoryViewShow,
+  artistCategoryViewShow, radioCategoryViewShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
   hideAllCtxMenus, toggleColorPickerToolbar,
-  showColorPickerToolbar } = useAppCommonStore()
+  showColorPickerToolbar, toggleGradientColorToolbar,
+  showGradientColorToolbar } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
+const { isDefaultClassicLayout } = storeToRefs(useSettingStore())
+const { getCurrentTheme } = useSettingStore()
+
+
 
 const getCtxMenuAutoHeight = () => {
   const total = commonCtxMenuData.value.length || 1
@@ -138,7 +152,7 @@ const bindEventListeners = () => {
     hideArtistListSubmenu()
   })
 
-  EventBus.on('color-picker-toolbar-show', ({ event: mouseEvent }) => {
+  EventBus.on('color-picker-toolbar-show', ({ event: mouseEvent, onChanged, value }) => {
     //根据鼠标点击位置，确定弹出位置
     const tbWidth = 218, tbHeight = 369
     const { x, y, offsetX, offsetY } = mouseEvent
@@ -153,17 +167,39 @@ const bindEventListeners = () => {
     pickerEl.style.top = `${top}px`
     pickerEl.style.left = `${left}px`
 
+    if (!colorPickerToolbarRef.value) return
+    if (value) value = value.replace(/\s/g, '')
+    colorPickerToolbarRef.value.init({ onChanged, value })
     showColorPickerToolbar()
   })
 
-  EventBus.on('app-resize', setupCustomThemeEditViewPos)
+  EventBus.on('gradient-color-toolbar-show', ({ event: mouseEvent, value, onChanged }) => {
+    if (!gradientColorToolbarRef.value) return
+    gradientColorToolbarRef.value.init({ onChanged, value })
+    showGradientColorToolbar()
+  })
+
+  EventBus.on('app-resize', () => {
+    setupCustomThemeEditViewPos()
+    setupGradientColorToolbarPos()
+  })
 }
 
 const setupCustomThemeEditViewPos = () => {
+  if (!customThemeEditViewShow.value) return
   EventBus.emit('app-elementAlignCenter', {
     selector: '#custom-theme-edit-view',
     width: 768,
     height: 520
+  })
+}
+
+const setupGradientColorToolbarPos = () => {
+  if (!gradientColorToolbarShow.value) return
+  EventBus.emit('app-elementAlignCenter', {
+    selector: '#gradient-color-toolbar',
+    width: 768,
+    height: 568
   })
 }
 
@@ -179,29 +215,69 @@ const setupPlayingView = (index) => {
   //nextTick(() => EventBus.emit('track-resetAnimFrameCnt'))
 }
 
+const appBackgroundScope = reactive({
+  playingView: true,
+  playbackQueue: false,
+  contextMenu: false,
+  toast: false,
+  soundEffectView: false,
+  lyricToolbar: false,
+  randomMusicToolbar: false
+})
+
 onMounted(() => {
   bindEventListeners()
   setupPlayingView()
 })
 
 watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
+watch(gradientColorToolbarShow, setupGradientColorToolbarPos)
+watch(() => getCurrentTheme(), (nv) => {
+  const { appBackgroundScope: scope } = nv
+  Object.assign(appBackgroundScope, { ...scope })
+}, { deep: true, immediate: true })
 </script>
 
 <template>
   <div id="popovers">
-    <CommonContextMenu v-show="commonCtxMenuShow" :class="{ 'custom-theme-bg': true }" :posStyle="ctxMenuPosStyle"
-      :data="commonCtxMenuData">
+    <!-- 浮层(Component、View)-->
+    <transition name="fade-ex">
+      <PlaylistCategoryView id="playlist-category-view"
+        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        v-show="playlistCategoryViewShow">
+      </PlaylistCategoryView>
+    </transition>
+
+    <transition name="fade-ex">
+      <ArtistCategoryView id="artist-category-view"
+        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        v-show="artistCategoryViewShow">
+      </ArtistCategoryView>
+    </transition>
+
+    <transition name="fade-ex">
+      <RadioCategoryView id="radio-category-view"
+        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        v-show="radioCategoryViewShow">
+      </RadioCategoryView>
+    </transition>
+
+    <CommonContextMenu v-show="commonCtxMenuShow" :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
+      :posStyle="ctxMenuPosStyle" :data="commonCtxMenuData">
     </CommonContextMenu>
 
-    <AddToListSubmenu v-show="addToListSubmenuShow" :class="{ 'custom-theme-bg': true }" :posStyle="ctxSubmenuPosStyle">
+    <AddToListSubmenu v-show="addToListSubmenuShow" :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
+      :posStyle="ctxSubmenuPosStyle">
     </AddToListSubmenu>
 
-    <ArtistListSubmenu v-show="artistListSubmenuShow" :class="{ 'custom-theme-bg': true }" :posStyle="ctxSubmenuPosStyle">
+    <ArtistListSubmenu v-show="artistListSubmenuShow" :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
+      :posStyle="ctxSubmenuPosStyle">
     </ArtistListSubmenu>
 
     <!-- 通用通知 -->
     <transition>
-      <Notification class="common-ntf" v-show="commonNotificationShow">
+      <Notification class="common-ntf" :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
+        v-show="commonNotificationShow">
         <template #text>
           <svg v-show="commonNotificationType == 0" width="36" height="36" viewBox="0 0 938.64 938.69"
             xmlns="http://www.w3.org/2000/svg">
@@ -234,12 +310,14 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
 
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
-      <component id="playing-view" :class="{ 'custom-theme-bg': true }" v-show="playingViewShow" :is="currentPlayingView">
+      <component id="playing-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.playingView }"
+        v-show="playingViewShow" :is="currentPlayingView">
       </component>
     </transition>
 
     <transition name="fade-ex">
-      <PlaybackQueueView id="playback-queue-view" :class="{ 'custom-theme-bg': true }" v-show="playbackQueueViewShow">
+      <PlaybackQueueView id="playback-queue-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.playbackQueue }"
+        v-show="playbackQueueViewShow">
       </PlaybackQueueView>
     </transition>
 
@@ -249,23 +327,42 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
       </VideoPlayingView>
     </transition>
 
-    <SoundEffectView id="sound-effect-view" :class="{ 'custom-theme-bg': true }" v-show="soundEffectViewShow">
+    <SoundEffectView id="sound-effect-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.soundEffectView }"
+      v-show="soundEffectViewShow">
     </SoundEffectView>
 
-    <LyricToolbar id="lyric-toolbar" :class="{ 'custom-theme-bg': true }" v-show="lyricToolbarShow">
+    <LyricToolbar id="lyric-toolbar" :class="{ 'app-custom-theme-bg': appBackgroundScope.lyricToolbar }"
+      v-show="lyricToolbarShow">
     </LyricToolbar>
 
-    <RandomMusicToolbar id="random-music-toolbar" :class="{ 'custom-theme-bg': true }" v-show="randomMusicToolbarShow">
+    <RandomMusicToolbar id="random-music-toolbar"
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.randomMusicToolbar }" v-show="randomMusicToolbarShow">
     </RandomMusicToolbar>
 
     <CustomThemeEditView id="custom-theme-edit-view" v-show="customThemeEditViewShow">
     </CustomThemeEditView>
 
-    <ColorPickerToolbar id="color-picker-toolbar" v-show="colorPickerToolbarShow" />
+    <ColorPickerToolbar id="color-picker-toolbar" ref="colorPickerToolbarRef" v-show="colorPickerToolbarShow" />
+
+    <GradientColorToolbar id="gradient-color-toolbar" ref="gradientColorToolbarRef" v-show="gradientColorToolbarShow" />
   </div>
 </template>
 
 <style>
+#playlist-category-view,
+#artist-category-view,
+#radio-category-view {
+  position: fixed;
+  top: 85px;
+  right: 0px;
+  width: 404px;
+  width: 40.4%;
+  z-index: 55;
+  background-color: var(--app-bg-color);
+  background-image: var(--app-bg-image);
+  box-shadow: 0px 0px 10px #161616;
+}
+
 #playback-queue-view {
   position: absolute;
   top: 0;
@@ -275,11 +372,9 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
   width: 33.5%;
   height: 100%;
   z-index: 99;
-  /*background-color: var(--bg-color);
-  background-image: var(--app-bg);*/
-  box-shadow: var(--pbq-box-shadow);
-  border-top-right-radius: var(--macstyle-border-radius);
-  border-bottom-right-radius: var(--macstyle-border-radius);
+  box-shadow: var(--box-shadow);
+  border-top-right-radius: var(--border-macstyle-border-radius);
+  border-bottom-right-radius: var(--border-macstyle-border-radius);
 }
 
 #playing-view,
@@ -290,11 +385,9 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
   width: 100%;
   height: 100%;
   z-index: 99;
-  /*background-color: var(--bg-color);
-  background-image: var(--app-bg);*/
   background-position: center;
   background-size: cover;
-  border-radius: var(--macstyle-border-radius);
+  border-radius: var(--border-macstyle-border-radius);
 }
 
 #video-playing-view {
@@ -308,9 +401,7 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
   width: 725px;
   height: 550px;
   z-index: 99;
-  /*background-color: var(--bg-color);
-  background-image: var(--app-bg);*/
-  box-shadow: var(--pbq-box-shadow);
+  box-shadow: var(--box-shadow);
 }
 
 #lyric-toolbar {
@@ -318,9 +409,7 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
   top: 202px;
   right: 30px;
   z-index: 99;
-  /*background-color: var(--bg-color);
-  background-image: var(--app-bg);*/
-  box-shadow: var(--pbq-box-shadow);
+  box-shadow: var(--box-shadow);
 }
 
 #random-music-toolbar {
@@ -328,9 +417,7 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
   bottom: 128px;
   right: 30px;
   z-index: 99;
-  /*background-color: var(--bg-color);
-  background-image: var(--app-bg);*/
-  box-shadow: var(--pbq-box-shadow);
+  box-shadow: var(--box-shadow);
 }
 
 #custom-theme-edit-view {
@@ -340,16 +427,36 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
   width: 768px;
   height: 520px;
   z-index: 99;
-  background-color: var(--bg-color);
-  /*background-image: var(--app-bg);*/
-  box-shadow: var(--pbq-box-shadow);
+  background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
 }
 
 #color-picker-toolbar {
   position: absolute;
   left: 50%;
   bottom: 125px;
+  z-index: 101;
+  background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
+}
+
+#gradient-color-toolbar {
+  width: 768px;
+  height: 568px;
+  position: absolute;
+  left: 50%;
+  bottom: 125px;
   z-index: 100;
-  box-shadow: var(--pbq-box-shadow);
+  background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
+}
+
+.app-custom-theme-bg .ntf-dialog-mask {
+  background-color: var(--app-bg-color);
+  background-image: var(--app-bg-image);
+}
+
+#popovers .autolayout {
+  top: 60px;
 }
 </style>

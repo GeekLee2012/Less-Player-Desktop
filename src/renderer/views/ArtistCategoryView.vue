@@ -95,6 +95,7 @@ EventBus.on('artistCategory-resetScroll', () => {
     padding-bottom: 30px;
     flex: 1;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .artist-category-view .header,
@@ -107,27 +108,14 @@ EventBus.on('artistCategory-resetScroll', () => {
 .artist-category-view .header {
     padding: 15px 33px;
     border-bottom: 1px solid var(--border-color);
-    /*
-    border-bottom: var(--category-view-border);
-    background: var(--category-view-header-bg);
-    background: var(--content-bg-color2);
-    */
-    /*display: flex;
-    flex-direction: row;
-    align-items: center;*/
 }
 
 .artist-category-view .header .cate-title {
     /*font-size: 21px;*/
-    font-size: var(--text-main3-title-size);
+    font-size: var(--content-text-module-title2-size);
     font-weight: bold;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     flex: 1;
-    /*
-    background: var(--btn-bg);
-    -webkit-background-clip: text;
-    color: transparent;
-    */
 }
 
 .artist-category-view .header .action {
@@ -144,18 +132,18 @@ EventBus.on('artistCategory-resetScroll', () => {
     justify-items: center;
     cursor: pointer;
     margin-left: 20px;
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
 }
 
 .artist-category-view .text-btn svg {
     margin-right: 5px;
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .artist-category-view .text-btn:hover,
 .artist-category-view .text-btn:hover svg {
-    color: var(--hl-color);
-    fill: var(--hl-color);
+    color: var(--content-text-highlight-color);
+    fill: var(--content-highlight-color);
 }
 
 .artist-category-view .center {
@@ -179,7 +167,7 @@ EventBus.on('artistCategory-resetScroll', () => {
     -webkit-background-clip: text;
     color: transparent;
     */
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     min-width: 39px;
     margin-top: 15px;
     margin-right: 20px;
@@ -197,20 +185,20 @@ EventBus.on('artistCategory-resetScroll', () => {
     margin-right: 10px;
     float: left;
     cursor: pointer;
-    color: var(--text-color);
-    font-size: var(--text-sub-size);
+    color: var(--content-text-color);
+    font-size: var(--content-text-subtitle-size);
     border-radius: 10rem;
 }
 
 .artist-category-view .fl-item:hover {
-    background-color: var(--list-item-hover);
-    color: var(--text-color);
+    background-color: var(--content-list-item-hover-bg-color);
+    color: var(--content-text-color);
 }
 
 
 .artist-category-view .current {
     border-radius: 10rem;
-    background: var(--btn-bg) !important;
-    color: var(--svg-btn-color) !important;
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
 }
 </style>

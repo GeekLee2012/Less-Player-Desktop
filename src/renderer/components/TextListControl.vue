@@ -19,6 +19,8 @@ const props = defineProps({
     color: var(--text-sub-text);
     line-height: 30px;
     word-wrap: break-word;
+    /*white-space: pre-wrap;*/
+    line-break: anywhere;
     word-break: normal;
 }
 
@@ -36,7 +38,7 @@ const props = defineProps({
 }
 
 .textlist-ctl p {
-    font-size: var(--text-size);
+    font-size: var(--content-text-size);
     margin-bottom: 36px;
 }
 

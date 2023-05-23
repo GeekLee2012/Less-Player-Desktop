@@ -206,7 +206,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 .song-item:hover {
     border-radius: 3px;
-    background: var(--list-item-hover);
+    background: var(--content-list-item-hover-bg-color);
 }
 
 .song-item .hidden {
@@ -217,7 +217,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     line-height: 50px;
     line-height: 59px;
     vertical-align: middle;
-    /*font-size: var(--text-size);*/
+    /*font-size: var(--content-text-size);*/
 }
 
 .song-item .spacing {
@@ -247,7 +247,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 .song-item .artist span:hover,
 .song-item .album span:hover {
-    background: var(--hl-text-bg);
+    background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
     color: transparent;
 }
@@ -261,11 +261,11 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 .song-item .sqno svg {
     margin-bottom: -3px;
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .song-item .sqno .checked-svg {
-    fill: var(--hl-color) !important;
+    fill: var(--content-highlight-color) !important;
 }
 
 .song-item .title-wrap {
@@ -281,9 +281,9 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 /* .song-item .mv span, */
 .song-item .vipflag span {
-    color: var(--hl-color);
+    color: var(--content-text-highlight-color);
     border-radius: 3px;
-    border: 1.3px solid var(--hl-color);
+    border: 1.3px solid var(--content-text-highlight-color);
     padding: 1px 3px;
     font-size: 10px;
     font-weight: 600;
@@ -306,7 +306,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .song-item .mv svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
@@ -352,7 +352,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     padding-left: 10px;
     padding-right: 10px;
 
-    /* background: var(--list-item-hover); */
+    /* background: var(--content-list-item-hover-bg-color); */
     visibility: hidden;
 }
 
@@ -361,13 +361,13 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .song-item .action svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 .song-item .mv svg:hover,
 .song-item .action svg:hover {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .song-item .title-wrap:hover .action {

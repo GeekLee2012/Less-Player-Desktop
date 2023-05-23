@@ -60,7 +60,7 @@ const loadCategories = async () => {
         const vendor = currentVender()
         if (!vendor || !vendor.categories) return
         const result = await vendor.categories()
-        if (!result) return
+        if (!result || result.data.length < 1) return
         cachedCates = result.data
         cachedOrders = result.orders
         if (!cachedCates) return

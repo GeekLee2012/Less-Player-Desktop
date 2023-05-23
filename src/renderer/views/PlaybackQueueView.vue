@@ -29,7 +29,8 @@ const targetPlaying = () => {
 }
 
 const onQueueEmpty = () => {
-    showToast("播放列表已被清空！", () => {
+    if (queueTracksSize.value > 0) return
+    showToast("当前播放列表已清空~", () => {
         hidePlaybackQueueView()
         hidePlayingView()
     })
@@ -92,7 +93,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     <div class="playback-queue-view" @click.stop="hidePlaybackQueueItemCtxMenu" ref="pbqRef">
         <div class="container">
             <div class="header">
-                <div class="title">当前播放</div>
+                <div class="title content-text-highlight">当前播放</div>
                 <div class="detail">
                     <!--<div class="subtext">共{{ queueTracks.length }}首</div>-->
                     <div class="subtext" v-html="queueState()"></div>
@@ -161,6 +162,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     flex: 1;
     flex-direction: column;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .playback-queue-view .header {
@@ -172,12 +174,12 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     margin-top: 8px;
     margin-left: 3px;
     text-align: left;
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
     display: flex;
 }
 
 .playback-queue-view .subtext {
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
 }
 
 .playback-queue-view .action {
@@ -189,7 +191,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
 
 .playback-queue-view .text-btn {
     text-align: left;
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
     display: flex;
     align-items: center;
     justify-items: center;
@@ -199,15 +201,18 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
 
 .playback-queue-view .text-btn svg {
     margin-right: 3px;
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
 }
 
 .playback-queue-view .text-btn:hover {
-    color: var(--hl-color);
+    color: var(--content-highlight-color);
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    color: transparent;
 }
 
 .playback-queue-view .text-btn:hover svg {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 .playback-queue-view .more-btn {
@@ -217,7 +222,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
 }
 
 .playback-queue-view .more-btn:hover svg {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 /*
@@ -234,11 +239,9 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
 .playback-queue-view .header .title {
     text-align: left;
     /*font-size: 23px;*/
-    font-size: var(--text-main2-title-size);
+    font-size: var(--content-text-module-subtitle-size);
     font-weight: bold;
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
+
 }
 
 .playback-queue-view .center {

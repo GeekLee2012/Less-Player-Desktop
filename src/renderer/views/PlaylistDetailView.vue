@@ -207,7 +207,7 @@ EventBus.on("refresh-favorite", checkFavorite)
             </div>
         </div>
         <div class="center">
-            <div class="list-title">
+            <div class="list-title content-text-highlight">
                 <div class="size-text" v-show="!isLoading">列表({{ listSizeText }})</div>
                 <div class="loading-mask" v-show="isLoading"
                     style="text-align: left;width: 150px; height: 28px; display: inline-block;"></div>
@@ -248,7 +248,7 @@ EventBus.on("refresh-favorite", checkFavorite)
 
 #playlist-detail-view .header .title {
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
     margin-bottom: 3px;
 
@@ -265,14 +265,14 @@ EventBus.on("refresh-favorite", checkFavorite)
 #playlist-detail-view .header .about {
     height: 139px;
     /*line-height: 23px;*/
-    line-height: var(--text-line-height);
-    font-size: var(--text-sub-size);
-    color: var(--text-sub-color);
+    line-height: var(--content-text-line-height);
+    font-size: var(--content-text-subtitle-size);
+    color: var(--content-subtitle-text-color);
     /* font-size: 15px; */
     overflow: hidden;
     word-wrap: break-word;
-    white-space: pre-wrap;
-    line-break: anywhere;
+    /*white-space: pre-wrap;
+    line-break: anywhere;*/
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -300,9 +300,6 @@ EventBus.on("refresh-favorite", checkFavorite)
     text-align: left;
     font-size: 16px;
     font-weight: bold;
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
 }
 
 #playlist-detail-view .list-title .size-text {

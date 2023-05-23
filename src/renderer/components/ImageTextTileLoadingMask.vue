@@ -29,14 +29,14 @@ onMounted(() => {
 }
 
 .tiles-loading-mask .tile {
-    width: var(--image-text-tile-mask-width);
+    width: var(--others-image-text-tile-mask-width);
     height: 206px;
     margin: 15px 13px;
 }
 
 .tiles-loading-mask .tile .cover {
     width: 100%;
-    height: var(--image-text-tile-mask-width);
+    height: var(--others-image-text-tile-mask-width);
     border-radius: 6px;
 }
 

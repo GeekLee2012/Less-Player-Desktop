@@ -18,15 +18,15 @@ body,
 #app {
   background: transparent;
   height: 100%;
-  font-size: var(--text-size);
-  color: var(--text-color);
+  font-size: var(--content-text-size);
+  color: var(--content-text-color);
   overflow: hidden;
-  border-radius: var(--macstyle-border-radius);
+  border-radius: var(--border-macstyle-border-radius);
 }
 
 #app {
-  background-image: var(--app-bg);
-  background-color: var(--bg-color);
+  background-image: var(--app-bg-image);
+  background-color: var(--app-bg-color);
   background-position: center;
   background-size: cover;
   display: flex;

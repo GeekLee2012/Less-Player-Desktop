@@ -134,15 +134,14 @@ const toggleRadioMode = () => {
 }
 
 .classic-main-top svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
     -webkit-app-region: none;
     background-color: transparent;
 }
 
 .classic-main-top svg:hover {
-    fill: var(--hl-color);
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .classic-main-top #switch-layout-btn svg,

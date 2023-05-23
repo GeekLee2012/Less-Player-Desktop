@@ -360,7 +360,7 @@ watch(sources, () => {
 #data-backup-view .header .title {
     text-align: left;
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
     padding-bottom: 15px;
     margin-bottom: 15px;
@@ -383,12 +383,12 @@ watch(sources, () => {
 }
 
 #data-backup-view .action .checkallbox svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 #data-backup-view .action .checkallbox .checked-svg {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 #data-backup-view .action .checkallbox>span {

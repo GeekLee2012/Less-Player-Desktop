@@ -38,7 +38,7 @@ const visitAlbumDetail = (platform, id, callback) => {
 }
 
 .album-ctl-visitable:hover {
-    background: var(--hl-text-bg);
+    background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
     color: transparent;
 }

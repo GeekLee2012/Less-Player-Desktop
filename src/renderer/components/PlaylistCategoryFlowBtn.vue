@@ -74,7 +74,7 @@ defineExpose({
 
     border: 0.1px solid var(--border-color);
     box-shadow: 0px 0px 1px #161616;
-    background: var(--btn-bg);
+    background: var(--button-icon-text-btn-bg-color);
     border-radius: 6px;
     width: 36px;
     height: 36px;
@@ -86,15 +86,15 @@ defineExpose({
 }
 
 .playlist-categroy-flow-btn:hover {
-    background: var(--back2top-btn-bg);
+    background: var(--button-icon-text-btn-hover-bg-color);
 }
 
 .playlist-categroy-flow-btn svg {
-    fill: var(--back2top-btn-svg-color) !important;
+    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
 .playlist-categroy-flow-btn svg:hover {
-    fill: var(--back2top-btn-svg-color) !important;
+    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
 /*TODO */

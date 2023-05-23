@@ -128,7 +128,9 @@ const renderAndScrollLyric = (secs) => {
     //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
     const frequency = getStateRefreshFrequency()
     const duration = 300 * frequency / 60
-    smoothScroll(lyricWrap, destScrollTop, duration)
+    smoothScroll(lyricWrap, destScrollTop, duration, 5, () => {
+        return (isUserMouseWheel.value || isSeeking.value)
+    })
 }
 
 const safeRenderAndScrollLyric = (secs) => {
@@ -437,8 +439,9 @@ watch(() => props.track, (nv, ov) => {
                 :index="index" :class="{
                     first: index == 0,
                     last: index == (lyricData.size - 1),
+                    'content-text-highlight': index == currentIndex,
                     current: index == currentIndex,
-                    locatorCurrent: (index == scrollLocatorCurrentIndex && isUserMouseWheel)
+                    locatorCurrent: (index == scrollLocatorCurrentIndex && index != currentIndex && isUserMouseWheel)
                 }">
                 <div class="text" :time-key="key" :index="index" v-html="value"></div>
                 <div class="extra-text" v-show="isExtraTextActived"></div>
@@ -488,12 +491,12 @@ watch(() => props.track, (nv, ov) => {
 }
 
 .lyric-ctl .mv svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 .lyric-ctl .mv:hover svg {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
 }
 
 .lyric-ctl .audio-title {
@@ -504,7 +507,7 @@ watch(() => props.track, (nv, ov) => {
     -webkit-box-orient: vertical;
 
     font-size: 28px;
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
     margin-bottom: 6px;
 
@@ -515,7 +518,7 @@ watch(() => props.track, (nv, ov) => {
 .lyric-ctl .audio-album {
     /*font-size: 18px;*/
     font-weight: bold;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     display: flex;
 }
 
@@ -547,16 +550,12 @@ watch(() => props.track, (nv, ov) => {
     font-size: 22px;
     line-height: 28px;
     margin-top: 28px;
-    color: #ccc;
-    color: var(--text-lyric-color);
+    color: var(--content-subtitle-text-color);
     word-break: break-word;
     /*word-wrap: break-word;*/
 }
 
 .lyric-ctl .center .current {
-    background: var(--text-lyric-hl-color);
-    -webkit-background-clip: text;
-    color: transparent;
     font-size: 22px;
     font-weight: bold !important;
 }
@@ -572,11 +571,6 @@ watch(() => props.track, (nv, ov) => {
     margin-bottom: 366px !important;
 }
 
-.lyric-ctl .center .locatorCurrent,
-.lyric-ctl .center .locatorCurrent .text {
-    font-weight: bold !important;
-}
-
 .lyric-ctl .no-lyric {
     flex: 1;
     height: 100%;
@@ -586,6 +580,16 @@ watch(() => props.track, (nv, ov) => {
     font-size: 23px;
     font-weight: bold !important;
     color: var(--text-lyric-color);
+}
+
+.lyric-ctl .center .line .extra-text {
+    /*margin-top: 3px;*/
+    color: var(--content-subtitle-text-color) !important;
+}
+
+.lyric-ctl .center .current .extra-text {
+    /*margin-top: 3px;*/
+    color: var(--content-text-color) !important;
 }
 
 .lyric-ctl .scroll-locator {
@@ -598,6 +602,12 @@ watch(() => props.track, (nv, ov) => {
     justify-content: center;
 }
 
+.lyric-ctl .center .locatorCurrent,
+.lyric-ctl .center .locatorCurrent .text,
+.lyric-ctl .center .locatorCurrent .extra-text {
+    color: var(--content-text-color) !important;
+    font-weight: bold !important;
+}
 
 .lyric-ctl .scroll-locator .time-text {
     font-size: 13px;
@@ -612,7 +622,7 @@ watch(() => props.track, (nv, ov) => {
     height: 1px;
     margin-right: 10px;
     margin-bottom: 3px;
-    border-bottom: 1px dashed var(--hl-color);
+    border-bottom: 1px dashed var(--content-text-highlight-color);
 }
 */
 
@@ -621,7 +631,7 @@ watch(() => props.track, (nv, ov) => {
     border-radius: 10rem;
     width: 18px;
     height: 18px;
-    background: var(--btn-bg);
+    background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -630,18 +640,14 @@ watch(() => props.track, (nv, ov) => {
 }
 
 .lyric-ctl .scroll-locator .play-btn:hover {
-    background: var(--btn-hover-bg);
+    background: var(--button-icon-text-btn-hover-bg-color);
 }
 
 .lyric-ctl .scroll-locator .play-btn svg {
     margin-left: 1px;
-    fill: var(--svg-btn-color) !important;
+    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
-.lyric-ctl .center .line .extra-text {
-    /*margin-top: 3px;*/
-    color: var(--text-lyric-color) !important;
-}
 
 .lyric-ctl .extra-btn {
     position: fixed;
@@ -650,19 +656,21 @@ watch(() => props.track, (nv, ov) => {
 }
 
 .lyric-ctl .extra-btn span {
-    border: 1.25px solid var(--text-sub-color);
+    border: 1.25px solid var(--content-subtitle-text-color);
     border-radius: 3px;
     padding: 1px 2px;
-    font-size: var(--tip-text-size);
-    font-size: var(--text-size);
+    font-size: var(--content-text-tip-text-size);
+    font-size: var(--content-text-size);
     cursor: pointer;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     font-weight: bold;
 }
 
 .lyric-ctl .extra-btn .active,
 .lyric-ctl .extra-btn span:hover {
-    color: var(--hl-color);
-    border-color: var(--hl-color);
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    color: transparent;
+    border-color: var(--content-highlight-color);
 }
 </style>

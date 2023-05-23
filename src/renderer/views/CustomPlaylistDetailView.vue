@@ -118,7 +118,7 @@ const resetBack2TopBtn = () => {
 
 const removeAll = () => {
     removeAllTracksFromCustomPlaylist(props.id)
-    showToast("全部歌曲已被删除！")
+    showToast("全部歌曲已删除！")
 }
 
 onActivated(() => {
@@ -183,7 +183,7 @@ onUpdated(() => {
             </div>
         </div>
         <div class="center">
-            <div class="list-title">歌曲({{ detail.data.length }})</div>
+            <div class="list-title content-text-highlight">歌曲({{ detail.data.length }})</div>
             <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="4" :id="id">
             </SongListControl>
         </div>
@@ -220,15 +220,15 @@ onUpdated(() => {
 
 #custom-playlist-detail-view .header .title {
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
 
 #custom-playlist-detail-view .header .about {
     min-height: 99px;
     /*line-height: 21px;*/
-    line-height: var(--text-line-height);
-    color: var(--text-sub-color);
+    line-height: var(--content-text-line-height);
+    color: var(--content-subtitle-text-color);
     overflow: hidden;
     word-wrap: break-all;
     white-space: pre-wrap;
@@ -253,19 +253,19 @@ onUpdated(() => {
 }
 
 #custom-playlist-detail-view .edit svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 #custom-playlist-detail-view .edit svg:hover {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 #custom-playlist-detail-view .time {
     /*font-size: 13px;*/
-    font-size: var(--tip-text-size);
+    font-size: var(--content-text-tip-text-size);
     font-weight: 520;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     text-align: left;
 }
 
@@ -291,8 +291,5 @@ onUpdated(() => {
     text-align: left;
     font-size: 16px;
     font-weight: bold;
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
 }
 </style>

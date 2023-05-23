@@ -201,19 +201,19 @@ const clearAll = () => {
     store.$reset()
     EventBus.emit("userProfile-reset")
     visitTab(0)
-    showToast("全部数据已被清空！")
+    showToast("全部数据已清空！")
     //updateUser(nickname, about, cover)
     store.$patch({ user: { nickname, about, cover } })
 }
 
 const clearFavorites = () => {
     removeAllFavorites()
-    showToast("我的收藏已被清空！")
+    showToast("我的收藏已清空！")
 }
 
 const clearRecents = () => {
     removeAllRecents()
-    showToast("最近播放已被清空！")
+    showToast("最近播放已清空！")
 }
 
 const refresh = () => {
@@ -318,16 +318,17 @@ EventBus.on("userHome-refresh", refresh)
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" v-for="(tab, index) in tabs" :class="{ active: activeTab == index }"
+                <span class="tab" v-for="(tab, index) in tabs"
+                    :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
                     @click="visitTab(index)" v-html="tab.name">
                 </span>
-                <span class="tab-tip" v-html="tabTipText"></span>
+                <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
             <div class="sub-tab-nav" v-show="subTabShow">
-                <span class="sub-tab" v-for="(tab, index) in typeTabs" :class="{ active: activeSubTab == index }"
+                <span class="sub-tab" v-for="(tab, index) in typeTabs"
+                    :class="{ active: activeSubTab == index, 'content-text-highlight': activeSubTab == index }"
                     @click="visitSubTab(index)" v-html="tab.name">
                 </span>
-                <!--<span class="tab-tip" v-html="subTabTipText"></span>-->
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
                 :dataType="dataType">
@@ -372,18 +373,18 @@ EventBus.on("userHome-refresh", refresh)
 }
 
 #user-profile-view .header .titleWrap svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 #user-profile-view .header .titleWrap svg:hover {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 #user-profile-view .header .title {
     text-align: left;
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
     margin-left: 10px;
     overflow: hidden;
@@ -400,9 +401,9 @@ EventBus.on("userHome-refresh", refresh)
     text-align: left;
     min-height: 80px;
     margin-bottom: 15px;
-    line-height: var(--text-line-height);
-    font-size: var(--text-sub-size);
-    color: var(--text-sub-color);
+    line-height: var(--content-text-line-height);
+    font-size: var(--content-text-subtitle-size);
+    color: var(--content-subtitle-text-color);
     overflow: hidden;
     word-wrap: break-all;
     white-space: pre-wrap;
@@ -440,7 +441,7 @@ EventBus.on("userHome-refresh", refresh)
 }
 
 #user-profile-view .tab {
-    font-size: var(--tab-title-text-size);
+    font-size: var(--content-text-tab-title-size);
     padding-left: 10px;
     padding-right: 10px;
     margin-right: 15px;
@@ -451,17 +452,12 @@ EventBus.on("userHome-refresh", refresh)
 #user-profile-view .tab-tip {
     position: absolute;
     right: 10px;
-    /*font-size: var(--tab-title-text-size);
-    font-size: var(--text-sub-size);*/
-    font-weight: 520;
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
+    font-weight: bold;
 }
 
 #user-profile-view .tab-nav .active {
-    border-color: #28c83f;
-    border-color: var(--hl-color);
+    font-weight: bold;
+    border-color: var(--content-highlight-color);
 }
 
 #user-profile-view .sub-tab-nav {
@@ -474,7 +470,7 @@ EventBus.on("userHome-refresh", refresh)
 
 #user-profile-view .sub-tab {
     /*font-size: 14px;*/
-    font-size: var(--text-sub-size);
+    font-size: var(--content-text-subtitle-size);
     font-weight: 520;
     padding-left: 6px;
     padding-right: 6px;
@@ -483,18 +479,8 @@ EventBus.on("userHome-refresh", refresh)
 }
 
 #user-profile-view .sub-tab-nav .active {
-    color: var(--hl-color);
+    /*color: var(--content-highlight-color);*/
     font-weight: bold;
-}
-
-#user-profile-view .sub-tab-nav .tab-tip {
-    position: absolute;
-    right: 10px;
-    font-size: 14px;
-    font-weight: 520;
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
 }
 
 #user-profile-view .songlist {

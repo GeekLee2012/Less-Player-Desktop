@@ -77,7 +77,7 @@ onMounted(resetBack2TopBtn)
             </div>
         </div>
         <div class="center">
-            <div class="list-title">歌曲({{ localTracks.length }})</div>
+            <div class="list-title content-text-highlight">歌曲({{ localTracks.length }})</div>
             <!--
                     <div class="empty-tip" v-show="localTracks.length < 1"><p>爱丫丫，空空如也~<br>快来添加些歌曲吧~</p></div>
                     <div class="loading-tip" v-show="isLoading"><p>添加歌曲中，请稍候......</p></div>
@@ -125,7 +125,7 @@ onMounted(resetBack2TopBtn)
     margin-top: 5px;
     margin-bottom: 20px;
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
 
@@ -133,7 +133,7 @@ onMounted(resetBack2TopBtn)
     text-align: left;
     margin-bottom: 20px;
     line-height: 23px;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
 
     overflow: hidden;
     word-wrap: break-all;
@@ -158,9 +158,6 @@ onMounted(resetBack2TopBtn)
     text-align: left;
     font-size: 16px;
     font-weight: bold;
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
 }
 
 #local-music-view .empty-tip,
@@ -168,7 +165,7 @@ onMounted(resetBack2TopBtn)
     margin-top: 66px;
     font-size: 18px;
     line-height: 28px;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
 }
 
 #local-music-view .songlist {
@@ -179,7 +176,7 @@ onMounted(resetBack2TopBtn)
 #local-music-view .artist span,
 #local-music-view .album span {
     cursor: default;
-    color: var(--text-color) !important;
+    color: var(--content-text-color) !important;
 }
 
 #local-music-view .songlist .title:hover .delete-btn {

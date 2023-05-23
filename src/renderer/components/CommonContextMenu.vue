@@ -446,11 +446,9 @@ EventBus.on("commonCtxMenu-init", dataType => {
     /*flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--bg-color);
-    background-image: var(--app-bg);
     border-radius: 8px;
     border: 1px solid var(--border-color);*/
-    box-shadow: 0px 0px 6px var(--ctx-menu-border-color);
+    box-shadow: 0px 0px 6px var(--border-popovers-border-color);
     max-height: 386px;
     border-radius: 8px;
 }
@@ -463,6 +461,7 @@ EventBus.on("commonCtxMenu-init", dataType => {
     justify-content: center;
     border-radius: 8px;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .common-ctx-menu .padding {
@@ -479,19 +478,19 @@ EventBus.on("commonCtxMenu-init", dataType => {
     flex-direction: row;
     align-items: center;
     /* font-size: 14px; */
-    font-size: var(--text-sub-size);
+    font-size: var(--content-text-subtitle-size);
     padding: 9px 20px;
     height: 23px;
 }
 
 .common-ctx-menu .menuItem:hover {
-    background-color: var(--text-sub-color);
-    background: var(--btn-bg);
-    color: var(--svg-btn-color);
+    background-color: var(--content-subtitle-text-color);
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-icon-color);
 }
 
 .common-ctx-menu .menuItem:hover svg {
-    fill: var(--svg-btn-color);
+    fill: var(--button-icon-text-btn-icon-color);
 }
 
 .common-ctx-menu .menuItem>div {
@@ -502,7 +501,7 @@ EventBus.on("commonCtxMenu-init", dataType => {
 
 .common-ctx-menu .menuItem svg {
     margin-right: 15px;
-    fill: var(--text-color);
+    fill: var(--content-text-color);
 }
 
 .common-ctx-menu .menuItem span {

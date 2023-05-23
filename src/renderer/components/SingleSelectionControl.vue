@@ -36,7 +36,7 @@ const setCurrentIndex = (index) => {
     align-items: center;
     justify-content: center;
     flex: 1;
-    --item-border-color: 1px solid var(--input-border-color);
+    --item-border-color: 1px solid var(--border-inputs-border-color);
 }
 
 .single-selection-ctl .item {
@@ -49,8 +49,8 @@ const setCurrentIndex = (index) => {
     font-size: 13px;
     text-align: center;
     /*
-    background-color: var(--list-item-hover);
-    background-color: var(--toggle-btn-bg);
+    background-color: var(--content-list-item-hover-bg-color);
+    background-color: var(--button-toggle-btn-bg-color);
     */
 }
 
@@ -68,7 +68,7 @@ const setCurrentIndex = (index) => {
 }
 
 .single-selection-ctl .active {
-    background: var(--btn-bg) !important;
-    color: var(--svg-btn-color) !important;
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
 }
 </style>

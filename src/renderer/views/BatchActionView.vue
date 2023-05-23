@@ -43,6 +43,7 @@ const { showToast, updateCommonCtxItem, hideAllCtxMenus } = useAppCommonStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 const { getLocalSongs } = storeToRefs(useLocalMusicStore())
+const { removeItem } = useLocalMusicStore()
 
 const isFavorites = () => props.source == "favorites"
 const isRecents = () => props.source == "recents"
@@ -285,6 +286,7 @@ const removeChecked = () => {
         if (isFavorites()) deleteFn = removeFavoriteSong
         if (isRecents()) deleteFn = removeRecentSong
         if (isCustomPlaylist()) deleteFn = removeTrackFromCustomPlaylist
+        if (isLocalMusic()) deleteFn = removeItem
     } else if (activeTab.value == 1) {
         if (isFavorites()) deleteFn = removeFavoritePlaylist
         if (isRecents()) deleteFn = removeRecentPlaylist
@@ -302,6 +304,7 @@ const removeChecked = () => {
             const { id } = commonCtxItem.value
             checkedData.forEach(item => deleteFn(id, item))
         }
+        if (isLocalMusic()) checkedData.forEach(item => deleteFn(item))
         refresh()
     }
 }
@@ -347,10 +350,11 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                 </div>
             </div>
             <div class="tabs">
-                <span class="tab" v-for="(tab, index) in typeTabs" :class="{ active: activeTab == index }"
+                <span class="tab" v-for="(tab, index) in typeTabs"
+                    :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
                     @click="visitTab(index)" v-show="isTabsVisible(tab, index)" v-html="tab.name">
                 </span>
-                <span class="tab-tip" v-html="tabTipText"></span>
+                <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
         </div>
         <div class="center">
@@ -505,7 +509,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 #batch-action-view .header .title-wrap {
     text-align: left;
     /*font-size: 30px;*/
-    font-size: var(--text-main-title-size);
+    font-size: var(--content-text-module-title-size);
     font-weight: bold;
     position: relative;
 }
@@ -517,7 +521,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     text-align: right;
     margin-left: 25px;
     /*font-size: 23px;*/
-    font-size: var(--text-main2-title-size);
+    font-size: var(--content-text-module-subtitle-size);
     font-weight: bold;
 }
 
@@ -525,7 +529,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     font-size: 17px;
     font-weight: bold;
     margin-right: 25px;
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
 }
 
 #batch-action-view .header .tabs {
@@ -538,25 +542,21 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 }
 
 #batch-action-view .header .tab {
-    font-size: var(--tab-title-text-size);
+    font-size: var(--content-text-tab-title-size);
     padding: 8px 15px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
 
 #batch-action-view .header .active {
-    color: var(--hl-color);
     font-weight: bold;
-    border-bottom: 3px solid var(--hl-color);
+    border-bottom: 3px solid var(--content-highlight-color);
 }
 
 #batch-action-view .header .tab-tip {
     position: absolute;
     right: 10px;
-    font-size: var(--text-size);
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
+    font-weight: bold;
 }
 
 #batch-action-view .center {
@@ -572,7 +572,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 }
 
 #batch-action-view .action svg {
-    fill: var(--svg-text-color);
+    fill: var(--button-icon-text-btn-text-color);
 }
 
 #batch-action-view .action .to-right {
@@ -589,12 +589,12 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 }
 
 #batch-action-view .action .checkbox svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 #batch-action-view .action .checkbox .checked-svg {
-    fill: var(--hl-color);
+    fill: var(--content-highlight-color);
 }
 
 #batch-action-view .action .checkbox>span {

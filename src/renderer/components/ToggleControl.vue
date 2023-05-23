@@ -16,15 +16,19 @@ const active = toRef(props, 'value')
 
 <style>
 .toggle-ctl {
+    /*
+    --button-toggle-btn-bg-color: var(--content-secondary-text-color);
+    --button-toggle-btn-thumb-color: var(--button-icon-text-btn-text-color);
+    */
     width: 40px;
     height: 20px;
     border-radius: 10rem;
-    border: 1px solid var(--toggle-btn-border-color);
+    border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     justify-content: center;
     cursor: pointer;
-    background: var(--toggle-btn-bg);
+    background: var(--button-toggle-btn-bg-color);
 }
 
 .toggle-ctl .thumb {
@@ -32,15 +36,15 @@ const active = toRef(props, 'value')
     width: 16px;
     height: 16px;
     border-radius: 10rem;
-    background: var(--toggle-thumb-bg);
+    background: var(--button-toggle-btn-thumb-color);
 }
 
 .toggle-ctl-active {
-    background: var(--toggle-btn-active-bg);
+    background: var(--button-icon-text-btn-bg-color);
     align-items: flex-end;
 }
 
 .toggle-ctl-active .thumb {
-    background: var(--toggle-active-thumb-bg) !important;
+    background: var(--button-icon-text-btn-text-color) !important;
 }
 </style>

@@ -72,7 +72,7 @@ const clear = () => {
     border-radius: 10rem 0 0 10rem;
     border-right: 0px;
     width: 28px;
-    background: var(--search-btn-bg);
+    background: var(--searchbar-search-btn-bg-color);
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -81,7 +81,7 @@ const clear = () => {
 }
 
 .search-bar .search-btn:hover {
-    background: var(--search-btn-hover-bg);
+    background: var(--searchbar-search-btn-hover-bg-color);
 }
 
 .search-bar .search-btn svg {
@@ -90,22 +90,22 @@ const clear = () => {
     */
     margin-top: 1px;
     margin-left: 5px;
-    fill: var(--search-btn-svg-color);
+    fill: var(--searchbar-search-btn-icon-color);
 }
 
 .search-bar .search-btn:hover svg {
-    fill: var(--search-btn-hover-svg-color);
+    fill: var(--searchbar-search-btn-hover-icon-color);
 }
 
 .search-bar .keyword {
-    font-size: var(--text-size);
+    font-size: var(--content-text-size);
     padding-left: 5px;
     padding-right: 6px;
     outline: 0;
     width: 123px;
     border-left: 0px;
     border-right: 0px;
-    background: var(--searchbar-bg);
+    background: var(--searchbar-bg-color);
     color: var(--searchbar-text-color);
 }
 
@@ -113,13 +113,13 @@ const clear = () => {
     border-radius: 0 10rem 10rem 0;
     width: 22px;
     border-left: 0px;
-    background: var(--searchbar-bg);
+    background: var(--searchbar-bg-color);
 }
 
 .search-bar .clear-btn svg {
     margin-top: 11.25px;
     margin-right: 6px;
-    fill: #666;
+    fill: var(--searchbar-clear-btn-icon-color);
     visibility: visible;
     cursor: pointer;
 }

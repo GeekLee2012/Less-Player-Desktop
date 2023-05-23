@@ -813,7 +813,7 @@ watch([textColorIndex], setupTextColor)
                         <div class="platform">
                             <span v-html="platformShortName"></span>
                         </div>
-                        <span class="cate-name" v-html="currentMusicCategoryName"></span>
+                        <span class="cate-name content-text-highlight" v-html="currentMusicCategoryName"></span>
                     </div>
                 </div>
                 <div class="flex-space">
@@ -849,7 +849,8 @@ watch([textColorIndex], setupTextColor)
                             </g>
                         </svg>
                     </span>
-                    <span class="lyric-btn spacing" :class="{ 'lyric-show': isLyricShow }" @click="toggleLyric">
+                    <span class="lyric-btn spacing"
+                        :class="{ 'lyric-show': isLyricShow, 'content-text-highlight': isLyricShow }" @click="toggleLyric">
                         词
                     </span>
                     <span class="text-color-btn spacing" :class="{ 'text-color-black': textColorIndex == 1 }"
@@ -954,8 +955,11 @@ watch([textColorIndex], setupTextColor)
                 </div>
             </div>
             <div class="lyric-ctl" v-show="isLyricShow">
-                <div class="line" :class="{ 'current-line': (hlLineIndex == 0) }" v-html="line1Text"></div>
-                <div class="line v-spacing" :class="{ 'current-line': (hlLineIndex == 1) }" v-html="line2Text"></div>
+                <div class="line" :class="{ 'current-line': hlLineIndex == 0, 'content-text-highlight': hlLineIndex == 0 }"
+                    v-html="line1Text"></div>
+                <div class="line v-spacing"
+                    :class="{ 'current-line': hlLineIndex == 1, 'content-text-highlight': hlLineIndex == 1 }"
+                    v-html="line2Text"></div>
             </div>
         </div>
         <Popovers></Popovers>
@@ -987,13 +991,13 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout svg {
-    fill: var(--svg-color);
+    fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
 .simple-layout svg:hover,
 .simple-layout .active svg {
-    fill: var(--svg-hover-color);
+    fill: var(--content-highlight-color);
     cursor: pointer;
 }
 
@@ -1027,7 +1031,7 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout>.center .top:hover {
-    background-color: var(--bg-color);
+    background-color: var(--app-bg-color);
     opacity: 0.85;
 }
 
@@ -1061,22 +1065,15 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout>.center .top .left .extra .platform span {
-    color: var(--hl-color);
-    border-radius: 3px;
-    border: 1.3px solid var(--hl-color);
-    padding: 1px 3px;
-    font-size: 10px;
-    font-weight: 600;
-    margin-right: 8px;
+    color: var(--content-text-highlight-color);
+    font-size: var(--content-text-tip-text-size);
+    font-weight: bold;
+    text-align: center;
 }
 
 .simple-layout>.center .top .left .extra .cate-name {
     padding: 1px;
     font-weight: bold;
-    /* font-size: var(--text-sub-size); */
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
 
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1113,8 +1110,8 @@ watch([textColorIndex], setupTextColor)
 
 .simple-layout .listen-btn .play-btn:hover svg,
 .simple-layout .listen-btn .play-btn:hover .text {
-    color: var(--hl-color);
-    fill: var(--svg-hover-color);
+    color: var(--content-text-highlight-color);
+    fill: var(--content-highlight-color);
 }
 
 .simple-layout>.center .top .action {
@@ -1133,7 +1130,7 @@ watch([textColorIndex], setupTextColor)
     border-radius: 3px;
     display: inline-block;
     cursor: pointer;
-    border: 2px solid var(--svg-color);
+    border: 2px solid var(--button-icon-btn-color);
     text-align: center;
     vertical-align: middle;
     font-size: 11px;
@@ -1142,19 +1139,18 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout>.center .top .action .lyric-show {
-    border: 2px solid var(--svg-hover-color);
-    color: var(--hl-color);
+    border: 2px solid var(--content-highlight-color);
 }
 
 .simple-layout>.center .top .action .text-color-btn {
     background: #000;
-    background: var(--svg-color);
+    background: var(--button-icon-btn-color);
     width: 15px;
     height: 11px;
     border-radius: 3px;
     display: inline-block;
     cursor: pointer;
-    border: 2px solid var(--svg-color);
+    border: 2px solid var(--button-icon-btn-color);
     text-align: center;
     vertical-align: middle;
     font-size: 12px;
@@ -1332,7 +1328,7 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout>.bottom .action .love-btn {
-    fill: var(--svg-hover-color) !important;
+    fill: var(--content-text-highlight-color) !important;
 }
 
 .simple-layout>.bottom .lyric-ctl {
@@ -1358,9 +1354,6 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout>.bottom .lyric-ctl .current-line {
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
     font-size: 21px;
     font-weight: bold;
 }

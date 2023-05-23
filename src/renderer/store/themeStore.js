@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia';
 import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from '../../common/Utils';
+import { useIpcRenderer, randomTextWithinAlphabetNums } from '../../common/Utils';
+import { Theme } from '../../common/Theme';
+import { presetThemes, presetCustomThemes } from './themes.json';
 
 
 
 const ipcRenderer = useIpcRenderer()
 
+/*
 const PRESET_THEMES = [{
     id: 'dark',
     name: '默认1',
@@ -78,13 +81,7 @@ const PRESET_THEMES = [{
     color: '#a8c5cb',
     hlColor: '#273b42',
     dark: false
-},/*{
-    id: 'blue3',
-    name: '蓝色3',
-    color: '#293581',
-    hlColor: '#293581',
-    dark: false
-}, */ {
+}, {
     id: 'yellow',
     name: '黄色1',
     color: '#ffb300',
@@ -108,13 +105,8 @@ const PRESET_THEMES = [{
     color: '#4d3e72',
     hlColor: '#e5bc8c',
     dark: true
-}, /*{
-    id: 'purple3',
-    name: '紫色3',
-    color: '#5f3d70',
-    hlColor: '#5f3d70',
-    dark: true
-} */]
+}]
+*/
 
 export const useThemeStore = defineStore('themes', {
     state: () => ({
@@ -126,11 +118,40 @@ export const useThemeStore = defineStore('themes', {
     actions: {
         getTheme(type, index) {
             index = index > 0 ? index : 0
-            const allThemes = [PRESET_THEMES, this.customThemes]
+            const allThemes = [presetThemes, this.customThemes]
             return allThemes[type][index]
         },
         getPresetThemes() {
-            return PRESET_THEMES
+            return presetThemes
+        },
+        getCustomThemes() {
+            const demoTheme = presetCustomThemes[0]
+            let index = this.customThemes.findIndex(item => (item.id == demoTheme.id))
+            index = Math.max(0, index)
+            this.customThemes.splice(index, 1, demoTheme)
+            return this.customThemes
+        },
+        saveCustomTheme(theme) {
+            if (!theme) return
+            let index = -1
+            if (theme.id) {
+                if (theme.id === 'CUSTDEMO') return
+                index = this.customThemes.findIndex(item => item.id == theme.id)
+            }
+            const now = Date.now()
+            if (index < 0) {
+                const id = randomTextWithinAlphabetNums(8)
+                Object.assign(theme, { id, created: now, updated: now })
+                this.customThemes.push(theme)
+            } else {
+                const _theme = this.customThemes[index]
+                Object.assign(_theme, { ...theme, updated: now })
+            }
+        },
+        removeCustomTheme({ id }) {
+            if (id === 'CUSTDEMO') return
+            const index = this.customThemes.findIndex(item => item.id === id)
+            if (index > -1) this.customThemes.splice(index, 1)
         }
     },
     persist: {

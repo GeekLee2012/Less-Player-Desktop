@@ -77,14 +77,14 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
         <div class="container">
             <div class="header">
                 <div class="cate-title">全部分类</div>
-                <div class="fl-item current" v-html="currentCategoryItem.data.key"></div>
+                <div class="fl-item content-text-highlight" v-html="currentCategoryItem.data.key"></div>
             </div>
             <div class="center">
                 <div class="fl-row" v-show="orders && orders.length > 0">
                     <div class="cate-title">排序</div>
                     <div class="cate-item-wrap">
                         <div v-for="(item, index) in orders" class="fl-item"
-                            :class="{ current: (currentOrder.index == index) }" @click="visitByOrder(item, index)"
+                            :class="{ current: currentOrder.index == index }" @click="visitByOrder(item, index)"
                             v-html="item.key">
                         </div>
                     </div>
@@ -119,6 +119,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     padding-bottom: 30px;
     flex: 1;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .playlist-category-view .header,
@@ -134,9 +135,6 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     padding-left: 33px;
     padding-right: 33px;
     border-bottom: 1px solid var(--border-color);
-    /* border-bottom: 0.5px solid var(--category-view-border); */
-    /*background: var(--category-view-header-bg);
-    background: var(--content-bg-color2);*/
 }
 
 .playlist-category-view .header .cate-title {
@@ -148,11 +146,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 .playlist-category-view .header .fl-item,
 .playlist-category-view .header .fl-item:hover {
     cursor: default;
-    /* font-size: 18px; */
-    background: var(--hl-text-bg);
-    -webkit-background-clip: text;
-    color: transparent;
-    font-size: var(--text-size);
+    font-size: var(--content-text-size);
     margin-right: 0px;
     /*
     padding-top: 8px;
@@ -188,7 +182,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     -webkit-background-clip: text;
     color: transparent;
     */
-    color: var(--text-sub-color);
+    color: var(--content-subtitle-text-color);
     min-width: 39px;
     margin-top: 15px;
     margin-right: 20px;
@@ -197,7 +191,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 .playlist-category-view .header .cate-title {
     /*font-size: 21px;*/
     margin-bottom: 3px;
-    font-size: var(--text-main3-title-size);
+    font-size: var(--content-text-module-title2-size);
 }
 
 .playlist-category-view .fl-item {
@@ -207,14 +201,14 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     margin-top: 10px;
     margin-right: 10px;
     cursor: pointer;
-    color: var(--text-color);
+    color: var(--content-text-color);
     border-radius: 10rem;
-    font-size: var(--text-sub-size);
+    font-size: var(--content-text-subtitle-size);
 }
 
 .playlist-category-view .fl-item:hover {
-    background-color: var(--list-item-hover);
-    color: var(--text-color);
+    background-color: var(--content-list-item-hover-bg-color);
+    color: var(--content-text-color);
 }
 
 .playlist-category-view .header .current {
@@ -224,7 +218,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 
 .playlist-category-view .center .current {
     border-radius: 10rem;
-    background: var(--btn-bg) !important;
-    color: var(--svg-btn-color) !important;
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
 }
 </style>

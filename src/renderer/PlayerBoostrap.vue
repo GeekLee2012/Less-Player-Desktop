@@ -42,7 +42,7 @@ const { addRecentSong, addRecentRadio,
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
     theme, layout, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable } = storeToRefs(useSettingStore())
-const { getCurrentThemeHlColor, setupStateRefreshFrequency,
+const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray } = useSettingStore()
 
 
@@ -336,7 +336,8 @@ const playAlbum = (album, text) => {
 /* 频谱 */
 let cachedSpectrumFreqData = null, spectrumColor = null, stroke = null
 const drawSpectrum = (canvas, freqData, alignment) => {
-    spectrumColor = getCurrentThemeHlColor()
+    //TODO
+    spectrumColor = getCurrentThemeHighlightColor()
     stroke = spectrumColor
 
     const dataLen = freqData.length
@@ -376,7 +377,7 @@ const drawSpectrum = (canvas, freqData, alignment) => {
 }
 
 const drawGridSpectrum = (canvas, freqData, alignment) => {
-    spectrumColor = getCurrentThemeHlColor()
+    spectrumColor = getCurrentThemeHighlightColor()
     stroke = spectrumColor
     const WIDTH = canvas.width, HEIGHT = canvas.height
     const canvasCtx = canvas.getContext("2d")
