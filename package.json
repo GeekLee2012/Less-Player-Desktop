@@ -29,7 +29,8 @@
     "dist:mac-release": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && cross-env PACK_HISTORY=keep electron-builder --mac --arm64",
     "dist:win-release": "cross-env NODE_ENV=prod vite build && electron-builder --win --x64 && cross-env PACK_HISTORY=keep electron-builder --win --arm64 && cross-env PACK_HISTORY=keep electron-builder --win --ia32",
     "dist:linux-release": "cross-env NODE_ENV=prod vite build && electron-builder --linux --x64 && cross-env PACK_HISTORY=keep electron-builder --linux --arm64",
-    "dist:release": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && cross-env PACK_HISTORY=keep electron-builder --win --x64 && cross-env PACK_HISTORY=keep electron-builder --linux --x64 &&cross-env PACK_HISTORY=keep electron-builder --mac --arm64 && cross-env PACK_HISTORY=keep electron-builder --win --arm64 && cross-env PACK_HISTORY=keep electron-builder --linux --arm64 && cross-env PACK_HISTORY=keep electron-builder --win --ia32"
+    "dist:release": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && cross-env PACK_HISTORY=keep electron-builder --win --x64 && cross-env PACK_HISTORY=keep electron-builder --linux --x64 &&cross-env PACK_HISTORY=keep electron-builder --mac --arm64 && cross-env PACK_HISTORY=keep electron-builder --win --arm64 && cross-env PACK_HISTORY=keep electron-builder --linux --arm64 && cross-env PACK_HISTORY=keep electron-builder --win --ia32",
+    "dist:mini-release": "cross-env NODE_ENV=prod vite build && electron-builder --mac --x64 && cross-env PACK_HISTORY=keep electron-builder --mac --arm64 && cross-env PACK_HISTORY=keep electron-builder --win --x64"
   },
   "dependencies": {
     "axios": "^0.26.1",
