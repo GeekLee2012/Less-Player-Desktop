@@ -48,7 +48,6 @@ export class Player {
             .on('track-stateRefreshFrequency', value => player.stateRefreshFrequency = value)
             .on('track-spectrumRefreshFrequency', value => player.spectrumRefreshFrequency = value)
             .on('track-markSeekPending', value => player.seekPendingMark = value)
-        //.on('track-resetAnimFrameCnt', () => player.animationFrameCnt = 0)
     }
 
     _isTrackAvailable() {
@@ -203,11 +202,8 @@ export class Player {
     }
 
     _notifyError(isRetry) {
-        this.notify('track-error', {
-            retry: isRetry,
-            track: this.currentTrack,
-            currentTime: this.currentTime
-        })
+        const { currentTrack: track, currentTime } = this
+        this.notify('track-error', { retry: isRetry, track, currentTime })
     }
 
     _retryPlay(maxRetry) {
@@ -216,19 +212,19 @@ export class Player {
     }
 
     _createWebAudioApi() {
-        if (this.webAudioApi) return
+        if (this.webAudioApi) return this.webAudioApi
         const audioCtx = Howler.ctx
-        if (!audioCtx) return
+        if (!audioCtx) return null
         const audioNode = this.sound._sounds[0]._node
-        if (!audioNode) return
+        if (!audioNode) return null
         this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
+        return this.webAudioApi
     }
 
     _resolveSound() {
-        this._createWebAudioApi()
-        if (!this.webAudioApi) return
+        if (!this._createWebAudioApi()) return
         this._resolvePendingSoundEffect()
-        const analyser = this.webAudioApi.getAnalyser()
+        const { analyser } = this.webAudioApi
         if (!analyser) return
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)

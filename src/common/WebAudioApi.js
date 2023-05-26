@@ -68,10 +68,6 @@ export class WebAudioApi {
         return this
     }
 
-    getAnalyser() {
-        return this.analyser
-    }
-
     createBiquadFilters() {
         const audioCtx = this.audioCtx
         if (!audioCtx) return []

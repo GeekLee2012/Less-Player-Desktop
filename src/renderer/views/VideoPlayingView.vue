@@ -128,7 +128,7 @@ onActivated(() => {
 .video-playing-view .header svg:hover,
 .video-playing-view .collapse-btn:hover,
 .video-playing-view .collapse-btn:hover svg {
-    fill: var(--content-text-highlight-color) !important;
+    fill: var(--content-highlight-color) !important;
     cursor: pointer;
 }
 

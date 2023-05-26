@@ -8,7 +8,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 
 
 const { getPresetThemes, getCustomThemes, removeCustomTheme } = useThemeStore()
-const { showCustomThemeEditView, hideCustomThemeEditView } = useAppCommonStore()
+const { showCustomThemeEditView, hideCustomThemeEditView, showToast } = useAppCommonStore()
 const { theme: themeSetting } = storeToRefs(useSettingStore())
 const { setThemeIndex } = useSettingStore()
 
@@ -27,6 +27,7 @@ const removeTheme = (item, index) => {
     if (index === currentIndex) {
         setThemeIndex(1, 0)
     }
+    showToast('主题已删除！')
 }
 
 const customThemeItemPreviewStyle = (item) => {
@@ -43,7 +44,8 @@ const customThemeItemPreviewStyle = (item) => {
     return {
         'background-color': bgColor,
         'background-image': themeBgImage,
-        'background-size': 'cover'
+        'background-size': 'cover',
+        'background-position': 'center'
     }
 }
 

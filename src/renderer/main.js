@@ -61,6 +61,7 @@ app.use(pinia)
     }
   })
   //Components
+  //自定义
   .component('SliderBar', SliderBar)
   .component('ProgressBar', ProgressBar)
   .component('VolumeBar', VolumeBar)

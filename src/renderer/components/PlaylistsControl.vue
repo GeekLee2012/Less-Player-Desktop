@@ -42,6 +42,10 @@ const visitItem = (item) => {
     }
 }
 
+const getSubtitle = (item) => {
+    return getListenNumText(item) || item.subtitle
+}
+
 const getListenNumText = (item) => {
     if (!isListenNumShow.value) return null
     let num = item.listenNum
@@ -56,7 +60,7 @@ const getListenNumText = (item) => {
     <div class="playlists-ctl">
         <PaginationTiles v-show="!loading">
             <ImageTextTile v-for="item in data" @click="visitItem(item)" :cover="item.cover" :title="item.title"
-                :subtitle="getListenNumText(item)" :playable="true" :playAction="() => playPlaylist(item)"
+                :subtitle="getSubtitle(item)" :color="item.color" :playable="true" :playAction="() => playPlaylist(item)"
                 :checkbox="checkbox" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>

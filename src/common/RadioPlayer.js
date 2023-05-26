@@ -137,7 +137,7 @@ export class RadioPlayer {
     _resolveSound() {
         if (!this.webAudioApi) return
         this._resolvePendingSoundEffect()
-        const analyser = this.webAudioApi.getAnalyser()
+        const { analyser } = this.webAudioApi
         if (!analyser) return
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)

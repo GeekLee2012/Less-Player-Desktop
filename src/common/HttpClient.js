@@ -62,3 +62,32 @@ export const postRaw = (url, data, config) => {
 export const postJson = (url, data, config) => {
     return __post(url, data, config, resp => JSON.parse(resp.data))
 }
+
+//获取国内IPv4
+export const getInternalIpv4 = () => {
+    return new Promise(async (resolve, reject) => {
+        let ipv4 = '128.108.208.188'
+        const urls = ['https://ip233.cn/',
+            'https://zh-hans.ipshu.com/',
+            'https://bajiu.cn/ip/',
+            'https://iplocation.com/'
+        ]
+        const rules = ['.container #internal-ip',
+            '.local_info .row .col p a',
+            '.cx div span',
+            '.rubber-container .result-table .ip'
+        ]
+        for (var i = 0; i < urls.length; i++) {
+            const doc = await getDoc(urls[i])
+            const el = doc.querySelector(rules[i])
+            if (!el) continue
+
+            const ipText = (el.textContent || '').trim()
+            if (ipText.length >= 7) { //简单校验一下即可
+                ipv4 = ipText
+                break
+            }
+        }
+        resolve(ipv4)
+    })
+}

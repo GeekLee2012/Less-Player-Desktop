@@ -8,6 +8,7 @@ const props = defineProps({
     cover: String,
     title: String,
     subtitle: String,
+    color: String,
     playable: Boolean,
     playAction: Function,
     checkbox: Boolean,
@@ -45,8 +46,9 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 <template>
     <div class="image-text-tile" @click="toggleCheck">
         <div class="cover-wrap">
-            <img class="cover" v-lazy="cover" />
-            <div class="cover-mask" :class="{ selectable: checkbox }">
+            <img class="cover" v-lazy="cover" v-show="!color" />
+            <div class="cover" v-show="color" :style="{ background: color }"></div>
+            <div class=" cover-mask" :class="{ selectable: checkbox }">
                 <div class="play-btn" v-show="playable && !checkbox" @click.stop="playAction">
                     <svg width="21" height="21" viewBox="0 0 139 139" xml:space="preserve"
                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -98,7 +100,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     line-height: var(--others-image-text-tile-cover-size);
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0px 0px 3px #161616;
+    box-shadow: 0px 0px 3px var(--border-popovers-border-color);
+    box-shadow: 0px 0px 3px #181818;
     background-color: var(--content-text-color);
 }
 
@@ -132,8 +135,9 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     text-align: left;
     line-height: 25px;
     color: #989898;
-    font-size: 13px;
-    font-weight: 520;
+    color: var(--content-secondary-text-color);
+    font-size: var(--content-text-tip-text-size);
+    font-weight: bold;
 
     overflow: hidden;
     text-overflow: ellipsis;

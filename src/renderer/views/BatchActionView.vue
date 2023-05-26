@@ -306,6 +306,7 @@ const removeChecked = () => {
         }
         if (isLocalMusic()) checkedData.forEach(item => deleteFn(item))
         refresh()
+        showToast("删除操作成功!")
     }
 }
 

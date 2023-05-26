@@ -52,15 +52,12 @@ const setLyricExistState = (value) => lyricExistState.value = value
 const isLyricReady = () => lyricExistState.value == 1
 
 
-let nextLineMillis = -1
 const renderAndScrollLyric = (secs) => {
     if (!isLyricReady()) return
     if (isSeeking.value) return
 
     const userOffset = lyric.value.offset
     const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
-    //时机未到，就不要耗资源了，CPU省点用
-    //if (trackTime < nextLineMillis) return
 
     //Highlight
     const lyricWrap = document.querySelector(".lyric-ctl .center")
@@ -80,11 +77,6 @@ const renderAndScrollLyric = (secs) => {
 
     nextTick(setupLyricLines)
 
-    //有点用的缓存，但不多，也能接受；目前有点副作用
-    /*
-    const nextLine = lines[index + 1]
-    nextLineMillis = nextLine ? toMillis(nextLine.getAttribute('time-key')) : Number.MAX_VALUE
-    */
 
     if (index >= 0) {
         setLyricCurrentIndex(index)
@@ -122,6 +114,7 @@ const renderAndScrollLyric = (secs) => {
     ////算法3：播放页垂直居中，依赖offsetParent定位；与算法2相似，只是参考系不同而已 ////
     //基本保证：准确定位，当前高亮行在播放页垂直居中，且基本与ScrollLocator平行
     //绝对意义上来说，并不垂直居中，也并不平行，因为歌词行自身有一定高度
+    if (!lines[index].offsetTop) return
     const { offsetTop } = lyricWrap
     const { clientHeight } = document.documentElement
     const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
@@ -153,7 +146,6 @@ const resetDefaultLyricScrollTop = () => {
 const resetLyricState = (track, state) => {
     state = state >= -1 ? state : -1
     //重置状态
-    nextLineMillis = -1
     //setLyricExist(isExist)
     setLyricExistState(state)
     setLyricData(Track.lyricData(track))

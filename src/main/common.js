@@ -2,10 +2,12 @@ const { opendirSync, readFileSync, statSync, writeFileSync } = require('fs');
 const { opendir, rmdir, rm } = require('fs/promises');
 const { homedir } = require('os');
 const path = require('path');
-const mm = require('music-metadata');
 const jschardet = require('jschardet');
 const iconv = require('iconv-lite');
 const CryptoJS = require('crypto-js');
+const mm = require('music-metadata');
+
+
 
 const FILE_PREFIX = 'file:///'
 

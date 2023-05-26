@@ -140,7 +140,7 @@ playlistPlatforms.splice(5, radioCount)
 const artistPlatforms = ALL_PLATFORMS.slice(1, 5)
 const radioPlatforms = [ALL_PLATFORMS[2], ALL_PLATFORMS[6], ALL_PLATFORMS[7], ALL_PLATFORMS[8]]
 const userhomePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length - 1)
-const searchScopePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length - (radioCount + 1))
+const searchScopePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length - (radioCount + 2))
 const randomMusicScopePlatforms = ALL_PLATFORMS.slice(1, ALL_PLATFORMS.length - 1)
 
 const vendors = {

@@ -348,7 +348,7 @@ const createMainWindow = () => {
     }
   })
   if (isDevEnv) {
-    mainWindow.loadURL("http://localhost:3000/")
+    mainWindow.loadURL("http://localhost:5173/")
     // Open the DevTools.
     mainWindow.webContents.openDevTools()
   } else {
@@ -638,6 +638,9 @@ const overrideRequest = (details) => {
     origin = "https://music.163.com/"
     referer = origin
     //if(url.includes("/dj/program/listen")) referer = null
+  } else if (url.includes("u6.kuwo.cn")) {
+    userAgent = 'fm 7010001}(android 7.1.2)'
+    cookie = ''
   } else if (url.includes("kuwo")) {
     csrf = randomTextWithinAlphabetNums(11).toUpperCase()
     origin = "https://www.kuwo.cn/"

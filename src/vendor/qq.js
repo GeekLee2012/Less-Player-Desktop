@@ -179,7 +179,7 @@ const searchParam = (keyword, type, offset, limit, page) => {
         n: limit,
         p: page,
         w: keyword,
-        cr: 1,      //未知参数，但是加上此参数搜索结果更令人满意
+        cr: 1,
         g_tk: 5381,
         t: type
     }
@@ -946,7 +946,7 @@ export class QQ {
             const url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
             const reqBody = artistAlbumReqBody(id, offset, limit)
             getJson(url, reqBody).then(json => {
-                const result = { id, offset, limit, page, data: [] }
+                const result = { id, platform: QQ.CODE, offset, limit, page, data: [] }
                 const albumList = json.req_1.data.list
                 albumList.forEach(item => {
                     const artist = item.singers.map(ar => ({ id: ar.singer_mid, name: ar.singer_name }))

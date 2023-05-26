@@ -5,6 +5,7 @@ import EventBus from '../../common/EventBus';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import PlaylistCategoryBar from '../components/PlaylistCategoryBar.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
+import AlbumListControl from '../components/AlbumListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import PlaylistCategoryFlowBtn from '../components/PlaylistCategoryFlowBtn.vue';
@@ -21,6 +22,8 @@ const orders = reactive([])
 const playlists = reactive([])
 const pagination = { offset: 0, limit: 35, page: 1 }
 let markScrollTop = 0
+const isAlbumType = ref(false)
+const setAlbumType = (value) => isAlbumType.value = value || false
 
 const { currentPlatformCode, currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
 const { currentVender, currentPlatformCategories, putCategories,
@@ -88,6 +91,7 @@ const loadContent = async (noLoadingMask) => {
     if (currentPlatformCode.value != result.platform) return
     if (currentCategoryCode.value != result.cate) return
     playlists.push(...result.data)
+    setAlbumType(result.dataType)
     setLoadingContent(false)
 }
 
@@ -170,7 +174,8 @@ EventBus.on("playlistSquare-refresh", refreshData)
     <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
         <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories">
         </PlaylistCategoryBar>
-        <PlaylistsControl :data="playlists" :loading="isLoadingContent"></PlaylistsControl>
+        <PlaylistsControl :data="playlists" :loading="isLoadingContent" v-show="!isAlbumType"></PlaylistsControl>
+        <AlbumListControl :data="playlists" :loading="isLoadingContent" v-show="isAlbumType"></AlbumListControl>
         <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef">
         </PlaylistCategoryFlowBtn>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

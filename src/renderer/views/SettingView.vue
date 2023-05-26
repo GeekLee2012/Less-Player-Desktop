@@ -464,7 +464,9 @@ onMounted(checkForUpdate)
             <div class="cache row">
                 <span class="cate-name">缓存</span>
                 <div class="content">
-                    <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的进度</div>
+                    <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的进度
+                        <br>最近播放记录，请定期手动清理；数据过多时，列表容易卡顿
+                    </div>
                     <div>
                         <span class="cate-subtitle">应用退出前，保存播放状态：</span>
                         <ToggleControl @click="toggleStorePlayState" :value="cache.storePlayState">
@@ -740,7 +742,7 @@ onMounted(checkForUpdate)
                         </div>
                         -->
                         <div>
-                            <span class="newflag">最新版本</span>
+                            <span class="newflag content-text-highlight">最新版本</span>
                             <span class="spacing">
                                 <a href="#" @click.prevent="visitLink(getTagReleasePageUrl(lastVersion))" class="link"
                                     v-html="lastVersion"></a>
@@ -1157,13 +1159,11 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .version .newflag {
-    color: var(--content-text-highlight-color);
     border-radius: 3px;
-    border: 1.3px solid var(--content-text-highlight-color);
-    padding: 1px 3px;
-    /*font-size: 12px;*/
+    border: 1.3px solid var(--content-highlight-color);
+    padding: 3px 6px;
     font-size: var(--content-text-tip-text-size);
-    font-weight: 600;
+    font-weight: bold;
     margin-right: 5px;
 }
 </style>
