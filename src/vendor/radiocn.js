@@ -43,7 +43,6 @@ export class RadioCN {
                 result.data.push(defaultCategory)
                 result.data.push(...anchorRadioCategories.data)
                 result.data.push(...fmRadioCategories.data)
-                console.log(result)
                 resolve(result)
             }).catch(error => resolve(result))
         })
