@@ -99,6 +99,20 @@ const releaseDrag = (event) => {
     if (props.onDragRelease) props.onDragRelease(value, event)
 }
 
+//优化拖动体验
+const thumbShow = ref(false)
+let thumbHideTimer = null
+const showThumb = () => {
+    if (thumbHideTimer) clearTimeout(thumbHideTimer)
+    thumbShow.value = true
+}
+
+const hideThumb = () => {
+    thumbHideTimer = setTimeout(() => {
+        thumbShow.value = false
+    }, 1000)
+}
+
 watch(() => props.value, (nv, ov) => {
     if (onDrag.value) return
     updateProgress(nv, ov)
@@ -113,8 +127,9 @@ defineExpose({
 </script>
 
 <template>
-    <div class="slider-bar" @mousewheel="scrollProgress">
-        <div class="slider-bar-ctl" :class="{ 'slider-bar-ctl-ondrag': onDrag }" ref="sliderCtlRef" @click="seekProgress">
+    <div class="slider-bar" @mousewheel="scrollProgress" @mouseenter="showThumb" @mouseleave="hideThumb">
+        <div class="slider-bar-ctl" :class="{ 'slider-bar-ctl-ondrag': onDrag, 'slider-bar-ctl-with-thumb': thumbShow }"
+            ref="sliderCtlRef" @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
             <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>
         </div>
@@ -155,12 +170,13 @@ defineExpose({
     background-color: var(--others-volumebar-thumb-color);
     z-index: 2;
     position: absolute;
-    left: 50%;
+    left: 0%;
     -webkit-app-region: none;
     visibility: hidden;
 }
 
-.slider-bar:hover .thumb,
+/*.slider-bar:hover .thumb,*/
+.slider-bar .slider-bar-ctl-with-thumb .thumb,
 .slider-bar .slider-bar-ctl-ondrag .thumb {
     visibility: visible;
 }

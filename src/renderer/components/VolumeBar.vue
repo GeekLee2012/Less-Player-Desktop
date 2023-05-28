@@ -117,6 +117,7 @@ defineExpose({
 
 .volume-bar .volume-value .thumb {
     visibility: hidden;
+    left: 50%;
 }
 
 .volume-bar:hover .volume-value .thumb {

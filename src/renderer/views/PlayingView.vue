@@ -313,7 +313,7 @@ onMounted(() => {
 }
 
 .playing-view .bottom {
-    height: 80px;
+    height: 77px;
     padding-bottom: 5px;
 }
 
