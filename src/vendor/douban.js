@@ -923,8 +923,7 @@ export class DouBan {
     //专辑详情: 歌曲
     static albumDetailAllSongs(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const result = new Album(id, DouBan.CODE)
-            resolve(result)
+            setTimeout(() => resolve(null), 1000)
         })
     }
 

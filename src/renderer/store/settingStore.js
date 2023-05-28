@@ -84,6 +84,8 @@ export const useSettingStore = defineStore('setting', {
             playlistCategoryBarFlowBtnShow: false,
             playbackQueueAutoPositionOnShow: false,
             listenNumShow: false,
+            //视频播放退出后，自动继续播放歌曲
+            resumePlayAfterVideo: false,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: true,
             //歌曲进度更新频度，默认为60，范围：1 - 1024
@@ -274,6 +276,9 @@ export const useSettingStore = defineStore('setting', {
         },
         currentTheme() {
             return this.getCurrentTheme()
+        },
+        isResumePlayAfterVideoEnable() {
+            return this.track.resumePlayAfterVideo
         }
     },
     actions: {
@@ -375,6 +380,9 @@ export const useSettingStore = defineStore('setting', {
         },
         togglePlaylistCategoryBarFlowBtnShow() {
             this.track.playlistCategoryBarFlowBtnShow = !this.track.playlistCategoryBarFlowBtnShow
+        },
+        toggleResumePlayAfterVideo() {
+            this.track.resumePlayAfterVideo = !this.track.resumePlayAfterVideo
         },
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping

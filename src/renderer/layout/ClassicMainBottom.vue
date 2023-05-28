@@ -8,7 +8,7 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 
 
 
-const { seekTrack, progressState,
+const { seekTrack, preseekTrack, progressState,
     favoritedState, toggleFavoritedState } = inject('player')
 
 const volumeBarRef = ref(null)
@@ -26,8 +26,13 @@ onMounted(() => {
 
 <template>
     <div class="classic-main-bottom">
-        <ProgressBar id="progress-bar" :value="progressState" :seekable="playing" :onseek="seekTrack">
+        <!--
+        <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack">
         </ProgressBar>
+        -->
+        <SliderBar :value="progressState" :disable="!playing" :disableScroll="true" :onSeek="seekTrack"
+            :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+        </SliderBar>
         <div id="play-nav">
             <PlayMeta id="play-meta" :hideVolumeBar="true"></PlayMeta>
             <div class="play-ctl-wrap">
@@ -90,11 +95,7 @@ onMounted(() => {
 }
 
 .classic-main-bottom .spacing {
-    margin-left: 15px;
-}
-
-.classic-main-bottom #progress-bar {
-    height: 2px;
+    margin-left: 18px;
 }
 
 .classic-main-bottom #play-nav #play-meta {
@@ -132,7 +133,7 @@ onMounted(() => {
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
-    padding-right: 33px;
+    padding-right: 36px;
 }
 
 .classic-main-bottom svg {

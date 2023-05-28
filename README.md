@@ -1,7 +1,7 @@
 # Less Player  
   
 [![GitHub release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
-[![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
+[![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/tags)
 [![GitHub license](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)  
 
 <!--![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
@@ -10,7 +10,7 @@
 
 一款基于Electron + Vue3开发的播放器。
 
-<b>`郑重声明：`本项目仅供学习交流，禁止非法商业用途，请支持正版！</b>   
+<b>`郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>   
   
 ### 前言  
 * 项目名字：源于Less is More（少即是多）
@@ -85,4 +85,4 @@
 * 待办事项：[TODO.md](TODO.md)  
   
 ### 其他  
-* 再次声明：本项目仅供学习交流，禁止非法商业用途，请支持正版！ 
+* 再次声明：本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！

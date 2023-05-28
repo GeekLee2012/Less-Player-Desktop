@@ -20,7 +20,8 @@ import { toMmss } from '../../common/Times';
 const { seekTrack, playMv,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
-    toggleFavoritedState } = inject('player')
+    toggleFavoritedState, preseekTrack,
+    mmssPreseekTime } = inject('player')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -148,11 +149,16 @@ onUnmounted(() => {
                         <canvas class="spectrum-canvas" width="404" height="56"></canvas>
                     </div>
                     <div class="progress-wrap">
+                        <!--
                         <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack">
                         </ProgressBar>
+                        -->
+                        <SliderBar :value="progressState" :disable="!playing" :disableScroll="true" :onSeek="seekTrack"
+                            :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+                        </SliderBar>
                     </div>
                     <div class="audio-time-wrap">
-                        <span class="t-current" v-html="mmssCurrentTime"></span>
+                        <span class="t-current" v-html="mmssPreseekTime || mmssCurrentTime"></span>
                         <span class="t-duration" v-html="Track.mmssDuration(currentTrack)"></span>
                     </div>
                     <div class="action">
@@ -240,6 +246,7 @@ onUnmounted(() => {
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
+    --others-sliderbar-ctl-height: 3px;
 }
 
 .visual-playing-view .container {
@@ -251,7 +258,7 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .spacing {
-    margin-left: 15px;
+    margin-left: 18px;
 }
 
 .visual-playing-view .header {
@@ -384,16 +391,14 @@ onUnmounted(() => {
     margin-bottom: 3px;
 }
 
-.visual-playing-view .progress-wrap .progress-bar {
+.visual-playing-view .progress-wrap .slider-bar {
     flex: 1;
-    height: 2px;
 }
 
 .visual-playing-view .audio-time-wrap {
     position: relative;
-    margin: 0px 2px 10px 2px;
-    font-size: 13px;
-    font-weight: 520px;
+    margin: 0px 3px 10px 3px;
+    font-size: 14px;
 }
 
 .visual-playing-view .audio-time-wrap .t-current {
@@ -410,6 +415,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0px 5px;
 }
 
 .visual-playing-view .canvas-wrap {
@@ -462,7 +468,7 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .volume-bar:hover {
-    width: 88px;
+    width: 80px;
 }
 
 .visual-playing-view .action .love-btn {

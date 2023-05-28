@@ -161,7 +161,7 @@ export class Player {
         const sound = this.getSound()
         if (!sound || !sound.playing()) return
         const duration = sound.duration()
-        if (duration) sound.seek(duration * percent)
+        if (duration) sound.seek(Math.min(duration * percent, duration))
     }
 
     _step() {

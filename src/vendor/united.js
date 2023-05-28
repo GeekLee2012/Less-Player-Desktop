@@ -111,17 +111,17 @@ export class United {
                 if (hits <= 2 && isArtistMissed) continue
 
                 //时长，误差Error
-                const de = Math.abs(duration - cDuration)
-                if (de == 0) {
+                const dError = Math.abs(duration - cDuration)
+                if (dError == 0) {
                     score += 0.15
                     ++hits
-                } else if (de < 30 * 1000) {
+                } else if (dError < 30 * 1000) {
                     score += 0.13
                 }
-                else if (de < 45 * 1000) {
+                else if (dError < 45 * 1000) {
                     score += 0.1
                 }
-                else if (de < 60 * 1000) {
+                else if (dError < 60 * 1000) {
                     score += 0.05
                 }
 

@@ -156,6 +156,6 @@ const toggleRadioMode = () => {
 .classic-main-top #theme-btn,
 .classic-main-top #userhome-btn,
 .classic-main-top #setting-btn {
-    margin-right: 15px;
+    margin-right: 18px;
 }
 </style>

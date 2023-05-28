@@ -1,40 +1,46 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { watch, ref } from 'vue';
 //TODO 组件代码写得乱，后期再梳理
 
 const props = defineProps({
-    initValue: Number, //0.0 - 1.0
-    onseek: Function,
-    onscroll: Function,
-    ondrag: Function
+    value: Number, //0.0 - 1.0
+    disable: Boolean,
+    disableScroll: Boolean,
+    onSeek: Function,
+    onScroll: Function,
+    onDragStart: Function,
+    onDragMove: Function,
+    onDragRelease: Function
 })
 
 const sliderCtlRef = ref(null)
 const progressRef = ref(null)
 const thumbRef = ref(null)
-let onDrag = false
-let value = parseFloat(props.initValue).toFixed(2)
+let onDrag = ref(false)
+let value = parseFloat(props.value).toFixed(2)
 
 //点击改变进度
-const seekProgress = (e) => {
-    if (thumbRef.value.contains(e.target)) {
-        updateProgressByDeltaWidth(e.offsetX)
+const seekProgress = (event) => {
+    if (props.disable) return
+    if (thumbRef.value.contains(event.target)) {
+        updateProgressByDeltaWidth(event.offsetX)
     } else {
-        updateProgressByWidth(e.offsetX)
+        updateProgressByWidth(event.offsetX)
     }
-    if (props.onseek) props.onseek(value)
+    if (props.onSeek) props.onSeek(value)
 }
 
 //滚轮改变进度
-const scrollProgress = (e) => {
-    if (e.deltaY == 0) return
-    const direction = e.deltaY > 0 ? -1 : 1
+const scrollProgress = (event) => {
+    if (props.disable || props.disableScroll) return
+    if (event.deltaY == 0) return
+    const direction = event.deltaY > 0 ? -1 : 1
     const step = 1 * direction
     let tmp = value * 100
     tmp += step
     const percent = (tmp / 100).toFixed(2)
     updateProgress(percent)
-    if (props.onscroll) props.onscroll(value)
+    if (props.onScroll) props.onScroll(value)
 }
 
 const updateProgress = (percent) => {
@@ -67,26 +73,36 @@ const updateProgressByDeltaWidth = (delta) => {
     updateProgressByWidth(oWidth + delta)
 }
 
-const startDrag = (e) => {
-    onDrag = true
+const startDrag = (event) => {
+    if (props.disable) return
+    onDrag.value = true
     document.addEventListener("mousemove", dragMove)
-    document.addEventListener("mouseup", endDrag)
+    document.addEventListener("mouseup", releaseDrag)
+    if (props.onDragStart) props.onDragStart(event)
 }
 
-const dragMove = (e) => {
-    if (!onDrag) return
-    const progress = e.clientX - sliderCtlRef.value.offsetLeft
+const dragMove = (event) => {
+    if (props.disable) return
+    if (!onDrag.value) return
+    const progress = event.clientX - sliderCtlRef.value.offsetLeft
     const width = sliderCtlRef.value.clientWidth
     updateProgress(progress / width)
-    if (props.ondrag) props.onseek(value)
+    if (props.onDragMove) props.onDragMove(value, event)
 }
 
 /* 以下为拖动滑块改变进度相关 */
-const endDrag = (e) => {
-    onDrag = false
+const releaseDrag = (event) => {
+    if (props.disable) return
+    onDrag.value = false
     document.removeEventListener("mousemove", dragMove)
-    document.removeEventListener("mouseup", endDrag)
+    document.removeEventListener("mouseup", releaseDrag)
+    if (props.onDragRelease) props.onDragRelease(value, event)
 }
+
+watch(() => props.value, (nv, ov) => {
+    if (onDrag.value) return
+    updateProgress(nv, ov)
+})
 
 //对外提供API
 defineExpose({
@@ -94,14 +110,11 @@ defineExpose({
     toggleProgress
 })
 
-onMounted(() => {
-
-})
 </script>
 
 <template>
     <div class="slider-bar" @mousewheel="scrollProgress">
-        <div class="slider-bar-ctl" ref="sliderCtlRef" @click="seekProgress">
+        <div class="slider-bar-ctl" :class="{ 'slider-bar-ctl-ondrag': onDrag }" ref="sliderCtlRef" @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
             <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>
         </div>
@@ -110,13 +123,13 @@ onMounted(() => {
 
 <style scoped>
 .slider-bar {
-    height: 10px;
+    height: 3px;
     background: transparent;
     -webkit-app-region: none;
 }
 
 .slider-bar .slider-bar-ctl {
-    height: 3px;
+    height: var(--others-sliderbar-ctl-height);
     border-radius: 10rem;
     background: var(--others-progressbar-bg-color);
     cursor: pointer;
@@ -127,8 +140,8 @@ onMounted(() => {
 }
 
 .slider-bar .progress {
-    width: 50%;
-    height: 3px;
+    width: 0%;
+    height: 100%;
     border-radius: 10rem;
     background: var(--content-text-highlight-color);
     z-index: 1;
@@ -144,5 +157,11 @@ onMounted(() => {
     position: absolute;
     left: 50%;
     -webkit-app-region: none;
+    visibility: hidden;
+}
+
+.slider-bar:hover .thumb,
+.slider-bar .slider-bar-ctl-ondrag .thumb {
+    visibility: visible;
 }
 </style>

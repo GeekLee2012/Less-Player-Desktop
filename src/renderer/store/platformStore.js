@@ -89,7 +89,7 @@ const ALL_PLATFORMS = [
         name: '豆瓣FM',
         shortName: 'DB',
         online: true,
-        types: ['playlists'],
+        types: ['playlists', 'artists', 'albums'],
         weight: 5
     },
     {
@@ -244,7 +244,7 @@ export const usePlatformStore = defineStore('platform', {
         },
         isAlbumDetailVisitable(platform) {
             if (!this.isPlatformValid(platform)) return false
-            return !this.isDouBan(platform) || !this.isLocalMusic(platform)
+            return !this.isLocalMusic(platform)
         },
         isPlatformValid(platform) {
             return platform && platform.trim().length > 0

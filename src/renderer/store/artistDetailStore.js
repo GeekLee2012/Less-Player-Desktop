@@ -150,11 +150,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
                 || isDouBan(this.platform)) {
                 this.tabs = [TAB_LIST[1], TAB_LIST[2], TAB_LIST[3]]
                 this.setupSongTabs(false, true)
-            } /*else if (isDouBan(this.platform)) {
-                this.tabs = [TAB_LIST[1], TAB_LIST[3]]
-                this.setupSongTabs(false, true)
-            } */
-            else {
+            } else {
                 this.tabs = TAB_LIST
                 this.setupSongTabs(true, true)
             }

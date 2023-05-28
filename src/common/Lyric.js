@@ -1,3 +1,4 @@
+import { toMillis } from './Times';
 import { toTrimString } from './Utils';
 
 
@@ -59,7 +60,7 @@ export class Lyric {
         } catch (error) {
             console.log(error)
         }
-        return lyric
+        return Lyric.sort(lyric)
     }
 
     static __isTimeDataLine(text) {
@@ -123,6 +124,16 @@ export class Lyric {
 
     static hasData(lyric) {
         return lyric && lyric.data.size > 0
+    }
+
+    static sort(lyric) {
+        if (!lyric || !lyric.data) return lyric
+        if (!lyric.data.size || lyric.data.size < 1) return lyric
+        const mapDatas = Array.from(lyric.data).sort((a, b) => (toMillis(a[0]) - toMillis(b[0])))
+        Object.assign(lyric, {
+            data: new Map(mapDatas.map(item => [item[0], item[1]]))
+        })
+        return lyric
     }
 
 }

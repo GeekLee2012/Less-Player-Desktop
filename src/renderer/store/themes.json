@@ -67,7 +67,7 @@
             "others": {
                 "scrollBarColor": "#9b9b9c",
                 "progressBarBgColor": "#666",
-                "volumeBarThumbColor": "#fff"
+                "volumeBarThumbColor": "#28c83f"
             }
         },
         {
@@ -137,7 +137,7 @@
             "others": {
                 "scrollBarColor": "#787878",
                 "progressBarBgColor": "#ccc",
-                "volumeBarThumbColor": "#272727"
+                "volumeBarThumbColor": "#28c83f"
             }
         },
         {
@@ -277,7 +277,7 @@
             "others": {
                 "scrollBarColor": "#999",
                 "progressBarBgColor": "#ccc",
-                "volumeBarThumbColor": "#414141"
+                "volumeBarThumbColor": "#fc589c"
             }
         },
         {
@@ -347,7 +347,7 @@
             "others": {
                 "scrollBarColor": "#555055",
                 "progressBarBgColor": "#555055",
-                "volumeBarThumbColor": "#eaeaea"
+                "volumeBarThumbColor": "#fc589c"
             }
         },
         {
@@ -487,7 +487,7 @@
             "others": {
                 "scrollBarColor": "#eee",
                 "progressBarBgColor": "#e7e1e3",
-                "volumeBarThumbColor": "#212121"
+                "volumeBarThumbColor": "#f7314d"
             }
         },
         {
@@ -557,7 +557,7 @@
             "others": {
                 "scrollBarColor": "#666",
                 "progressBarBgColor": "#555",
-                "volumeBarThumbColor": "#ccc"
+                "volumeBarThumbColor": "#d53943"
             }
         },
         {
@@ -627,7 +627,7 @@
             "others": {
                 "scrollBarColor": "#919793",
                 "progressBarBgColor": "#b1b7b3",
-                "volumeBarThumbColor": "#282828cb"
+                "volumeBarThumbColor": "#64903f"
             }
         },
         {
@@ -697,7 +697,7 @@
             "others": {
                 "scrollBarColor": "#91934366",
                 "progressBarBgColor": "#91934333",
-                "volumeBarThumbColor": "#919343"
+                "volumeBarThumbColor": "#e1e0a7"
             }
         },
         {
@@ -767,7 +767,7 @@
             "others": {
                 "scrollBarColor": "#989898",
                 "progressBarBgColor": "#99999966",
-                "volumeBarThumbColor": "#161616"
+                "volumeBarThumbColor": "#2783fb"
             }
         },
         {
@@ -837,7 +837,7 @@
             "others": {
                 "scrollBarColor": "#395a6266",
                 "progressBarBgColor": "#ccc",
-                "volumeBarThumbColor": "#395a62"
+                "volumeBarThumbColor": "#273b42"
             }
         },
         {
@@ -907,7 +907,7 @@
             "others": {
                 "scrollBarColor": "#cbcbcb",
                 "progressBarBgColor": "#ddd",
-                "volumeBarThumbColor": "#272727"
+                "volumeBarThumbColor": "#ffb300"
             }
         },
         {
@@ -977,7 +977,7 @@
             "others": {
                 "scrollBarColor": "#ababab",
                 "progressBarBgColor": "#ddd",
-                "volumeBarThumbColor": "#272727"
+                "volumeBarThumbColor": "#fc9b29"
             }
         },
         {
@@ -1047,7 +1047,7 @@
             "others": {
                 "scrollBarColor": "#cbcbcb",
                 "progressBarBgColor": "#ddd",
-                "volumeBarThumbColor": "#272727"
+                "volumeBarThumbColor": "#9c27b0"
             }
         },
         {
@@ -1117,7 +1117,7 @@
             "others": {
                 "scrollBarColor": "#cbcbcb",
                 "progressBarBgColor": "#cbcbcb",
-                "volumeBarThumbColor": "#fff"
+                "volumeBarThumbColor": "#e5bc8c"
             }
         }
     ],
@@ -1129,6 +1129,7 @@
             "author": null,
             "created": null,
             "updated": null,
+            "previewBg": null,
             "appBackground": {
                 "bgColor": "#FFFFFF",
                 "bgImage": null,
@@ -1191,9 +1192,8 @@
             "others": {
                 "scrollBarColor": "#999999",
                 "progressBarBgColor": "#ababab",
-                "volumeBarThumbColor": "#999999"
-            },
-            "previewBg": null
+                "volumeBarThumbColor": "#28C83F"
+            }
         }
     ]
 }

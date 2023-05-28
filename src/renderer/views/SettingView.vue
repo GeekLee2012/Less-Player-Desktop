@@ -35,6 +35,7 @@ const { setThemeIndex,
     toggleCategoryBarRandom,
     togglePlaylistCategoryBarFlowBtnShow,
     toggleListenNumShow,
+    toggleResumePlayAfterVideo,
     togglePlayingWithoutSleeping,
     toggleStorePlayState,
     toggleStoreLocalMusic,
@@ -438,6 +439,11 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                     </div>
                     <div>
+                        <span class="cate-subtitle">视频退出后，自动续播歌曲：</span>
+                        <ToggleControl @click="toggleResumePlayAfterVideo" :value="track.resumePlayAfterVideo">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">播放歌曲时，防止系统睡眠：</span>
                         <ToggleControl @click="togglePlayingWithoutSleeping" :value="track.playingWithoutSleeping">
                         </ToggleControl>
@@ -796,10 +802,13 @@ onMounted(checkForUpdate)
                             <span class="link">Gitee</span>
                         </div>
                     </div>
-                    <div class="license last">
+                    <div class="license">
                         <span>开源许可证：</span>
                         <span class="link" @click="visitLink('https://www.apache.org/licenses/LICENSE-2.0.html')">Apache
                             License 2.0</span>
+                    </div>
+                    <div class="annoucement last">
+                        <span><b>郑重声明：当前应用完全开源免费，仅供学习交流；若谁做非法用途，后果自负！</b></span>
                     </div>
                 </div>
             </div>
@@ -898,7 +907,9 @@ onMounted(checkForUpdate)
 #setting-view .theme .cate-name b:hover {
     cursor: pointer;
     font-weight: bold;
-    color: var(--content-text-highlight-color);
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    color: transparent !important;
 }
 
 #setting-view .theme .content {
@@ -1033,30 +1044,6 @@ onMounted(checkForUpdate)
     margin-left: 188px;
 }
 
-#setting-view .about .content span {
-    width: auto;
-    margin-right: 6px;
-}
-
-#setting-view .center .repository div {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-#setting-view .repository svg {
-    fill: var(--content-text-color);
-    cursor: pointer;
-}
-
-#setting-view .repository .link,
-#setting-view .license .link {
-    text-decoration: underline;
-    cursor: pointer;
-    color: var(--content-text-color);
-    padding-left: 5px;
-}
-
 
 #setting-view .keys-input-ctl input {
     min-width: 159px;
@@ -1165,5 +1152,29 @@ onMounted(checkForUpdate)
     font-size: var(--content-text-tip-text-size);
     font-weight: bold;
     margin-right: 5px;
+}
+
+#setting-view .about .content span {
+    width: auto;
+    margin-right: 6px;
+}
+
+#setting-view .center .repository div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#setting-view .repository svg {
+    fill: var(--content-text-color);
+    cursor: pointer;
+}
+
+#setting-view .repository .link,
+#setting-view .license .link {
+    text-decoration: underline;
+    cursor: pointer;
+    color: var(--content-text-color);
+    padding-left: 5px;
 }
 </style>

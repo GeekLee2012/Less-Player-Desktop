@@ -116,6 +116,7 @@ const getAlbumDetail = () => {
     if (!vendor || !vendor.albumDetail) return
     const id = albumId.value
     vendor.albumDetail(id).then(result => {
+        if (!result) return
         const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
         updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
         updateAbout(result.about)
@@ -126,7 +127,6 @@ const getAlbumDetail = () => {
             updateTabData(allSongs.value)
             currentTabView.value = SongListControl
             setLoading(false)
-            return
         }
     })
 }
@@ -143,7 +143,7 @@ const loadAllSongs = () => {
     if (!vendor || !vendor.albumDetailAllSongs) return
     const id = albumId.value
     vendor.albumDetailAllSongs(id, 0, 100).then(result => {
-        if (!isAllSongsTab()) return
+        if (!isAllSongsTab() || !result) return
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
         setLoading(false)
@@ -213,9 +213,6 @@ watch([platform, albumId], reloadAll, { immediate: true })
                     </div>
                     <div class="info-row">
                         <span class="col1"><b>发行时间:</b> {{ publishTime || '未知' }} </span>
-                        <!--
-                                        <span class="col2"><b>发行公司:</b> {{ company }} </span>
-                                        -->
                     </div>
                     <div class="info-row">
                         <span class="col2"><b>发行公司:</b> {{ company || '未知' }}</span>

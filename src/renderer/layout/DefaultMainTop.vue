@@ -9,7 +9,7 @@ import { usePlayStore } from '../store/playStore';
 
 
 const { visitUserHome, visitSetting } = inject('appRoute')
-const { seekTrack, progressState } = inject('player')
+const { seekTrack, progressState, preseekTrack } = inject('player')
 const { playing } = storeToRefs(usePlayStore())
 </script>
 
@@ -45,7 +45,13 @@ const { playing } = storeToRefs(usePlayStore())
                 <Navigator></Navigator>
             </div>
         </div>
-        <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
+        <!--
+        <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack">
+        </ProgressBar>
+        -->
+        <SliderBar :value="progressState" :disable="!playing" :disableScroll="true" :onSeek="seekTrack"
+            :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+        </SliderBar>
     </div>
 </template>
 
@@ -59,7 +65,7 @@ const { playing } = storeToRefs(usePlayStore())
     flex-direction: column;
     height: var(--others-playnav-height);
     -webkit-app-region: drag;
-    /* background: #faf4f6; */
+    --others-sliderbar-ctl-height: 3px;
 }
 
 .default-main-top #play-nav #play-meta {

@@ -41,7 +41,8 @@ const { addRecentSong, addRecentRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
     theme, layout, isStoreRecentPlay,
-    isSimpleLayout, isVipTransferEnable } = storeToRefs(useSettingStore())
+    isSimpleLayout, isVipTransferEnable,
+    isResumePlayAfterVideoEnable } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray } = useSettingStore()
 
@@ -544,6 +545,7 @@ EventBus.on('track-state', state => {
 })
 //播放进度
 const mmssCurrentTime = ref('00:00')
+const mmssPreseekTime = ref('00:00')
 const currentTimeState = ref(0) //单位: 秒
 const progressState = ref(0)
 
@@ -582,6 +584,9 @@ EventBus.on('track-nextPlaylistRadioTrack', track =>
 
 //播放进度
 const seekTrack = (percent) => {
+    //清除预备状态
+    mmssPreseekTime.value = null
+
     if (isPlaying()) {
         seekTrackDirectly(percent)
     } else { //非播放状态
@@ -598,6 +603,15 @@ const seekTrack = (percent) => {
 
 const seekTrackDirectly = (percent) => EventBus.emit('track-seek', percent)
 const markTrackSeekPending = (percent) => EventBus.emit('track-markSeekPending', percent)
+
+//播放进度，预备调整状态
+const preseekTrack = (percent) => {
+    const track = currentTrack.value
+    if (!track) return
+    const duration = track ? track.duration : 0
+    if (duration <= 0) return
+    mmssPreseekTime.value = toMmss(duration * percent)
+}
 
 //播放MV
 const playMv = (track) => {
@@ -748,6 +762,12 @@ watch(theme, () => {
     drawCanvasSpectrum()
 }, { deep: true })
 
+watch(videoPlayingViewShow, (nv, ov) => {
+    if (!nv && isResumePlayAfterVideoEnable.value
+        && !isPlaying.value) {
+        togglePlay()
+    }
+})
 
 //播放器相关API
 provide('player', {
@@ -763,6 +783,8 @@ provide('player', {
     playState,
     favoritedState,
     toggleFavoritedState,
+    preseekTrack,
+    mmssPreseekTime,
 })
 </script>
 

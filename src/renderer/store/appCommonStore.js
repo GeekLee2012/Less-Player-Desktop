@@ -191,9 +191,9 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.commonNotificationShow = true
         },
         hideCommonNotification() {
-            this.commonNotificationText = null
-            this.setCommonNotificationType()
             this.commonNotificationShow = false
+            this.commonNotificationText = null
+            this.setCommonNotificationType(-1)
         },
         doToast(text, type, callback, delay) {
             if (toastTimer) clearTimeout(toastTimer)

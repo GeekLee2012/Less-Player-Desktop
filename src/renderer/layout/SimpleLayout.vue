@@ -23,7 +23,8 @@ import ArtistControl from '../components/ArtistControl.vue';
 const { seekTrack, playPlaylist,
     playMv, progressState,
     mmssCurrentTime, currentTimeState,
-    favoritedState, toggleFavoritedState } = inject('player')
+    favoritedState, toggleFavoritedState,
+    preseekTrack, mmssPreseekTime } = inject('player')
 
 const volumeBarRef = ref(null)
 const textColorIndex = ref(0)
@@ -880,7 +881,7 @@ watch([textColorIndex], setupTextColor)
                 </ArtistControl>
             </div>
             <div class="audio-time-wrap" v-show="lyric.metaPos != 1">
-                <span class="t-current" v-html="mmssCurrentTime"></span>
+                <span class="t-current" v-html="mmssPreseekTime || mmssCurrentTime"></span>
                 <span class="t-duration" v-html="Track.mmssDuration(currentTrack)"></span>
             </div>
             <div class="canvas-wrap" v-show="spectrumCanvasShow">
@@ -889,7 +890,12 @@ watch([textColorIndex], setupTextColor)
         </div>
         <div class="bottom" @contextmenu="toggleLyricToolbar()">
             <div class="progress-wrap">
+                <!--
                 <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
+                -->
+                <SliderBar :value="progressState" :disable="!playing" :disableScroll="true" :onSeek="seekTrack"
+                    :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+                </SliderBar>
             </div>
             <div class="action" v-show="!isLyricShow">
                 <div class="btm-left">
@@ -975,11 +981,11 @@ watch([textColorIndex], setupTextColor)
     flex: 1;
     -webkit-app-region: none;
     --layout-width: 500px;
-    --scrollbar-height: 3px;
     --bottom-height: 88px;
     width: var(--layout-width);
     overflow: hidden;
-    background: var(--content-bg-color)
+    background: var(--content-bg-color);
+    --others-sliderbar-ctl-height: 3px;
 }
 
 .simple-layout .spacing {
@@ -1283,9 +1289,9 @@ watch([textColorIndex], setupTextColor)
     width: 100%;
 }
 
-.simple-layout .progress-wrap .progress-bar {
+.simple-layout .progress-wrap .slider-bar {
     flex: 1;
-    height: var(--scrollbar-height);
+    border-radius: 0px;
 }
 
 .simple-layout>.bottom .action {

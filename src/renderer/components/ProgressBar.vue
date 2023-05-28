@@ -58,21 +58,21 @@ defineExpose({ updateProgress })
 </script>
 
 <template>
-    <div class="progress-bar" :class="{ handcur: seekable }" ref="barRef" @click="seek">
+    <div class="progressbar" :class="{ handcur: seekable }" ref="barRef" @click.stop="seek">
         <div class="progress" ref="barValueRef"></div>
     </div>
 </template>
 
 <style scoped>
-.progress-bar {
-    height: 3px;
+.progressbar {
+    height: var(--others-progressbar-height);
     border-radius: 10rem;
     /*background: linear-gradient(to right, #464646, #666) !important;*/
     background: var(--others-progressbar-bg-color);
     -webkit-app-region: none;
 }
 
-.progress-bar .progress {
+.progressbar .progress {
     width: 0%;
     height: 100%;
     border-radius: 10rem;

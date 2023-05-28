@@ -43,6 +43,8 @@
   --others-image-text-tile-mask-width: var(--others-image-text-tile-cover-size);
   --others-theme-preview-tile-width: 160px;
   --others-theme-preview-tile-height: 95px;
+  --others-progressbar-height: 3px;
+  --others-sliderbar-ctl-height: 2px;
 
   /* 主题相关 */
   --border-popovers-border-color: #666;

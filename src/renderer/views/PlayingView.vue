@@ -20,7 +20,8 @@ import { toMmss } from '../../common/Times';
 const { seekTrack, playMv,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
-    toggleFavoritedState } = inject('player')
+    toggleFavoritedState, preseekTrack,
+    mmssPreseekTime } = inject('player')
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
@@ -84,7 +85,12 @@ onMounted(() => {
                 </div>
             </div>
             <div class="bottom">
+                <!--
                 <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
+                -->
+                <SliderBar :value="progressState" :disable="!playing" :disableScroll="true" :onSeek="seekTrack"
+                    :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+                </SliderBar>
                 <div class="action">
                     <div class="btm-left">
                         <div @click="toggleFavoritedState">
@@ -119,7 +125,9 @@ onMounted(() => {
                         </div>
                     </div>
                     <div>
-                        <AudioTime :current="mmssCurrentTime" :duration="Track.mmssDuration(currentTrack)"></AudioTime>
+                        <AudioTime :current="mmssPreseekTime || mmssCurrentTime"
+                            :duration="Track.mmssDuration(currentTrack)">
+                        </AudioTime>
                     </div>
                     <div class="btm-center">
                         <PlayControl></PlayControl>
@@ -176,10 +184,11 @@ onMounted(() => {
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
+    --others-sliderbar-ctl-height: 3px;
 }
 
 .playing-view .spacing {
-    margin-left: 15px;
+    margin-left: 20px;
 }
 
 .playing-view .container {
@@ -304,7 +313,7 @@ onMounted(() => {
 }
 
 .playing-view .bottom {
-    height: 77px;
+    height: 80px;
     padding-bottom: 5px;
 }
 

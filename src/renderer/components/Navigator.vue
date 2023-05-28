@@ -41,7 +41,7 @@ const { backward, forward } = inject('appRoute')
 }
 
 .navigator .spacing {
-    margin-left: 15px;
+    margin-left: 16px;
 }
 
 .navigator svg {

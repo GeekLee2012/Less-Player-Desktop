@@ -57,7 +57,7 @@ const togglePlaybackQueue = () => {
                 </g>
             </svg>
         </div>
-        <div class="play-prev-btn spacing " @click="playPrevTrack">
+        <div class="play-prev-btn spacing" @click="playPrevTrack">
             <!--
             <svg width="18" height="18" viewBox="0 0 24 28.01" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><g id="Layer_2-2" data-name="Layer 2"><path d="M1.2,28a1.12,1.12,0,0,0,1.2-1V16L22.09,27.81a1.37,1.37,0,0,0,1.68-.21A.92.92,0,0,0,24,27V1a1.11,1.11,0,0,0-1.2-1,1.45,1.45,0,0,0-.71.19L2.4,12V1A1.12,1.12,0,0,0,1.2,0,1.12,1.12,0,0,0,0,1V27A1.12,1.12,0,0,0,1.2,28Z"/></g></g></g></svg>
             -->
