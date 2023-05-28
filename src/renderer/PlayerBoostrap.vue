@@ -604,7 +604,7 @@ const seekTrack = (percent) => {
 const seekTrackDirectly = (percent) => EventBus.emit('track-seek', percent)
 const markTrackSeekPending = (percent) => EventBus.emit('track-markSeekPending', percent)
 
-//播放进度，预备调整状态
+//播放进度，更新预备状态
 const preseekTrack = (percent) => {
     const track = currentTrack.value
     if (!track) return
