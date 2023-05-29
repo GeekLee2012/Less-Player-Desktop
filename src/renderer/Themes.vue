@@ -88,7 +88,7 @@ const applyTheme = (theme) => {
 
     '--others-scrollbar-color': theme.others.scrollBarColor,
     '--others-progressbar-bg-color': theme.others.progressBarBgColor,
-    '--others-volumebar-thumb-color': theme.others.volumeBarThumbColor,
+    //'--others-volumebar-thumb-color': theme.others.volumeBarThumbColor,
     //'--others-checkbox-bg-color': theme.others.checkboxBgColor,
 
     "--content-border-image": contentBorderImage,

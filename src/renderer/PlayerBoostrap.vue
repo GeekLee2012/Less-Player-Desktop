@@ -545,7 +545,7 @@ EventBus.on('track-state', state => {
 })
 //播放进度
 const mmssCurrentTime = ref('00:00')
-const mmssPreseekTime = ref('00:00')
+const mmssPreseekTime = ref(null) //格式: 00:00
 const currentTimeState = ref(0) //单位: 秒
 const progressState = ref(0)
 

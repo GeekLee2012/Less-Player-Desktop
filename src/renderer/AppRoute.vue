@@ -172,9 +172,6 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
     platform = platform.trim()
     if (visitable) {
         let exploreMode = exploreModeCode.value
-        //let moduleName = 'artist'
-        //TODO 存在隐藏Bug，歌手页存在，但在当前exploreMode下找不到平台
-        //如豆瓣FM有歌手页的，但无专辑页
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
         visitRoute(createCommonRoute(toPath, onRouteReady)).then(() => updateArtistDetailKeys(platform, id))

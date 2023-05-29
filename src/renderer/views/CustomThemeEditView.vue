@@ -142,8 +142,8 @@ const setupAppLogoAppNameTextColor = (value) => Object.assign(customTheme.appLog
 
 const setupOthersScrollBarColor = (value) => Object.assign(customTheme.others, { scrollBarColor: value })
 const setupOthersProgressBarBgColor = (value) => Object.assign(customTheme.others, { progressBarBgColor: value })
-const setupOthersVolumeBarThumbColor = (value) => Object.assign(customTheme.others, { volumeBarThumbColor: value })
-const setupOthersCheckboxBgColor = (value) => Object.assign(customTheme.others, { checkboxBgColor: value })
+//const setupOthersVolumeBarThumbColor = (value) => Object.assign(customTheme.others, { volumeBarThumbColor: value })
+//const setupOthersCheckboxBgColor = (value) => Object.assign(customTheme.others, { checkboxBgColor: value })
 
 watch(workingCustomTheme, (nv, ov) => {
     resetTheme()
@@ -625,7 +625,8 @@ watch(workingCustomTheme, (nv, ov) => {
                                 :onChanged="setupOthersProgressBarBgColor">
                             </ColorInputControl>
                         </div>
-                        <div class="item">
+                        <!--
+                        <div class="item" v-show="false">
                             <div class="name">音量滑块颜色：</div>
                             <ColorInputControl :value="customTheme.others.volumeBarThumbColor"
                                 :onChanged="setupOthersVolumeBarThumbColor">
@@ -637,6 +638,7 @@ watch(workingCustomTheme, (nv, ov) => {
                                 :onChanged="setupOthersCheckboxBgColor">
                             </ColorInputControl>
                         </div>
+                        -->
                     </div>
                 </div>
             </div>

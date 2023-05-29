@@ -89,7 +89,7 @@ export class Theme {
         this.others = {
             scrollBarColor: null,
             progressBarBgColor: null,
-            volumeBarThumbColor: null,
+            volumeBarThumbColor: null, //已废弃
             //checkboxBgColor: null
         }
     }

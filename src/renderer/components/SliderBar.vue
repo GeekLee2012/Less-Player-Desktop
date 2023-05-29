@@ -6,6 +6,7 @@ const props = defineProps({
     value: Number, //0.0 - 1.0
     disable: Boolean,
     disableScroll: Boolean,
+    disableOptimize: Boolean,
     onSeek: Function,
     onScroll: Function,
     onDragStart: Function,
@@ -108,9 +109,10 @@ const showThumb = () => {
 }
 
 const hideThumb = () => {
+    const delay = props.disableOptimize ? 0 : 1000
     thumbHideTimer = setTimeout(() => {
         thumbShow.value = false
-    }, 1000)
+    }, delay)
 }
 
 watch(() => props.value, (nv, ov) => {
@@ -167,7 +169,8 @@ defineExpose({
     width: 10px;
     height: 10px;
     border-radius: 10rem;
-    background-color: var(--others-volumebar-thumb-color);
+    /*background-color: var(--others-volumebar-thumb-color);*/
+    background-color: var(--content-highlight-color);
     z-index: 2;
     position: absolute;
     left: 0%;

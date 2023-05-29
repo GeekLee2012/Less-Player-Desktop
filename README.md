@@ -1,7 +1,7 @@
 # Less Player  
   
 [![GitHub release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
-[![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/tags)
+[![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
 [![GitHub license](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)  
 
 <!--![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
@@ -74,7 +74,7 @@
 
 ### For普通用户
 * 最新开发预览版（测试版），会在项目自身仓库，不定期打包发布，欢迎愿意尝鲜的朋友体验！
-* 顶部分别有release、tag、license三个图标按钮，请点击`tag按钮`直达tags列表页面。
+* 当前顶部分别有release、tag、license三个图标按钮，请点击`tag按钮`直达页面。
 * 开发预览版，均为Pre-release版本，且tag标签名称以发布日期结尾。
 * 以下资源库，暂时不再使用（因为分开单独管理，并没有解决任何问题）：
 * [Github资源库（废弃）](https://github.com/GeekLee2012/Resources/releases/)  

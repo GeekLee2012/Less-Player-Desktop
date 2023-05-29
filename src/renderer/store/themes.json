@@ -355,7 +355,7 @@
             "name": "粉红",
             "previewBg": "#fc7688",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ba5776",
                 "bgImage": null,
                 "bgImageGradient": "linear-gradient(to top, #ba5776, #fc99a7)"
             },
@@ -373,7 +373,7 @@
                 "textColor": "#fff",
                 "subtitleTextColor": "#eee",
                 "secondaryTextColor": "#ccc",
-                "bgColor": "#ffffff25",
+                "bgColor": "#fc99a720",
                 "textHighlightColor": "#fff",
                 "highlightColor": "#fff",
                 "headerNavBgColor": "#16161625",
@@ -416,7 +416,7 @@
             },
             "others": {
                 "scrollBarColor": "#eee",
-                "progressBarBgColor": "#ffffff56",
+                "progressBarBgColor": "#ffffff66",
                 "volumeBarThumbColor": "#fff"
             }
         },

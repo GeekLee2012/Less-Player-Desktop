@@ -156,8 +156,8 @@ watch(() => props.value, (nv, ov) => updateProgress(nv, true))
     width: 10px;
     height: 10px;
     border-radius: 10rem;
-    background-color: var(--others-volumebar-thumb-color);
-    background: var(--content-text-highlight-color);
+    /*background-color: var(--others-volumebar-thumb-color);*/
+    background-color: var(--content-highlight-color);
     z-index: 2;
     position: absolute;
     top: 50%;
