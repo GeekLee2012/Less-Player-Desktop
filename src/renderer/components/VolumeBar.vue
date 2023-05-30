@@ -59,7 +59,7 @@ defineExpose({
                 </g>
             </svg>
         </div>
-        <SliderBar class="volume-value" ref="sliderRef" :value="0.5" :onSeek="updateVolume" :onScroll="updateVolume"
+        <SliderBar class="volume-value" ref="sliderRef" :value="volume" :onSeek="updateVolume" :onScroll="updateVolume"
             :onDragMove="updateVolume" :disableOptimize="true">
         </SliderBar>
     </div>

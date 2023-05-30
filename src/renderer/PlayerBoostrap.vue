@@ -552,6 +552,7 @@ const progressState = ref(0)
 const resetPlayState = (ignore) => {
     currentTimeState.value = 0
     mmssCurrentTime.value = '00:00'
+    mmssPreseekTime.value = null
     progressState.value = 0
     if (!ignore) setPlayState(PLAY_STATE.NONE)
 }

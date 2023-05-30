@@ -47,6 +47,9 @@ const reformat = (value) => {
         }
     }
     return _value.toUpperCase().replace('LINEAR-GRADIENT', 'linear-gradient')
+        .replace('TOP', 'top').replace('BOTTOM', 'bottom')
+        .replace('LEFT', 'left').replace('RIGHT', 'right')
+        .replace('TO', 'to')
 }
 
 const toggleMode = () => {

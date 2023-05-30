@@ -99,7 +99,6 @@ const renderAndScrollLyric = (secs) => {
     const maxScrollTop = scrollHeight - clientHeight
     const destScrollTop = maxScrollTop * (scrollIndex / (lines.length - 1))
     lyricWrap.scrollTop = destScrollTop
-    //smoothScroll(lyricWrap, 300)
     */
 
     ////算法2：歌词可视区居中，依赖offsetParent定位 ////
@@ -107,6 +106,7 @@ const renderAndScrollLyric = (secs) => {
     //offsetTop：元素到offsetParent顶部的距离
     //offsetParent：距离元素最近的一个具有定位的祖宗元素（relative，absolute，fixed），若祖宗都不符合条件，offsetParent为body
     /* 
+    if (!lines[index].offsetTop) return
     const destScrollTop = lines[index].offsetTop - lyricWrap.clientHeight / 2
     lyricWrap.scrollTop = Math.max(destScrollTop, 0)
     */

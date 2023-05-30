@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref } from 'vue';
+import { watch, ref, onMounted } from 'vue';
 //TODO 组件代码写得乱，后期再梳理
 
 const props = defineProps({
@@ -120,17 +120,19 @@ watch(() => props.value, (nv, ov) => {
     updateProgress(nv, ov)
 })
 
+onMounted(() => updateProgress(props.value))
+
 //对外提供API
 defineExpose({
     updateProgress,
     toggleProgress
 })
-
 </script>
 
 <template>
     <div class="slider-bar" @mousewheel="scrollProgress" @mouseenter="showThumb" @mouseleave="hideThumb">
-        <div class="slider-bar-ctl" :class="{ 'slider-bar-ctl-ondrag': onDrag, 'slider-bar-ctl-with-thumb': thumbShow }"
+        <div class="slider-bar-ctl"
+            :class="{ 'slider-bar-ctl-ondrag': onDrag, 'slider-bar-ctl-with-thumb': thumbShow, 'slider-bar-ctl-disable': disable }"
             ref="sliderCtlRef" @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
             <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>
@@ -154,6 +156,10 @@ defineExpose({
     flex-direction: row;
     align-items: center;
     position: relative;
+}
+
+.slider-bar .slider-bar-ctl-disable {
+    cursor: default;
 }
 
 .slider-bar .progress {

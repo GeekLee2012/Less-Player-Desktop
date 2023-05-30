@@ -281,9 +281,12 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 /* .song-item .mv span, */
 .song-item .vipflag span {
-    color: var(--content-text-highlight-color);
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    color: transparent !important;
+
     border-radius: 3px;
-    border: 1.3px solid var(--content-text-highlight-color);
+    border: 1.3px solid var(--content-highlight-color);
     padding: 1px 3px;
     font-size: 10px;
     font-weight: 600;
