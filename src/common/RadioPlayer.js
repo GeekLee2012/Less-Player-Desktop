@@ -61,7 +61,7 @@ export class RadioPlayer {
             self.channelChanged = false
             lastPlayTime = Date.now()
             this.animationFrameCnt = 0
-            requestAnimationFrame(self.__step.bind(self))
+            requestAnimationFrame(self._step.bind(self))
         })
     }
 
@@ -105,7 +105,7 @@ export class RadioPlayer {
         audioNode.volume = value
     }
 
-    __step() {
+    _step() {
         if (!this.channel) return
         if (!this.playing) return
         const nowTime = Date.now()
@@ -114,7 +114,7 @@ export class RadioPlayer {
         if (this.isStateRefreshEnabled()) this.notify('track-pos', currentSecs)
         this._resolveSound()
         this._countAnimationFrame()
-        requestAnimationFrame(this.__step.bind(this))
+        requestAnimationFrame(this._step.bind(this))
     }
 
     on(event, handler) {

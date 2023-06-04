@@ -226,7 +226,8 @@ export class Player {
         this._resolvePendingSoundEffect()
         const { analyser } = this.webAudioApi
         if (!analyser) return
-        const freqData = new Uint8Array(analyser.frequencyBinCount)
+        const { frequencyBinCount } = analyser
+        const freqData = new Uint8Array(frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
         if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-spectrumData', freqData)
     }

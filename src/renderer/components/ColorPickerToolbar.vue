@@ -30,17 +30,22 @@ const VueColorKitHack = {
         this.onChanged = onChanged
     },
     selectColor(color) {
+        const _color = this._reformateHexa(color)
         if (colorPickerRef.value) colorPickerRef.value.selectColor(color)
     },
-    reformatHexaInput() {
-        const { value } = this.hexaInput
+    _reformateHexa(value) {
         let _value = value || ''.trim()
-        if (_value.length < 1) return
-        if (!_value.startsWith('#')) _value = '#' + _value
+        if (_value.length < 1) return value
+        if (!_value.startsWith('#') && !_value.startsWith('rgb')) _value = '#' + _value
         if (_value.length == 4) {
             const parts = _value.split('')
             _value = `#${parts[1]}${parts[1]}${parts[2]}${parts[2]}${parts[3]}${parts[3]}`
         }
+        return _value
+    },
+    reformatHexaInput() {
+        const { value } = this.hexaInput
+        let _value = this._reformateHexa(value)
         Object.assign(this.hexaInput, { value: _value.toUpperCase() })
     },
     updateRgbaInput() {
@@ -166,7 +171,7 @@ defineExpose({
     </div>
 </template>
 
-<style scoped>
+<style>
 .color-picker-toolbar {
     width: 218px;
     height: 369px;
@@ -205,5 +210,9 @@ defineExpose({
 
 .color-picker-toolbar .header .btn:hover {
     fill: var(--content-highlight-color);
+}
+
+.color-picker-toolbar .value {
+    font-size: 15px !important;
 }
 </style>

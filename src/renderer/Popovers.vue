@@ -180,6 +180,7 @@ const bindEventListeners = () => {
   })
 
   EventBus.on('app-resize', () => {
+    setupSoundEffectViewPos()
     setupCustomThemeEditViewPos()
     setupGradientColorToolbarPos()
   })
@@ -200,6 +201,14 @@ const setupGradientColorToolbarPos = () => {
     selector: '#gradient-color-toolbar',
     width: 768,
     height: 568
+  })
+}
+
+const setupSoundEffectViewPos = () => {
+  EventBus.emit('app-elementAlignCenter', {
+    selector: '.default-layout #sound-effect-view',
+    width: 725,
+    height: 550
   })
 }
 
@@ -232,10 +241,13 @@ onMounted(() => {
 
 watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
 watch(gradientColorToolbarShow, setupGradientColorToolbarPos)
+watch(soundEffectViewShow, setupSoundEffectViewPos)
+
 watch(() => getCurrentTheme(), (nv) => {
   const { appBackgroundScope: scope } = nv
   Object.assign(appBackgroundScope, { ...scope })
 }, { deep: true, immediate: true })
+
 </script>
 
 <template>

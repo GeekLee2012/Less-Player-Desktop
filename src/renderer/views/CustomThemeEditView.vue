@@ -597,7 +597,7 @@ watch(workingCustomTheme, (nv, ov) => {
                             </ColorInputControl>
                         </div>
                         <div class="item">
-                            <div class="name">内部L字颜色：</div>
+                            <div class="name">内部字母L颜色：</div>
                             <ColorInputControl :value="customTheme.appLogo.innerTextColor" :colorMode="true"
                                 :onChanged="setupAppLogoInnerTextColor">
                             </ColorInputControl>

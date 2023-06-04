@@ -7,7 +7,7 @@ import qs from "qs";
 const DOM_PARSER = new DOMParser()
 //axios.defaults.withCredentials = true
 
-const __get = (url, data, config, parseContentType) => {
+const _get = (url, data, config, parseContentType) => {
     return new Promise((resolve, reject) => {
         if (data && (typeof (data) === 'object')) {
             data = qs.stringify(data)
@@ -26,7 +26,7 @@ const __get = (url, data, config, parseContentType) => {
     })
 }
 
-const __post = (url, data, config, parseContentType) => {
+const _post = (url, data, config, parseContentType) => {
     return new Promise((resolve, reject) => {
         if (data && (typeof (data) === 'object')) {
             data = qs.stringify(data)
@@ -44,23 +44,23 @@ const __post = (url, data, config, parseContentType) => {
 }
 
 export const getRaw = (url, data, config) => {
-    return __get(url, data, config, resp => resp.data)
+    return _get(url, data, config, resp => resp.data)
 }
 
 export const getDoc = (url, data, config) => {
-    return __get(url, data, config, resp => DOM_PARSER.parseFromString(resp.data, "text/html"))
+    return _get(url, data, config, resp => DOM_PARSER.parseFromString(resp.data, "text/html"))
 }
 
 export const getJson = (url, data, config) => {
-    return __get(url, data, config, resp => JSON.parse(resp.data))
+    return _get(url, data, config, resp => JSON.parse(resp.data))
 }
 
 export const postRaw = (url, data, config) => {
-    return __post(url, data, config, resp => resp.data)
+    return _post(url, data, config, resp => resp.data)
 }
 
 export const postJson = (url, data, config) => {
-    return __post(url, data, config, resp => JSON.parse(resp.data))
+    return _post(url, data, config, resp => JSON.parse(resp.data))
 }
 
 //获取国内IPv4

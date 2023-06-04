@@ -28,8 +28,8 @@ export class Lyric {
 
     //MM:ss.SSS
     addLine(mmssSSS, text) {
-        if (!Lyric.__isValidTime(mmssSSS)) return
-        this.data.set(Lyric.__unifyTime(mmssSSS), text)
+        if (!Lyric._isValidTime(mmssSSS)) return
+        this.data.set(Lyric._unifyTime(mmssSSS), text)
     }
 
     hasData() {
@@ -51,10 +51,10 @@ export class Lyric {
                 if (line.length < 1) return
                 //console.log(line)
                 if (!line.startsWith(TAG_BEGIN) || !line.includes(TAG_END)) return
-                if (Lyric.__isTimeDataLine(line)) {
-                    Lyric.__parseTimeData(lyric, line)
+                if (Lyric._isTimeDataLine(line)) {
+                    Lyric._parseTimeData(lyric, line)
                 } else {
-                    Lyric.__parseMetaData(lyric, line)
+                    Lyric._parseMetaData(lyric, line)
                 }
             })
         } catch (error) {
@@ -63,11 +63,11 @@ export class Lyric {
         return Lyric.sort(lyric)
     }
 
-    static __isTimeDataLine(text) {
+    static _isTimeDataLine(text) {
         return TIME_LINE_REGEX.test(text)
     }
 
-    static __parseTimeData(lyric, text) {
+    static _parseTimeData(lyric, text) {
         const tokens = text.split(/[\[\]]/)
         const len = tokens.length
         if (len < 3) return
@@ -80,7 +80,7 @@ export class Lyric {
         }
     }
 
-    static __parseMetaData(lyric, text) {
+    static _parseMetaData(lyric, text) {
         const tokens = text.split(/[\[:\]]/)
         const len = tokens.length
         if (len < 3) return
@@ -103,11 +103,11 @@ export class Lyric {
         }
     }
 
-    static __isValidTime(text) {
+    static _isValidTime(text) {
         return TIME_REGEX.test(text)
     }
 
-    static __unifyTime(time) {
+    static _unifyTime(time) {
         const timeParts = time.split('.')
         if (timeParts.length >= 2) {
             const millisPart = timeParts[1].trim()

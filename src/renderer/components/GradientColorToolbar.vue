@@ -177,7 +177,7 @@ const updateValue = (value) => {
 }
 
 const appendColorStop = () => {
-    colorStops.value.push({ color: '#FFF', stop: null })
+    colorStops.value.push({ color: '#FFFFFF', stop: null })
     updateValue()
 }
 
@@ -317,7 +317,7 @@ defineExpose({
                     <div class="cate-name">颜色区间</div>
                     <div class="row-content">
                         <div class="tip-text">提示：没有颜色区间时，请点击窗口标题栏右侧的"追加颜色区间"按钮。<br>
-                            区间值: 可以不设置，格式：[起点值,终点值]，中间必须以空格分隔。<br>
+                            区间值: 值为百分数，可不设置，格式：[起点值 终点值]，中间必须以空格分隔。
                             示例：设置值为: 0% 20%，或者50%
                         </div>
                         <div class="item" v-for="(item, index) in colorStops" @keydown.stop="">

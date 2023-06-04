@@ -87,99 +87,6 @@ const setImageTextTileSize = () => {
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 1
     document.documentElement.style.setProperty('--others-image-text-tile-cover-size', `${tileWidth}px`)
-    /*
-    tileCovers.forEach(item => {
-        item.style.width = tileWidth + 'px'
-        item.style.height = tileWidth + 'px'
-    })
-    tileTitles.forEach(item => {
-        item.style.width = tileWidth + 'px'
-    })
-    tileSubtitles.forEach(item => {
-        item.style.width = tileWidth + 'px'
-    })
-    */
-}
-/*
-let dynamicSizeStyleElem = null
-const setImageTextTileSize0 = () => {
-    const tileMinWidth = 173
-    const tileHMargin = 13
-    const mainMargin = 33
-    const scrollBarWidth = 6
-    const limits = [8, 7, 6, 5, 4] //TODO 宽屏、超宽屏，需更好兼容性
-    const mainContent = document.getElementById('default-main-content')
-    if (!mainContent) return
-    const { clientWidth } = mainContent
-    const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
-    let tileWidth = tileMinWidth, limit = 4
-    for (var i = 0; i < limits.length; i++) {
-        if (clientWidth >= minWidths[i]) {
-            limit = limits[i]
-            break
-        }
-    }
-    tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
-
-    //浮点数运算有误差，保险起见，设置一个误差值
-    tileWidth = parseInt(tileWidth) - 1
-    if (!dynamicSizeStyleElem) {
-        dynamicSizeStyleElem = document.createElement('style')
-        dynamicSizeStyleElem.setAttribute('type', 'text/css')
-        document.head.appendChild(dynamicSizeStyleElem)
-
-    }
-    dynamicSizeStyleElem.innerHTML = `.dynamic-width{width:${tileWidth}px !important;}\n`
-        + `.dynamic-height{height:${tileWidth}px !important;\n}`
-        + `.dynamic-size{width:${tileWidth}px !important;height:${tileWidth}px !important;line-height:${tileWidth}px !important;}\n`
-}
-
-const setImageTextTileLoadingMaskSize = () => {
-    const tileMinWidth = 173;
-    const tileHMargin = 13;
-    const mainMargin = 33;
-    const titleHeight = 28, titleMarginTop = 5;
-    const scrollBarWidth = 6
-    const limits = [8, 7, 6, 5, 4]
-    const mainContent = document.getElementById('default-main-content')
-    if (!mainContent) return
-    const { clientWidth } = mainContent
-    const minWidths = limits.map(item => item * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
-    const tiles = document.querySelectorAll('.tiles-loading-mask .tile')
-    const tileCovers = document.querySelectorAll('.tiles-loading-mask .tile .cover')
-    const tileTitles = document.querySelectorAll('.tiles-loading-mask .tile .title')
-    let tileWidth = tileMinWidth, limit = 4, isLastVisible = true
-    for (var i = 0; i < limits.length; i++) {
-        if (clientWidth >= minWidths[i]) {
-            limit = limits[i]
-            //TODO
-            isLastVisible = (i == 4)
-            break
-        }
-    }
-    tileWidth = (clientWidth - 2 * mainMargin - scrollBarWidth) / limit - tileHMargin * 2
-    //浮点数运算有误差，保险起见，设置一个误差值
-    tileWidth = parseInt(tileWidth) - 2
-    for (var i = 0; i < tiles.length; i++) {
-        const item = tiles[i]
-        item.style.width = tileWidth + 'px'
-        item.style.height = tileWidth + titleHeight + titleMarginTop + 'px'
-        if (i == (tiles.length - 1)) {
-            item.style.display = isLastVisible ? 'block' : 'none'
-        }
-    }
-    tileCovers.forEach(item => {
-        item.style.width = tileWidth + 'px'
-        item.style.height = tileWidth + 'px'
-    })
-    tileTitles.forEach(item => {
-        item.style.width = tileWidth + 'px'
-    })
-}
-*/
-const setImageTextTileComponentSize = () => {
-    setImageTextTileSize()
-    //setImageTextTileLoadingMaskSize()
 }
 
 const setPlayingCoverSize = () => {
@@ -297,14 +204,6 @@ const setPlayingViewSize = () => {
     setLyricToolbarPos()
 }
 
-const setSoundEffectViewAlignment = () => {
-    EventBus.emit('app-elementAlignCenter', {
-        selector: '.default-layout #sound-effect-view',
-        width: 725,
-        height: 550
-    })
-}
-
 const setLyricToolbarPos = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const el = document.querySelector('#lyric-toolbar')
@@ -367,17 +266,13 @@ onMounted(() => {
         //自适应搜索框大小
         //setSearchBarSize()
         //自适应ImageTextTile组件大小
-        setImageTextTileComponentSize()
+        setImageTextTileSize()
         //自适应分类列表大小
         setCategoryViewSize()
         //自适应播放页组件大小
         setPlayingViewSize()
         //自适应批量操作页面列表大小
         setBatchViewListSize()
-        //自适应视频页面大小
-        //setVideoViewSize()
-        //音效窗口自动居中
-        setSoundEffectViewAlignment()
         //主题页
         setThemeViewItemsSize()
 
@@ -396,15 +291,37 @@ onMounted(() => {
 
 })
 
-//EventBus.on('imageTextTiles-update', setImageTextTileComponentSize)
-//EventBus.on('imageTextTiles-mounted', setImageTextTileComponentSize)
 EventBus.on('batchView-show', setBatchViewListSize)
 EventBus.on('playingView-changed', setPlayingViewSize)
 EventBus.on('app-layout-default', setupDefaultLayout)
+/*
+EventBus.on('app-resize', event => {
+    if (!isDefaultLayout.value) return
+    //自适应播放元信息组件大小
+    setPlayMetaSize()
+    //自适应搜索框大小
+    //setSearchBarSize()
+    //自适应ImageTextTile组件大小
+    setImageTextTileSize()
+    //自适应分类列表大小
+    setCategoryViewSize()
+    //自适应播放页组件大小
+    setPlayingViewSize()
+    //自适应批量操作页面列表大小
+    setBatchViewListSize()
+    //主题页
+    setThemeViewItemsSize()
+
+    //隐藏上下文菜单
+    hideAllCtxMenus()
+    //TODO 窗口缩放Bug，放在最后执行确保缩放
+    setupWindowZoom(true)
+    //nextTick(() => setupWindowZoom(true))
+})
+*/
 
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)
-watch(soundEffectViewShow, setSoundEffectViewAlignment)
 watch(playingViewShow, (nv, ov) => {
     hideLyricToolbar()
     setPlayingViewSize()

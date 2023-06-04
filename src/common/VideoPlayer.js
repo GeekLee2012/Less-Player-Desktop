@@ -53,7 +53,7 @@ export class VideoPlayer {
                 self.setPlayState(true)
                 self.videoChanged = false
                 lastPlayTime = Date.now()
-                requestAnimationFrame(self.__step.bind(self))
+                requestAnimationFrame(self._step.bind(self))
             })
         } else { //TODO
             this.addSourceToVideo(gVideoHolder, src, 'video/mp4')
@@ -128,14 +128,14 @@ export class VideoPlayer {
         gVideoHolder.volume = value
     }
 
-    __step() {
+    _step() {
         if (!this.video) return
         if (!this.playing) return
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
         const currentSecs = currentTime / 1000
         EventBus.emit('video-pos', currentSecs)
-        requestAnimationFrame(this.__step.bind(this))
+        requestAnimationFrame(this._step.bind(this))
     }
 
     on(event, handler) {
