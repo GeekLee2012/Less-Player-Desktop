@@ -9,6 +9,15 @@ const MusicMetadata = require('music-metadata');
 
 const FILE_PREFIX = 'file:///'
 
+const transformPath = (path) => {
+    try {
+        return path.replace(/\\/g, '/')
+    } catch (error) {
+        console.log(error)
+    }
+    return path
+}
+
 const isExtentionValid = (name, exts) => {
     for (var ext of exts) {
         if (name.endsWith(ext)) {
@@ -25,7 +34,7 @@ const scanDirTracks = async (dir, exts) => {
         const files = []
         for await (const dirent of list) {
             if (dirent.isFile() && isExtentionValid(dirent.name, exts)) {
-                const fullname = path.join(dir, dirent.name)
+                const fullname = transformPath(path.join(dir, dirent.name))
                 files.push(fullname)
             }
         }
@@ -42,7 +51,7 @@ const scanDirTracks = async (dir, exts) => {
 
 function getSimpleFileName(fullname) {
     if (!fullname) return ''
-    fullname = fullname.trim()
+    fullname = transformPath(fullname).trim()
     const from = fullname.lastIndexOf('/')
     const to = fullname.lastIndexOf('.')
     return fullname.substring(from + 1, to)
@@ -65,6 +74,7 @@ async function parseTracks(audioFiles) {
 }
 
 async function parseTrackMetadata(file) {
+    file = transformPath(file)
     const metadata = await MusicMetadata.parseFile(file, { duration: true })
     const artist = []
     let filename = getSimpleFileName(file)
@@ -205,6 +215,7 @@ const listFiles = async (dir, isFullname) => {
 //解析.pls格式文件
 const parsePlsFile = async (filename) => {
     try {
+        filename = transformPath(filename)
         const sname = getSimpleFileName(filename)
         const result = { file: filename, name: sname, version: null, data: [] }
         //读取文本内容
@@ -263,6 +274,7 @@ const parsePlsFile = async (filename) => {
 //解析.m3u格式文件
 const parseM3uFile = async (filename) => {
     try {
+        filename = transformPath(filename)
         const sname = getSimpleFileName(filename)
         const result = { file: filename, name: sname, version: null, data: [] }
         //读取文本内容
