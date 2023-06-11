@@ -1,9 +1,11 @@
 <script setup>
-import SvgTextButton from '../components/SvgTextButton.vue';
+const props = defineProps({
+    disabled: Boolean
+})
 </script>
 
 <template>
-    <SvgTextButton class="play-add-all-btn" text="播放全部">
+    <SvgTextButton class="play-add-all-btn" text="播放全部" :disabled="disabled">
         <template #left-img>
             <svg width="18" height="18" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">

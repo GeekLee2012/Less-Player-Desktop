@@ -10,10 +10,12 @@ const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
 
 const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX,
   randomTextWithinAlphabetNums, nextInt,
-  getDownloadDir, removePath, listFiles
+  getDownloadDir, removePath, listFiles,
+  parsePlsFile, parseM3uFile
 } = require('./common')
 
 const path = require('path')
+const { dir } = require('console')
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
@@ -232,13 +234,44 @@ const registryGlobalListeners = () => {
     if (path) shell.showItemInFolder(path)
   })
 
-  ipcMain.handle('open-audio-dirs', async (event, ...args) => {
+  ipcMain.handle('open-audio-playlist', async (event, ...args) => {
+    const result = await dialog.showOpenDialog(mainWin, {
+      title: '请选择Audio Playlist文件',
+      filters: [{ name: 'Playlist文件', extensions: ['.m3u', '.pls'] }],
+      properties: ['openFile']
+    })
+    if (result.canceled) return null
+    return result.filePaths[0]
+  })
+
+  ipcMain.handle('parse-audio-playlist', async (event, ...args) => {
+    const file = args[0].trim()
+    let result = null
+    if (file.toLowerCase().endsWith('.pls')) {
+      result = await parsePlsFile(file)
+    } else if (file.toLowerCase().endsWith('.m3u')) {
+      result = await parseM3uFile(file)
+    }
+    return result
+  })
+
+  ipcMain.handle('open-dirs', async (event, ...args) => {
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件夹',
       properties: ['openDirectory']
     })
     if (result.canceled) return null
-    return scanDirTracks(result.filePaths[0], AUDIO_EXTS)
+    return result.filePaths
+  })
+
+  ipcMain.handle('scan-audio-dirs', async (event, ...args) => {
+    const dirs = args[0]
+    const result = []
+    for (var i = 0; i < dirs.length; i++) {
+      const tracks = await scanDirTracks(dirs[i], AUDIO_EXTS)
+      result.push(tracks)
+    }
+    return result
   })
 
   ipcMain.handle('open-audios', async (event, ...args) => {
@@ -349,10 +382,9 @@ const createMainWindow = () => {
   })
   if (isDevEnv) {
     mainWindow.loadURL("http://localhost:5173/")
-    // Open the DevTools.
+    //打开DevTools
     mainWindow.webContents.openDevTools()
   } else {
-    // Load the index.html of the app.
     mainWindow.loadFile('dist/index.html')
   }
   //菜单
@@ -383,10 +415,10 @@ const createMainWindow = () => {
       "*://*.qtfm.cn/*"
     ]
   }
-  const webSession = mainWindow.webContents.session
-  webSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    overrideRequest(details)
-    callback({ requestHeaders: details.requestHeaders })
+  const { webRequest } = mainWindow.webContents.session
+  webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    const { requestHeaders } = overrideRequest(details)
+    callback({ requestHeaders })
   })
 
   return mainWindow
@@ -468,7 +500,7 @@ const sendToRenderer = (channel, args) => {
 
 //TODO 
 const sendTrayAction = (action, showWin) => {
-  if (showWin && mainWin) mainWin.show()
+  if (mainWin && showWin) mainWin.show()
   sendToRenderer('tray-action', action)
 }
 
@@ -526,7 +558,7 @@ const setWindowButtonVisibility = (visible) => {
 }
 
 const toggleWinOSFullScreen = () => {
-  if (!isWinOS) return null
+  if (!mainWin || !isWinOS) return null
   const isMax = mainWin.isMaximized()
   if (isMax) {
     mainWin.unmaximize()
@@ -537,7 +569,7 @@ const toggleWinOSFullScreen = () => {
 }
 
 const setupAppWindowZoom = (zoom, noResize) => {
-  if (!zoom) return
+  if (!mainWin || !zoom) return
   zoom = Number(zoom) || 85
   const zoomFactor = parseFloat(zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return
@@ -630,7 +662,7 @@ const overrideRequest = (details) => {
   let xrouter = null
   let csrf = null
 
-  const url = details.url
+  const { url } = details
   if (url.includes("qq.com")) {
     origin = "https://y.qq.com/"
     referer = origin
@@ -682,6 +714,7 @@ const overrideRequest = (details) => {
   if (xrouter) details.requestHeaders['x-router'] = xrouter
   if (csrf) details.requestHeaders['CSRF'] = csrf
 
+  return details
 }
 
 //启动应用

@@ -109,7 +109,7 @@ export const useSettingStore = defineStore('setting', {
         /* 缓存 */
         cache: {
             storePlayState: true,   //退出后保存播放状态：包括当前歌曲、播放列表等
-            storeLocalMusic: false, //退出后记录已经添加的本地歌曲
+            storeLocalMusic: true, //退出后记录已经添加的本地歌曲
             storeRecentPlay: true,  //记录最近播放
         },
         /* 菜单栏、Windows平台为系统托盘 */

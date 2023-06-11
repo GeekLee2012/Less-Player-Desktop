@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'CustomPlaylistEditView'
+    name: 'LocalPlaylistEditView'
 }
 </script>
 
@@ -9,7 +9,7 @@ export default {
 import { storeToRefs } from 'pinia';
 import { onMounted, onActivated, ref, reactive, watch, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useUserProfileStore } from '../store/userProfileStore';
+import { useLocalMusicStore } from '../store/localMusicStore';
 import { useIpcRenderer } from '../../common/Utils';
 
 
@@ -24,23 +24,25 @@ const ipcRenderer = useIpcRenderer()
 
 const { showToast } = useAppCommonStore()
 const titleRef = ref(null)
+const tagsRef = ref(null)
 const aboutRef = ref(null)
 const coverRef = ref(null)
 const invalid = ref(false)
-const detail = reactive({ title: null, about: null, cover: null })
+const detail = reactive({ title: null, tags: null, about: null, cover: null })
 
 //TODO
-const { addCustomPlaylist, updateCustomPlaylist, getCustomPlaylist } = useUserProfileStore()
+const { addLocalPlaylist, updateLocalPlaylist, getLocalPlaylist } = useLocalMusicStore()
 
-const loadCustomPlaylist = () => {
+const loadLocalPlaylist = () => {
     if (!props.id) return
     const id = props.id.trim()
     if (id.length < 1) return
-    const playlist = getCustomPlaylist(id)
+    const playlist = getLocalPlaylist(id)
     if (!playlist) return
-    const { title, about, cover } = playlist
+    const { title, tags, about, cover } = playlist
     Object.assign(detail, { id })
     if (cover) Object.assign(detail, { cover })
+    if (tags) Object.assign(detail, { tags })
     if (title) Object.assign(detail, { title })
     if (about) Object.assign(detail, { about })
 }
@@ -52,6 +54,7 @@ const checkValid = () => {
 
 const submit = () => {
     let title = titleRef.value.value.trim()
+    let tags = tagsRef.value.value.trim()
     let about = aboutRef.value.value.trim()
     let cover = coverRef.value.src
     if (title.length < 1) {
@@ -60,9 +63,9 @@ const submit = () => {
     }
     let text = "歌单已创建成功!"
     if (!props.id) {
-        addCustomPlaylist(title, about, cover)
+        addLocalPlaylist(title, tags, about, cover)
     } else {
-        updateCustomPlaylist(props.id, title, about, cover)
+        updateLocalPlaylist(props.id, title, tags, about, cover)
         text = "歌单已保存!"
     }
     showToast(text, backward)
@@ -74,20 +77,22 @@ const updateCover = async () => {
     const result = await ipcRenderer.invoke('open-image')
     if (result.length > 0) {
         const title = titleRef.value.value.trim()
+        const tags = tagsRef.value.value.trim()
         const about = aboutRef.value.value.trim()
         const cover = result[0]
-        Object.assign(detail, { title, about, cover })
+        Object.assign(detail, { title, tags, about, cover })
     }
 }
 
-onMounted(() => loadCustomPlaylist())
+onMounted(() => loadLocalPlaylist())
+
 </script>
 
 <template>
-    <div id="custom-playlist-edit-view">
+    <div id="local-playlist-edit-view">
         <div class="header">
-            <span class="title" v-show="!id">创建歌单</span>
-            <span class="title" v-show="id">编辑歌单</span>
+            <span class="title" v-show="!id">创建本地歌单</span>
+            <span class="title" v-show="id">编辑本地歌单</span>
         </div>
         <div class="center">
             <div>
@@ -103,6 +108,16 @@ onMounted(() => loadCustomPlaylist())
                     <div @keydown.stop="">
                         <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
                             placeholder="歌单名称，最多允许输入99个字符哦" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <span>标签</span>
+                        <span class="required"> （暂时还不支持）</span>
+                    </div>
+                    <div @keydown.stop="">
+                        <input type="text" :value="detail.tags" ref="tagsRef" :class="{ invalid }" maxlength="99"
+                            placeholder="标签，歌单分类；多个标签时，以英文状态下的逗号(,)分隔" />
                     </div>
                 </div>
                 <div class="form-row">
@@ -123,7 +138,7 @@ onMounted(() => loadCustomPlaylist())
 </template>
 
 <style>
-#custom-playlist-edit-view {
+#local-playlist-edit-view {
     display: flex;
     flex-direction: column;
     padding: 20px 33px 15px 33px;
@@ -131,14 +146,14 @@ onMounted(() => loadCustomPlaylist())
     overflow: scroll;
 }
 
-#custom-playlist-edit-view .header {
+#local-playlist-edit-view .header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 20px;
 }
 
-#custom-playlist-edit-view .header .title {
+#local-playlist-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
     /*font-size: 30px;*/
@@ -146,13 +161,13 @@ onMounted(() => loadCustomPlaylist())
     font-weight: bold;
 }
 
-#custom-playlist-edit-view .center {
+#local-playlist-edit-view .center {
     display: flex;
     flex-direction: row;
     flex: 1;
 }
 
-#custom-playlist-edit-view .center .cover {
+#local-playlist-edit-view .center .cover {
     width: 175px;
     height: 175px;
     border-radius: 6px;
@@ -160,7 +175,7 @@ onMounted(() => loadCustomPlaylist())
     box-shadow: 0px 0px 1px #161616;
 }
 
-#custom-playlist-edit-view .center .cover-eidt-btn {
+#local-playlist-edit-view .center .cover-eidt-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
     padding: 5px;
@@ -169,31 +184,31 @@ onMounted(() => loadCustomPlaylist())
 }
 
 
-#custom-playlist-edit-view .center .right {
+#local-playlist-edit-view .center .right {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-left: 20px;
 }
 
-#custom-playlist-edit-view .center .form-row {
+#local-playlist-edit-view .center .form-row {
     margin-bottom: 17px;
 }
 
-#custom-playlist-edit-view .center .form-row div {
+#local-playlist-edit-view .center .form-row div {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#custom-playlist-edit-view .center .form-row span {
+#local-playlist-edit-view .center .form-row span {
     font-size: var(--content-text-subtitle-size);
     color: var(--content-text-color);
     margin-bottom: 8px;
 }
 
-#custom-playlist-edit-view .center .form-row input,
-#custom-playlist-edit-view .center .form-row textarea {
+#local-playlist-edit-view .center .form-row input,
+#local-playlist-edit-view .center .form-row textarea {
     flex: 1;
     border: 1px solid var(--border-inputs-border-color);
     outline: none;
@@ -205,37 +220,37 @@ onMounted(() => loadCustomPlaylist())
     font-size: var(--content-text-size);
 }
 
-#custom-playlist-edit-view .center .form-row input {
+#local-playlist-edit-view .center .form-row input {
     height: 25px;
 }
 
-#custom-playlist-edit-view .center .form-row textarea {
-    height: 280px;
+#local-playlist-edit-view .center .form-row textarea {
+    height: 188px;
     padding: 8px;
 }
 
-#custom-playlist-edit-view .center .action {
+#local-playlist-edit-view .center .action {
     display: flex;
     flex-direction: row;
 }
 
-#custom-playlist-edit-view .spacing {
+#local-playlist-edit-view .spacing {
     margin-left: 20px;
 }
 
-#custom-playlist-edit-view .required {
+#local-playlist-edit-view .required {
     color: var(--content-text-highlight-color) !important;
     font-weight: bold;
     font-size: 20px;
 }
 
-#custom-playlist-edit-view .invalid {
+#local-playlist-edit-view .invalid {
     border-color: var(--content-error-color) !important;
     border-width: 3px;
 }
 
 /*
-#custom-playlist-edit-view ::-webkit-input-placeholder {
+#local-playlist-edit-view ::-webkit-input-placeholder {
     color: var(--input-placeholder-color);
 }
 */

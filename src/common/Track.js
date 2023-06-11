@@ -119,6 +119,7 @@ export class Track {
         if (!track || !track.cover) return false
         track.cover = track.cover.trim()
         if (track.cover.length < 1) return false
+        if (track.cover.includes('default_cover.png')) return false
         return true
     }
 

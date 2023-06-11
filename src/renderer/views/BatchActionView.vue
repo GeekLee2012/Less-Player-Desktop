@@ -7,18 +7,19 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { inject, onMounted, reactive, ref, shallowRef, watch } from 'vue';
+import { inject, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue';
 import EventBus from '../../common/EventBus';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import SongListControl from '../components/SongListControl.vue';
-import SvgTextButton from '../components/SvgTextButton.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
+import Mousetrap from 'mousetrap';
+
 
 
 const { currentRoutePath, backward } = inject('appRoute')
@@ -36,14 +37,14 @@ const { removeFavoriteSong, removeFavoritePlaylist,
     removeFavoriteAlbum, removeFavoriteRadio,
     removeRecentSong, removeRecentPlaylist,
     removeRecentAlbum, removeRecentRadio,
-    getCustomPlaylist, removeTrackFromCustomPlaylist } = useUserProfileStore()
+    getCustomPlaylist, removeFromCustomPlaylist } = useUserProfileStore()
 const { addTracks, playTrack } = usePlayStore()
 const { commonCtxMenuShow, commonCtxItem } = storeToRefs(useAppCommonStore())
 const { showToast, updateCommonCtxItem, hideAllCtxMenus } = useAppCommonStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
-const { getLocalSongs } = storeToRefs(useLocalMusicStore())
-const { removeItem } = useLocalMusicStore()
+const { localPlaylists } = storeToRefs(useLocalMusicStore())
+const { getLocalPlaylist, removeFromLocalPlaylist, removeLocalPlaylist } = useLocalMusicStore()
 
 const isFavorites = () => props.source == "favorites"
 const isRecents = () => props.source == "recents"
@@ -74,9 +75,11 @@ const typeTabs = [{
 const title = ref("")
 const subtitle = ref("")
 const activeTab = ref(0)
+const firstVisibleTab = ref(0)
 const tabTipText = ref("")
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
+
 //TODO
 const actionShowCtl = reactive({
     playBtn: false,
@@ -98,8 +101,10 @@ const updateTitle = () => {
         text = "创建的歌单"
         subtext = sourceItem.title
     }
-    if (isLocalMusic()) text = "本地歌曲"
-
+    if (isLocalMusic()) {
+        text = "本地歌曲"
+        subtext = sourceItem.title
+    }
     title.value = text
     subtitle.value = subtext
 }
@@ -108,8 +113,35 @@ const isTabsVisible = (tab, index) => {
     if (isFavorites()) return true
     if (isRecents()) return true
     if (isCustomPlaylist() && index == 0) return true
-    if (isLocalMusic() && index == 0) return true
+    if (isLocalMusic() && props.id !== '0' && index == 0) return true
+    if (isLocalMusic() && props.id === '0' && index == 1) return true
     return false
+}
+
+const getFirstVisibleTabIndex = () => {
+    return (isLocalMusic() && props.id === '0') ? 1 : 0
+}
+
+//shift快速选择功能，当前区间边界Index
+let shiftRangeCurrentIndex = -1
+const fastSelectByShiftKey = (item) => {
+    if (!shiftPressed.value) return
+    const { index } = item
+    if (shiftRangeCurrentIndex < 0) {
+        checkedData.push(item)
+    } else {
+        const start = Math.min(shiftRangeCurrentIndex, index)
+        const end = Math.max(shiftRangeCurrentIndex, index) + 1
+        const rangeData = tabData.slice(start, end)
+        for (var i = start; i < end; i++) {
+            if (i === shiftRangeCurrentIndex) continue
+            checkedData.push({
+                index: i,
+                ...rangeData[i]
+            })
+        }
+    }
+    shiftRangeCurrentIndex = index
 }
 
 const onCheckChanged = (checked, item) => {
@@ -175,12 +207,13 @@ const switchTab = () => {
                 addToQueueBtn: true,
                 deleteBtn: true,
             })
-            tabData.push(...getLocalSongs.value)
+            tabData.push(...loadLocalPlaylist())
         }
         currentTabView.value = SongListControl
     } else if (activeTab.value == 1) {
         if (isFavorites()) tabData.push(...getFavoritePlaylilsts.value(platform))
         if (isRecents()) tabData.push(...getRecentPlaylilsts.value(platform))
+        if (isLocalMusic()) tabData.push(...localPlaylists.value)
         currentTabView.value = PlaylistsControl
     } else if (activeTab.value == 2) {
         if (isFavorites()) tabData.push(...getFavoriteAlbums.value(platform))
@@ -211,10 +244,27 @@ const loadCustomPlaylist = (platform) => {
     return playlist.data.filter(item => (item.platform == platform.trim()))
 }
 
+const loadLocalPlaylist = () => {
+    const playlist = getLocalPlaylist(props.id)
+    Object.assign(sourceItem, { ...playlist })
+    updateCommonCtxItem(playlist)
+    return playlist.data
+}
+
 const toggleSelectAll = () => {
     if (tabData.length < 1) return
     ignoreCheckAllEvent.value = false
     checkedAll.value = !checkedAll.value
+    checkedData.length = 0
+    if (checkedAll.value) {
+        checkedData.push(...tabData)
+    }
+    updateTipText()
+}
+
+const selectAll = () => {
+    ignoreCheckAllEvent.value = false
+    checkedAll.value = true
     checkedData.length = 0
     if (checkedAll.value) {
         checkedData.push(...tabData)
@@ -285,11 +335,12 @@ const removeChecked = () => {
     if (activeTab.value == 0) {
         if (isFavorites()) deleteFn = removeFavoriteSong
         if (isRecents()) deleteFn = removeRecentSong
-        if (isCustomPlaylist()) deleteFn = removeTrackFromCustomPlaylist
-        if (isLocalMusic()) deleteFn = removeItem
+        if (isCustomPlaylist()) deleteFn = removeFromCustomPlaylist
+        if (isLocalMusic()) deleteFn = removeFromLocalPlaylist
     } else if (activeTab.value == 1) {
         if (isFavorites()) deleteFn = removeFavoritePlaylist
         if (isRecents()) deleteFn = removeRecentPlaylist
+        if (isLocalMusic()) deleteFn = removeLocalPlaylist
     } else if (activeTab.value == 2) {
         if (isFavorites()) deleteFn = removeFavoriteAlbum
         if (isRecents()) deleteFn = removeRecentAlbum
@@ -299,12 +350,13 @@ const removeChecked = () => {
     }
     if (deleteFn) {
         if (isFavorites()) checkedData.forEach(item => deleteFn(item.id, item.platform))
-        if (isRecents()) checkedData.forEach(item => deleteFn(item))
-        if (isCustomPlaylist()) {
+        else if (isRecents()) checkedData.forEach(item => deleteFn(item))
+        else if (activeTab.value == 0 && (isCustomPlaylist() || isLocalMusic())) {
             const { id } = commonCtxItem.value
             checkedData.forEach(item => deleteFn(id, item))
+        } else if (activeTab.value == 1 && isLocalMusic()) {
+            checkedData.forEach(item => deleteFn(item.id))
         }
-        if (isLocalMusic()) checkedData.forEach(item => deleteFn(item))
         refresh()
         showToast("删除操作成功!")
     }
@@ -327,11 +379,36 @@ const resetBack2TopBtn = () => {
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(contentRef.value)
 }
 
+const shiftPressed = ref(false)
+const setShiftPressed = (value) => shiftPressed.value = value
+//注册/取消当前页面快捷键
+const registryLocalKeys = (unbind) => {
+    if (unbind) { //取消注册
+        Mousetrap.unbind(['ctrl+a', 'command+a'])
+        Mousetrap.unbind(['shift'])
+        shiftRangeCurrentIndex = - 1
+    } else { //注册
+        //全选
+        Mousetrap.bind(['ctrl+a', 'command+a'], selectAll)
+        //开启/关闭快速选择
+        Mousetrap.bind(['shift'], () => setShiftPressed(true), 'keydown')
+        Mousetrap.bind(['shift'], () => {
+            setShiftPressed(false)
+            shiftRangeCurrentIndex = - 1
+        }, 'keyup')
+    }
+}
+
 onMounted(() => {
     updateCurrentPlatform(0)
-    visitTab(0)
+    visitTab(getFirstVisibleTabIndex())
     updateTitle()
     resetBack2TopBtn()
+    registryLocalKeys()
+})
+
+onUnmounted(() => {
+    registryLocalKeys(true)
 })
 
 watch(currentPlatformCode, (nv, ov) => {
@@ -360,7 +437,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
         </div>
         <div class="center">
             <div class="action">
-                <div class="checkbox" :class="{ btnDisabled: (tabData.length < 1) }">
+                <div class="checkbox" :class="{ 'button-disabled': (tabData.length < 1) }">
                     <svg @click="toggleSelectAll" v-show="!checkedAll" width="16" height="16" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
@@ -381,7 +458,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                     </svg>
                     <span @click="toggleSelectAll">{{ (checkedAll ? "取消全选" : "全选") }}</span>
                 </div>
-                <SvgTextButton :isDisabled="checkedData.length < 1" text="播放" class="spacing" v-show="actionShowCtl.playBtn"
+                <SvgTextButton :disabled="checkedData.length < 1" text="播放" class="spacing" v-show="actionShowCtl.playBtn"
                     :leftAction="playChecked" :rightAction="addToQueue">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 0 139 139" xml:space="preserve"
@@ -408,7 +485,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                         </svg>
                     </template>
                 </SvgTextButton>
-                <SvgTextButton :isDisabled="checkedData.length < 1" text="添加到" class="spacing addToBtn"
+                <SvgTextButton :disabled="checkedData.length < 1" text="添加到" class="spacing addToBtn"
                     v-show="actionShowCtl.addToBtn" :leftAction="toggleAddCheckedMenu">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 -50 768.02 554.57" xmlns="http://www.w3.org/2000/svg">
@@ -427,7 +504,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                         </svg>
                     </template>
                 </SvgTextButton>
-                <SvgTextButton :isDisabled="checkedData.length < 1" text="移动到" class="spacing moveToBtn"
+                <SvgTextButton :disabled="checkedData.length < 1" text="移动到" class="spacing moveToBtn"
                     v-show="actionShowCtl.moveToBtn" :leftAction="toggleMoveCheckedMenu">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 0 896.41 896.43" xmlns="http://www.w3.org/2000/svg">
@@ -440,18 +517,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                         </svg>
                     </template>
                 </SvgTextButton>
-                <!--
-                            <SvgTextButton :isDisabled="checkedData.length < 1" 
-                                text="添加到当前播放" class="spacing addToBtn"
-                                v-show="actionShowCtl.addToQueueBtn" 
-                                :leftAction="addToQueue" >
-                                <template #left-img>
-                                    <svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>
-                                </template>
-                            </SvgTextButton>
-                            -->
-                <SvgTextButton :isDisabled="checkedData.length < 1" text="删除" class="spacing"
-                    v-show="actionShowCtl.deleteBtn" :leftAction="removeChecked">
+                <SvgTextButton :disabled="checkedData.length < 1" text="删除" class="spacing" v-show="actionShowCtl.deleteBtn"
+                    :leftAction="removeChecked">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">
@@ -474,7 +541,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
             </div>
             <div class="content" ref="contentRef" @scroll="onScroll">
                 <component :is="currentTabView" :data="tabData" :checkbox="true" :checkedAll="checkedAll"
-                    :checkChangedFn="onCheckChanged" :ignoreCheckAllEvent="ignoreCheckAllEvent">
+                    :checkChangedFn="onCheckChanged" :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkedData="checkedData">
                 </component>
             </div>
         </div>

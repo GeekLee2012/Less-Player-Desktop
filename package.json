@@ -37,8 +37,6 @@
     "crypto-js": "^4.1.1",
     "hls.js": "^1.4.4",
     "howler": "^2.2.3",
-    "iconv-lite": "^0.6.3",
-    "jschardet": "^3.0.0",
     "mitt": "^3.0.0",
     "mousetrap": "^1.6.5",
     "music-metadata": "^7.13.4",

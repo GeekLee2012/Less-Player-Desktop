@@ -1,14 +1,12 @@
 <script setup>
-import SvgTextButton from '../components/SvgTextButton.vue';
-
-
 const props = defineProps({
-    deleteBtn: Boolean
+    deleteBtn: Boolean,
+    disabled: Boolean
 })
 </script>
 
 <template>
-    <SvgTextButton class="batch-action-btn" text="批量操作">
+    <SvgTextButton class="batch-action-btn" text="批量操作" :disabled="disabled">
         <template #left-img>
             <svg width="15" height="15" viewBox="0 0 160 125" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
@@ -39,6 +37,4 @@ const props = defineProps({
     </SvgTextButton>
 </template>
 
-<style>
-
-</style>
+<style></style>

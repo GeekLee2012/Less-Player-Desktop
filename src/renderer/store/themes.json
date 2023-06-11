@@ -28,54 +28,54 @@
                 "highlightColor": "#28c83f",
                 "headerNavBgColor": "#48484a",
                 "loadingMaskColor": "linear-gradient(to right, #414141 8%, #515151 18%, #414141 33%)",
-                "listItemHoverBgColor": "#666",
+                "listItemHoverBgColor": "#666666",
                 "leftNavBgColor": "#48484a",
-                "inputsBgColor": "#eee",
+                "inputsBgColor": "#eeeeee",
                 "inputsTextColor": "#373737"
             },
             "border": {
                 "borderColor": "#414141",
-                "leftNavBorderColor": "#333",
-                "popoversBorderColor": "#222",
-                "inputsBorderColor": "#999"
+                "leftNavBorderColor": "#333333",
+                "popoversBorderColor": "#222222",
+                "inputsBorderColor": "#999999"
             },
             "button": {
-                "iconBtnColor": "#fff",
+                "iconBtnColor": "#ffffff",
                 "iconTextBtnTextColor": "#eaeaea",
-                "iconTextBtnIconColor": "#fff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #2edfa3, #28c83f)",
-                "toggleBtnBgColor": "#999",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnBgColor": "#999999",
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": null,
-                "bgColor": "#eee",
+                "bgColor": "#eeeeee",
                 "textColor": "#373737",
                 "searchBtnBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
                 "searchBtnHoverBgColor": "linear-gradient(to top right, #2edfa3, #28c83f)",
-                "searchBtnIconColor": "#fff",
-                "searchBtnHoverIconColor": "#fff",
-                "clearBtnIconColor": "#666"
+                "searchBtnIconColor": "#ffffff",
+                "searchBtnHoverIconColor": "#ffffff",
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to top right, #1ca388, #28c83f)",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "##1ca388",
                 "appNameTextColor": "linear-gradient(to top right, #1ca388, #28c83f)"
             },
             "others": {
                 "scrollBarColor": "#9b9b9c",
-                "progressBarBgColor": "#666",
+                "progressBarBgColor": "#666666",
                 "volumeBarThumbColor": "#28c83f"
             }
         },
         {
             "id": "default-white",
             "name": "默认2",
-            "previewBg": "#fff",
+            "previewBg": "#ffffff",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "bgImage": null,
                 "bgImageGradient": null
             },
@@ -98,45 +98,45 @@
                 "highlightColor": "#28c83f",
                 "headerNavBgColor": "#eeeeee88",
                 "loadingMaskColor": "linear-gradient(to right, #eee 8%, #ddd 18%, #eee 33%)",
-                "listItemHoverBgColor": "#eee",
+                "listItemHoverBgColor": "#eeeeee",
                 "leftNavBgColor": "#f8f8f8ff",
-                "inputsBgColor": "#fff",
+                "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#272727"
             },
             "border": {
-                "borderColor": "#eee",
+                "borderColor": "#eeeeee",
                 "leftNavBorderColor": null,
-                "popoversBorderColor": "#999",
-                "inputsBorderColor": "#ccc"
+                "popoversBorderColor": "#999999",
+                "inputsBorderColor": "#cccccc"
             },
             "button": {
                 "iconBtnColor": "#272727",
-                "iconTextBtnTextColor": "#fff",
-                "iconTextBtnIconColor": "#fff",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #2edfa3, #28c83f)",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": "#333",
-                "bgColor": "#fff",
+                "borderColor": "#333333",
+                "bgColor": "#ffffff",
                 "textColor": null,
-                "searchBtnBgColor": "#fff",
-                "searchBtnHoverBgColor": "#fff",
+                "searchBtnBgColor": "#ffffff",
+                "searchBtnHoverBgColor": "#ffffff",
                 "searchBtnIconColor": "#272727",
                 "searchBtnHoverIconColor": "#28c83f",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to top right, #1ca388, #28c83f)",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#1ca388",
                 "appNameTextColor": "linear-gradient(to top right, #1ca388, #28c83f)"
             },
             "others": {
                 "scrollBarColor": "#787878",
-                "progressBarBgColor": "#ccc",
+                "progressBarBgColor": "#cccccc",
                 "volumeBarThumbColor": "#28c83f"
             }
         },
@@ -145,7 +145,7 @@
             "name": "浅色",
             "previewBg": "#e7e1e3",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "bgImage": null,
                 "bgImageGradient": null
             },
@@ -161,23 +161,23 @@
             },
             "content": {
                 "textColor": "#313131",
-                "subtitleTextColor": "#666",
+                "subtitleTextColor": "#666666",
                 "secondaryTextColor": "#a0a0a0",
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "textHighlightColor": "#676163",
                 "highlightColor": "#676163",
                 "headerNavBgColor": "#eeeeee88",
                 "loadingMaskColor": "linear-gradient(to right, #eee 8%, #ddd 18%, #eee 33%)",
                 "listItemHoverBgColor": "#faf4f6",
                 "leftNavBgColor": "#e7e1e3cb",
-                "inputsBgColor": "#fff",
+                "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#313131"
             },
             "border": {
-                "borderColor": "#eee",
-                "leftNavBorderColor": "#ddd",
-                "popoversBorderColor": "#999",
-                "inputsBorderColor": "#ccc"
+                "borderColor": "#eeeeee",
+                "leftNavBorderColor": "#dddddd",
+                "popoversBorderColor": "#999999",
+                "inputsBorderColor": "#cccccc"
             },
             "button": {
                 "iconBtnColor": "#676163",
@@ -185,8 +185,8 @@
                 "iconTextBtnIconColor": "#414141",
                 "iconTextBtnBgColor": "#c7c1c3cb",
                 "iconTextBtnHoverBgColor": "#d7d1d3cb",
-                "toggleBtnBgColor": "#ddd",
-                "toggleBtnThumbColor": "#888"
+                "toggleBtnBgColor": "#dddddd",
+                "toggleBtnThumbColor": "#888888"
             },
             "searchBar": {
                 "borderColor": "#e8e8e8",
@@ -196,7 +196,7 @@
                 "searchBtnHoverBgColor": "#e7e1e3",
                 "searchBtnIconColor": "#676163",
                 "searchBtnHoverIconColor": "#676163",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#878183cb",
@@ -215,7 +215,7 @@
             "name": "粉色1",
             "previewBg": "#e667af",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "bgImage": null,
                 "bgImageGradient": null
             },
@@ -231,52 +231,52 @@
             },
             "content": {
                 "textColor": "#212121",
-                "subtitleTextColor": "#666",
+                "subtitleTextColor": "#666666",
                 "secondaryTextColor": "#a0a0a0",
                 "bgColor": "#ffffffdc",
                 "textHighlightColor": "linear-gradient(to top right, #e667af, #e6399b)",
                 "highlightColor": "#fc589c",
                 "headerNavBgColor": "#eeeeee88",
                 "loadingMaskColor": "linear-gradient(to right, #eee 8%, #ddd 18%, #eee 33%)",
-                "listItemHoverBgColor": "#eee",
+                "listItemHoverBgColor": "#eeeeee",
                 "leftNavBgColor": "#f8f8f8ff",
-                "inputsBgColor": "#fff",
+                "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#212121"
             },
             "border": {
                 "borderColor": "#f4f4f4",
-                "leftNavBorderColor": "#ddd",
-                "popoversBorderColor": "#999",
-                "inputsBorderColor": "#ccc"
+                "leftNavBorderColor": "#dddddd",
+                "popoversBorderColor": "#999999",
+                "inputsBorderColor": "#cccccc"
             },
             "button": {
                 "iconBtnColor": "#414141",
-                "iconTextBtnTextColor": "#fff",
-                "iconTextBtnIconColor": "#fff",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "linear-gradient(to right, #e6399b, #e667af)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #e6399b, #992667)",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#ccc"
+                "toggleBtnThumbColor": "#cccccc"
             },
             "searchBar": {
-                "borderColor": "#333",
-                "bgColor": "#fff",
+                "borderColor": "#333333",
+                "bgColor": "#ffffff",
                 "textColor": null,
-                "searchBtnBgColor": "#fff",
-                "searchBtnHoverBgColor": "#fff",
+                "searchBtnBgColor": "#ffffff",
+                "searchBtnHoverBgColor": "#ffffff",
                 "searchBtnIconColor": "#272727",
                 "searchBtnHoverIconColor": "#fc589c",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to right, #e6399b, #e667af)",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#fc589c",
                 "appNameTextColor": "linear-gradient(to right, #e6399b, #e667af)"
             },
             "others": {
-                "scrollBarColor": "#999",
-                "progressBarBgColor": "#ccc",
+                "scrollBarColor": "#999999",
+                "progressBarBgColor": "#cccccc",
                 "volumeBarThumbColor": "#fc589c"
             }
         },
@@ -301,46 +301,46 @@
             },
             "content": {
                 "textColor": "#cdcdcd",
-                "subtitleTextColor": "#888",
-                "secondaryTextColor": "#666",
+                "subtitleTextColor": "#888888",
+                "secondaryTextColor": "#666666",
                 "bgColor": "#252025",
                 "textHighlightColor": "linear-gradient(to top right, #fc589c, #e6399b)",
                 "highlightColor": "#fc589c",
-                "headerNavBgColor": "#333",
+                "headerNavBgColor": "#333333",
                 "loadingMaskColor": "linear-gradient(to right, #494949 8%, #595959 18%, #494949 33%)",
                 "listItemHoverBgColor": "#353035",
                 "leftNavBgColor": "#252025",
-                "inputsBgColor": "#ddd",
+                "inputsBgColor": "#dddddd",
                 "inputsTextColor": "#393939"
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#000",
-                "popoversBorderColor": "#000",
+                "leftNavBorderColor": "#000000",
+                "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#454045"
             },
             "button": {
                 "iconBtnColor": "#eaeaea",
                 "iconTextBtnTextColor": "#eaeaea",
-                "iconTextBtnIconColor": "#fff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "linear-gradient(to top right, #e6399b, #fc589c)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #fc589c, #992667) ",
                 "toggleBtnBgColor": "#454045",
-                "toggleBtnThumbColor": "#ccc"
+                "toggleBtnThumbColor": "#cccccc"
             },
             "searchBar": {
                 "borderColor": null,
-                "bgColor": "#ddd",
+                "bgColor": "#dddddd",
                 "textColor": "#393939",
-                "searchBtnBgColor": "#ddd",
-                "searchBtnHoverBgColor": "#ddd",
+                "searchBtnBgColor": "#dddddd",
+                "searchBtnHoverBgColor": "#dddddd",
                 "searchBtnIconColor": "#252025",
                 "searchBtnHoverIconColor": "#252025",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to top right, #e6399b, #fc589c)",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#fc589c",
                 "appNameTextColor": "linear-gradient(to top right, #e6399b, #fc589c)"
             },
@@ -370,54 +370,54 @@
                 "randomMusicToolbar": false
             },
             "content": {
-                "textColor": "#fff",
-                "subtitleTextColor": "#eee",
-                "secondaryTextColor": "#ccc",
+                "textColor": "#ffffff",
+                "subtitleTextColor": "#eeeeee",
+                "secondaryTextColor": "#cccccc",
                 "bgColor": "#fc99a720",
-                "textHighlightColor": "#fff",
-                "highlightColor": "#fff",
+                "textHighlightColor": "#ffffff",
+                "highlightColor": "#ffffff",
                 "headerNavBgColor": "#16161625",
                 "loadingMaskColor": "linear-gradient(to right, #ffffffab 8%, #ffffff88 18%, #ffffffab 33%)",
                 "listItemHoverBgColor": "#16161633",
                 "leftNavBgColor": "#ffffff08",
-                "inputsBgColor": "#fff",
-                "inputsTextColor": "#666"
+                "inputsBgColor": "#ffffff",
+                "inputsTextColor": "#666666"
             },
             "border": {
                 "borderColor": null,
                 "leftNavBorderColor": "#31313125",
-                "popoversBorderColor": "#666",
+                "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#31313159"
             },
             "button": {
-                "iconBtnColor": "#fff",
+                "iconBtnColor": "#ffffff",
                 "iconTextBtnTextColor": "#fc7688",
                 "iconTextBtnIconColor": "#fc7688",
                 "iconTextBtnBgColor": "linear-gradient(to right, #eee, #fff)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #ddd, #fff)",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": null,
-                "bgColor": "#fff",
-                "textColor": "#666",
+                "bgColor": "#ffffff",
+                "textColor": "#666666",
                 "searchBtnBgColor": "linear-gradient(to right, #eee, #fff)",
                 "searchBtnHoverBgColor": "linear-gradient(to right, #eee, #fff)",
                 "searchBtnIconColor": "#fc7688",
                 "searchBtnHoverIconColor": "#fc7688",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to right, #eee, #fff)",
                 "innerBgColor": "#fc7688",
-                "innerTextColor": "#fff",
+                "innerTextColor": "#ffffff",
                 "appNameTextColor": "linear-gradient(to right, #eee, #fff)"
             },
             "others": {
-                "scrollBarColor": "#eee",
+                "scrollBarColor": "#eeeeee",
                 "progressBarBgColor": "#ffffff66",
-                "volumeBarThumbColor": "#fff"
+                "volumeBarThumbColor": "#ffffff"
             }
         },
         {
@@ -425,7 +425,7 @@
             "name": "红色1",
             "previewBg": "#f9453f",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "bgImage": null,
                 "bgImageGradient": null
             },
@@ -441,51 +441,51 @@
             },
             "content": {
                 "textColor": "#313131",
-                "subtitleTextColor": "#666",
-                "secondaryTextColor": "#999",
-                "bgColor": "#fff",
+                "subtitleTextColor": "#666666",
+                "secondaryTextColor": "#999999",
+                "bgColor": "#ffffff",
                 "textHighlightColor": "linear-gradient(to top right, #f84860, #f7314d)",
                 "highlightColor": "#f7314d",
-                "headerNavBgColor": "#eee",
+                "headerNavBgColor": "#eeeeee",
                 "loadingMaskColor": "linear-gradient(to right, #eee 8%, #ddd 18%, #eee 33%)",
                 "listItemHoverBgColor": "#f7314d0f",
                 "leftNavBgColor": null,
-                "inputsBgColor": "#fff",
+                "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#313131"
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#ccc",
-                "popoversBorderColor": "#666",
-                "inputsBorderColor": "#ccc"
+                "leftNavBorderColor": "#cccccc",
+                "popoversBorderColor": "#666666",
+                "inputsBorderColor": "#cccccc"
             },
             "button": {
                 "iconBtnColor": "#212121",
-                "iconTextBtnTextColor": "#fff",
-                "iconTextBtnIconColor": "#fff",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "linear-gradient(to right, #f84860, #f7314d)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to right, #f7314d, #c43631) ",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": "#f7314d",
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "textColor": null,
                 "searchBtnBgColor": "linear-gradient(to right, #f84860, #f7314d)",
                 "searchBtnHoverBgColor": "linear-gradient(to right, #f7314d, #c43631)",
-                "searchBtnIconColor": "#fff",
-                "searchBtnHoverIconColor": "#fff",
-                "clearBtnIconColor": "#666"
+                "searchBtnIconColor": "#ffffff",
+                "searchBtnHoverIconColor": "#ffffff",
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to top right, #f84860, #f7314d)",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#f7314d",
                 "appNameTextColor": "linear-gradient(to top right, #f84860, #f7314d)"
             },
             "others": {
-                "scrollBarColor": "#eee",
+                "scrollBarColor": "#eeeeee",
                 "progressBarBgColor": "#e7e1e3",
                 "volumeBarThumbColor": "#f7314d"
             }
@@ -510,9 +510,9 @@
                 "randomMusicToolbar": false
             },
             "content": {
-                "textColor": "#ccc",
+                "textColor": "#cccccc",
                 "subtitleTextColor": "#989898",
-                "secondaryTextColor": "#666",
+                "secondaryTextColor": "#666666",
                 "bgColor": "#21252b",
                 "textHighlightColor": "linear-gradient(to top right, #f84860, #d53943)",
                 "highlightColor": "#d53943",
@@ -520,43 +520,43 @@
                 "loadingMaskColor": "linear-gradient(to right, #414141 8%, #515151 18%, #414141 33%)",
                 "listItemHoverBgColor": "#f9453f33",
                 "leftNavBgColor": null,
-                "inputsBgColor": "#ddd",
+                "inputsBgColor": "#dddddd",
                 "inputsTextColor": "#363636"
             },
             "border": {
                 "borderColor": null,
                 "leftNavBorderColor": "#0b0b0b",
-                "popoversBorderColor": "#000",
+                "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#454045"
             },
             "button": {
-                "iconBtnColor": "#ccc",
-                "iconTextBtnTextColor": "#ccc",
-                "iconTextBtnIconColor": "#ccc",
+                "iconBtnColor": "#cccccc",
+                "iconTextBtnTextColor": "#cccccc",
+                "iconTextBtnIconColor": "#cccccc",
                 "iconTextBtnBgColor": "linear-gradient(to right, #f84860, #d53943)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to right, #d53943, #c43631)",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": null,
-                "bgColor": "#ddd",
+                "bgColor": "#dddddd",
                 "textColor": "#363636",
                 "searchBtnBgColor": "linear-gradient(to right, #f84860, #d53943)",
                 "searchBtnHoverBgColor": "linear-gradient(to right, #d53943, #c43631)",
-                "searchBtnIconColor": "#ccc",
-                "searchBtnHoverIconColor": "#ccc",
-                "clearBtnIconColor": "#666"
+                "searchBtnIconColor": "#cccccc",
+                "searchBtnHoverIconColor": "#cccccc",
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to top right, #f84860, #d53943)",
-                "innerBgColor": "#ccc",
+                "innerBgColor": "#cccccc",
                 "innerTextColor": "#d53943",
                 "appNameTextColor": "linear-gradient(to top right, #f84860, #d53943)"
             },
             "others": {
-                "scrollBarColor": "#666",
-                "progressBarBgColor": "#555",
+                "scrollBarColor": "#666666",
+                "progressBarBgColor": "#555555",
                 "volumeBarThumbColor": "#d53943"
             }
         },
@@ -596,7 +596,7 @@
             "border": {
                 "borderColor": null,
                 "leftNavBorderColor": "#bcbcbc",
-                "popoversBorderColor": "#666",
+                "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#bcbcbc"
             },
             "button": {
@@ -606,7 +606,7 @@
                 "iconTextBtnBgColor": "#64903fcb",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #64903fcb, #64903f)",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": null,
@@ -616,11 +616,11 @@
                 "searchBtnHoverBgColor": "#cfdec3cb",
                 "searchBtnIconColor": "#282828cb",
                 "searchBtnHoverIconColor": "#74a04f",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#74a04f",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#74a04f",
                 "appNameTextColor": "#74a04f"
             },
@@ -666,7 +666,7 @@
             "border": {
                 "borderColor": null,
                 "leftNavBorderColor": "#91934356",
-                "popoversBorderColor": "#000",
+                "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#91934356"
             },
             "button": {
@@ -676,7 +676,7 @@
                 "iconTextBtnBgColor": "#e1e0a7",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #919343, #e1e0a7) ",
                 "toggleBtnBgColor": "#91934333",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": null,
@@ -686,11 +686,11 @@
                 "searchBtnHoverBgColor": "#919343cb",
                 "searchBtnIconColor": "#919343",
                 "searchBtnHoverIconColor": null,
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#e1e0a7",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#919343",
                 "appNameTextColor": "#919343"
             },
@@ -705,7 +705,7 @@
             "name": "蓝色",
             "previewBg": "#2783fb",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "bgImage": "../bg_blue.jpg",
                 "bgImageGradient": null
             },
@@ -736,17 +736,17 @@
             "border": {
                 "borderColor": "#dddddd66",
                 "leftNavBorderColor": "#bababa",
-                "popoversBorderColor": "#666",
-                "inputsBorderColor": "#ccc"
+                "popoversBorderColor": "#666666",
+                "inputsBorderColor": "#cccccc"
             },
             "button": {
                 "iconBtnColor": "#161616",
-                "iconTextBtnTextColor": "#fff",
-                "iconTextBtnIconColor": "#fff",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "linear-gradient(to right, #2783fb, #2783fb)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #2783fb, #0753cb)",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": "#999999",
@@ -756,11 +756,11 @@
                 "searchBtnHoverBgColor": "#56ccf225",
                 "searchBtnIconColor": "#161616",
                 "searchBtnHoverIconColor": "#2783fb",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#0753cb",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#0753cb",
                 "appNameTextColor": "#0753cb"
             },
@@ -775,7 +775,7 @@
             "name": "蓝色2",
             "previewBg": "#a8c5cb",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "bgImage": null,
                 "bgImageGradient": "linear-gradient(to bottom right, #cce3e9, #a8c5cb)"
             },
@@ -793,10 +793,10 @@
                 "textColor": "#273b42",
                 "subtitleTextColor": "#375b62",
                 "secondaryTextColor": "#676b62",
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "textHighlightColor": "linear-gradient(to right, #395a62, #395a62)",
                 "highlightColor": "#273b42",
-                "headerNavBgColor": "#eee",
+                "headerNavBgColor": "#eeeeee",
                 "loadingMaskColor": "linear-gradient(to right, #91b6c036 8%, #91b6c025 18%, #91b6c036 33%)",
                 "listItemHoverBgColor": "#91b6c036",
                 "leftNavBgColor": null,
@@ -804,39 +804,39 @@
                 "inputsTextColor": "#273b42"
             },
             "border": {
-                "borderColor": "#ddd",
+                "borderColor": "#dddddd",
                 "leftNavBorderColor": "#ababab",
-                "popoversBorderColor": "#999",
-                "inputsBorderColor": "#ccc"
+                "popoversBorderColor": "#999999",
+                "inputsBorderColor": "#cccccc"
             },
             "button": {
                 "iconBtnColor": "#395a62",
-                "iconTextBtnTextColor": "#fff",
-                "iconTextBtnIconColor": "#fff",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "linear-gradient(to right, #395a62, #395a62)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #395a62, #273b42)",
                 "toggleBtnBgColor": "#979b92",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": "#395a62",
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "textColor": null,
-                "searchBtnBgColor": "#fff",
+                "searchBtnBgColor": "#ffffff",
                 "searchBtnHoverBgColor": null,
                 "searchBtnIconColor": "#395a62",
                 "searchBtnHoverIconColor": "#273b42",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#395a62",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#273b42",
                 "appNameTextColor": "#395a62"
             },
             "others": {
                 "scrollBarColor": "#395a6266",
-                "progressBarBgColor": "#ccc",
+                "progressBarBgColor": "#cccccc",
                 "volumeBarThumbColor": "#273b42"
             }
         },
@@ -845,7 +845,7 @@
             "name": "黄色",
             "previewBg": "#ffb300",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "bgImage": null,
                 "bgImageGradient": null
             },
@@ -860,53 +860,53 @@
                 "randomMusicToolbar": false
             },
             "content": {
-                "textColor": "#000",
-                "subtitleTextColor": "#333",
-                "secondaryTextColor": "#999",
-                "bgColor": "#fff",
+                "textColor": "#000000",
+                "subtitleTextColor": "#333333",
+                "secondaryTextColor": "#999999",
+                "bgColor": "#ffffff",
                 "textHighlightColor": "#ffb300",
                 "highlightColor": "#ffb300",
-                "headerNavBgColor": "#eee",
+                "headerNavBgColor": "#eeeeee",
                 "loadingMaskColor": "linear-gradient(to right, #ddddddab 8%, #cccccc88 18%, #ddddddab 33%)",
                 "listItemHoverBgColor": "#ffb30025",
                 "leftNavBgColor": null,
-                "inputsBgColor": "#fff",
-                "inputsTextColor": "#000"
+                "inputsBgColor": "#ffffff",
+                "inputsTextColor": "#000000"
             },
             "border": {
-                "borderColor": "#eee",
-                "leftNavBorderColor": "#ddd",
-                "popoversBorderColor": "#999",
-                "inputsBorderColor": "#ddd"
+                "borderColor": "#eeeeee",
+                "leftNavBorderColor": "#dddddd",
+                "popoversBorderColor": "#999999",
+                "inputsBorderColor": "#dddddd"
             },
             "button": {
-                "iconBtnColor": "#000",
-                "iconTextBtnTextColor": "#fff",
-                "iconTextBtnIconColor": "#fff",
+                "iconBtnColor": "#000000",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "#ffb300",
                 "iconTextBtnHoverBgColor": "#ffb300cb",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": "#999",
-                "bgColor": "#fff",
+                "borderColor": "#999999",
+                "bgColor": "#ffffff",
                 "textColor": null,
-                "searchBtnBgColor": "#fff",
+                "searchBtnBgColor": "#ffffff",
                 "searchBtnHoverBgColor": null,
-                "searchBtnIconColor": "#000",
+                "searchBtnIconColor": "#000000",
                 "searchBtnHoverIconColor": "#ffb300",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#ffb300",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#ffb300",
                 "appNameTextColor": "#ffb300"
             },
             "others": {
                 "scrollBarColor": "#cbcbcb",
-                "progressBarBgColor": "#ddd",
+                "progressBarBgColor": "#dddddd",
                 "volumeBarThumbColor": "#ffb300"
             }
         },
@@ -930,9 +930,9 @@
                 "randomMusicToolbar": false
             },
             "content": {
-                "textColor": "#000",
-                "subtitleTextColor": "#666",
-                "secondaryTextColor": "#999",
+                "textColor": "#000000",
+                "subtitleTextColor": "#666666",
+                "secondaryTextColor": "#999999",
                 "bgColor": "#f7f1e4",
                 "textHighlightColor": "#fc9b29",
                 "highlightColor": "#fc9b29",
@@ -941,42 +941,42 @@
                 "listItemHoverBgColor": "#fc9b2925",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#fafafa",
-                "inputsTextColor": "#333"
+                "inputsTextColor": "#333333"
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#ccc",
-                "popoversBorderColor": "#999",
-                "inputsBorderColor": "#ccc"
+                "leftNavBorderColor": "#cccccc",
+                "popoversBorderColor": "#999999",
+                "inputsBorderColor": "#cccccc"
             },
             "button": {
-                "iconBtnColor": "#000",
-                "iconTextBtnTextColor": "#fff",
-                "iconTextBtnIconColor": "#fff",
+                "iconBtnColor": "#000000",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "#fc9b29",
                 "iconTextBtnHoverBgColor": "#fc9b29",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": "#333",
-                "bgColor": "#fff",
+                "borderColor": "#333333",
+                "bgColor": "#ffffff",
                 "textColor": null,
-                "searchBtnBgColor": "#fff",
+                "searchBtnBgColor": "#ffffff",
                 "searchBtnHoverBgColor": "#fc9b29cb",
-                "searchBtnIconColor": "#000",
-                "searchBtnHoverIconColor": "#fff",
-                "clearBtnIconColor": "#666"
+                "searchBtnIconColor": "#000000",
+                "searchBtnHoverIconColor": "#ffffff",
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#fc9b29",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#fc9b29",
                 "appNameTextColor": "#fc9b29"
             },
             "others": {
                 "scrollBarColor": "#ababab",
-                "progressBarBgColor": "#ddd",
+                "progressBarBgColor": "#dddddd",
                 "volumeBarThumbColor": "#fc9b29"
             }
         },
@@ -985,7 +985,7 @@
             "name": "紫色",
             "previewBg": "#9c27b0",
             "appBackground": {
-                "bgColor": "#fff",
+                "bgColor": "#ffffff",
                 "bgImage": null,
                 "bgImageGradient": null
             },
@@ -1000,53 +1000,53 @@
                 "randomMusicToolbar": false
             },
             "content": {
-                "textColor": "#000",
-                "subtitleTextColor": "#333",
-                "secondaryTextColor": "#777",
-                "bgColor": "#fff",
+                "textColor": "#000000",
+                "subtitleTextColor": "#333333",
+                "secondaryTextColor": "#777777",
+                "bgColor": "#ffffff",
                 "textHighlightColor": "#9c27b0",
                 "highlightColor": "#9c27b0",
-                "headerNavBgColor": "#eee",
+                "headerNavBgColor": "#eeeeee",
                 "loadingMaskColor": "linear-gradient(to right, #ddddddab 8%, #cccccc88 18%, #ddddddab 33%)",
                 "listItemHoverBgColor": "#9c27b025",
                 "leftNavBgColor": null,
-                "inputsBgColor": "#fff",
-                "inputsTextColor": "#000"
+                "inputsBgColor": "#ffffff",
+                "inputsTextColor": "#000000"
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#ddd",
-                "popoversBorderColor": "#999",
-                "inputsBorderColor": "#ddd"
+                "leftNavBorderColor": "#dddddd",
+                "popoversBorderColor": "#999999",
+                "inputsBorderColor": "#dddddd"
             },
             "button": {
-                "iconBtnColor": "#000",
-                "iconTextBtnTextColor": "#fff",
-                "iconTextBtnIconColor": "#fff",
+                "iconBtnColor": "#000000",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "#9c27b0",
                 "iconTextBtnHoverBgColor": "#9c27b0cb",
                 "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": "#ddd",
-                "bgColor": "#fff",
+                "borderColor": "#dddddd",
+                "bgColor": "#ffffff",
                 "textColor": null,
-                "searchBtnBgColor": "#fff",
-                "searchBtnHoverBgColor": "#fff",
-                "searchBtnIconColor": "#000",
+                "searchBtnBgColor": "#ffffff",
+                "searchBtnHoverBgColor": "#ffffff",
+                "searchBtnIconColor": "#000000",
                 "searchBtnHoverIconColor": "#9c27b0",
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#9c27b0",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#9c27b0",
                 "appNameTextColor": "#9c27b0"
             },
             "others": {
                 "scrollBarColor": "#cbcbcb",
-                "progressBarBgColor": "#ddd",
+                "progressBarBgColor": "#dddddd",
                 "volumeBarThumbColor": "#9c27b0"
             }
         },
@@ -1071,7 +1071,7 @@
             },
             "content": {
                 "textColor": "#fdfdf2",
-                "subtitleTextColor": "#ddd",
+                "subtitleTextColor": "#dddddd",
                 "secondaryTextColor": "#ababab",
                 "bgColor": "#ffffff13",
                 "textHighlightColor": "#e5bc8c",
@@ -1080,14 +1080,14 @@
                 "loadingMaskColor": "linear-gradient(to right, #fdfdf2ab 8%, #fdfdf288 18%, #fdfdf2ab 33%)",
                 "listItemHoverBgColor": "#fdfdf225",
                 "leftNavBgColor": "#ffffff20",
-                "inputsBgColor": "#fff",
+                "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#272727"
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#333",
-                "popoversBorderColor": "#222",
-                "inputsBorderColor": "#333"
+                "leftNavBorderColor": "#333333",
+                "popoversBorderColor": "#222222",
+                "inputsBorderColor": "#333333"
             },
             "button": {
                 "iconBtnColor": "#fdfdf2",
@@ -1096,7 +1096,7 @@
                 "iconTextBtnBgColor": "#e5bc8c",
                 "iconTextBtnHoverBgColor": "#c59c6c",
                 "toggleBtnBgColor": "#fdfdf2ab",
-                "toggleBtnThumbColor": "#fff"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
                 "borderColor": null,
@@ -1106,11 +1106,11 @@
                 "searchBtnHoverBgColor": "#fdfdf2",
                 "searchBtnIconColor": "#4d3e72",
                 "searchBtnHoverIconColor": null,
-                "clearBtnIconColor": "#666"
+                "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "#e5bc8c",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#4d3e72",
                 "appNameTextColor": "#e5bc8c"
             },
@@ -1131,7 +1131,7 @@
             "updated": null,
             "previewBg": null,
             "appBackground": {
-                "bgColor": "#FFFFFF",
+                "bgColor": "#ffffff",
                 "bgImage": null,
                 "bgImageGradient": "linear-gradient(#ff00007f,#0000ff7f)"
             },
@@ -1148,51 +1148,51 @@
             "content": {
                 "textColor": "#212121",
                 "textHighlightColor": "linear-gradient(to right top,#1ca388,#28c83f)",
-                "highlightColor": "#28C83F",
+                "highlightColor": "#28c83f",
                 "subtitleTextColor": "#555555",
                 "secondaryTextColor": "#777777",
-                "bgColor": "#FFFFFFBC",
-                "headerNavBgColor": "#F1F1F199",
+                "bgColor": "#ffffffbc",
+                "headerNavBgColor": "#f1f1f199",
                 "loadingMaskColor": "linear-gradient(to right,#66666625 8%,#66666636 18%,#66666625 33%)",
                 "listItemHoverBgColor": "#66666625",
-                "leftNavBgColor": "#FFFFFF99",
+                "leftNavBgColor": "#ffffff99",
                 "inputsBgColor": null,
                 "inputsTextColor": null
             },
             "border": {
-                "borderColor": "#CCCCCC",
+                "borderColor": "#cccccc",
                 "leftNavBorderColor": null,
                 "popoversBorderColor": "#666666",
-                "inputsBorderColor": "#999"
+                "inputsBorderColor": "#999999"
             },
             "button": {
                 "iconBtnColor": "#393939",
-                "iconTextBtnTextColor": "#FFFFFF",
-                "iconTextBtnIconColor": "#FFFFFF",
+                "iconTextBtnTextColor": "#ffffff",
+                "iconTextBtnIconColor": "#ffffff",
                 "iconTextBtnBgColor": "linear-gradient(to right,#1ca388,#28c83f)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to right top,#2edfa3,#28c83f)",
                 "toggleBtnBgColor": "#999999",
-                "toggleBtnThumbColor": "#FFFFFF"
+                "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": "#666",
+                "borderColor": "#666666",
                 "bgColor": null,
                 "searchBtnBgColor": null,
                 "searchBtnHoverBgColor": null,
-                "searchBtnIconColor": "#333",
+                "searchBtnIconColor": "#333333",
                 "searchBtnHoverIconColor": "#28c83f",
                 "clearBtnIconColor": null
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to right, #1ca388, #28c83f)",
-                "innerBgColor": "#fff",
+                "innerBgColor": "#ffffff",
                 "innerTextColor": "#1ca388",
                 "appNameTextColor": "linear-gradient(to top right, #1ca388, #28c83f)"
             },
             "others": {
                 "scrollBarColor": "#999999",
                 "progressBarBgColor": "#ababab",
-                "volumeBarThumbColor": "#28C83F"
+                "volumeBarThumbColor": "#28c83f"
             }
         }
     ]

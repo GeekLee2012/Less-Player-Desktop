@@ -1,7 +1,4 @@
 <script setup>
-import SvgTextButton from '../components/SvgTextButton.vue';
-
-
 const props = defineProps({
     text: String
 })
@@ -30,6 +27,4 @@ const props = defineProps({
     </SvgTextButton>
 </template>
 
-<style>
-
-</style>
+<style></style>

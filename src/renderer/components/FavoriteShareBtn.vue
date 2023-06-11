@@ -1,7 +1,4 @@
 <script setup>
-import SvgTextButton from './SvgTextButton.vue';
-
-
 const props = defineProps({
     favorited: Boolean,
     actionText: String

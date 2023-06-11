@@ -75,8 +75,9 @@ input {
   color: var(--content-inputs-text-color);
 }
 
-.btnDisabled {
+.button-disabled {
   opacity: 0.33;
+  cursor: default !important;
 }
 
 ::-webkit-scrollbar {

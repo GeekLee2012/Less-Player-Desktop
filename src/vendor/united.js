@@ -29,14 +29,33 @@ const getVendor = (code) => {
 /** 统一平台，协调处理公共业务 */
 export class United {
     static CODE = 'united'
+    static NULL_CODE = 'NULLL_CODEEE'
+
+    static tranformTitle(title, artistName) {
+        const tTitle = title || ''
+        const tArtistName = artistName || United.NULL_CODE
+        return tTitle.replace(tArtistName, '')
+            .replace(/-/g, '')
+    }
+
+    static tranformArtistName(name) {
+        const tName = name || ''
+        return tName.replace('网络歌手', '')
+            .replace('未知歌手', '')
+            .replace('未知艺人', '')
+            .replace('未知艺术家', '')
+            .replace('群星', '')
+    }
 
     //互惠互助、互通有无、移花接木？奏是介些说法啦 ~
-    static transferTrack(track) {
+    static transferTrack(track, ignoreUrl, ignoreAlbum) {
         return new Promise(async (resolve, reject) => {
             let result = null
             const { platform: fromPlatform, title } = track
             const firstArtistName = Track.firstArtistName(track)
-            let keyword = `${title} ${firstArtistName}`
+            const tTitle = United.tranformTitle(title, firstArtistName)
+            const tArtistName = United.tranformArtistName(firstArtistName)
+            const keyword = `${tTitle} ${tArtistName}`
 
             const filterdVendors = vendors.filter(v => (v.CODE != fromPlatform))
             const fromVendor = getVendor(fromPlatform)
@@ -48,7 +67,7 @@ export class United {
                 const searchResult = await vendor.searchSongs(keyword)
                 const { data: candidates } = searchResult
                 if (!candidates || candidates.length < 1) continue
-                result = await United.matchFromCandidates(track, candidates.slice(0, Math.min(candidates.length, 20)))
+                result = await United.matchFromCandidates(track, candidates.slice(0, Math.min(candidates.length, 20)), ignoreUrl, ignoreAlbum)
                 if (result) break
             }
             resolve(result)
@@ -56,7 +75,7 @@ export class United {
     }
 
     //TODO 匹配算法，后续再完善
-    static matchFromCandidates(track, candidates) {
+    static matchFromCandidates(track, candidates, ignoreUrl, ignoreAlbum) {
         return new Promise(async (resolve, reject) => {
             let result = null
             const { id, platform, title, artist, duration } = track
@@ -72,23 +91,24 @@ export class United {
                 const cArtistName = Track.artistName(candidate)
                 const cAlbumName = Track.albumName(candidate)
                 let score = 0.05, hits = 0
-                const isSimilar = cTitle.includes(title)
                 //歌曲名称
-                if (isSimilar) {
-                    score += 0.25
-                    if (title == cTitle) {
-                        score += 0.05
-                        ++hits
-                    }
-                }
+                const _title = (title || United.NULL_CODE)
+                const isSimilar = cTitle.toLowerCase().includes(_title.toLowerCase())
                 //歌曲名称没有任何相同
                 if (!isSimilar) continue
+                score += 0.25
+                if (title == cTitle) {
+                    score += 0.05
+                    ++hits
+                }
+
                 //歌手
                 let isArtistMissed = true //未命中歌手
                 if (artist && cArtistName) {
                     for (var j = 0; j < artist.length; j++) {
                         const { name } = artist[j]
-                        if (cArtistName.includes(name)) {
+                        const _name = (name || United.NULL_CODE)
+                        if (cArtistName.toLowerCase().includes(_name.toLowerCase())) {
                             score += 0.2
                             isArtistMissed = false
                             ++hits
@@ -97,10 +117,14 @@ export class United {
                     }
                 }
                 //专辑
-                if (albumName == cAlbumName) {
+                const _albumName = (albumName || United.NULL_CODE)
+                if (ignoreAlbum) {
                     score += 0.2
                     ++hits
-                } else if (cAlbumName.includes(albumName)) {
+                } else if (_albumName == cAlbumName) {
+                    score += 0.2
+                    ++hits
+                } else if (cAlbumName.toLowerCase().includes(_albumName.toLowerCase())) {
                     score += 0.15
                 } else {
                     score += 0.05
@@ -129,8 +153,9 @@ export class United {
 
                 if (score < 0.65 && hits < 2) continue
                 const vendor = getVendor(cPlatform)
+                if (!vendor) continue
                 const cDetail = await vendor.playDetail(cId, candidate)
-                if (!Track.hasUrl(cDetail)) continue
+                if (!Track.hasUrl(cDetail) && !ignoreUrl) continue
                 const { url } = cDetail
                 //歌词
                 const cLyric = await vendor.lyric(candidate.id, candidate)

@@ -1,7 +1,8 @@
 <script setup>
 const excludes = ['LocalMusicView', 'CustomPlaylistEditView',
     'UserInfoEditView', 'BatchActionView',
-    'DataBackupView', 'DataRestoreView']
+    'DataBackupView', 'DataRestoreView',
+    'LocalPlaylistEditView']
 </script>
 
 <template>

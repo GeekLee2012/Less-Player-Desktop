@@ -9,6 +9,7 @@ const props = defineProps({
     disableOptimize: Boolean,
     onSeek: Function,
     onScroll: Function,
+    onScrollFinish: Function,
     onDragStart: Function,
     onDragMove: Function,
     onDragRelease: Function
@@ -19,9 +20,15 @@ const progressRef = ref(null)
 const thumbRef = ref(null)
 let onDrag = ref(false)
 let value = parseFloat(props.value).toFixed(2)
+const onUserScroll = ref(false)
+let userScrollTimer = null
 
 //点击改变进度
 const seekProgress = (event) => {
+    if (userScrollTimer) {
+        clearTimeout(userScrollTimer)
+        onUserScroll.value = false
+    }
     if (props.disable) return
     if (thumbRef.value.contains(event.target)) {
         updateProgressByDeltaWidth(event.offsetX)
@@ -33,6 +40,8 @@ const seekProgress = (event) => {
 
 //滚轮改变进度
 const scrollProgress = (event) => {
+    onUserScroll.value = true
+    if (userScrollTimer) clearTimeout(userScrollTimer)
     if (props.disable || props.disableScroll) return
     if (event.deltaY == 0) return
     const direction = event.deltaY > 0 ? -1 : 1
@@ -42,6 +51,12 @@ const scrollProgress = (event) => {
     const percent = (tmp / 100).toFixed(2)
     updateProgress(percent)
     if (props.onScroll) props.onScroll(value)
+    if (props.onScrollFinish) {
+        userScrollTimer = setTimeout(() => {
+            props.onScrollFinish(value)
+            onUserScroll.value = false
+        }, 200)
+    }
 }
 
 const updateProgress = (percent) => {
@@ -79,7 +94,7 @@ const startDrag = (event) => {
     onDrag.value = true
     document.addEventListener("mousemove", dragMove)
     document.addEventListener("mouseup", releaseDrag)
-    if (props.onDragStart) props.onDragStart(event)
+    if (props.onDragStart) props.onDragStart(value, event)
 }
 
 const dragMove = (event) => {
@@ -116,7 +131,7 @@ const hideThumb = () => {
 }
 
 watch(() => props.value, (nv, ov) => {
-    if (onDrag.value) return
+    if (onDrag.value || onUserScroll.value) return
     updateProgress(nv, ov)
 })
 

@@ -1,5 +1,4 @@
 <script setup>
-import SvgTextButton from '../components/SvgTextButton.vue';
 </script>
 
 <template>

@@ -66,7 +66,7 @@ const renderAndScrollLyric = (secs) => {
 
     let index = -1
     for (var i = 0; i < lines.length; i++) {
-        const timeKey = lines[i].getAttribute('time-key')
+        const timeKey = lines[i].getAttribute('timeKey')
         const lineTime = toMillis(timeKey)
         if (trackTime >= lineTime) {
             index = i
@@ -114,7 +114,7 @@ const renderAndScrollLyric = (secs) => {
     ////算法3：播放页垂直居中，依赖offsetParent定位；与算法2相似，只是参考系不同而已 ////
     //基本保证：准确定位，当前高亮行在播放页垂直居中，且基本与ScrollLocator平行
     //绝对意义上来说，并不垂直居中，也并不平行，因为歌词行自身有一定高度
-    if (!lines[index].offsetTop) return
+    if (!lines[index] || !lines[index].offsetTop) return
     const { offsetTop } = lyricWrap
     const { clientHeight } = document.documentElement
     const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
@@ -282,7 +282,7 @@ const updateScrollLocatorTime = () => {
     const y = locatorEl.offsetTop
     const pointEl = document.elementFromPoint(x, y)
     if (!pointEl) return
-    const timekey = pointEl.getAttribute('time-key')
+    const timekey = pointEl.getAttribute('timeKey')
     if (!timekey) return
     //Time
     setScrollLocatorTime(timekey)
@@ -320,7 +320,7 @@ const isExtraTextActived = computed(() => {
         || (Track.hasLyricRoma(track) && lyricRomaActived.value)
 })
 
-//额外歌词对应的时间，如翻译、发音
+//额外歌词（如翻译、发音）对应的时间
 const getExtraTimeKey = (mmssSSS, offset) => {
     return toMMssSSS(toMillis(mmssSSS) + (offset || 0))
         || mmssSSS
@@ -332,14 +332,16 @@ const setupLyricExtra = () => {
     if (lines) {
         try {
             lines.forEach((line, index) => {
-                const timeKey = line.getAttribute('time-key')
-                if (!timeKey) return
+                //1、重置
                 const extraTextEl = line.querySelector('.extra-text')
                 if (!extraTextEl) return
-                extraTextEl.innerHTML = null //重置
+                extraTextEl.innerHTML = null
+
+                //2、重新赋值
                 const extraTextMap = lyricTransData.value || lyricRomaData.value
                 if (!extraTextMap) return
-
+                const timeKey = line.getAttribute('timeKey')
+                if (!timeKey) return
                 let extraText = null
                 //算法简单粗暴，最坏情况11次尝试！！！
                 const timeErrors = [0, 10, -10, 20, -20, 30, -30, 40, -40, 50, -50]
@@ -427,7 +429,7 @@ watch(() => props.track, (nv, ov) => {
             <div v-show="lyricExistState == 0" class="no-lyric">
                 <label>暂无歌词，请继续欣赏音乐吧~</label>
             </div>
-            <div v-show="lyricExistState == 1" v-for="([key, value], index) in lyricData" class="line" :time-key="key"
+            <div v-show="lyricExistState == 1" v-for="([key, value], index) in lyricData" class="line" :timeKey="key"
                 :index="index" :class="{
                     first: index == 0,
                     last: index == (lyricData.size - 1),
@@ -435,7 +437,7 @@ watch(() => props.track, (nv, ov) => {
                     current: index == currentIndex,
                     locatorCurrent: (index == scrollLocatorCurrentIndex && index != currentIndex && isUserMouseWheel)
                 }">
-                <div class="text" :time-key="key" :index="index" v-html="value"></div>
+                <div class="text" :timeKey="key" :index="index" v-html="value"></div>
                 <div class="extra-text" v-show="isExtraTextActived"></div>
             </div>
         </div>

@@ -42,7 +42,8 @@ const toggleMaximize = () => {
                 </g>
             </svg>
         </div>
-        <div @click="doMinimize" v-show="!hideMinBtn" class="ctl-btn min-btn" :class="{ btnDisabled: isMinBtnDisabled }">
+        <div @click="doMinimize" v-show="!hideMinBtn" class="ctl-btn min-btn"
+            :class="{ 'button-disabled': isMinBtnDisabled }">
             <svg viewBox="0 0 256 256" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
                 <path
@@ -95,9 +96,6 @@ const toggleMaximize = () => {
     /* width: 56px; */
 }
 
-.win-traffic-light-btn .btnDisabled {
-    cursor: default !important;
-}
 
 .win-traffic-light-btn .ctl-btn {
     /* width: 16px;

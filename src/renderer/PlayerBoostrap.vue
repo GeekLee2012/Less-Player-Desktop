@@ -183,11 +183,6 @@ const bootstrapTrack = (track) => {
             return
         }
         const { id, platform, artistNotCompleted } = track
-        //本地音乐也不需要再处理
-        if (isLocalMusic(platform)) {
-            resolve(track)
-            return
-        }
         //平台服务
         const vendor = getVendor(platform)
         if (!vendor || !vendor.playDetail) {
@@ -514,7 +509,7 @@ EventBus.on('track-changed', track => {
 EventBus.on('track-play', track => {
     resetAutoSkip()
     traceRecentTrack(track)
-    loadLyric(track)
+    //loadLyric(track)
 })
 
 EventBus.on('track-error', onPlayerErrorRetry)
@@ -604,6 +599,10 @@ const seekTrack = (percent) => {
 
 const seekTrackDirectly = (percent) => EventBus.emit('track-seek', percent)
 const markTrackSeekPending = (percent) => EventBus.emit('track-markSeekPending', percent)
+EventBus.on('track-seekFinish', () => {
+    //清除预备状态
+    mmssPreseekTime.value = null
+})
 
 //播放进度，更新预备状态
 const preseekTrack = (percent) => {

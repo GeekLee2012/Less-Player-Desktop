@@ -550,8 +550,8 @@ export class NetEase {
                 initial: cate['字母'].item.value
             }
             return Object.assign(result, source)
-        } catch (e) {
-            //console.log(e)
+        } catch (error) {
+            //console.log(error)
         }
         return result
     }

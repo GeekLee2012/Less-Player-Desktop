@@ -21,6 +21,7 @@ import AudioTime from './components/AudioTime.vue';
 import PlayControl from './components/PlayControl.vue';
 import ImageTextTile from './components/ImageTextTile.vue';
 import SongItem from './components/SongItem.vue';
+import SvgTextButton from './components/SvgTextButton.vue';
 //Views
 //import PlayingView from './views/PlayingView.vue';
 import VideoPlayingView from './views/VideoPlayingView.vue';
@@ -46,6 +47,7 @@ const app = createApp(App);
 app.config.errorHandler = (err, vm, info) => {
   // 处理错误
   // `info` 是 Vue 特定的错误信息，比如错误所在的生命周期钩子
+  //暂时仅需捕获，以免程序崩溃，其他不用特别处理
 }
 
 app.use(pinia)
@@ -69,6 +71,7 @@ app.use(pinia)
   .component('PlayControl', PlayControl)
   .component('ImageTextTile', ImageTextTile)
   .component('SongItem', SongItem)
+  .component('SvgTextButton', SvgTextButton)
   //Views
   //.component('PlayingView', PlayingView)
   .component('VideoPlayingView', VideoPlayingView)

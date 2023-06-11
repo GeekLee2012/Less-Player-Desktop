@@ -34,8 +34,7 @@ export class Player {
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = Player.get()
-        return player.on('suspend', () => player.pause())
-            .on('track-play', track => player.playTrack(track))
+        return player.on('track-play', track => player.playTrack(track))
             .on('track-restore', track => player.restore(track))
             .on('track-changed', () => player.setCurrent(null))
             .on('track-togglePlay', () => player.togglePlay())
@@ -161,7 +160,10 @@ export class Player {
         const sound = this.getSound()
         if (!sound || !sound.playing()) return
         const duration = sound.duration()
-        if (duration) sound.seek(Math.min(duration * percent, duration))
+        if (duration) {
+            sound.seek(Math.min(duration * percent, duration))
+            //this.notify('track-seekFinish')
+        }
     }
 
     _step() {
@@ -212,24 +214,28 @@ export class Player {
     }
 
     _createWebAudioApi() {
-        if (this.webAudioApi) return this.webAudioApi
-        const audioCtx = Howler.ctx
-        if (!audioCtx) return null
-        const audioNode = this.sound._sounds[0]._node
-        if (!audioNode) return null
-        this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
+        if (!this.webAudioApi) {
+            const audioCtx = Howler.ctx
+            if (audioCtx) {
+                const audioNode = this.sound._sounds[0]._node
+                if (audioNode) {
+                    this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
+                }
+            }
+        }
         return this.webAudioApi
     }
 
     _resolveSound() {
         if (!this._createWebAudioApi()) return
         this._resolvePendingSoundEffect()
+        if (!this.isSpectrumRefreshEnabled()) return
         const { analyser } = this.webAudioApi
         if (!analyser) return
         const { frequencyBinCount } = analyser
         const freqData = new Uint8Array(frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
-        if (this.isSpectrumRefreshEnabled()) EventBus.emit('track-spectrumData', freqData)
+        this.notify('track-spectrumData', freqData)
     }
 
     _tryUnlockHowlAudios() {

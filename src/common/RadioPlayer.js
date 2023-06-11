@@ -137,11 +137,12 @@ export class RadioPlayer {
     _resolveSound() {
         if (!this.webAudioApi) return
         this._resolvePendingSoundEffect()
+        if (!this.isSpectrumRefreshEnabled()) return
         const { analyser } = this.webAudioApi
         if (!analyser) return
         const freqData = new Uint8Array(analyser.frequencyBinCount)
         analyser.getByteFrequencyData(freqData)
-        if (this.isSpectrumRefreshEnabled()) this.notify('track-spectrumData', freqData)
+        this.notify('track-spectrumData', freqData)
     }
 
     updateEQ(values) {

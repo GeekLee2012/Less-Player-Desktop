@@ -1,4 +1,6 @@
 <script setup>
+import { computed, reactive } from 'vue';
+
 const props = defineProps({
     data: Array,
     artistVisitable: Boolean,

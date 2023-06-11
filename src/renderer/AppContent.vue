@@ -102,9 +102,11 @@ const setupCache = () => {
   if (!isStorePlayStateBeforeQuit.value) {
     localStorage.removeItem('player')
   }
+  /*
   if (!isStoreLocalMusicBeforeQuit.value) {
     localStorage.removeItem('localMusic')
   }
+  */
 }
 
 const setupLayout = (isInit) => {

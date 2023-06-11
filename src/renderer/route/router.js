@@ -16,6 +16,8 @@ import UserInfoEditView from '../views/UserInfoEditView.vue';
 import BatchActionView from '../views/BatchActionView.vue';
 import DataBackupView from '../views/DataBackupView.vue';
 import DataRestoreView from '../views/DataRestoreView.vue';
+import LocalPlaylistEditView from '../views/LocalPlaylistEditView.vue';
+import LocalPlaylistDetailView from '../views/LocalPlaylistDetailView.vue';
 
 
 
@@ -100,6 +102,21 @@ const routes = [
     {  //数据还原
         path: '/data/restore',
         component: DataRestoreView
+    },
+    {  //分类歌单 - 本地歌曲 - 自建歌单
+        path: '/:exploreMode/localPlaylist/create',
+        props: true,
+        component: LocalPlaylistEditView
+    },
+    {  //分类歌单 - 本地歌曲 - 自建歌单 - 编辑
+        path: '/:exploreMode/localPlaylist/edit/:id',
+        props: true,
+        component: LocalPlaylistEditView
+    },
+    {  //分类歌单 - 自建本地歌单 - 详情
+        path: '/:exploreMode/localPlaylist/:id',
+        props: true,
+        component: LocalPlaylistDetailView
     },
 ]
 

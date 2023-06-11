@@ -39,9 +39,7 @@ const toggleCheck = () => {
     if (checkChangedFn) checkChangedFn(isChecked.value, { index: props.index, ...props.data })
 }
 
-const setChecked = (value) => {
-    isChecked.value = value
-}
+const setChecked = (value) => isChecked.value = value
 
 const playItem = () => {
     playTrack(props.data)
@@ -142,7 +140,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
                 -->
         </div>
         <div class="title-wrap" :class="{ spacing: !(checkbox || Track.hasMv(data) || showVipFlag(data)) }">
-            <span v-html="data.title" :class="{ limitedSpan: !checkbox }"></span>
+            <span v-html="data.filename || data.title" :class="{ limitedSpan: !checkbox }"></span>
             <div class="action" :class="{ hidden: checkbox }">
                 <svg @click="playItem" width="18" height="18" class="play-btn" viewBox="0 0 139 139" xml:space="preserve"
                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">

@@ -71,7 +71,6 @@ const resolveGradientText = (value) => {
     }
     const gradientParts = []
     while (value.length > 0) {
-        //console.log(value)
         if (value.startsWith('#')) {
             const hexa = value.split(',')[0]
             gradientParts.push(hexa)
@@ -172,7 +171,6 @@ const updateValue = (value) => {
             .replace(',,', ',').replace('(,', '(')
     }
     //if (colorStops.length == 1) value = `${colorStops[0].color}`
-    //console.log(value)
     doUpdateValue(value)
 }
 

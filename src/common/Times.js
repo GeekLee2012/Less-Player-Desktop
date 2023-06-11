@@ -15,7 +15,6 @@ export const toMMssSSS = (millis) => {
     let fullSecs = ((millis % 60000) / 1000);
     let seconds = Math.floor(fullSecs);
     let millsecs = ((fullSecs - seconds) * 1000).toFixed(0);
-    //console.log(fullSecs + ", " + seconds + ", " + millsecs)
     minutes = (minutes < 10 ? '0' : '') + minutes
     seconds = (seconds < 10 ? '0' : '') + seconds
     millsecs = (millsecs < 100 ? (millsecs < 10 ? '00' : '0') : '') + millsecs

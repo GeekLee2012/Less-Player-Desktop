@@ -88,8 +88,9 @@ onMounted(() => {
                 <!--
                 <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
                 -->
-                <SliderBar :value="progressState" :disable="!playing" :disableScroll="true" :onSeek="seekTrack"
-                    :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+                <SliderBar :value="progressState" :disable="!playing" :onSeek="seekTrack" :disableScroll="true"
+                    :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack"
+                    :onDragMove="preseekTrack">
                 </SliderBar>
                 <div class="action">
                     <div class="btm-left">

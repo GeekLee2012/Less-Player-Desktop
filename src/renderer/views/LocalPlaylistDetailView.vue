@@ -1,39 +1,47 @@
 <script setup>
 import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject } from 'vue';
 import { storeToRefs } from 'pinia';
-import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { useLocalMusicStore } from '../store/localMusicStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { toYyyymmddHhMmSs } from '../../common/Times';
+import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
+import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { usePlatformStore } from '../store/platformStore';
+import { useIpcRenderer } from "../../common/Utils";
 
 
-
-const { visitCustomPlaylistEdit, visitBatchCustomPlaylist } = inject('appRoute')
 
 const props = defineProps({
     exploreMode: String,
     id: String
 })
 
+const { visitLocalPlaylistEdit, visitBatchLocalPlaylist } = inject('appRoute')
+
+const ipcRenderer = useIpcRenderer()
+
+
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
 const detail = reactive({})
 let offset = 0, page = 1, limit = 1000, total = 0
 let markScrollTop = 0
-const loading = ref(true)
+const isLoading = ref(false)
+const setLoading = (value) => isLoading.value = value
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem } = useAppCommonStore()
-const { getCustomPlaylist, removeAllFromCustomPlaylist } = useUserProfileStore()
+const { getLocalPlaylist, addToLocalPlaylist,
+    removeFromLocalPlaylist, removeAllFromLocalPlaylist } = useLocalMusicStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 
 const resetView = () => {
-    Object.assign(detail, { cover: 'default_cover.png', title: '', about: '', data: [] })
+    Object.assign(detail, { cover: 'default_cover.png', title: '', tags: null, about: '', data: [] })
     offset = 0
     page = 1
     total = 0
@@ -47,16 +55,12 @@ const nextPage = () => {
 }
 
 const loadContent = () => {
-    const playlist = getCustomPlaylist(props.id)
-    //if(playlist.data) cleanUpAllSongs([ playlist.data ])
+    const playlist = getLocalPlaylist(props.id)
     Object.assign(detail, { ...playlist })
     updateCommonCtxItem(playlist)
-    const platform = currentPlatformCode.value
-    if (!platform || platform.trim() == 'all') {
-        return
-    }
-    const data = playlist.data.filter(item => (item.platform == platform.trim()))
-    Object.assign(detail, { data })
+    //const platform = currentPlatformCode.value
+    const data = playlist.data.
+        Object.assign(detail, { data })
 }
 
 const loadMoreContent = () => {
@@ -67,7 +71,7 @@ const loadMoreContent = () => {
 
 const getAbout = () => {
     return (detail.about && detail.about.trim().length > 0) ?
-        detail.about.trim() : "这个人很懒，什么也没留下~"
+        detail.about.trim() : "暂时还没有歌单简介 ~"
 }
 
 const playAll = () => {
@@ -117,8 +121,27 @@ const resetBack2TopBtn = () => {
 }
 
 const removeAll = () => {
-    removeAllFromCustomPlaylist(props.id)
+    removeAllFromLocalPlaylist(props.id)
     showToast("全部歌曲已删除！")
+}
+
+const addFolders = async () => {
+    if (!ipcRenderer) return
+    const dirs = await ipcRenderer.invoke('open-dirs')
+
+    if (dirs) {
+        setLoading(true)
+        //dirs.forEach(item => addDir(item))
+        const result = await ipcRenderer.invoke('scan-audio-dirs', dirs)
+        if (result) result.forEach(({ data }) => data.forEach(item => addToLocalPlaylist(props.id, item)))
+    }
+    setLoading(false)
+}
+
+const addFiles = async () => {
+    if (!ipcRenderer) return
+    const result = await ipcRenderer.invoke('open-audios')
+    if (result) result.forEach(item => addToLocalPlaylist(props.id, item))
 }
 
 onActivated(() => {
@@ -148,7 +171,7 @@ onUpdated(() => {
 </script>
 
 <template>
-    <div id="custom-playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
+    <div id="local-playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="detail.cover" />
@@ -157,7 +180,7 @@ onUpdated(() => {
                 <div class="title" v-html="detail.title"></div>
                 <div class="about" v-html="getAbout()"></div>
                 <div class="edit">
-                    <div @click="() => visitCustomPlaylistEdit(id)">
+                    <div @click="() => visitLocalPlaylistEdit(id)">
                         <svg width="16" height="16" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -174,17 +197,22 @@ onUpdated(() => {
                     </div>
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn class="btn-spacing" :leftAction="playAll" :rightAction="() => addAll()">
+                    <PlayAddAllBtn class="btn-spacing" :leftAction="playAll" :rightAction="() => addAll()"
+                        :disabled="isLoading">
                     </PlayAddAllBtn>
-                    <BatchActionBtn :deleteBtn="true" :leftAction="() => visitBatchCustomPlaylist(id, 'userhome')"
-                        :rightAction="removeAll">
+                    <AddFolderFileBtn :leftAction="addFolders" :rightAction="addFiles" class="btn-spacing"
+                        :disabled="isLoading">
+                    </AddFolderFileBtn>
+                    <BatchActionBtn :deleteBtn="true" :leftAction="() => visitBatchLocalPlaylist(id)"
+                        :rightAction="removeAll" :disabled="isLoading">
                     </BatchActionBtn>
                 </div>
             </div>
         </div>
         <div class="center">
             <div class="list-title content-text-highlight">歌曲({{ detail.data.length }})</div>
-            <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="4" :id="id">
+            <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="1" :id="id"
+                :loading="isLoading">
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -192,7 +220,7 @@ onUpdated(() => {
 </template>
 
 <style scoped>
-#custom-playlist-detail-view {
+#local-playlist-detail-view {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -201,30 +229,30 @@ onUpdated(() => {
     overflow-x: hidden;
 }
 
-#custom-playlist-detail-view .header {
+#local-playlist-detail-view .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
 }
 
-#custom-playlist-detail-view .header .right {
+#local-playlist-detail-view .header .right {
     flex: 1;
     margin-left: 30px;
 }
 
-#custom-playlist-detail-view .header .title,
-#custom-playlist-detail-view .header .about {
+#local-playlist-detail-view .header .title,
+#local-playlist-detail-view .header .about {
     text-align: left;
     margin-bottom: 10px;
 }
 
-#custom-playlist-detail-view .header .title {
+#local-playlist-detail-view .header .title {
     /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
 
-#custom-playlist-detail-view .header .about {
+#local-playlist-detail-view .header .about {
     min-height: 99px;
     /*line-height: 21px;*/
     line-height: var(--content-text-line-height);
@@ -241,27 +269,27 @@ onUpdated(() => {
     /*font-size: 15px;*/
 }
 
-#custom-playlist-detail-view .right .edit {
+#local-playlist-detail-view .right .edit {
     display: flex;
     flex-direction: row;
     align-items: center;
     margin-bottom: 15px;
 }
 
-#custom-playlist-detail-view .spacing {
+#local-playlist-detail-view .spacing {
     margin-left: 6px;
 }
 
-#custom-playlist-detail-view .edit svg {
+#local-playlist-detail-view .edit svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
-#custom-playlist-detail-view .edit svg:hover {
+#local-playlist-detail-view .edit svg:hover {
     fill: var(--content-highlight-color);
 }
 
-#custom-playlist-detail-view .time {
+#local-playlist-detail-view .time {
     /*font-size: 13px;*/
     font-size: var(--content-text-tip-text-size);
     font-weight: 520;
@@ -269,23 +297,23 @@ onUpdated(() => {
     text-align: left;
 }
 
-#custom-playlist-detail-view .header .cover {
+#local-playlist-detail-view .header .cover {
     width: 233px;
     height: 233px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }
 
-#custom-playlist-detail-view .action {
+#local-playlist-detail-view .action {
     display: flex;
     flex-direction: row;
 }
 
-#custom-playlist-detail-view .btn-spacing {
+#local-playlist-detail-view .btn-spacing {
     margin-right: 20px;
 }
 
-#custom-playlist-detail-view .list-title {
+#local-playlist-detail-view .list-title {
     margin-left: 3px;
     margin-bottom: 3px;
     text-align: left;

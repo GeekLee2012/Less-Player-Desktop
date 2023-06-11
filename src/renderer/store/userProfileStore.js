@@ -253,7 +253,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             Object.assign(playlist, { updated })
             return true
         },
-        removeTrackFromCustomPlaylist(id, track) {
+        removeFromCustomPlaylist(id, track) {
             const playlist = this.getCustomPlaylist(id)
             if (!playlist) return false
             const index = this.findItemIndex(playlist.data, track)
@@ -267,11 +267,11 @@ export const useUserProfileStore = defineStore("userProfile", {
             if (!toId || !fromId) return false
             if (toId == fromId) return false
             if (this.addToCustomPlaylist(toId, track)) {
-                return this.removeTrackFromCustomPlaylist(fromId, track)
+                return this.removeFromCustomPlaylist(fromId, track)
             }
             return false
         },
-        removeAllTracksFromCustomPlaylist(id) {
+        removeAllFromCustomPlaylist(id) {
             const playlist = this.getCustomPlaylist(id)
             if (!playlist) return false
             playlist.data.length = 0

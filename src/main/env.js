@@ -34,7 +34,7 @@ const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41'
 ]
 //支持的音频文件扩展名（本地文件）
-const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
+const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a', 'wma']
 //支持的图片文件扩展名（本地文件）
 const IMAGE_EXTS = ['jpg', 'jpeg', 'png']
 //是否为macOS

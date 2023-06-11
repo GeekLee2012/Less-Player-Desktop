@@ -133,11 +133,11 @@ const visitRoute = (route) => {
 const highlightPlatform = (to) => {
     const path = to.path
     let platform = ''
-    if (path.includes('/square') || path.includes('/playlist')
+    if (path.includes('/local') || path.includes('/localPlaylist')) {
+        platform = 'local'
+    } else if (path.includes('/square') || path.includes('/playlist')
         || path.includes('/artist') || path.includes('/album')) {
         platform = path.split('/')[3]
-    } else if (path.includes('/local')) {
-        platform = 'local'
     } else if (path.includes('/userhome')) {
         const parts = path.split('/')
         // /userhome/{code}
@@ -220,6 +220,9 @@ provide('appRoute', {
     visitSearch: (keyword) => (visitRoute(createCommonRoute(`/search/${keyword}`))),
     visitPlaylist: (platform, id) => {
         const exploreMode = resolveExploreMode()
+        if (platform === 'local') {
+            return visitRoute(createCommonRoute(`/${exploreMode}/localPlaylist/${id}`))
+        }
         return visitRoute(createCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`))
     },
     visitArtist: ({ platform, item, index, callback, onRouteReady }) => {
@@ -232,7 +235,7 @@ provide('appRoute', {
     visitFavoritePlaylist: (platform, id) => {
         let exploreMode = resolveExploreMode()
         if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
-            exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
+            exploreMode = (exploreMode == 'userhome') ? 'userhome' : 'radios'
         }
         return visitRoute(`/${exploreMode}/playlist/${platform}/${id}`)
     },
@@ -252,8 +255,11 @@ provide('appRoute', {
         exploreMode = resolveExploreMode(exploreMode)
         return visitRoute(`/${exploreMode}/batch/customPlaylist/${id}`)
     },
-    visitBatchLocalMusic: () => {
+    visitBatchLocalMusic: (id) => {
         return visitRoute("/playlists/batch/local/0")
+    },
+    visitBatchLocalPlaylist: (id) => {
+        return visitRoute(`/playlists/batch/local/${id}`)
     },
     visitDataBackup: () => {
         return visitRoute("/data/backup")
@@ -263,6 +269,14 @@ provide('appRoute', {
     },
     visitUserInfoEdit: () => {
         return visitRoute("/userhome/user/edit")
+    },
+    visitLocalPlaylistCreate: (exploreMode) => {
+        exploreMode = resolveExploreMode(exploreMode)
+        return visitRoute(createCommonRoute(`/${exploreMode}/localPlaylist/create`))
+    },
+    visitLocalPlaylistEdit: (id, exploreMode) => {
+        exploreMode = resolveExploreMode(exploreMode)
+        return visitRoute(`/${exploreMode}/localPlaylist/edit/${id}`)
     },
 })
 </script>

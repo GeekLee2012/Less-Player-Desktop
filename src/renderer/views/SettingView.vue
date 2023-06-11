@@ -4,13 +4,13 @@ import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
-import SvgTextButton from '../components/SvgTextButton.vue';
 import packageCfg from '../../../package.json';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useIpcRenderer, isMacOS, isWinOS } from '../../common/Utils';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { getDoc } from '../../common/HttpClient';
 import { usePlayStore } from '../store/playStore';
+import { useLocalMusicStore } from '../store/localMusicStore';
 import EventBus from '../../common/EventBus';
 
 
@@ -62,7 +62,7 @@ const { setThemeIndex,
     togglePlaybackQueueAutoPositionOnShow,
 } = useSettingStore()
 
-const { showToast } = useAppCommonStore()
+const { showToast, showImportantToast } = useAppCommonStore()
 
 //打开默认浏览器，并访问超链接
 const visitLink = (url) => {
@@ -77,22 +77,21 @@ const resetData = async () => {
         msg: "数据重置，将会清空我的主页、当前播放等全部数据，同时恢复默认设置。  确定要继续吗？"
     })
     if (!ok) return
-    const settingStore = useSettingStore()
-    const appCommonStore = useAppCommonStore()
-    const playStore = usePlayStore()
-    const userProfileStore = useUserProfileStore()
 
-    appCommonStore.$reset()
-    playStore.$reset()
-    userProfileStore.$reset()
-    settingStore.$reset()
-
-    const storeKeys = ['player', 'appCommon', 'userProfile', 'setting']
-    storeKeys.forEach(key => {
+    const relativeStores = {
+        'player': usePlayStore(),
+        'appCommon': useAppCommonStore(),
+        'userProfile': useUserProfileStore(),
+        'localMusic': useLocalMusicStore(),
+        'setting': useSettingStore()
+    }
+    for (var [key, store] of Object.entries(relativeStores)) {
+        store.$reset()
         localStorage.removeItem(key)
-    })
+    }
+
     EventBus.emit('setting-reset')
-    showToast("数据已重置成功!")
+    showImportantToast("数据已重置成功!")
 }
 
 /* 数据 - 恢复默认设置 */
@@ -104,7 +103,7 @@ const resetSettingData = () => {
         localStorage.removeItem(key)
     })
     EventBus.emit('setting-reset')
-    showToast("已恢复默认设置!")
+    showImportantToast("已恢复默认设置!")
 }
 
 /* 通用设置 */
@@ -478,7 +477,7 @@ onMounted(checkForUpdate)
                         <ToggleControl @click="toggleStorePlayState" :value="cache.storePlayState">
                         </ToggleControl>
                     </div>
-                    <div>
+                    <div v-show="false">
                         <span class="cate-subtitle">应用退出前，保存本地歌曲：</span>
                         <ToggleControl @click="toggleStoreLocalMusic" :value="cache.storeLocalMusic">
                         </ToggleControl>

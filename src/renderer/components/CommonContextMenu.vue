@@ -30,12 +30,12 @@ const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore(
 const { showToast, setCommonCtxMenuData, hideAllCtxMenus } = useAppCommonStore()
 const { playTrackLater, addTrack, removeTrack, addTracks, playTrack } = usePlayStore()
 const { addFavoriteTrack, removeFavoriteSong, addFavoriteRadio,
-    removeCustomPlaylist, removeTrackFromCustomPlaylist,
+    removeCustomPlaylist, removeFromCustomPlaylist,
     getCustomPlaylist, removeRecentSong,
     addToCustomPlaylist, moveToCustomPlaylist,
     removeFavoritePlaylist } = useUserProfileStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
-const { removeItem } = useLocalMusicStore()
+const { removeFromLocalPlaylist } = useLocalMusicStore()
 
 
 const toastAndHideMenu = (text) => {
@@ -104,8 +104,9 @@ const removeQueueItem = () => {
 }
 
 const removeLocalItem = (item, index) => {
-    //removeItem(index)
-    removeItem(commonCtxMenuCacheItem.value)
+    const { id } = commonCtxItem.value // Playlist
+    const track = commonCtxMenuCacheItem.value
+    removeFromLocalPlaylist(id, track)
     toastAndHideMenu("歌曲已删除！")
 }
 
@@ -141,7 +142,7 @@ const removeCustom = () => {
 const removeFromCustom = () => {
     const { id } = commonCtxItem.value // Playlist
     const track = commonCtxMenuCacheItem.value
-    removeTrackFromCustomPlaylist(id, track)
+    removeFromCustomPlaylist(id, track)
     toastAndHideMenu("歌曲已删除！")
 }
 

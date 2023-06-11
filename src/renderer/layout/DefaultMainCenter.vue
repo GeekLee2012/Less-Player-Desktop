@@ -377,6 +377,7 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding #batch-action-view,
 #default-main-center .autopadding #user-info-edit-view,
 #default-main-center .autopadding #custom-playlist-edit-view,
+#default-main-center .autopadding #local-playlist-edit-view,
 #default-main-center .autopadding #data-backup-view,
 #default-main-center .autopadding #data-restore-view {
     padding-top: 5px;
@@ -386,7 +387,8 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding #playlist-detail-view,
 #default-main-center .autopadding #artist-detail-view,
 #default-main-center .autopadding #album-detail-view,
-#default-main-center .autopadding #custom-playlist-detail-view {
+#default-main-center .autopadding #custom-playlist-detail-view,
+#default-main-center .autopadding #local-playlist-detail-view {
     padding-top: 13px;
 }
 </style>

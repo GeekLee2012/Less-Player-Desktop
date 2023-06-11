@@ -7,7 +7,6 @@ export default {
 
 <script setup>
 import { inject, reactive, ref, toRef, watch } from 'vue';
-import SvgTextButton from '../components/SvgTextButton.vue';
 import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import EventBus from '../../common/EventBus';
@@ -375,7 +374,7 @@ watch(sourcesCategories, () => {
                     <span @click="toggleCheckAll">{{ (isCheckedAll ? "取消全选" : "全选") }}</span>
                 </div>
                 <SvgTextButton class="spacing" text="打开备份文件" :leftAction="openBackupFile"></SvgTextButton>
-                <SvgTextButton class="spacing" :isDisabled="!isReady" text="开始还原" :leftAction="restore"></SvgTextButton>
+                <SvgTextButton class="spacing" :disabled="!isReady" text="开始还原" :leftAction="restore"></SvgTextButton>
                 <SvgTextButton text="完成" :leftAction="backward" class="to-right"></SvgTextButton>
             </div>
         </div>

@@ -26,6 +26,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         commonNotificationShow: false,
         commonNotificationText: null,
         commonNotificationType: 0, //类型，0 - 普通成功消息，1-失败消息
+        commonNotificationImportant: false, //是否可以被新消息覆盖
         //通用上下文菜单
         commonCtxMenuShow: false,
         commonCtxMenuData: [],
@@ -193,6 +194,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         hideCommonNotification() {
             this.commonNotificationShow = false
             this.commonNotificationText = null
+            this.commonNotificationImportant = false
             this.setCommonNotificationType(-1)
         },
         doToast(text, type, callback, delay) {
@@ -209,6 +211,11 @@ export const useAppCommonStore = defineStore('appCommon', {
             }, (delay || 1500))
         },
         showToast(text, callback, delay) {
+            if (this.commonNotificationImportant) return
+            this.doToast(text || "操作成功！", 0, callback, delay || 1688)
+        },
+        showImportantToast(text, callback, delay) {
+            this.commonNotificationImportant = true
             this.doToast(text || "操作成功！", 0, callback, delay || 1688)
         },
         showFailToast(text, callback, delay) {

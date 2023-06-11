@@ -2,10 +2,8 @@ const { opendirSync, readFileSync, statSync, writeFileSync } = require('fs');
 const { opendir, rmdir, rm } = require('fs/promises');
 const { homedir } = require('os');
 const path = require('path');
-const jschardet = require('jschardet');
-const iconv = require('iconv-lite');
 const CryptoJS = require('crypto-js');
-const mm = require('music-metadata');
+const MusicMetadata = require('music-metadata');
 
 
 
@@ -26,14 +24,13 @@ const scanDirTracks = async (dir, exts) => {
         const list = await opendir(dir)
         const files = []
         for await (const dirent of list) {
-            //console.log(dirent.name)
             if (dirent.isFile() && isExtentionValid(dirent.name, exts)) {
                 const fullname = path.join(dir, dirent.name)
                 files.push(fullname)
             }
         }
         if (files.length > 0) {
-            const tracks = await parseTracks(files)
+            const tracks = await parseTracks(files.sort())
             result.data.push(...tracks)
         }
         return result
@@ -53,49 +50,13 @@ function getSimpleFileName(fullname) {
 
 async function parseTracks(audioFiles) {
     const tracks = []
-    for (const audioFile of audioFiles) {
-        const metadata = await mm.parseFile(audioFile, { duration: true })
-        const artist = []
-        let title = getSimpleFileName(audioFile)
-        const album = { id: 0, name: '' }
-        let coverData = 'default_cover.png'
-        let duration = 0
+    for (const file of audioFiles) {
         try {
-            if (metadata.common) {
-                if (metadata.common.title) {
-                    title = decodeText(metadata.common.title.trim())
-                }
-                if (metadata.common.artists) {
-                    metadata.common.artists.forEach(ar => artist.push({ id: '', name: decodeText(ar) }))
-                }
-                if (metadata.common.album) {
-                    album.name = decodeText(metadata.common.album)
-                }
-                const cover = mm.selectCover(metadata.common.picture)
-                if (cover) {
-                    coverData = `data:${cover.format};base64,${cover.data.toString('base64')}`
-                }
+            const track = await parseTrackMetadata(file)
+            if (track) {
+                const index = tracks.findIndex(item => track.id == item.id)
+                if (index == -1) tracks.push(track)
             }
-            if (metadata.format) {
-                if (metadata.format.duration) {
-                    duration = metadata.format.duration * 1000
-                }
-            }
-
-            const hash = CryptoJS.MD5(title + artist.name + album.name + duration).toString()
-            //TODO
-            const track = {
-                id: hash,
-                platform: 'local',
-                title,
-                artist,
-                album,
-                duration,
-                cover: coverData
-            }
-            track.url = FILE_PREFIX + audioFile
-            const index = tracks.findIndex(item => track.id == item.id)
-            if (index < 0) tracks.push(track)
         } catch (error) {
             console.log(error)
         }
@@ -103,33 +64,74 @@ async function parseTracks(audioFiles) {
     return tracks
 }
 
-//TODO 中文编码容易乱码
-function decodeText(text) {
+async function parseTrackMetadata(file) {
+    const metadata = await MusicMetadata.parseFile(file, { duration: true })
+    const artist = []
+    let filename = getSimpleFileName(file)
+    const album = { id: 0, name: '' }
+    let coverData = 'default_cover.png'
+    let title = null, duration = 0, lyricText = null
     try {
-        const detect = jschardet.detect(text)
-        //console.log(detect)
-        if (!detect.encoding) return text
-        const encoding = detect.encoding.trim().toLowerCase()
-        if ('windows-1252' === encoding) {
-            return iconv.decode(Buffer.from(text), 'gb2312')
-        } else if ('ibm855' === encoding) {
-            return iconv.decode(Buffer.from(text), 'gb2312')
-        } else if ('gb2312' === encoding) {
-            return iconv.decode(Buffer.from(text), 'gb2312')
-        } else if ('gbk' === encoding) {
-            return iconv.decode(Buffer.from(text), 'gbk')
+        if (metadata.common) {
+            const { title: mTitle, artist: mArtist, artists, album: mAlbum, picture, lyrics } = metadata.common
+            //歌曲名称
+            if (mTitle) title = mTitle.trim()
+            //歌手、艺人
+            if (artists) artists.forEach(ar => artist.push({ id: '', name: ar }))
+            //专辑名称
+            if (mAlbum) album.name = mAlbum
+            //封面
+            const cover = MusicMetadata.selectCover(picture)
+            if (cover) coverData = `data:${cover.format};base64,${cover.data.toString('base64')}`
+            //内嵌歌词
+            if (lyrics && lyrics.length > 0) lyricText = lyrics[0]
         }
+        if (metadata.format) {
+            const { duration: mDuration } = metadata.format
+            if (mDuration) duration = mDuration * 1000
+        }
+
+        //内嵌歌词
+        if (metadata.native && !lyricText) {
+            const ID3v23 = metadata.native['ID3v2.3']
+            for (var i in ID3v23) {
+                const { id, value } = ID3v23[i]
+                if (id === 'USLT') {
+                    lyricText = value.text
+                    break
+                }
+            }
+        }
+
+        const hash = CryptoJS.MD5(file).toString()
+        //TODO
+        return {
+            id: hash,
+            platform: 'local',
+            title: title || filename,
+            filename,
+            artist,
+            album,
+            duration,
+            cover: coverData,
+            embeddedLyricText: lyricText,
+            url: (FILE_PREFIX + file)
+        }
+
     } catch (error) {
         console.log(error)
     }
-    return text
+    return null
 }
 
 function readText(file, encoding) {
     try {
-        const data = readFileSync(file, { encoding })
-        if (encoding) return data.toString()
-        return decodeText(data.toString())
+        file = file.replace(FILE_PREFIX, '')
+        const statResult = statSync(file, { throwIfNoEntry: false })
+        if (statResult) {
+            const data = readFileSync(file, { encoding })
+            return data.toString()
+        }
     } catch (error) {
         console.log(error)
     }
@@ -138,8 +140,11 @@ function readText(file, encoding) {
 
 function writeText(file, text) {
     try {
-        writeFileSync(file, text)
-        return true
+        const statResult = statSync(file, { throwIfNoEntry: false })
+        if (statResult) {
+            writeFileSync(file, text)
+            return true
+        }
     } catch (error) {
         console.log(error)
     }
@@ -186,7 +191,6 @@ const listFiles = async (dir, isFullname) => {
         //const result = { path: dir, data: [] }
         const list = await opendir(dir)
         for await (const dirent of list) {
-            //console.log(dirent.name)
             if (dirent.isFile()) {
                 const filename = isFullname ? path.join(dir, dirent.name) : dirent.name
                 files.push(filename)
@@ -196,6 +200,111 @@ const listFiles = async (dir, isFullname) => {
         console.log(error);
     }
     return files
+}
+
+//解析.pls格式文件
+const parsePlsFile = async (filename) => {
+    try {
+        const sname = getSimpleFileName(filename)
+        const result = { file: filename, name: sname, version: null, data: [] }
+        //读取文本内容
+        const content = readText(filename)
+        if (!content) return null
+        //逐行解析
+        const lines = content.trim().split('\n')
+        if (!lines) return null
+        let title = null, file = null, length = null
+        for (var i = 0; i < lines.length; i++) {
+            const line = lines[i].trim()
+
+            if (line.length < 1) return
+            //[Playlist]，类似标签，直接忽略
+            if (line.startsWith('[') && line.endsWith(']')) continue
+
+            const index = line.indexOf('=')
+            //不合法格式
+            if (index == -1) continue
+            //解析[key=value]
+            const key = line.substring(0, index)
+            const value = line.substring(index + 1)
+            const lcKey = key.toLowerCase()
+            if (lcKey.startsWith('numberofentries')) {
+                Object.assign(result, { total: parseInt(value) })
+            } else if (lcKey.startsWith('version')) {
+                Object.assign(result, { version: value })
+            } else if (lcKey.startsWith('file')) {
+                file = value
+            } else if (lcKey.startsWith('title')) {
+                title = value
+            } else if (lcKey.startsWith('length')) {
+                length = parseInt(value)
+            }
+            //TODO 暂时先简单处理，不校验序号是否匹配
+            if (file != null && title != null && length != null) {
+                //从文件本身去解析 Metadata，pls自带信息不完整
+                const track = await parseTrackMetadata(file)
+                if (track) {
+                    const index = result.data.findIndex(item => track.id == item.id)
+                    if (index == -1) result.data.push(track)
+                }
+                //重置
+                title = null
+                file = null
+                length = null
+            }
+        }
+        return result
+    } catch (error) {
+        console.log(error)
+    }
+    return null
+}
+
+//解析.m3u格式文件
+const parseM3uFile = async (filename) => {
+    try {
+        const sname = getSimpleFileName(filename)
+        const result = { file: filename, name: sname, version: null, data: [] }
+        //读取文本内容
+        const content = readText(filename)
+        if (!content) return null
+        //逐行解析
+        const lines = content.trim().split('\n')
+        if (!lines) return null
+        let title = null, file = null, length = null
+        for (var i = 0; i < lines.length; i++) {
+            const line = lines[i].trim()
+
+            if (line.length < 1) return
+            if (line.startsWith('#EXTM3U')) continue
+
+            if (line.startsWith('#EXTINF:')) {
+                const metaText = line.replace('#EXTINF:', '')
+                const index = metaText.indexOf(',')
+                length = parseInt(metaText.substring(0, index))
+                title = metaText.substring(index + 1).trim()
+            } else {
+                file = line
+            }
+            //TODO 暂时先简单处理，不校验序号是否匹配
+            if (file != null && title != null && length != null) {
+                //从文件本身去解析 Metadata，pls自带信息不完整
+                const track = await parseTrackMetadata(file)
+                if (track) {
+                    const index = result.data.findIndex(item => track.id == item.id)
+                    if (index == -1) result.data.push(track)
+                }
+                //重置
+                title = null
+                file = null
+                length = null
+            }
+        }
+        return result
+    } catch (error) {
+        console.log(error)
+    }
+    return null
 }
 
 module.exports = {
@@ -210,5 +319,7 @@ module.exports = {
     nextInt,
     getDownloadDir,
     removePath,
-    listFiles
+    listFiles,
+    parsePlsFile,
+    parseM3uFile
 }

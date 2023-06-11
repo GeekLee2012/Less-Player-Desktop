@@ -10,7 +10,6 @@ import { storeToRefs } from 'pinia';
 import { ref, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import SvgTextButton from '../components/SvgTextButton.vue';
 import { useIpcRenderer } from '../../common/Utils';
 
 
