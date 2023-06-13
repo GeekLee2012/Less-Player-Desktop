@@ -30,11 +30,6 @@ const props = defineProps({
     margin-bottom: 15px;
     font-size: 20px;
     font-weight: bold;
-    /*
-    background: linear-gradient(to top right, #1ca388, #28c83f);
-    -webkit-background-clip: text;
-    color: transparent;
-    */
 }
 
 .textlist-ctl p {

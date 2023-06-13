@@ -30,7 +30,7 @@ const toastAndHideMenu = (text) => {
 
 const addToQueue = () => {
     addTrack(commonCtxMenuCacheItem.value)
-    toastAndHideMenu("歌曲已添加成功！")
+    toastAndHideMenu("歌曲添加成功！")
 }
 
 const createCustom = () => {
@@ -57,7 +57,7 @@ const MenuItems = {
 
 const handleClick = (item, mode) => {
     const track = commonCtxMenuCacheItem.value
-    let text = "歌曲已添加成功！"
+    let text = "歌曲添加成功！"
     if (mode < 3 && Playlist.isFMRadioType(track)) {
         text = "FM电台无法加入歌单！"
         setCommonNotificationType(1)
@@ -68,7 +68,7 @@ const handleClick = (item, mode) => {
     if (mode == 1) {
         const { id } = commonCtxItem.value
         success = moveToCustomPlaylist(item.id, id, track)
-        text = "歌曲已移动成功！"
+        text = "歌曲移动成功！"
     } else if (mode == 3) { //添加当前播放列表
         //TODO 暂时先简单处理，不考虑异常情况
         const queue = toRaw(queueTracks.value)
@@ -77,7 +77,7 @@ const handleClick = (item, mode) => {
             addToCustomPlaylist(item.id, qItem)
         })
         success = true
-        text = "全部歌曲已添加成功！"
+        text = "全部歌曲添加成功！"
     } else {
         success = addToCustomPlaylist(item.id, track)
     }

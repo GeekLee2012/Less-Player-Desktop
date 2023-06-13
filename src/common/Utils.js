@@ -146,3 +146,14 @@ export const smoothAnimation = (target, animationAlgoFn, start, dest, duration, 
 export const smoothScroll = (target, dest, duration, step, interruptAction) => {
     smoothAnimation(target, easeInOutQuad, target.scrollTop, dest, duration, step, (value => target.scrollTop = value), interruptAction)
 }
+
+//限制数组总长度，超出部分会直接删除
+export const trimArray = async (data, limit) => {
+    limit = limit || 999
+    if (data && data.length > limit) {
+        const deleteCount = data.length - limit
+        await data.splice(limit, deleteCount)
+        return deleteCount
+    }
+    return 0
+}

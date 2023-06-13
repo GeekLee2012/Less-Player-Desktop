@@ -57,12 +57,12 @@ export class United {
             const tArtistName = United.tranformArtistName(firstArtistName)
             const keyword = `${tTitle} ${tArtistName}`
 
-            const filterdVendors = vendors.filter(v => (v.CODE != fromPlatform))
+            const filteredVendors = vendors.filter(v => (v.CODE != fromPlatform))
             const fromVendor = getVendor(fromPlatform)
-            if (fromVendor) filterdVendors.push(fromVendor)
+            if (fromVendor) filteredVendors.push(fromVendor)
 
-            for (var i = 0; i < filterdVendors.length; i++) {
-                const vendor = filterdVendors[i]
+            for (var i = 0; i < filteredVendors.length; i++) {
+                const vendor = filteredVendors[i]
                 //if (vendor.CODE == fromPlatform || vendor.CODE == DouBan.CODE) continue
                 const searchResult = await vendor.searchSongs(keyword)
                 const { data: candidates } = searchResult
@@ -148,8 +148,6 @@ export class United {
                 else if (dError < 60 * 1000) {
                     score += 0.05
                 }
-
-                //Object.assign(candidate, { score })
 
                 if (score < 0.65 && hits < 2) continue
                 const vendor = getVendor(cPlatform)

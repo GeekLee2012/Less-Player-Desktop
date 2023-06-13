@@ -177,11 +177,6 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 .playlist-category-view .cate-title {
     font-size: 19px;
     font-weight: bold;
-    /*
-    background: linear-gradient(to top right, #28c83f, #1ca388);
-    -webkit-background-clip: text;
-    color: transparent;
-    */
     color: var(--content-subtitle-text-color);
     min-width: 39px;
     margin-top: 15px;

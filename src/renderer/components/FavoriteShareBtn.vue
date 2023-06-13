@@ -1,7 +1,8 @@
 <script setup>
 const props = defineProps({
     favorited: Boolean,
-    actionText: String
+    actionText: String,
+    disabled: Boolean
 })
 
 const getTextByStatus = () => {
@@ -11,7 +12,7 @@ const getTextByStatus = () => {
 </script>
 
 <template>
-    <SvgTextButton class="favorite-share-btn" :text="getTextByStatus()">
+    <SvgTextButton class="favorite-share-btn" :text="getTextByStatus()" :disabled="disabled">
         <template #left-img>
             <svg v-show="!favorited" width="17" height="17" viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">

@@ -12,7 +12,8 @@ const props = defineProps({
 
 const visitAlbumDetail = (platform, id, callback) => {
     if (!props.visitable) return
-    visitAlbum({ platform, id, callback })
+    const { data } = props
+    visitAlbum({ platform, id, data, callback })
 }
 </script>
 
@@ -40,6 +41,7 @@ const visitAlbumDetail = (platform, id, callback) => {
 .album-ctl-visitable:hover {
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 </style>

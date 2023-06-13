@@ -40,13 +40,15 @@ const { commonNotificationShow, commonNotificationText,
   lyricToolbarShow, randomMusicToolbarShow,
   customThemeEditViewShow, colorPickerToolbarShow,
   gradientColorToolbarShow, playlistCategoryViewShow,
-  artistCategoryViewShow, radioCategoryViewShow } = storeToRefs(useAppCommonStore())
+  artistCategoryViewShow, radioCategoryViewShow,
+  popoverHintShow, popoverHintText } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
   hideAllCtxMenus, toggleColorPickerToolbar,
   showColorPickerToolbar, toggleGradientColorToolbar,
-  showGradientColorToolbar } = useAppCommonStore()
+  showGradientColorToolbar, showPopoverHint,
+  hidePopoverHint, isSamePopoverHintShow } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { isDefaultClassicLayout } = storeToRefs(useSettingStore())
 const { getCurrentTheme } = useSettingStore()
@@ -130,6 +132,29 @@ EventBus.on('commonCtxMenu-show', ({ event, value }) => {
   showCommonCtxMenu(value)
 })
 
+//TODO 实现方式有待完善
+const registerPopoverHints = () => {
+  const hintEls = document.querySelectorAll('[popover-hint]')
+  if (!hintEls) return
+  hintEls.forEach(el => {
+    const text = el.getAttribute('popover-hint')
+    if (!text) return
+    el.onmouseover = (event) => {
+      if (isSamePopoverHintShow(el)) return
+      showPopoverHint(el, text)
+
+      const popoverHint = document.querySelector('.popover-hint')
+      const { x, y } = event
+      const { clientWidth: width, clientHeight: height } = el
+      popoverHint.style.left = x + 'px'
+      popoverHint.style.top = y + 30 + 'px'
+    }
+    el.onmouseout = (event) => {
+      hidePopoverHint()
+    }
+  })
+}
+
 const bindEventListeners = () => {
   EventBus.on('addToListSubmenu-show', e => {
     submenuItemNums = customPlaylists.value.length + 2
@@ -184,7 +209,10 @@ const bindEventListeners = () => {
     setupCustomThemeEditViewPos()
     setupGradientColorToolbarPos()
   })
+
+  EventBus.on('popover-hint-register', registerPopoverHints)
 }
+
 
 const setupCustomThemeEditViewPos = () => {
   if (!customThemeEditViewShow.value) return
@@ -247,7 +275,6 @@ watch(() => getCurrentTheme(), (nv) => {
   const { appBackgroundScope: scope } = nv
   Object.assign(appBackgroundScope, { ...scope })
 }, { deep: true, immediate: true })
-
 </script>
 
 <template>
@@ -357,6 +384,13 @@ watch(() => getCurrentTheme(), (nv) => {
     <ColorPickerToolbar id="color-picker-toolbar" ref="colorPickerToolbarRef" v-show="colorPickerToolbarShow" />
 
     <GradientColorToolbar id="gradient-color-toolbar" ref="gradientColorToolbarRef" v-show="gradientColorToolbarShow" />
+
+    <Notification class="popover-hint" :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
+      v-show="popoverHintShow">
+      <template #text>
+        <div v-html="popoverHintText"></div>
+      </template>
+    </Notification>
   </div>
 </template>
 
@@ -470,5 +504,33 @@ watch(() => getCurrentTheme(), (nv) => {
 
 #popovers .autolayout {
   top: 60px;
+}
+
+#popovers .popover-hint {
+  z-index: 1024;
+}
+
+#popovers .popover-hint .ntf-dialog-mask {
+  border-radius: 6px;
+}
+
+#popovers .popover-hint .ntf-dialog {
+  width: auto !important;
+  height: auto !important;
+  align-items: flex-start;
+}
+
+#popovers .popover-hint .ntf-text {
+  font-size: var(--content-text-tip-text-size);
+  padding: 6px 15px;
+}
+
+#popovers .popover-hint .ntf-text div {
+  text-align: left;
+  align-items: center;
+  min-width: 20px;
+  max-width: 520px;
+  width: max-content !important;
+  height: auto !important;
 }
 </style>

@@ -1,8 +1,11 @@
-import { Lyric } from "../common/Lyric"
-import { Track } from "../common/Track"
-import { useIpcRenderer } from "../common/Utils"
-import { FILE_PREFIX } from "../common/Constants"
-import { United } from "./united"
+import { Lyric } from "../common/Lyric";
+import { Track } from "../common/Track";
+import { Album } from "../common/Album";
+import { useIpcRenderer } from "../common/Utils";
+import { FILE_PREFIX } from "../common/Constants";
+import { United } from "./united";
+import { useLocalMusicStore } from "../renderer/store/localMusicStore";
+
 
 
 
@@ -63,6 +66,78 @@ export class LocalMusic {
                     Object.assign(track, { cover })
                 }
             }
+            resolve(result)
+        })
+    }
+
+    static artistDetail(id) {
+        return new Promise((resolve, reject) => {
+            const result = { id, title: id, cover: 'default_cover.png', data: [], about: '【本地歌曲 - 歌手】' }
+            resolve(result)
+        })
+    }
+
+    //歌手详情: 全部歌曲
+    static artistDetailAllSongs(id, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            const _name = (id || '').toLowerCase().trim()
+            const result = { id, platform: LocalMusic.CODE, offset, limit, page, total: 0, data: [] }
+            if (_name.length < 1 || page > 1) {
+                resolve(result)
+                return
+            }
+            const { localPlaylists } = useLocalMusicStore()
+            localPlaylists.forEach(playlist => {
+                const filteredPlaylist = playlist.data.filter(item => {
+                    const { artist } = item
+                    if (artist && artist.length > 0) {
+                        for (var i = 0; i < artist.length; i++) {
+                            const { name } = artist[i]
+                            if (name && name.toLowerCase().trim() === _name) {
+                                return true
+                            }
+                        }
+                    }
+                    return false
+                })
+                if (filteredPlaylist.length > 0) result.data.push(...filteredPlaylist)
+            })
+            resolve(result)
+        })
+    }
+
+    static albumDetail(id) {
+        return new Promise((resolve, reject) => {
+            const result = new Album(id, LocalMusic.CODE, id)
+            result.about = '【本地歌曲 - 专辑】'
+            resolve(result)
+        })
+    }
+
+    //专辑详情: 全部歌曲
+    static albumDetailAllSongs(id, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            const _name = (id || '').toLowerCase().trim()
+            const result = new Album(id, LocalMusic.CODE, id)
+            if (_name.length < 1 || page > 1) {
+                resolve(result)
+                return
+            }
+            const { localPlaylists } = useLocalMusicStore()
+            localPlaylists.forEach(playlist => {
+                const filteredPlaylist = playlist.data.filter(item => {
+                    const { album } = item
+                    if (album && album.name) {
+                        if (album.name.toLowerCase().trim() === _name) {
+                            const { cover, publishTime } = item
+                            Object.assign(result, { cover, artistName: Track.firstArtistName(item), publishTime })
+                            return true
+                        }
+                    }
+                    return false
+                })
+                if (filteredPlaylist.length > 0) result.data.push(...filteredPlaylist)
+            })
             resolve(result)
         })
     }

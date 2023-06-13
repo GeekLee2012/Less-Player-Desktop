@@ -35,7 +35,7 @@ const isLoading = ref(false)
 const setLoading = (value) => isLoading.value = value
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showToast, updateCommonCtxItem } = useAppCommonStore()
+const { showToast, updateCommonCtxItem, hideAllCtxMenus } = useAppCommonStore()
 const { getLocalPlaylist, addToLocalPlaylist,
     removeFromLocalPlaylist, removeAllFromLocalPlaylist } = useLocalMusicStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
@@ -48,10 +48,10 @@ const resetView = () => {
 }
 
 const nextPage = () => {
-    if (detail.data.length >= total) return false
-    offset = page * limit
-    page = page + 1
-    return true
+    //if (detail.data.length >= total) return false
+    //offset = page * limit
+    //page = page + 1
+    return false
 }
 
 const loadContent = () => {
@@ -71,7 +71,7 @@ const loadMoreContent = () => {
 
 const getAbout = () => {
     return (detail.about && detail.about.trim().length > 0) ?
-        detail.about.trim() : "暂时还没有歌单简介 ~"
+        detail.about.trim() : "还没有简介 ~"
 }
 
 const playAll = () => {
@@ -112,6 +112,7 @@ const scrollToLoad = () => {
 }
 
 const onScroll = () => {
+    hideAllCtxMenus()
     scrollToLoad()
 }
 
@@ -131,9 +132,14 @@ const addFolders = async () => {
 
     if (dirs) {
         setLoading(true)
-        //dirs.forEach(item => addDir(item))
         const result = await ipcRenderer.invoke('scan-audio-dirs', dirs)
         if (result) result.forEach(({ data }) => data.forEach(item => addToLocalPlaylist(props.id, item)))
+        /*
+        ipcRenderer.on('scan-audio-dirs-result', (event, result) => {
+            if (result) result.forEach(({ data }) => data.forEach(item => addToLocalPlaylist(props.id, item)))
+            setLoading(false)
+        })
+        */
     }
     setLoading(false)
 }

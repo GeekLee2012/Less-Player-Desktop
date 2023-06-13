@@ -11,7 +11,7 @@ const FILE_PREFIX = 'file:///'
 
 const transformPath = (path) => {
     try {
-        return path.replace(/\\/g, '/')
+        return path.replace(FILE_PREFIX, '').replace(/\\/g, '/').trim()
     } catch (error) {
         console.log(error)
     }
@@ -45,13 +45,13 @@ const scanDirTracks = async (dir, exts) => {
         return result
     } catch (error) {
         console.log(error);
+        return null
     }
-    return null
 }
 
 function getSimpleFileName(fullname) {
     if (!fullname) return ''
-    fullname = transformPath(fullname).trim()
+    fullname = transformPath(fullname)
     const from = fullname.lastIndexOf('/')
     const to = fullname.lastIndexOf('.')
     return fullname.substring(from + 1, to)
@@ -61,7 +61,7 @@ async function parseTracks(audioFiles) {
     const tracks = []
     for (const file of audioFiles) {
         try {
-            const track = await parseTrackMetadata(file)
+            const track = await createTrackFromMetadata(file)
             if (track) {
                 const index = tracks.findIndex(item => track.id == item.id)
                 if (index == -1) tracks.push(track)
@@ -73,17 +73,21 @@ async function parseTracks(audioFiles) {
     return tracks
 }
 
-async function parseTrackMetadata(file) {
+async function createTrackFromMetadata(file) {
     file = transformPath(file)
+    const statResult = statSync(file, { throwIfNoEntry: false })
+    if (!statResult) return null
+
     const metadata = await MusicMetadata.parseFile(file, { duration: true })
     const artist = []
     let filename = getSimpleFileName(file)
     const album = { id: 0, name: '' }
     let coverData = 'default_cover.png'
-    let title = null, duration = 0, lyricText = null
+    let title = null, duration = 0, lyricText = null, publishTime = null
     try {
         if (metadata.common) {
-            const { title: mTitle, artist: mArtist, artists, album: mAlbum, picture, lyrics } = metadata.common
+            const { title: mTitle, artist: mArtist, artists, album: mAlbum, picture, lyrics,
+                year: mYear, date: mDate, originaldate } = metadata.common
             //歌曲名称
             if (mTitle) title = mTitle.trim()
             //歌手、艺人
@@ -95,6 +99,11 @@ async function parseTrackMetadata(file) {
             if (cover) coverData = `data:${cover.format};base64,${cover.data.toString('base64')}`
             //内嵌歌词
             if (lyrics && lyrics.length > 0) lyricText = lyrics[0]
+
+            //发布时间
+            if (originaldate) publishTime = originaldate
+            if (!publishTime && mDate) publishTime = mDate
+            if (!publishTime && mYear) publishTime = mYear
         }
         if (metadata.format) {
             const { duration: mDuration } = metadata.format
@@ -125,7 +134,8 @@ async function parseTrackMetadata(file) {
             duration,
             cover: coverData,
             embeddedLyricText: lyricText,
-            url: (FILE_PREFIX + file)
+            url: (FILE_PREFIX + file),
+            publishTime
         }
 
     } catch (error) {
@@ -136,7 +146,7 @@ async function parseTrackMetadata(file) {
 
 function readText(file, encoding) {
     try {
-        file = file.replace(FILE_PREFIX, '')
+        file = transformPath(file)
         const statResult = statSync(file, { throwIfNoEntry: false })
         if (statResult) {
             const data = readFileSync(file, { encoding })
@@ -198,7 +208,6 @@ const removePath = (path) => {
 const listFiles = async (dir, isFullname) => {
     const files = []
     try {
-        //const result = { path: dir, data: [] }
         const list = await opendir(dir)
         for await (const dirent of list) {
             if (dirent.isFile()) {
@@ -253,7 +262,7 @@ const parsePlsFile = async (filename) => {
             //TODO 暂时先简单处理，不校验序号是否匹配
             if (file != null && title != null && length != null) {
                 //从文件本身去解析 Metadata，pls自带信息不完整
-                const track = await parseTrackMetadata(file)
+                const track = await createTrackFromMetadata(file)
                 if (track) {
                     const index = result.data.findIndex(item => track.id == item.id)
                     if (index == -1) result.data.push(track)
@@ -301,7 +310,7 @@ const parseM3uFile = async (filename) => {
             //TODO 暂时先简单处理，不校验序号是否匹配
             if (file != null && title != null && length != null) {
                 //从文件本身去解析 Metadata，pls自带信息不完整
-                const track = await parseTrackMetadata(file)
+                const track = await createTrackFromMetadata(file)
                 if (track) {
                     const index = result.data.findIndex(item => track.id == item.id)
                     if (index == -1) result.data.push(track)

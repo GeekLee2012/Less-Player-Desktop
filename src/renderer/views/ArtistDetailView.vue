@@ -51,7 +51,7 @@ const { setActiveTab, updateArtist,
     isArtistDetailLoaded
 } = useArtistDetailStore()
 
-const { getVendor } = usePlatformStore()
+const { getVendor, isLocalMusic } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
 
@@ -124,10 +124,10 @@ const checkFollow = () => {
 }
 const updateTabData = (data) => {
     tabData.length = 0
-    if (typeof (data) == 'string') {
+    if (typeof (data) === 'string') {
         tabData.push(data)
         updateTabTipText(0)
-    } else if (data) {
+    } else if (data.length > 0) {
         tabData.push(...data)
         updateTabTipText(tabData.length)
     }
@@ -396,7 +396,8 @@ watch([platform, artistId], reloadAll, { immediate: true })
                         text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
                         v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
-                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
+                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing"
+                        :disabled="isLocalMusic(platform)" v-show="!isLocalMusic(platform)">
                     </FavoriteShareBtn>
                 </div>
             </div>

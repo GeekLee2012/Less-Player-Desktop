@@ -3,19 +3,20 @@ import { inject, ref } from 'vue';
 
 
 const props = defineProps({
-    miniMode: Boolean
+    miniMode: Boolean,
+    placeholder: String,
+    submitAction: Function
 })
 
-
-const { visitSearch } = inject('appRoute')
 
 const keywordRef = ref(null)
 const hasText = ref(false)
 
-const visitSearchView = () => {
+const submitSearch = () => {
     const kwInputEl = keywordRef.value
     const keyword = kwInputEl.value.trim()
-    if (keyword.length > 0) visitSearch(keyword)
+    const { submitAction } = props
+    if (submitAction) submitAction(keyword)
 }
 
 const toggleClearBtn = () => {
@@ -30,7 +31,7 @@ const clear = () => {
 </script>
 
 <template>
-    <div class="search-bar" :class="{ 'mini-search-bar': miniMode }" @keydown.enter="visitSearchView" @keydown.stop="">
+    <div class="search-bar" :class="{ 'mini-search-bar': miniMode }" @keydown.enter="submitSearch" @keydown.stop="">
         <div class="search-btn" @click="visitSearchView">
             <svg :width="miniMode ? 20 : 15" :height="miniMode ? 20 : 15" viewBox="0 0 726.24 726.5"
                 xmlns="http://www.w3.org/2000/svg">
@@ -42,7 +43,7 @@ const clear = () => {
                 </g>
             </svg>
         </div>
-        <input type="text" class="keyword" placeholder="现在想听点什么~" ref="keywordRef" @input="toggleClearBtn" />
+        <input type="text" class="keyword" :placeholder="placeholder" ref="keywordRef" @input="toggleClearBtn" />
         <div class="clear-btn">
             <svg v-show="hasText" @click="clear" width="9" height="9" viewBox="0 0 593.14 593.11" data-name="Layer 1"
                 xmlns="http://www.w3.org/2000/svg">
@@ -65,7 +66,7 @@ const clear = () => {
 .search-bar .keyword,
 .search-bar .clear-btn {
     border: 1px solid var(--searchbar-border-color);
-    height: 32px;
+    height: 100%;
 }
 
 .search-bar .search-btn {

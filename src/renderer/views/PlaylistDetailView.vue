@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, reactive, ref, watch, inject } from 'vue';
+import { onMounted, onActivated, reactive, ref, watch, inject, nextTick } from 'vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';

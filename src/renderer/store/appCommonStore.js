@@ -49,6 +49,12 @@ export const useAppCommonStore = defineStore('appCommon', {
         currentTraceId: null,
         colorPickerToolbarShow: false,
         gradientColorToolbarShow: false,
+        //悬浮提示
+        popoverHintShow: false,
+        popoverHintText: null,
+        popoverHintTarget: null,
+        //独占搜索框
+        searchBarExclusiveAction: null
     }),
     getters: {
         isPlaylistMode() {
@@ -338,6 +344,23 @@ export const useAppCommonStore = defineStore('appCommon', {
         showGradientColorToolbar() {
             this.gradientColorToolbarShow = true
         },
+        showPopoverHint(el, text) {
+            this.popoverHintTarget = el
+            this.popoverHintText = text
+            this.popoverHintShow = true
+        },
+        hidePopoverHint() {
+            this.popoverHintShow = false
+            this.popoverHintTarget = null
+            this.popoverHintText = null
+        },
+        isSamePopoverHintShow(el) {
+            return this.popoverHintTarget
+                && this.popoverHintTarget === el
+        },
+        setSearchBarExclusiveAction(action) {
+            this.searchBarExclusiveAction = action
+        }
     },
     persist: {
         enabled: true,

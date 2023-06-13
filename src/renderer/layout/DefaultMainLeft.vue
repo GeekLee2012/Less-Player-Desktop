@@ -430,6 +430,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 #explore-mode .mode-item:hover span {
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 
@@ -457,7 +458,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 }
 
 #explore-mode .excluded-mode-item:hover svg {
-    fill: var(--button-icon-btn-color) !important;
+    fill: var(--content-subtitle-text-color) !important;
 }
 
 #custom-playlist-list,
@@ -579,6 +580,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     font-weight: bold;
     background: var(--app-logo-app-name-text-color);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 </style>

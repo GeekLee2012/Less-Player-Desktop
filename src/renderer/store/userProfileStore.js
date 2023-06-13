@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import EventBus from "../../common/EventBus";
-import { randomTextWithinAlphabetNums } from "../../common/Utils";
+import { randomTextWithinAlphabetNums, trimArray } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 
 
@@ -131,8 +131,11 @@ export const useUserProfileStore = defineStore("userProfile", {
             if (!state) return
             if (!item) return
             const index = this.findItemIndex(state, item, compareFn)
-            if (index != -1) state.splice(index, 1)
-            this.refreshUserHome()
+            if (index != -1) {
+                state.splice(index, 1)
+                this.refreshUserHome()
+            }
+
         },
         uniqueInsertFirst(state, item, compareFn) {
             this.removeItem(state, item, compareFn)
@@ -246,6 +249,8 @@ export const useUserProfileStore = defineStore("userProfile", {
         addToCustomPlaylist(id, track) {
             const playlist = this.getCustomPlaylist(id)
             if (!playlist) return false
+            const { platform } = track
+            if (isLocalMusic(platform)) return false
             const index = this.findItemIndex(playlist.data, track)
             if (index > -1) return false
             playlist.data.push(track)
@@ -310,28 +315,33 @@ export const useUserProfileStore = defineStore("userProfile", {
                 type, pid, songlistId, extra1, extra2, mv,
                 payPlay, payDownload
             })
-            //TODO
-            const limit = 999
-            if (this.recents.songs.length > limit) {
-                const deleteCount = this.recents.songs.length - limit
-                this.recents.songs.splice(limit, deleteCount)
-                this.refreshUserHome()
-            }
+            trimArray(this.recents.songs, 999).then(deleteCount => {
+                if (deleteCount) this.refreshUserHome()
+            })
         },
         addRecentPlaylist(id, platform, title, cover, type) {
             this.uniqueInsertFirst(this.recents.playlists, {
                 id, platform, title, cover, type
+            })
+            trimArray(this.recents.playlists, 666).then(deleteCount => {
+                if (deleteCount) this.refreshUserHome()
             })
         },
         addRecentAlbum(id, platform, title, cover, publishTime) {
             this.uniqueInsertFirst(this.recents.albums, {
                 id, platform, title, cover, publishTime
             })
+            trimArray(this.recents.albums, 666).then(deleteCount => {
+                if (deleteCount) this.refreshUserHome()
+            })
         },
         addRecentRadio(track) {
             const { id, platform, title, cover, type, } = track
             this.uniqueInsertFirst(this.recents.radios, {
                 id, platform, title, cover, type, data: [track]
+            })
+            trimArray(this.recents.radios, 366).then(count => {
+                if (count) this.refreshUserHome()
             })
         },
         removeRecentSong(track) {
@@ -357,7 +367,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.recents.radios.length = 0
             this.refreshUserHome()
         },
-        refreshUserHome() {
+        refreshUserHome() { //TODO
             EventBus.emit("userHome-refresh")
         },
         nextDecoration() {

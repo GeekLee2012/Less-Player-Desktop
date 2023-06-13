@@ -151,8 +151,8 @@ export const useArtistDetailStore = defineStore('artistDetail', {
                 this.tabs = [TAB_LIST[1], TAB_LIST[2], TAB_LIST[3]]
                 this.setupSongTabs(false, true)
             } else {
-                this.tabs = TAB_LIST
-                this.setupSongTabs(true, true)
+                this.tabs = [TAB_LIST[1], TAB_LIST[3]]
+                this.setupSongTabs(false, true)
             }
         },
         isHotSongsTab() {

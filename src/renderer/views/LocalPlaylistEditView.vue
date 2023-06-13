@@ -61,7 +61,7 @@ const submit = () => {
         invalid.value = true
         return
     }
-    let text = "歌单已创建成功!"
+    let text = "歌单创建成功!"
     if (!props.id) {
         addLocalPlaylist(title, tags, about, cover)
     } else {

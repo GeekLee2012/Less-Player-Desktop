@@ -67,7 +67,7 @@ const loadMoreContent = () => {
 
 const getAbout = () => {
     return (detail.about && detail.about.trim().length > 0) ?
-        detail.about.trim() : "这个人很懒，什么也没留下~"
+        detail.about.trim() : "还没有简介 ~ "
 }
 
 const playAll = () => {

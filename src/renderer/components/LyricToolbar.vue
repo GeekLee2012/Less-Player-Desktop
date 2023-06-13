@@ -227,6 +227,7 @@ const getLyricOffsetText = () => {
 .lyric-toolbar .text-btn:hover svg {
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent !important;
     fill: var(--content-highlight-color);
 }

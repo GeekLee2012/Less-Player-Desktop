@@ -16,6 +16,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useIpcRenderer } from "../../common/Utils";
+import EventBus from '../../common/EventBus';
 
 
 
@@ -49,11 +50,12 @@ const importPlaylist = async () => {
         let msg = '导入歌单失败！'
         const result = await ipcRenderer.invoke('parse-audio-playlist', file)
         if (result) {
-            const { name, data } = result
+            const { name, data, total } = result
             const id = addLocalPlaylist(name)
-            if (id && data) {
+            if (id && data && data.length > 0) {
                 data.forEach(item => addToLocalPlaylist(id, item))
-                msg = '导入歌单成功！'
+                const numText = total ? `${data.length} / ${total}` : `${data.length}`
+                msg = `导入歌单完成！<br>已导入${numText}首歌曲`
             }
         }
         showToast(msg)
@@ -66,7 +68,9 @@ const removeAll = () => {
     resetAll()
 }
 
-onMounted(resetBack2TopBtn)
+onMounted(() => {
+    resetBack2TopBtn()
+})
 </script>
 
 <template>
@@ -74,9 +78,10 @@ onMounted(resetBack2TopBtn)
         <div class="header">
             <div class="title">本地歌曲</div>
             <div class="about">
-                <p>支持播放的音频格式：.mp3、.flac、.ogg、.wav、.wma、.aac、.m4a</p>
+                <p>支持播放的音频格式：.mp3、.flac、.ogg、.wav、.aac、.m4a</p>
                 <p>支持导入的歌单格式：.m3u、.pls</p>
-                <p>最近播放功能，暂时不支持记录本地歌曲 ~</p>
+                <p>最近播放功能，暂时还不支持记录本地歌曲</p>
+                <p>歌曲信息乱码时，建议使用第三方音乐标签工具修正后，再重新添加到当前播放器</p>
             </div>
             <div class="action">
                 <CreatePlaylistBtn :leftAction="visitLocalPlaylistCreate">
@@ -96,7 +101,7 @@ onMounted(resetBack2TopBtn)
                     </template>
                 </SvgTextButton>
                 <BatchActionBtn :deleteBtn="true" :leftAction="visitBatchLocalMusic" :rightAction="removeAll"
-                    class="spacing">
+                    popover-hint="圾桶图标按钮，点击后将清空全部本地歌单，请谨慎操作" class="spacing">
                 </BatchActionBtn>
             </div>
         </div>

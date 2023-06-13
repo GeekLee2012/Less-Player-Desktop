@@ -1,7 +1,6 @@
 <script setup>
 import { inject, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
@@ -10,11 +9,11 @@ import { useAppCommonStore } from '../store/appCommonStore';
 
 
 
-const { visitThemes, visitUserHome, visitSetting } = inject('appRoute')
+const { visitThemes, visitUserHome, visitSetting, visitSearch } = inject('appRoute')
 
 const { setLayoutIndex } = useSettingStore()
 const { isRadioModeShortcutEnable } = storeToRefs(useSettingStore())
-const { isRadioMode } = storeToRefs(useAppCommonStore())
+const { isRadioMode, searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 
 const switchToSimpleLayout = () => {
     setLayoutIndex(2) //TODO
@@ -23,12 +22,21 @@ const switchToSimpleLayout = () => {
 const toggleRadioMode = () => {
     EventBus.emit("toggleRadioMode")
 }
+
+const visitSearchView = (keyword) => {
+    if (keyword && keyword.length > 0) visitSearch(keyword)
+}
+
+const getSearchBarPlaceholder = () => {
+    return searchBarExclusiveAction.value ? '独占模式搜索' : '现在想听点什么 ~'
+}
 </script>
 
 <template>
     <div class="classic-main-top">
         <Navigator></Navigator>
-        <SearchBar></SearchBar>
+        <SearchBar :submitAction="searchBarExclusiveAction || visitSearchView" :placeholder="getSearchBarPlaceholder()">
+        </SearchBar>
         <div class="action">
             <div id="radio-btn" @click="toggleRadioMode" v-show="isRadioModeShortcutEnable">
                 <svg v-show="!isRadioMode" width="19" height="18" viewBox="0 0 939.22 940.41"

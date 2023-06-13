@@ -38,10 +38,12 @@ const { setActiveTab, updateTabTipText,
     isAllSongsTab, isAboutTab,
     isAllSongsTabLoaded, isAlbumDetailLoaded,
     updateAllSongs, updateAlbum,
-    updateAbout, resetAll
+    updateAbout, resetAll,
+    updateCover, updateArtistName,
+    updatePublishTime,
 } = useAlbumDetailStore()
 
-const { getVendor } = usePlatformStore()
+const { getVendor, isLocalMusic } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
 
@@ -97,10 +99,10 @@ const checkFavorite = () => {
 
 const updateTabData = (data) => {
     tabData.value.length = 0
-    if (typeof (data) == 'string') {
+    if (typeof (data) === 'string') {
         tabData.value.push(data)
         updateTabTipText(0)
-    } else if (data) {
+    } else if (data.length > 0) {
         tabData.value.push(...data)
         updateTabTipText(tabData.value.length)
     }
@@ -146,6 +148,11 @@ const loadAllSongs = () => {
         if (!isAllSongsTab() || !result) return
         updateAllSongs(result.data)
         updateTabData(allSongs.value)
+        if (isLocalMusic(platform.value)) {
+            updateCover(result.cover)
+            updateArtistName(result.artistName)
+            updatePublishTime(result.publishTime)
+        }
         setLoading(false)
     })
 }
@@ -220,7 +227,8 @@ watch([platform, albumId], reloadAll, { immediate: true })
                 </div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()" class="spacing"></PlayAddAllBtn>
-                    <FavoriteShareBtn :favorited="favorited" :leftAction="toggleFavorite" class="spacing">
+                    <FavoriteShareBtn :favorited="favorited" :leftAction="toggleFavorite" class="spacing"
+                        :disabled="isLocalMusic(platform)" v-show="!isLocalMusic(platform)">
                     </FavoriteShareBtn>
                 </div>
             </div>

@@ -17,7 +17,7 @@ import { isDevEnv } from '../common/Utils';
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { isArtistDetailVisitable, isAlbumDetailVisitable,
-    updateCurrentPlatformByCode } = usePlatformStore()
+    updateCurrentPlatformByCode, isLocalMusic } = usePlatformStore()
 const { exploreModeCode, isUserHomeMode } = storeToRefs(useAppCommonStore())
 const { setExploreMode, setArtistExploreMode,
     setRadioExploreMode, setUserHomeExploreMode,
@@ -25,7 +25,7 @@ const { setExploreMode, setArtistExploreMode,
     updateCommonCtxItem, hidePlaybackQueueView,
     setPlaylistExploreMode, hideVideoPlayingView,
     hideLyricToolbar, hideRandomMusicToolbar,
-    hideSoundEffectView } = useAppCommonStore()
+    hideSoundEffectView, hidePopoverHint } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -77,6 +77,7 @@ const hideRelativeComponents = (to) => {
     hideVideoPlayingView()
     hideAllCtxMenus()
     updateCommonCtxItem(null)
+    hidePopoverHint()
 
     hideLyricToolbar()
     hideRandomMusicToolbar()
@@ -154,6 +155,7 @@ const valiadateArtistId = (id) => {
 
 const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onRouteReady }) => {
     let id = item.id
+    if (isLocalMusic(platform)) id = item.name
     const platformValid = isArtistDetailVisitable(platform)
     let idValid = valiadateArtistId(id)
     //TODO 二次确认数据，太别扭啦
@@ -168,6 +170,7 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
             }
         }
     }
+
     const visitable = platformValid && idValid
     platform = platform.trim()
     if (visitable) {
@@ -181,7 +184,8 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
 }
 
 //TODO 单一责任
-const visitAlbumDetail = (platform, id, callback) => {
+const visitAlbumDetail = (platform, id, callback, data) => {
+    if (isLocalMusic(platform)) id = data.name
     const platformValid = isAlbumDetailVisitable(platform)
     const idValid = (typeof (id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
@@ -228,8 +232,8 @@ provide('appRoute', {
     visitArtist: ({ platform, item, index, callback, onRouteReady }) => {
         visitArtistDetail({ platform, item, index, callback, onRouteReady })
     },
-    visitAlbum: ({ platform, id, callback }) => {
-        visitAlbumDetail(platform, id, callback)
+    visitAlbum: ({ platform, id, callback, data }) => {
+        visitAlbumDetail(platform, id, callback, data)
     },
     //类似visitPlaylist，但有些区别
     visitFavoritePlaylist: (platform, id) => {

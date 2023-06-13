@@ -41,6 +41,9 @@ export class Track {
         this.payDownload = payDownload
         //是否为替换版本
         this.isCandidate = false
+
+        //本地歌曲标签
+        this.publishTime = null
     }
 
     mmssDuration() {

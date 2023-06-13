@@ -58,6 +58,7 @@ EventBus.on('track-artistUpdated', data => {
 .artist-ctl .visitable:hover {
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 </style>

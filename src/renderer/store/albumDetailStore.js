@@ -72,8 +72,17 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
             this.resetAllSongs()
             this.allSongs.push(...tracks)
         },
+        updateCover(cover) {
+            this.albumCover = cover
+        },
+        updateArtistName(artistName) {
+            this.artistName = artistName
+        },
+        updatePublishTime(publishTime) {
+            this.publishTime = publishTime
+        },
         updateAbout(about) {
-            this.resetAbout()
+            //this.resetAbout()
             this.about = about
         },
         isAlbumDetailLoaded() {

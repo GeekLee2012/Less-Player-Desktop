@@ -55,7 +55,7 @@ const addItemToQueue = () => {
     } else {
         addTrack(cache)
     }
-    toastAndHideMenu("歌曲已添加成功！")
+    toastAndHideMenu("歌曲添加成功！")
 }
 
 const playItemLater = () => {
@@ -95,7 +95,7 @@ const visitItemArtist = (event) => {
 
 const visitItemAlbum = () => {
     const { platform, album } = commonCtxMenuCacheItem.value
-    visitAlbum({ platform, id: album.id })
+    visitAlbum({ platform, id: album.id, data: album })
 }
 
 const removeQueueItem = () => {
@@ -311,7 +311,7 @@ const addToCustom = (item) => {
     tracks.forEach(track => {
         addToCustomPlaylist(item.id, track)
     })
-    toastAndHideMenu("歌曲已添加成功！")
+    toastAndHideMenu("歌曲添加成功！")
 }
 
 const moveToCustom = (item) => {
@@ -327,7 +327,7 @@ const moveToCustom = (item) => {
     tracks.forEach(track => {
         moveToCustomPlaylist(toId, fromId, track)
     })
-    toastAndHideMenu("歌曲已移动成功！")
+    toastAndHideMenu("歌曲移动成功！")
 }
 
 const initToCustomMenuData = (mode) => {
@@ -378,6 +378,7 @@ EventBus.on("commonCtxMenu-init", dataType => {
             const addToQueueMenuItem = Object.assign({}, { ...MenuItems.addToQueue })
             addToQueueMenuItem.name = "添加到当前播放"
             data = [MenuItems.play, addToQueueMenuItem, MenuItems.playLater,
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
             MenuItems.sp, MenuItems.removeFromLocal,]
             break;
         case 2: //我的主页-我的收藏-歌曲列表

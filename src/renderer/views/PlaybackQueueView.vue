@@ -209,6 +209,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     color: var(--content-highlight-color);
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 

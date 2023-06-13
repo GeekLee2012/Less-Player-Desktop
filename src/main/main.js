@@ -1,14 +1,16 @@
 const { app, BrowserWindow, ipcMain,
   Menu, dialog, powerMonitor,
   shell, powerSaveBlocker, Tray,
-  globalShortcut, session
+  globalShortcut, session, utilityProcess
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
-  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON
+  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON,
+  AUDIO_PLAYLIST_EXTS, BACKUP_FILE_EXTS
 } = require('./env')
 
-const { scanDirTracks, parseTracks, readText, writeText, FILE_PREFIX,
+const { scanDirTracks, parseTracks,
+  readText, writeText, FILE_PREFIX,
   randomTextWithinAlphabetNums, nextInt,
   getDownloadDir, removePath, listFiles,
   parsePlsFile, parseM3uFile
@@ -237,7 +239,7 @@ const registryGlobalListeners = () => {
   ipcMain.handle('open-audio-playlist', async (event, ...args) => {
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择Audio Playlist文件',
-      filters: [{ name: 'Playlist文件', extensions: ['.m3u', '.pls'] }],
+      filters: [{ name: 'Playlist文件', extensions: AUDIO_PLAYLIST_EXTS }],
       properties: ['openFile']
     })
     if (result.canceled) return null
@@ -247,9 +249,9 @@ const registryGlobalListeners = () => {
   ipcMain.handle('parse-audio-playlist', async (event, ...args) => {
     const file = args[0].trim()
     let result = null
-    if (file.toLowerCase().endsWith('.pls')) {
+    if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[1]}`)) {
       result = await parsePlsFile(file)
-    } else if (file.toLowerCase().endsWith('.m3u')) {
+    } else if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[0]}`)) {
       result = await parseM3uFile(file)
     }
     return result
@@ -272,6 +274,14 @@ const registryGlobalListeners = () => {
       result.push(tracks)
     }
     return result
+    /* 子进程方式
+    const child = utilityProcess.fork(path.join(__dirname, 'metadata.js'))
+    child.postMessage({ action: 'scanDirTracks', args: [dirs[0], AUDIO_EXTS] })
+    child.on('message', result => {
+      sendToRenderer('scan-audio-dirs-result', [result])
+      child.kill()
+    })
+    */
   })
 
   ipcMain.handle('open-audios', async (event, ...args) => {
@@ -321,7 +331,7 @@ const registryGlobalListeners = () => {
   ipcMain.handle('open-backup-file', async (event, ...args) => {
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择备份文件',
-      filters: [{ name: 'JSON文件', extensions: ['.json'] }],
+      filters: [{ name: 'JSON文件', extensions: BACKUP_FILE_EXTS }],
       properties: ['openFile']
     })
     if (result.canceled) return null

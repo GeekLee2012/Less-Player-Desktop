@@ -529,6 +529,7 @@ watch(() => props.track, (nv, ov) => {
     padding-right: 6px;
     padding-bottom: 15px;
     -webkit-mask-image: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
+    mask-image: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
 }
 
 .lyric-ctl .lyric-content {
@@ -664,6 +665,7 @@ watch(() => props.track, (nv, ov) => {
 .lyric-ctl .extra-btn span:hover {
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
     border-color: var(--content-highlight-color);
 }

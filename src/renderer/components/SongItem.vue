@@ -47,7 +47,7 @@ const playItem = () => {
 
 const addItem = () => {
     addTrack(props.data)
-    showToast("歌曲已添加成功！")
+    showToast("歌曲添加成功！")
 }
 
 const deleteItem = () => {
@@ -280,7 +280,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 /* .song-item .mv span, */
 .song-item .vipflag span {
     background: var(--content-text-highlight-color);
-    -webkit-background-clip: text;
+    background-clip: text;
     color: transparent !important;
 
     border-radius: 3px;

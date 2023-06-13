@@ -239,12 +239,14 @@ export const usePlatformStore = defineStore('platform', {
             return platform.trim() == LocalMusic.CODE
         },
         isArtistDetailVisitable(platform) {
-            if (!this.isPlatformValid(platform)) return false
-            return !this.isLocalMusic(platform)
+            //if (!this.isPlatformValid(platform)) return false
+            //return !this.isLocalMusic(platform)
+            return this.isPlatformValid(platform)
         },
         isAlbumDetailVisitable(platform) {
-            if (!this.isPlatformValid(platform)) return false
-            return !this.isLocalMusic(platform)
+            //if (!this.isPlatformValid(platform)) return false
+            //return !this.isLocalMusic(platform)
+            return this.isPlatformValid(platform)
         },
         isPlatformValid(platform) {
             return platform && platform.trim().length > 0

@@ -48,6 +48,7 @@ export const useLocalMusicStore = defineStore('localMusic', {
             if (!playlist) return false
             const index = playlist.data.findIndex(e => e.id === track.id)
             if (index > -1) return false
+            Object.assign(track, { pid: id })
             playlist.data.push(track)
             const updated = Date.now()
             Object.assign(playlist, { updated })

@@ -908,6 +908,7 @@ onMounted(checkForUpdate)
     font-weight: bold;
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent !important;
 }
 
@@ -1085,7 +1086,7 @@ onMounted(checkForUpdate)
     width: 100%;
     cursor: pointer;
     background: transparent;
-    -webkit-appearance: none;
+    appearance: none;
     margin-top: 10px;
     margin-bottom: 5px;
     padding: 0px;
