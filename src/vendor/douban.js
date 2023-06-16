@@ -299,7 +299,7 @@ export class DouBan {
                     top.forEach(item => {
                         const { id, title1: title, pic: cover, color } = item
                         const playlist = new Playlist(DouBan.MHZ_CODE + '_' + id, DouBan.CODE, null, title)
-                        playlist.isRadioType = true
+                        playlist.type = Playlist.NORMAL_RADIO_TYPE
                         const { R, G, B } = color
                         playlist.color = `rgb(${R},${G}, ${B})`
                         result.data.push(playlist)
@@ -313,7 +313,7 @@ export class DouBan {
                             const { id, title1, title2, color } = radio
                             const title = `${stitle} | ${title1} ${title2}`
                             const playlist = new Playlist(DouBan.MHZ_CODE + '_' + id, DouBan.CODE, null, title)
-                            playlist.isRadioType = true
+                            playlist.type = Playlist.NORMAL_RADIO_TYPE
                             const { R, G, B } = color
                             playlist.color = `rgb(${R},${G}, ${B})`
                             result.data.push(playlist)

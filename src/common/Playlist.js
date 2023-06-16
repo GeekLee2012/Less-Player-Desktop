@@ -52,7 +52,7 @@ export class Playlist {
     }
 
     static _assertType(item, type) {
-        item = Playlist.resolveOldVersionType(item)
+        //item = Playlist.resolveOldVersionType(item)
         return item && item.type === type
     }
 
