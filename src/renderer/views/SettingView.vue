@@ -60,6 +60,7 @@ const { setThemeIndex,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
+    toggleUseOnlineCover,
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -440,6 +441,11 @@ onMounted(checkForUpdate)
                     <div>
                         <span class="cate-subtitle">视频退出后，自动续播歌曲：</span>
                         <ToggleControl @click="toggleResumePlayAfterVideo" :value="track.resumePlayAfterVideo">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">本地歌曲使用在线封面：</span>
+                        <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
                         </ToggleControl>
                     </div>
                     <div>

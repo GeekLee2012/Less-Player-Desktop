@@ -18,7 +18,8 @@ const props = defineProps({
     checkedAll: Boolean,
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function,
-    loading: Boolean
+    loading: Boolean,
+    customLoadingCount: Number
 })
 
 const { isPlatformValid } = usePlatformStore()
@@ -64,6 +65,8 @@ const getListenNumText = (item) => {
                 :checkbox="checkbox" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>
+            <ImageTextTileLoadingMask :count="customLoadingCount" v-show="customLoadingCount && customLoadingCount > 0">
+            </ImageTextTileLoadingMask>
         </PaginationTiles>
         <ImageTextTileLoadingMask :count="20" v-show="loading"></ImageTextTileLoadingMask>
     </div>

@@ -9,7 +9,7 @@ import { useSettingStore } from './store/settingStore';
 import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
 import { isDevEnv, useIpcRenderer } from '../common/Utils';
-import { PLAY_STATE, TRAY_ACTION } from '../common/Constants';
+import { PLAY_STATE, TRAY_ACTION, IMAGE_PROTOCAL } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
 import { toMmss } from '../common/Times';
 import { Lyric } from '../common/Lyric';
@@ -449,17 +449,23 @@ const getVideoDetail = (platform, id) => {
     })
 }
 
-const setupCurrentMediaSession = () => {
+const setupCurrentMediaSession = async () => {
     if ("mediaSession" in navigator) {
         const track = currentTrack.value
         if (!track) return
         const { title, cover } = track
+        //TODO 本地歌曲可能使用在线封面，会导致数据不一致
+        // 暂时忽略，仍然使用旧封面，不去尝试进行更新，得不偿失
+        let coverSrc = cover
+        if (cover && cover.startsWith(IMAGE_PROTOCAL.prefix)) {
+            if (ipcRenderer) coverSrc = await ipcRenderer.invoke('open-image-base64', cover)
+        }
         navigator.mediaSession.metadata = new MediaMetadata({
             title,
             artist: Track.artistName(track),
             album: Track.albumName(track),
             artwork: [{
-                src: cover || 'default_cover.png',
+                src: coverSrc || 'default_cover.png',
                 sizes: "500x500",
                 type: "image/png",
             }]

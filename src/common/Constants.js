@@ -1,5 +1,10 @@
 export const FILE_PREFIX = 'file:///'
 
+export const IMAGE_PROTOCAL = {
+    scheme: 'lessimage',
+    prefix: 'lessimage://',
+}
+
 export const PLAY_STATE = {
     NONE: -1,
     INIT: 0,

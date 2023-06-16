@@ -4,18 +4,29 @@ import { randomTextWithinAlphabetNums } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 
 
+/*
+const indexedDBStorage = {
+    setItem(key, state) {
+        return
+    },
+    getItem(key) {
+        return
+    }
+}
+*/
 
 export const useLocalMusicStore = defineStore('localMusic', {
     state: () => ({
         localDirs: [],
         localTracks: [],
         //上面状态，后期会全部移除掉
-        localPlaylists: []
+        localPlaylists: [],
+        importTaskCount: 0, //正在进行中的导入任务数
     }),
     getters: {
-        getLocalSongs() {
-            return this.localTracks
-        },
+        getLocalPlaylists() {
+            return this.localPlaylists
+        }
     },
     actions: {
         resetAll() {
@@ -23,12 +34,15 @@ export const useLocalMusicStore = defineStore('localMusic', {
             this.localTracks.length = 0
             this.localPlaylists.length = 0
         },
-        addLocalPlaylist(title, tags, about, cover) {
+        addLocalPlaylist(title, tags, about, cover, data) {
             const id = Playlist.LOCAL_PLAYLIST_ID_PREFIX + randomTextWithinAlphabetNums(12)
             const created = Date.now()
             const updated = created
+            tags = tags || ''
+            about = about || ''
             cover = cover || 'default_cover.png'
-            this.localPlaylists.push({ id, platform: 'local', title, tags, about, cover, data: [], created, updated })
+            data = data || []
+            this.localPlaylists.push({ id, platform: 'local', type: Playlist.NORMAL_TYPE, title, tags, about, cover, data, created, updated })
             return id
         },
         updateLocalPlaylist(id, title, tags, about, cover) {
@@ -79,13 +93,19 @@ export const useLocalMusicStore = defineStore('localMusic', {
             this.localPlaylists.splice(index, 1)
             return true
         },
+        increaseImportTaskCount() {
+            ++this.importTaskCount
+        },
+        decreaseImportTaskCount() {
+            this.importTaskCount = Math.max(this.importTaskCount - 1, 0)
+        },
     },
     persist: {
         enabled: true,
         strategies: [
             {
                 storage: localStorage,
-                paths: ['localDirs', 'localTracks', 'localPlaylists']
+                paths: ['localPlaylists']
             }
         ]
     }

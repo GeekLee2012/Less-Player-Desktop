@@ -5,7 +5,7 @@ import { useIpcRenderer } from "../common/Utils";
 import { FILE_PREFIX } from "../common/Constants";
 import { United } from "./united";
 import { useLocalMusicStore } from "../renderer/store/localMusicStore";
-
+import { useSettingStore } from "../renderer/store/settingStore";
 
 
 
@@ -22,11 +22,14 @@ export class LocalMusic {
             let url = track.url
             if (!url.includes(FILE_PREFIX)) Object.assign(result, { url: (FILE_PREFIX + url) })
             //封面
-            if (!Track.hasCover(track)) {
-                const onlineCandidate = await United.transferTrack(track, true)
-                if (onlineCandidate) {
-                    const { cover } = onlineCandidate
-                    Object.assign(result, { cover })
+            if (Track.hasCover(track) && !track.cover.startsWith('http')) {
+                const { isUseOnlineCoverEnable } = useSettingStore()
+                if (isUseOnlineCoverEnable) {
+                    const onlineCandidate = await United.transferTrack(track, true, true)
+                    if (onlineCandidate) {
+                        const { cover } = onlineCandidate
+                        Object.assign(track, { cover })
+                    }
                 }
             }
             resolve(result)
@@ -42,7 +45,7 @@ export class LocalMusic {
             //本地歌词（同名文件）
             try {
                 if (!lyricText && ipcRenderer) {
-                    lyricText = await ipcRenderer.invoke('lyric-load', track.url)
+                    lyricText = await ipcRenderer.invoke('load-lyric-file', track.url)
                 }
             } catch (error) {
                 console.log(error)
@@ -59,11 +62,14 @@ export class LocalMusic {
                 Object.assign(result, { lyric: Lyric.parseFromText(lyricText) })
             }
             //封面，顺便更新一下
-            if (!Track.hasCover(track)) {
-                if (!onlineCandidate) onlineCandidate = await United.transferTrack(track, true, true)
-                if (onlineCandidate) {
-                    const { cover } = onlineCandidate
-                    Object.assign(track, { cover })
+            if (Track.hasCover(track) && !track.cover.startsWith('http')) {
+                const { isUseOnlineCoverEnable } = useSettingStore()
+                if (isUseOnlineCoverEnable) {
+                    if (!onlineCandidate) onlineCandidate = await United.transferTrack(track, true, true)
+                    if (onlineCandidate) {
+                        const { cover } = onlineCandidate
+                        Object.assign(track, { cover })
+                    }
                 }
             }
             resolve(result)
@@ -100,7 +106,15 @@ export class LocalMusic {
                     }
                     return false
                 })
-                if (filteredPlaylist.length > 0) result.data.push(...filteredPlaylist)
+                //if (filteredPlaylist.length > 0) result.data.push(...filteredPlaylist)
+                //去重
+                if (filteredPlaylist.length > 0) {
+                    for (var i = 0; i < filteredPlaylist.length; i++) {
+                        const track = filteredPlaylist[i]
+                        const index = result.data.findIndex(item => item.id === track.id)
+                        if (index < 0) result.data.push(track)
+                    }
+                }
             })
             resolve(result)
         })
@@ -136,7 +150,15 @@ export class LocalMusic {
                     }
                     return false
                 })
-                if (filteredPlaylist.length > 0) result.data.push(...filteredPlaylist)
+                //if (filteredPlaylist.length > 0) result.data.push(...filteredPlaylist)
+                //去重
+                if (filteredPlaylist.length > 0) {
+                    for (var i = 0; i < filteredPlaylist.length; i++) {
+                        const track = filteredPlaylist[i]
+                        const index = result.data.findIndex(item => item.id === track.id)
+                        if (index < 0) result.data.push(track)
+                    }
+                }
             })
             resolve(result)
         })

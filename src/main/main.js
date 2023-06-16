@@ -1,7 +1,8 @@
 const { app, BrowserWindow, ipcMain,
   Menu, dialog, powerMonitor,
   shell, powerSaveBlocker, Tray,
-  globalShortcut, session, utilityProcess
+  globalShortcut, session,
+  utilityProcess, protocol,
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
@@ -13,11 +14,16 @@ const { scanDirTracks, parseTracks,
   readText, writeText, FILE_PREFIX,
   randomTextWithinAlphabetNums, nextInt,
   getDownloadDir, removePath, listFiles,
-  parsePlsFile, parseM3uFile
+  parsePlsFile, parseM3uFile,
+  writePlsFile, writeM3uFile,
+  IMAGE_PROTOCAL, IMAGE_TEXT_PROTOCAL,
+  parseImageDataFromFile
 } = require('./common')
 
 const path = require('path')
 const { dir } = require('console')
+
+
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
@@ -80,6 +86,20 @@ const init = () => {
           savePath
         })
         //console.log("[ Download - Done ]")
+      })
+    })
+
+    //自定义协议
+    const EMPTY_BUFFER = Buffer.from('')
+    protocol.registerBufferProtocol(IMAGE_PROTOCAL.scheme, async (request, callback) => {
+      const file = decodeURI(request.url.slice(IMAGE_PROTOCAL.prefix.length))
+      parseImageDataFromFile(file).then(result => {
+        let response = { data: EMPTY_BUFFER }
+        if (result) {
+          const { format, data } = result
+          response = { mimeType: format, data }
+        }
+        callback(response)
       })
     })
   })
@@ -257,6 +277,23 @@ const registryGlobalListeners = () => {
     return result
   })
 
+  ipcMain.handle('export-playlists', async (event, ...args) => {
+    const { path, format, data: playlists } = args[0]
+    let result = false
+    if (playlists && playlists.length > 0) {
+      for (var i = 0; i < playlists.length; i++) {
+        const { title, data } = playlists[i]
+        let file = `${path}/${title}.${format}`
+        if (format === AUDIO_PLAYLIST_EXTS[1]) {
+          result = result || await writePlsFile(file, data)
+        } else if (format === AUDIO_PLAYLIST_EXTS[0]) {
+          result = result || await writeM3uFile(file, data)
+        }
+      }
+    }
+    return result
+  })
+
   ipcMain.handle('open-dirs', async (event, ...args) => {
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件夹',
@@ -274,14 +311,6 @@ const registryGlobalListeners = () => {
       result.push(tracks)
     }
     return result
-    /* 子进程方式
-    const child = utilityProcess.fork(path.join(__dirname, 'metadata.js'))
-    child.postMessage({ action: 'scanDirTracks', args: [dirs[0], AUDIO_EXTS] })
-    child.on('message', result => {
-      sendToRenderer('scan-audio-dirs-result', [result])
-      child.kill()
-    })
-    */
   })
 
   ipcMain.handle('open-audios', async (event, ...args) => {
@@ -307,7 +336,13 @@ const registryGlobalListeners = () => {
     return result.filePaths.map(item => (FILE_PREFIX + item))
   })
 
-  ipcMain.handle('lyric-load', async (event, ...args) => {
+  ipcMain.handle('open-image-base64', async (event, ...args) => {
+    const file = args[0].trim().slice(IMAGE_PROTOCAL.prefix.length)
+    const imageResult = await parseImageDataFromFile(file)
+    return imageResult ? imageResult.text : null
+  })
+
+  ipcMain.handle('load-lyric-file', async (event, ...args) => {
     const arg = args[0].trim()
     const index = arg.lastIndexOf('.')
     const lyricFile = arg.substring(0, index) + ".lrc"

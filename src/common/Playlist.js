@@ -39,35 +39,37 @@ export class Playlist {
     }
 
     static resolveOldVersionType(item) {
-        if (item.isFMRadio) {
+        if (item.type >= 0) {
+            //存在type属性，直接忽略
+        } else if (item.isFMRadio) {
             item.type = Playlist.FM_RADIO_TYPE
         } else if (item.isRadioType) {
             item.type = Playlist.NORMAL_RADIO_TYPE
-        } else if (!item.type) {
+        } else {
             item.type = Playlist.NORMAL_TYPE
         }
         return item
     }
 
-    static doAssertType(item, type) {
+    static _assertType(item, type) {
         item = Playlist.resolveOldVersionType(item)
         return item && item.type === type
     }
 
     static isNormalType(item) { //普通歌单，必须设置平台
-        return item.platform && Playlist.doAssertType(item, Playlist.NORMAL_TYPE)
+        return item.platform && Playlist._assertType(item, Playlist.NORMAL_TYPE)
     }
 
     static isNormalRadioType(item) {
-        return Playlist.doAssertType(item, Playlist.NORMAL_RADIO_TYPE)
+        return Playlist._assertType(item, Playlist.NORMAL_RADIO_TYPE)
     }
 
     static isFMRadioType(item) {
-        return Playlist.doAssertType(item, Playlist.FM_RADIO_TYPE)
+        return Playlist._assertType(item, Playlist.FM_RADIO_TYPE)
     }
 
     static isAnchorRadioType(item) {
-        return Playlist.doAssertType(item, Playlist.ANCHOR_RADIO_TYPE)
+        return Playlist._assertType(item, Playlist.ANCHOR_RADIO_TYPE)
     }
 
     static isCustomType(item) {

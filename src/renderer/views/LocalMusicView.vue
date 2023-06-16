@@ -6,7 +6,7 @@ export default {
 </script>
 
 <script setup>
-import { inject, onMounted, ref } from 'vue';
+import { inject, onMounted, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
 import { usePlayStore } from '../store/playStore';
@@ -15,7 +15,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { useIpcRenderer } from "../../common/Utils";
+import { isDevEnv, useIpcRenderer } from "../../common/Utils";
 import EventBus from '../../common/EventBus';
 
 
@@ -25,8 +25,9 @@ const { currentRoutePath, visitLocalPlaylistCreate, visitBatchLocalMusic } = inj
 
 const ipcRenderer = useIpcRenderer()
 
-const { localPlaylists } = storeToRefs(useLocalMusicStore())
-const { addLocalPlaylist, addToLocalPlaylist, resetAll } = useLocalMusicStore()
+const { localPlaylists, importTaskCount } = storeToRefs(useLocalMusicStore())
+const { addLocalPlaylist, resetAll,
+    increaseImportTaskCount, decreaseImportTaskCount } = useLocalMusicStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
 
 const localMusicRef = ref(null)
@@ -48,16 +49,21 @@ const importPlaylist = async () => {
     const file = await ipcRenderer.invoke('open-audio-playlist')
     if (file) {
         let msg = '导入歌单失败！'
+        increaseImportTaskCount()
         const result = await ipcRenderer.invoke('parse-audio-playlist', file)
         if (result) {
             const { name, data, total } = result
-            const id = addLocalPlaylist(name)
-            if (id && data && data.length > 0) {
-                data.forEach(item => addToLocalPlaylist(id, item))
+            if (name && data && data.length > 0) {
+                try {
+                    addLocalPlaylist(name, null, null, null, data)
+                } catch (error) {
+                    if (isDevEnv()) console.log(error)
+                }
                 const numText = total ? `${data.length} / ${total}` : `${data.length}`
-                msg = `导入歌单完成！<br>已导入${numText}首歌曲`
+                msg = `导入歌单已完成！<br>共${numText}首歌曲！`
             }
         }
+        decreaseImportTaskCount()
         showToast(msg)
     }
 }
@@ -86,7 +92,7 @@ onMounted(() => {
             <div class="action">
                 <CreatePlaylistBtn :leftAction="visitLocalPlaylistCreate">
                 </CreatePlaylistBtn>
-                <SvgTextButton text="导入歌单" :leftAction="importPlaylist" class="spacing">
+                <SvgTextButton text="导入歌单" :leftAction="importPlaylist" :disabled="importTaskCount > 0" class="spacing">
                     <template #left-img>
                         <svg width="17" height="15" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -107,7 +113,8 @@ onMounted(() => {
         </div>
         <div class="center">
             <div class="list-title content-text-highlight">歌单({{ localPlaylists.length }})</div>
-            <PlaylistsControl :data="localPlaylists" :loading="isLoading"></PlaylistsControl>
+            <PlaylistsControl :data="localPlaylists" :loading="isLoading" :customLoadingCount="importTaskCount">
+            </PlaylistsControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>

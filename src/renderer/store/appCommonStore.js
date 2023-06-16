@@ -54,7 +54,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         popoverHintText: null,
         popoverHintTarget: null,
         //独占搜索框
-        searchBarExclusiveAction: null
+        searchBarExclusiveAction: null,
+        playlistExportToolbarShow: false,
+        playlistExportContextItem: null
     }),
     getters: {
         isPlaylistMode() {
@@ -360,6 +362,14 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setSearchBarExclusiveAction(action) {
             this.searchBarExclusiveAction = action
+        },
+        showPlaylistExportToolbar(contextItem) {
+            this.playlistExportContextItem = contextItem
+            this.playlistExportToolbarShow = true
+        },
+        hidePlaylistExportToolbar() {
+            this.playlistExportContextItem = null
+            this.playlistExportToolbarShow = false
         }
     },
     persist: {

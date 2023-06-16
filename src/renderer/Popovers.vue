@@ -20,6 +20,8 @@ import EventBus from '../common/EventBus';
 import CustomThemeEditView from './views/CustomThemeEditView.vue';
 import ColorPickerToolbar from './components/ColorPickerToolbar.vue';
 import GradientColorToolbar from './components/GradientColorToolbar.vue';
+import PlaylistExportToolbar from './components/PlaylistExportToolbar.vue';
+
 
 
 
@@ -41,7 +43,8 @@ const { commonNotificationShow, commonNotificationText,
   customThemeEditViewShow, colorPickerToolbarShow,
   gradientColorToolbarShow, playlistCategoryViewShow,
   artistCategoryViewShow, radioCategoryViewShow,
-  popoverHintShow, popoverHintText } = storeToRefs(useAppCommonStore())
+  popoverHintShow, popoverHintText,
+  playlistExportToolbarShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -240,6 +243,15 @@ const setupSoundEffectViewPos = () => {
   })
 }
 
+const setupPlaylistExportToolbarPos = () => {
+  EventBus.emit('app-elementAlignCenter', {
+    selector: '.default-layout #playlist-export-toolbar',
+    width: 520,
+    height: 211
+  })
+}
+
+
 //TODO
 watch(playbackQueueViewShow, hideAllCtxMenus)
 watch(playingViewThemeIndex, (nv) => setupPlayingView(nv))
@@ -270,6 +282,7 @@ onMounted(() => {
 watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
 watch(gradientColorToolbarShow, setupGradientColorToolbarPos)
 watch(soundEffectViewShow, setupSoundEffectViewPos)
+watch(playlistExportToolbarShow, setupPlaylistExportToolbarPos)
 
 watch(() => getCurrentTheme(), (nv) => {
   const { appBackgroundScope: scope } = nv
@@ -391,6 +404,8 @@ watch(() => getCurrentTheme(), (nv) => {
         <div v-html="popoverHintText"></div>
       </template>
     </Notification>
+
+    <PlaylistExportToolbar id="playlist-export-toolbar" v-show="playlistExportToolbarShow"></PlaylistExportToolbar>
   </div>
 </template>
 
@@ -492,6 +507,17 @@ watch(() => getCurrentTheme(), (nv) => {
   position: absolute;
   left: 50%;
   bottom: 125px;
+  z-index: 100;
+  background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
+}
+
+#playlist-export-toolbar {
+  width: 520px;
+  height: 211px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);

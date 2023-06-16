@@ -43,7 +43,8 @@ const { removeFavoriteSong, removeFavoritePlaylist,
 const { addTracks, playTrack } = usePlayStore()
 const { commonCtxMenuShow, commonCtxItem, searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, updateCommonCtxItem,
-    hideAllCtxMenus, setSearchBarExclusiveAction } = useAppCommonStore()
+    hideAllCtxMenus, setSearchBarExclusiveAction,
+    showPlaylistExportToolbar } = useAppCommonStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
@@ -91,6 +92,7 @@ const actionShowCtl = reactive({
     moveToBtn: false,
     addToQueueBtn: false,
     deleteBtn: true,
+    exportBtn: false
 })
 const checkedData = reactive([])
 const checkedAll = ref(false)
@@ -172,6 +174,7 @@ const resetTab = () => {
         moveToBtn: false,
         addToQueueBtn: false,
         deleteBtn: true,
+        exportBtn: false
     })
     EventBus.emit("checkbox-refresh")
 }
@@ -190,6 +193,7 @@ const switchTab = () => {
             moveToBtn: false,
             addToQueueBtn: false,
             deleteBtn: true,
+            exportBtn: false
         })
         if (isFavorites()) tabData.push(...filterSongsWithKeyword(getFavoriteSongs.value(platform)))
         if (isRecents()) tabData.push(...filterRecentSongs())
@@ -210,6 +214,7 @@ const switchTab = () => {
                 moveToBtn: false,
                 addToQueueBtn: true,
                 deleteBtn: true,
+                exportBtn: false
             })
             tabData.push(...loadLocalPlaylist())
         }
@@ -217,7 +222,17 @@ const switchTab = () => {
     } else if (activeTab.value == 1) {
         if (isFavorites()) tabData.push(...filterByTitleWithKeyword(getFavoritePlaylilsts.value(platform)))
         if (isRecents()) tabData.push(...filterByTitleWithKeyword(getRecentPlaylilsts.value(platform)))
-        if (isLocalMusic()) tabData.push(...filterByTitleWithKeyword(localPlaylists.value))
+        if (isLocalMusic()) {
+            Object.assign(actionShowCtl, {
+                playBtn: false,
+                addToBtn: false,
+                moveToBtn: false,
+                addToQueueBtn: true,
+                deleteBtn: true,
+                exportBtn: true
+            })
+            tabData.push(...filterByTitleWithKeyword(localPlaylists.value))
+        }
         currentTabView.value = PlaylistsControl
     } else if (activeTab.value == 2) {
         if (isFavorites()) tabData.push(...filterByTitleWithKeyword(getFavoriteAlbums.value(platform)))
@@ -413,6 +428,14 @@ const removeChecked = () => {
     }
 }
 
+const exportChecked = () => {
+    if (activeTab.value == 1) {
+        if (isLocalMusic()) {
+            showPlaylistExportToolbar(checkedData)
+        }
+    }
+}
+
 //TODO
 const refresh = () => {
     EventBus.emit("checkbox-refresh")
@@ -593,6 +616,21 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path
                                         d="M415.82,109.83l-48,48.05q-11.67,11.67-23.34,23.33c-14.07,14-33.73,14.73-46.83,1.73s-12.53-32.9,1.73-47.17q59-59.06,118.08-118.09c2.82-2.83,5.51-5.8,8.4-8.56,12.57-12,32.28-12.27,44.62,0q64.28,64.05,128.23,128.43a31.73,31.73,0,0,1,0,45.37c-12.6,12.5-32.34,12.53-45.37-.36-22.87-22.61-45.53-45.44-68.25-68.21-1.29-1.3-2.32-2.85-4.48-3.71V415.9H786.3c-1.58-1.7-2.72-3-3.95-4.25-22.74-22.76-45.57-45.41-68.2-68.27-17.51-17.69-10.76-46.49,12.53-53.62,12.85-3.94,23.94-.4,33.33,9q55.34,55.33,110.67,110.65c5.3,5.3,10.7,10.51,16,15.83,12.84,12.93,13.06,32.88.24,45.72q-63.58,63.68-127.36,127.18c-13.4,13.34-33.4,13.48-46.1.58s-12.39-32.47.78-45.74q33.82-34.05,67.88-67.87a42.32,42.32,0,0,1,4.34-3.38l-.68-1.09H480.5V786.38c1.78-1.66,3.1-2.82,4.34-4.06,22.75-22.74,45.39-45.59,68.27-68.2,17.57-17.36,46-10.82,53.41,12.18,4.13,12.82.82,24-8.56,33.42Q563.39,794.43,528.69,829q-28.62,28.66-57.19,57.36c-13.28,13.32-33.2,13.4-46.44.15q-63.24-63.3-126.45-126.67c-15.18-15.23-13.55-38.16,3.41-49.93,13-9,29.71-7.37,41.5,4.36q34,33.84,67.88,67.87c1.28,1.27,2.3,2.8,4.44,3.56V480.48H110c1.59,1.68,2.73,2.93,3.92,4.13,22.74,22.75,45.56,45.42,68.2,68.26,16.12,16.26,12.33,41.91-7.47,51.9-12.65,6.39-27,4-37.65-6.56-15.15-15-30.17-30.16-45.27-45.23Q51,512.36,10.27,471.77C-3.29,458.26-3.46,438.41,10,425q63.14-63.06,126.31-126.1c12.29-12.27,29-14.12,42.24-4.83,16.7,11.76,18.39,34.58,3.47,49.61-22.55,22.71-45.23,45.27-67.85,67.91-1.25,1.25-2.43,2.57-4.12,4.37H415.82Z" />
+                                </g>
+                            </g>
+                        </svg>
+                    </template>
+                </SvgTextButton>
+                <SvgTextButton :disabled="checkedData.length < 1" text="导出歌单" class="spacing"
+                    v-show="actionShowCtl.exportBtn" :leftAction="exportChecked">
+                    <template #left-img>
+                        <svg width="16" height="16" viewBox="0 0 853.89 768.12" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M426.89,768.1q-148.75,0-297.49,0C69.87,768,19.57,729.77,4.61,672.61a140,140,0,0,1-4.3-34.06c-.45-55.66-.3-111.33-.22-167,0-31.16,27.63-51.89,56.33-42.53,17.88,5.84,29.09,22.14,29.12,42.72q.1,65.5.06,131c0,11.67,0,23.33,0,35,.13,27.13,18,45.07,45.21,45.09q143,.06,286,0,152.49,0,305,0c10.8,0,20.87-2.1,29.52-8.91,11.68-9.19,16.88-21.33,16.83-36.16-.15-43,0-86,0-129,0-12.84-.15-25.67,0-38.5.26-17.26,7.72-30.64,23.12-38.63,14.61-7.58,29.38-6.73,43.18,2.34,12.62,8.28,19,20.51,19,35.46.17,57.83.86,115.68-.21,173.49-1.18,63.32-47.07,114.32-109.5,123.77a140.44,140.44,0,0,1-20.92,1.3Q574.88,768.17,426.89,768.1Z" />
+                                    <path
+                                        d="M479.85,146.1v6.79q0,200,0,400c0,22.17-13.11,39-33.73,43.58-25.55,5.68-51-13.5-51.27-39.67-.5-42.15-.2-84.32-.2-126.48q0-139.23,0-278.46v-5.69c-2,1.8-3.26,2.89-4.46,4.09Q338.89,201.45,287.62,252.7c-14.1,14.06-32.63,17.57-49.5,9.65a42.57,42.57,0,0,1-14.66-65.86c1.39-1.67,2.9-3.23,4.43-4.76Q316.62,103,405.36,14.27C420.27-.62,439.53-4.17,456.94,5.1a51.57,51.57,0,0,1,11.87,9Q558,103.05,647,192.21c12.33,12.34,17,27,11.88,43.87-4.83,16-15.89,26-32.26,29.38-15.32,3.13-28.58-1.47-39.64-12.55q-39-39.1-78.12-78.14Q496.52,162.41,484.14,150C483,148.91,481.8,147.88,479.85,146.1Z" />
                                 </g>
                             </g>
                         </svg>

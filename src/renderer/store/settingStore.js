@@ -86,6 +86,8 @@ export const useSettingStore = defineStore('setting', {
             listenNumShow: false,
             //视频播放退出后，自动继续播放歌曲
             resumePlayAfterVideo: false,
+            //本地歌曲使用在线封面
+            useOnlineCover: false,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: true,
             //歌曲进度更新频度，默认为60，范围：1 - 1024
@@ -279,6 +281,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isResumePlayAfterVideoEnable() {
             return this.track.resumePlayAfterVideo
+        },
+        isUseOnlineCoverEnable() {
+            return this.track.useOnlineCover
         }
     },
     actions: {
@@ -383,6 +388,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleResumePlayAfterVideo() {
             this.track.resumePlayAfterVideo = !this.track.resumePlayAfterVideo
+        },
+        toggleUseOnlineCover() {
+            this.track.useOnlineCover = !this.track.useOnlineCover
         },
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping

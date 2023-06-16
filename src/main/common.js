@@ -8,10 +8,16 @@ const MusicMetadata = require('music-metadata');
 
 
 const FILE_PREFIX = 'file:///'
+const IMAGE_PROTOCAL = {
+    scheme: 'lessimage',
+    prefix: 'lessimage://',
+}
 
 const transformPath = (path) => {
     try {
-        return path.replace(FILE_PREFIX, '').replace(/\\/g, '/').trim()
+        return path.replace(FILE_PREFIX, '')
+            .replace(/\\/g, '/')
+            .replace(/\/\//g, '').trim()
     } catch (error) {
         console.log(error)
     }
@@ -82,7 +88,7 @@ async function createTrackFromMetadata(file) {
     const artist = []
     let filename = getSimpleFileName(file)
     const album = { id: 0, name: '' }
-    let coverData = 'default_cover.png'
+    //let coverData = 'default_cover.png'
     let title = null, duration = 0, lyricText = null, publishTime = null
     try {
         if (metadata.common) {
@@ -95,8 +101,10 @@ async function createTrackFromMetadata(file) {
             //专辑名称
             if (mAlbum) album.name = mAlbum
             //封面
-            const cover = MusicMetadata.selectCover(picture)
-            if (cover) coverData = `data:${cover.format};base64,${cover.data.toString('base64')}`
+            //const cover = MusicMetadata.selectCover(picture)
+            //直接返回内容数据，太耗内存
+            //if (cover) coverData = `data:${cover.format};base64,${cover.data.toString('base64')}`
+
             //内嵌歌词
             if (lyrics && lyrics.length > 0) lyricText = lyrics[0]
 
@@ -122,8 +130,8 @@ async function createTrackFromMetadata(file) {
             }
         }
 
-        const hash = CryptoJS.MD5(file).toString()
         //TODO
+        const hash = CryptoJS.MD5(file).toString()
         return {
             id: hash,
             platform: 'local',
@@ -132,7 +140,7 @@ async function createTrackFromMetadata(file) {
             artist,
             album,
             duration,
-            cover: coverData,
+            cover: (IMAGE_PROTOCAL.prefix + file),
             embeddedLyricText: lyricText,
             url: (FILE_PREFIX + file),
             publishTime
@@ -142,6 +150,26 @@ async function createTrackFromMetadata(file) {
         console.log(error)
     }
     return null
+}
+
+async function parseImageDataFromFile(file) {
+    let coverData = null
+
+    file = transformPath(file)
+    const statResult = statSync(file, { throwIfNoEntry: false })
+    if (!statResult) return coverData
+
+    try {
+        const metadata = await MusicMetadata.parseFile(file, { duration: true })
+        const { picture } = metadata.common
+        //封面
+        const cover = MusicMetadata.selectCover(picture)
+        //if (cover) coverData = `data:${cover.format};base64,${cover.data.toString('base64')}`
+        if (cover) coverData = { format: cover.format, data: cover.data, text: `data:${cover.format};base64,${cover.data.toString('base64')}` }
+    } catch (error) {
+        console.log(error)
+    }
+    return coverData
 }
 
 function readText(file, encoding) {
@@ -160,11 +188,9 @@ function readText(file, encoding) {
 
 function writeText(file, text) {
     try {
-        const statResult = statSync(file, { throwIfNoEntry: false })
-        if (statResult) {
-            writeFileSync(file, text)
-            return true
-        }
+        file = transformPath(file)
+        writeFileSync(file, text)
+        return true
     } catch (error) {
         console.log(error)
     }
@@ -328,12 +354,44 @@ const parseM3uFile = async (filename) => {
     return null
 }
 
+
+//保存为.pls格式文件
+const writePlsFile = async (filename, data) => {
+    let content = '[Playlist]\n'
+    for (var i = 0; i < data.length; i++) {
+        const { title, duration, url } = data[i]
+        const num = i + 1
+        const file = transformPath(url)
+        const length = duration > 0 ? Math.ceil(duration / 1000) : -1
+        content += `File${num}=${file}\n`
+        content += `Title${num}=${title}\n`
+        content += `Length${num}=${length}\n`
+    }
+    content += `NumberOfEntries=${data.length}\n`
+    content += 'Version=2\n'
+    return writeText(filename, content)
+}
+
+//保存为.m3u格式文件
+const writeM3uFile = async (filename, data) => {
+    console.log(filename)
+    let content = '#EXTM3U\n'
+    for (var i = 0; i < data.length; i++) {
+        const { title, duration, url } = data[i]
+        const file = transformPath(url)
+        const length = duration > 0 ? Math.ceil(duration / 1000) : -1
+        content += `#EXTINF:${length}, ${title}\n${file}\n`
+    }
+    return writeText(filename, content)
+}
+
 module.exports = {
     scanDirTracks,
     parseTracks,
     readText,
     writeText,
     FILE_PREFIX,
+    IMAGE_PROTOCAL,
     ALPHABET_NUMS,
     randomText,
     randomTextWithinAlphabetNums,
@@ -342,5 +400,8 @@ module.exports = {
     removePath,
     listFiles,
     parsePlsFile,
-    parseM3uFile
+    parseM3uFile,
+    writePlsFile,
+    writeM3uFile,
+    parseImageDataFromFile
 }

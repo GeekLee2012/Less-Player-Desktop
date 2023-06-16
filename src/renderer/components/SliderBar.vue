@@ -119,6 +119,7 @@ const releaseDrag = (event) => {
 const thumbShow = ref(false)
 let thumbHideTimer = null
 const showThumb = () => {
+    if (props.disable) return
     if (thumbHideTimer) clearTimeout(thumbHideTimer)
     thumbShow.value = true
 }
