@@ -16,8 +16,8 @@ const { scanDirTracks, parseTracks,
   getDownloadDir, removePath, listFiles,
   parsePlsFile, parseM3uFile,
   writePlsFile, writeM3uFile,
-  IMAGE_PROTOCAL, IMAGE_TEXT_PROTOCAL,
-  parseImageDataFromFile
+  IMAGE_PROTOCAL, parseImageDataFromFile,
+  statPathSync, walkSync
 } = require('./common')
 
 const path = require('path')
@@ -269,10 +269,42 @@ const registryGlobalListeners = () => {
   ipcMain.handle('parse-audio-playlist', async (event, ...args) => {
     const file = args[0].trim()
     let result = null
-    if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[1]}`)) {
+    if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[2]}`)) {
       result = await parsePlsFile(file)
-    } else if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[0]}`)) {
+    } else if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[0]}`)
+      || file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[1]}`)) {
       result = await parseM3uFile(file)
+    }
+    return result
+  })
+
+  ipcMain.handle('dnd-open-audio-playlist', async (event, ...args) => {
+    const file = args[0].trim()
+    const deep = args.length > 1 ? args[1] : false
+    let result = null
+    if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[2]}`)) {
+      result = await parsePlsFile(file)
+    } else if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[0]}`)
+      || file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[1]}`)) {
+      result = await parseM3uFile(file)
+    } else {
+      result = await scanDirTracks(file, null, deep)
+    }
+    return result
+  })
+
+  ipcMain.handle('dnd-open-audios', async (event, ...args) => {
+    const path = args[0]
+    const deep = args.length > 1 ? args[1] : false
+    const statResult = statPathSync(path)
+    if (!statResult) return null
+    const result = []
+    if (statResult.isFile()) {
+      const tracks = await parseTracks([path])
+      result.push({ path, data: tracks })
+    } else if (statResult.isDirectory()) {
+      const tracks = await scanDirTracks(path, null, deep)
+      result.push(tracks)
     }
     return result
   })
@@ -303,11 +335,12 @@ const registryGlobalListeners = () => {
     return result.filePaths
   })
 
-  ipcMain.handle('scan-audio-dirs', async (event, ...args) => {
+  ipcMain.handle('open-audio-dirs', async (event, ...args) => {
     const dirs = args[0]
+    const deep = args.length > 1 ? args[1] : false
     const result = []
     for (var i = 0; i < dirs.length; i++) {
-      const tracks = await scanDirTracks(dirs[i], AUDIO_EXTS)
+      const tracks = await scanDirTracks(dirs[i], null, deep)
       result.push(tracks)
     }
     return result
@@ -403,6 +436,8 @@ const registryGlobalListeners = () => {
     })
     return (result && result.length > 0) ? (downloadDir + result[0]) : null
   })
+
+  setupDnd()
 }
 
 //创建浏览窗口
@@ -696,6 +731,10 @@ const openDevTools = () => {
 
 const cleanupBeforeQuit = () => {
   cancelDownload()
+}
+
+const setupDnd = () => {
+
 }
 
 //覆盖(包装)请求

@@ -5,7 +5,7 @@ import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
-import { useUserProfileStore } from '../store/userProfileStore';
+import { useSettingStore } from '../store/settingStore';
 import { toYyyymmddHhMmSs } from '../../common/Times';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
@@ -25,6 +25,12 @@ const { visitLocalPlaylistEdit, visitBatchLocalPlaylist } = inject('appRoute')
 
 const ipcRenderer = useIpcRenderer()
 
+const { addTracks, resetQueue, playNextTrack } = usePlayStore()
+const { showToast, updateCommonCtxItem, hideAllCtxMenus, showFailToast } = useAppCommonStore()
+const { getLocalPlaylist, addToLocalPlaylist,
+    removeFromLocalPlaylist, removeAllFromLocalPlaylist } = useLocalMusicStore()
+const { currentPlatformCode } = storeToRefs(usePlatformStore())
+const { isUseDndForAddLocalTracksEnable, isUseDeeplyScanForDirectoryEnable } = storeToRefs(useSettingStore())
 
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -33,12 +39,6 @@ let offset = 0, page = 1, limit = 1000, total = 0
 let markScrollTop = 0
 const isLoading = ref(false)
 const setLoading = (value) => isLoading.value = value
-
-const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { showToast, updateCommonCtxItem, hideAllCtxMenus } = useAppCommonStore()
-const { getLocalPlaylist, addToLocalPlaylist,
-    removeFromLocalPlaylist, removeAllFromLocalPlaylist } = useLocalMusicStore()
-const { currentPlatformCode } = storeToRefs(usePlatformStore())
 
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', tags: null, about: '', data: [] })
@@ -129,25 +129,71 @@ const removeAll = () => {
 const addFolders = async () => {
     if (!ipcRenderer) return
     const dirs = await ipcRenderer.invoke('open-dirs')
-
+    let msg = '文件夹添加失败！', success = false
     if (dirs) {
         setLoading(true)
-        const result = await ipcRenderer.invoke('scan-audio-dirs', dirs)
-        if (result) result.forEach(({ data }) => data.forEach(item => addToLocalPlaylist(props.id, item)))
-        /*
-        ipcRenderer.on('scan-audio-dirs-result', (event, result) => {
-            if (result) result.forEach(({ data }) => data.forEach(item => addToLocalPlaylist(props.id, item)))
-            setLoading(false)
-        })
-        */
+        const result = await ipcRenderer.invoke('open-audio-dirs', dirs, isUseDeeplyScanForDirectoryEnable.value)
+        if (result && result.length > 0) {
+            let count = 0
+            result.forEach(({ data }) => data.forEach(item => {
+                addToLocalPlaylist(props.id, item)
+                ++count
+            }))
+            msg = `文件夹添加成功！<br>共新增${count}首歌曲！`
+            success = true
+        }
     }
+    if (success) showToast(msg)
+    if (!success) showFailToast(msg)
     setLoading(false)
 }
 
 const addFiles = async () => {
     if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-audios')
-    if (result) result.forEach(item => addToLocalPlaylist(props.id, item))
+    let msg = '文件添加失败！', success = false
+    if (result && result.length > 0) {
+        result.forEach(item => addToLocalPlaylist(props.id, item))
+        msg = `文件添加成功！<br>共新增${result.length}首歌曲！`
+        success = true
+    }
+    if (success) showToast(msg)
+    if (!success) showFailToast(msg)
+}
+
+const onDrapOver = (event) => {
+    event.preventDefault()
+}
+
+const onDrop = async (event) => {
+    if (!ipcRenderer) return
+    if (!isUseDndForAddLocalTracksEnable.value) {
+        showFailToast('拖拽还没有启用哦！<br>请重新检查设置。')
+        return
+    }
+    event.preventDefault()
+
+    const { files } = event.dataTransfer
+    if (files.length > 1) {
+        showFailToast('还不支持多文件拖拽！')
+        return
+    }
+    const { name, path } = files[0]
+    setLoading(true)
+    const result = await ipcRenderer.invoke('dnd-open-audios', path, isUseDeeplyScanForDirectoryEnable.value)
+    let msg = '添加操作失败！', success = false
+    if (result && result.length > 0) {
+        let count = 0
+        result.forEach(({ data }) => data.forEach(item => {
+            addToLocalPlaylist(props.id, item)
+            ++count
+        }))
+        msg = `添加操作成功！<br>共新增${count}首歌曲！`
+        success = true
+    }
+    setLoading(false)
+    if (success) showToast(msg)
+    if (!success) showFailToast(msg)
 }
 
 onActivated(() => {
@@ -177,7 +223,7 @@ onUpdated(() => {
 </script>
 
 <template>
-    <div id="local-playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
+    <div id="local-playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll" @dragover="onDrapOver" @drop="onDrop">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="detail.cover" />

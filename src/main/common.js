@@ -1,9 +1,10 @@
-const { opendirSync, readFileSync, statSync, writeFileSync } = require('fs');
+const { opendirSync, readFileSync, statSync, writeFileSync, readdirSync } = require('fs');
 const { opendir, rmdir, rm } = require('fs/promises');
 const { homedir } = require('os');
 const path = require('path');
 const CryptoJS = require('crypto-js');
 const MusicMetadata = require('music-metadata');
+const { AUDIO_EXTS } = require('./env');
 
 
 
@@ -26,24 +27,33 @@ const transformPath = (path) => {
 
 const isExtentionValid = (name, exts) => {
     for (var ext of exts) {
-        if (name.endsWith(ext)) {
+        if (name && name.endsWith(ext)) {
             return true
         }
     }
     return false
 }
 
-const scanDirTracks = async (dir, exts) => {
+const statPathSync = (path) => {
     try {
-        const result = { path: dir, data: [] }
-        const list = await opendir(dir)
+        path = transformPath(path)
+        return statSync(path, { throwIfNoEntry: false })
+    } catch (error) {
+        console.log(error)
+    }
+    return null
+}
+
+const scanDirTracks = async (dir, exts, deep) => {
+    try {
+        if (!exts || exts.length < 1) exts = AUDIO_EXTS
+        const result = { path: dir, data: [], name: getSimpleFileName(dir) }
         const files = []
-        for await (const dirent of list) {
+        walkSync(dir, (file, dirent) => {
             if (dirent.isFile() && isExtentionValid(dirent.name, exts)) {
-                const fullname = transformPath(path.join(dir, dirent.name))
-                files.push(fullname)
+                files.push(transformPath(file))
             }
-        }
+        }, { deep })
         if (files.length > 0) {
             const tracks = await parseTracks(files.sort())
             result.data.push(...tracks)
@@ -59,7 +69,8 @@ function getSimpleFileName(fullname) {
     if (!fullname) return ''
     fullname = transformPath(fullname)
     const from = fullname.lastIndexOf('/')
-    const to = fullname.lastIndexOf('.')
+    let to = fullname.lastIndexOf('.')
+    to = to >= 0 ? to : fullname.length
     return fullname.substring(from + 1, to)
 }
 
@@ -67,6 +78,7 @@ async function parseTracks(audioFiles) {
     const tracks = []
     for (const file of audioFiles) {
         try {
+            if (!isExtentionValid(file, AUDIO_EXTS)) continue
             const track = await createTrackFromMetadata(file)
             if (track) {
                 const index = tracks.findIndex(item => track.id == item.id)
@@ -230,7 +242,9 @@ const removePath = (path) => {
     rm(path, { force: true })
 }
 
-/** 返回值为数组，且当没有文件时，默认为[ ] */
+/** 返回值为数组，且当没有文件时，默认为[ ] 
+ * 不遍历子目录
+ */
 const listFiles = async (dir, isFullname) => {
     const files = []
     try {
@@ -245,6 +259,25 @@ const listFiles = async (dir, isFullname) => {
         console.log(error);
     }
     return files
+}
+
+/**
+ * 遍历当前目录全部文件，包括子目录
+ */
+const walkSync = (dir, callback, options) => {
+    try {
+        options = options || { deep: false }
+        readdirSync(dir, { withFileTypes: true }).forEach(dirent => {
+            var pathName = path.join(dir, dirent.name);
+            if (dirent.isFile()) {
+                callback(pathName, dirent);
+            } else if (dirent.isDirectory() && options.deep) {
+                walkSync(pathName, callback, options);
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 //解析.pls格式文件
@@ -318,14 +351,15 @@ const parseM3uFile = async (filename) => {
         //逐行解析
         const lines = content.trim().split('\n')
         if (!lines) return null
-        let title = null, file = null, length = null
+        //let title = null, file = null, length = null
+        let file = null
         for (var i = 0; i < lines.length; i++) {
             const line = lines[i].trim()
 
             if (line.length < 1) return
+            /*
             if (line.startsWith('#EXTM3U')) continue
-
-            if (line.startsWith('#EXTINF:')) {
+            if (line.startsWith('#EXTINF')) {
                 const metaText = line.replace('#EXTINF:', '')
                 const index = metaText.indexOf(',')
                 length = parseInt(metaText.substring(0, index))
@@ -333,8 +367,10 @@ const parseM3uFile = async (filename) => {
             } else {
                 file = line
             }
-            //TODO 暂时先简单处理，不校验序号是否匹配
-            if (file != null && title != null && length != null) {
+            */
+            if (line.startsWith('#')) continue
+            file = line
+            if (file != null) {
                 //从文件本身去解析 Metadata，pls自带信息不完整
                 const track = await createTrackFromMetadata(file)
                 if (track) {
@@ -342,9 +378,9 @@ const parseM3uFile = async (filename) => {
                     if (index == -1) result.data.push(track)
                 }
                 //重置
-                title = null
                 file = null
-                length = null
+                //title = null
+                //length = null
             }
         }
         return result
@@ -403,5 +439,7 @@ module.exports = {
     parseM3uFile,
     writePlsFile,
     writeM3uFile,
-    parseImageDataFromFile
+    parseImageDataFromFile,
+    statPathSync,
+    walkSync
 }

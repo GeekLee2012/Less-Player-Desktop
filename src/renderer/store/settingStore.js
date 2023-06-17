@@ -86,14 +86,23 @@ export const useSettingStore = defineStore('setting', {
             listenNumShow: false,
             //视频播放退出后，自动继续播放歌曲
             resumePlayAfterVideo: false,
-            //本地歌曲使用在线封面
-            useOnlineCover: false,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: true,
             //歌曲进度更新频度，默认为60，范围：1 - 1024
             stateRefreshFrequency: 60,
             //歌曲频谱刷新频度，默认为3，范围：1 - 256
             spectrumRefreshFrequency: 3,
+            ////本地歌曲
+            //启用在线封面
+            useOnlineCover: false,
+            //显示音频格式
+            audioTypeFlagShow: false,
+            //扫描目录时，启用深度遍历
+            useDeeplyScanForDirectory: false,
+            //启用Dnd操作，创建本地歌单
+            useDndForCreateLocalPlaylist: false,
+            //启用Dnd操作，为本地歌单添加歌曲
+            useDndForAddLocalTracks: false,
         },
         /* 歌词 */
         lyric: {
@@ -284,6 +293,19 @@ export const useSettingStore = defineStore('setting', {
         },
         isUseOnlineCoverEnable() {
             return this.track.useOnlineCover
+        },
+        isUseDeeplyScanForDirectoryEnable() {
+            return this.track.useDeeplyScanForDirectory
+        },
+        isUseDndForCreateLocalPlaylistEnable() {
+            return this.track.useDndForCreateLocalPlaylist
+        }
+        ,
+        isUseDndForAddLocalTracksEnable() {
+            return this.track.useDndForAddLocalTracks
+        },
+        isAudioTypeFlagShowEnable() {
+            return this.track.audioTypeFlagShow
         }
     },
     actions: {
@@ -389,9 +411,6 @@ export const useSettingStore = defineStore('setting', {
         toggleResumePlayAfterVideo() {
             this.track.resumePlayAfterVideo = !this.track.resumePlayAfterVideo
         },
-        toggleUseOnlineCover() {
-            this.track.useOnlineCover = !this.track.useOnlineCover
-        },
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping
             this.setupAppSuspension()
@@ -416,6 +435,21 @@ export const useSettingStore = defineStore('setting', {
             if (freq < 1 || freq > 256) return
             this.track.spectrumRefreshFrequency = freq
             this.setupSpectrumRefreshFrequency()
+        },
+        toggleUseOnlineCover() {
+            this.track.useOnlineCover = !this.track.useOnlineCover
+        },
+        toggleAudioTypeFlagShow() {
+            this.track.audioTypeFlagShow = !this.track.audioTypeFlagShow
+        },
+        toggleUseDeeplyScanForDirectory() {
+            this.track.useDeeplyScanForDirectory = !this.track.useDeeplyScanForDirectory
+        },
+        toggleUseDndForCreateLocalPlaylist() {
+            this.track.useDndForCreateLocalPlaylist = !this.track.useDndForCreateLocalPlaylist
+        },
+        toggleUseDndForAddLocalTracks() {
+            this.track.useDndForAddLocalTracks = !this.track.useDndForAddLocalTracks
         },
         toggleTrayShow() {
             this.tray.show = !this.tray.show

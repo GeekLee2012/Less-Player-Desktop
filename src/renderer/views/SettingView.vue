@@ -61,6 +61,10 @@ const { setThemeIndex,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
     toggleUseOnlineCover,
+    toggleUseDndForCreateLocalPlaylist,
+    toggleUseDndForAddLocalTracks,
+    toggleUseDeeplyScanForDirectory,
+    toggleAudioTypeFlagShow
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -444,11 +448,6 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">本地歌曲使用在线封面：</span>
-                        <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
-                        </ToggleControl>
-                    </div>
-                    <div>
                         <span class="cate-subtitle">播放歌曲时，防止系统睡眠：</span>
                         <ToggleControl @click="togglePlayingWithoutSleeping" :value="track.playingWithoutSleeping">
                         </ToggleControl>
@@ -469,6 +468,42 @@ onMounted(checkForUpdate)
                         <input type="number" :value="track.spectrumRefreshFrequency" placeholder="1-256，默认3" min="1"
                             max="256" step="1" @input="updateSpectrumRefreshFrequency"
                             @focusout="updateSpectrumRefreshFrequency" />
+                    </div>
+                </div>
+            </div>
+            <div class="track row">
+                <span class="cate-name">本地歌曲</span>
+                <div class="content">
+                    <div>
+                        <span class="cate-subtitle">启用在线封面（如果可用）：</span>
+                        <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">显示音频格式标识：</span>
+                        <ToggleControl @click="toggleAudioTypeFlagShow" :value="track.audioTypeFlagShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">扫描目录时，启用深度遍历：</span>
+                        <ToggleControl @click="toggleUseDeeplyScanForDirectory" :value="track.useDeeplyScanForDirectory">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：可能会比较耗费性能</div>
+                    </div>
+                    <div class="tip-text">提示：支持拖拽单一目录、文件；且在指定区域内才会生效。
+                        <br>导入歌单，仅在本地歌曲首页有效；支持拖拽目录、歌单格式文件。
+                        <br>而导入歌曲，仅在本地歌曲 - 歌单页有效；支持拖拽目录、音频格式文件。
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">允许拖拽方式，导入歌单：</span>
+                        <ToggleControl @click="toggleUseDndForCreateLocalPlaylist"
+                            :value="track.useDndForCreateLocalPlaylist">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">允许拖拽方式，导入歌曲：</span>
+                        <ToggleControl @click="toggleUseDndForAddLocalTracks" :value="track.useDndForAddLocalTracks">
+                        </ToggleControl>
                     </div>
                 </div>
             </div>

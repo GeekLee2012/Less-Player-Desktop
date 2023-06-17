@@ -38,7 +38,7 @@ const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
 //支持的图片文件扩展名（本地文件）
 const IMAGE_EXTS = ['jpg', 'jpeg', 'png']
 //支持导入的歌单格式
-const AUDIO_PLAYLIST_EXTS = ['m3u', 'pls']
+const AUDIO_PLAYLIST_EXTS = ['m3u', 'm3u8', 'pls']
 //支持备份的文件格式
 const BACKUP_FILE_EXTS = ['json']
 //是否为macOS

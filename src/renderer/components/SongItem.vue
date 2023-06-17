@@ -6,6 +6,7 @@ import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
 import EventBus from '../../common/EventBus';
 
@@ -17,6 +18,8 @@ const { playing } = storeToRefs(usePlayStore())
 const { addTrack, playTrack, togglePlay } = usePlayStore()
 const { showToast, hidePlaybackQueueView, toggleVideoPlayingView } = useAppCommonStore()
 const { track } = storeToRefs(useSettingStore())
+const { isLocalMusic } = usePlatformStore()
+
 
 const props = defineProps({
     index: Number,
@@ -98,6 +101,22 @@ const showVipFlag = (data) => {
     return track.value.vipFlagShow && Track.isVip(data)
 }
 
+const showAudioTypeFlag = (data) => {
+    return track.value.audioTypeFlagShow && hasAudioType(data)
+}
+
+const hasAudioType = (data) => {
+    return getAudioTypeFlagText(data)
+}
+
+const getAudioTypeFlagText = (data) => {
+    const { platform, url } = data
+    if (!isLocalMusic(platform)) return null
+    const index = url.lastIndexOf('.')
+    if (index > 0) return url.substring(index + 1).toUpperCase()
+    return null
+}
+
 EventBus.on("checkbox-refresh", () => setChecked(false))
 </script>
 
@@ -123,7 +142,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
             </svg>
         </div>
         <div v-show="!checkbox" class="sqno">{{ index + 1 }}</div>
-        <div class="vipflag" v-show="showVipFlag(data)" :class="{ spacing: !checkbox }">
+        <div class="vipflag textflag" v-show="showVipFlag(data)" :class="{ spacing: !checkbox }">
             <span>VIP</span>
         </div>
         <div class="mv" v-show="!checkbox && Track.hasMv(data)" :class="{ spacing: !(checkbox || showVipFlag(data)) }">
@@ -135,11 +154,13 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
                     </g>
                 </g>
             </svg>
-            <!--
-                <span @click="playMv">MV</span>
-                -->
         </div>
-        <div class="title-wrap" :class="{ spacing: !(checkbox || Track.hasMv(data) || showVipFlag(data)) }">
+        <div class="audio-type-flag textflag" v-show="!checkbox && showAudioTypeFlag(data)"
+            :class="{ spacing: !(checkbox || showVipFlag(data) || Track.hasMv(data)) }">
+            <span v-html="getAudioTypeFlagText(data)"></span>
+        </div>
+        <div class="title-wrap"
+            :class="{ spacing: !(checkbox || Track.hasMv(data) || showVipFlag(data) || showAudioTypeFlag(data)) }">
             <span v-html="data.filename || data.title" :class="{ limitedSpan: !checkbox }"></span>
             <div class="action" :class="{ hidden: checkbox }">
                 <svg @click="playItem" width="18" height="18" class="play-btn" viewBox="0 0 139 139" xml:space="preserve"
@@ -278,16 +299,17 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 /* .song-item .mv span, */
-.song-item .vipflag span {
+.song-item .textflag span {
     background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
     background-clip: text;
     color: transparent !important;
 
     border-radius: 3px;
     border: 1.3px solid var(--content-highlight-color);
     padding: 1px 3px;
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: bold;
     margin-right: 5px;
 }
 
