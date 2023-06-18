@@ -2,10 +2,11 @@
 import { inject, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
 import EventBus from '../../common/EventBus';
-import { useAppCommonStore } from '../store/appCommonStore';
+
 
 
 
@@ -28,7 +29,7 @@ const visitSearchView = (keyword) => {
 }
 
 const getSearchBarPlaceholder = () => {
-    return searchBarExclusiveAction.value ? '独占模式搜索' : '现在想听点什么 ~'
+    return searchBarExclusiveAction.value ? '独占搜索框模式' : '现在想听点什么 ~'
 }
 </script>
 

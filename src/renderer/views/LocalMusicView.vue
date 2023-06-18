@@ -46,10 +46,6 @@ const onScroll = () => {
     hideAllCtxMenus()
 }
 
-const onDrapOver = (event) => {
-    event.preventDefault()
-}
-
 const onDrop = async (event) => {
     if (!ipcRenderer) return
     if (!isUseDndForCreateLocalPlaylistEnable.value) {
@@ -127,7 +123,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div id="local-music-view" ref="localMusicRef" @scroll="onScroll" @dragover="onDrapOver" @drop="onDrop">
+    <div id="local-music-view" ref="localMusicRef" @scroll="onScroll" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <div class="title">本地歌曲</div>
             <div class="about">

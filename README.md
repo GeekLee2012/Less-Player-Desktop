@@ -4,8 +4,8 @@
 [![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
 [![GitHub license](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)  
 
-<!--![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/GeekLee2012/Less-Player-Desktop.svg)](http://isitmaintained.com/project/GeekLee2012/Less-Player-Desktop "Percentage of issues still open")
+![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
+<!--[![Percentage of issues still open](http://isitmaintained.com/badge/open/GeekLee2012/Less-Player-Desktop.svg)](http://isitmaintained.com/project/GeekLee2012/Less-Player-Desktop "Percentage of issues still open")
 -->
 
 一款基于Electron + Vue3开发的播放器。

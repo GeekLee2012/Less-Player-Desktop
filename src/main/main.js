@@ -144,7 +144,7 @@ const init = () => {
 const registryGlobalShortcuts = () => {
   const config = {
     // 播放或暂停
-    'Shift+Space': 'togglePlay',
+    'Alt+Shift+Space': 'togglePlay',
     // 播放模式切换
     'Shift+M': 'switchPlayMode',
     // 上 / 下一曲

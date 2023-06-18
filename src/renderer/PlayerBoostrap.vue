@@ -492,7 +492,7 @@ EventBus.on('track-changed', track => {
     }, async (reason) => {
         if (reason == 'noUrl') {
             //TODO
-            if (!isVipTransferEnable.value) {
+            if (!isVipTransferEnable.value || isLocalMusic(track.platform)) {
                 handleUnplayableTrack(track)
                 return
             }
@@ -513,7 +513,7 @@ EventBus.on('track-changed', track => {
     })
 })
 EventBus.on('track-play', track => {
-    resetAutoSkip()
+    //resetAutoSkip()
     traceRecentTrack(track)
     //loadLyric(track)
 })
@@ -523,6 +523,7 @@ EventBus.on('track-state', state => {
     //播放刚开始时，更新MediaSession
     if (playState.value == PLAY_STATE.INIT && state == PLAY_STATE.PLAYING) {
         setupCurrentMediaSession()
+        resetAutoSkip()
     }
 
     setPlayState(state)

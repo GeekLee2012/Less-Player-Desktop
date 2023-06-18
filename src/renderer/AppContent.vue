@@ -47,7 +47,7 @@ const deepInState = (state, cache) => {
     const value = state[path]
     if (value && typeof (value) === 'object') {
       deepInState(state[path], cache[path])
-    } else {
+    } else if (cache) {
       state[path] = (isReservedPath(path) ? state[path] : cache[path])
     }
   }

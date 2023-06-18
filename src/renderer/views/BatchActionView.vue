@@ -14,11 +14,11 @@ import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
+import { useSettingStore } from '../store/settingStore';
 import Mousetrap from 'mousetrap';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import SongListControl from '../components/SongListControl.vue';
-import SearchBar from '../components/SearchBar.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 
 
@@ -49,6 +49,8 @@ const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { getLocalPlaylist, removeFromLocalPlaylist, removeLocalPlaylist } = useLocalMusicStore()
+const { isSearchForBatchActionShow } = storeToRefs(useSettingStore())
+
 
 const isFavorites = () => props.source == "favorites"
 const isRecents = () => props.source == "recents"
@@ -473,7 +475,8 @@ const registryLocalKeys = (unbind) => {
     }
 }
 
-const toggleUseSearchBarForBatchAction = () => {
+const toggleUseSearchBar = () => {
+    if (!isSearchForBatchActionShow.value) return
     const action = searchBarExclusiveAction.value ? null : setSearchKeyword
     setSearchBarExclusiveAction(action)
 }
@@ -485,7 +488,7 @@ onMounted(() => {
     resetBack2TopBtn()
     registryLocalKeys()
     setSearchKeyword(null)
-    toggleUseSearchBarForBatchAction()
+    toggleUseSearchBar()
 })
 
 onUnmounted(() => {
@@ -515,9 +518,9 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                     :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
                     @click="visitTab(index)" v-show="isTabsVisible(tab, index)" v-html="tab.name">
                 </span>
-                <div class="search-wrap checkbox">
-                    <svg @click="toggleUseSearchBarForBatchAction" v-show="!searchBarExclusiveAction" width="16" height="16"
-                        viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
+                <div class="search-wrap checkbox" @click="toggleUseSearchBar" v-show="isSearchForBatchActionShow">
+                    <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
+                        xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -525,8 +528,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                             </g>
                         </g>
                     </svg>
-                    <svg @click="toggleUseSearchBarForBatchAction" v-show="searchBarExclusiveAction" class="checked-svg"
-                        width="16" height="16" viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                    <svg v-show="searchBarExclusiveAction" class="checked-svg" width="16" height="16"
+                        viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -534,7 +537,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                             </g>
                         </g>
                     </svg>
-                    <span @click="toggleUseSearchBarForBatchAction">独占搜索框模式</span>
+                    <span>独占搜索框模式</span>
                 </div>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>

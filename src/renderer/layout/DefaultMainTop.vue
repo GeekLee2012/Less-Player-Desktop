@@ -1,16 +1,28 @@
 <script setup>
 import { inject } from 'vue';
 import { storeToRefs } from 'pinia';
+import { usePlayStore } from '../store/playStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import PlayMeta from '../components/PlayMeta.vue';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
-import { usePlayStore } from '../store/playStore';
+
 
 
 
 const { visitUserHome, visitSetting } = inject('appRoute')
 const { seekTrack, progressState, preseekTrack } = inject('player')
 const { playing } = storeToRefs(usePlayStore())
+const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
+
+
+const visitSearchView = (keyword) => {
+    if (keyword && keyword.length > 0) visitSearch(keyword)
+}
+
+const getSearchBarPlaceholder = () => {
+    return searchBarExclusiveAction.value ? '独占搜索框模式' : '现在想听点什么 ~'
+}
 </script>
 
 <template>
@@ -21,7 +33,9 @@ const { playing } = storeToRefs(usePlayStore())
                 <PlayControl></PlayControl>
             </div>
             <div class="top-right">
-                <SearchBar></SearchBar>
+                <SearchBar :submitAction="searchBarExclusiveAction || visitSearchView"
+                    :placeholder="getSearchBarPlaceholder()">
+                </SearchBar>
                 <div id="userhome-btn" @click="visitUserHome">
                     <svg width="22" height="20" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">

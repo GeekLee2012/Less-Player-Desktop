@@ -104,6 +104,11 @@ export const useSettingStore = defineStore('setting', {
             //启用Dnd操作，为本地歌单添加歌曲
             useDndForAddLocalTracks: false,
         },
+        search: {
+            onlinePlaylistShow: false,
+            localPlaylistShow: false,
+            batchActionShow: true
+        },
         /* 歌词 */
         lyric: {
             fontSize: 22,   //普通字号
@@ -152,7 +157,7 @@ export const useSettingStore = defineStore('setting', {
                 id: 'togglePlay',
                 name: '播放 / 暂停',
                 binding: 'Space',
-                gBinding: 'Shift + Space'
+                gBinding: 'Alt + Shift + Space'
             }, {
                 id: 'togglePlayMode',
                 name: '切换播放模式',
@@ -306,6 +311,15 @@ export const useSettingStore = defineStore('setting', {
         },
         isAudioTypeFlagShowEnable() {
             return this.track.audioTypeFlagShow
+        },
+        isSearchForOnlinePlaylistShow() {
+            return this.search.onlinePlaylistShow
+        },
+        isSearchForLocalPlaylistShow() {
+            return this.search.localPlaylistShow
+        },
+        isSearchForBatchActionShow() {
+            return this.search.batchActionShow
         }
     },
     actions: {
@@ -339,18 +353,6 @@ export const useSettingStore = defineStore('setting', {
             const current = this.getCurrentTheme()
             return current.id === theme.id
         },
-        /*
-        getCurrentThemeId() {
-            const { getTheme } = useThemeStore()
-            const { type, index } = this.theme
-            return getTheme(type, index).id
-        },
-        getCurrentThemeColor() {
-            const { getTheme } = useThemeStore()
-            const { type, index } = this.theme
-            return getTheme(type, index).color
-        },
-        */
         getCurrentThemeHighlightColor() {
             const { getTheme } = useThemeStore()
             const { type, index } = this.theme
@@ -450,6 +452,15 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleUseDndForAddLocalTracks() {
             this.track.useDndForAddLocalTracks = !this.track.useDndForAddLocalTracks
+        },
+        toggleSearchForOnlinePlaylistShow() {
+            this.search.onlinePlaylistShow = !this.search.onlinePlaylistShow
+        },
+        toggleSearchForLocalPlaylistShow() {
+            this.search.localPlaylistShow = !this.search.localPlaylistShow
+        },
+        toggleSearchForBatchActionShow() {
+            this.search.batchActionShow = !this.search.batchActionShow
         },
         toggleTrayShow() {
             this.tray.show = !this.tray.show

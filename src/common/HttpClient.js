@@ -7,7 +7,7 @@ import qs from "qs";
 const DOM_PARSER = new DOMParser()
 //axios.defaults.withCredentials = true
 
-const _get = (url, data, config, parseContentType) => {
+const _get = (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
         if (data && (typeof (data) === 'object')) {
             data = qs.stringify(data)
@@ -16,7 +16,7 @@ const _get = (url, data, config, parseContentType) => {
         }
         axios.get(url, config).then(resp => {
             try {
-                const result = parseContentType(resp)
+                const result = callback(resp)
                 resolve(result)
             } catch (err) {
                 resolve(resp.data)
@@ -26,14 +26,14 @@ const _get = (url, data, config, parseContentType) => {
     })
 }
 
-const _post = (url, data, config, parseContentType) => {
+const _post = (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
         if (data && (typeof (data) === 'object')) {
             data = qs.stringify(data)
         }
         axios.post(url, data, config).then(resp => {
             try {
-                const result = parseContentType(resp)
+                const result = callback(resp)
                 resolve(result)
             } catch (err) {
                 resolve(resp.data)
@@ -67,19 +67,23 @@ export const postJson = (url, data, config) => {
 export const getInternalIpv4 = () => {
     return new Promise(async (resolve, reject) => {
         let ipv4 = '128.108.208.188'
-        const urls = ['https://ip233.cn/',
-            'https://zh-hans.ipshu.com/',
-            'https://bajiu.cn/ip/',
-            'https://iplocation.com/'
-        ]
-        const rules = ['.container #internal-ip',
-            '.local_info .row .col p a',
-            '.cx div span',
-            '.rubber-container .result-table .ip'
-        ]
-        for (var i = 0; i < urls.length; i++) {
-            const doc = await getDoc(urls[i])
-            const el = doc.querySelector(rules[i])
+        const sites = [{
+            url: 'https://ip233.cn/',
+            rule: '.container #internal-ip'
+        }, {
+            url: 'https://zh-hans.ipshu.com/',
+            rule: '.local_info .row .col p a'
+        }, {
+            url: 'https://bajiu.cn/ip/',
+            rule: '.cx div span'
+        }, {
+            url: 'https://iplocation.com/',
+            rule: '.rubber-container .result-table .ip'
+        }]
+        for (var i = 0; i < sites.length; i++) {
+            const { url, rule } = sites[i]
+            const doc = await getDoc(url)
+            const el = doc.querySelector(rule)
             if (!el) continue
 
             const ipText = (el.textContent || '').trim()

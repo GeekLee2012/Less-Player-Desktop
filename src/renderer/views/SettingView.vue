@@ -21,7 +21,7 @@ const ipcRenderer = useIpcRenderer()
 
 const { theme, layout, common, track,
     keys, tray, navigation, dialog,
-    cache, network, other,
+    cache, network, other, search,
     isHttpProxyEnable, isSocksProxyEnable } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
@@ -64,7 +64,10 @@ const { setThemeIndex,
     toggleUseDndForCreateLocalPlaylist,
     toggleUseDndForAddLocalTracks,
     toggleUseDeeplyScanForDirectory,
-    toggleAudioTypeFlagShow
+    toggleAudioTypeFlagShow,
+    toggleSearchForOnlinePlaylistShow,
+    toggleSearchForLocalPlaylistShow,
+    toggleSearchForBatchActionShow
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -503,6 +506,27 @@ onMounted(checkForUpdate)
                     <div class="last">
                         <span class="cate-subtitle">允许拖拽方式，导入歌曲：</span>
                         <ToggleControl @click="toggleUseDndForAddLocalTracks" :value="track.useDndForAddLocalTracks">
+                        </ToggleControl>
+                    </div>
+                </div>
+            </div>
+            <div class="search row">
+                <span class="cate-name">搜索</span>
+                <div class="content">
+                    <div>显示独占搜索框模式：</div>
+                    <div>
+                        <span class="cate-subtitle">在线歌单（详情）页：</span>
+                        <ToggleControl @click="toggleSearchForOnlinePlaylistShow" :value="search.onlinePlaylistShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">本地歌单（详情）页：</span>
+                        <ToggleControl @click="toggleSearchForLocalPlaylistShow" :value="search.localPlaylistShow">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">批量操作：</span>
+                        <ToggleControl @click="toggleSearchForBatchActionShow" :value="search.batchActionShow">
                         </ToggleControl>
                     </div>
                 </div>
