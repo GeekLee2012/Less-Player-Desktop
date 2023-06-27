@@ -2,19 +2,17 @@
   
 [![GitHub release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
 [![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
-[![GitHub license](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)  
-
-![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
-<!--[![Percentage of issues still open](http://isitmaintained.com/badge/open/GeekLee2012/Less-Player-Desktop.svg)](http://isitmaintained.com/project/GeekLee2012/Less-Player-Desktop "Percentage of issues still open")
--->
-
+[![GitHub license](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)
+![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)  
+  
+  
 一款基于Electron + Vue3开发的播放器。
 
 <b>`郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>   
   
 ### 前言  
 * 项目名字：源于Less is More（少即是多）
-* 开发模式：渐进模式，边学习边开发（学以致用）  
+* 开发模式：循序渐进模式，边学习边开发（学以致用）  
   
 ### 开发/测试环境
 * OS：macOS Monterey（开发、测试）、Windows 10（虚拟机，仅测试）  
@@ -79,7 +77,7 @@
 * 以下资源库，暂时不再使用（因为分开单独管理，并没有解决任何问题）：
 * [Github资源库（废弃）](https://github.com/GeekLee2012/Resources/releases/)  
 * [Gitee资源库（废弃）](https://gitee.com/rive08/resources/releases/)  
-* PS: 变动带来的不便，请朋友们谅解！有时我也想做一些尝试，至于结果也并非总在预料之中。 
+* PS: 变动带来的不便，请朋友们谅解！有时我也想做一些尝试，然而结果也并非总在预料之中。 
   
 ### 项目相关文档
 * 常见问题：[FAQ.md](FAQ.md)  

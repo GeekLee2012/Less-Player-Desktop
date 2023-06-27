@@ -117,7 +117,7 @@ export class Player {
     togglePlay() {
         const sound = this.getSound()
         if (!sound) {
-            this.retryPlay(1)
+            this._retryPlay(1)
             return
         }
         if (sound.playing()) {
@@ -149,7 +149,7 @@ export class Player {
 
     restore(track) {
         this.setCurrent(track)
-        this.createSound()
+        //this.createSound()
     }
 
     volume(value) {
@@ -209,8 +209,13 @@ export class Player {
     }
 
     _retryPlay(maxRetry) {
-        this._notifyError(this.retry < maxRetry)
-        ++this.retry
+        const isRetry = this.retry < maxRetry
+        this._notifyError(isRetry)
+        if (isRetry) {
+            ++this.retry
+        } else {
+            this.retry = 0
+        }
     }
 
     _createWebAudioApi() {

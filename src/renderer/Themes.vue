@@ -251,6 +251,7 @@ watch(themeSetting, () => setupAppTheme(), { deep: true })
   background-size: 100% auto;
   height: 66px;
   position: relative;
+  border-radius: 5px;
 }
 
 @keyframes forwards {

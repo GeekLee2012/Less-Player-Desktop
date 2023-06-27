@@ -118,16 +118,11 @@ export class United {
                 }
                 //专辑
                 const _albumName = (albumName || United.NULL_CODE)
-                if (ignoreAlbum) {
-                    score += 0.2
-                    ++hits
-                } else if (_albumName == cAlbumName) {
+                if (ignoreAlbum || _albumName == cAlbumName) {
                     score += 0.2
                     ++hits
                 } else if (cAlbumName.toLowerCase().includes(_albumName.toLowerCase())) {
                     score += 0.15
-                } else {
-                    score += 0.05
                 }
 
                 //同歌曲名、同专辑名、不同歌手，大概率为不同歌曲
@@ -139,17 +134,19 @@ export class United {
                 if (dError == 0) {
                     score += 0.15
                     ++hits
-                } else if (dError < 30 * 1000) {
+                } else if (dError < 5 * 1000) {
                     score += 0.13
-                }
-                else if (dError < 45 * 1000) {
+                } else if (dError < 10 * 1000) {
                     score += 0.1
-                }
-                else if (dError < 60 * 1000) {
-                    score += 0.05
+                } else if (dError < 20 * 1000) {
+                    score -= 0.05
+                } else if (dError < 30 * 1000) {
+                    score -= 0.1
+                } else {
+                    score -= 0.15
                 }
 
-                if (score < 0.65 && hits < 2) continue
+                if (score < 0.6 || hits < 2) continue
                 const vendor = getVendor(cPlatform)
                 if (!vendor) continue
                 const cDetail = await vendor.playDetail(cId, candidate)

@@ -85,7 +85,7 @@ export class Qingting {
                 const result = new Playlist(id, Qingting.CODE, img_url, name, null, desc)
                 result.type = Playlist.ANCHOR_RADIO_TYPE
                 result.total = program_count
-                const artistName = podcasters && podcasters.length > 0 ? podcasters[0].name : ''
+                const artistName = podcasters && podcasters.length > 0 ? podcasters[0].name : '蜻蜓FM'
 
                 plist.forEach(item => {
                     const { id, title, duration, cover, playcount, update_time } = item
@@ -95,7 +95,7 @@ export class Qingting {
                     track.pid = result.id
                     track.type = result.type
                     track.lyric.addLine('999:99.000', detail)
-                    //track.extra1 = playcount
+                    if (artistName === '蜻蜓FM') track.extra1 = '&nbsp;'
                     track.extra2 = update_time
                     result.addTrack(track)
                 })

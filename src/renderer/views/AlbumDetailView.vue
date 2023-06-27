@@ -234,10 +234,10 @@ watch([platform, albumId], reloadAll, { immediate: true })
             </div>
             <div class="right" v-show="isLoading">
                 <div class="title" v-show="isLoadingDetail">
-                    <div class="loading-mask" style="width: 36%; height: 39px; display: inline-block;"></div>
+                    <div class="loading-mask" style="width: 88%; height: 39px; display: inline-block;"></div>
                 </div>
                 <div class="info" v-show="isLoadingDetail">
-                    <div class="loading-mask" v-for="i in 3" style="width: 500px; height: 36px; display: inline-block;">
+                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 28px; display: inline-block;">
                     </div>
                 </div>
                 <div class="action">

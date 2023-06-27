@@ -456,9 +456,9 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                         <div class="tip-text spacing">提示：不影响系统正常熄屏、锁屏</div>
                     </div>
-                    <div class="tip-text">提示：当前应用，更新频度是指每多少个动画帧更新一次；
-                        频度越小，动画可能越流畅，<br>而CPU占用越高；
-                        歌曲进度更新频度，一般与屏幕刷新率保持一致
+                    <div class="tip-text">提示：当前应用，更新频度，是指每多少个动画帧进行一次更新操作<br>
+                        频度值越小，动画可能越流畅，而CPU占用则会越高<br>
+                        歌曲（歌词）进度更新频度，建议与当前设备的屏幕刷新率保持一致
                     </div>
                     <div>
                         <span class="cate-subtitle">歌曲（歌词）进度更新频度：</span>
@@ -491,22 +491,21 @@ onMounted(checkForUpdate)
                         <span class="cate-subtitle">扫描目录时，启用深度遍历：</span>
                         <ToggleControl @click="toggleUseDeeplyScanForDirectory" :value="track.useDeeplyScanForDirectory">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：可能会比较耗费性能</div>
+                        <div class="tip-text spacing">提示：扫描多级子目录，较耗性能</div>
                     </div>
-                    <div class="tip-text">提示：支持拖拽单一目录、文件；且在指定区域内才会生效。
-                        <br>导入歌单，仅在本地歌曲首页有效；支持拖拽目录、歌单格式文件。
-                        <br>而导入歌曲，仅在本地歌曲 - 歌单页有效；支持拖拽目录、音频格式文件。
-                    </div>
+                    <div class="tip-text">提示：支持拖拽单一目录、文件；仅在本地歌曲相关页面、指定区域内才会有效</div>
                     <div>
                         <span class="cate-subtitle">允许拖拽方式，导入歌单：</span>
                         <ToggleControl @click="toggleUseDndForCreateLocalPlaylist"
                             :value="track.useDndForCreateLocalPlaylist">
                         </ToggleControl>
+                        <div class="tip-text spacing">提示：首页有效；支持目录、歌单文件</div>
                     </div>
                     <div class="last">
                         <span class="cate-subtitle">允许拖拽方式，导入歌曲：</span>
                         <ToggleControl @click="toggleUseDndForAddLocalTracks" :value="track.useDndForAddLocalTracks">
                         </ToggleControl>
+                        <div class="tip-text spacing">提示：歌单页有效；支持目录、音频文件</div>
                     </div>
                 </div>
             </div>
@@ -534,8 +533,8 @@ onMounted(checkForUpdate)
             <div class="cache row">
                 <span class="cate-name">缓存</span>
                 <div class="content">
-                    <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的进度
-                        <br>最近播放记录，请定期手动清理；数据过多时，列表容易卡顿
+                    <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的播放进度
+                        <br>最近播放记录，请定期手动清理；数据过多时，部分列表容易卡顿
                     </div>
                     <div>
                         <span class="cate-subtitle">应用退出前，保存播放状态：</span>

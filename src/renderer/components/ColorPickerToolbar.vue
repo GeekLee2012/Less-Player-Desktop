@@ -31,7 +31,7 @@ const VueColorKitHack = {
     },
     selectColor(color) {
         const _color = this._reformateHexa(color)
-        if (colorPickerRef.value) colorPickerRef.value.selectColor(color)
+        if (colorPickerRef.value) colorPickerRef.value.selectColor(_color)
     },
     _reformateHexa(value) {
         let _value = value || ''.trim()

@@ -172,17 +172,16 @@ export class RadioCN {
             }
             getJson(url, reqBody).then(jsonp => {
                 const json = parseJson(jsonp, callback)
+                const { odchannel: playlist, program: programs } = json.data
 
-                const playlist = json.data.odchannel
                 const { name, imageUrl, description } = playlist
-                const cover = imageUrl[0].url
+                const { url: cover } = imageUrl[0]
                 const result = new Playlist(id, RadioCN.CODE, cover, name, null, description)
                 result.type = Playlist.ANCHOR_RADIO_TYPE
                 result.total = json.total
 
-                const programs = json.data.program
                 programs.forEach(item => {
-                    const artist = []
+                    const artist = [{ id: '', name: '央广云听' }]
                     const album = { id, name }
                     const duration = parseInt(item.duration) * 1000
                     const cover = result.cover
@@ -191,6 +190,7 @@ export class RadioCN {
                     track.url = item.downloadUrl || item.streams[0].url
                     track.lyric.addLine('999:99.000', item.description || description)
                     track.type = result.type
+                    track.extra1 = '&nbsp;'
                     track.extra2 = item.onlinetime
                     track.pid = id
                     result.addTrack(track)

@@ -50,8 +50,8 @@ export class LocalMusic {
             } catch (error) {
                 console.log(error)
             }
-            let onlineCandidate = null
             //在线歌词
+            let onlineCandidate = null
             if (!lyricText) {
                 onlineCandidate = await United.transferTrack(track, true, true)
                 if (onlineCandidate) {
