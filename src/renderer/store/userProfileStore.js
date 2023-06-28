@@ -250,7 +250,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             const playlist = this.getCustomPlaylist(id)
             if (!playlist) return false
             const { platform } = track
-            if (isLocalMusic(platform)) return false
+            if (platform === 'local') return false
             const index = this.findItemIndex(playlist.data, track)
             if (index > -1) return false
             playlist.data.push(track)

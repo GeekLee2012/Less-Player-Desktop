@@ -188,14 +188,13 @@ const backup = async () => {
         data: backupSource
     }
     const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')
-    const filename = "Less.Player.Backup-" + timestamp + ".json"
-    const result = await ipcRenderer.invoke("save-file", {
-        title: "数据备份",
+    const filename = `Less.Player.Backup-${timestamp}.json`
+    const result = await ipcRenderer.invoke('save-file', {
+        title: '数据备份',
         name: filename,
         data: JSON.stringify(backupData)
-    }
-    )
-    if (result) showToast("数据备份成功!")
+    })
+    if (result) showToast('数据备份成功！')
 }
 
 const hasChildren = (item) => {
@@ -203,7 +202,7 @@ const hasChildren = (item) => {
 }
 
 const getChildItemId = (item, child) => {
-    return item.id + "." + child.id
+    return item.id + '.' + child.id
 }
 
 const getChildItemSuffix = (id, subId) => {

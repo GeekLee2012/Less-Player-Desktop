@@ -9,7 +9,7 @@ import { Playlist } from '../../common/Playlist';
 
 
 
-const { visitPlaylist } = inject('appRoute')
+const { visitPlaylist, visitFreeFMEdit } = inject('appRoute')
 const { playPlaylist } = inject('player')
 
 const props = defineProps({
@@ -22,7 +22,7 @@ const props = defineProps({
     customLoadingCount: Number
 })
 
-const { isPlatformValid } = usePlatformStore()
+const { isPlatformValid, isFreeFM } = usePlatformStore()
 const { isListenNumShow } = storeToRefs(useSettingStore())
 
 const visitItem = (item) => {
@@ -33,7 +33,9 @@ const visitItem = (item) => {
     const idValid = (typeof (id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
 
-    if (Playlist.isFMRadioType(item)
+    if (isFreeFM(platform)) {
+        visitFreeFMEdit(id)
+    } else if (Playlist.isFMRadioType(item)
         || Playlist.isNormalRadioType(item)) {
         //FM广播电台、普通歌单电台
         playPlaylist(item)

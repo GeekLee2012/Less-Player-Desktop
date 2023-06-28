@@ -9,27 +9,32 @@ export default {
 import { storeToRefs } from 'pinia';
 import { inject, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue';
 import EventBus from '../../common/EventBus';
+import Mousetrap from 'mousetrap';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
+import { useFreeFMStore } from '../store/freeFMStore';
 import { useSettingStore } from '../store/settingStore';
-import Mousetrap from 'mousetrap';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { useIpcRenderer } from '../../common/Utils';
+import { toYyyymmddHhMmSs } from '../../common/Times';
 
 
 
-
-const { currentRoutePath, backward } = inject('appRoute')
 
 const props = defineProps({
     source: String, //数据源，所属功能/模块
     id: String //记录ID
 })
+
+
+const { currentRoutePath, backward } = inject('appRoute')
+const ipcRenderer = useIpcRenderer()
 
 const { getFavoriteSongs, getFavoritePlaylilsts,
     getFavoriteAlbums, getFavoriteRadios,
@@ -49,13 +54,16 @@ const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { getLocalPlaylist, removeFromLocalPlaylist, removeLocalPlaylist } = useLocalMusicStore()
+const { freeRadios } = storeToRefs(useFreeFMStore())
+const { removeFreeRadio } = useFreeFMStore()
 const { isSearchForBatchActionShow } = storeToRefs(useSettingStore())
 
 
 const isFavorites = () => props.source == "favorites"
 const isRecents = () => props.source == "recents"
-const isCustomPlaylist = () => props.source == "customPlaylist"
+const isCustomPlaylist = () => props.source == "custom"
 const isLocalMusic = () => props.source == "local"
+const isFreeFM = () => props.source == "freefm"
 
 const typeTabs = [{
     code: 'songs',
@@ -113,6 +121,9 @@ const updateTitle = () => {
         text = "本地歌曲"
         subtext = sourceItem.title
     }
+    if (isFreeFM()) {
+        text = "自由FM"
+    }
     title.value = text
     subtitle.value = subtext
 }
@@ -123,11 +134,17 @@ const isTabsVisible = (tab, index) => {
     if (isCustomPlaylist() && index == 0) return true
     if (isLocalMusic() && props.id !== '0' && index == 0) return true
     if (isLocalMusic() && props.id === '0' && index == 1) return true
+    if (isFreeFM() && props.id === '0' && index == 3) return true
     return false
 }
 
 const getFirstVisibleTabIndex = () => {
-    return (isLocalMusic() && props.id === '0') ? 1 : 0
+    if (isLocalMusic() && props.id === '0') {
+        return 1
+    } else if (isFreeFM()) {
+        return 3
+    }
+    return 0
 }
 
 //shift快速选择功能，当前区间边界Index
@@ -175,8 +192,8 @@ const resetTab = () => {
         addToBtn: false,
         moveToBtn: false,
         addToQueueBtn: false,
-        deleteBtn: true,
-        exportBtn: false
+        exportBtn: false,
+        deleteBtn: true
     })
     EventBus.emit("checkbox-refresh")
 }
@@ -192,10 +209,7 @@ const switchTab = () => {
         Object.assign(actionShowCtl, {
             playBtn: true,
             addToBtn: true,
-            moveToBtn: false,
-            addToQueueBtn: false,
-            deleteBtn: true,
-            exportBtn: false
+            deleteBtn: true
         })
         if (isFavorites()) tabData.push(...filterSongsWithKeyword(getFavoriteSongs.value(platform)))
         if (isRecents()) tabData.push(...filterRecentSongs())
@@ -204,7 +218,6 @@ const switchTab = () => {
                 playBtn: true,
                 addToBtn: true,
                 moveToBtn: true,
-                addToQueueBtn: false,
                 deleteBtn: true,
             })
             tabData.push(...loadCustomPlaylist(platform))
@@ -212,11 +225,8 @@ const switchTab = () => {
         if (isLocalMusic()) {
             Object.assign(actionShowCtl, {
                 playBtn: true,
-                addToBtn: false,
-                moveToBtn: false,
                 addToQueueBtn: true,
-                deleteBtn: true,
-                exportBtn: false
+                deleteBtn: true
             })
             tabData.push(...loadLocalPlaylist())
         }
@@ -226,9 +236,6 @@ const switchTab = () => {
         if (isRecents()) tabData.push(...filterByTitleWithKeyword(getRecentPlaylilsts.value(platform)))
         if (isLocalMusic()) {
             Object.assign(actionShowCtl, {
-                playBtn: false,
-                addToBtn: false,
-                moveToBtn: false,
                 addToQueueBtn: true,
                 deleteBtn: true,
                 exportBtn: true
@@ -243,6 +250,13 @@ const switchTab = () => {
     } else if (activeTab.value == 3) {
         if (isFavorites()) tabData.push(...filterByTitleWithKeyword(getFavoriteRadios.value(platform)))
         if (isRecents()) tabData.push(...filterByTitleWithKeyword(getRecentRadios.value(platform)))
+        if (isFreeFM()) {
+            Object.assign(actionShowCtl, {
+                deleteBtn: true,
+                exportBtn: true
+            })
+            tabData.push(...freeRadios.value)
+        }
         currentTabView.value = PlaylistsControl
     }
     updateTipText()
@@ -399,6 +413,7 @@ const toggleMoveCheckedMenu = (event) => {
 }
 
 const removeChecked = () => {
+    if (checkedData.length < 1) return
     let deleteFn = null
     if (activeTab.value == 0) {
         if (isFavorites()) deleteFn = removeFavoriteSong
@@ -415,15 +430,18 @@ const removeChecked = () => {
     } else if (activeTab.value == 3) {
         if (isFavorites()) deleteFn = removeFavoriteRadio
         if (isRecents()) deleteFn = removeRecentRadio
+        if (isFreeFM()) deleteFn = removeFreeRadio
     }
     if (deleteFn) {
         if (isFavorites()) checkedData.forEach(item => deleteFn(item.id, item.platform))
-        else if (isRecents()) checkedData.forEach(item => deleteFn(item))
+        //else if (isRecents()) checkedData.forEach(item => deleteFn(item))
         else if (activeTab.value == 0 && (isCustomPlaylist() || isLocalMusic())) {
             const { id } = commonCtxItem.value
             checkedData.forEach(item => deleteFn(id, item))
         } else if (activeTab.value == 1 && isLocalMusic()) {
             checkedData.forEach(item => deleteFn(item.id))
+        } else { //默认情况
+            checkedData.forEach(item => deleteFn(item))
         }
         refresh()
         showToast("删除操作成功!")
@@ -435,7 +453,32 @@ const exportChecked = () => {
         if (isLocalMusic()) {
             showPlaylistExportToolbar(checkedData)
         }
+    } else if (isFreeFM()) {
+        exportRadios(checkedData)
     }
+}
+
+const exportRadios = async (radios) => {
+    if (!radios || radios.length < 1) return
+    if (!ipcRenderer) return
+    const now = Date.now()
+    const radioData = []
+    radios.forEach(item => {
+        const { platform, type, title, cover, tags, about, data } = item
+        if (data && data.length > 0) {
+            const { url, streamType } = data[0]
+            radioData.push({ platform, title, url, type, streamType, cover, tags, about })
+        }
+    })
+    const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')
+    const filename = `FreeRadios-${timestamp}.json`
+    const result = await ipcRenderer.invoke('save-file', {
+        title: 'FM电台导出',
+        name: filename,
+        data: JSON.stringify({ created: now, data: radioData })
+    })
+    if (result) showToast('FM电台导出成功！')
+    else showFailToast('FM电台导出失败！')
 }
 
 //TODO
@@ -624,8 +667,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                         </svg>
                     </template>
                 </SvgTextButton>
-                <SvgTextButton :disabled="checkedData.length < 1" text="导出歌单" class="spacing"
-                    v-show="actionShowCtl.exportBtn" :leftAction="exportChecked">
+                <SvgTextButton :disabled="checkedData.length < 1" text="导出" class="spacing" v-show="actionShowCtl.exportBtn"
+                    :leftAction="exportChecked">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 0 853.89 768.12" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">

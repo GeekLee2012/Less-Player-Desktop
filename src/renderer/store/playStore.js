@@ -65,17 +65,20 @@ export const usePlayStore = defineStore('play', {
         setPlaying(value) {
             this.playing = value
         },
+        isDefaultFMRadioType(track) {
+            return track && Playlist.isFMRadioType(track) && !track.streamType
+        },
         togglePlay() {
+            const { currentTrack: track } = this
             //FM广播
-            if (Playlist.isFMRadioType(this.currentTrack)) {
+            if (this.isDefaultFMRadioType(track)) {
                 EventBus.emit('radio-togglePlay')
                 return
             }
             //播放列表为空
             if (this.queueTracksSize < 1) return
             //当前歌曲不存在或存在但缺少url
-            if (!Track.hasUrl(this.currentTrack)
-                || NO_TRACK == this.currentTrack) {
+            if (!Track.hasUrl(track) || NO_TRACK == track) {
                 this.playNextTrack()
                 return
             }
@@ -148,7 +151,7 @@ export const usePlayStore = defineStore('play', {
         playTrackDirectly(track) {
             this.__resetPlayState()
             let playEventName = 'track-play'
-            if (Playlist.isFMRadioType(track)) { //FM广播
+            if (this.isDefaultFMRadioType(track)) { //FM广播, 默认Live Stream
                 playEventName = 'radio-play'
             } else if (!Track.hasUrl(track)) {   //普通歌曲
                 playEventName = 'track-changed'

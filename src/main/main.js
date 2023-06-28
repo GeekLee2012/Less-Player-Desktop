@@ -396,10 +396,11 @@ const registryGlobalListeners = () => {
     return writeText(result.filePath, data)
   })
 
-  ipcMain.handle('open-backup-file', async (event, ...args) => {
+  ipcMain.handle('open-json-file', async (event, ...args) => {
+    const title = args[0] || '请选JSON文件'
     const result = await dialog.showOpenDialog(mainWin, {
-      title: '请选择备份文件',
-      filters: [{ name: 'JSON文件', extensions: BACKUP_FILE_EXTS }],
+      title,
+      filters: [{ name: 'JSON文件', extensions: ['json'] }],
       properties: ['openFile']
     })
     if (result.canceled) return null

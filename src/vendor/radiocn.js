@@ -211,7 +211,7 @@ export class RadioCN {
     //歌词
     static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            resolve(resolve({ id, platform: RadioCN.CODE, lyric: new Lyric(), trans: null }))
+            resolve(resolve({ id, platform: RadioCN.CODE, lyric: null, trans: null }))
         })
     }
 

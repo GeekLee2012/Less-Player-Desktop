@@ -93,6 +93,13 @@ const ALL_PLATFORMS = [
         weight: 5
     },
     {
+        code: LocalMusic.CODE,
+        name: '本地歌曲',
+        shortName: 'LO',
+        online: false,
+        types: null
+    },
+    {
         code: RadioCN.CODE,
         name: '央广云听',
         shortName: 'YT',
@@ -117,31 +124,25 @@ const ALL_PLATFORMS = [
         weight: 5
     },
     {
-        code: LocalMusic.CODE,
-        name: '本地歌曲',
-        shortName: 'LO',
-        online: false,
-        types: null
-    },
-    /*{
         code: FreeFM.CODE,
-        name: '自由电台',
+        name: '自由FM',
         shortName: 'FREE',
         online: true,
         types: ['fmRadios'],
         weight: 5
-    },
-    */
+    }
 ]
 
-const radioCount = 3
-const playlistPlatforms = ALL_PLATFORMS.slice(1)
-playlistPlatforms.splice(5, radioCount)
+const playlistPlatforms = ALL_PLATFORMS.slice(1, 7)
 const artistPlatforms = ALL_PLATFORMS.slice(1, 5)
-const radioPlatforms = [ALL_PLATFORMS[2], ALL_PLATFORMS[6], ALL_PLATFORMS[7], ALL_PLATFORMS[8]]
-const userhomePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length - 1)
-const searchScopePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length - (radioCount + 2))
+const radioPlatforms = ALL_PLATFORMS.slice(7)
+radioPlatforms.splice(0, 0, ALL_PLATFORMS[2])
+const userhomePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length)
+userhomePlatforms.splice(6, 1)
+const searchScopePlatforms = ALL_PLATFORMS.slice(1, 5)
+//TODO暂不支持FreeFM随机播放
 const randomMusicScopePlatforms = ALL_PLATFORMS.slice(1, ALL_PLATFORMS.length - 1)
+randomMusicScopePlatforms.splice(5, 1)
 
 const vendors = {
     qq: QQ,
@@ -237,6 +238,10 @@ export const usePlatformStore = defineStore('platform', {
         isLocalMusic(platform) {
             if (!this.isPlatformValid(platform)) return false
             return platform.trim() == LocalMusic.CODE
+        },
+        isFreeFM(platform) {
+            if (!this.isPlatformValid(platform)) return false
+            return platform.trim() == FreeFM.CODE
         },
         isArtistDetailVisitable(platform) {
             //if (!this.isPlatformValid(platform)) return false

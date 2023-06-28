@@ -99,7 +99,6 @@ const loadLyric = (track) => {
     const platform = track.platform
     const vendor = getVendor(platform)
     if (!vendor || !vendor.lyric
-        || Playlist.isFMRadioType(track)
         || Playlist.isAnchorRadioType(track)) {
         if (isCurrentTrack(track)) EventBus.emit('track-noLyric', track)
         return
@@ -253,14 +252,14 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
 
     const { id, platform } = playlist
     if (Playlist.isFMRadioType(playlist)) { //FM广播电台
-        if (text) showToast(text)
+        showToast(text || '即将为您收听电台')
         const track = playlist.data[0]
-        addTrack(track)
+        //addTrack(track)
         playTrack(track)
         return
     } else if (Playlist.isNormalRadioType(playlist)) { //歌单电台
         //提示前置，避免因网络卡顿导致用户多次请求
-        if (text) showToast(text)
+        showToast(text || '即将为您播放电台')
         playNextPlaylistRadioTrack(platform, id, traceId)
         return
     } else if (Playlist.isNormalType(playlist)

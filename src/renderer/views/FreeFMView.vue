@@ -1,0 +1,172 @@
+<script>
+//定义名称，方便用于<keep-alive>
+export default {
+    name: 'FreeFMView'
+}
+</script>
+
+<script setup>
+import { inject, onMounted, reactive, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
+import { usePlayStore } from '../store/playStore';
+import { useFreeFMStore } from '../store/freeFMStore';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { useSettingStore } from '../store/settingStore';
+import PlaylistsControl from '../components/PlaylistsControl.vue';
+import BatchActionBtn from '../components/BatchActionBtn.vue';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { isDevEnv, useIpcRenderer } from "../../common/Utils";
+import EventBus from '../../common/EventBus';
+
+
+
+
+const { visitFreeFMCreate, visitBatchFreeFM } = inject('appRoute')
+
+const ipcRenderer = useIpcRenderer()
+
+const { freeRadios, importTaskCount } = storeToRefs(useFreeFMStore())
+const { addFreeRadio, resetAll,
+    increaseImportTaskCount, decreaseImportTaskCount } = useFreeFMStore()
+const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
+const { isUseDndForCreateLocalPlaylistEnable, isUseDeeplyScanForDirectoryEnable } = storeToRefs(useSettingStore())
+
+const freefmRef = ref(null)
+const back2TopBtnRef = ref(null)
+
+const isLoading = ref(false)
+const setLoading = (value) => isLoading.value = value
+
+const resetBack2TopBtn = () => {
+    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(freefmRef.value)
+}
+
+const onScroll = () => {
+    hideAllCtxMenus()
+}
+
+const onDrop = async (event) => {
+    if (!ipcRenderer) return
+    if (importTaskCount.value > 0) return
+    event.preventDefault()
+    //暂时不想支持拖拽
+}
+
+const importRadios = async () => {
+    if (!ipcRenderer) return
+    const result = await ipcRenderer.invoke('open-json-file')
+    if (result) {
+        increaseImportTaskCount()
+        const { data: radios } = JSON.parse(result.data)
+        let msg = '导入FM电台失败！', success = false
+        if (radios && radios.length > 0) {
+            radios.forEach(item => {
+                const { title, url, streamType, cover, tags, about } = item
+                addFreeRadio(title, url, streamType, tags, about, cover)
+            })
+            msg = `导入FM电台已完成！<br>共${radios.length}个电台！`
+            success = true
+        }
+        decreaseImportTaskCount()
+        if (success) showToast(msg)
+        if (!success) showFailToast(msg)
+    }
+}
+
+const removeAll = () => {
+    if (freeRadios.value.length < 1) return
+    showToast('自由FM已全部清空!')
+    resetAll()
+}
+
+onMounted(() => {
+    resetBack2TopBtn()
+})
+</script>
+
+<template>
+    <div id="freefm-view" ref="freefmRef" @scroll="onScroll" @dragover="e => e.preventDefault()" @drop="onDrop">
+        <div class="header">
+            <div class="title">自由FM</div>
+            <div class="about">
+                <p>初衷：收集全球电台，更多地了解世界</p>
+                <p>世界那么大，一起来聆听吧</p>
+            </div>
+            <div class="action">
+                <SvgTextButton text="新建FM电台" :leftAction="visitFreeFMCreate">
+                </SvgTextButton>
+                <SvgTextButton text="导入FM电台" :leftAction="importRadios" :disabled="importTaskCount > 0" class="spacing">
+                    <template #left-img>
+                        <svg width="17" height="15" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M426.89,768q-148.75,0-297.49,0C69.87,767.93,19.57,729.67,4.61,672.5a140.41,140.41,0,0,1-4.31-34c-.44-55.67-.29-111.33-.21-167,0-31.15,27.63-51.88,56.33-42.52,17.88,5.83,29.09,22.14,29.12,42.72q.1,65.51.06,131c0,11.66,0,23.33,0,35,.13,27.13,18,45.07,45.21,45.08q143,.07,286,0,152.49,0,305,0c10.8,0,20.87-2.11,29.52-8.91,11.68-9.19,16.88-21.33,16.83-36.16-.15-43,0-86,0-129,0-12.83-.15-25.66,0-38.49.26-17.27,7.72-30.64,23.12-38.64,14.61-7.57,29.38-6.72,43.18,2.34,12.62,8.29,19,20.52,19,35.47.17,57.83.86,115.67-.21,173.49-1.18,63.32-47.07,114.32-109.5,123.77a141.79,141.79,0,0,1-20.92,1.3Q574.88,768.07,426.89,768Z" />
+                                    <path
+                                        d="M394.63,450.06v-5.88q0-199.47,0-398.94c0-20.15,9.91-35.63,26.85-42.21,28.37-11,58.2,9.24,58.3,40,.19,62,.06,124,.06,186V451.28c2-1.84,3.34-3,4.57-4.19Q535.69,395.84,587,344.6c18.84-18.76,47.07-18,63.7,1.39a42.31,42.31,0,0,1-1.2,56.56c-8.5,9.16-17.56,17.79-26.4,26.63Q546,506.25,468.93,583.3c-15.5,15.47-36.33,18.46-53.8,7.71a51.86,51.86,0,0,1-9.31-7.48q-89.51-89.35-178.88-178.84c-13.46-13.48-17.06-31.76-9.79-48.24a42.62,42.62,0,0,1,41.2-25.38c11.71.55,21.35,5.62,29.57,13.87q40.38,40.57,80.91,81c8.22,8.23,16.38,16.53,24.57,24.8Z" />
+                                </g>
+                            </g>
+                        </svg>
+                    </template>
+                </SvgTextButton>
+                <BatchActionBtn :deleteBtn="true" :leftAction="visitBatchFreeFM" :rightAction="removeAll"
+                    popover-hint="圾桶图标按钮，点击后将清空全部本地歌单，请谨慎操作" class="spacing">
+                </BatchActionBtn>
+            </div>
+        </div>
+        <div class="center">
+            <div class="list-title content-text-highlight">FM电台({{ freeRadios.length }})</div>
+            <PlaylistsControl :data="freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount">
+            </PlaylistsControl>
+        </div>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
+    </div>
+</template>
+
+<style>
+#freefm-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px 33px 10px 33px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+#freefm-view .spacing {
+    margin-left: 20px;
+}
+
+#freefm-view .header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+#freefm-view .header .title {
+    text-align: left;
+    margin-bottom: 10px;
+    font-size: var(--content-text-module-title-size);
+    font-weight: bold;
+}
+
+#freefm-view .header .about {
+    text-align: left;
+    margin-left: 5px;
+    margin-bottom: 15px;
+    line-height: 28px;
+    color: var(--content-subtitle-text-color);
+}
+
+#freefm-view .header .action {
+    display: flex;
+}
+
+#freefm-view .center .list-title {
+    margin-bottom: 5px;
+    text-align: left;
+    font-size: 16px;
+    font-weight: bold;
+}
+</style>

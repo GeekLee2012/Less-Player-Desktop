@@ -177,7 +177,7 @@ const resovleFilename = (filePath) => {
 
 const openBackupFile = async () => {
     if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke("open-backup-file")
+    const result = await ipcRenderer.invoke('open-json-file', '请选择备份文件')
     if (!result) return
 
     sourcesCategories.length = 0

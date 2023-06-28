@@ -46,7 +46,7 @@ const setupRouter = () => {
 const highlightNavigationCustomPlaylist = (to, from) => {
     const path = to.path
     let index = -1
-    if (path.includes('/customPlaylist/')
+    if (path.includes('/custom/')
         && !path.includes('/create')
         && !path.includes('/edit')) {
         const id = path.split('/')[3]
@@ -134,8 +134,10 @@ const visitRoute = (route) => {
 const highlightPlatform = (to) => {
     const path = to.path
     let platform = ''
-    if (path.includes('/local') || path.includes('/localPlaylist')) {
+    if (path.includes('/local')) {
         platform = 'local'
+    } else if (path.includes('/freefm')) {
+        platform = 'freefm'
     } else if (path.includes('/square') || path.includes('/playlist')
         || path.includes('/artist') || path.includes('/album')) {
         platform = path.split('/')[3]
@@ -143,8 +145,8 @@ const highlightPlatform = (to) => {
         const parts = path.split('/')
         // /userhome/{code}
         if (parts.length === 3) platform = parts[2]
-        // /userhome/customPlaylist/{id}
-        if (parts.length === 4 && parts[2] === 'customPlaylist') platform = 'all'
+        // /userhome/custom/{id}
+        if (parts.length === 4 && parts[2] === 'custom') platform = 'all'
     }
     updateCurrentPlatformByCode(platform)
 }
@@ -225,7 +227,7 @@ provide('appRoute', {
     visitPlaylist: (platform, id) => {
         const exploreMode = resolveExploreMode()
         if (platform === 'local') {
-            return visitRoute(createCommonRoute(`/${exploreMode}/localPlaylist/${id}`))
+            return visitRoute(createCommonRoute(`/${exploreMode}/local/${id}`))
         }
         return visitRoute(createCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`))
     },
@@ -245,19 +247,19 @@ provide('appRoute', {
     },
     visitCustomPlaylistCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(createCommonRoute(`/${exploreMode}/customPlaylist/create`))
+        return visitRoute(createCommonRoute(`/${exploreMode}/custom/create`))
     },
     visitCustomPlaylist: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/customPlaylist/${id}`)
+        return visitRoute(`/${exploreMode}/custom/${id}`)
     },
     visitCustomPlaylistEdit: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/customPlaylist/edit/${id}`)
+        return visitRoute(`/${exploreMode}/custom/edit/${id}`)
     },
     visitBatchCustomPlaylist: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/batch/customPlaylist/${id}`)
+        return visitRoute(`/${exploreMode}/batch/custom/${id}`)
     },
     visitBatchLocalMusic: (id) => {
         return visitRoute("/playlists/batch/local/0")
@@ -276,11 +278,22 @@ provide('appRoute', {
     },
     visitLocalPlaylistCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(createCommonRoute(`/${exploreMode}/localPlaylist/create`))
+        return visitRoute(createCommonRoute(`/${exploreMode}/local/create`))
     },
     visitLocalPlaylistEdit: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/localPlaylist/edit/${id}`)
+        return visitRoute(`/${exploreMode}/local/edit/${id}`)
+    },
+    visitFreeFMCreate: (exploreMode) => {
+        exploreMode = resolveExploreMode(exploreMode)
+        return visitRoute(createCommonRoute(`/${exploreMode}/freefm/create`))
+    },
+    visitFreeFMEdit: (id, exploreMode) => {
+        exploreMode = resolveExploreMode(exploreMode)
+        return visitRoute(createCommonRoute(`/${exploreMode}/freefm/edit/${id}`))
+    },
+    visitBatchFreeFM: (id) => {
+        return visitRoute("/radios/batch/freefm/0")
     },
 })
 </script>

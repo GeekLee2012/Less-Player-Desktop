@@ -162,9 +162,7 @@ const reloadLyricData = (track) => {
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
         const lyricData = track.lyric.data
         let isValidLyric = true
-        if (lyricData.size <= 3) { //歌词行数太少，直接判定为无效歌词
-            isValidLyric = false
-        } else if (lyricData.size <= 6) {
+        if (lyricData.size <= 6) {
             const linesIter = lyricData.values()
             let line = linesIter.next()
             while (!line.done) {

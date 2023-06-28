@@ -102,14 +102,14 @@ onMounted(() => loadCustomPlaylist())
                     </div>
                     <div @keydown.stop="">
                         <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
-                            placeholder="歌单名称，最多允许输入99个字符哦" />
+                            placeholder="歌单名称，最多允许输入99个字符" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
                         <textarea :value="detail.about" ref="aboutRef" maxlength="1024"
-                            placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多允许输入1024个字符哦">
+                            placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多允许输入1024个字符">
                                 </textarea>
                     </div>
                 </div>
@@ -177,7 +177,7 @@ onMounted(() => loadCustomPlaylist())
 }
 
 #custom-playlist-edit-view .center .form-row {
-    margin-bottom: 17px;
+    margin-bottom: 15px;
 }
 
 #custom-playlist-edit-view .center .form-row div {

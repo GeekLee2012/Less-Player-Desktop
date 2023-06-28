@@ -18,6 +18,8 @@ import DataBackupView from '../views/DataBackupView.vue';
 import DataRestoreView from '../views/DataRestoreView.vue';
 import LocalPlaylistEditView from '../views/LocalPlaylistEditView.vue';
 import LocalPlaylistDetailView from '../views/LocalPlaylistDetailView.vue';
+import FreeFMView from '../views/FreeFMView.vue';
+import FreeFMEditView from '../views/FreeFMEditView.vue';
 
 
 
@@ -36,7 +38,7 @@ const routes = [
         component: RadioSquareView
     },
     {  //本地歌曲
-        path: '/local',
+        path: '/:exploreMode/local',
         component: LocalMusicView
     },
     {  //主题
@@ -76,17 +78,17 @@ const routes = [
         component: UserInfoEditView
     },
     {  //我的主页 - 自建歌单
-        path: '/:exploreMode/customPlaylist/create',
+        path: '/:exploreMode/custom/create',
         props: true,
         component: CustomPlaylistEditView
     },
     {  //我的主页 - 自建歌单 - 编辑
-        path: '/:exploreMode/customPlaylist/edit/:id',
+        path: '/:exploreMode/custom/edit/:id',
         props: true,
         component: CustomPlaylistEditView
     },
     {  //我的主页 - 自建歌单 - 详情
-        path: '/:exploreMode/customPlaylist/:id',
+        path: '/:exploreMode/custom/:id',
         props: true,
         component: CustomPlaylistDetailView
     },
@@ -104,19 +106,33 @@ const routes = [
         component: DataRestoreView
     },
     {  //分类歌单 - 本地歌曲 - 自建歌单
-        path: '/:exploreMode/localPlaylist/create',
+        path: '/:exploreMode/local/create',
         props: true,
         component: LocalPlaylistEditView
     },
     {  //分类歌单 - 本地歌曲 - 自建歌单 - 编辑
-        path: '/:exploreMode/localPlaylist/edit/:id',
+        path: '/:exploreMode/local/edit/:id',
         props: true,
         component: LocalPlaylistEditView
     },
     {  //分类歌单 - 自建本地歌单 - 详情
-        path: '/:exploreMode/localPlaylist/:id',
+        path: '/:exploreMode/local/:id',
         props: true,
         component: LocalPlaylistDetailView
+    },
+    {  //自由FM
+        path: '/:exploreMode/freefm',
+        component: FreeFMView
+    },
+    {  //分类歌单 - 自由FM - 创建FM电台
+        path: '/:exploreMode/freefm/create',
+        props: true,
+        component: FreeFMEditView
+    },
+    {  //分类歌单 - 自由FM - 编辑FM电台
+        path: '/:exploreMode/freefm/edit/:id',
+        props: true,
+        component: FreeFMEditView
     },
 ]
 

@@ -12,7 +12,7 @@ const props = defineProps({
 })
 
 const handleMenuItem = (item, index, event) => {
-    if (!item.action) return
+    if (!item || !item.action) return
     item.action(item, index, event)
     hideAllCtxMenus()
 }

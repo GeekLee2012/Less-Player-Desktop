@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'LocalPlaylistEditView'
+    name: 'FreeFMEditView'
 }
 </script>
 
@@ -9,7 +9,7 @@ export default {
 import { storeToRefs } from 'pinia';
 import { onMounted, onActivated, ref, reactive, watch, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useLocalMusicStore } from '../store/localMusicStore';
+import { useFreeFMStore } from '../store/freeFMStore';
 import { useIpcRenderer } from '../../common/Utils';
 
 
@@ -23,50 +23,46 @@ const props = defineProps({
 const ipcRenderer = useIpcRenderer()
 
 const { showToast } = useAppCommonStore()
-const titleRef = ref(null)
-const tagsRef = ref(null)
-const aboutRef = ref(null)
 const coverRef = ref(null)
-const invalid = ref(false)
-const detail = reactive({ title: null, tags: null, about: null, cover: null })
+const detail = reactive({ title: null, url: null, streamType: 0, tags: null, about: null, cover: null })
+const setStreamType = (value) => Object.assign(detail, { streamType: value })
+const titleInvalid = ref(false)
+const urlInvalid = ref(false)
 
-//TODO
-const { addLocalPlaylist, updateLocalPlaylist, getLocalPlaylist } = useLocalMusicStore()
 
-const loadLocalPlaylist = () => {
+const { addFreeRadio, updateFreeRadio, getFreeRadio } = useFreeFMStore()
+
+const loadRadio = () => {
     if (!props.id) return
     const id = props.id.trim()
     if (id.length < 1) return
-    const playlist = getLocalPlaylist(id)
-    if (!playlist) return
-    const { title, tags, about, cover } = playlist
+    const radio = getFreeRadio(id)
+    if (!radio) return
+    const { title, data, tags, about, cover } = radio
     Object.assign(detail, { id })
     if (cover) Object.assign(detail, { cover })
     if (tags) Object.assign(detail, { tags })
     if (title) Object.assign(detail, { title })
     if (about) Object.assign(detail, { about })
-}
-
-const checkValid = () => {
-    let title = titleRef.value.value
-    invalid.value = (!title || title.trim().length < 1)
+    if (data && data.length > 0) Object.assign(detail, { url: data[0].url, streamType: data[0].streamType })
 }
 
 const submit = () => {
-    let title = titleRef.value.value.trim()
-    let tags = tagsRef.value.value.trim()
-    let about = aboutRef.value.value.trim()
-    let cover = coverRef.value.src
+    const { title, url, streamType, tags, about, cover } = detail
     if (title.length < 1) {
-        invalid.value = true
+        titleInvalid.value = true
         return
     }
-    let text = "歌单创建成功!"
+    if (url.length < 1) {
+        urlInvalid.value = true
+        return
+    }
+    let text = "电台创建成功!"
     if (!props.id) {
-        addLocalPlaylist(title, tags, about, cover)
+        addFreeRadio(title, url, streamType, tags, about, cover)
     } else {
-        updateLocalPlaylist(props.id, title, tags, about, cover)
-        text = "歌单已保存!"
+        updateFreeRadio(props.id, title, url, streamType, tags, about, cover)
+        text = "电台已保存!"
     }
     showToast(text, backward)
 }
@@ -76,23 +72,20 @@ const updateCover = async () => {
     if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-image')
     if (result.length > 0) {
-        const title = titleRef.value.value.trim()
-        const tags = tagsRef.value.value.trim()
-        const about = aboutRef.value.value.trim()
         const cover = result[0]
-        Object.assign(detail, { title, tags, about, cover })
+        Object.assign(detail, { cover })
     }
 }
 
-onMounted(() => loadLocalPlaylist())
+onMounted(() => loadRadio())
 
 </script>
 
 <template>
     <div id="local-playlist-edit-view">
         <div class="header">
-            <span class="title" v-show="!id">创建本地歌单</span>
-            <span class="title" v-show="id">编辑本地歌单</span>
+            <span class="title" v-show="!id">创建FM电台</span>
+            <span class="title" v-show="id">编辑FM电台</span>
         </div>
         <div class="center">
             <div>
@@ -102,12 +95,43 @@ onMounted(() => loadLocalPlaylist())
             <div class="right">
                 <div class="form-row">
                     <div>
-                        <span>歌单名</span>
+                        <span>电台名称</span>
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
-                            placeholder="歌单名称，最多允许输入99个字符" />
+                        <input type="text" v-model="detail.title" :class="{ invalid: titleInvalid }" maxlength="128"
+                            placeholder="电台名称，最多允许输入128个字符" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <span>URL</span>
+                        <span class="required"> *</span>
+                    </div>
+                    <div @keydown.stop="">
+                        <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }" maxlength="256"
+                            placeholder="URL，仅支持http / https协议，最多允许输入256个字符" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <span>音频流类型：</span>
+                        <span v-for="(item, index) in ['默认Http Live Stream', '普通音频Live']" class="stream-type-item spacing"
+                            :class="{ active: index == detail.streamType }" @click="setStreamType(index)">
+                            {{ item }}
+                        </span>
+                    </div>
+                    <div class="tip-text">提示：音频类型，请根据具体URL格式或内容来选择。比如：<br>
+                        https://xxxxxx.m3u8?q=xxx &nbsp;&nbsp;=> &nbsp;默认Http Live Stream<br>
+                        https://xxxxxx.mp3?wd=xxx &nbsp;&nbsp;=> &nbsp;普通音频Live
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <span>封面URL</span>
+                    </div>
+                    <div @keydown.stop="">
+                        <input type="text" v-model="detail.cover" />
                     </div>
                 </div>
                 <div class="form-row">
@@ -116,16 +140,15 @@ onMounted(() => loadLocalPlaylist())
                         <span class="required"> （暂时还不支持）</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="detail.tags" ref="tagsRef" :class="{ invalid }" maxlength="128"
-                            placeholder="标签，歌单分类；多个标签时，以英文状态下的逗号(,)分隔" />
+                        <input type="text" v-model="detail.tags" maxlength="128"
+                            placeholder="标签，电台分类；多个标签时，以英文状态下的逗号(,)分隔" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="detail.about" ref="aboutRef" maxlength="1024"
-                            placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多允许输入1024个字符">
-                                </textarea>
+                        <textarea v-model="detail.about" maxlength="1024" placeholder="描述，最多允许输入1024个字符">
+                        </textarea>
                     </div>
                 </div>
                 <div class="action">
@@ -192,13 +215,14 @@ onMounted(() => loadLocalPlaylist())
 }
 
 #local-playlist-edit-view .center .form-row {
-    margin-bottom: 17px;
+    margin-bottom: 25px;
 }
 
 #local-playlist-edit-view .center .form-row div {
     display: flex;
     flex-direction: row;
     align-items: center;
+    text-align: left;
 }
 
 #local-playlist-edit-view .center .form-row span {
@@ -227,6 +251,26 @@ onMounted(() => loadLocalPlaylist())
 #local-playlist-edit-view .center .form-row textarea {
     height: 188px;
     padding: 8px;
+}
+
+#local-playlist-edit-view .center .form-row .stream-type-item {
+    /*min-width: 136px;*/
+    padding: 6px 15px;
+    text-align: center;
+    border-radius: 10rem;
+    /*margin-right: 20px;*/
+    border: 0px solid var(--border-color);
+    cursor: pointer;
+}
+
+#local-playlist-edit-view .center .form-row .stream-type-item:hover {
+    background-color: var(--border-color);
+    background-color: var(--content-list-item-hover-bg-color);
+}
+
+#local-playlist-edit-view .center .form-row .active {
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
 }
 
 #local-playlist-edit-view .center .action {

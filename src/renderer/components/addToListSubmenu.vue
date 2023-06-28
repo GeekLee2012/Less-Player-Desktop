@@ -6,6 +6,7 @@ import { Playlist } from '../../common/Playlist';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { usePlatformStore } from '../store/platformStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
 
 
@@ -18,13 +19,18 @@ const props = defineProps({
 const { queueTracks } = storeToRefs(usePlayStore())
 const { addTrack } = usePlayStore()
 const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
-const { showToast, hideAllCtxMenus, setCommonNotificationType, hidePlaybackQueueView } = useAppCommonStore()
+const { showToast, showFailToast, hideAllCtxMenus, hidePlaybackQueueView } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { addToCustomPlaylist, moveToCustomPlaylist } = useUserProfileStore()
+const { isLocalMusic } = usePlatformStore()
 const customData = reactive([])
 
-const toastAndHideMenu = (text) => {
-    showToast(text)
+const toastAndHideMenu = (text, failed) => {
+    if (failed) {
+        showFailToast(text)
+    } else {
+        showToast(text)
+    }
     hideAllCtxMenus()
 }
 
@@ -57,18 +63,23 @@ const MenuItems = {
 
 const handleClick = (item, mode) => {
     const track = commonCtxMenuCacheItem.value
-    let text = "歌曲添加成功！"
-    if (mode < 3 && Playlist.isFMRadioType(track)) {
-        text = "FM电台无法加入歌单！"
-        setCommonNotificationType(1)
-        toastAndHideMenu(text)
+    let text = "当前操作失败！<br>歌曲已存在或类型不对！"
+    if (Playlist.isFMRadioType(track)) {
+        text = "添加到自定义歌单<br>不支持FM电台！"
+        toastAndHideMenu(text, true)
+        return
+    } else if (isLocalMusic(track.platform)) {
+        text = "添加到自定义歌单<br>不支持本地歌曲！"
+        toastAndHideMenu(text, true)
         return
     }
     let success = false
     if (mode == 1) {
         const { id } = commonCtxItem.value
-        success = moveToCustomPlaylist(item.id, id, track)
-        text = "歌曲移动成功！"
+        if (moveToCustomPlaylist(item.id, id, track)) {
+            text = "歌曲移动成功！"
+            success = true
+        }
     } else if (mode == 3) { //添加当前播放列表
         //TODO 暂时先简单处理，不考虑异常情况
         const queue = toRaw(queueTracks.value)
@@ -78,12 +89,11 @@ const handleClick = (item, mode) => {
         })
         success = true
         text = "全部歌曲添加成功！"
-    } else {
-        success = addToCustomPlaylist(item.id, track)
+    } else if (addToCustomPlaylist(item.id, track)) {
+        success = true
+        text = "歌曲添加成功！"
     }
-    text = success ? text : "歌曲已存在！"
-    setCommonNotificationType(success ? 0 : 1)
-    toastAndHideMenu(text)
+    toastAndHideMenu(text, !success)
 }
 
 const initData = (mode) => {

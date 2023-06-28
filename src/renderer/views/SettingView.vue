@@ -493,7 +493,7 @@ onMounted(checkForUpdate)
                         </ToggleControl>
                         <div class="tip-text spacing">提示：扫描多级子目录，较耗性能</div>
                     </div>
-                    <div class="tip-text">提示：支持拖拽单一目录、文件；仅在本地歌曲相关页面、指定区域内才会有效</div>
+                    <div class="tip-text">提示：支持拖拽单个目录、文件；仅在本地歌曲相关页面、指定区域内才会有效</div>
                     <div>
                         <span class="cate-subtitle">允许拖拽方式，导入歌单：</span>
                         <ToggleControl @click="toggleUseDndForCreateLocalPlaylist"
@@ -589,7 +589,7 @@ onMounted(checkForUpdate)
                         <ToggleControl @click="toggleFollowArtistsShow" :value="navigation.followArtistsShow">
                         </ToggleControl>
                     </div>
-                    <div class="tip-text">提示：顶部导航栏显示快捷入口，仅在“经典主流”布局下生效</div>
+                    <div class="tip-text">提示：顶部导航栏快捷入口，仅在“经典主流”布局下生效</div>
                     <div>顶部导航栏显示快捷入口：</div>
                     <div class="last">
                         <span class="cate-subtitle">相约电波：</span>

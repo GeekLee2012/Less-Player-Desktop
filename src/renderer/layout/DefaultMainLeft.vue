@@ -21,7 +21,7 @@ const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { platforms, currentPlatformIndex,
     currentPlatformCode } = storeToRefs(usePlatformStore())
-const { updateCurrentPlatform, isLocalMusic } = usePlatformStore()
+const { updateCurrentPlatform, isLocalMusic, isFreeFM } = usePlatformStore()
 const { isPlaylistMode, isArtistMode, isRadioMode, isUserHomeMode,
     exploreModeCode, exitToHomeBtnShow } = storeToRefs(useAppCommonStore())
 const { nextExploreMode, setPlaylistExploreMode, setRadioExploreMode } = useAppCommonStore()
@@ -45,8 +45,8 @@ const updatePlatformIndex = (index, isSwitchMode) => {
     const platform = currentPlatformCode.value
     const exploreMode = exploreModeCode.value
     let path = null
-    if (isLocalMusic(platform)) {
-        path = `/${platform}`
+    if (isLocalMusic(platform) || isFreeFM(platform)) {
+        path = `/${exploreMode}/${platform}`
     } else if (isUserHomeMode.value && isSwitchMode) {
         path = `/${exploreMode}/${platform}`
     } else if (isPlaylistMode.value || isArtistMode.value || isRadioMode.value) {

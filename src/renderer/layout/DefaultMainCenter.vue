@@ -370,8 +370,10 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding .playlist-square-view,
 #default-main-center .autopadding .artist-square-view,
 #default-main-center .autopadding .radio-square-view,
+#default-main-center .autopadding #local-music-view,
 #default-main-center .autopadding #themes-view .title,
 #default-main-center .autopadding #setting-view .title,
+#default-main-center .autopadding #freefm-view,
 #default-main-center .autopadding #search-view,
 #default-main-center .autopadding #user-profile-view,
 #default-main-center .autopadding #batch-action-view,
@@ -383,7 +385,6 @@ watch(lyricMetaPos, () => {
     padding-top: 5px;
 }
 
-#default-main-center .autopadding #local-music-view,
 #default-main-center .autopadding #playlist-detail-view,
 #default-main-center .autopadding #artist-detail-view,
 #default-main-center .autopadding #album-detail-view,
