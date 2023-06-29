@@ -107,7 +107,8 @@ export const useSettingStore = defineStore('setting', {
         search: {
             onlinePlaylistShow: false,
             localPlaylistShow: false,
-            batchActionShow: true
+            batchActionShow: true,
+            freeFMShow: true
         },
         /* 歌词 */
         lyric: {
@@ -320,6 +321,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isSearchForBatchActionShow() {
             return this.search.batchActionShow
+        },
+        isSearchForFreeFMShow() {
+            return this.search.freeFMShow
         }
     },
     actions: {
@@ -461,6 +465,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleSearchForBatchActionShow() {
             this.search.batchActionShow = !this.search.batchActionShow
+        },
+        toggleSearchForFreeFMShow() {
+            this.search.freeFMShow = !this.search.freeFMShow
         },
         toggleTrayShow() {
             this.tray.show = !this.tray.show

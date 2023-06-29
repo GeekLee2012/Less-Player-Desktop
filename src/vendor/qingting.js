@@ -120,7 +120,7 @@ export class Qingting {
     //歌词
     static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            resolve({ id, platform: Qingting.CODE, lyric: new Lyric(), trans: null })
+            resolve({ id, platform: Qingting.CODE, lyric: null, trans: null })
         })
     }
 

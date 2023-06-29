@@ -103,6 +103,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
     box-shadow: 0px 0px 3px #181818;
     background-color: var(--app-bg-color);
+    background-size: contain;
 }
 
 .image-text-tile .cover-wrap:hover {

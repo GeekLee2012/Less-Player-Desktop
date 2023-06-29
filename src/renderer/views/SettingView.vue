@@ -67,7 +67,8 @@ const { setThemeIndex,
     toggleAudioTypeFlagShow,
     toggleSearchForOnlinePlaylistShow,
     toggleSearchForLocalPlaylistShow,
-    toggleSearchForBatchActionShow
+    toggleSearchForBatchActionShow,
+    toggleSearchForFreeFMShow
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -521,6 +522,11 @@ onMounted(checkForUpdate)
                     <div>
                         <span class="cate-subtitle">本地歌单（详情）页：</span>
                         <ToggleControl @click="toggleSearchForLocalPlaylistShow" :value="search.localPlaylistShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">自由FM：</span>
+                        <ToggleControl @click="toggleSearchForFreeFMShow" :value="search.freeFMShow">
                         </ToggleControl>
                     </div>
                     <div class="last">

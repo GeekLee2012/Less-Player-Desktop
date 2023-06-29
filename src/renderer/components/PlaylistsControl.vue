@@ -46,7 +46,7 @@ const visitItem = (item) => {
 }
 
 const getSubtitle = (item) => {
-    return getListenNumText(item) || item.subtitle
+    return getListenNumText(item) || item.subtitle || item.tags
 }
 
 const getListenNumText = (item) => {

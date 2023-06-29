@@ -102,8 +102,8 @@ onMounted(() => {
     position: relative;
     width: var(--others-playmeta-height);
     height: var(--others-playmeta-height);
-    box-shadow: 0px 0px 1px #161616;
     box-shadow: 0px 0px 1px var(--border-left-nav-border-color);
+    border: 0.1px solid var(--border-color);
 }
 
 .play-meta .audio-cover,
@@ -122,7 +122,8 @@ onMounted(() => {
 }
 
 .play-meta .audio-cover {
-    background-color: var(--content-text-color);
+    /*background-color: var(--content-text-color);*/
+    background-color: var(--app-bg-color);
 }
 
 .play-meta .cover-mask {

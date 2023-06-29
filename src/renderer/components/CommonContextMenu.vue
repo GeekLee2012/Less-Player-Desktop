@@ -72,6 +72,7 @@ const addFavoriteItem = () => {
     } else {
         addFavoriteTrack(track)
     }
+    EventBus.emit('track-refreshFavoritedState')
     toastAndHideMenu(text)
 }
 

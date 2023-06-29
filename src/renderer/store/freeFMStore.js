@@ -20,6 +20,14 @@ export const useFreeFMStore = defineStore('freeFM', {
             this.freeRadios.length = 0
         },
         addFreeRadio(title, url, streamType, tags, about, cover) {
+            const index = this.freeRadios.findIndex(e => {
+                if (e.data && e.data.length > 0) {
+                    return e.data[0].url === url
+                }
+                return false
+            })
+            if (index != -1) return
+
             const id = randomTextWithinAlphabetNums(16)
             const created = Date.now()
             const updated = created
@@ -41,22 +49,27 @@ export const useFreeFMStore = defineStore('freeFM', {
             return id
         },
         updateFreeRadio(id, title, url, streamType, tags, about, cover) {
-            if (this.freeRadios.length < 1) return
+            if (this.freeRadios.length < 1) return false
             const index = this.freeRadios.findIndex(e => e.id === id)
-            if (index < 0) return
+            if (index < 0) return false
             const updated = Date.now()
             const { data } = this.freeRadios[index]
-            const album = { id: '', name: tags || '自由FM' }
             if (data && data.length > 0) {
+                const album = { id: '', name: tags || '自由FM' }
+                cover = cover || 'default_cover.png'
+
                 data[0].lyric = null    //重置歌词
                 Object.assign(data[0], {
+                    title,
                     url,
                     streamType,
                     album,
+                    cover,
                     type: Playlist.FM_RADIO_TYPE
                 })
             }
             Object.assign(this.freeRadios[index], { platform: 'freefm', title, about, tags, cover, data, updated })
+            return true
         },
         getFreeRadio(id) {
             if (this.freeRadios.length < 1) return { id }

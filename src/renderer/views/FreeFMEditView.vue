@@ -22,7 +22,7 @@ const props = defineProps({
 
 const ipcRenderer = useIpcRenderer()
 
-const { showToast } = useAppCommonStore()
+const { showToast, showFailToast } = useAppCommonStore()
 const coverRef = ref(null)
 const detail = reactive({ title: null, url: null, streamType: 0, tags: null, about: null, cover: null })
 const setStreamType = (value) => Object.assign(detail, { streamType: value })
@@ -47,24 +47,35 @@ const loadRadio = () => {
     if (data && data.length > 0) Object.assign(detail, { url: data[0].url, streamType: data[0].streamType })
 }
 
+const resetCheckStatus = () => {
+    titleInvalid.value = false
+    urlInvalid.value = false
+}
+
 const submit = () => {
+    resetCheckStatus()
     const { title, url, streamType, tags, about, cover } = detail
-    if (title.length < 1) {
+    if (!title || title.length < 1) {
         titleInvalid.value = true
         return
     }
-    if (url.length < 1) {
+    if (!url || url.trim().length < 10 || !url.trim().startsWith('http')) {
         urlInvalid.value = true
         return
     }
-    let text = "电台创建成功!"
+    let success = false, text = null
     if (!props.id) {
-        addFreeRadio(title, url, streamType, tags, about, cover)
+        success = addFreeRadio(title, url, streamType, tags, about, cover)
+        text = success ? '电台创建成功!' : '电台创建失败！<br>已存在相同URL的电台'
     } else {
-        updateFreeRadio(props.id, title, url, streamType, tags, about, cover)
-        text = "电台已保存!"
+        success = updateFreeRadio(props.id, title, url, streamType, tags, about, cover)
+        text = success ? '电台已保存!' : '电台无法保存！<br>当前电台可能不存在'
     }
-    showToast(text, backward)
+    if (success) {
+        showToast(text, backward)
+    } else {
+        showFailToast(text)
+    }
 }
 
 //TODO
@@ -109,8 +120,8 @@ onMounted(() => loadRadio())
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }" maxlength="256"
-                            placeholder="URL，仅支持http / https协议，最多允许输入256个字符" />
+                        <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }" maxlength="512"
+                            placeholder="音频流URL，仅支持http / https协议，最多允许输入512个字符" />
                     </div>
                 </div>
                 <div class="form-row">
@@ -131,13 +142,13 @@ onMounted(() => loadRadio())
                         <span>封面URL</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" v-model="detail.cover" />
+                        <input type="text" v-model="detail.cover" placeholder="封面图片URL，支持本地文件URL、在线URL" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div>
                         <span>标签</span>
-                        <span class="required"> （暂时还不支持）</span>
+                        <span class="required"> （待完善）</span>
                     </div>
                     <div @keydown.stop="">
                         <input type="text" v-model="detail.tags" maxlength="128"
@@ -196,6 +207,7 @@ onMounted(() => loadRadio())
     border-radius: 6px;
     /* border: 1px solid var(--border-left-nav-border-color); */
     box-shadow: 0px 0px 1px #161616;
+    object-fit: contain;
 }
 
 #local-playlist-edit-view .center .cover-eidt-btn {

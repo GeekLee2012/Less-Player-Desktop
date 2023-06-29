@@ -316,9 +316,9 @@ const registryGlobalListeners = () => {
       for (var i = 0; i < playlists.length; i++) {
         const { title, data } = playlists[i]
         let file = `${path}/${title}.${format}`
-        if (format === AUDIO_PLAYLIST_EXTS[1]) {
+        if (format === AUDIO_PLAYLIST_EXTS[2]) {
           result = result || await writePlsFile(file, data)
-        } else if (format === AUDIO_PLAYLIST_EXTS[0]) {
+        } else if (format === AUDIO_PLAYLIST_EXTS[1]) {
           result = result || await writeM3uFile(file, data)
         }
       }
@@ -493,7 +493,8 @@ const createMainWindow = () => {
       "*://*.ridio.cn/*",
       "*://*.cnr.cn/*",
       "*://*.qingting.fm/*",
-      "*://*.qtfm.cn/*"
+      "*://*.qtfm.cn/*",
+      "*://*/*"
     ]
   }
   const { webRequest } = mainWindow.webContents.session
@@ -758,6 +759,7 @@ const overrideRequest = (details) => {
   } else if (url.includes("u6.kuwo.cn")) {
     userAgent = 'fm 7010001}(android 7.1.2)'
     cookie = ''
+    //referer = 'https://www.kuwo.cn/'
   } else if (url.includes("kuwo")) {
     csrf = randomTextWithinAlphabetNums(11).toUpperCase()
     origin = "https://www.kuwo.cn/"
@@ -783,8 +785,16 @@ const overrideRequest = (details) => {
     origin = "https://www.qingting.fm/"
     referer = origin
   } else if (url.includes("ximalaya")) {
-    origin = " https://www.ximalaya.com"
+    origin = " https://www.ximalaya.com/"
     referer = origin
+  }
+
+  //默认Referer
+  if (!referer) {
+    const urlParts = url.split('://')
+    const scheme = urlParts[0]
+    const host = urlParts[1].split('/')[0]
+    referer = `${scheme}://${host}/`
   }
 
   /*

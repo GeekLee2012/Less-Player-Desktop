@@ -225,7 +225,6 @@ const addAndPlayTracks = (tracks, needReset, text, traceId) => {
 
 //接收播放器错误通知，重试播放
 const onPlayerErrorRetry = ({ retry, track, currentTime }) => {
-    console.log("retry")
     if (!retry) { //超出最大重试次数
         handleUnplayableTrack(track)
     } else if (track) {
