@@ -55,7 +55,7 @@ const getListenNumText = (item) => {
     if (!num) return null
     const unit = 10000
     if (num >= unit) num = parseFloat(num / unit).toFixed(1) + "万"
-    return '播放：' + num
+    return `播放量：${num}`
 }
 </script>
 
@@ -65,7 +65,7 @@ const getListenNumText = (item) => {
             <ImageTextTile v-for="item in data" @click="visitItem(item)" :cover="item.cover" :title="item.title"
                 :subtitle="getSubtitle(item)" :color="item.color" :playable="true" :playAction="() => playPlaylist(item)"
                 :checkbox="checkbox" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
-                :checkChangedFn="(checked) => checkChangedFn(checked, item)">
+                :checkChangedFn="(checked) => checkChangedFn(checked, item)" :platform="item.platform">
             </ImageTextTile>
             <ImageTextTileLoadingMask :count="customLoadingCount" v-show="customLoadingCount && customLoadingCount > 0">
             </ImageTextTileLoadingMask>

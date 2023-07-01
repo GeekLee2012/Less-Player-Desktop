@@ -27,7 +27,8 @@ const setAlbumType = (value) => isAlbumType.value = value || false
 
 const { currentPlatformCode, currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
 const { currentVender, currentPlatformCategories, putCategories,
-    putOrders, currentPlatformOrders } = usePlaylistSquareStore()
+    putOrders, currentPlatformOrders,
+    resetOrder, updateCurrentOrderByValue } = usePlaylistSquareStore()
 const { isPlaylistMode } = storeToRefs(useAppCommonStore())
 
 const isLoadingCategories = ref(true)
@@ -57,6 +58,7 @@ const loadCategories = async () => {
     orders.length = 0
     setLoadingCategories(true)
     setLoadingContent(true)
+    resetOrder()
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
     if (!cachedCates) {
@@ -90,6 +92,9 @@ const loadContent = async (noLoadingMask) => {
     if (!result) return
     if (currentPlatformCode.value != result.platform) return
     if (currentCategoryCode.value != result.cate) return
+    if (order != result.order && result.order) {
+        updateCurrentOrderByValue(result.order)
+    }
     playlists.push(...result.data)
     setAlbumType(result.dataType)
     setLoadingContent(false)

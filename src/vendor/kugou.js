@@ -273,8 +273,11 @@ export class KuGou {
     //歌单(列表)广场
     static square(cate, offset, limit, page, order) {
         const originCate = cate
-        let resolvedCate = (cate || "").toString().trim()
-        order = order || 5
+        let resolvedCate = (cate || '').toString().trim()
+        const orders = ['5', '6', '7', '3', '8']
+        const defaultOrder = orders[Math.floor((Math.random() * 1000) % orders.length)]
+        order = order || defaultOrder
+
         //榜单
         if (resolvedCate === KuGou.TOPLIST_CODE) return KuGou.toplist(cate, offset, limit, page, order)
         //电台

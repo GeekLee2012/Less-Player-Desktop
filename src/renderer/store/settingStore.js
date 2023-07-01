@@ -77,7 +77,7 @@ export const useSettingStore = defineStore('setting', {
                 index: 0,
             },
             //VIP收费歌曲，是否自动切换到免费歌曲（可能来自不同平台）
-            vipTransfer: false,
+            vipTransfer: true,
             vipFlagShow: false,
             //歌单分类栏随机显示
             playlistCategoryBarRandom: false,
@@ -85,7 +85,7 @@ export const useSettingStore = defineStore('setting', {
             playbackQueueAutoPositionOnShow: false,
             listenNumShow: false,
             //视频播放退出后，自动继续播放歌曲
-            resumePlayAfterVideo: false,
+            resumePlayAfterVideo: true,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: true,
             //歌曲进度更新频度，默认为60，范围：1 - 1024
@@ -94,15 +94,15 @@ export const useSettingStore = defineStore('setting', {
             spectrumRefreshFrequency: 3,
             ////本地歌曲
             //启用在线封面
-            useOnlineCover: false,
+            useOnlineCover: true,
             //显示音频格式
             audioTypeFlagShow: false,
             //扫描目录时，启用深度遍历
             useDeeplyScanForDirectory: false,
             //启用Dnd操作，创建本地歌单
-            useDndForCreateLocalPlaylist: false,
+            useDndForCreateLocalPlaylist: true,
             //启用Dnd操作，为本地歌单添加歌曲
-            useDndForAddLocalTracks: false,
+            useDndForAddLocalTracks: true,
         },
         search: {
             onlinePlaylistShow: false,
@@ -143,13 +143,11 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 对话框 */
         dialog: {
-            clearQueue: true,
-            batchAdd: false,
-            batchMove: true,
             batchDelete: true,
-            restore: true,
-            reset: true,
-            quit: false,
+            clearRecents: true,
+            resetSetting: true,
+            clearLocalMusics: true,
+            clearFreeFM: true,
         },
         /* 快捷键 */
         keys: {
@@ -324,6 +322,21 @@ export const useSettingStore = defineStore('setting', {
         },
         isSearchForFreeFMShow() {
             return this.search.freeFMShow
+        },
+        isShowDialogBeforeBatchDelete() {
+            return this.dialog.batchDelete
+        },
+        isShowDialogBeforeClearRecents() {
+            return this.dialog.clearRecents
+        },
+        isShowDialogBeforeResetSetting() {
+            return this.dialog.resetSetting
+        },
+        isShowDialogBeforeClearLocalMusics() {
+            return this.dialog.clearLocalMusics
+        },
+        isShowDialogBeforeClearFreeFM() {
+            return this.dialog.clearFreeFM
         }
     },
     actions: {
@@ -701,6 +714,21 @@ export const useSettingStore = defineStore('setting', {
         },
         getStateRefreshFrequency() {
             return this.track.stateRefreshFrequency
+        },
+        toggleShowDialogBeforeBatchDelete() {
+            this.dialog.batchDelete = !this.dialog.batchDelete
+        },
+        toggleShowDialogBeforeClearRecents() {
+            this.dialog.clearRecents = !this.dialog.clearRecents
+        },
+        toggleShowDialogBeforeResetSetting() {
+            this.dialog.resetSetting = !this.dialog.resetSetting
+        },
+        toggleShowDialogBeforeClearLocalMusics() {
+            this.dialog.clearLocalMusics = !this.dialog.clearLocalMusics
+        },
+        toggleShowDialogBeforeClearFreeFM() {
+            this.dialog.clearFreeFM = !this.dialog.clearFreeFM
         }
     },
     persist: {

@@ -9,18 +9,21 @@ export default {
 import { inject, reactive, ref, toRef, watch } from 'vue';
 import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
-import EventBus from '../../common/EventBus';
+import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
+import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from '../../common/Utils';
 import { useAppCommonStore } from '../store/appCommonStore';
 
 
 
 const { backward } = inject('appRoute')
+const ipcRenderer = useIpcRenderer()
 
 const userProfileStore = useUserProfileStore()
+const recentsStore = useRecentsStore()
 const settingStore = useSettingStore()
-const ipcRenderer = useIpcRenderer()
+
 const { showToast } = useAppCommonStore()
 
 const isCheckedAll = ref(false)
@@ -222,15 +225,21 @@ const restore = async () => {
         'tray', 'navigation', 'dialog',
         'keys', 'network']
     */
+    const _stores = {
+        setting: settingStore,
+        recents: recentsStore
+    }
     for (var i = 0; i < sourcesCategories.length; i++) {
         const id = sourcesCategories[i].id
         const checked = sourcesCategories[i].checked
         const children = sourcesCategories[i].children
 
+        const _store = _stores[id] || userProfileStore
+
         if (id === "setting") {
             if (!checked) continue
             localStorage.removeItem(id)
-            settingStore.$reset()
+            _store.$reset()
             const backupSetting = {}
             const settingPaths = Object.keys(sourcesData[id])
             for (var j = 0; j < settingPaths.length; j++) {
@@ -239,23 +248,23 @@ const restore = async () => {
                 backupSetting[path] = sourcesData[id][path]
             }
             //$patch仅改变值但并没有触发任何监听器
-            settingStore.$patch(backupSetting)
+            _store.$patch(backupSetting)
             //手动触发监听器
             EventBus.emit("setting-restore")
         } else if (checked) {
             const backupData = {}
             backupData[id] = sourcesData[id]
-            userProfileStore.$patch(backupData)
+            _store.$patch(backupData)
         } else if (children) {
             const backupData = {}
-            backupData[id] = userProfileStore.$state[id]
+            backupData[id] = _store.$state[id]
             for (var j = 0; j < children.length; j++) {
                 const childId = children[j].id
                 const checked = children[j].checked
                 if (!checked) continue
                 stateData[childId] = sourcesData[id][childId]
             }
-            userProfileStore.$patch(backupData)
+            _store.$patch(backupData)
         }
     }
     showToast("数据还原成功!")

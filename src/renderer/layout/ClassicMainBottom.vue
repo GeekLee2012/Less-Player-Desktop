@@ -9,7 +9,7 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 
 
 const { seekTrack, preseekTrack, progressState,
-    favoritedState, toggleFavoritedState } = inject('player')
+    favoritedState, toggleFavoritedState, isTrackSeekable } = inject('player')
 
 const volumeBarRef = ref(null)
 
@@ -26,11 +26,7 @@ onMounted(() => {
 
 <template>
     <div class="classic-main-bottom">
-        <!--
-        <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack">
-        </ProgressBar>
-        -->
-        <SliderBar :value="progressState" :disable="!playing" :onSeek="seekTrack" :disableScroll="true"
+        <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
             :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack" :onDragMove="preseekTrack">
         </SliderBar>
         <div id="play-nav">

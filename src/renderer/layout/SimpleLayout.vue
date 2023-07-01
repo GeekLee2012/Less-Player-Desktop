@@ -24,7 +24,8 @@ const { seekTrack, playPlaylist,
     playMv, progressState,
     mmssCurrentTime, currentTimeState,
     favoritedState, toggleFavoritedState,
-    preseekTrack, mmssPreseekTime } = inject('player')
+    preseekTrack, mmssPreseekTime,
+    isTrackSeekable } = inject('player')
 
 const volumeBarRef = ref(null)
 const textColorIndex = ref(0)
@@ -890,10 +891,7 @@ watch([textColorIndex], setupTextColor)
         </div>
         <div class="bottom" @contextmenu="toggleLyricToolbar()">
             <div class="progress-wrap">
-                <!--
-                <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
-                -->
-                <SliderBar :value="progressState" :disable="!playing" :onSeek="seekTrack" :disableScroll="true"
+                <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
                     :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack"
                     :onDragMove="preseekTrack">
                 </SliderBar>

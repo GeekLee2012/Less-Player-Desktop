@@ -93,7 +93,7 @@ onMounted(() => loadRadio())
 </script>
 
 <template>
-    <div id="local-playlist-edit-view">
+    <div id="freefm-edit-view">
         <div class="header">
             <span class="title" v-show="!id">创建FM电台</span>
             <span class="title" v-show="id">编辑FM电台</span>
@@ -148,11 +148,10 @@ onMounted(() => loadRadio())
                 <div class="form-row">
                     <div>
                         <span>标签</span>
-                        <span class="required"> （待完善）</span>
                     </div>
                     <div @keydown.stop="">
                         <input type="text" v-model="detail.tags" maxlength="128"
-                            placeholder="标签，电台分类；多个标签时，以英文状态下的逗号(,)分隔" />
+                            placeholder="标签，电台分类，用于搜索；多个标签时，以英文状态下的逗号(,)分隔" />
                     </div>
                 </div>
                 <div class="form-row">
@@ -172,7 +171,7 @@ onMounted(() => loadRadio())
 </template>
 
 <style>
-#local-playlist-edit-view {
+#freefm-edit-view {
     display: flex;
     flex-direction: column;
     padding: 20px 33px 15px 33px;
@@ -180,14 +179,14 @@ onMounted(() => loadRadio())
     overflow: scroll;
 }
 
-#local-playlist-edit-view .header {
+#freefm-edit-view .header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 20px;
 }
 
-#local-playlist-edit-view .header .title {
+#freefm-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
     /*font-size: 30px;*/
@@ -195,13 +194,13 @@ onMounted(() => loadRadio())
     font-weight: bold;
 }
 
-#local-playlist-edit-view .center {
+#freefm-edit-view .center {
     display: flex;
     flex-direction: row;
     flex: 1;
 }
 
-#local-playlist-edit-view .center .cover {
+#freefm-edit-view .center .cover {
     width: 175px;
     height: 175px;
     border-radius: 6px;
@@ -210,7 +209,7 @@ onMounted(() => loadRadio())
     object-fit: contain;
 }
 
-#local-playlist-edit-view .center .cover-eidt-btn {
+#freefm-edit-view .center .cover-eidt-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
     padding: 5px;
@@ -219,32 +218,32 @@ onMounted(() => loadRadio())
 }
 
 
-#local-playlist-edit-view .center .right {
+#freefm-edit-view .center .right {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-left: 20px;
 }
 
-#local-playlist-edit-view .center .form-row {
+#freefm-edit-view .center .form-row {
     margin-bottom: 25px;
 }
 
-#local-playlist-edit-view .center .form-row div {
+#freefm-edit-view .center .form-row div {
     display: flex;
     flex-direction: row;
     align-items: center;
     text-align: left;
 }
 
-#local-playlist-edit-view .center .form-row span {
+#freefm-edit-view .center .form-row span {
     font-size: var(--content-text-subtitle-size);
     color: var(--content-text-color);
     margin-bottom: 8px;
 }
 
-#local-playlist-edit-view .center .form-row input,
-#local-playlist-edit-view .center .form-row textarea {
+#freefm-edit-view .center .form-row input,
+#freefm-edit-view .center .form-row textarea {
     flex: 1;
     border: 1px solid var(--border-inputs-border-color);
     outline: none;
@@ -256,16 +255,16 @@ onMounted(() => loadRadio())
     font-size: var(--content-text-size);
 }
 
-#local-playlist-edit-view .center .form-row input {
+#freefm-edit-view .center .form-row input {
     height: 25px;
 }
 
-#local-playlist-edit-view .center .form-row textarea {
+#freefm-edit-view .center .form-row textarea {
     height: 188px;
     padding: 8px;
 }
 
-#local-playlist-edit-view .center .form-row .stream-type-item {
+#freefm-edit-view .center .form-row .stream-type-item {
     /*min-width: 136px;*/
     padding: 6px 15px;
     text-align: center;
@@ -275,38 +274,38 @@ onMounted(() => loadRadio())
     cursor: pointer;
 }
 
-#local-playlist-edit-view .center .form-row .stream-type-item:hover {
+#freefm-edit-view .center .form-row .stream-type-item:hover {
     background-color: var(--border-color);
     background-color: var(--content-list-item-hover-bg-color);
 }
 
-#local-playlist-edit-view .center .form-row .active {
+#freefm-edit-view .center .form-row .active {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
 }
 
-#local-playlist-edit-view .center .action {
+#freefm-edit-view .center .action {
     display: flex;
     flex-direction: row;
 }
 
-#local-playlist-edit-view .spacing {
+#freefm-edit-view .spacing {
     margin-left: 20px;
 }
 
-#local-playlist-edit-view .required {
+#freefm-edit-view .required {
     color: var(--content-text-highlight-color) !important;
     font-weight: bold;
     font-size: 20px;
 }
 
-#local-playlist-edit-view .invalid {
+#freefm-edit-view .invalid {
     border-color: var(--content-error-color) !important;
     border-width: 3px;
 }
 
 /*
-#local-playlist-edit-view ::-webkit-input-placeholder {
+#freefm-edit-view ::-webkit-input-placeholder {
     color: var(--input-placeholder-color);
 }
 */

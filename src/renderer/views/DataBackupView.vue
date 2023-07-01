@@ -7,12 +7,13 @@ export default {
 
 <script setup>
 import { inject, reactive, ref, toRef, toRaw, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
-import EventBus from '../../common/EventBus';
+import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
 import { version } from '../../../package.json';
-import { storeToRefs } from 'pinia';
+import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from '../../common/Utils';
 import { toYyyymmddHhMmSs } from '../../common/Times';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -22,6 +23,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 const { backward } = inject('appRoute')
 
 const userProfileStore = useUserProfileStore()
+const recentsStore = useRecentsStore()
 const settingStore = useSettingStore()
 const { getCustomPlaylists } = storeToRefs(useUserProfileStore())
 const ipcRenderer = useIpcRenderer()
@@ -148,35 +150,41 @@ const backup = async () => {
 
     const backupSource = {}
     //const settingPaths = ['theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys']
+    const _stores = {
+        setting: settingStore,
+        recents: recentsStore,
+        user: userProfileStore
+    }
     for (var i = 0; i < sources.length; i++) {
         const id = sources[i].id
         const checked = sources[i].checked
         const children = sources[i].children
 
+        const _store = _stores[id] || userProfileStore
         backupSource[id] = {}
         if (id === "user") {
             if (!checked) continue
-            backupSource[id] = userProfileStore.$state[id]
+            backupSource[id] = _store.$state[id]
         } else if (id === "setting") {
             if (!checked) continue
-            const settingPaths = Object.keys(toRaw(settingStore.$state))
+            const settingPaths = Object.keys(toRaw(_store.$state))
             for (var j = 0; j < settingPaths.length; j++) {
                 const path = settingPaths[j]
                 if ('other|blackHole'.includes(path)) continue
-                backupSource[id][path] = settingStore.$state[path]
+                backupSource[id][path] = _store.$state[path]
             }
         } else if (id === "customPlaylists") {
             backupSource[id] = []
             if (!checked) continue
-            backupSource[id] = userProfileStore.$state[id]
+            backupSource[id] = _store.$state[id]
         } else if (checked) {
-            backupSource[id] = userProfileStore.$state[id]
+            backupSource[id] = _store.$state[id]
         } else if (children) {
             for (var j = 0; j < children.length; j++) {
                 const childId = children[j].id
                 const checked = children[j].checked
                 if (!checked) continue
-                backupSource[id][childId] = userProfileStore.$state[id][childId]
+                backupSource[id][childId] = _store.$state[id][childId]
             }
         }
     }

@@ -23,6 +23,7 @@ import EventBus from '../../common/EventBus';
 
 
 const { currentRoutePath, visitLocalPlaylistCreate, visitBatchLocalMusic } = inject('appRoute')
+const { showConfirm } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
 
@@ -30,7 +31,9 @@ const { localPlaylists, importTaskCount } = storeToRefs(useLocalMusicStore())
 const { addLocalPlaylist, resetAll,
     increaseImportTaskCount, decreaseImportTaskCount } = useLocalMusicStore()
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
-const { isUseDndForCreateLocalPlaylistEnable, isUseDeeplyScanForDirectoryEnable } = storeToRefs(useSettingStore())
+const { isUseDndForCreateLocalPlaylistEnable,
+    isUseDeeplyScanForDirectoryEnable,
+    isShowDialogBeforeClearLocalMusics } = storeToRefs(useSettingStore())
 
 const localMusicRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -111,8 +114,13 @@ const importPlaylist = async () => {
     }
 }
 
-const removeAll = () => {
+const removeAll = async () => {
     if (localPlaylists.value.length < 1) return
+
+    let ok = true
+    if (isShowDialogBeforeClearLocalMusics.value) ok = await showConfirm({ msg: '确定要清空本地歌曲吗？' })
+    if (!ok) return
+
     showToast('本地歌曲已全部清空!')
     resetAll()
 }

@@ -11,7 +11,7 @@ import Navigator from '../components/Navigator.vue';
 
 
 const { visitUserHome, visitSetting } = inject('appRoute')
-const { seekTrack, progressState, preseekTrack } = inject('player')
+const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('player')
 const { playing } = storeToRefs(usePlayStore())
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 
@@ -59,11 +59,7 @@ const getSearchBarPlaceholder = () => {
                 <Navigator></Navigator>
             </div>
         </div>
-        <!--
-        <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack">
-        </ProgressBar>
-        -->
-        <SliderBar :value="progressState" :disable="!playing" :onSeek="seekTrack" :disableScroll="true"
+        <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
             :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack" :onDragMove="preseekTrack">
         </SliderBar>
     </div>

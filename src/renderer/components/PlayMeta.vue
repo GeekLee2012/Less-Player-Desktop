@@ -4,9 +4,11 @@ import VolumeBar from './VolumeBar.vue';
 import AudioTime from './AudioTime.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
+import { usePlatformStore } from '../store/platformStore';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
+
 
 
 const { mmssCurrentTime, mmssPreseekTime } = inject('player')
@@ -18,6 +20,8 @@ const props = defineProps({
 const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useAppCommonStore())
 const { showPlayingView, toggleCoverMask } = useAppCommonStore()
+const { isFreeFM } = usePlatformStore()
+
 const volumeBarRef = ref(null)
 
 const trackMeta = (track) => {
@@ -35,7 +39,8 @@ onMounted(() => {
 <template>
     <div class="play-meta">
         <div class="cover-wrap" @mouseenter="toggleCoverMask" @mouseleave="toggleCoverMask">
-            <img class="audio-cover" v-lazy="currentTrack.cover" />
+            <img class="audio-cover" v-lazy="currentTrack.cover"
+                :class="{ 'obj-fit-contain': isFreeFM(currentTrack.platform) }" />
             <div class="cover-mask" v-show="coverMaskShow" @click="showPlayingView">
                 <svg width="19" height="19" viewBox="0 0 763.32 424.57" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">

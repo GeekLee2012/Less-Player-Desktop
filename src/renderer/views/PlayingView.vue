@@ -4,7 +4,6 @@ import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
@@ -12,8 +11,6 @@ import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import { Track } from '../../common/Track';
-import { Playlist } from '../../common/Playlist';
-import { toMmss } from '../../common/Times';
 
 
 
@@ -21,7 +18,7 @@ const { seekTrack, playMv,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
-    mmssPreseekTime } = inject('player')
+    mmssPreseekTime, isTrackSeekable } = inject('player')
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
@@ -32,6 +29,7 @@ const { hidePlayingView, minimize,
 const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos } = storeToRefs(useSettingStore())
+
 const volumeBarRef = ref(null)
 
 const onUserMouseWheel = (e) => EventBus.emit('lyric-userMouseWheel', e)
@@ -85,10 +83,7 @@ onMounted(() => {
                 </div>
             </div>
             <div class="bottom">
-                <!--
-                <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack"></ProgressBar>
-                -->
-                <SliderBar :value="progressState" :disable="!playing" :onSeek="seekTrack" :disableScroll="true"
+                <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
                     :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack"
                     :onDragMove="preseekTrack">
                 </SliderBar>

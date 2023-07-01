@@ -4,11 +4,6 @@ import { toMmss } from './Times';
 
 
 
-/** 
- * 被废弃的属性： 
- * isRadioType: 是否为电台歌曲;
- * isFMRadio: 是否为广播电台(当歌单类型为电台时); 
- */
 export class Track {
     constructor(id, platform, title, artist, album,
         duration, cover, url, type,
@@ -42,7 +37,7 @@ export class Track {
         //是否为替换版本
         this.isCandidate = false
 
-        //本地歌曲标签
+        //本地歌曲属性
         this.publishTime = null
     }
 

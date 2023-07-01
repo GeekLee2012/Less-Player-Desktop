@@ -23,7 +23,7 @@ const updateCategories = () => {
 const updateOrders = () => {
     orders.length = 0
     const cached = currentPlatformOrders() || []
-    orders.push(...cached)
+    if (cached.length > 0) orders.push(...cached)
 }
 
 const resetScroll = () => {

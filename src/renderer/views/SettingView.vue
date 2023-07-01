@@ -1,28 +1,31 @@
 <script setup>
 import { inject, onActivated, onMounted, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { usePlayStore } from '../store/playStore';
+import { useUserProfileStore } from '../store/userProfileStore';
+import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
+import { useLocalMusicStore } from '../store/localMusicStore';
+import { useIpcRenderer, isMacOS, isWinOS } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
 import packageCfg from '../../../package.json';
-import { useAppCommonStore } from '../store/appCommonStore';
-import { useIpcRenderer, isMacOS, isWinOS } from '../../common/Utils';
-import { useUserProfileStore } from '../store/userProfileStore';
 import { getDoc } from '../../common/HttpClient';
-import { usePlayStore } from '../store/playStore';
-import { useLocalMusicStore } from '../store/localMusicStore';
 import EventBus from '../../common/EventBus';
 
 
 
 const { visitThemes, visitDataBackup, visitDataRestore, } = inject('appRoute')
+const { showConfirm } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
 
 const { theme, layout, common, track,
     keys, tray, navigation, dialog,
     cache, network, other, search,
-    isHttpProxyEnable, isSocksProxyEnable } = storeToRefs(useSettingStore())
+    isHttpProxyEnable, isSocksProxyEnable,
+    isShowDialogBeforeResetSetting } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
     setWindowZoom,
@@ -68,7 +71,12 @@ const { setThemeIndex,
     toggleSearchForOnlinePlaylistShow,
     toggleSearchForLocalPlaylistShow,
     toggleSearchForBatchActionShow,
-    toggleSearchForFreeFMShow
+    toggleSearchForFreeFMShow,
+    toggleShowDialogBeforeBatchDelete,
+    toggleShowDialogBeforeClearRecents,
+    toggleShowDialogBeforeResetSetting,
+    toggleShowDialogBeforeClearLocalMusics,
+    toggleShowDialogBeforeClearFreeFM,
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -80,19 +88,18 @@ const visitLink = (url) => {
 
 /* 数据 - 重置 */
 const resetData = async () => {
-    if (!ipcRenderer) return
-    const ok = await ipcRenderer.invoke('show-confirm', {
-        title: "确认",
-        msg: "数据重置，将会清空我的主页、当前播放等全部数据，同时恢复默认设置。  确定要继续吗？"
+    const ok = await showConfirm({
+        msg: '数据重置，将会清空我的主页、当前播放等全部数据，同时恢复默认设置。但不会清空本地歌曲、自由FM的数据。  确定要继续吗？'
     })
     if (!ok) return
 
     const relativeStores = {
-        'player': usePlayStore(),
-        'appCommon': useAppCommonStore(),
-        'userProfile': useUserProfileStore(),
-        'localMusic': useLocalMusicStore(),
-        'setting': useSettingStore()
+        player: usePlayStore(),
+        appCommon: useAppCommonStore(),
+        userProfile: useUserProfileStore(),
+        recents: useRecentsStore(),
+        //localMusic: useLocalMusicStore(),
+        setting: useSettingStore()
     }
     for (var [key, store] of Object.entries(relativeStores)) {
         store.$reset()
@@ -104,7 +111,10 @@ const resetData = async () => {
 }
 
 /* 数据 - 恢复默认设置 */
-const resetSettingData = () => {
+const resetSettingData = async () => {
+    let ok = true
+    if (isShowDialogBeforeResetSetting.value) ok = await showConfirm({ msg: '确定要恢复默认设置吗？' })
+    if (!ok) return
     const settingStore = useSettingStore()
     settingStore.$reset()
     const storeKeys = ['setting']
@@ -604,43 +614,33 @@ onMounted(checkForUpdate)
                     </div>
                 </div>
             </div>
-            <div class="dialog row" style="display: none;">
+            <div class="dialog row">
                 <span class="cate-name">对话框</span>
                 <div class="content">
                     <div>当进行如下操作时，需要确认：</div>
                     <div>
-                        <span class="cate-subtitle">清空当前播放：</span>
-                        <ToggleControl @click="" :value="dialog.clearQueue">
-                        </ToggleControl>
-                    </div>
-                    <div>
-                        <span class="cate-subtitle">批量添加：</span>
-                        <ToggleControl @click="" :value="dialog.batchAdd">
-                        </ToggleControl>
-                    </div>
-                    <div>
-                        <span class="cate-subtitle">批量移动：</span>
-                        <ToggleControl @click="" :value="dialog.batchMove">
-                        </ToggleControl>
-                    </div>
-                    <div>
                         <span class="cate-subtitle">批量删除：</span>
-                        <ToggleControl @click="" :value="dialog.batchDelete">
+                        <ToggleControl @click="toggleShowDialogBeforeBatchDelete" :value="dialog.batchDelete">
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">数据还原：</span>
-                        <ToggleControl @click="" :value="dialog.restore">
+                        <span class="cate-subtitle">清空最近播放：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeClearRecents" :value="dialog.clearRecents">
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">数据重置：</span>
-                        <ToggleControl @click="" :value="dialog.reset">
+                        <span class="cate-subtitle">恢复默认设置：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeResetSetting" :value="dialog.resetSetting">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">清空本地歌曲：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeClearLocalMusics" :value="dialog.clearLocalMusics">
                         </ToggleControl>
                     </div>
                     <div class="last">
-                        <span class="cate-subtitle">应用退出：</span>
-                        <ToggleControl @click="" :value="dialog.quit">
+                        <span class="cate-subtitle">清空自由FM：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeClearFreeFM" :value="dialog.clearFreeFM">
                         </ToggleControl>
                     </div>
                 </div>

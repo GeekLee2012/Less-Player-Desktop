@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import EventBus from '../../common/EventBus';
+import { usePlatformStore } from '../../renderer/store/platformStore';
 
 
 
@@ -14,8 +15,12 @@ const props = defineProps({
     checkbox: Boolean,
     checked: Boolean,
     ignoreCheckAllEvent: Boolean,
-    checkChangedFn: Function
+    checkChangedFn: Function,
+    platform: String
 })
+
+const { isFreeFM } = usePlatformStore()
+
 
 const isChecked = ref(props.checked)
 const toggleCheck = () => {
@@ -46,7 +51,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 <template>
     <div class="image-text-tile" @click="toggleCheck">
         <div class="cover-wrap">
-            <img class="cover" v-lazy="cover" v-show="!color" />
+            <img class="cover" v-lazy="cover" v-show="!color" :class="{ 'obj-fit-contain': isFreeFM(platform) }" />
             <div class="cover" v-show="color" :style="{ background: color }"></div>
             <div class=" cover-mask" :class="{ selectable: checkbox }">
                 <div class="play-btn" v-show="playable && !checkbox" @click.stop="playAction">
@@ -103,7 +108,6 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
     box-shadow: 0px 0px 3px #181818;
     background-color: var(--app-bg-color);
-    background-size: contain;
 }
 
 .image-text-tile .cover-wrap:hover {
@@ -136,10 +140,10 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     width: var(--others-image-text-tile-cover-size);
     text-align: left;
     line-height: 25px;
-    color: #989898;
     color: var(--content-secondary-text-color);
     font-size: var(--content-text-tip-text-size);
-    font-weight: bold;
+    /*font-weight: bold;*/
+    color: var(--content-subtitle-text-color);
 
     overflow: hidden;
     text-overflow: ellipsis;

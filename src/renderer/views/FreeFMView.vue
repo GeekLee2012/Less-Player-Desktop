@@ -21,8 +21,8 @@ import EventBus from '../../common/EventBus';
 
 
 
-
 const { currentRoutePath, visitFreeFMCreate, visitBatchFreeFM } = inject('appRoute')
+const { showConfirm } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
 
@@ -31,7 +31,7 @@ const { addFreeRadio, resetAll,
     increaseImportTaskCount, decreaseImportTaskCount } = useFreeFMStore()
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus, setSearchBarExclusiveAction } = useAppCommonStore()
-const { isSearchForFreeFMShow } = storeToRefs(useSettingStore())
+const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM } = storeToRefs(useSettingStore())
 
 
 const freefmRef = ref(null)
@@ -85,10 +85,15 @@ const importRadios = async () => {
     }
 }
 
-const removeAll = () => {
+const removeAll = async () => {
     if (freeRadios.value.length < 1) return
-    showToast('自由FM已全部清空!')
+
+    let ok = true
+    if (isShowDialogBeforeClearFreeFM.value) ok = await showConfirm({ msg: '确定要清空自由FM电台吗？' })
+    if (!ok) return
+
     resetAll()
+    showToast('自由FM已全部清空!')
 }
 
 const toggleUseSearchBar = () => {
@@ -146,7 +151,8 @@ watch(searchKeyword, filterContent)
             <div class="about">
                 <p>初衷：期待汇集全球主流电台，跟随电波一起，更多地了解、感知世界</p>
                 <p>世界那么大，一起来静心聆听吧</p>
-                <p>去探索、去思考、去发现、去追寻，真正属于自己的人生吧</p>
+                <p>去探索、去发现，世界的美好</p>
+                <p>去思考、去追寻，自己的人生</p>
             </div>
             <div class="action">
                 <SvgTextButton text="新建FM电台" :leftAction="visitFreeFMCreate">
@@ -216,14 +222,10 @@ watch(searchKeyword, filterContent)
     margin-left: 20px;
 }
 
-#freefm-view img {
-    object-fit: contain;
-}
-
 #freefm-view .header {
     display: flex;
     flex-direction: column;
-    margin-bottom: 33px;
+    margin-bottom: 20px;
 }
 
 #freefm-view .header .title {

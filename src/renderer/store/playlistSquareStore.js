@@ -69,6 +69,18 @@ export const usePlaylistSquareStore = defineStore('playlistSquare', {
             this.currentOrder.value = value
             this.currentOrder.index = index
         },
+        updateCurrentOrderByValue(value) {
+            if (!value) return
+            const pOrders = this.currentPlatformOrders()
+            if (!pOrders || pOrders.length < 1) return
+            for (var i = 0; i < pOrders.length; i++) {
+                const order = pOrders[i]
+                const { key, value: cValue } = order
+                if ((cValue + '') === (value + '')) {
+                    this.updateCurrentOrder(key, cValue, i)
+                }
+            }
+        },
         resetOrder() {
             this.updateCurrentOrder(null, null, 0)
         }

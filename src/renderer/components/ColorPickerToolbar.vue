@@ -36,7 +36,10 @@ const VueColorKitHack = {
     _reformateHexa(value) {
         let _value = value || ''.trim()
         if (_value.length < 1) return value
-        if (!_value.startsWith('#') && !_value.startsWith('rgb')) _value = '#' + _value
+        if (!_value.startsWith('#')
+            && !_value.startsWith('rgb') && !_value.includes(',')) {
+            _value = '#' + _value
+        }
         if (_value.length == 4) {
             const parts = _value.split('')
             _value = `#${parts[1]}${parts[1]}${parts[2]}${parts[2]}${parts[3]}${parts[3]}`

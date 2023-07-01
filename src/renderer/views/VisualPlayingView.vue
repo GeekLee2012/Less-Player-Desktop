@@ -21,7 +21,7 @@ const { seekTrack, playMv,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
-    mmssPreseekTime } = inject('player')
+    mmssPreseekTime, isTrackSeekable } = inject('player')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -149,13 +149,9 @@ onUnmounted(() => {
                         <canvas class="spectrum-canvas" width="404" height="56"></canvas>
                     </div>
                     <div class="progress-wrap">
-                        <!--
-                        <ProgressBar :value="progressState" :seekable="playing" :onseek="seekTrack">
-                        </ProgressBar>
-                        -->
-                        <SliderBar :value="progressState" :disable="!playing" :onSeek="seekTrack" :disableScroll="true"
-                            :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack"
-                            :onDragMove="preseekTrack">
+                        <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack"
+                            :disableScroll="true" :onScroll="preseekTrack" :onScrollFinish="seekTrack"
+                            :onDragRelease="seekTrack" :onDragMove="preseekTrack">
                         </SliderBar>
                     </div>
                     <div class="audio-time-wrap">

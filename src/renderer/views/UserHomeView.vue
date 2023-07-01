@@ -1,15 +1,17 @@
 <script setup>
 import { onMounted, onActivated, ref, shallowRef, watch, reactive, inject } from 'vue';
 import { storeToRefs } from 'pinia';
-import AlbumListControl from '../components/AlbumListControl.vue';
-import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
-import SongListControl from '../components/SongListControl.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { useRecentsStore } from '../store/recentsStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { useSettingStore } from '../store/settingStore';
 import EventBus from '../../common/EventBus';
+import AlbumListControl from '../components/AlbumListControl.vue';
+import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
+import SongListControl from '../components/SongListControl.vue';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
 import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import CustomPlaylistListControl from '../components/CustomPlaylistListControl.vue';
@@ -18,8 +20,10 @@ import BatchActionBtn from '../components/BatchActionBtn.vue';
 
 
 
+
 const { currentRoutePath, visitRoute,
     visitUserInfoEdit, visitCustomPlaylistCreate } = inject('appRoute')
+const { showConfirm } = inject('appCommon')
 
 const tabs = [{
     code: 'favorites',
@@ -76,12 +80,14 @@ const { showToast, hideAllCtxMenus } = useAppCommonStore()
 const { getFavoriteSongs, getFavoritePlaylilsts,
     getFavoriteAlbums, getFavoriteRadios,
     getCustomPlaylists, getFollowArtists,
-    getRecentSongs, getRecentPlaylilsts,
-    getRecentAlbums, getRecentRadios,
     decoration, getUserCover,
     getUserNickName, getUserAbout } = storeToRefs(useUserProfileStore())
-const { removeAllFavorites, removeAllRecents,
-    nextDecoration } = useUserProfileStore()
+const { removeAllFavorites, nextDecoration } = useUserProfileStore()
+const { getRecentSongs, getRecentPlaylilsts,
+    getRecentAlbums, getRecentRadios } = storeToRefs(useRecentsStore())
+const { removeAllRecents } = useRecentsStore()
+const { isShowDialogBeforeClearRecents } = storeToRefs(useSettingStore())
+
 
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
@@ -187,10 +193,15 @@ const visitBatchActionView = () => {
     visitRoute(`/userhome/batch/${source}/0`)
 }
 
-const batchRemoveAll = () => {
+const batchRemoveAll = async () => {
     const index = activeTab.value
     //if(index == 0) clearFavorites()
-    if (index == 3) clearRecents()
+    if (index == 3) {
+        let ok = true
+        if (isShowDialogBeforeClearRecents.value) ok = await showConfirm({ msg: '确定要清空最近播放吗？' })
+        if (!ok) return
+        clearRecents()
+    }
 }
 
 //TODO

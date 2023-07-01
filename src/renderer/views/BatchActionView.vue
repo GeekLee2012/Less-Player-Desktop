@@ -14,6 +14,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { useRecentsStore } from '../store/recentsStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { useFreeFMStore } from '../store/freeFMStore';
 import { useSettingStore } from '../store/settingStore';
@@ -34,16 +35,13 @@ const props = defineProps({
 
 
 const { currentRoutePath, backward } = inject('appRoute')
+const { showConfirm } = inject('appCommon')
 const ipcRenderer = useIpcRenderer()
 
 const { getFavoriteSongs, getFavoritePlaylilsts,
-    getFavoriteAlbums, getFavoriteRadios,
-    getRecentSongs, getRecentPlaylilsts,
-    getRecentAlbums, getRecentRadios } = storeToRefs(useUserProfileStore())
+    getFavoriteAlbums, getFavoriteRadios, } = storeToRefs(useUserProfileStore())
 const { removeFavoriteSong, removeFavoritePlaylist,
     removeFavoriteAlbum, removeFavoriteRadio,
-    removeRecentSong, removeRecentPlaylist,
-    removeRecentAlbum, removeRecentRadio,
     getCustomPlaylist, removeFromCustomPlaylist } = useUserProfileStore()
 const { addTracks, playTrack } = usePlayStore()
 const { commonCtxMenuShow, commonCtxItem, searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
@@ -56,7 +54,11 @@ const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { getLocalPlaylist, removeFromLocalPlaylist, removeLocalPlaylist } = useLocalMusicStore()
 const { freeRadios } = storeToRefs(useFreeFMStore())
 const { removeFreeRadio } = useFreeFMStore()
-const { isSearchForBatchActionShow } = storeToRefs(useSettingStore())
+const { isSearchForBatchActionShow, isShowDialogBeforeBatchDelete } = storeToRefs(useSettingStore())
+const { getRecentSongs, getRecentPlaylilsts,
+    getRecentAlbums, getRecentRadios } = storeToRefs(useRecentsStore())
+const { removeRecentSong, removeRecentPlaylist,
+    removeRecentAlbum, removeRecentRadio, } = useRecentsStore()
 
 
 const isFavorites = () => props.source == "favorites"
@@ -255,7 +257,7 @@ const switchTab = () => {
                 deleteBtn: true,
                 exportBtn: true
             })
-            tabData.push(...freeRadios.value)
+            tabData.push(...filterByTitleAndTagsWithKeyword(freeRadios.value))
         }
         currentTabView.value = PlaylistsControl
     }
@@ -269,46 +271,61 @@ const visitTab = (index) => {
     switchTab()
 }
 
-const filterSongsWithKeyword = (list) => {
+const filterWithKeyword = (list, filterFn) => {
     let keyword = searchKeyword.value
     let result = list
     if (keyword) {
-        keyword = keyword.toLowerCase()
+        keyword = keyword.trim().toLowerCase()
         result = result.filter(item => {
-            const { title, artist, album } = item
-            if (title.toLowerCase().includes(keyword)) {
-                return true
-            }
-            if (album && album.name) {
-                if (album.name.toLowerCase().includes(keyword)) {
-                    return true
-                }
-            }
-            if (artist) {
-                for (var i = 0; i < artist.length; i++) {
-                    const { name } = artist[i]
-                    if (name && name.toLowerCase().includes(keyword)) {
-                        return true
-                    }
-                }
-            }
-            return false
+            if (filterFn) return filterFn(keyword, item)
+            return true
         })
     }
     return result
 }
 
+const filterSongsWithKeyword = (list) => {
+    return filterWithKeyword(list, (keyword, item) => {
+        const { title, artist, album } = item
+        if (title.toLowerCase().includes(keyword)) {
+            return true
+        }
+        if (album && album.name) {
+            if (album.name.toLowerCase().includes(keyword)) {
+                return true
+            }
+        }
+        if (artist) {
+            for (var i = 0; i < artist.length; i++) {
+                const { name } = artist[i]
+                if (name && name.toLowerCase().includes(keyword)) {
+                    return true
+                }
+            }
+        }
+        return false
+    })
+}
+
+const filterRecentSongs = () => {
+    let platform = currentPlatformCode.value
+    if (!platform || platform.trim() == 'all') platform = null
+    return filterSongsWithKeyword(getRecentSongs.value(platform))
+}
+
 const filterByTitleWithKeyword = (list) => {
-    let keyword = searchKeyword.value
-    let result = list
-    if (keyword) {
-        keyword = keyword.toLowerCase()
-        result = result.filter(item => {
-            const { title } = item
-            return title.toLowerCase().includes(keyword)
-        })
-    }
-    return result
+    return filterWithKeyword(list, (keyword, item) => (item.title.toLowerCase().includes(keyword)))
+}
+
+const filterByTitleAndTagsWithKeyword = (list) => {
+    return filterWithKeyword(list, (keyword, item) => {
+        const { title, tags } = item
+        const _tags = tags || ''
+        if (title.toLowerCase().includes(keyword)) {
+            return true
+        }
+        return _tags.toLowerCase().includes(keyword)
+    })
 }
 
 const loadCustomPlaylist = (platform) => {
@@ -325,12 +342,6 @@ const loadLocalPlaylist = () => {
     Object.assign(sourceItem, { ...playlist })
     updateCommonCtxItem(playlist)
     return filterSongsWithKeyword(playlist.data)
-}
-
-const filterRecentSongs = () => {
-    let platform = currentPlatformCode.value
-    if (!platform || platform.trim() == 'all') platform = null
-    return filterSongsWithKeyword(getRecentSongs.value(platform))
 }
 
 const toggleSelectAll = () => {
@@ -412,8 +423,12 @@ const toggleMoveCheckedMenu = (event) => {
     eventMode = mode
 }
 
-const removeChecked = () => {
+const removeChecked = async () => {
     if (checkedData.length < 1) return
+    let ok = true
+    if (isShowDialogBeforeBatchDelete.value) ok = await showConfirm({ msg: '确定要删除所选数据吗？' })
+    if (!ok) return
+
     let deleteFn = null
     if (activeTab.value == 0) {
         if (isFavorites()) deleteFn = removeFavoriteSong
@@ -467,7 +482,7 @@ const exportRadios = async (radios) => {
         const { platform, type, title, cover, tags, about, data } = item
         if (data && data.length > 0) {
             const { url, streamType } = data[0]
-            radioData.push({ platform, title, url, type, streamType, cover, tags, about })
+            radioData.push({ title, url, streamType, cover, tags, about })
         }
     })
     const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')

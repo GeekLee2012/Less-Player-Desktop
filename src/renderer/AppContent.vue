@@ -1,10 +1,12 @@
 <script setup>
-import { onMounted, shallowRef, inject, watch, triggerRef, ref, nextTick } from 'vue';
+import { onMounted, shallowRef, inject, watch, triggerRef, ref, nextTick, provide } from 'vue';
 import { storeToRefs } from 'pinia';
 import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
+import { useUserProfileStore } from './store/userProfileStore';
+import { useRecentsStore } from './store/recentsStore';
 import Themes from './Themes.vue';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
@@ -36,6 +38,7 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   hideAllCategoryViews, showToast, hideLyricToolbar,
   hideSoundEffectView, hideCustomThemeEditView,
   hideColorPickerToolbar } = useAppCommonStore()
+
 
 const isReservedPath = (path) => {
   const reservedPaths = ['id', 'name', 'binding', 'gBinding']
@@ -217,10 +220,41 @@ const setupMacStyle = () => {
   //TODO 边框阴影效果, 再看看情况
 }
 
+//数据迁移 - 最近播放记录
+const migrateRecentsData = () => {
+  //旧版本数据
+  const { recents: oRecents } = storeToRefs(useUserProfileStore())
+  const { removeAllRecents } = useUserProfileStore()
+  const { songs: oSongs, playlists: oPlaylists,
+    albums: oAlbums, radios: oRadios } = oRecents.value
+
+  //新版本数据
+  const { recents: nRecents } = storeToRefs(useRecentsStore())
+  const { songs: nSongs, playlists: nPlaylists,
+    albums: nAlbums, radios: nRadios } = nRecents.value
+
+  //同步迁移
+  if (nSongs.length < 1 && oSongs.length > 0) {
+    nSongs.push(...oSongs)
+  }
+  if (nPlaylists.length < 1 && oPlaylists.length > 0) {
+    nPlaylists.push(...oPlaylists)
+  }
+  if (nAlbums.length < 1 && oAlbums.length > 0) {
+    nAlbums.push(...oAlbums)
+  }
+  if (nRadios.length < 1 && oRadios.length > 0) {
+    nRadios.push(...oRadios)
+  }
+  //清理旧版本数据
+  removeAllRecents()
+}
+
 const initialize = () => {
   setupMacStyle()
   restoreSetting()
   registryIpcRendererListeners()
+  migrateRecentsData()
 }
 
 EventBus.on("app-zoom", setupTrafficLightWinCtlBtn)
@@ -234,6 +268,15 @@ EventBus.on('setting-reset', restoreSetting)
 
 //直接在setup()时初始化，不需要等待其他生命周期
 initialize()
+
+const showConfirm = async ({ title, msg }) => {
+  if (!ipcRenderer) return false
+  const ok = await ipcRenderer.invoke('show-confirm', {
+    title: title || '确认',
+    msg
+  })
+  return ok
+}
 
 onMounted(() => {
   //窗口大小变化事件监听
@@ -253,6 +296,10 @@ onMounted(() => {
   setupAppGlobalProxy()
   //setupWindowCtlButton()
   registryDefaultLocalKeys()
+})
+
+provide('appCommon', {
+  showConfirm
 })
 </script>
 

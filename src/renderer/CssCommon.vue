@@ -62,8 +62,11 @@
   color: transparent !important;
 }
 
-input {
+input,
+textarea {
   font-size: var(--content-text-subtitle-size);
+  font-family: var(--content-text-font-family);
+  color: var(--content-inputs-text-color);
 }
 
 .text-input-ctl {
@@ -98,6 +101,10 @@ input {
   /*font-size: 13.5px;*/
   font-size: var(--content-text-tip-text-size);
   color: var(--content-subtitle-text-color);
+}
+
+.obj-fit-contain {
+  object-fit: contain;
 }
 
 /*TODO 试验性CSS */

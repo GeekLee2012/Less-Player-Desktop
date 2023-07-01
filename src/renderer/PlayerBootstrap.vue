@@ -5,6 +5,7 @@ import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { usePlatformStore } from './store/platformStore';;
 import { useUserProfileStore } from './store/userProfileStore';
+import { useRecentsStore } from './store/recentsStore';
 import { useSettingStore } from './store/settingStore';
 import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
@@ -19,7 +20,7 @@ import { United } from '../vendor/united';
 
 const ipcRenderer = useIpcRenderer()
 
-const { currentTrack, queueTracksSize, playingIndex } = storeToRefs(usePlayStore())
+const { currentTrack, queueTracksSize, playingIndex, playing } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack,
     setAutoPlaying, playPrevTrack,
     togglePlay, switchPlayMode,
@@ -34,9 +35,7 @@ const { playingViewShow, videoPlayingViewShow,
 const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId } = useAppCommonStore()
-const { addRecentSong, addRecentRadio,
-    addRecentPlaylist, addRecentAlbum,
-    addFavoriteTrack, removeFavoriteSong,
+const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
@@ -45,6 +44,8 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
     isResumePlayAfterVideoEnable } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray } = useSettingStore()
+const { addRecentSong, addRecentRadio,
+    addRecentPlaylist, addRecentAlbum } = useRecentsStore()
 
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
@@ -622,6 +623,10 @@ const preseekTrack = (percent) => {
     mmssPreseekTime.value = toMmss(duration * percent)
 }
 
+const isTrackSeekable = computed(() => {
+    return playing.value && !Playlist.isFMRadioType(currentTrack.value)
+})
+
 //播放MV
 const playMv = (track) => {
     if (!Track.hasMv(track)) return
@@ -794,6 +799,7 @@ provide('player', {
     toggleFavoritedState,
     preseekTrack,
     mmssPreseekTime,
+    isTrackSeekable,
 })
 </script>
 

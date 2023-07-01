@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import EventBus from "../../common/EventBus";
 import { randomTextWithinAlphabetNums, trimArray } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
+import { usePlatformStore } from "./platformStore";
 
 
 
@@ -39,7 +40,6 @@ export const useUserProfileStore = defineStore("userProfile", {
         decoration: {
             current: 1001
         },
-
     }),
     getters: {
         getUserCover() { //Potrait
@@ -77,6 +77,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         getFollowArtists() {
             return (platform) => filterByPlatform(this.follows.artists, platform)
         },
+        /*
         getRecentSongs() {
             return (platform) => filterByPlatform(this.recents.songs, platform)
         },
@@ -89,6 +90,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         getRecentRadios() {
             return (platform) => filterByPlatform(this.recents.radios, platform)
         },
+        */
     },
     actions: {
         updateUser(nickname, about, cover) {
@@ -137,8 +139,20 @@ export const useUserProfileStore = defineStore("userProfile", {
             }
 
         },
+        removeItems(state, item, compareFn) {
+            if (!state) return
+            if (!item) return
+            let index = - 1, count = 0
+            while (true) {
+                index = this.findItemIndex(state, item, compareFn)
+                if (index == -1 || count > 10) break
+                state.splice(index, 1)
+                ++count
+            }
+            if (count) this.refreshUserHome()
+        },
         uniqueInsertFirst(state, item, compareFn) {
-            this.removeItem(state, item, compareFn)
+            this.removeItems(state, item, compareFn)
             this.insertFirst(state, item, compareFn)
         },
         //我的收藏
@@ -302,6 +316,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         isFollowArtist(id, platform) {
             return this.findItemIndex(this.follows.artists, { id, platform }) != -1
         },
+        /*
         //最近播放
         addRecentSong(track) {
             const { id, platform, title, artist, album, duration, cover,
@@ -337,9 +352,17 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         addRecentRadio(track) {
             const { id, platform, title, cover, type, } = track
+            const { isFreeFM } = usePlatformStore()
+            const compareFn = (item, e) => {
+                if (item.data && item.data.length > 0
+                    && e.data && e.data.length > 0) {
+                    return item.data[0].url === e.data[0].url
+                }
+                return false
+            }
             this.uniqueInsertFirst(this.recents.radios, {
                 id, platform, title, cover, type, data: [track]
-            })
+            }, isFreeFM(platform) ? compareFn : null)
             trimArray(this.recents.radios, 366).then(count => {
                 if (count) this.refreshUserHome()
             })
@@ -360,6 +383,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             const { id, platform } = track
             this.removeItem(this.recents.radios, { id, platform })
         },
+        */
         removeAllRecents() {
             this.recents.songs.length = 0
             this.recents.playlists.length = 0
