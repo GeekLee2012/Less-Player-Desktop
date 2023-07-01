@@ -107,6 +107,10 @@ textarea {
   object-fit: contain;
 }
 
+.winos-style .text-btn svg {
+  padding-top: 2px;
+}
+
 /*TODO 试验性CSS */
 /* 可以为进入和离开动画设置不同的持续时间和动画函数 */
 .fade-ex-enter-active,

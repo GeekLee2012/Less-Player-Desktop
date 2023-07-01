@@ -819,7 +819,7 @@ watch([textColorIndex], setupTextColor)
                     </div>
                 </div>
                 <div class="flex-space">
-                    <div class="listen-btn">
+                    <div class="listen-btn text-btn">
                         <div class="play-btn" @click="randomPlay">
                             <svg width="15" height="15" viewBox="0 0 139 139" xml:space="preserve"
                                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -1115,7 +1115,7 @@ watch([textColorIndex], setupTextColor)
 
 .simple-layout .listen-btn .play-btn:hover svg,
 .simple-layout .listen-btn .play-btn:hover .text {
-    color: var(--content-text-highlight-color);
+    color: var(--content-highlight-color);
     fill: var(--content-highlight-color);
 }
 

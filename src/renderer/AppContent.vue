@@ -11,7 +11,7 @@ import Themes from './Themes.vue';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import EventBus from '../common/EventBus';
-import { isMacOS, useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
+import { isMacOS, isWinOS, useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
 
 
 
@@ -306,7 +306,7 @@ provide('appCommon', {
 <template>
   <Themes>
     <keep-alive :max="2">
-      <component :is="currentAppLayout">
+      <component :is="currentAppLayout" :class="{ 'winos-style': isWinOS() }">
       </component>
     </keep-alive>
     <slot></slot>

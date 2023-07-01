@@ -4,7 +4,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import ColorInputControl from '../components/ColorInputControl.vue';
 import GradientColorInputControl from '../components/GradientColorInputControl.vue';
 import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from '../../common/Utils';
+import { useIpcRenderer, isWinOS } from '../../common/Utils';
 import { storeToRefs } from 'pinia';
 
 
@@ -54,7 +54,7 @@ const exportPlaylist = async () => {
 
 <template>
     <div class="playlist-export-toolbar" v-gesture-dnm="{ trigger: '.header' }">
-        <div class="container">
+        <div class="container" :class="{ 'container-win-style': isWinOS() }">
             <div class="header">
                 <div class="action left-action">
                     <div class="close-btn btn" @click="hidePlaylistExportToolbar">
@@ -266,13 +266,19 @@ const exportPlaylist = async () => {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
-    height: 37px;
+    height: 37.5px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--button-icon-text-btn-bg-color);
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     font-size: var(--content-text-tip-text-size);
     cursor: pointer;
+}
+
+/* 别扭挖坑的方式 */
+.playlist-export-toolbar .container-win-style .dir-input-ctl .select-btn {
+    height: 40px;
 }
 </style>
