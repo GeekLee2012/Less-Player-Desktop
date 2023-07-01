@@ -576,7 +576,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                     :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
                     @click="visitTab(index)" v-show="isTabsVisible(tab, index)" v-html="tab.name">
                 </span>
-                <div class="search-wrap checkbox" @click="toggleUseSearchBar" v-show="isSearchForBatchActionShow">
+                <div class="search-wrap checkbox text-btn" @click="toggleUseSearchBar" v-show="isSearchForBatchActionShow">
                     <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">

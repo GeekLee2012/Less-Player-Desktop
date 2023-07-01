@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, shallowRef, inject, watch, triggerRef, ref, nextTick, provide } from 'vue';
+import { onMounted, shallowRef, inject, watch, triggerRef, ref, nextTick, provide, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
@@ -15,7 +15,7 @@ import { isMacOS, isWinOS, useIpcRenderer, useUseCustomTrafficLight } from '../c
 
 
 
-const { visitSetting } = inject('appRoute')
+const { visitSetting, visitSearch } = inject('appRoute')
 const ipcRenderer = useIpcRenderer()
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
@@ -32,7 +32,7 @@ const { togglePlay, switchPlayMode,
   toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
 const { playingViewShow, videoPlayingViewShow,
   playingViewThemeIndex, commonNotificationText,
-  commonNotificationShow } = storeToRefs(useAppCommonStore())
+  commonNotificationShow, searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
   hideAllCategoryViews, showToast, hideLyricToolbar,
@@ -278,6 +278,26 @@ const showConfirm = async ({ title, msg }) => {
   return ok
 }
 
+const searchDefault = async (keyword) => {
+  if (keyword && keyword.length > 0) {
+    if (keyword.startsWith('设置')) {
+      visitSetting()
+      if (ipcRenderer) ipcRenderer.invoke('find-in-page', keyword.slice(2).trim())
+    } else {
+      visitSearch(keyword)
+    }
+  }
+}
+
+const searchAction = computed(() => {
+  return searchBarExclusiveAction.value || searchDefault
+})
+
+const searchBarPlaceholder = computed(() => {
+  return searchBarExclusiveAction.value ? '独占搜索框模式' : '现在想听点什么 ~'
+})
+
+
 onMounted(() => {
   //窗口大小变化事件监听
   window.addEventListener('resize', event => {
@@ -299,7 +319,9 @@ onMounted(() => {
 })
 
 provide('appCommon', {
-  showConfirm
+  showConfirm,
+  searchAction,
+  searchBarPlaceholder,
 })
 </script>
 

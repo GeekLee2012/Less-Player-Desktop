@@ -310,7 +310,8 @@ onDeactivated(() => {
         <div class="center">
             <div class="list-title">
                 <span class="content-text-highlight">歌曲({{ detail.data.length }})</span>
-                <div class="search-wrap checkbox" @click="toggleUseSearchBar" v-show="isSearchForLocalPlaylistShow">
+                <div class="search-wrap checkbox text-btn" @click="toggleUseSearchBar"
+                    v-show="isSearchForLocalPlaylistShow">
                     <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">

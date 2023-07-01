@@ -438,7 +438,10 @@ const registryGlobalListeners = () => {
     return (result && result.length > 0) ? (downloadDir + result[0]) : null
   })
 
-  setupDnd()
+  ipcMain.handle('find-in-page', async (event, ...args) => {
+    const keyword = args[0]
+    if (mainWin) mainWin.webContents.findInPage(keyword)
+  })
 }
 
 //创建浏览窗口
@@ -501,6 +504,10 @@ const createMainWindow = () => {
   webRequest.onBeforeSendHeaders(filter, (details, callback) => {
     const { requestHeaders } = overrideRequest(details)
     callback({ requestHeaders })
+  })
+
+  mainWindow.webContents.on('found-in-page', (event, result) => {
+    if (result.finalUpdate) mainWindow.webContents.stopFindInPage('clearSelection')
   })
 
   return mainWindow
@@ -733,10 +740,6 @@ const openDevTools = () => {
 
 const cleanupBeforeQuit = () => {
   cancelDownload()
-}
-
-const setupDnd = () => {
-
 }
 
 //覆盖(包装)请求

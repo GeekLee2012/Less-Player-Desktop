@@ -277,7 +277,7 @@ EventBus.on("refresh-favorite", checkFavorite)
         <div class="center">
             <div class="list-title">
                 <div class="size-text content-text-highlight" v-show="!isLoading">列表({{ listSizeText }})</div>
-                <div class="search-wrap checkbox" v-show="!isLoading && isSearchForOnlinePlaylistShow"
+                <div class="search-wrap checkbox text-btn" v-show="!isLoading && isSearchForOnlinePlaylistShow"
                     @click="toggleUseSearchBar">
                     <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">

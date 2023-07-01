@@ -10,11 +10,13 @@ import EventBus from '../../common/EventBus';
 
 
 
-const { visitThemes, visitUserHome, visitSetting, visitSearch } = inject('appRoute')
+const { visitThemes, visitUserHome, visitSetting } = inject('appRoute')
+const { searchAction, searchBarPlaceholder } = inject('appCommon')
+
 
 const { setLayoutIndex } = useSettingStore()
 const { isRadioModeShortcutEnable } = storeToRefs(useSettingStore())
-const { isRadioMode, searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
+const { isRadioMode } = storeToRefs(useAppCommonStore())
 
 const switchToSimpleLayout = () => {
     setLayoutIndex(2) //TODO
@@ -23,20 +25,12 @@ const switchToSimpleLayout = () => {
 const toggleRadioMode = () => {
     EventBus.emit("toggleRadioMode")
 }
-
-const visitSearchView = (keyword) => {
-    if (keyword && keyword.length > 0) visitSearch(keyword)
-}
-
-const getSearchBarPlaceholder = () => {
-    return searchBarExclusiveAction.value ? '独占搜索框模式' : '现在想听点什么 ~'
-}
 </script>
 
 <template>
     <div class="classic-main-top">
         <Navigator></Navigator>
-        <SearchBar :submitAction="searchBarExclusiveAction || visitSearchView" :placeholder="getSearchBarPlaceholder()">
+        <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
         </SearchBar>
         <div class="action">
             <div id="radio-btn" @click="toggleRadioMode" v-show="isRadioModeShortcutEnable">
