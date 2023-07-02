@@ -9,7 +9,9 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { useRecentsStore } from '../store/recentsStore';
 import { Playlist } from '../../common/Playlist';
+
 
 
 
@@ -31,11 +33,11 @@ const { showToast, setCommonCtxMenuData, hideAllCtxMenus } = useAppCommonStore()
 const { playTrackLater, addTrack, removeTrack, addTracks, playTrack } = usePlayStore()
 const { addFavoriteTrack, removeFavoriteSong, addFavoriteRadio,
     removeCustomPlaylist, removeFromCustomPlaylist,
-    getCustomPlaylist, removeRecentSong,
-    addToCustomPlaylist, moveToCustomPlaylist,
+    getCustomPlaylist, addToCustomPlaylist, moveToCustomPlaylist,
     removeFavoritePlaylist } = useUserProfileStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { removeFromLocalPlaylist } = useLocalMusicStore()
+const { removeRecentSong, } = useRecentsStore()
 
 
 const toastAndHideMenu = (text) => {

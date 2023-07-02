@@ -105,11 +105,6 @@ const setupCache = () => {
   if (!isStorePlayStateBeforeQuit.value) {
     localStorage.removeItem('player')
   }
-  /*
-  if (!isStoreLocalMusicBeforeQuit.value) {
-    localStorage.removeItem('localMusic')
-  }
-  */
 }
 
 const setupLayout = (isInit) => {
@@ -234,18 +229,11 @@ const migrateRecentsData = () => {
     albums: nAlbums, radios: nRadios } = nRecents.value
 
   //同步迁移
-  if (nSongs.length < 1 && oSongs.length > 0) {
-    nSongs.push(...oSongs)
-  }
-  if (nPlaylists.length < 1 && oPlaylists.length > 0) {
-    nPlaylists.push(...oPlaylists)
-  }
-  if (nAlbums.length < 1 && oAlbums.length > 0) {
-    nAlbums.push(...oAlbums)
-  }
-  if (nRadios.length < 1 && oRadios.length > 0) {
-    nRadios.push(...oRadios)
-  }
+  if (nSongs.length < 1 && oSongs.length > 0) nSongs.push(...oSongs)
+  if (nPlaylists.length < 1 && oPlaylists.length > 0) nPlaylists.push(...oPlaylists)
+  if (nAlbums.length < 1 && oAlbums.length > 0) nAlbums.push(...oAlbums)
+  if (nRadios.length < 1 && oRadios.length > 0) nRadios.push(...oRadios)
+
   //清理旧版本数据
   removeAllRecents()
 }
@@ -269,23 +257,37 @@ EventBus.on('setting-reset', restoreSetting)
 //直接在setup()时初始化，不需要等待其他生命周期
 initialize()
 
+let isConfirmDialogShowing = false
 const showConfirm = async ({ title, msg }) => {
-  if (!ipcRenderer) return false
+  if (!ipcRenderer || isConfirmDialogShowing) return false
+  isConfirmDialogShowing = true
   const ok = await ipcRenderer.invoke('show-confirm', {
     title: title || '确认',
     msg
   })
+  isConfirmDialogShowing = false
   return ok
 }
 
 const searchDefault = async (keyword) => {
-  if (keyword && keyword.length > 0) {
-    if (keyword.startsWith('设置')) {
-      visitSetting()
-      if (ipcRenderer) ipcRenderer.invoke('find-in-page', keyword.slice(2).trim())
-    } else {
+  if (!keyword || keyword.trim().length < 1) return
+  keyword = keyword.trim()
+
+  let searchType = 0
+  //关键字格式：设置xxx
+  if (keyword.startsWith('设置')) {
+    keyword = keyword.slice(2).trim()
+    searchType = 1
+    visitSetting()
+  }
+
+  //搜索
+  switch (searchType) {
+    case 1: //页内搜索、定位
+      if (ipcRenderer && keyword.length > 0) ipcRenderer.invoke('find-in-page', keyword)
+      break
+    default: //搜索页
       visitSearch(keyword)
-    }
   }
 }
 

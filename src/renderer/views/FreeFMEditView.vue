@@ -28,9 +28,10 @@ const detail = reactive({ title: null, url: null, streamType: 0, tags: null, abo
 const setStreamType = (value) => Object.assign(detail, { streamType: value })
 const titleInvalid = ref(false)
 const urlInvalid = ref(false)
+const isActionDisabled = ref(false)
 
 
-const { addFreeRadio, updateFreeRadio, getFreeRadio } = useFreeFMStore()
+const { addFreeRadio, updateFreeRadio, getFreeRadio, removeFreeRadio } = useFreeFMStore()
 
 const loadRadio = () => {
     if (!props.id) return
@@ -75,6 +76,16 @@ const submit = () => {
         showToast(text, backward)
     } else {
         showFailToast(text)
+    }
+}
+
+const remove = () => {
+    const success = removeFreeRadio({ id: props.id })
+    if (success) {
+        isActionDisabled.value = true
+        showToast('电台已删除！', backward)
+    } else {
+        showFailToast('电台删除失败！')
     }
 }
 
@@ -162,8 +173,11 @@ onMounted(() => loadRadio())
                     </div>
                 </div>
                 <div class="action">
-                    <SvgTextButton :leftAction="submit" text="保存"></SvgTextButton>
-                    <SvgTextButton :leftAction="backward" text="取消" class="spacing"></SvgTextButton>
+                    <SvgTextButton :leftAction="submit" text="保存" :disabled="isActionDisabled"></SvgTextButton>
+                    <SvgTextButton :leftAction="remove" text="删除" v-show="id" class="spacing" :disabled="isActionDisabled">
+                    </SvgTextButton>
+                    <SvgTextButton :leftAction="backward" text="取消" class="spacing" :disabled="isActionDisabled">
+                    </SvgTextButton>
                 </div>
             </div>
         </div>

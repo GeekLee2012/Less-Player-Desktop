@@ -281,8 +281,9 @@ const walkSync = (dir, callback, options) => {
 }
 
 //解析.pls格式文件
-const parsePlsFile = async (filename) => {
+const parsePlsFile = async (filename, audioExts) => {
     try {
+        audioExts = audioExts || AUDIO_EXTS
         filename = transformPath(filename)
         const sname = getSimpleFileName(filename)
         const result = { file: filename, name: sname, version: null, data: [] }
@@ -319,7 +320,7 @@ const parsePlsFile = async (filename) => {
                 length = parseInt(value)
             }
             //TODO 暂时先简单处理，不校验序号是否匹配
-            if (file != null && title != null && length != null) {
+            if (file != null && isExtentionValid(file, audioExts)) {
                 //从文件本身去解析 Metadata，pls自带信息不完整
                 const track = await createTrackFromMetadata(file)
                 if (track) {
@@ -340,8 +341,9 @@ const parsePlsFile = async (filename) => {
 }
 
 //解析.m3u格式文件
-const parseM3uFile = async (filename) => {
+const parseM3uFile = async (filename, audioExts) => {
     try {
+        audioExts = audioExts || AUDIO_EXTS
         filename = transformPath(filename)
         const sname = getSimpleFileName(filename)
         const result = { file: filename, name: sname, version: null, data: [] }
@@ -370,7 +372,7 @@ const parseM3uFile = async (filename) => {
             */
             if (line.startsWith('#')) continue
             file = line
-            if (file != null) {
+            if (file != null && isExtentionValid(file, audioExts)) {
                 //从文件本身去解析 Metadata，pls自带信息不完整
                 const track = await createTrackFromMetadata(file)
                 if (track) {
