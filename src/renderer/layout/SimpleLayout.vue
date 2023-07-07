@@ -1333,7 +1333,7 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout>.bottom .action .love-btn {
-    fill: var(--content-text-highlight-color) !important;
+    fill: var(--content-highlight-color) !important;
 }
 
 .simple-layout>.bottom .lyric-ctl {

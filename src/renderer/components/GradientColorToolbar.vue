@@ -410,7 +410,7 @@ defineExpose({
     align-items: center;*/
 }
 
-.gradient-color-toolbar .header .action svg {
+.gradient-color-toolbar .header .left-action svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
@@ -426,7 +426,7 @@ defineExpose({
 }
 
 .gradient-color-toolbar .header .title-wrap {
-    margin-left: 20px;
+    margin-left: 6px;
     flex: 1;
     display: flex;
 }
@@ -448,22 +448,6 @@ defineExpose({
     justify-items: center;
     margin-left: 33px;
     cursor: pointer;
-}
-
-.gradient-color-toolbar .text-btn svg {
-    margin-right: 3px;
-    fill: var(--button-icon-btn-color);
-}
-
-.gradient-color-toolbar .text-btn:hover {
-    background: var(--content-text-highlight-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent !important;
-}
-
-.gradient-color-toolbar .text-btn:hover svg {
-    fill: var(--content-highlight-color);
 }
 
 .gradient-color-toolbar .tip-text {

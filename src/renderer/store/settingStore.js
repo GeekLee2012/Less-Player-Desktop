@@ -139,7 +139,7 @@ export const useSettingStore = defineStore('setting', {
             customPlaylistsShow: false,
             favoritePlaylistsShow: false,
             followArtistsShow: false,
-            radioModeShortcut: false,
+            radioModeShortcut: true,
         },
         /* 对话框 */
         dialog: {

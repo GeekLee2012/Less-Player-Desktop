@@ -107,6 +107,28 @@ textarea {
   object-fit: contain;
 }
 
+.text-btn {
+  cursor: pointer;
+}
+
+.text-btn:hover {
+  color: var(--content-highlight-color);
+  background: var(--content-text-highlight-color);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-btn svg {
+  margin-right: 5px;
+  fill: var(--button-icon-btn-color);
+}
+
+.text-btn:hover svg {
+  cursor: pointer;
+  fill: var(--content-highlight-color);
+}
+
 .winos-style .text-btn svg {
   padding-top: 2px;
 }

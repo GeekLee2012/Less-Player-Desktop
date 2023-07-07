@@ -431,9 +431,4 @@ EventBus.on("refresh-favorite", checkFavorite)
 #playlist-detail-view .search-wrap svg {
     margin-top: 1px;
 }
-
-#playlist-detail-view .search-wrap>span {
-    margin-left: 5px;
-    cursor: pointer;
-}
 </style>

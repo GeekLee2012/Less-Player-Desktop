@@ -284,6 +284,9 @@ provide('appRoute', {
         exploreMode = resolveExploreMode(exploreMode)
         return visitRoute(`/${exploreMode}/local/edit/${id}`)
     },
+    visitFreeFM() {
+        return visitRoute(createCommonRoute(`/radios/freefm`))
+    },
     visitFreeFMCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
         return visitRoute(createCommonRoute(`/${exploreMode}/freefm/create`))

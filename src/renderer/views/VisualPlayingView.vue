@@ -469,7 +469,7 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .action .love-btn {
-    fill: var(--content-text-highlight-color) !important;
+    fill: var(--content-highlight-color) !important;
 }
 
 .visual-playing-view .bottom {

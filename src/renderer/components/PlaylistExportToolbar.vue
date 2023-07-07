@@ -148,7 +148,7 @@ const exportPlaylist = async () => {
     align-items: center;*/
 }
 
-.playlist-export-toolbar .header .action svg {
+.playlist-export-toolbar .header .left-action svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
@@ -183,21 +183,6 @@ const exportPlaylist = async () => {
     cursor: pointer;
 }
 
-.playlist-export-toolbar .text-btn svg {
-    margin-right: 3px;
-    fill: var(--button-icon-btn-color);
-}
-
-.playlist-export-toolbar .text-btn:hover {
-    background: var(--content-text-highlight-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent !important;
-}
-
-.playlist-export-toolbar .text-btn:hover svg {
-    fill: var(--content-highlight-color);
-}
 
 .playlist-export-toolbar .center {
     padding: 0px 33px;

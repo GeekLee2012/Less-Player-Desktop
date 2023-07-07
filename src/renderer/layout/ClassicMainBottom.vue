@@ -152,6 +152,6 @@ onMounted(() => {
 }
 
 .classic-main-bottom .love-btn {
-    fill: var(--content-text-highlight-color) !important;
+    fill: var(--content-highlight-color) !important;
 }
 </style>

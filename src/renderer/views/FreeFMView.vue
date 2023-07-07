@@ -30,7 +30,8 @@ const { freeRadios, importTaskCount } = storeToRefs(useFreeFMStore())
 const { addFreeRadio, resetAll,
     increaseImportTaskCount, decreaseImportTaskCount } = useFreeFMStore()
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
-const { showToast, showFailToast, hideAllCtxMenus, setSearchBarExclusiveAction } = useAppCommonStore()
+const { showToast, showFailToast, hideAllCtxMenus,
+    setSearchBarExclusiveAction, toggleTagsCategoryView } = useAppCommonStore()
 const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM } = storeToRefs(useSettingStore())
 
 
@@ -93,6 +94,7 @@ const removeAll = async () => {
     if (!ok) return
 
     resetAll()
+    filteredData.value = null
     showToast('自由FM已全部清空!')
 }
 
@@ -127,6 +129,48 @@ const filterContent = () => {
     }
 }
 
+const getAllTags = () => {
+    const allTags = []
+    const data = freeRadios.value
+    data.forEach(item => {
+        const { tags } = item
+        if (!tags || tags.trim().length < 1) return
+        const tagTexts = tags.split(',')
+        tagTexts.forEach(tagText => {
+            if (!tagText || tagText.trim().length < 1) return
+            tagText = tagText.trim()
+            const index = allTags.findIndex(e => (e.value == tagText))
+            if (index < 0) {
+                allTags.push({ name: tagText, value: tagText, occurence: 0 })
+            } else {
+                ++allTags[index].occurence
+            }
+        })
+    })
+    return allTags.sort((a, b) => (b.occurence - a.occurence))
+}
+
+const filterByTags = (tags) => {
+    if (!tags) return
+    const data = freeRadios.value
+    const listData = data.filter(item => {
+        const { tags: tagsText } = item
+        const _tagTexts = tagsText || ''
+        for (var i = 0; i < tags.length; i++) {
+            const { value } = tags[i]
+            if (_tagTexts.toLowerCase().includes(value.toLowerCase())) {
+                return true
+            }
+        }
+        return false
+    })
+    filteredData.value = listData.length > 0 ? listData : null
+}
+
+const showTagsView = () => {
+    EventBus.emit('tagsCategory-update', { data: getAllTags(), callback: filterByTags })
+    toggleTagsCategoryView()
+}
 
 onMounted(() => {
     resetBack2TopBtn()
@@ -199,6 +243,17 @@ watch(searchKeyword, filterContent)
                         </g>
                     </svg>
                     <span>独占搜索框模式</span>
+                </div>
+                <div class="tags-btn text-btn" @click.stop="showTagsView" v-show="false">
+                    <svg width="15" height="15" viewBox="0 0 29.3 29.3">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z" />
+                            </g>
+                        </g>
+                    </svg>
+                    <span>标签</span>
                 </div>
             </div>
             <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount">
@@ -278,21 +333,29 @@ watch(searchKeyword, filterContent)
     fill: var(--content-highlight-color);
 }
 
-
 #freefm-view .search-wrap {
     position: absolute;
+    right: 68px;
     right: -10px;
     display: flex;
     align-items: center;
-    font-weight: bold;
+    /* font-weight: bold; */
 }
 
 #freefm-view .search-wrap svg {
     margin-top: 1px;
 }
 
-#freefm-view .search-wrap>span {
-    margin-left: 5px;
-    cursor: pointer;
+#freefm-view .tags-btn {
+    position: absolute;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#freefm-view .tags-btn:hover {
+    fill: var(--content-highlight-color);
+    color: var(--content-highlight-color);
 }
 </style>

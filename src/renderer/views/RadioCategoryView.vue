@@ -214,17 +214,6 @@ EventBus.on('radioCategory-resetScroll', resetScroll)
     margin-left: 20px;
 }
 
-.radio-category-view .text-btn svg {
-    margin-right: 5px;
-    fill: var(--button-icon-btn-color);
-}
-
-.radio-category-view .text-btn:hover,
-.radio-category-view .text-btn:hover svg {
-    color: var(--content-text-highlight-color);
-    fill: var(--content-highlight-color);
-}
-
 .radio-category-view .center {
     flex-direction: column;
     margin-left: 33px;

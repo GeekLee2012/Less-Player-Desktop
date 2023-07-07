@@ -746,22 +746,6 @@ watch(workingCustomTheme, (nv, ov) => {
     cursor: pointer;
 }
 
-.custom-theme-edit-view .text-btn svg {
-    margin-right: 3px;
-    fill: var(--button-icon-btn-color);
-}
-
-.custom-theme-edit-view .text-btn:hover {
-    background: var(--content-text-highlight-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent !important;
-}
-
-.custom-theme-edit-view .text-btn:hover svg {
-    fill: var(--content-highlight-color);
-}
-
 .custom-theme-edit-view .tip-text {
     margin-bottom: 15px;
     text-align: left;

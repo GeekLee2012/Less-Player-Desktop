@@ -602,8 +602,9 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
         </div>
         <div class="center">
             <div class="action">
-                <div class="checkbox" :class="{ 'button-disabled': (tabData.length < 1) }">
-                    <svg @click="toggleSelectAll" v-show="!checkedAll" width="16" height="16" viewBox="0 0 731.64 731.66"
+                <div class="checkbox select-all" :class="{ 'button-disabled': (tabData.length < 1) }"
+                    @click="toggleSelectAll">
+                    <svg v-show="!checkedAll" width="16" height="16" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -612,8 +613,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                             </g>
                         </g>
                     </svg>
-                    <svg @click="toggleSelectAll" v-show="checkedAll" class="checked-svg" width="16" height="16"
-                        viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                    <svg v-show="checkedAll" class="checked-svg" width="16" height="16" viewBox="0 0 767.89 767.94"
+                        xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -621,7 +622,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                             </g>
                         </g>
                     </svg>
-                    <span @click="toggleSelectAll">{{ (checkedAll ? "取消全选" : "全选") }}</span>
+                    <span>{{ (checkedAll ? "取消全选" : "全选") }}</span>
                 </div>
                 <SvgTextButton :disabled="checkedData.length < 1" text="播放" class="spacing" v-show="actionShowCtl.playBtn"
                     :leftAction="playChecked" :rightAction="addToQueue">
@@ -815,11 +816,6 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     margin-top: 1px;
 }
 
-#batch-action-view .header .search-wrap>span {
-    margin-left: 5px;
-    cursor: pointer;
-}
-
 #batch-action-view .header .tab-tip {
     position: absolute;
     right: 10px;
@@ -872,6 +868,14 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     /*width: 65px;*/
     min-width: 80px;
     cursor: pointer;
+}
+
+#batch-action-view .action .select-all {
+    cursor: pointer;
+}
+
+#batch-action-view .action .select-all span {
+    margin-left: 10px;
 }
 
 #batch-action-view .content {

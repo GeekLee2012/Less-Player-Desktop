@@ -17,12 +17,11 @@ const { scanDirTracks, parseTracks,
   parsePlsFile, parseM3uFile,
   writePlsFile, writeM3uFile,
   IMAGE_PROTOCAL, parseImageDataFromFile,
-  statPathSync, walkSync
+  statPathSync, walkSync, MD5,
 } = require('./common')
 
 const path = require('path')
 const { dir } = require('console')
-
 
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
@@ -750,6 +749,7 @@ const overrideRequest = (details) => {
   let userAgent = null
   let xrouter = null
   let csrf = null
+  let cross = null
 
   const { url } = details
   if (url.includes("qq.com")) {
@@ -764,12 +764,14 @@ const overrideRequest = (details) => {
     cookie = ''
     //referer = 'https://www.kuwo.cn/'
   } else if (url.includes("kuwo")) {
-    csrf = randomTextWithinAlphabetNums(11).toUpperCase()
+    const kw_token = randomTextWithinAlphabetNums(10).toUpperCase()
+    //const hm_token = 'JBKeCaitKM6jTWMfdef4kJMF2BBf4T3z'
+    const hm_token = randomTextWithinAlphabetNums(32).toUpperCase()
     origin = "https://www.kuwo.cn/"
     referer = origin
-    cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; "
-      + "_ga=GA1.2.1036906485.1647595722; "
-      + "kw_token=" + csrf
+    // cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; _ga=GA1.2.1036906485.1647595722; kw_token=" + csrf
+    cookie = `kw_token=${kw_token};Hm_token=${hm_token}`
+    cross = MD5(hm_token).toLowerCase()
   } else if (url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
@@ -811,6 +813,7 @@ const overrideRequest = (details) => {
   if (cookie) details.requestHeaders['Cookie'] = cookie
   if (xrouter) details.requestHeaders['x-router'] = xrouter
   if (csrf) details.requestHeaders['CSRF'] = csrf
+  if (cross) details.requestHeaders['Cross'] = cross
 
   return details
 }

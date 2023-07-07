@@ -49,15 +49,20 @@ const setSearchBarSize = () => {
 
 const setCategoryViewSize = () => {
     const mainContent = document.getElementById('default-main-content')
+    if (!mainContent) return
+
     const playlistCategory = document.querySelector('#playlist-category-view')
     const artistCategory = document.querySelector('#artist-category-view')
     const radioCategory = document.querySelector('#radio-category-view')
-    if (!mainContent) return
+    const tagsCategory = document.querySelector('#tags-category-view')
+
+    const categories = [playlistCategory, artistCategory, radioCategory, tagsCategory]
+
     const { clientHeight } = mainContent, padding = 0
     const height = (clientHeight - padding)
-    if (playlistCategory) playlistCategory.style.height = height + 'px'
-    if (artistCategory) artistCategory.style.height = height + 'px'
-    if (radioCategory) radioCategory.style.height = height + 'px'
+    categories.forEach(item => {
+        if (item) item.style.height = `${height}px`
+    })
 }
 
 const setImageTextTileSize = () => {
@@ -294,31 +299,6 @@ onMounted(() => {
 EventBus.on('batchView-show', setBatchViewListSize)
 EventBus.on('playingView-changed', setPlayingViewSize)
 EventBus.on('app-layout-default', setupDefaultLayout)
-/*
-EventBus.on('app-resize', event => {
-    if (!isDefaultLayout.value) return
-    //自适应播放元信息组件大小
-    setPlayMetaSize()
-    //自适应搜索框大小
-    //setSearchBarSize()
-    //自适应ImageTextTile组件大小
-    setImageTextTileSize()
-    //自适应分类列表大小
-    setCategoryViewSize()
-    //自适应播放页组件大小
-    setPlayingViewSize()
-    //自适应批量操作页面列表大小
-    setBatchViewListSize()
-    //主题页
-    setThemeViewItemsSize()
-
-    //隐藏上下文菜单
-    hideAllCtxMenus()
-    //TODO 窗口缩放Bug，放在最后执行确保缩放
-    setupWindowZoom(true)
-    //nextTick(() => setupWindowZoom(true))
-})
-*/
 
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)

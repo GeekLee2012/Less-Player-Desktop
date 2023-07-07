@@ -13,6 +13,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         playlistCategoryViewShow: false,
         artistCategoryViewShow: false,
         radioCategoryViewShow: false,
+        tagsCategoryViewShow: false,
         playbackQueueViewShow: false,
         playingViewShow: false,
         videoPlayingViewShow: false,
@@ -124,6 +125,16 @@ export const useAppCommonStore = defineStore('appCommon', {
         hideRadioCategoryView() {
             this.radioCategoryViewShow = false
             EventBus.emit("radioCategory-resetScroll")
+        },
+        toggleTagsCategoryView() {
+            this.tagsCategoryViewShow = !this.tagsCategoryViewShow
+            if (!this.tagsCategoryViewShow) {
+                EventBus.emit("tagsCategory-resetScroll")
+            }
+        },
+        hideTagsCategoryView() {
+            this.tagsCategoryViewShow = false
+            EventBus.emit("tagsCategory-resetScroll")
         },
         showPlayingView() {
             this.playingViewShow = true
@@ -270,6 +281,7 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.hidePlaylistCategoryView()
             this.hideArtistCategoryView()
             this.hideRadioCategoryView()
+            this.hideTagsCategoryView()
         },
         hideAllCtxMenus() {
             this.hideCommonCtxMenu()

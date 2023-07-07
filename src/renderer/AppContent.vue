@@ -15,7 +15,7 @@ import { isMacOS, isWinOS, useIpcRenderer, useUseCustomTrafficLight } from '../c
 
 
 
-const { visitSetting, visitSearch } = inject('appRoute')
+const { visitSetting, visitSearch, visitFreeFM } = inject('appRoute')
 const ipcRenderer = useIpcRenderer()
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
@@ -274,8 +274,12 @@ const searchDefault = async (keyword) => {
   keyword = keyword.trim()
 
   let searchType = 0
-  //关键字格式：设置xxx
-  if (keyword.startsWith('设置')) {
+
+  if (keyword == '自由FM'
+    || keyword.toLowerCase() == 'freefm') {
+    visitFreeFM()
+    return
+  } else if (keyword.startsWith('设置')) { //关键字格式：设置xxx
     keyword = keyword.slice(2).trim()
     searchType = 1
     visitSetting()

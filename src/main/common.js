@@ -91,6 +91,10 @@ async function parseTracks(audioFiles) {
     return tracks
 }
 
+function MD5(text) {
+    return text ? CryptoJS.MD5(text).toString() : null
+}
+
 async function createTrackFromMetadata(file) {
     file = transformPath(file)
     const statResult = statSync(file, { throwIfNoEntry: false })
@@ -143,7 +147,7 @@ async function createTrackFromMetadata(file) {
         }
 
         //TODO
-        const hash = CryptoJS.MD5(file).toString()
+        const hash = MD5(file)
         return {
             id: hash,
             platform: 'local',
@@ -226,7 +230,7 @@ const randomText = (src, len) => {
 
 /** 随机字符串: 大小写字母和数字组成 */
 const randomTextWithinAlphabetNums = (len) => {
-    return randomText(ALPHABET_NUMS, len)
+    return randomText(ALPHABET_NUMS + ALPHABET_NUMS + ALPHABET_NUMS, len)
 }
 
 const nextInt = (max) => {
@@ -443,5 +447,6 @@ module.exports = {
     writeM3uFile,
     parseImageDataFromFile,
     statPathSync,
-    walkSync
+    walkSync,
+    MD5,
 }

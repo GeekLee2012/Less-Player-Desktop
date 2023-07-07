@@ -1,52 +1,66 @@
 <script setup>
-import { useArtistSquareStore } from '../store/artistSquareStore';
-import { useAppCommonStore } from '../store/appCommonStore';
-import EventBus from '../../common/EventBus';
 import { reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useAppCommonStore } from '../store/appCommonStore';
+import EventBus from '../../common/EventBus';
 
 
 
-const artistCategoryViewRef = ref(null)
-const { currentCategoryItems } = storeToRefs(useArtistSquareStore())
-const { currentCategory, updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareStore()
-const { isArtistMode } = storeToRefs(useAppCommonStore())
-const categories = reactive([])
+const tagsData = ref([])
+const checkedData = reactive([])
+let onChangedCallback = null
 
-const updateCategory = () => {
-    categories.length = 0
-    const cached = currentCategory()
-    if (cached) categories.push(...cached)
-    resetCurrentCategoryItems()
+tagsData.value = [{
+    name: '中国',
+    value: '中国'
+}, {
+    name: '音乐',
+    value: '音乐'
+}, {
+    name: '新闻',
+    value: '新闻'
+}, {
+    name: 'Pop',
+    value: 'Pop'
+}, {
+    name: 'Jazz',
+    value: 'Jazz'
+}]
+
+const notifyChanged = () => {
+    const callback = onChangedCallback
+    if (callback) callback(checkedData)
 }
 
-const resetScroll = () => {
-    if (!artistCategoryViewRef.value) return
-    artistCategoryViewRef.value.scrollTop = 0
+const resetAllChecked = () => {
+    checkedData.length = 0
+    notifyChanged()
 }
 
-const visitCateItem = (name, item, index) => {
-    updateCurrentCategoryItem(name, item, index)
-    //hideArtistCategoryView()
+const toggleTagActive = (tag, index) => {
+    const cIndex = checkedData.indexOf(tag)
+    if (cIndex == -1) {
+        checkedData.push(tag)
+    } else {
+        checkedData.splice(cIndex, 1)
+    }
+    notifyChanged()
 }
 
-EventBus.on('artistCategory-update', () => {
-    updateCategory()
-})
-
-EventBus.on('artistCategory-resetScroll', () => {
-    resetScroll()
+EventBus.on('tagsCategory-update', ({ data, callback }) => {
+    tagsData.value = data
+    onChangedCallback = callback
 })
 </script>
 
 <template>
-    <div class="artist-category-view" ref="artistCategoryViewRef" @click.stop="">
+    <div class="tags-category-view" @click.stop="">
         <div class="container">
             <div class="header">
-                <span class="cate-title">全部分类</span>
+                <div class="tag-title">全部标签</div>
                 <div class="action">
-                    <div class="reset-btn text-btn" @click="resetCurrentCategoryItems">
-                        <svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1"
+                    <div class="reset-btn text-btn" @click="resetAllChecked">
+                        <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z"
@@ -66,13 +80,9 @@ EventBus.on('artistCategory-resetScroll', () => {
                 </div>
             </div>
             <div class="center">
-                <div v-for="(cate, row) in categories" class="fl-row">
-                    <div class="cate-title">{{ cate.name }}</div>
-                    <div class="cate-item-wrap">
-                        <div v-for="(item, col) in cate.data" class="fl-item"
-                            :class="{ current: col == currentCategoryItems[cate.name].index }"
-                            @click="visitCateItem(cate.name, item, col)" v-html="item.key">
-                        </div>
+                <div class="fl-row">
+                    <div v-for="(tag, index) in tagsData" class="fl-item" v-html="tag.name"
+                        :class="{ active: checkedData.includes(tag) }" @click="toggleTagActive(tag, index)">
                     </div>
                 </div>
             </div>
@@ -81,7 +91,7 @@ EventBus.on('artistCategory-resetScroll', () => {
 </template>
 
 <style scoped>
-.artist-category-view {
+.tags-category-view {
     display: flex;
     overflow: hidden;
     overflow-x: hidden;
@@ -89,7 +99,7 @@ EventBus.on('artistCategory-resetScroll', () => {
     border-bottom-left-radius: 5px;
 }
 
-.artist-category-view .container {
+.tags-category-view .container {
     overflow: scroll;
     overflow-x: hidden;
     padding-bottom: 30px;
@@ -98,57 +108,70 @@ EventBus.on('artistCategory-resetScroll', () => {
     background: var(--content-bg-color-no-transparent);
 }
 
-.artist-category-view .header,
-.artist-category-view .center {
+.tags-category-view .header,
+.tags-category-view .center {
     display: flex;
-    /*flex-direction: row;*/
     text-align: left;
 }
 
-.artist-category-view .header {
-    padding: 15px 33px;
+.tags-category-view .header {
+    margin-bottom: 5px;
+    padding-bottom: 10px;
+    padding-left: 33px;
+    padding-right: 33px;
     border-bottom: 1px solid var(--border-color);
 }
 
-.artist-category-view .header .cate-title {
-    /*font-size: 21px;*/
-    font-size: var(--content-text-module-title2-size);
-    font-weight: bold;
-    color: var(--content-subtitle-text-color);
+.tags-category-view .header .tag-title {
+    /*margin-right: 1px;*/
     flex: 1;
 }
 
-.artist-category-view .header .action {
+
+.tags-category-view .header .fl-item,
+.tags-category-view .header .fl-item:hover {
+    cursor: default;
+    font-size: var(--content-text-size);
+    margin-right: 0px;
+}
+
+.tags-category-view .header .action {
+    flex: 1;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    margin-top: 10px;
 }
 
-.artist-category-view .text-btn {
+.tags-category-view .header .text-btn {
     text-align: left;
-    /*font-size: 15px;*/
     display: flex;
     align-items: center;
     justify-items: center;
     cursor: pointer;
     margin-left: 20px;
-    font-size: var(--content-text-tip-text-size);
 }
 
-.artist-category-view .center {
+.tags-category-view .center {
     flex-direction: column;
     margin-left: 33px;
     margin-right: 33px;
 }
 
-.artist-category-view .fl-row {
+.tags-category-view .fl-row {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     margin-bottom: 10px;
     text-align: left;
 }
 
-.artist-category-view .center .cate-title {
+.tags-category-view .tag-item-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.tags-category-view .tag-title {
     font-size: 19px;
     font-weight: bold;
     color: var(--content-subtitle-text-color);
@@ -157,30 +180,34 @@ EventBus.on('artistCategory-resetScroll', () => {
     margin-right: 20px;
 }
 
-.artist-category-view .cate-item-wrap {
-    display: flex;
-    flex-wrap: wrap;
+.tags-category-view .header .tag-title {
+    /*font-size: 21px;*/
+    margin-bottom: 3px;
+    font-size: var(--content-text-module-title2-size);
 }
 
-.artist-category-view .fl-item {
-    /*font-size: 15px;*/
+.tags-category-view .fl-item {
+    /*float: left;*/
+    /* font-size: 15px; */
     padding: 6px 16px;
     margin-top: 10px;
     margin-right: 10px;
-    float: left;
     cursor: pointer;
     color: var(--content-text-color);
-    font-size: var(--content-text-subtitle-size);
     border-radius: 10rem;
+    font-size: var(--content-text-subtitle-size);
 }
 
-.artist-category-view .fl-item:hover {
+.tags-category-view .fl-item:hover {
     background-color: var(--content-list-item-hover-bg-color);
     color: var(--content-text-color);
 }
 
+.tags-category-view .header .active {
+    font-weight: bold;
+}
 
-.artist-category-view .current {
+.tags-category-view .center .active {
     border-radius: 10rem;
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;

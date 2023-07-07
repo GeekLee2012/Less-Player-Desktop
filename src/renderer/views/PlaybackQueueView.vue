@@ -200,23 +200,6 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     margin-left: 20px;
 }
 
-.playback-queue-view .text-btn svg {
-    margin-right: 3px;
-    fill: var(--button-icon-btn-color);
-}
-
-.playback-queue-view .text-btn:hover {
-    color: var(--content-highlight-color);
-    background: var(--content-text-highlight-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.playback-queue-view .text-btn:hover svg {
-    fill: var(--content-highlight-color);
-}
-
 .playback-queue-view .more-btn {
     cursor: pointer;
     margin-top: 4px;
@@ -227,23 +210,11 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     fill: var(--content-highlight-color);
 }
 
-/*
-.playback-queue-view .text-btn span {
-    display: none;
-}
-
-.playback-queue-view .target-btn:hover span,
-.playback-queue-view .clear-btn:hover span {
-    display: flex;
-}
-*/
-
 .playback-queue-view .header .title {
     text-align: left;
     /*font-size: 23px;*/
     font-size: var(--content-text-module-subtitle-size);
     font-weight: bold;
-
 }
 
 .playback-queue-view .center {

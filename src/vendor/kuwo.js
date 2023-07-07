@@ -37,14 +37,17 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const result = { platform: KuWo.CODE, data: [], orders: [] }
             const url = "https://www.kuwo.cn/api/www/playlist/getTagList"
-                + "?httpsStatus=1&reqId=" + randomReqId()
+                + "?httpsStatus=1&reqId=" + randomReqId() + '&plat=web_www'
             getJson(url, null, CONFIG).then(json => {
-                const defaultCategory = new Category("精选")
-                defaultCategory.add("最新", '#new')
-                defaultCategory.add("最热", '#hot')
-                result.data.push(defaultCategory)
+                const cateArray = json.data || []
 
-                const cateArray = json.data
+                if (cateArray && cateArray.length > 0) {
+                    const defaultCategory = new Category("精选")
+                    defaultCategory.add("最新", '#new')
+                    defaultCategory.add("最热", '#hot')
+                    result.data.push(defaultCategory)
+                }
+
                 cateArray.forEach(cate => {
                     const category = new Category(cate.name)
                     const cateItems = cate.data
@@ -55,8 +58,11 @@ export class KuWo {
                         result.data.push(category)
                     }
                 })
-                const firstCate = result.data[0]
-                firstCate.data.splice(2, 0, { key: '排行榜', value: KuWo.TOPLIST_CODE })
+
+                if (cateArray && cateArray.length > 0) {
+                    const firstCate = result.data[0]
+                    firstCate.data.splice(2, 0, { key: '排行榜', value: KuWo.TOPLIST_CODE })
+                }
                 resolve(result)
             })
         })
@@ -71,15 +77,18 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const result = { platform: KuWo.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }
             let url = null
+            //官方 rn = 20
             if (resolvedCate.startsWith('#')) {
                 resolvedCate = resolvedCate.substring(1)
                 url = "https://www.kuwo.cn/api/www/classify/playlist/getRcmPlayList"
                     + "?pn=" + page + "&rn=" + limit
                     + "&order=" + resolvedCate + "&httpsStatus=1&reqId=" + randomReqId()
+                    + "&plat=web_www&from="
             } else {
                 url = "https://www.kuwo.cn/api/www/classify/playlist/getTagPlayList"
                     + "?pn=" + page + "&rn=" + limit
                     + "&id=" + resolvedCate + "&httpsStatus=1&reqId=" + randomReqId()
+                    + "&plat=web_www&from="
             }
             getJson(url, null, CONFIG).then(json => {
                 const pagination = json.data
@@ -183,6 +192,7 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/playlist/playListInfo"
                 + "?pid=" + id + "&pn=" + page + "&rn=" + limit
                 + "&httpsStatus=1&reqId=" + randomReqId()
+                + "&plat=web_www&from="
             const result = new Playlist(id, KuWo.CODE)
             /*
             result.cover = json.data.img500
@@ -221,6 +231,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/v1/www/music/playUrl"
                 + "?mid=" + id + "&type=music" + "&httpsStatus=1&reqId=" + randomReqId()
+                + "&plat=web_www&from="
             const result = new Track(id, KuWo.CODE)
             getJson(url, null, CONFIG).then(json => {
                 if (json.data) Object.assign(result, { url: json.data.url })
@@ -236,6 +247,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "http://m.kuwo.cn/newh5/singles/songinfoandlrc"
                 + "?musicId=" + id + "&httpsStatus=1&reqId=" + randomReqId()
+                + "&plat=web_www&from="
             getJson(url, null, CONFIG).then(json => {
                 const result = { id, platform: KuWo.CODE, lyric: new Lyric(), trans: null }
                 if (!json.data) {
@@ -258,7 +270,7 @@ export class KuWo {
     //歌手详情：Name、Cover、简介(如果有)等
     static artistDetail(id) {
         return new Promise((resolve, reject) => {
-            let url = "http://www.kuwo.cn/singer_detail/" + id
+            let url = `http://www.kuwo.cn/singer_detail/${id}`
             getDoc(url).then(doc => {
                 let title = '', cover = '', about = ''
 
