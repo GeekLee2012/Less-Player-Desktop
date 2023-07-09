@@ -195,7 +195,7 @@ const onUserMouseWheel = (e) => {
     if (userMouseWheelCancelTimer) clearTimeout(userMouseWheelCancelTimer)
     userMouseWheelCancelTimer = setTimeout(() => {
         setUserMouseWheel(false)
-    }, 3000)
+    }, 2888)
     updateScrollLocatorTime()
 }
 
@@ -266,8 +266,8 @@ const setupLyricScrollLocator = () => {
 
     const { alignment } = lyric.value
     //const flexAligns = ['flex-start', 'center', 'flex-end']
-    const locatorPositions = ['80px', '80px', leftAlignPos + 'px']
-    locatorEl.style.right = locatorPositions[alignment]
+    const locatorPositions = ['80', '80', leftAlignPos]
+    locatorEl.style.right = locatorPositions[alignment] + 'px'
     //locatorEl.style.justifyContent = flexAligns[alignment]
 }
 
@@ -296,7 +296,7 @@ const seekFromLyric = () => {
     const { duration } = props.track
     if (duration <= 0) return
     const current = toMillis(scrollLocatorTime.value)
-    if (current < 0) return
+    if (current < 0 || current > duration) return
 
     setUserMouseWheel(false)
     setSeeking(true)
@@ -330,9 +330,9 @@ const setupLyricExtra = () => {
     if (lines) {
         try {
             lines.forEach((line, index) => {
-                //1、重置
                 const extraTextEl = line.querySelector('.extra-text')
                 if (!extraTextEl) return
+                //1、重置
                 extraTextEl.innerHTML = null
 
                 //2、重新赋值

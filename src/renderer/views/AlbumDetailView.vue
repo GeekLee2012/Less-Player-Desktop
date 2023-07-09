@@ -8,17 +8,19 @@ export default {
 -->
 
 <script setup>
-import { inject, ref, reactive, shallowRef, watch, toRaw } from 'vue';
+import { inject, ref, reactive, shallowRef, watch, toRaw, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
-import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
-import SongListControl from '../components/SongListControl.vue';
-import TextListControl from '../components/TextListControl.vue';
+import EventBus from '../../common/EventBus';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { useUserProfileStore } from '../store/userProfileStore';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
+import SongListControl from '../components/SongListControl.vue';
+import TextListControl from '../components/TextListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
-import { useAppCommonStore } from '../store/appCommonStore';
-import { useUserProfileStore } from '../store/userProfileStore';
+import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
+
 
 
 
@@ -52,14 +54,12 @@ const tabData = ref([])
 const detail = reactive({})
 const isLoadingDetail = ref(false)
 const isLoading = ref(false)
+const setLoadingDetail = (value) => isLoadingDetail.value = value
+const setLoading = (value) => isLoading.value = value
+const titleRef = ref(null)
+const isTwoLinesTitle = ref(false)
+const setTwoLinesTitle = (value) => isTwoLinesTitle.value = value
 
-const setLoadingDetail = (value) => {
-    isLoadingDetail.value = value
-}
-
-const setLoading = (value) => {
-    isLoading.value = value
-}
 
 const visitTab = (index, isClick) => {
     if (isLoading.value && isClick) return
@@ -202,8 +202,19 @@ const switchTab = () => {
     }
 }
 
+const detectTitleHeight = () => {
+    const titleEl = titleRef.value
+    if (!titleEl) return
+    const { clientHeight } = titleEl
+    if (!clientHeight) return
+    setTwoLinesTitle(clientHeight > 50)
+}
+
 //TODO 需要梳理优化
 watch([platform, albumId], reloadAll, { immediate: true })
+watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
+
+EventBus.on('app-resize', detectTitleHeight)
 </script>
 
 <template>
@@ -213,8 +224,8 @@ watch([platform, albumId], reloadAll, { immediate: true })
                 <img class="cover" v-lazy="albumCover" />
             </div>
             <div class="right" v-show="!isLoading">
-                <div class="title" v-html="albumName"></div>
-                <div class="info">
+                <div class="title" v-html="albumName" ref="titleRef"></div>
+                <div class="info" :class="{ 'short-info': isTwoLinesTitle }">
                     <div class="info-row">
                         <span><b>歌手:</b> {{ artistName || '未知歌手' }} </span>
                     </div>
@@ -237,11 +248,12 @@ watch([platform, albumId], reloadAll, { immediate: true })
                     <div class="loading-mask" style="width: 88%; height: 39px; display: inline-block;"></div>
                 </div>
                 <div class="info" v-show="isLoadingDetail">
-                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 28px; display: inline-block;">
+                    <div class="loading-mask" v-for="  i   in   3  "
+                        style="width: 100%; height: 28px; display: inline-block;">
                     </div>
                 </div>
                 <div class="action">
-                    <div class="loading-mask spacing" v-for="i in 2"
+                    <div class="loading-mask spacing" v-for="  i   in   2  "
                         style="width: 168px; height: 36px; display: inline-block;"></div>
                 </div>
             </div>
@@ -249,7 +261,7 @@ watch([platform, albumId], reloadAll, { immediate: true })
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
-                    v-for="(tab, index) in tabs" @click="visitTab(index, true)" v-html="tab.name">
+                    v-for="(  tab, index  ) in   tabs  " @click="visitTab(index, true)" v-html="tab.name">
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
@@ -283,7 +295,7 @@ watch([platform, albumId], reloadAll, { immediate: true })
 
 #album-detail-view .header .title {
     text-align: left;
-    margin-top: 5px;
+    margin-top: 0px;
     /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
@@ -307,9 +319,15 @@ watch([platform, albumId], reloadAll, { immediate: true })
 
 #album-detail-view .header .info {
     margin-top: 20px;
-    margin-bottom: 31px;
+    margin-bottom: 43px;
     /*font-size: 16px;*/
     text-align: left;
+}
+
+
+#album-detail-view .header .short-info {
+    margin-top: 10px;
+    margin-bottom: 13px;
 }
 
 #album-detail-view .header .info-row {
@@ -326,7 +344,6 @@ watch([platform, albumId], reloadAll, { immediate: true })
 }
 
 #album-detail-view .header .info-row .col1 {
-    width: 200px;
     width: 233px;
     display: inline-block;
 }

@@ -1,16 +1,16 @@
 <script setup>
 import { onMounted, onActivated, reactive, ref, watch, inject, nextTick, onDeactivated } from 'vue';
-import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
+import { storeToRefs } from 'pinia';
+import EventBus from '../../common/EventBus';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { useAppCommonStore } from '../store/appCommonStore';
+import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
-import { useUserProfileStore } from '../store/userProfileStore';
-import EventBus from '../../common/EventBus';
-import { storeToRefs } from 'pinia';
 
 
 
@@ -40,6 +40,9 @@ const isLoading = ref(true)
 const setLoading = (value) => isLoading.value = value
 const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
+const titleRef = ref(null)
+const isTwoLinesTitle = ref(false)
+const setTwoLinesTitle = (value) => isTwoLinesTitle.value = value
 
 
 const updateListSizeText = () => {
@@ -221,10 +224,19 @@ const filterContent = () => {
     updateListSizeText()
 }
 
+const detectTitleHeight = () => {
+    const titleEl = titleRef.value
+    if (!titleEl) return
+    const { clientHeight } = titleEl
+    if (!clientHeight) return
+    setTwoLinesTitle(clientHeight > 50)
+}
+
 
 /* 生命周期、监听 */
 onActivated(() => {
     restoreScrollState()
+    detectTitleHeight()
 })
 
 onDeactivated(() => {
@@ -240,8 +252,10 @@ watch(() => props.id, () => {
 }, { immediate: true })
 
 watch(searchKeyword, filterContent)
+watch(isLoading, () => nextTick(detectTitleHeight))
 
 EventBus.on("refresh-favorite", checkFavorite)
+EventBus.on('app-resize', detectTitleHeight)
 </script>
 
 <template>
@@ -251,8 +265,8 @@ EventBus.on("refresh-favorite", checkFavorite)
                 <img class="cover" v-lazy="detail.cover" />
             </div>
             <div class="right" v-show="!isLoading">
-                <div class="title" v-html="detail.title"></div>
-                <div class="about" v-html="trimExtraHtml(detail.about)"></div>
+                <div class="title" v-html="detail.title" ref="titleRef"></div>
+                <div class="about" v-html="trimExtraHtml(detail.about)" :class="{ 'short-about': isTwoLinesTitle }"></div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="() => playAll()" :rightAction="() => addAll()" class="btn-spacing">
                     </PlayAddAllBtn>
@@ -370,6 +384,11 @@ EventBus.on("refresh-favorite", checkFavorite)
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 5;
+}
+
+#playlist-detail-view .header .short-about {
+    height: 105px;
+    -webkit-line-clamp: 4;
 }
 
 #playlist-detail-view .header .cover {

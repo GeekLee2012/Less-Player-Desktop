@@ -1061,13 +1061,13 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
-                "playbackQueue": false,
-                "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
-                "soundEffectView": false,
-                "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "playbackQueue": true,
+                "categoryView": true,
+                "contextMenu": true,
+                "toast": true,
+                "soundEffectView": true,
+                "lyricToolbar": true,
+                "randomMusicToolbar": true
             },
             "content": {
                 "textColor": "#fdfdf2",
