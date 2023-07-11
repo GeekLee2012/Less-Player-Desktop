@@ -655,8 +655,9 @@ onMounted(checkForUpdate)
                         <SvgTextButton text="恢复默认" style="display: none"></SvgTextButton>
                         <div class="tip-text" v-show="false">提示：目前暂时不支持自定义</div>
                     </div>
+                    <div class="tip-text">提示：一般不建议启用全局快捷键，容易与其他应用的快捷键产生冲突</div>
                     <div v-for="(item, index) in keys.data" :class="{ last: index == (keys.data.length - 1) }">
-                        <span class="cate-subtitle">{{ item.name }}：</span>
+                        <span class="cate-subtitle cate-text">{{ item.name }}：</span>
                         <KeysInputControl :value="item.binding" :class="{ keysInputAdptWidth: !keys.global }">
                         </KeysInputControl>
                         <KeysInputControl :value="item.gBinding" class="global-keys-ctrl" v-show="keys.global">
@@ -667,8 +668,11 @@ onMounted(checkForUpdate)
             <div class="network row">
                 <span class="cate-name">网络</span>
                 <div class="content" @keydown.stop="">
-                    <div class="tip-text">提示：国内网络下，一般无需配置；开启代理后，若配置不当，当前应用将无法正常联网</div>
-                    <div>网络代理配置：
+                    <div class="tip-text">提示：国内网络下，一般无需配置；开启代理后，若配置不当，当前应用将无法正常联网
+                        <br>需用户名/密码验证的代理功能，暂时未经测试，无法确保可以正常使用
+                        <br>开启代理，并修改配置后，请点击“应用更改”按钮，新配置才会生效哦
+                    </div>
+                    <div>网络代理配置（实验性功能）：
                         <div class="spacing">
                             <SvgTextButton text="应用更改" :leftAction="applySetupProxy" :rightAction="closeProxy">
                                 <template #left-img>
@@ -693,7 +697,9 @@ onMounted(checkForUpdate)
                             </SvgTextButton>
                         </div>
                     </div>
+                    <!--
                     <div class="tip-text">提示：开启代理，并修改配置后，请点击“应用更改”按钮，新配置才会生效哦</div>
+                    -->
                     <div>
                         <span class="cate-subtitle">HTTP代理模式：</span>
                         <ToggleControl @click="toggleHttpProxyShow" v-model="network.httpProxy.enable"
@@ -955,11 +961,19 @@ onMounted(checkForUpdate)
     margin-right: 25px;
 }
 
+/*
 #setting-view .navigation .cate-subtitle,
-#setting-view .keys .cate-subtitle,
-#setting-view .network .cate-subtitle {
+#setting-view .dialog .cate-subtitle,
+#setting-view .network .cate-subtitle ,
+#setting-view .keys .cate-subtitle {
     width: 225px !important;
 }
+*/
+
+#setting-view .keys .cate-text {
+    width: 202px !important;
+}
+
 
 #setting-view .content .last {
     margin-bottom: 0px;

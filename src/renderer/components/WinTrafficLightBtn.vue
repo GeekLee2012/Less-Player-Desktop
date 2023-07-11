@@ -25,6 +25,7 @@ const doMinimize = () => {
     minimize(isHideToTrayOnMinimized.value)
 }
 
+//TODO 
 const isMaximized = ref(false)
 const toggleMaximize = () => {
     isMaximized.value = !isMaximized.value

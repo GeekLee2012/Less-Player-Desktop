@@ -3,7 +3,7 @@ import App from './App.vue';
 
 //Pinia
 import { createPinia } from 'pinia';
-import piniaPersist from 'pinia-plugin-persist'
+import piniaPersist from 'pinia-plugin-persist';
 //Router
 import { router } from './route/router';
 //LazyLoad

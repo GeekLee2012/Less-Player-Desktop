@@ -158,8 +158,9 @@ const setupFontSize = (fontSize) => {
     '--content-text-tip-text-size': (fontSize - 1.5),
     '--content-text-tab-title-size': (fontSize + 1.5),
     '--content-text-module-title3-size': Math.min((fontSize + 3.5), 28),
-    '--content-setting-cate-subtitle-width': Math.min((fontSize / 15.5 * 225), 239),
-    '--content-left-nav-line-height': (fontSize / 15.5 * 32)
+    '--content-setting-cate-subtitle-width': Math.min((fontSize / 15.5 * 225), 258),
+    //'--content-left-nav-line-height': (fontSize / 15.5 * 33),
+    '--content-left-nav-line-spacing': (fontSize / 15.5 * 10.5),
   }
   for (const [key, value] of Object.entries(changes)) {
     document.documentElement.style.setProperty(key, `${value}px`)

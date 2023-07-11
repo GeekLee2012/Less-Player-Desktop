@@ -492,16 +492,16 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 #main-left ul {
     list-style: none;
     text-align: left;
-    line-height: var(--content-left-nav-line-height);
     padding-left: 13%;
     padding-left: 10%;
+    line-height: var(--content-left-nav-line-height);
 }
 
 #main-left li {
     text-decoration: none;
     width: 60%;
     width: 128px;
-    margin-bottom: 10.5px;
+    margin-bottom: var(--content-left-nav-line-spacing);
     padding-left: 20px;
     padding-right: 20px;
     cursor: pointer;
@@ -539,13 +539,12 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 }
 
 #main-left .bottom {
-    height: 72px;
     height: 60px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-right: 22px;
+    margin-right: 23px;
 }
 
 #app-logo {
@@ -564,7 +563,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     width: 16px;
     height: 16px;
     line-height: 16px;
-    font-size: 13px;
+    font-size: 13.5px;
     justify-content: center;
     border-radius: 10rem;
     background: var(--app-logo-inner-bg-color);
@@ -576,7 +575,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     align-items: center;
     justify-content: center;
     margin-left: 10px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     background: var(--app-logo-app-name-text-color);
     -webkit-background-clip: text;

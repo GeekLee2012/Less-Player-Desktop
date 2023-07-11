@@ -71,14 +71,14 @@ const getAbout = () => {
 }
 
 const playAll = () => {
-    if (detail.data.length < 1) return
+    if (!detail.data || detail.data.length < 1) return
     resetQueue()
     addAll("即将为您播放全部！")
     playNextTrack()
 }
 
 const addAll = (text) => {
-    if (detail.data.length < 1) return
+    if (!detail.data || detail.data.length < 1) return
     addTracks(detail.data)
     showToast(text || "歌曲已全部添加！")
 }
@@ -117,6 +117,7 @@ const resetBack2TopBtn = () => {
 }
 
 const removeAll = () => {
+    if (!detail.data || detail.data.length < 1) return
     removeAllFromCustomPlaylist(props.id)
     showToast("全部歌曲已删除！")
 }

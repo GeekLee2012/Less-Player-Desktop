@@ -17,11 +17,10 @@ const { scanDirTracks, parseTracks,
   parsePlsFile, parseM3uFile,
   writePlsFile, writeM3uFile,
   IMAGE_PROTOCAL, parseImageDataFromFile,
-  statPathSync, walkSync, MD5,
+  statPathSync, MD5,
 } = require('./common')
 
 const path = require('path')
-const { dir } = require('console')
 
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'

@@ -660,9 +660,13 @@ const toggleFavoritedState = () => {
         setFavoritedState(false)
         return
     }
-    setFavoritedState(!favoritedState.value)
     const track = currentTrack.value
+    if (!track) return
     const { id, platform } = track
+    if (isLocalMusic(platform)) {
+        return
+    }
+    setFavoritedState(!favoritedState.value)
     const isFMRadioType = Playlist.isFMRadioType(track)
     let text = "歌曲收藏成功！"
     if (favoritedState.value) {
@@ -763,6 +767,7 @@ onMounted(() => {
 watch(queueTracksSize, (nv, ov) => {
     if (nv < 1) {
         resetPlayState()
+        setFavoritedState(false)
         EventBus.emit('playbackQueue-empty')
     }
 })
