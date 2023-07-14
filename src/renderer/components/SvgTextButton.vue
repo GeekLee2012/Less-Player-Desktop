@@ -3,19 +3,22 @@ const props = defineProps({
     text: String,
     leftAction: Function,
     rightAction: Function,
-    disabled: Boolean
+    disabled: Boolean,
+    useEvent: Boolean
 })
 
 const handleLeftClick = (event) => {
-    const { disabled, leftAction } = props
+    const { disabled, leftAction, useEvent } = props
     if (disabled) return
-    if (leftAction) leftAction(event)
+    const _event = useEvent ? event : null
+    if (leftAction) leftAction(_event)
 }
 
 const handleRightClick = (event) => {
-    const { disabled, rightAction } = props
+    const { disabled, rightAction, useEvent } = props
     if (disabled) return
-    if (rightAction) rightAction(event)
+    const _event = useEvent ? event : null
+    if (rightAction) rightAction(_event)
 }
 </script>
 

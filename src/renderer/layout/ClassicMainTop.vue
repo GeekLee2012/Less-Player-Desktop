@@ -15,8 +15,10 @@ const { searchAction, searchBarPlaceholder } = inject('appCommon')
 
 
 const { setLayoutIndex } = useSettingStore()
-const { isRadioModeShortcutEnable } = storeToRefs(useSettingStore())
-const { isRadioMode } = storeToRefs(useAppCommonStore())
+const { isRadioModeShortcutEnable,
+    isUserHomeShortcutEnable,
+    isSimpleLayoutShortcutEnable } = storeToRefs(useSettingStore())
+const { isRadioMode, isRadioModeEnable } = storeToRefs(useAppCommonStore())
 
 const switchToSimpleLayout = () => {
     setLayoutIndex(2) //TODO
@@ -33,7 +35,7 @@ const toggleRadioMode = () => {
         <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
         </SearchBar>
         <div class="action">
-            <div id="radio-btn" @click="toggleRadioMode" v-show="isRadioModeShortcutEnable">
+            <div id="radio-btn" @click="toggleRadioMode" v-show="isRadioModeEnable && isRadioModeShortcutEnable">
                 <svg v-show="!isRadioMode" width="19" height="18" viewBox="0 0 939.22 940.41"
                     xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
@@ -73,7 +75,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="userhome-btn" @click="visitUserHome">
+            <div id="userhome-btn" @click="visitUserHome" v-show="isUserHomeShortcutEnable">
                 <svg width="21" height="20" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -93,7 +95,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="switch-layout-btn" @click="switchToSimpleLayout">
+            <div id="switch-layout-btn" @click="switchToSimpleLayout" v-show="isSimpleLayoutShortcutEnable">
                 <svg width="20" height="18" viewBox="0 0 1019 1019" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">

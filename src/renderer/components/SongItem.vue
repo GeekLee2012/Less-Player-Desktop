@@ -66,7 +66,7 @@ const showContextMenu = (event) => {
     hidePlaybackQueueView()
     const { data, dataType } = props
     setTimeout(() => {
-        EventBus.emit("commonCtxMenu-init", dataType || 0)
+        EventBus.emit("commonCtxMenu-init", { dataType: (dataType || 0) })
         EventBus.emit("commonCtxMenu-show", { event, value: data })
     }, 99)
 }
@@ -122,7 +122,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 <template>
     <div class="song-item" @click="toggleCheck" @contextmenu="showContextMenu">
-        <div v-show="checkbox" class="sqno">
+        <div v-show="checkbox" class="checkbox">
             <svg v-show="!isChecked" width="16" height="16" viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
@@ -272,19 +272,19 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 */
 
-.song-item .sqno {
+.song-item .sqno,
+.song-item .checkbox {
     width: 35px;
     padding-left: 8px;
     text-align: left;
 }
 
-.song-item .sqno svg {
-    margin-bottom: -3px;
-    fill: var(--button-icon-btn-color);
+.song-item .checkbox {
+    width: 30px;
 }
 
-.song-item .sqno .checked-svg {
-    fill: var(--content-highlight-color) !important;
+.song-item .checkbox svg {
+    margin-bottom: -3px;
 }
 
 .song-item .title-wrap {

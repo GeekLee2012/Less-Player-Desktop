@@ -265,8 +265,11 @@ export const useUserProfileStore = defineStore("userProfile", {
             if (!playlist) return false
             const { platform } = track
             if (platform === 'local') return false
+            if (Playlist.isFMRadioType(track)) return false
+
             const index = this.findItemIndex(playlist.data, track)
             if (index > -1) return false
+
             playlist.data.push(track)
             const updated = Date.now()
             Object.assign(playlist, { updated })
@@ -275,8 +278,10 @@ export const useUserProfileStore = defineStore("userProfile", {
         removeFromCustomPlaylist(id, track) {
             const playlist = this.getCustomPlaylist(id)
             if (!playlist) return false
+
             const index = this.findItemIndex(playlist.data, track)
             if (index < 0) return false
+
             playlist.data.splice(index, 1)
             const updated = Date.now()
             Object.assign(playlist, { updated })
@@ -285,6 +290,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         moveToCustomPlaylist(toId, fromId, track) {
             if (!toId || !fromId) return false
             if (toId == fromId) return false
+
             if (this.addToCustomPlaylist(toId, track)) {
                 return this.removeFromCustomPlaylist(fromId, track)
             }
@@ -293,6 +299,7 @@ export const useUserProfileStore = defineStore("userProfile", {
         removeAllFromCustomPlaylist(id) {
             const playlist = this.getCustomPlaylist(id)
             if (!playlist) return false
+
             playlist.data.length = 0
             const updated = Date.now()
             Object.assign(playlist, { updated })
@@ -316,74 +323,6 @@ export const useUserProfileStore = defineStore("userProfile", {
         isFollowArtist(id, platform) {
             return this.findItemIndex(this.follows.artists, { id, platform }) != -1
         },
-        /*
-        //最近播放
-        addRecentSong(track) {
-            const { id, platform, title, artist, album, duration, cover,
-                type, pid, songlistId, extra1, extra2, mv,
-                payPlay, payDownload } = track
-            if (!platform || platform.trim().length < 1) return
-            //TODO
-            const url = Playlist.isAnchorRadioType(track) ? track.url : null
-            this.uniqueInsertFirst(this.recents.songs, {
-                id, platform, title, artist, album, duration, cover, url,
-                type, pid, songlistId, extra1, extra2, mv,
-                payPlay, payDownload
-            })
-            trimArray(this.recents.songs, 999).then(deleteCount => {
-                if (deleteCount) this.refreshUserHome()
-            })
-        },
-        addRecentPlaylist(id, platform, title, cover, type) {
-            this.uniqueInsertFirst(this.recents.playlists, {
-                id, platform, title, cover, type
-            })
-            trimArray(this.recents.playlists, 666).then(deleteCount => {
-                if (deleteCount) this.refreshUserHome()
-            })
-        },
-        addRecentAlbum(id, platform, title, cover, publishTime) {
-            this.uniqueInsertFirst(this.recents.albums, {
-                id, platform, title, cover, publishTime
-            })
-            trimArray(this.recents.albums, 666).then(deleteCount => {
-                if (deleteCount) this.refreshUserHome()
-            })
-        },
-        addRecentRadio(track) {
-            const { id, platform, title, cover, type, } = track
-            const { isFreeFM } = usePlatformStore()
-            const compareFn = (item, e) => {
-                if (item.data && item.data.length > 0
-                    && e.data && e.data.length > 0) {
-                    return item.data[0].url === e.data[0].url
-                }
-                return false
-            }
-            this.uniqueInsertFirst(this.recents.radios, {
-                id, platform, title, cover, type, data: [track]
-            }, isFreeFM(platform) ? compareFn : null)
-            trimArray(this.recents.radios, 366).then(count => {
-                if (count) this.refreshUserHome()
-            })
-        },
-        removeRecentSong(track) {
-            const { id, platform } = track
-            this.removeItem(this.recents.songs, { id, platform })
-        },
-        removeRecentPlaylist(playlist) {
-            const { id, platform } = playlist
-            this.removeItem(this.recents.playlists, { id, platform })
-        },
-        removeRecentAlbum(album) {
-            const { id, platform } = album
-            this.removeItem(this.recents.albums, { id, platform })
-        },
-        removeRecentRadio(track) {
-            const { id, platform } = track
-            this.removeItem(this.recents.radios, { id, platform })
-        },
-        */
         removeAllRecents() {
             this.recents.songs.length = 0
             this.recents.playlists.length = 0

@@ -38,8 +38,8 @@ const setLoading = (value) => {
     isLoading.value = value
 }
 
-const visitTab = (index) => {
-    if (index < 0 || activeTab.value == index) return
+const visitTab = (index, force) => {
+    if (!force && (index < 0 || activeTab.value == index)) return
     setActiveTab(index)
     loadTab()
 }
@@ -131,7 +131,7 @@ const onScroll = () => {
     hideAllCtxMenus()
 }
 
-onActivated(() => visitTab(0))
+onActivated(() => visitTab(0, true))
 watch(currentPlatformIndex, (nv, ov) => loadTab())
 watch(activeTab, (nv, ov) => visitTab(nv))
 watch(() => props.keyword, (nv, ov) => loadTab())

@@ -85,14 +85,6 @@ textarea {
   cursor: default !important;
 }
 
-::-webkit-scrollbar {
-  width: var(--others-scrollbar-width);
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .warning {
   fill: var(--content-error-color) !important;
   color: var(--content-error-color) !important;
@@ -130,9 +122,39 @@ textarea {
   fill: var(--content-highlight-color);
 }
 
+.text-btn svg {
+  padding-top: 1px;
+}
+
 .winos-style .text-btn svg {
   padding-top: 2px;
 }
+
+.checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox svg {
+  fill: var(--button-icon-btn-color) !important;
+  cursor: pointer;
+}
+
+.checkbox .checked-svg {
+  fill: var(--content-highlight-color) !important;
+}
+
+
+
+::-webkit-scrollbar {
+  width: var(--others-scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
 
 /*TODO 试验性CSS */
 /* 可以为进入和离开动画设置不同的持续时间和动画函数 */

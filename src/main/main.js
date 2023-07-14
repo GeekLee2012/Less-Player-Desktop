@@ -17,7 +17,7 @@ const { scanDirTracks, parseTracks,
   parsePlsFile, parseM3uFile,
   writePlsFile, writeM3uFile,
   IMAGE_PROTOCAL, parseImageDataFromFile,
-  statPathSync, MD5,
+  statPathSync, MD5, SHA1,
 } = require('./common')
 
 const path = require('path')
@@ -376,8 +376,9 @@ const registryGlobalListeners = () => {
   ipcMain.handle('load-lyric-file', async (event, ...args) => {
     const arg = args[0].trim()
     const index = arg.lastIndexOf('.')
-    const lyricFile = arg.substring(0, index) + ".lrc"
-    return readText(lyricFile)
+    const lyricFile = arg.substring(0, index)
+    return readText(`${lyricFile}.lrc`)
+      || readText(`${lyricFile}.LRC`)
   })
 
   ipcMain.handle('invoke-vendor', async (event, ...args) => {
@@ -770,7 +771,7 @@ const overrideRequest = (details) => {
     referer = origin
     // cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; _ga=GA1.2.1036906485.1647595722; kw_token=" + csrf
     cookie = `kw_token=${kw_token};Hm_token=${hm_token}`
-    cross = MD5(hm_token).toLowerCase()
+    cross = MD5(SHA1(hm_token).toLowerCase()).toLowerCase()
   } else if (url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
@@ -807,7 +808,7 @@ const overrideRequest = (details) => {
   */
 
   //if(origin) details.requestHeaders['Origin'] = origin
-  if (userAgent) details.requestHeaders['UserAgent'] = userAgent
+  if (userAgent) details.requestHeaders['User-Agent'] = userAgent
   if (referer) details.requestHeaders['Referer'] = referer
   if (cookie) details.requestHeaders['Cookie'] = cookie
   if (xrouter) details.requestHeaders['x-router'] = xrouter

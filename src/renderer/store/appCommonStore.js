@@ -23,6 +23,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         //探索模式，歌单、歌手
         exploreModes: ['playlists', 'artists', 'radios', 'userhome'],
         exploreModeIndex: 0,
+        exploreModeActiveStates: [true, true, true, false],
         //通用通知
         commonNotificationShow: false,
         commonNotificationText: null,
@@ -87,6 +88,18 @@ export const useAppCommonStore = defineStore('appCommon', {
             return (type) => {
                 return this.randomMusicTypeCodes.includes(type)
             }
+        },
+        isExploreModeEnable() {
+            return (exploreMode) => {
+                const index = this.exploreModes.findIndex(item => (item == exploreMode))
+                return this.exploreModeActiveStates[index]
+            }
+        },
+        isArtistModeEnable() {
+            return this.isExploreModeEnable('artists')
+        },
+        isRadioModeEnable() {
+            return this.isExploreModeEnable('radios')
         }
     },
     actions: {
@@ -182,12 +195,34 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.exploreModeIndex = index % this.exploreModeLength
         },
         nextExploreMode() {
+            /*
             const length = this.exploreModeLength
             if (this.exploreModeIndex == length - 2) {
                 this.setExploreMode(0)
             } else {
                 this.setExploreMode(this.exploreModeIndex + 1)
             }
+            */
+            const length = this.exploreModeLength
+            let index = this.exploreModeIndex, count = 1
+            do {
+                index = (index + 1) % length
+                if (this.exploreModeActiveStates[index]) {
+                    this.setExploreMode(index)
+                    break
+                }
+                ++count
+            } while (count < length)
+        },
+        setExploreModeActiveState(index, active) {
+            this.exploreModeActiveStates[index] = active
+            if (!active && index == this.exploreModeIndex) {
+                this.nextExploreMode()
+            }
+        },
+        resetExploreModeActiveStates() {
+            this.exploreModeActiveStates.length = 0
+            this.exploreModeActiveStates = [true, true, true, false]
         },
         setPlaylistExploreMode() {
             this.setExploreMode(0)
@@ -233,12 +268,12 @@ export const useAppCommonStore = defineStore('appCommon', {
             if (this.commonNotificationImportant) return
             this.doToast(text || "操作成功！", 0, callback, delay || 1688)
         },
-        showImportantToast(text, callback, delay) {
-            this.commonNotificationImportant = true
-            this.doToast(text || "操作成功！", 0, callback, delay || 1688)
-        },
         showFailToast(text, callback, delay) {
             this.doToast(text || "操作失败！", 1, callback, delay || 2233)
+        },
+        showImportantToast(text, callback, delay, type) {
+            this.commonNotificationImportant = true
+            this.doToast(text || "操作成功！", type || 0, callback, delay || 1688)
         },
         updateCommonCtxItem(value) {
             this.commonCtxItem = value
@@ -392,7 +427,7 @@ export const useAppCommonStore = defineStore('appCommon', {
                 storage: localStorage,
                 paths: ['playingViewThemeIndex', 'spectrumIndex',
                     'randomMusicPlatformCodes', 'randomMusicTypeCodes',
-                    'currentMusicCategoryName']
+                    'currentMusicCategoryName', 'exploreModeActiveStates']
             },
         ],
     },

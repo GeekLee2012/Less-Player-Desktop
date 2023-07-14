@@ -127,7 +127,7 @@ const updateTabData = (data) => {
     if (typeof (data) === 'string') {
         tabData.push(data)
         updateTabTipText(0)
-    } else if (data.length > 0) {
+    } else if (Array.isArray(data) && data.length > 0) {
         tabData.push(...data)
         updateTabTipText(tabData.length)
     }

@@ -324,6 +324,7 @@ watch(searchKeyword, filterContent)
     cursor: pointer;
 }
 
+/*
 #freefm-view .checkbox svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
@@ -332,6 +333,7 @@ watch(searchKeyword, filterContent)
 #freefm-view .checkbox .checked-svg {
     fill: var(--content-highlight-color);
 }
+*/
 
 #freefm-view .search-wrap {
     position: absolute;

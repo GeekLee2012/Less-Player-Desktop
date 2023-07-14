@@ -7,10 +7,13 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore';
+import { useLocalMusicStore } from '../store/localMusicStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
 
 
-const { visitCustomPlaylistCreate } = inject('appRoute')
+
+//TODO 整体设计比较乱，后续待梳理
+const { visitCustomPlaylistCreate, visitLocalPlaylistCreate } = inject('appRoute')
 
 const props = defineProps({
     posStyle: Object
@@ -23,7 +26,10 @@ const { showToast, showFailToast, hideAllCtxMenus, hidePlaybackQueueView } = use
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { addToCustomPlaylist, moveToCustomPlaylist } = useUserProfileStore()
 const { isLocalMusic } = usePlatformStore()
-const customData = reactive([])
+const { localPlaylists } = storeToRefs(useLocalMusicStore())
+const { addToLocalPlaylist, moveToLocalPlaylist } = useLocalMusicStore()
+const listData = reactive([])
+let currentDataType = 6
 
 const toastAndHideMenu = (text, failed) => {
     if (failed) {
@@ -39,8 +45,8 @@ const addToQueue = () => {
     toastAndHideMenu("歌曲添加成功！")
 }
 
-const createCustom = () => {
-    visitCustomPlaylistCreate('userhome')
+const createPlaylist = () => {
+    isLocalMusicType(currentDataType) ? visitLocalPlaylistCreate() : visitCustomPlaylistCreate('userhome')
     hidePlaybackQueueView()
 }
 
@@ -56,69 +62,79 @@ const MenuItems = {
     create: {
         name: '新建歌单',
         icon: '<svg width="16" height="16" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z"/><path d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z"/><path d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z"/><path d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z"/></g></g></svg>',
-        action: createCustom,
+        action: createPlaylist,
     },
 }
 
+const isLocalMusicType = (dataType) => (dataType == 10)
 
-const handleClick = (item, mode) => {
+const handleClick = (item, actionMode, dataType) => {
     const track = commonCtxMenuCacheItem.value
-    let text = "当前操作失败！<br>歌曲已存在或类型不对！"
+    let text = "操作失败！<br>歌曲可能已经存在！"
     if (Playlist.isFMRadioType(track)) {
-        text = "添加到自定义歌单<br>不支持FM电台！"
-        toastAndHideMenu(text, true)
-        return
-    } else if (isLocalMusic(track.platform)) {
-        text = "添加到自定义歌单<br>不支持本地歌曲！"
+        text = "添加到歌单<br>不支持FM电台！"
         toastAndHideMenu(text, true)
         return
     }
+    let addToAction = addToCustomPlaylist
+    let moveToAction = moveToCustomPlaylist
+    if (isLocalMusicType(dataType)) {
+        addToAction = addToLocalPlaylist
+        moveToAction = moveToLocalPlaylist
+    }
     let success = false
-    if (mode == 1) {
+    if (actionMode == 1) {
         const { id } = commonCtxItem.value
-        if (moveToCustomPlaylist(item.id, id, track)) {
+        if (moveToAction(item.id, id, track)) {
             text = "歌曲移动成功！"
             success = true
         }
-    } else if (mode == 3) { //添加当前播放列表
+    } else if (actionMode == 3) { //添加当前播放列表
         //TODO 暂时先简单处理，不考虑异常情况
         const queue = toRaw(queueTracks.value)
         queue.forEach(qItem => {
             if (Playlist.isFMRadioType(qItem)) return
-            addToCustomPlaylist(item.id, qItem)
+            addToAction(item.id, qItem)
         })
         success = true
         text = "全部歌曲添加成功！"
-    } else if (addToCustomPlaylist(item.id, track)) {
+    } else if (addToAction(item.id, track)) {
         success = true
         text = "歌曲添加成功！"
     }
     toastAndHideMenu(text, !success)
 }
 
-const initData = (mode) => {
-    customData.length = 0
+const initData = (actionMode, dataType) => {
+    currentDataType = dataType || 6
+    listData.length = 0
     const fixedItems = [MenuItems.playbackQueue, MenuItems.create]
-    if (mode >= 1) { //移动模式 或 其他无当前播放的模式
-        customData.push(fixedItems[1])
+    if (actionMode >= 1) { //移动模式 或 其他无当前播放的模式
+        listData.push(fixedItems[1])
     } else {
-        customData.push(...fixedItems)
+        listData.push(...fixedItems)
     }
-    customPlaylists.value.forEach(item => {
-        customData.push({
+    const playlists = isLocalMusicType(dataType) ? localPlaylists.value : customPlaylists.value
+    playlists.forEach(item => {
+        if (commonCtxItem.value && item.id === commonCtxItem.value.id) return
+        listData.push({
             name: item.title,
-            action: (event) => handleClick(item, mode),
+            action: (event) => handleClick(item, actionMode, dataType),
         })
     })
+    return listData.length
 }
 
 onMounted(() => initData())
 
-EventBus.on("addToListSubmenu-init", (mode) => initData(mode))
+EventBus.on("addToListSubmenu-init", ({ mode, dataType, callback }) => {
+    const total = initData(mode, dataType)
+    if (callback) callback({ total })
+})
 </script>
 
 <template>
-    <CommonContextSubmenu :data="customData" :posStyle="posStyle">
+    <CommonContextSubmenu :data="listData" :posStyle="posStyle">
     </CommonContextSubmenu>
 </template>
 

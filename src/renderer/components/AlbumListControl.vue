@@ -20,7 +20,7 @@ const visitItem = (item) => {
     const { checkbox } = props
     if (checkbox) return
     const { id, platform } = item
-    visitAlbum({ platform, id })
+    visitAlbum({ platform, id, data: item })
 }
 </script>
 

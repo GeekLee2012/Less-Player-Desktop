@@ -228,6 +228,8 @@ const switchTab = () => {
             Object.assign(actionShowCtl, {
                 playBtn: true,
                 addToQueueBtn: true,
+                addToBtn: true,
+                moveToBtn: true,
                 deleteBtn: true
             })
             tabData.push(...loadLocalPlaylist())
@@ -387,13 +389,13 @@ const addToQueue = () => {
 }
 
 //TODO
-const showAddToList = (event, dataType, elSelector) => {
+const showAddToList = (event, dataType, elSelector, actionType) => {
     event.stopPropagation()
     const el = document.querySelector(elSelector)
     const clientRect = el.getBoundingClientRect()
     const { x, y, width, height, bottom } = clientRect
     const { clientX, clientY } = event
-    EventBus.emit("commonCtxMenu-init", dataType)
+    EventBus.emit("commonCtxMenu-init", { dataType, actionType })
     EventBus.emit("commonCtxMenu-show", {
         event: { x, y: (bottom + 3), clientX, clientY },
         value: sortCheckData()
@@ -401,26 +403,24 @@ const showAddToList = (event, dataType, elSelector) => {
 }
 
 let eventMode = 0
-const toggleAddCheckedMenu = (event) => {
-    const mode = 6
+const doToggleCheckedPopupMenu = (event, actionType) => {
+    const mode = isLocalMusic() ? 10 : 6
+    const elSelector = (actionType == 1) ? "#batch-action-view .moveToBtn" : "#batch-action-view .addToBtn"
     if (commonCtxMenuShow.value && eventMode == mode) {
         hideAllCtxMenus()
     } else {
         hideAllCtxMenus()
-        showAddToList(event, mode, "#batch-action-view .addToBtn")
+        showAddToList(event, mode, elSelector, actionType)
     }
     eventMode = mode
 }
 
+const toggleAddCheckedMenu = (event) => {
+    doToggleCheckedPopupMenu(event)
+}
+
 const toggleMoveCheckedMenu = (event) => {
-    const mode = 7
-    if (commonCtxMenuShow.value && eventMode == mode) {
-        hideAllCtxMenus()
-    } else {
-        hideAllCtxMenus()
-        showAddToList(event, mode, "#batch-action-view .moveToBtn")
-    }
-    eventMode = mode
+    doToggleCheckedPopupMenu(event, 1)
 }
 
 const removeChecked = async () => {
@@ -602,7 +602,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
         </div>
         <div class="center">
             <div class="action">
-                <div class="checkbox select-all" :class="{ 'button-disabled': (tabData.length < 1) }"
+                <div class="checkbox checkall" :class="{ 'button-disabled': (tabData.length < 1) }"
                     @click="toggleSelectAll">
                     <svg v-show="!checkedAll" width="16" height="16" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">
@@ -652,7 +652,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                     </template>
                 </SvgTextButton>
                 <SvgTextButton :disabled="checkedData.length < 1" text="添加到" class="spacing addToBtn"
-                    v-show="actionShowCtl.addToBtn" :leftAction="toggleAddCheckedMenu">
+                    v-show="actionShowCtl.addToBtn" :leftAction="toggleAddCheckedMenu" :useEvent="true">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 -50 768.02 554.57" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -671,7 +671,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
                     </template>
                 </SvgTextButton>
                 <SvgTextButton :disabled="checkedData.length < 1" text="移动到" class="spacing moveToBtn"
-                    v-show="actionShowCtl.moveToBtn" :leftAction="toggleMoveCheckedMenu">
+                    v-show="actionShowCtl.moveToBtn" :leftAction="toggleMoveCheckedMenu" :useEvent="true">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 0 896.41 896.43" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -844,13 +844,12 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 }
 
 #batch-action-view .action .checkbox {
-    display: flex;
     flex-direction: row;
-    align-items: center;
     margin-left: 8px;
     margin-right: 15px;
 }
 
+/*
 #batch-action-view .header .checkbox svg,
 #batch-action-view .action .checkbox svg {
     fill: var(--button-icon-btn-color);
@@ -861,6 +860,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 #batch-action-view .action .checkbox .checked-svg {
     fill: var(--content-highlight-color);
 }
+*/
 
 #batch-action-view .action .checkbox>span {
     text-align: left;
@@ -870,12 +870,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     cursor: pointer;
 }
 
-#batch-action-view .action .select-all {
-    cursor: pointer;
-}
-
-#batch-action-view .action .select-all span {
-    margin-left: 10px;
+#batch-action-view .action .checkall span {
+    margin-left: 13px;
 }
 
 #batch-action-view .content {

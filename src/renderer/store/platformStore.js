@@ -7,9 +7,11 @@ import { DouBan } from '../../vendor/douban';
 import { RadioCN } from '../../vendor/radiocn';
 import { Qingting } from '../../vendor/qingting';
 import { LocalMusic } from '../../vendor/localmusic';
-import { useAppCommonStore } from './appCommonStore';
 import { Ximalaya } from '../../vendor/ximalaya';
 import { FreeFM } from '../../vendor/freefm';
+import { useAppCommonStore } from './appCommonStore';
+import { toLowerCaseTrimString } from '../../common/Utils';
+import { useSettingStore } from './settingStore';
 
 
 
@@ -39,9 +41,6 @@ const T_TYPES = [{
     name: '主播电台',
     weight: 3
 }]
-
-const randomMusicTypes = T_TYPES.slice(1)
-randomMusicTypes.splice(1, 2)
 
 //音乐平台
 const ALL_PLATFORMS = [
@@ -133,17 +132,41 @@ const ALL_PLATFORMS = [
     }
 ]
 
-const playlistPlatforms = ALL_PLATFORMS.slice(1, 7)
-const artistPlatforms = ALL_PLATFORMS.slice(1, 5)
-const radioPlatforms = ALL_PLATFORMS.slice(7)
-radioPlatforms.splice(0, 0, ALL_PLATFORMS[2])
-const userhomePlatforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length)
-userhomePlatforms.splice(6, 1)
-const searchScopePlatforms = ALL_PLATFORMS.slice(1, 5)
-//TODO暂不支持FreeFM随机播放
-const randomMusicScopePlatforms = ALL_PLATFORMS.slice(1, ALL_PLATFORMS.length - 1)
-randomMusicScopePlatforms.splice(5, 1)
+const scopePlatforms = {
+    playlists: function () {
+        return ALL_PLATFORMS.slice(1, 7)
+    },
+    artists: () => {
+        return ALL_PLATFORMS.slice(1, 5)
+    },
+    radios: () => {
+        const platforms = ALL_PLATFORMS.slice(7)
+        platforms.splice(0, 0, ALL_PLATFORMS[2])
+        return platforms
+    },
+    search: () => {
+        const platforms = ALL_PLATFORMS.slice(1, 7)
+        platforms.splice(4, 1)
+        return platforms
+    },
+    random: () => {
+        const platforms = ALL_PLATFORMS.slice(1, ALL_PLATFORMS.length - 1)
+        platforms.splice(5, 1)
+        return platforms
+    },
+    userhome: () => {
+        const platforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length)
+        platforms.splice(6, 1)
+        return platforms
+    }
+}
 
+const getScopePlatforms = (scope) => {
+    const sPlatforms = scopePlatforms[toLowerCaseTrimString(scope)]
+    return sPlatforms && sPlatforms()
+}
+
+//TODO
 const vendors = {
     qq: QQ,
     netease: NetEase,
@@ -158,7 +181,7 @@ const vendors = {
 }
 
 //平台相关Store
-export const usePlatformStore = defineStore('platform', {
+export const usePlatformStore = defineStore('platforms', {
     //State
     state: () => ({
         currentPlatformIndex: 0,
@@ -168,25 +191,40 @@ export const usePlatformStore = defineStore('platform', {
     getters: {
         platforms() { //根据使用范围获取平台
             return (scope) => {
-                scope = (scope || '').toString().trim()
-                if (scope == 'search') return searchScopePlatforms
-                else if (scope == 'random') return randomMusicScopePlatforms
+                const result = getScopePlatforms(scope)
+                if (result) {
+                    return result
+                }
+
                 //缺少范围或不匹配，按模式获取
                 const { isArtistMode, isRadioMode, isUserHomeMode } = useAppCommonStore()
-                if (isArtistMode) return artistPlatforms
-                if (isRadioMode) return radioPlatforms
-                if (isUserHomeMode) return userhomePlatforms
-                return playlistPlatforms
+                if (isArtistMode) {
+                    return getScopePlatforms('artists')
+                } else if (isRadioMode) {
+                    return getScopePlatforms('radios')
+                } else if (isUserHomeMode) {
+                    return getScopePlatforms('userhome')
+                }
+                return getScopePlatforms('playlists')
+            }
+        },
+        activePlatforms() {
+            return (scope) => {
+                const { filterActiveModulesPlatforms } = useSettingStore()
+                const { exploreModeCode } = useAppCommonStore()
+                return filterActiveModulesPlatforms(this.platforms(scope), scope || exploreModeCode)
             }
         },
         currentPlatform() {
-            return this.platforms()[this.currentPlatformIndex]
+            return this.activePlatforms()[this.currentPlatformIndex]
         },
         currentPlatformCode() {
             return this.currentPlatform ? this.currentPlatform.code : ''
         },
         randomMusicTypes() {
-            return randomMusicTypes
+            const types = T_TYPES.slice(1)
+            types.splice(1, 2)
+            return types
         },
     },
     //Actions
@@ -199,7 +237,7 @@ export const usePlatformStore = defineStore('platform', {
                 this.updateCurrentPlatform(-1)
                 return
             }
-            const platformArr = this.platforms()
+            const platformArr = this.activePlatforms()
             for (var i = 0; i < platformArr.length; i++) {
                 if (code === platformArr[i].code) {
                     this.updateCurrentPlatform(i)
@@ -209,48 +247,40 @@ export const usePlatformStore = defineStore('platform', {
             this.updateCurrentPlatform(-1)
         },
         getVendor(platform) {
-            platform = (platform || '').toString().trim().toLowerCase()
-            return this.vendors[platform]
+            return this.vendors[toLowerCaseTrimString(platform)]
         },
         currentVender() {
             return this.getVendor(this.currentPlatformCode)
         },
-        isQQ(platform) {
+        assertsPlatform(platform, code) {
             if (!this.isPlatformValid(platform)) return false
-            return platform.trim() == QQ.CODE
+            return platform.trim() == code
+        },
+        isQQ(platform) {
+            return this.assertsPlatform(platform, QQ.CODE)
         },
         isNetEase(platform) {
-            if (!this.isPlatformValid(platform)) return false
-            return platform.trim() == NetEase.CODE
+            return this.assertsPlatform(platform, NetEase.CODE)
         },
         isKuWo(platform) {
-            if (!this.isPlatformValid(platform)) return false
-            return platform.trim() == KuWo.CODE
+            return this.assertsPlatform(platform, KuWo.CODE)
         },
         isKuGou(platform) {
-            if (!this.isPlatformValid(platform)) return false
-            return platform.trim() == KuGou.CODE
+            return this.assertsPlatform(platform, KuGou.CODE)
         },
         isDouBan(platform) {
-            if (!this.isPlatformValid(platform)) return false
-            return platform.trim() == DouBan.CODE
+            return this.assertsPlatform(platform, DouBan.CODE)
         },
         isLocalMusic(platform) {
-            if (!this.isPlatformValid(platform)) return false
-            return platform.trim() == LocalMusic.CODE
+            return this.assertsPlatform(platform, LocalMusic.CODE)
         },
         isFreeFM(platform) {
-            if (!this.isPlatformValid(platform)) return false
-            return platform.trim() == FreeFM.CODE
+            return this.assertsPlatform(platform, FreeFM.CODE)
         },
         isArtistDetailVisitable(platform) {
-            //if (!this.isPlatformValid(platform)) return false
-            //return !this.isLocalMusic(platform)
             return this.isPlatformValid(platform)
         },
         isAlbumDetailVisitable(platform) {
-            //if (!this.isPlatformValid(platform)) return false
-            //return !this.isLocalMusic(platform)
             return this.isPlatformValid(platform)
         },
         isPlatformValid(platform) {

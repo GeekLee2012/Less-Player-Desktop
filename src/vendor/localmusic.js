@@ -1,11 +1,12 @@
 import { Lyric } from "../common/Lyric";
 import { Track } from "../common/Track";
 import { Album } from "../common/Album";
-import { useIpcRenderer } from "../common/Utils";
+import { toLowerCaseTrimString, toTrimString, useIpcRenderer } from "../common/Utils";
 import { FILE_PREFIX } from "../common/Constants";
 import { United } from "./united";
 import { useLocalMusicStore } from "../renderer/store/localMusicStore";
 import { useSettingStore } from "../renderer/store/settingStore";
+import { Playlist } from "../common/Playlist";
 
 
 
@@ -99,7 +100,7 @@ export class LocalMusic {
                     if (artist && artist.length > 0) {
                         for (var i = 0; i < artist.length; i++) {
                             const { name } = artist[i]
-                            if (name && name.toLowerCase().trim() === _name) {
+                            if (toLowerCaseTrimString(name) === _name) {
                                 return true
                             }
                         }
@@ -164,4 +165,104 @@ export class LocalMusic {
         })
     }
 
+    //搜索: 歌曲
+    static searchSongs(keyword, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            keyword = toLowerCaseTrimString(keyword)
+            const result = { platform: LocalMusic.CODE, offset, limit, page, data: [] }
+            const { localPlaylists } = useLocalMusicStore()
+            localPlaylists.forEach(playlist => {
+                const filteredData = playlist.data.filter(item => {
+                    const { title } = item
+                    return toLowerCaseTrimString(title).includes(keyword)
+                })
+                //去重
+                if (filteredData.length > 0) {
+                    for (var i = 0; i < filteredData.length; i++) {
+                        const track = filteredData[i]
+                        const index = result.data.findIndex(item => item.id === track.id)
+                        if (index < 0) result.data.push(track)
+                    }
+                }
+            })
+            resolve(result)
+        })
+    }
+
+    //搜索: 歌单
+    static searchPlaylists(keyword, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            keyword = toLowerCaseTrimString(keyword)
+            const result = { platform: LocalMusic.CODE, offset, limit, page, data: [] }
+            const { localPlaylists } = useLocalMusicStore()
+            const filteredData = localPlaylists.filter(playlist => {
+                const { title } = playlist
+                return toLowerCaseTrimString(title).includes(keyword)
+            })
+            if (filteredData.length > 0) result.data.push(...filteredData)
+            resolve(result)
+        })
+    }
+
+    //搜索: 专辑
+    static searchAlbums(keyword, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            keyword = toLowerCaseTrimString(keyword)
+            const result = { platform: LocalMusic.CODE, offset, limit, page, data: [] }
+            const { localPlaylists } = useLocalMusicStore()
+            localPlaylists.forEach(playlist => {
+                const filteredData = playlist.data.filter(item => {
+                    const { name: albumTitle } = item.album
+                    return toLowerCaseTrimString(albumTitle).includes(keyword)
+                })
+                //去重
+                if (filteredData.length > 0) {
+                    for (var i = 0; i < filteredData.length; i++) {
+                        const track = filteredData[i]
+                        if (!track.album || !track.album.name) continue
+                        const index = result.data.findIndex(item =>
+                            toLowerCaseTrimString(item.title) == toLowerCaseTrimString(track.album.name))
+                        if (index < 0) {
+                            const { album: al, cover, artist, publishTime } = track
+                            const album = new Album(al.name, LocalMusic.CODE, al.name, cover, artist, null, toTrimString(publishTime))
+                            result.data.push(album)
+                        }
+                    }
+                }
+            })
+            resolve(result)
+        })
+    }
+
+    //搜索: 歌手
+    static searchArtists(keyword, offset, limit, page) {
+        return new Promise((resolve, reject) => {
+            keyword = toLowerCaseTrimString(keyword)
+            const result = { platform: LocalMusic.CODE, offset, limit, page, data: [] }
+            const { localPlaylists } = useLocalMusicStore()
+            localPlaylists.forEach(playlist => {
+                playlist.data.forEach(item => {
+                    const { artist } = item
+                    if (artist && artist.length > 0) {
+                        for (var i = 0; i < artist.length; i++) {
+                            const { name } = artist[i]
+                            if (toLowerCaseTrimString(name).includes(keyword)) {
+                                const index = result.data.findIndex(item =>
+                                    toLowerCaseTrimString(item.title) == toLowerCaseTrimString(name))
+                                if (index < 0) {
+                                    result.data.push({
+                                        id: name,
+                                        platform: LocalMusic.CODE,
+                                        title: name,
+                                        cover: null
+                                    })
+                                }
+                            }
+                        }
+                    }
+                })
+            })
+            resolve(result)
+        })
+    }
 }

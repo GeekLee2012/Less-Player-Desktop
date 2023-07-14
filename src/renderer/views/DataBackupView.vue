@@ -294,7 +294,7 @@ watch(sources, () => {
         <div class="header">
             <div class="title">数据备份</div>
             <div class="action">
-                <div class="checkallbox">
+                <div class="checkbox checkall">
                     <svg @click="toggleCheckAll" v-show="!isCheckedAll" width="16" height="16" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
@@ -380,7 +380,7 @@ watch(sources, () => {
     position: relative;
 }
 
-#data-backup-view .action .checkallbox {
+#data-backup-view .action .checkall {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -388,16 +388,18 @@ watch(sources, () => {
     margin-right: 25px;
 }
 
-#data-backup-view .action .checkallbox svg {
+/*
+#data-backup-view .action .checkall svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
-#data-backup-view .action .checkallbox .checked-svg {
+#data-backup-view .action .checkall .checked-svg {
     fill: var(--content-highlight-color);
 }
+*/
 
-#data-backup-view .action .checkallbox>span {
+#data-backup-view .action .checkall>span {
     text-align: left;
     margin: 0px 20px;
     width: 65px;

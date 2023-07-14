@@ -50,17 +50,23 @@ export const useLocalMusicStore = defineStore('localMusic', {
             if (this.localPlaylists.length < 1) return
             const index = this.localPlaylists.findIndex(e => e.id === id)
             if (index < 0) return
+
             const updated = Date.now()
             Object.assign(this.localPlaylists[index], { platform: 'local', title, about, tags, cover, updated })
         },
         getLocalPlaylist(id) {
-            if (this.localPlaylists.length < 1) return { id }
+            if (this.localPlaylists.length < 1) return null
             const index = this.localPlaylists.findIndex(e => e.id === id)
-            return index < 0 ? { id } : this.localPlaylists[index]
+            return index < 0 ? null : this.localPlaylists[index]
         },
         addToLocalPlaylist(id, track) {
             const playlist = this.getLocalPlaylist(id)
             if (!playlist) return false
+
+            const { platform } = track
+            if (platform != 'local') return false
+            if (Playlist.isFMRadioType(track)) return false
+
             const index = playlist.data.findIndex(e => e.id === track.id)
             if (index > -1) return false
             Object.assign(track, { pid: id })
@@ -72,16 +78,28 @@ export const useLocalMusicStore = defineStore('localMusic', {
         removeFromLocalPlaylist(id, track) {
             const playlist = this.getLocalPlaylist(id)
             if (!playlist) return false
+
             const index = playlist.data.findIndex(e => e.id === track.id)
             if (index < 0) return false
+
             playlist.data.splice(index, 1)
             const updated = Date.now()
             Object.assign(playlist, { updated })
             return true
         },
+        moveToLocalPlaylist(toId, fromId, track) {
+            if (!toId || !fromId) return false
+            if (toId == fromId) return false
+
+            if (this.addToLocalPlaylist(toId, track)) {
+                return this.removeFromLocalPlaylist(fromId, track)
+            }
+            return false
+        },
         removeAllFromLocalPlaylist(id) {
             const playlist = this.getLocalPlaylist(id)
             if (!playlist) return false
+
             playlist.data.length = 0
             const updated = Date.now()
             Object.assign(playlist, { updated })

@@ -95,6 +95,10 @@ function MD5(text) {
     return text ? CryptoJS.MD5(text).toString() : null
 }
 
+function SHA1(text) {
+    return text ? CryptoJS.SHA1(text).toString() : null
+}
+
 async function createTrackFromMetadata(file) {
     file = transformPath(file)
     const statResult = statSync(file, { throwIfNoEntry: false })
@@ -113,9 +117,21 @@ async function createTrackFromMetadata(file) {
             //歌曲名称
             if (mTitle) title = mTitle.trim()
             //歌手、艺人
-            if (artists) artists.forEach(ar => artist.push({ id: '', name: ar }))
+            if (artists) {
+                if (artists.length > 1) {
+                    artists.forEach(ar => artist.push({ id: 0, name: ar }))
+                } else { //异常格式
+                    artists.forEach(ar => {
+                        const delimiter = '、'
+                        const names = ar.replace(/[\/&，,\|\\]/g, delimiter).split(delimiter)
+                        names.forEach(name => {
+                            artist.push({ id: 0, name })
+                        })
+                    })
+                }
+            }
             //专辑名称
-            if (mAlbum) album.name = mAlbum
+            if (mAlbum) Object.assign(album, { id: 0, name: mAlbum })
             //封面
             //const cover = MusicMetadata.selectCover(picture)
             //直接返回内容数据，太耗内存
@@ -449,4 +465,5 @@ module.exports = {
     statPathSync,
     walkSync,
     MD5,
+    SHA1,
 }

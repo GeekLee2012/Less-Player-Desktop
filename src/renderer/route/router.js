@@ -20,13 +20,17 @@ import LocalPlaylistEditView from '../views/LocalPlaylistEditView.vue';
 import LocalPlaylistDetailView from '../views/LocalPlaylistDetailView.vue';
 import FreeFMView from '../views/FreeFMView.vue';
 import FreeFMEditView from '../views/FreeFMEditView.vue';
+import HomePageView from '../views/HomePageView.vue';
+import ModulesSettingView from '../views/ModulesSettingView.vue';
+
 
 
 
 const routes = [
     { //默认
         path: '/',
-        redirect: '/playlists/square/qq'
+        //redirect: '/playlists/square/qq'
+        component: HomePageView
     }, { //歌单广场
         path: '/playlists/square/:platform',
         component: PlaylistSquareView
@@ -120,20 +124,24 @@ const routes = [
         props: true,
         component: LocalPlaylistDetailView
     },
-    {  //自由FM
+    {  //相约电波 - 自由FM
         path: '/:exploreMode/freefm',
         component: FreeFMView
     },
-    {  //分类歌单 - 自由FM - 创建FM电台
+    {  //相约电波 - 自由FM - 创建FM电台
         path: '/:exploreMode/freefm/create',
         props: true,
         component: FreeFMEditView
     },
-    {  //分类歌单 - 自由FM - 编辑FM电台
+    {  //相约电波 - 自由FM - 编辑FM电台
         path: '/:exploreMode/freefm/edit/:id',
         props: true,
         component: FreeFMEditView
     },
+    {  //设置 - 功能管理
+        path: '/setting/modules',
+        component: ModulesSettingView
+    }
 ]
 
 export const router = createRouter({

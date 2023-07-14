@@ -36,8 +36,8 @@ export const useSearchStore = defineStore('search', {
     }),
     getters: {
         platforms() {
-            const { platforms } = usePlatformStore()
-            return platforms('search')
+            const { activePlatforms } = usePlatformStore()
+            return activePlatforms('search')
         },
         activeTabCode(state) {
             if (this.activeTab < 0) return ''

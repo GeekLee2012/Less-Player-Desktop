@@ -53,7 +53,7 @@ const { hideCommonCtxMenu, showCommonCtxMenu,
   showColorPickerToolbar, toggleGradientColorToolbar,
   showGradientColorToolbar, showPopoverHint,
   hidePopoverHint, isSamePopoverHintShow } = useAppCommonStore()
-const { customPlaylists } = storeToRefs(useUserProfileStore())
+//const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { isDefaultClassicLayout } = storeToRefs(useSettingStore())
 const { getCurrentTheme } = useSettingStore()
 
@@ -122,8 +122,8 @@ const adjustSubmenuPosition = (event) => {
 
 const setSubmenuPosition = (event) => {
   const pos = adjustSubmenuPosition(event)
-  //const padding = submenuItemNums > 7 ? 5 : 0
-  const padding = 5
+  const padding = submenuItemNums > 6 ? 12 : 6
+  //const padding = 10
   ctxSubmenuPosStyle.left = ctxMenuPos.x - menuWidth - padding + 'px !important'
   ctxSubmenuPosStyle.top = pos.y + 'px !important'
 }
@@ -160,9 +160,10 @@ const registerPopoverHints = () => {
 }
 
 const bindEventListeners = () => {
-  EventBus.on('addToListSubmenu-show', e => {
-    submenuItemNums = customPlaylists.value.length + 2
-    setSubmenuPosition(e)
+  EventBus.on('addToListSubmenu-show', ({ event, total }) => {
+    //submenuItemNums = customPlaylists.value.length + 2
+    submenuItemNums = total
+    setSubmenuPosition(event)
     showAddToListSubmenu()
   })
 

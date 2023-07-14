@@ -22,6 +22,7 @@ const props = defineProps({
 })
 
 const { visitLocalPlaylistEdit, visitBatchLocalPlaylist } = inject('appRoute')
+const { showConfirm } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
 
@@ -34,7 +35,7 @@ const { getLocalPlaylist, addToLocalPlaylist,
     removeFromLocalPlaylist, removeAllFromLocalPlaylist } = useLocalMusicStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { isUseDndForAddLocalTracksEnable, isUseDeeplyScanForDirectoryEnable,
-    isSearchForLocalPlaylistShow } = storeToRefs(useSettingStore())
+    isSearchForLocalPlaylistShow, isShowDialogBeforeBatchDelete } = storeToRefs(useSettingStore())
 
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -45,7 +46,6 @@ const isLoading = ref(false)
 const setLoading = (value) => isLoading.value = value
 const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
-
 
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', tags: null, about: '', data: [] })
@@ -91,13 +91,19 @@ const filterSongsWithKeyword = (list) => {
 }
 
 const loadContent = () => {
+    setLoading(true)
     const playlist = getLocalPlaylist(props.id)
+    if (!playlist) {
+        Object.assign(detail, { title: '当前歌单找不到啦', about: '神秘代码：404', data: [], updated: Date.now() })
+        return
+    }
     Object.assign(detail, { ...playlist })
     updateCommonCtxItem(playlist)
     //const platform = currentPlatformCode.value
     const { data } = playlist
     const filtredData = filterSongsWithKeyword(data)
     Object.assign(detail, { data: filtredData })
+    setLoading(false)
 }
 
 const loadMoreContent = () => {
@@ -158,7 +164,13 @@ const resetBack2TopBtn = () => {
     back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
 }
 
-const removeAll = () => {
+const removeAll = async () => {
+    if (!detail.data || detail.data.length < 1) return
+
+    let ok = true
+    if (isShowDialogBeforeBatchDelete.value) ok = await showConfirm({ msg: '确定要清空歌单吗？' })
+    if (!ok) return
+
     removeAllFromLocalPlaylist(props.id)
     showToast("全部歌曲已删除！")
 }
@@ -167,18 +179,17 @@ const addFolders = async () => {
     if (!ipcRenderer) return
     const dirs = await ipcRenderer.invoke('open-dirs')
     let msg = '文件夹添加失败！', success = false
-    if (dirs) {
-        setLoading(true)
-        const result = await ipcRenderer.invoke('open-audio-dirs', dirs, isUseDeeplyScanForDirectoryEnable.value)
-        if (result && result.length > 0) {
-            let count = 0
-            result.forEach(({ data }) => data.forEach(item => {
-                addToLocalPlaylist(props.id, item)
-                ++count
-            }))
-            msg = `文件夹添加成功！<br>共新增${count}首歌曲！`
-            success = true
-        }
+    if (!dirs) return
+    setLoading(true)
+    const result = await ipcRenderer.invoke('open-audio-dirs', dirs, isUseDeeplyScanForDirectoryEnable.value)
+    if (result && result.length > 0) {
+        let count = 0
+        result.forEach(({ data }) => data.forEach(item => {
+            addToLocalPlaylist(props.id, item)
+            ++count
+        }))
+        msg = `文件夹添加成功！<br>共新增${count}首歌曲！`
+        success = true
     }
     if (success) showToast(msg)
     if (!success) showFailToast(msg)
@@ -188,14 +199,14 @@ const addFolders = async () => {
 const addFiles = async () => {
     if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-audios')
-    let msg = '文件添加失败！', success = false
-    if (result && result.length > 0) {
-        result.forEach(item => addToLocalPlaylist(props.id, item))
-        msg = `文件添加成功！<br>共新增${result.length}首歌曲！`
-        success = true
-    }
-    if (success) showToast(msg)
-    if (!success) showFailToast(msg)
+    if (!result || result.length < 1) return
+    //let msg = '文件添加失败！', success = false
+    result.forEach(item => addToLocalPlaylist(props.id, item))
+    const msg = `文件添加成功！<br>共新增${result.length}首歌曲！`
+    showToast(msg)
+    //success = true
+    //if (success) showToast(msg)
+    //if (!success) showFailToast(msg)
 }
 
 const onDrop = async (event) => {
@@ -278,7 +289,7 @@ onDeactivated(() => {
                 <div class="title" v-html="detail.title"></div>
                 <div class="about" v-html="getAbout()"></div>
                 <div class="edit">
-                    <div @click="() => visitLocalPlaylistEdit(id)">
+                    <div @click="() => visitLocalPlaylistEdit(id)" v-show="detail.id">
                         <svg width="16" height="16" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -454,6 +465,7 @@ onDeactivated(() => {
     cursor: pointer;
 }
 
+/*
 #local-playlist-detail-view .checkbox svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
@@ -462,7 +474,7 @@ onDeactivated(() => {
 #local-playlist-detail-view .checkbox .checked-svg {
     fill: var(--content-highlight-color);
 }
-
+*/
 
 #local-playlist-detail-view .search-wrap {
     position: absolute;
@@ -472,12 +484,9 @@ onDeactivated(() => {
     font-weight: bold;
 }
 
+/*
 #local-playlist-detail-view .search-wrap svg {
     margin-top: 1px;
 }
-
-#local-playlist-detail-view .search-wrap>span {
-    margin-left: 5px;
-    cursor: pointer;
-}
+*/
 </style>

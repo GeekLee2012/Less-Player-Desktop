@@ -3,14 +3,16 @@ import { inject } from 'vue';
 import PlayMeta from '../components/PlayMeta.vue';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
-
+import { storeToRefs } from 'pinia';
+import { useSettingStore } from '../store/settingStore';
 
 
 
 const { visitUserHome, visitSetting } = inject('appRoute')
 const { searchAction, searchBarPlaceholder } = inject('appCommon')
-
 const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('player')
+
+const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
 </script>
 
 <template>
@@ -23,7 +25,7 @@ const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('play
             <div class="top-right">
                 <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
                 </SearchBar>
-                <div id="userhome-btn" @click="visitUserHome">
+                <div id="userhome-btn" @click="visitUserHome" v-show="isUserHomeShortcutEnable">
                     <svg width="22" height="20" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -33,7 +35,7 @@ const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('play
                         </g>
                     </svg>
                 </div>
-                <div id="setting-btn" @click="visitSetting">
+                <div id="setting-btn" @click="visitSetting" :class="{ 'no-userhome-btn': !isUserHomeShortcutEnable }">
                     <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -102,6 +104,10 @@ const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('play
 .default-main-top #userhome-btn svg {
     margin-top: 4px;
     fill: var(--button-icon-btn-color);
+}
+
+.default-main-top .no-userhome-btn {
+    margin-left: 33px;
 }
 
 .default-main-top #setting-btn {

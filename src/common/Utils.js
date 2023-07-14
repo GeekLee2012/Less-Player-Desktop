@@ -58,6 +58,10 @@ export const toTrimString = (value) => {
     return (value || '').toString().trim()
 }
 
+export const toLowerCaseTrimString = (value) => {
+    return toTrimString(value).toLowerCase()
+}
+
 export const isBlank = (text) => {
     return toTrimString(text).length < 1
 }

@@ -47,7 +47,7 @@ const removeItem = () => {
 
 const showContextMenu = (event) => {
     event.preventDefault()
-    EventBus.emit("commonCtxMenu-init", 9)
+    EventBus.emit("commonCtxMenu-init", { dataType: 9 })
     EventBus.emit("commonCtxMenu-show", { event, value: props.data })
 }
 </script>

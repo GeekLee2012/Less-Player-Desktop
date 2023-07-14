@@ -429,6 +429,7 @@ EventBus.on('app-resize', detectTitleHeight)
     cursor: pointer;
 }
 
+/*
 #playlist-detail-view .checkbox svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
@@ -437,6 +438,7 @@ EventBus.on('app-resize', detectTitleHeight)
 #playlist-detail-view .checkbox .checked-svg {
     fill: var(--content-highlight-color);
 }
+*/
 
 
 #playlist-detail-view .search-wrap {

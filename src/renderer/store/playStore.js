@@ -12,7 +12,7 @@ const NO_TRACK = new Track('0', '', '听你想听，爱你所爱',
     { id: '0', name: '山川湖海，日月星辰' },
     0, 'default_cover.png')
 
-export const usePlayStore = defineStore('play', {
+export const usePlayStore = defineStore('player', {
     state: () => ({
         playing: false,
         playingIndex: -1,
@@ -244,7 +244,7 @@ export const usePlayStore = defineStore('play', {
         enabled: true,
         strategies: [
             {
-                key: "player",
+                //key: "player",
                 storage: localStorage,
                 paths: ['playingIndex', 'playMode', 'queueTracks', 'volume']
             }

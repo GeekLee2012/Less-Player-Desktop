@@ -2,12 +2,14 @@ import { defineStore } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from '../../common/Utils';
 import { useThemeStore } from './themeStore';
+import { usePlatformStore } from './platformStore';
+import { useAppCommonStore } from './appCommonStore';
 
 
 
 const ipcRenderer = useIpcRenderer()
 
-const QUALITIES = [{
+const TRACK_QUALITIES = [{
     id: 'standard',
     name: '标准'
 }, {
@@ -51,6 +53,17 @@ const FONTSIZE_LEVELS = [{
     value: 19.5
 }]
 
+const IMAGE_QUALITIES = [{
+    id: 'normal',
+    name: '普通'
+}, {
+    id: 'medium',
+    name: '中等'
+}, {
+    id: 'large',
+    name: '高清'
+}]
+
 //TODO 本地缓存导致Store State数据不一致
 export const useSettingStore = defineStore('setting', {
     state: () => ({
@@ -69,6 +82,14 @@ export const useSettingStore = defineStore('setting', {
             fontWeight: 400,
             fontSizeLevel: 3,
             fontSize: 17.5
+        },
+        modules: {  //功能模块
+            off: {  //关闭列表
+                playlists: [],
+                artists: [],
+                radios: [],
+                search: []
+            }
         },
         /* 播放歌曲 */
         track: {
@@ -98,7 +119,7 @@ export const useSettingStore = defineStore('setting', {
             //显示音频格式
             audioTypeFlagShow: false,
             //扫描目录时，启用深度遍历
-            useDeeplyScanForDirectory: false,
+            useDeeplyScanForDirectory: true,
             //启用Dnd操作，创建本地歌单
             useDndForCreateLocalPlaylist: true,
             //启用Dnd操作，为本地歌单添加歌曲
@@ -140,6 +161,8 @@ export const useSettingStore = defineStore('setting', {
             favoritePlaylistsShow: false,
             followArtistsShow: false,
             radioModeShortcut: true,
+            userHomeShortcut: true,
+            simpleLayoutShortcut: true,
         },
         /* 对话框 */
         dialog: {
@@ -222,8 +245,9 @@ export const useSettingStore = defineStore('setting', {
             }
         },
         /* 其他 */
-        other: {
-
+        others: {
+            //版本 - 检查更新时，是否忽略开发预览版
+            checkPreReleaseVersion: false
         },
         blackHole: null, //黑洞state，永远不需要持久化
     }),
@@ -280,8 +304,11 @@ export const useSettingStore = defineStore('setting', {
         isRadioModeShortcutEnable() {
             return this.navigation.radioModeShortcut
         },
-        isAnimationLowDelayEnable() {
-            return this.track.animationLowDelay
+        isUserHomeShortcutEnable() {
+            return this.navigation.userHomeShortcut
+        },
+        isSimpleLayoutShortcutEnable() {
+            return this.navigation.simpleLayoutShortcut
         },
         isPlaybackQueueAutoPositionOnShow() {
             return this.track.playbackQueueAutoPositionOnShow
@@ -337,6 +364,36 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeClearFreeFM() {
             return this.dialog.clearFreeFM
+        },
+        isCheckPreReleaseVersion() {
+            return this.others.checkPreReleaseVersion
+        },
+        isModulesPlaylistsOff() {
+            return (platform) => {
+                return this.modules.off.playlists.includes(platform)
+            }
+        },
+        isModulesArtistsOff() {
+            return (platform) => {
+                return this.modules.off.artists.includes(platform)
+            }
+        },
+        isModulesRadiosOff() {
+            return (platform) => {
+                return this.modules.off.radios.includes(platform)
+            }
+        },
+        isModulesSearchOff() {
+            return (platform) => {
+                return this.modules.off.search.includes(platform)
+            }
+        },
+        filterActiveModulesPlatforms() {
+            return (platforms, scope) => {
+                if (!platforms || platforms.length < 1) return []
+                const offPlatforms = this.modules.off[scope]
+                return platforms.filter(item => (!offPlatforms || !offPlatforms.includes(item.code || item)))
+            }
         }
     },
     actions: {
@@ -414,6 +471,9 @@ export const useSettingStore = defineStore('setting', {
             const currentLevel = this.allFontSizeLevels()[index]
             if (currentLevel) this.setFontSize(currentLevel.value, true)
             //EventBus.emit('setting-fontSizeLevel', this.common.fontSizeLevel)
+        },
+        allImageQualities() {
+            return IMAGE_QUALITIES
         },
         setTrackQualityIndex(index) {
             this.track.quality.index = index
@@ -501,6 +561,12 @@ export const useSettingStore = defineStore('setting', {
         toggleRadioModeShortcut() {
             this.navigation.radioModeShortcut = !this.navigation.radioModeShortcut
         },
+        toggleUserHomeShortcut() {
+            this.navigation.userHomeShortcut = !this.navigation.userHomeShortcut
+        },
+        toggleSimpleLayoutShortcut() {
+            this.navigation.simpleLayoutShortcut = !this.navigation.simpleLayoutShortcut
+        },
         toggleKeysGlobal() {
             this.keys.global = !this.keys.global
             this.setupGlobalShortcut()
@@ -539,7 +605,7 @@ export const useSettingStore = defineStore('setting', {
             this.blackHole = value
         },
         allQualities() {
-            return QUALITIES
+            return TRACK_QUALITIES
         },
         resolveFont(value, noWrap) {
             value = (value || '').trim()
@@ -729,6 +795,39 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeClearFreeFM() {
             this.dialog.clearFreeFM = !this.dialog.clearFreeFM
+        },
+        toggleCheckPreReleaseVersion() {
+            this.others.checkPreReleaseVersion = !this.others.checkPreReleaseVersion
+        },
+        toggleModulesPlatformOff(module, platform) {
+            if (!module || !platform) return
+            const index = module.findIndex(item => (item === platform))
+            if (index < 0) {
+                module.push(platform)
+            } else {
+                module.splice(index, 1)
+            }
+        },
+        toggleModulesPlaylistsOff(platform) {
+            this.toggleModulesPlatformOff(this.modules.off.playlists, platform)
+            const { activePlatforms } = usePlatformStore()
+            const { setExploreModeActiveState } = useAppCommonStore()
+            setExploreModeActiveState(0, activePlatforms('playlists').length > 0)
+        },
+        toggleModulesArtistsOff(platform) {
+            this.toggleModulesPlatformOff(this.modules.off.artists, platform)
+            const { activePlatforms } = usePlatformStore()
+            const { setExploreModeActiveState } = useAppCommonStore()
+            setExploreModeActiveState(1, activePlatforms('artists').length > 0)
+        },
+        toggleModulesRadiosOff(platform) {
+            this.toggleModulesPlatformOff(this.modules.off.radios, platform)
+            const { activePlatforms } = usePlatformStore()
+            const { setExploreModeActiveState } = useAppCommonStore()
+            setExploreModeActiveState(2, activePlatforms('radios').length > 0)
+        },
+        toggleModulesSearchOff(platform) {
+            this.toggleModulesPlatformOff(this.modules.off.search, platform)
         }
     },
     persist: {
@@ -737,9 +836,9 @@ export const useSettingStore = defineStore('setting', {
             {
                 //key: 'setting',
                 storage: localStorage,
-                paths: ['theme', 'layout', 'common', 'track',
-                    'lyric', 'cache', 'tray', 'navigation',
-                    'dialog', 'keys', 'network']
+                paths: ['theme', 'layout', 'common', 'modules', 'track',
+                    'lyric', 'cache', 'tray', 'navigation', 'dialog',
+                    'keys', 'network', 'others']
             },
         ],
     },

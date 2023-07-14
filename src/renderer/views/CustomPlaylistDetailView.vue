@@ -1,19 +1,21 @@
 <script setup>
 import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject } from 'vue';
 import { storeToRefs } from 'pinia';
-import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { usePlayStore } from '../store/playStore';
-import SongListControl from '../components/SongListControl.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
+import { usePlatformStore } from '../store/platformStore';
+import { useSettingStore } from '../store/settingStore';
 import { toYyyymmddHhMmSs } from '../../common/Times';
+import SongListControl from '../components/SongListControl.vue';
+import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { usePlatformStore } from '../store/platformStore';
 
 
 
 const { visitCustomPlaylistEdit, visitBatchCustomPlaylist } = inject('appRoute')
+const { showConfirm } = inject('appCommon')
 
 const props = defineProps({
     exploreMode: String,
@@ -31,6 +33,7 @@ const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem } = useAppCommonStore()
 const { getCustomPlaylist, removeAllFromCustomPlaylist } = useUserProfileStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
+const { isShowDialogBeforeBatchDelete } = storeToRefs(useSettingStore())
 
 const resetView = () => {
     Object.assign(detail, { cover: 'default_cover.png', title: '', about: '', data: [] })
@@ -48,6 +51,10 @@ const nextPage = () => {
 
 const loadContent = () => {
     const playlist = getCustomPlaylist(props.id)
+    if (!playlist) {
+        Object.assign(detail, { title: '当前歌单找不到啦', about: '神秘代码：404', data: [], updated: Date.now() })
+        return
+    }
     //if(playlist.data) cleanUpAllSongs([ playlist.data ])
     Object.assign(detail, { ...playlist })
     updateCommonCtxItem(playlist)
@@ -55,7 +62,7 @@ const loadContent = () => {
     if (!platform || platform.trim() == 'all') {
         return
     }
-    const data = playlist.data.filter(item => (item.platform == platform.trim()))
+    const data = playlist.data.filter(item => (item.platform == platform.trim())) || []
     Object.assign(detail, { data })
 }
 
@@ -116,8 +123,13 @@ const resetBack2TopBtn = () => {
     back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
 }
 
-const removeAll = () => {
+const removeAll = async () => {
     if (!detail.data || detail.data.length < 1) return
+
+    let ok = true
+    if (isShowDialogBeforeBatchDelete.value) ok = await showConfirm({ msg: '确定要清空歌单吗？' })
+    if (!ok) return
+
     removeAllFromCustomPlaylist(props.id)
     showToast("全部歌曲已删除！")
 }

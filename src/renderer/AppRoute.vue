@@ -57,7 +57,7 @@ const highlightNavigationCustomPlaylist = (to, from) => {
 
 const autoSwitchExploreMode = (to) => {
     const path = to.path
-    if (path.includes('/playlists/')) {
+    if (path.includes('/playlists/') || path == '/') {
         setExploreMode(0)
     } else if (path.includes('/artists/')) {
         setArtistExploreMode()
@@ -85,7 +85,7 @@ const hideRelativeComponents = (to) => {
 }
 
 const createCommonRoute = (toPath, onRouteReady) => ({
-    toPath,
+    path: toPath,
     onRouteReady,
     //不完全等价 router.beforeResovle()
     beforeRoute: (toPath) => {
@@ -104,7 +104,7 @@ const createCommonRoute = (toPath, onRouteReady) => ({
 
 const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
-const resolveRoute = (route) => (typeof (route) == 'object' ? route : { toPath: route.toString() })
+const resolveRoute = (route) => (typeof (route) == 'object' ? route : { path: route.toString() })
 
 //TODO Reject是否需要实现待考虑
 const visitRoute = (route) => {
@@ -113,7 +113,8 @@ const visitRoute = (route) => {
             //if(reject) reject()
             return
         }
-        const { toPath, onRouteReady, beforeRoute } = resolveRoute(route)
+        route = resolveRoute(route)
+        const { path: toPath, onRouteReady, beforeRoute } = route
         if (!toPath) {
             //if(reject) reject()
             return
@@ -126,14 +127,18 @@ const visitRoute = (route) => {
             return
         }
         if (onRouteReady) onRouteReady(toPath)
-        router.push(toPath)
+        router.push(route)
         if (resolve) resolve()
     })
 }
 
+const visitCommonRoute = (route) => {
+    return visitRoute(createCommonRoute(route))
+}
+
 const highlightPlatform = (to) => {
     const path = to.path
-    let platform = ''
+    let platform = null
     if (path.includes('/local')) {
         platform = 'local'
     } else if (path.includes('/freefm')) {
@@ -148,7 +153,7 @@ const highlightPlatform = (to) => {
         // /userhome/custom/{id}
         if (parts.length === 4 && parts[2] === 'custom') platform = 'all'
     }
-    updateCurrentPlatformByCode(platform)
+    if (platform) updateCurrentPlatformByCode(platform)
 }
 
 const valiadateArtistId = (id) => {
@@ -157,7 +162,7 @@ const valiadateArtistId = (id) => {
 
 const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onRouteReady }) => {
     let id = item.id
-    if (isLocalMusic(platform)) id = item.name
+    if (isLocalMusic(platform)) id = item.name || item.title
     const platformValid = isArtistDetailVisitable(platform)
     let idValid = valiadateArtistId(id)
     //TODO 二次确认数据，太别扭啦
@@ -179,7 +184,7 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
         let exploreMode = exploreModeCode.value
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
-        visitRoute(createCommonRoute(toPath, onRouteReady)).then(() => updateArtistDetailKeys(platform, id))
+        visitCommonRoute(toPath, onRouteReady).then(() => updateArtistDetailKeys(platform, id))
         hideAllCtxMenus()
     }
     if (callback) callback(visitable)
@@ -187,7 +192,7 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
 
 //TODO 单一责任
 const visitAlbumDetail = (platform, id, callback, data) => {
-    if (isLocalMusic(platform)) id = data.name
+    if (isLocalMusic(platform)) id = data.name || data.title
     const platformValid = isAlbumDetailVisitable(platform)
     const idValid = (typeof (id) == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
@@ -203,7 +208,7 @@ const visitAlbumDetail = (platform, id, callback, data) => {
             exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
-        visitRoute(createCommonRoute(toPath)).then(() => {
+        visitCommonRoute(toPath).then(() => {
             if (isAlbum) updateAlbumDetailKeys(platform, id)
         })
         hideAllCtxMenus()
@@ -217,19 +222,22 @@ setupRouter()
 provide('appRoute', {
     currentRoutePath,
     visitRoute,
+    visitCommonRoute,
     backward: () => router.back(),
     forward: () => router.forward(),
-    visitHome: () => (visitRoute(createCommonRoute('/'))),
-    visitThemes: () => (visitRoute(createCommonRoute('/themes'))),
-    visitUserHome: () => (visitRoute(createCommonRoute('/userhome/all'))),
-    visitSetting: () => (visitRoute(createCommonRoute('/setting'))),
-    visitSearch: (keyword) => (visitRoute(createCommonRoute(`/search/${keyword}`))),
+    visitHome: () => (visitCommonRoute('/')),
+    visitThemes: () => (visitCommonRoute('/themes')),
+    visitUserHome: () => (visitCommonRoute('/userhome/all')),
+    visitSetting: () => (visitCommonRoute('/setting')),
+    visitSearch: (keyword) => (visitCommonRoute(`/search/${keyword}`)),
+    visitLocalMusic: () => (visitCommonRoute('/playlists/local')),
+    visitPlaylistSquare: (platform) => (visitCommonRoute(`/playlists/square/${platform}`)),
     visitPlaylist: (platform, id) => {
         const exploreMode = resolveExploreMode()
         if (platform === 'local') {
-            return visitRoute(createCommonRoute(`/${exploreMode}/local/${id}`))
+            return visitCommonRoute(`/${exploreMode}/local/${id}`)
         }
-        return visitRoute(createCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`))
+        return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)
     },
     visitArtist: ({ platform, item, index, callback, onRouteReady }) => {
         visitArtistDetail({ platform, item, index, callback, onRouteReady })
@@ -243,61 +251,64 @@ provide('appRoute', {
         if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = (exploreMode == 'userhome') ? 'userhome' : 'radios'
         }
-        return visitRoute(`/${exploreMode}/playlist/${platform}/${id}`)
+        return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)
     },
     visitCustomPlaylistCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(createCommonRoute(`/${exploreMode}/custom/create`))
+        return visitCommonRoute(`/${exploreMode}/custom/create`)
     },
     visitCustomPlaylist: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/custom/${id}`)
+        return visitCommonRoute(`/${exploreMode}/custom/${id}`)
     },
     visitCustomPlaylistEdit: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/custom/edit/${id}`)
+        return visitCommonRoute(`/${exploreMode}/custom/edit/${id}`)
     },
     visitBatchCustomPlaylist: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/batch/custom/${id}`)
+        return visitCommonRoute(`/${exploreMode}/batch/custom/${id}`)
     },
-    visitBatchLocalMusic: (id) => {
-        return visitRoute("/playlists/batch/local/0")
+    visitBatchLocalMusic: () => {
+        return visitCommonRoute('/playlists/batch/local/0')
     },
     visitBatchLocalPlaylist: (id) => {
-        return visitRoute(`/playlists/batch/local/${id}`)
+        return visitCommonRoute(`/playlists/batch/local/${id}`)
     },
     visitDataBackup: () => {
-        return visitRoute("/data/backup")
+        return visitCommonRoute('/data/backup')
     },
     visitDataRestore: () => {
-        return visitRoute("/data/restore")
+        return visitCommonRoute('/data/restore')
     },
     visitUserInfoEdit: () => {
-        return visitRoute("/userhome/user/edit")
+        return visitCommonRoute('/userhome/user/edit')
     },
     visitLocalPlaylistCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(createCommonRoute(`/${exploreMode}/local/create`))
+        return visitCommonRoute(`/${exploreMode}/local/create`)
     },
     visitLocalPlaylistEdit: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(`/${exploreMode}/local/edit/${id}`)
+        return visitCommonRoute(`/${exploreMode}/local/edit/${id}`)
     },
-    visitFreeFM() {
-        return visitRoute(createCommonRoute(`/radios/freefm`))
+    visitFreeFM: () => {
+        return visitCommonRoute(`/radios/freefm`)
     },
     visitFreeFMCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(createCommonRoute(`/${exploreMode}/freefm/create`))
+        return visitCommonRoute(`/${exploreMode}/freefm/create`)
     },
     visitFreeFMEdit: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitRoute(createCommonRoute(`/${exploreMode}/freefm/edit/${id}`))
+        return visitCommonRoute(`/${exploreMode}/freefm/edit/${id}`)
     },
-    visitBatchFreeFM: (id) => {
-        return visitRoute("/radios/batch/freefm/0")
+    visitBatchFreeFM: () => {
+        return visitCommonRoute('/radios/batch/freefm/0')
     },
+    visitModulesSetting: () => {
+        return visitCommonRoute('/setting/modules')
+    }
 })
 </script>
 

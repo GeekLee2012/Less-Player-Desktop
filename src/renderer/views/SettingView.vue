@@ -16,16 +16,17 @@ import EventBus from '../../common/EventBus';
 
 
 
-const { visitThemes, visitDataBackup, visitDataRestore, } = inject('appRoute')
+const { visitThemes, visitDataBackup,
+    visitDataRestore, visitModulesSetting, } = inject('appRoute')
 const { showConfirm } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
 
 const { theme, layout, common, track,
     keys, tray, navigation, dialog,
-    cache, network, other, search,
+    cache, network, others, search,
     isHttpProxyEnable, isSocksProxyEnable,
-    isShowDialogBeforeResetSetting } = storeToRefs(useSettingStore())
+    isShowDialogBeforeResetSetting, isCheckPreReleaseVersion } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
     setWindowZoom,
@@ -60,6 +61,7 @@ const { setThemeIndex,
     setFontSizeLevel,
     setFontSize,
     resolveFont,
+    allImageQualities,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
@@ -77,6 +79,9 @@ const { setThemeIndex,
     toggleShowDialogBeforeResetSetting,
     toggleShowDialogBeforeClearLocalMusics,
     toggleShowDialogBeforeClearFreeFM,
+    toggleCheckPreReleaseVersion,
+    toggleUserHomeShortcut,
+    toggleSimpleLayoutShortcut
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -154,8 +159,10 @@ const updateSpectrumRefreshFrequency = (e) => {
 }
 
 /* 应用更新升级 */
-const changelogUrl = "https://gitee.com/rive08/less-player-desktop/blob/master/CHANGELOG.md"
-const lastReleaseUrlRoot = "https://gitee.com/rive08/less-player-desktop/releases/tag/"
+const changelogUrl = 'https://gitee.com/rive08/less-player-desktop/blob/master/CHANGELOG.md'
+const lastReleaseUrlRoot = 'https://gitee.com/rive08/less-player-desktop/releases/tag/'
+const githubReleasesUrl = 'https://github.com/GeekLee2012/Less-Player-Desktop/releases/'
+const giteeReleasesUrl = 'https://gitee.com/rive08/less-player-desktop/releases/'
 const { version } = packageCfg
 const lastVersion = ref(version)
 const isLastRelease = ref(true)
@@ -164,14 +171,8 @@ const progressBarRef = ref(null)
 const downloadProgress = ref('准备开始下载')
 let localSavePath = null
 
-const setLastRelease = (value) => {
-    isLastRelease.value = value
-}
-
-const setDownloadState = (value) => {
-    downloadState.value = value
-}
-
+const setLastRelease = (value) => isLastRelease.value = value
+const setDownloadState = (value) => downloadState.value = value
 const isDownloadError = () => (downloadState.value == -1)
 const isUnstarted = () => (downloadState.value <= 0)
 const isDownloading = () => (downloadState.value == 1)
@@ -205,9 +206,26 @@ const resetDownloadProgress = () => {
 
 const getLastReleaseVersion = () => {
     return new Promise((resolve, reject) => {
-        getDoc(changelogUrl).then(doc => {
-            let lastVersion = doc.querySelector('.file_content h3').textContent.trim()
-            resolve(lastVersion)
+        setLastRelease(true)
+        const mode = isCheckPreReleaseVersion.value ? 'pre-release' : 'release'
+        const config = {
+            'pre-release': {
+                url: githubReleasesUrl,
+                getLastVersion: (doc) => {
+                    return doc.querySelector('.repository-content .col-md-2 .mr-3 span').textContent.trim()
+                }
+            },
+            'release': {
+                url: changelogUrl,
+                getLastVersion: (doc) => {
+                    return doc.querySelector('.file_content h3').textContent.trim()
+                }
+            }
+        }
+        const { url, getLastVersion } = config[mode]
+        //resolve('v0.1.16-dev-20230712')
+        getDoc(url).then(doc => {
+            resolve(getLastVersion(doc))
         }).catch(reason => {
             reject(version)
         })
@@ -236,7 +254,10 @@ const getVersionReleaseUrl = (version) => {
     })
 }
 
-const getTagReleasePageUrl = (version) => `https://gitee.com/rive08/less-player-desktop/releases/tag/${version}`
+const getTagReleasePageUrl = (version) => {
+    //`https://gitee.com/rive08/less-player-desktop/releases/tag/${version}`
+    return isCheckPreReleaseVersion.value ? githubReleasesUrl : giteeReleasesUrl
+}
 
 //是否已经下载，且存在下载文件但未进行安装
 const checkDownloaded = async () => {
@@ -280,14 +301,14 @@ const startDownload = async () => {
     ipcRenderer.send('download-item', { url: lastReleaseUrl })
 }
 
-const checkForUpdate = () => {
-    getLastReleaseVersion().then(result => {
-        const currentVersion = ("v" + version)
-        lastVersion.value = result
-        setLastRelease(currentVersion >= result)
-        //只针对macOS平台，检查是否已经下载好更新
-        //if (isMacOS()) checkDownloaded()
-    })
+const checkForUpdate = async () => {
+    const result = await getLastReleaseVersion()
+    if (!result) return
+    const currentVersion = ("v" + version)
+    lastVersion.value = result
+    setLastRelease(currentVersion >= result)
+    //只针对macOS平台，检查是否已经下载好更新
+    //if (isMacOS()) checkDownloaded()
 }
 
 const cancelDownload = () => {
@@ -333,6 +354,8 @@ onActivated(() => {
 })
 
 onMounted(checkForUpdate)
+
+watch(isCheckPreReleaseVersion, checkForUpdate)
 </script>
 
 <template>
@@ -402,7 +425,7 @@ onMounted(checkForUpdate)
                             {{ item.name }}
                         </span>
                     </div>
-                    <div class="last">
+                    <div>
                         <span>字体粗细：</span>
                         <input type="number" :value="common.fontWeight" placeholder="100-1000，默认400" min="100" max="1000"
                             step="10" @keydown.enter="updateFontWeight" @focusout="updateFontWeight" />
@@ -411,13 +434,33 @@ onMounted(checkForUpdate)
                             </option>
                         </datalist>
                     </div>
+                    <div>
+                        <span style="margin-right: 8px;">图片清晰度（暂未支持）：</span>
+                        <span v-for="(item, index) in allImageQualities()" class="quality-item"
+                            :class="{ active: index == 2 }" @click="">
+                            {{ item.name }}
+                        </span>
+                    </div>
+                    <div>
+                        <span style="margin-right: 8px;">分页方式（暂未支持）：</span>
+                        <span v-for="(item, index) in ['普通', '瀑布流']" class="quality-item" :class="{ active: index == 1 }"
+                            @click="">
+                            {{ item }}
+                        </span>
+                    </div>
+                    <div class="last">
+                        <span>功能管理：</span>
+                        <SvgTextButton text="前往设置" :leftAction="visitModulesSetting" class="spacing">
+                        </SvgTextButton>
+                        <div class="tip-text spacing">提示：实验性功能，设置开启、关闭部分功能</div>
+                    </div>
                 </div>
             </div>
             <div class="track row">
                 <span class="cate-name">播放歌曲</span>
                 <div class="content">
                     <div>
-                        <span class="cate-subtitle">优先音质（暂不支持）：</span>
+                        <span class="cate-subtitle">优先音质（暂未支持）：</span>
                         <span v-for="(item, index) in allQualities()" class="quality-item"
                             :class="{ active: index == track.quality.index }" @click="setTrackQualityIndex(index)">
                             {{ item.name }}
@@ -465,7 +508,7 @@ onMounted(checkForUpdate)
                         <span class="cate-subtitle">播放歌曲时，防止系统睡眠：</span>
                         <ToggleControl @click="togglePlayingWithoutSleeping" :value="track.playingWithoutSleeping">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：不影响系统正常熄屏、锁屏</div>
+                        <div class="tip-text spacing">提示：不会影响系统正常熄屏、锁屏</div>
                     </div>
                     <div class="tip-text">提示：当前应用，更新频度，是指每多少个动画帧进行一次更新操作<br>
                         频度值越小，动画可能越流畅，而CPU占用则会越高<br>
@@ -489,7 +532,7 @@ onMounted(checkForUpdate)
                 <span class="cate-name">本地歌曲</span>
                 <div class="content">
                     <div>
-                        <span class="cate-subtitle">启用在线封面（如果可用）：</span>
+                        <span class="cate-subtitle">歌曲在线封面（如果可用）：</span>
                         <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
                         </ToggleControl>
                     </div>
@@ -605,11 +648,21 @@ onMounted(checkForUpdate)
                         <ToggleControl @click="toggleFollowArtistsShow" :value="navigation.followArtistsShow">
                         </ToggleControl>
                     </div>
-                    <div class="tip-text">提示：顶部导航栏快捷入口，仅在“经典主流”布局下生效</div>
+                    <div class="tip-text">提示：顶部导航栏，部分快捷入口，仅在“经典主流”布局下生效</div>
                     <div>顶部导航栏显示快捷入口：</div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">相约电波：</span>
                         <ToggleControl @click="toggleRadioModeShortcut" :value="navigation.radioModeShortcut">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">我的主页：</span>
+                        <ToggleControl @click="toggleUserHomeShortcut" :value="navigation.userHomeShortcut">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">简约布局：</span>
+                        <ToggleControl @click="toggleSimpleLayoutShortcut" :value="navigation.simpleLayoutShortcut">
                         </ToggleControl>
                     </div>
                 </div>
@@ -655,7 +708,7 @@ onMounted(checkForUpdate)
                         <SvgTextButton text="恢复默认" style="display: none"></SvgTextButton>
                         <div class="tip-text" v-show="false">提示：目前暂时不支持自定义</div>
                     </div>
-                    <div class="tip-text">提示：一般不建议启用全局快捷键，容易与其他应用的快捷键产生冲突</div>
+                    <div class="tip-text">提示：一般不建议开启全局快捷键，容易与其他应用的快捷键产生冲突</div>
                     <div v-for="(item, index) in keys.data" :class="{ last: index == (keys.data.length - 1) }">
                         <span class="cate-subtitle cate-text">{{ item.name }}：</span>
                         <KeysInputControl :value="item.binding" :class="{ keysInputAdptWidth: !keys.global }">
@@ -796,8 +849,28 @@ onMounted(checkForUpdate)
                         <div><span v-html="packageCfg.version"></span></div>
                         <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing link">更新日志</a>
                         <!--<div class="tip-text spacing">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
+                        <div class="update-check checkbox text-btn spacing1" @click="toggleCheckPreReleaseVersion">
+                            <svg v-show="!others.checkPreReleaseVersion" width="16" height="16" viewBox="0 0 731.64 731.66"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <svg v-show="others.checkPreReleaseVersion" class="checked-svg" width="16" height="16"
+                                viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <span>检查更新，不忽略Pre-release开发预览版</span>
+                        </div>
                     </div>
-                    <!--<div class="tip-text" :class="{ last: isLastRelease }">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
                     <div :class="{ last: !isLastRelease }" v-show="!isLastRelease">
                         <!--
                         <SvgTextButton v-show="!isLastRelease && isUnstarted()" text="下载更新" :leftAction="startDownload">
@@ -822,12 +895,43 @@ onMounted(checkForUpdate)
                             <span v-html="downloadProgress"></span>
                         </div>
                         -->
-                        <div>
+                        <div class="new-version-wrap">
                             <span class="newflag content-text-highlight">最新版本</span>
-                            <span class="spacing">
+                            <div class="release-url-link">
                                 <a href="#" @click.prevent="visitLink(getTagReleasePageUrl(lastVersion))" class="link"
                                     v-html="lastVersion"></a>
-                            </span>
+                                <svg width="17" height="17" @click.prevent="visitLink(githubReleasesUrl)"
+                                    viewBox="0 0 896.57 896.13" xmlns="http://www.w3.org/2000/svg">
+                                    <g id="Layer_2" data-name="Layer 2">
+                                        <g id="Layer_1-2" data-name="Layer 1">
+                                            <path
+                                                d="M530.94,661.76c9.72-1.55,20.09-3,30.37-4.87,29-5.35,56.87-13.91,82.47-28.93,34.06-20,58.17-48.61,72-85.41,17.43-46.46,22-94.58,14.29-143.53-4.89-31.28-18.72-58.83-39.16-83-2.4-2.84-3-5.13-1.83-8.86,11.22-34.68,9-69.25-1.37-103.68-.39-1.28-.85-2.53-1.28-3.79-3.61-10.76-4-11.08-15.5-10.44a129.51,129.51,0,0,0-51.66,14.21c-18.8,9.55-36.85,20.61-55.08,31.25-3,1.73-5.36,2.33-8.77,1.42C506.13,223,456,218.6,405.37,224.37c-21.76,2.48-43.23,7.56-64.76,11.81-3.63.72-6.2.37-9.2-1.67-24.46-16.6-49.88-31.4-78.41-40-11.84-3.57-23.86-6.12-36.39-4.87-2.8.28-4.43,1.19-5.44,4-13.43,38.1-17,76.51-4.17,115.58a6.28,6.28,0,0,1-1.11,5.15c-34.63,40.19-46.48,87.38-43.47,139.33,1.64,28.22,5.51,56,15,82.75,20.12,56.56,60.27,92,116.48,110.58,22.55,7.44,45.74,11.75,69.22,14.81.62.08,1.23.23,2.57.49-8.9,8.71-15.67,18.39-19.59,29.61-3.23,9.23-5.28,18.86-8,28.26-.45,1.55-1.37,3.65-2.63,4.18-25.86,11-52.27,15.86-79.58,5.66-21-7.82-35.64-22.95-46.76-41.78-8.78-14.85-19.45-27.91-34-37.39-14-9.13-29-14.94-46.19-12a24,24,0,0,0-4.8,1.3c-6.05,2.4-7.74,6.72-3.62,11.69,4,4.81,8.56,9.55,13.8,12.84,20.41,12.81,33.76,31.35,44.07,52.46,5,10.15,8.5,21.07,14.13,30.81,17.73,30.63,45.39,46.51,79.92,50.74a181.82,181.82,0,0,0,31.91.72c10.43-.57,20.77-2.62,31.79-4.1.09,1.48.29,3.19.3,4.91.22,23.5.47,47,.6,70.49.11,19.5-14.42,29.89-33,23.45a429.5,429.5,0,0,1-128.92-70.85C87.5,753.23,31,663.11,9.8,553c-28.65-148.76,5.39-282.82,103.76-398.79,59-69.58,133.7-115.82,222-139.57,49.52-13.33,99.89-17.33,151-13,187.9,15.94,347.67,152.93,394.17,339.6,38.12,153,7.54,292.8-92,415.79-52,64.23-118.34,109.22-196.38,136.71a29.35,29.35,0,0,1-19.14.58c-8.52-2.76-12.88-9.07-14.08-17.68a59.85,59.85,0,0,1-.28-8.48q.18-60,.42-120c.1-21.4-2.63-42.31-12.39-61.59C542.47,678,536.4,670.17,530.94,661.76Z" />
+                                        </g>
+                                    </g>
+                                </svg>
+                                <svg width="15" height="15" v-show="!others.checkPreReleaseVersion"
+                                    @click.prevent="visitLink(giteeReleasesUrl)" viewBox="0 0 49.87 49.82"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g id="Layer_2" data-name="Layer 2">
+                                        <g id="Layer_1-2" data-name="Layer 1">
+                                            <g id="Layer_2-2" data-name="Layer 2">
+                                                <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                                    <g id="LOGO">
+                                                        <g id="Artboard">
+                                                            <g id="logo-black">
+                                                                <g id="Group">
+                                                                    <path id="G" class="cls-1"
+                                                                        d="M47.62,19.93H22.15a2.21,2.21,0,0,0-2.22,2.2v5.55a2.21,2.21,0,0,0,2.2,2.22H37.65a2.23,2.23,0,0,1,2.22,2.21h0v.56h0v.55a6.65,6.65,0,0,1-6.65,6.65h-21A2.21,2.21,0,0,1,10,37.65h0v-21A6.65,6.65,0,0,1,16.65,10h31a2.21,2.21,0,0,0,2.22-2.2h0V2.21A2.21,2.21,0,0,0,47.66,0h-31A16.6,16.6,0,0,0,0,16.54V47.61a2.21,2.21,0,0,0,2.21,2.21H34.88A15,15,0,0,0,49.83,34.88V22.15a2.21,2.21,0,0,0-2.2-2.22Z" />
+                                                                </g>
+                                                            </g>
+                                                        </g>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1083,9 +1187,9 @@ onMounted(checkForUpdate)
     min-width: 66px; */
 }
 
-#setting-view .layout .content .layout-item,
+#setting-view .content .layout-item,
 #setting-view .common .content .fslevel-item,
-#setting-view .track .content .quality-item {
+#setting-view .content .quality-item {
     min-width: 68px;
     padding: 6px;
     text-align: center;
@@ -1095,7 +1199,7 @@ onMounted(checkForUpdate)
     cursor: pointer;
 }
 
-#setting-view .layout .content .layout-item {
+#setting-view .content .layout-item {
     width: auto;
     min-width: 93px;
 }
@@ -1136,11 +1240,15 @@ onMounted(checkForUpdate)
 }
 
 #setting-view .keysInputAdptWidth input {
-    width: 42%;
+    width: 41%;
 }
 
 #setting-view .center .spacing {
     margin-left: 25px;
+}
+
+#setting-view .center .spacing1 {
+    margin-left: 50px;
 }
 
 #setting-view .link {
@@ -1260,5 +1368,20 @@ onMounted(checkForUpdate)
     cursor: pointer;
     color: var(--content-text-color);
     padding-left: 5px;
+}
+
+#setting-view .version .new-version-wrap {
+    display: flex;
+    align-items: center;
+}
+
+#setting-view .version .new-version-wrap .release-url-link {
+    margin-left: 15px;
+}
+
+#setting-view .version .new-version-wrap .release-url-link svg {
+    margin-bottom: -2px;
+    margin-left: 15px;
+    cursor: pointer;
 }
 </style>

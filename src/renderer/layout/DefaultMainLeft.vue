@@ -7,7 +7,7 @@ import EventBus from '../../common/EventBus';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import path from 'path';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { inject, ref } from 'vue';
+import { inject, onActivated, onMounted, ref } from 'vue';
 import { useSettingStore } from '../store/settingStore';
 
 
@@ -20,7 +20,7 @@ const { visitRoute, visitArtist, visitHome,
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { platforms, currentPlatformIndex,
-    currentPlatformCode } = storeToRefs(usePlatformStore())
+    currentPlatformCode, activePlatforms } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform, isLocalMusic, isFreeFM } = usePlatformStore()
 const { isPlaylistMode, isArtistMode, isRadioMode, isUserHomeMode,
     exploreModeCode, exitToHomeBtnShow } = storeToRefs(useAppCommonStore())
@@ -78,7 +78,7 @@ const visitCustomItem = (item, index) => {
 
 const showContextMenu = (item, index, event, dataType) => {
     event.preventDefault()
-    EventBus.emit("commonCtxMenu-init", dataType)
+    EventBus.emit("commonCtxMenu-init", { dataType })
     EventBus.emit("commonCtxMenu-show", { event, value: item })
 }
 
@@ -248,7 +248,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                     <span>音乐平台</span>
                 </div>
                 <ul>
-                    <li v-for="(item, index) in platforms()" :class="{ active: (currentPlatformIndex == index) }"
+                    <li v-for="(item, index) in activePlatforms()" :class="{ active: (currentPlatformIndex == index) }"
                         @click="updatePlatformIndex(index)" v-html="item.name">
                     </li>
                 </ul>

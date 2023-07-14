@@ -37,7 +37,7 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
   hideAllCategoryViews, showToast, hideLyricToolbar,
   hideSoundEffectView, hideCustomThemeEditView,
-  hideColorPickerToolbar } = useAppCommonStore()
+  hideColorPickerToolbar, resetExploreModeActiveStates } = useAppCommonStore()
 
 
 const isReservedPath = (path) => {
@@ -48,7 +48,7 @@ const isReservedPath = (path) => {
 const deepInState = (state, cache) => {
   for (let path in state) {
     const value = state[path]
-    if (value && typeof (value) === 'object') {
+    if (value && typeof (value) === 'object' && !Array.isArray(value)) {
       deepInState(state[path], cache[path])
     } else if (cache) {
       state[path] = (isReservedPath(path) ? state[path] : cache[path])
@@ -191,7 +191,8 @@ const setElementAlignCenter = (selector, width, height, offsetLeft, offsetTop) =
   el.style.top = top + 'px'
 }
 
-const restoreSetting = () => {
+const restoreSetting = (isInit) => {
+  //初始化
   cleanupSetting()
   setupAppSuspension()
   setupCache()
@@ -199,6 +200,10 @@ const restoreSetting = () => {
   setupGlobalShortcut()
   setupLayout(true)
   setupWindowZoom()
+  //非初始化，比如重置设置、还原备份数据 
+  if (!isInit) {
+    resetExploreModeActiveStates()
+  }
 }
 
 //注册ipcRenderer消息监听器
@@ -240,7 +245,7 @@ const migrateRecentsData = () => {
 
 const initialize = () => {
   setupMacStyle()
-  restoreSetting()
+  restoreSetting(true)
   registryIpcRendererListeners()
   migrateRecentsData()
 }
