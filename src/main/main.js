@@ -46,6 +46,21 @@ const startup = () => {
   registryGlobalListeners()
 }
 
+//清理缓存
+const clearCaches = () => {
+  if (!mainWin) return
+  try {
+    const { session } = mainWin.webContents
+    const cacheSizeLimit = 256 * 1024 * 1024
+    if (session.getCacheSize() > cacheSizeLimit) {
+      session.clearCache()
+    }
+    session.clearCodeCaches({ urls: [] })
+  } catch (error) {
+    if (isDevEnv) console.log(error)
+  }
+}
+
 const init = () => {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
@@ -56,6 +71,9 @@ const init = () => {
     //全局UserAgent
     app.userAgentFallback = USER_AGENTS[nextInt(USER_AGENTS.length)]
     mainWin = createMainWindow()
+
+    //清理缓存
+    clearCaches()
 
     session.defaultSession.on('will-download', (event, item, webContents) => {
       //event.preventDefault()
@@ -100,6 +118,7 @@ const init = () => {
         callback(response)
       })
     })
+
   })
 
   app.on('activate', (event) => {
@@ -441,6 +460,7 @@ const registryGlobalListeners = () => {
     const keyword = args[0]
     if (mainWin) mainWin.webContents.findInPage(keyword)
   })
+
 }
 
 //创建浏览窗口

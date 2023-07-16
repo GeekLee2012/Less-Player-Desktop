@@ -57,7 +57,9 @@
     "electron-builder": ">=22.14.13",
     "vite": "^4.3.9",
     "vue-color-kit": "^1.0.5",
-    "wait-on": "^7.0.1"
+    "wait-on": "^7.0.1",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4"
   },
   "build": {
     "appId": "xyz.rive2012.less-player",

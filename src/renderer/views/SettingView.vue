@@ -80,6 +80,8 @@ const { setThemeIndex,
     toggleShowDialogBeforeClearLocalMusics,
     toggleShowDialogBeforeClearFreeFM,
     toggleCheckPreReleaseVersion,
+    toggleModulesSettingShortcut,
+    toggleThemesShortcut,
     toggleUserHomeShortcut,
     toggleSimpleLayoutShortcut
 } = useSettingStore()
@@ -653,6 +655,16 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     <div>
                         <span class="cate-subtitle">相约电波：</span>
                         <ToggleControl @click="toggleRadioModeShortcut" :value="navigation.radioModeShortcut">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">功能管理：</span>
+                        <ToggleControl @click="toggleModulesSettingShortcut" :value="navigation.modulesSettingShortcut">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">主题页：</span>
+                        <ToggleControl @click="toggleThemesShortcut" :value="navigation.themesShortcut">
                         </ToggleControl>
                     </div>
                     <div>

@@ -161,6 +161,8 @@ export const useSettingStore = defineStore('setting', {
             favoritePlaylistsShow: false,
             followArtistsShow: false,
             radioModeShortcut: true,
+            modulesSettingShortcut: false,
+            themesShortcut: true,
             userHomeShortcut: true,
             simpleLayoutShortcut: true,
         },
@@ -303,6 +305,12 @@ export const useSettingStore = defineStore('setting', {
         },
         isRadioModeShortcutEnable() {
             return this.navigation.radioModeShortcut
+        },
+        isModulesSettingShortcutEnable() {
+            return this.navigation.modulesSettingShortcut
+        },
+        isThemesShortcutEnable() {
+            return this.navigation.themesShortcut
         },
         isUserHomeShortcutEnable() {
             return this.navigation.userHomeShortcut
@@ -560,6 +568,12 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleRadioModeShortcut() {
             this.navigation.radioModeShortcut = !this.navigation.radioModeShortcut
+        },
+        toggleModulesSettingShortcut() {
+            this.navigation.modulesSettingShortcut = !this.navigation.modulesSettingShortcut
+        },
+        toggleThemesShortcut() {
+            this.navigation.themesShortcut = !this.navigation.themesShortcut
         },
         toggleUserHomeShortcut() {
             this.navigation.userHomeShortcut = !this.navigation.userHomeShortcut

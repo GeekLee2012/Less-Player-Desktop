@@ -10,12 +10,14 @@ import EventBus from '../../common/EventBus';
 
 
 
-const { visitThemes, visitUserHome, visitSetting } = inject('appRoute')
+const { visitThemes, visitUserHome, visitSetting, visitModulesSetting } = inject('appRoute')
 const { searchAction, searchBarPlaceholder } = inject('appCommon')
 
 
 const { setLayoutIndex } = useSettingStore()
 const { isRadioModeShortcutEnable,
+    isModulesSettingShortcutEnable,
+    isThemesShortcutEnable,
     isUserHomeShortcutEnable,
     isSimpleLayoutShortcutEnable } = storeToRefs(useSettingStore())
 const { isRadioMode, isRadioModeEnable } = storeToRefs(useAppCommonStore())
@@ -65,7 +67,17 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="theme-btn" @click="visitThemes">
+            <div id="module-btn" @click="visitModulesSetting" v-show="isModulesSettingShortcutEnable">
+                <svg width="19" height="19" viewBox="0 0 853.51 926.34" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Layer_2" data-name="Layer 2">
+                        <g id="Layer_1-2" data-name="Layer 1">
+                            <path
+                                d="M853.49,463.39q0,87.5-.06,175c0,8.81-.12,17.73-1.44,26.41-4,26.08-17.42,46.35-40.26,59.51-33.6,19.35-67.6,38-101.49,56.87Q593.06,846.32,475.85,911.42c-16.89,9.42-34.3,16-54.07,14.79-14.86-.89-28.22-6.06-41-13.15q-165.68-92-331.35-184C29,717.79,13.33,702.65,5.18,680.34,1,668.86.08,656.93.07,644.93Q0,463.45,0,282c0-20.08,3.66-39,15.44-55.83,9-12.79,21-21.6,34.42-29q165.22-91.77,330.42-183.6C396.3,4.6,413.06-1,431.71.16a84.85,84.85,0,0,1,36.11,10.58Q536.23,48.5,604.55,86.45q98,54.4,196,108.87c14.83,8.23,28.6,17.49,38.31,32,11.23,16.79,14.66,35.37,14.63,55.08q-.13,90.49,0,181ZM383.72,816.85c.12-2,.27-3.43.27-4.87q0-159.72.09-319.44c0-3.33-1.14-5-4-6.55Q235.12,405.59,90.24,325c-1.33-.74-2.73-1.38-4.74-2.39v5q0,158.22-.12,316.45c0,6,2.31,8.68,7.15,11.37q143.28,79.34,286.41,159C380.35,815.18,381.81,815.87,383.72,816.85ZM768,322.64c-2.09,1.06-3.27,1.61-4.4,2.24Q618.67,405.39,473.71,485.82c-3.22,1.79-4.29,3.73-4.29,7.37q.15,159,.08,318v5.91c2.14-1.08,3.47-1.69,4.74-2.4q142.95-79.42,286-158.72c5.86-3.24,7.92-6.79,7.9-13.47q-.3-157-.12-314ZM722.58,250c-1.11-.8-1.49-1.14-1.93-1.38Q575.93,168.22,431.27,87.74c-4.23-2.35-7.06-1-10.48.89q-143,79.45-286,158.85c-1.19.66-2.29,1.48-3.86,2.5l6.16,3.46q142.31,79.05,284.57,158.23c3.89,2.17,6.59,2,10.32-.12q128.26-71.44,256.65-142.66C699.86,262.68,711,256.43,722.58,250Z" />
+                        </g>
+                    </g>
+                </svg>
+            </div>
+            <div id="theme-btn" @click="visitThemes" v-show="isThemesShortcutEnable">
                 <svg width="19" height="19" viewBox="0 -10 940.66 926.15" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -85,7 +97,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="setting-btn" @click="visitSetting">
+            <div id="setting-btn" @click="visitSetting" :class="{ 'last-btn': !isSimpleLayoutShortcutEnable }">
                 <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -149,18 +161,24 @@ const toggleRadioMode = () => {
     fill: var(--content-highlight-color);
 }
 
-.classic-main-top #switch-layout-btn svg,
 .classic-main-top #radio-btn svg,
+.classic-main-top #module-btn svg,
 .classic-main-top #theme-btn svg,
 .classic-main-top #userhome-btn svg,
-.classic-main-top #setting-btn svg {
+.classic-main-top #setting-btn svg,
+.classic-main-top #switch-layout-btn svg {
     margin-top: 4px;
 }
 
 .classic-main-top #radio-btn,
+.classic-main-top #module-btn svg,
 .classic-main-top #theme-btn,
 .classic-main-top #userhome-btn,
 .classic-main-top #setting-btn {
     margin-right: 18px;
+}
+
+.classic-main-top .last-btn {
+    margin-right: 0px !important;
 }
 </style>
