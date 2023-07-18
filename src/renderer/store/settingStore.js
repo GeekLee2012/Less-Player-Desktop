@@ -60,7 +60,7 @@ const IMAGE_QUALITIES = [{
     id: 'medium',
     name: '中等'
 }, {
-    id: 'large',
+    id: 'big',
     name: '高清'
 }]
 
@@ -81,7 +81,8 @@ export const useSettingStore = defineStore('setting', {
             fontFamily: '',
             fontWeight: 400,
             fontSizeLevel: 3,
-            fontSize: 17.5
+            fontSize: 17.5,
+            imgQualityIndex: 1,
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -126,6 +127,7 @@ export const useSettingStore = defineStore('setting', {
             useDndForAddLocalTracks: true,
         },
         search: {
+            autoPlaceholder: true,
             onlinePlaylistShow: false,
             localPlaylistShow: false,
             batchActionShow: true,
@@ -346,6 +348,9 @@ export const useSettingStore = defineStore('setting', {
         isAudioTypeFlagShowEnable() {
             return this.track.audioTypeFlagShow
         },
+        isSearchBarAutoPlaceholderEnable() {
+            return this.search.autoPlaceholder
+        },
         isSearchForOnlinePlaylistShow() {
             return this.search.onlinePlaylistShow
         },
@@ -483,6 +488,25 @@ export const useSettingStore = defineStore('setting', {
         allImageQualities() {
             return IMAGE_QUALITIES
         },
+        getImageQualityIndex() {
+            return this.common.imgQualityIndex
+        },
+        setImageQualityIndex(index) {
+            index = Math.max(index, 0)
+            index = Math.min(index, IMAGE_QUALITIES.length - 1)
+            this.common.imgQualityIndex = index
+        },
+        getImageUrlByQuality(urls) {
+            if (!urls || urls.length < 1) return null
+            let result = null, count = 0
+            let index = this.getImageQualityIndex()
+            do {
+                result = urls[index]
+                if (result) break
+                index = ++index % urls.length
+            } while (++count < urls.length)
+            return result
+        },
         setTrackQualityIndex(index) {
             this.track.quality.index = index
         },
@@ -537,6 +561,13 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleUseDndForAddLocalTracks() {
             this.track.useDndForAddLocalTracks = !this.track.useDndForAddLocalTracks
+        },
+        toggleSearchBarAutoPlaceholder() {
+            this.search.autoPlaceholder = !this.search.autoPlaceholder
+            if (!this.search.autoPlaceholder) {
+                const { setSearchPlaceHolderIndex } = useAppCommonStore()
+                setSearchPlaceHolderIndex(0)
+            }
         },
         toggleSearchForOnlinePlaylistShow() {
             this.search.onlinePlaylistShow = !this.search.onlinePlaylistShow

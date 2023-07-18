@@ -118,11 +118,10 @@ const VueColorKitHack = {
         this.setRgbaInput(rgbaEl.querySelector('input'))
     },
     changeColor({ rgba, hsv, hex }) {
-        let { value: hexa } = this.hexaInput
+        const alpha = parseInt(255 * rgba.a)
+        const hexAlpha = Number(alpha).toString(16).toUpperCase().replace('FF', '').replace('0', '00')
+        const hexa = `${hex}${hexAlpha}`
         if (!this.isFromHexaInput) {
-            const alpha = parseInt(255 * rgba.a)
-            const hexAlpha = Number(alpha).toString(16).toUpperCase().replace('FF', '').replace('0', '00')
-            hexa = `${hex}${hexAlpha}`
             nextTick(() => Object.assign(this.hexaInput, { value: hexa }))
         }
         Object.assign(this.value, { rgba, hsv, hex, hexa })

@@ -5,6 +5,7 @@ import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
 import { base64Encode, base64Decode, hexDecode } from "../common/Utils";
+import { useSettingStore } from "../renderer/store/settingStore";
 
 
 
@@ -20,21 +21,41 @@ const moduleReq = (module, method, param) => {
     return { module, method, param }
 }
 
-const getPlaylistCover = (originUrl) => {
-    if (!originUrl) return null
-    return originUrl.replace("/300?n=1", "/600?n=1")
+const changeImageSize = (url, oSize, nSize) => {
+    oSize = oSize || 300
+    nSize = nSize || 600
+    if (!url) return null
+    return url.replace(`/${oSize}?n=1`, `/${nSize}?n=1`)
 }
 
-const getArtistCover = (artistmid) => {
-    if (!artistmid) return null
-    return "http://y.gtimg.cn/music/photo_new/T001R500x500M000"
-        + artistmid + ".jpg"
+const getArtistCover = (artistmid, size) => {
+    size = size || 500
+    return !artistmid ? null :
+        `http://y.gtimg.cn/music/photo_new/T001R${size}x${size}M000${artistmid}.jpg`
 }
 
-const getAlbumCover = (albummid) => {
-    if (!albummid) return null
-    return "https://y.qq.com/music/photo_new/T002R500x500M000"
-        + albummid + ".jpg?max_age=2592000"
+const getAlbumCover = (albummid, size) => {
+    size = size || 500
+    return !albummid ? null :
+        `https://y.qq.com/music/photo_new/T002R${size}x${size}M000${albummid}.jpg?max_age=2592000`
+}
+
+const getCoverByQuality = ({ artistMid, albumMid }) => {
+    const { getImageUrlByQuality } = useSettingStore()
+    if (artistMid) {
+        return getImageUrlByQuality([
+            getArtistCover(artistMid, 300),
+            getArtistCover(artistMid),
+            getArtistCover(artistMid, 800)
+        ])
+    } else if (albumMid) {
+        return getImageUrlByQuality([
+            getAlbumCover(albumMid, 300),
+            getAlbumCover(albumMid),
+            getAlbumCover(albumMid, 800)
+        ])
+    }
+    return null
 }
 
 const getTrackTypeMeta = (typeName) => {
@@ -544,7 +565,7 @@ export class QQ {
                     const artist = song.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     const album = { id: song.album.mid, name: song.album.name }
                     const duration = song.interval * 1000
-                    const cover = getAlbumCover(song.album.mid)
+                    const cover = getCoverByQuality({ albumMid: song.album.mid })
                     const track = new Track(song.mid, QQ.CODE, song.name, artist, album, duration, cover)
                     track.pid = id
                     track.songID = song.id
@@ -610,7 +631,7 @@ export class QQ {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     const album = { id: item.album.mid, name: item.album.name }
                     const duration = item.interval * 1000
-                    const cover = getAlbumCover(item.album.mid)
+                    const cover = getCoverByQuality({ albumMid: item.album.mid })
                     const cache = new Track(item.mid, QQ.CODE, item.title, artist, album, duration, cover)
                     cache.type = Playlist.NORMAL_RADIO_TYPE
                     cache.channel = channel
@@ -656,15 +677,17 @@ export class QQ {
                 ein: (offset + limit - 1)
             }
             getJson(url, reqBody).then(json => {
-                result.total = Math.ceil(json.data.sum / limit)
-                const list = json.data.list
-                list.forEach(item => {
-                    const cover = item.imgurl
-                    const playlist = new Playlist(item.dissid, QQ.CODE, cover, item.dissname)
-                    playlist.about = item.introduction
-                    playlist.listenNum = item.listennum
-                    result.data.push(playlist)
-                })
+                if (json && json.data) {
+                    result.total = Math.ceil(json.data.sum / limit)
+                    const list = json.data.list
+                    list.forEach(item => {
+                        const cover = item.imgurl
+                        const playlist = new Playlist(item.dissid, QQ.CODE, cover, item.dissname)
+                        playlist.about = item.introduction
+                        playlist.listenNum = item.listennum
+                        result.data.push(playlist)
+                    })
+                }
                 resolve(result)
             })
         })
@@ -698,13 +721,15 @@ export class QQ {
                         size: limit
                     })
             })
+            const { getImageUrlByQuality } = useSettingStore()
+
             postJson(url, reqBody).then(json => {
                 const { content } = json.req_1.data
                 result.total = Math.ceil(content.total_cnt / limit)
                 const list = content.v_item
                 list.forEach(lItem => {
                     const item = lItem.basic
-                    const cover = item.cover.big_url || item.cover.medium_url || item.cover.default_url
+                    const cover = getImageUrlByQuality([item.cover.small_url, item.cover.medium_url, item.cover.big_url])
                     const playlist = new Playlist(item.tid, QQ.CODE, cover, item.title)
                     playlist.about = item.desc
                     playlist.listenNum = item.play_cnt
@@ -731,12 +756,18 @@ export class QQ {
                 disstid: id, // 歌单的id
                 loginUin: 0,
             }
+            const { getImageUrlByQuality } = useSettingStore()
             getJson(url, reqBody).then(json => {
                 const playlist = json.cdlist[0]
 
                 result.dissid = playlist.dissid
                 result.title = playlist.dissname
-                result.cover = getPlaylistCover(playlist.logo)
+
+                result.cover = getImageUrlByQuality([
+                    playlist.logo,
+                    playlist.logo,
+                    changeImageSize(playlist.logo, 300, 600) //size=800不存在
+                ])
                 result.about = playlist.desc
 
                 const songs = playlist.songlist
@@ -744,7 +775,7 @@ export class QQ {
                     const artist = song.singer.map(e => ({ id: e.mid, name: e.name }))
                     const album = { id: song.albummid, name: song.albumname }
                     const duration = song.interval * 1000
-                    const cover = getAlbumCover(song.albummid)
+                    const cover = getCoverByQuality({ albumMid: song.albummid })
                     const track = new Track(song.songmid, QQ.CODE, song.songname, artist, album, duration, cover)
                     track.mv = song.vid
                     track.pid = id
@@ -886,7 +917,7 @@ export class QQ {
                     const json = JSON.parse(scriptText)
                     const detail = json.singerDetail
                     result.title = detail.basic_info.name
-                    result.cover = getArtistCover(detail.basic_info.singer_mid) || detail.pic.pic
+                    result.cover = getCoverByQuality({ artistMid: detail.basic_info.singer_mid }) || detail.pic.pic
                     result.about = detail.descstr
                 }
                 resolve(result)
@@ -926,7 +957,7 @@ export class QQ {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     const album = { id: item.album.mid, name: item.album.name }
                     const duration = item.interval * 1000
-                    const cover = getAlbumCover(item.album.mid)
+                    const cover = getCoverByQuality({ albumMid: item.album.mid })
 
                     const track = new Track(item.mid, QQ.CODE, item.title,
                         artist, album, duration, cover)
@@ -950,7 +981,7 @@ export class QQ {
                 const albumList = json.req_1.data.list
                 albumList.forEach(item => {
                     const artist = item.singers.map(ar => ({ id: ar.singer_mid, name: ar.singer_name }))
-                    const cover = getAlbumCover(item.album_mid)
+                    const cover = getCoverByQuality({ albumMid: item.album_mid })
                     const album = new Album(item.album_mid, QQ.CODE, item.album_name, cover, artist)
                     album.publishTime = item.pub_time
                     result.data.push(album)
@@ -982,8 +1013,9 @@ export class QQ {
                     const json = JSON.parse(scriptText)
 
                     const detail = json.detail
+                    //const cover = detail.picurl.startsWith("//") ? ("https:" + detail.picurl) : detail.picurl
                     result.title = detail.albumName
-                    result.cover = detail.picurl.startsWith("//") ? ("https:" + detail.picurl) : detail.picurl
+                    result.cover = getCoverByQuality({ albumMid: detail.albumMid })
                     result.artist = detail.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     result.publishTime = detail.ctime
                     result.company = detail.company
@@ -1006,7 +1038,7 @@ export class QQ {
                     const song = item.songInfo
                     const artist = song.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     const album = { id, name: song.album.name }
-                    const cover = getAlbumCover(id)
+                    const cover = getCoverByQuality({ albumMid: id })
                     const duration = song.interval * 1000
                     const track = new Track(song.mid, QQ.CODE, song.name, artist, album, duration, cover)
                     track.mv = song.mv.vid
@@ -1049,7 +1081,7 @@ export class QQ {
                     const artist = item.singer.map(ar => ({ id: ar.mid, name: ar.name }))
                     const album = { id: item.album.mid, name: item.album.name }
                     const duration = item.interval * 1000
-                    const cover = getAlbumCover(item.album.mid)
+                    const cover = getCoverByQuality({ albumMid: album.id })
                     const track = new Track(item.mid, QQ.CODE, item.name, artist, album, duration, cover)
                     track.mv = item.mv.vid
                     track.payPlay = (item.pay.pay_play == 1)
@@ -1061,11 +1093,18 @@ export class QQ {
 
     //搜索: 歌单
     static searchPlaylists(keyword, offset, limit, page) {
+        const { getImageUrlByQuality } = useSettingStore()
         return QQ.doMultiPageSearch({ keyword, type: 3, offset, limit, page },
             {
                 getList: json => json.req_1.data.body.songlist,
                 mapItem: item => {
-                    const playlist = new Playlist(item.dissid, QQ.CODE, item.imgurl, item.dissname)
+                    let cover = item.imgurl
+                    cover = getImageUrlByQuality([
+                        cover,
+                        cover,
+                        changeImageSize(cover, 300, 600) //size=800不存在
+                    ])
+                    const playlist = new Playlist(item.dissid, QQ.CODE, cover, item.dissname)
                     //playlist.about = item.introduction
                     return playlist
                 }
@@ -1078,7 +1117,9 @@ export class QQ {
             {
                 getList: json => json.req_1.data.body.album,
                 mapItem: item => {
-                    const album = new Album(item.albumMID, QQ.CODE, item.albumName, item.albumPic)
+                    //const cover = item.albumPic
+                    const cover = getCoverByQuality({ albumMid: item.albumMID })
+                    const album = new Album(item.albumMID, QQ.CODE, item.albumName, cover)
                     album.publishTime = item.publicTime
                     return album
                 }
@@ -1094,7 +1135,8 @@ export class QQ {
                     id: item.singerMID,
                     platform: QQ.CODE,
                     title: item.singerName,
-                    cover: item.singerPic
+                    //cover: item.singerPic
+                    cover: getCoverByQuality({ artistMid: item.singerMID })
                 })
             })
     }
@@ -1195,7 +1237,8 @@ export class QQ {
                 list.forEach(item => {
                     const id = item.singer_mid
                     const title = item.singer_name
-                    const cover = item.singer_pic
+                    //const cover = item.singer_pic
+                    const cover = getCoverByQuality({ artistMid: id })
                     const artist = { id, platform: QQ.CODE, title, cover }
                     result.data.push(artist)
                 })

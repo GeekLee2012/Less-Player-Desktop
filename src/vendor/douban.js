@@ -152,7 +152,7 @@ export class DouBan {
     //主题歌单分类
     static tagPlaylistCategories() {
         const result = { platform: DouBan.CODE, data: [] }
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListTag"
             const reqBody = JSON.stringify({
                 "comm": {
@@ -173,7 +173,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -213,7 +213,7 @@ export class DouBan {
         if (resolvedCate.includes(DouBan.RECOMMAND_SONGS_CODE)) return DouBan.recommandSongs(cate, offset, limit, page)
 
         //精选歌单
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const result = { platform: DouBan.CODE, cate: originCate, offset, limit, page, total: 10, data: [] }
             const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=MergePage"
             const reqBody = JSON.stringify({
@@ -235,7 +235,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -261,7 +261,7 @@ export class DouBan {
 
     //兆赫列表，playlistRadios
     static mhzChannels(cate, offset, limit, page) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 1, data: [] }
             if (page > 1) {
                 resolve(result)
@@ -287,7 +287,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -329,7 +329,7 @@ export class DouBan {
     static tagPlaylists(cate, offset, limit, page) {
         const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 100, data: [] }
         const tagId = parseInt((cate || '').replace(DouBan.TAG_PLAYLIST_CODE + '_', '').trim())
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListGenreSongPlayList"
             const reqBody = JSON.stringify({
                 "comm": {
@@ -350,7 +350,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -397,7 +397,7 @@ export class DouBan {
 
     //编辑精选
     static recommandByEditor(cate, offset, limit, page) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 1, data: [] }
             if (page > 1) {
                 resolve(result)
@@ -423,7 +423,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -456,7 +456,7 @@ export class DouBan {
     static recommandAlbums(cate, offset, limit, page) {
         const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 1, data: [], dataType: 1 }
         //const cateId = parseInt(toTrimString(cate).replace(DouBan.RECOMMAND_ALBUM_CODE + '_', ''))
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (page > 1) {
                 resolve(result)
                 return
@@ -481,7 +481,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -506,7 +506,7 @@ export class DouBan {
     static recommandSectionSongs(id, offset, limit, page) {
         const pos = parseInt(toTrimString(id).replace(DouBan.SECTION_SONGS_CODE + '_', ''))
         const titles = ['未知歌单', '宝藏单曲', '探索发现']
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const result = new Playlist(id, DouBan.CODE, DouBan.MAIN_BG, titles[pos])
             Object.assign(result, {
                 about: '每一次的不期而遇，也许都会有别样的风景。'
@@ -533,7 +533,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -567,7 +567,7 @@ export class DouBan {
 
         //普通歌单
         id = parseInt(id.replace(DouBan.TAG_PLAYLIST_CODE + '_', ''))
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const result = new Playlist(id, DouBan.CODE)
             const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=QueryPlaylistDetailEx"
             const reqBody = JSON.stringify({
@@ -589,7 +589,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -666,7 +666,7 @@ export class DouBan {
 
     //歌手详情：Name、Cover、简介(如果有)、热门歌曲等
     static artistDetail(id) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListSingerSong"
             const reqBody = JSON.stringify({
                 "comm": {
@@ -687,7 +687,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -742,7 +742,7 @@ export class DouBan {
 
     //歌手详情: 专辑
     static artistDetailAlbums(id, offset, limit, page) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListSingerAlbum"
             const reqBody = JSON.stringify({
                 "comm": {
@@ -763,7 +763,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },
@@ -799,7 +799,7 @@ export class DouBan {
     //电台：下一首歌曲
     static nextPlaylistRadioTrack(channel, track) {
         channel = channel.replace(DouBan.MHZ_CODE + '_', '')
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             let result = null
             const firstplay = !track ? 1 : 0
             //是否命中缓存
@@ -838,7 +838,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": "1_098346_" + Date.now()
                 },
@@ -867,7 +867,7 @@ export class DouBan {
     //专辑详情
     static albumDetail(id) {
         id = parseInt(toTrimString(id).replace(DouBan.RECOMMAND_ALBUM_CODE + '_', ''))
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=QueryAlbumDetailEx"
             const reqBody = JSON.stringify({
                 "comm": {
@@ -888,7 +888,7 @@ export class DouBan {
                     "qimei": "b13acea18edc3ca714cbfce610001e817518",
                     "qimei36": "b13acea18edc3ca714cbfce610001e817518",
                     "fPersonality": "0",
-                    "v4ip": getIpv4(),
+                    "v4ip": await getIpv4(),
                     "gzip": "0",
                     "traceid": '1_098365_' + Date.now()
                 },

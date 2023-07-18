@@ -214,6 +214,8 @@ watch(themeSetting, () => setupAppTheme(), { deep: true })
 .app-custom-theme-bg {
   background-color: var(--app-bg-color);
   background-image: var(--app-bg-image);
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .app-custom-theme-bg .container {

@@ -184,7 +184,7 @@ async function createTrackFromMetadata(file) {
     return null
 }
 
-async function parseImageDataFromFile(file) {
+async function parseImageMetaFromFile(file) {
     let coverData = null
 
     file = transformPath(file)
@@ -204,18 +204,22 @@ async function parseImageDataFromFile(file) {
     return coverData
 }
 
-function readText(file, encoding) {
+function readBufferSync(file, encoding) {
     try {
         file = transformPath(file)
         const statResult = statSync(file, { throwIfNoEntry: false })
         if (statResult) {
-            const data = readFileSync(file, { encoding })
-            return data.toString()
+            return readFileSync(file, { encoding })
         }
     } catch (error) {
         console.log(error)
     }
     return null
+}
+
+function readText(file, encoding) {
+    const data = readBufferSync(file, encoding)
+    return data ? data.toString() : null
 }
 
 function writeText(file, text) {
@@ -461,9 +465,9 @@ module.exports = {
     parseM3uFile,
     writePlsFile,
     writeM3uFile,
-    parseImageDataFromFile,
+    parseImageMetaFromFile,
     statPathSync,
     walkSync,
     MD5,
-    SHA1,
+    SHA1
 }

@@ -21,7 +21,7 @@ import BatchActionBtn from '../components/BatchActionBtn.vue';
 
 
 
-const { currentRoutePath, visitRoute,
+const { currentRoutePath, visitCommonRoute,
     visitUserInfoEdit, visitCustomPlaylistCreate } = inject('appRoute')
 const { showConfirm } = inject('appCommon')
 
@@ -190,7 +190,7 @@ const switchSubTab = () => {
 
 const visitBatchActionView = () => {
     const source = tabs[activeTab.value].code
-    visitRoute(`/userhome/batch/${source}/0`)
+    visitCommonRoute(`/userhome/batch/${source}/0`)
 }
 
 const batchRemoveAll = async () => {

@@ -25,9 +25,10 @@ const { setExploreMode, setArtistExploreMode,
     updateCommonCtxItem, hidePlaybackQueueView,
     setPlaylistExploreMode, hideVideoPlayingView,
     hideLyricToolbar, hideRandomMusicToolbar,
-    hideSoundEffectView, hidePopoverHint } = useAppCommonStore()
+    hideSoundEffectView, hidePopoverHint,
+    setSearchPlaceHolderIndex } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
-const { isSimpleLayout } = storeToRefs(useSettingStore())
+const { isSimpleLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
 /* 全局Router设置  */
@@ -39,6 +40,7 @@ const setupRouter = () => {
         highlightPlatform(to)
         highlightNavigationCustomPlaylist(to, from)
         hideRelativeComponents(to)
+        autoSwitchSearchPlaceHolder(to)
     })
 }
 
@@ -68,6 +70,28 @@ const autoSwitchExploreMode = (to) => {
     } else {
         //setExploreMode(0)
     }
+}
+
+//TODO 硬编码
+let searchPlaceHolderTimer = null
+const autoSwitchSearchPlaceHolder = (to) => {
+    if (!isSearchBarAutoPlaceholderEnable.value) return
+    clearTimeout(searchPlaceHolderTimer)
+
+    const path = to.path
+    let index = 0
+    if (path.includes('/local')) {
+        index = 1
+    } else if (path.includes('/radios')) {
+        index = 2
+    } else if (path.includes('/setting')) {
+        index = 3
+    }
+    setSearchPlaceHolderIndex(index)
+    searchPlaceHolderTimer = setTimeout(() => {
+        if (index != 0) setSearchPlaceHolderIndex(0)
+    }, 60000)
+
 }
 
 const hideRelativeComponents = (to) => {
@@ -308,6 +332,9 @@ provide('appRoute', {
     },
     visitModulesSetting: () => {
         return visitCommonRoute('/setting/modules')
+    },
+    visitBatchRecents: () => {
+        return visitCommonRoute('/userhome/batch/recents/0')
     }
 })
 </script>

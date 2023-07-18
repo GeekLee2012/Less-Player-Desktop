@@ -97,7 +97,8 @@ const PRESET_EQUALIZERS = [
         values: [-2, -1, -1, 0, 3, 4, 3, 0, 0, 1]
     }]
 
-const MIN_GAIN = -40 / 4, MAX_GAIN = 40 / 4
+//const MIN_GAIN = -40 / 4, MAX_GAIN = 40 / 4
+const MIN_GAIN = -12, MAX_GAIN = 12
 
 //预设混响
 const PRESET_IMPULSE_RESPONSES = [
@@ -251,9 +252,12 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         currentEQ() {
             return PRESET_EQUALIZERS[this.currentEQIndex]
         },
+        isCustomEQ() {
+            const { id } = this.currentEQ
+            return id === 'custom'
+        },
         currentEQValues() {
-            const { id, values } = this.currentEQ
-            return id === 'custom' ? this.customEQValues : values
+            return this.isCustomEQ ? this.customEQValues : this.currentEQ.values
         },
         currentEQValue() {
             return (index) => this.currentEQValues[index]
@@ -292,8 +296,8 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         //TODO 暂时简单处理：关闭时，相当于快捷关闭; 开启时，并不开启任何音效
         toggleSoundEffect() {
             this.isUseEffect = !this.isUseEffect
-            this.currentEQIndex = 0
-            this.currentIRIndex = 0
+            this.setUseEffect(1, 0)
+            this.setUseEffect(0, 0)
         },
         //均衡器
         getPresetEQs() {
@@ -305,22 +309,43 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         getEQNames() {
             return EQ
         },
+        _formatEQValue(value) {
+            value = value || 0
+            const flValue = parseFloat(value).toFixed(1)
+            const intValue = parseInt(value)
+            return (intValue == flValue) ? intValue : flValue
+        },
         updateCustomEQValue(index, value) {
-            const fValue = parseFloat(value).toFixed(1)
-            this.customEQValues[index] = (fValue == value ? parseInt(value) : fValue)
+            this.customEQValues[index] = this._formatEQValue(value)
         },
         percentToEQValue(percent) {
             const ZERO_PERCENT = 0.5
+            let value = 0
             if (percent < ZERO_PERCENT) {
-                return MIN_GAIN * (ZERO_PERCENT - percent) / ZERO_PERCENT
+                value = MIN_GAIN * (ZERO_PERCENT - percent) / ZERO_PERCENT
             } else if (percent > ZERO_PERCENT) {
-                return MAX_GAIN * (percent - ZERO_PERCENT) / ZERO_PERCENT
+                value = MAX_GAIN * (percent - ZERO_PERCENT) / ZERO_PERCENT
             }
-            return 0
+            return this._formatEQValue(value)
         },
         //混响
         getPresetIRs() {
             return PRESET_IMPULSE_RESPONSES
+        },
+        syncCurrentEQToCustom() {
+            if (!this.isUseEffect || this.isCustomEQ) return false
+            const values = this.currentEQValues
+            values.forEach((value, index) => {
+                this.updateCustomEQValue(index, value)
+            })
+            return true
         }
     },
+    persist: {
+        enabled: true,
+        strategies: [{
+            storage: localStorage,
+            //paths: []
+        },]
+    }
 })

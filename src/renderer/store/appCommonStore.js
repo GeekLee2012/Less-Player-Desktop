@@ -58,7 +58,8 @@ export const useAppCommonStore = defineStore('appCommon', {
         //独占搜索框
         searchBarExclusiveAction: null,
         playlistExportToolbarShow: false,
-        playlistExportContextItem: null
+        playlistExportContextItem: null,
+        searchPlaceHolderIndex: 0
     }),
     getters: {
         isPlaylistMode() {
@@ -417,6 +418,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         hidePlaylistExportToolbar() {
             this.playlistExportContextItem = null
             this.playlistExportToolbarShow = false
+        },
+        setSearchPlaceHolderIndex(index) {
+            this.searchPlaceHolderIndex = index
         }
     },
     persist: {

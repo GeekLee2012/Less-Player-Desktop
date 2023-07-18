@@ -8,6 +8,7 @@ import forge from 'node-forge';
 import { Album } from "../common/Album";
 import { isBlank, randomText, toUtf8 } from "../common/Utils";
 import CryptoJS from 'crypto-js';
+import { useSettingStore } from "../renderer/store/settingStore";
 
 
 
@@ -73,6 +74,16 @@ const searchParam = (keyword, type) => {
     }
 }
 
+const getCoverByQuality = (url) => {
+    if (!url) return url
+    const { getImageUrlByQuality } = useSettingStore()
+    return getImageUrlByQuality([
+        `${url}?param=140y140`,
+        `${url}?param=500y500`,
+        `${url}?param=1000y1000`,
+    ])
+}
+
 const DEFAULT_CATE = new Category("推荐")
 DEFAULT_CATE.add("默认", '')
 
@@ -124,8 +135,9 @@ export class NetEase {
                     const listenNumEl = el.querySelector(".bottom .nb")
 
                     if (coverEl) {
-                        cover = coverEl.getAttribute("src").split("?")[0]
+                        cover = coverEl.getAttribute("src")
                         //cover = coverEl.getAttribute("src").replace("140y140", "500y500")
+                        if (cover) cover = getCoverByQuality(cover.split("?")[0])
                     }
 
                     if (titleEl) {
@@ -172,7 +184,9 @@ export class NetEase {
                     const titleEl = el.querySelector(".mine .name a")
 
                     if (coverEl) {
-                        cover = coverEl.getAttribute("src").replace("40y40", "500y500")
+                        //cover = coverEl.getAttribute("src").replace("40y40", "500y500")
+                        cover = coverEl.getAttribute("src")
+                        if (cover) cover = getCoverByQuality(cover.split("?")[0])
                     }
 
                     if (titleEl) {
@@ -295,7 +309,8 @@ export class NetEase {
             getDoc(url).then(doc => {
                 const title = doc.querySelector("#artist-name").textContent
                 let cover = doc.querySelector(".n-artist img").getAttribute('src')
-                cover = cover.replace('640y300', '500y500')
+                //cover = cover.replace('640y300', '500y500')
+                if (cover) cover = getCoverByQuality(cover.split('?')[0])
 
                 const data = []
                 const jsonText = doc.querySelector('#song-list-pre-data').textContent
@@ -347,7 +362,8 @@ export class NetEase {
                     const coverEl = el.querySelector('.u-cover')
                     const title = coverEl.getAttribute('title')
                     let cover = coverEl.querySelector('img').getAttribute('src')
-                    cover = cover.replace('120y120', '500y500')
+                    //cover = cover.replace('120y120', '500y500')
+                    if (cover) cover = getCoverByQuality(cover.split('?')[0])
 
                     const id = coverEl.querySelector('.msk').getAttribute('href').split('=')[1]
                     const publishTime = el.querySelector(".s-fc3").textContent
@@ -403,7 +419,7 @@ export class NetEase {
                     about = pEl.innerHTML
                 }
 
-                cover = cover.replace('177y177', '1024y1024')
+                if (cover) cover = getCoverByQuality(cover.split('?')[0])
                 const result = new Album(id, NetEase.CODE, title, cover, artist, company, publishTime, about)
 
                 const predata = doc.querySelector('#song-list-pre-data')
@@ -498,7 +514,8 @@ export class NetEase {
                         id: item.id,
                         platform: NetEase.CODE,
                         title: item.name,
-                        cover: (item.picUrl + "?param=500y500")
+                        //cover: (item.picUrl + "?param=500y500")
+                        cover: getCoverByQuality(item.picUrl)
                     }))
                 }
                 resolve(result)
@@ -581,7 +598,8 @@ export class NetEase {
                     const coverEl = el.querySelector('.u-cover')
                     if (coverEl) {
                         cover = coverEl.querySelector('img').getAttribute('src')
-                            .replace("130y130", "500y500")
+                        //.replace("130y130", "500y500")
+                        if (cover) cover = getCoverByQuality(cover.split('?')[0])
                     }
                     const aEl = el.querySelector('.nm')
                     const id = aEl.getAttribute('href').split('?id=')[1]
@@ -636,7 +654,8 @@ export class NetEase {
                     const coverEl = el.querySelector('.u-cover')
                     if (coverEl) {
                         cover = coverEl.querySelector('img').getAttribute('src')
-                            .replace("130y130", "500y500")
+                        //.replace("130y130", "500y500")
+                        if (cover) cover = getCoverByQuality(cover.split('?')[0])
                     }
                     const aEl = el.querySelector('.nm')
                     const id = aEl.getAttribute('href').split('?id=')[1]
@@ -740,7 +759,9 @@ export class NetEase {
                         const titleEl = el.querySelector(".f-fs2 a")
 
                         if (coverEl) {
-                            cover = coverEl.getAttribute("src").replace("200y200", "500y500")
+                            cover = coverEl.getAttribute("src")
+                            //.replace("200y200", "500y500")
+                            if (cover) cover = getCoverByQuality(cover.split('?')[0])
                         }
 
                         if (titleEl) {
@@ -770,7 +791,9 @@ export class NetEase {
                     const titleEl = el.querySelector(".cnt .f-fs3 a")
 
                     if (coverEl) {
-                        cover = coverEl.getAttribute("src").replace("200y200", "500y500")
+                        cover = coverEl.getAttribute("src")
+                        //.replace("200y200", "500y500")
+                        if (cover) cover = getCoverByQuality(cover.split('?')[0])
                     }
 
                     if (titleEl) {
@@ -801,7 +824,9 @@ export class NetEase {
                 const result = new Playlist(id, NetEase.CODE, null, title, url, about)
                 result.type = Playlist.ANCHOR_RADIO_TYPE
                 if (coverEl) {
-                    const cover = coverEl.getAttribute("src").replace("200y200", "500y500")
+                    let cover = coverEl.getAttribute("src")
+                    //.replace("200y200", "500y500")
+                    if (cover) cover = getCoverByQuality(cover.split('?')[0])
                     result.cover = cover
                 }
                 const subtitleEl = doc.querySelector(".n-songtb .u-title .sub")

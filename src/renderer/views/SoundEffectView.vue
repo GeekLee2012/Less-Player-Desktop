@@ -15,7 +15,7 @@ const { currentEQIndex, currentEffectName,
 const { setUseEffect, toggleSoundEffect,
     getPresetEQs, getEQNames,
     updateCustomEQValue, percentToEQValue,
-    getPresetIRs } = useSoundEffectStore()
+    getPresetIRs, syncCurrentEQToCustom } = useSoundEffectStore()
 const activeTabIndex = ref(0)
 
 const setActiveTab = (index) => activeTabIndex.value = index
@@ -28,8 +28,9 @@ const switchEQ = (item, index) => {
 }
 
 const updateEQValue = (percent, item, index) => {
-    //currentEQIndex.value = 1
-    updateCustomEQValue(index, percentToEQValue(percent))
+    if (!syncCurrentEQToCustom()) {
+        updateCustomEQValue(index, percentToEQValue(percent))
+    }
     setUseEffect(0, 1)
 }
 
@@ -105,9 +106,10 @@ const switchIR = (item, index) => {
                     <div class="bands">
                         <div v-for="(item, index) in getEQNames()" class="item">
                             <div class="value">{{ currentEQValue(index) }}</div>
-                            <VerticalSliderBar :value="currentEQValueToPercent(index)"
+                            <VerticalSliderBar :value="currentEQValueToPercent(index)" :precision="6"
                                 :onseek="(value) => updateEQValue(value, item, index)"
-                                :onscroll="(value) => updateEQValue(value, item, index)">
+                                :onscroll="(value) => updateEQValue(value, item, index)"
+                                :onDragMove="(value) => updateEQValue(value, item, index)">
                             </VerticalSliderBar>
                             <div class="text">{{ getEQFrequency(item.frequency) }}</div>
                         </div>
@@ -280,7 +282,7 @@ const switchIR = (item, index) => {
 
 .sound-effect-view .center .bands .text,
 .sound-effect-view .center .bands .value {
-    font-size: 13px;
+    font-size: 15px;
     margin-top: 15px;
 }
 

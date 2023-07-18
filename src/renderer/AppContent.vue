@@ -15,7 +15,9 @@ import { isMacOS, isWinOS, useIpcRenderer, useUseCustomTrafficLight } from '../c
 
 
 
-const { visitSetting, visitSearch, visitFreeFM } = inject('appRoute')
+const { visitSetting, visitSearch, visitFreeFM,
+  visitThemes, visitModulesSetting,
+  visitDataBackup, visitDataRestore, } = inject('appRoute')
 const ipcRenderer = useIpcRenderer()
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
@@ -32,7 +34,8 @@ const { togglePlay, switchPlayMode,
   toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
 const { playingViewShow, videoPlayingViewShow,
   playingViewThemeIndex, commonNotificationText,
-  commonNotificationShow, searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
+  commonNotificationShow, searchBarExclusiveAction,
+  searchPlaceHolderIndex, } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
   hideAllCategoryViews, showToast, hideLyricToolbar,
@@ -279,14 +282,32 @@ const searchDefault = async (keyword) => {
   keyword = keyword.trim()
 
   let searchType = 0
+  if (keyword.startsWith('设置')) { //关键字格式：设置xxx
+    keyword = keyword.slice(2).trim()
+    searchType = 1
+  }
 
   if (keyword == '自由FM'
     || keyword.toLowerCase() == 'freefm') {
     visitFreeFM()
     return
-  } else if (keyword.startsWith('设置')) { //关键字格式：设置xxx
-    keyword = keyword.slice(2).trim()
-    searchType = 1
+  } else if (keyword === '主题') {
+    visitThemes()
+    return
+  } else if (keyword === '功能'
+    || keyword === '功能管理') {
+    visitModulesSetting()
+    return
+  } else if (keyword === '备份') {
+    visitDataBackup()
+    return
+  } else if (keyword === '还原') {
+    visitDataRestore()
+    return
+  } else if (keyword === '主题') {
+    visitThemes()
+    return
+  } else {
     visitSetting()
   }
 
@@ -304,8 +325,12 @@ const searchAction = computed(() => {
   return searchBarExclusiveAction.value || searchDefault
 })
 
+const searchPlaceHolders = ['现在想听点什么 ~', '搜本地歌曲 ~', '试试搜“自由FM”吧 ~', '试试搜"设置xxx"吧 ~']
 const searchBarPlaceholder = computed(() => {
-  return searchBarExclusiveAction.value ? '独占搜索框模式' : '现在想听点什么 ~'
+  const index = searchPlaceHolderIndex.value
+  return searchBarExclusiveAction.value ?
+    '独占搜索框模式' :
+    (searchPlaceHolders[index] || searchPlaceHolders[0])
 })
 
 

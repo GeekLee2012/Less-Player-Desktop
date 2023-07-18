@@ -1,7 +1,7 @@
 import { Lyric } from "../common/Lyric";
 import { Track } from "../common/Track";
 import { Album } from "../common/Album";
-import { toLowerCaseTrimString, toTrimString, useIpcRenderer } from "../common/Utils";
+import { isDevEnv, toLowerCaseTrimString, toTrimString, useIpcRenderer } from "../common/Utils";
 import { FILE_PREFIX } from "../common/Constants";
 import { United } from "./united";
 import { useLocalMusicStore } from "../renderer/store/localMusicStore";
@@ -23,14 +23,12 @@ export class LocalMusic {
             let url = track.url
             if (!url.includes(FILE_PREFIX)) Object.assign(result, { url: (FILE_PREFIX + url) })
             //封面
-            if (Track.hasCover(track) && !track.cover.startsWith('http')) {
-                const { isUseOnlineCoverEnable } = useSettingStore()
-                if (isUseOnlineCoverEnable) {
-                    const onlineCandidate = await United.transferTrack(track, true, true)
-                    if (onlineCandidate) {
-                        const { cover } = onlineCandidate
-                        Object.assign(track, { cover })
-                    }
+            const { isUseOnlineCoverEnable } = useSettingStore()
+            if (isUseOnlineCoverEnable) {
+                const onlineCandidate = await United.transferTrack(track, true, true)
+                if (onlineCandidate) {
+                    const { cover } = onlineCandidate
+                    if (track.cover != cover) Object.assign(track, { cover })
                 }
             }
             resolve(result)
@@ -63,14 +61,12 @@ export class LocalMusic {
                 Object.assign(result, { lyric: Lyric.parseFromText(lyricText) })
             }
             //封面，顺便更新一下
-            if (Track.hasCover(track) && !track.cover.startsWith('http')) {
-                const { isUseOnlineCoverEnable } = useSettingStore()
-                if (isUseOnlineCoverEnable) {
-                    if (!onlineCandidate) onlineCandidate = await United.transferTrack(track, true, true)
-                    if (onlineCandidate) {
-                        const { cover } = onlineCandidate
-                        Object.assign(track, { cover })
-                    }
+            const { isUseOnlineCoverEnable } = useSettingStore()
+            if (isUseOnlineCoverEnable) {
+                if (!onlineCandidate) onlineCandidate = await United.transferTrack(track, true, true)
+                if (onlineCandidate) {
+                    const { cover } = onlineCandidate
+                    if (track.cover != cover) Object.assign(track, { cover })
                 }
             }
             resolve(result)

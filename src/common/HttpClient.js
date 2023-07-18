@@ -64,34 +64,23 @@ export const postJson = (url, data, config) => {
 }
 
 //获取国内IPv4
-export const getInternalIpv4 = () => {
-    return new Promise(async (resolve, reject) => {
-        let ipv4 = '128.108.208.188'
-        const sites = [{
-            url: 'https://ip233.cn/',
-            rule: '.container #internal-ip'
-        }, {
-            url: 'https://zh-hans.ipshu.com/',
-            rule: '.local_info .row .col p a'
-        }, {
-            url: 'https://bajiu.cn/ip/',
-            rule: '.cx div span'
-        }, {
-            url: 'https://iplocation.com/',
-            rule: '.rubber-container .result-table .ip'
-        }]
-        for (var i = 0; i < sites.length; i++) {
-            const { url, rule } = sites[i]
-            const doc = await getDoc(url)
-            const el = doc.querySelector(rule)
-            if (!el) continue
-
-            const ipText = (el.textContent || '').trim()
-            if (ipText.length >= 7) { //简单校验一下即可
-                ipv4 = ipText
-                break
-            }
-        }
-        resolve(ipv4)
-    })
+export const getInternalIpv4 = async () => {
+    try {
+        const url = 'https://qifu-api.baidubce.com/ip/local/geo/v1/district'
+        const json = await getJson(url)
+        return json.ip
+    } catch (error) {
+        console.log(error)
+    }
+    //随机IP池
+    const ipPools = [
+        '128.108.208.188', '116.233.123.121', '116.181.153.135',
+        '115.102.151.135', '112.102.11.138', '116.233.188.121',
+        '113.112.168.132', '115.122.188.89', '116.233.188.118',
+        '115.122.128.189', '116.233.125.121', '116.233.135.88',
+        '117.156.118.118', '116.156.118.118', '122.122.128.189',
+        '113.112.168.25', '113.118.128.25', '113.118.128.66'
+    ]
+    const index = parseInt(Math.random() * (ipPools.length - 1))
+    return ipPools[index]
 }

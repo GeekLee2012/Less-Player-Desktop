@@ -1,5 +1,5 @@
 <script setup>
-import { inject, onActivated, onMounted, ref, toRaw, watch } from 'vue';
+import { computed, inject, nextTick, onActivated, onMounted, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
@@ -17,7 +17,8 @@ import EventBus from '../../common/EventBus';
 
 
 const { visitThemes, visitDataBackup,
-    visitDataRestore, visitModulesSetting, } = inject('appRoute')
+    visitDataRestore, visitModulesSetting,
+    visitBatchRecents, } = inject('appRoute')
 const { showConfirm } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
@@ -62,6 +63,7 @@ const { setThemeIndex,
     setFontSize,
     resolveFont,
     allImageQualities,
+    setImageQualityIndex,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
@@ -70,6 +72,7 @@ const { setThemeIndex,
     toggleUseDndForAddLocalTracks,
     toggleUseDeeplyScanForDirectory,
     toggleAudioTypeFlagShow,
+    toggleSearchBarAutoPlaceholder,
     toggleSearchForOnlinePlaylistShow,
     toggleSearchForLocalPlaylistShow,
     toggleSearchForBatchActionShow,
@@ -350,8 +353,35 @@ const toggleSocksProxyShow = () => {
     if (!isSocksProxyEnable.value) setupProxy('SOCKS网络代理已关闭')
 }
 
+const sessionCacheSize = ref(0)
+const sessionCacheSizeText = computed(() => {
+    const cacheSize = sessionCacheSize.value
+    if (cacheSize < 0) return '未知'
+    const kb = isWinOS() ? 1024 : 1000
+    const mb = cacheSize / kb / kb
+    const floatMb = parseFloat(mb).toFixed(1)
+    const intMb = parseInt(mb)
+    return intMb == floatMb ? `${intMb} M` : `${floatMb} M`
+})
+
+const updateSessionCacheSize = async () => {
+    if (!ipcRenderer) return
+    const cacheSize = await ipcRenderer.invoke('app-cacheSize')
+    sessionCacheSize.value = cacheSize
+}
+
+const clearSessionCache = async () => {
+    if (!ipcRenderer) return
+    const result = await ipcRenderer.invoke('app-clearCaches')
+    if (result) {
+        updateSessionCacheSize()
+        showToast('资源缓存已清理！')
+    }
+}
+
 /* 生命周期、监听 */
 onActivated(() => {
+    updateSessionCacheSize()
     updateBlackHole(Math.random() * 100000000)
 })
 
@@ -437,9 +467,9 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </datalist>
                     </div>
                     <div>
-                        <span style="margin-right: 8px;">图片清晰度（暂未支持）：</span>
+                        <span style="margin-right: 8px;">图片清晰度：</span>
                         <span v-for="(item, index) in allImageQualities()" class="quality-item"
-                            :class="{ active: index == 2 }" @click="">
+                            :class="{ active: index == common.imgQualityIndex }" @click="setImageQualityIndex(index)">
                             {{ item.name }}
                         </span>
                     </div>
@@ -568,6 +598,13 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
             <div class="search row">
                 <span class="cate-name">搜索</span>
                 <div class="content">
+                    <div class="tip-text">提示：场景化提示，即不同页面场景下，搜索框Placeholder显示相应的提示</div>
+                    <div>
+                        <span class="cate-subtitle">搜索框场景化提示：</span>
+                        <ToggleControl @click="toggleSearchBarAutoPlaceholder" :value="search.autoPlaceholder">
+                        </ToggleControl>
+                    </div>
+                    <div class="tip-text">提示：独占搜索框模式，通过临时独占搜索框，实现不同场景的搜索</div>
                     <div>显示独占搜索框模式：</div>
                     <div>
                         <span class="cate-subtitle">在线歌单（详情）页：</span>
@@ -595,10 +632,11 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                 <span class="cate-name">缓存</span>
                 <div class="content">
                     <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的播放进度
-                        <br>最近播放记录，请定期手动清理；数据过多时，部分列表容易卡顿
+                        <br>最近播放记录，请定期手动清理；记录过多时，部分列表容易卡顿
+                        <br>资源缓存，默认上限为500M左右；应用每次启动时，会自动检查清理
                     </div>
                     <div>
-                        <span class="cate-subtitle">应用退出前，保存播放状态：</span>
+                        <span class="cate-subtitle">保存播放状态：</span>
                         <ToggleControl @click="toggleStorePlayState" :value="cache.storePlayState">
                         </ToggleControl>
                     </div>
@@ -607,10 +645,22 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         <ToggleControl @click="toggleStoreLocalMusic" :value="cache.storeLocalMusic">
                         </ToggleControl>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">保存最近播放记录：</span>
                         <ToggleControl @click="toggleStoreRecentPlay" :value="cache.storeRecentPlay">
                         </ToggleControl>
+                        <div class="spacing2">
+                            <SvgTextButton text="前往清理" :leftAction="visitBatchRecents">
+                            </SvgTextButton>
+                        </div>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">资源缓存占用约为：</span>
+                        <div class="cache-size-text">{{ sessionCacheSizeText }}</div>
+                        <div class="spacing">
+                            <SvgTextButton text="清空缓存" :leftAction="clearSessionCache">
+                            </SvgTextButton>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -682,7 +732,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
             <div class="dialog row">
                 <span class="cate-name">对话框</span>
                 <div class="content">
-                    <div>当进行如下操作时，需要确认：</div>
+                    <div>当进行下列操作时，需要确认：</div>
                     <div>
                         <span class="cate-subtitle">批量删除：</span>
                         <ToggleControl @click="toggleShowDialogBeforeBatchDelete" :value="dialog.batchDelete">
@@ -1263,6 +1313,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
     margin-left: 50px;
 }
 
+#setting-view .center .spacing2 {
+    margin-left: 70px;
+}
+
 #setting-view .link {
     color: var(--content-text-color);
 }
@@ -1319,6 +1373,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 
 #setting-view .font div {
     flex: 1;
+}
+
+#setting-view .cache-size-text {
+    width: 88px;
 }
 
 #setting-view .common input[type='text'],

@@ -6,8 +6,9 @@ import { createPinia } from 'pinia';
 import piniaPersist from 'pinia-plugin-persist';
 //Router
 import { router } from './route/router';
-//LazyLoad
+//Lazy Load
 import VueLazyLoad from 'vue3-lazyload';
+//import lazyPlugin from 'vue3-lazy';
 //播放器
 import { Player } from '../common/Player';
 import { RadioPlayer } from '../common/RadioPlayer';
@@ -57,7 +58,11 @@ app.use(pinia)
     log: false,
     lifecycle: {
       error: (el) => {
-        //console.log(el)
+        //此库有坑，还是巨坑，且停更已久
+        //按上面简单的配置后，若图片加载失败时，此库会无限循环尝试加载图片......
+
+        //看了源码，尝试hack一下，发现没起作用，保留下面一行代码，作为入口，备忘
+        //const lazy = app.config.globalProperties.$Lazyload
       }
     }
   })

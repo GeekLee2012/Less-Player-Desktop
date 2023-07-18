@@ -16,11 +16,12 @@ const { scanDirTracks, parseTracks,
   getDownloadDir, removePath, listFiles,
   parsePlsFile, parseM3uFile,
   writePlsFile, writeM3uFile,
-  IMAGE_PROTOCAL, parseImageDataFromFile,
+  IMAGE_PROTOCAL, parseImageMetaFromFile,
   statPathSync, MD5, SHA1,
 } = require('./common')
 
 const path = require('path')
+const fetch = require('electron-fetch').default
 
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
@@ -47,25 +48,34 @@ const startup = () => {
 }
 
 //清理缓存
-const clearCaches = () => {
-  if (!mainWin) return
+const clearCaches = async (force) => {
+  if (!mainWin) return false
   try {
     const { session } = mainWin.webContents
-    const cacheSizeLimit = 256 * 1024 * 1024
-    if (session.getCacheSize() > cacheSizeLimit) {
+    const cacheSize = await session.getCacheSize()
+    const limit = 500 * 1024 * 1024
+    if (cacheSize >= limit || force) {
       session.clearCache()
     }
     session.clearCodeCaches({ urls: [] })
+    return true
   } catch (error) {
     if (isDevEnv) console.log(error)
   }
+  return false
+}
+
+const responseDefaultCover = async () => {
+  const response = await fetch('default_cover.png')
+  const data = await response.arrayBuffer()
+  return { mimeType: 'image/png', data }
 }
 
 const init = () => {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     //全局快捷键
     //registryGlobalShortcuts()
     //全局UserAgent
@@ -106,16 +116,15 @@ const init = () => {
     })
 
     //自定义协议
-    const EMPTY_BUFFER = Buffer.from('')
     protocol.registerBufferProtocol(IMAGE_PROTOCAL.scheme, async (request, callback) => {
       const file = decodeURI(request.url.slice(IMAGE_PROTOCAL.prefix.length))
-      parseImageDataFromFile(file).then(result => {
-        let response = { data: EMPTY_BUFFER }
+      parseImageMetaFromFile(file).then(async result => {
         if (result) {
-          const { format, data } = result
-          response = { mimeType: format, data }
+          const { format: mimeType, data } = result
+          callback({ mimeType, data })
+        } else {
+          callback(Buffer.from(''))
         }
-        callback(response)
       })
     })
 
@@ -388,7 +397,7 @@ const registryGlobalListeners = () => {
 
   ipcMain.handle('open-image-base64', async (event, ...args) => {
     const file = args[0].trim().slice(IMAGE_PROTOCAL.prefix.length)
-    const imageResult = await parseImageDataFromFile(file)
+    const imageResult = await parseImageMetaFromFile(file)
     return imageResult ? imageResult.text : null
   })
 
@@ -461,6 +470,24 @@ const registryGlobalListeners = () => {
     if (mainWin) mainWin.webContents.findInPage(keyword)
   })
 
+  ipcMain.handle('app-cacheSize', async (event, ...args) => {
+    if (!mainWin) return -1
+    const { session } = mainWin.webContents
+    const cacheSize = await session.getCacheSize()
+    return cacheSize
+  })
+
+  ipcMain.handle('app-clearCaches', async (event, ...args) => {
+    return await clearCaches(true)
+  })
+}
+
+//应用显示时，待执行任务
+const onReadyToShowTasks = async () => {
+  //预先获取Cookie
+  const urls = ['https://www.kuwo.cn/']
+  urls.forEach(url => fetchCookie(url, true))
+  //其他任务
 }
 
 //创建浏览窗口
@@ -496,6 +523,8 @@ const createMainWindow = () => {
   mainWindow.once('ready-to-show', () => {
     setWindowButtonVisibility(!useCustomTrafficLight)
     mainWindow.show()
+
+    onReadyToShowTasks()
   })
 
   mainWindow.on('show', () => {
@@ -761,17 +790,98 @@ const cleanupBeforeQuit = () => {
   cancelDownload()
 }
 
+const getSecretOffical = (t, e) => {
+  if (null == e || e.length <= 0) return console.log('Please enter a password with which to encrypt the message.'),
+    null;
+  for (var n = '', i = 0; i < e.length; i++) n += e.charCodeAt(i).toString();
+  var r = Math.floor(n.length / 5),
+    o = parseInt(
+      n.charAt(r) + n.charAt(2 * r) + n.charAt(3 * r) + n.charAt(4 * r) + n.charAt(5 * r)
+    ),
+    l = Math.ceil(e.length / 2),
+    c = Math.pow(2, 31) - 1;
+  if (o < 2) return console.log(
+    'Algorithm cannot find a suitable hash. Please choose a different password. \nPossible considerations are to choose a more complex or longer password.'
+  ),
+    null;
+  var d = Math.round(1000000000 * Math.random()) % 100000000;
+  for (n += d; n.length > 10;) n = (
+    parseInt(n.substring(0, 10)) + parseInt(n.substring(10, n.length))
+  ).toString();
+  n = (o * n + l) % c;
+  var h = '',
+    f = '';
+  for (i = 0; i < t.length; i++) f += (h = parseInt(t.charCodeAt(i) ^ Math.floor(n / c * 255))) < 16 ? '0' + h.toString(16) : h.toString(16),
+    n = (o * n + l) % c;
+  for (d = d.toString(16); d.length < 8;) d = '0' + d;
+  return f += d
+}
+
+const cookiesMap = {} //格式: { url: cookie }
+const cookiesPendingMap = {} //格式: { url: true }
+const getCookie = (url, fetchOnMissing) => {
+  let cookie = cookiesMap[url]
+  try {
+    if (cookie) {
+      const _now = Date.now()
+      const { expires } = cookie
+      const expiresMillis = expires ? Date.parse(expires) : _now
+      if (expiresMillis <= _now) {
+        Reflect.deleteProperty(cookiesMap, url)
+      }
+    }
+  } catch (error) {
+    if (isDevEnv) console.log(error)
+  }
+  if (!cookie && fetchOnMissing) fetchCookie(url, fetchOnMissing)
+  return cookie
+}
+
+//暂时使用内存做缓存
+const cacheCookie = (url, cookie) => {
+  cookiesMap[url] = cookie
+}
+
+const fetchCookie = async (url, ignoreCache) => {
+  let cookie = ignoreCache ? null : getCookie(url)
+  //缓存命中
+  if (cookie) return cookie
+  try {
+    //前置状态检查，避免多次重复请求
+    if (cookiesPendingMap[url]) return cookie
+    cookiesPendingMap[url] = true
+
+    //缓存未命中
+    const resp = await fetch(url)
+    const cookieText = resp.headers.get('Set-Cookie')
+    if (cookieText) {
+      cookie = {}
+      const items = cookieText.split(';')
+      items.forEach(item => {
+        const kvPair = item.split('=')
+        const key = kvPair[0].trim()
+        const value = kvPair[1].trim()
+        cookie[key] = value
+      })
+      cacheCookie(url, cookie)
+    }
+  } catch (error) {
+    if (isDevEnv) console.log(error)
+  }
+  Reflect.deleteProperty(cookiesPendingMap, url)
+  return cookie
+}
+
 //覆盖(包装)请求
 const overrideRequest = (details) => {
-  let origin = null
-  let referer = null
-  let cookie = null
-  let userAgent = null
-  let xrouter = null
-  let csrf = null
-  let cross = null
-
   const { url } = details
+  if (url.includes('localhost')) return details
+
+  let origin = null, referer = null, xrouter = null
+  let cookie = null, userAgent = null
+  let csrf = null, cross = null, secret = null
+
+
   if (url.includes("qq.com")) {
     origin = "https://y.qq.com/"
     referer = origin
@@ -784,14 +894,34 @@ const overrideRequest = (details) => {
     cookie = ''
     //referer = 'https://www.kuwo.cn/'
   } else if (url.includes("kuwo")) {
-    const kw_token = randomTextWithinAlphabetNums(10).toUpperCase()
-    //const hm_token = 'JBKeCaitKM6jTWMfdef4kJMF2BBf4T3z'
-    const hm_token = randomTextWithinAlphabetNums(32).toUpperCase()
     origin = "https://www.kuwo.cn/"
     referer = origin
-    // cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; _ga=GA1.2.1036906485.1647595722; kw_token=" + csrf
-    cookie = `kw_token=${kw_token};Hm_token=${hm_token}`
+
+    //Cookie
+    const hm_iuvt = {
+      key: 'Hm_Iuvt_cdb524f42f0ce19b169a8071123a4727',
+      value: randomTextWithinAlphabetNums(32)
+    }
+    const kwCookie = getCookie(origin, true)
+    if (kwCookie) {
+      for (const [key, value] of Object.entries(kwCookie)) {
+        if (key.toLocaleLowerCase().includes('hm_iuvt_')) {
+          Object.assign(hm_iuvt, { key, value })
+          break
+        }
+      }
+    }
+    const kw_token = randomTextWithinAlphabetNums(10).toUpperCase()
+    //const hm_token = 'JBKeCaitKM6jTWMfdef4kJMF2BBf4T3z'
+    const hm_token = randomTextWithinAlphabetNums(32)
+    //cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; _ga=GA1.2.1036906485.1647595722; kw_token=" + csrf
+    cookie = `kw_token=${kw_token};Hm_token=${hm_token};${hm_iuvt.key}=${hm_iuvt.value};`
+
+    //其他
     cross = MD5(SHA1(hm_token).toLowerCase()).toLowerCase()
+    secret = getSecretOffical(hm_iuvt.value, hm_iuvt.key)
+
+    if (url.includes('bangId')) referer = 'https://www.kuwo.cn/rankList'
   } else if (url.includes("kugou")) {
     origin = "https://www.kugou.com/"
     referer = origin
@@ -834,6 +964,7 @@ const overrideRequest = (details) => {
   if (xrouter) details.requestHeaders['x-router'] = xrouter
   if (csrf) details.requestHeaders['CSRF'] = csrf
   if (cross) details.requestHeaders['Cross'] = cross
+  if (secret) details.requestHeaders['Secret'] = secret
 
   return details
 }

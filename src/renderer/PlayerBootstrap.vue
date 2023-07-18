@@ -51,8 +51,9 @@ const { addRecentSong, addRecentRadio,
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
 
 const playState = ref(PLAY_STATE.NONE)
-
 const setPlayState = (value) => playState.value = value
+const pendingPlay = ref(false)
+const setPendingPlay = (value) => pendingPlay.value = value
 
 /* 记录最近播放 */
 //歌曲、电台
@@ -229,7 +230,13 @@ const onPlayerErrorRetry = ({ retry, track, currentTime }) => {
     if (!retry) { //超出最大重试次数
         handleUnplayableTrack(track)
     } else if (track) {
-        //TODO 暂时重头开始播放
+        //TODO 尝试继续播放
+        const { duration } = track
+        if (duration > 0) {
+            const percent = currentTime / duration
+            markTrackSeekPending(percent)
+        }
+
         EventBus.emit('track-changed', track)
     }
 }
@@ -632,7 +639,10 @@ const playMv = (track) => {
     if (!Track.hasMv(track)) return
     const { platform, mv } = track
     getVideoDetail(platform, mv).then(result => {
-        if (isPlaying()) togglePlay()
+        const playing = isPlaying()
+        if (playing) togglePlay()
+        setPendingPlay(playing)
+
         toggleVideoPlayingView()
         EventBus.emit('video-play', result)
         traceRecentTrack(track)
@@ -783,8 +793,9 @@ watch(theme, () => {
 
 watch(videoPlayingViewShow, (nv, ov) => {
     if (!nv && isResumePlayAfterVideoEnable.value
-        && !isPlaying.value) {
+        && !isPlaying.value && pendingPlay.value) {
         togglePlay()
+        setPendingPlay(false)
     }
 })
 

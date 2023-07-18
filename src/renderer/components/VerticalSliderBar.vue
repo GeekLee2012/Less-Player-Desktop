@@ -1,54 +1,63 @@
 <script setup>
-import { onMounted, ref, toRef, watch } from 'vue';
-//TODO 组件代码写得乱，后期再梳理
+import { nextTick, onMounted, ref, toRef, watch } from 'vue';
 
 
 
 const props = defineProps({
-    value: Number, //0.0 - 1.0
+    value: Number, //0 - 1
+    precision: Number, //精度，保留小数位数
     onseek: Function,
     onscroll: Function,
-    ondrag: Function
+    onDragStart: Function,
+    onDragMove: Function,
+    onDragRelease: Function
 })
 
 const sliderCtlRef = ref(null)
 const progressRef = ref(null)
 const thumbRef = ref(null)
-let onDrag = false
-let value = parseFloat(props.value || 0.5).toFixed(2)
+const precision = parseInt(props.precision || 2)
+let value = null
+const setValue = (percent) => value = parseFloat(percent || 0).toFixed(precision)
+let onDrag = false, dragReleasing = false
 
 //点击改变进度
-const seekProgress = (e) => {
-    if (thumbRef.value.contains(e.target)) {
-        updateProgressByDeltaHeight(e.offsetY)
-    } else if (sliderCtlRef.value == e.target) {
-        updateProgressByHeight(e.offsetY, true)
-    } else {
-        updateProgressByHeight(e.offsetY)
+const seekProgress = (event) => {
+    if (onDrag || dragReleasing) return
+    const { target, offsetY } = event
+    let trigger = 0 //在滑动轨道上触发
+    if (progressRef.value.contains(target)) { //在当前进度内（高亮色区域）触发
+        trigger = 1
+    } else if (thumbRef.value.contains(target)) { //在滑块上触发
+        trigger = 2
     }
-    if (props.onseek) props.onseek(value)
+    updateProgressByHeight(offsetY, trigger)
+    const { onseek } = props
+    if (onseek) onseek(value)
 }
 
 //滚轮改变进度
 const scrollProgress = (e) => {
-    if (e.deltaY == 0) return
+    if (onDrag || e.deltaY == 0) return
     const direction = e.deltaY > 0 ? -1 : 1
     const step = 1 * direction
     let tmp = value * 100
     tmp += step
-    const percent = (tmp / 100).toFixed(2)
+    const percent = (tmp / 100).toFixed(precision)
     updateProgress(percent)
-    if (props.onscroll) props.onscroll(value)
+    const { onscroll } = props
+    if (onscroll) onscroll(value)
 }
 
 const updateProgress = (percent, noUpdate) => {
-    percent = percent * 100
-    percent = percent > 0 ? percent : 0
-    percent = percent < 100 ? percent : 100
-    progressRef.value.style.height = percent + "%"
-    thumbRef.value.style.top = (100 - percent) + "%"
-    if (noUpdate) return
-    value = (percent / 100).toFixed(2)
+    let height = (percent || 0) * 100
+    height = height > 0 ? height : 0
+    height = height < 100 ? height : 100
+
+    progressRef.value.style.height = `${height}%`
+    thumbRef.value.style.bottom = `${height}%`
+
+    if (!noUpdate) setValue(height / 100)
 }
 
 //快捷操作
@@ -57,49 +66,64 @@ const toggleProgress = () => {
     return value
 }
 
-const updateProgressByHeight = (height, needReverse) => {
-    const totalHeight = sliderCtlRef.value.offsetHeight
-    let oPercent = parseFloat(progressRef.value.style.height.replace('%', '')) / 100
-    if (isNaN(oPercent)) oPercent = 0.5
-    const oHeight = totalHeight * oPercent
-    let percent = height / totalHeight
-    if (needReverse) {
-        percent = 1 - percent
-    } else {
-        if (oHeight >= height) percent = (oHeight - height) / totalHeight
+const updateProgressByHeight = (height, trigger) => {
+    const { clientHeight: sliderHeight } = sliderCtlRef.value
+    const oProgressHeight = (value || 0) * sliderHeight
+    const thumbHeight = 10
+    //默认滑动轨道内触发
+    let nProgressHeight = sliderHeight - height
+    switch (trigger) {
+        case 1: //当前进度内触发（高亮色区域）
+            nProgressHeight = oProgressHeight - height
+            break
+        case 2: //滑块触发
+            nProgressHeight = oProgressHeight + thumbHeight - height
+            break
     }
+
+    const percent = nProgressHeight / sliderHeight
     updateProgress(percent)
 }
 
-const updateProgressByDeltaHeight = (delta) => {
-    if (delta == 0) return
-    const totalHeight = sliderCtlRef.value.offsetHeight
-    let oPercent = parseFloat(progressRef.value.style.height.replace('%', '')) / 100
-    if (isNaN(oPercent)) oPercent = 0.5
-    let oHeight = totalHeight * oPercent
-    updateProgressByHeight(oHeight + delta)
-}
-
-const startDrag = (e) => {
+let fromY = -1, dragReleaseTimer = null
+const startDrag = (event) => {
+    event.stopPropagation()
     onDrag = true
+    dragReleasing = false
+    clearTimeout(dragReleaseTimer)
+    fromY = event.screenY
+
     document.addEventListener("mousemove", dragMove)
-    document.addEventListener("mouseup", endDrag)
+    document.addEventListener("mouseup", releaseDrag)
+    const { onDragStart } = props
+    if (onDragStart) onDragStart(value, event)
 }
 
-const dragMove = (e) => {
+const dragMove = (event) => {
     if (!onDrag) return
-    const progress = e.offsetY
-    const totalHeight = sliderCtlRef.value.clientHeight
-    const percent = progress / totalHeight
-    //updateProgress(percent)
-    //if(props.ondrag)  props.onseek(value)
+    const { clientHeight: sliderHeight } = sliderCtlRef.value
+    const oProgressHeight = (value || 0) * sliderHeight
+    const { screenY: currentY } = event
+    const nProgressHeight = oProgressHeight + (fromY - currentY)
+    const percent = nProgressHeight / sliderHeight
+    updateProgress(percent)
+    fromY = currentY
+    const { onDragMove } = props
+    if (onDragMove) onDragMove(value, event)
 }
 
-/* 以下为拖动滑块改变进度相关 */
-const endDrag = (e) => {
+const releaseDrag = (event) => {
     onDrag = false
+    dragReleasing = true
+
     document.removeEventListener("mousemove", dragMove)
-    document.removeEventListener("mouseup", endDrag)
+    document.removeEventListener("mouseup", releaseDrag)
+    const { onDragRelease } = props
+    if (onDragRelease) onDragRelease(value, event)
+
+    dragReleaseTimer = setTimeout(() => {
+        dragReleasing = false
+    }, 888)
 }
 
 //对外提供API
@@ -108,13 +132,12 @@ defineExpose({
     toggleProgress
 })
 
-watch(() => props.value, (nv, ov) => updateProgress(nv, true))
+watch(() => props.value, (nv, ov) => {
+    nextTick(() => updateProgress(nv))
+}, { immediate: true })
 </script>
 
 <template>
-    <!--
-        <input type="range" ></input>
-    -->
     <div class="vertical-slider-bar" @mousewheel="scrollProgress">
         <div class="vertical-slider-bar-ctl" ref="sliderCtlRef" @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
@@ -156,10 +179,9 @@ watch(() => props.value, (nv, ov) => updateProgress(nv, true))
     width: 10px;
     height: 10px;
     border-radius: 10rem;
-    /*background-color: var(--others-volumebar-thumb-color);*/
     background-color: var(--content-highlight-color);
     z-index: 2;
     position: absolute;
-    top: 50%;
+    bottom: 50%;
 }
 </style>

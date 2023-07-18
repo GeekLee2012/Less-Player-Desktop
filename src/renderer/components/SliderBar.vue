@@ -29,31 +29,39 @@ const seekProgress = (event) => {
         clearTimeout(userScrollTimer)
         onUserScroll.value = false
     }
-    if (props.disable) return
-    if (thumbRef.value.contains(event.target)) {
-        updateProgressByDeltaWidth(event.offsetX)
+    const { disable, onSeek } = props
+    if (disable) return
+
+    const { target, offsetX } = event
+    if (thumbRef.value.contains(target)) {
+        updateProgressByDeltaWidth(offsetX)
     } else {
-        updateProgressByWidth(event.offsetX)
+        updateProgressByWidth(offsetX)
     }
-    if (props.onSeek) props.onSeek(value)
+
+    if (onSeek) onSeek(value)
 }
 
 //滚轮改变进度
 const scrollProgress = (event) => {
     onUserScroll.value = true
     if (userScrollTimer) clearTimeout(userScrollTimer)
-    if (props.disable || props.disableScroll) return
+
+    const { disable, disableScroll, onScroll, onScrollFinish } = props
+    if (disable || disableScroll) return
     if (event.deltaY == 0) return
     const direction = event.deltaY > 0 ? -1 : 1
     const step = 1 * direction
     let tmp = value * 100
     tmp += step
+
     const percent = (tmp / 100).toFixed(2)
     updateProgress(percent)
-    if (props.onScroll) props.onScroll(value)
-    if (props.onScrollFinish) {
+
+    if (onScroll) onScroll(value)
+    if (onScrollFinish) {
         userScrollTimer = setTimeout(() => {
-            props.onScrollFinish(value)
+            onScrollFinish(value)
             onUserScroll.value = false
         }, 200)
     }
@@ -63,8 +71,10 @@ const updateProgress = (percent) => {
     percent = percent * 100
     percent = percent > 0 ? percent : 0
     percent = percent < 100 ? percent : 100
-    progressRef.value.style.width = percent + "%"
-    thumbRef.value.style.left = percent + "%"
+
+    progressRef.value.style.width = `${percent}%`
+    thumbRef.value.style.left = `${percent}%`
+
     value = (percent / 100).toFixed(2)
 }
 
@@ -75,8 +85,8 @@ const toggleProgress = () => {
 }
 
 const updateProgressByWidth = (width) => {
-    const totalWidth = sliderCtlRef.value.offsetWidth
-    let percent = width / totalWidth
+    const { clientWidth: sliderWidth } = sliderCtlRef.value
+    const percent = width / sliderWidth
     updateProgress(percent)
 }
 
@@ -94,16 +104,19 @@ const startDrag = (event) => {
     onDrag.value = true
     document.addEventListener("mousemove", dragMove)
     document.addEventListener("mouseup", releaseDrag)
-    if (props.onDragStart) props.onDragStart(value, event)
+    const { onDragStart } = props
+    if (onDragStart) onDragStart(value, event)
 }
 
 const dragMove = (event) => {
     if (props.disable) return
     if (!onDrag.value) return
-    const progress = event.clientX - sliderCtlRef.value.offsetLeft
-    const width = sliderCtlRef.value.clientWidth
-    updateProgress(progress / width)
-    if (props.onDragMove) props.onDragMove(value, event)
+    const { offsetLeft, clientWidth: sliderWidth } = sliderCtlRef.value
+    const progress = event.clientX - offsetLeft
+
+    updateProgress(progress / sliderWidth)
+    const { onDragMove } = props
+    if (onDragMove) onDragMove(value, event)
 }
 
 /* 以下为拖动滑块改变进度相关 */
@@ -112,7 +125,8 @@ const releaseDrag = (event) => {
     onDrag.value = false
     document.removeEventListener("mousemove", dragMove)
     document.removeEventListener("mouseup", releaseDrag)
-    if (props.onDragRelease) props.onDragRelease(value, event)
+    const { onDragRelease } = props
+    if (onDragRelease) onDragRelease(value, event)
 }
 
 //优化拖动体验

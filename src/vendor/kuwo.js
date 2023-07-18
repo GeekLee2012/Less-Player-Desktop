@@ -6,6 +6,7 @@ import { Lyric } from "../common/Lyric";
 import { toMMssSSS } from "../common/Times";
 import { Album } from "../common/Album";
 import { randomTextWithinAlphabetNums } from "../common/Utils";
+import { useSettingStore } from "../renderer/store/settingStore";
 
 
 
@@ -25,6 +26,47 @@ const randomReqId = () => {
 const CONFIG = {
     withCredentials: true
 }
+
+const getCoverByQuality = (url) => {
+    if (!url) return url
+    const { getImageUrlByQuality } = useSettingStore()
+    return getImageUrlByQuality([
+        url.replace('_500.', '_300.'),
+        url,
+        url.replace('_500.', '_1000.')
+    ])
+}
+
+const getAlbumCoverByQuality = (url) => {
+    if (!url) return url
+    const { getImageUrlByQuality } = useSettingStore()
+    return getImageUrlByQuality([
+        url.replace('/albumcover/500/', '/albumcover/300/'),
+        url,
+        url.replace('/albumcover/500/', '/albumcover/1000/'),
+    ])
+}
+
+const getArtistCoverByQuality = (url) => {
+    if (!url) return url
+    const { getImageUrlByQuality } = useSettingStore()
+    return getImageUrlByQuality([
+        url.replace('/starheads/300/', '/starheads/120/'),
+        url,
+        url.replace('/starheads/300/', '/starheads/500/'),
+    ])
+}
+
+const getSearchCoverByQuality = (url) => {
+    if (!url) return url
+    const { getImageUrlByQuality } = useSettingStore()
+    return getImageUrlByQuality([
+        url.replace('_700.', '_150.'),
+        url.replace('_150.', '_500.').replace('_700.', '_500.'),
+        url.replace('_150.', '_500.'),
+    ])
+}
+
 
 export class KuWo {
     static CODE = 'kuwo'
@@ -98,7 +140,7 @@ export class KuWo {
 
                 data.forEach(item => {
                     const id = item.id
-                    const cover = item.img
+                    const cover = getCoverByQuality(item.img)
                     const title = item.name
 
                     if (id) {
@@ -130,7 +172,6 @@ export class KuWo {
                     scriptText = scriptText.split(key)[1]
                     //const json = eval(scriptText)
                     const json = Function('return ' + scriptText)()
-
                     //参考官方页面
                     const bangList = json.data[0].bangMenu
                     for (var i = 0; i < 3; i++) {
@@ -158,19 +199,33 @@ export class KuWo {
             const reqBody = {
                 bangId,
                 pn: page,
-                rn: 300,
+                rn: 20,
                 httpsStatus: 1,
-                reqId: randomReqId()
+                reqId: randomReqId(),
+                plat: 'web_www',
+                from: ''
             }
+            const result = new Playlist(id, KuWo.CODE)
             getJson(url, reqBody, CONFIG).then(json => {
+                if (json.code != 200) {
+                    resolve(result)
+                    return
+                }
                 const cache = KuWo.CACHE_TOPLISTS.get(id)
-                const result = new Playlist(id, KuWo.CODE)
                 if (cache) {
                     result.cover = cache.cover
                     result.title = cache.title
                     result.about = cache.about
                 }
-                const playlist = json.data.musicList
+                const { num: total, musicList } = json.data
+                result.total = total
+                const maxPage = Math.ceil(total / 20)
+                if (page > maxPage) { // 超出最大页数后，KW居然还返回数据！！！
+                    resolve(result)
+                    return
+                }
+
+                const playlist = musicList
                 playlist.forEach(item => {
                     const artist = [{ id: item.artistid, name: item.artist }]
                     const album = { id: item.albumid, name: item.album }
@@ -200,10 +255,11 @@ export class KuWo {
             result.about = json.data.info
             result.total = json.data.total
             */
+            const { getImageUrlByQuality } = useSettingStore()
             getJson(url, null, CONFIG).then(json => {
                 const { img500, img700, img300, info, total } = json.data
                 Object.assign(result, {
-                    cover: img700 || img500 || img300,
+                    cover: getImageUrlByQuality([img300, img500, img700]),
                     title: json.data.name,
                     about: info,
                     total: Math.ceil(total / 30)
@@ -213,7 +269,8 @@ export class KuWo {
                     const artist = [{ id: item.artistid, name: item.artist }]
                     const album = { id: item.albumid, name: item.album }
                     const duration = item.duration * 1000
-                    const cover = item.pic
+                    const cover = getAlbumCoverByQuality(item.pic)
+
                     const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
                     if (item.hasmv == 1) track.mv = item.rid
                     track.pid = id
@@ -283,7 +340,8 @@ export class KuWo {
 
                     const singerInfo = json.data[0].singerInfo
                     title = singerInfo.name
-                    cover = singerInfo.pic300
+                    //cover = singerInfo.pic300
+                    cover = getArtistCoverByQuality(singerInfo.pic300)
                     about = singerInfo.info
                 }
                 const result = { id, title, cover, about }
@@ -298,6 +356,7 @@ export class KuWo {
             const url = "http://www.kuwo.cn/api/www/artist/artistMusic"
                 + "?artistid=" + id + "&pn=" + page + "&rn=" + limit
                 + "&httpsStatus=1&reqId=" + randomReqId()
+                + "&plat=web_www&from="
             getJson(url, null, CONFIG).then(json => {
                 const total = json.data.total
                 const data = []
@@ -306,7 +365,7 @@ export class KuWo {
                     const artist = [{ id: item.artistid, name: item.artist }]
                     const album = { id: item.albumid, name: item.album }
                     const duration = item.duration * 1000
-                    const cover = item.pic
+                    const cover = getAlbumCoverByQuality(item.pic)
                     const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
                     if (item.hasmv) track.mv = item.rid
                     data.push(track)
@@ -329,7 +388,8 @@ export class KuWo {
                 const list = json.data.albumList
                 list.forEach(item => {
                     const artist = [{ id: item.artistid, name: item.artist }]
-                    const album = new Album(item.albumid, KuWo.CODE, item.album, item.pic, artist,
+                    const cover = getAlbumCoverByQuality(item.pic)
+                    const album = new Album(item.albumid, KuWo.CODE, item.album, cover, artist,
                         null, item.releaseDate, item.albuminfo)
                     data.push(album)
                 })
@@ -352,12 +412,11 @@ export class KuWo {
                     scriptText = scriptText.split(key)[1]
                     //const json = eval(scriptText)
                     const json = Function('return ' + scriptText)()
-
                     const pageData = json.data[0].pageData
                     const albumInfo = json.data[0].albumInfo
 
                     name = albumInfo.album
-                    cover = albumInfo.pic
+                    cover = getAlbumCoverByQuality(albumInfo.pic)
                     artist.push({ id: albumInfo.artistid, name: albumInfo.artist })
                     publishTime = albumInfo.releaseDate
                     about = albumInfo.albuminfo
@@ -366,7 +425,8 @@ export class KuWo {
                         const trackArtist = [{ id: item.artistid, name: item.artist }]
                         const trackAlbum = { id: item.albumid, name: item.album }
                         const duration = item.duration * 1000
-                        const track = new Track(item.rid, KuWo.CODE, item.name, trackArtist, trackAlbum, duration, item.pic)
+                        const trackCover = getAlbumCoverByQuality(item.pic)
+                        const track = new Track(item.rid, KuWo.CODE, item.name, trackArtist, trackAlbum, duration, trackCover)
                         if (item.hasmv) track.mv = item.rid
                         data.push(track)
                     })
@@ -390,6 +450,7 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/search/searchMusicBykeyWord"
                 + "?key=" + keyword + "&pn=" + page + "&rn=" + limit
                 + "&httpsStatus=1&reqId=" + randomReqId()
+                + "&plat=web_www&from="
             const result = { platform: KuWo.CODE, offset, limit, page, data: [] }
             getJson(url, null, CONFIG).then(json => {
                 if (json.code == 200) {
@@ -397,7 +458,8 @@ export class KuWo {
                         const artist = [{ id: item.artistid, name: item.artist }]
                         const album = { id: item.albumid, name: item.album }
                         const duration = item.duration * 1000
-                        const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, item.pic)
+                        const cover = getAlbumCoverByQuality(item.pic)
+                        const track = new Track(item.rid, KuWo.CODE, item.name, artist, album, duration, cover)
                         if (item.hasmv) track.mv = item.rid
                         return track
                     })
@@ -450,9 +512,11 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/search/searchPlayListBykeyWord"
                 + "?key=" + keyword + "&pn=" + page + "&rn=" + limit
                 + "&httpsStatus=1&reqId=" + randomReqId()
+                + "&plat=web_www&from="
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.list.map(item => {
-                    const playlist = new Playlist(item.id, KuWo.CODE, item.img, item.name)
+                    const cover = getSearchCoverByQuality(item.img)
+                    const playlist = new Playlist(item.id, KuWo.CODE, cover, item.name)
                     return playlist
                 })
                 const result = { platform: KuWo.CODE, offset, limit, page, data }
@@ -467,11 +531,13 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/search/searchAlbumBykeyWord"
                 + "?key=" + keyword + "&pn=" + page + "&rn=" + limit
                 + "&httpsStatus=1&reqId=" + randomReqId()
+                + "&plat=web_www&from="
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.albumList.map(item => {
                     const artist = [{ id: item.artistid, name: item.artist }]
                     const albumName = item.album
-                    const album = new Album(item.albumid, KuWo.CODE, albumName, item.pic, artist)
+                    const cover = getAlbumCoverByQuality(item.pic)
+                    const album = new Album(item.albumid, KuWo.CODE, albumName, cover, artist)
                     album.publishTime = item.releaseDate
                     return album
                 })
@@ -487,13 +553,15 @@ export class KuWo {
             const url = "https://www.kuwo.cn/api/www/search/searchArtistBykeyWord"
                 + "?key=" + keyword + "&pn=" + page + "&rn=" + limit
                 + "&httpsStatus=1&reqId=" + randomReqId()
+                + "&plat=web_www&from="
             getJson(url, null, CONFIG).then(json => {
                 const data = json.data.artistList.map(item => {
                     return {
                         id: item.id,
                         platform: KuWo.CODE,
                         title: item.name,
-                        cover: item.pic300
+                        //cover: item.pic300
+                        cover: getArtistCoverByQuality(item.pic300)
                     }
                 })
                 const result = { platform: KuWo.CODE, offset, limit, page, data }
@@ -562,7 +630,8 @@ export class KuWo {
                 list.forEach(item => {
                     const id = item.id
                     const title = item.name
-                    const cover = item.pic300 || item.pic || item.pic120 || item.pic70
+                    //const cover = item.pic300 || item.pic || item.pic120 || item.pic70
+                    const cover = getArtistCoverByQuality(item.pic300)
                     const artist = { id, platform: KuWo.CODE, title, cover }
                     result.data.push(artist)
                 })
@@ -575,6 +644,7 @@ export class KuWo {
         return new Promise((resolve, reject) => {
             const url = "https://www.kuwo.cn/api/v1/www/music/playUrl"
                 + `?mid=${id}&type=mv&httpsStatus=1&reqId=${randomReqId()}`
+                + "&plat=web_www&from="
             getJson(url).then(json => {
                 const result = { id, platform: KuWo.CODE, quality, url: '' }
                 if (json.data) result.url = json.data.url || ''
