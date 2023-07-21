@@ -7,6 +7,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import RadioCategoryBar from '../components/RadioCategoryBar.vue';
 import { useRadioSquareStore } from '../store/radioSquareStore';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
+import { useSettingStore } from '../store/settingStore';
 
 
 
@@ -26,6 +27,7 @@ const { currentPlatformCode, currentCategoryCode,
 const { currentVender, currentPlatformCategories, putCategories,
     putOrders, currentPlatformOrders, setMultiSelectMode } = useRadioSquareStore()
 const { isRadioMode } = storeToRefs(useAppCommonStore())
+const { getPaginationStyleIndex } = storeToRefs(useSettingStore())
 
 const isLoadingCategories = ref(true)
 const isLoadingContent = ref(true)
@@ -80,22 +82,28 @@ const loadCategories = async () => {
     setLoadingCategories(false)
 }
 
-const loadContent = async (noLoadingMask) => {
+const loadContent = async (noLoadingMask, offset, limit, page) => {
     const vendor = currentVender()
     if (!vendor || !vendor.radioSquare) return
     if (!noLoadingMask) setLoadingContent(true)
     let cate = multiSelectMode.value ? currentCategoryItems.value : currentCategoryCode.value
+    /*
     const offset = pagination.offset
     const limit = pagination.limit
     const page = pagination.page
+    */
     const order = currentOrder.value.value
     const result = await vendor.radioSquare(cate, offset, limit, page, order)
+    console.log(result)
+    if (!result) return
     if (currentPlatformCode.value != result.platform) return
     //重新再获取一次，确保没有变更
     cate = multiSelectMode.value ? currentCategoryItems.value : currentCategoryCode.value
     if (cate != result.cate) return
     radios.push(...result.data)
     setLoadingContent(false)
+
+    return { data: result.data, total: result.total, limit }
 }
 
 
@@ -104,6 +112,7 @@ const loadMoreContent = () => {
     loadContent(true)
 }
 
+const nextPagePendingMark = ref(0)
 const scrollToLoad = () => {
     if (isLoadingContent.value) return
     if (!squareContentRef.value) return
@@ -112,8 +121,15 @@ const scrollToLoad = () => {
     const clientHeight = squareContentRef.value.clientHeight
     markScrollState()
     if ((scrollTop + clientHeight) >= scrollHeight) {
-        loadMoreContent()
+        //loadMoreContent()
+        nextPagePendingMark.value = Date.now()
     }
+}
+
+const loadPageContent = async ({ offset, page, limit }) => {
+    const isNormalType = getPaginationStyleIndex.value === 0
+    if (isNormalType) resetScrollState()
+    return loadContent(!isNormalType, offset, limit, page)
 }
 
 const onScroll = () => {
@@ -159,9 +175,11 @@ const resetCommom = () => {
     resetBack2TopBtn()
 }
 
+const refreshPendingMark = ref(0)
 const refreshData = () => {
     resetCommom()
-    loadContent()
+    refreshPendingMark.value = Date.now()
+    //loadContent()
 }
 
 watch(currentPlatformCode, (nv, ov) => {
@@ -176,7 +194,10 @@ EventBus.on("radioSquare-refresh", refreshData)
 <template>
     <div class="radio-square-view" ref="squareContentRef" @scroll="onScroll">
         <RadioCategoryBar :data="categories" :loading="isLoadingCategories"></RadioCategoryBar>
-        <PlaylistsControl :data="radios" :loading="isLoadingContent"></PlaylistsControl>
+        <PlaylistsControl :loading="isLoadingContent" :loadPage="loadPageContent" :limit="35"
+            :paginationStyleType="getPaginationStyleIndex" :nextPagePendingMark="nextPagePendingMark"
+            :refreshPendingMark="refreshPendingMark">
+        </PlaylistsControl>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>

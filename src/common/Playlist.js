@@ -52,12 +52,14 @@ export class Playlist {
     }
 
     static _assertType(item, type) {
+        if (!item) return false
+        item.type = (item.type || Playlist.NORMAL_TYPE)
         //item = Playlist.resolveOldVersionType(item)
-        return item && item.type === type
+        return item.type === type
     }
 
     static isNormalType(item) { //普通歌单，必须设置平台
-        return item.platform && Playlist._assertType(item, Playlist.NORMAL_TYPE)
+        return item && item.platform && Playlist._assertType(item, Playlist.NORMAL_TYPE)
     }
 
     static isNormalRadioType(item) {

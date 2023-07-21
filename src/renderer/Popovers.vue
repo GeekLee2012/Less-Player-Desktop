@@ -52,7 +52,8 @@ const { hideCommonCtxMenu, showCommonCtxMenu,
   hideAllCtxMenus, toggleColorPickerToolbar,
   showColorPickerToolbar, toggleGradientColorToolbar,
   showGradientColorToolbar, showPopoverHint,
-  hidePopoverHint, isSamePopoverHintShow } = useAppCommonStore()
+  hidePopoverHint, isSamePopoverHintShow,
+  updateCommonCtxMenuCacheItemIndex } = useAppCommonStore()
 //const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { isDefaultClassicLayout } = storeToRefs(useSettingStore())
 const { getCurrentTheme } = useSettingStore()
@@ -66,7 +67,7 @@ const getCtxMenuAutoHeight = () => {
   return itemHeight * (total - spNums) + 7.5 * spNums + 2 * padding
 }
 
-const menuWidth = 208
+const menuWidth = 208 + 10
 
 const adjustMenuPosition = (event) => {
   const { x, y, clientX, clientY } = event
@@ -128,11 +129,12 @@ const setSubmenuPosition = (event) => {
   ctxSubmenuPosStyle.top = pos.y + 'px !important'
 }
 
-EventBus.on('commonCtxMenu-show', ({ event, value }) => {
+EventBus.on('commonCtxMenu-show', ({ event, value, index }) => {
   hideCommonCtxMenu(true) //强制取消上次的显示
   hideAddToListSubmenu()
   hideArtistListSubmenu()
   setMenuPosition(event)
+  //updateCommonCtxMenuCacheItemIndex(index)
   showCommonCtxMenu(value)
 })
 

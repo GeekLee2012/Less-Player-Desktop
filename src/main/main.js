@@ -1,8 +1,8 @@
 const { app, BrowserWindow, ipcMain,
   Menu, dialog, powerMonitor,
   shell, powerSaveBlocker, Tray,
-  globalShortcut, session,
-  utilityProcess, protocol,
+  globalShortcut, session, utilityProcess,
+  protocol, nativeTheme,
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
@@ -164,6 +164,9 @@ const init = () => {
     }
   })
 
+  nativeTheme.on('updated', () => {
+    console.log(nativeTheme.themeSource)
+  })
 }
 
 //全局快捷键
@@ -884,6 +887,8 @@ const overrideRequest = (details) => {
 
   if (url.includes("qq.com")) {
     origin = "https://y.qq.com/"
+    if (url.includes('moviets.tc.qq.com')) origin = "https://v.qq.com/"
+
     referer = origin
   } else if (url.includes("163.com") || url.includes("126.net")) {
     origin = "https://music.163.com/"

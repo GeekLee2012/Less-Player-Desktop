@@ -43,8 +43,8 @@ export class VideoPlayer {
         if (!this.video || !this.video.url) return
         const self = this
 
-        const src = this.video.url
-        if (this.isM3U8Video()) {
+        const { url: src } = this.video
+        if (this.isHlsVideo()) {
             this.hls.loadSource(src)
             this.hls.attachMedia(gVideoHolder)
 
@@ -63,9 +63,10 @@ export class VideoPlayer {
         }
     }
 
-    isM3U8Video() {
+    isHlsVideo() {
         if (!this.video || !this.video.url) return false
         return this.video.url.includes('.m3u8')
+            || this.video.url.includes('.ts')
     }
 
     addSourceToVideo(element, src, type) {
@@ -83,7 +84,7 @@ export class VideoPlayer {
         if (!Hls.isSupported()) return
         if (!gVideoHolder) return
         if (!this.playing) return
-        if (this.isM3U8Video()) {
+        if (this.isHlsVideo()) {
             this.hls.detachMedia()
         } else {
             gVideoHolder.pause()

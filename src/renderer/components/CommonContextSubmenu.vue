@@ -85,6 +85,7 @@ const resetScroll = () => {
 
 .common-ctx-submenu .menuItem {
     width: 168px;
+    width: 178px;
     display: flex;
     flex-direction: row;
     align-items: center;

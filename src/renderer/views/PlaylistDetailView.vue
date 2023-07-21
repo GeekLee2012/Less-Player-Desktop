@@ -11,6 +11,7 @@ import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
+import { Playlist } from '../../common/Playlist';
 
 
 
@@ -123,7 +124,7 @@ const toggleFavorite = () => {
     let text = "歌单收藏成功！"
     if (favorited.value) {
         const { title, cover } = detail
-        addFavoritePlaylist(props.id, props.platform, title, cover)
+        addFavoritePlaylist(props.id, props.platform, title, cover, Playlist.NORMAL_TYPE)
     } else {
         removeFavoritePlaylist(props.id, props.platform)
         text = "歌单已取消收藏！"

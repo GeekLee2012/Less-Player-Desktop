@@ -9,16 +9,8 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
 import EventBus from '../../common/EventBus';
+import { toTrimString } from '../../common/Utils';
 
-
-
-const { playMv } = inject('player')
-
-const { playing } = storeToRefs(usePlayStore())
-const { addTrack, playTrack, togglePlay } = usePlayStore()
-const { showToast, hidePlaybackQueueView, toggleVideoPlayingView } = useAppCommonStore()
-const { track } = storeToRefs(useSettingStore())
-const { isLocalMusic } = usePlatformStore()
 
 
 const props = defineProps({
@@ -33,6 +25,17 @@ const props = defineProps({
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function
 })
+
+const { playMv } = inject('player')
+const { showContextMenu } = inject('appCommon')
+
+const { playing } = storeToRefs(usePlayStore())
+const { addTrack, playTrack, togglePlay } = usePlayStore()
+const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
+const { showToast } = useAppCommonStore()
+const { track, isHighlightCtxMenuItemEnable } = storeToRefs(useSettingStore())
+const { isLocalMusic } = usePlatformStore()
+
 
 const isChecked = ref(props.checked)
 const toggleCheck = () => {
@@ -60,20 +63,10 @@ const deleteItem = () => {
     }
 }
 
-const showContextMenu = (event) => {
-    event.preventDefault()
+const onContextMenu = (event) => {
     if (props.checkbox) return
-    hidePlaybackQueueView()
-    const { data, dataType } = props
-    setTimeout(() => {
-        EventBus.emit("commonCtxMenu-init", { dataType: (dataType || 0) })
-        EventBus.emit("commonCtxMenu-show", { event, value: data })
-    }, 99)
-}
-
-//TODO
-const toString = (value) => {
-    return value ? value.toString() : value
+    const { data, dataType, index, contextMenuCallback } = props
+    showContextMenu(event, data, dataType || 0, index)
 }
 
 watch(() => props.checked, (nv, ov) => {
@@ -121,7 +114,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 </script>
 
 <template>
-    <div class="song-item" @click="toggleCheck" @contextmenu="showContextMenu">
+    <div class="song-item" @click="toggleCheck" @contextmenu="onContextMenu"
+        :class="{ 'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data) }">
         <div v-show="checkbox" class="checkbox">
             <svg v-show="!isChecked" width="16" height="16" viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
@@ -201,7 +195,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
         </div>
         <div class="artist spacing1" v-show="!isExtra1Available()">
             <ArtistControl :visitable="artistVisitable && !checkbox" :platform="data.platform" :data="data.artist"
-                :trackId="toString(data.id)">
+                :trackId="toTrimString(data.id)">
             </ArtistControl>
         </div>
         <div class="album spacing1" v-show="!isExtra2Available()">
@@ -221,10 +215,11 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     flex-direction: row;
     flex: 1;
     margin-bottom: 3px;
+    border-radius: 3px;
 }
 
 .song-item:hover {
-    border-radius: 3px;
+    /*border-radius: 3px;*/
     background: var(--content-list-item-hover-bg-color);
 }
 

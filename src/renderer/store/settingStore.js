@@ -83,6 +83,7 @@ export const useSettingStore = defineStore('setting', {
             fontSizeLevel: 3,
             fontSize: 17.5,
             imgQualityIndex: 1,
+            paginationStyleIndex: 1,
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -125,6 +126,8 @@ export const useSettingStore = defineStore('setting', {
             useDndForCreateLocalPlaylist: true,
             //启用Dnd操作，为本地歌单添加歌曲
             useDndForAddLocalTracks: true,
+            //高亮当前右键菜单对应的歌曲
+            highlightCtxMenuItem: true
         },
         search: {
             autoPlaceholder: true,
@@ -407,6 +410,12 @@ export const useSettingStore = defineStore('setting', {
                 const offPlatforms = this.modules.off[scope]
                 return platforms.filter(item => (!offPlatforms || !offPlatforms.includes(item.code || item)))
             }
+        },
+        isHighlightCtxMenuItemEnable() {
+            return this.track.highlightCtxMenuItem
+        },
+        getPaginationStyleIndex() {
+            return this.common.paginationStyleIndex
         }
     },
     actions: {
@@ -507,6 +516,9 @@ export const useSettingStore = defineStore('setting', {
             } while (++count < urls.length)
             return result
         },
+        setPaginationStyleIndex(index) {
+            this.common.paginationStyleIndex = index
+        },
         setTrackQualityIndex(index) {
             this.track.quality.index = index
         },
@@ -534,6 +546,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleVipFlagShow() {
             this.track.vipFlagShow = !this.track.vipFlagShow
+        },
+        toggleHightlightCtxMenuItem() {
+            this.track.highlightCtxMenuItem = !this.track.highlightCtxMenuItem
         },
         setStateRefreshFrequency(value) {
             const freq = parseInt(value || 60)

@@ -113,18 +113,22 @@ textarea {
 }
 
 .text-btn svg {
+  padding-top: 1px;
   margin-right: 5px;
   fill: var(--button-icon-btn-color);
 }
 
+.btn:hover svg,
 .text-btn:hover svg {
   cursor: pointer;
   fill: var(--content-highlight-color);
 }
 
-.text-btn svg {
-  padding-top: 1px;
+.btn svg {
+  cursor: pointer;
+  fill: var(--button-icon-btn-color);
 }
+
 
 .winos-style .text-btn svg {
   padding-top: 2px;
@@ -144,6 +148,9 @@ textarea {
   fill: var(--content-highlight-color) !important;
 }
 
+.list-item-ctx-menu-trigger {
+  background: var(--content-list-item-hover-bg-color);
+}
 
 
 ::-webkit-scrollbar {

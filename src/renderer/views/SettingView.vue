@@ -64,9 +64,11 @@ const { setThemeIndex,
     resolveFont,
     allImageQualities,
     setImageQualityIndex,
+    setPaginationStyleIndex,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
+    toggleHightlightCtxMenuItem,
     toggleUseOnlineCover,
     toggleUseDndForCreateLocalPlaylist,
     toggleUseDndForAddLocalTracks,
@@ -467,22 +469,24 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </datalist>
                     </div>
                     <div>
-                        <span style="margin-right: 8px;">图片清晰度：</span>
+                        <span class="sec-title">图片清晰度：</span>
                         <span v-for="(item, index) in allImageQualities()" class="quality-item"
                             :class="{ active: index == common.imgQualityIndex }" @click="setImageQualityIndex(index)">
                             {{ item.name }}
                         </span>
                     </div>
                     <div>
-                        <span style="margin-right: 8px;">分页方式（暂未支持）：</span>
-                        <span v-for="(item, index) in ['普通', '瀑布流']" class="quality-item" :class="{ active: index == 1 }"
-                            @click="">
+                        <span class="sec-title">分页方式：</span>
+                        <span v-for="(item, index) in ['普通', '瀑布流']" class="quality-item"
+                            :class="{ active: index == common.paginationStyleIndex }"
+                            @click="setPaginationStyleIndex(index)">
                             {{ item }}
                         </span>
+                        <div class="tip-text spacing">提示：实验性功能，测试阶段</div>
                     </div>
                     <div class="last">
-                        <span>功能管理：</span>
-                        <SvgTextButton text="前往设置" :leftAction="visitModulesSetting" class="spacing">
+                        <span class="sec-title">功能管理：</span>
+                        <SvgTextButton text="前往设置" :leftAction="visitModulesSetting">
                         </SvgTextButton>
                         <div class="tip-text spacing">提示：实验性功能，设置开启、关闭部分功能</div>
                     </div>
@@ -529,6 +533,11 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         <span class="cate-subtitle">当前播放列表自动定位：</span>
                         <ToggleControl @click="togglePlaybackQueueAutoPositionOnShow"
                             :value="track.playbackQueueAutoPositionOnShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">右键菜单显示时，高亮歌曲：</span>
+                        <ToggleControl @click="toggleHightlightCtxMenuItem" :value="track.highlightCtxMenuItem">
                         </ToggleControl>
                     </div>
                     <div>
@@ -633,7 +642,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                 <div class="content">
                     <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的播放进度
                         <br>最近播放记录，请定期手动清理；记录过多时，部分列表容易卡顿
-                        <br>资源缓存，默认上限为500M左右；应用每次启动时，会自动检查清理
+                        <br>资源缓存，默认上限为500M左右；应用会在每次启动时，自动检查并清理
                     </div>
                     <div>
                         <span class="cate-subtitle">保存播放状态：</span>
@@ -744,18 +753,18 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">恢复默认设置：</span>
-                        <ToggleControl @click="toggleShowDialogBeforeResetSetting" :value="dialog.resetSetting">
-                        </ToggleControl>
-                    </div>
-                    <div>
                         <span class="cate-subtitle">清空本地歌曲：</span>
                         <ToggleControl @click="toggleShowDialogBeforeClearLocalMusics" :value="dialog.clearLocalMusics">
                         </ToggleControl>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">清空自由FM：</span>
                         <ToggleControl @click="toggleShowDialogBeforeClearFreeFM" :value="dialog.clearFreeFM">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">恢复默认设置：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeResetSetting" :value="dialog.resetSetting">
                         </ToggleControl>
                     </div>
                 </div>
@@ -1116,7 +1125,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 }
 
 #setting-view .content>div {
-    margin-bottom: 30px;
+    margin-bottom: 33px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1285,6 +1294,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
     /*border: 1px solid var(--border-color);*/
 }
 
+#setting-view .common .content .sec-title {
+    width: 128px;
+}
+
 #setting-view .keys .global-keys-ctrl {
     margin-left: 35px;
     margin-right: 20px;
@@ -1314,7 +1327,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 }
 
 #setting-view .center .spacing2 {
-    margin-left: 70px;
+    margin-left: 72px;
 }
 
 #setting-view .link {
@@ -1390,6 +1403,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
     margin-left: 10px;
     min-width: 258px;
     color: var(--content-inputs-text-color);
+}
+
+#setting-view .track input[type='number'] {
+    margin-left: 0px;
 }
 
 #setting-view .network input {

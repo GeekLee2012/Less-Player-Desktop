@@ -1,11 +1,12 @@
 <script setup>
 const props = defineProps({
-    disabled: Boolean
+    disabled: Boolean,
+    text: String
 })
 </script>
 
 <template>
-    <SvgTextButton class="play-add-all-btn" text="播放全部" :disabled="disabled">
+    <SvgTextButton class="play-add-all-btn" :text="text || '播放全部'" :disabled="disabled">
         <template #left-img>
             <svg width="18" height="18" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">

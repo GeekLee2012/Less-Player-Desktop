@@ -142,7 +142,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
             </div>
             <div class="center" ref="listRef" :onmousewheel="onUserMouseWheel">
                 <template v-for="(item, index) in queueTracks">
-                    <PlaybackQueueItem class="item" :data="item" :active="playingIndex == index">
+                    <PlaybackQueueItem class="item" :data="item" :active="playingIndex == index" :index="index">
                     </PlaybackQueueItem>
                 </template>
             </div>

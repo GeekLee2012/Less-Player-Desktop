@@ -88,6 +88,7 @@ const onDrop = async (event) => {
     }
 }
 
+const refreshTime = ref(0)
 const importPlaylist = async () => {
     if (!ipcRenderer) return
     const file = await ipcRenderer.invoke('open-audio-playlist')
@@ -111,6 +112,7 @@ const importPlaylist = async () => {
         decreaseImportTaskCount()
         if (success) showToast(msg)
         if (!success) showFailToast(msg)
+        refreshTime.value = Date.now()
     }
 }
 
@@ -123,6 +125,7 @@ const removeAll = async () => {
 
     showToast('本地歌曲已全部清空!')
     resetAll()
+    refreshTime.value = Date.now()
 }
 
 onMounted(() => {
@@ -165,7 +168,7 @@ onMounted(() => {
         </div>
         <div class="center">
             <div class="list-title content-text-highlight">歌单({{ localPlaylists.length }})</div>
-            <PlaylistsControl :data="localPlaylists" :loading="isLoading" :customLoadingCount="importTaskCount">
+            <PlaylistsControl :data="localPlaylists" :customLoadingCount="importTaskCount">
             </PlaylistsControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

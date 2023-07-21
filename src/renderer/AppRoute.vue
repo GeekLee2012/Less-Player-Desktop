@@ -26,7 +26,7 @@ const { setExploreMode, setArtistExploreMode,
     setPlaylistExploreMode, hideVideoPlayingView,
     hideLyricToolbar, hideRandomMusicToolbar,
     hideSoundEffectView, hidePopoverHint,
-    setSearchPlaceHolderIndex } = useAppCommonStore()
+    setSearchPlaceHolderIndex, setRouterCtxCacheItem } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -85,7 +85,15 @@ const autoSwitchSearchPlaceHolder = (to) => {
     } else if (path.includes('/radios')) {
         index = 2
     } else if (path.includes('/setting')) {
-        index = 3
+        index = path.includes('/modules') ? 8 : 3
+    } else if (path.includes('/themes')) {
+        index = 4
+    } else if (path.includes('/data/backup')) {
+        index = 5
+    } else if (path.includes('/data/restore')) {
+        index = 6
+    } else if (path.includes('/userhome')) {
+        index = 7
     }
     setSearchPlaceHolderIndex(index)
     searchPlaceHolderTimer = setTimeout(() => {
@@ -108,23 +116,29 @@ const hideRelativeComponents = (to) => {
     hideSoundEffectView()
 }
 
-const createCommonRoute = (toPath, onRouteReady) => ({
-    path: toPath,
-    onRouteReady,
-    //不完全等价 router.beforeResovle()
-    beforeRoute: (toPath) => {
-        //hidePlayingView()
-        hideRelativeComponents()
-        if (isSimpleLayout.value) switchToFallbackLayout()
-        if (!toPath.includes('/artist/')) hidePlaybackQueueView()
-        if (toPath.includes('/theme') ||
-            toPath.includes('/search') ||
-            toPath.includes('/setting')) {
-            if (isUserHomeMode.value) setPlaylistExploreMode()
+const createCommonRoute = (route, onRouteReady) => {
+    route = route || { path: '/' }
+    if (typeof (route) === 'string') route = { path: route }
+    return {
+        ...route,
+        path: (route.path || route.toPath),
+        onRouteReady,
+        //不完全等价 router.beforeResovle()
+        beforeRoute: (toPath) => {
+            //hidePlayingView()
+            setRouterCtxCacheItem(null)
+            hideRelativeComponents()
+            if (isSimpleLayout.value) switchToFallbackLayout()
+            if (!toPath.includes('/artist/')) hidePlaybackQueueView()
+            if (toPath.includes('/theme') ||
+                toPath.includes('/search') ||
+                toPath.includes('/setting')) {
+                if (isUserHomeMode.value) setPlaylistExploreMode()
+            }
+            EventBus.emit('app-beforeRoute', toPath)
         }
-        EventBus.emit('app-beforeRoute', toPath)
     }
-})
+}
 
 const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
@@ -138,7 +152,7 @@ const visitRoute = (route) => {
             return
         }
         route = resolveRoute(route)
-        const { path: toPath, onRouteReady, beforeRoute } = route
+        const { path: toPath, onRouteReady, beforeRoute, replace } = route
         if (!toPath) {
             //if(reject) reject()
             return
@@ -146,7 +160,7 @@ const visitRoute = (route) => {
         if (beforeRoute) beforeRoute(toPath)
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
-        if (isSame) {
+        if (isSame && !replace) {
             //if(reject) reject()
             return
         }
@@ -156,8 +170,8 @@ const visitRoute = (route) => {
     })
 }
 
-const visitCommonRoute = (route) => {
-    return visitRoute(createCommonRoute(route))
+const visitCommonRoute = (route, onRouteReady) => {
+    return visitRoute(createCommonRoute(route, onRouteReady))
 }
 
 const highlightPlatform = (to) => {
@@ -205,7 +219,7 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
     const visitable = platformValid && idValid
     platform = platform.trim()
     if (visitable) {
-        let exploreMode = exploreModeCode.value
+        let exploreMode = resolveExploreMode()
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
         visitCommonRoute(toPath, onRouteReady).then(() => updateArtistDetailKeys(platform, id))
@@ -222,7 +236,7 @@ const visitAlbumDetail = (platform, id, callback, data) => {
     const visitable = platformValid && idValid
     platform = platform.trim()
     if (visitable) {
-        let exploreMode = exploreModeCode.value
+        let exploreMode = resolveExploreMode()
         let moduleName = 'album', isAlbum = true
         if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
@@ -335,6 +349,17 @@ provide('appRoute', {
     },
     visitBatchRecents: () => {
         return visitCommonRoute('/userhome/batch/recents/0')
+    },
+    visitFreeVideoCreate: () => {
+        return visitCommonRoute('/videos/video/create')
+    },
+    visitTrack: ({ id, platform, title, cover, artist, album }, onRouteReady) => {
+        const exploreMode = resolveExploreMode()
+        return visitCommonRoute({
+            path: `/${exploreMode}/track`,
+            replace: true,
+            query: { id, platform, title, cover, artist, album }
+        }, onRouteReady)
     }
 })
 </script>

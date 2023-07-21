@@ -406,23 +406,10 @@ defineExpose({
 
 .gradient-color-toolbar .header .action {
     display: flex;
-    /*justify-content: center;
-    align-items: center;*/
-}
-
-.gradient-color-toolbar .header .left-action svg {
-    fill: var(--button-icon-btn-color);
-    cursor: pointer;
 }
 
 .gradient-color-toolbar .header .action .close-btn {
     width: 30px;
-}
-
-.gradient-color-toolbar .header .action .btn:hover,
-.gradient-color-toolbar .header .action .btn:hover svg {
-    fill: var(--content-highlight-color);
-    cursor: pointer;
 }
 
 .gradient-color-toolbar .header .title-wrap {

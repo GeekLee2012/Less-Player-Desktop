@@ -302,8 +302,4 @@ const customThemeItemPreviewStyle = (item) => {
 #themes-view .custom-themes .preview:hover .action {
     visibility: visible;
 }
-
-#themes-view .custom-themes .action .btn:hover svg {
-    fill: var(--content-highlight-color);
-}
 </style>

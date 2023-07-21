@@ -8,13 +8,14 @@ import { usePlayStore } from '../store/playStore';
 
 
 
-const { visitCustomPlaylist, visitCustomPlaylistEdit,
-    visitBatchCustomPlaylist } = inject('appRoute')
-
 const props = defineProps({
     index: Number,
     data: Object
 })
+
+const { visitCustomPlaylist, visitCustomPlaylistEdit,
+    visitBatchCustomPlaylist } = inject('appRoute')
+const { showContextMenu } = inject('appCommon')
 
 const { hideAllCtxMenus, showToast } = useAppCommonStore()
 const { getCustomPlaylist, removeCustomPlaylist } = useUserProfileStore()
@@ -50,15 +51,13 @@ const removeItem = () => {
     toastAndHideMenu("歌单已删除！")
 }
 
-const showContextMenu = (event) => {
-    event.preventDefault()
-    EventBus.emit("commonCtxMenu-init", { dataType: 3 })
-    EventBus.emit("commonCtxMenu-show", { event, value: props.data })
+const onContextMenu = (event) => {
+    showContextMenu(event, props.data, 3)
 }
 </script>
 
 <template>
-    <div class="custom-playlist-item" @contextmenu="showContextMenu">
+    <div class="custom-playlist-item" @contextmenu="onContextMenu">
         <div class="sqno">{{ index + 1 }}</div>
         <div class="cover" @click="visitItem">
             <img v-lazy="data.cover" />

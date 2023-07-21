@@ -9,9 +9,11 @@ import AlbumListControl from '../components/AlbumListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import PlaylistCategoryFlowBtn from '../components/PlaylistCategoryFlowBtn.vue';
+import { toTrimString } from '../../common/Utils';
+import { useSettingStore } from '../store/settingStore';
 
 
-
+//TODO 需要梳理优化, 前期缺少设计，现在全是坑
 const squareContentRef = ref(null)
 const back2TopBtnRef = ref(null)
 const playlistCategoryFlowBtnRef = ref(null)
@@ -30,6 +32,8 @@ const { currentVender, currentPlatformCategories, putCategories,
     putOrders, currentPlatformOrders,
     resetOrder, updateCurrentOrderByValue } = usePlaylistSquareStore()
 const { isPlaylistMode } = storeToRefs(useAppCommonStore())
+const { getPaginationStyleIndex } = storeToRefs(useSettingStore())
+
 
 const isLoadingCategories = ref(true)
 const isLoadingContent = ref(true)
@@ -42,6 +46,7 @@ const setLoadingContent = (value) => {
     isLoadingContent.value = value
 }
 
+/*
 const resetPagination = () => {
     playlists.length = 0
     pagination.offset = 0
@@ -51,7 +56,9 @@ const resetPagination = () => {
 const nextPage = () => {
     pagination.offset = pagination.page * pagination.limit
     pagination.page = pagination.page + 1
+    return false
 }
+*/
 
 const loadCategories = async () => {
     categories.length = 0
@@ -78,46 +85,60 @@ const loadCategories = async () => {
     setLoadingCategories(false)
 }
 
-const loadContent = async (noLoadingMask) => {
+const loadContent = async (noLoadingMask, offset, limit, page) => {
     const vendor = currentVender()
     if (!vendor || !vendor.square) return
     if (!noLoadingMask) setLoadingContent(true)
+
     const cate = currentCategoryCode.value
-    const offset = pagination.offset
-    const limit = pagination.limit
-    const page = pagination.page
     const order = currentOrder.value.value
     const result = await vendor.square(cate, offset, limit, page, order)
 
     if (!result) return
-    if (currentPlatformCode.value != result.platform) return
-    if (currentCategoryCode.value != result.cate) return
-    if (order != result.order && result.order) {
-        updateCurrentOrderByValue(result.order)
+    const { platform: rPlatform, cate: rCate, order: rOrder, dataType, data, total } = result
+
+    if (currentPlatformCode.value != rPlatform) return
+    if (toTrimString(currentCategoryCode.value) != toTrimString(rCate)) return
+
+    if (rOrder && order != rOrder) {
+        updateCurrentOrderByValue(rOrder)
     }
-    playlists.push(...result.data)
-    setAlbumType(result.dataType)
+
+    setAlbumType(dataType)
+    if (isAlbumType) playlists.push(...data)
+
     setLoadingContent(false)
+    return { data, total, limit }
 }
 
-
+/*
 const loadMoreContent = () => {
-    nextPage()
-    loadContent(true)
+    if (nextPage()) {
+        loadContent(true)
+    }
+}
+*/
+
+const loadPageContent = async ({ offset, page, limit }) => {
+    const isNormalType = getPaginationStyleIndex.value === 0
+    if (isNormalType) resetScrollState()
+    return loadContent(!isNormalType, offset, limit, page)
 }
 
+const nextPagePendingMark = ref(0)
 const scrollToLoad = () => {
     if (isLoadingContent.value) return
     const { scrollTop, scrollHeight, clientHeight } = squareContentRef.value
     markScrollState()
     const allowedError = 10 //允许误差
     if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
-        loadMoreContent()
+        //loadMoreContent()
+        nextPagePendingMark.value = Date.now()
     }
 }
 
-const onScroll = () => {
-    scrollToLoad()
+const onScroll = (event) => {
+    scrollToLoad(event)
 }
 
 const markScrollState = () => {
@@ -140,8 +161,6 @@ const resetFlowBtns = () => {
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
 }
 
-
-//TODO 后期需要梳理优化
 /*-------------- 各种监听 --------------*/
 onMounted(() => {
     resetCommom()
@@ -153,14 +172,16 @@ onActivated(() => {
 })
 
 const resetCommom = () => {
-    resetPagination()
+    //resetPagination()
     resetScrollState()
     resetFlowBtns()
 }
 
-const refreshData = () => {
+const refreshPendingMark = ref(0)
+const refreshData = async () => {
     resetCommom()
-    loadContent()
+    refreshPendingMark.value = Date.now()
+    //loadContent()
 }
 
 
@@ -179,7 +200,10 @@ EventBus.on("playlistSquare-refresh", refreshData)
     <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
         <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories">
         </PlaylistCategoryBar>
-        <PlaylistsControl :data="playlists" :loading="isLoadingContent" v-show="!isAlbumType"></PlaylistsControl>
+        <PlaylistsControl :loading="isLoadingContent" :paginationStyleType="getPaginationStyleIndex"
+            :limit="pagination.limit" :loadPage="loadPageContent" :nextPagePendingMark="nextPagePendingMark"
+            :refreshPendingMark="refreshPendingMark" v-show="!isAlbumType">
+        </PlaylistsControl>
         <AlbumListControl :data="playlists" :loading="isLoadingContent" v-show="isAlbumType"></AlbumListControl>
         <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef">
         </PlaylistCategoryFlowBtn>

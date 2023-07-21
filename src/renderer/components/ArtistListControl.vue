@@ -24,10 +24,10 @@ const visitItem = (item) => {
 
 <template>
     <div class="artistlist-ctl">
-        <PaginationTiles v-show="!loading">
+        <div class="content" v-show="!loading">
             <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title" @click="visitItem(item)">
             </ImageTextTile>
-        </PaginationTiles>
+        </div>
         <ImageTextTileLoadingMask :count="20" v-show="loading"></ImageTextTileLoadingMask>
     </div>
 </template>
@@ -36,6 +36,13 @@ const visitItem = (item) => {
 .artistlist-ctl .image-text-tile {
     margin-top: 25px !important;
     margin-bottom: 15px;
+}
+
+.artistlist-ctl .content {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    flex: 1;
 }
 
 .artistlist-ctl .image-text-tile .cover {

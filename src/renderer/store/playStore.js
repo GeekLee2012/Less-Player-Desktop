@@ -88,7 +88,7 @@ export const usePlayStore = defineStore('player', {
         addTrack(track) {
             //TODO 超级列表如何保证时效
             const index = this.findIndex(track)
-            if (index == -1) this.queueTracks.push(track)
+            if (index == -1) this.queueTracks.push({ ...track })
         },
         addTracks(tracks) {
             //TODO 暂时不去重, 超级列表如何保证时效
@@ -100,14 +100,14 @@ export const usePlayStore = defineStore('player', {
             let index = this.findIndex(track)
             if (index == -1) {
                 index = this.playingIndex + 1
-                this.queueTracks.splice(index, 0, track)
+                this.queueTracks.splice(index, 0, { ...track })
             } else if (index < this.playingIndex) {
-                this.queueTracks.splice(this.playingIndex + 1, 0, track)
+                this.queueTracks.splice(this.playingIndex + 1, 0, { ...track })
                 this.queueTracks.splice(index, 1)
                 --this.playingIndex
             } else if (index > this.playingIndex
                 && (index != this.playingIndex + 1)) {
-                this.queueTracks.splice(this.playingIndex + 1, 0, track)
+                this.queueTracks.splice(this.playingIndex + 1, 0, { ...track })
                 this.queueTracks.splice(index + 1, 1)
             }
         },
@@ -163,7 +163,7 @@ export const usePlayStore = defineStore('player', {
             let index = this.findIndex(track)
             if (index == -1) {
                 index = this.playingIndex + 1
-                this.queueTracks.splice(index, 0, track)
+                this.queueTracks.splice(index, 0, { ...track })
             }
             this.playingIndex = index
             this.playTrackDirectly(track)

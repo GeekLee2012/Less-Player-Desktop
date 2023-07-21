@@ -144,23 +144,10 @@ const exportPlaylist = async () => {
 
 .playlist-export-toolbar .header .action {
     display: flex;
-    /*justify-content: center;
-    align-items: center;*/
-}
-
-.playlist-export-toolbar .header .left-action svg {
-    fill: var(--button-icon-btn-color);
-    cursor: pointer;
 }
 
 .playlist-export-toolbar .header .action .close-btn {
     width: 30px;
-}
-
-.playlist-export-toolbar .header .action .btn:hover,
-.playlist-export-toolbar .header .action .btn:hover svg {
-    fill: var(--content-highlight-color);
-    cursor: pointer;
 }
 
 .playlist-export-toolbar .header .title-wrap {

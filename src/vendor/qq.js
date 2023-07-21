@@ -650,7 +650,7 @@ export class QQ {
 
     //歌单广场(列表)
     static square_v0(cate, offset, limit, page) {
-        const originCate = cate || 0
+        const originCate = cate || QQ.DEFAULT_CATE
         let resolvedCate = cate
         if (typeof (resolvedCate) == 'string') resolvedCate = parseInt(resolvedCate.trim())
         resolvedCate = resolvedCate > 0 ? resolvedCate : QQ.DEFAULT_CATE

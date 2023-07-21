@@ -202,16 +202,7 @@ defineExpose({
 }
 
 .color-picker-toolbar .header .btn {
-    cursor: pointer;
     width: 30px;
-}
-
-.color-picker-toolbar .header .btn svg {
-    fill: var(--button-icon-btn-color);
-}
-
-.color-picker-toolbar .header .btn:hover {
-    fill: var(--content-highlight-color);
 }
 
 .color-picker-toolbar .value {

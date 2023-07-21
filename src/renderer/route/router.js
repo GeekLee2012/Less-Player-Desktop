@@ -22,7 +22,8 @@ import FreeFMView from '../views/FreeFMView.vue';
 import FreeFMEditView from '../views/FreeFMEditView.vue';
 import HomePageView from '../views/HomePageView.vue';
 import ModulesSettingView from '../views/ModulesSettingView.vue';
-
+import FreeVideoEditView from '../views/FreeVideoEditView.vue';
+import TrackDetailView from '../views/TrackDetailView.vue';
 
 
 
@@ -76,6 +77,11 @@ const routes = [
         path: '/:exploreMode/album/:platform/:id',
         props: true,
         component: AlbumDetailView
+    },
+    {  //歌曲详情
+        path: '/:exploreMode/track',
+        component: TrackDetailView,
+        props: route => ({ ...route.query })
     },
     {  //我的主页 - 用户信息 - 编辑
         path: '/userhome/user/edit',
@@ -141,6 +147,10 @@ const routes = [
     {  //设置 - 功能管理
         path: '/setting/modules',
         component: ModulesSettingView
+    },
+    {  //视频 - 创建播放源
+        path: '/videos/video/create',
+        component: FreeVideoEditView
     }
 ]
 

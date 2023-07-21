@@ -11,13 +11,14 @@ import Themes from './Themes.vue';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import EventBus from '../common/EventBus';
-import { isMacOS, isWinOS, useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
+import { isMacOS, isWinOS, toLowerCaseTrimString, useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
 
 
 
 const { visitSetting, visitSearch, visitFreeFM,
   visitThemes, visitModulesSetting,
-  visitDataBackup, visitDataRestore, } = inject('appRoute')
+  visitDataBackup, visitDataRestore,
+  visitUserHome, visitFreeVideoCreate, } = inject('appRoute')
 const ipcRenderer = useIpcRenderer()
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
@@ -282,30 +283,43 @@ const searchDefault = async (keyword) => {
   keyword = keyword.trim()
 
   let searchType = 0
-  if (keyword.startsWith('设置')) { //关键字格式：设置xxx
-    keyword = keyword.slice(2).trim()
+  if (keyword.startsWith('@')) { //格式：@xxx
+    keyword = toLowerCaseTrimString(keyword.slice(1))
     searchType = 1
   }
 
-  if (keyword == '自由FM'
-    || keyword.toLowerCase() == 'freefm') {
+  if (searchType == 0) {
+    //默认搜索
+  } else if (keyword === '自由FM'
+    || keyword === 'fm'
+    || keyword === 'freefm') {
     visitFreeFM()
     return
-  } else if (keyword === '主题') {
+  } else if (keyword === '主题'
+    || keyword === 'theme') {
     visitThemes()
     return
   } else if (keyword === '功能'
-    || keyword === '功能管理') {
+    || keyword === '功能管理'
+    || keyword === 'modules') {
     visitModulesSetting()
     return
-  } else if (keyword === '备份') {
+  } else if (keyword === '备份'
+    || keyword == 'backup') {
     visitDataBackup()
     return
-  } else if (keyword === '还原') {
+  } else if (keyword === '还原'
+    || keyword === 'restore') {
     visitDataRestore()
     return
-  } else if (keyword === '主题') {
-    visitThemes()
+  } else if (keyword === '我的主页'
+    || keyword === '主页'
+    || keyword === 'userhome') {
+    visitUserHome()
+    return
+  } else if (keyword === '视频'
+    || keyword.toLowerCase() === 'video') {
+    visitFreeVideoCreate()
     return
   } else {
     visitSetting()
@@ -325,7 +339,13 @@ const searchAction = computed(() => {
   return searchBarExclusiveAction.value || searchDefault
 })
 
-const searchPlaceHolders = ['现在想听点什么 ~', '搜本地歌曲 ~', '试试搜“自由FM”吧 ~', '试试搜"设置xxx"吧 ~']
+const searchPlaceHolders = [
+  '现在想听点什么 ~', '搜一搜本地歌曲 ~',
+  '试搜一下“@FM”吧 ~', '试试关键字"@"开头吧 ~',
+  '试搜一下“@主题”吧 ~', '试搜一下“@备份”吧 ~',
+  '试搜一下“@还原”吧 ~', '试搜一下“@主页”吧 ~',
+  '试搜一下“@功能”吧 ~'
+]
 const searchBarPlaceholder = computed(() => {
   const index = searchPlaceHolderIndex.value
   return searchBarExclusiveAction.value ?
@@ -333,6 +353,16 @@ const searchBarPlaceholder = computed(() => {
     (searchPlaceHolders[index] || searchPlaceHolders[0])
 })
 
+const showContextMenu = (event, data, dataType, index, isPlaybackQueue) => {
+  event.preventDefault()
+  //if (props.checkbox) return
+  if (!isPlaybackQueue) hidePlaybackQueueView()
+  //const { data, dataType, index } = props
+  setTimeout(() => {
+    EventBus.emit("commonCtxMenu-init", { dataType })
+    EventBus.emit("commonCtxMenu-show", { event, value: data, index })
+  }, 99)
+}
 
 onMounted(() => {
   //窗口大小变化事件监听
@@ -354,8 +384,10 @@ onMounted(() => {
   registryDefaultLocalKeys()
 })
 
+//通用API
 provide('appCommon', {
   showConfirm,
+  showContextMenu,
   searchAction,
   searchBarPlaceholder,
 })

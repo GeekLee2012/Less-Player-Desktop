@@ -201,12 +201,13 @@ export class Track {
             && track.artist.length > 0
     }
 
-    static isM3U8(track) {
-        return Track.hasUrl(track) && track.url.includes(".m3u8")
-    }
-
     static isCandidate(track) {
         return track && track.isCandidate
+    }
+
+    static cover(track) {
+        //return Track.hasCover(track) ? track.cover : 'default_cover.png'
+        return Track.hasCover(track) ? track.cover : null
     }
 
 }

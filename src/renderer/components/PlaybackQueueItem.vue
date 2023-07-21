@@ -6,18 +6,24 @@ import { inject, onMounted, ref } from 'vue';
 import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { storeToRefs } from 'pinia';
+import { useSettingStore } from '../store/settingStore';
 
 
 
 const { visitPlaylist } = inject('appRoute')
+const { showContextMenu } = inject('appCommon')
 
 const { queueTracksSize } = storeToRefs(usePlayStore())
 const { playTrack, removeTrack, isCurrentTrack, togglePlay } = usePlayStore()
+const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
+const { isHighlightCtxMenuItemEnable } = storeToRefs(useSettingStore())
+
 
 const props = defineProps({
     data: Object, //Track
-    active: Boolean
+    active: Boolean,
+    index: Number
 })
 
 const playItem = () => {
@@ -38,23 +44,19 @@ const linkItem = () => {
 
 const removeItem = () => {
     removeTrack(props.data)
-    if (queueTracksSize.value > 0) {
-        showToast("歌曲已删除！")
-        return
-    }
-    EventBus.emit("playbackQueue-empty")
+    if (queueTracksSize.value > 0) showToast("歌曲已删除！")
 }
 
-const showContextMenu = (event) => {
-    event.preventDefault()
-    EventBus.emit("commonCtxMenu-init", { dataType: 9 })
-    EventBus.emit("commonCtxMenu-show", { event, value: props.data })
+const onContextMenu = (event) => {
+    const { data, index } = props
+    showContextMenu(event, data, 9, index, true)
 }
 </script>
 
 <template>
-    <div class="playback-queue-item" :class="{ 'playback-queue-item-active': active }" @dblclick=""
-        @contextmenu="showContextMenu">
+    <div class="playback-queue-item"
+        :class="{ 'playback-queue-item-active': active, 'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data) }"
+        @dblclick="" @contextmenu="onContextMenu">
         <div class="item-wrap">
             <div class="left">
                 <img class="cover" v-lazy="data.cover" />

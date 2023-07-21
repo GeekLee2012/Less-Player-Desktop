@@ -94,17 +94,6 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
     margin-top: 20px;
 }
 
-.random-music-toolbar svg {
-    fill: var(--button-icon-btn-color);
-    cursor: pointer;
-}
-
-.random-music-toolbar .btn:hover,
-.random-music-toolbar .btn:hover svg {
-    fill: var(--content-highlight-color);
-    cursor: pointer;
-}
-
 .random-music-toolbar .header {
     display: flex;
     flex-direction: row;

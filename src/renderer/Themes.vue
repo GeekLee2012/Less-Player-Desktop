@@ -186,6 +186,24 @@ const setupFontStyle = () => {
   setupFontSize()
 }
 
+/*
+const setupAutoTheme = () => {
+  const detectedNode = document.getElementById('auto-theme')
+  const observer = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+      if (mutation.type === "childList") {
+        console.log("A child node has been added or removed.")
+      } else if (mutation.type === "attributes") {
+        console.log(`The ${mutation.attributeName} attribute was modified.`)
+      }
+    }
+  })
+  observer.observe(detectedNode, { attributes: true, childList: true, subtree: true })
+
+  detectedNode.innerHTML = 'Hello World'
+}
+*/
+
 EventBus.on('setting-fontFamily', updateFontFamily)
 EventBus.on('setting-fontWeight', updateFontWeight)
 //EventBus.on('setting-fontSizeLevel', setupFontSizeLevel)
@@ -194,7 +212,10 @@ EventBus.on('setting-reset', setupFontStyle)
 EventBus.on('setting-restore', setupFontStyle)
 EventBus.on('theme-applyTheme', setupAppTheme)
 
-onMounted(setupFontStyle)
+onMounted(() => {
+  setupFontStyle()
+  setupAutoTheme()
+})
 watch(themeSetting, () => setupAppTheme(), { deep: true })
 </script>
 
@@ -207,7 +228,6 @@ watch(themeSetting, () => setupAppTheme(), { deep: true })
 <style>
 /*
 @media (prefers-color-scheme: light) {}
-
 @media (prefers-color-scheme: dark) {}
 */
 

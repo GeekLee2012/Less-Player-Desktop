@@ -702,19 +702,6 @@ watch(workingCustomTheme, (nv, ov) => {
 
 .custom-theme-edit-view .header .action {
     display: flex;
-    /*justify-content: center;
-    align-items: center;*/
-}
-
-.custom-theme-edit-view .header .action svg {
-    fill: var(--button-icon-btn-color);
-    cursor: pointer;
-}
-
-.custom-theme-edit-view .header .action .btn:hover,
-.custom-theme-edit-view .header .action .btn:hover svg {
-    fill: var(--content-highlight-color);
-    cursor: pointer;
 }
 
 .custom-theme-edit-view .header .action .close-btn {

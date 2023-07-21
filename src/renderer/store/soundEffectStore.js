@@ -278,11 +278,11 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         }
     },
     actions: {
-        setUseEffect(type, index) {
+        setUseEffect(type, index, ignore) {
             type = type || 0
             index = index || 0
             this.currentEffectType = type
-            this.isUseEffect = (index > 0)
+            if (!ignore) this.isUseEffect = (index > 0)
             if (this.currentEffectType === 1) { //混响
                 this.currentEQIndex = 0
                 this.currentIRIndex = index
@@ -296,8 +296,8 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         //TODO 暂时简单处理：关闭时，相当于快捷关闭; 开启时，并不开启任何音效
         toggleSoundEffect() {
             this.isUseEffect = !this.isUseEffect
-            this.setUseEffect(1, 0)
-            this.setUseEffect(0, 0)
+            this.setUseEffect(1, 0, true)
+            this.setUseEffect(0, 0, true)
         },
         //均衡器
         getPresetEQs() {

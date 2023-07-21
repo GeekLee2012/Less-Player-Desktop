@@ -35,6 +35,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         commonCtxItem: {},  //菜单的上下文对象，用于公共参数传递
         commonCtxMenuCacheItem: {}, //菜单缓存对象，与具体点击的菜单项相关
         commonCtxMenuSeparatorNums: 0,
+        commonCtxMenuCacheItemIndex: -1, //菜单(右键)触发时，触发源对象对应的Index
         addToListSubmenuShow: false,
         artistListSubmenuShow: false,
         exitToHomeBtnShow: false,
@@ -59,7 +60,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         searchBarExclusiveAction: null,
         playlistExportToolbarShow: false,
         playlistExportContextItem: null,
-        searchPlaceHolderIndex: 0
+        searchPlaceHolderIndex: 0,
+        //路由上下文缓存
+        routerCtxCacheItem: null,
     }),
     getters: {
         isPlaylistMode() {
@@ -282,6 +285,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         updateCommonCtxMenuCacheItem(value) {
             this.commonCtxMenuCacheItem = value
         },
+        updateCommonCtxMenuCacheItemIndex(index) {
+            this.commonCtxMenuCacheItemIndex = index
+        },
         showCommonCtxMenu(value) {
             this.commonCtxMenuShow = true
             this.updateCommonCtxMenuCacheItem(value)
@@ -289,6 +295,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         hideCommonCtxMenu(clearCache) {
             this.commonCtxMenuShow = false
             if (clearCache) this.updateCommonCtxMenuCacheItem(null)
+            this.updateCommonCtxMenuCacheItemIndex(-1)
         },
         setCommonCtxMenuData(data) {
             this.commonCtxMenuData.length = 0
@@ -320,7 +327,7 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.hideTagsCategoryView()
         },
         hideAllCtxMenus() {
-            this.hideCommonCtxMenu()
+            this.hideCommonCtxMenu(true)
             this.hideAddToListSubmenu()
             this.hideArtistListSubmenu()
         },
@@ -421,6 +428,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setSearchPlaceHolderIndex(index) {
             this.searchPlaceHolderIndex = index
+        },
+        setRouterCtxCacheItem(value) {
+            this.routerCtxCacheItem = value
         }
     },
     persist: {

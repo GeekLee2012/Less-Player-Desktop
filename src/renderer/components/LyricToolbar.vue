@@ -144,17 +144,6 @@ const getLyricOffsetText = () => {
     background: var(--content-bg-color-no-transparent);
 }
 
-.lyric-toolbar svg {
-    fill: var(--button-icon-btn-color);
-    cursor: pointer;
-}
-
-.lyric-toolbar .btn:hover,
-.lyric-toolbar .btn:hover svg {
-    fill: var(--content-highlight-color);
-    cursor: pointer;
-}
-
 .lyric-toolbar .header {
     display: flex;
     flex-direction: row;

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
@@ -35,7 +35,8 @@ const { getLocalPlaylist, addToLocalPlaylist,
     removeFromLocalPlaylist, removeAllFromLocalPlaylist } = useLocalMusicStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { isUseDndForAddLocalTracksEnable, isUseDeeplyScanForDirectoryEnable,
-    isSearchForLocalPlaylistShow, isShowDialogBeforeBatchDelete } = storeToRefs(useSettingStore())
+    isSearchForLocalPlaylistShow, isShowDialogBeforeBatchDelete,
+    getPaginationStyleIndex } = storeToRefs(useSettingStore())
 
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -172,6 +173,7 @@ const removeAll = async () => {
     if (!ok) return
 
     removeAllFromLocalPlaylist(props.id)
+    detail.data.length = 0
     showToast("全部歌曲已删除！")
 }
 
@@ -345,7 +347,8 @@ onDeactivated(() => {
                 </div>
             </div>
             <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="1" :id="id"
-                :loading="isLoading">
+                :loading="isLoading" :paginationStyleType="getPaginationStyleIndex" :pageLimit="30"
+                :onPageLoaded="resetScrollState">
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -465,17 +468,6 @@ onDeactivated(() => {
     cursor: pointer;
 }
 
-/*
-#local-playlist-detail-view .checkbox svg {
-    fill: var(--button-icon-btn-color);
-    cursor: pointer;
-}
-
-#local-playlist-detail-view .checkbox .checked-svg {
-    fill: var(--content-highlight-color);
-}
-*/
-
 #local-playlist-detail-view .search-wrap {
     position: absolute;
     right: -10px;
@@ -483,10 +475,4 @@ onDeactivated(() => {
     align-items: center;
     font-weight: bold;
 }
-
-/*
-#local-playlist-detail-view .search-wrap svg {
-    margin-top: 1px;
-}
-*/
 </style>

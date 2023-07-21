@@ -15,6 +15,7 @@ import { useSettingStore } from '../store/settingStore';
 const { visitRoute, visitArtist, visitHome,
     visitFavoritePlaylist, visitCustomPlaylist,
     visitCustomPlaylistCreate, } = inject('appRoute')
+const { showContextMenu } = inject('appCommon')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -76,10 +77,8 @@ const visitCustomItem = (item, index) => {
     visitCustomPlaylist(item.id)
 }
 
-const showContextMenu = (item, index, event, dataType) => {
-    event.preventDefault()
-    EventBus.emit("commonCtxMenu-init", { dataType })
-    EventBus.emit("commonCtxMenu-show", { event, value: item })
+const onContextMenu = (event, data, dataType, index) => {
+    showContextMenu(event, data, dataType, index)
 }
 
 const visitArtistItem = (item, index) => {
@@ -269,7 +268,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                 <ul>
                     <li v-for="(item, index) in getCustomPlaylists"
                         :class="{ active: (activeCustomPlaylistIndex == index) }" @click="visitCustomItem(item, index)"
-                        @contextmenu="(e) => showContextMenu(item, index, e, 3)" v-html="item.title">
+                        @contextmenu="(e) => onContextMenu(e, item, 3, index)" v-html="item.title">
                     </li>
                 </ul>
             </div>
@@ -304,7 +303,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                 <ul v-show="!isFavoritePlaylistsCollapsed">
                     <li v-for="(item, index) in getFavoritePlaylilsts()"
                         :class="{ active: (activeFavoritePlaylistIndex == index) }" @click="visitFavourteItem(item, index)"
-                        @contextmenu="(e) => showContextMenu(item, index, e, 8)" v-html="item.title">
+                        @contextmenu="(e) => onContextMenu(e, item, 8, index)" v-html="item.title">
                     </li>
                 </ul>
             </div>

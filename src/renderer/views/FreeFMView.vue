@@ -32,7 +32,8 @@ const { addFreeRadio, resetAll,
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,
     setSearchBarExclusiveAction, toggleTagsCategoryView } = useAppCommonStore()
-const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM } = storeToRefs(useSettingStore())
+const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM,
+    getPaginationStyleIndex, } = storeToRefs(useSettingStore())
 
 
 const freefmRef = ref(null)
@@ -172,6 +173,12 @@ const showTagsView = () => {
     toggleTagsCategoryView()
 }
 
+const loadPageContent = ({ offset, limit, page, dataInProps }) => {
+    if (!dataInProps) return
+    const pageData = dataInProps.slice(offset, offset + limit)
+    return { data: pageData }
+}
+
 onMounted(() => {
     resetBack2TopBtn()
 })
@@ -258,6 +265,11 @@ watch(searchKeyword, filterContent)
             </div>
             <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount">
             </PlaylistsControl>
+            <!--
+            <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount"
+                :paginationStyleType="getPaginationStyleIndex" :limit="30" :loadPage="loadPageContent">
+            </PlaylistsControl>
+            -->
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>

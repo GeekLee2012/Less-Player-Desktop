@@ -260,6 +260,17 @@ const setThemeViewItemsSize = () => {
     document.documentElement.style.setProperty('--others-theme-preview-tile-height', `${tileHeight}px`)
 }
 
+const setPaginationSize = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    //const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
+    const minHeight = 430 * hScaleRatio
+    const el = document.querySelector('.pagination-tiles')
+
+    if (!el) return
+    el.style.setProperty('--content-min-height', `${minHeight}px`)
+}
+
 onActivated(setupDefaultLayout)
 
 onMounted(() => {
@@ -280,6 +291,8 @@ onMounted(() => {
         setBatchViewListSize()
         //主题页
         setThemeViewItemsSize()
+        //分页组件
+        setPaginationSize()
 
         //隐藏上下文菜单
         hideAllCtxMenus()

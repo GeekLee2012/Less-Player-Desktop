@@ -26,13 +26,13 @@ const visitItem = (item) => {
 
 <template>
     <div class="albumlist-ctl">
-        <PaginationTiles v-show="!loading">
+        <div class="content" v-show="!loading">
             <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title"
                 :subtitle="item.subtitle || item.publishTime" @click="visitItem(item)" :checkbox="checkbox"
                 :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>
-        </PaginationTiles>
+        </div>
         <ImageTextTileLoadingMask :count="20" v-show="loading">
         </ImageTextTileLoadingMask>
     </div>
@@ -41,5 +41,12 @@ const visitItem = (item) => {
 <style scoped>
 .albumlist-ctl .image-text-tile {
     /* margin-top: 25px; */
+}
+
+.albumlist-ctl .content {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    flex: 1;
 }
 </style>

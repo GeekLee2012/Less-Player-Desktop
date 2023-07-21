@@ -877,4 +877,8 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 #batch-action-view .content {
     overflow: scroll;
 }
+
+#batch-action-view .pagination-tiles .pag-action {
+    margin-bottom: 39px;
+}
 </style>

@@ -175,19 +175,8 @@ const switchIR = (item, index) => {
     align-items: center;
 }
 
-.sound-effect-view .header .action svg {
-    fill: var(--button-icon-btn-color);
-    cursor: pointer;
-}
-
 .sound-effect-view .header .action .close-btn {
     width: 30px;
-}
-
-.sound-effect-view .header .action .btn:hover,
-.sound-effect-view .header .action .btn:hover svg {
-    fill: var(--content-highlight-color);
-    cursor: pointer;
 }
 
 .sound-effect-view .header .title-wrap {

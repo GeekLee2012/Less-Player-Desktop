@@ -643,10 +643,17 @@ const playMv = (track) => {
         if (playing) togglePlay()
         setPendingPlay(playing)
 
-        toggleVideoPlayingView()
-        EventBus.emit('video-play', result)
+        playVideo(result)
         traceRecentTrack(track)
     }, reason => showFailToast('当前MV无法播放！'))
+}
+
+//video => { url }
+const playVideo = (video) => {
+    if (!videoPlayingViewShow.value) {
+        toggleVideoPlayingView()
+    }
+    EventBus.emit('video-play', video)
 }
 
 //设置RadioPlayer
@@ -799,12 +806,13 @@ watch(videoPlayingViewShow, (nv, ov) => {
     }
 })
 
-//播放器相关API
+//播放器API
 provide('player', {
     seekTrack,
     playPlaylist,
     playAlbum,
     playMv,
+    playVideo,
     addAndPlayTracks,
     loadLyric,
     mmssCurrentTime,

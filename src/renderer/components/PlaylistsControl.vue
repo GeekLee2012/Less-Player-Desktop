@@ -1,5 +1,5 @@
 <script setup>
-import { inject } from 'vue';
+import { inject, reactive, watch, ref, onMounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
@@ -19,7 +19,12 @@ const props = defineProps({
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function,
     loading: Boolean,
-    customLoadingCount: Number
+    customLoadingCount: Number,
+    paginationStyleType: Number,
+    limit: Number,
+    loadPage: Function,
+    nextPagePendingMark: Number,
+    refreshPendingMark: Number,
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
@@ -57,20 +62,34 @@ const getListenNumText = (item) => {
     if (num >= unit) num = parseFloat(num / unit).toFixed(1) + "万"
     return `播放量：${num}`
 }
+
+const computedMaxPage = computed(() => {
+    const { data, limit } = props
+    if (!data || !limit) return 0
+    return Math.ceil(data.length / limit)
+})
 </script>
 
 <template>
     <div class="playlists-ctl">
-        <PaginationTiles v-show="!loading">
-            <ImageTextTile v-for="item in data" @click="visitItem(item)" :cover="item.cover" :title="item.title"
-                :subtitle="getSubtitle(item)" :color="item.color" :playable="true" :playAction="() => playPlaylist(item)"
-                :checkbox="checkbox" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
-                :checkChangedFn="(checked) => checkChangedFn(checked, item)" :platform="item.platform">
-            </ImageTextTile>
-            <ImageTextTileLoadingMask :count="customLoadingCount" v-show="customLoadingCount && customLoadingCount > 0">
-            </ImageTextTileLoadingMask>
+        <PaginationTiles :data="data" :paginationStyleType="paginationStyleType" :limit="limit" :maxPage="computedMaxPage"
+            :loadPage="loadPage" :nextPagePendingMark="nextPagePendingMark" :refreshPendingMark="refreshPendingMark"
+            :loading="loading">
+            <template v-slot="{ item, index }">
+                <ImageTextTile @click="visitItem(item)" :cover="item.cover" :title="item.title"
+                    :subtitle="getSubtitle(item)" :platform="item.platform" :color="item.color" :playable="true"
+                    :playAction="() => playPlaylist(item)" :checkbox="checkbox" :checked="checkedAll"
+                    :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkChangedFn="(checked) => checkChangedFn(checked, item)">
+                </ImageTextTile>
+            </template>
+            <template #loading1>
+                <ImageTextTileLoadingMask :count="customLoadingCount" v-show="customLoadingCount && customLoadingCount > 0">
+                </ImageTextTileLoadingMask>
+            </template>
+            <template #loading2>
+                <ImageTextTileLoadingMask :count="20" v-show="loading"></ImageTextTileLoadingMask>
+            </template>
         </PaginationTiles>
-        <ImageTextTileLoadingMask :count="20" v-show="loading"></ImageTextTileLoadingMask>
     </div>
 </template>
 
