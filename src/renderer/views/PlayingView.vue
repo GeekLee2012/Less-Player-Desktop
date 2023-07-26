@@ -354,4 +354,8 @@ onMounted(() => {
     font-size: 18px;
     color: var(--button-icon-btn-color);
 }
+
+.winos-style .playing-view .bottom .action .lyric-btn {
+    font-weight: normal;
+}
 </style>

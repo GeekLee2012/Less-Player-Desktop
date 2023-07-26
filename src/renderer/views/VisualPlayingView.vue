@@ -508,6 +508,10 @@ onUnmounted(() => {
     color: var(--button-icon-btn-color);
 }
 
+.winos-style .visual-playing-view .action .lyric-btn {
+    font-weight: normal;
+}
+
 .visual-playing-view .bottom {
     height: 56px;
 }

@@ -5,7 +5,7 @@ import { useSettingStore } from './store/settingStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
 import EventBus from '../common/EventBus';
-import { Theme } from '../common/Theme';
+import { isMacOS } from '../common/Utils';
 
 
 
@@ -186,6 +186,12 @@ const setupFontStyle = () => {
   setupFontSize()
 }
 
+const setupMacStyle = () => {
+  const borderRadius = isMacOS() ? 0 : 12
+  document.documentElement.style.setProperty('--border-macstyle-border-radius', `${borderRadius}px`)
+  //TODO 边框阴影效果, 再看看情况
+}
+
 /*
 const setupAutoTheme = () => {
   const detectedNode = document.getElementById('auto-theme')
@@ -211,6 +217,8 @@ EventBus.on('setting-fontSize', setupFontSize)
 EventBus.on('setting-reset', setupFontStyle)
 EventBus.on('setting-restore', setupFontStyle)
 EventBus.on('theme-applyTheme', setupAppTheme)
+
+setupMacStyle()
 
 onMounted(() => {
   setupFontStyle()

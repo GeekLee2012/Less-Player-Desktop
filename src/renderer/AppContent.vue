@@ -218,12 +218,6 @@ const registryIpcRendererListeners = () => {
   ipcRenderer.on('app-quit', setupCache)
 }
 
-const setupMacStyle = () => {
-  const borderRadius = isMacOS() ? 0 : 12
-  document.documentElement.style.setProperty('--border-macstyle-border-radius', `${borderRadius}px`)
-  //TODO 边框阴影效果, 再看看情况
-}
-
 //数据迁移 - 最近播放记录
 const migrateRecentsData = () => {
   //旧版本数据
@@ -248,7 +242,6 @@ const migrateRecentsData = () => {
 }
 
 const initialize = () => {
-  setupMacStyle()
   restoreSetting(true)
   registryIpcRendererListeners()
   migrateRecentsData()
