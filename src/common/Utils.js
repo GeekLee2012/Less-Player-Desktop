@@ -31,6 +31,10 @@ export const isDevEnv = () => {
     return tryCall(() => (electronAPI.isDevEnv), null)
 }
 
+export const useMessagePort = () => {
+    return tryCall(() => (electronAPI.messagePort), null)
+}
+
 export const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz'
 export const ALPHABET_NUMS = ALPHABETS + '01234567890'
 

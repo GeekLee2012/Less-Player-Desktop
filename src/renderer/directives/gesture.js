@@ -18,7 +18,6 @@ export const bindDragAndMove = (el, binding) => {
 
             const width = el.clientWidth, height = el.clientHeight
             const { clientWidth, clientHeight } = document.documentElement
-            //console.log("[ Gesture Directive ] ", width, ",",height)
 
             let left = (el.offsetLeft + gx)
             let top = (el.offsetTop + gy)

@@ -136,18 +136,32 @@ export const useSettingStore = defineStore('setting', {
             batchActionShow: true,
             freeFMShow: true
         },
-        /* 歌词 */
+        /* 普通歌词 */
         lyric: {
-            fontSize: 22,   //普通字号
-            hlFontSize: 22, //高亮字号
+            fontSize: 22,   //普通行字号
+            hlFontSize: 22, //高亮行字号
             fontWeight: 400,
             lineHeight: 28,
             lineSpacing: 28,
-            offset: 0, //时间补偿值，快慢
+            offset: 0,  //时间补偿值，快慢
             metaPos: 0, //歌曲信息, 0:默认, 1:隐藏, 2:顶部
-            alignment: 0, //对齐方式, 0:左, 1:中, 2:右
-            trans: true, //翻译
-            roma: true //发音
+            alignment: 0,   //对齐方式, 0:左, 1:中, 2:右
+            trans: true,    //翻译
+            roma: true  //发音
+        },
+        /* 桌面歌词 */
+        desktopLyric: {
+            fontSize: 20,   //普通行字号
+            /*
+            hlFontSize: 30, //高亮行字号
+            fontWeight: 400,
+            lineHeight: 36,
+            */
+            lineSpacing: 22, //行间距
+            alignment: 1,   //对齐方式, 0:左, 1:中, 2:右
+            layoutMode: 0,   // 0 => 单行， 1 => 双行, 2 => 全显
+            color: null,    //普通行颜色
+            hlColor: null,  //高亮行颜色
         },
         /* 缓存 */
         cache: {
@@ -888,6 +902,47 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleModulesSearchOff(platform) {
             this.toggleModulesPlatformOff(this.modules.off.search, platform)
+        },
+        setDesktopLyricFontSize(value) {
+            const fontSize = parseInt(value || 15)
+            if (fontSize < 15 || fontSize > 60) return
+            this.desktopLyric.fontSize = fontSize
+            this.syncSettingToDesktopLyric()
+        },
+        setDesktopLyricColor(value) {
+            this.desktopLyric.color = value
+            this.syncSettingToDesktopLyric()
+        },
+        setDesktopLyricHighlightColor(value) {
+            this.desktopLyric.hlColor = value
+            this.syncSettingToDesktopLyric()
+        },
+        setDesktopLyricLineSpacing(value) {
+            value = parseInt(value)
+            if (value < 0 || value > 100) return
+            this.desktopLyric.lineSpacing = value
+            this.syncSettingToDesktopLyric()
+        },
+        setDesktopLyricAlignment(value) {
+            this.desktopLyric.alignment = value
+            this.syncSettingToDesktopLyric()
+        },
+        setDesktopLyricLayoutMode(value) {
+            this.desktopLyric.layoutMode = value
+            if (this.desktopLyric.layoutMode !== 1 && this.desktopLyric.alignment === 3) {
+                this.desktopLyric.alignment = 1
+            }
+            this.syncSettingToDesktopLyric()
+        },
+        syncSettingFromDesktopLyric(data) {
+            const { alignment, fontSize, layoutMode, lineSpacing } = data
+            this.desktopLyric.alignment = alignment
+            this.desktopLyric.fontSize = fontSize
+            this.desktopLyric.layoutMode = layoutMode
+            this.desktopLyric.lineSpacing = lineSpacing
+        },
+        syncSettingToDesktopLyric() {
+            EventBus.emit('setting-syncToDesktopLyric', this.desktopLyric)
         }
     },
     persist: {
@@ -897,8 +952,8 @@ export const useSettingStore = defineStore('setting', {
                 //key: 'setting',
                 storage: localStorage,
                 paths: ['theme', 'layout', 'common', 'modules', 'track',
-                    'lyric', 'cache', 'tray', 'navigation', 'dialog',
-                    'keys', 'network', 'others']
+                    'lyric', 'desktopLyric', 'cache', 'tray', 'navigation',
+                    'dialog', 'keys', 'network', 'others']
             },
         ],
     },

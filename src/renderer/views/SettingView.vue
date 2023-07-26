@@ -10,6 +10,7 @@ import { useLocalMusicStore } from '../store/localMusicStore';
 import { useIpcRenderer, isMacOS, isWinOS } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
+import ColorInputControl from '../components/ColorInputControl.vue';
 import packageCfg from '../../../package.json';
 import { getDoc } from '../../common/HttpClient';
 import EventBus from '../../common/EventBus';
@@ -23,10 +24,9 @@ const { showConfirm } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
 
-const { theme, layout, common, track,
-    keys, tray, navigation, dialog,
-    cache, network, others, search,
-    isHttpProxyEnable, isSocksProxyEnable,
+const { theme, layout, common, track, desktopLyric,
+    keys, tray, navigation, dialog, cache,
+    network, others, search, isHttpProxyEnable, isSocksProxyEnable,
     isShowDialogBeforeResetSetting, isCheckPreReleaseVersion } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
@@ -88,7 +88,13 @@ const { setThemeIndex,
     toggleModulesSettingShortcut,
     toggleThemesShortcut,
     toggleUserHomeShortcut,
-    toggleSimpleLayoutShortcut
+    toggleSimpleLayoutShortcut,
+    setDesktopLyricFontSize,
+    setDesktopLyricColor,
+    setDesktopLyricHighlightColor,
+    setDesktopLyricLineSpacing,
+    setDesktopLyricAlignment,
+    setDesktopLyricLayoutMode
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -141,29 +147,44 @@ const resetSettingData = async () => {
 const zoomTickmarks = [50, 70, 85, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
 const fontWeights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 
-const updateWinZoom = (e) => {
-    setWindowZoom(e.target.value)
+const updateWinZoom = (event) => {
+    setWindowZoom(event.target.value)
 }
 
-const updateFontFamily = (e) => {
-    setFontFamily(e.target.value)
+const updateFontFamily = (event) => {
+    setFontFamily(event.target.value)
 }
 
-const updateFontSize = (e) => {
-    setFontSize(e.target.value)
+const updateFontSize = (event) => {
+    setFontSize(event.target.value)
 }
 
-const updateFontWeight = (e) => {
-    setFontWeight(e.target.value)
+const updateFontWeight = (event) => {
+    setFontWeight(event.target.value)
 }
 
-const updateStateRefreshFrequency = (e) => {
-    setStateRefreshFrequency(e.target.value)
+const updateStateRefreshFrequency = (event) => {
+    setStateRefreshFrequency(event.target.value)
 }
 
-const updateSpectrumRefreshFrequency = (e) => {
-    setSpectrumRefreshFrequency(e.target.value)
+const updateSpectrumRefreshFrequency = (event) => {
+    setSpectrumRefreshFrequency(event.target.value)
 }
+
+const updateDesktopLyricFontSize = (event) => {
+    setDesktopLyricFontSize(event.target.value)
+}
+
+const updateDesktopLyricLineSpacing = (event) => {
+    setDesktopLyricLineSpacing(event.target.value)
+}
+
+const showDeskLyricAlignItem = computed(() => {
+    return (index) => {
+        if (index !== 3) return true
+        return desktopLyric.value.layoutMode == 1
+    }
+})
 
 /* 应用更新升级 */
 const changelogUrl = 'https://gitee.com/rive08/less-player-desktop/blob/master/CHANGELOG.md'
@@ -601,6 +622,49 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         <ToggleControl @click="toggleUseDndForAddLocalTracks" :value="track.useDndForAddLocalTracks">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：歌单页有效；支持目录、音频文件</div>
+                    </div>
+                </div>
+            </div>
+            <div class="desktopLyric row">
+                <span class="cate-name">桌面歌词</span>
+                <div class="content">
+                    <div class="tip-text">提示：实验性功能，测试阶段</div>
+                    <div>
+                        <span class="sec-title">字体大小：</span>
+                        <input type="number" :value="desktopLyric.fontSize" placeholder="15-60，默认30" min="15" max="60"
+                            step="0.1" @keydown.enter="updateDesktopLyricFontSize" @focusout="updateDesktopLyricFontSize" />
+                    </div>
+                    <div>
+                        <span class="sec-title">文字颜色：</span>
+                        <ColorInputControl :value="desktopLyric.color" :colorMode="true" :onChanged="setDesktopLyricColor">
+                        </ColorInputControl>
+                    </div>
+                    <div>
+                        <span class="sec-title">文字高亮颜色：</span>
+                        <ColorInputControl :value="desktopLyric.hlColor" :onChanged="setDesktopLyricHighlightColor">
+                        </ColorInputControl>
+                    </div>
+                    <div>
+                        <span class="sec-title">行间距：</span>
+                        <input type="number" :value="desktopLyric.lineSpacing" placeholder="0-100，默认20" min="0" max="100"
+                            step="1" @keydown.enter="updateDesktopLyricLineSpacing"
+                            @focusout="updateDesktopLyricLineSpacing" />
+                    </div>
+                    <div>
+                        <span class="sec-title">对齐方式：</span>
+                        <span v-for="(item, index) in ['左对齐', '居中', '右对齐', '左、右对齐']" class="quality-item"
+                            v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment }"
+                            @click="setDesktopLyricAlignment(index)">
+                            {{ item }}
+                        </span>
+                    </div>
+                    <div class="last">
+                        <span class="sec-title">显示模式：</span>
+                        <span v-for="(item, index) in ['单行', '双行', '全部']" class="quality-item"
+                            :class="{ active: index === desktopLyric.layoutMode }"
+                            @click="setDesktopLyricLayoutMode(index)">
+                            {{ item }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -1281,14 +1345,15 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 
 #setting-view .layout .content .layout-item:hover,
 #setting-view .common .content .fslevel-item:hover,
-#setting-view .track .content .quality-item:hover {
+#setting-view .content .quality-item:hover {
     background-color: var(--border-color);
     background-color: var(--content-list-item-hover-bg-color);
 }
 
 #setting-view .layout .content .active,
 #setting-view .common .content .active,
-#setting-view .track .content .active {
+#setting-view .track .content .active,
+#setting-view .desktopLyric .content .active {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
     /*border: 1px solid var(--border-color);*/
@@ -1296,6 +1361,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 
 #setting-view .common .content .sec-title {
     width: 128px;
+}
+
+#setting-view .desktopLyric .content .sec-title {
+    width: 139px;
 }
 
 #setting-view .keys .global-keys-ctrl {
@@ -1395,6 +1464,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 #setting-view .common input[type='text'],
 #setting-view .common input[type='number'],
 #setting-view .track input[type='number'],
+#setting-view .desktopLyric input[type='number'],
 #setting-view .network input {
     border-radius: 3px;
     padding: 8px;
@@ -1405,8 +1475,13 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
     color: var(--content-inputs-text-color);
 }
 
-#setting-view .track input[type='number'] {
+#setting-view .track input[type='number'],
+#setting-view .desktopLyric input[type='number'] {
     margin-left: 0px;
+}
+
+#setting-view .desktopLyric .color-input-ctl {
+    width: 276px;
 }
 
 #setting-view .network input {

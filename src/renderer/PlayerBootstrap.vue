@@ -1,5 +1,5 @@
 <script setup>
-import { inject, provide, onMounted, watch, ref, nextTick, computed } from 'vue';
+import { inject, provide, onMounted, watch, ref, nextTick, computed, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -9,7 +9,7 @@ import { useRecentsStore } from './store/recentsStore';
 import { useSettingStore } from './store/settingStore';
 import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
-import { isDevEnv, useIpcRenderer } from '../common/Utils';
+import { isDevEnv, useIpcRenderer, useMessagePort } from '../common/Utils';
 import { PLAY_STATE, TRAY_ACTION, IMAGE_PROTOCAL } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
 import { toMmss } from '../common/Times';
@@ -28,13 +28,15 @@ const { playTrack, playNextTrack,
     updateCurrentTime, setPlaying,
     resetQueue, addTracks,
     addTrack, playTrackDirectly,
-    isCurrentTrack, isPlaying } = usePlayStore()
+    isCurrentTrack, isPlaying, setVideoSrc } = usePlayStore()
 const { getVendor, isLocalMusic } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
-    playingViewThemeIndex, spectrumIndex } = storeToRefs(useAppCommonStore())
+    playingViewThemeIndex, spectrumIndex,
+    desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
-    showToast, isCurrentTraceId } = useAppCommonStore()
+    showToast, isCurrentTraceId,
+    toggleDesktopLyricShow, setDesktopLyricCtxData } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
@@ -43,9 +45,11 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
     isSimpleLayout, isVipTransferEnable,
     isResumePlayAfterVideoEnable } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
-    setupSpectrumRefreshFrequency, setupTray } = useSettingStore()
+    setupSpectrumRefreshFrequency, setupTray,
+    syncSettingFromDesktopLyric } = useSettingStore()
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
+
 
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
@@ -649,11 +653,16 @@ const playMv = (track) => {
 }
 
 //video => { url }
-const playVideo = (video) => {
-    if (!videoPlayingViewShow.value) {
-        toggleVideoPlayingView()
+const playVideo = async (video) => {
+    try {
+        if (!videoPlayingViewShow.value) {
+            toggleVideoPlayingView()
+        }
+        setVideoSrc(video.url)
+        EventBus.emit('video-play', video)
+    } catch (error) {
+        //
     }
-    EventBus.emit('video-play', video)
 }
 
 //设置RadioPlayer
@@ -723,10 +732,10 @@ EventBus.on("track-refreshFavoritedState", checkFavoritedState)
 const registryIpcRendererListeners = () => {
     if (!ipcRenderer) return
     //Tray事件
-    ipcRenderer.on("tray-action", (e, value) => {
+    ipcRenderer.on("tray-action", (event, action) => {
         //TODO 视频播放中，暂时不允许中断
         if (videoPlayingViewShow.value) return
-        switch (value) {
+        switch (action) {
             case TRAY_ACTION.RESTORE:
                 setupTray()
                 break
@@ -752,6 +761,14 @@ const registryIpcRendererListeners = () => {
                 visitSetting()
                 setupTray()
                 break
+            case TRAY_ACTION.DESKTOP_LYRIC_OPEN:
+            case TRAY_ACTION.DESKTOP_LYRIC_CLOSE:
+                toggleDesktopLyricShow(true)
+                break
+            case TRAY_ACTION.DESKTOP_LYRIC_LOCK:
+            case TRAY_ACTION.DESKTOP_LYRIC_UNLOCK:
+                postMessageToDesktopLryic('s-desktopLyric-lockState')
+                break
         }
     })
 
@@ -768,10 +785,62 @@ const registryIpcRendererListeners = () => {
     ipcRenderer.on('globalShortcut-toggleLyricToolbar', () => {
         if (playingViewShow.value) toggleLyricToolbar()
     })
-
     //其他事件
+    ipcRenderer.on('app-desktopLyricShowSate', (event, isShow) => {
+        EventBus.emit('desktopLyric-showState', isShow)
+        if (isShow) postMessageToDesktopLryic('s-desktopLyric-init')
+    })
 }
 registryIpcRendererListeners()
+
+
+let messagePort = null, messagePortTimer = null
+const setupMessagePort = () => {
+    clearInterval(messagePortTimer)
+
+    messagePortTimer = setInterval(() => {
+        messagePort = useMessagePort()
+        if (messagePort) {
+            clearInterval(messagePortTimer)
+
+            EventBus.emit('desktopLyric-messagePort', messagePort)
+
+            messagePort.onmessage = (event) => {
+                const { action, data } = event.data
+                handleMessageFromDesktopLyric(action, data)
+            }
+        }
+    }, 1000)
+}
+
+const postMessageToDesktopLryic = (action, data) => {
+    if (messagePort) messagePort.postMessage({ action, data })
+}
+
+const handleMessageFromDesktopLyric = (action, data) => {
+    if (action === 'c-setting-visit') {
+        if (!ipcRenderer) return
+        ipcRenderer.send('app-showMainWindow')
+        visitSetting()
+        ipcRenderer.invoke('find-in-page', '桌面歌词')
+    } else if (action === 'c-setting-sync') {
+        syncSettingFromDesktopLyric(data)
+    } else if (action === 'c-track-seek') {
+        seekTrack(data)
+    } else if (action === 'c-track-togglePlay') {
+        togglePlay()
+    } else if (action === 'c-track-playPrev') {
+        playPrevTrack()
+    } else if (action === 'c-track-playNext') {
+        playNextTrack()
+    } else if (messagePort.onPlayerMessage) { //必须放在最后
+        messagePort.onPlayerMessage(action, data)
+    }
+}
+
+EventBus.on('setting-syncToDesktopLyric', data => {
+    postMessageToDesktopLryic('s-setting-sync', toRaw(data))
+})
 
 onMounted(() => {
     setupRadioPlayer()
@@ -779,6 +848,7 @@ onMounted(() => {
 
     setupStateRefreshFrequency()
     setupSpectrumRefreshFrequency()
+    setupMessagePort()
 })
 
 watch(queueTracksSize, (nv, ov) => {
@@ -787,6 +857,14 @@ watch(queueTracksSize, (nv, ov) => {
         setFavoritedState(false)
         EventBus.emit('playbackQueue-empty')
     }
+})
+
+watch(playing, (nv, ov) => {
+    if (ipcRenderer) ipcRenderer.send('app-playState', nv)
+})
+
+watch(desktopLyricShow, (nv, ov) => {
+    if (ipcRenderer) ipcRenderer.send('app-desktopLyricOpenState', nv)
 })
 
 //TODO

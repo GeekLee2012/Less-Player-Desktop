@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref, onMounted, inject, onUnmounted, nextTick, onUpdated, computed } from 'vue';
+import { watch, ref, onMounted, inject, onUnmounted, nextTick, onUpdated, computed, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
@@ -19,7 +19,8 @@ const props = defineProps({
     currentTime: Number
 })
 
-const { playMv, loadLyric, currentTimeState, seekTrack, playState } = inject('player')
+const { playMv, loadLyric, currentTimeState,
+    seekTrack, playState, } = inject('player')
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
@@ -64,9 +65,9 @@ const renderAndScrollLyric = (secs) => {
     if (!lyricWrap) return
     const lines = lyricWrap.querySelectorAll('.line')
 
-    let index = -1
+    let index = -1, timeKey = null
     for (var i = 0; i < lines.length; i++) {
-        const timeKey = lines[i].getAttribute('timeKey')
+        timeKey = lines[i].getAttribute('timeKey')
         const lineTime = toMillis(timeKey)
         if (trackTime >= lineTime) {
             index = i
@@ -603,7 +604,7 @@ watch(() => props.track, (nv, ov) => {
 }
 
 .lyric-ctl .scroll-locator .time-text {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
 }
 

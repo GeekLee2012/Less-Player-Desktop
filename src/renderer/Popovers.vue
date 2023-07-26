@@ -64,7 +64,7 @@ const getCtxMenuAutoHeight = () => {
   const total = commonCtxMenuData.value.length || 1
   const spNums = commonCtxMenuSeparatorNums.value
   const itemHeight = 38, padding = 15
-  return itemHeight * (total - spNums) + 7.5 * spNums + 2 * padding
+  return itemHeight * (total - spNums) + 7.5 * spNums + 2 * padding + 10
 }
 
 const menuWidth = 208 + 10

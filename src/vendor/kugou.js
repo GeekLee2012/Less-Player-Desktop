@@ -315,7 +315,7 @@ export class KuGou {
         const result = { platform: KuGou.CODE, cate, order, offset, limit, page, total: 0, data: [] }
         return new Promise((resolve, reject) => {
             //分类为默认、排序为推荐，否则其他情况直接返回
-            if (toTrimString(cate).length > 0 || order != KuGou.ORDERS[0].value) {
+            if (toTrimString(cate).length > 0 || order != KuGou.ORDERS[0].value || page > 1) {
                 resolve(result)
                 return
             }

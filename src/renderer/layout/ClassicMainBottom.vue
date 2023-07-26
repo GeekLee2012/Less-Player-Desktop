@@ -15,7 +15,8 @@ const volumeBarRef = ref(null)
 
 const { volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
-const { toggleSoundEffectView } = useAppCommonStore()
+const { desktopLyricShow } = storeToRefs(useAppCommonStore())
+const { toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
 
 
 onMounted(() => {
@@ -39,7 +40,7 @@ onMounted(() => {
                     <VolumeBar ref="volumeBarRef"></VolumeBar>
                 </div>
                 <div class="spacing" @click="toggleFavoritedState">
-                    <svg v-show="!favoritedState" width="18" height="19" viewBox="0 0 1024 937.46"
+                    <svg v-show="!favoritedState" class="love-btn" width="18" height="19" viewBox="0 0 1024 937.46"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -48,8 +49,8 @@ onMounted(() => {
                             </g>
                         </g>
                     </svg>
-                    <svg v-show="favoritedState" class="love-btn" width="18" height="17" viewBox="0 0 1024 937.53"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg v-show="favoritedState" class="love-btn love-btn-active" width="18" height="17"
+                        viewBox="0 0 1024 937.53" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -57,6 +58,10 @@ onMounted(() => {
                             </g>
                         </g>
                     </svg>
+                </div>
+                <div class="lyric-btn spacing" :class="{ 'content-text-highlight': desktopLyricShow }"
+                    @click="() => toggleDesktopLyricShow()">
+                    词
                 </div>
                 <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
                     <svg width="17" height="17" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
@@ -143,15 +148,31 @@ onMounted(() => {
 }
 
 .classic-main-bottom .volume-bar {
-    width: 21px;
+    width: 88px;
+    margin-right: 36px;
     /* margin-left: 3px; */
 }
 
 .classic-main-bottom .volume-bar:hover {
-    width: 100px;
+    /*width: 100px;*/
 }
 
 .classic-main-bottom .love-btn {
+    margin-top: 2px;
+}
+
+.classic-main-bottom .love-btn-active {
     fill: var(--content-highlight-color) !important;
+}
+
+.classic-main-bottom .lyric-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 3px;
+    font-size: 18px;
+    color: var(--button-icon-btn-color);
 }
 </style>

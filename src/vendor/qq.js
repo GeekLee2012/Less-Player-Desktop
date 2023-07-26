@@ -1247,7 +1247,7 @@ export class QQ {
         })
     }
 
-    static videoDetail(id, quality) {
+    static videoDetail_v0(id, quality) {
         return new Promise((resolve, reject) => {
             const url = 'http://u.y.qq.com/cgi-bin/musicu.fcg'
             const reqBody = {
@@ -1257,7 +1257,13 @@ export class QQ {
                         method: 'GetMvUrls',
                         param: {
                             vids: [id],
-                            request_typet: 10001,
+                            request_type: 10001,
+                            /*
+                            "request_type": 10003,
+                            "addrtype": 3,
+                            "format": 265,
+                            "maxFiletype": 60
+                            */
                         }
                     }
                 })
@@ -1275,6 +1281,52 @@ export class QQ {
                 const mvUrls = mvData[id]
                 //TODO 其实应该全部返回给客户端，由客户端决定播放url，播放失败时也方便重试
                 result.url = mvUrls.length > 0 ? mvUrls[mvUrls.length - 1] : ''
+                resolve(result)
+            })
+        })
+    }
+
+    static videoDetail(id, quality) {
+        return new Promise((resolve, reject) => {
+            const url = 'http://u.y.qq.com/cgi-bin/musicu.fcg'
+            const reqBody = {
+                data: JSON.stringify({
+                    req_1: {
+                        module: 'music.stream.MvUrlProxy',
+                        method: 'GetMvUrls',
+                        param: {
+                            vids: [id],
+                            request_type: 10003
+                        }
+                    }
+                })
+            }
+            const result = { id, platform: QQ.CODE, quality, url: '' }
+            getJson(url, reqBody).then(json => {
+                const data = json.req_1.data
+                const mvData = {}
+                Object.keys(data).forEach(vid => {
+                    let keyHits = 0
+                    for (const [key, value] of Object.entries(data[vid])) {
+                        if (keyHits >= 2) break
+                        if (key === 'mp4' || key === 'hls') {
+                            ++keyHits
+                            mvData[key] = []
+                            value.forEach(item => {
+                                const url = item.freeflow_url[0]
+                                if (!url || url.trim().length < 1) return
+                                mvData[key].push(url)
+                            })
+                        }
+                    }
+                })
+                for (const [key, value] of Object.entries(mvData)) {
+                    if (value.length > 0) {
+                        result.url = value[value.length - 1]
+                        break
+                    }
+                }
+                //TODO 其实应该全部返回给客户端，由客户端决定播放url，播放失败时也方便重试
                 resolve(result)
             })
         })

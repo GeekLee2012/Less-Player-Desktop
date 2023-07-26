@@ -41,7 +41,7 @@ RadioPlayer.initAndSetup()
 VideoPlayer.initAndSetup()
 
 //应用：创建、配置
-const app = createApp(App);
+const app = createApp(App)
 
 //全局异常处理器
 app.config.errorHandler = (err, vm, info) => {

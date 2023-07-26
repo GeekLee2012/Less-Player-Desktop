@@ -59,9 +59,11 @@ defineExpose({
                 </g>
             </svg>
         </div>
-        <SliderBar class="volume-value" ref="sliderRef" :value="volume" :onSeek="updateVolume" :onScroll="updateVolume"
-            :onDragMove="updateVolume" :disableOptimize="true">
-        </SliderBar>
+        <div class="volume-value">
+            <SliderBar ref="sliderRef" :value="volume" :onSeek="updateVolume" :onScroll="updateVolume"
+                :onDragMove="updateVolume" :disableOptimize="true">
+            </SliderBar>
+        </div>
     </div>
 </template>
 
@@ -75,17 +77,12 @@ defineExpose({
     --others-sliderbar-ctl-height: 3px;
 }
 
-/* 
-.volume-bar .volume-status,
-.volume-bar .volume-value {
-    margin: auto; 
-}
-*/
-
 .volume-bar .volume-status {
-    margin-top: 3px;
     width: 20px;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .volume-bar .volume-status svg {

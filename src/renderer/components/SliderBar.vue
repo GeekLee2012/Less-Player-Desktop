@@ -1,9 +1,8 @@
 <script setup>
 import { watch, ref, onMounted } from 'vue';
-//TODO 组件代码写得乱，后期再梳理
 
 const props = defineProps({
-    value: Number, //0.0 - 1.0
+    value: Number,      //0.0 - 1.0
     disable: Boolean,
     disableScroll: Boolean,
     disableOptimize: Boolean,
@@ -12,7 +11,8 @@ const props = defineProps({
     onScrollFinish: Function,
     onDragStart: Function,
     onDragMove: Function,
-    onDragRelease: Function
+    onDragRelease: Function,
+    thumbStyle: Number  //0 => 默认， 1 => 加大
 })
 
 const sliderCtlRef = ref(null)
@@ -165,7 +165,8 @@ defineExpose({
             :class="{ 'slider-bar-ctl-ondrag': onDrag, 'slider-bar-ctl-with-thumb': thumbShow, 'slider-bar-ctl-disable': disable }"
             ref="sliderCtlRef" @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
-            <div class="thumb" ref="thumbRef" @mousedown="startDrag"></div>
+            <div class="thumb" :class="{ 'big-thumb': (thumbStyle == 1) }" ref="thumbRef" @mousedown="startDrag">
+            </div>
         </div>
     </div>
 </template>
@@ -202,8 +203,8 @@ defineExpose({
 }
 
 .slider-bar .thumb {
-    width: 10px;
-    height: 10px;
+    width: 13px;
+    height: 13px;
     border-radius: 10rem;
     /*background-color: var(--others-volumebar-thumb-color);*/
     background-color: var(--content-highlight-color);
@@ -212,6 +213,10 @@ defineExpose({
     left: 0%;
     -webkit-app-region: none;
     visibility: hidden;
+}
+
+.slider-bar .big-thumb {
+    border: 1px solid var(--content-highlight-color);
 }
 
 /*.slider-bar:hover .thumb,*/

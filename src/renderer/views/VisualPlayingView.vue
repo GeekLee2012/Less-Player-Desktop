@@ -27,10 +27,10 @@ const { seekTrack, playMv,
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { playingViewShow, spectrumIndex,
-    playingViewThemeIndex } = storeToRefs(useAppCommonStore())
+    playingViewThemeIndex, desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize, showToast,
     switchPlayingViewTheme, switchSpectrumIndex,
-    toggleSoundEffectView } = useAppCommonStore()
+    toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
 const { getCurrentThemeHighlightColor } = useSettingStore()
 const { currentTrack, playingIndex,
     playing, volume, queueTracksSize } = storeToRefs(usePlayStore())
@@ -160,7 +160,7 @@ onUnmounted(() => {
                     </div>
                     <div class="action">
                         <div class="btm-left">
-                            <div @click="toggleFavoritedState">
+                            <div class="favorite-btn" @click="toggleFavoritedState">
                                 <svg v-show="!favoritedState" width="20" height="20" viewBox="0 0 1024 937.46"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
@@ -180,7 +180,28 @@ onUnmounted(() => {
                                     </g>
                                 </svg>
                             </div>
-                            <VolumeBar class="spacing" ref="volumeBarRef"></VolumeBar>
+                            <div class="spectrum-btn spacing" @click="switchSpectrumIndex"
+                                :class="{ active: spectrumIndex < 0 }" v-show="false">
+                                <svg width="18" height="17" viewBox="0 0 1003.7 910.4" xmlns="http://www.w3.org/2000/svg">
+                                    <g id="Layer_2" data-name="Layer 2">
+                                        <g id="Layer_1-2" data-name="Layer 1">
+                                            <path
+                                                d="M558.35,455.05q0,197.71,0,395.43c0,23.94-9.54,42.39-30.94,53.57-35.59,18.6-79.08-5.74-81.67-45.8-1-15.6-.42-31.31-.42-47q0-375.43-.06-750.87c0-24.56,9.72-43.31,31.88-54.49,35.17-17.76,78,6.46,80.72,45.73,1,13.93.45,28,.45,42Q558.39,274.34,558.35,455.05Z" />
+                                            <path
+                                                d="M780.91,455.46q0,141.23,0,282.45c0,28-18.79,51.18-45.28,56.25C700.1,801,668.06,774.7,668,738.39c-.15-50.49-.05-101-.05-151.48q0-206.71,0-413.42c0-27.25,16.49-49.55,41.51-56.36,36.49-9.94,71.43,17,71.46,55.38q.11,133,0,266Z" />
+                                            <path
+                                                d="M222.78,455.06q0-141.22,0-282.46c0-32.54,25.16-57.78,57.09-57.51,30.91.25,55.77,25.31,55.85,56.8.16,60.49,0,121,0,181.47q0,191.46,0,382.93c0,21.23-8.07,38.4-26.05,49.93-18.3,11.73-37.84,12.56-57,2.36-19.52-10.41-29.86-27.38-29.91-49.57Q222.57,597,222.78,455.06Z" />
+                                            <path
+                                                d="M890.65,455.63q0-84.24,0-168.46c.06-26.54,17.39-48.82,42.37-55.06,36.35-9.07,70.42,17.67,70.55,55.71.18,53,0,106,0,159q0,87.72,0,175.45c0,26.81-17,49.41-41.58,55.82-36.91,9.64-71.28-16.95-71.37-55.47C890.55,566.93,890.65,511.28,890.65,455.63Z" />
+                                            <path
+                                                d="M113,455.55q0,83.49,0,167c-.05,24.61-13.49,44.63-35.53,53.57C40.25,691.17.17,663.46.08,622.31-.07,558.66,0,495,0,431.36,0,383.54,0,335.72.07,287.9.13,261,17.43,238.43,42.39,232.15c36.22-9.12,70.43,17.3,70.58,55C113.2,343.25,113,399.4,113,455.55Z" />
+                                        </g>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="volume-ctl-btn spacing">
+                                <VolumeBar ref="volumeBarRef"></VolumeBar>
+                            </div>
                             <!--<div class="spacing"><svg width="21" height="21" viewBox="0 0 767.96 895.83" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M458.7,677.8,274.75,559.58c-35.29,34.33-77.25,51.15-126.42,47.61C104,604,67.35,584.86,38.16,551.38c-53.89-61.79-50.31-156.85,8.26-216.25,60.08-60.95,162.47-65.53,228.41.79L458.59,217.83c-17.32-49.24-14-96.72,13.09-141.57,19.67-32.52,47.82-55.37,83.9-67.49,75.65-25.39,155.7,5.8,193.1,74.7C785.34,151,768.21,236,708.87,284.05c-60.76,49.2-153.42,49.49-215.57-12.43l-184,118.25a161.11,161.11,0,0,1,0,115.78l184,118.23c64.15-64.7,163-61.37,223-6C774.44,671.56,785,760.17,740.5,825.46c-44.86,65.91-131.3,89-202.23,54.35C466.68,844.85,428.1,760.37,458.7,677.8ZM512,159.4a96,96,0,1,0,96.37-95.62A96.09,96.09,0,0,0,512,159.4Zm0,576a96,96,0,1,0,96.36-95.62A96.08,96.08,0,0,0,512,735.4ZM160.36,351.78A96,96,0,1,0,256,448.11,96,96,0,0,0,160.36,351.78Z"/></g></g></svg></div>-->
                         </div>
                         <div class="btm-center">
@@ -208,6 +229,10 @@ onUnmounted(() => {
                                     </g>
                                 </svg>
                                 -->
+                            </div>
+                            <div class="lyric-btn spacing" :class="{ 'content-text-highlight': desktopLyricShow }"
+                                @click="() => toggleDesktopLyricShow()">
+                                词
                             </div>
                             <div class="equalizer spacing" :class="{ active: isUseEffect }">
                                 <svg @click="toggleSoundEffectView" width="17" height="17" viewBox="0 0 1024 1024"
@@ -459,17 +484,28 @@ onUnmounted(() => {
     align-items: center;
 }
 
+
 .visual-playing-view .volume-bar {
-    width: 25px;
-    /* margin-left: 3px; */
+    width: 70px;
 }
 
 .visual-playing-view .volume-bar:hover {
-    width: 80px;
+    /*width: 80px;*/
 }
 
 .visual-playing-view .action .love-btn {
     fill: var(--content-highlight-color) !important;
+}
+
+.visual-playing-view .action .lyric-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 3px;
+    font-size: 18px;
+    color: var(--button-icon-btn-color);
 }
 
 .visual-playing-view .bottom {

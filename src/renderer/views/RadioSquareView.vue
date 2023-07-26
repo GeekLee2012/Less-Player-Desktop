@@ -94,7 +94,6 @@ const loadContent = async (noLoadingMask, offset, limit, page) => {
     */
     const order = currentOrder.value.value
     const result = await vendor.radioSquare(cate, offset, limit, page, order)
-    console.log(result)
     if (!result) return
     if (currentPlatformCode.value != result.platform) return
     //重新再获取一次，确保没有变更

@@ -41,7 +41,8 @@ const loadPageContent = ({ offset, limit, page }) => {
     return { data: pageData }
 }
 
-watch(() => props.data, () => {
+//TODO Bug: 播放歌曲时也被触发....
+watch(() => props.data, (nv, ov) => {
     refreshPendingMark.value = Date.now()
 }, { immediate: true, deep: true })
 </script>

@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain,
   Menu, dialog, powerMonitor,
   shell, powerSaveBlocker, Tray,
   globalShortcut, session, utilityProcess,
-  protocol, nativeTheme,
+  protocol, nativeTheme, MessageChannelMain,
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
@@ -21,6 +21,7 @@ const { scanDirTracks, parseTracks,
 } = require('./common')
 
 const path = require('path')
+const Url = require('url')
 const fetch = require('electron-fetch').default
 
 
@@ -35,11 +36,17 @@ const appLayoutConfig = {
     appHeight: 588
   }
 }
-let mainWin = null, appLayout = DEFAULT_LAYOUT
-let powerSaveBlockerId = -1, appTray = null
+let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT
+let powerSaveBlockerId = -1
+let appTray = null, appTrayMenu = null, appTrayShow = false
+let playState = false, desktopLyricLockState = false
+let lyricWinMinWidth = 450, lyricWinMinHeight = 168
 const proxyAuthRealms = []
 //TODO 下载队列
 let downloadingItem = null
+
+
+const { port1, port2 } = new MessageChannelMain()
 
 /* 自定义函数 */
 const startup = () => {
@@ -96,7 +103,7 @@ const init = () => {
         if (state == 'progressing') {
           const received = item.getReceivedBytes()
           const total = item.getTotalBytes()
-          sendToRenderer('download-progressing', {
+          sendToMainRenderer('download-progressing', {
             url: item.getURL(),
             savePath,
             received,
@@ -107,7 +114,7 @@ const init = () => {
 
       item.on('done', (event, state) => {
         downloadingItem = null
-        sendToRenderer('download-done', {
+        sendToMainRenderer('download-done', {
           url: item.getURL(),
           savePath
         })
@@ -133,14 +140,14 @@ const init = () => {
   app.on('activate', (event) => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (BrowserWindow.getAllWindows().length === 0 || mainWin.isDestroyed()) {
       mainWin = createMainWindow()
     }
-    sendToRenderer('app-active')
+    sendToMainRenderer('app-active')
   })
 
   app.on('did-become-active', (event) => {
-    sendToRenderer('app-active')
+    sendToMainRenderer('app-active')
   })
 
   // Quit when all windows are closed, except on macOS. There, it's common
@@ -152,7 +159,7 @@ const init = () => {
 
   app.on('before-quit', (event) => {
     cleanupBeforeQuit()
-    sendToRenderer('app-quit')
+    sendToMainRenderer('app-quit')
   })
 
   app.on('login', (event, webContents, details, authInfo, callback) => {
@@ -191,8 +198,10 @@ const registryGlobalShortcuts = () => {
     // 打开 / 关闭歌词设置
     'Shift+L': 'toggleLyricToolbar',
     // 打开 开发者工具
-    'Control+Alt+Shift+I': openDevTools,
-    'Command+Alt+Shift+I': openDevTools
+    'Control+Alt+Shift+I': () => openDevTools(mainWin),
+    'Command+Alt+Shift+I': () => openDevTools(mainWin),
+    'Control+Alt+Shift+J': () => openDevTools(lyricWin),
+    'Command+Alt+Shift+J': () => openDevTools(lyricWin),
   }
 
   const activeWindowValues = ['visitSetting', 'togglePlaybackQueue', 'toggleLyricToolbar']
@@ -202,7 +211,7 @@ const registryGlobalShortcuts = () => {
       if (valueType === 'function') {
         value()
       } else if (valueType === 'string') {
-        sendToRenderer('globalShortcut-' + value)
+        sendToMainRenderer('globalShortcut-' + value)
         if (activeWindowValues.includes(value)) mainWin.show()
       }
     })
@@ -210,22 +219,51 @@ const registryGlobalShortcuts = () => {
 }
 
 //在菜单栏显示
-const setupTray = (isShow) => {
-  if (isShow) {
+const setupTray = (forceShow) => {
+  if (appTrayShow || forceShow) {
     if (appTray) appTray.destroy()
     appTray = new Tray(path.join(__dirname, APP_ICON))
-    appTray.setContextMenu(Menu.buildFromTemplate(initTrayMenuTemplate()))
+    appTrayMenu = Menu.buildFromTemplate(initTrayMenuTemplate())
+    appTray.setContextMenu(appTrayMenu)
   } else if (appTray) {
     appTray.destroy()
     appTray = null
+    appTrayMenu = null
   }
+  setupTrayMenu()
+}
+
+const setupTrayMenu = () => {
+  if (!appTrayMenu) return
+  const desktopLyricOpenState = isLyricWindowShow()
+  const states = {
+    'play': !playState,
+    'pause': playState,
+    'desktop-lyric-open': !desktopLyricOpenState,
+    'desktop-lyric-close': desktopLyricOpenState,
+    'desktop-lyric-lock': desktopLyricOpenState && !desktopLyricLockState,
+    'desktop-lyric-unlock': desktopLyricOpenState && desktopLyricLockState,
+  }
+
+  for (const [key, value] of Object.entries(states)) {
+    const item = appTrayMenu.getMenuItemById(key)
+    item.visible = value
+  }
+  return appTrayMenu
 }
 
 //全局事件监听
 const registryGlobalListeners = () => {
   //主进程事件监听
   ipcMain.on('app-quit', () => {
-    if (isDevEnv || isMacOS) {
+    if (isLyricWindowShow()) {
+      setupTray(true)
+      mainWin.hide()
+      return
+    } else if (appTrayShow) {
+      mainWin.hide()
+      return
+    } else if (isDevEnv && isMacOS) {
       mainWin.close()
       return
     }
@@ -248,40 +286,41 @@ const registryGlobalListeners = () => {
       isFullScreen = !mainWin.isFullScreen()
       mainWin.setFullScreen(isFullScreen)
     }
-    sendToRenderer('app-max', isFullScreen)
-  }).on('app-suspension', (e, data) => {
+    sendToMainRenderer('app-max', isFullScreen)
+  }).on('app-suspension', (event, data) => {
     if (data === true) {
       powerSaveBlockerId = powerSaveBlocker.start('prevent-app-suspension')
     } else if (powerSaveBlockerId != -1) {
       powerSaveBlocker.stop(powerSaveBlockerId)
       powerSaveBlockerId = -1
     }
-  }).on('app-tray', (e, isShow) => {
-    setupTray(isShow)
-  }).on('app-zoom', (e, { zoom, noResize }) => {
+  }).on('app-tray', (event, isShow) => {
+    appTrayShow = isShow
+    setupTray()
+  }).on('app-zoom', (event, { zoom, noResize }) => {
     setupAppWindowZoom(zoom, noResize)
-  }).on('app-winBtn', (e, value) => {
-    setWindowButtonVisibility(value === true)
-  }).on('app-layout-default', (e, { zoom, isInit }) => {
+  }).on('app-winBtn', (event, value) => {
+    setWindowButtonVisibility(mainWin, value === true)
+  }).on('app-layout-default', (event, { zoom, isInit }) => {
     setupAppLayout(DEFAULT_LAYOUT, zoom, isInit)
-  }).on('app-layout-simple', (e, { zoom, isInit }) => {
+  }).on('app-layout-simple', (event, { zoom, isInit }) => {
     setupAppLayout(SIMPLE_LAYOUT, zoom, isInit)
-  }).on('app-globalShortcut', (e, data) => {
+  }).on('app-globalShortcut', (event, data) => {
     if (data === true) {
       globalShortcut.unregisterAll()
       registryGlobalShortcuts()
     } else {
       globalShortcut.unregisterAll()
     }
-  }).on('app-setGlobalProxy', (e, data) => {
+  }).on('app-setGlobalProxy', (event, data) => {
     setupAppGlobalProxy(data)
-  }).on('visit-link', (e, data) => {
+  }).on('visit-link', (event, data) => {
     shell.openExternal(data)
-  }).on('download-item', (e, { url }) => {
-    mainWin.webContents.downloadURL(url)
-  }).on('download-cancel', (e, data) => {
+  }).on('download-item', (event, { url }) => {
+    if (mainWin) mainWin.webContents.downloadURL(url)
+  }).on('download-cancel', (event, data) => {
     cancelDownload()
-  }).on('path-showInFolder', (e, path) => {
+  }).on('path-showInFolder', (event, path) => {
     if (path) shell.showItemInFolder(path)
   })
 
@@ -483,6 +522,78 @@ const registryGlobalListeners = () => {
   ipcMain.handle('app-clearCaches', async (event, ...args) => {
     return await clearCaches(true)
   })
+
+  ipcMain.on('app-desktopLyric-toggle', (event, ...args) => {
+    const fromDesktopLyric = args[0]
+    toggleLyricWindow()
+    if (fromDesktopLyric) {
+      const lyricShow = isLyricWindowShow()
+      sendTrayAction(lyricShow ? 7 : 8)
+    }
+  }).on('app-playState', (event, ...args) => {
+    playState = args[0]
+    setupTrayMenu()
+  }).on('app-desktopLyricLockState', (event, ...args) => {
+    desktopLyricLockState = args[0]
+    lyricWin.setResizable(!desktopLyricLockState)
+    lyricWin.setMinimumSize(lyricWinMinWidth, lyricWinMinHeight)
+    if (desktopLyricLockState) lyricWin.blur()
+    setupTrayMenu()
+  }).on('app-showMainWindow', (event, ...args) => {
+    showMainWindow()
+  }).on('app-desktopLyricLayoutState', (event, ...args) => {
+    const { layoutMode, isInit } = args[0]
+    const { x, y, width, height } = lyricWin.getBounds()
+    let limit = parseInt(lyricWinMinHeight * 1.25)
+    switch (layoutMode) {
+      case 0:
+        if (height > limit) {
+          lyricWin.setSize(width, lyricWinMinHeight)
+        }
+        break
+      case 1:
+        limit = parseInt(lyricWinMinHeight * 1.5)
+        if (height > limit || height < (lyricWinMinHeight + 20)) {
+          lyricWin.setSize(width, limit)
+        }
+        break
+      case 2:
+        limit = 520
+        if (height < limit) {
+          lyricWin.setSize(width, limit)
+        }
+        break
+    }
+    if (isInit) lyricWin.center()
+  }).on('app-desktopLyricAlwaysOnTopState', (event, ...args) => {
+    lyricWin.setAlwaysOnTop(!lyricWin.isAlwaysOnTop())
+  })
+}
+
+const toggleLyricWindow = () => {
+  let showState = false
+  if (!lyricWin) {
+    lyricWin = createLyricWindow()
+    lyricWin.setAlwaysOnTop(true)
+    showState = true
+  } else if (lyricWin.isVisible()) {
+    lyricWin.hide()
+    // 关闭后需要重新配对MessagePort
+    // 暂时不关闭，空间换时间
+    //lyricWin.close()
+    //lyricWin = null
+
+    if (!appTrayShow) {
+      setupTray()
+      const mainShow = isMainWindowShow()
+      if (!mainShow) showMainWindow()
+    }
+  } else {
+    lyricWin.showInactive()
+    showState = true
+  }
+  sendToMainRenderer('app-desktopLyricShowSate', showState)
+  setupTrayMenu()
 }
 
 //应用显示时，待执行任务
@@ -491,6 +602,14 @@ const onReadyToShowTasks = async () => {
   const urls = ['https://www.kuwo.cn/']
   urls.forEach(url => fetchCookie(url, true))
   //其他任务
+}
+
+const tryPostMessageFromPort = (win, msg, port) => {
+  try {
+    win.webContents.postMessage('port', msg, [port])
+  } catch (error) {
+    if (isDevEnv) console.log(error)
+  }
 }
 
 //创建浏览窗口
@@ -503,20 +622,23 @@ const createMainWindow = () => {
     minWidth: width,
     minHeight: height,
     titleBarStyle: 'hidden',
+    title: 'Less Player, Less is More !',
     //trafficLightPosition: { x: 20, y: 18 },
+    trafficLightPosition: { x: -404, y: -404 }, // 404 => 神秘数字 
     transparent: true,
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
+      contextIsolation: false, //Electron太坑，不得不关闭，毕竟没找到什么好的方式
       webSecurity: false  //TODO 有风险，暂时保留此方案，留待后期调整
     }
   })
   if (isDevEnv) {
     mainWindow.loadURL("http://localhost:5173/")
     //打开DevTools
-    mainWindow.webContents.openDevTools()
+    openDevTools(mainWindow)
   } else {
     mainWindow.loadFile('dist/index.html')
   }
@@ -524,14 +646,15 @@ const createMainWindow = () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(initAppMenuTemplate()))
 
   mainWindow.once('ready-to-show', () => {
-    setWindowButtonVisibility(!useCustomTrafficLight)
+    setWindowButtonVisibility(mainWindow, !useCustomTrafficLight)
     mainWindow.show()
 
+    tryPostMessageFromPort(mainWindow, null, port1)
     onReadyToShowTasks()
   })
 
   mainWindow.on('show', () => {
-    sendToRenderer('app-active')
+    sendToMainRenderer('app-active')
   })
 
   //配置请求过滤
@@ -630,7 +753,7 @@ const initAppMenuTemplate = () => {
   return template
 }
 
-const sendToRenderer = (channel, args) => {
+const sendToMainRenderer = (channel, args) => {
   try {
     if (mainWin && mainWin.webContents) mainWin.webContents.send(channel, args)
   } catch (error) {
@@ -638,46 +761,69 @@ const sendToRenderer = (channel, args) => {
   }
 }
 
-//TODO 
-const sendTrayAction = (action, showWin) => {
-  if (mainWin && showWin) mainWin.show()
-  sendToRenderer('tray-action', action)
+const showMainWindow = () => {
+  if (mainWin) mainWin.show()
+}
+
+const sendTrayAction = (action, showMain) => {
+  if (showMain) {
+    showMainWindow()
+  }
+  sendToMainRenderer('tray-action', action)
 }
 
 const initTrayMenuTemplate = () => {
   const template = [{
     label: '听你想听，爱你所爱',
-    click: () => {
-      sendTrayAction(-1, true)
-    }
+    click: () => sendTrayAction(0, true)
   }, {
     type: 'separator'
   }, {
-    label: '播放 / 暂停',
+    id: 'desktop-lyric-open',
+    label: '开启桌面歌词',
+    click: () => {
+      sendTrayAction(7)
+      toggleLyricWindow()
+    }
+  }, {
+    id: 'desktop-lyric-close',
+    label: '关闭桌面歌词',
+    click: () => {
+      sendTrayAction(8)
+      toggleLyricWindow()
+    }
+  }, {
+    id: 'desktop-lyric-lock',
+    label: '锁定桌面歌词',
+    click: () => sendTrayAction(9)
+  }, {
+    id: 'desktop-lyric-unlock',
+    label: '解锁桌面歌词',
+    click: () => sendTrayAction(10)
+  }, {
+    type: 'separator'
+  }, {
+    id: 'play',
+    label: '播放',
     click: () => sendTrayAction(1)
   }, {
-    label: '上一曲',
+    id: 'pause',
+    label: '暂停',
     click: () => sendTrayAction(2)
   }, {
-    label: '下一曲',
+    label: '上一曲',
     click: () => sendTrayAction(3)
   }, {
+    label: '下一曲',
+    click: () => sendTrayAction(4)
+  }, {
     type: 'separator'
-  }, /*{
-    label: '首页',
-    click: () => {
-      sendTrayAction(4, true)
-    }
-  },*/ {
+  }, {
     label: '我的主页',
-    click: () => {
-      sendTrayAction(5, true)
-    }
+    click: () => sendTrayAction(5, true)
   }, {
     label: '设置',
-    click: () => {
-      sendTrayAction(6, true)
-    }
+    click: () => sendTrayAction(6, true)
   }, {
     type: 'separator'
   }, {
@@ -688,10 +834,10 @@ const initTrayMenuTemplate = () => {
 }
 
 //设置系统交通灯按钮可见性
-const setWindowButtonVisibility = (visible) => {
+const setWindowButtonVisibility = (win, visible) => {
   if (!isMacOS) return
   try {
-    if (mainWin) mainWin.setWindowButtonVisibility(visible)
+    if (win) win.setWindowButtonVisibility(visible)
   } catch (error) {
     if (isDevEnv) console.log(error)
   }
@@ -785,8 +931,8 @@ const getProxyAuthRealm = (scheme, host, port) => {
   return { username: null, secret: null }
 }
 
-const openDevTools = () => {
-  if (mainWin) mainWin.webContents.openDevTools()
+const openDevTools = (win) => {
+  if (win && win.webContents) win.webContents.openDevTools()
 }
 
 const cleanupBeforeQuit = () => {
@@ -972,6 +1118,59 @@ const overrideRequest = (details) => {
   if (secret) details.requestHeaders['Secret'] = secret
 
   return details
+}
+
+//创建桌面歌词窗口
+const createLyricWindow = () => {
+  // Create the browser window.
+  const win = new BrowserWindow({
+    width: lyricWinMinWidth,
+    height: lyricWinMinHeight,
+    minWidth: lyricWinMinWidth,
+    minHeight: lyricWinMinHeight,
+    titleBarStyle: 'hidden',
+    title: '桌面歌词',
+    trafficLightPosition: { x: -404, y: -404 },
+    transparent: true,
+    frame: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      //nodeIntegrationInWorker: true,
+      contextIsolation: false, //Electron太坑，不得不关闭，毕竟没找到什么好的方式
+      webSecurity: false  //TODO 有风险，暂时保留此方案，留待后期调整
+    }
+  })
+
+  win.loadURL(
+    app.isPackaged
+      ? Url.format({
+        pathname: path.join(__dirname, '../../dist/index.html'),
+        protocol: 'file:',
+        slashes: true,
+        hash: 'desktopLyric',
+      })
+      : 'http://localhost:5173/#/desktopLyric',
+  )
+
+  if (isDevEnv) openDevTools(win)
+
+  win.once('ready-to-show', () => {
+    setWindowButtonVisibility(win, false)
+    win.show()
+
+    tryPostMessageFromPort(win, null, port2)
+  })
+
+  return win
+}
+
+const isMainWindowShow = () => {
+  return mainWin && mainWin.isVisible()
+}
+
+const isLyricWindowShow = () => {
+  return lyricWin && lyricWin.isVisible()
 }
 
 //启动应用

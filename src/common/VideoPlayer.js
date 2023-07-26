@@ -1,5 +1,5 @@
-import EventBus from './EventBus';
 import Hls from 'hls.js';
+import EventBus from './EventBus';
 
 
 
@@ -44,7 +44,7 @@ export class VideoPlayer {
         const self = this
 
         const { url: src } = this.video
-        if (this.isHlsVideo()) {
+        if (VideoPlayer.isHlsVideo()) {
             this.hls.loadSource(src)
             this.hls.attachMedia(gVideoHolder)
 
@@ -56,35 +56,36 @@ export class VideoPlayer {
                 requestAnimationFrame(self._step.bind(self))
             })
         } else { //TODO
-            this.addSourceToVideo(gVideoHolder, src, 'video/mp4')
             gVideoHolder.load()
             gVideoHolder.play()
             this.setPlayState(true)
         }
     }
 
-    isHlsVideo() {
-        if (!this.video || !this.video.url) return false
-        return this.video.url.includes('.m3u8')
-            || this.video.url.includes('.ts')
+    static isHlsVideo(url) {
+        if (!url || url.trim().length < 1) return false
+        return url.includes('.m3u8?')
+            || url.endsWith('.m3u8')
+            || url.includes('.ts?')
+            || url.endsWith('.ts')
     }
 
     addSourceToVideo(element, src, type) {
+        if (!element) return
         let source = element.querySelector('source')
         if (!source) {
             source = document.createElement('source')
             element.appendChild(source)
         }
-        source.src = src;
-        source.type = type;
+        source.src = src
+        source.type = type
     }
 
     //暂停
     pause() {
-        if (!Hls.isSupported()) return
-        if (!gVideoHolder) return
+        if (!Hls.isSupported() || !gVideoHolder) return
         if (!this.playing) return
-        if (this.isHlsVideo()) {
+        if (VideoPlayer.isHlsVideo()) {
             this.hls.detachMedia()
         } else {
             gVideoHolder.pause()
@@ -107,21 +108,21 @@ export class VideoPlayer {
 
     setVideo(video) {
         this.pause()
-        this.hls.stopLoad()
+        if (VideoPlayer.isHlsVideo()) this.hls.stopLoad()
         this.video = video
         this.videoChanged = true
-        if (!video) this.resetHtmlVideo()
+        if (!video) this.reloadVideo()
     }
 
-    resetHtmlVideo() {
-        this.addSourceToVideo(gVideoHolder, '')
-        gVideoHolder.load()
+    reloadVideo() {
+        if (gVideoHolder) gVideoHolder.load()
     }
 
     playVideo(video) {
         this.setVideo(video)
         this.play()
     }
+
 
     volume(value) {
         if (!Hls.isSupported()) return

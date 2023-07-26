@@ -52,6 +52,11 @@
   --box-shadow: 0px 0px 6px var(--border-popovers-border-color);
   --searchbar-clear-btn-icon-color: #666;
 
+  --content-desktop-lyric-text-size: 20px;
+  --content-desktop-lyric-color: #393939;
+  --content-desktop-lyric-highlight-color: linear-gradient(to top right, #1ca388, #28c83f);
+  --content-desktop-lyric-line-spacing: 22px;
+
   font-family: var(--content-text-font-family);
   letter-spacing: var(--content-text-letter-spacing);
 }
@@ -61,6 +66,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 input,

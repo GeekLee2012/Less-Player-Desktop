@@ -436,7 +436,6 @@ const writePlsFile = async (filename, data) => {
 
 //保存为.m3u格式文件
 const writeM3uFile = async (filename, data) => {
-    console.log(filename)
     let content = '#EXTM3U\n'
     for (var i = 0; i < data.length; i++) {
         const { title, duration, url } = data[i]

@@ -1,14 +1,16 @@
 <script setup>
-import Themes from './Themes.vue';
-
+import AppRoute from "./AppRoute.vue";
+import PlayerBootstrap from "./PlayerBootstrap.vue";
+import Themes from "./Themes.vue";
+import AppContent from "./AppContent.vue";
 </script>
 
 <template>
-  <Themes>
-    <router-view v-slot="{ Component }">
-      <component :is="Component" />
-    </router-view>
-  </Themes>
+  <AppRoute>
+    <PlayerBootstrap>
+      <AppContent></AppContent>
+    </PlayerBootstrap>
+  </AppRoute>
 </template>
 
 <style>
@@ -17,10 +19,9 @@ body,
 #app {
   background: transparent;
   height: 100%;
-  overflow: hidden;
-
   font-size: var(--content-text-size);
   color: var(--content-text-color);
+  overflow: hidden;
   border-radius: var(--border-macstyle-border-radius);
 }
 

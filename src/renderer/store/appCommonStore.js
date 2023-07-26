@@ -63,6 +63,10 @@ export const useAppCommonStore = defineStore('appCommon', {
         searchPlaceHolderIndex: 0,
         //路由上下文缓存
         routerCtxCacheItem: null,
+        //桌面歌词
+        desktopLyricShow: false,
+        desktopLyricLocked: false,
+        desktopLyricCtxData: null,
     }),
     getters: {
         isPlaylistMode() {
@@ -431,6 +435,13 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setRouterCtxCacheItem(value) {
             this.routerCtxCacheItem = value
+        },
+        toggleDesktopLyricShow(noSend) {
+            this.desktopLyricShow = !this.desktopLyricShow
+            if (ipcRenderer && !noSend) ipcRenderer.send('app-desktopLyric-toggle')
+        },
+        setDesktopLyricCtxData(value) {
+            this.desktopLyricCtxData = value
         }
     },
     persist: {

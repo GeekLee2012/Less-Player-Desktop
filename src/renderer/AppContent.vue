@@ -145,7 +145,7 @@ const setupTrafficLightWinCtlBtn = () => {
 //TODO
 const setVideoViewSize = () => {
   const { clientWidth, clientHeight } = document.documentElement
-  const els = document.querySelectorAll(".video-holder")
+  const els = document.querySelectorAll('.video-holder')
   if (!els) return
   els.forEach(el => {
     el.style.width = clientWidth + "px"
@@ -394,13 +394,22 @@ provide('appCommon', {
 </script>
 
 <template>
-  <Themes>
+  <div id="app-content">
     <keep-alive :max="2">
       <component :is="currentAppLayout" :class="{ 'winos-style': isWinOS() }">
       </component>
     </keep-alive>
     <slot></slot>
-  </Themes>
+  </div>
 </template>
 
-<style></style>
+<style>
+#app-content {
+  display: flex;
+  flex: 1;
+  background-image: var(--app-bg-image);
+  background-color: var(--app-bg-color);
+  background-position: center;
+  background-size: cover;
+}
+</style>

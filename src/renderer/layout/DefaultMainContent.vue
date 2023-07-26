@@ -1,9 +1,30 @@
 <script setup>
+import { storeToRefs } from 'pinia';
+import { inject, onActivated } from 'vue';
+import { usePlatformStore } from '../store/platformStore';
+
 const excludes = ['LocalMusicView', 'CustomPlaylistEditView',
     'UserInfoEditView', 'BatchActionView',
     'DataBackupView', 'DataRestoreView',
     'LocalPlaylistEditView', 'FreeFMEditView',
     'FreeVideoEditView']
+
+/*
+const { visitPlaylistSquare, visitLocalMusic } = inject('appRoute')
+
+const { activePlatforms } = storeToRefs(usePlatformStore())
+const { isLocalMusic } = usePlatformStore()
+
+const visitFirstActivePlatform = () => {
+const platform = activePlatforms.value('playlists')[0].code
+if (isLocalMusic(platform)) {
+    visitLocalMusic()
+} else {
+    visitPlaylistSquare(platform)
+}
+}
+
+onActivated(visitFirstActivePlatform)*/
 </script>
 
 <template>

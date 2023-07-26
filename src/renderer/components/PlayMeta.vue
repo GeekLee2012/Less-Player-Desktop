@@ -77,7 +77,9 @@ onMounted(() => {
             <div class="time-volume-wrap">
                 <AudioTime :current="mmssPreseekTime || mmssCurrentTime" :duration="Track.mmssDuration(currentTrack)">
                 </AudioTime>
-                <VolumeBar class="volume-bar" ref="volumeBarRef" v-show="!hideVolumeBar"></VolumeBar>
+                <div class="volume-bar">
+                    <VolumeBar ref="volumeBarRef" v-show="!hideVolumeBar"></VolumeBar>
+                </div>
             </div>
         </div>
     </div>
@@ -174,14 +176,16 @@ onMounted(() => {
 .play-meta .time-volume-wrap {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
     width: 211px;
     /* justify-content: center; */
 }
 
 .play-meta .audio-time,
 .play-meta .volume-bar {
-    line-height: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
 }
 
 .play-meta .audio-time {
@@ -194,12 +198,10 @@ onMounted(() => {
 
 .play-meta .volume-bar {
     margin-left: 10px;
-    margin-top: 3px;
 }
 
 .play-meta .volume-status {
     width: 18px;
-    margin-top: 6px;
 }
 
 .play-meta .st-slient,

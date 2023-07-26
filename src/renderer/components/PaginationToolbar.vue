@@ -89,17 +89,22 @@ const nextPage = (event) => {
     return goToPage(pagination.page + 1, event)
 }
 
+const refresh = (event) => {
+    return goToPage(pagination.page, event)
+}
+
 watch(() => props.maxPage, refreshPageList)
 
 defineExpose({
     prevPage,
     nextPage,
     goToPage,
+    refresh,
 })
 </script>
 
 <template>
-    <div class="pagination-toolbar">
+    <div class="pagination-toolbar" v-show="pageList.length > 1">
         <div class="action">
             <div class="prev-btn btn" @click="prevPage">
                 <svg width="18" height="18" viewBox="0 0 455.71 818.05" xmlns="http://www.w3.org/2000/svg">

@@ -20,12 +20,15 @@ export const PLAY_MODE = {
 }
 
 export const TRAY_ACTION = {
-    RESTORE: -1, //什么也不做，仅恢复上次显示
-    PAUSE: 0,
+    RESTORE: 0, //什么也不做，仅恢复上次显示
     PLAY: 1,
-    PLAY_PREV: 2,
-    PLAY_NEXT: 3,
-    HOME: 4,
+    PAUSE: 2,
+    PLAY_PREV: 3,
+    PLAY_NEXT: 4,
     USERHOME: 5,
     SETTING: 6,
+    DESKTOP_LYRIC_OPEN: 7,
+    DESKTOP_LYRIC_CLOSE: 8,
+    DESKTOP_LYRIC_LOCK: 9,
+    DESKTOP_LYRIC_UNLOCK: 10,
 }

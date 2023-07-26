@@ -3,6 +3,7 @@ import { PLAY_STATE } from '../common/Constants';
 import EventBus from '../common/EventBus';
 import { Track } from './Track';
 import { WebAudioApi } from './WebAudioApi';
+import { toRaw } from 'vue';
 
 
 
@@ -24,6 +25,8 @@ export class Player {
         this.animationFrameCnt = 0 //动画帧数计数器，控制事件触发频率，降低CPU占用
         this.stateRefreshFrequency = 60 //歌曲进度更新频度
         this.spectrumRefreshFrequency = 3 //歌曲频谱更新频度
+        this.desktopLyricMessagePort = null
+        this.desktopLyricMessagePortActiveState = null
     }
 
     static get() {
@@ -47,6 +50,10 @@ export class Player {
             .on('track-stateRefreshFrequency', value => player.stateRefreshFrequency = value)
             .on('track-spectrumRefreshFrequency', value => player.spectrumRefreshFrequency = value)
             .on('track-markSeekPending', value => player.seekPendingMark = value)
+            .on('desktopLyric-messagePort', value => player.setupDesktopLyricMessagePort(value))
+            .on('track-noLyric', value => player.postLyricStateToDesktopLyric(value, false))
+            .on('track-lyricLoaded', value => player.postLyricStateToDesktopLyric(value, true))
+            .on('desktopLyric-showState', value => player.setMessagePortActiveState(value))
     }
 
     _isTrackAvailable() {
@@ -140,6 +147,9 @@ export class Player {
         this.stop()
         this.currentTrack = track
         this.createSound()
+        if (!track) {
+            this.notifyStateChanged(PLAY_STATE.NONE)
+        }
     }
 
     playTrack(track) {
@@ -175,7 +185,9 @@ export class Player {
         }
         //当前时间
         this.currentTime = sound.seek() || 0
-        if (this.isStateRefreshEnabled()) this.notify('track-pos', this.currentTime)
+        if (this.isStateRefreshEnabled()) {
+            this.notify('track-pos', this.currentTime)
+        }
         //声音处理
         try {
             this._resolveSound()
@@ -201,6 +213,8 @@ export class Player {
     notifyStateChanged(state) {
         this.playState = state
         this.notify('track-state', this.playState)
+
+        this.postPlayStateToDesktopLryic()
     }
 
     _notifyError(isRetry) {
@@ -299,5 +313,68 @@ export class Player {
     _rewindAnimationFrame(callback, noReset) {
         this._stopAnimationFrame(noReset)
         this.animationFrameId = requestAnimationFrame(callback)
+    }
+
+    setupDesktopLyricMessagePort(messagePort) {
+        this.desktopLyricMessagePort = messagePort
+        this.onDesktopLyricMessage()
+    }
+
+    setMessagePortActiveState(state) {
+        this.desktopLyricMessagePortActiveState = state
+    }
+
+    postMessageToDesktopLryic(action, data) {
+        if (!this.desktopLyricMessagePortActiveState) return
+        const messagePort = this.desktopLyricMessagePort
+        if (messagePort) messagePort.postMessage({ action, data })
+    }
+
+    postPlayStateToDesktopLryic() {
+        if (!this.desktopLyricMessagePortActiveState) return
+        switch (this.playState) {
+            case PLAY_STATE.NONE:
+                this.postMessageToDesktopLryic('s-track-none')
+                break
+            case PLAY_STATE.INIT:
+                this.postMessageToDesktopLryic('s-track-init', {
+                    track: Player.getRawTrack(this.currentTrack)
+                })
+                break
+            case PLAY_STATE.PLAYING:
+                this.postMessageToDesktopLryic('s-track-play')
+                break
+            case PLAY_STATE.PAUSE:
+                this.postMessageToDesktopLryic('s-track-pause')
+                break
+        }
+    }
+
+    onDesktopLyricMessage() {
+        const self = this
+        this.desktopLyricMessagePort.onPlayerMessage = (action, data) => {
+            if (action == 'c-track-init') {
+                //self.setMessagePortActiveState(true)
+                self.postMessageToDesktopLryic('s-track-init', {
+                    track: Player.getRawTrack(self.currentTrack),
+                    playing: (self.playState == PLAY_STATE.PLAYING)
+                })
+            } else if (action == 'c-track-pos') {
+                const sound = self.getSound()
+                if (!sound) return
+                self.currentTime = sound.seek() || 0
+                self.postMessageToDesktopLryic('s-track-pos', self.currentTime)
+            }
+        }
+    }
+
+    postLyricStateToDesktopLyric(track, hasLyric) {
+        if (!this.desktopLyricMessagePortActiveState) return
+        const action = hasLyric ? 's-track-lyricLoaded' : 's-track-noLyric'
+        this.postMessageToDesktopLryic(action, Player.getRawTrack(track))
+    }
+
+    static getRawTrack(track) {
+        return toRaw(track)
     }
 }

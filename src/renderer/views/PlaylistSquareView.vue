@@ -105,7 +105,10 @@ const loadContent = async (noLoadingMask, offset, limit, page) => {
     }
 
     setAlbumType(dataType)
-    if (isAlbumType) playlists.push(...data)
+    if (isAlbumType) {
+        playlists.length = 0
+        playlists.push(...data)
+    }
 
     setLoadingContent(false)
     return { data, total, limit }
@@ -180,6 +183,7 @@ const resetCommom = () => {
 const refreshPendingMark = ref(0)
 const refreshData = async () => {
     resetCommom()
+    setLoadingContent(true)
     refreshPendingMark.value = Date.now()
     //loadContent()
 }
@@ -204,7 +208,8 @@ EventBus.on("playlistSquare-refresh", refreshData)
             :limit="pagination.limit" :loadPage="loadPageContent" :nextPagePendingMark="nextPagePendingMark"
             :refreshPendingMark="refreshPendingMark" v-show="!isAlbumType">
         </PlaylistsControl>
-        <AlbumListControl :data="playlists" :loading="isLoadingContent" v-show="isAlbumType"></AlbumListControl>
+        <AlbumListControl :data="playlists" :loading="isLoadingContent" v-show="isAlbumType">
+        </AlbumListControl>
         <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef">
         </PlaylistCategoryFlowBtn>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

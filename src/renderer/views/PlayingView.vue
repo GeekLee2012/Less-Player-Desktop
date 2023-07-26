@@ -22,10 +22,10 @@ const { seekTrack, playMv,
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
-const { playingViewShow } = storeToRefs(useAppCommonStore())
+const { playingViewShow, desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize,
     showToast, switchPlayingViewTheme,
-    toggleSoundEffectView } = useAppCommonStore()
+    toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
 const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos } = storeToRefs(useSettingStore())
@@ -153,6 +153,10 @@ onMounted(() => {
                             </g>
                         </svg>
                         -->
+                        </div>
+                        <div class="lyric-btn spacing" :class="{ 'content-text-highlight': desktopLyricShow }"
+                            @click="() => toggleDesktopLyricShow()">
+                            词
                         </div>
                         <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
                             <svg width="17" height="17" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
@@ -338,5 +342,16 @@ onMounted(() => {
 
 .playing-view .bottom .action .love-btn {
     fill: var(--content-highlight-color) !important;
+}
+
+.playing-view .bottom .action .lyric-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 3px;
+    font-size: 18px;
+    color: var(--button-icon-btn-color);
 }
 </style>

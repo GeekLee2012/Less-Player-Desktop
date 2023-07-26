@@ -449,7 +449,6 @@ const pickPlaylist = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
-        //if (isDevEnv()) console.log(`获取歌单失败：${platform} - ${cateName}, TraceId: ${traceId}`)
         showCurrentTracFailToast(traceId)
         return
     }
@@ -463,7 +462,6 @@ const pickPlaylist = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.square(cate, offset, limit, page, order)
-        //if (isDevEnv()) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -575,7 +573,6 @@ const pickAnchorRadio = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
-        //if (isDevEnv()) console.log(`获取主播电台失败：${platform} - ${cateName}`)
         showCurrentTracFailToast(traceId)
         return
     }
@@ -590,7 +587,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.radioSquare(cate, offset, limit, page, order)
-        //if (isDevEnv()) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -713,7 +710,7 @@ const pickFMRadio = async (platform, traceId) => {
         const page = Math.max(nextInt(total), 1)
         const offset = (page - 1) * limit
         result = await vendor.radioSquare(cate, offset, limit, page, order)
-        //if (isDevEnv()) console.log(`${platform} - ${cateName}: ${page}/${total} , ${offset}`)
+
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -1408,14 +1405,4 @@ watch([textColorIndex], setupTextColor)
 .simple-layout #sound-effect-view .center .bands {
     display: none;
 }
-
-/*
-.simple-layout #video-playing-view .win-ctl-wrap {
-    width: 105px !important;
-}
-
-.simple-layout #video-playing-view .win-traffic-light-btn .max-btn {
-    display: none;
-}
-*/
 </style>
