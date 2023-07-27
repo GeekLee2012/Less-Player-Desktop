@@ -8,7 +8,6 @@ import { useSettingStore } from './store/settingStore';
 import Mousetrap from 'mousetrap';
 
 
-
 const ipcRenderer = useIpcRenderer()
 
 const { desktopLyric } = storeToRefs(useSettingStore())
@@ -20,6 +19,8 @@ const sendToMain = (channel, data) => {
   if (ipcRenderer) ipcRenderer.send(channel, data)
 }
 
+
+//TODO 歌词处理逻辑, 几乎与LyricControl组件重复
 const currenTrack = ref(null)
 const currentIndex = ref(0)
 const lyricData = ref(null)
@@ -42,7 +43,7 @@ const isLyricReady = () => lyricExistState.value == 1
 
 const setLyricState = (track) => {
   setLyricExistState(-1)
-  setCurrentIndex(-1)
+  setCurrentIndex(0)
   setLyricData(Track.lyricData(track))
   setLyricTransData(Track.lyricTransData(track))
 
@@ -58,7 +59,7 @@ const setLyricState = (track) => {
           || lineText.includes('没有填词')
           || lineText.includes('没有歌词'))
         if (noLyric) {
-          existState = 0
+          state = 0
           break
         }
         line = linesIter.next()
@@ -254,7 +255,8 @@ const postMessageToMain = (action, data) => {
 
 const handleMessage = ({ action, data }) => {
   if (action == 's-desktopLyric-init') {
-    setupLyricSetting()
+    syncSettingFromMain(data)
+    setupLyricSetting(true)
     postMessageToMain('c-track-init')
   } else if (action === 's-track-none') {
     setCurrentTrack(null)
@@ -279,6 +281,8 @@ const handleMessage = ({ action, data }) => {
   } else if (action === 's-setting-sync') {
     syncSettingFromMain(data)
     setupLyricSetting()
+  } else if (action === 's-theme-apply') {
+    applyThemeFromMain(data)
   }
 }
 
@@ -313,7 +317,7 @@ const setupLyricSetting = (isInit) => {
     desktopLyricRef.value.style.setProperty(key, value)
   }
 
-  sendLyricLayoutStateToMain(isInit)
+  if (typeof (isInit) != 'undefined') sendLyricLayoutStateToMain(isInit)
 }
 
 
@@ -340,14 +344,24 @@ const toggleLock = () => {
   sendToMain('app-desktopLyricLockState', lockState.value)
 }
 
-const onMouseover = () => {
+const onMouseover = (event) => {
   if (!lockState.value) return
   lockVisible.value = true
 }
 
-const onMouseout = () => {
+const onMouseout = (event) => {
   if (!lockState.value) return
   lockVisible.value = false
+}
+
+const onLockBtnMouseOver = (event) => {
+  if (!lockState.value) return
+  //sendToMain('app-desktopLyric-ignoreMouseEvent', false)
+}
+
+const onLockBtnMouseOut = (event) => {
+  if (!lockState.value) return
+  //sendToMain('app-desktopLyric-ignoreMouseEvent', true)
 }
 
 //对齐方式
@@ -412,7 +426,7 @@ const switchLayoutMode = () => {
   }
 
   sendLyricLayoutStateToMain()
-  syncSettingToMain()
+  syncSettingToMain(false)
 }
 
 const toggleLyricTransActive = () => {
@@ -441,6 +455,24 @@ const syncSettingToMain = () => {
   postMessageToMain('c-setting-sync', toRaw(desktopLyric.value))
 }
 
+const applyThemeFromMain = (theme) => {
+  const themeProperties = {
+    '--app-bg-color': theme.appBackground.bgColor || "#FFFFFF",
+    '--content-text-color': theme.content.textColor,
+    '--content-text-highlight-color': theme.content.textHighlightColor,
+    '--content-highlight-color': theme.content.highlightColor,
+
+    '--button-icon-btn-color': theme.button.iconBtnColor,
+    '--button-icon-text-btn-bg-color': theme.button.iconTextBtnBgColor,
+    '--button-icon-text-btn-hover-bg-color': theme.button.iconTextBtnHoverBgColor,
+    '--button-icon-text-btn-icon-color': theme.button.iconTextBtnIconColor,
+  }
+
+  for (const [key, value] of Object.entries(themeProperties)) {
+    document.documentElement.style.setProperty(key, value)
+  }
+}
+
 watch(isUserMouseWheel, setupLyricScrollLocator)
 
 //注册默认应用级别快捷键
@@ -460,7 +492,7 @@ const registryDefaultLocalKeys = () => {
 
 onMounted(() => {
   setupMessagePort()
-  setupLyricSetting(true)
+  //setupLyricSetting(true)
   registryDefaultLocalKeys()
 })
 </script>
@@ -495,7 +527,8 @@ onMounted(() => {
             </g>
           </svg>
         </div>
-        <div class="lock-btn btn spacing" :class="{ active: lockState }" v-show="lockVisible" @click="toggleLock">
+        <div class="lock-btn btn spacing" :class="{ active: lockState }" v-show="lockVisible" @click="toggleLock"
+          @mouseover="onLockBtnMouseOver" @mouseout="onLockBtnMouseOut">
           <svg width="17" height="17" viewBox="0 0 768.04 938.72" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
@@ -689,21 +722,18 @@ onMounted(() => {
       </div>
     </div>
     <div class="center" :class="{
-      'lyric-showall': (!lockState && desktopLyric.layoutMode == 2),
+      'lyric-showall': (!lockState && desktopLyric.layoutMode == 2 && lyricExistState == 1),
       'lyric-layout-ends': (desktopLyric.layoutMode == 1 && desktopLyric.alignment == 3)
     }" @mousewheel="onUserMouseWheel">
-      <div class="no-lyric desktop-lyric-content-highlight" :class="{
+      <div class="desktop-lyric-content-highlight" :class="{
+        'no-lyric': lyricExistState == 0,
         'align-left': desktopLyric.alignment == 0,
-        'align-center': (desktopLyric.alignment != 0 && desktopLyric.alignment != 2),
+        'align-center': desktopLyric.alignment == 1,
         'align-right': desktopLyric.alignment == 2
       }" v-show="lyricExistState !== 1">
         {{ getDefaultLyricText() }}
       </div>
       <div class="content" v-show="lyricExistState == 1">
-        <div v-show="currentIndex == -1 && desktopLyric.layoutMode != 2"
-          class="waiting-line desktop-lyric-content-highlight">
-          {{ getDefaultLyricText() }}
-        </div>
         <div v-for="([key, value], index) in lyricData" v-show="showByLayoutMode(key, value, index)" class="line" :class="{
           'desktop-lyric-content-highlight': (currentIndex == index),
           first: index == 0,
@@ -753,7 +783,7 @@ onMounted(() => {
   color: var(--content-desktop-lyric-color);
   background: transparent !important;
   -webkit-app-region: none;
-  /* pointer-events: none; */
+  /*pointer-events: none;*/
 }
 
 .desktop-lyric-content-highlight {
@@ -770,13 +800,6 @@ onMounted(() => {
 .desktop-lyric .content::-webkit-scrollbar {
   display: none;
 }
-
-/*
-.desktop-lyric-lock .lock-btn,
-.desktop-lyric-lock .line {
-  pointer-events: auto;
-}
-*/
 
 .desktop-lyric .spacing {
   margin-left: 20px;
@@ -813,7 +836,6 @@ onMounted(() => {
 }
 
 .desktop-lyric .center .no-lyric,
-.desktop-lyric .center .waiting-line,
 .desktop-lyric .center .line {
   margin-bottom: var(--content-desktop-lyric-line-spacing);
   padding: 0px 33px;

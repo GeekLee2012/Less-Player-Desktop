@@ -5,6 +5,7 @@ import PaginationTiles from './PaginationTiles.vue';
 
 
 const props = defineProps({
+    id: String, //唯一性标识，同时用作刷新全部数据的依据
     data: Array,
     artistVisitable: Boolean,
     albumVisitable: Boolean,
@@ -30,7 +31,8 @@ const maxPage = computed(() => {
 })
 
 const currentOffset = ref(0)
-const refreshPendingMark = ref(0)
+const refreshAllPendingMark = ref(0)
+const refreshPagePendingMark = ref(0)
 const loadPageContent = ({ offset, limit, page }) => {
     currentOffset.value = offset
     const { data, paginationStyleType } = props
@@ -41,10 +43,18 @@ const loadPageContent = ({ offset, limit, page }) => {
     return { data: pageData }
 }
 
-//TODO Bug: 播放歌曲时也被触发....
-watch(() => props.data, (nv, ov) => {
-    refreshPendingMark.value = Date.now()
-}, { immediate: true, deep: true })
+//TODO 逻辑上有Bug, 暂时先这样
+watch(() => props.data.length, (nv, ov) => {
+    if (ov && nv) {
+        refreshPagePendingMark.value = Date.now()
+    } else {
+        refreshAllPendingMark.value = Date.now()
+    }
+})
+
+watch(() => props.id, (nv, ov) => {
+    refreshAllPendingMark.value = Date.now()
+}, { immediate: true })
 </script>
 
 <!--
@@ -65,9 +75,9 @@ watch(() => props.data, (nv, ov) => {
 -->
 <template>
     <div class="songlist-ctl">
-        <PaginationTiles :paginationStyleType="paginationStyleType" :limit="limit" :maxPage="maxPage"
+        <PaginationTiles :paginationStyleType="paginationStyleType" :direction="1" :limit="limit" :maxPage="maxPage"
             :loadPage="loadPageContent" :onPageLoaded="onPageLoaded" :loading="loading"
-            :refreshPendingMark="refreshPendingMark">
+            :refreshAllPendingMark="refreshAllPendingMark" :refreshPagePendingMark="refreshPagePendingMark">
             <template v-slot="{ item, index }">
                 <SongItem :index="(currentOffset + index)" :data="item" :artistVisitable="artistVisitable"
                     :albumVisitable="albumVisitable" :dataType="dataType" :deleteFn="deleteFn" :checkbox="checkbox"
@@ -88,9 +98,5 @@ watch(() => props.data, (nv, ov) => {
 .songlist-ctl {
     display: flex;
     flex-direction: column;
-}
-
-.songlist-ctl .pag-tile {
-    width: 100%;
 }
 </style>

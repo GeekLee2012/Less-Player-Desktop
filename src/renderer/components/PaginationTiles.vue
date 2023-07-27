@@ -7,14 +7,16 @@ import PaginationToolbar from './PaginationToolbar.vue';
 //TODO 设计复杂，逻辑较乱
 const props = defineProps({
     data: Array,
-    paginationStyleType: Number,
+    paginationStyleType: Number, // 0 => 普通， 1 => 瀑布流，下拉翻页
+    direction: Number, //0 => row, 1 => column
     limit: Number,
     maxPage: Number,
     loadPage: Function,
     onPageLoaded: Function,
     loading: Boolean,
-    nextPagePendingMark: Number,
-    refreshPendingMark: Number,
+    nextPagePendingMark: Number,    //下一页
+    refreshAllPendingMark: Number,  //刷新全部
+    refreshPagePendingMark: Number, //刷新当前页
 })
 
 //数据优先级： props.data > dataFromLoad
@@ -54,10 +56,16 @@ const nextPage = (event) => {
     paginationToolbarRef.value.nextPage(event)
 }
 
-const refresh = () => {
+const refreshAll = () => {
     dataFromLoad.length = 0
     if (props.data || !paginationToolbarRef.value) return
     paginationToolbarRef.value.goToPage(1)
+}
+
+const refreshPage = () => {
+    dataFromLoad.length = 0
+    if (props.data || !paginationToolbarRef.value) return
+    paginationToolbarRef.value.refreshPage()
 }
 
 /*
@@ -82,20 +90,22 @@ const isLastPageContent = computed(() => {
 })
 
 watch(() => props.nextPagePendingMark, nextPage, { immediate: true })
-watch(() => props.refreshPendingMark, refresh, { immediate: true })
+watch(() => props.refreshPagePendingMark, refreshPage, { immediate: true })
+watch(() => props.refreshAllPendingMark, refreshAll, { immediate: true })
 watch(() => props.data, (nv, ov) => {
     dataFromLoad.length = 0
     if (nv && nv.length > 0) dataFromLoad.push(...nv)
 }, { immediate: true, deep: true })
 watch(() => props.maxPage, (nv, ov) => { maxPage.value = nv }, { immediate: true })
-watch(() => props.paginationStyleType, refresh, { immediate: true })
+watch(() => props.paginationStyleType, refreshAll, { immediate: true })
 
-onMounted(refresh)
+onMounted(refreshAll)
 </script>
 
 <template>
     <div class="pagination-tiles">
-        <div class="pag-content" :class="{ 'last-pag-content': isLastPageContent }" v-show="!loading">
+        <div class="pag-content" :class="{ 'last-pag-content': isLastPageContent, 'flex-column': (direction == 1) }"
+            v-show="!loading">
             <div class="pag-tile" v-for="(item, index) in (data || dataFromLoad)">
                 <slot :item="item" :index="index"></slot>
             </div>
@@ -128,6 +138,14 @@ onMounted(refresh)
     flex-wrap: wrap;
     flex-direction: row;
     flex: 1;
+}
+
+.pagination-tiles .flex-column {
+    flex-direction: column;
+}
+
+.pagination-tiles .flex-column .pag-tile {
+    width: 100%;
 }
 
 .pagination-tiles .last-pag-content {

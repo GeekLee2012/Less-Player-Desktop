@@ -50,8 +50,8 @@ const toastAndHideMenu = (text) => {
 }
 
 const playItem = () => {
-    hideAllCtxMenus()
     playTrack(commonCtxMenuCacheItem.value)
+    hideAllCtxMenus()
 }
 
 const addItemToQueue = () => {

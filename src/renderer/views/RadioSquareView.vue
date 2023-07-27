@@ -174,10 +174,10 @@ const resetCommom = () => {
     resetBack2TopBtn()
 }
 
-const refreshPendingMark = ref(0)
+const refreshAllPendingMark = ref(0)
 const refreshData = () => {
     resetCommom()
-    refreshPendingMark.value = Date.now()
+    refreshAllPendingMark.value = Date.now()
     //loadContent()
 }
 
@@ -195,7 +195,7 @@ EventBus.on("radioSquare-refresh", refreshData)
         <RadioCategoryBar :data="categories" :loading="isLoadingCategories"></RadioCategoryBar>
         <PlaylistsControl :loading="isLoadingContent" :loadPage="loadPageContent" :limit="35"
             :paginationStyleType="getPaginationStyleIndex" :nextPagePendingMark="nextPagePendingMark"
-            :refreshPendingMark="refreshPendingMark">
+            :refreshAllPendingMark="refreshAllPendingMark">
         </PlaylistsControl>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>

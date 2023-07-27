@@ -24,7 +24,7 @@ const props = defineProps({
     limit: Number,
     loadPage: Function,
     nextPagePendingMark: Number,
-    refreshPendingMark: Number,
+    refreshAllPendingMark: Number,
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
@@ -73,7 +73,7 @@ const computedMaxPage = computed(() => {
 <template>
     <div class="playlists-ctl">
         <PaginationTiles :data="data" :paginationStyleType="paginationStyleType" :limit="limit" :maxPage="computedMaxPage"
-            :loadPage="loadPage" :nextPagePendingMark="nextPagePendingMark" :refreshPendingMark="refreshPendingMark"
+            :loadPage="loadPage" :nextPagePendingMark="nextPagePendingMark" :refreshAllPendingMark="refreshAllPendingMark"
             :loading="loading">
             <template v-slot="{ item, index }">
                 <ImageTextTile @click="visitItem(item)" :cover="item.cover" :title="item.title"

@@ -904,8 +904,8 @@ export const useSettingStore = defineStore('setting', {
             this.toggleModulesPlatformOff(this.modules.off.search, platform)
         },
         setDesktopLyricFontSize(value) {
-            const fontSize = parseInt(value || 15)
-            if (fontSize < 15 || fontSize > 60) return
+            const fontSize = parseInt(value || 20)
+            if (fontSize < 10 || fontSize > 100) return
             this.desktopLyric.fontSize = fontSize
             this.syncSettingToDesktopLyric()
         },
@@ -919,7 +919,7 @@ export const useSettingStore = defineStore('setting', {
         },
         setDesktopLyricLineSpacing(value) {
             value = parseInt(value)
-            if (value < 0 || value > 100) return
+            if (value < 0 || value > 404) return
             this.desktopLyric.lineSpacing = value
             this.syncSettingToDesktopLyric()
         },

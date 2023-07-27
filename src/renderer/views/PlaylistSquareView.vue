@@ -180,11 +180,11 @@ const resetCommom = () => {
     resetFlowBtns()
 }
 
-const refreshPendingMark = ref(0)
+const refreshAllPendingMark = ref(0)
 const refreshData = async () => {
     resetCommom()
     setLoadingContent(true)
-    refreshPendingMark.value = Date.now()
+    refreshAllPendingMark.value = Date.now()
     //loadContent()
 }
 
@@ -206,7 +206,7 @@ EventBus.on("playlistSquare-refresh", refreshData)
         </PlaylistCategoryBar>
         <PlaylistsControl :loading="isLoadingContent" :paginationStyleType="getPaginationStyleIndex"
             :limit="pagination.limit" :loadPage="loadPageContent" :nextPagePendingMark="nextPagePendingMark"
-            :refreshPendingMark="refreshPendingMark" v-show="!isAlbumType">
+            :refreshAllPendingMark="refreshAllPendingMark" v-show="!isAlbumType">
         </PlaylistsControl>
         <AlbumListControl :data="playlists" :loading="isLoadingContent" v-show="isAlbumType">
         </AlbumListControl>

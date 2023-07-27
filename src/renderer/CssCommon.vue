@@ -54,7 +54,7 @@
 
   --content-desktop-lyric-text-size: 20px;
   --content-desktop-lyric-color: #393939;
-  --content-desktop-lyric-highlight-color: linear-gradient(to top right, #1ca388, #28c83f);
+  --content-desktop-lyric-highlight-color: var(--content-text-highlight-color);
   --content-desktop-lyric-line-spacing: 22px;
 
   font-family: var(--content-text-font-family);
@@ -63,8 +63,8 @@
 
 .content-text-highlight {
   background: var(--content-text-highlight-color);
-  -webkit-background-clip: text;
   background-clip: text;
+  -webkit-background-clip: text;
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
 }

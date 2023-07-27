@@ -41,12 +41,12 @@ const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
-    theme, layout, isStoreRecentPlay,
+    theme, layout, desktopLyric, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
     isResumePlayAfterVideoEnable } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray,
-    syncSettingFromDesktopLyric } = useSettingStore()
+    syncSettingFromDesktopLyric, getCurrentTheme } = useSettingStore()
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
 
@@ -58,6 +58,7 @@ const playState = ref(PLAY_STATE.NONE)
 const setPlayState = (value) => playState.value = value
 const pendingPlay = ref(false)
 const setPendingPlay = (value) => pendingPlay.value = value
+let desktopLyricShowState = false
 
 /* 记录最近播放 */
 //歌曲、电台
@@ -787,8 +788,11 @@ const registryIpcRendererListeners = () => {
     })
     //其他事件
     ipcRenderer.on('app-desktopLyricShowSate', (event, isShow) => {
-        EventBus.emit('desktopLyric-showState', isShow)
-        if (isShow) postMessageToDesktopLryic('s-desktopLyric-init')
+        desktopLyricShowState = isShow
+        EventBus.emit('desktopLyric-showState', desktopLyricShowState)
+        if (desktopLyricShowState) {
+            postMessageToDesktopLryic('s-desktopLyric-init', toRaw(desktopLyric.value))
+        }
     })
 }
 registryIpcRendererListeners()
@@ -814,6 +818,7 @@ const setupMessagePort = () => {
 }
 
 const postMessageToDesktopLryic = (action, data) => {
+    if (!desktopLyricShowState) return
     if (messagePort) messagePort.postMessage({ action, data })
 }
 
@@ -863,17 +868,19 @@ watch(playing, (nv, ov) => {
     if (ipcRenderer) ipcRenderer.send('app-playState', nv)
 })
 
+/*
 watch(desktopLyricShow, (nv, ov) => {
     if (ipcRenderer) ipcRenderer.send('app-desktopLyricOpenState', nv)
 })
+*/
 
 //TODO
 watch(theme, () => {
-    if (isPlaying() || (playingViewThemeIndex.value != 1
-        && layout.value.index != 2)) {
-        return
+    if (!isPlaying() && (playingViewThemeIndex.value == 1
+        || layout.value.index == 2)) {
+        drawCanvasSpectrum()
     }
-    drawCanvasSpectrum()
+    postMessageToDesktopLryic('s-theme-apply', toRaw(getCurrentTheme()))
 }, { deep: true })
 
 watch(videoPlayingViewShow, (nv, ov) => {

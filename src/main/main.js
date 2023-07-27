@@ -535,25 +535,28 @@ const registryGlobalListeners = () => {
     setupTrayMenu()
   }).on('app-desktopLyricLockState', (event, ...args) => {
     desktopLyricLockState = args[0]
+    //lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
     lyricWin.setResizable(!desktopLyricLockState)
     lyricWin.setMinimumSize(lyricWinMinWidth, lyricWinMinHeight)
-    if (desktopLyricLockState) lyricWin.blur()
+    if (desktopLyricLockState) {
+      lyricWin.blur()
+    }
     setupTrayMenu()
   }).on('app-showMainWindow', (event, ...args) => {
     showMainWindow()
   }).on('app-desktopLyricLayoutState', (event, ...args) => {
     const { layoutMode, isInit } = args[0]
     const { x, y, width, height } = lyricWin.getBounds()
-    let limit = parseInt(lyricWinMinHeight * 1.25)
+    let limit = lyricWinMinHeight
     switch (layoutMode) {
       case 0:
         if (height > limit) {
-          lyricWin.setSize(width, lyricWinMinHeight)
+          lyricWin.setSize(width, limit)
         }
         break
       case 1:
-        limit = parseInt(lyricWinMinHeight * 1.5)
-        if (height > limit || height < (lyricWinMinHeight + 20)) {
+        limit = parseInt(lyricWinMinHeight * 1.25)
+        if (height != limit) {
           lyricWin.setSize(width, limit)
         }
         break
@@ -567,6 +570,8 @@ const registryGlobalListeners = () => {
     if (isInit) lyricWin.center()
   }).on('app-desktopLyricAlwaysOnTopState', (event, ...args) => {
     lyricWin.setAlwaysOnTop(!lyricWin.isAlwaysOnTop())
+  }).on('app-desktopLyric-ignoreMouseEvent', (event, ...args) => {
+    lyricWin.setIgnoreMouseEvents(args[0])
   })
 }
 
@@ -592,6 +597,7 @@ const toggleLyricWindow = () => {
     lyricWin.showInactive()
     showState = true
   }
+  lyricWin.setIgnoreMouseEvents(false)
   sendToMainRenderer('app-desktopLyricShowSate', showState)
   setupTrayMenu()
 }
@@ -622,7 +628,7 @@ const createMainWindow = () => {
     minWidth: width,
     minHeight: height,
     titleBarStyle: 'hidden',
-    title: 'Less Player, Less is More !',
+    title: 'Less Player - Less is More !',
     //trafficLightPosition: { x: 20, y: 18 },
     trafficLightPosition: { x: -404, y: -404 }, // 404 => 神秘数字 
     transparent: true,
@@ -1129,7 +1135,7 @@ const createLyricWindow = () => {
     minWidth: lyricWinMinWidth,
     minHeight: lyricWinMinHeight,
     titleBarStyle: 'hidden',
-    title: '桌面歌词',
+    title: 'Less Player - 桌面歌词',
     trafficLightPosition: { x: -404, y: -404 },
     transparent: true,
     frame: false,

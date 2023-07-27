@@ -89,7 +89,7 @@ const nextPage = (event) => {
     return goToPage(pagination.page + 1, event)
 }
 
-const refresh = (event) => {
+const refreshPage = (event) => {
     return goToPage(pagination.page, event)
 }
 
@@ -99,7 +99,7 @@ defineExpose({
     prevPage,
     nextPage,
     goToPage,
-    refresh,
+    refreshPage,
 })
 </script>
 

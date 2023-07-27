@@ -23,7 +23,7 @@ const props = defineProps({
     checkbox: Boolean,
     checked: Boolean,
     ignoreCheckAllEvent: Boolean,
-    checkChangedFn: Function
+    checkChangedFn: Function,
 })
 
 const { playMv } = inject('player')
@@ -57,8 +57,9 @@ const addItem = () => {
 }
 
 const deleteItem = () => {
-    if (props.deleteFn) {
-        props.deleteFn(props.index)
+    const { deleteFn, index, data } = props
+    if (deleteFn) {
+        deleteFn(index)
         showToast("歌曲已删除！")
     }
 }

@@ -628,10 +628,13 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
             <div class="desktopLyric row">
                 <span class="cate-name">桌面歌词</span>
                 <div class="content">
-                    <div class="tip-text">提示：实验性功能，测试阶段</div>
+                    <div class="tip-text">提示：实验性功能，测试阶段
+                        <br>桌面歌词，在未锁定状态下，背景颜色默认为当前主题的背景颜色
+                        <br>当文字（高亮）颜色和桌面歌词背景颜色一样时，只有在锁定状态下，才能看到文字效果
+                    </div>
                     <div>
                         <span class="sec-title">字体大小：</span>
-                        <input type="number" :value="desktopLyric.fontSize" placeholder="15-60，默认30" min="15" max="60"
+                        <input type="number" :value="desktopLyric.fontSize" placeholder="10-100，默认20" min="10" max="100"
                             step="0.1" @keydown.enter="updateDesktopLyricFontSize" @focusout="updateDesktopLyricFontSize" />
                     </div>
                     <div>
@@ -646,7 +649,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     </div>
                     <div>
                         <span class="sec-title">行间距：</span>
-                        <input type="number" :value="desktopLyric.lineSpacing" placeholder="0-100，默认20" min="0" max="100"
+                        <input type="number" :value="desktopLyric.lineSpacing" placeholder="0-404，默认20" min="0" max="404"
                             step="1" @keydown.enter="updateDesktopLyricLineSpacing"
                             @focusout="updateDesktopLyricLineSpacing" />
                     </div>
