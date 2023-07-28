@@ -36,7 +36,7 @@ const { getLocalPlaylist, addToLocalPlaylist,
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { isUseDndForAddLocalTracksEnable, isUseDeeplyScanForDirectoryEnable,
     isSearchForLocalPlaylistShow, isShowDialogBeforeBatchDelete,
-    getPaginationStyleIndex } = storeToRefs(useSettingStore())
+    getPaginationStyleIndex, getLimitPerPageForLocalPlaylist } = storeToRefs(useSettingStore())
 
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -347,7 +347,7 @@ onDeactivated(() => {
                 </div>
             </div>
             <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="1" :id="id"
-                :loading="isLoading" :paginationStyleType="getPaginationStyleIndex" :pageLimit="30"
+                :loading="isLoading" :paginationStyleType="getPaginationStyleIndex" :limit="getLimitPerPageForLocalPlaylist"
                 :onPageLoaded="resetScrollState">
             </SongListControl>
         </div>

@@ -126,8 +126,10 @@ export const useSettingStore = defineStore('setting', {
             useDndForCreateLocalPlaylist: true,
             //启用Dnd操作，为本地歌单添加歌曲
             useDndForAddLocalTracks: true,
+            //普通分页，本地歌曲每页记录数
+            limitPerPageForLocalPlaylist: 30,
             //高亮当前右键菜单对应的歌曲
-            highlightCtxMenuItem: true
+            highlightCtxMenuItem: true,
         },
         search: {
             autoPlaceholder: true,
@@ -362,6 +364,9 @@ export const useSettingStore = defineStore('setting', {
         isUseDndForAddLocalTracksEnable() {
             return this.track.useDndForAddLocalTracks
         },
+        getLimitPerPageForLocalPlaylist() {
+            return this.track.limitPerPageForLocalPlaylist
+        },
         isAudioTypeFlagShowEnable() {
             return this.track.audioTypeFlagShow
         },
@@ -590,6 +595,11 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleUseDndForAddLocalTracks() {
             this.track.useDndForAddLocalTracks = !this.track.useDndForAddLocalTracks
+        },
+        setLimitPerPageForLocalPlaylist(value) {
+            value = parseInt(value || 30)
+            if (value < 10 || value > 200) return
+            this.track.limitPerPageForLocalPlaylist = value
         },
         toggleSearchBarAutoPlaceholder() {
             this.search.autoPlaceholder = !this.search.autoPlaceholder

@@ -25,6 +25,8 @@ const Url = require('url')
 const fetch = require('electron-fetch').default
 
 
+let messagePortPair = null
+
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
   'default': {
@@ -45,8 +47,6 @@ const proxyAuthRealms = []
 //TODO 下载队列
 let downloadingItem = null
 
-
-const { port1, port2 } = new MessageChannelMain()
 
 /* 自定义函数 */
 const startup = () => {
@@ -533,18 +533,16 @@ const registryGlobalListeners = () => {
   }).on('app-playState', (event, ...args) => {
     playState = args[0]
     setupTrayMenu()
-  }).on('app-desktopLyricLockState', (event, ...args) => {
+  }).on('app-desktopLyric-lock', (event, ...args) => {
     desktopLyricLockState = args[0]
-    //lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
+    lyricWin.setHasShadow(!desktopLyricLockState)
     lyricWin.setResizable(!desktopLyricLockState)
     lyricWin.setMinimumSize(lyricWinMinWidth, lyricWinMinHeight)
-    if (desktopLyricLockState) {
-      lyricWin.blur()
-    }
+    if (desktopLyricLockState) lyricWin.blur()
     setupTrayMenu()
-  }).on('app-showMainWindow', (event, ...args) => {
+  }).on('app-mainWin-show', (event, ...args) => {
     showMainWindow()
-  }).on('app-desktopLyricLayoutState', (event, ...args) => {
+  }).on('app-desktopLyric-layoutMode', (event, ...args) => {
     const { layoutMode, isInit } = args[0]
     const { x, y, width, height } = lyricWin.getBounds()
     let limit = lyricWinMinHeight
@@ -568,8 +566,9 @@ const registryGlobalListeners = () => {
         break
     }
     if (isInit) lyricWin.center()
-  }).on('app-desktopLyricAlwaysOnTopState', (event, ...args) => {
-    lyricWin.setAlwaysOnTop(!lyricWin.isAlwaysOnTop())
+  }).on('app-desktopLyric-alwaysOnTop', (event, ...args) => {
+    //lyricWin.setAlwaysOnTop(!lyricWin.isAlwaysOnTop())
+    lyricWin.setAlwaysOnTop(args[0] || false)
   }).on('app-desktopLyric-ignoreMouseEvent', (event, ...args) => {
     lyricWin.setIgnoreMouseEvents(args[0])
   })
@@ -582,23 +581,25 @@ const toggleLyricWindow = () => {
     lyricWin.setAlwaysOnTop(true)
     showState = true
   } else if (lyricWin.isVisible()) {
-    lyricWin.hide()
-    // 关闭后需要重新配对MessagePort
-    // 暂时不关闭，空间换时间
-    //lyricWin.close()
-    //lyricWin = null
+    //lyricWin.hide()
+    //关闭后需要重新配对MessagePort
+    lyricWin.close()
+    lyricWin = null
+    closeMessagePortPair()
 
     if (!appTrayShow) {
       setupTray()
       const mainShow = isMainWindowShow()
       if (!mainShow) showMainWindow()
     }
-  } else {
+  }
+  /*
+  else { //当采取lyricWin.hide()方式时
     lyricWin.showInactive()
     showState = true
   }
-  lyricWin.setIgnoreMouseEvents(false)
-  sendToMainRenderer('app-desktopLyricShowSate', showState)
+  */
+  sendToMainRenderer('app-desktopLyric-showSate', showState)
   setupTrayMenu()
 }
 
@@ -610,12 +611,34 @@ const onReadyToShowTasks = async () => {
   //其他任务
 }
 
-const tryPostMessageFromPort = (win, msg, port) => {
+const tryPostMessage = (win, msg, transfers) => {
   try {
-    win.webContents.postMessage('port', msg, [port])
+    win.webContents.postMessage('port', msg, transfers)
   } catch (error) {
     if (isDevEnv) console.log(error)
   }
+}
+
+const tryCloseMessagePort = (port) => {
+  try {
+    if (port) port.close()
+  } catch (error) {
+    if (isDevEnv) console.log(error)
+  }
+}
+
+const setupMessagePortPair = (win1, win2) => {
+  const { port1, port2 } = new MessageChannelMain()
+
+  tryPostMessage(win1, null, [port1])
+  tryPostMessage(win2, null, [port2])
+  return { port1, port2 }
+}
+
+const closeMessagePortPair = () => {
+  if (!messagePortPair) return
+  tryCloseMessagePort(messagePortPair.port1)
+  tryCloseMessagePort(messagePortPair.port2)
 }
 
 //创建浏览窗口
@@ -655,7 +678,6 @@ const createMainWindow = () => {
     setWindowButtonVisibility(mainWindow, !useCustomTrafficLight)
     mainWindow.show()
 
-    tryPostMessageFromPort(mainWindow, null, port1)
     onReadyToShowTasks()
   })
 
@@ -677,7 +699,7 @@ const createMainWindow = () => {
       "*://*.cnr.cn/*",
       "*://*.qingting.fm/*",
       "*://*.qtfm.cn/*",
-      "*://*/*"
+      "*://*/* "
     ]
   }
   const { webRequest } = mainWindow.webContents.session
@@ -1163,9 +1185,9 @@ const createLyricWindow = () => {
 
   win.once('ready-to-show', () => {
     setWindowButtonVisibility(win, false)
-    win.show()
+    win.showInactive()
 
-    tryPostMessageFromPort(win, null, port2)
+    messagePortPair = setupMessagePortPair(mainWin, win)
   })
 
   return win

@@ -161,10 +161,12 @@ textarea {
 
 ::-webkit-scrollbar {
   width: var(--others-scrollbar-width);
+  -webkit-app-region: no-drag;
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
+  -webkit-app-region: no-drag;
 }
 
 

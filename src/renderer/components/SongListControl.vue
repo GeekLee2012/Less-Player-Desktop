@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, toRef, watch } from 'vue';
 import PaginationTiles from './PaginationTiles.vue';
 
 
@@ -20,14 +20,18 @@ const props = defineProps({
     useExtra2: Boolean,
     paginationStyleType: Number,
     onPageLoaded: Function,
-    pageLimit: Number,
+    limit: Number,
 })
 
-const limit = ref(props.pageLimit || 2333)
-const maxPage = computed(() => {
-    const { data } = props
-    if (!data || data.length < 0) return 0
-    return Math.ceil(data.length / limit.value)
+const limit = toRef(props, 'limit')
+const data = toRef(props, 'data')
+const paginationStyleType = toRef(props, 'paginationStyleType')
+
+const getLimit = computed(() => (limit.value || 2333))
+
+const getMaxPage = computed(() => {
+    if (!data.value || data.value.length < 0) return 0
+    return Math.ceil(data.value.length / limit.value)
 })
 
 const currentOffset = ref(0)
@@ -35,16 +39,15 @@ const refreshAllPendingMark = ref(0)
 const refreshPagePendingMark = ref(0)
 const loadPageContent = ({ offset, limit, page }) => {
     currentOffset.value = offset
-    const { data, paginationStyleType } = props
-    if (!data || data.length < 0) return
-    if (paginationStyleType !== 0) return { data }
+    if (!data.value || data.value.length < 0) return
+    if (paginationStyleType.value !== 0) return { data: data.value }
 
-    const pageData = data.slice(offset, offset + limit)
+    const pageData = data.value.slice(offset, offset + limit)
     return { data: pageData }
 }
 
 //TODO 逻辑上有Bug, 暂时先这样
-watch(() => props.data.length, (nv, ov) => {
+watch(() => data.value.length, (nv, ov) => {
     if (ov && nv) {
         refreshPagePendingMark.value = Date.now()
     } else {
@@ -75,7 +78,7 @@ watch(() => props.id, (nv, ov) => {
 -->
 <template>
     <div class="songlist-ctl">
-        <PaginationTiles :paginationStyleType="paginationStyleType" :direction="1" :limit="limit" :maxPage="maxPage"
+        <PaginationTiles :paginationStyleType="paginationStyleType" :direction="1" :limit="getLimit" :maxPage="getMaxPage"
             :loadPage="loadPageContent" :onPageLoaded="onPageLoaded" :loading="loading"
             :refreshAllPendingMark="refreshAllPendingMark" :refreshPagePendingMark="refreshPagePendingMark">
             <template v-slot="{ item, index }">

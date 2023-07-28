@@ -65,8 +65,7 @@ const getListenNumText = (item) => {
 
 const computedMaxPage = computed(() => {
     const { data, limit } = props
-    if (!data || !limit) return 0
-    return Math.ceil(data.length / limit)
+    return (!data || !limit) ? 0 : Math.ceil(data.length / limit)
 })
 </script>
 

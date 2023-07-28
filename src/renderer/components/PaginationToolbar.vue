@@ -1,5 +1,6 @@
 <script setup>
-import { onMounted, reactive, watch } from 'vue';
+import { onMounted, reactive, ref, toRef, toRefs, watch } from 'vue';
+
 
 //TODO 分页工具栏
 const props = defineProps({
@@ -8,16 +9,17 @@ const props = defineProps({
     onPageChanged: Function
 })
 
+const { limit, maxPage } = toRefs(props)
+
 const defaultMaxPage = 1024
 const ellipsisPage = - defaultMaxPage
 
 const pagination = reactive({ offset: 0, page: 1 })
 const getMaxPage = () => {
-    const { maxPage } = props
-    const hasMaxPage = maxPage > 0
+    const hasMax = maxPage.value > 0
     return {
-        hasMaxPage,
-        maxPage: (hasMaxPage ? maxPage : defaultMaxPage)
+        hasMax,
+        max: (hasMax ? maxPage.value : defaultMaxPage)
     }
 }
 
@@ -28,24 +30,24 @@ const getOffset = (page, limit) => {
 const pageList = reactive([1, 2, 3, 4, 5, 6, 7, 8, 9])
 const refreshPageList = () => {
     const { page } = pagination
-    const { maxPage, hasMaxPage } = getMaxPage()
+    const { max, hasMax } = getMaxPage()
 
     let list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    if (maxPage < 9) {
-        list.splice(maxPage, 9 - maxPage)
-    } else if (hasMaxPage) {
+    if (max < 9) {
+        list.splice(max, 9 - max)
+    } else if (hasMax) {
         if (page <= 6) {
-            list = [1, 2, 3, 4, 5, 6, 7, ellipsisPage, maxPage]
-        } else if (page < (maxPage - 4)) {
-            list = [1, ellipsisPage, page - 2, page - 1, page, page + 1, page + 2, ellipsisPage, maxPage]
+            list = [1, 2, 3, 4, 5, 6, 7, ellipsisPage, max]
+        } else if (page < (max - 4)) {
+            list = [1, ellipsisPage, page - 2, page - 1, page, page + 1, page + 2, ellipsisPage, max]
         } else {
-            list = [1, ellipsisPage, maxPage - 6, maxPage - 5, maxPage - 4, maxPage - 3, maxPage - 2, maxPage - 1, maxPage]
+            list = [1, ellipsisPage, max - 6, max - 5, max - 4, max - 3, max - 2, max - 1, max]
         }
     } else if (page > 6) {
-        if (page < (maxPage - 3)) {
+        if (page < (max - 3)) {
             list = [1, ellipsisPage, page - 3, page - 2, page - 1, page, page + 1, page + 2, page + 3]
         } else {
-            list = [1, ellipsisPage, maxPage - 6, maxPage - 5, maxPage - 4, maxPage - 3, maxPage - 2, maxPage - 1, maxPage]
+            list = [1, ellipsisPage, max - 6, max - 5, max - 4, max - 3, max - 2, max - 1, max]
         }
     }
 
@@ -58,24 +60,24 @@ const resolvePresetPage = (page, index) => {
     if (page === ellipsisPage && index === 1) { //左边
         return Math.ceil((pagination.page - 3) / 2 + 1)
     } else if (page === ellipsisPage) { //右边
-        const { maxPage } = getMaxPage()
-        return Math.ceil((maxPage - pagination.page) / 2 + pagination.page)
+        const { max } = getMaxPage()
+        return Math.ceil((max - pagination.page) / 2 + pagination.page)
     }
     return page
 }
 
 const goToPage = (page, event) => {
-    const { onPageChanged, limit } = props
-    const { maxPage } = getMaxPage()
+    const { onPageChanged } = props
+    const { max } = getMaxPage()
 
     page = Math.max(page, 1)
-    page = Math.min(page, maxPage)
+    page = Math.min(page, max)
 
     if (page === pagination.page && event) return false
 
-    const offset = getOffset(page, limit)
+    const offset = getOffset(page, limit.value)
     Object.assign(pagination, { offset, page })
-    if (onPageChanged) onPageChanged({ offset, page, limit, maxPage })
+    if (onPageChanged) onPageChanged({ offset, page, limit: limit.value, maxPage: max })
 
     refreshPageList()
     return true
@@ -93,7 +95,13 @@ const refreshPage = (event) => {
     return goToPage(pagination.page, event)
 }
 
-watch(() => props.maxPage, refreshPageList)
+watch(maxPage, (nv, ov) => {
+    refreshPageList(nv)
+}, { immediate: true })
+
+watch(limit, () => {
+    goToPage(1)
+}, { immediate: true })
 
 defineExpose({
     prevPage,

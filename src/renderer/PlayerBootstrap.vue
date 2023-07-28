@@ -786,12 +786,16 @@ const registryIpcRendererListeners = () => {
     ipcRenderer.on('globalShortcut-toggleLyricToolbar', () => {
         if (playingViewShow.value) toggleLyricToolbar()
     })
+
     //其他事件
-    ipcRenderer.on('app-desktopLyricShowSate', (event, isShow) => {
+    ipcRenderer.on('app-desktopLyric-showSate', (event, isShow) => {
         desktopLyricShowState = isShow
         EventBus.emit('desktopLyric-showState', desktopLyricShowState)
         if (desktopLyricShowState) {
-            postMessageToDesktopLryic('s-desktopLyric-init', toRaw(desktopLyric.value))
+            setupMessagePort(() => {
+                EventBus.emit('desktopLyric-messagePort', messagePort)
+            })
+            //postMessageToDesktopLryic('s-desktopLyric-init', toRaw(desktopLyric.value))
         }
     })
 }
@@ -799,16 +803,16 @@ registryIpcRendererListeners()
 
 
 let messagePort = null, messagePortTimer = null
-const setupMessagePort = () => {
+const setupMessagePort = (callback) => {
     clearInterval(messagePortTimer)
 
     messagePortTimer = setInterval(() => {
         messagePort = useMessagePort()
+
         if (messagePort) {
             clearInterval(messagePortTimer)
 
-            EventBus.emit('desktopLyric-messagePort', messagePort)
-
+            if (callback) callback()
             messagePort.onmessage = (event) => {
                 const { action, data } = event.data
                 handleMessageFromDesktopLyric(action, data)
@@ -825,7 +829,7 @@ const postMessageToDesktopLryic = (action, data) => {
 const handleMessageFromDesktopLyric = (action, data) => {
     if (action === 'c-setting-visit') {
         if (!ipcRenderer) return
-        ipcRenderer.send('app-showMainWindow')
+        ipcRenderer.send('app-mainWin-show')
         visitSetting()
         ipcRenderer.invoke('find-in-page', '桌面歌词')
     } else if (action === 'c-setting-sync') {
@@ -838,6 +842,8 @@ const handleMessageFromDesktopLyric = (action, data) => {
         playPrevTrack()
     } else if (action === 'c-track-playNext') {
         playNextTrack()
+    } else if (action === 'c-track-init-retry') {
+        postMessageToDesktopLryic('s-track-init-retry', toRaw(currentTrack.value))
     } else if (messagePort.onPlayerMessage) { //必须放在最后
         messagePort.onPlayerMessage(action, data)
     }
@@ -853,7 +859,6 @@ onMounted(() => {
 
     setupStateRefreshFrequency()
     setupSpectrumRefreshFrequency()
-    setupMessagePort()
 })
 
 watch(queueTracksSize, (nv, ov) => {

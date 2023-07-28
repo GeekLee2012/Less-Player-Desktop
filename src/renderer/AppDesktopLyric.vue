@@ -19,7 +19,6 @@ const sendToMain = (channel, data) => {
   if (ipcRenderer) ipcRenderer.send(channel, data)
 }
 
-
 //TODO 歌词处理逻辑, 几乎与LyricControl组件重复
 const currenTrack = ref(null)
 const currentIndex = ref(0)
@@ -115,14 +114,16 @@ const renderLyric = (currentTime) => {
   if (desktopLyric.value.layoutMode !== 2) return
 
   if (!lines[index] || !lines[index].offsetTop) return
-  const { offsetTop } = lyricWrap
+  //const { offsetTop } = lyricWrap
   const { clientHeight } = document.documentElement
-  const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
+  //const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
+  const destScrollTop = lines[index].offsetTop - clientHeight / 2
   //const frequency = getStateRefreshFrequency()
   //const duration = 300 * frequency / 60
   smoothScroll(lyricWrap, destScrollTop, 300, 5, () => {
     return (isUserMouseWheel.value || isSeeking.value)
   })
+
 }
 
 const onUserMouseWheel = (event) => {
@@ -239,6 +240,13 @@ const setupLyricExtra = () => {
   }
 }
 
+const initDesktopLryic = () => {
+  //syncSettingFromMain(data)
+  setupLyricSetting(true)
+  postMessageToMain('c-track-init')
+}
+
+
 let syncTrackPosTimer = null
 const syncTrackPos = () => {
   clearInterval(syncTrackPosTimer)
@@ -254,16 +262,21 @@ const postMessageToMain = (action, data) => {
 }
 
 const handleMessage = ({ action, data }) => {
-  if (action == 's-desktopLyric-init') {
+  /*if (action == 's-desktopLyric-init') {
     syncSettingFromMain(data)
     setupLyricSetting(true)
     postMessageToMain('c-track-init')
-  } else if (action === 's-track-none') {
+  } */
+  if (action === 's-track-none') {
     setCurrentTrack(null)
   } else if (action === 's-track-init') {
     const { track, playing } = data
     setCurrentTrack(track)
     if (playing) syncTrackPos()
+    //再次确认，是否有当前播放Track
+    if (!track) postMessageToMain('c-track-init-retry')
+  } else if (action === 's-track-init-retry') {
+    setCurrentTrack(data)
   } else if (action === 's-track-play') {
     syncTrackPos()
   } else if (action === 's-track-pause') {
@@ -276,17 +289,15 @@ const handleMessage = ({ action, data }) => {
     setCurrentTrack(data)
   } else if (action === 's-desktopLyric-lockState') {
     toggleLock()
-  } else if (action === 's-desktopLyric-initStyle') {
-    setupLyricSetting()
   } else if (action === 's-setting-sync') {
     syncSettingFromMain(data)
-    setupLyricSetting()
+    setupLyricSetting(false)
   } else if (action === 's-theme-apply') {
     applyThemeFromMain(data)
   }
 }
 
-const setupMessagePort = () => {
+const setupMessagePort = (callback) => {
   clearInterval(messagePortTimer)
 
   messagePortTimer = setInterval(() => {
@@ -294,17 +305,17 @@ const setupMessagePort = () => {
     if (messagePort) {
       clearInterval(messagePortTimer)
 
-      //postMessageToMain('c-track-init')
-
       messagePort.onmessage = (event) => {
         handleMessage(event.data)
       }
+
+      if (callback) callback()
     }
   }, 1000)
 }
 
 const desktopLyricRef = ref(null)
-const setupLyricSetting = (isInit) => {
+const setupLyricSetting = (isInit, layoutState) => {
   if (!desktopLyricRef.value) return
   const { fontSize, color, hlColor, lineSpacing } = desktopLyric.value
   const styles = {
@@ -317,7 +328,9 @@ const setupLyricSetting = (isInit) => {
     desktopLyricRef.value.style.setProperty(key, value)
   }
 
-  if (typeof (isInit) != 'undefined') sendLyricLayoutStateToMain(isInit)
+  if (typeof (isInit) != 'undefined') {
+    sendLyricLayoutStateToMain(isInit)
+  }
 }
 
 
@@ -331,7 +344,7 @@ const hideWin = () => {
 const pinState = ref(true)
 const togglePin = () => {
   pinState.value = !pinState.value
-  sendToMain('app-desktopLyricAlwaysOnTopState')
+  sendToMain('app-desktopLyric-alwaysOnTop', pinState.value)
 }
 
 //锁定歌词
@@ -341,7 +354,7 @@ const lockVisible = ref(true)
 const toggleLock = () => {
   lockState.value = !lockState.value
   lockVisible.value = true
-  sendToMain('app-desktopLyricLockState', lockState.value)
+  sendToMain('app-desktopLyric-lock', lockState.value)
 }
 
 const onMouseover = (event) => {
@@ -354,14 +367,15 @@ const onMouseout = (event) => {
   lockVisible.value = false
 }
 
+//事件透传
 const onLockBtnMouseOver = (event) => {
   if (!lockState.value) return
-  //sendToMain('app-desktopLyric-ignoreMouseEvent', false)
+  sendToMain('app-desktopLyric-ignoreMouseEvent', false)
 }
 
 const onLockBtnMouseOut = (event) => {
   if (!lockState.value) return
-  //sendToMain('app-desktopLyric-ignoreMouseEvent', true)
+  sendToMain('app-desktopLyric-ignoreMouseEvent', true)
 }
 
 //对齐方式
@@ -376,25 +390,29 @@ const switchAlignState = () => {
 
 //字体调节
 const fontUp = () => {
-  setDesktopLyricFontSize(desktopLyric.value.fontSize + 1)
+  const { fontSize } = desktopLyric.value
+  setDesktopLyricFontSize(fontSize + 1)
   setupLyricSetting()
   syncSettingToMain()
 }
 
 const fontDown = () => {
-  setDesktopLyricFontSize(desktopLyric.value.fontSize - 1)
+  const { fontSize } = desktopLyric.value
+  setDesktopLyricFontSize(fontSize - 1)
   setupLyricSetting()
   syncSettingToMain()
 }
 
 const lineSpacingUp = () => {
-  setDesktopLyricLineSpacing(desktopLyric.value.lineSpacing + 1)
+  const { lineSpacing } = desktopLyric.value
+  setDesktopLyricLineSpacing(lineSpacing + 1)
   setupLyricSetting()
   syncSettingToMain()
 }
 
 const lineSpacingDown = () => {
-  setDesktopLyricLineSpacing(desktopLyric.value.lineSpacing - 1)
+  const { lineSpacing } = desktopLyric.value
+  setDesktopLyricLineSpacing(lineSpacing - 1)
   setupLyricSetting()
   syncSettingToMain()
 }
@@ -420,13 +438,14 @@ const showByLayoutMode = computed(() => {
 
 const switchLayoutMode = () => {
   const { alignment, layoutMode } = desktopLyric.value
-  setDesktopLyricLayoutMode((layoutMode + 1) % 3)
-  if (desktopLyric.value.layoutMode != 1 && alignment == 3) {
+  const nLayoutMode = (layoutMode + 1) % 3
+  setDesktopLyricLayoutMode(nLayoutMode)
+  if (nLayoutMode != 1 && alignment == 3) {
     setDesktopLyricAlignment(1)
   }
 
   sendLyricLayoutStateToMain()
-  syncSettingToMain(false)
+  syncSettingToMain()
 }
 
 const toggleLyricTransActive = () => {
@@ -434,7 +453,8 @@ const toggleLyricTransActive = () => {
 }
 
 const sendLyricLayoutStateToMain = (isInit) => {
-  sendToMain('app-desktopLyricLayoutState', { layoutMode: desktopLyric.value.layoutMode, isInit })
+  const { layoutMode } = desktopLyric.value
+  sendToMain('app-desktopLyric-layoutMode', { layoutMode, isInit })
 }
 
 const visitSetting = () => {
@@ -475,7 +495,7 @@ const applyThemeFromMain = (theme) => {
 
 watch(isUserMouseWheel, setupLyricScrollLocator)
 
-//注册默认应用级别快捷键
+//注册默认应用级别快捷键  
 const registryDefaultLocalKeys = () => {
   //按键事件监听
   window.addEventListener('keydown', event => {
@@ -491,8 +511,7 @@ const registryDefaultLocalKeys = () => {
 }
 
 onMounted(() => {
-  setupMessagePort()
-  //setupLyricSetting(true)
+  setupMessagePort(initDesktopLryic)
   registryDefaultLocalKeys()
 })
 </script>
@@ -725,7 +744,7 @@ onMounted(() => {
       'lyric-showall': (!lockState && desktopLyric.layoutMode == 2 && lyricExistState == 1),
       'lyric-layout-ends': (desktopLyric.layoutMode == 1 && desktopLyric.alignment == 3)
     }" @mousewheel="onUserMouseWheel">
-      <div class="desktop-lyric-content-highlight" :class="{
+      <div class="unready-state-line desktop-lyric-content-highlight" :class="{
         'no-lyric': lyricExistState == 0,
         'align-left': desktopLyric.alignment == 0,
         'align-center': desktopLyric.alignment == 1,
@@ -733,8 +752,8 @@ onMounted(() => {
       }" v-show="lyricExistState !== 1">
         {{ getDefaultLyricText() }}
       </div>
-      <div class="content" v-show="lyricExistState == 1">
-        <div v-for="([key, value], index) in lyricData" v-show="showByLayoutMode(key, value, index)" class="line" :class="{
+      <div v-show="lyricExistState == 1 && showByLayoutMode(key, value, index)" v-for="([key, value], index) in lyricData"
+        class="line" :class="{
           'desktop-lyric-content-highlight': (currentIndex == index),
           first: index == 0,
           last: index == (lyricData.size - 1),
@@ -745,9 +764,8 @@ onMounted(() => {
           'align-right': desktopLyric.alignment == 2,
           'locator-current': (index == scrollLocatorCurrentIndex && index != currentIndex && isUserMouseWheel)
         }" :timeKey="key" :index="index">
-          <div class="text" :timeKey="key" :index="index" v-html="value"></div>
-          <div class="extra-text" v-show="isExtraTextActived"></div>
-        </div>
+        <div class="text" :timeKey="key" :index="index" v-html="value"></div>
+        <div class="extra-text" v-show="isExtraTextActived"></div>
       </div>
     </div>
     <div class="scroll-locator"
@@ -781,7 +799,7 @@ onMounted(() => {
 
 .desktop-lyric-lock {
   color: var(--content-desktop-lyric-color);
-  background: transparent !important;
+  background: none;
   -webkit-app-region: none;
   /*pointer-events: none;*/
 }
@@ -796,8 +814,7 @@ onMounted(() => {
   font-weight: bold;
 }
 
-.desktop-lyric .center::-webkit-scrollbar,
-.desktop-lyric .content::-webkit-scrollbar {
+.desktop-lyric .center::-webkit-scrollbar {
   display: none;
 }
 
@@ -835,9 +852,14 @@ onMounted(() => {
   overflow: scroll;
 }
 
+.desktop-lyric-lock .container {
+  background-color: #00000018;
+}
+
 .desktop-lyric .center .no-lyric,
+.desktop-lyric .center .unready-state-line,
 .desktop-lyric .center .line {
-  margin-bottom: var(--content-desktop-lyric-line-spacing);
+  margin-top: var(--content-desktop-lyric-line-spacing);
   padding: 0px 33px;
   word-break: break-word;
 }

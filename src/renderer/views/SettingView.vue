@@ -72,6 +72,7 @@ const { setThemeIndex,
     toggleUseOnlineCover,
     toggleUseDndForCreateLocalPlaylist,
     toggleUseDndForAddLocalTracks,
+    setLimitPerPageForLocalPlaylist,
     toggleUseDeeplyScanForDirectory,
     toggleAudioTypeFlagShow,
     toggleSearchBarAutoPlaceholder,
@@ -169,6 +170,10 @@ const updateStateRefreshFrequency = (event) => {
 
 const updateSpectrumRefreshFrequency = (event) => {
     setSpectrumRefreshFrequency(event.target.value)
+}
+
+const updateLimitPerPageForLocalPlaylist = (event) => {
+    setLimitPerPageForLocalPlaylist(event.target.value)
 }
 
 const updateDesktopLyricFontSize = (event) => {
@@ -617,11 +622,17 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </ToggleControl>
                         <div class="tip-text spacing">提示：首页有效；支持目录、歌单文件</div>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">允许拖拽方式，导入歌曲：</span>
                         <ToggleControl @click="toggleUseDndForAddLocalTracks" :value="track.useDndForAddLocalTracks">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：歌单页有效；支持目录、音频文件</div>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">歌单分页时，每页记录数：</span>
+                        <input type="number" :value="track.limitPerPageForLocalPlaylist" placeholder="10-200，默认30" min="10"
+                            max="200" step="0.1" @keydown.enter="updateLimitPerPageForLocalPlaylist"
+                            @focusout="updateLimitPerPageForLocalPlaylist" />
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, toRef, toRefs, watch } from 'vue';
 import PaginationToolbar from './PaginationToolbar.vue';
 
 
@@ -20,37 +20,44 @@ const props = defineProps({
 })
 
 //数据优先级： props.data > dataFromLoad
-const maxPage = ref(props.maxPage || -1)
+const { data, limit, maxPage,
+    paginationStyleType, nextPagePendingMark,
+    refreshAllPendingMark, refreshPagePendingMark } = toRefs(props)
 const dataFromLoad = reactive([])
 
 const currentPage = ref(1)
 const currentPageMatchLimit = ref(null)
 const setCurrentPage = (value) => currentPage.value = value
 const setCurrentPageMatchLimit = (value) => currentPageMatchLimit.value = value
+const totalPageFromLoad = ref(0)
+
+const getMaxPage = computed(() => {
+    return totalPageFromLoad.value || maxPage.value
+})
 
 const onPageChanged = async ({ offset, limit, page }) => {
     setCurrentPage(page)
     const { paginationStyleType, loadPage, onPageLoaded, data: dataInProps } = props
     if (!loadPage) return
-    const isNormalStyleType = (paginationStyleType === 0)
+    const isNormalStyleType = (paginationStyleType == 0)
 
     const result = await loadPage({ offset, limit, page, dataInProps })
     if (!result) return
 
     if (isNormalStyleType) dataFromLoad.length = 0
 
-    const { data, total } = result
-    if (data) {
-        setCurrentPageMatchLimit(data.length === limit)
-        dataFromLoad.push(...data)
+    const { data: rData, total } = result
+    if (rData) {
+        setCurrentPageMatchLimit(rData.length === limit)
+        dataFromLoad.push(...rData)
     }
-    if (total >= 0) maxPage.value = total
-    if (onPageLoaded) onPageLoaded({ offset, limit, page, data, total })
+    if (total >= 0) totalPageFromLoad.value = total
+    if (onPageLoaded) onPageLoaded({ offset, limit, page, data: rData, total })
 }
 
 const paginationToolbarRef = ref(null)
 const nextPage = (event) => {
-    const isNormalStyleType = (props.paginationStyleType === 0)
+    const isNormalStyleType = (paginationStyleType.value == 0)
     if (!paginationToolbarRef.value || isNormalStyleType) return
 
     paginationToolbarRef.value.nextPage(event)
@@ -58,48 +65,26 @@ const nextPage = (event) => {
 
 const refreshAll = () => {
     dataFromLoad.length = 0
-    if (props.data || !paginationToolbarRef.value) return
+    if (data.value || !paginationToolbarRef.value) return
     paginationToolbarRef.value.goToPage(1)
 }
 
 const refreshPage = () => {
     dataFromLoad.length = 0
-    if (props.data || !paginationToolbarRef.value) return
+    if (data.value || !paginationToolbarRef.value) return
     paginationToolbarRef.value.refreshPage()
 }
 
-/*
-const paginationTilesRef = ref(null)
-const scrollToLoad = (event) => {
-    if (!paginationTilesRef.value) return
-
-    const { scrollTop, scrollHeight, clientHeight } = paginationTilesRef.value
-    //markScrollState()
-    console.log(scrollTop, scrollHeight, clientHeight)
-    const allowedError = 10 //允许误差
-    if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
-        nextPage(event)
-    }
-}
-*/
-
 const isLastPageContent = computed(() => {
-    if (props.paginationStyleType !== 0) return false
+    if (paginationStyleType.value != 0) return false
     if (!currentPageMatchLimit.value) return true
-    return currentPage === maxPage
+    return currentPage == maxPage.value
 })
 
-watch(() => props.nextPagePendingMark, nextPage, { immediate: true })
-watch(() => props.refreshPagePendingMark, refreshPage, { immediate: true })
-watch(() => props.refreshAllPendingMark, refreshAll, { immediate: true })
-watch(() => props.data, (nv, ov) => {
-    dataFromLoad.length = 0
-    if (nv && nv.length > 0) dataFromLoad.push(...nv)
-}, { immediate: true, deep: true })
-watch(() => props.maxPage, (nv, ov) => { maxPage.value = nv }, { immediate: true })
-watch(() => props.paginationStyleType, refreshAll, { immediate: true })
-
-onMounted(refreshAll)
+watch(nextPagePendingMark, nextPage, { immediate: true })
+watch(refreshPagePendingMark, refreshPage, { immediate: true })
+watch(refreshAllPendingMark, () => { nextTick(refreshAll) }, { immediate: true })
+watch(paginationStyleType, refreshAll, { immediate: true })
 </script>
 
 <template>
@@ -116,8 +101,8 @@ onMounted(refreshAll)
         <div>
             <slot name="loading2"></slot>
         </div>
-        <PaginationToolbar ref="paginationToolbarRef" v-show="paginationStyleType === 0 && maxPage" :limit="limit"
-            :maxPage="maxPage" :onPageChanged="onPageChanged">
+        <PaginationToolbar ref="paginationToolbarRef" v-show="paginationStyleType == 0 && getMaxPage > 1" :limit="limit"
+            :maxPage="getMaxPage" :onPageChanged="onPageChanged">
         </PaginationToolbar>
     </div>
 </template>
