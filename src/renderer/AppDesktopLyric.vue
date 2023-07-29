@@ -1,7 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { smoothScroll, useIpcRenderer, useMessagePort } from '../common/Utils';
+import { randomTextWithinAlphabetNums, smoothScroll, useIpcRenderer, useMessagePort } from '../common/Utils';
 import { Track } from '../common/Track';
 import { toMMssSSS, toMillis } from '../common/Times';
 import { useSettingStore } from './store/settingStore';
@@ -240,10 +240,13 @@ const setupLyricExtra = () => {
   }
 }
 
+let initTimer = null
 const initDesktopLryic = () => {
   //syncSettingFromMain(data)
   setupLyricSetting(true)
-  postMessageToMain('c-track-init')
+  initTimer = setInterval(() => {
+    postMessageToMain('c-track-init')
+  }, 1000)
 }
 
 
@@ -270,6 +273,7 @@ const handleMessage = ({ action, data }) => {
   if (action === 's-track-none') {
     setCurrentTrack(null)
   } else if (action === 's-track-init') {
+    clearInterval(initTimer)
     const { track, playing } = data
     setCurrentTrack(track)
     if (playing) syncTrackPos()
@@ -297,6 +301,7 @@ const handleMessage = ({ action, data }) => {
   }
 }
 
+/*
 const setupMessagePort = (callback) => {
   clearInterval(messagePortTimer)
 
@@ -312,6 +317,23 @@ const setupMessagePort = (callback) => {
       if (callback) callback()
     }
   }, 1000)
+}
+*/
+
+const setupMessagePort = (callback) => {
+  if (!ipcRenderer) return
+  const pairChannel = randomTextWithinAlphabetNums(16)
+  ipcRenderer.on(pairChannel, event => {
+    messagePort = event.ports[0]
+
+    messagePort.onmessage = (event) => {
+      handleMessage(event.data)
+    }
+
+    if (callback) callback()
+  })
+
+  sendToMain('app-messagePort-setup', pairChannel)
 }
 
 const desktopLyricRef = ref(null)
@@ -510,10 +532,13 @@ const registryDefaultLocalKeys = () => {
   Mousetrap.bind(['right'], () => postMessageToMain('c-track-playNext'))
 }
 
+//可以不必等 Mounted事件
+setupMessagePort(initDesktopLryic)
+registryDefaultLocalKeys()
+/*
 onMounted(() => {
-  setupMessagePort(initDesktopLryic)
-  registryDefaultLocalKeys()
 })
+*/
 </script>
 
 <template>

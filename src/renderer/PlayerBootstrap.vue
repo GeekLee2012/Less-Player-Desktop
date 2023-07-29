@@ -791,35 +791,33 @@ const registryIpcRendererListeners = () => {
     ipcRenderer.on('app-desktopLyric-showSate', (event, isShow) => {
         desktopLyricShowState = isShow
         EventBus.emit('desktopLyric-showState', desktopLyricShowState)
-        if (desktopLyricShowState) {
-            setupMessagePort(() => {
-                EventBus.emit('desktopLyric-messagePort', messagePort)
-            })
-            //postMessageToDesktopLryic('s-desktopLyric-init', toRaw(desktopLyric.value))
-        }
+    })
+    ipcRenderer.on('app-messagePort-channel', (event, channel) => {
+        setupMessagePort(channel, () => {
+            console.log(channel, messagePort)
+            EventBus.emit('desktopLyric-messagePort', messagePort)
+        })
+        ipcRenderer.send('app-messagePort-pair')
     })
 }
 registryIpcRendererListeners()
 
 
-let messagePort = null, messagePortTimer = null
-const setupMessagePort = (callback) => {
-    clearInterval(messagePortTimer)
+let messagePort = null
+const setupMessagePort = (channel, callback) => {
+    if (!ipcRenderer) return
+    ipcRenderer.on(channel, event => {
+        messagePort = event.ports[0]
 
-    messagePortTimer = setInterval(() => {
-        messagePort = useMessagePort()
-
-        if (messagePort) {
-            clearInterval(messagePortTimer)
-
-            if (callback) callback()
-            messagePort.onmessage = (event) => {
-                const { action, data } = event.data
-                handleMessageFromDesktopLyric(action, data)
-            }
+        messagePort.onmessage = (event) => {
+            const { action, data } = event.data
+            handleMessageFromDesktopLyric(action, data)
         }
-    }, 1000)
+
+        if (callback) callback()
+    })
 }
+
 
 const postMessageToDesktopLryic = (action, data) => {
     if (!desktopLyricShowState) return

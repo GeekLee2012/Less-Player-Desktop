@@ -29,9 +29,11 @@ window.electronAPI = {
   useCustomTrafficLight
 }
 
+/*
 ipcRenderer.on('port', event => {
   window.electronAPI.messagePort = event.ports[0]
 })
+*/
 
 /*
 contextBridge.exposeInMainWorld('electronAPI', {

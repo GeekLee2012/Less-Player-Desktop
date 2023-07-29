@@ -25,7 +25,7 @@ const Url = require('url')
 const fetch = require('electron-fetch').default
 
 
-let messagePortPair = null
+let messagePortPair = null, messagePortChannel = null
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
@@ -535,6 +535,7 @@ const registryGlobalListeners = () => {
     setupTrayMenu()
   }).on('app-desktopLyric-lock', (event, ...args) => {
     desktopLyricLockState = args[0]
+    if (isMacOS) lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
     lyricWin.setHasShadow(!desktopLyricLockState)
     lyricWin.setResizable(!desktopLyricLockState)
     lyricWin.setMinimumSize(lyricWinMinWidth, lyricWinMinHeight)
@@ -570,7 +571,12 @@ const registryGlobalListeners = () => {
     //lyricWin.setAlwaysOnTop(!lyricWin.isAlwaysOnTop())
     lyricWin.setAlwaysOnTop(args[0] || false)
   }).on('app-desktopLyric-ignoreMouseEvent', (event, ...args) => {
-    lyricWin.setIgnoreMouseEvents(args[0])
+    if (isMacOS) lyricWin.setIgnoreMouseEvents(args[0])
+  }).on('app-messagePort-setup', (event, ...args) => {
+    messagePortChannel = args[0]
+    sendToMainRenderer('app-messagePort-channel', messagePortChannel)
+  }).on('app-messagePort-pair', (event, ...args) => {
+    messagePortPair = setupMessagePortPair(mainWin, lyricWin)
   })
 }
 
@@ -613,7 +619,7 @@ const onReadyToShowTasks = async () => {
 
 const tryPostMessage = (win, msg, transfers) => {
   try {
-    win.webContents.postMessage('port', msg, transfers)
+    win.webContents.postMessage(messagePortChannel, msg, transfers)
   } catch (error) {
     if (isDevEnv) console.log(error)
   }
@@ -628,11 +634,11 @@ const tryCloseMessagePort = (port) => {
 }
 
 const setupMessagePortPair = (win1, win2) => {
-  const { port1, port2 } = new MessageChannelMain()
-
+  const msgChannelMain = new MessageChannelMain()
+  const { port1, port2 } = msgChannelMain
   tryPostMessage(win1, null, [port1])
   tryPostMessage(win2, null, [port2])
-  return { port1, port2 }
+  return msgChannelMain
 }
 
 const closeMessagePortPair = () => {
@@ -1186,8 +1192,6 @@ const createLyricWindow = () => {
   win.once('ready-to-show', () => {
     setWindowButtonVisibility(win, false)
     win.showInactive()
-
-    messagePortPair = setupMessagePortPair(mainWin, win)
   })
 
   return win
