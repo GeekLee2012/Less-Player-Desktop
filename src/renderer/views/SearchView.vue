@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, onMounted, ref, shallowRef, watch } from 'vue';
+import { onActivated, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSearchStore } from '../store/searchStore';
 import AlbumListControl from '../components/AlbumListControl.vue';

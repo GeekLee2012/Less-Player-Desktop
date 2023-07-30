@@ -172,11 +172,13 @@ export const useUserProfileStore = defineStore("userProfile", {
                 payPlay, payDownload } = track
             //TODO
             const url = Playlist.isAnchorRadioType(track) ? track.url : null
+            if (platform === 'local') return false
             this.addItem(this.favorites.songs, {
                 id, platform, title, artist, album, duration, cover, url,
                 type, pid, songlistId, extra1, extra2, mv,
                 payPlay, payDownload
             })
+            return true
         },
         addFavoriteRadio(track) {
             const { id, platform, title, cover, artist, url,

@@ -21,7 +21,6 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import EventBus from '../../common/EventBus';
 
 
 
@@ -330,7 +329,6 @@ const markScrollState = () => {
 }
 
 const restoreScrollState = () => {
-    //EventBus.emit("imageTextTiles-update")
     if (markScrollTop < 1) return
     if (!artistDetailRef.value) return
     artistDetailRef.value.scrollTop = markScrollTop

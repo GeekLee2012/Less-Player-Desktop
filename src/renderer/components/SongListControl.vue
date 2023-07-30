@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, reactive, ref, toRef, watch } from 'vue';
+import { computed, ref, toRef, watch } from 'vue';
 import PaginationTiles from './PaginationTiles.vue';
 
 

@@ -1,5 +1,5 @@
 <script setup>
-import { inject, provide, onMounted, watch, ref, nextTick, computed, toRaw } from 'vue';
+import { inject, provide, onMounted, watch, ref, computed, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -9,7 +9,7 @@ import { useRecentsStore } from './store/recentsStore';
 import { useSettingStore } from './store/settingStore';
 import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
-import { isDevEnv, useIpcRenderer, useMessagePort } from '../common/Utils';
+import { isDevEnv, useIpcRenderer } from '../common/Utils';
 import { PLAY_STATE, TRAY_ACTION, IMAGE_PROTOCAL } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
 import { toMmss } from '../common/Times';
@@ -36,7 +36,7 @@ const { playingViewShow, videoPlayingViewShow,
 const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId,
-    toggleDesktopLyricShow, setDesktopLyricCtxData } = useAppCommonStore()
+    toggleDesktopLyricShow, toggleDesktopLyricAlwaysOnTop } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
@@ -770,6 +770,10 @@ const registryIpcRendererListeners = () => {
             case TRAY_ACTION.DESKTOP_LYRIC_UNLOCK:
                 postMessageToDesktopLryic('s-desktopLyric-lockState')
                 break
+            case TRAY_ACTION.DESKTOP_LYRIC_PIN:
+            case TRAY_ACTION.DESKTOP_LYRIC_UNPIN:
+                postMessageToDesktopLryic('s-desktopLyric-pinState')
+                break
         }
     })
 
@@ -794,7 +798,6 @@ const registryIpcRendererListeners = () => {
     })
     ipcRenderer.on('app-messagePort-channel', (event, channel) => {
         setupMessagePort(channel, () => {
-            console.log(channel, messagePort)
             EventBus.emit('desktopLyric-messagePort', messagePort)
         })
         ipcRenderer.send('app-messagePort-pair')

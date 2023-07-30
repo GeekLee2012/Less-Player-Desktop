@@ -1,7 +1,6 @@
 <script setup>
 import AppRoute from "./AppRoute.vue";
 import PlayerBootstrap from "./PlayerBootstrap.vue";
-import Themes from "./Themes.vue";
 import AppContent from "./AppContent.vue";
 </script>
 

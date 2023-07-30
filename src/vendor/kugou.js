@@ -4,7 +4,7 @@ import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
-import { base64Decode, md5, toTrimString, toUtf8 } from "../common/Utils";
+import { md5, toTrimString, } from "../common/Utils";
 import { useSettingStore } from "../renderer/store/settingStore";
 
 

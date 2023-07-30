@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated, computed } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';

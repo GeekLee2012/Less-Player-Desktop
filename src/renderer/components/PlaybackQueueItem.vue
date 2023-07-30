@@ -1,12 +1,11 @@
 <script setup>
+import { inject, } from 'vue';
+import { storeToRefs } from 'pinia';
+import { usePlayStore } from '../store/playStore';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { useSettingStore } from '../store/settingStore';
 import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
-import { usePlayStore } from '../store/playStore';
-import { inject, onMounted, ref } from 'vue';
-import EventBus from '../../common/EventBus';
-import { useAppCommonStore } from '../store/appCommonStore';
-import { storeToRefs } from 'pinia';
-import { useSettingStore } from '../store/settingStore';
 
 
 

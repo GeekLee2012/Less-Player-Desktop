@@ -1,5 +1,5 @@
 <script setup>
-import { inject, reactive, watch, ref, onMounted, computed } from 'vue';
+import { inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';

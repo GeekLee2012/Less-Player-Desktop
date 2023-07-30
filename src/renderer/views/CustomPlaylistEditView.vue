@@ -6,8 +6,7 @@ export default {
 </script>
 
 <script setup>
-import { storeToRefs } from 'pinia';
-import { onMounted, onActivated, ref, reactive, watch, inject } from 'vue';
+import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useIpcRenderer } from '../../common/Utils';

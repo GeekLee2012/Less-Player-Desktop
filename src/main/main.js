@@ -42,7 +42,7 @@ let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT
 let powerSaveBlockerId = -1
 let appTray = null, appTrayMenu = null, appTrayShow = false
 let playState = false, desktopLyricLockState = false
-let lyricWinMinWidth = 450, lyricWinMinHeight = 168
+let lyricWinMinWidth = 450, lyricWinMinHeight = 168, isDesktopLyricAutoHeight = true
 const proxyAuthRealms = []
 //TODO 下载队列
 let downloadingItem = null
@@ -236,6 +236,7 @@ const setupTray = (forceShow) => {
 const setupTrayMenu = () => {
   if (!appTrayMenu) return
   const desktopLyricOpenState = isLyricWindowShow()
+  const desktopLyricPinState = (lyricWin && lyricWin.isAlwaysOnTop())
   const states = {
     'play': !playState,
     'pause': playState,
@@ -243,6 +244,8 @@ const setupTrayMenu = () => {
     'desktop-lyric-close': desktopLyricOpenState,
     'desktop-lyric-lock': desktopLyricOpenState && !desktopLyricLockState,
     'desktop-lyric-unlock': desktopLyricOpenState && desktopLyricLockState,
+    'desktop-lyric-pin': desktopLyricOpenState && !desktopLyricPinState,
+    'desktop-lyric-unpin': desktopLyricOpenState && desktopLyricPinState,
   }
 
   for (const [key, value] of Object.entries(states)) {
@@ -543,8 +546,11 @@ const registryGlobalListeners = () => {
     setupTrayMenu()
   }).on('app-mainWin-show', (event, ...args) => {
     showMainWindow()
+  }).on('app-desktopLyric-autoHeight', (event, ...args) => {
+    isDesktopLyricAutoHeight = args[0]
   }).on('app-desktopLyric-layoutMode', (event, ...args) => {
     const { layoutMode, isInit } = args[0]
+    if (!isDesktopLyricAutoHeight && !isInit) return
     const { x, y, width, height } = lyricWin.getBounds()
     let limit = lyricWinMinHeight
     switch (layoutMode) {
@@ -570,6 +576,7 @@ const registryGlobalListeners = () => {
   }).on('app-desktopLyric-alwaysOnTop', (event, ...args) => {
     //lyricWin.setAlwaysOnTop(!lyricWin.isAlwaysOnTop())
     lyricWin.setAlwaysOnTop(args[0] || false)
+    setupTrayMenu()
   }).on('app-desktopLyric-ignoreMouseEvent', (event, ...args) => {
     if (isMacOS) lyricWin.setIgnoreMouseEvents(args[0])
   }).on('app-messagePort-setup', (event, ...args) => {
@@ -834,6 +841,14 @@ const initTrayMenuTemplate = () => {
     id: 'desktop-lyric-unlock',
     label: '解锁桌面歌词',
     click: () => sendTrayAction(10)
+  }, {
+    id: 'desktop-lyric-pin',
+    label: '置顶桌面歌词',
+    click: () => sendTrayAction(11)
+  }, {
+    id: 'desktop-lyric-unpin',
+    label: '取消置顶桌面歌词',
+    click: () => sendTrayAction(12)
   }, {
     type: 'separator'
   }, {

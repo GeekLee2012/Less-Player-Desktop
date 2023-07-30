@@ -1,8 +1,9 @@
 <script setup>
-import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useSettingStore } from '../store/settingStore';
+import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
+import { useSettingStore } from '../store/settingStore';
+
 
 
 const props = defineProps({

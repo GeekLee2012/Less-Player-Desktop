@@ -1,9 +1,6 @@
 <script setup>
-import { computed, onMounted, reactive, ref, toRaw } from 'vue';
+import { ref, toRaw } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import ColorInputControl from '../components/ColorInputControl.vue';
-import GradientColorInputControl from '../components/GradientColorInputControl.vue';
-import EventBus from '../../common/EventBus';
 import { useIpcRenderer, isWinOS } from '../../common/Utils';
 import { storeToRefs } from 'pinia';
 

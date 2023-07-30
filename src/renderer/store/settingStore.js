@@ -161,9 +161,10 @@ export const useSettingStore = defineStore('setting', {
             */
             lineSpacing: 22, //行间距
             alignment: 1,   //对齐方式, 0:左, 1:中, 2:右
-            layoutMode: 0,   // 0 => 单行， 1 => 双行, 2 => 全显
+            layoutMode: 0,   // 显示模式（布局），0 => 单行， 1 => 双行, 2 => 全显
             color: null,    //普通行颜色
             hlColor: null,  //高亮行颜色
+            autoHeight: true,   //窗口自动高度，跟随显示模式
         },
         /* 缓存 */
         cache: {
@@ -915,7 +916,7 @@ export const useSettingStore = defineStore('setting', {
         },
         setDesktopLyricFontSize(value) {
             const fontSize = parseInt(value || 20)
-            if (fontSize < 10 || fontSize > 100) return
+            if (fontSize < 10 || fontSize > 365) return
             this.desktopLyric.fontSize = fontSize
             this.syncSettingToDesktopLyric()
         },
@@ -928,8 +929,8 @@ export const useSettingStore = defineStore('setting', {
             this.syncSettingToDesktopLyric()
         },
         setDesktopLyricLineSpacing(value) {
-            value = parseInt(value)
-            if (value < 0 || value > 404) return
+            value = parseInt(value || 22)
+            if (value < 0 || value > 1024) return
             this.desktopLyric.lineSpacing = value
             this.syncSettingToDesktopLyric()
         },
@@ -943,6 +944,10 @@ export const useSettingStore = defineStore('setting', {
                 this.desktopLyric.alignment = 1
             }
             this.syncSettingToDesktopLyric()
+        },
+        toggleDesktopLyricAutoHeight() {
+            this.desktopLyric.autoHeight = !this.desktopLyric.autoHeight
+            if (ipcRenderer) ipcRenderer.send('app-desktopLyric-autoHeight', this.desktopLyric.autoHeight)
         },
         syncSettingFromDesktopLyric(data) {
             const { alignment, fontSize, layoutMode, lineSpacing } = data

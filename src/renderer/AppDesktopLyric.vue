@@ -1,11 +1,12 @@
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref, toRaw, watch } from 'vue';
+import { computed, nextTick, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useSettingStore } from './store/settingStore';
+import Mousetrap from 'mousetrap';
 import { randomTextWithinAlphabetNums, smoothScroll, useIpcRenderer, useMessagePort } from '../common/Utils';
 import { Track } from '../common/Track';
 import { toMMssSSS, toMillis } from '../common/Times';
-import { useSettingStore } from './store/settingStore';
-import Mousetrap from 'mousetrap';
+
 
 
 const ipcRenderer = useIpcRenderer()
@@ -293,6 +294,8 @@ const handleMessage = ({ action, data }) => {
     setCurrentTrack(data)
   } else if (action === 's-desktopLyric-lockState') {
     toggleLock()
+  } else if (action === 's-desktopLyric-pinState') {
+    togglePin()
   } else if (action === 's-setting-sync') {
     syncSettingFromMain(data)
     setupLyricSetting(false)
@@ -337,7 +340,7 @@ const setupMessagePort = (callback) => {
 }
 
 const desktopLyricRef = ref(null)
-const setupLyricSetting = (isInit, layoutState) => {
+const setupLyricSetting = (isInit) => {
   if (!desktopLyricRef.value) return
   const { fontSize, color, hlColor, lineSpacing } = desktopLyric.value
   const styles = {
@@ -877,16 +880,16 @@ onMounted(() => {
   overflow: scroll;
 }
 
-.desktop-lyric-lock .container {
-  background-color: #00000018;
-}
-
 .desktop-lyric .center .no-lyric,
 .desktop-lyric .center .unready-state-line,
 .desktop-lyric .center .line {
-  margin-top: var(--content-desktop-lyric-line-spacing);
+  margin-top: 0px;
   padding: 0px 33px;
   word-break: break-word;
+}
+
+.desktop-lyric .center .line {
+  margin-bottom: var(--content-desktop-lyric-line-spacing);
 }
 
 .desktop-lyric .lyric-layout-ends .even,
@@ -908,10 +911,11 @@ onMounted(() => {
   mask-image: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
 }
 
-
+/*
 .desktop-lyric .lyric-showall .no-lyric {
   margin-top: 88px;
 }
+*/
 
 .desktop-lyric .lyric-showall .first {
   margin-top: 258px !important;

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated } from 'vue';
+import { onActivated } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';

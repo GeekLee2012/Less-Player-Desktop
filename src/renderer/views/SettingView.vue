@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, nextTick, onActivated, onMounted, ref, toRaw, watch } from 'vue';
+import { computed, inject, onActivated, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
@@ -95,7 +95,8 @@ const { setThemeIndex,
     setDesktopLyricHighlightColor,
     setDesktopLyricLineSpacing,
     setDesktopLyricAlignment,
-    setDesktopLyricLayoutMode
+    setDesktopLyricLayoutMode,
+    toggleDesktopLyricAutoHeight,
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -645,7 +646,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     </div>
                     <div>
                         <span class="sec-title">字体大小：</span>
-                        <input type="number" :value="desktopLyric.fontSize" placeholder="10-100，默认20" min="10" max="100"
+                        <input type="number" :value="desktopLyric.fontSize" placeholder="10-365，默认20" min="10" max="365"
                             step="0.1" @keydown.enter="updateDesktopLyricFontSize" @focusout="updateDesktopLyricFontSize" />
                     </div>
                     <div>
@@ -660,7 +661,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     </div>
                     <div>
                         <span class="sec-title">行间距：</span>
-                        <input type="number" :value="desktopLyric.lineSpacing" placeholder="0-404，默认20" min="0" max="404"
+                        <input type="number" :value="desktopLyric.lineSpacing" placeholder="0-1024，默认22" min="0" max="1024"
                             step="1" @keydown.enter="updateDesktopLyricLineSpacing"
                             @focusout="updateDesktopLyricLineSpacing" />
                     </div>
@@ -672,13 +673,19 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                             {{ item }}
                         </span>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="sec-title">显示模式：</span>
                         <span v-for="(item, index) in ['单行', '双行', '全部']" class="quality-item"
                             :class="{ active: index === desktopLyric.layoutMode }"
                             @click="setDesktopLyricLayoutMode(index)">
                             {{ item }}
                         </span>
+                    </div>
+                    <div class="last">
+                        <span class="sec-title">窗口自动高度：</span>
+                        <ToggleControl @click="toggleDesktopLyricAutoHeight" :value="desktopLyric.autoHeight">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：开启时，随显示模式自动调整为对应默认的高度</div>
                     </div>
                 </div>
             </div>

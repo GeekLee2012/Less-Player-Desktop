@@ -5,6 +5,7 @@ import { useSettingStore } from '../store/settingStore';
 import SingleSelectionControl from './SingleSelectionControl.vue';
 
 
+
 const { hideLyricToolbar } = useAppCommonStore()
 const { lyric } = storeToRefs(useSettingStore())
 const { setLyricFontSize, setLyricHighlightFontSize,

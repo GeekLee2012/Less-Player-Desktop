@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, shallowRef, inject, watch, triggerRef, ref, nextTick, provide, computed } from 'vue';
+import { onMounted, shallowRef, inject, provide, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
@@ -7,11 +7,10 @@ import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
-import Themes from './Themes.vue';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import EventBus from '../common/EventBus';
-import { isMacOS, isWinOS, toLowerCaseTrimString, useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
+import { isWinOS, toLowerCaseTrimString, useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
 
 
 

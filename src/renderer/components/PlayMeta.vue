@@ -1,12 +1,11 @@
 <script setup>
-import { onMounted, ref, inject, watch } from 'vue';
-import VolumeBar from './VolumeBar.vue';
-import AudioTime from './AudioTime.vue';
+import { onMounted, ref, inject } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { usePlatformStore } from '../store/platformStore';
-import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
+import VolumeBar from './VolumeBar.vue';
+import AudioTime from './AudioTime.vue';
 import { Track } from '../../common/Track';
 
 

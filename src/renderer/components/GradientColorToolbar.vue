@@ -1,9 +1,8 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { ref } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import ColorInputControl from '../components/ColorInputControl.vue';
 import GradientColorInputControl from '../components/GradientColorInputControl.vue';
-import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from '../../common/Utils';
 
 

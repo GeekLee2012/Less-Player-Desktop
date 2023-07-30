@@ -1,14 +1,14 @@
 <script setup>
 import { ref, watch, inject } from 'vue';
 import { storeToRefs } from 'pinia';
-import { Track } from '../../common/Track';
-import ArtistControl from './ArtistControl.vue';
-import AlbumControl from './AlbumControl.vue';
+import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
-import EventBus from '../../common/EventBus';
+import { Track } from '../../common/Track';
+import ArtistControl from './ArtistControl.vue';
+import AlbumControl from './AlbumControl.vue';
 import { toTrimString } from '../../common/Utils';
 
 

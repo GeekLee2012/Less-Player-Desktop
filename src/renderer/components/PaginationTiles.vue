@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref, toRef, toRefs, watch } from 'vue';
+import { computed, nextTick, reactive, ref, toRefs, watch } from 'vue';
 import PaginationToolbar from './PaginationToolbar.vue';
 
 
@@ -44,7 +44,7 @@ const onPageChanged = async ({ offset, limit, page }) => {
     const result = await loadPage({ offset, limit, page, dataInProps })
     if (!result) return
 
-    if (isNormalStyleType) dataFromLoad.length = 0
+    if (isNormalStyleType || page == 1 || offset == 0) dataFromLoad.length = 0
 
     const { data: rData, total } = result
     if (rData) {
@@ -81,6 +81,10 @@ const isLastPageContent = computed(() => {
     return currentPage == maxPage.value
 })
 
+const showToolbar = computed(() => {
+    return paginationStyleType.value == 0 && getMaxPage.value > 1
+})
+
 watch(nextPagePendingMark, nextPage, { immediate: true })
 watch(refreshPagePendingMark, refreshPage, { immediate: true })
 watch(refreshAllPendingMark, () => { nextTick(refreshAll) }, { immediate: true })
@@ -101,8 +105,8 @@ watch(paginationStyleType, refreshAll, { immediate: true })
         <div>
             <slot name="loading2"></slot>
         </div>
-        <PaginationToolbar ref="paginationToolbarRef" v-show="paginationStyleType == 0 && getMaxPage > 1" :limit="limit"
-            :maxPage="getMaxPage" :onPageChanged="onPageChanged">
+        <PaginationToolbar ref="paginationToolbarRef" v-show="showToolbar" :limit="limit" :maxPage="getMaxPage"
+            :onPageChanged="onPageChanged">
         </PaginationToolbar>
     </div>
 </template>

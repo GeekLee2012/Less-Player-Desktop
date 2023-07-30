@@ -1,10 +1,9 @@
 <script setup>
-import { onMounted, onUnmounted, reactive, ref, watch, inject } from 'vue';
+import { onMounted, onUnmounted, reactive, ref, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
@@ -12,8 +11,6 @@ import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import { Track } from '../../common/Track';
-import { Playlist } from '../../common/Playlist';
-import { toMmss } from '../../common/Times';
 
 
 

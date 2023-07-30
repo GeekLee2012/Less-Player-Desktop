@@ -6,7 +6,7 @@ export default {
 </script>
 
 <script setup>
-import { inject, reactive, ref, toRef, watch } from 'vue';
+import { inject, reactive, ref, watch } from 'vue';
 import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';

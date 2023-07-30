@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useArtistSquareStore } from '../store/artistSquareStore';

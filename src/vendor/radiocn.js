@@ -1,8 +1,7 @@
-import { getDoc, getJson } from "../common/HttpClient";
+import { getJson } from "../common/HttpClient";
 import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
-import { Lyric } from "../common/Lyric";
 import { toYyyymmdd } from "../common/Times";
 
 

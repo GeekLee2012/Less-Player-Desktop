@@ -1,6 +1,5 @@
 <script setup>
 import { useArtistSquareStore } from '../store/artistSquareStore';
-import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
 import { reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -10,7 +9,6 @@ import { storeToRefs } from 'pinia';
 const artistCategoryViewRef = ref(null)
 const { currentCategoryItems } = storeToRefs(useArtistSquareStore())
 const { currentCategory, updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareStore()
-const { isArtistMode } = storeToRefs(useAppCommonStore())
 const categories = reactive([])
 
 const updateCategory = () => {

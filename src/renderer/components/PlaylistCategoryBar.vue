@@ -1,6 +1,6 @@
 <script setup>
+import { reactive } from 'vue';
 import { storeToRefs } from 'pinia';
-import { onMounted, reactive } from 'vue';
 import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';

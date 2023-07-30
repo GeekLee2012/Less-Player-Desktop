@@ -6,17 +6,15 @@ export default {
 </script>
 
 <script setup>
-import { computed, inject, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
+import { computed, inject, onDeactivated, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
-import { usePlayStore } from '../store/playStore';
 import { useFreeFMStore } from '../store/freeFMStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { isDevEnv, useIpcRenderer } from "../../common/Utils";
+import { useIpcRenderer } from "../../common/Utils";
 import EventBus from '../../common/EventBus';
 
 
@@ -32,8 +30,7 @@ const { addFreeRadio, resetAll,
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,
     setSearchBarExclusiveAction, toggleTagsCategoryView } = useAppCommonStore()
-const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM,
-    getPaginationStyleIndex, } = storeToRefs(useSettingStore())
+const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM, } = storeToRefs(useSettingStore())
 
 
 const freefmRef = ref(null)

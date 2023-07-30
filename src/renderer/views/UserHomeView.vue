@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, ref, shallowRef, watch, reactive, inject } from 'vue';
+import { onActivated, ref, shallowRef, watch, reactive, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
@@ -104,7 +104,6 @@ const dataType = ref(2)
 const userProfileRef = ref(null)
 const back2TopBtnRef = ref(null)
 
-
 const visitTab = (index) => {
     if (loading.value) return
     isDiffTab = (activeTab.value != index)
@@ -132,7 +131,7 @@ const switchTab = () => {
     if (activeTab.value == 1) {
         tabData.push(...getCustomPlaylists.value)
         currentTabView.value = CustomPlaylistListControl
-    } if (activeTab.value == 2) {
+    } else if (activeTab.value == 2) {
         tabData.push(...getFollowArtists.value(platform))
         currentTabView.value = ArtistListControl
     }
@@ -267,6 +266,10 @@ const onScroll = () => {
     scrollToLoad()
 }
 
+const dataListId = computed(() => {
+    return activeTab.value + '-' + (activeSubTab.value || 0)
+})
+
 
 /* 生命周期、监听 */
 onActivated(() => {
@@ -342,7 +345,7 @@ EventBus.on("userHome-refresh", refresh)
                 </span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
-                :dataType="dataType">
+                :dataType="dataType" :id="dataListId">
             </component>
             <div v-show="loading">
                 <div class="loading-mask" v-for="i in 12"

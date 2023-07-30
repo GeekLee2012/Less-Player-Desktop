@@ -1,6 +1,4 @@
 <script setup>
-import { onMounted } from 'vue';
-
 const props = defineProps({
     current: String,
     duration: String

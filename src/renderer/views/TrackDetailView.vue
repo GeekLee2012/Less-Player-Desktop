@@ -6,18 +6,13 @@ export default {
 </script>
 
 <script setup>
-import { inject, ref } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useUserProfileStore } from '../store/userProfileStore';
-import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import ArtistControl from '../components/ArtistControl.vue';
 import AlbumControl from '../components/AlbumControl.vue';
-import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
-import { Track } from '../../common/Track';
 
 
 
@@ -58,7 +53,6 @@ const playItemLater = () => {
     playTrackLater(track)
     showToast('下一曲将为您播放！')
 }
-
 </script>
 
 <template>
@@ -148,8 +142,10 @@ const playItemLater = () => {
 #track-detail-view .header .title {
     text-align: left;
     margin-top: 0px;
-    /*font-size: 30px;*/
-    height: 128px;
+    /*font-size: 30px;
+    height: 128px;*/
+    height: 113px;
+    margin-bottom: 15px;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 

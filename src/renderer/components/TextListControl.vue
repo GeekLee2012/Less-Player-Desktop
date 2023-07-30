@@ -1,4 +1,4 @@
-<!-- 比较鸡肋糟糕的组件设计，后期改掉 -->
+<!-- 比较鸡肋糟糕的组件设计 -->
 <script setup>
 const props = defineProps({
     platform: String,

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, reactive, ref, watch, inject, nextTick, onDeactivated } from 'vue';
+import { onActivated, reactive, ref, watch, inject, nextTick, onDeactivated } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';

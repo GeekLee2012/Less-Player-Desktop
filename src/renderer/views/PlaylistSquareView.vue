@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
+import { onActivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';

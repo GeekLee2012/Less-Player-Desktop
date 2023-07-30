@@ -14,7 +14,7 @@ import { useSettingStore } from '../store/settingStore';
 
 const { visitRoute, visitArtist, visitHome,
     visitFavoritePlaylist, visitCustomPlaylist,
-    visitCustomPlaylistCreate, } = inject('appRoute')
+    visitCustomPlaylistCreate, currentRoutePath } = inject('appRoute')
 const { showContextMenu } = inject('appCommon')
 
 //是否使用自定义交通灯控件
@@ -45,8 +45,11 @@ const updatePlatformIndex = (index, isSwitchMode) => {
 
     const platform = currentPlatformCode.value
     const exploreMode = exploreModeCode.value
+    const currentPath = currentRoutePath()
     let path = null
-    if (isLocalMusic(platform) || isFreeFM(platform)) {
+    if (isLocalMusic(platform)) {
+        path = `/${exploreMode}/${platform}`
+    } else if (isFreeFM(platform) && !currentPath.includes('/batch/')) {
         path = `/${exploreMode}/${platform}`
     } else if (isUserHomeMode.value && isSwitchMode) {
         path = `/${exploreMode}/${platform}`

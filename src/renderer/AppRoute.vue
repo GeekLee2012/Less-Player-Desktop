@@ -1,15 +1,15 @@
 <script setup>
 import { provide } from 'vue';
-import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import EventBus from '../common/EventBus';
-import { Playlist } from '../common/Playlist';
+import { useUserProfileStore } from './store/userProfileStore';
+import { useSettingStore } from './store/settingStore';
 import { useArtistDetailStore } from './store/artistDetailStore';
 import { useAlbumDetailStore } from './store/albumDetailStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { usePlatformStore } from './store/platformStore';
-import { useUserProfileStore } from './store/userProfileStore';
-import { useSettingStore } from './store/settingStore';
+import { Playlist } from '../common/Playlist';
 import { isDevEnv } from '../common/Utils';
 
 
@@ -46,7 +46,7 @@ const setupRouter = () => {
 
 //TODO 数据量大时，可能有卡顿风险
 const highlightNavigationCustomPlaylist = (to, from) => {
-    const path = to.path
+    const { path } = to
     let index = -1
     if (path.includes('/custom/')
         && !path.includes('/create')
@@ -58,7 +58,7 @@ const highlightNavigationCustomPlaylist = (to, from) => {
 }
 
 const autoSwitchExploreMode = (to) => {
-    const path = to.path
+    const { path } = to
     if (path.includes('/playlists/') || path == '/') {
         setExploreMode(0)
     } else if (path.includes('/artists/')) {
@@ -78,7 +78,7 @@ const autoSwitchSearchPlaceHolder = (to) => {
     if (!isSearchBarAutoPlaceholderEnable.value) return
     clearTimeout(searchPlaceHolderTimer)
 
-    const path = to.path
+    const { path } = to
     let index = 0
     if (path.includes('/local')) {
         index = 1
@@ -152,7 +152,7 @@ const visitRoute = (route) => {
             return
         }
         route = resolveRoute(route)
-        const { path: toPath, onRouteReady, beforeRoute, replace } = route
+        const { path: toPath, onRouteReady, beforeRoute, replace, override } = route
         if (!toPath) {
             //if(reject) reject()
             return
@@ -160,10 +160,12 @@ const visitRoute = (route) => {
         if (beforeRoute) beforeRoute(toPath)
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
-        if (isSame && !replace) {
+        if (isSame && !replace && !override) {
             //if(reject) reject()
             return
         }
+        //相同且要求覆盖，才进行替换
+        if (isSame && override) Object.assign(route, { replace: true })
         if (onRouteReady) onRouteReady(toPath)
         router.push(route)
         if (resolve) resolve()
@@ -357,7 +359,8 @@ provide('appRoute', {
         const exploreMode = resolveExploreMode()
         return visitCommonRoute({
             path: `/${exploreMode}/track`,
-            replace: true,
+            //replace: false,   //Vue-Router原生支持选项，但有副作用
+            override: true,     //自定义选项
             query: { id, platform, title, cover, artist, album }
         }, onRouteReady)
     }

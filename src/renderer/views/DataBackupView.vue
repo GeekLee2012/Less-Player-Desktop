@@ -6,7 +6,7 @@ export default {
 </script>
 
 <script setup>
-import { inject, reactive, ref, toRef, toRaw, watch } from 'vue';
+import { inject, reactive, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';

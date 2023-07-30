@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import EventBus from '../../common/EventBus';
 import { usePlatformStore } from '../../renderer/store/platformStore';
 

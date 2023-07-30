@@ -1,7 +1,6 @@
 <script setup>
 import { inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import EventBus from '../../common/EventBus';
 import { toYyyymmddHhMmSs } from "../../common/Times";
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlayStore } from '../store/playStore';

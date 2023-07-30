@@ -4,6 +4,7 @@ import { inject, onActivated } from 'vue';
 import { usePlatformStore } from '../store/platformStore';
 
 
+
 const { visitPlaylistSquare, visitLocalMusic } = inject('appRoute')
 
 const { activePlatforms } = storeToRefs(usePlatformStore())

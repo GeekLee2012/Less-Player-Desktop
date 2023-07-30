@@ -1,9 +1,7 @@
 <script setup>
-import { inject, ref, toRaw } from 'vue';
+import { inject, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
-import { useAlbumDetailStore } from '../store/albumDetailStore';
-import { useArtistDetailStore } from '../store/artistDetailStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -30,7 +28,7 @@ const { playPlaylist } = inject('player')
 let currentDataType = -1
 
 const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
-const { showToast, setCommonCtxMenuData,
+const { showToast, setCommonCtxMenuData, showFailToast,
     hideAllCtxMenus, setRouterCtxCacheItem, } = useAppCommonStore()
 const { playTrackLater, addTrack, removeTrack, addTracks, playTrack } = usePlayStore()
 const { addFavoriteTrack, removeFavoriteSong, addFavoriteRadio,
@@ -44,8 +42,12 @@ const { removeRecentSong, } = useRecentsStore()
 const { isLocalMusic } = usePlatformStore()
 
 
-const toastAndHideMenu = (text) => {
-    showToast(text)
+const toastAndHideMenu = (text, failed) => {
+    if (failed) {
+        showFailToast(text)
+    } else {
+        showToast(text)
+    }
     hideAllCtxMenus()
 }
 
@@ -71,15 +73,20 @@ const playItemLater = () => {
 
 const addFavoriteItem = () => {
     const track = commonCtxMenuCacheItem.value
-    let text = "歌曲收藏成功！"
+    if (!track) return
+    const { platform } = track
+    let text = "歌曲收藏成功！", success = true
     if (Playlist.isFMRadioType(track)) {
         addFavoriteRadio(track)
         text = "FM电台收藏成功！"
+    } else if (isLocalMusic(platform)) {
+        success = false
+        text = "本地歌曲不支持收藏！"
     } else {
         addFavoriteTrack(track)
     }
-    EventBus.emit('track-refreshFavoritedState')
-    toastAndHideMenu(text)
+    if (success) EventBus.emit('track-refreshFavoritedState')
+    toastAndHideMenu(text, !success)
 }
 
 //TODO

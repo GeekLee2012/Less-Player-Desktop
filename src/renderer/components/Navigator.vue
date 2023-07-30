@@ -2,6 +2,7 @@
 import { inject } from 'vue';
 
 
+
 const { backward, forward } = inject('appRoute')
 </script>
 

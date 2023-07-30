@@ -1,15 +1,7 @@
 <script setup>
-import { onMounted } from 'vue';
-
 const props = defineProps({
     count: Number
 })
-
-/*
-onMounted(() => {
-    EventBus.emit("imageTextTiles-mounted")
-})
-*/
 </script>
 
 <template>

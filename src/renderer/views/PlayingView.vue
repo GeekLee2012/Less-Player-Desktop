@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch, inject, onUnmounted } from 'vue';
+import { onMounted, ref, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
