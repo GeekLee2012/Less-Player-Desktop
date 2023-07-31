@@ -6,7 +6,9 @@
 ![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)  
   
   
-一款基于Electron + Vue3开发的播放器。
+一款基于Electron + Vue3开发的播放器。  
+由于个人工作和生活等方面原因，从2023-08-01起暂停更新，计划2024年再继续回归更新。 
+请朋友们见谅，也感谢大家的理解和支持。
 
 <b>`郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>   
   
@@ -33,6 +35,7 @@
 * 设置页：包括主题、布局、窗口缩放、导航栏、快捷键、网络代理等  
 * 播放页：目前支持2种样式，“一静一动”; 歌词设置灵活，支持通过歌词调整歌曲进度、外文翻译（需平台支持） 
 * 窗口缩放：屏幕大小，适应自如  
+* 桌面歌词：支持3种显示模式，即单行、双行、全部；同时可对字体大小、颜色、行间距等进行设置
   
 PS：  
 *任何删除清空操作（带垃圾桶图标的按钮）请谨慎！其实也没这么夸张，哈哈~*  
@@ -68,10 +71,6 @@ PS：
 * 更新依赖  
   `npm update`
   
-### 发行版  
-* 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
-* Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)
-
 ### For普通用户
 * 最新开发预览版（测试版），会在项目自身仓库，不定期打包发布，欢迎愿意尝鲜的朋友体验！
 * 当前顶部分别有release、tag、license、downloads等图标按钮，请点击`tag按钮`直达页面。
@@ -80,6 +79,10 @@ PS：
 * [Github资源库（废弃）](https://github.com/GeekLee2012/Resources/releases/)  
 * [Gitee资源库（废弃）](https://gitee.com/rive08/resources/releases/)  
 * PS: 变动带来的不便，请朋友们谅解！有时我也想做一些尝试，然而结果也并非总在预料之中。 
+  
+### 发行版  
+* 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
+* Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)
   
 ### 项目相关文档
 * 常见问题：[FAQ.md](FAQ.md)  

@@ -14,7 +14,7 @@ registry=http://registry.npmmirror.com
 ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
 ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/
 ```
-（其实，将项目中的npmrc文件直接重命名为.npmrc即可）
+（ 其实，将项目中的npmrc文件直接重命名为.npmrc即可 ）
   
 > 常用命令  
 
