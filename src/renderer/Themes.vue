@@ -222,7 +222,7 @@ setupMacStyle()
 
 onMounted(() => {
   setupFontStyle()
-  setupAutoTheme()
+  //setupAppTheme()
 })
 watch(themeSetting, () => setupAppTheme(), { deep: true })
 </script>

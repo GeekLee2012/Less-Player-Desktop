@@ -1,17 +1,26 @@
 import { toMillis } from './Times';
-import { toTrimString } from './Utils';
+import { toLowerCaseTrimString, toTrimString } from './Utils';
 
 
 
 const TAG_BEGIN = "["
 const TAG_END = "]"
 
+/*
 const TITLE_TAG_NAME = "ti"
 const ARTIST_TAG_NAME = "ar"
 const ALBUM_TAG_NAME = "al"
 const BY_TAG_NAME = "by"
 const OFFSET_TAG_NAME = "offset"
 //const META_TAG_DELIM = ":";
+*/
+const META_TAGS = {
+    ti: 'title',
+    ar: 'artist',
+    al: 'album',
+    //by: 'by',
+    //offset: 'offset'
+}
 
 const TIME_REGEX = /\d{2}:\d{2}(:\d{2})?(\.\d{2,3})?/
 const TIME_LINE_REGEX = /^\[\d{2}:\d{2}(:\d{2})?(\.\d{2,3})?].*/
@@ -83,12 +92,13 @@ export class Lyric {
         const tokens = text.split(/[\[:\]]/)
         const len = tokens.length
         if (len < 3) return
-        let name = tokens[0]
-        let value = tokens[1]
+        let name = tokens[1]
+        let value = tokens[2]
         if (!name || !value) return
-        name = name.toString().trim().toLowerCase()
-        value = value.toString().trim()
+        name = toLowerCaseTrimString(name)
+        value = toTrimString(value)
         if (value.len < 1) return
+        /*
         if (TITLE_TAG_NAME == name) {
             lyric.title = value
         } else if (ARTIST_TAG_NAME == name) {
@@ -100,6 +110,9 @@ export class Lyric {
         } else if (OFFSET_TAG_NAME == name) {
             lyric.offset = value
         }
+        */
+        const propName = META_TAGS[name] || name
+        lyric[propName] = value
     }
 
     static _isValidTime(text) {
@@ -111,14 +124,14 @@ export class Lyric {
         if (timeParts.length >= 2) {
             const millisPart = timeParts[1].trim()
             if (millisPart.length == 2) { //10ms
-                return time + '0'
+                return `${time}0`
             } else if (millisPart.length == 1) { //格式错误，暂时当成ms处理
                 return timeParts[0].trim() + '.00' + millisPart
             } else if (millisPart.length >= 3) { //格式错误，暂时截断，然后当成ms处理
                 return timeParts[0].trim() + '.' + millisPart.substring(0, 3)
             }
         }
-        return time + '.000'
+        return `${time}.000`
     }
 
     static hasData(lyric) {

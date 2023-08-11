@@ -1024,8 +1024,9 @@ const getCookie = (url, fetchOnMissing) => {
       const _now = Date.now()
       const { expires } = cookie
       const expiresMillis = expires ? Date.parse(expires) : _now
-      if (expiresMillis <= _now) {
+      if (_now >= expiresMillis) {
         Reflect.deleteProperty(cookiesMap, url)
+        cookie = null
       }
     }
   } catch (error) {
@@ -1143,7 +1144,6 @@ const overrideRequest = (details) => {
     origin = " https://www.ximalaya.com/"
     referer = origin
   }
-
   //默认Referer
   if (!referer) {
     const urlParts = url.split('://')

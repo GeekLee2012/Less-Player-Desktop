@@ -250,7 +250,8 @@ const randomText = (src, len) => {
 
 /** 随机字符串: 大小写字母和数字组成 */
 const randomTextWithinAlphabetNums = (len) => {
-    return randomText(ALPHABET_NUMS + ALPHABET_NUMS + ALPHABET_NUMS, len)
+    const choices = ALPHABET_NUMS + ALPHABET_NUMS + ALPHABET_NUMS
+    return randomText(choices, len)
 }
 
 const nextInt = (max) => {
@@ -292,11 +293,11 @@ const walkSync = (dir, callback, options) => {
     try {
         options = options || { deep: false }
         readdirSync(dir, { withFileTypes: true }).forEach(dirent => {
-            var pathName = path.join(dir, dirent.name);
+            const pathName = path.join(dir, dirent.name)
             if (dirent.isFile()) {
-                callback(pathName, dirent);
+                callback(pathName, dirent)
             } else if (dirent.isDirectory() && options.deep) {
-                walkSync(pathName, callback, options);
+                walkSync(pathName, callback, options)
             }
         })
     } catch (error) {

@@ -3,12 +3,53 @@ import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { toYyyymmdd } from "../common/Times";
+import { md5 } from "../common/Utils";
 
 
 
 const parseJson = (jsonp, callbackName) => {
     jsonp = jsonp.split(callbackName + '(')[1].trim()
     return JSON.parse(jsonp.substring(0, jsonp.length - 1))
+}
+
+const secretKey = 'f0fc4c668392f9f9a447e48584c214ee'
+
+// // 获取sign参数(使用其它参数排序后，拼接Key，转为大写MD5串)
+const getParamsOrderByKey = function (params, methodType) {
+    if (!methodType) methodType = 'get'
+    methodType = methodType.toUpperCase()
+    if (methodType === 'POST') {
+        return JSON.stringify(params)
+    } else {
+        var sortArr = Object.keys(params).sort();
+        var sortParams = [];
+        var tmpKey = '';
+        if (sortArr.length) {
+            for (var i = 0; i < sortArr.length; i++) {
+                tmpKey = sortArr[i];
+                sortParams.push(tmpKey + '=' + params[tmpKey])
+            }
+        }
+        return sortParams.join('&')
+    }
+}
+
+const getSign = (tm, data, methodType) => {
+    const signText = (data ? (getParamsOrderByKey(data, methodType) + '&') : '') + 'timestamp=' + tm + '&key=' + secretKey
+    return md5(signText).toUpperCase()
+}
+
+const getRequestConfig = (data, methodType) => {
+    methodType = methodType || 'get'
+    const tm = Date.now()
+    return {
+        headers: {
+            equipmentId: '0000',
+            platformCode: 'WEB',
+            timestamp: tm,
+            sign: getSign(tm, data, methodType)
+        }
+    }
 }
 
 //央广云听
@@ -23,7 +64,7 @@ export class RadioCN {
     static GD_CODE = RadioCN.RADIO_PREFIX + '3240'
 
     //全部分类
-    static categories() {
+    static categories_v0() {
         return new Promise(async (resolve, reject) => {
             const result = { platform: RadioCN.CODE, data: [], orders: [] }
 
@@ -47,8 +88,21 @@ export class RadioCN {
         })
     }
 
+    //全部分类
+    static categories() {
+        return new Promise(async (resolve, reject) => {
+            const result = { platform: RadioCN.CODE, data: [], orders: [], multiMode: true }
+            RadioCN.fmRadioCategories().then(cates => {
+                if (cates.data.length > 0) {
+                    result.data.push(...cates.data)
+                }
+                resolve(result)
+            }).catch(error => resolve(result))
+        })
+    }
+
     //电台分类
-    static fmRadioCategories() {
+    static fmRadioCategories_v0() {
         return new Promise((resolve, reject) => {
             const url = "http://tacc.radio.cn/pcpages/radiopages"
             const ts = Date.now()
@@ -75,39 +129,68 @@ export class RadioCN {
         })
     }
 
+    static fmRadioCategories() {
+        return new Promise(async (resolve, reject) => {
+            let url = "https://ytmsout.radio.cn/web/appProvince/list/all"
+            const result = { platform: RadioCN.CODE, data: [] }
+            const provincesResult = await getJson(url, null, getRequestConfig())
+            if (provincesResult && provincesResult.data) {
+                const provincesCate = new Category('地区')
+                result.data.push(provincesCate)
+
+                provincesResult.data.forEach(item => {
+                    const { provinceName, provinceCode } = item
+                    provincesCate.add(provinceName, provinceCode)
+                })
+            }
+            url = "https://ytmsout.radio.cn/web/appCategory/list/all"
+            const typesResult = await getJson(url, null, getRequestConfig())
+            if (typesResult && typesResult.data) {
+                const typesCate = new Category('类型')
+                result.data.push(typesCate)
+
+                typesResult.data.forEach(item => {
+                    const { categoryName, id } = item
+                    typesCate.add(categoryName, id)
+                })
+            }
+            resolve(result)
+        })
+    }
+
+    static parseFmRadioCate(cate) {
+        return {
+            provinceCode: cate['地区'].item['value'],
+            provinceName: cate['地区'].item['key'],
+            categoryId: cate['类型'].item['value'],
+            categoryName: cate['类型'].item['key'],
+        }
+    }
+
     //广播电台
     static fmRadioSquare(cate, offset, limit, page, order) {
         const result = { platform: RadioCN.CODE, cate, offset, limit, page, total: 1, data: [] }
-        cate = cate.replace(RadioCN.RADIO_PREFIX, '')
+        const { provinceCode, provinceName, categoryId, categoryName } = RadioCN.parseFmRadioCate(cate)
         return new Promise((resolve, reject) => {
             if (page > 1) {
                 resolve(result)
                 return
             }
-            const url = "http://tacc.radio.cn/pcpages/radiopages"
-            const ts = Date.now()
-            const callback = 'jQuery112208803652938521349_' + ts
-            const reqBody = {
-                callback,
-                place_id: cate,
-                channel_id: 1,
-                date: toYyyymmdd(ts),
-                _: ts
-            }
-            getJson(url, reqBody).then(jsonp => {
-                const json = parseJson(jsonp, callback)
-                const list = json.data.top
+            const data = { categoryId, provinceCode }
+            const url = "https://ytmsout.radio.cn/web/appBroadcast/list"
+            getJson(url, data, getRequestConfig(data)).then(json => {
+                const list = json.data
                 list.forEach(item => {
-                    const { id, name, radio_id, radio_name, icon, streams, description } = item
-                    const cover = icon[0].url
-                    const playlist = new Playlist(id, RadioCN.CODE, cover, name, null, description)
+                    const { contentId: id, title, image: cover, mp3PlayUrlHigh, mp3PlayUrlLow, playUrlLow, playUrlMulti } = item
+                    const playlist = new Playlist(id, RadioCN.CODE, cover, title)
                     playlist.type = Playlist.FM_RADIO_TYPE
 
                     const artist = [{ id: '', name: '央广云听' }]
-                    const album = { id: '', name: radio_name }
-                    const channelTrack = new Track(id, playlist.platform, name, artist, album)
+                    const albumName = `${provinceName} - ${categoryName}`.replace(' - 全部', '')
+                    const album = { id: '', name: albumName }
+                    const channelTrack = new Track(id, playlist.platform, title, artist, album)
                     channelTrack.cover = cover
-                    channelTrack.url = streams[0].url
+                    channelTrack.url = playUrlMulti || playUrlLow
                     channelTrack.type = playlist.type
 
                     playlist.addTrack(channelTrack)
@@ -122,9 +205,9 @@ export class RadioCN {
     static square(cate, offset, limit, page, order) {
         const originCate = cate
         let resolvedCate = (cate || "").toString().trim()
-        resolvedCate = resolvedCate.length < 1 ? RadioCN.CNR_CODE : resolvedCate
+        //resolvedCate = resolvedCate.length < 1 ? RadioCN.CNR_CODE : resolvedCate
         //电台
-        if (resolvedCate.startsWith(RadioCN.RADIO_PREFIX)) return RadioCN.fmRadioSquare(resolvedCate, offset, limit, page, order)
+        if (typeof (cate) == 'object') return RadioCN.fmRadioSquare(cate, offset, limit, page, order)
         //分类歌单
         return new Promise((resolve, reject) => {
             const result = { platform: RadioCN.CODE, cate: originCate, offset, limit, page, total: 0, data: [] }

@@ -376,11 +376,11 @@ EventBus.on('app-resize', detectTitleHeight)
     line-height: var(--content-text-line-height);
     font-size: var(--content-text-subtitle-size);
     color: var(--content-subtitle-text-color);
-    /* font-size: 15px; */
+
     overflow: hidden;
     word-wrap: break-word;
-    /*white-space: pre-wrap;
-    line-break: anywhere;*/
+    line-break: anywhere;
+    /*white-space: pre-wrap;*/
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
