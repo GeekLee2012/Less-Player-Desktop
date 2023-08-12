@@ -103,7 +103,8 @@ const ALL_PLATFORMS = [
         name: '央广云听',
         shortName: 'YT',
         online: true,
-        types: ['fmRadios', 'anchorRadios'],
+        //types: ['fmRadios', 'anchorRadios'],
+        types: ['fmRadios'],
         weight: 5
     },
     {
