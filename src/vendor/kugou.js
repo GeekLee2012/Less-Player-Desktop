@@ -54,14 +54,18 @@ const getCustomCover = (url, size) => {
     //http://c1.kgimg.com/custom/150/20201207/20201207134716994336.jpg
     //https://imge.kugou.com/temppic/20130807/20130807185439172736.png
     //https://imge.kugou.com/stdmusic/20180712/20180712154305100613.jpg
+    //https://imge.kugou.com/stdmusic/240/20180712/20180712154305100613.jpg
     //http://imge.kugou.com/soft/collection/240/20210518/20210518180852210693.jpg
     size = size || 480
     if (url.includes('/temppic/')) {
-        return 'https://imgessl.kugou.com/custom/' + size + '/' + url.split('/temppic/')[1]
+        url = `https://imgessl.kugou.com/custom/${size}/` + url.split('/temppic/')[1]
     } else if (url.includes('/stdmusic/')) {
-        return 'https://imge.kugou.com/stdmusic/' + size + '/' + url.split('/stdmusic/')[1]
+        url = `https://imge.kugou.com/stdmusic/${size}/` + url.split('/stdmusic/')[1]
     }
-    return url.replace('/custom/150/', `/custom/${size}/`)
+    return url.replace(`/${size}/150/`, `/${size}/`)
+        .replace(`/${size}/240/`, `/${size}/`)
+        .replace(`/${size}/480/`, `/${size}/`)
+        .replace('/custom/150/', `/custom/${size}/`)
         .replace('/custom/240/', `/custom/${size}/`)
         .replace('/custom/480/', `/custom/${size}/`)
         .replace('/soft/collection/150/', `/soft/collection/${size}/`)
@@ -246,7 +250,6 @@ export class KuGou {
                     const cover = item.querySelector('.cover img').getAttribute('src')
                     const title = item.querySelector('.name').textContent
                     const playlist = new Playlist(fmid, KuGou.CODE, cover, title, url)
-                    //playlist.isRadioType = true
                     playlist.type = Playlist.NORMAL_RADIO_TYPE
                     result.data.push(playlist)
                 })
@@ -418,8 +421,8 @@ export class KuGou {
         if (id.startsWith(KuGou.TOPLIST_PREFIX)) return KuGou.toplistDetail(id, offset, limit, page)
         if (id.startsWith('gcid_')) return KuGou.playlistDetail_v1(id, offset, limit, page)
         return new Promise((resolve, reject) => {
-            const url = "https://www.kugou.com/yy/special/single/" + id + ".html"
-            //const url = "http://mac.kugou.com/v2/musicol/yueku/v1/special/single/" + id + "-5-9999.html"
+            const url = `https://www.kugou.com/yy/special/single/${id}.html`
+            //const url = `http://mac.kugou.com/v2/musicol/yueku/v1/special/single/${id}-5-9999.html`
             getDoc(url).then(doc => {
                 let cover = doc.querySelector('.specialPage .pic img').getAttribute('_src')
                 if (cover) cover = getCoverByQuality(cover)
@@ -439,7 +442,7 @@ export class KuGou {
                     }
                 }
                 if (scriptText) {
-                    const json = Function(scriptText + ' return data')()
+                    const json = Function(`${scriptText}; return data`)()
                     json.forEach(item => {
                         const artist = []
                         const album = { id: item.album_id, name: item.album_name }
@@ -471,9 +474,7 @@ export class KuGou {
         id = (id + '').trim()
         if (id.startsWith(KuGou.TOPLIST_PREFIX)) return KuGou.toplistDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
-            //TODO
-            const url = "http://mac.kugou.com/v2/musicol/yueku/v1/special/single/" + id + "-5-9999.html"
-
+            const url = `http://mac.kugou.com/v2/musicol/yueku/v1/special/single/${id}-5-9999.html`
             getDoc(url).then(doc => {
                 const result = new Playlist(id, KuGou.CODE)
                 //Tracks
@@ -488,7 +489,7 @@ export class KuGou {
                     }
                 }
                 if (scriptText) {
-                    const json = Function(scriptText + ' return global')()
+                    const json = Function(`${scriptText}; return global`)()
 
                     result.cover = json.cover.replace("/240/", '/480/')
                     result.title = json.name
@@ -535,7 +536,7 @@ export class KuGou {
                     }
                 }
                 if (scriptText) {
-                    const json = Function(scriptText + ' return { nData, data, specialData }')()
+                    const json = Function(`${scriptText}; return { nData, data, specialData }`)()
                     const { listinfo, songs: list } = json.nData
                     Object.assign(result, {
                         title: listinfo.name,
@@ -629,8 +630,8 @@ export class KuGou {
     //歌手详情：Name、Cover、简介(如果有)等
     static artistDetail(id) {
         return new Promise((resolve, reject) => {
-            //const url = "https://www.kugou.com/singer/" + id + ".html"
-            const url = "https://www.kugou.com/singer/info/" + id + "/"
+            //const url = `https://www.kugou.com/singer/${id}.html`
+            const url = `https://www.kugou.com/singer/info/${id}/`
             getDoc(url).then(doc => {
                 let cover = doc.querySelector('.sng_ins_1 .top img').getAttribute('_src')
                 if (cover) cover = getCoverByQuality(cover)
@@ -650,9 +651,7 @@ export class KuGou {
                 resolve({ offset, limit, page, total: 0, data: [] })
                 return
             }
-            const url = "https://www.kugou.com/yy/"
-                + "?r=singer/song&sid=" + id
-                + "&p=" + page + "&t=" + Date.now()
+            const url = `https://www.kugou.com/yy/?r=singer/song&sid=${id}&p=${page}&t=` + Date.now()
             postJson(url).then(json => {
                 const total = json.total
                 const data = []
@@ -674,9 +673,7 @@ export class KuGou {
     //歌手详情: 专辑
     static artistDetailAlbums(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const url = "https://www.kugou.com/yy/"
-                + "?r=singer/album&sid=" + id
-                + "&p=" + page + "&t=" + Date.now()
+            const url = `https://www.kugou.com/yy/?r=singer/album&sid=${id}&p=${page}&t=` + Date.now()
             postJson(url).then(json => {
                 const total = json.total
                 const data = []
@@ -695,7 +692,7 @@ export class KuGou {
     //专辑详情
     static albumDetail(id) {
         return new Promise((resolve, reject) => {
-            const url = "https://www.kugou.com/album/" + id + ".html"
+            const url = `https://www.kugou.com/album/${id}.html`
             getDoc(url).then(doc => {
                 let cover = doc.querySelector('.pic img').getAttribute('_src')
                 if (cover) cover = getCoverByQuality(cover)
@@ -762,7 +759,7 @@ export class KuGou {
                 + "&iscorrection=1&privilege_filter=0&token=&srcappid=2919"
                 + "&clienttime=" + now + "&mid=" + now + "&uuid=" + now + "&dfid=-"
             const signature = getSignature(param)
-            const url = "https://complexsearch.kugou.com/v2/search/song" + "?" + param + "&signature=" + signature
+            const url = `https://complexsearch.kugou.com/v2/search/song?${param}&signature=${signature}`
             const result = { platform: KuGou.CODE, offset, limit, page, data: [] }
             getJson(url).then(jsonp => {
                 let jsonText = jsonp.split(callbackFn + "(")[1].trim()
@@ -795,7 +792,7 @@ export class KuGou {
                 + "&iscorrection=1&privilege_filter=0&token=&srcappid=2919"
                 + "&clienttime=" + now + "&mid=" + now + "&uuid=" + now + "&dfid=-"
             const signature = getSignature(param)
-            const url = "https://complexsearch.kugou.com/v1/search/special" + "?" + param + "&signature=" + signature
+            const url = `https://complexsearch.kugou.com/v1/search/special?${param}&signature=${signature}`
 
             getJson(url).then(jsonp => {
                 let jsonText = jsonp.split(callbackFn + "(")[1].trim()
@@ -821,7 +818,7 @@ export class KuGou {
                 + `&mid=e463b0b4d6b10509c05f270142d87a7d&page=${page}&pagesize=20`
                 + `&platform=WebFilter&requestid=5&srcappid=2919&tag=em&token=&userid=0&uuid=e35cb5213b6619ec5c61e5cecb61bcf4`
             const signature = getSignature(param)
-            const url = "https://complexsearch.kugou.com/v1/search/album" + "?" + param + "&signature=" + signature
+            const url = `https://complexsearch.kugou.com/v1/search/album?${param}&signature=${signature}`
             getJson(url).then(json => {
                 const data = json.data.lists.map(item => {
                     const cover = getCoverByQuality(item.img)
@@ -907,7 +904,7 @@ export class KuGou {
             }
             //const url = 'https://www.kugou.com/yy/html/singer.html'
             const resolvedCate = KuGou.parseArtistCate(cate, offset, limit, page)
-            const url = 'https://www.kugou.com/yy/singer/index/' + resolvedCate + '.html'
+            const url = `https://www.kugou.com/yy/singer/index/${resolvedCate}.html`
             getDoc(url).then(doc => {
                 let els = doc.querySelectorAll('.sng .r #list_head li')
                 els.forEach(el => {

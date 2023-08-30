@@ -62,7 +62,7 @@ export class RadioCN {
     static SH_CODE = RadioCN.RADIO_PREFIX + '3228'
     static JS_CODE = RadioCN.RADIO_PREFIX + '3232'
     static GD_CODE = RadioCN.RADIO_PREFIX + '3240'
-    static FM_CATES_CACHE = { data: [] }
+    static FM_CATES_CACHE = []
 
     //全部分类
     static categories_v0() {
@@ -156,7 +156,8 @@ export class RadioCN {
                 })
             }
             if (result.data.length > 0) {
-                RadioCN.FM_CATES_CACHE.data.push(...result.data)
+                RadioCN.FM_CATES_CACHE.length = 0
+                RadioCN.FM_CATES_CACHE.push(...result.data)
             }
             resolve(result)
         })
@@ -165,7 +166,7 @@ export class RadioCN {
     static randomCate() {
         let provinceCode = 0, provinceName = '国家'
         let typeId = 0, typeName = '全部'
-        const cacheCates = RadioCN.FM_CATES_CACHE.data
+        const cacheCates = RadioCN.FM_CATES_CACHE
         if (cacheCates.length > 0) {
             const { data: provinces } = cacheCates[0]
             const index = parseInt(Math.random() * (provinces.length - 1))

@@ -165,8 +165,12 @@ const updateScrollLocatorTime = () => {
   if (!locatorEl) return
   const lyricEl = document.querySelector('.desktop-lyric .center')
   if (!lyricEl) return
+  //横屏
   const x = lyricEl.offsetLeft + 188
   const y = locatorEl.offsetTop
+  //竖屏
+  //const x = locatorEl.offsetLeft
+  //const y = lyricEl.offsetTop + 188
   const pointEl = document.elementFromPoint(x, y)
   if (!pointEl) return
   const timekey = pointEl.getAttribute('timeKey')
@@ -545,8 +549,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="desktop-lyric" :class="{ 'desktop-lyric-lock': lockState }" ref="desktopLyricRef" @mouseover="onMouseover"
-    @mouseout="onMouseout">
+  <div class="desktop-lyric" :class="{ 'desktop-lyric-lock': lockState, 'desktop-lyric-vertical': false }"
+    ref="desktopLyricRef" @mouseover="onMouseover" @mouseout="onMouseout">
     <div class="header">
       <div class="action">
         <div class="close-btn btn" v-show="!lockState" @click="hideWin">
@@ -968,4 +972,77 @@ onMounted(() => {
   margin-left: 1px;
   fill: var(--button-icon-text-btn-icon-color) !important;
 }
+
+/* 实验性CSS - 竖屏歌词 */
+/*
+.desktop-lyric-vertical {
+  flex-direction: row;
+}
+
+.desktop-lyric-vertical .header {
+  width: 66px;
+  background-color: var(--content-left-nav-bg-color);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 33px 0px;
+}
+
+.desktop-lyric-lock .header {
+  background: none;
+  border-right: 1px solid transparent;
+}
+
+.desktop-lyric-vertical .header .action {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.desktop-lyric-vertical .spacing {
+  margin-left: 0px;
+  margin-top: 25px;
+}
+
+.desktop-lyric-vertical .center {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 33px;
+  overflow-x: scroll;
+  width: 202px;
+  writing-mode: vertical-rl;
+}
+
+.desktop-lyric-vertical .center .line {
+  writing-mode: vertical-rl;
+  letter-spacing: 6px;
+  line-height: var(--content-desktop-lyric-text-size + 6);
+  margin-left: var(--content-desktop-lyric-line-spacing);
+  padding: 0px;
+  text-align: left;
+  min-height: 202px;
+}
+
+.desktop-lyric-vertical .lyric-showall {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.desktop-lyric-vertical .lyric-showall .first {
+  margin-top: 0px !important;
+}
+
+.desktop-lyric-vertical .lyric-showall .end {
+  margin-bottom: 0px !important;
+}
+
+.desktop-lyric-vertical .scroll-locator {
+  left: 50% !important;
+  width: fit-content;
+}
+*/
 </style>

@@ -187,9 +187,10 @@ onMounted(() => loadRadio())
 #freefm-edit-view {
     display: flex;
     flex-direction: column;
-    padding: 20px 33px 15px 33px;
+    padding: 20px 33px;
     flex: 1;
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 #freefm-edit-view .header {

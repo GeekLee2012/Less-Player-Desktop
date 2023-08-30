@@ -190,8 +190,8 @@ const setElementAlignCenter = (selector, width, height, offsetLeft, offsetTop) =
   //offsetXXX 设置偏移量
   const left = (clientWidth - width) / 2 + (offsetLeft || 0)
   const top = (clientHeight - height) / 2 + (offsetTop || 0)
-  el.style.left = left + 'px'
-  el.style.top = top + 'px'
+  el.style.left = `${left}px`
+  el.style.top = `${top}px`
 }
 
 const restoreSetting = (isInit) => {
@@ -352,7 +352,7 @@ const showContextMenu = (event, data, dataType, index, isPlaybackQueue) => {
   //const { data, dataType, index } = props
   setTimeout(() => {
     EventBus.emit("commonCtxMenu-init", { dataType })
-    EventBus.emit("commonCtxMenu-show", { event, value: data, index })
+    EventBus.emit("commonCtxMenu-show", { event, data, index })
   }, 99)
 }
 

@@ -129,13 +129,13 @@ const setSubmenuPosition = (event) => {
   ctxSubmenuPosStyle.top = pos.y + 'px !important'
 }
 
-EventBus.on('commonCtxMenu-show', ({ event, value, index }) => {
+EventBus.on('commonCtxMenu-show', ({ event, data, index }) => {
   hideCommonCtxMenu(true) //强制取消上次的显示
   hideAddToListSubmenu()
   hideArtistListSubmenu()
   setMenuPosition(event)
   //updateCommonCtxMenuCacheItemIndex(index)
-  showCommonCtxMenu(value)
+  showCommonCtxMenu(data)
 })
 
 //TODO 实现方式有待完善

@@ -275,8 +275,19 @@ export const usePlatformStore = defineStore('platforms', {
         isLocalMusic(platform) {
             return this.assertsPlatform(platform, LocalMusic.CODE)
         },
+        isRadioCN(platform) {
+            return this.assertsPlatform(platform, RadioCN.CODE)
+        },
+        isXimalaya(platform) {
+            return this.assertsPlatform(platform, Ximalaya.CODE)
+        },
         isFreeFM(platform) {
             return this.assertsPlatform(platform, FreeFM.CODE)
+        },
+        isFMRadioPlatform(platform) {
+            return this.isRadioCN(platform)
+                || this.isXimalaya(platform)
+                || this.isFreeFM(platform)
         },
         isArtistDetailVisitable(platform) {
             return this.isPlatformValid(platform)

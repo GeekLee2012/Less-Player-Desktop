@@ -36,7 +36,7 @@ const router = useRouter()
 const setupRouter = () => {
     router.beforeResolve((to, from) => {
         if (isDevEnv()) console.log("[ ROUTE ] ==>>> " + to.path)
-        autoSwitchExploreMode(to)
+        autoSwitchExploreMode(to, from)
         highlightPlatform(to)
         highlightNavigationCustomPlaylist(to, from)
         hideRelativeComponents(to)
@@ -57,18 +57,20 @@ const highlightNavigationCustomPlaylist = (to, from) => {
     EventBus.emit("navigation-refreshCustomPlaylistIndex", index)
 }
 
-const autoSwitchExploreMode = (to) => {
-    const { path } = to
-    if (path.includes('/playlists/') || path == '/') {
+const autoSwitchExploreMode = (to, from) => {
+    const { path: toPath } = to
+    const { path: fromPath } = from
+    if (toPath.includes('/playlists/') || toPath == '/') {
         setExploreMode(0)
-    } else if (path.includes('/artists/')) {
+    } else if (toPath.includes('/artists/')) {
         setArtistExploreMode()
-    } else if (path.includes('/radios')) {
+    } else if (toPath.includes('/radios')) {
         setRadioExploreMode()
-    } else if (path.includes('/userhome')) {
+    } else if (toPath.includes('/userhome')) {
         setUserHomeExploreMode()
-    } else {
-        //setExploreMode(0)
+    } else if (fromPath.includes('/batch/')
+        && toPath.includes('/setting')) {
+        setExploreMode(0)
     }
 }
 
@@ -103,8 +105,6 @@ const autoSwitchSearchPlaceHolder = (to) => {
 }
 
 const hideRelativeComponents = (to) => {
-    //const path = to.path
-    //TODO
     hidePlayingView()
     hideVideoPlayingView()
     hideAllCtxMenus()
@@ -144,7 +144,7 @@ const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
 const resolveRoute = (route) => (typeof (route) == 'object' ? route : { path: route.toString() })
 
-//TODO Reject是否需要实现待考虑
+//Reject是否需要实现待考虑
 const visitRoute = (route) => {
     return new Promise((resolve, reject) => {
         if (!route) {
@@ -176,13 +176,21 @@ const visitCommonRoute = (route, onRouteReady) => {
     return visitRoute(createCommonRoute(route, onRouteReady))
 }
 
+const refresh = () => {
+    const route = router.currentRoute.value
+    Object.assign(route, { override: true })
+    visitCommonRoute(route)
+}
+
 const highlightPlatform = (to) => {
-    const path = to.path
+    const { path } = to
     let platform = null
     if (path.includes('/local')) {
         platform = 'local'
     } else if (path.includes('/freefm')) {
         platform = 'freefm'
+    } else if (path.includes('/track')) {
+        platform = path.split('/')[2]
     } else if (path.includes('/square') || path.includes('/playlist')
         || path.includes('/artist') || path.includes('/album')) {
         platform = path.split('/')[3]
@@ -265,6 +273,7 @@ provide('appRoute', {
     visitCommonRoute,
     backward: () => router.back(),
     forward: () => router.forward(),
+    refresh,
     visitHome: () => (visitCommonRoute('/')),
     visitThemes: () => (visitCommonRoute('/themes')),
     visitUserHome: () => (visitCommonRoute('/userhome/all')),
@@ -358,7 +367,7 @@ provide('appRoute', {
     visitTrack: ({ id, platform, title, cover, artist, album }, onRouteReady) => {
         const exploreMode = resolveExploreMode()
         return visitCommonRoute({
-            path: `/${exploreMode}/track`,
+            path: `/${exploreMode}/${platform}/track`,
             //replace: false,   //Vue-Router原生支持选项，但有副作用
             override: true,     //自定义选项
             query: { id, platform, title, cover, artist, album }

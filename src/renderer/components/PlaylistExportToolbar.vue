@@ -1,8 +1,8 @@
 <script setup>
-import { ref, toRaw } from 'vue';
-import { useAppCommonStore } from '../store/appCommonStore';
-import { useIpcRenderer, isWinOS } from '../../common/Utils';
+import { computed, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { useIpcRenderer, isWinOS, toTrimString } from '../../common/Utils';
 
 
 
@@ -11,18 +11,28 @@ const ipcRenderer = useIpcRenderer()
 const { playlistExportContextItem } = storeToRefs(useAppCommonStore())
 const { showToast, hidePlaylistExportToolbar } = useAppCommonStore()
 
+const title = ref('导出Playlist')
+const setTitle = (value) => {
+    title.value = value || '导出Playlist'
+}
+
 const playlistFormats = [{
     id: 'm3u',
     name: 'm3u',
 }, {
     id: 'pls',
     name: 'pls',
+}, {
+    id: 'json',
+    name: 'json',
 }]
 
 const formatIndex = ref(0)
 const setPlaylistFormat = (item, index) => {
     formatIndex.value = index
 }
+
+const filteredPlaylistFormats = ref(playlistFormats)
 
 const exportPathRef = ref(null)
 const selectDir = async () => {
@@ -33,24 +43,39 @@ const selectDir = async () => {
     }
 }
 
+const exportNameRef = ref(null)
 const exportPlaylist = async () => {
     if (!ipcRenderer || !exportPathRef.value) return
-    const path = exportPathRef.value.value
-    if (!path || path.trim().length < 1) return
+    const path = toTrimString(exportPathRef.value.value)
+    //const name = toTrimString(exportNameRef.value.value)
+    if (!path || path.length < 1) return
+    //if (!name || name.length < 1) return
+
     const format = playlistFormats[formatIndex.value].id
-    const data = toRaw(playlistExportContextItem.value)
+    let { data, formatFn } = playlistExportContextItem.value
+    if (formatFn) data = formatFn(data, format)
+    data = toRaw(data)
+
     const result = await ipcRenderer.invoke('export-playlists', { path, format, data })
-    let msg = '歌单导出失败！'
+    let msg = '导出失败！'
     if (result) {
         hidePlaylistExportToolbar()
-        msg = '歌单导出功！'
+        msg = '导出成功！'
     }
     showToast(msg)
 }
+
+watch(playlistExportContextItem, (nv, ov) => {
+    if (!nv) return
+    const { noJson, title } = nv
+    setTitle(title)
+    const key = noJson ? 'json' : 'uuundefined'
+    filteredPlaylistFormats.value = playlistFormats.filter(item => (item.id != key))
+}, { immediate: true })
 </script>
 
 <template>
-    <div class="playlist-export-toolbar" v-gesture-dnm="{ trigger: '.header' }">
+    <div class="playlist-export-toolbar" v-gesture-dnm="{ trigger: '.header' }" @keydown.stop="">
         <div class="container" :class="{ 'container-win-style': isWinOS() }">
             <div class="header">
                 <div class="action left-action">
@@ -64,7 +89,7 @@ const exportPlaylist = async () => {
                     </div>
                 </div>
                 <div class="title-wrap">
-                    <div class="title">导出歌单</div>
+                    <div class="title" v-html="title"></div>
                 </div>
                 <div class="action right-action">
                     <div class="save-btn text-btn" @click="exportPlaylist">
@@ -82,22 +107,33 @@ const exportPlaylist = async () => {
             </div>
             <div class="center">
                 <div class="row first">
-                    <div class="cate-name">歌单格式：</div>
+                    <div class="cate-name">文件格式：</div>
                     <div class="row-content">
-                        <span v-for="(item, index) in playlistFormats" :class="{ active: index == formatIndex }"
-                            class="list-item" @click="setPlaylistFormat(item, index)" v-html="item.name">
+                        <span v-for="(item, index) in filteredPlaylistFormats" class="list-item"
+                            :class="{ active: index == formatIndex }" @click="setPlaylistFormat(item, index)"
+                            v-html="item.name">
                         </span>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="cate-name">文件路径：</div>
+                    <div class="cate-name">存储目录：</div>
                     <div class="row-content">
                         <div class="dir-input-ctl">
-                            <input class="text-input-ctl" ref="exportPathRef" placeholder="导出文件存储路径" />
+                            <input class="text-input-ctl" ref="exportPathRef" placeholder="文件存储目录" />
                             <div class="select-btn" @click="selectDir">选择</div>
                         </div>
                     </div>
                 </div>
+                <!--
+                <div class="row" v-show="false">
+                    <div class="cate-name">文件名称：</div>
+                    <div class="row-content">
+                        <div class="name-input-ctl">
+                            <input class="text-input-ctl" ref="exportNameRef" placeholder="文件名称" />
+                        </div>
+                    </div>
+                </div>
+                -->
             </div>
         </div>
     </div>
@@ -250,4 +286,10 @@ const exportPlaylist = async () => {
 .playlist-export-toolbar .container-win-style .dir-input-ctl .select-btn {
     height: 40px;
 }
+
+/*
+.playlist-export-toolbar .name-input-ctl .text-input-ctl {
+    width: 325px;
+}
+*/
 </style>

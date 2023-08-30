@@ -94,8 +94,8 @@ export class Ximalaya {
             const result = { platform: Ximalaya.CODE, cate, offset, limit, page, total: 0, data: [] }
             const pageSize = 48
             const url = "https://mobile.ximalaya.com/radio-first-page-app/search"
-                + "?locationId=" + locationId + "&locationTypeId=" + locationTypeId
-                + "&categoryId=" + categoryId + "&pageNum=" + page + "&pageSize=" + pageSize
+                + `?locationId=${locationId}&locationTypeId=${locationTypeId}`
+                + `&categoryId=${categoryId}&pageNum=${page}&pageSize=${pageSize}`
             getJson(url).then(json => {
                 const list = json.data.radios
                 const total = json.data.total

@@ -9,7 +9,7 @@ import { useFreeFMStore } from "../renderer/store/freeFMStore";
 export class FreeFM {
     static CODE = 'freefm'
 
-    //歌曲播放详情：url、cover、lyric等
+    //播放详情：url、cover、lyric等
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
             resolve(track)

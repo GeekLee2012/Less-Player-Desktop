@@ -591,7 +591,7 @@ export class QQ {
                 radioList.forEach(group => {
                     group.list.forEach(item => {
                         const cid = item.id
-                        const title = group.title + '| ' + item.title
+                        const title = group.title + '｜' + item.title
                         const playlist = new Playlist(cid, QQ.CODE, item.pic_url, title)
                         //playlist.isRadioType = true
                         playlist.type = Playlist.NORMAL_RADIO_TYPE

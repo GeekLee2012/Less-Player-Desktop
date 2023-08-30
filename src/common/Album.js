@@ -30,7 +30,8 @@ export class Album {
         this.data.push(track)
     }
 
-    hasTracks() {
-        return this.data && this.data.length > 0
+    static hasTracks(album) {
+        return album && album.data && album.data.length > 0
     }
+
 }

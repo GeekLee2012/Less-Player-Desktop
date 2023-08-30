@@ -50,56 +50,64 @@ const updateTabData = (data) => {
     updateTabTipText(tabData.value.length)
 }
 
-const loadSongs = () => {
+const loadSongs = async () => {
     currentTabView.value = SongListControl
     setLoading(true)
     const vendor = currentVender()
     if (!vendor || !vendor.searchSongs) return
-    vendor.searchSongs(props.keyword, offset, limit, page).then(result => {
-        if (!isSongsTab()) return
-        if (currentPlatform() != result.platform) return
-        updateTabData(result.data)
-        setLoading(false)
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.searchSongs(props.keyword, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!isSongsTab() || !result) return
+    if (currentPlatform() != result.platform) return
+    updateTabData(result.data)
+    setLoading(false)
 }
 
-const loadPlaylists = () => {
+const loadPlaylists = async () => {
     currentTabView.value = PlaylistsControl
     setLoading(true)
     const vendor = currentVender()
     if (!vendor || !vendor.searchPlaylists) return
-    vendor.searchPlaylists(props.keyword, offset, limit, page).then(result => {
-        if (!isPlaylistsTab()) return
-        if (currentPlatform() != result.platform) return
-        updateTabData(result.data)
-        setLoading(false)
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.searchPlaylists(props.keyword, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!isPlaylistsTab() || !result) return
+    if (currentPlatform() != result.platform) return
+    updateTabData(result.data)
+    setLoading(false)
 }
 
-const loadAlbums = () => {
+const loadAlbums = async () => {
     currentTabView.value = AlbumListControl
     setLoading(true)
     const vendor = currentVender()
     if (!vendor || !vendor.searchAlbums) return
-    vendor.searchAlbums(props.keyword, offset, limit, page).then(result => {
-        if (!isAlbumsTab()) return
-        if (currentPlatform() != result.platform) return
-        updateTabData(result.data)
-        setLoading(false)
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.searchAlbums(props.keyword, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!isAlbumsTab() || !result) return
+    if (currentPlatform() != result.platform) return
+    updateTabData(result.data)
+    setLoading(false)
 }
 
-const loadArtists = () => {
+const loadArtists = async () => {
     currentTabView.value = ArtistListControl
     setLoading(true)
     const vendor = currentVender()
     if (!vendor || !vendor.searchArtists) return
-    vendor.searchArtists(props.keyword, offset, limit, page).then(result => {
-        if (!isArtistsTab()) return
-        if (currentPlatform() != result.platform) return
-        updateTabData(result.data)
-        setLoading(false)
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.searchArtists(props.keyword, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!isArtistsTab() || !result) return
+    if (currentPlatform() != result.platform) return
+    updateTabData(result.data)
+    setLoading(false)
 }
 
 const resetTabView = () => {

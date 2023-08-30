@@ -20,6 +20,7 @@ import SongListControl from '../components/SongListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
+import { Album } from '../../common/Album';
 
 
 
@@ -108,7 +109,7 @@ const updateTabData = (data) => {
     }
 }
 
-const getAlbumDetail = () => {
+const getAlbumDetail = async () => {
     setLoadingDetail(true)
     if (isAlbumDetailLoaded()) {
         setLoadingDetail(false)
@@ -117,23 +118,25 @@ const getAlbumDetail = () => {
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.albumDetail) return
     const id = albumId.value
-    vendor.albumDetail(id).then(result => {
-        if (!result) return
-        const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
-        updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
-        updateAbout(result.about)
-        Object.assign(detail, result)
-        setLoadingDetail(false)
-        if (result.hasTracks()) {
-            updateAllSongs(result.data)
-            updateTabData(allSongs.value)
-            currentTabView.value = SongListControl
-            setLoading(false)
-        }
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.albumDetail(id)
+    } while (!result && retry++ <= 3)
+    if (!result) return
+    const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
+    updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
+    updateAbout(result.about)
+    Object.assign(detail, result)
+    setLoadingDetail(false)
+    if (Album.hasTracks(result)) {
+        updateAllSongs(result.data)
+        updateTabData(allSongs.value)
+        currentTabView.value = SongListControl
+        setLoading(false)
+    }
 }
 
-const loadAllSongs = () => {
+const loadAllSongs = async () => {
     setLoading(true)
     currentTabView.value = SongListControl
     if (isAllSongsTabLoaded()) {
@@ -144,17 +147,19 @@ const loadAllSongs = () => {
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.albumDetailAllSongs) return
     const id = albumId.value
-    vendor.albumDetailAllSongs(id, 0, 100).then(result => {
-        if (!isAllSongsTab() || !result) return
-        updateAllSongs(result.data)
-        updateTabData(allSongs.value)
-        if (isLocalMusic(platform.value)) {
-            updateCover(result.cover)
-            updateArtistName(result.artistName)
-            updatePublishTime(result.publishTime)
-        }
-        setLoading(false)
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.albumDetailAllSongs(id, 0, 100)
+    } while (!result && retry++ <= 3)
+    if (!isAllSongsTab() || !result) return
+    updateAllSongs(result.data)
+    updateTabData(allSongs.value)
+    if (isLocalMusic(platform.value)) {
+        updateCover(result.cover)
+        updateArtistName(result.artistName)
+        updatePublishTime(result.publishTime)
+    }
+    setLoading(false)
 }
 
 const loadAbout = () => {
@@ -227,7 +232,7 @@ EventBus.on('app-resize', detectTitleHeight)
                 <div class="title" v-html="albumName" ref="titleRef"></div>
                 <div class="info" :class="{ 'short-info': isTwoLinesTitle }">
                     <div class="info-row">
-                        <span><b>歌手:</b> {{ artistName || '未知歌手' }} </span>
+                        <p><b>歌手:</b> <span class="artist">{{ artistName || '未知歌手' }} </span></p>
                     </div>
                     <div class="info-row">
                         <span class="col1"><b>发行时间:</b> {{ publishTime || '未知' }} </span>
@@ -265,7 +270,7 @@ EventBus.on('app-resize', detectTitleHeight)
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
-            <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
+            <component :id="id" :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
                 :loading="isLoading">
             </component>
         </div>
@@ -335,12 +340,22 @@ EventBus.on('app-resize', detectTitleHeight)
 }
 
 #album-detail-view .header .info-row span {
-    color: #ababab;
     color: var(--content-subtitle-text-color);
+}
+
+#album-detail-view .header .info-row p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: left;
 }
 
 #album-detail-view .header .info-row b {
     margin-right: 8px;
+    font-weight: normal;
+    color: var(--content-subtitle-text-color);
 }
 
 #album-detail-view .header .info-row .col1 {

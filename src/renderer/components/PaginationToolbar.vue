@@ -52,7 +52,7 @@ const refreshPageList = () => {
     }
 
     pageList.length = 0
-    pageList.push(...list)
+    if (hasMax) pageList.push(...list)
 }
 
 //转换特殊页

@@ -84,6 +84,7 @@ export const useSettingStore = defineStore('setting', {
             fontSize: 17.5,
             imgQualityIndex: 1,
             paginationStyleIndex: 1,
+            imageTextTileStyleIndex: 0, //歌单、专辑等Tile样式
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -129,7 +130,7 @@ export const useSettingStore = defineStore('setting', {
             //普通分页，本地歌曲每页记录数
             limitPerPageForLocalPlaylist: 30,
             //高亮当前右键菜单对应的歌曲
-            highlightCtxMenuItem: true,
+            highlightCtxMenuItem: true
         },
         search: {
             autoPlaceholder: true,
@@ -436,6 +437,9 @@ export const useSettingStore = defineStore('setting', {
         },
         getPaginationStyleIndex() {
             return this.common.paginationStyleIndex
+        },
+        isUseCardStyleImageTextTile() {
+            return this.common.imageTextTileStyleIndex == 1
         }
     },
     actions: {
@@ -581,6 +585,11 @@ export const useSettingStore = defineStore('setting', {
             if (freq < 1 || freq > 256) return
             this.track.spectrumRefreshFrequency = freq
             this.setupSpectrumRefreshFrequency()
+        },
+        setImageTextTileStyleIndex(value) {
+            const index = parseInt(value || 0)
+            if (index < 0 || index > 1) return
+            this.common.imageTextTileStyleIndex = index
         },
         toggleUseOnlineCover() {
             this.track.useOnlineCover = !this.track.useOnlineCover

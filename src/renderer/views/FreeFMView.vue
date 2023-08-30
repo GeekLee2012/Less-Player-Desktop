@@ -6,7 +6,7 @@ export default {
 </script>
 
 <script setup>
-import { computed, inject, onDeactivated, onMounted, ref, watch } from 'vue';
+import { computed, inject, onActivated, onDeactivated, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useFreeFMStore } from '../store/freeFMStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -14,7 +14,7 @@ import { useSettingStore } from '../store/settingStore';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { useIpcRenderer } from "../../common/Utils";
+import { useIpcRenderer, parseM3uText, parsePlsText } from "../../common/Utils";
 import EventBus from '../../common/EventBus';
 
 
@@ -53,6 +53,7 @@ const resetBack2TopBtn = () => {
 }
 
 const onScroll = () => {
+    markScrollState()
     hideAllCtxMenus()
 }
 
@@ -65,10 +66,21 @@ const onDrop = async (event) => {
 
 const importRadios = async () => {
     if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-json-file')
+    const result = await ipcRenderer.invoke('open-file', { title: '请选择数据文件', filterExts: ['json', 'm3u', 'm3u8', 'pls'] })
     if (result) {
         increaseImportTaskCount()
-        const { data: radios } = JSON.parse(result.data)
+        const { data: rData, filePath } = result
+        const isJson = filePath.endsWith('.json')
+        const isPls = filePath.endsWith('.pls')
+        const { data: radios } = isJson ?
+            JSON.parse(rData)
+            : isPls ? parsePlsText(rData, item => {
+                item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
+                return item
+            }) : parseM3uText(rData, item => {
+                item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
+                return item
+            })
         let msg = '导入FM电台失败！', success = false
         if (radios && radios.length > 0) {
             radios.forEach(item => {
@@ -125,6 +137,7 @@ const filterContent = () => {
     if (listData && listData.length != data.length) {
         filteredData.value = listData
     }
+    resetScrollState()
 }
 
 const getAllTags = () => {
@@ -176,8 +189,28 @@ const loadPageContent = ({ offset, limit, page, dataInProps }) => {
     return { data: pageData }
 }
 
-onMounted(() => {
+let markScrollTop = 0
+const markScrollState = () => {
+    if (freefmRef.value) markScrollTop = freefmRef.value.scrollTop
+}
+
+const restoreScrollState = () => {
+    if (markScrollTop < 1) return
+    if (freefmRef.value) freefmRef.value.scrollTop = markScrollTop
+}
+
+const resetScrollState = () => {
+    markScrollTop = 0
+    if (freefmRef.value) freefmRef.value.scrollTop = markScrollTop
     resetBack2TopBtn()
+}
+
+onMounted(() => {
+    resetScrollState()
+})
+
+onActivated(() => {
+    restoreScrollState()
 })
 
 onDeactivated(() => {

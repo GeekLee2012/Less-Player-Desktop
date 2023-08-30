@@ -65,6 +65,7 @@ const { setThemeIndex,
     allImageQualities,
     setImageQualityIndex,
     setPaginationStyleIndex,
+    setImageTextTileStyleIndex,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
@@ -194,23 +195,35 @@ const showDeskLyricAlignItem = computed(() => {
 
 /* 应用更新升级 */
 const changelogUrl = 'https://gitee.com/rive08/less-player-desktop/blob/master/CHANGELOG.md'
-const lastReleaseUrlRoot = 'https://gitee.com/rive08/less-player-desktop/releases/tag/'
+//const lastReleaseUrlRoot = 'https://gitee.com/rive08/less-player-desktop/releases/tag/'
 const githubReleasesUrl = 'https://github.com/GeekLee2012/Less-Player-Desktop/releases/'
 const giteeReleasesUrl = 'https://gitee.com/rive08/less-player-desktop/releases/'
 const { version } = packageCfg
 const lastVersion = ref(version)
+const giteeLastVersion = ref(version)
+const githubLastVersion = ref(version)
 const isLastRelease = ref(true)
+const giteeHasNewRelease = ref(false)
+const githubHasNewRelease = ref(false)
+/*
 const downloadState = ref(0)
 const progressBarRef = ref(null)
 const downloadProgress = ref('准备开始下载')
 let localSavePath = null
+*/
 
 const setLastRelease = (value) => isLastRelease.value = value
+const setGiteeLastVersion = (value) => giteeLastVersion.value = value
+const setGithubLastVersion = (value) => githubLastVersion.value = value
+const setGiteeHasNewRelease = (value) => giteeHasNewRelease.value = value
+const setGithubHasNewRelease = (value) => githubHasNewRelease.value = value
+/*
 const setDownloadState = (value) => downloadState.value = value
 const isDownloadError = () => (downloadState.value == -1)
 const isUnstarted = () => (downloadState.value <= 0)
 const isDownloading = () => (downloadState.value == 1)
 const isDownloaded = () => (downloadState.value == 2)
+
 
 const updateDownloadProgress = (received, total) => {
     let receivedMB = 0, totalMB = 0
@@ -237,35 +250,35 @@ const resetDownloadProgress = () => {
     setDownloadState(0)
     updateDownloadProgress(0, 0)
 }
-
+*/
 const getLastReleaseVersion = () => {
     return new Promise((resolve, reject) => {
         setLastRelease(true)
-        const mode = isCheckPreReleaseVersion.value ? 'pre-release' : 'release'
-        const config = {
-            'pre-release': {
-                url: githubReleasesUrl,
-                getLastVersion: (doc) => {
-                    return doc.querySelector('.repository-content .col-md-2 .mr-3 span').textContent.trim()
-                }
-            },
-            'release': {
-                url: changelogUrl,
-                getLastVersion: (doc) => {
-                    return doc.querySelector('.file_content h3').textContent.trim()
-                }
-            }
+        setGiteeHasNewRelease(false)
+        setGithubHasNewRelease(false)
+        setGiteeLastVersion(version)
+        setGithubLastVersion(version)
+
+        if (isCheckPreReleaseVersion.value) { //开发预览版
+            Promise.all([getDoc(giteeReleasesUrl), getDoc(githubReleasesUrl)]).then(docs => {
+                const [giteeDoc, githubDoc] = docs
+                const giteeVersion = giteeDoc.querySelector('.releases-tag-content .release-tag-item .release-meta .tag-name').textContent.trim()
+                const githubVersion = githubDoc.querySelector('.repository-content .col-md-2 .mr-3 span').textContent.trim()
+                resolve({ giteeVersion, githubVersion })
+            }).catch(reason => {
+                reject({ version })
+            })
+        } else { //正式版
+            getDoc(changelogUrl).then(doc => {
+                const changeLogLastVersion = doc.querySelector('.file_content h3').textContent.trim()
+                resolve({ version: changeLogLastVersion })
+            }).catch(reason => {
+                reject({ version })
+            })
         }
-        const { url, getLastVersion } = config[mode]
-        //resolve('v0.1.16-dev-20230712')
-        getDoc(url).then(doc => {
-            resolve(getLastVersion(doc))
-        }).catch(reason => {
-            reject(version)
-        })
     })
 }
-
+/*
 const getVersionReleaseUrl = (version) => {
     return new Promise((resolve, reject) => {
         const url = lastReleaseUrlRoot + version
@@ -287,12 +300,12 @@ const getVersionReleaseUrl = (version) => {
         })
     })
 }
-
+*/
 const getTagReleasePageUrl = (version) => {
     //`https://gitee.com/rive08/less-player-desktop/releases/tag/${version}`
     return isCheckPreReleaseVersion.value ? githubReleasesUrl : giteeReleasesUrl
 }
-
+/*
 //是否已经下载，且存在下载文件但未进行安装
 const checkDownloaded = async () => {
     if (!ipcRenderer) return
@@ -334,17 +347,33 @@ const startDownload = async () => {
     })
     ipcRenderer.send('download-item', { url: lastReleaseUrl })
 }
+*/
 
 const checkForUpdate = async () => {
     const result = await getLastReleaseVersion()
     if (!result) return
+    const { version: releaseVersion, giteeVersion, githubVersion } = result
     const currentVersion = ("v" + version)
-    lastVersion.value = result
-    setLastRelease(currentVersion >= result)
-    //只针对macOS平台，检查是否已经下载好更新
-    //if (isMacOS()) checkDownloaded()
+    if (releaseVersion) {
+        lastVersion.value = releaseVersion
+    } else if (isCheckPreReleaseVersion.value) {
+        const maxVersion = giteeVersion >= githubVersion ? giteeVersion : githubVersion
+        lastVersion.value = maxVersion
+    } else {
+        lastVersion.value = currentVersion
+    }
+    if (giteeVersion) {
+        setGiteeLastVersion(giteeVersion)
+        setGiteeHasNewRelease(giteeVersion > currentVersion)
+    }
+    if (githubVersion) {
+        setGithubLastVersion(githubVersion)
+        setGithubHasNewRelease(githubVersion > currentVersion)
+    }
+    setLastRelease(currentVersion >= lastVersion.value)
 }
 
+/*
 const cancelDownload = () => {
     if (ipcRenderer) ipcRenderer.send('download-cancel')
     resetDownloadProgress()
@@ -354,6 +383,7 @@ const showPathInFolder = async () => {
     if (!ipcRenderer) return
     ipcRenderer.send('path-showInFolder', localSavePath)
 }
+*/
 
 //TODO test功能暂未实现
 const applySetupProxy = () => {
@@ -494,6 +524,15 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                             <option v-for="(item, index) in fontWeights" :value="item">
                             </option>
                         </datalist>
+                    </div>
+                    <div>
+                        <span class="sec-title">图文控件风格：</span>
+                        <span v-for="(item, index) in ['普通', '卡片']" class="quality-item"
+                            :class="{ active: index == common.imageTextTileStyleIndex }"
+                            @click="setImageTextTileStyleIndex(index)">
+                            {{ item }}
+                        </span>
+                        <div class="tip-text spacing">提示：歌单、专辑等预览控件</div>
                     </div>
                     <div>
                         <span class="sec-title">图片清晰度：</span>
@@ -1028,56 +1067,36 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </div>
                     </div>
                     <div :class="{ last: !isLastRelease }" v-show="!isLastRelease">
-                        <!--
-                        <SvgTextButton v-show="!isLastRelease && isUnstarted()" text="下载更新" :leftAction="startDownload">
-                        </SvgTextButton>
-                        <SvgTextButton v-show="isDownloading()" text="取消下载" :leftAction="cancelDownload">
-                        </SvgTextButton>
-                        <SvgTextButton v-show="isDownloaded()" text="打开文件" :leftAction="showPathInFolder">
-                        </SvgTextButton>
-                        <div v-show="!isLastRelease && isUnstarted()" class="spacing">
-                            <span>发现新版本：<a href="#" @click.prevent="visitLink(getTagReleasePageUrl(lastVersion))"
-                                    class="link" v-html="lastVersion"></a>
-                            </span>
-                        </div>
-                        <div v-show="isDownloadError()" class="download-wrap spacing">
-                            <span class="warning" v-html="downloadProgress"></span>
-                        </div>
-                        <div v-show="isDownloading()" class="download-wrap spacing">
-                            <ProgressBar ref="progressBarRef"></ProgressBar>
-                            <span class="spacing" v-html="downloadProgress"></span>
-                        </div>
-                        <div v-show="isDownloaded()" class="download-wrap spacing">
-                            <span v-html="downloadProgress"></span>
-                        </div>
-                        -->
                         <div class="new-version-wrap">
                             <span class="newflag content-text-highlight">最新版本</span>
-                            <div class="release-url-link">
-                                <a href="#" @click.prevent="visitLink(getTagReleasePageUrl(lastVersion))" class="link"
-                                    v-html="lastVersion"></a>
-                                <svg width="17" height="17" @click.prevent="visitLink(githubReleasesUrl)"
-                                    viewBox="0 0 896.57 896.13" xmlns="http://www.w3.org/2000/svg">
-                                    <g id="Layer_2" data-name="Layer 2">
-                                        <g id="Layer_1-2" data-name="Layer 1">
-                                            <path
-                                                d="M530.94,661.76c9.72-1.55,20.09-3,30.37-4.87,29-5.35,56.87-13.91,82.47-28.93,34.06-20,58.17-48.61,72-85.41,17.43-46.46,22-94.58,14.29-143.53-4.89-31.28-18.72-58.83-39.16-83-2.4-2.84-3-5.13-1.83-8.86,11.22-34.68,9-69.25-1.37-103.68-.39-1.28-.85-2.53-1.28-3.79-3.61-10.76-4-11.08-15.5-10.44a129.51,129.51,0,0,0-51.66,14.21c-18.8,9.55-36.85,20.61-55.08,31.25-3,1.73-5.36,2.33-8.77,1.42C506.13,223,456,218.6,405.37,224.37c-21.76,2.48-43.23,7.56-64.76,11.81-3.63.72-6.2.37-9.2-1.67-24.46-16.6-49.88-31.4-78.41-40-11.84-3.57-23.86-6.12-36.39-4.87-2.8.28-4.43,1.19-5.44,4-13.43,38.1-17,76.51-4.17,115.58a6.28,6.28,0,0,1-1.11,5.15c-34.63,40.19-46.48,87.38-43.47,139.33,1.64,28.22,5.51,56,15,82.75,20.12,56.56,60.27,92,116.48,110.58,22.55,7.44,45.74,11.75,69.22,14.81.62.08,1.23.23,2.57.49-8.9,8.71-15.67,18.39-19.59,29.61-3.23,9.23-5.28,18.86-8,28.26-.45,1.55-1.37,3.65-2.63,4.18-25.86,11-52.27,15.86-79.58,5.66-21-7.82-35.64-22.95-46.76-41.78-8.78-14.85-19.45-27.91-34-37.39-14-9.13-29-14.94-46.19-12a24,24,0,0,0-4.8,1.3c-6.05,2.4-7.74,6.72-3.62,11.69,4,4.81,8.56,9.55,13.8,12.84,20.41,12.81,33.76,31.35,44.07,52.46,5,10.15,8.5,21.07,14.13,30.81,17.73,30.63,45.39,46.51,79.92,50.74a181.82,181.82,0,0,0,31.91.72c10.43-.57,20.77-2.62,31.79-4.1.09,1.48.29,3.19.3,4.91.22,23.5.47,47,.6,70.49.11,19.5-14.42,29.89-33,23.45a429.5,429.5,0,0,1-128.92-70.85C87.5,753.23,31,663.11,9.8,553c-28.65-148.76,5.39-282.82,103.76-398.79,59-69.58,133.7-115.82,222-139.57,49.52-13.33,99.89-17.33,151-13,187.9,15.94,347.67,152.93,394.17,339.6,38.12,153,7.54,292.8-92,415.79-52,64.23-118.34,109.22-196.38,136.71a29.35,29.35,0,0,1-19.14.58c-8.52-2.76-12.88-9.07-14.08-17.68a59.85,59.85,0,0,1-.28-8.48q.18-60,.42-120c.1-21.4-2.63-42.31-12.39-61.59C542.47,678,536.4,670.17,530.94,661.76Z" />
+                            <div class="release-url-link spacing">
+                                <span v-show="githubHasNewRelease">
+                                    <svg width="17" height="17" @click.prevent="visitLink(githubReleasesUrl)"
+                                        viewBox="0 0 896.57 896.13" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="Layer_2" data-name="Layer 2">
+                                            <g id="Layer_1-2" data-name="Layer 1">
+                                                <path
+                                                    d="M530.94,661.76c9.72-1.55,20.09-3,30.37-4.87,29-5.35,56.87-13.91,82.47-28.93,34.06-20,58.17-48.61,72-85.41,17.43-46.46,22-94.58,14.29-143.53-4.89-31.28-18.72-58.83-39.16-83-2.4-2.84-3-5.13-1.83-8.86,11.22-34.68,9-69.25-1.37-103.68-.39-1.28-.85-2.53-1.28-3.79-3.61-10.76-4-11.08-15.5-10.44a129.51,129.51,0,0,0-51.66,14.21c-18.8,9.55-36.85,20.61-55.08,31.25-3,1.73-5.36,2.33-8.77,1.42C506.13,223,456,218.6,405.37,224.37c-21.76,2.48-43.23,7.56-64.76,11.81-3.63.72-6.2.37-9.2-1.67-24.46-16.6-49.88-31.4-78.41-40-11.84-3.57-23.86-6.12-36.39-4.87-2.8.28-4.43,1.19-5.44,4-13.43,38.1-17,76.51-4.17,115.58a6.28,6.28,0,0,1-1.11,5.15c-34.63,40.19-46.48,87.38-43.47,139.33,1.64,28.22,5.51,56,15,82.75,20.12,56.56,60.27,92,116.48,110.58,22.55,7.44,45.74,11.75,69.22,14.81.62.08,1.23.23,2.57.49-8.9,8.71-15.67,18.39-19.59,29.61-3.23,9.23-5.28,18.86-8,28.26-.45,1.55-1.37,3.65-2.63,4.18-25.86,11-52.27,15.86-79.58,5.66-21-7.82-35.64-22.95-46.76-41.78-8.78-14.85-19.45-27.91-34-37.39-14-9.13-29-14.94-46.19-12a24,24,0,0,0-4.8,1.3c-6.05,2.4-7.74,6.72-3.62,11.69,4,4.81,8.56,9.55,13.8,12.84,20.41,12.81,33.76,31.35,44.07,52.46,5,10.15,8.5,21.07,14.13,30.81,17.73,30.63,45.39,46.51,79.92,50.74a181.82,181.82,0,0,0,31.91.72c10.43-.57,20.77-2.62,31.79-4.1.09,1.48.29,3.19.3,4.91.22,23.5.47,47,.6,70.49.11,19.5-14.42,29.89-33,23.45a429.5,429.5,0,0,1-128.92-70.85C87.5,753.23,31,663.11,9.8,553c-28.65-148.76,5.39-282.82,103.76-398.79,59-69.58,133.7-115.82,222-139.57,49.52-13.33,99.89-17.33,151-13,187.9,15.94,347.67,152.93,394.17,339.6,38.12,153,7.54,292.8-92,415.79-52,64.23-118.34,109.22-196.38,136.71a29.35,29.35,0,0,1-19.14.58c-8.52-2.76-12.88-9.07-14.08-17.68a59.85,59.85,0,0,1-.28-8.48q.18-60,.42-120c.1-21.4-2.63-42.31-12.39-61.59C542.47,678,536.4,670.17,530.94,661.76Z" />
+                                            </g>
                                         </g>
-                                    </g>
-                                </svg>
-                                <svg width="15" height="15" v-show="!others.checkPreReleaseVersion"
-                                    @click.prevent="visitLink(giteeReleasesUrl)" viewBox="0 0 49.87 49.82"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <g id="Layer_2" data-name="Layer 2">
-                                        <g id="Layer_1-2" data-name="Layer 1">
-                                            <g id="Layer_2-2" data-name="Layer 2">
-                                                <g id="Layer_1-2-2" data-name="Layer 1-2">
-                                                    <g id="LOGO">
-                                                        <g id="Artboard">
-                                                            <g id="logo-black">
-                                                                <g id="Group">
-                                                                    <path id="G" class="cls-1"
-                                                                        d="M47.62,19.93H22.15a2.21,2.21,0,0,0-2.22,2.2v5.55a2.21,2.21,0,0,0,2.2,2.22H37.65a2.23,2.23,0,0,1,2.22,2.21h0v.56h0v.55a6.65,6.65,0,0,1-6.65,6.65h-21A2.21,2.21,0,0,1,10,37.65h0v-21A6.65,6.65,0,0,1,16.65,10h31a2.21,2.21,0,0,0,2.22-2.2h0V2.21A2.21,2.21,0,0,0,47.66,0h-31A16.6,16.6,0,0,0,0,16.54V47.61a2.21,2.21,0,0,0,2.21,2.21H34.88A15,15,0,0,0,49.83,34.88V22.15a2.21,2.21,0,0,0-2.2-2.22Z" />
+                                    </svg>
+                                    <a href="#" @click.prevent="visitLink(githubReleasesUrl)" class="link"
+                                        v-html="githubLastVersion"></a>
+                                </span>
+                                <span :class="{ spacing: githubHasNewRelease }" v-show="giteeHasNewRelease">
+                                    <svg width="15" height="15" @click.prevent="visitLink(giteeReleasesUrl)"
+                                        viewBox="0 0 49.87 49.82" xmlns="http://www.w3.org/2000/svg">
+                                        <g id="Layer_2" data-name="Layer 2">
+                                            <g id="Layer_1-2" data-name="Layer 1">
+                                                <g id="Layer_2-2" data-name="Layer 2">
+                                                    <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                                        <g id="LOGO">
+                                                            <g id="Artboard">
+                                                                <g id="logo-black">
+                                                                    <g id="Group">
+                                                                        <path id="G" class="cls-1"
+                                                                            d="M47.62,19.93H22.15a2.21,2.21,0,0,0-2.22,2.2v5.55a2.21,2.21,0,0,0,2.2,2.22H37.65a2.23,2.23,0,0,1,2.22,2.21h0v.56h0v.55a6.65,6.65,0,0,1-6.65,6.65h-21A2.21,2.21,0,0,1,10,37.65h0v-21A6.65,6.65,0,0,1,16.65,10h31a2.21,2.21,0,0,0,2.22-2.2h0V2.21A2.21,2.21,0,0,0,47.66,0h-31A16.6,16.6,0,0,0,0,16.54V47.61a2.21,2.21,0,0,0,2.21,2.21H34.88A15,15,0,0,0,49.83,34.88V22.15a2.21,2.21,0,0,0-2.2-2.22Z" />
+                                                                    </g>
                                                                 </g>
                                                             </g>
                                                         </g>
@@ -1085,8 +1104,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                                                 </g>
                                             </g>
                                         </g>
-                                    </g>
-                                </svg>
+                                    </svg>
+                                    <a href="#" @click.prevent="visitLink(giteeReleasesUrl)" class="link"
+                                        v-html="giteeLastVersion"></a>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -1385,7 +1406,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 }
 
 #setting-view .desktopLyric .content .sec-title {
-    width: 139px;
+    width: 159px;
 }
 
 #setting-view .keys .global-keys-ctrl {
@@ -1550,7 +1571,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
     text-decoration: underline;
     cursor: pointer;
     color: var(--content-text-color);
-    padding-left: 5px;
+    padding-left: 6px;
 }
 
 #setting-view .version .new-version-wrap {
@@ -1558,13 +1579,15 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
     align-items: center;
 }
 
+/*
 #setting-view .version .new-version-wrap .release-url-link {
     margin-left: 15px;
 }
+*/
 
 #setting-view .version .new-version-wrap .release-url-link svg {
     margin-bottom: -2px;
-    margin-left: 15px;
+    padding-right: 6px;
     cursor: pointer;
 }
 </style>

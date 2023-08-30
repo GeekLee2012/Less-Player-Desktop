@@ -24,14 +24,14 @@ const props = defineProps({
 })
 
 const limit = toRef(props, 'limit')
-const data = toRef(props, 'data')
+const dataFromProps = toRef(props, 'data')
 const paginationStyleType = toRef(props, 'paginationStyleType')
 
 const getLimit = computed(() => (limit.value || 2333))
 
 const getMaxPage = computed(() => {
-    if (!data.value || data.value.length < 0) return 0
-    return Math.ceil(data.value.length / limit.value)
+    if (!dataFromProps.value || dataFromProps.value.length < 0) return 0
+    return Math.ceil(dataFromProps.value.length / limit.value)
 })
 
 const currentOffset = ref(0)
@@ -39,20 +39,24 @@ const refreshAllPendingMark = ref(0)
 const refreshPagePendingMark = ref(0)
 const loadPageContent = ({ offset, limit, page }) => {
     currentOffset.value = offset
-    if (!data.value || data.value.length < 0) return
-    if (paginationStyleType.value !== 0) return { data: data.value }
+    if (!dataFromProps.value || dataFromProps.value.length < 0) return
+    if (paginationStyleType.value != 0) return { data: dataFromProps.value }
 
-    const pageData = data.value.slice(offset, offset + limit)
+    const pageData = dataFromProps.value.slice(offset, offset + limit)
     return { data: pageData }
 }
 
 //TODO 逻辑上有Bug, 暂时先这样
-watch(() => data.value.length, (nv, ov) => {
+watch(() => dataFromProps.value.length, (nv, ov) => {
     if (ov && nv) {
         refreshPagePendingMark.value = Date.now()
     } else {
         refreshAllPendingMark.value = Date.now()
     }
+})
+
+watch(() => dataFromProps.value.length > 0 && dataFromProps.value[0].id, (nv, ov) => {
+    refreshAllPendingMark.value = Date.now()
 })
 
 watch(() => props.id, (nv, ov) => {

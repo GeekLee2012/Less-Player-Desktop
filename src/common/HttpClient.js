@@ -21,8 +21,7 @@ const _get = (url, data, config, callback) => {
             } catch (err) {
                 resolve(resp.data)
             }
-        }, error => reject(error))
-        //.catch(error => reject(error))
+        }, error => reject(error)).catch(error => reject(error))
     })
 }
 
@@ -38,8 +37,7 @@ const _post = (url, data, config, callback) => {
             } catch (err) {
                 resolve(resp.data)
             }
-        }, error => reject(error))
-        //.catch(error => reject(error))
+        }, error => reject(error)).catch(error => reject(error))
     })
 }
 

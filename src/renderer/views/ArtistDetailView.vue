@@ -142,20 +142,21 @@ const getArtistDetail = async () => {
     if (!vendor || !vendor.artistDetail) return
     setLoadingDetail(true)
     const id = artistId.value
-    const result = await vendor.artistDetail(id)
+    let result = null, retry = 1
+    do {
+        result = await vendor.artistDetail(id)
+    } while (!result && retry++ <= 3)
     if (!result) return
     updateArtist(result.title, result.cover)
-    let { about } = result
-    if (!about) {
-        about = await vendor.artistDetailAbout(id)
-    }
+    let { about, hotSongs } = result
+    if (!about) about = await vendor.artistDetailAbout(id)
     if (about) updateAbout(about)
-    if (result.hotSongs) updateHotSongs(result.hotSongs)
+    if (hotSongs) updateHotSongs(hotSongs)
     Object.assign(detail, result)
     setLoadingDetail(false)
 }
 
-const loadHotSongs = () => {
+const loadHotSongs = async () => {
     setLoadingSongs(true)
     if (isHotSongsTabLoaded()) {
         updateTabData(hotSongs.value)
@@ -165,30 +166,36 @@ const loadHotSongs = () => {
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailHotSongs) return
     const id = artistId.value
-    vendor.artistDetailHotSongs(id).then(result => {
-        if (!isHotSongsTab()) return
-        if (!result) return
-        if (result.name && result.cover) updateArtist(result.name, result.cover)
-        updateHotSongs(result.data)
-        updateTabData(hotSongs.value)
-        setLoadingSongs(false)
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.artistDetailHotSongs(id)
+    } while (!result && retry++ <= 3)
+    if (!isHotSongsTab()) return
+    if (!result) return
+    const { name, cover, data } = result
+    if (name && cover) updateArtist(name, cover)
+    updateHotSongs(data)
+    updateTabData(hotSongs.value)
+    setLoadingSongs(false)
 }
 
 //TODO
-const loadMoreSongs = () => {
+const loadMoreSongs = async () => {
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailAllSongs) return
     const id = artistId.value
-    vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
-        appendAllSongs(result.data)
-        updateTabData(allSongs.value)
-        currentTabView.value = SongListControl
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.artistDetailAllSongs(id, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!isAllSongsTab() || !result) return
+    appendAllSongs(result.data)
+    updateTabData(allSongs.value)
+    currentTabView.value = SongListControl
     offset = page++ * limit
 }
 
-const loadAllSongs = () => {
+const loadAllSongs = async () => {
     setLoadingSongs(true)
     if (isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
@@ -198,17 +205,18 @@ const loadAllSongs = () => {
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailAllSongs) return
     const id = artistId.value
-    vendor.artistDetailAllSongs(id, offset, limit, page).then(result => {
-        if (!isAllSongsTab()) return
-        if (!result) return
-        updateAllSongs(result.data)
-        updateTabData(allSongs.value)
-        setLoadingSongs(false)
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.artistDetailAllSongs(id, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!isAllSongsTab() || !result) return
+    updateAllSongs(result.data)
+    updateTabData(allSongs.value)
+    setLoadingSongs(false)
     offset = page++ * limit
 }
 
-const loadAlbums = () => {
+const loadAlbums = async () => {
     setLoadingDetail(false)
     setLoadingAlbums(true)
     if (isAlbumsTabLoaded()) {
@@ -223,13 +231,14 @@ const loadAlbums = () => {
     if (!vendor || !vendor.artistDetailAlbums) return
     const id = artistId.value
     //TODO 分页加载全部
-    vendor.artistDetailAlbums(id, 0, 365, 1).then(result => {
-        if (!isAlbumsTab()) return
-        if (!result) return
-        updateAlbums(result.data)
-        updateTabData(result.data)
-        setLoadingAlbums(false)
-    })
+    let result = null, retry = 1
+    do {
+        result = await vendor.artistDetailAlbums(id, 0, 365, 1)
+    } while (!result && retry++ <= 3)
+    if (!isAlbumsTab() || !result) return
+    updateAlbums(result.data)
+    updateTabData(result.data)
+    setLoadingAlbums(false)
 }
 
 const loadAbout = () => {
@@ -430,7 +439,7 @@ watch([platform, artistId], reloadAll, { immediate: true })
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
-            <component :is="currentTabView" :data="tabData" :platform="platform" :artistVisitable="true"
+            <component :id="id" :is="currentTabView" :data="tabData" :platform="platform" :artistVisitable="true"
                 :albumVisitable="true" :loading="isLoading">
             </component>
         </div>

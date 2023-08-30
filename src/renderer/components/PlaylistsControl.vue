@@ -28,7 +28,7 @@ const props = defineProps({
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
-const { isListenNumShow } = storeToRefs(useSettingStore())
+const { isListenNumShow, isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 
 const visitItem = (item) => {
     const { checkbox } = props
@@ -59,8 +59,14 @@ const getListenNumText = (item) => {
     let num = item.listenNum
     if (!num) return null
     const unit = 10000
-    if (num >= unit) num = parseFloat(num / unit).toFixed(1) + "万"
-    return `播放量：${num}`
+    if (num >= (unit * unit)) num = parseFloat(num / (unit * unit)).toFixed(5) + "亿"
+    else if (num >= unit) num = parseFloat(num / unit).toFixed(1) + "万"
+    if (!isUseCardStyleImageTextTile.value) return `播放量：${num}`
+    return `<div class='play-cnt'><svg width="14" height="14" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <path
+                    d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
+            </svg> ${num}</div>`
 }
 
 const computedMaxPage = computed(() => {
@@ -92,9 +98,25 @@ const computedMaxPage = computed(() => {
     </div>
 </template>
 
-<style scoped>
+<style>
 .playlists-ctl {
     /* margin-top: 15px; */
     margin-top: 5px;
+}
+
+.playlists-ctl .play-cnt {
+    display: flex;
+    align-items: center;
+}
+
+/*
+.playlists-ctl .image-text-tile-card .play-cnt {
+    justify-content: center;
+}
+*/
+
+.playlists-ctl .play-cnt svg {
+    fill: var(--content-subtitle-text-color);
+    margin-right: 4px;
 }
 </style>

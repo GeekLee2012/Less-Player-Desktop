@@ -128,7 +128,7 @@ const scrollToLoad = () => {
 const loadPageContent = async ({ offset, page, limit }) => {
     const isNormalType = getPaginationStyleIndex.value === 0
     if (isNormalType) resetScrollState()
-    return loadContent(!isNormalType, offset, limit, page)
+    return loadContent((!isNormalType && page > 1), offset, limit, page)
 }
 
 const onScroll = () => {

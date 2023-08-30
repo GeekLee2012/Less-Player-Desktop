@@ -65,6 +65,7 @@ export class United {
                 const vendor = filteredVendors[i]
                 //if (vendor.CODE == fromPlatform || vendor.CODE == DouBan.CODE) continue
                 const searchResult = await vendor.searchSongs(keyword)
+                if (!searchResult) continue
                 const { data: candidates } = searchResult
                 if (!candidates || candidates.length < 1) continue
                 result = await United.matchFromCandidates(track, candidates.slice(0, Math.min(candidates.length, 20)), ignoreUrl, ignoreAlbum)
@@ -79,7 +80,7 @@ export class United {
         return new Promise(async (resolve, reject) => {
             let result = null
             const { id, platform, title, artist, duration } = track
-            const albumName = Track.albumName(track)
+            const albumName = Track.albumName(track) || United.NULL_CODE
             for (var i = 0; i < candidates.length; i++) {
                 const candidate = candidates[i]
                 const { id: cId, title: cTitle,
@@ -117,11 +118,11 @@ export class United {
                     }
                 }
                 //专辑
-                const _albumName = (albumName || United.NULL_CODE)
-                if (ignoreAlbum || _albumName == cAlbumName) {
+                if (ignoreAlbum || albumName == cAlbumName
+                    || albumName == United.NULL_CODE) {
                     score += 0.2
                     ++hits
-                } else if (cAlbumName.toLowerCase().includes(_albumName.toLowerCase())) {
+                } else if (cAlbumName.toLowerCase().includes(albumName.toLowerCase())) {
                     score += 0.15
                 }
 
@@ -154,6 +155,7 @@ export class United {
                 const { url } = cDetail
                 //歌词
                 const cLyric = await vendor.lyric(candidate.id, candidate)
+                if (!cLyric) continue
                 const { lyric, trans: lyricTrans, roma: lyricRoma } = cLyric
                 Object.assign(candidate, { url, lyric, lyricTrans, lyricRoma, isCandidate: true, score })
                 result = candidate

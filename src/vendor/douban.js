@@ -311,7 +311,7 @@ export class DouBan {
                         if (!radios) return
                         radios.forEach(radio => {
                             const { id, title1, title2, color } = radio
-                            const title = `${stitle} | ${title1} ${title2}`
+                            const title = `${stitle}｜${title1} ${title2}`
                             const playlist = new Playlist(DouBan.MHZ_CODE + '_' + id, DouBan.CODE, null, title)
                             playlist.type = Playlist.NORMAL_RADIO_TYPE
                             const { R, G, B } = color

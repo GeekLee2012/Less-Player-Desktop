@@ -165,3 +165,120 @@ export const trimArray = async (data, limit) => {
     }
     return 0
 }
+
+/** 支持格式:  
+ * #EXTINF: [length], [title], [cover]  
+ * [url]  
+ * 注意：当[title]中有英文逗号[,]时，内容必须使用中文双引号[“”]包裹；  
+ * 而[cover]不允许有英文逗号。
+ */
+export const parseM3uText = (text, mapFn) => {
+    const result = { data: [] }
+    try {
+        //逐行解析
+        const lines = toTrimString(text).split('\n')
+        if (!lines) return result
+        let title = null, url = null, length = null, cover = null
+        for (var i = 0; i < lines.length; i++) {
+            const line = toTrimString(lines[i])
+
+            if (line.length < 1) return result
+            if (line.startsWith('#EXTM3U')) continue
+            if (line.startsWith('#EXTINF')) {
+                const metaText = line.replace('#EXTINF:', '')
+                const metaParts = metaText.split(',')
+                const pLen = metaParts.length
+                length = parseInt(metaParts[0])
+                if (pLen > 2) {
+                    cover = metaParts[pLen - 1].replace('“', '').replace('”', '').replace(/"/g, '')
+                    title = ''
+                    for (let j = 1; j < pLen - 1; j++) {
+                        title += (metaParts[j] + ', ')
+                    }
+                } else {
+                    title = metaParts[1]
+                }
+                title = toTrimString(title)
+                if (title.endsWith(',')) title = toTrimString(title.substring(0, title.length - 1))
+                if (title.startsWith('“') || title.startsWith('"')) title = toTrimString(title.substring(1))
+                if (title.endsWith('”') || title.startsWith('"')) title = toTrimString(title.substring(0, title.length - 1))
+            } else {
+                url = line
+            }
+            if (url != null) {
+                let item = {
+                    title,
+                    length,
+                    cover,
+                    url
+                }
+                if (mapFn) item = mapFn(item)
+                result.data.push(item)
+                //重置
+                title = null
+                url = null
+                length = null
+                cover = null
+            }
+        }
+    } catch (error) {
+        console.log(error)
+    }
+    return result
+}
+
+//解析.pls格式文件
+export const parsePlsText = (text, mapFn) => {
+    const result = { data: [] }
+    try {
+        //逐行解析
+        const lines = toTrimString(text).split('\n')
+        if (!lines) return result
+        let title = null, url = null, length = null
+        for (var i = 0; i < lines.length; i++) {
+            const line = toTrimString(lines[i])
+
+            if (line.length < 1) return result
+            //[Playlist]，类似标签，直接忽略
+            if (line.startsWith('[') && line.endsWith(']')) continue
+
+            const index = line.indexOf('=')
+            //不合法格式
+            if (index == -1) continue
+            //解析[key=value]
+            const key = line.substring(0, index)
+            const value = line.substring(index + 1)
+            const lcKey = key.toLowerCase()
+            if (lcKey.startsWith('numberofentries')) {
+                Object.assign(result, { total: parseInt(value) })
+            } else if (lcKey.startsWith('version')) {
+                Object.assign(result, { version: value })
+            } else if (lcKey.startsWith('file')) {
+                url = value
+            } else if (lcKey.startsWith('title')) {
+                title = value
+            } else if (lcKey.startsWith('length')) {
+                length = parseInt(value)
+            }
+            //TODO 暂时先简单处理，不校验序号是否匹配
+            if (url != null && title != null && length != null) {
+                let item = {
+                    title,
+                    url,
+                    length,
+                    cover: null
+                }
+                if (mapFn) item = mapFn(item)
+                result.data.push(item)
+                //重置
+                title = null
+                url = null
+                length = null
+            }
+        }
+        return result
+    } catch (error) {
+        console.log(error)
+    }
+    return result
+}

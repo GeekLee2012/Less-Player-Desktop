@@ -7,7 +7,7 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { inject, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue';
+import { inject, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue';
 import EventBus from '../../common/EventBus';
 import Mousetrap from 'mousetrap';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -398,7 +398,7 @@ const showAddToList = (event, dataType, elSelector, actionType) => {
     EventBus.emit("commonCtxMenu-init", { dataType, actionType })
     EventBus.emit("commonCtxMenu-show", {
         event: { x, y: (bottom + 3), clientX, clientY },
-        value: sortCheckData()
+        data: sortCheckData()
     })
 }
 
@@ -463,16 +463,7 @@ const removeChecked = async () => {
     }
 }
 
-const exportChecked = () => {
-    if (activeTab.value == 1) {
-        if (isLocalMusic()) {
-            showPlaylistExportToolbar(checkedData)
-        }
-    } else if (isFreeFM()) {
-        exportRadios(checkedData)
-    }
-}
-
+/*
 const exportRadios = async (radios) => {
     if (!radios || radios.length < 1) return
     if (!ipcRenderer) return
@@ -494,6 +485,39 @@ const exportRadios = async (radios) => {
     })
     if (result) showToast('FM电台导出成功！')
     else showFailToast('FM电台导出失败！')
+}
+*/
+const formatRadios = (radios, format) => {
+    if (!radios || radios.length < 1) return
+    if (!ipcRenderer) return
+    const now = Date.now()
+    const radioData = []
+    radios.forEach(item => {
+        const { platform, type, title, cover, tags, about, data } = item
+        if (data && data.length > 0) {
+            const { url, streamType } = data[0]
+            radioData.push({ title, url, streamType, cover, tags, about })
+        }
+    })
+    const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')
+    const filename = `FreeRadios-${timestamp}`
+    const presetData = {
+        json: JSON.stringify({ created: now, data: radioData })
+    }
+    return [{
+        title: filename,
+        data: presetData[format] || radioData
+    }]
+}
+
+const exportChecked = () => {
+    let exportCfg = null
+    if (isLocalMusic()) {
+        exportCfg = { data: checkedData, noJson: true, title: '导出本地歌单' }
+    } else if (isFreeFM()) {
+        exportCfg = { data: checkedData, formatFn: formatRadios, title: '导出FM电台' }
+    }
+    if (exportCfg) showPlaylistExportToolbar(exportCfg)
 }
 
 //TODO

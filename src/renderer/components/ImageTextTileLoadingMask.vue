@@ -1,11 +1,18 @@
 <script setup>
+import { storeToRefs } from 'pinia';
+import { useSettingStore } from '../../renderer/store/settingStore';
+
+
+
 const props = defineProps({
     count: Number
 })
+
+const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 </script>
 
 <template>
-    <div class="tiles-loading-mask">
+    <div class="tiles-loading-mask" :class="{ 'tiles-card-loading-mask': isUseCardStyleImageTextTile }">
         <div class="tile" v-for="i in count">
             <div class="cover loading-mask"></div>
             <div class="title loading-mask"></div>
@@ -37,5 +44,16 @@ const props = defineProps({
     height: 28px;
     margin-top: 5px;
     border-radius: 3px;
+}
+
+.tiles-card-loading-mask .tile .cover {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.tiles-card-loading-mask .tile .title {
+    margin-top: 0px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
 }
 </style>

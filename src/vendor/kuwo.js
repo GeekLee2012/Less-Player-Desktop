@@ -106,7 +106,7 @@ export class KuWo {
                     firstCate.data.splice(2, 0, { key: '排行榜', value: KuWo.TOPLIST_CODE })
                 }
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -151,7 +151,7 @@ export class KuWo {
                     }
                 })
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -277,9 +277,7 @@ export class KuWo {
                     result.addTrack(track)
                 })
                 resolve(result)
-            }).catch(error => {
-                resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -293,9 +291,7 @@ export class KuWo {
             getJson(url, null, CONFIG).then(json => {
                 if (json.data) Object.assign(result, { url: json.data.url })
                 resolve(result)
-            }).catch(error => {
-                resolve(result)
-            })
+            }, error => resolve(result)).catch(error => resolve(result))
         })
     }
 
@@ -346,7 +342,7 @@ export class KuWo {
                 }
                 const result = { id, title, cover, about }
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -372,7 +368,7 @@ export class KuWo {
                 })
                 const result = { offset, limit, page, total, data }
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -395,14 +391,14 @@ export class KuWo {
                 })
                 const result = { offset, limit, page, total, data }
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
     //专辑详情
-    static albumDetail(id) {
+    static albumDetail_v0(id) {
         return new Promise((resolve, reject) => {
-            const url = "http://www.kuwo.cn/album_detail/" + id
+            const url = `http://www.kuwo.cn/album_detail/${id}`
             getDoc(url).then(doc => {
                 let name = '', cover = '', artist = [], company = '', publishTime = '', about = '', data = []
 
@@ -434,7 +430,56 @@ export class KuWo {
                 const result = new Album(id, KuWo.CODE, name, cover, artist,
                     company, publishTime, about, data)
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
+        })
+    }
+
+    //专辑详情
+    static albumDetail(id) {
+        return new Promise(async (resolve, reject) => {
+            let page = 1, limit = 20, totalPage = 1
+            let detail = await KuWo.doGetAlbumDetail(id, page++, limit)
+            if (!detail) return resolve(null)
+            let { album, total, data } = detail
+            totalPage = Math.ceil(total / limit)
+            while (totalPage >= page) {
+                //目前KW太不稳定，经常返回599或430错误，所以数据不宜过多，截断就好
+                if (page > 3) break
+                detail = await KuWo.doGetAlbumDetail(id, page++, limit)
+                if (!detail) return resolve(null)
+                data.push(...detail.data)
+            }
+            const result = album
+            album.data = data
+            resolve(result)
+        })
+    }
+
+    //专辑详情
+    static doGetAlbumDetail(id, page, limit) {
+        return new Promise((resolve, reject) => {
+            const reqId = randomReqId()
+            const url = `https://www.kuwo.cn/api/www/album/albumInfo?albumId=${id}&pn=${page}&rn=${limit}&httpsStatus=1&reqId=${reqId}&plat=web_www`
+            getJson(url).then(json => {
+                const artist = [], data = []
+                const { album: name, pic, artistid, artist: aArtist, albuminfo: about, musicList, releaseDate: publishTime, total } = json.data
+                const cover = getAlbumCoverByQuality(pic)
+                artist.push({ id: artistid, name: aArtist })
+
+                musicList.forEach(item => {
+                    const trackArtist = [{ id: item.artistid, name: item.artist }]
+                    const trackAlbum = { id: item.albumid, name: item.album }
+                    const duration = item.duration * 1000
+                    const trackCover = getAlbumCoverByQuality(item.pic)
+                    const track = new Track(item.rid, KuWo.CODE, item.name, trackArtist, trackAlbum, duration, trackCover)
+                    if (item.hasmv) track.mv = item.rid
+                    data.push(track)
+                })
+
+                const album = new Album(id, KuWo.CODE, name, cover, artist,
+                    null, publishTime, about)
+                resolve({ album, page, limit, total, data })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -466,7 +511,7 @@ export class KuWo {
                     if (data && data.length > 0) result.data.push(...data)
                 }
                 resolve(result)
-            }).catch(error => resolve(result))
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -501,7 +546,7 @@ export class KuWo {
                 })
                 if (data && data.length > 0) result.data.push(...data)
                 resolve(result)
-            }).catch(error => resolve(result))
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -521,7 +566,7 @@ export class KuWo {
                 })
                 const result = { platform: KuWo.CODE, offset, limit, page, data }
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -543,7 +588,7 @@ export class KuWo {
                 })
                 const result = { platform: KuWo.CODE, offset, limit, page, data }
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 
@@ -566,7 +611,7 @@ export class KuWo {
                 })
                 const result = { platform: KuWo.CODE, offset, limit, page, data }
                 resolve(result)
-            })
+            }, error => resolve(null)).catch(error => resolve(null))
         })
     }
 

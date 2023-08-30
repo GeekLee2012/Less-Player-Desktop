@@ -102,7 +102,7 @@ export class Track {
     }
 
     static albumName(track) {
-        return track && track.album ? track.album.name.trim() : null
+        return track && track.album ? toTrimString(track.album.name) : null
     }
 
     static hasLyric(track) {
@@ -110,12 +110,12 @@ export class Track {
     }
 
     static hasUrl(track) {
-        return track && track.url && track.url.trim().length > 0
+        return track && track.url && toTrimString(track.url).length > 0
     }
 
     static hasCover(track) {
         if (!track || !track.cover) return false
-        track.cover = track.cover.trim()
+        track.cover = toTrimString(track.cover)
         if (track.cover.length < 1) return false
         if (track.cover.includes('default_cover.png')) return false
         return true
@@ -125,7 +125,7 @@ export class Track {
         if (!track || !track.id) return false
         const id = track.id
         if (typeof (id) == 'number') return id > 0
-        if (typeof (id) == 'string') return id.trim().length > 0
+        if (typeof (id) == 'string') return toTrimString(id).length > 0
     }
 
     static firstArtistName(track) {
@@ -181,14 +181,14 @@ export class Track {
         if (!track || !track.mv) return false
         const mv = track.mv.toString()
         if (typeof (mv) == 'number') return mv > 0
-        if (typeof (mv) == 'string') return mv.trim().length > 0
+        if (typeof (mv) == 'string') return toTrimString(mv).length > 0
     }
 
     static hasPid(track) {
         if (!track || !track.pid) return false
         const pid = track.pid
         if (typeof (pid) == 'number') return pid > 0
-        if (typeof (pid) == 'string') return pid.trim().length > 0
+        if (typeof (pid) == 'string') return toTrimString(pid).length > 0
     }
 
     static isVip(track) {

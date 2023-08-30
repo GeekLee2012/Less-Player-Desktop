@@ -180,30 +180,27 @@ const handleUnplayableTrack = (track, msg) => {
 const bootstrapTrack = (track) => {
     return new Promise(async (resolve, reject) => {
         if (!track) {
-            reject('none')
-            return
+            return reject('none')
         }
         //FM电台不需要再处理
         if (Playlist.isFMRadioType(track)) {
-            resolve(track)
-            return
+            return resolve(track)
         }
         const { id, platform, artistNotCompleted } = track
         //平台服务
         const vendor = getVendor(platform)
         if (!vendor || !vendor.playDetail) {
-            reject('noService')
-            return
+            return reject('noService')
         }
         //播放相关数据
         const result = await vendor.playDetail(id, track)
+        if (!result) return reject('noUrl')
         const { lyric, cover, artist, url } = result
         //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
         if (Track.hasUrl(result)) Object.assign(track, { url })
         //无法获取到有效url
         if (!Track.hasUrl(track)) { //VIP收费歌曲或其他
-            reject('noUrl')
-            return
+            return reject('noUrl')
         }
         setAutoPlaying(false)
         //设置歌词

@@ -848,15 +848,15 @@ watch([textColorIndex], setupTextColor)
                             </g>
                         </svg>
                     </span>
-                    <span class="lyric-btn spacing"
+                    <span class="lyric-btn btn spacing"
                         :class="{ 'lyric-show': isLyricShow, 'content-text-highlight': isLyricShow }" @click="toggleLyric">
                         词
                     </span>
-                    <span class="text-color-btn spacing" :class="{ 'text-color-black': textColorIndex == 1 }"
+                    <span class="text-color-btn btn spacing" :class="{ 'text-color-black': textColorIndex == 1 }"
                         @click="switchTextColor">
                         T
                     </span>
-                    <span @click="quitSimpleLayout" class="spacing">
+                    <span @click="quitSimpleLayout" class="btn spacing">
                         <svg width="17" height="16" viewBox="0 0 1019 1019" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -1126,40 +1126,28 @@ watch([textColorIndex], setupTextColor)
     margin-left: 43px;
 }
 
-.simple-layout>.center .top .action .lyric-btn {
+.simple-layout>.center .top .action .lyric-btn,
+.simple-layout>.center .top .action .text-color-btn {
     width: 15px;
     height: 13px;
     border-radius: 3px;
-    display: inline-block;
-    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 2px solid var(--button-icon-btn-color);
-    text-align: center;
-    vertical-align: middle;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     margin-bottom: 3px;
 }
 
 .simple-layout>.center .top .action .lyric-show {
     border: 2px solid var(--content-highlight-color);
+    cursor: pointer;
 }
 
 .simple-layout>.center .top .action .text-color-btn {
-    background: #000;
     background: var(--button-icon-btn-color);
-    width: 15px;
-    height: 11px;
-    border-radius: 3px;
-    display: inline-block;
-    cursor: pointer;
-    border: 2px solid var(--button-icon-btn-color);
-    text-align: center;
-    vertical-align: middle;
-    font-size: 12px;
-    font-weight: bold;
     color: #fff;
-    padding-bottom: 2px;
-    margin-bottom: 3px;
 }
 
 .simple-layout>.center .top .action .text-color-black {

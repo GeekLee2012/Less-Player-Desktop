@@ -33,7 +33,7 @@ const toggleRadioMode = () => {
 
 <template>
     <div class="classic-main-top">
-        <Navigator></Navigator>
+        <Navigator :refreshable="false"></Navigator>
         <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
         </SearchBar>
         <div class="action">

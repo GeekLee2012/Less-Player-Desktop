@@ -1,7 +1,9 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import EventBus from '../../common/EventBus';
+import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../../renderer/store/platformStore';
+import { useSettingStore } from '../../renderer/store/settingStore';
 
 
 
@@ -19,7 +21,8 @@ const props = defineProps({
     platform: String
 })
 
-const { isFreeFM } = usePlatformStore()
+const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
+const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 
 
 const isChecked = ref(props.checked)
@@ -34,11 +37,9 @@ const setChecked = (value) => {
     isChecked.value = value
 }
 
-/*
-onMounted(() => {
-    EventBus.emit("imageTextTiles-mounted")
+const notCardStyleFreeFM = computed(() => {
+    return isFreeFM(props.platform) && !isUseCardStyleImageTextTile.value
 })
-*/
 
 watch(() => props.checked, (nv, ov) => {
     if (props.ignoreCheckAllEvent) return
@@ -49,9 +50,13 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 </script>
 
 <template>
-    <div class="image-text-tile" @click="toggleCheck">
+    <div class="image-text-tile" :class="{
+        'image-text-tile-card': isUseCardStyleImageTextTile,
+        'image-text-tile-radio': isFMRadioPlatform(platform),
+        'image-text-tile-color-mode': color
+    }" @click="toggleCheck">
         <div class="cover-wrap">
-            <img class="cover" v-lazy="cover" v-show="!color" :class="{ 'obj-fit-contain': isFreeFM(platform) }" />
+            <img class="cover" v-lazy="cover" v-show="!color" :class="{ 'obj-fit-contain': notCardStyleFreeFM }" />
             <div class="cover" v-show="color" :style="{ background: color }"></div>
             <div class=" cover-mask" :class="{ selectable: checkbox }">
                 <div class="play-btn" v-show="playable && !checkbox" @click.stop="playAction">
@@ -89,8 +94,10 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
                 <img class="cover" v-lazy="cover" /> 
             </picture>
             -->
-        <div class="title" v-html="title"></div>
-        <div class="subtitle" v-show="subtitle" v-html="subtitle"></div>
+        <div class="title-wrap">
+            <div class="title" v-html="title"></div>
+            <div class="subtitle" v-show="subtitle" v-html="subtitle"></div>
+        </div>
     </div>
 </template>
 
@@ -218,5 +225,69 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     margin-top: 1px;
     margin-left: 2px;
     fill: var(--button-icon-text-btn-icon-color) !important;
+}
+
+
+/* 实验性CSS */
+.image-text-tile-card {
+    background-color: var(--app-bg-color);
+    box-shadow: 0px 0px 3px #181818;
+    border-radius: 6px;
+    min-height: 218px;
+    margin-top: 20px;
+    margin-bottom: 18px;
+}
+
+.image-text-tile-card:hover {
+    transform: scale(1.08) translateY(-4px);
+}
+
+.image-text-tile-card:hover .title {
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.image-text-tile-card .cover-wrap:hover {
+    transform: none;
+}
+
+.image-text-tile-card .cover {
+    box-shadow: none;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    height: 152px;
+}
+
+.image-text-tile-card .cover-wrap {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.image-text-tile-card .title-wrap {
+    padding: 5px 10px;
+    width: var(--others-card-image-text-tile-title-width);
+}
+
+.image-text-tile-card .radio-title-wrap {
+    background-color: var(--content-left-nav-bg-color);
+}
+
+.image-text-tile-card .title {
+    margin-top: 0px;
+}
+
+.image-text-tile-card .title,
+.image-text-tile-card .subtitle {
+    width: auto;
+}
+
+/*.image-text-tile-card .title,
+.image-text-tile-card .subtitle,*/
+.image-text-tile-card.image-text-tile-radio .title,
+.image-text-tile-card.image-text-tile-radio .subtitle,
+.image-text-tile-card.image-text-tile-color-mode .title,
+.image-text-tile-card.image-text-tile-color-mode .subtitle {
+    text-align: center;
 }
 </style>

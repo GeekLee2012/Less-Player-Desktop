@@ -240,7 +240,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .song-item .spacing1 {
-    margin-left: 8px;
+    /*margin-left: 8px;*/
+    margin-left: 20px;
 }
 
 .song-item .title-wrap,

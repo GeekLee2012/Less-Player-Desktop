@@ -71,8 +71,12 @@ const loadCategories = async () => {
     if (!cachedCates) {
         const vendor = currentVender()
         if (!vendor || !vendor.categories) return
-        const result = await vendor.categories()
+        let result = null, retry = 1
+        do {
+            result = await vendor.categories()
+        } while (!result && retry++ <= 3)
         if (!result || result.data.length < 1) return
+
         cachedCates = result.data
         cachedOrders = result.orders
         if (!cachedCates) return
@@ -92,8 +96,10 @@ const loadContent = async (noLoadingMask, offset, limit, page) => {
 
     const cate = currentCategoryCode.value
     const order = currentOrder.value.value
-    const result = await vendor.square(cate, offset, limit, page, order)
-
+    let result = null, retry = 1
+    do {
+        result = await vendor.square(cate, offset, limit, page, order)
+    } while (!result && retry++ <= 3)
     if (!result) return
     const { platform: rPlatform, cate: rCate, order: rOrder, dataType, data, total } = result
 
@@ -125,7 +131,7 @@ const loadMoreContent = () => {
 const loadPageContent = async ({ offset, page, limit }) => {
     const isNormalType = getPaginationStyleIndex.value === 0
     if (isNormalType) resetScrollState()
-    return loadContent(!isNormalType, offset, limit, page)
+    return loadContent((!isNormalType && page > 1), offset, limit, page)
 }
 
 const nextPagePendingMark = ref(0)
@@ -151,6 +157,7 @@ const markScrollState = () => {
 const resetScrollState = () => {
     markScrollTop = 0
     if (squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
+    resetFlowBtns()
 }
 
 const restoreScrollState = () => {
@@ -177,7 +184,6 @@ onActivated(() => {
 const resetCommom = () => {
     //resetPagination()
     resetScrollState()
-    resetFlowBtns()
 }
 
 const refreshAllPendingMark = ref(0)

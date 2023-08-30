@@ -14,7 +14,7 @@ const { scanDirTracks, parseTracks,
   readText, writeText, FILE_PREFIX,
   randomTextWithinAlphabetNums, nextInt,
   getDownloadDir, removePath, listFiles,
-  parsePlsFile, parseM3uFile,
+  parsePlsFile, parseM3uPlaylist,
   writePlsFile, writeM3uFile,
   IMAGE_PROTOCAL, parseImageMetaFromFile,
   statPathSync, MD5, SHA1,
@@ -344,7 +344,7 @@ const registryGlobalListeners = () => {
       result = await parsePlsFile(file)
     } else if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[0]}`)
       || file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[1]}`)) {
-      result = await parseM3uFile(file)
+      result = await parseM3uPlaylist(file)
     }
     return result
   })
@@ -357,7 +357,7 @@ const registryGlobalListeners = () => {
       result = await parsePlsFile(file)
     } else if (file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[0]}`)
       || file.toLowerCase().endsWith(`.${AUDIO_PLAYLIST_EXTS[1]}`)) {
-      result = await parseM3uFile(file)
+      result = await parseM3uPlaylist(file)
     } else {
       result = await scanDirTracks(file, null, deep)
     }
@@ -384,14 +384,22 @@ const registryGlobalListeners = () => {
     const { path, format, data: playlists } = args[0]
     let result = false
     if (playlists && playlists.length > 0) {
+      const tasks = []
       for (var i = 0; i < playlists.length; i++) {
         const { title, data } = playlists[i]
         let file = `${path}/${title}.${format}`
-        if (format === AUDIO_PLAYLIST_EXTS[2]) {
-          result = result || await writePlsFile(file, data)
-        } else if (format === AUDIO_PLAYLIST_EXTS[1]) {
-          result = result || await writeM3uFile(file, data)
+        if (format == AUDIO_PLAYLIST_EXTS[2]) {
+          tasks.push(writePlsFile(file, data))
+        } else if (format == AUDIO_PLAYLIST_EXTS[0]
+          || format == AUDIO_PLAYLIST_EXTS[0]) {
+          tasks.push(writeM3uFile(file, data))
+        } else if (format == BACKUP_FILE_EXTS[0]) {
+          result = result || writeText(file, data)
         }
+      }
+      if (tasks.length > 0) {
+        const taskResults = await Promise.all(tasks)
+        taskResults.forEach(success => result = result || success)
       }
     }
     return result
@@ -468,11 +476,11 @@ const registryGlobalListeners = () => {
     return writeText(result.filePath, data)
   })
 
-  ipcMain.handle('open-json-file', async (event, ...args) => {
-    const title = args[0] || '请选JSON文件'
+  ipcMain.handle('open-file', async (event, ...args) => {
+    const { title, filterExts } = args[0]
     const result = await dialog.showOpenDialog(mainWin, {
-      title,
-      filters: [{ name: 'JSON文件', extensions: ['json'] }],
+      title: title || '请选择文件',
+      filters: [{ name: '数据文件', extensions: filterExts || ['*'] }],
       properties: ['openFile']
     })
     if (result.canceled) return null

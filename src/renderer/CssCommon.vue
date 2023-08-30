@@ -40,8 +40,10 @@
 
   --others-playmeta-height: 77px;
   --others-playnav-height: 80px;
-  --others-image-text-tile-cover-size: 173px;
+  /*--others-image-text-tile-cover-size: 173px*/
+  --others-image-text-tile-cover-size: 172px;
   --others-image-text-tile-mask-width: var(--others-image-text-tile-cover-size);
+  --others-card-image-text-tile-title-width: 152px;
   --others-theme-preview-tile-width: 160px;
   --others-theme-preview-tile-height: 95px;
   --others-progressbar-height: 3px;
@@ -130,8 +132,13 @@ textarea {
   fill: var(--content-highlight-color);
 }
 
-.btn svg {
+.btn,
+.btn svg,
+.btn svg:hover {
   cursor: pointer;
+}
+
+.btn svg {
   fill: var(--button-icon-btn-color);
 }
 

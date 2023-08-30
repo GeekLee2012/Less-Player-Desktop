@@ -70,4 +70,13 @@ const visitItem = (item) => {
     margin-top: 10px !important;
     width: 75%;
 }
+
+.artistlist-ctl .image-text-tile-card .cover {
+    height: var(--others-image-text-tile-cover-size) !important;
+}
+
+.artistlist-ctl .image-text-tile-card {
+    box-shadow: none !important;
+    background-color: transparent !important;
+}
 </style>

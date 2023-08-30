@@ -365,8 +365,8 @@ const parsePlsFile = async (filename, audioExts) => {
     return null
 }
 
-//解析.m3u格式文件
-const parseM3uFile = async (filename, audioExts) => {
+//解析.m3u格式，歌曲列表文件
+const parseM3uPlaylist = async (filename, audioExts) => {
     try {
         audioExts = audioExts || AUDIO_EXTS
         filename = transformPath(filename)
@@ -462,7 +462,7 @@ module.exports = {
     removePath,
     listFiles,
     parsePlsFile,
-    parseM3uFile,
+    parseM3uPlaylist,
     writePlsFile,
     writeM3uFile,
     parseImageMetaFromFile,
