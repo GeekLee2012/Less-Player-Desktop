@@ -97,7 +97,8 @@ const { setThemeIndex,
     setDesktopLyricLineSpacing,
     setDesktopLyricAlignment,
     setDesktopLyricLayoutMode,
-    toggleDesktopLyricAutoHeight,
+    toggleDesktopLyricAutoSize,
+    setDesktopLyricTextDirection,
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
@@ -548,7 +549,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                             @click="setPaginationStyleIndex(index)">
                             {{ item }}
                         </span>
-                        <div class="tip-text spacing">提示：实验性功能，测试阶段</div>
+                        <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div class="last">
                         <span class="sec-title">功能管理：</span>
@@ -679,7 +680,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
             <div class="desktopLyric row">
                 <span class="cate-name">桌面歌词</span>
                 <div class="content">
-                    <div class="tip-text">提示：实验性功能，测试阶段
+                    <div class="tip-text">提示：实验性功能
                         <br>桌面歌词，在未锁定状态下，背景颜色默认为当前主题的背景颜色
                         <br>当文字（高亮）颜色和桌面歌词背景颜色一样时，只有在锁定状态下，才能看到文字效果
                     </div>
@@ -705,8 +706,24 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                             @focusout="updateDesktopLyricLineSpacing" />
                     </div>
                     <div>
+                        <span class="sec-title">文字方向：</span>
+                        <span v-for="(item, index) in ['横屏', '竖屏']" class="quality-item"
+                            :class="{ active: index === desktopLyric.textDirection }"
+                            @click="setDesktopLyricTextDirection(index)">
+                            {{ item }}
+                        </span>
+                    </div>
+                    <div v-show="desktopLyric.textDirection == 0">
                         <span class="sec-title">对齐方式：</span>
                         <span v-for="(item, index) in ['左对齐', '居中', '右对齐', '左、右对齐']" class="quality-item"
+                            v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment }"
+                            @click="setDesktopLyricAlignment(index)">
+                            {{ item }}
+                        </span>
+                    </div>
+                    <div v-show="desktopLyric.textDirection == 1">
+                        <span class="sec-title">对齐方式：</span>
+                        <span v-for="(item, index) in ['上对齐', '居中', '下对齐', '上、下对齐']" class="quality-item"
                             v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment }"
                             @click="setDesktopLyricAlignment(index)">
                             {{ item }}
@@ -721,10 +738,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </span>
                     </div>
                     <div class="last">
-                        <span class="sec-title">窗口自动高度：</span>
-                        <ToggleControl @click="toggleDesktopLyricAutoHeight" :value="desktopLyric.autoHeight">
+                        <span class="sec-title">窗口自动大小：</span>
+                        <ToggleControl @click="toggleDesktopLyricAutoSize" :value="desktopLyric.autoSize">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：开启时，随显示模式自动调整为对应默认的高度</div>
+                        <div class="tip-text spacing">提示：开启时，随显示模式自动调整为对应默认的大小</div>
                     </div>
                 </div>
             </div>

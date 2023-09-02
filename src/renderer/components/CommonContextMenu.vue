@@ -573,6 +573,8 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
     text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .common-ctx-menu .separator {

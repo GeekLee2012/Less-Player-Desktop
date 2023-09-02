@@ -109,7 +109,7 @@ watch(paginationStyleType, refreshAll, { immediate: true })
         <div>
             <slot name="loading2"></slot>
         </div>
-        <div class="empty-data" v-show="computedData.length < 1 && false">
+        <div class="empty-data" v-show="!loading && computedData.length < 1 && false">
             <div class="icon">
                 <svg width="32" height="32" v-show="false" viewBox="0 0 921.17 508.33" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">

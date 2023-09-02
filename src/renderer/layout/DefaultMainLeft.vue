@@ -517,6 +517,8 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 #main-left li:hover {

@@ -165,7 +165,9 @@ export const useSettingStore = defineStore('setting', {
             layoutMode: 0,   // 显示模式（布局），0 => 单行， 1 => 双行, 2 => 全显
             color: null,    //普通行颜色
             hlColor: null,  //高亮行颜色
-            autoHeight: true,   //窗口自动高度，跟随显示模式
+            autoHeight: true,   //已废弃，窗口自动高度，跟随显示模式
+            autoSize: true,     //窗口自动大小，跟随显示模式
+            textDirection: 0,   //文字显示方向，0 => 横屏，1 => 竖屏
         },
         /* 缓存 */
         cache: {
@@ -943,6 +945,11 @@ export const useSettingStore = defineStore('setting', {
             this.desktopLyric.lineSpacing = value
             this.syncSettingToDesktopLyric()
         },
+        setDesktopLyricTextDirection(value) {
+            this.desktopLyric.textDirection = value
+            this.setupDesktopLyricAutoSize(true)
+            this.syncSettingToDesktopLyric()
+        },
         setDesktopLyricAlignment(value) {
             this.desktopLyric.alignment = value
             this.syncSettingToDesktopLyric()
@@ -958,12 +965,20 @@ export const useSettingStore = defineStore('setting', {
             this.desktopLyric.autoHeight = !this.desktopLyric.autoHeight
             if (ipcRenderer) ipcRenderer.send('app-desktopLyric-autoHeight', this.desktopLyric.autoHeight)
         },
+        toggleDesktopLyricAutoSize() {
+            this.desktopLyric.autoSize = !this.desktopLyric.autoSize
+            this.setupDesktopLyricAutoSize()
+        },
+        setupDesktopLyricAutoSize(isInit) {
+            if (ipcRenderer) ipcRenderer.send('app-desktopLyric-autoSize', this.desktopLyric.autoSize, this.desktopLyric.textDirection == 1, isInit)
+        },
         syncSettingFromDesktopLyric(data) {
-            const { alignment, fontSize, layoutMode, lineSpacing } = data
+            const { alignment, fontSize, layoutMode, lineSpacing, textDirection } = data
             this.desktopLyric.alignment = alignment
             this.desktopLyric.fontSize = fontSize
             this.desktopLyric.layoutMode = layoutMode
             this.desktopLyric.lineSpacing = lineSpacing
+            this.desktopLyric.textDirection = textDirection
         },
         syncSettingToDesktopLyric() {
             EventBus.emit('setting-syncToDesktopLyric', this.desktopLyric)

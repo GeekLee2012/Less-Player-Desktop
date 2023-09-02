@@ -246,6 +246,8 @@ onMounted(() => {
     align-items: center;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .playing-view .meta-wrap .audio-title {

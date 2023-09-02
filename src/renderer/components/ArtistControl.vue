@@ -48,6 +48,8 @@ EventBus.on('track-artistUpdated', data => {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .artist-ctl .visitable {

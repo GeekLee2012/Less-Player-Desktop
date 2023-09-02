@@ -3,7 +3,7 @@ import { computed, nextTick, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import Mousetrap from 'mousetrap';
-import { randomTextWithinAlphabetNums, smoothScroll, useIpcRenderer, useMessagePort } from '../common/Utils';
+import { randomTextWithinAlphabetNums, smoothScroll, useIpcRenderer, smoothScrollHorizional } from '../common/Utils';
 import { Track } from '../common/Track';
 import { toMMssSSS, toMillis } from '../common/Times';
 
@@ -12,9 +12,10 @@ import { toMMssSSS, toMillis } from '../common/Times';
 const ipcRenderer = useIpcRenderer()
 
 const { desktopLyric } = storeToRefs(useSettingStore())
-const { setDesktopLyricFontSize, setDesktopLyricAlignment,
-  setDesktopLyricLayoutMode, setDesktopLyricColor,
-  setDesktopLyricHighlightColor, setDesktopLyricLineSpacing } = useSettingStore()
+const { setDesktopLyricFontSize, setDesktopLyricTextDirection,
+  setDesktopLyricAlignment, setDesktopLyricLayoutMode,
+  setDesktopLyricColor, setDesktopLyricHighlightColor,
+  setDesktopLyricLineSpacing, setupDesktopLyricAutoSize, } = useSettingStore()
 
 const sendToMain = (channel, data) => {
   if (ipcRenderer) ipcRenderer.send(channel, data)
@@ -112,16 +113,23 @@ const renderLyric = (currentTime) => {
 
   //是否为用户手动滚动歌词
   if (isUserMouseWheel.value || isSeeking.value) return
-  if (desktopLyric.value.layoutMode !== 2) return
+  const { layoutMode, textDirection } = desktopLyric.value
+  if (layoutMode != 2) return
 
-  if (!lines[index] || !lines[index].offsetTop) return
+  const isVeritical = (textDirection == 1)
+  const offsetProp = isVeritical ? 'offsetLeft' : 'offsetTop'
+
+  if (!lines[index] || !lines[index][offsetProp]) return
   //const { offsetTop } = lyricWrap
-  const { clientHeight } = document.documentElement
+  const { clientHeight, clientWidth } = document.documentElement
+  const clientSize = isVeritical ? clientWidth : clientHeight
   //const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
-  const destScrollTop = lines[index].offsetTop - clientHeight / 2
+  const destScrollValue = lines[index][offsetProp] - clientSize / 2
+
+  const scrollAction = isVeritical ? smoothScrollHorizional : smoothScroll
   //const frequency = getStateRefreshFrequency()
   //const duration = 300 * frequency / 60
-  smoothScroll(lyricWrap, destScrollTop, 300, 5, () => {
+  scrollAction(lyricWrap, destScrollValue, 300, 5, () => {
     return (isUserMouseWheel.value || isSeeking.value)
   })
 
@@ -150,14 +158,15 @@ const setupLyricScrollLocator = () => {
   const locatorEl = document.querySelector('.desktop-lyric .scroll-locator')
   if (!locatorEl) return
 
-  const { clientWidth } = document.documentElement
+  const { clientWidth, clientHeight } = document.documentElement
   const lyricEl = document.querySelector('.desktop-lyric .center')
   let leftAlignPos = clientWidth / 2 - 100
   if (lyricEl) leftAlignPos = Math.max(lyricEl.clientWidth - 100, leftAlignPos)
 
-  const { alignment } = desktopLyric.value
+  const { alignment, textDirection } = desktopLyric.value
   const locatorPositions = ['33', '33', leftAlignPos]
-  locatorEl.style.right = locatorPositions[alignment] + 'px'
+  if (textDirection == 0) locatorEl.style.right = locatorPositions[alignment] + 'px'
+  if (textDirection == 1) locatorEl.style.top = (clientHeight - 33 - locatorPositions[alignment]) + 'px'
 }
 
 const updateScrollLocatorTime = () => {
@@ -165,12 +174,15 @@ const updateScrollLocatorTime = () => {
   if (!locatorEl) return
   const lyricEl = document.querySelector('.desktop-lyric .center')
   if (!lyricEl) return
+  const { textDirection } = desktopLyric.value
   //横屏
-  const x = lyricEl.offsetLeft + 188
-  const y = locatorEl.offsetTop
+  let x = lyricEl.offsetLeft + 188
+  let y = locatorEl.offsetTop
   //竖屏
-  //const x = locatorEl.offsetLeft
-  //const y = lyricEl.offsetTop + 188
+  if (textDirection == 1) {
+    x = locatorEl.offsetLeft
+    y = lyricEl.offsetTop + 188
+  }
   const pointEl = document.elementFromPoint(x, y)
   if (!pointEl) return
   const timekey = pointEl.getAttribute('timeKey')
@@ -344,7 +356,7 @@ const setupMessagePort = (callback) => {
 }
 
 const desktopLyricRef = ref(null)
-const setupLyricSetting = (isInit) => {
+const setupLyricSetting = (needResize) => {
   if (!desktopLyricRef.value) return
   const { fontSize, color, hlColor, lineSpacing } = desktopLyric.value
   const styles = {
@@ -357,8 +369,9 @@ const setupLyricSetting = (isInit) => {
     desktopLyricRef.value.style.setProperty(key, value)
   }
 
-  if (typeof (isInit) != 'undefined') {
-    sendLyricLayoutStateToMain(isInit)
+  if (typeof (needResize) == 'boolean') {
+    sendLyricLayoutStateToMain(needResize)
+    setupDesktopLyricAutoSize(needResize)
   }
 }
 
@@ -405,6 +418,16 @@ const onLockBtnMouseOver = (event) => {
 const onLockBtnMouseOut = (event) => {
   if (!lockState.value) return
   sendToMain('app-desktopLyric-ignoreMouseEvent', true)
+}
+
+//文字显示方向，横屏、竖屏
+const switchTextDirectionState = () => {
+  const { textDirection } = desktopLyric.value
+  const direction = (textDirection + 1) % 2
+  setDesktopLyricTextDirection(direction)
+  setupLyricSetting(true)
+  syncSettingToMain()
+  setupLyricScrollLocator()
 }
 
 //对齐方式
@@ -475,15 +498,16 @@ const switchLayoutMode = () => {
 
   sendLyricLayoutStateToMain()
   syncSettingToMain()
+  setupLyricSetting(true)
 }
 
 const toggleLyricTransActive = () => {
   setLyricTransActive(!lyricTransActived.value)
 }
 
-const sendLyricLayoutStateToMain = (isInit) => {
-  const { layoutMode } = desktopLyric.value
-  sendToMain('app-desktopLyric-layoutMode', { layoutMode, isInit })
+const sendLyricLayoutStateToMain = (needResize) => {
+  const { layoutMode, textDirection } = desktopLyric.value
+  sendToMain('app-desktopLyric-layoutMode', { layoutMode, textDirection, needResize })
 }
 
 const visitSetting = () => {
@@ -491,9 +515,10 @@ const visitSetting = () => {
 }
 
 const syncSettingFromMain = (data) => {
-  const { fontSize, alignment, layoutMode, color, hlColor, lineSpacing } = data
+  const { fontSize, textDirection, alignment, layoutMode, color, hlColor, lineSpacing, } = data
   setDesktopLyricFontSize(fontSize)
   setDesktopLyricAlignment(alignment)
+  setDesktopLyricTextDirection(textDirection)
   setDesktopLyricLayoutMode(layoutMode)
   setDesktopLyricColor(color)
   setDesktopLyricHighlightColor(hlColor)
@@ -549,7 +574,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="desktop-lyric" :class="{ 'desktop-lyric-lock': lockState, 'desktop-lyric-vertical': false }"
+  <div class="desktop-lyric"
+    :class="{ 'desktop-lyric-lock': lockState, 'desktop-lyric-vertical': (desktopLyric.textDirection == 1) }"
     ref="desktopLyricRef" @mouseover="onMouseover" @mouseout="onMouseout">
     <div class="header">
       <div class="action">
@@ -587,6 +613,34 @@ onMounted(() => {
                   d="M128,383.71v-6.83c0-40.32-.08-80.65,0-121A255.94,255.94,0,0,1,324.23,7.19C465.55-27,607.47,64.07,635,207a292.07,292.07,0,0,1,4.79,50.11c.67,40.32.22,80.65.22,121v5.46c8.06,1,15.83,1.52,23.48,2.85,54.73,9.5,98.13,56.29,103.62,111.62.51,5.13.86,10.3.86,15.46q.07,148,0,295.95c0,61.93-40.79,113-101.12,126.31a137,137,0,0,1-29.24,2.84q-253.71.25-507.43.1C66.77,938.66,15.43,897.38,2.68,836A136.23,136.23,0,0,1,.12,808.74Q-.13,661.52,0,514.28c0-64.85,43.4-117,107.15-128.43C113.84,384.65,120.68,384.44,128,383.71ZM383.88,853.44h253c28,0,45.86-17.91,45.87-46q0-146,0-292c0-28.11-17.84-46-45.86-46q-253.26,0-506.5,0a51.82,51.82,0,0,0-8.46.49c-22.55,3.78-36.65,20.94-36.66,44.73q0,146.74,0,293.49a54.15,54.15,0,0,0,1.28,12.39c4.8,20.12,21.66,32.86,43.28,32.87Q256.89,853.47,383.88,853.44ZM554.53,383.92c.1-1.79.23-2.94.23-4.09,0-41,.23-82-.16-122.95a181.55,181.55,0,0,0-3.31-33.72C536.81,150.8,480.86,97.59,407.11,87.28,354,79.85,307.05,95,267.75,131.45c-36.62,33.92-54.22,76.66-54.44,126.48-.18,40.32,0,80.64,0,121,0,1.61.17,3.22.27,5Z" />
                 <path
                   d="M341.27,743.32c0-8.33-.16-16.67.07-25,.09-3.24-1.07-5-3.73-6.78-28-19.11-41.34-45.83-38.35-79.46,2.85-32,19.91-55.45,48.85-69.3,40.27-19.27,88.72-3.22,110.48,35.84a85.21,85.21,0,0,1-27.47,112.49c-3.4,2.24-4.47,4.53-4.43,8.39q.29,23.75,0,47.49c-.2,17-7.38,30.35-22.48,38.52-14.31,7.75-28.95,7.21-42.77-1.34-13.52-8.37-19.89-21.09-20.18-36.87C341.15,759.32,341.27,751.32,341.27,743.32Z" />
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="text-direction-btn btn spacing" v-show="!lockState" @click="switchTextDirectionState">
+          <svg width="16" height="16" v-show="desktopLyric.textDirection == 0" viewBox="0 0 703.66 768.11"
+            xmlns="http://www.w3.org/2000/svg">
+            <g id="Layer_2" data-name="Layer 2">
+              <g id="Layer_1-2" data-name="Layer 1">
+                <path
+                  d="M319.59,436.78c1.11-4.32,1.77-8.81,3.39-12.92Q402.43,222.58,482.06,21.38C487.53,7.56,498.41,0,512.19,0c14,0,24.62,7.56,30.28,21.89q42.48,107.46,84.82,215,36.83,93.33,73.62,186.66c7.9,20-1.78,39.89-21.72,44.75-15.36,3.74-30.67-4.33-37-20-8.75-21.59-17.18-43.3-25.74-65-5.07-12.84-10.18-25.67-15.11-38.57-1.05-2.73-2.43-3.81-5.45-3.8q-84,.14-168,0c-4,0-4.57,2.38-5.6,5q-20,50.59-40,101.2c-5.52,13.93-16.65,21.79-30.46,21.72C334.22,468.76,320.23,454.65,319.59,436.78Zm192.54-318c-21.15,53.48-41.77,105.6-62.5,158h124.8C553.68,224.17,533.16,172.1,512.13,118.77Z" />
+                <path
+                  d="M85.42,657.32V34.6C85.42,17,95,4.14,110.57.79A31.85,31.85,0,0,1,149.21,30.4c.11,2.16.06,4.33.06,6.5V658.45c1.94-1.77,3.23-2.86,4.42-4.05,9.1-9,17.92-18.39,27.32-27.11a31.64,31.64,0,0,1,52.68,16.29c2.48,10.77,0,20.79-7.76,28.67-28.84,29.13-57.73,58.22-87,86.91-12.29,12-31.07,11.9-43.36-.18Q51.89,716.05,9,672.39c-12.43-12.65-11.68-32.3.72-44.54a31.5,31.5,0,0,1,44.2-.37C64.25,637.34,74,647.83,84.05,658Z" />
+                <path
+                  d="M554.48,658.62c2.19-2,3.4-3,4.53-4.16,8.61-8.59,17.14-17.26,25.82-25.78,13.31-13.06,33-13.32,45.69-.71s12.56,32.49-.56,45.69q-41.93,42.2-84.11,84.11c-13.61,13.54-32.69,13.52-46.35,0q-42.18-41.93-84.11-84.11c-13.18-13.25-13.28-33-.52-45.65s32.43-12.34,45.69.72c9.71,9.57,19.27,19.3,30.15,30.22v-7q0-74.22,0-148.44c0-15.68,7.95-27.55,21.32-32.29,21.13-7.49,42.34,7.91,42.4,31.09.13,49.65,0,99.29,0,148.94Z" />
+              </g>
+            </g>
+          </svg>
+          <svg width="16" height="16" v-show="desktopLyric.textDirection == 1" viewBox="0 0 716.58 716.58"
+            xmlns="http://www.w3.org/2000/svg">
+            <g id="Layer_2" data-name="Layer 2">
+              <g id="Layer_1-2" data-name="Layer 1">
+                <path
+                  d="M25.45,460.54c-18.2,0-30.14-17.39-23.65-35,10-27.17,20.27-54.23,30.43-81.33q61-162.61,122-325.22c6.52-17.37,24-24.06,38.54-14.82,5.61,3.58,8.81,8.86,11.09,14.94q38.58,103.07,77.24,206.09,37.21,99.3,74.44,198.6c5.72,15.25.25,29.43-13.41,35s-28.31-1.22-33.87-15.89q-14.06-37.11-27.9-74.28c-7.12-19-14.3-38-21.24-57.06-1.23-3.38-2.88-4.49-6.46-4.48q-73.74.18-147.48,0c-3.71,0-5.09,1.35-6.3,4.6Q74.58,376.89,50,442C45.51,454,36.85,460.5,25.45,460.54ZM238.07,255.8C218.4,203.35,198.94,151.45,179,98.19L119.87,255.8Z" />
+                <path
+                  d="M629.3,563.32c-2.22-2.32-3.43-3.64-4.7-4.91-17.91-17.91-35.92-35.73-53.71-53.76-13.94-14.14-8.37-37.11,10.3-42.62,10.17-3,19-.19,26.47,7.32q29.46,29.58,59,59,20.5,20.51,41,41c11.75,11.82,11.84,26.81.16,38.52Q657.87,658,607.79,708c-11,11-26.79,11.45-37.08,1.31-10.51-10.34-10.12-26.14,1.07-37.4q26.26-26.43,52.68-52.68c1.29-1.29,2.78-2.39,4.18-3.57l-.44-1.38H37.67c-4.33,0-8.67.1-13,0A25.45,25.45,0,0,1,25,563.34c2,0,4,0,6,0H629.3Z" />
+                <path
+                  d="M627.83,204.56h-5.74q-118,0-236,0c-13.63,0-23.48-6.73-26.78-18.12-4.66-16.05,6.51-31.65,23.49-32.79,1.83-.13,3.66-.07,5.5-.07H629c-1.9-2.07-3-3.37-4.22-4.58Q597.89,122.11,571,95.24c-7.17-7.2-9.69-15.85-6.82-25.67C567,60.16,573.38,54.19,582.9,52s17.72.69,24.59,7.58q17.47,17.52,35,35,32.16,32.18,64.33,64.35c13,13,13,27.4.14,40.29q-49.49,49.51-99,99c-10.72,10.7-25,11.85-35.54,3-11.8-9.84-12.61-26.78-1.53-38q26.72-27,53.73-53.74c1.25-1.24,3-1.95,4.55-2.9C628.72,205.92,628.27,205.24,627.83,204.56Z" />
               </g>
             </g>
           </svg>
@@ -822,7 +876,7 @@ onMounted(() => {
   flex-direction: column;
 
   background: var(--app-bg-color);
-  color: var(--content-text-color);
+  color: var(--content-subtitle-text-color);
   font-size: var(--content-desktop-lyric-text-size);
 
   position: relative;
@@ -841,7 +895,6 @@ onMounted(() => {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
-  -webkit-text-fill-color: transparent;
 
   font-weight: bold;
 }
@@ -894,6 +947,27 @@ onMounted(() => {
 
 .desktop-lyric .center .line {
   margin-bottom: var(--content-desktop-lyric-line-spacing);
+}
+
+.desktop-lyric .center .desktop-lyric-content-highlight .extra-text {
+  color: var(--content-text-color);
+}
+
+.desktop-lyric-lock .center .line .extra-text {
+  /*
+  background: var(--content-desktop-lyric-highlight-color);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  */
+  color: var(--content-desktop-lyric-color) !important;
+}
+
+.desktop-lyric-lock .center .desktop-lyric-content-highlight .extra-text {
+  background: var(--content-desktop-lyric-highlight-color);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
 }
 
 .desktop-lyric .lyric-layout-ends .even,
@@ -974,7 +1048,6 @@ onMounted(() => {
 }
 
 /* 实验性CSS - 竖屏歌词 */
-/*
 .desktop-lyric-vertical {
   flex-direction: row;
 }
@@ -986,7 +1059,7 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 33px 0px;
+  padding: 25px 0px;
 }
 
 .desktop-lyric-lock .header {
@@ -1003,28 +1076,51 @@ onMounted(() => {
 
 .desktop-lyric-vertical .spacing {
   margin-left: 0px;
-  margin-top: 25px;
+  margin-top: 20px;
 }
 
 .desktop-lyric-vertical .center {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: flex-start;
-  padding: 33px;
+  padding: 33px 0px !important;
+  overflow: hidden;
   overflow-x: scroll;
   width: 202px;
+  /*
+  flex-direction: column;
   writing-mode: vertical-rl;
+  */
 }
 
 .desktop-lyric-vertical .center .line {
   writing-mode: vertical-rl;
-  letter-spacing: 6px;
-  line-height: var(--content-desktop-lyric-text-size + 6);
+  letter-spacing: 2px;
+  line-height: var(--content-desktop-lyric-text-size + 3);
   margin-left: var(--content-desktop-lyric-line-spacing);
   padding: 0px;
   text-align: left;
-  min-height: 202px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop-lyric-vertical .lyric-layout-ends .even,
+.desktop-lyric-vertical .center .align-left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.desktop-lyric-vertical .center .align-center {
+  align-items: center;
+  text-align: center;
+}
+
+.desktop-lyric-vertical .lyric-layout-ends .odd,
+.desktop-lyric-vertical .center .align-right {
+  align-items: flex-end;
+  text-align: right;
 }
 
 .desktop-lyric-vertical .lyric-showall {
@@ -1034,15 +1130,28 @@ onMounted(() => {
 
 .desktop-lyric-vertical .lyric-showall .first {
   margin-top: 0px !important;
+  margin-left: 258px;
 }
 
-.desktop-lyric-vertical .lyric-showall .end {
+.desktop-lyric-vertical .lyric-showall .last {
   margin-bottom: 0px !important;
+  margin-right: 366px;
 }
 
 .desktop-lyric-vertical .scroll-locator {
   left: 50% !important;
-  width: fit-content;
+  width: 36px;
+  height: fit-content;
+  flex-wrap: wrap;
 }
-*/
+
+.desktop-lyric-vertical .scroll-locator .time-text {
+  margin-bottom: 3px;
+}
+
+.desktop-lyric-vertical .no-lyric,
+.desktop-lyric-vertical .unready-state-line {
+  writing-mode: vertical-rl;
+  display: flex;
+}
 </style>

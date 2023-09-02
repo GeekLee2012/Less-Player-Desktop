@@ -326,6 +326,8 @@ onUnmounted(() => {
     align-items: center;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .visual-playing-view .meta-wrap .audio-artist {

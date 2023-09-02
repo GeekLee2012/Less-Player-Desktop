@@ -32,6 +32,8 @@ const visitAlbumDetail = (platform, id, callback) => {
     -webkit-box-orient: vertical;
     /* -webkit-app-region: none; */
     text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .album-ctl-visitable {

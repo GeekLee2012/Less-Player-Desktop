@@ -155,6 +155,11 @@ export const smoothScroll = (target, dest, duration, step, interruptAction) => {
     smoothAnimation(target, easeInOutQuad, target.scrollTop, dest, duration, step, (value => target.scrollTop = value), interruptAction)
 }
 
+//平滑滚动 - 水平方向
+export const smoothScrollHorizional = (target, dest, duration, step, interruptAction) => {
+    smoothAnimation(target, easeInOutQuad, target.scrollLeft, dest, duration, step, (value => target.scrollLeft = value), interruptAction)
+}
+
 //限制数组总长度，超出部分会直接删除
 export const trimArray = async (data, limit) => {
     limit = limit || 999

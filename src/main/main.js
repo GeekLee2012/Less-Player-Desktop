@@ -42,7 +42,8 @@ let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT
 let powerSaveBlockerId = -1
 let appTray = null, appTrayMenu = null, appTrayShow = false
 let playState = false, desktopLyricLockState = false
-let lyricWinMinWidth = 450, lyricWinMinHeight = 168, isDesktopLyricAutoHeight = true
+//let lyricWinMinWidth = 450, lyricWinMinHeight = 168
+let isDesktopLyricAutoSize = true, isVerticalDesktopLyric = false, desktopLyricLayoutMode = 0
 const proxyAuthRealms = []
 //TODO 下载队列
 let downloadingItem = null
@@ -172,7 +173,7 @@ const init = () => {
   })
 
   nativeTheme.on('updated', () => {
-    console.log(nativeTheme.themeSource)
+    //console.log(nativeTheme.themeSource)
   })
 }
 
@@ -549,38 +550,20 @@ const registryGlobalListeners = () => {
     if (isMacOS) lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
     lyricWin.setHasShadow(!desktopLyricLockState)
     lyricWin.setResizable(!desktopLyricLockState)
-    lyricWin.setMinimumSize(lyricWinMinWidth, lyricWinMinHeight)
+    //lyricWin.setMinimumSize(lyricWinMinWidth, lyricWinMinHeight)
     if (desktopLyricLockState) lyricWin.blur()
     setupTrayMenu()
   }).on('app-mainWin-show', (event, ...args) => {
     showMainWindow()
-  }).on('app-desktopLyric-autoHeight', (event, ...args) => {
-    isDesktopLyricAutoHeight = args[0]
+  }).on('app-desktopLyric-autoSize', (event, ...args) => {
+    isDesktopLyricAutoSize = args[0]
+    isVerticalDesktopLyric = args[1]
   }).on('app-desktopLyric-layoutMode', (event, ...args) => {
-    const { layoutMode, isInit } = args[0]
-    if (!isDesktopLyricAutoHeight && !isInit) return
-    const { x, y, width, height } = lyricWin.getBounds()
-    let limit = lyricWinMinHeight
-    switch (layoutMode) {
-      case 0:
-        if (height > limit) {
-          lyricWin.setSize(width, limit)
-        }
-        break
-      case 1:
-        limit = parseInt(lyricWinMinHeight * 1.25)
-        if (height != limit) {
-          lyricWin.setSize(width, limit)
-        }
-        break
-      case 2:
-        limit = 520
-        if (height < limit) {
-          lyricWin.setSize(width, limit)
-        }
-        break
-    }
-    if (isInit) lyricWin.center()
+    const { layoutMode, textDirection, needResize } = args[0]
+    desktopLyricLayoutMode = layoutMode
+    isVerticalDesktopLyric = (textDirection == 1)
+    if (!isDesktopLyricAutoSize && !needResize) return
+    setupDesktopLyricWindowSize(isDesktopLyricAutoSize || needResize)
   }).on('app-desktopLyric-alwaysOnTop', (event, ...args) => {
     //lyricWin.setAlwaysOnTop(!lyricWin.isAlwaysOnTop())
     lyricWin.setAlwaysOnTop(args[0] || false)
@@ -593,6 +576,48 @@ const registryGlobalListeners = () => {
   }).on('app-messagePort-pair', (event, ...args) => {
     messagePortPair = setupMessagePortPair(mainWin, lyricWin)
   })
+}
+
+const setupDesktopLyricWindowSize = (needResize) => {
+  const minWidth = isVerticalDesktopLyric ? 150 : 450
+  const minHeight = isVerticalDesktopLyric ? 465 : 100
+  if (lyricWin) {
+    lyricWin.setMinimumSize(minWidth, minHeight)
+    lyricWin.setSize(minWidth, minHeight)
+    if (needResize) { //逻辑有些乱
+      const { x, y, width, height } = lyricWin.getBounds()
+      switch (desktopLyricLayoutMode) {
+        case 0:
+          if (isVerticalDesktopLyric) {
+            if (width > 150) {
+              lyricWin.setSize(150, Math.max(height, minHeight))
+            }
+          } else if (height > 200) {
+            lyricWin.setSize(width, 100)
+          }
+          break
+        case 1:
+          if (isVerticalDesktopLyric) {
+            if (width != 200) {
+              lyricWin.setSize(200, Math.max(height, minHeight))
+            }
+          } else if (height != 150) {
+            lyricWin.setSize(width, 150)
+          }
+          break
+        case 2:
+          if (isVerticalDesktopLyric) {
+            if (width < 366) {
+              lyricWin.setSize(366, Math.max(height, minHeight))
+            }
+          } else if (height < 520) {
+            lyricWin.setSize(width, 520)
+          }
+          break
+      }
+      lyricWin.center()
+    }
+  }
 }
 
 const toggleLyricWindow = () => {
@@ -1181,10 +1206,10 @@ const overrideRequest = (details) => {
 const createLyricWindow = () => {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: lyricWinMinWidth,
-    height: lyricWinMinHeight,
-    minWidth: lyricWinMinWidth,
-    minHeight: lyricWinMinHeight,
+    width: 450,
+    height: 150,
+    minWidth: 100,
+    minHeight: 100,
     titleBarStyle: 'hidden',
     title: 'Less Player - 桌面歌词',
     trafficLightPosition: { x: -404, y: -404 },

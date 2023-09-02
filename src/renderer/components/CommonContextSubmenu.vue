@@ -126,6 +126,8 @@ const resetScroll = () => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .common-ctx-submenu .separator {
