@@ -272,7 +272,7 @@ const getLastReleaseVersion = () => {
         } else { //正式版
             getDoc(changelogUrl).then(doc => {
                 const changeLogLastVersion = doc.querySelector('.file_content h3').textContent.trim()
-                resolve({ version: changeLogLastVersion })
+                resolve({ version: changeLogLastVersion, giteeVersion: changeLogLastVersion, githubVersion: changeLogLastVersion })
             }).catch(reason => {
                 reject({ version })
             })
