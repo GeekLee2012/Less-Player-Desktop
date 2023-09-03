@@ -253,6 +253,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 /*
@@ -293,6 +295,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 .song-item .title-wrap span {
     z-index: 1;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 /* .song-item .mv span, */
@@ -348,6 +352,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .song-item .duration {
@@ -402,5 +408,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 </style>

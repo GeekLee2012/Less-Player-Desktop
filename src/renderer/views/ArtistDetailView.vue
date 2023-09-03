@@ -486,6 +486,7 @@ watch([platform, artistId], reloadAll, { immediate: true })
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-break: anywhere;
 }
 
 #artist-detail-view .header .alias {

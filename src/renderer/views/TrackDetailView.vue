@@ -151,8 +151,8 @@ const playItemLater = () => {
 
     overflow: hidden;
     word-wrap: break-word;
-    /*white-space: pre-wrap;
-    line-break: anywhere;*/
+    /*white-space: pre-wrap;*/
+    line-break: anywhere;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;

@@ -313,6 +313,8 @@ EventBus.on('app-resize', detectTitleHeight)
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 #album-detail-view .header .cover {

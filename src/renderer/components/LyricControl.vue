@@ -505,6 +505,7 @@ watch(() => props.track, (nv, ov) => {
     margin-bottom: 6px;
 
     word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .lyric-ctl .audio-artist,
