@@ -1053,9 +1053,9 @@ onMounted(() => {
 }
 
 .desktop-lyric-vertical .header {
-  width: 66px;
-  background-color: var(--content-left-nav-bg-color);
-  border-right: 1px solid var(--border-color);
+  width: 56px;
+  /*background-color: var(--content-left-nav-bg-color);
+  border-right: 1px solid var(--border-color);*/
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -1097,7 +1097,7 @@ onMounted(() => {
 .desktop-lyric-vertical .center .line {
   writing-mode: vertical-rl;
   letter-spacing: 2px;
-  line-height: var(--content-desktop-lyric-text-size + 3);
+  /*line-height: var(--content-desktop-lyric-text-size + 3);*/
   margin-left: var(--content-desktop-lyric-line-spacing);
   padding: 0px;
   text-align: left;

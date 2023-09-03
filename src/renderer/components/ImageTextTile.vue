@@ -233,7 +233,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     background-color: var(--app-bg-color);
     box-shadow: 0px 0px 3px #181818;
     border-radius: 6px;
-    min-height: 218px;
+    min-height: var(--others-image-text-tile-card-min-height);
     margin-top: 20px;
     margin-bottom: 18px;
 }
@@ -257,7 +257,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     box-shadow: none;
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
-    height: 152px;
+    height: var(--others-image-text-tile-card-cover-height);
 }
 
 .image-text-tile-card .cover-wrap {

@@ -615,7 +615,7 @@ const setupDesktopLyricWindowSize = (needResize) => {
           }
           break
       }
-      lyricWin.center()
+      //lyricWin.center()
     }
   }
 }
