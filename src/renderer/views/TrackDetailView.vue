@@ -13,6 +13,7 @@ import { usePlayStore } from '../store/playStore';
 import ArtistControl from '../components/ArtistControl.vue';
 import AlbumControl from '../components/AlbumControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
+import { Track } from '../../common/Track';
 
 
 
@@ -59,7 +60,7 @@ const playItemLater = () => {
     <div id="track-detail-view">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="cover || 'default_cover.png'" />
+                <img class="cover" v-lazy="Track.coverDefault({ cover })" />
             </div>
             <div class="right">
                 <div class="title" v-html="title"></div>

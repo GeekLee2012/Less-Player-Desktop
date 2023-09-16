@@ -11,6 +11,7 @@ import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import { Track } from '../../common/Track';
+import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 
 
 
@@ -19,12 +20,14 @@ const { seekTrack, playMv,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
     mmssPreseekTime, isTrackSeekable } = inject('player')
+const { useWindowsStyleWinCtl } = inject('appCommon')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
-const { playingViewShow, spectrumIndex,
-    playingViewThemeIndex, desktopLyricShow } = storeToRefs(useAppCommonStore())
+const { isMaxScreen, playingViewShow,
+    spectrumIndex, playingViewThemeIndex,
+    desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize, showToast,
     switchPlayingViewTheme, switchSpectrumIndex,
     toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
@@ -110,9 +113,10 @@ onUnmounted(() => {
     <div class="visual-playing-view" :style="viewStyle">
         <div class="container" :style="filterStyle">
             <div class="header">
-                <div class="win-ctl-wrap">
-                    <WinTrafficLightBtn v-show="useCustomTrafficLight" :showCollapseBtn="true"
-                        :collapseAction="hidePlayingView"></WinTrafficLightBtn>
+                <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
+                    <WinTrafficLightBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
+                        :isMaximized="isMaxScreen">
+                    </WinTrafficLightBtn>
                 </div>
                 <div class="meta-wrap" v-show="(lyricMetaPos == 2)">
                     <div class="meta">
@@ -128,7 +132,7 @@ onUnmounted(() => {
                             </svg>
                         </div>
                         <div class="audio-title" v-html="currentTrack.title"></div>
-                        <div v-show="Track.hasArtist(currentTrack)">&nbsp;-&nbsp;</div>
+                        <div v-show="Track.hasArtist(currentTrack)">&nbsp;&nbsp;-&nbsp;&nbsp;</div>
                         <div class="audio-artist">
                             <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
                                 :trackId="currentTrack.id" class="ar-ctl">
@@ -136,11 +140,17 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </div>
+                <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
+                    <WinNonMacOSControlBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
+                        :isMaximized="isMaxScreen">
+                    </WinNonMacOSControlBtn>
+                </div>
             </div>
             <div class="center">
                 <div class="left">
                     <div class="cover">
-                        <img v-lazy="currentTrack.cover" :class="{ rotation: (playingViewShow && playing) }" />
+                        <img v-lazy="Track.coverDefault(currentTrack)"
+                            :class="{ rotation: (playingViewShow && playing) }" />
                     </div>
                     <div class="canvas-wrap" @click="switchSpectrumIndex">
                         <canvas class="spectrum-canvas" width="404" height="56"></canvas>
@@ -205,7 +215,7 @@ onUnmounted(() => {
                             <PlayControl></PlayControl>
                         </div>
                         <div class="btm-right">
-                            <div class="theme" @click="switchPlayingViewTheme">
+                            <div class="theme-btn btn" @click="switchPlayingViewTheme">
                                 <svg width="17" height="17" viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">
@@ -227,11 +237,11 @@ onUnmounted(() => {
                                 </svg>
                                 -->
                             </div>
-                            <div class="lyric-btn spacing" :class="{ 'content-text-highlight': desktopLyricShow }"
+                            <div class="lyric-btn btn spacing" :class="{ 'content-text-highlight': desktopLyricShow }"
                                 @click="() => toggleDesktopLyricShow()">
                                 词
                             </div>
-                            <div class="equalizer spacing" :class="{ active: isUseEffect }">
+                            <div class="equalizer-btn btn spacing" :class="{ active: isUseEffect }">
                                 <svg @click="toggleSoundEffectView" width="17" height="17" viewBox="0 0 1024 1024"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
@@ -292,9 +302,10 @@ onUnmounted(() => {
 
 .visual-playing-view .header .win-ctl-wrap {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     margin-left: var(--others-win-ctl-margin-left);
+    width: 18%;
 }
 
 .visual-playing-view .meta-wrap {
@@ -303,6 +314,8 @@ onUnmounted(() => {
     align-items: center;
     justify-content: center;
     flex: 1;
+    padding-right: 18%;
+    margin-right: var(--others-win-ctl-margin-left);
 }
 
 .visual-playing-view .meta {
@@ -312,7 +325,7 @@ onUnmounted(() => {
     justify-content: center;
     overflow: hidden;
     flex: 1;
-    width: 61.8%;
+    width: 88%;
 }
 
 .visual-playing-view .meta-wrap .audio-title,
@@ -348,12 +361,16 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .header svg:hover,
-.visual-playing-view .theme svg:hover,
-.visual-playing-view .equalizer svg:hover,
+.visual-playing-view .theme-btn svg:hover,
+.visual-playing-view .equalizer-btn svg:hover,
 .visual-playing-view .active svg,
 .visual-playing-view .collapse-btn:hover svg {
     fill: var(--content-highlight-color);
     cursor: pointer;
+}
+
+.visual-playing-view .theme-btn {
+    transform: rotate(-90deg);
 }
 
 .visual-playing-view .center {
@@ -507,8 +524,8 @@ onUnmounted(() => {
     color: var(--button-icon-btn-color);
 }
 
-.winos-style .visual-playing-view .action .lyric-btn {
-    font-weight: normal;
+.visual-playing-view .action .lyric-btn:hover {
+    color: var(--content-highlight-color);
 }
 
 .visual-playing-view .bottom {

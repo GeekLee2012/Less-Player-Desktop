@@ -33,9 +33,9 @@ const setPlayMetaSize = () => {
     const titleWrapEl = document.querySelector('.play-meta .title-wrap')
     const audioTitleEl = document.querySelector('.play-meta .audio-title')
     const timeVolWrapEl = document.querySelector('.play-meta .time-volume-wrap')
-    if (titleWrapEl) titleWrapEl.style.width = width + 'px'
-    if (audioTitleEl) audioTitleEl.style.width = width + 'px'
-    if (timeVolWrapEl) timeVolWrapEl.style.width = width + 'px'
+    if (titleWrapEl) titleWrapEl.style.width = `${width}px`
+    if (audioTitleEl) audioTitleEl.style.width = `${width}px`
+    if (timeVolWrapEl) timeVolWrapEl.style.width = `${width}px`
 }
 
 const setSearchBarSize = () => {
@@ -44,7 +44,7 @@ const setSearchBarSize = () => {
     //const hScaleRatio = clientHeight / minAppHeight
     const size = 123 * Math.max(wScaleRatio, 1)
     const el = document.querySelector('.default-main-top .search-bar .keyword')
-    if (el) el.style.width = size + 'px'
+    if (el) el.style.width = `${size}px`
 }
 
 const setCategoryViewSize = () => {
@@ -92,10 +92,21 @@ const setImageTextTileSize = () => {
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 1
     const cardTileHeight = parseInt(tileWidth * 0.883)
+    /*
     document.documentElement.style.setProperty('--others-image-text-tile-cover-size', `${tileWidth}px`)
     document.documentElement.style.setProperty('--others-card-image-text-tile-title-width', `${tileWidth - 20}px`)
     document.documentElement.style.setProperty('--others-image-text-tile-card-cover-height', `${cardTileHeight}px`)
     document.documentElement.style.setProperty('--others-image-text-tile-card-min-height', `${cardTileHeight + 66}px`)
+    */
+    const changes = {
+        '--others-image-text-tile-cover-size': `${tileWidth}px`,
+        '--others-card-image-text-tile-title-width': `${tileWidth - 20}px`,
+        '--others-image-text-tile-card-cover-height': `${cardTileHeight}px`,
+        '--others-image-text-tile-card-min-height': `${cardTileHeight + 66}px`
+    }
+    for (const [key, value] of Object.entries(changes)) {
+        document.documentElement.style.setProperty(key, value)
+    }
 }
 
 const setPlayingCoverSize = () => {
@@ -197,7 +208,7 @@ const setBatchViewListSize = () => {
     //const height = (clientHeight - 133 - padding)
     //header 87, margin 15, action 31
     const height = (clientHeight - 87 - 15 - 31)
-    if (el) el.style.height = height + 'px'
+    if (el) el.style.height = `${height}px`
 }
 
 //自适应播放页组件大小
@@ -222,8 +233,8 @@ const setLyricToolbarPos = () => {
     const left = (clientWidth - width - padding)
     const top = (clientHeight - height) / 2
     //el.style.right = padding + 'px'
-    el.style.left = left + 'px'
-    el.style.top = top + 'px'
+    el.style.left = `${left}px`
+    el.style.top = `${top}px`
 }
 
 const setupDefaultLayout = () => {
@@ -271,8 +282,7 @@ const setPaginationSize = () => {
     const minHeight = 430 * hScaleRatio
     const el = document.querySelector('.pagination-tiles')
 
-    if (!el) return
-    el.style.setProperty('--content-min-height', `${minHeight}px`)
+    if (el) el.style.setProperty('--content-min-height', `${minHeight}px`)
 }
 
 onActivated(setupDefaultLayout)

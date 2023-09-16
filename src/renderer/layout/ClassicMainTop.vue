@@ -6,12 +6,13 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
 import EventBus from '../../common/EventBus';
-
+import { useUseCustomTrafficLight } from '../../common/Utils';
+import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 
 
 
 const { visitThemes, visitUserHome, visitSetting, visitModulesSetting } = inject('appRoute')
-const { searchAction, searchBarPlaceholder } = inject('appCommon')
+const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
 
 
 const { setLayoutIndex } = useSettingStore()
@@ -19,11 +20,16 @@ const { isRadioModeShortcutEnable,
     isModulesSettingShortcutEnable,
     isThemesShortcutEnable,
     isUserHomeShortcutEnable,
-    isSimpleLayoutShortcutEnable } = storeToRefs(useSettingStore())
-const { isRadioMode, isRadioModeEnable } = storeToRefs(useAppCommonStore())
+    isSimpleLayoutShortcutEnable, } = storeToRefs(useSettingStore())
+const { isMaxScreen, isRadioMode, isRadioModeEnable } = storeToRefs(useAppCommonStore())
+
+//是否使用自定义交通灯控件
+const useCustomTrafficLight = useUseCustomTrafficLight()
+
 
 const switchToSimpleLayout = () => {
-    setLayoutIndex(2) //TODO
+    if (isMaxScreen.value) return
+    setLayoutIndex(2) //TODO 硬编码
 }
 
 const toggleRadioMode = () => {
@@ -38,7 +44,7 @@ const toggleRadioMode = () => {
         </SearchBar>
         <div class="action">
             <div id="radio-btn" @click="toggleRadioMode" v-show="isRadioModeEnable && isRadioModeShortcutEnable">
-                <svg v-show="!isRadioMode" width="19" height="18" viewBox="0 0 939.22 940.41"
+                <svg v-show="!isRadioMode" width="20" height="18" viewBox="0 0 939.22 940.41"
                     xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -51,7 +57,7 @@ const toggleRadioMode = () => {
                         </g>
                     </g>
                 </svg>
-                <svg v-show="isRadioMode" width="19" height="20" viewBox="0 -50 895.95 703.92"
+                <svg v-show="isRadioMode" width="20" height="19" viewBox="0 -50 895.95 703.92"
                     xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -88,7 +94,7 @@ const toggleRadioMode = () => {
                 </svg>
             </div>
             <div id="userhome-btn" @click="visitUserHome" v-show="isUserHomeShortcutEnable">
-                <svg width="21" height="20" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
+                <svg width="21" height="21" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
                             <path
@@ -117,6 +123,9 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
+            <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
+                <WinNonMacOSControlBtn :isMaximized="isMaxScreen"></WinNonMacOSControlBtn>
+            </div>
         </div>
     </div>
 </template>
@@ -135,10 +144,6 @@ const toggleRadioMode = () => {
 .classic-main-top .navigator {
     margin-top: 3px;
     margin-right: 15px;
-}
-
-.classic-main-top .search-bar .keyword {
-    width: 178px;
 }
 
 .classic-main-top .action {

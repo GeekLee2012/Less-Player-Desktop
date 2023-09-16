@@ -212,7 +212,7 @@ const registryGlobalShortcuts = () => {
       if (valueType === 'function') {
         value()
       } else if (valueType === 'string') {
-        sendToMainRenderer('globalShortcut-' + value)
+        sendToMainRenderer(`globalShortcut-${value}`)
         if (activeWindowValues.includes(value)) mainWin.show()
       }
     })
@@ -260,16 +260,18 @@ const setupTrayMenu = () => {
 const registryGlobalListeners = () => {
   //主进程事件监听
   ipcMain.on('app-quit', () => {
-    if (isLyricWindowShow()) {
-      setupTray(true)
-      mainWin.hide()
-      return
-    } else if (appTrayShow) {
-      mainWin.hide()
-      return
-    } else if (isDevEnv && isMacOS) {
-      mainWin.close()
-      return
+    if (mainWin && !mainWin.isDestroyed()) {
+      if (isLyricWindowShow()) {
+        setupTray(true)
+        mainWin.hide()
+        return
+      } else if (appTrayShow) {
+        mainWin.hide()
+        return
+      } else if (isDevEnv && isMacOS) {
+        mainWin.close()
+        return
+      }
     }
     cleanupBeforeQuit()
     app.quit()
@@ -382,7 +384,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('export-playlists', async (event, ...args) => {
-    const { path, format, data: playlists } = args[0]
+    const { path, format, data: playlists, looseMode } = args[0]
     let result = false
     if (playlists && playlists.length > 0) {
       const tasks = []
@@ -393,7 +395,7 @@ const registryGlobalListeners = () => {
           tasks.push(writePlsFile(file, data))
         } else if (format == AUDIO_PLAYLIST_EXTS[0]
           || format == AUDIO_PLAYLIST_EXTS[0]) {
-          tasks.push(writeM3uFile(file, data))
+          tasks.push(writeM3uFile(file, data, looseMode))
         } else if (format == BACKUP_FILE_EXTS[0]) {
           result = result || writeText(file, data)
         }
@@ -536,12 +538,15 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.on('app-desktopLyric-toggle', (event, ...args) => {
-    const fromDesktopLyric = args[0]
     toggleLyricWindow()
+    sendTrayAction(isLyricWindowShow() ? 7 : 8)
+    /*
+    const fromDesktopLyric = args[0]
     if (fromDesktopLyric) {
       const lyricShow = isLyricWindowShow()
       sendTrayAction(lyricShow ? 7 : 8)
     }
+    */
   }).on('app-playState', (event, ...args) => {
     playState = args[0]
     setupTrayMenu()
@@ -622,7 +627,7 @@ const setupDesktopLyricWindowSize = (needResize) => {
 
 const toggleLyricWindow = () => {
   let showState = false
-  if (!lyricWin) {
+  if (!lyricWin || lyricWin.isDestroyed()) {
     lyricWin = createLyricWindow()
     lyricWin.setAlwaysOnTop(true)
     showState = true
@@ -836,7 +841,7 @@ const sendToMainRenderer = (channel, args) => {
 }
 
 const showMainWindow = () => {
-  if (mainWin) mainWin.show()
+  if (mainWin && !mainWin.isDestroyed()) mainWin.show()
 }
 
 const sendTrayAction = (action, showMain) => {
@@ -939,7 +944,7 @@ const toggleWinOSFullScreen = () => {
 const setupAppWindowZoom = (zoom, noResize) => {
   if (!mainWin || !zoom) return
   zoom = Number(zoom) || 85
-  const zoomFactor = parseFloat(zoom / 100)
+  const zoomFactor = zoom / 100
   if (zoomFactor < 0.5 || zoomFactor > 3) return
   mainWin.webContents.setZoomFactor(zoomFactor)
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
@@ -1246,11 +1251,11 @@ const createLyricWindow = () => {
 }
 
 const isMainWindowShow = () => {
-  return mainWin && mainWin.isVisible()
+  return mainWin && !mainWin.isDestroyed() && mainWin.isVisible()
 }
 
 const isLyricWindowShow = () => {
-  return lyricWin && lyricWin.isVisible()
+  return lyricWin && !lyricWin.isDestroyed() && lyricWin.isVisible()
 }
 
 //启动应用

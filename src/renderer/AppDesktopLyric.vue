@@ -1153,5 +1153,7 @@ onMounted(() => {
 .desktop-lyric-vertical .unready-state-line {
   writing-mode: vertical-rl;
   display: flex;
+  height: 100%;
+  flex-direction: column;
 }
 </style>

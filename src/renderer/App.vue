@@ -1,6 +1,5 @@
 <script setup>
 import Themes from './Themes.vue';
-
 </script>
 
 <template>

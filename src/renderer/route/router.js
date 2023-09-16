@@ -87,7 +87,7 @@ const routes = [
                 component: AlbumDetailView
             },
             {  //歌曲详情
-                path: '/:exploreMode/:platform/track',
+                path: '/:exploreMode/:platform/track/:id',
                 component: TrackDetailView,
                 props: route => ({ ...route.query })
             },

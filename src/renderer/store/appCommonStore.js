@@ -9,6 +9,7 @@ let toastTimer = null
 
 export const useAppCommonStore = defineStore('appCommon', {
     state: () => ({
+        isMaxScreen: false, //Electron存在系统兼容性问题，部分OS平台下无法全屏FullScreen显示
         coverMaskShow: false,
         playlistCategoryViewShow: false,
         artistCategoryViewShow: false,
@@ -27,7 +28,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         //通用通知
         commonNotificationShow: false,
         commonNotificationText: null,
-        commonNotificationType: 0, //类型，0 - 普通成功消息，1-失败消息
+        commonNotificationType: 0, //类型，0 -> 普通成功消息，1 -> 失败消息
         commonNotificationImportant: false, //是否可以被新消息覆盖
         //通用上下文菜单
         commonCtxMenuShow: false,
@@ -111,6 +112,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         }
     },
     actions: {
+        toggleMaxScreen() {
+            this.isMaxScreen = !this.isMaxScreen
+        },
         hidePlaybackQueueView() {
             this.playbackQueueViewShow = false
         },
@@ -196,6 +200,7 @@ export const useAppCommonStore = defineStore('appCommon', {
             if (ipcRenderer) ipcRenderer.send('app-min', isToTray)
         },
         maximize() {
+            this.toggleMaxScreen()
             if (ipcRenderer) ipcRenderer.send('app-max')
         },
         setExploreMode(index) {
@@ -437,7 +442,10 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.routerCtxCacheItem = value
         },
         toggleDesktopLyricShow(noSend) {
-            this.desktopLyricShow = !this.desktopLyricShow
+            this.setDesktopLyricShow(!this.desktopLyricShow, noSend)
+        },
+        setDesktopLyricShow(value, noSend) {
+            this.desktopLyricShow = value
             if (ipcRenderer && !noSend) ipcRenderer.send('app-desktopLyric-toggle')
         },
         setDesktopLyricCtxData(value) {

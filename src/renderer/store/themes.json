@@ -2,7 +2,7 @@
     "presetThemes": [
         {
             "id": "default-dark",
-            "name": "默认1",
+            "name": "默认",
             "previewBg": "#48484a",
             "appBackground": {
                 "bgColor": "#48484a",
@@ -212,7 +212,7 @@
         },
         {
             "id": "pink",
-            "name": "粉色1",
+            "name": "粉色",
             "previewBg": "#e667af",
             "appBackground": {
                 "bgColor": "#ffffff",
@@ -422,7 +422,7 @@
         },
         {
             "id": "red",
-            "name": "红色1",
+            "name": "红色",
             "previewBg": "#f9453f",
             "appBackground": {
                 "bgColor": "#ffffff",
@@ -665,7 +665,7 @@
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#91934356",
+                "leftNavBorderColor": "#91934336",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#91934356"
             },

@@ -176,7 +176,7 @@ onMounted(() => {
     color: var(--button-icon-btn-color);
 }
 
-.winos-style .classic-main-bottom .lyric-btn {
-    font-weight: normal;
+.classic-main-bottom .lyric-btn:hover {
+    color: var(--content-highlight-color);
 }
 </style>

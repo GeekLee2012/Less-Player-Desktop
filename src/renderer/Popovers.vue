@@ -86,6 +86,9 @@ const adjustMenuPosition = (event) => {
   if (bGapY > 0) { //溢出底部边界
     pos.y = pos.y - menuHeight + padding / 2
   }
+  //防止溢出上下边界
+  pos.y = Math.max(pos.y, padding)
+  pos.y = Math.min(pos.y, clientHeight - padding)
   return pos
 }
 
@@ -118,6 +121,9 @@ const adjustSubmenuPosition = (event) => {
   } else {
     pos.y = pos.y - menuHeight / 2
   }
+  //防止溢出上下边界
+  pos.y = Math.max(pos.y, padding)
+  pos.y = Math.min(pos.y, clientHeight - padding)
   return pos
 }
 
@@ -264,8 +270,6 @@ const setupPlayingView = (index) => {
   index = index || playingViewThemeIndex.value
   const playingViewThemes = [PlayingView, VisualPlayingView]
   currentPlayingView.value = playingViewThemes[index]
-  //重置动画计数器，让歌曲进度直接刷新
-  //nextTick(() => EventBus.emit('track-resetAnimFrameCnt'))
 }
 
 const appBackgroundScope = reactive({
@@ -433,7 +437,10 @@ watch(() => getCurrentTheme(), (nv) => {
   z-index: 55;
   background-color: var(--app-bg-color);
   background-image: var(--app-bg-image);
-  box-shadow: 0px 0px 10px #161616;
+  /*
+  box-shadow: 0px 0px 10px var(--border-popovers-border-color);
+  */
+  box-shadow: var(--box-shadow);
 }
 
 #playback-queue-view {
@@ -475,6 +482,7 @@ watch(() => getCurrentTheme(), (nv) => {
   height: 550px;
   z-index: 99;
   box-shadow: var(--box-shadow);
+  border-radius: 15px;
 }
 
 #lyric-toolbar {
@@ -483,6 +491,7 @@ watch(() => getCurrentTheme(), (nv) => {
   right: 30px;
   z-index: 99;
   box-shadow: var(--box-shadow);
+  border-radius: 5px;
 }
 
 #random-music-toolbar {
@@ -491,6 +500,7 @@ watch(() => getCurrentTheme(), (nv) => {
   right: 30px;
   z-index: 99;
   box-shadow: var(--box-shadow);
+  border-radius: 10px;
 }
 
 #custom-theme-edit-view {
@@ -502,6 +512,7 @@ watch(() => getCurrentTheme(), (nv) => {
   z-index: 99;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
+  border-radius: 15px;
 }
 
 #color-picker-toolbar {
@@ -511,6 +522,7 @@ watch(() => getCurrentTheme(), (nv) => {
   z-index: 101;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
+  border-radius: 5px;
 }
 
 #gradient-color-toolbar {
@@ -522,6 +534,7 @@ watch(() => getCurrentTheme(), (nv) => {
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
+  border-radius: 15px;
 }
 
 #playlist-export-toolbar {
@@ -533,12 +546,26 @@ watch(() => getCurrentTheme(), (nv) => {
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
+  border-radius: 15px;
 }
 
 .app-custom-theme-bg .ntf-dialog-mask {
   background-color: var(--app-bg-color);
   background-image: var(--app-bg-image);
 }
+
+#popovers .common-ntf,
+#popovers .common-ntf .ntf-dialog-mask {
+  border-radius: 12px;
+}
+
+#popovers .common-ctx-menu,
+#popovers .common-ctx-menu .container,
+#popovers .common-ctx-submenu,
+#popovers .common-ctx-submenu .container {
+  border-radius: 8px;
+}
+
 
 #popovers .autolayout {
   top: 60px;

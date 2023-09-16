@@ -45,9 +45,9 @@ const statPathSync = (path) => {
 }
 
 const scanDirTracks = async (dir, exts, deep) => {
+    const result = { path: dir, data: [], name: getSimpleFileName(dir) }
     try {
         if (!exts || exts.length < 1) exts = AUDIO_EXTS
-        const result = { path: dir, data: [], name: getSimpleFileName(dir) }
         const files = []
         walkSync(dir, (file, dirent) => {
             if (dirent.isFile() && isExtentionValid(dirent.name, exts)) {
@@ -58,11 +58,10 @@ const scanDirTracks = async (dir, exts, deep) => {
             const tracks = await parseTracks(files.sort())
             result.data.push(...tracks)
         }
-        return result
     } catch (error) {
-        console.log(error);
-        return null
+        console.log(error)
     }
+    return result
 }
 
 function getSimpleFileName(fullname) {
@@ -295,7 +294,9 @@ const walkSync = (dir, callback, options) => {
         readdirSync(dir, { withFileTypes: true }).forEach(dirent => {
             const pathName = path.join(dir, dirent.name)
             if (dirent.isFile()) {
-                callback(pathName, dirent)
+                if (callback && typeof (callback) == 'function') {
+                    callback(pathName, dirent)
+                }
             } else if (dirent.isDirectory() && options.deep) {
                 walkSync(pathName, callback, options)
             }
@@ -436,13 +437,16 @@ const writePlsFile = async (filename, data) => {
 }
 
 //保存为.m3u格式文件
-const writeM3uFile = async (filename, data) => {
+const writeM3uFile = async (filename, data, looseMode) => {
     let content = '#EXTM3U\n'
     for (var i = 0; i < data.length; i++) {
-        const { title, duration, url } = data[i]
+        const { title, duration, url, cover } = data[i]
+        //非标准，自定义扩展
+        const coverExtPart = (cover && looseMode && cover != 'default_cover.png')
+            ? `, "${cover}"` : ''
         const file = transformPath(url)
-        const length = duration > 0 ? Math.ceil(duration / 1000) : -1
-        content += `#EXTINF:${length}, ${title}\n${file}\n`
+        const length = (duration && duration > 0) ? Math.ceil(duration / 1000) : -1
+        content += `#EXTINF:${length}, ${title}${coverExtPart}\n${file}\n`
     }
     return writeText(filename, content)
 }

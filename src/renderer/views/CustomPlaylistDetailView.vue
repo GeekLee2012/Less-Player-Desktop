@@ -171,7 +171,7 @@ onUpdated(() => {
                 <div class="about" v-html="getAbout()"></div>
                 <div class="edit">
                     <div @click="() => visitCustomPlaylistEdit(id)">
-                        <svg width="16" height="16" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path

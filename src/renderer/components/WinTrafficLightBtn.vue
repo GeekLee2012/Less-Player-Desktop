@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -10,7 +10,8 @@ const props = defineProps({
     hideMinBtn: Boolean,
     hideMaxBtn: Boolean,
     showCollapseBtn: Boolean,
-    collapseAction: Function
+    collapseAction: Function,
+    isMaximized: Boolean,
 })
 
 const { quit, minimize, maximize } = useAppCommonStore()
@@ -26,10 +27,8 @@ const doMinimize = () => {
     minimize(isHideToTrayOnMinimized.value)
 }
 
-//TODO 
-const isMaximized = ref(false)
+const isMaximized = toRef(props, 'isMaximized')
 const toggleMaximize = () => {
-    isMaximized.value = !isMaximized.value
     maximize()
 }
 </script>

@@ -9,6 +9,7 @@ import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { Playlist } from '../../common/Playlist';
+import { Track } from '../../common/Track';
 
 
 
@@ -115,6 +116,7 @@ const visitItemAlbum = () => {
 const visitTrackDetail = () => {
     const data = toRaw(commonCtxMenuCacheItem.value)
     const { id, platform, title, cover, artist, album } = data
+    if (Playlist.isFMRadioType(data)) return
     visitTrack({
         id, platform, title, cover, artist,
         artist: JSON.stringify(artist),
@@ -435,13 +437,13 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
             const addToQueueMenuItem = Object.assign({}, { ...MenuItems.addToQueue })
             addToQueueMenuItem.name = "添加到当前播放"
             data = [MenuItems.play, addToQueueMenuItem, MenuItems.playLater,
-            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
-            MenuItems.sp, MenuItems.visitTrack, MenuItems.removeFromLocal]
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
+            MenuItems.sp, MenuItems.removeFromLocal]
             break;
         case 2: //我的主页 - 我的收藏 - 歌曲列表
             data = [MenuItems.play, MenuItems.playLater, MenuItems.addToList,
-            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
-            MenuItems.sp, MenuItems.visitTrack, MenuItems.removeFromFavorite,]
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
+            MenuItems.sp, MenuItems.removeFromFavorite,]
             break;
         case 3: //我的主页 - 创建的歌单 - 歌单列表
             data = [MenuItems.playCustom, MenuItems.editCustom,
@@ -450,12 +452,13 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
         case 4: //创建的歌单 - 歌曲列表
             data = [MenuItems.play, MenuItems.playLater,
             MenuItems.sp, MenuItems.addToList, MenuItems.moveToList, MenuItems.addFavorite,
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
             MenuItems.sp, MenuItems.removeFromCustom]
             break;
         case 5: //我的主页 - 最近播放 - 歌曲列表
-            data = [MenuItems.play, MenuItems.playLater, MenuItems.addToList,
-            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
-            MenuItems.sp, MenuItems.addFavorite, MenuItems.removeSongFromRecent,]
+            data = [MenuItems.play, MenuItems.playLater, MenuItems.addToList, MenuItems.addFavorite, ,
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
+            MenuItems.sp, MenuItems.removeSongFromRecent,]
             break;
         case 6: //我的主页 - 批量操作 - 移动到菜单、移动到菜单 
             data = initBatchActionPopupMenuData(dataType, actionType == 1)
@@ -508,7 +511,6 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
     border: 1px solid var(--border-color);*/
     box-shadow: 0px 0px 6px var(--border-popovers-border-color);
     max-height: 404px;
-    border-radius: 8px;
 }
 
 .common-ctx-menu .container {
@@ -517,7 +519,7 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    /*border-radius: 8px;*/
     background: var(--content-bg-color);
     background: var(--content-bg-color-no-transparent);
 }

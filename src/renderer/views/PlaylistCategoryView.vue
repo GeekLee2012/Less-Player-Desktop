@@ -197,7 +197,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
     margin-right: 10px;
     cursor: pointer;
     color: var(--content-text-color);
-    border-radius: 10rem;
+    border-radius: var(--border-list-item-border-radius);
     font-size: var(--content-text-subtitle-size);
 }
 
@@ -212,7 +212,7 @@ EventBus.on('playlistCategory-resetScroll', resetScroll)
 
 
 .playlist-category-view .center .current {
-    border-radius: 10rem;
+    border-radius: var(--border-list-item-border-radius);
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
 }

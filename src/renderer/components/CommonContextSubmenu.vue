@@ -57,16 +57,15 @@ const resetScroll = () => {
     /*flex-direction: column;
     align-items: center;
     justify-content: center;
-    */
     border-radius: 8px;
-    /*padding: 15px 0px;
+    padding: 15px 0px;
     max-height: 297px;
     border: 1px solid var(--border-color);*/
     box-shadow: 0px 0px 6px var(--border-popovers-border-color);
 }
 
 .common-ctx-submenu .container {
-    border-radius: 8px;
+    /*border-radius: 8px;*/
     display: flex;
     flex-direction: column;
     align-items: center;

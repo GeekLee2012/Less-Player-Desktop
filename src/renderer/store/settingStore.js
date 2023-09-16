@@ -78,6 +78,7 @@ export const useSettingStore = defineStore('setting', {
         },
         common: {
             winZoom: 85,
+            winCtlStyle: 0, // 0 => 自动，1 => macOS, 2 => Windows
             fontFamily: '',
             fontWeight: 400,
             fontSizeLevel: 3,
@@ -107,6 +108,10 @@ export const useSettingStore = defineStore('setting', {
             playlistCategoryBarRandom: false,
             playlistCategoryBarFlowBtnShow: false,
             playbackQueueAutoPositionOnShow: false,
+            //关闭按钮，Electron平台兼容性问题，主要为Windows等平台冗余设计
+            playbackQueueCloseBtnShow: false,
+            //历史播放按钮，即最近播放快捷入口
+            playbackQueueHistoryBtnShow: false,
             listenNumShow: false,
             //视频播放退出后，自动继续播放歌曲
             resumePlayAfterVideo: true,
@@ -147,8 +152,8 @@ export const useSettingStore = defineStore('setting', {
             lineHeight: 28,
             lineSpacing: 28,
             offset: 0,  //时间补偿值，快慢
-            metaPos: 0, //歌曲信息, 0:默认, 1:隐藏, 2:顶部
-            alignment: 0,   //对齐方式, 0:左, 1:中, 2:右
+            metaPos: 0, //歌曲信息, 0 => 默认, 1 => 隐藏, 2 => 顶部
+            alignment: 0,   //对齐方式, 0 => 左, 1 => 中, 2 => 右
             trans: true,    //翻译
             roma: true  //发音
         },
@@ -161,7 +166,7 @@ export const useSettingStore = defineStore('setting', {
             lineHeight: 36,
             */
             lineSpacing: 22, //行间距
-            alignment: 1,   //对齐方式, 0:左, 1:中, 2:右
+            alignment: 1,   //对齐方式, 0 => 左, 1 => 中, 2 => 右
             layoutMode: 0,   // 显示模式（布局），0 => 单行， 1 => 双行, 2 => 全显
             color: null,    //普通行颜色
             hlColor: null,  //高亮行颜色
@@ -301,6 +306,9 @@ export const useSettingStore = defineStore('setting', {
             const index = this.layout.index
             return index == 0 || index == 1
         },
+        isDefaultOldLayout() {  //旧版布局，第一个版本发布时的布局
+            return this.layout.index == 0
+        },
         isDefaultClassicLayout() {
             return this.layout.index == 1
         },
@@ -309,6 +317,15 @@ export const useSettingStore = defineStore('setting', {
         },
         getWindowZoom() {
             return this.common.winZoom
+        },
+        isUseAutoWinCtl() {
+            return this.common.winCtlStyle == 0
+        },
+        isUseMacOSWinCtl() {
+            return this.common.winCtlStyle == 1
+        },
+        isUseWindowsWinCtl() {
+            return this.common.winCtlStyle == 2
         },
         isListenNumShow() {
             return this.track.listenNumShow
@@ -345,6 +362,12 @@ export const useSettingStore = defineStore('setting', {
         },
         isPlaybackQueueAutoPositionOnShow() {
             return this.track.playbackQueueAutoPositionOnShow
+        },
+        isPlaybackQueueCloseBtnShow() {
+            return this.track.playbackQueueCloseBtnShow
+        },
+        isPlaybackQueueHistoryBtnShow() {
+            return this.track.playbackQueueHistoryBtnShow
         },
         isHideToTrayOnMinimized() {
             return this.tray.showOnMinimized
@@ -488,6 +511,11 @@ export const useSettingStore = defineStore('setting', {
             this.common.winZoom = zoom
             this.setupWindowZoom()
         },
+        setWindowCtlStyle(value) {
+            const index = parseInt(value || 0)
+            if (index < 0 || index > 2) return
+            this.common.winCtlStyle = index
+        },
         currentFontSize() {
             return this.common.fontSize
         },
@@ -566,6 +594,12 @@ export const useSettingStore = defineStore('setting', {
         },
         togglePlaybackQueueAutoPositionOnShow() {
             this.track.playbackQueueAutoPositionOnShow = !this.track.playbackQueueAutoPositionOnShow
+        },
+        togglePlaybackQueueCloseBtnShow() {
+            this.track.playbackQueueCloseBtnShow = !this.track.playbackQueueCloseBtnShow
+        },
+        togglePlaybackQueueHistoryBtnShow() {
+            this.track.playbackQueueHistoryBtnShow = !this.track.playbackQueueHistoryBtnShow
         },
         toggleListenNumShow() {
             this.track.listenNumShow = !this.track.listenNumShow
@@ -924,6 +958,7 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleModulesSearchOff(platform) {
             this.toggleModulesPlatformOff(this.modules.off.search, platform)
+            EventBus.emit('modules-toggleSearchPlatform')
         },
         setDesktopLyricFontSize(value) {
             const fontSize = parseInt(value || 20)

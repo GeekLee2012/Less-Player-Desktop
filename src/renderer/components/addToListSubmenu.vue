@@ -46,7 +46,7 @@ const addToQueue = () => {
 }
 
 const createPlaylist = () => {
-    isLocalMusicType(currentDataType) ? visitLocalPlaylistCreate() : visitCustomPlaylistCreate('userhome')
+    isLocalMusicType(currentDataType) ? visitLocalPlaylistCreate() : visitCustomPlaylistCreate()
     hidePlaybackQueueView()
 }
 

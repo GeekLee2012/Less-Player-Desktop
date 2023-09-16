@@ -6,7 +6,8 @@ import { reactive, toRefs, watch } from 'vue';
 const props = defineProps({
     limit: Number,
     maxPage: Number,
-    onPageChanged: Function
+    onPageChanged: Function,
+    disabled: Boolean
 })
 
 const { limit, maxPage } = toRefs(props)
@@ -112,7 +113,7 @@ defineExpose({
 </script>
 
 <template>
-    <div class="pagination-toolbar" v-show="pageList.length > 1">
+    <div class="pagination-toolbar" v-show="!disabled && pageList.length > 1">
         <div class="action">
             <div class="prev-btn btn" @click="prevPage">
                 <svg width="18" height="18" viewBox="0 0 455.71 818.05" xmlns="http://www.w3.org/2000/svg">

@@ -3,7 +3,7 @@ import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { toYyyymmdd } from "../common/Times";
-import { md5 } from "../common/Utils";
+import { isDevEnv, md5, toTrimString } from "../common/Utils";
 
 
 
@@ -91,7 +91,7 @@ export class RadioCN {
 
     //全部分类
     static categories() {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const result = { platform: RadioCN.CODE, data: [], orders: [], multiMode: true }
             RadioCN.fmRadioCategories().then(cates => {
                 if (cates.data.length > 0) {
@@ -196,7 +196,8 @@ export class RadioCN {
     //广播电台
     static fmRadioSquare(cate, offset, limit, page, order) {
         const result = { platform: RadioCN.CODE, cate, offset, limit, page, total: 1, data: [] }
-        const { provinceCode, provinceName, categoryId, categoryName } = RadioCN.parseFmRadioCate(cate)
+        const parsedCate = RadioCN.parseFmRadioCate(cate)
+        const { provinceCode, provinceName, categoryId, categoryName } = parsedCate
         return new Promise((resolve, reject) => {
             if (page > 1) {
                 resolve(result)
@@ -218,6 +219,7 @@ export class RadioCN {
                     channelTrack.cover = cover
                     channelTrack.url = playUrlMulti || playUrlLow
                     channelTrack.type = playlist.type
+                    channelTrack.position = RadioCN.stringifyPosition(parsedCate, offset, limit, page, order)
 
                     playlist.addTrack(channelTrack)
                     result.data.push(playlist)
@@ -227,8 +229,13 @@ export class RadioCN {
         })
     }
 
-    //全部
+    //全部电台
     static square(cate, offset, limit, page, order) {
+        return RadioCN.fmRadioSquare(cate, offset, limit, page, order)
+    }
+
+    //全部：电台、歌单（节目播单）
+    static square_v0(cate, offset, limit, page, order) {
         const originCate = cate
         let resolvedCate = (cate || "").toString().trim()
         //resolvedCate = resolvedCate.length < 1 ? RadioCN.CNR_CODE : resolvedCate
@@ -308,10 +315,69 @@ export class RadioCN {
         })
     }
 
+    static stringifyPosition(cate, offset, limit, page, order) {
+        const { provinceCode, provinceName, categoryId, categoryName } = cate
+        return `${provinceCode},${provinceName};${categoryId},${categoryName};${offset};${limit};${page};${order || ''}`
+    }
+
+    static parsePosition(position) {
+        try {
+            if (position && typeof (position) == 'object') {
+                const props = Object.keys(position)
+                if (!props.includes('cate') || !props.includes('offset')
+                    || !props.includes('limit') || !props.includes('page')) {
+                    return null
+                }
+                return position
+            }
+            const [province, category, offset, limit, page, order] = position.split(';')
+            const [provinceCode, provinceName] = province.split(',')
+            const [categoryId, categoryName] = category.split(',')
+            const cate = {
+                '地区': {
+                    item: {
+                        key: provinceName,
+                        value: provinceCode
+                    }
+                },
+                '类型': {
+                    item: {
+                        key: categoryName,
+                        value: categoryId
+                    }
+                }
+            }
+            return { cate, offset, limit, page, order }
+        } catch (error) {
+            if (isDevEnv()) console.log(error)
+        }
+        return null
+    }
 
     //歌曲播放详情：url、cover、lyric等
     static playDetail(id, track) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            const { position } = track
+            //由于url存在时效，可能会过期
+            if (position) {
+                const pPosition = RadioCN.parsePosition(position)
+                if (!pPosition) {
+                    return resolve(track)
+                }
+                const { cate, offset, limit, page, order } = pPosition
+                const radiosResult = await RadioCN.fmRadioSquare(cate, offset, limit, page, order)
+                if (radiosResult && radiosResult.data.length > 0) {
+                    for (let i = 0; i < radiosResult.data.length; i++) {
+                        const radioPlaylist = radiosResult.data[i]
+                        if (toTrimString(id) == toTrimString(radioPlaylist.id)
+                            && radioPlaylist.data && radioPlaylist.data.length > 0) {
+                            const { url } = radioPlaylist.data[0]
+                            Object.assign(track, { url })
+                            break
+                        }
+                    }
+                }
+            }
             resolve(track)
         })
     }

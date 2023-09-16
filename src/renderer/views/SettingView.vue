@@ -31,6 +31,7 @@ const { theme, layout, common, track, desktopLyric,
 const { setThemeIndex,
     setLayoutIndex,
     setWindowZoom,
+    setWindowCtlStyle,
     setFontFamily,
     setFontWeight,
     toggleRadioModeShortcut,
@@ -69,6 +70,8 @@ const { setThemeIndex,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
+    togglePlaybackQueueCloseBtnShow,
+    togglePlaybackQueueHistoryBtnShow,
     toggleHightlightCtxMenuItem,
     toggleUseOnlineCover,
     toggleUseDndForCreateLocalPlaylist,
@@ -102,6 +105,14 @@ const { setThemeIndex,
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
+const { isMaxScreen } = storeToRefs(useAppCommonStore())
+
+
+const switchLayout = (index) => {
+    //TODO 硬编码
+    if (isMaxScreen.value && index == 2) return
+    setLayoutIndex(index)
+}
 
 //打开默认浏览器，并访问超链接
 const visitLink = (url) => {
@@ -470,8 +481,8 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                 <span class="cate-name">布局</span>
                 <div class="content">
                     <div class="last">
-                        <span v-for="(item, index) in ['默认', '经典主流', '简约']" class="layout-item"
-                            :class="{ active: index == layout.index }" @click="setLayoutIndex(index)">
+                        <span v-for="(item, index) in ['旧版', '经典主流', '简约']" class="layout-item"
+                            :class="{ active: index == layout.index }" @click="switchLayout(index)">
                             {{ item }}
                         </span>
                     </div>
@@ -499,6 +510,14 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                                 </option>
                             </datalist>
                         </div>
+                    </div>
+                    <div class="window-ctl">
+                        <span class="sec-title">窗口按钮风格：</span>
+                        <span v-for="(item, index) in ['自动', 'macOS', 'Windows']" class="quality-item"
+                            :class="{ active: index == common.winCtlStyle }" @click="setWindowCtlStyle(index)">
+                            {{ item }}
+                        </span>
+                        <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div class="font" @keydown.stop="">
                         <span>字体名称：</span>
@@ -603,6 +622,17 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </ToggleControl>
                     </div>
                     <div>
+                        <span class="cate-subtitle">当前播放列表关闭按钮：</span>
+                        <ToggleControl @click="togglePlaybackQueueCloseBtnShow" :value="track.playbackQueueCloseBtnShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">当前播放列表历史按钮：</span>
+                        <ToggleControl @click="togglePlaybackQueueHistoryBtnShow"
+                            :value="track.playbackQueueHistoryBtnShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">右键菜单显示时，高亮歌曲：</span>
                         <ToggleControl @click="toggleHightlightCtxMenuItem" :value="track.highlightCtxMenuItem">
                         </ToggleControl>
@@ -680,9 +710,8 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
             <div class="desktopLyric row">
                 <span class="cate-name">桌面歌词</span>
                 <div class="content">
-                    <div class="tip-text">提示：实验性功能
-                        <br>桌面歌词，在未锁定状态下，背景颜色默认为当前主题的背景颜色
-                        <br>当文字（高亮）颜色和桌面歌词背景颜色一样时，只有在锁定状态下，才能看到文字效果
+                    <div class="tip-text">提示：实验性功能。在未锁定状态下，背景颜色默认为当前主题的背景颜色
+                        <br>当文字（高亮）颜色、桌面歌词背景颜色相同时，只有在锁定状态下，才能看到文字效果
                     </div>
                     <div>
                         <span class="sec-title">字体大小：</span>
@@ -782,7 +811,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                 <span class="cate-name">缓存</span>
                 <div class="content">
                     <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的播放进度
-                        <br>最近播放记录，请定期手动清理；记录过多时，部分列表容易卡顿
+                        <br>最近播放记录，请定期手动清理；当记录过多时，部分列表容易卡顿
                         <br>资源缓存，默认上限为500M左右；应用会在每次启动时，自动检查并清理
                     </div>
                     <div>
@@ -1387,7 +1416,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
     min-width: 68px;
     padding: 6px;
     text-align: center;
-    border-radius: 10rem;
+    border-radius: var(--border-list-item-border-radius);
     margin-right: 20px;
     border: 0px solid var(--border-color);
     cursor: pointer;
@@ -1420,6 +1449,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 
 #setting-view .common .content .sec-title {
     width: 128px;
+}
+
+#setting-view .window-ctl .sec-title {
+    width: 159px !important;
 }
 
 #setting-view .desktopLyric .content .sec-title {
@@ -1525,7 +1558,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 #setting-view .track input[type='number'],
 #setting-view .desktopLyric input[type='number'],
 #setting-view .network input {
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     padding: 8px;
     border: 1px solid var(--border-inputs-border-color);
     background-color: var(--content-inputs-bg-color);

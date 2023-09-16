@@ -70,6 +70,11 @@ export const isBlank = (text) => {
     return toTrimString(text).length < 1
 }
 
+//TODO 处理空白无效字符
+export const trimExtraChars = (text) => {
+    return toTrimString(text).replace(/(\\n\\n)/g, '')
+}
+
 /*
 export const useRgbaster = async (src, opts) => {
     return new Promise((resolve, reject) => {
@@ -142,7 +147,7 @@ export const smoothAnimation = (target, animationAlgoFn, start, dest, duration, 
             return
         }
         let updateValue = animationAlgoFn(current, start, distance, duration)
-        if (target) updateAction(updateValue)
+        if (target && typeof (updateAction) == 'function') updateAction(updateValue)
         current += step
         cancelAnimationFrame(animationFrameId)
         animationFrameId = requestAnimationFrame(updateAnimation)
@@ -217,7 +222,7 @@ export const parseM3uText = (text, mapFn) => {
                     cover,
                     url
                 }
-                if (mapFn) item = mapFn(item)
+                if (mapFn && typeof (mapFn) == 'function') item = mapFn(item)
                 result.data.push(item)
                 //重置
                 title = null
@@ -273,7 +278,7 @@ export const parsePlsText = (text, mapFn) => {
                     length,
                     cover: null
                 }
-                if (mapFn) item = mapFn(item)
+                if (mapFn && typeof (mapFn) == 'function') item = mapFn(item)
                 result.data.push(item)
                 //重置
                 title = null

@@ -29,7 +29,6 @@
 .ntf-dialog-mask {
     position: absolute;
     margin: auto;
-    border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--box-shadow);
 }

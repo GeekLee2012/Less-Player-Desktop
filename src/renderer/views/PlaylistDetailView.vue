@@ -12,6 +12,7 @@ import Back2TopBtn from '../components/Back2TopBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import { Playlist } from '../../common/Playlist';
+import { trimExtraChars } from '../../common/Utils';
 
 
 
@@ -173,13 +174,6 @@ const resetBack2TopBtn = () => {
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
 }
 
-//TODO
-const trimExtraHtml = (text) => {
-    text = (text || '').trim()
-    //TODO 暂时不处理html空白格式信息
-    return text
-}
-
 const toggleUseSearchBar = () => {
     if (!isSearchForOnlinePlaylistShow.value) return
     const action = searchBarExclusiveAction.value ? null : setSearchKeyword
@@ -267,7 +261,7 @@ EventBus.on('app-resize', detectTitleHeight)
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>
-                <div class="about" v-html="trimExtraHtml(detail.about)" :class="{ 'short-about': isTwoLinesTitle }"></div>
+                <div class="about" v-html="trimExtraChars(detail.about)" :class="{ 'short-about': isTwoLinesTitle }"></div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="() => playAll()" :rightAction="() => addAll()" class="btn-spacing">
                     </PlayAddAllBtn>

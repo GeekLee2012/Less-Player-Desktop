@@ -46,7 +46,7 @@ const isMacOS = (process.platform === 'darwin')
 //是否为Windows OS
 const isWinOS = (process.platform === 'win32')
 //是否使用自定义交通灯控件
-const useCustomTrafficLight = !isMacOS || true
+const useCustomTrafficLight = isMacOS
 //TODO NODE_ENV取值：dev、proc
 //是否为开发环境
 const isDevEnv = (process.env['NODE_ENV'] === 'dev')

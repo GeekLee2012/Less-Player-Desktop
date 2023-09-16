@@ -29,14 +29,16 @@ const { playTrack, playNextTrack,
     resetQueue, addTracks,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying, setVideoSrc } = usePlayStore()
-const { getVendor, isLocalMusic } = usePlatformStore()
+const { getVendor, isLocalMusic,
+    isRadioCN, isXimalaya } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
     playingViewThemeIndex, spectrumIndex,
     desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId,
-    toggleDesktopLyricShow, toggleDesktopLyricAlwaysOnTop } = useAppCommonStore()
+    toggleDesktopLyricShow, toggleDesktopLyricAlwaysOnTop,
+    setDesktopLyricShow } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
@@ -153,8 +155,7 @@ const toastAndPlayNext = (track, msg) => {
 //目前实现方式已稍作处理
 const handleUnplayableTrack = (track, msg) => {
     const queueSize = queueTracksSize.value
-    const isPlaylistRadio = Playlist.isNormalRadioType(track)
-    if (isPlaylistRadio) { //普通歌单电台
+    if (Playlist.isNormalRadioType(track)) { //普通歌单电台
         toastAndPlayNext(track, msg)
         return
     } else if (autoSkipCnt >= queueSize) { //非电台歌曲，且没有下一曲
@@ -182,8 +183,8 @@ const bootstrapTrack = (track) => {
         if (!track) {
             return reject('none')
         }
-        //FM电台不需要再处理
-        if (Playlist.isFMRadioType(track)) {
+        //FM电台
+        if (Playlist.isFMRadioType(track) && Track.hasUrl(track)) {
             return resolve(track)
         }
         const { id, platform, artistNotCompleted } = track
@@ -198,13 +199,13 @@ const bootstrapTrack = (track) => {
         const { lyric, cover, artist, url } = result
         //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
         if (Track.hasUrl(result)) Object.assign(track, { url })
-        //无法获取到有效url
-        if (!Track.hasUrl(track)) { //VIP收费歌曲或其他
-            return reject('noUrl')
-        }
+        //无法获取到有效url，VIP收费歌曲或其他
+        if (!Track.hasUrl(track)) return reject('noUrl')
         setAutoPlaying(false)
         //设置歌词
-        if (Track.hasLyric(result) && !Track.isCandidate(track)) updateLyric(track, { lyric })
+        if (Track.hasLyric(result)) {
+            updateLyric(track, { lyric })
+        }
         //设置封面
         if (Track.hasCover(result)) Object.assign(track, { cover })
         //设置歌手信息
@@ -228,17 +229,20 @@ const addAndPlayTracks = (tracks, needReset, text, traceId) => {
 }
 
 //接收播放器错误通知，重试播放
-const onPlayerErrorRetry = ({ retry, track, currentTime }) => {
-    if (!retry) { //超出最大重试次数
+const onPlayerErrorRetry = ({ isRetry, track, currentTime, radio }) => {
+    if (isDevEnv()) console.log({ isRetry, track, radio })
+    if (!isRetry) { //超出最大重试次数
         handleUnplayableTrack(track)
-    } else if (track) {
+    } else if (track) { //普通歌曲
         //TODO 尝试继续播放
-        const { duration } = track
-        if (duration > 0) {
+        const { platform, duration } = track
+        if (duration > 0 && !radio) {
             const percent = currentTime / duration
             markTrackSeekPending(percent)
         }
-
+        //强行重置url，并尝试重新获取
+        if (!radio || isRadioCN(platform) || isXimalaya(platform)) track.url = ""
+        if (!radio) track.isCandidate = false
         EventBus.emit('track-changed', track)
     }
 }
@@ -262,8 +266,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     const { id, platform } = playlist
     if (Playlist.isFMRadioType(playlist)) { //FM广播电台
         showToast(text || '即将为您收听电台')
-        const track = playlist.data[0]
-        //addTrack(track)
+        const track = playlist.data ? playlist.data[0] : playlist
         playTrack(track)
         return
     } else if (Playlist.isNormalRadioType(playlist)) { //歌单电台
@@ -490,6 +493,7 @@ const setupCurrentMediaSession = async () => {
 EventBus.on('radio-play', traceRecentTrack)
 EventBus.on('radio-state', playing => {
     setPlaying(playing)
+    checkFavoritedState()
     if (playing) setupCurrentMediaSession()
 })
 //普通歌曲
@@ -499,9 +503,9 @@ EventBus.on('track-changed', track => {
             playTrackDirectly(track)
         }
     }, async (reason) => {
-        if (reason == 'noUrl') {
-            //TODO
-            if (!isVipTransferEnable.value || isLocalMusic(track.platform)) {
+        if (reason == 'noUrl') { //TODO
+            if (!isVipTransferEnable.value || isLocalMusic(track.platform)
+                || Playlist.isFMRadioType(track)) {
                 handleUnplayableTrack(track)
                 return
             }
@@ -580,7 +584,7 @@ EventBus.on('track-pos', secs => {
     const currentTime = secs * 1000
     mmssCurrentTime.value = toMmss(currentTime)
     currentTimeState.value = secs
-    const duration = track ? track.duration : 0
+    const duration = track.duration || 0
     progressState.value = duration > 0 ? (currentTime / duration) : 0
 })
 
@@ -760,8 +764,10 @@ const registryIpcRendererListeners = () => {
                 setupTray()
                 break
             case TRAY_ACTION.DESKTOP_LYRIC_OPEN:
+                setDesktopLyricShow(true, true)
+                break
             case TRAY_ACTION.DESKTOP_LYRIC_CLOSE:
-                toggleDesktopLyricShow(true)
+                setDesktopLyricShow(false, true)
                 break
             case TRAY_ACTION.DESKTOP_LYRIC_LOCK:
             case TRAY_ACTION.DESKTOP_LYRIC_UNLOCK:

@@ -182,10 +182,10 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         addFavoriteRadio(track) {
             const { id, platform, title, cover, artist, url,
-                type, pid, songlistId, extra1, extra2 } = track
+                type, pid, songlistId, extra1, extra2, position } = track
             this.addItem(this.favorites.radios, {
                 id, platform, title, cover, artist, url,
-                type, pid, songlistId, extra1, extra2
+                type, pid, songlistId, extra1, extra2, position
             })
         },
         removeFavoritePlaylist(id, platform) {

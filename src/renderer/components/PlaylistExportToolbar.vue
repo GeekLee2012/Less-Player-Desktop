@@ -52,11 +52,11 @@ const exportPlaylist = async () => {
     //if (!name || name.length < 1) return
 
     const format = playlistFormats[formatIndex.value].id
-    let { data, formatFn } = playlistExportContextItem.value
+    let { data, formatFn, looseMode } = playlistExportContextItem.value
     if (formatFn) data = formatFn(data, format)
     data = toRaw(data)
 
-    const result = await ipcRenderer.invoke('export-playlists', { path, format, data })
+    const result = await ipcRenderer.invoke('export-playlists', { path, format, data, looseMode })
     let msg = '导出失败！'
     if (result) {
         hidePlaylistExportToolbar()
@@ -144,7 +144,6 @@ watch(playlistExportContextItem, (nv, ov) => {
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
-    border-radius: 15px;
     -webkit-app-region: none;
 }
 

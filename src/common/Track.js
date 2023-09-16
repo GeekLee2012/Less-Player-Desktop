@@ -1,6 +1,7 @@
 import { Lyric } from './Lyric';
 import { toTrimString } from './Utils';
 import { toMmss } from './Times';
+import { DEFAULT_COVER_BASE64 } from './Constants';
 
 
 
@@ -75,7 +76,7 @@ export class Track {
     }
 
     static mmssDuration(track) {
-        return toMmss(track.duration)
+        return toMmss(track.duration || 0)
     }
 
     hasPid() {
@@ -117,7 +118,7 @@ export class Track {
         if (!track || !track.cover) return false
         track.cover = toTrimString(track.cover)
         if (track.cover.length < 1) return false
-        if (track.cover.includes('default_cover.png')) return false
+        if (track.cover == 'default_cover.png') return false
         return true
     }
 
@@ -156,22 +157,6 @@ export class Track {
         return track && track.lyricRoma ? track.lyricRoma.data : null
     }
 
-    /*
-    static fromChannel(channelTrack, type) {
-        const track = new Track()
-        if(channelTrack) {
-            Object.assign(track, channelTrack)
-            track.artist.push(channelTrack.radio)
-            track.channel = channelTrack
-            track.id = track.id + ""
-        }
-        track.type = type
-        //track.isRadioType = true
-        //track.isFMRadio = isFMRadio
-        return track
-    }
-    */
-
     static isEquals(t1, t2) {
         if (!t1 || !t2) return false
         return t1.id == t2.id && t1.platform == t2.platform
@@ -206,8 +191,11 @@ export class Track {
     }
 
     static cover(track) {
-        //return Track.hasCover(track) ? track.cover : 'default_cover.png'
         return Track.hasCover(track) ? track.cover : null
+    }
+
+    static coverDefault(track) {
+        return Track.hasCover(track) ? track.cover : DEFAULT_COVER_BASE64
     }
 
 }

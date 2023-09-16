@@ -304,8 +304,7 @@ export class KuWo {
             getJson(url, null, CONFIG).then(json => {
                 const result = { id, platform: KuWo.CODE, lyric: new Lyric(), trans: null }
                 if (!json.data) {
-                    resolve(result)
-                    return
+                    return resolve(result)
                 }
                 const lrclist = json.data.lrclist
                 if (lrclist) {

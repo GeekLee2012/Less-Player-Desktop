@@ -1,32 +1,35 @@
 <script setup>
 import { inject } from 'vue';
+import { storeToRefs } from 'pinia';
 import PlayMeta from '../components/PlayMeta.vue';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
-import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
+import { useAppCommonStore } from '../store/appCommonStore';
+import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 
 
 
 const { visitUserHome, visitSetting } = inject('appRoute')
-const { searchAction, searchBarPlaceholder } = inject('appCommon')
+const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
 const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('player')
 
 const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
+const { isMaxScreen } = storeToRefs(useAppCommonStore())
 </script>
 
 <template>
     <div class="default-main-top">
-        <div id="play-nav">
+        <div class="play-nav">
             <PlayMeta id="play-meta"></PlayMeta>
             <div class="play-ctl-wrap">
                 <PlayControl></PlayControl>
             </div>
-            <div class="top-right">
+            <div class="action">
                 <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
                 </SearchBar>
-                <div id="userhome-btn" @click="visitUserHome" v-show="isUserHomeShortcutEnable">
-                    <svg width="22" height="20" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
+                <div class="userhome-btn btn" @click="visitUserHome" v-show="!useWindowsStyleWinCtl">
+                    <svg width="22" height="21" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -35,7 +38,7 @@ const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
                         </g>
                     </svg>
                 </div>
-                <div id="setting-btn" @click="visitSetting" :class="{ 'no-userhome-btn': !isUserHomeShortcutEnable }">
+                <div class="setting-btn btn" v-show="!useWindowsStyleWinCtl" @click="visitSetting">
                     <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -45,7 +48,12 @@ const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
                         </g>
                     </svg>
                 </div>
+                <!--
                 <Navigator></Navigator>
+                -->
+                <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
+                    <WinNonMacOSControlBtn :isMaximized="isMaxScreen"></WinNonMacOSControlBtn>
+                </div>
             </div>
         </div>
         <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
@@ -55,23 +63,23 @@ const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
 </template>
 
 <style>
-.default-main-top,
-#play-nav {
-    display: flex;
-}
-
 .default-main-top {
+    display: flex;
     flex-direction: column;
     height: var(--others-playnav-height);
     -webkit-app-region: drag;
     --others-sliderbar-ctl-height: 3px;
 }
 
-.default-main-top #play-nav #play-meta {
+.default-main-top .play-nav {
+    display: flex;
+}
+
+.default-main-top .play-nav #play-meta {
     width: 34.33%;
 }
 
-.default-main-top #play-nav .play-ctl-wrap {
+.default-main-top .play-nav .play-ctl-wrap {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -80,29 +88,32 @@ const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
     margin: 0px 15px;
 }
 
-.default-main-top #play-nav .play-ctl-wrap .spacing {
+.default-main-top .play-nav .play-ctl-wrap .spacing {
     margin-left: 15px;
 }
 
-.default-main-top #play-nav .top-right {
+.default-main-top .play-nav>.action {
     width: 39.33%;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
-    margin-right: 28px;
+    /*margin-right: 28px;*/
+    margin-right: 15px;
 }
 
-.default-main-top #userhome-btn {
+.default-main-top .userhome-btn {
     cursor: pointer;
     -webkit-app-region: none;
     margin-left: 16px;
     margin-right: 15px;
     background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.default-main-top #userhome-btn svg {
-    margin-top: 4px;
+.default-main-top .userhome-btn svg {
     fill: var(--button-icon-btn-color);
 }
 
@@ -110,20 +121,22 @@ const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
     margin-left: 33px;
 }
 
-.default-main-top #setting-btn {
+.default-main-top .setting-btn {
     cursor: pointer;
     -webkit-app-region: none;
     /*margin-left: 15px;*/
     margin-right: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.default-main-top #setting-btn svg {
-    margin-top: 4px;
+.default-main-top .setting-btn svg {
     fill: var(--button-icon-btn-color);
 }
 
-.default-main-top #userhome-btn svg:hover,
-.default-main-top #setting-btn svg:hover {
+.default-main-top .userhome-btn svg:hover,
+.default-main-top .setting-btn svg:hover {
     fill: var(--content-highlight-color);
 }
 </style>

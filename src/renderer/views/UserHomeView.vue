@@ -75,7 +75,7 @@ const typeTabs = [{
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
-const { playingViewShow, isUserHomeMode } = storeToRefs(useAppCommonStore())
+const { playingViewShow, isUserHomeMode, routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
 const { getFavoriteSongs, getFavoritePlaylilsts,
     getFavoriteAlbums, getFavoriteRadios,
@@ -271,12 +271,19 @@ const dataListId = computed(() => {
 })
 
 
+const visitRouterCtxCacheItem = () => {
+    if (!routerCtxCacheItem.value) return
+    const { id } = routerCtxCacheItem.value
+    if (id == 'visitRecents') visitTab(3)
+}
+
 /* 生命周期、监听 */
 onActivated(() => {
     resetBack2TopBtn()
     restoreScrollState()
 
     refresh()
+    visitRouterCtxCacheItem()
 })
 
 watch(playingViewShow, (nv, ov) => {
@@ -290,6 +297,7 @@ watch(currentPlatformCode, (nv, ov) => {
 })
 
 EventBus.on("userHome-refresh", refresh)
+EventBus.on("userHome-visitTab", index => visitTab(index))
 </script>
     
 <template>
@@ -304,7 +312,7 @@ EventBus.on("userHome-refresh", refresh)
             <div class="right">
                 <div class="titleWrap">
                     <div @click="visitUserInfoEdit">
-                        <svg width="16" height="16" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path

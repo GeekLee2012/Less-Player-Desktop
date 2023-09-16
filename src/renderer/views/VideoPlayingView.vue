@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated } from 'vue';
+import { inject, onActivated } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -7,13 +7,17 @@ import { usePlayStore } from '../store/playStore';
 import EventBus from '../../common/EventBus';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUseCustomTrafficLight } from '../../common/Utils';
+import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 
 
+
+const { useWindowsStyleWinCtl } = inject('appCommon')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { hideVideoPlayingView } = useAppCommonStore()
+const { isMaxScreen } = storeToRefs(useAppCommonStore())
 const { isSimpleLayout } = storeToRefs(useSettingStore())
 const { videoSrc } = storeToRefs(usePlayStore())
 const { setVideoSrc } = usePlayStore()
@@ -42,10 +46,13 @@ onActivated(() => {
 <template>
     <div class="video-playing-view">
         <div class="header">
-            <div class="win-ctl-wrap">
-                <WinTrafficLightBtn v-show="useCustomTrafficLight" :hideMaxBtn="isSimpleLayout" :showCollapseBtn="true"
-                    :collapseAction="quitVideo">
+            <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
+                <WinTrafficLightBtn :hideMaxBtn="isSimpleLayout" :showCollapseBtn="true" :collapseAction="quitVideo">
                 </WinTrafficLightBtn>
+            </div>
+            <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
+                <WinNonMacOSControlBtn :showCollapseBtn="true" :collapseAction="quitVideo" :isMaximized="isMaxScreen">
+                </WinNonMacOSControlBtn>
             </div>
         </div>
         <div class="center">
@@ -96,6 +103,7 @@ onActivated(() => {
 
 .video-playing-view .collapse-btn svg {
     fill: #fff !important;
+    stroke: #fff !important;
 }
 
 .video-playing-view .center {

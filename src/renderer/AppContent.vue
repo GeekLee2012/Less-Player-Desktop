@@ -14,17 +14,18 @@ import { isWinOS, toLowerCaseTrimString, useIpcRenderer, useUseCustomTrafficLigh
 
 
 
-const { visitSetting, visitSearch, visitFreeFM,
-  visitThemes, visitModulesSetting,
-  visitDataBackup, visitDataRestore,
-  visitUserHome, visitFreeVideoCreate, } = inject('appRoute')
+const { visitSetting, visitSearch,
+  visitFreeFM, visitThemes,
+  visitModulesSetting, visitDataBackup,
+  visitDataRestore, visitUserHome,
+  visitFreeVideoCreate, visitRecents } = inject('appRoute')
 const ipcRenderer = useIpcRenderer()
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const currentAppLayout = shallowRef(null)
 
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
-  getWindowZoom, isSimpleLayout } = storeToRefs(useSettingStore())
+  getWindowZoom, isSimpleLayout, isUseAutoWinCtl, isUseWindowsWinCtl } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
   setupAppGlobalProxy } = useSettingStore()
@@ -309,6 +310,11 @@ const searchDefault = async (keyword) => {
     || keyword === 'userhome') {
     visitUserHome()
     return
+  } else if (keyword === '最近播放'
+    || keyword === '最近'
+    || keyword.toLowerCase() === 'recents') {
+    visitRecents()
+    return
   } else if (keyword === '视频'
     || keyword.toLowerCase() === 'video') {
     visitFreeVideoCreate()
@@ -356,6 +362,12 @@ const showContextMenu = (event, data, dataType, index, isPlaybackQueue) => {
   }, 99)
 }
 
+const useWindowsStyleWinCtl = computed(() => {
+  if (isUseWindowsWinCtl.value) return true
+  if (isUseAutoWinCtl.value) return isWinOS()
+  return false
+})
+
 onMounted(() => {
   //窗口大小变化事件监听
   window.addEventListener('resize', event => {
@@ -382,13 +394,17 @@ provide('appCommon', {
   showContextMenu,
   searchAction,
   searchBarPlaceholder,
+  useWindowsStyleWinCtl,
 })
 </script>
 
 <template>
   <div id="app-content">
     <keep-alive :max="2">
-      <component :is="currentAppLayout" :class="{ 'winos-style': isWinOS() }">
+      <component :is="currentAppLayout" :class="{
+        'winos-style': isWinOS(),
+        'use-winos-win-ctl': useWindowsStyleWinCtl
+      }">
       </component>
     </keep-alive>
     <slot></slot>

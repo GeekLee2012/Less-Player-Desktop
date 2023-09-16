@@ -74,7 +74,7 @@ export class LocalMusic {
 
     static artistDetail(id) {
         return new Promise((resolve, reject) => {
-            const result = { id, title: id, cover: 'default_cover.png', data: [], about: '【本地歌曲 - 歌手】' }
+            const result = { id, title: id, cover: 'default_cover.png', data: [], about: '【本地歌曲 - 歌手】暂无简介' }
             resolve(result)
         })
     }
@@ -119,7 +119,7 @@ export class LocalMusic {
     static albumDetail(id) {
         return new Promise((resolve, reject) => {
             const result = new Album(id, LocalMusic.CODE, id)
-            result.about = '【本地歌曲 - 专辑】'
+            result.about = '【本地歌曲 - 专辑】暂无简介'
             resolve(result)
         })
     }

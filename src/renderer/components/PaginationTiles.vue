@@ -83,8 +83,9 @@ const isLastPageContent = computed(() => {
     return currentPage == maxPage.value
 })
 
-const toolbarShow = computed(() => {
-    return isNormalStyleType.value && getMaxPage.value > 1
+const isToolbarEnable = computed(() => {
+    if (!isNormalStyleType.value) return false
+    return getMaxPage.value > 1
 })
 
 const computedData = computed(() => (dataInProps.value || dataFromLoad))
@@ -144,7 +145,7 @@ watch(paginationStyleType, refreshAll, { immediate: true })
                 空空如也，喵喵喵 ~
             </div>
         </div>
-        <PaginationToolbar ref="paginationToolbarRef" v-show="toolbarShow" :limit="limit" :maxPage="getMaxPage"
+        <PaginationToolbar ref="paginationToolbarRef" :disabled="!isToolbarEnable" :limit="limit" :maxPage="getMaxPage"
             :onPageChanged="onPageChanged">
         </PaginationToolbar>
     </div>

@@ -127,7 +127,7 @@ EventBus.on('radioCategory-update', () => {
     font-size: var(--content-text-size);
     cursor: pointer;
     white-space: nowrap;
-    border-radius: 10rem;
+    border-radius: var(--border-list-item-border-radius);
     /*border: 1px solid transparent;*/
     color: var(--content-text-color);
 }

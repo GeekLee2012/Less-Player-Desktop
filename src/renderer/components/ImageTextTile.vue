@@ -4,6 +4,7 @@ import EventBus from '../../common/EventBus';
 import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../../renderer/store/platformStore';
 import { useSettingStore } from '../../renderer/store/settingStore';
+import { Track } from '../../common/Track';
 
 
 
@@ -56,7 +57,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
         'image-text-tile-color-mode': color
     }" @click="toggleCheck">
         <div class="cover-wrap">
-            <img class="cover" v-lazy="cover" v-show="!color" :class="{ 'obj-fit-contain': notCardStyleFreeFM }" />
+            <img class="cover" v-lazy="Track.coverDefault({ cover })" v-show="!color"
+                :class="{ 'obj-fit-contain': notCardStyleFreeFM }" />
             <div class="cover" v-show="color" :style="{ background: color }"></div>
             <div class=" cover-mask" :class="{ selectable: checkbox }">
                 <div class="play-btn" v-show="playable && !checkbox" @click.stop="playAction">
@@ -104,13 +106,14 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 <style scoped>
 .image-text-tile {
     margin: 15px 13px;
+    --tile-border-radius: 6px;
 }
 
 .image-text-tile .cover {
     width: var(--others-image-text-tile-cover-size);
     height: var(--others-image-text-tile-cover-size);
     line-height: var(--others-image-text-tile-cover-size);
-    border-radius: 6px;
+    border-radius: var(--tile-border-radius);
     cursor: pointer;
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
     box-shadow: 0px 0px 3px #181818;
@@ -144,6 +147,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     color: transparent;
 }
 
+/*强制换行、截断英文单词，虽然不好看，但尽量避免文字超长，撑开并挤掉其他UI元素*/
 .image-text-tile .subtitle {
     width: var(--others-image-text-tile-cover-size);
     text-align: left;
@@ -292,5 +296,9 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 .image-text-tile-card.image-text-tile-color-mode .title,
 .image-text-tile-card.image-text-tile-color-mode .subtitle {
     text-align: center;
+}
+
+.image-text-tile-color-mode .title {
+    line-break: normal;
 }
 </style>

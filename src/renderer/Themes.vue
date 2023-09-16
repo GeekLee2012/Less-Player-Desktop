@@ -6,6 +6,7 @@ import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
 import EventBus from '../common/EventBus';
 import { isMacOS } from '../common/Utils';
+import CssWinOS from './CssWinOS.vue';
 
 
 
@@ -230,6 +231,7 @@ watch(themeSetting, () => setupAppTheme(), { deep: true })
 <template>
   <CssReset></CssReset>
   <CssCommon></CssCommon>
+  <CssWinOS></CssWinOS>
   <slot></slot>
 </template>
 

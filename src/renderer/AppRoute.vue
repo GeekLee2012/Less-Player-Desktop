@@ -60,17 +60,19 @@ const highlightNavigationCustomPlaylist = (to, from) => {
 const autoSwitchExploreMode = (to, from) => {
     const { path: toPath } = to
     const { path: fromPath } = from
-    if (toPath.includes('/playlists/') || toPath == '/') {
-        setExploreMode(0)
+    if (toPath.includes('/playlists/') || toPath == '/'
+        || (fromPath.includes('/batch/') && toPath.includes('/setting'))) {
+        setPlaylistExploreMode()
     } else if (toPath.includes('/artists/')) {
         setArtistExploreMode()
     } else if (toPath.includes('/radios')) {
         setRadioExploreMode()
     } else if (toPath.includes('/userhome')) {
         setUserHomeExploreMode()
-    } else if (fromPath.includes('/batch/')
-        && toPath.includes('/setting')) {
-        setExploreMode(0)
+    } else if (toPath.includes('/theme') ||
+        toPath.includes('/search') ||
+        toPath.includes('/setting')) {
+        if (isUserHomeMode.value) setPlaylistExploreMode()
     }
 }
 
@@ -130,11 +132,6 @@ const createCommonRoute = (route, onRouteReady) => {
             hideRelativeComponents()
             if (isSimpleLayout.value) switchToFallbackLayout()
             if (!toPath.includes('/artist/')) hidePlaybackQueueView()
-            if (toPath.includes('/theme') ||
-                toPath.includes('/search') ||
-                toPath.includes('/setting')) {
-                if (isUserHomeMode.value) setPlaylistExploreMode()
-            }
             EventBus.emit('app-beforeRoute', toPath)
         }
     }
@@ -144,31 +141,27 @@ const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
 const resolveRoute = (route) => (typeof (route) == 'object' ? route : { path: route.toString() })
 
-//Reject是否需要实现待考虑
 const visitRoute = (route) => {
     return new Promise((resolve, reject) => {
         if (!route) {
-            //if(reject) reject()
-            return
+            return reject('noRoute')
         }
         route = resolveRoute(route)
         const { path: toPath, onRouteReady, beforeRoute, replace, override } = route
         if (!toPath) {
-            //if(reject) reject()
-            return
+            return reject('noRoute')
         }
-        if (beforeRoute) beforeRoute(toPath)
+        if (beforeRoute && typeof (beforeRoute) == 'function') beforeRoute(toPath)
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
         if (isSame && !replace && !override) {
-            //if(reject) reject()
-            return
+            return reject('sameRoute')
         }
         //相同且要求覆盖，才进行替换
         if (isSame && override) Object.assign(route, { replace: true })
-        if (onRouteReady) onRouteReady(toPath)
+        if (onRouteReady && typeof (onRouteReady) == 'function') onRouteReady(toPath)
         router.push(route)
-        if (resolve) resolve()
+        resolve(route)
     })
 }
 
@@ -264,6 +257,8 @@ const visitAlbumDetail = (platform, id, callback, data) => {
     if (callback) callback(visitable)
 }
 
+const visitUserHome = (onRouteReady) => (visitCommonRoute('/userhome/all', onRouteReady))
+
 setupRouter()
 
 //TODO 世界上没有什么是绝对完美的，没有代码提示是硬伤 ~
@@ -276,7 +271,7 @@ provide('appRoute', {
     refresh,
     visitHome: () => (visitCommonRoute('/')),
     visitThemes: () => (visitCommonRoute('/themes')),
-    visitUserHome: () => (visitCommonRoute('/userhome/all')),
+    visitUserHome,
     visitSetting: () => (visitCommonRoute('/setting')),
     visitSearch: (keyword) => (visitCommonRoute(`/search/${keyword}`)),
     visitLocalMusic: () => (visitCommonRoute('/playlists/local')),
@@ -367,11 +362,16 @@ provide('appRoute', {
     visitTrack: ({ id, platform, title, cover, artist, album }, onRouteReady) => {
         const exploreMode = resolveExploreMode()
         return visitCommonRoute({
-            path: `/${exploreMode}/${platform}/track`,
+            path: `/${exploreMode}/${platform}/track/${id}`,
             //replace: false,   //Vue-Router原生支持选项，但有副作用
             override: true,     //自定义选项
             query: { id, platform, title, cover, artist, album }
         }, onRouteReady)
+    },
+    visitRecents: () => {
+        //setTimeout(() => EventBus.emit('userHome-visitTab', 3), 66)
+        visitUserHome(() => setRouterCtxCacheItem({ id: 'visitRecents' }))
+            .catch(() => EventBus.emit('userHome-visitTab', 3))
     }
 })
 </script>

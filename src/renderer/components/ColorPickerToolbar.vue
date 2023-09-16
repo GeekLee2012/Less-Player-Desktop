@@ -177,7 +177,6 @@ defineExpose({
 .color-picker-toolbar {
     width: 218px;
     height: 369px;
-    border-radius: 5px;
     -webkit-app-region: none;
 }
 

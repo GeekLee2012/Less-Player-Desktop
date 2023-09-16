@@ -19,9 +19,8 @@ const props = defineProps({
 
 .keys-input-ctl input {
     border: 1px solid var(--border-inputs-border-color);
-    /*border-bottom: 1px solid #eee;*/
     background-color: var(--content-inputs-bg-color);
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     padding: 5px;
     color: var(--content-inputs-text-color);
     cursor: default;

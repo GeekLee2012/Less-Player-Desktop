@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, ref, shallowRef, watch } from 'vue';
+import { onActivated, onMounted, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSearchStore } from '../store/searchStore';
 import AlbumListControl from '../components/AlbumListControl.vue';
@@ -7,6 +7,7 @@ import ArtistListControl from '../components/ArtistListControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
+import EventBus from '../../common/EventBus';
 
 
 
@@ -114,6 +115,7 @@ const resetTabView = () => {
     currentTabView.value = null
     tabData.value.length = 0
     updateTabTipText(0)
+    resetScrollState()
 }
 
 const loadTab = () => {
@@ -134,19 +136,46 @@ const byPlatform = (index) => {
     setCurrentPlatformIndex(index)
 }
 
+let markScrollTop = 0
+const searchViewRef = ref(null)
+
 //TODO
 const onScroll = () => {
     hideAllCtxMenus()
+    markScrollState()
 }
 
-onActivated(() => visitTab(0, true))
+const markScrollState = () => {
+    if (searchViewRef.value) markScrollTop = searchViewRef.value.scrollTop
+}
+
+const resetScrollState = () => {
+    markScrollTop = 0
+    if (searchViewRef.value) searchViewRef.value.scrollTop = markScrollTop
+    //resetFlowBtns()
+}
+
+const restoreScrollState = () => {
+    //EventBus.emit("imageTextTiles-update")
+    if (markScrollTop < 1) return
+    if (searchViewRef.value) searchViewRef.value.scrollTop = markScrollTop
+}
+
+
+EventBus.on('modules-toggleSearchPlatform', () => visitTab(0, true))
+
+onMounted(() => visitTab(0, true))
+onActivated(() => {
+    restoreScrollState()
+})
+
 watch(currentPlatformIndex, (nv, ov) => loadTab())
 watch(activeTab, (nv, ov) => visitTab(nv))
 watch(() => props.keyword, (nv, ov) => loadTab())
 </script>
 
 <template>
-    <div id="search-view" @scroll="onScroll">
+    <div id="search-view" ref="searchViewRef" @scroll="onScroll">
         <div class="header">
             <div class="keyword">
                 <b>搜 </b><span class="text content-text-highlight">{{ keyword }}</span>

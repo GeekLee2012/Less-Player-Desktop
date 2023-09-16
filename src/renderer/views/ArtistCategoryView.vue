@@ -169,7 +169,7 @@ EventBus.on('artistCategory-resetScroll', () => {
     cursor: pointer;
     color: var(--content-text-color);
     font-size: var(--content-text-subtitle-size);
-    border-radius: 10rem;
+    border-radius: var(--border-list-item-border-radius);
 }
 
 .artist-category-view .fl-item:hover {

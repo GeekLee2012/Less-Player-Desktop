@@ -293,6 +293,7 @@ export const usePlatformStore = defineStore('platforms', {
             return this.isPlatformValid(platform)
         },
         isAlbumDetailVisitable(platform) {
+            if (this.isRadioCN(platform) || this.isXimalaya(platform)) return false
             return this.isPlatformValid(platform)
         },
         isPlatformValid(platform) {

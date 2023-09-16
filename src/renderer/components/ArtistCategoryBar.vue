@@ -97,7 +97,7 @@ const getAlphabetData = () => {
     color: var(--content-text-color);
     font-size: var(--content-text-size);
     cursor: pointer;
-    border-radius: 10rem;
+    border-radius: var(--border-list-item-border-radius);
     /*border: 0.1px solid transparent;*/
     white-space: nowrap;
 }

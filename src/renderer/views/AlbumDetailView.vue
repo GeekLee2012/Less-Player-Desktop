@@ -21,6 +21,7 @@ import TextListControl from '../components/TextListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { Album } from '../../common/Album';
+import { Track } from '../../common/Track';
 
 
 
@@ -226,7 +227,7 @@ EventBus.on('app-resize', detectTitleHeight)
     <div id="album-detail-view" ref="detailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="albumCover" />
+                <img class="cover" v-lazy="Track.coverDefault({ cover: albumCover })" />
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="albumName" ref="titleRef"></div>

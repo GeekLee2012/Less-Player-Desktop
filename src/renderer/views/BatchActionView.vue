@@ -515,7 +515,7 @@ const exportChecked = () => {
     if (isLocalMusic()) {
         exportCfg = { data: checkedData, noJson: true, title: '导出本地歌单' }
     } else if (isFreeFM()) {
-        exportCfg = { data: checkedData, formatFn: formatRadios, title: '导出FM电台' }
+        exportCfg = { data: checkedData, formatFn: formatRadios, title: '导出FM电台', looseMode: true }
     }
     if (exportCfg) showPlaylistExportToolbar(exportCfg)
 }

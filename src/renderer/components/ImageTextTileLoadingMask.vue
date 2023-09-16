@@ -53,6 +53,7 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 
 .tiles-card-loading-mask .tile .title {
     margin-top: 0px;
+    border-radius: 6px;
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
 }

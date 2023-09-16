@@ -17,6 +17,7 @@ import { isMacOS, isDevEnv, nextInt, randomTextWithinAlphabet } from '../../comm
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import ArtistControl from '../components/ArtistControl.vue';
+import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 
 
 
@@ -26,6 +27,8 @@ const { seekTrack, playPlaylist,
     favoritedState, toggleFavoritedState,
     preseekTrack, mmssPreseekTime,
     isTrackSeekable } = inject('player')
+const { useWindowsStyleWinCtl } = inject('appCommon')
+
 
 const volumeBarRef = ref(null)
 const textColorIndex = ref(0)
@@ -733,7 +736,8 @@ const pickFMRadio = async (platform, traceId) => {
 
 const updatePlatformShortName = () => {
     const { platform } = currentTrack.value
-    const shortName = getPlatformShortName(platform)
+    let shortName = getPlatformShortName(platform)
+    if (useWindowsStyleWinCtl.value) shortName = shortName.substring(0, 2)
     platformShortName.value = shortName || 'ALL'
 }
 
@@ -801,12 +805,23 @@ watch([textColorIndex], setupTextColor)
 </script>
 
 <template>
-    <div class="simple-layout">
+    <div class="simple-layout" :class="{ 'simple-layout-use-winos-win-ctl': useWindowsStyleWinCtl }">
         <div class="center" @contextmenu.stop="toggleRandomMusicToolbar()">
             <div class="top" :class="{ 'top-fixed': !isMacOS() }">
                 <div class="left">
-                    <div class="win-ctl-wrap">
+                    <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
                         <WinTrafficLightBtn :hideMaxBtn="true"></WinTrafficLightBtn>
+                    </div>
+                    <div class="win-action-left" v-show="useWindowsStyleWinCtl">
+                        <span class="lyric-btn btn spacing"
+                            :class="{ 'lyric-show': isLyricShow, 'content-text-highlight': isLyricShow }"
+                            @click="toggleLyric">
+                            词
+                        </span>
+                        <span class="text-color-btn btn spacing" :class="{ 'text-color-black': textColorIndex == 1 }"
+                            @click="switchTextColor">
+                            T
+                        </span>
                     </div>
                     <div class="extra">
                         <div class="platform">
@@ -848,12 +863,12 @@ watch([textColorIndex], setupTextColor)
                             </g>
                         </svg>
                     </span>
-                    <span class="lyric-btn btn spacing"
+                    <span v-show="!useWindowsStyleWinCtl" class="lyric-btn btn spacing"
                         :class="{ 'lyric-show': isLyricShow, 'content-text-highlight': isLyricShow }" @click="toggleLyric">
                         词
                     </span>
-                    <span class="text-color-btn btn spacing" :class="{ 'text-color-black': textColorIndex == 1 }"
-                        @click="switchTextColor">
+                    <span v-show="!useWindowsStyleWinCtl" class="text-color-btn btn spacing"
+                        :class="{ 'text-color-black': textColorIndex == 1 }" @click="switchTextColor">
                         T
                     </span>
                     <span @click="quitSimpleLayout" class="btn spacing">
@@ -866,10 +881,13 @@ watch([textColorIndex], setupTextColor)
                             </g>
                         </svg>
                     </span>
+                    <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
+                        <WinNonMacOSControlBtn :hideMaxBtn="true"></WinNonMacOSControlBtn>
+                    </div>
                 </div>
             </div>
             <div class="cover">
-                <img v-lazy="currentTrack.cover" :class="{ rotation: false }" />
+                <img v-lazy="Track.coverDefault(currentTrack)" :class="{ rotation: false }" />
             </div>
             <div class="meta-wrap" v-show="lyric.metaPos != 1">
                 <div class="audio-title" v-html="Track.title(currentTrack)"></div>
@@ -1126,6 +1144,14 @@ watch([textColorIndex], setupTextColor)
     margin-left: 43px;
 }
 
+.simple-layout>.center .top .win-action-left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.simple-layout>.center .top .win-action-left .lyric-btn,
+.simple-layout>.center .top .win-action-left .text-color-btn,
 .simple-layout>.center .top .action .lyric-btn,
 .simple-layout>.center .top .action .text-color-btn {
     width: 15px;
@@ -1140,17 +1166,21 @@ watch([textColorIndex], setupTextColor)
     margin-bottom: 3px;
 }
 
-.simple-layout>.center .top .action .lyric-show {
+
+.simple-layout>.center .top .action .lyric-show,
+.simple-layout>.center .top .win-action-left .lyric-show {
     border: 2px solid var(--content-highlight-color);
     cursor: pointer;
 }
 
-.simple-layout>.center .top .action .text-color-btn {
+.simple-layout>.center .top .action .text-color-btn,
+.simple-layout>.center .top .win-action-left .text-color-btn {
     background: var(--button-icon-btn-color);
     color: #fff;
 }
 
-.simple-layout>.center .top .action .text-color-black {
+.simple-layout>.center .top .action .text-color-black,
+.simple-layout>.center .top .win-action-left .text-color-black {
     background: #fff;
     color: #000;
 }
@@ -1161,7 +1191,8 @@ watch([textColorIndex], setupTextColor)
     visibility: hidden;
 }
 
-.simple-layout>.center .top-fixed .action {
+.simple-layout>.center .top-fixed .action,
+.simple-layout>.center .top-fixed .win-action-left {
     -webkit-app-region: none;
 }
 

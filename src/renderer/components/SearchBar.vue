@@ -104,7 +104,7 @@ const clear = () => {
     padding-left: 5px;
     padding-right: 6px;
     outline: 0;
-    width: 123px;
+    width: 178px;
     border-left: 0px;
     border-right: 0px;
     background: var(--searchbar-bg-color);

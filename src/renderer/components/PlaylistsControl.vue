@@ -92,7 +92,11 @@ const computedMaxPage = computed(() => {
                 </ImageTextTileLoadingMask>
             </template>
             <template #loading2>
-                <ImageTextTileLoadingMask :count="20" v-show="loading"></ImageTextTileLoadingMask>
+                <ImageTextTileLoadingMask :count="customLoadingCount"
+                    v-show="data && data.length < 1 && customLoadingCount && customLoadingCount > 0">
+                </ImageTextTileLoadingMask>
+                <ImageTextTileLoadingMask :count="20" v-show="!customLoadingCount && loading">
+                </ImageTextTileLoadingMask>
             </template>
         </PaginationTiles>
     </div>

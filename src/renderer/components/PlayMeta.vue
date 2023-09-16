@@ -29,7 +29,6 @@ const trackMeta = (track) => {
     return track.title + artistName
 }
 
-
 onMounted(() => {
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
@@ -38,7 +37,7 @@ onMounted(() => {
 <template>
     <div class="play-meta">
         <div class="cover-wrap" @mouseenter="toggleCoverMask" @mouseleave="toggleCoverMask">
-            <img class="audio-cover" v-lazy="currentTrack.cover"
+            <img class="audio-cover" v-lazy="Track.coverDefault(currentTrack)"
                 :class="{ 'obj-fit-contain': isFreeFM(currentTrack.platform) }" />
             <div class="cover-mask" v-show="coverMaskShow" @click="showPlayingView">
                 <svg width="19" height="19" viewBox="0 0 763.32 424.57" xmlns="http://www.w3.org/2000/svg">

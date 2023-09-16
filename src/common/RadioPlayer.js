@@ -1,6 +1,7 @@
 import EventBus from '../common/EventBus';
 import Hls from 'hls.js';
 import { WebAudioApi } from './WebAudioApi';
+import { toTrimString } from './Utils';
 
 
 
@@ -12,6 +13,8 @@ export class RadioPlayer {
         this.hls = new Hls()
         this.playing = false
         this.channelChanged = false
+        this.retry = 0
+        this.isBindHlsEvent = false
         this.webAudioApi = null
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
         this.pendingSoundEffect = null
@@ -48,21 +51,33 @@ export class RadioPlayer {
         if (!Hls.isSupported()) return
         if (!audioNode) return
         if (!this.channel) return
+        if (toTrimString(this.channel.url).length < 1) {
+            //this._retryPlay(1)
+            return
+        }
 
         //this.hls.loadSource('http://ngcdn001.cnr.cn/live/zgzs/index.m3u8')
         //this.channel.url = "https://npr-ice.streamguys1.com/live.mp3"
         this.hls.loadSource(this.channel.url)
         this.hls.attachMedia(audioNode)
 
-        const self = this
-        this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            audioNode.play()
-            self.setState(true)
-            self.channelChanged = false
-            lastPlayTime = Date.now()
-            this.animationFrameCnt = 0
-            requestAnimationFrame(self._step.bind(self))
-        })
+        //Hls事件绑定
+        if (!this.isBindHlsEvent) {
+            const self = this
+            this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                audioNode.play()
+                self.setState(true)
+                self.channelChanged = false
+                self.retry = 0
+                lastPlayTime = Date.now()
+                this.animationFrameCnt = 0
+                requestAnimationFrame(self._step.bind(self))
+            })
+            this.hls.on(Hls.Events.ERROR, function () {
+                self._retryPlay(1)
+            })
+            this.isBindHlsEvent = true
+        }
     }
 
     //暂停
@@ -185,5 +200,20 @@ export class RadioPlayer {
 
     isSpectrumRefreshEnabled() {
         return this.animationFrameCnt % this.spectrumRefreshFrequency == 0
+    }
+
+    _notifyError(isRetry) {
+        const { channel: track } = this
+        this.notify('track-error', { isRetry, track, currentTime: 0, radio: true })
+    }
+
+    _retryPlay(maxRetry) {
+        const isRetry = this.retry < maxRetry
+        this._notifyError(isRetry)
+        if (isRetry) {
+            ++this.retry
+        } else {
+            this.retry = 0
+        }
     }
 }

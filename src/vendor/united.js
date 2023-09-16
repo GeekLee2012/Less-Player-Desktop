@@ -153,11 +153,14 @@ export class United {
                 const cDetail = await vendor.playDetail(cId, candidate)
                 if (!Track.hasUrl(cDetail) && !ignoreUrl) continue
                 const { url } = cDetail
+                Object.assign(candidate, { url, isCandidate: true, score })
                 //歌词
                 const cLyric = await vendor.lyric(candidate.id, candidate)
                 if (!cLyric) continue
                 const { lyric, trans: lyricTrans, roma: lyricRoma } = cLyric
-                Object.assign(candidate, { url, lyric, lyricTrans, lyricRoma, isCandidate: true, score })
+                if (lyric) Object.assign(candidate, { lyric })
+                if (lyricTrans) Object.assign(candidate, { lyricTrans })
+                if (lyricRoma) Object.assign(candidate, { lyricRoma })
                 result = candidate
                 break
             }

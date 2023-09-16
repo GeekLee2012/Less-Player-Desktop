@@ -11,6 +11,7 @@ import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { useUseCustomTrafficLight } from '../../common/Utils';
 import { Track } from '../../common/Track';
+import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 
 
 
@@ -19,10 +20,13 @@ const { seekTrack, playMv,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
     mmssPreseekTime, isTrackSeekable } = inject('player')
+const { useWindowsStyleWinCtl } = inject('appCommon')
+
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
-const { playingViewShow, desktopLyricShow } = storeToRefs(useAppCommonStore())
+
+const { isMaxScreen, playingViewShow, desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize,
     showToast, switchPlayingViewTheme,
     toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
@@ -45,9 +49,9 @@ onMounted(() => {
     <div class="playing-view">
         <div class="container">
             <div class="header">
-                <div class="win-ctl-wrap">
-                    <WinTrafficLightBtn v-show="useCustomTrafficLight" :showCollapseBtn="true"
-                        :collapseAction="hidePlayingView">
+                <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
+                    <WinTrafficLightBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
+                        :isMaximized="isMaxScreen">
                     </WinTrafficLightBtn>
                 </div>
                 <div class="meta-wrap" v-show="(lyricMetaPos == 2)">
@@ -64,18 +68,23 @@ onMounted(() => {
                             </svg>
                         </div>
                         <div class="audio-title" v-html="currentTrack.title"></div>
-                        <div v-show="Track.hasArtist(currentTrack)">&nbsp;-&nbsp;</div>
-                        <div class="audio-artist spacing">
+                        <div v-show="Track.hasArtist(currentTrack)">&nbsp;&nbsp;-&nbsp;&nbsp;</div>
+                        <div class="audio-artist">
                             <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
                                 :trackId="currentTrack.id" class="ar-ctl">
                             </ArtistControl>
                         </div>
                     </div>
                 </div>
+                <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
+                    <WinNonMacOSControlBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
+                        :isMaximized="isMaxScreen">
+                    </WinNonMacOSControlBtn>
+                </div>
             </div>
             <div class="center">
                 <div class="cover">
-                    <img v-lazy="currentTrack.cover" />
+                    <img v-lazy="Track.coverDefault(currentTrack)" />
                 </div>
                 <div class="lyric-wrap">
                     <LyricControl :track="currentTrack" :currentTime="currentTimeState" @mousewheel="onUserMouseWheel">
@@ -132,7 +141,7 @@ onMounted(() => {
                         <VolumeBar ref="volumeBarRef"></VolumeBar>
                     </div>
                     <div class="btm-right">
-                        <div class="theme" @click="switchPlayingViewTheme">
+                        <div class="theme-btn btn" @click="switchPlayingViewTheme">
                             <svg width="17" height="17" viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
@@ -158,7 +167,8 @@ onMounted(() => {
                             @click="() => toggleDesktopLyricShow()">
                             词
                         </div>
-                        <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
+                        <div class="equalizer-btn btn spacing" :class="{ active: isUseEffect }"
+                            @click="toggleSoundEffectView">
                             <svg width="17" height="17" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
@@ -211,9 +221,10 @@ onMounted(() => {
 
 .playing-view .header .win-ctl-wrap {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     margin-left: var(--others-win-ctl-margin-left);
+    width: 18%;
 }
 
 .playing-view .meta-wrap {
@@ -222,6 +233,8 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     flex: 1;
+    padding-right: 18%;
+    margin-right: var(--others-win-ctl-margin-left);
 }
 
 .playing-view .meta {
@@ -231,7 +244,7 @@ onMounted(() => {
     justify-content: center;
     overflow: hidden;
     flex: 1;
-    width: 61.8%;
+    width: 88%;
 }
 
 .playing-view .meta-wrap .audio-title,
@@ -272,12 +285,16 @@ onMounted(() => {
 }
 
 .playing-view .header svg:hover,
-.playing-view .theme svg:hover,
-.playing-view .equalizer svg:hover,
+.playing-view .theme-btn svg:hover,
+.playing-view .equalizer-btn svg:hover,
 .playing-view .active svg,
 .playing-view .collapse-btn:hover svg {
     fill: var(--content-highlight-color);
     cursor: pointer;
+}
+
+.playing-view .theme-btn {
+    transform: rotate(-90deg);
 }
 
 .playing-view .center {
@@ -357,7 +374,7 @@ onMounted(() => {
     color: var(--button-icon-btn-color);
 }
 
-.winos-style .playing-view .bottom .action .lyric-btn {
-    font-weight: normal;
+.playing-view .bottom .action .lyric-btn:hover {
+    color: var(--content-highlight-color);
 }
 </style>

@@ -22,9 +22,16 @@ export class Player {
         this.pendingSoundEffect = null
         this.animationFrameId = 0
         this.seekPendingMark = 0 //percent
+        //动画帧 - 进度刷新
         this.animationFrameCnt = 0 //动画帧数计数器，控制事件触发频率，降低CPU占用
         this.stateRefreshFrequency = 60 //歌曲进度更新频度
         this.spectrumRefreshFrequency = 3 //歌曲频谱更新频度
+        /*
+        this.useStateRefreshAutoDetector = false
+        this.lastAnimationFrameUpdateTime = 0   //上一动画帧执行时间
+        this.animationFrameTimeCnt = 0  //动画帧累加计时器
+        */
+        //桌面歌词
         this.desktopLyricMessagePort = null
         this.desktopLyricMessagePortActiveState = null
     }
@@ -91,6 +98,11 @@ export class Player {
             onseek: function () {
                 //重置动画帧
                 self._rewindAnimationFrame(self._step.bind(self))
+                /*
+                //重置动画帧相关时间
+                self.lastAnimationFrameUpdateTime = Date.now()
+                self.animationFrameTimeCnt = 1000
+                */
             },
             onloaderror: function () {
                 self._retryPlay(1)
@@ -183,11 +195,17 @@ export class Player {
             this._stopAnimationFrame()
             return
         }
-        //当前时间
+        //当前播放时间
         this.currentTime = sound.seek() || 0
-        if (this.isStateRefreshEnabled()) {
-            this.notify('track-pos', this.currentTime)
-        }
+
+        //刷新进度
+        /*
+        const isTimeReset = this._countAnimationFrameTime()
+        const needRefreshState = this.useStateRefreshAutoDetector ? isTimeReset : this.isStateRefreshEnabled()
+        if (needRefreshState) this.notify('track-pos', this.currentTime)
+        */
+        if (this.isStateRefreshEnabled()) this.notify('track-pos', this.currentTime)
+
         //声音处理
         try {
             this._resolveSound()
@@ -219,7 +237,7 @@ export class Player {
 
     _notifyError(isRetry) {
         const { currentTrack: track, currentTime } = this
-        this.notify('track-error', { retry: isRetry, track, currentTime })
+        this.notify('track-error', { isRetry, track, currentTime })
     }
 
     _retryPlay(maxRetry) {
@@ -376,5 +394,19 @@ export class Player {
 
     static getRawTrack(track) {
         return toRaw(track)
+    }
+
+    _countAnimationFrameTime() {
+        const _now = Date.now()
+        //动画帧自动计时器
+        if (this.lastAnimationFrameUpdateTime) {
+            this.animationFrameTimeCnt += (_now - this.lastAnimationFrameUpdateTime)
+        }
+        this.lastAnimationFrameUpdateTime = _now
+        const reset = this.animationFrameTimeCnt >= 990
+        if (reset) {
+            this.animationFrameTimeCnt = 0
+        }
+        return reset
     }
 }

@@ -123,7 +123,7 @@ const releaseDrag = (event) => {
 
     dragReleaseTimer = setTimeout(() => {
         dragReleasing = false
-    }, 888)
+    }, 1288)
 }
 
 //对外提供API
@@ -176,8 +176,8 @@ watch(() => props.value, (nv, ov) => {
 }
 
 .vertical-slider-bar .thumb {
-    width: 10px;
-    height: 10px;
+    width: 13px;
+    height: 13px;
     border-radius: 10rem;
     background-color: var(--content-highlight-color);
     z-index: 2;

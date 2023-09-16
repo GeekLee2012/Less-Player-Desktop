@@ -21,6 +21,7 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { Track } from '../../common/Track';
 
 
 
@@ -149,7 +150,9 @@ const getArtistDetail = async () => {
     if (!result) return
     updateArtist(result.title, result.cover)
     let { about, hotSongs } = result
-    if (!about) about = await vendor.artistDetailAbout(id)
+    if (!about && vendor.artistDetailAbout) {
+        about = await vendor.artistDetailAbout(id)
+    }
     if (about) updateAbout(about)
     if (hotSongs) updateHotSongs(hotSongs)
     Object.assign(detail, result)
@@ -392,7 +395,7 @@ watch([platform, artistId], reloadAll, { immediate: true })
     <div id="artist-detail-view" ref="artistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="artistCover" />
+                <img class="cover" v-lazy="Track.coverDefault({ cover: artistCover })" />
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="artistName"></div>

@@ -9,7 +9,9 @@ export default {
 import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useFreeFMStore } from '../store/freeFMStore';
+import { useUserProfileStore } from '../store/userProfileStore';
 import { useIpcRenderer } from '../../common/Utils';
+import { FreeFM } from '../../vendor/freefm';
 
 
 
@@ -31,6 +33,7 @@ const isActionDisabled = ref(false)
 
 
 const { addFreeRadio, updateFreeRadio, getFreeRadio, removeFreeRadio } = useFreeFMStore()
+const { removeFavoriteRadio } = useUserProfileStore()
 
 const loadRadio = () => {
     if (!props.id) return
@@ -80,6 +83,7 @@ const submit = () => {
 
 const remove = () => {
     const success = removeFreeRadio({ id: props.id })
+    removeFavoriteRadio(props.id, FreeFM.CODE)
     if (success) {
         isActionDisabled.value = true
         showToast('电台已删除！', backward)

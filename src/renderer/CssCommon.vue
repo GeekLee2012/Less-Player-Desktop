@@ -29,6 +29,8 @@
 
   /*边框 */
   --border-macstyle-border-radius: 0px;
+  --border-list-item-border-radius: 10rem;
+  --border-inputs-border-radius: 3px;
 
   --others-scrollbar-width: 6px;
   /*--win-ctl-width: 105px;*/
@@ -53,7 +55,7 @@
 
   /* 主题相关 */
   --border-popovers-border-color: #666;
-  --box-shadow: 0px 0px 6px var(--border-popovers-border-color);
+  --box-shadow: 0px 0px 8px var(--border-popovers-border-color);
   --searchbar-clear-btn-icon-color: #666;
 
   --content-desktop-lyric-text-size: 20px;
@@ -144,10 +146,6 @@ textarea {
   fill: var(--button-icon-btn-color);
 }
 
-
-.winos-style .text-btn svg {
-  padding-top: 2px;
-}
 
 .checkbox {
   display: flex;
