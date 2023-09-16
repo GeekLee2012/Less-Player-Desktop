@@ -1,4 +1,4 @@
-# <div align=center>Less Player<div>  
+# <div align=center>Less Player</div>  
   
 [![GitHub release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
 [![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
