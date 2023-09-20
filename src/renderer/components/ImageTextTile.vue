@@ -183,7 +183,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 .image-text-tile .cover-wrap .cover-mask {
     position: absolute;
     margin: auto;
-    z-index: 2;
+    z-index: 1;
     visibility: hidden;
 }
 

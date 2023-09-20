@@ -1,12 +1,12 @@
 # <div align=center>Less Player</div>  
   
 [![GitHub release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
-[![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
+[![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/tags)
 [![GitHub license](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)
 ![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)  
     
   
-一款基于Electron + Vue3开发的播放器。  
+一款基于Electron + Vue 3开发的播放器。  
   
 由于个人工作和生活等方面原因，从2023-08-01起暂停更新，计划2024年再继续回归更新。 
 请朋友们见谅，也感谢大家的理解和支持。
@@ -39,7 +39,7 @@
 * <b>窗口缩放</b>：屏幕大小，适应自如  
 * <b>桌面歌词</b>：支持横屏、竖屏歌词；支持3种显示模式，即单行、双行、全部；同时可对字体大小、颜色、行间距等进行设置 
   
-PS：  
+PS  
 *任何删除清空操作（带垃圾桶图标的按钮）请谨慎！其实也没这么夸张，哈哈 ~*  
 *目前部分功能已支持确认，请参考播放器功能“设置页 - 对话框”*  
   
@@ -74,8 +74,9 @@ PS：
   `npm update`
   
 ### For普通用户
+* 播放器设置相对灵活，部分功能会默认“关闭”，需前往“设置页”开启或切换
 * 最新开发预览版（测试版），会在项目自身仓库，不定期打包发布，欢迎愿意尝鲜的朋友体验！
-* 当前顶部分别有release、tag、license、downloads等图标按钮，请点击`tag按钮`直达页面。
+* 当前顶部分别有release、tag、license、downloads等图标按钮，请点击`release按钮`直达页面。
 * 开发预览版，均为Pre-release版本，且tag标签名称以发布日期结尾。
 * 以下资源库，暂时不再使用（因为分开单独管理，并没有解决任何问题）：
 * [Github资源库（废弃）](https://github.com/GeekLee2012/Resources/releases/)  

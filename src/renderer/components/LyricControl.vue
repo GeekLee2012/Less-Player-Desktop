@@ -113,8 +113,8 @@ const renderAndScrollLyric = (secs) => {
     */
 
     ////算法3：播放页垂直居中，依赖offsetParent定位；与算法2相似，只是参考系不同而已 ////
-    //基本保证：准确定位，当前高亮行在播放页垂直居中，且基本与ScrollLocator平行
-    //绝对意义上来说，并不垂直居中，也并不平行，因为歌词行自身有一定高度
+    //基本保证：准确定位，当前高亮行在播放页垂直居中，且基本与ScrollLocator在同一水平线上
+    //绝对意义上来说，并不垂直居中，因为歌词行自身有一定高度
     if (!lines[index] || !lines[index].offsetTop) return
     const { offsetTop } = lyricWrap
     const { clientHeight } = document.documentElement

@@ -44,7 +44,7 @@ const toggleRadioMode = () => {
         </SearchBar>
         <div class="action">
             <div id="radio-btn" @click="toggleRadioMode" v-show="isRadioModeEnable && isRadioModeShortcutEnable">
-                <svg v-show="!isRadioMode" width="20" height="18" viewBox="0 0 939.22 940.41"
+                <svg v-show="!isRadioMode" width="20" height="19" viewBox="0 0 939.22 940.41"
                     xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">

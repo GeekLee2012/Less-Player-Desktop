@@ -271,10 +271,12 @@ const dataListId = computed(() => {
 })
 
 
+const visitRecentsTab = () => visitTab(3)
+
 const visitRouterCtxCacheItem = () => {
     if (!routerCtxCacheItem.value) return
     const { id } = routerCtxCacheItem.value
-    if (id == 'visitRecents') visitTab(3)
+    if (id == 'visitRecents') visitRecentsTab()
 }
 
 /* 生命周期、监听 */
@@ -297,7 +299,7 @@ watch(currentPlatformCode, (nv, ov) => {
 })
 
 EventBus.on("userHome-refresh", refresh)
-EventBus.on("userHome-visitTab", index => visitTab(index))
+EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
 </script>
     
 <template>

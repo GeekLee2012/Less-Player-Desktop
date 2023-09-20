@@ -363,10 +363,13 @@ watch(lyricMetaPos, () => {
 }
 
 #default-main-center,
-#default-main-top,
-#default-main-content,
-#default-main-bottom {
+#default-main-content {
     z-index: 0;
+}
+
+#default-main-top,
+#default-main-bottom {
+    z-index: 1;
 }
 
 #default-main-center .autolayout {

@@ -10,7 +10,7 @@ import { useAlbumDetailStore } from './store/albumDetailStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { usePlatformStore } from './store/platformStore';
 import { Playlist } from '../common/Playlist';
-import { isDevEnv } from '../common/Utils';
+import { isDevEnv, toTrimString } from '../common/Utils';
 
 
 
@@ -139,7 +139,7 @@ const createCommonRoute = (route, onRouteReady) => {
 
 const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
-const resolveRoute = (route) => (typeof (route) == 'object' ? route : { path: route.toString() })
+const resolveRoute = (route) => (typeof (route) == 'object' ? route : { path: toTrimString(route) })
 
 const visitRoute = (route) => {
     return new Promise((resolve, reject) => {
@@ -147,10 +147,11 @@ const visitRoute = (route) => {
             return reject('noRoute')
         }
         route = resolveRoute(route)
-        const { path: toPath, onRouteReady, beforeRoute, replace, override } = route
+        const { path: toPath, beforeRoute, onRouteReady, replace, override } = route
         if (!toPath) {
             return reject('noRoute')
         }
+        //beforeRoute设置后，一般都会执行，除非route不存在
         if (beforeRoute && typeof (beforeRoute) == 'function') beforeRoute(toPath)
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
@@ -159,6 +160,7 @@ const visitRoute = (route) => {
         }
         //相同且要求覆盖，才进行替换
         if (isSame && override) Object.assign(route, { replace: true })
+        //onRouteReady设置后，仅在route有效时执行
         if (onRouteReady && typeof (onRouteReady) == 'function') onRouteReady(toPath)
         router.push(route)
         resolve(route)
@@ -369,9 +371,16 @@ provide('appRoute', {
         }, onRouteReady)
     },
     visitRecents: () => {
-        //setTimeout(() => EventBus.emit('userHome-visitTab', 3), 66)
+        //实现方式1：通过setTimeout函数延时调用
+        //缺点：不确定性，即不同设备性能不一样，路由导航所耗费时间不一样
+        //setTimeout(() => EventBus.emit('userHome-visitRecentsTab'), 66)
+        //visitUserHome()
+
+        //实现方式2：路由上下文对象 + 回调
         visitUserHome(() => setRouterCtxCacheItem({ id: 'visitRecents' }))
-            .catch(() => EventBus.emit('userHome-visitTab', 3))
+            .catch(error => {
+                if (error == 'sameRoute') EventBus.emit('userHome-visitRecentsTab')
+            })
     }
 })
 </script>
