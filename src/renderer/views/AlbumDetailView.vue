@@ -54,6 +54,7 @@ const { showToast, hideAllCtxMenus } = useAppCommonStore()
 let currentTabView = shallowRef(null)
 const tabData = ref([])
 const detail = reactive({})
+const dataType = ref(0)
 const isLoadingDetail = ref(false)
 const isLoading = ref(false)
 const setLoadingDetail = (value) => isLoadingDetail.value = value
@@ -179,6 +180,8 @@ const scrollToTop = () => {
 }
 
 const reloadAll = () => {
+    dataType.value = isLocalMusic(platform.value) ? 11 : 0
+
     setLoadingDetail(true)
     setLoading(true)
     resetAll()
@@ -215,6 +218,9 @@ const detectTitleHeight = () => {
     if (!clientHeight) return
     setTwoLinesTitle(clientHeight > 50)
 }
+
+//TODO
+EventBus.on('ctxMenu-removeFromLocal', reloadAll)
 
 //TODO 需要梳理优化
 watch([platform, albumId], reloadAll, { immediate: true })
@@ -271,8 +277,8 @@ EventBus.on('app-resize', detectTitleHeight)
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
-            <component :id="id" :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
-                :loading="isLoading">
+            <component :id="id" :is="currentTabView" :data="tabData" :dataType="dataType" :artistVisitable="true"
+                :albumVisitable="true" :loading="isLoading">
             </component>
         </div>
     </div>
@@ -419,5 +425,9 @@ EventBus.on('app-resize', detectTitleHeight)
 #album-detail-view .text-ctl p {
     margin-top: 15px;
     margin-bottom: 5px;
+}
+
+#album-detail-view .textlist-ctl {
+    padding: 0 8px 10px 8px;
 }
 </style>

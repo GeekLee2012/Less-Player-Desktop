@@ -7,14 +7,19 @@ const props = defineProps({
     value: Number,      //0.0 - 1.0
     disable: Boolean,
     disableScroll: Boolean,
-    disableOptimize: Boolean,
+    //属性disableOptimize，已废弃，不灵活且目前名称不够清晰易懂
+    //Boolean方式虽然简单，但不够灵活
+    //为确保功能更灵活、更明确，采用数据值方式
+    //参见属性thumbAutoHideDelay
+    //disableOptimize: Boolean, 
     onSeek: Function,
     onScroll: Function,
     onScrollFinish: Function,
     onDragStart: Function,
     onDragMove: Function,
     onDragRelease: Function,
-    thumbStyle: Number  //0 => 默认， 1 => 加大
+    thumbStyle: Number,  //0 => 默认， 1 => 加大
+    thumbAutoHideDelay: Number, //单位ms, 默认1000
 })
 
 const sliderCtlRef = ref(null)
@@ -141,7 +146,11 @@ const showThumb = () => {
 }
 
 const hideThumb = () => {
-    const delay = props.disableOptimize ? 0 : 1000
+    //const delay = props.disableOptimize ? 0 : 1000
+
+    let delay = props.thumbAutoHideDelay
+    if (typeof (delay) == 'undefined') delay = 1000
+    delay = Math.max(delay, 0)
     thumbHideTimer = setTimeout(() => {
         thumbShow.value = false
     }, delay)

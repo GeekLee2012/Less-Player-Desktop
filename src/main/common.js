@@ -452,6 +452,7 @@ const writeM3uFile = async (filename, data, looseMode) => {
 }
 
 module.exports = {
+    transformPath,
     scanDirTracks,
     parseTracks,
     readText,

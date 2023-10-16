@@ -64,6 +64,9 @@ export const useArtistSquareStore = defineStore('artistSquare', {
         },
         putAlphabet(platform, alphabet) {
             this.alphabetMap.set(platform, alphabet)
+        },
+        getAlphabet(platform) {
+            return this.alphabetMap.get(platform)
         }
     }
 })

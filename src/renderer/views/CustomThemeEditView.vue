@@ -260,7 +260,7 @@ watch(workingCustomTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item" @keydown.stop="">
                             <input type="text" class="text-input-ctl" :class="{ invalid: isFormInvalid }" maxlength="64"
-                                placeholder="主题名称，最多允许输入64个字符" :value="customTheme.name" @change="setupThemeName"
+                                placeholder="主题名称，最多支持输入64个字符" :value="customTheme.name" @change="setupThemeName"
                                 @blur="setupThemeName" />
                         </div>
                     </div>

@@ -92,6 +92,19 @@ textarea {
   color: var(--content-inputs-text-color);
 }
 
+.select-list-ctl {
+  /*appearance: none;
+  -webkit-appearance: none;*/
+  border-radius: 3px;
+  padding: 8px;
+  min-width: 366px;
+  font-size: var(--content-text-subtitle-size);
+  outline: 0;
+  /*color: var(--content-subtitle-text-color);*/
+  border: 1px solid var(--border-inputs-border-color);
+  background-color: var(--content-inputs-bg-color);
+}
+
 .button-disabled {
   opacity: 0.33;
   cursor: default !important;

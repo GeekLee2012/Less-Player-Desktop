@@ -34,6 +34,7 @@ export class VideoPlayer {
 
     static setVideoHolder(videoHolder) {
         gVideoHolder = videoHolder
+        gVideoHolder.addEventListener("ended", event => EventBus.emit('video-ended', event))
     }
 
     //播放

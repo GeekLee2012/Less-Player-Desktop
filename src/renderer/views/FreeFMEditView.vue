@@ -125,7 +125,7 @@ onMounted(() => loadRadio())
                     </div>
                     <div @keydown.stop="">
                         <input type="text" v-model="detail.title" :class="{ invalid: titleInvalid }" maxlength="128"
-                            placeholder="电台名称，最多允许输入128个字符" />
+                            placeholder="电台名称，最多支持输入128个字符" />
                     </div>
                 </div>
                 <div class="form-row">
@@ -135,19 +135,19 @@ onMounted(() => loadRadio())
                     </div>
                     <div @keydown.stop="">
                         <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }" maxlength="512"
-                            placeholder="音频流URL，仅支持http / https协议，最多允许输入512个字符" />
+                            placeholder="音频流URL，仅支持http / https协议，最多支持输入512个字符" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div>
                         <span>音频流类型：</span>
-                        <span v-for="(item, index) in ['默认Http Live Stream', '普通音频Live']" class="stream-type-item spacing"
+                        <span v-for="(item, index) in ['Http Live Stream', '普通音频Live']" class="stream-type-item spacing"
                             :class="{ active: index == detail.streamType }" @click="setStreamType(index)">
                             {{ item }}
                         </span>
                     </div>
-                    <div class="tip-text">提示：音频类型，请根据具体URL格式或内容来选择。比如：<br>
-                        https://xxxxxx.m3u8?q=xxx &nbsp;&nbsp;=> &nbsp;默认Http Live Stream<br>
+                    <div class="tip-text">提示：音频流类型，请根据具体URL格式或内容来选择。比如：<br>
+                        https://xxxxxx.m3u8?q=xxx &nbsp;&nbsp;=> &nbsp;Http Live Stream<br>
                         https://xxxxxx.mp3?wd=xxx &nbsp;&nbsp;=> &nbsp;普通音频Live
                     </div>
                 </div>
@@ -171,7 +171,7 @@ onMounted(() => loadRadio())
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
-                        <textarea v-model="detail.about" maxlength="1024" placeholder="描述，最多允许输入1024个字符">
+                        <textarea v-model="detail.about" maxlength="1024" placeholder="描述，最多支持输入1024个字符">
                         </textarea>
                     </div>
                 </div>

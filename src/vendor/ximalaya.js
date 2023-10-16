@@ -196,7 +196,7 @@ export class Ximalaya {
     //歌词
     static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            resolve(resolve({ id, platform: Ximalaya.CODE, lyric: new Lyric(), trans: null }))
+            resolve({ id, platform: Ximalaya.CODE, lyric: new Lyric(), trans: null })
         })
     }
 

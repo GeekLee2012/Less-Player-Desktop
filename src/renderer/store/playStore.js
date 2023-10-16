@@ -27,6 +27,8 @@ export const usePlayStore = defineStore('player', {
         //是否正在自动下一曲
         isAutoPlaying: false,
         videoSrc: null,
+        //音频输出设备
+        audioOutputDevices: []
     }),
     getters: {
         currentTrack(state) {
@@ -93,8 +95,7 @@ export const usePlayStore = defineStore('player', {
         },
         addTracks(tracks) {
             //TODO 暂时不去重, 超级列表如何保证时效
-            //this.queueTracks.push(...tracks)
-            if (tracks.length < 1) return
+            if (!tracks || tracks.length < 1) return
             tracks.forEach(item => this.addTrack(item));
         },
         playTrackLater(track) {
@@ -162,7 +163,7 @@ export const usePlayStore = defineStore('player', {
         //播放，并更新当前播放列表相关状态
         playTrack(track) {
             let index = this.findIndex(track)
-            if (index == -1) {
+            if (index < 0) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
             }
@@ -242,6 +243,9 @@ export const usePlayStore = defineStore('player', {
         },
         setVideoSrc(value) {
             this.videoSrc = value
+        },
+        setAudioOutputDevices(devices) {
+            this.audioOutputDevices = devices
         }
     },
     persist: {

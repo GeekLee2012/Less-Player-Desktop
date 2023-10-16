@@ -85,8 +85,8 @@ const loadContent = async (noLoadingMask) => {
     const page = pagination.page
     const result = await vendor.artistSquare(cate, offset, limit, page)
     if (!result) return
-    if (currentPlatformCode.value != result.platform)
-        if (currentCategoryItems.value != result.cate) return
+    if (currentPlatformCode.value != result.platform) return
+    if (currentCategoryItems.value != result.cate) return
     pagination.page = result.page
     addArtistData(result.data)
     setLoadingContent(false)
@@ -147,9 +147,13 @@ const refreshData = () => {
 
 /* 生命周期、监听 */
 onActivated(() => {
-    loadCategories()
+    //loadCategories()
     resetBack2TopBtn()
     restoreScrollState()
+})
+
+onMounted(() => {
+    loadCategories()
 })
 
 //TODO

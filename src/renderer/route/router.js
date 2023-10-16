@@ -50,9 +50,13 @@ const routes = [
                 path: '/radios/square/:platform',
                 component: RadioSquareView
             },
-            {  //本地歌曲
-                path: '/:exploreMode/local',
+            {  //分类歌单 - 本地歌曲
+                path: '/playlists/local',
                 component: LocalMusicView
+            },
+            {  //万千歌手 - 本地歌曲
+                path: '/artists/local',
+                component: ArtistSquareView
             },
             {  //主题
                 path: '/themes',

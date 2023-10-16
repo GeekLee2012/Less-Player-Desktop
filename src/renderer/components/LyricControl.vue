@@ -20,7 +20,7 @@ const props = defineProps({
 })
 
 const { playMv, loadLyric, currentTimeState,
-    seekTrack, playState, } = inject('player')
+    seekTrack, playState, progressSeekingState } = inject('player')
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
@@ -85,8 +85,8 @@ const renderAndScrollLyric = (secs) => {
         index = 0
     }
 
-    //是否为用户手动滚动歌词
-    if (isUserMouseWheel.value || isSeeking.value) return
+    //是否为用户主动改变进度，如手动滚动歌词、拖动进度条
+    if (isUserMouseWheel.value || isSeeking.value || progressSeekingState.value) return
 
     //Scroll 滚动算法
 
@@ -114,16 +114,16 @@ const renderAndScrollLyric = (secs) => {
 
     ////算法3：播放页垂直居中，依赖offsetParent定位；与算法2相似，只是参考系不同而已 ////
     //基本保证：准确定位，当前高亮行在播放页垂直居中，且基本与ScrollLocator在同一水平线上
-    //绝对意义上来说，并不垂直居中，因为歌词行自身有一定高度
-    if (!lines[index] || !lines[index].offsetTop) return
+    if (!lines[index] || !lines[index].offsetTop || !lines[index].clientHeight) return
     const { offsetTop } = lyricWrap
     const { clientHeight } = document.documentElement
-    const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
+    const lineHeight = lines[index].clientHeight
+    const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop) + lineHeight / 2
     //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
     const frequency = getStateRefreshFrequency()
     const duration = 300 * frequency / 60
     smoothScroll(lyricWrap, destScrollTop, duration, 5, () => {
-        return (isUserMouseWheel.value || isSeeking.value)
+        return (isUserMouseWheel.value || isSeeking.value || progressSeekingState.value)
     })
 }
 
@@ -423,10 +423,10 @@ watch(() => props.track, (nv, ov) => {
         </div>
         <div class="center" ref="lyricWrapRef">
             <div v-show="lyricExistState == -1" class="no-lyric">
-                <label>歌词加载中，请先欣赏音乐吧~</label>
+                <span>歌词加载中，请先欣赏音乐吧~</span>
             </div>
             <div v-show="lyricExistState == 0" class="no-lyric">
-                <label>暂无歌词，请继续欣赏音乐吧~</label>
+                <span>暂无歌词，请继续欣赏音乐吧~</span>
             </div>
             <div v-show="lyricExistState == 1" v-for="([key, value], index) in lyricData" class="line" :timeKey="key"
                 :index="index" :class="{

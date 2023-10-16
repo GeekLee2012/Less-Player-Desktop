@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, ref, watch, toRaw, inject, nextTick } from 'vue';
+import { onActivated, ref, watch, toRaw, inject, nextTick, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
@@ -13,11 +13,13 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
 import { toMillis } from '../../common/Times';
-import { isMacOS, isDevEnv, nextInt, randomTextWithinAlphabet } from '../../common/Utils';
+import { isMacOS, isDevEnv, nextInt, randomTextWithinAlphabet, toTrimString } from '../../common/Utils';
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
+import { useArtistSquareStore } from '../store/artistSquareStore';
+import { Album } from '../../common/Album';
 
 
 
@@ -26,7 +28,8 @@ const { seekTrack, playPlaylist,
     mmssCurrentTime, currentTimeState,
     favoritedState, toggleFavoritedState,
     preseekTrack, mmssPreseekTime,
-    isTrackSeekable } = inject('player')
+    isTrackSeekable, playAlbum,
+    addAndPlayTracks, } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 
@@ -40,7 +43,7 @@ const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore
 const { soundEffectViewShow, spectrumIndex,
     lyricToolbarShow, randomMusicToolbarShow,
     randomMusicPlatformCodes, randomMusicTypeCodes,
-    currentMusicCategoryName } = storeToRefs(useAppCommonStore())
+    currentMusicCategoryName, currentTraceId } = storeToRefs(useAppCommonStore())
 const { showToast, toggleSoundEffectView,
     setSpectrumIndex, toggleLyricToolbar,
     toggleRandomMusicToolbar, showFailToast,
@@ -55,7 +58,8 @@ const { randomMusicTypes } = storeToRefs(usePlatformStore())
 const { getVendor, platforms,
     isPlaylistType, isAnchorRadioType,
     isFMRadioType, getPlatformName,
-    getPlatformShortName } = usePlatformStore()
+    getPlatformShortName, isArtistType,
+    isAlbumType } = usePlatformStore()
 
 const spectrumCanvasShow = ref(spectrumIndex.value >= 0)
 
@@ -309,7 +313,7 @@ const nextRandomPlatformCode = (platforms) => {
 
 /* 随便听听 */
 const randomPlay = async () => {
-    const traceId = randomTextWithinAlphabet(6) + Date.now()
+    const traceId = randomTextWithinAlphabet(8) + Date.now()
     setCurrentTraceId(traceId)
 
     //数组，全部类型、全部平台
@@ -345,8 +349,8 @@ const randomPlay = async () => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     //超出最大重试次数，匹配不到任何平台
-    if (!availablePlatforms || availablePlatforms.length < 0) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+    if (!availablePlatforms || availablePlatforms.length < 1) {
+        showCurrentTracFailToast(traceId, '平台类型不匹配<br>请重新检查随机设置')
         return
     }
 
@@ -364,6 +368,10 @@ const randomPlay = async () => {
     //获取可播放数据
     if (isPlaylistType(rmTypeCode)) {
         pickPlaylist(platform, traceId)
+    } else if (isArtistType(rmTypeCode)) {
+        pickArtist(platform, traceId)
+    } else if (isAlbumType(rmTypeCode)) {
+        pickAlbum(platform, traceId)
     } else if (isAnchorRadioType(rmTypeCode)) {
         pickAnchorRadio(platform, traceId)
     } else if (isFMRadioType(rmTypeCode)) {
@@ -377,7 +385,7 @@ const showCurrentTracFailToast = (traceId, text) => {
 }
 
 //获取歌单分类
-const pickCategory = async (platform, traceId) => {
+const pickPlaylistCategory = async (platform, traceId) => {
     const { getCategories, putCategories, putOrders } = usePlaylistSquareStore()
     //平台服务
     const vendor = getVendor(platform)
@@ -417,11 +425,11 @@ const pickCategory = async (platform, traceId) => {
 }
 
 //随机获取平台里的一个歌单
-const pickPlaylist = async (platform, traceId) => {
+const pickPlaylist = async (platform, traceId, noPlayAction) => {
     //获取歌单分类
     let category = null
     try {
-        category = await pickCategory(platform, traceId)
+        category = await pickPlaylistCategory(platform, traceId)
     } catch (error) {
         console.log(error)
     }
@@ -452,17 +460,19 @@ const pickPlaylist = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
+        if (isDevEnv()) console.log(`获取不到数据：${platform}, ${cateName}`)
         showCurrentTracFailToast(traceId)
         return
     }
     //重置，下面会再次复用
     retry = 0
 
-    let success = false
+    let success = false, page = 1
     do {
         if (!isCurrentTraceId(traceId)) return
         //获取随机一个分页数据
-        const page = Math.max(nextInt(total), 1)
+        //由于部分平台总页数不准确，故采用Math.pow() + retry变量 + maxRetry变量干预随机
+        page = Math.max(parseInt(nextInt(total) / Math.pow(2, (retry ? retry + maxRetry : 0))), 1)
         const offset = (page - 1) * limit
         result = await vendor.square(cate, offset, limit, page, order)
         if (!result || result.data.length < 1) {
@@ -473,21 +483,29 @@ const pickPlaylist = async (platform, traceId) => {
         //retry = 0
 
         //随机选择一个歌单
-        const playlists = result.data
+        const { data: playlists, dataType } = result
         const playlist = playlists[nextInt(playlists.length)]
+        if (noPlayAction) {
+            Object.assign(playlist, { dataType })
+            return playlist
+        }
         //特殊情况，歌单电台
         if (Playlist.isNormalRadioType(playlist)) {
             const titleParts = playlist.title.replaceAll(' ', '').split('|')
             cateName = titleParts.length > 1 ? titleParts[1] : titleParts[0]
         }
-        if (isCurrentTraceId(traceId)) {
-            setCurrentMusicCategoryName(cateName)
-            playPlaylist(playlist, null, traceId)
-        }
+
+        if (!isCurrentTraceId(traceId)) return
+        setCurrentMusicCategoryName(cateName)
+        const playAction = (dataType && dataType == 1) ? playAlbum : playPlaylist
+        playAction(playlist, null, traceId)
         success = true
         break
     } while (retry > 0 && retry < maxRetry)
-    if (!success) showCurrentTracFailToast(traceId)
+    if (!success) {
+        if (isDevEnv()) console.log(`获取不到数据：${platform}, ${cateName}, ${page}`)
+        showCurrentTracFailToast(traceId)
+    }
 }
 
 //获取主播电台分类
@@ -734,6 +752,257 @@ const pickFMRadio = async (platform, traceId) => {
     if (!success) showCurrentTracFailToast(traceId)
 }
 
+//获取歌手分类
+const pickArtistsCategory = async (platform, traceId) => {
+    const { getCategory, putCategory,
+        putAlphabet, getAlphabet } = useArtistSquareStore()
+    //平台服务
+    const vendor = getVendor(platform)
+    if (!vendor || !vendor.artistCategories) {
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        return
+    }
+    let cachedCategories = getCategory(platform)
+    let cachedAlphabet = getAlphabet(platform)
+    if (!cachedCategories) {
+        let maxRetry = 3, retry = 0
+        do {
+            if (!isCurrentTraceId(traceId)) return
+
+            const result = await vendor.artistCategories()
+            if (result && result.data.length > 0) {
+                result.data.push(result.alphabet)
+                cachedCategories = result.data
+                cachedAlphabet = result.alphabet
+
+                putCategory(result.platform, cachedCategories)
+                putAlphabet(result.platform, cachedAlphabet)
+                break
+            }
+            ++retry
+        } while (retry > 0 && retry < maxRetry)
+    }
+    if (!isCurrentTraceId(traceId)) return
+
+    if (!cachedCategories || !cachedCategories.length < 0) {
+        return null
+    }
+    if (!cachedAlphabet || !cachedAlphabet.data.length < 0) {
+        return null
+    }
+
+    //分类
+    const resultCategory = {}
+    cachedCategories.forEach(cachedCate => {
+        const index = nextInt(cachedCate.data.length)
+        const item = cachedCate.data[index]
+        resultCategory[cachedCate.name] = { item, index }
+    })
+    /*
+    //字母分类
+    const index = nextInt(cachedAlphabet.data.length)
+    const item = cachedAlphabet.data[index]
+    resultCategory[cachedAlphabet.name] = { item, index }
+    */
+    return resultCategory
+}
+
+//随机获取平台里的一个歌手
+const pickArtist = async (platform, traceId, noPlayAction) => {
+    //获取歌单分类
+    let category = null
+    try {
+        category = await pickArtistsCategory(platform, traceId)
+    } catch (error) {
+        console.log(error)
+    }
+    if (!isCurrentTraceId(traceId) || !category) return
+    const limit = 35
+    let result = null
+    //平台服务
+    const vendor = getVendor(platform)
+    if (!vendor || !vendor.artistSquare) {
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        return
+    }
+
+    //重试
+    let maxRetry = 3, retry = 0
+    //获取歌手列表
+    do {
+        if (!isCurrentTraceId(traceId)) return
+
+        result = await vendor.artistSquare(category, 0, limit, 1)
+        if (result && result.data.length > 0) {
+            break
+        }
+        ++retry
+    } while (retry > 0 && retry < maxRetry)
+    if (!result || result.data.length < 0) { //获取不到数据，暂时返回
+        if (isDevEnv()) console.log(`获取不到数据：${platform}`, category)
+        showCurrentTracFailToast(traceId)
+        return
+    }
+
+    //重置，下面会再次复用
+    retry = 0
+
+    let success = false, page = 1
+    do {
+        if (!isCurrentTraceId(traceId)) return
+
+        //随机选择一个歌手
+        const { data: artists } = result
+        const artist = artists[nextInt(artists.length)]
+        if (!artist) {
+            ++retry
+            continue
+        }
+        if (noPlayAction) return artist
+
+        let artistName = toTrimString(artist.title)
+        artistName = artistName.length <= 16 ? artistName : (artistName.substring(0, 15) + '...')
+        setCurrentMusicCategoryName(artistName)
+
+        if (vendor.artistDetailHotSongs) {
+            result = await vendor.artistDetailHotSongs(artist.id)
+        } else if (vendor.artistDetailAllSongs) {
+            result = await vendor.artistDetailAllSongs(artist.id, 0, 30, 1)
+        }
+
+        if (!isCurrentTraceId(traceId)) return
+        if (result && result.data.length > 0) {
+            addAndPlayTracks(result.data, true, `即将为您播放歌手<br>${artistName}`, traceId)
+            success = true
+            break
+        }
+        ++retry
+    } while (retry > 0 && retry < maxRetry)
+    if (!success) {
+        if (isDevEnv()) console.log(`获取不到数据：${platform}, ${page}`, category)
+        showCurrentTracFailToast(traceId)
+    }
+}
+
+//随机获取歌单里的一张专辑
+const pickAlbumFromPlaylist = async (platform, traceId) => {
+    let playlist = await pickPlaylist(platform, traceId, true)
+    if (!playlist) return
+
+    const { dataType } = playlist
+    //专辑
+    if (dataType && dataType == 1) {
+        return playlist
+    }
+
+    //平台服务
+    const vendor = getVendor(platform)
+    if (!vendor) {
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        return
+    }
+
+    const { id } = playlist
+    let maxRetry = 3, retry = 0, track = null
+    //歌单电台
+    if (Playlist.isNormalRadioType(playlist)) {
+        do {
+            if (traceId && !isCurrentTraceId(traceId)) return
+
+            if (!vendor.nextPlaylistRadioTrack) return
+            track = await vendor.nextPlaylistRadioTrack(id)
+            if (Track.hasAlbum(track)) {
+                break
+            }
+            ++retry
+        } while (retry > 0 && retry < maxRetry)
+    } else if (Playlist.isNormalType(playlist)) { //普通歌单
+        while (!playlist.data || playlist.data.length < 1) {
+            if (traceId && !isCurrentTraceId(traceId)) return
+
+            if (++retry > maxRetry) return
+            //重试一次加载数据
+            if (!vendor.playlistDetail) return
+            playlist = await vendor.playlistDetail(id, 0, 1000, 1)
+        }
+        if (!playlist.data || playlist.data.length < 1) return
+
+        //重置，复用
+        retry = 0
+        do {
+            track = playlist.data[nextInt(playlist.data.length)]
+            if (Track.hasAlbum(track)) break
+            ++retry
+        } while (retry > 0 && retry < maxRetry)
+    }
+
+    if (!Track.hasAlbum(track)) return
+    if (traceId && !isCurrentTraceId(traceId)) return
+
+    const { id: aid, name } = track.album
+    return new Album(aid, platform, name)
+}
+
+//随机获取歌手的一张专辑
+const pickAlbumFromArtist = async (platform, traceId) => {
+    const artist = await pickArtist(platform, traceId, true)
+
+    //平台服务
+    const vendor = getVendor(platform)
+    if (!vendor || !vendor.artistDetailAlbums) {
+        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        return
+    }
+
+    if (!artist) return
+
+    const { id } = artist
+    //重试
+    let maxRetry = 3, retry = 0, success = false, result = null
+    //获取歌手专辑
+    do {
+        if (!isCurrentTraceId(traceId)) return
+
+        result = await vendor.artistDetailAlbums(id, 0, 365, 1)
+        if (result && result.data.length > 0) {
+            success = true
+            break
+        }
+        ++retry
+    } while (retry > 0 && retry < maxRetry)
+    if (!success) {
+        if (isDevEnv()) console.log(`获取不到数据：${platform}`, artist)
+        showCurrentTracFailToast(traceId)
+        return
+    }
+    return result.data[nextInt(result.data.length)]
+}
+
+
+//随机获取平台里的一张专辑 
+const pickAlbum = async (platform, traceId) => {
+    const isOdd = (nextInt() % 2 != 0)
+    const isArtistSupported = (platforms('artists').findIndex(item => (item.code == platform)) != -1)
+    let album = null
+    if (isOdd || !isArtistSupported) {
+        album = await pickAlbumFromPlaylist(platform, traceId)
+    } else {
+        album = await pickAlbumFromArtist(platform, traceId)
+    }
+    if (!album) {
+        showCurrentTracFailToast(traceId)
+        return
+    }
+    if (traceId && !isCurrentTraceId(traceId)) return
+
+    let albumName = toTrimString(album.title)
+    albumName = albumName.length <= 12 ? albumName : (albumName.substring(0, 10) + '...')
+    setCurrentMusicCategoryName(albumName)
+
+    playAlbum(album, `即将为您播放专辑<br>${albumName}`, traceId)
+}
+
+
 const updatePlatformShortName = () => {
     const { platform } = currentTrack.value
     let shortName = getPlatformShortName(platform)
@@ -747,6 +1016,10 @@ const quitSimpleLayout = () => {
     hideSoundEffectView()
     switchToFallbackLayout()
 }
+
+const computedCategoryName = computed(() => {
+    return currentTraceId.value ? currentMusicCategoryName.value : ''
+})
 
 /* EventBus事件 */
 EventBus.on('track-lyricLoaded', track => checkLyricValid(track))
@@ -827,12 +1100,12 @@ watch([textColorIndex], setupTextColor)
                         <div class="platform">
                             <span v-html="platformShortName"></span>
                         </div>
-                        <span class="cate-name content-text-highlight" v-html="currentMusicCategoryName"></span>
+                        <span class="cate-name content-text-highlight" v-html="computedCategoryName"></span>
                     </div>
                 </div>
                 <div class="flex-space">
-                    <div class="listen-btn text-btn">
-                        <div class="play-btn" @click="randomPlay">
+                    <div class="listen-btn">
+                        <div class="play-btn text-btn" @click="randomPlay">
                             <svg width="15" height="15" viewBox="0 0 139 139" xml:space="preserve"
                                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                 <path
@@ -852,7 +1125,7 @@ watch([textColorIndex], setupTextColor)
                     </div>
                 </div>
                 <div class="action">
-                    <span class="mv" v-show="Track.hasMv(currentTrack)">
+                    <span class="mv-btn" v-show="Track.hasMv(currentTrack)">
                         <svg @click="playMv(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -871,7 +1144,7 @@ watch([textColorIndex], setupTextColor)
                         :class="{ 'text-color-black': textColorIndex == 1 }" @click="switchTextColor">
                         T
                     </span>
-                    <span @click="quitSimpleLayout" class="btn spacing">
+                    <span @click="quitSimpleLayout" class="quit-layout-btn btn spacing">
                         <svg width="17" height="16" viewBox="0 0 1019 1019" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -1082,6 +1355,7 @@ watch([textColorIndex], setupTextColor)
 .simple-layout>.center .top .left .extra .platform {
     display: flex;
     align-items: center;
+    margin-right: 3px;
 }
 
 .simple-layout>.center .top .left .extra .platform span {
@@ -1116,16 +1390,20 @@ watch([textColorIndex], setupTextColor)
     align-items: center;
 }
 
-.simple-layout .listen-btn .text {
-    padding: 3px 6px;
-    -webkit-app-region: none;
-}
-
 .simple-layout .listen-btn .play-btn {
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+}
+
+.simple-layout .listen-btn .play-btn svg {
+    margin: 0px !important;
+}
+
+.simple-layout .listen-btn .text {
+    padding: 3px 6px;
+    -webkit-app-region: none;
 }
 
 .simple-layout .listen-btn .play-btn:hover svg,
@@ -1163,7 +1441,7 @@ watch([textColorIndex], setupTextColor)
     border: 2px solid var(--button-icon-btn-color);
     font-size: 12px;
     font-weight: bold;
-    margin-bottom: 3px;
+    /*margin-bottom: 3px;*/
 }
 
 
@@ -1189,6 +1467,14 @@ watch([textColorIndex], setupTextColor)
 .simple-layout>.center .top .flex-space,
 .simple-layout>.center .top .action {
     visibility: hidden;
+}
+
+.simple-layout>.center .top .action .mv-btn,
+.simple-layout>.center .top .action .quit-layout-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*padding-top: 3px;*/
 }
 
 .simple-layout>.center .top-fixed .action,

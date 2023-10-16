@@ -22,6 +22,7 @@ import SongListControl from '../components/SongListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { Track } from '../../common/Track';
+import EventBus from '../../common/EventBus';
 
 
 
@@ -58,6 +59,7 @@ const { showToast, hideAllCtxMenus } = useAppCommonStore()
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
+const dataType = ref(0)
 const detail = reactive({})
 let offset = 0, page = 1, limit = 30
 const isLoadingDetail = ref(false)
@@ -354,6 +356,7 @@ const resetPagination = () => {
 const reloadAll = () => {
     resetTabView()
     currentTabView.value = SongListControl
+    dataType.value = isLocalMusic(platform.value) ? 11 : 0
 
     setLoadingDetail(true)
     setLoadingSongs(true)
@@ -382,6 +385,9 @@ const trimExtraHtml = (text) => {
         .replace(/^。/g, '')
         .trim()
 }
+
+//TODO
+EventBus.on('ctxMenu-removeFromLocal', reloadAll)
 
 /* 生命周期、监听 */
 //TODO 需要梳理优化，容易出现重复加载Bug
@@ -442,8 +448,8 @@ watch([platform, artistId], reloadAll, { immediate: true })
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
-            <component :id="id" :is="currentTabView" :data="tabData" :platform="platform" :artistVisitable="true"
-                :albumVisitable="true" :loading="isLoading">
+            <component :id="id" :is="currentTabView" :data="tabData" :dataType="dataType" :platform="platform"
+                :artistVisitable="true" :albumVisitable="true" :loading="isLoading">
             </component>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -562,5 +568,9 @@ watch([platform, artistId], reloadAll, { immediate: true })
 #artist-detail-view .songlist {
     display: flex;
     flex-direction: column;
+}
+
+#artist-detail-view .textlist-ctl {
+    padding: 0 8px 10px 8px;
 }
 </style>

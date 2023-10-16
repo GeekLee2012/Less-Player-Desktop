@@ -13,7 +13,8 @@ import CommonContextSubmenu from './CommonContextSubmenu.vue';
 
 
 //TODO 整体设计比较乱，后续待梳理
-const { visitCustomPlaylistCreate, visitLocalPlaylistCreate } = inject('appRoute')
+const { currentRoutePath, visitCustomPlaylistCreate,
+    visitLocalPlaylistCreate } = inject('appRoute')
 
 const props = defineProps({
     posStyle: Object
@@ -22,14 +23,16 @@ const props = defineProps({
 const { queueTracks } = storeToRefs(usePlayStore())
 const { addTrack } = usePlayStore()
 const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
-const { showToast, showFailToast, hideAllCtxMenus, hidePlaybackQueueView } = useAppCommonStore()
+const { showToast, showFailToast,
+    hideAllCtxMenus, hidePlaybackQueueView,
+    setRouterCtxCacheItem } = useAppCommonStore()
 const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { addToCustomPlaylist, moveToCustomPlaylist } = useUserProfileStore()
 const { isLocalMusic } = usePlatformStore()
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { addToLocalPlaylist, moveToLocalPlaylist } = useLocalMusicStore()
 const listData = reactive([])
-let currentDataType = 6
+let currentDataType = 6, currentActionMode = 0
 
 const toastAndHideMenu = (text, failed) => {
     if (failed) {
@@ -46,8 +49,17 @@ const addToQueue = () => {
 }
 
 const createPlaylist = () => {
-    isLocalMusicType(currentDataType) ? visitLocalPlaylistCreate() : visitCustomPlaylistCreate()
+    const data = (currentActionMode == 3 ? queueTracks.value : commonCtxMenuCacheItem.value)
     hidePlaybackQueueView()
+    isLocalMusicType(currentDataType) ?
+        visitLocalPlaylistCreate()
+        : visitCustomPlaylistCreate(null,
+            () => setRouterCtxCacheItem({
+                id: 'createPlaylistWithData',
+                data,
+                isMoveAction: (currentActionMode == 1),
+                fromId: (commonCtxItem.value ? commonCtxItem.value.id : null)
+            }))
 }
 
 const MenuItems = {
@@ -69,44 +81,69 @@ const MenuItems = {
 const isLocalMusicType = (dataType) => (dataType == 10)
 
 const handleClick = (item, actionMode, dataType) => {
-    const track = commonCtxMenuCacheItem.value
-    let text = "操作失败！<br>歌曲可能已经存在！"
-    if (Playlist.isFMRadioType(track)) {
-        text = "添加到歌单<br>不支持FM电台！"
-        toastAndHideMenu(text, true)
-        return
+    const tracks = []
+    const cache = commonCtxMenuCacheItem.value
+    if (Array.isArray(cache)) {
+        tracks.push(...cache)
+    } else {
+        tracks.push(cache)
     }
+
     let addToAction = addToCustomPlaylist
     let moveToAction = moveToCustomPlaylist
+
     if (isLocalMusicType(dataType)) {
         addToAction = addToLocalPlaylist
         moveToAction = moveToLocalPlaylist
     }
-    let success = false
-    if (actionMode == 1) {
-        const { id } = commonCtxItem.value
-        if (moveToAction(item.id, id, track)) {
-            text = "歌曲移动成功！"
+
+    let text = "操作失败！<br>歌曲可能已经存在！"
+    let success = false, needTriggerEvent = false
+
+    //TODO 无法保证事务一致性
+    for (let i = 0; i < tracks.length; i++) {
+        const track = tracks[i]
+        if (Playlist.isFMRadioType(track)) {
+            text = "添加到歌单<br>不支持FM电台！"
+            if (tracks.length == 1) {
+                success = false
+                toastAndHideMenu(text, true)
+                break
+            }
+        }
+
+        if (actionMode == 1 && commonCtxItem.value) {
+            const { id } = commonCtxItem.value
+            if (moveToAction(item.id, id, track)) {
+                text = "歌曲移动成功！"
+                success = true
+                needTriggerEvent = true
+            }
+        } else if (actionMode == 3) { //添加当前播放列表
+            //TODO 暂时先简单处理，不考虑异常情况
+            const queue = toRaw(queueTracks.value)
+            queue.forEach(qItem => {
+                if (Playlist.isFMRadioType(qItem)) return
+                addToAction(item.id, qItem)
+            })
+            text = "全部歌曲添加成功！"
+            success = true
+        } else if (addToAction(item.id, track)) {
+            text = "歌曲添加成功！"
             success = true
         }
-    } else if (actionMode == 3) { //添加当前播放列表
-        //TODO 暂时先简单处理，不考虑异常情况
-        const queue = toRaw(queueTracks.value)
-        queue.forEach(qItem => {
-            if (Playlist.isFMRadioType(qItem)) return
-            addToAction(item.id, qItem)
-        })
-        success = true
-        text = "全部歌曲添加成功！"
-    } else if (addToAction(item.id, track)) {
-        success = true
-        text = "歌曲添加成功！"
     }
     toastAndHideMenu(text, !success)
+    if (needTriggerEvent) EventBus.emit('commonCtxMenuItem-finish')
 }
 
 const initData = (actionMode, dataType) => {
-    currentDataType = dataType || 6
+    currentDataType = dataType || 0
+    currentActionMode = actionMode || 0
+    const isCustomPlaylist = (currentDataType == 4)
+    const isPlaybackQueue = (currentDataType == 9)
+    const isBatchAction = (currentDataType == 6 || currentDataType == 10)
+
     listData.length = 0
     const fixedItems = [MenuItems.playbackQueue, MenuItems.create]
     if (actionMode >= 1) { //移动模式 或 其他无当前播放的模式
@@ -116,7 +153,10 @@ const initData = (actionMode, dataType) => {
     }
     const playlists = isLocalMusicType(dataType) ? localPlaylists.value : customPlaylists.value
     playlists.forEach(item => {
-        if (commonCtxItem.value && item.id === commonCtxItem.value.id) return
+        if (commonCtxItem.value && item.id == commonCtxItem.value.id) {
+            if (isCustomPlaylist) return
+            if (isBatchAction && !isPlaybackQueue) return
+        }
         listData.push({
             name: item.title,
             action: (event) => handleClick(item, actionMode, dataType),
@@ -129,7 +169,7 @@ onMounted(() => initData())
 
 EventBus.on("addToListSubmenu-init", ({ mode, dataType, callback }) => {
     const total = initData(mode, dataType)
-    if (callback) callback({ total })
+    if (callback && typeof (callback) == 'function') callback({ total })
 })
 </script>
 

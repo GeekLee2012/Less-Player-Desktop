@@ -60,12 +60,12 @@ const submit = () => {
         invalid.value = true
         return
     }
-    let text = "歌单创建成功!"
+    let text = "歌单创建成功！"
     if (!props.id) {
         addLocalPlaylist(title, tags, about, cover)
     } else {
         updateLocalPlaylist(props.id, title, tags, about, cover)
-        text = "歌单已保存!"
+        text = "歌单已保存！"
     }
     showToast(text, backward)
 }
@@ -106,7 +106,7 @@ onMounted(() => loadLocalPlaylist())
                     </div>
                     <div @keydown.stop="">
                         <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
-                            placeholder="歌单名称，最多允许输入99个字符" />
+                            placeholder="歌单名称，最多支持输入99个字符" />
                     </div>
                 </div>
                 <div class="form-row">
@@ -123,7 +123,7 @@ onMounted(() => loadLocalPlaylist())
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
                         <textarea :value="detail.about" ref="aboutRef" maxlength="1024"
-                            placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多允许输入1024个字符">
+                            placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多支持输入1024个字符">
                                 </textarea>
                     </div>
                 </div>

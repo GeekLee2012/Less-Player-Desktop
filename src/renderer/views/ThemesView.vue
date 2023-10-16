@@ -8,7 +8,8 @@ import { useAppCommonStore } from '../store/appCommonStore';
 
 
 const { getPresetThemes, getCustomThemes, removeCustomTheme } = useThemeStore()
-const { showCustomThemeEditView, hideCustomThemeEditView, showToast } = useAppCommonStore()
+const { showCustomThemeEditView, hideCustomThemeEditView,
+    showToast, hidePlaybackQueueView } = useAppCommonStore()
 const { theme: themeSetting } = storeToRefs(useSettingStore())
 const { setThemeIndex } = useSettingStore()
 
@@ -49,6 +50,12 @@ const customThemeItemPreviewStyle = (item) => {
     }
 }
 
+const editTheme = (item) => {
+    hidePlaybackQueueView()
+    showCustomThemeEditView(item)
+}
+
+const ceateTheme = () => editTheme()
 </script>
 
 <template>
@@ -87,8 +94,8 @@ const customThemeItemPreviewStyle = (item) => {
                 <!--<div class="cate-name">自定义</div>-->
                 <div class="content">
                     <div class="item">
-                        <div class="preview create-action" @click="showCustomThemeEditView()">
-                            <svg class="add-custom-btn" @click="" width="32" height="32" viewBox="0 0 682.65 682.74"
+                        <div class="preview create-action" @click="ceateTheme()">
+                            <svg class="add-custom-btn" width="32" height="32" viewBox="0 0 682.65 682.74"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
@@ -98,7 +105,7 @@ const customThemeItemPreviewStyle = (item) => {
                                 </g>
                             </svg>
                         </div>
-                        <div class="name" @click="createTheme">新建主题</div>
+                        <div class="name" @click="ceateTheme()">新建主题</div>
                     </div>
                     <div class="item" v-for="(item, index) in getCustomThemes()"
                         :class="{ active: index == themeSetting.index && themeSetting.type === 1 }">
@@ -113,7 +120,7 @@ const customThemeItemPreviewStyle = (item) => {
                                 </g>
                             </svg>
                             <div class="action">
-                                <div class="edit-btn btn" @click.stop="showCustomThemeEditView(item)">
+                                <div class="edit-btn btn" @click.stop="editTheme(item)">
                                     <svg width="26" height="26" viewBox="0 0 992.3 992.23"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <g id="Layer_2" data-name="Layer 2">

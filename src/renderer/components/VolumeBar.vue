@@ -61,7 +61,7 @@ defineExpose({
         </div>
         <div class="volume-value">
             <SliderBar ref="sliderRef" :value="volume" :onSeek="updateVolume" :onScroll="updateVolume"
-                :onDragMove="updateVolume" :disableOptimize="true">
+                :onDragMove="updateVolume" :thumbAutoHideDelay="0">
             </SliderBar>
         </div>
     </div>

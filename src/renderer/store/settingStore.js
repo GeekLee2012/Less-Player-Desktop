@@ -97,6 +97,8 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 播放歌曲 */
         track: {
+            //音频输出设备
+            audioOutputDeviceId: null,
             //音质
             quality: {
                 index: 0,
@@ -112,9 +114,16 @@ export const useSettingStore = defineStore('setting', {
             playbackQueueCloseBtnShow: false,
             //历史播放按钮，即最近播放快捷入口
             playbackQueueHistoryBtnShow: false,
+            //MV标识、MV播放按钮
+            playbackQueueMvBtnShow: false,
+            //歌单播放量
             listenNumShow: false,
+            //视频播放时，自动暂停播放歌曲
+            pauseOnPlayingVideo: true,
             //视频播放退出后，自动继续播放歌曲
             resumePlayAfterVideo: true,
+            //视频播完后，自动关闭视频播放页面
+            quitVideoAfterEnded: true,
             //播放歌曲时，防止系统睡眠
             playingWithoutSleeping: true,
             //歌曲进度更新频度，默认为60，范围：1 - 1024
@@ -281,7 +290,9 @@ export const useSettingStore = defineStore('setting', {
             //版本 - 检查更新时，是否忽略开发预览版
             checkPreReleaseVersion: false
         },
-        blackHole: null, //黑洞state，永远不需要持久化
+        //“黑洞 ”state，永远不需要持久化
+        //仅用于触发某些机制，但现在暂时已经用处不大啦
+        blackHole: null,
     }),
     getters: {
         isVipTransferEnable() {
@@ -369,14 +380,23 @@ export const useSettingStore = defineStore('setting', {
         isPlaybackQueueHistoryBtnShow() {
             return this.track.playbackQueueHistoryBtnShow
         },
+        isPlaybackQueueMvBtnShow() {
+            return this.track.playbackQueueMvBtnShow
+        },
         isHideToTrayOnMinimized() {
             return this.tray.showOnMinimized
         },
         currentTheme() {
             return this.getCurrentTheme()
         },
+        isPauseOnPlayingVideoEnable() {
+            return this.track.pauseOnPlayingVideo
+        },
         isResumePlayAfterVideoEnable() {
             return this.track.resumePlayAfterVideo
+        },
+        isQuitVideoAfterEndedEnable() {
+            return this.track.quitVideoAfterEnded
         },
         isUseOnlineCoverEnable() {
             return this.track.useOnlineCover
@@ -465,6 +485,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isUseCardStyleImageTextTile() {
             return this.common.imageTextTileStyleIndex == 1
+        },
+        selectedAudioOutputDeviceId() {
+            return this.track.audioOutputDeviceId
         }
     },
     actions: {
@@ -585,8 +608,14 @@ export const useSettingStore = defineStore('setting', {
         togglePlaylistCategoryBarFlowBtnShow() {
             this.track.playlistCategoryBarFlowBtnShow = !this.track.playlistCategoryBarFlowBtnShow
         },
+        togglePauseOnPlayingVideo() {
+            this.track.pauseOnPlayingVideo = !this.track.pauseOnPlayingVideo
+        },
         toggleResumePlayAfterVideo() {
             this.track.resumePlayAfterVideo = !this.track.resumePlayAfterVideo
+        },
+        toggleQuitVideoAfterEnded() {
+            this.track.quitVideoAfterEnded = !this.track.quitVideoAfterEnded
         },
         togglePlayingWithoutSleeping() {
             this.track.playingWithoutSleeping = !this.track.playingWithoutSleeping
@@ -600,6 +629,9 @@ export const useSettingStore = defineStore('setting', {
         },
         togglePlaybackQueueHistoryBtnShow() {
             this.track.playbackQueueHistoryBtnShow = !this.track.playbackQueueHistoryBtnShow
+        },
+        togglePlaybackQueueMvBtnShow() {
+            this.track.playbackQueueMvBtnShow = !this.track.playbackQueueMvBtnShow
         },
         toggleListenNumShow() {
             this.track.listenNumShow = !this.track.listenNumShow
@@ -1017,6 +1049,13 @@ export const useSettingStore = defineStore('setting', {
         },
         syncSettingToDesktopLyric() {
             EventBus.emit('setting-syncToDesktopLyric', this.desktopLyric)
+        },
+        setAudioOutputDeviceId(value) {
+            this.track.audioOutputDeviceId = value
+            this.setupAudioOutputDevice()
+        },
+        setupAudioOutputDevice() {
+            EventBus.emit('outputDevice-setup', this.track.audioOutputDeviceId)
         }
     },
     persist: {

@@ -9,6 +9,7 @@ import DefaultMainBottom from './DefaultMainBottom.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
 import EventBus from '../../common/EventBus';
+import { isDevEnv } from '../../common/Utils';
 
 
 
@@ -204,10 +205,10 @@ const setBatchViewListSize = () => {
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const el = document.querySelector('#batch-action-view .content')
-    const { clientHeight } = mainContent, padding = 52
-    //const height = (clientHeight - 133 - padding)
+    const { clientHeight } = mainContent
+    const padding = isDefaultClassicLayout.value ? 8 : 30
     //header 87, margin 15, action 31
-    const height = (clientHeight - 87 - 15 - 31)
+    const height = (clientHeight - 87 - 15 - 31 - padding)
     if (el) el.style.height = `${height}px`
 }
 
@@ -291,6 +292,8 @@ onMounted(() => {
     //窗口大小变化事件监听
     window.addEventListener('resize', event => {
         if (!isDefaultLayout.value) return
+        //TODO 窗口缩放Bug
+        //nextTick(() => setupWindowZoom(true))
         //自适应播放元信息组件大小
         setPlayMetaSize()
         //自适应搜索框大小
@@ -313,6 +316,7 @@ onMounted(() => {
         //TODO 窗口缩放Bug，放在最后执行确保缩放
         setupWindowZoom(true)
         //nextTick(() => setupWindowZoom(true))
+        if (isDevEnv()) console.log('[ RESIZE ]')
     })
 
     //点击事件监听

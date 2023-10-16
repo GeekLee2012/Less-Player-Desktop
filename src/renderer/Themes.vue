@@ -162,6 +162,8 @@ const setupFontSize = (fontSize) => {
     '--content-setting-cate-subtitle-width': Math.min((fontSize / 15.5 * 225), 245),
     //'--content-left-nav-line-height': (fontSize / 15.5 * 33),
     '--content-left-nav-line-spacing': (fontSize / 15.5 * 10.5),
+    //'--content-text-module-title-size': (fontSize / 17.5 * 30),
+    //'--content-text-module-subtitle-size': Math.max((fontSize / 17.5 * 25), 25)
   }
   for (const [key, value] of Object.entries(changes)) {
     document.documentElement.style.setProperty(key, `${value}px`)

@@ -239,11 +239,18 @@ export const useUserProfileStore = defineStore("userProfile", {
             }
         },
         //自建歌单
-        addCustomPlaylist(title, about, cover) {
+        addCustomPlaylist(title, about, cover, data) {
             const id = Playlist.CUSTOM_ID_PREFIX + randomTextWithinAlphabetNums(12)
+            const _data = []
+            if (Array.isArray(data)) {
+                _data.push(...data)
+            } else if (data) {
+                _data.push(data)
+            }
             this.addItem(this.customPlaylists, {
-                id, title, about, cover, data: []
+                id, title, about, cover, data: _data
             }, (e1, e2) => e1.id === e2.id)
+            return id
         },
         updateCustomPlaylist(id, title, about, cover) {
             if (this.customPlaylists.length < 1) return

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
@@ -12,6 +12,7 @@ import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { usePlatformStore } from '../store/platformStore';
+import EventBus from '../../common/EventBus';
 import { useIpcRenderer } from "../../common/Utils";
 
 
@@ -248,8 +249,22 @@ const toggleUseSearchBar = () => {
     setSearchBarExclusiveAction(action)
 }
 
+const titleRef = ref(null)
+const isTwoLinesTitle = ref(false)
+const setTwoLinesTitle = (value) => isTwoLinesTitle.value = value
+const detectTitleHeight = () => {
+    const titleEl = titleRef.value
+    if (!titleEl) return
+    const { clientHeight } = titleEl
+    if (!clientHeight) return
+    setTwoLinesTitle(clientHeight > 50)
+}
+
+EventBus.on('app-resize', detectTitleHeight)
+
 onActivated(() => {
     restoreScrollState()
+    nextTick(detectTitleHeight)
     loadContent()
 })
 
@@ -288,8 +303,8 @@ onDeactivated(() => {
                 <img class="cover" v-lazy="detail.cover" />
             </div>
             <div class="right">
-                <div class="title" v-html="detail.title"></div>
-                <div class="about" v-html="getAbout()"></div>
+                <div class="title" v-html="detail.title" ref="titleRef"></div>
+                <div class="about" v-html="getAbout()" :class="{ 'short-about': isTwoLinesTitle }"></div>
                 <div class="edit">
                     <div @click="() => visitLocalPlaylistEdit(id)" v-show="detail.id">
                         <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
@@ -346,7 +361,7 @@ onDeactivated(() => {
                     <span>独占搜索框模式</span>
                 </div>
             </div>
-            <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="1" :id="id"
+            <SongListControl :data="detail.data" :dataType="1" :artistVisitable="true" :albumVisitable="true" :id="id"
                 :loading="isLoading" :paginationStyleType="getPaginationStyleIndex" :limit="getLimitPerPageForLocalPlaylist"
                 :onPageLoaded="resetScrollState">
             </SongListControl>
@@ -389,8 +404,9 @@ onDeactivated(() => {
 }
 
 #local-playlist-detail-view .header .about {
-    min-height: 99px;
-    /*line-height: 21px;*/
+    height: 86px;
+    /*min-height: 99px;
+    line-height: 21px;*/
     line-height: var(--content-text-line-height);
     color: var(--content-subtitle-text-color);
     overflow: hidden;
@@ -400,9 +416,15 @@ onDeactivated(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5;
-    margin-bottom: 10px;
+    -webkit-line-clamp: 3;
+    margin-bottom: 15px;
     /*font-size: 15px;*/
+}
+
+#local-playlist-detail-view .header .short-about {
+    height: 60px;
+    -webkit-line-clamp: 2;
+    margin-bottom: 10px;
 }
 
 #local-playlist-detail-view .right .edit {

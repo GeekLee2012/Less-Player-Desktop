@@ -4,7 +4,7 @@ import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
-import { md5, toTrimString, } from "../common/Utils";
+import { md5, toTrimString, toUpperCaseTrimString, } from "../common/Utils";
 import { useSettingStore } from "../renderer/store/settingStore";
 
 
@@ -24,8 +24,7 @@ const signParam = (param) => {
 }
 
 const getSignature = (param) => {
-    const sign = md5(signParam(param)) || ''
-    return sign.toUpperCase()
+    return toUpperCaseTrimString(md5(signParam(param)))
 }
 
 /*
@@ -699,7 +698,7 @@ export class KuGou {
                 const detailItems = doc.querySelector('.detail').childNodes
                 const title = detailItems.item(2).textContent
                 const artistName = detailItems.item(6).textContent
-                const publishTime = detailItems.item(12).textContent
+                const publishTime = detailItems.item(12) ? detailItems.item(12).textContent : null
                 const about = doc.querySelector('.intro').textContent
                 const artist = [{ id: 0, name: artistName }]
 

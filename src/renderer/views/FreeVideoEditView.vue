@@ -94,7 +94,7 @@ const updateCover = async () => {
                     </div>
                     <div @keydown.stop="">
                         <input type="text" v-model="detail.title" :class="{ invalid: titleInvalid }" maxlength="128"
-                            placeholder="视频名称，最多允许输入128个字符" />
+                            placeholder="视频名称，最多支持输入128个字符" />
                     </div>
                 </div>
                 -->
@@ -105,7 +105,7 @@ const updateCover = async () => {
                     </div>
                     <div @keydown.stop="">
                         <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }" maxlength="1024"
-                            placeholder="视频流URL，仅支持http / https协议，最多允许输入1024个字符" />
+                            placeholder="视频流URL，仅支持http / https协议，最多支持输入1024个字符" />
                     </div>
                 </div>
                 <!--
@@ -138,7 +138,7 @@ const updateCover = async () => {
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
-                        <textarea v-model="detail.about" maxlength="1024" placeholder="描述，最多允许输入1024个字符">
+                        <textarea v-model="detail.about" maxlength="1024" placeholder="描述，最多支持输入1024个字符">
                         </textarea>
                     </div>
                 </div>

@@ -10,14 +10,15 @@ import { useAlbumDetailStore } from './store/albumDetailStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { usePlatformStore } from './store/platformStore';
 import { Playlist } from '../common/Playlist';
-import { isDevEnv, toTrimString } from '../common/Utils';
+import { isDevEnv, toTrimString, isBlank } from '../common/Utils';
 
 
 
 const { updateArtistDetailKeys } = useArtistDetailStore()
 const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { isArtistDetailVisitable, isAlbumDetailVisitable,
-    updateCurrentPlatformByCode, isLocalMusic } = usePlatformStore()
+    updateCurrentPlatformByCode, isLocalMusic,
+    isFMRadioPlatform, isFreeFM, } = usePlatformStore()
 const { exploreModeCode, isUserHomeMode } = storeToRefs(useAppCommonStore())
 const { setExploreMode, setArtistExploreMode,
     setRadioExploreMode, setUserHomeExploreMode,
@@ -126,13 +127,13 @@ const createCommonRoute = (route, onRouteReady) => {
         path: (route.path || route.toPath),
         onRouteReady,
         //不完全等价 router.beforeResovle()
-        beforeRoute: (toPath) => {
+        beforeRoute: (toPath, fromPath) => {
             //hidePlayingView()
             setRouterCtxCacheItem(null)
             hideRelativeComponents()
             if (isSimpleLayout.value) switchToFallbackLayout()
             if (!toPath.includes('/artist/')) hidePlaybackQueueView()
-            EventBus.emit('app-beforeRoute', toPath)
+            EventBus.emit('app-beforeRoute', { toPath, fromPath })
         }
     }
 }
@@ -147,7 +148,7 @@ const visitRoute = (route) => {
             return reject('noRoute')
         }
         route = resolveRoute(route)
-        const { path: toPath, beforeRoute, onRouteReady, replace, override } = route
+        const { path: toPath, beforeRoute, onRouteReady, replace, override, rejectOnSame } = route
         if (!toPath) {
             return reject('noRoute')
         }
@@ -156,7 +157,7 @@ const visitRoute = (route) => {
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
         if (isSame && !replace && !override) {
-            return reject('sameRoute')
+            return rejectOnSame ? reject('sameRoute') : null
         }
         //相同且要求覆盖，才进行替换
         if (isSame && override) Object.assign(route, { replace: true })
@@ -199,8 +200,16 @@ const highlightPlatform = (to) => {
     if (platform) updateCurrentPlatformByCode(platform)
 }
 
+const visitUserHome = (onRouteReady, rejectOnSame) => (visitCommonRoute({ path: '/userhome/all', rejectOnSame }, onRouteReady))
+
+const visitRadio = async (platform) => {
+    const toPath = isFreeFM(platform) ? `/radios/${platform}` : `/radios/square/${platform}`
+    return visitCommonRoute(toPath).catch(error => { })
+}
+
 const valiadateArtistId = (id) => {
-    return (typeof (id) == 'string') ? (id.trim().length > 0) : (id > 0)
+    id = id || ''
+    return (typeof (id) == 'string') ? !isBlank(id) : (parseInt(id) > 0)
 }
 
 const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onRouteReady }) => {
@@ -222,18 +231,23 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
     }
 
     const visitable = platformValid && idValid
-    platform = platform.trim()
+    platform = toTrimString(platform)
     if (visitable) {
         let exploreMode = resolveExploreMode()
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
-        visitCommonRoute(toPath, onRouteReady).then(() => updateArtistDetailKeys(platform, id))
+        visitCommonRoute(toPath, onRouteReady)
+            .then(() => updateArtistDetailKeys(platform, id))
+            .catch(error => { })
+        hideAllCtxMenus()
+    } else if (isFMRadioPlatform(platform)) {
+        visitRadio(platform)
         hideAllCtxMenus()
     }
-    if (callback) callback(visitable)
+    if (callback && typeof (callback) == 'function') callback(visitable)
 }
 
-//TODO 单一责任
+
 const visitAlbumDetail = (platform, id, callback, data) => {
     if (isLocalMusic(platform)) id = data.name || data.title
     const platformValid = isAlbumDetailVisitable(platform)
@@ -247,7 +261,7 @@ const visitAlbumDetail = (platform, id, callback, data) => {
             exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
             moduleName = 'playlist'
             isAlbum = false
-        } else { //TODO
+        } else { //TODO 单一责任
             exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
@@ -256,10 +270,8 @@ const visitAlbumDetail = (platform, id, callback, data) => {
         })
         hideAllCtxMenus()
     }
-    if (callback) callback(visitable)
+    if (callback && typeof (callback) == 'function') callback(visitable)
 }
-
-const visitUserHome = (onRouteReady) => (visitCommonRoute('/userhome/all', onRouteReady))
 
 setupRouter()
 
@@ -299,9 +311,9 @@ provide('appRoute', {
         }
         return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)
     },
-    visitCustomPlaylistCreate: (exploreMode) => {
+    visitCustomPlaylistCreate: (exploreMode, onRouteReady) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitCommonRoute(`/${exploreMode}/custom/create`)
+        return visitCommonRoute({ path: `/${exploreMode}/custom/create`, override: true }, onRouteReady)
     },
     visitCustomPlaylist: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
@@ -309,7 +321,7 @@ provide('appRoute', {
     },
     visitCustomPlaylistEdit: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitCommonRoute(`/${exploreMode}/custom/edit/${id}`)
+        return visitCommonRoute({ path: `/${exploreMode}/custom/edit/${id}`, override: true })
     },
     visitBatchCustomPlaylist: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
@@ -332,22 +344,19 @@ provide('appRoute', {
     },
     visitLocalPlaylistCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitCommonRoute(`/${exploreMode}/local/create`)
+        return visitCommonRoute({ path: `/${exploreMode}/local/create`, override: true })
     },
     visitLocalPlaylistEdit: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitCommonRoute(`/${exploreMode}/local/edit/${id}`)
-    },
-    visitFreeFM: () => {
-        return visitCommonRoute(`/radios/freefm`)
+        return visitCommonRoute({ path: `/${exploreMode}/local/edit/${id}`, override: true })
     },
     visitFreeFMCreate: (exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitCommonRoute(`/${exploreMode}/freefm/create`)
+        return visitCommonRoute({ path: `/${exploreMode}/freefm/create`, override: true })
     },
     visitFreeFMEdit: (id, exploreMode) => {
         exploreMode = resolveExploreMode(exploreMode)
-        return visitCommonRoute(`/${exploreMode}/freefm/edit/${id}`)
+        return visitCommonRoute({ path: `/${exploreMode}/freefm/edit/${id}`, override: true })
     },
     visitBatchFreeFM: () => {
         return visitCommonRoute('/radios/batch/freefm/0')
@@ -377,11 +386,12 @@ provide('appRoute', {
         //visitUserHome()
 
         //实现方式2：路由上下文对象 + 回调
-        visitUserHome(() => setRouterCtxCacheItem({ id: 'visitRecents' }))
+        visitUserHome(() => setRouterCtxCacheItem({ id: 'visitRecents' }), true)
             .catch(error => {
                 if (error == 'sameRoute') EventBus.emit('userHome-visitRecentsTab')
             })
-    }
+    },
+    visitRadio,
 })
 </script>
 

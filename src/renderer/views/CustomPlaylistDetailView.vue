@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
+import EventBus from '../../common/EventBus';
 import { toYyyymmddHhMmSs } from '../../common/Times';
 import SongListControl from '../components/SongListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
@@ -134,8 +135,22 @@ const removeAll = async () => {
     showToast("全部歌曲已删除！")
 }
 
+const titleRef = ref(null)
+const isTwoLinesTitle = ref(false)
+const setTwoLinesTitle = (value) => isTwoLinesTitle.value = value
+const detectTitleHeight = () => {
+    const titleEl = titleRef.value
+    if (!titleEl) return
+    const { clientHeight } = titleEl
+    if (!clientHeight) return
+    setTwoLinesTitle(clientHeight > 50)
+}
+
+EventBus.on('app-resize', detectTitleHeight)
+
 onActivated(() => {
     restoreScrollState()
+    nextTick(detectTitleHeight)
     loadContent()
 })
 
@@ -147,6 +162,7 @@ watch(() => props.id, () => {
 })
 
 watch(currentPlatformCode, loadContent)
+
 
 onMounted(() => {
     resetView()
@@ -167,8 +183,8 @@ onUpdated(() => {
                 <img class="cover" v-lazy="detail.cover" />
             </div>
             <div class="right">
-                <div class="title" v-html="detail.title"></div>
-                <div class="about" v-html="getAbout()"></div>
+                <div class="title" v-html="detail.title" ref="titleRef"></div>
+                <div class="about" v-html="getAbout()" :class="{ 'short-about': isTwoLinesTitle }"></div>
                 <div class="edit">
                     <div @click="() => visitCustomPlaylistEdit(id)">
                         <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
@@ -238,7 +254,7 @@ onUpdated(() => {
 }
 
 #custom-playlist-detail-view .header .about {
-    min-height: 99px;
+    height: 86px;
     /*line-height: 21px;*/
     line-height: var(--content-text-line-height);
     color: var(--content-subtitle-text-color);
@@ -249,9 +265,15 @@ onUpdated(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5;
-    margin-bottom: 10px;
+    -webkit-line-clamp: 3;
+    margin-bottom: 15px;
     /*font-size: 15px;*/
+}
+
+#custom-playlist-detail-view .header .short-about {
+    height: 60px;
+    -webkit-line-clamp: 2;
+    margin-bottom: 10px;
 }
 
 #custom-playlist-detail-view .right .edit {

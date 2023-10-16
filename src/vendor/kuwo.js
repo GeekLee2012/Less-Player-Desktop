@@ -27,6 +27,8 @@ const CONFIG = {
     withCredentials: true
 }
 
+const KW_DEFAULT_COVER_URIS = ['/star/albumcover/300/30/92/3189025836.jpg']
+
 const getCoverByQuality = (url) => {
     if (!url) return url
     const { getImageUrlByQuality } = useSettingStore()
@@ -39,6 +41,9 @@ const getCoverByQuality = (url) => {
 
 const getAlbumCoverByQuality = (url) => {
     if (!url) return url
+    if (KW_DEFAULT_COVER_URIS.findIndex(uri => (url.includes(uri))) != -1) {
+        return null
+    }
     const { getImageUrlByQuality } = useSettingStore()
     return getImageUrlByQuality([
         url.replace('/albumcover/500/', '/albumcover/300/'),

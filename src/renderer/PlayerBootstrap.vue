@@ -20,7 +20,8 @@ import { United } from '../vendor/united';
 
 const ipcRenderer = useIpcRenderer()
 
-const { currentTrack, queueTracksSize, playingIndex, playing } = storeToRefs(usePlayStore())
+const { currentTrack, queueTracksSize,
+    playingIndex, playing } = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack,
     setAutoPlaying, playPrevTrack,
     togglePlay, switchPlayMode,
@@ -28,7 +29,8 @@ const { playTrack, playNextTrack,
     updateCurrentTime, setPlaying,
     resetQueue, addTracks,
     addTrack, playTrackDirectly,
-    isCurrentTrack, isPlaying, setVideoSrc } = usePlayStore()
+    isCurrentTrack, isPlaying,
+    setVideoSrc, setAudioOutputDevices } = usePlayStore()
 const { getVendor, isLocalMusic,
     isRadioCN, isXimalaya } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
@@ -38,17 +40,19 @@ const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId,
     toggleDesktopLyricShow, toggleDesktopLyricAlwaysOnTop,
-    setDesktopLyricShow } = useAppCommonStore()
+    setDesktopLyricShow, setCurrentTraceId } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
     theme, layout, desktopLyric, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
-    isResumePlayAfterVideoEnable } = storeToRefs(useSettingStore())
+    isResumePlayAfterVideoEnable, isPauseOnPlayingVideoEnable,
+    selectedAudioOutputDeviceId, } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray,
-    syncSettingFromDesktopLyric, getCurrentTheme } = useSettingStore()
+    syncSettingFromDesktopLyric, getCurrentTheme,
+    setAudioOutputDeviceId, setupAudioOutputDevice } = useSettingStore()
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
 
@@ -129,7 +133,7 @@ const updateLyric = (track, { lyric, roma, trans }) => {
 
 //处理不可播放歌曲
 const AUTO_PLAY_NEXT_MSG = '当前歌曲无法播放<br>即将为您播放下一曲'
-const NO_NEXT_MSG = '当前歌曲无法播放<br>列表无其他可播放歌曲'
+const NO_NEXT_MSG = '当前歌曲无法播放<br>列表无可播放歌曲'
 const OVERTRY_MSG = '尝试播放次数太多<br>请手动播放其他歌曲吧'
 const TRY_TRANSFRER_MSG = '当前歌曲无法播放<br>即将尝试切换其他版本'
 const TRANSFRER_OK_MSG = '版本切换已完成<br>即将为您播放歌曲'
@@ -220,12 +224,17 @@ const bootstrapTrack = (track) => {
 
 //添加到播放列表，并开始播放
 const addAndPlayTracks = (tracks, needReset, text, traceId) => {
+    if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
     if (traceId && !isCurrentTraceId(traceId)) return
 
     if (needReset) resetQueue()
     showToast(text || "即将为您播放全部！")
     addTracks(tracks)
-    playNextTrack()
+    if (needReset) {
+        playNextTrack()
+    } else {
+        playTrack(tracks[0])
+    }
 }
 
 //接收播放器错误通知，重试播放
@@ -249,6 +258,7 @@ const onPlayerErrorRetry = ({ isRetry, track, currentTime, radio }) => {
 
 /* 播放歌单 */
 const playPlaylist = async (playlist, text, traceId) => {
+    if (!traceId) setCurrentTraceId(null)
     try {
         doPlayPlaylist(playlist, text, traceId)
     } catch (error) {
@@ -272,7 +282,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     } else if (Playlist.isNormalRadioType(playlist)) { //歌单电台
         //提示前置，避免因网络卡顿导致用户多次请求
         showToast(text || '即将为您播放电台')
-        playNextPlaylistRadioTrack(platform, id, traceId)
+        playNextPlaylistRadioTrack(platform, id, null, traceId)
         return
     } else if (Playlist.isNormalType(playlist)
         || Playlist.isAnchorRadioType(playlist)) {
@@ -280,10 +290,10 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         while (!playlist.data || playlist.data.length < 1) {
             if (traceId && !isCurrentTraceId(traceId)) return
 
-            if (++retry > maxRetry) return
+            if (++retry > maxRetry) break
             //重试一次加载数据
             const vendor = getVendor(platform)
-            if (!vendor || !vendor.playlistDetail) return
+            if (!vendor || !vendor.playlistDetail) break
             playlist = await vendor.playlistDetail(id, 0, 1000, 1)
         }
     }
@@ -331,14 +341,47 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId) => 
 }
 
 //播放专辑
-const playAlbum = (album, text) => {
+const playAlbum = (album, text, traceId) => {
+    if (!traceId) setCurrentTraceId(null)
+    try {
+        doPlayAlbum(album, text, traceId)
+    } catch (error) {
+        console.log(error)
+        if (traceId && !isCurrentTraceId(traceId)) return
+        showFailToast('网络异常！请稍候重试')
+        return
+    }
+}
+
+const doPlayAlbum = async (album, text, traceId) => {
+    if (traceId && !isCurrentTraceId(traceId)) return
+
+    const { id, platform } = album
+    let maxRetry = 3, retry = 0
+    while (!album.data || album.data.length < 1) {
+        if (traceId && !isCurrentTraceId(traceId)) return
+
+        if (++retry > maxRetry) return
+        //重试一次加载数据
+        const vendor = getVendor(platform)
+        if (!vendor || !vendor.albumDetail) return
+        album = await vendor.albumDetail(id)
+        if ((!album.data || album.data.length < 1) && vendor.albumDetailAllSongs) {
+            const result = await vendor.albumDetailAllSongs(id, 0, 100)
+            if (result.data && result.data.length > 0) {
+                album.data.push(...result.data)
+            }
+        }
+    }
     if (!album || !album.data || album.data.length < 1) {
+        if (traceId && !isCurrentTraceId(traceId)) return
         showFailToast('网络异常！请稍候重试')
         return
     }
     traceRecentAlbum(album)
-    addAndPlayTracks(album.data, true, text)
+    addAndPlayTracks(album.data, true, text || '即将为您播放专辑！')
 }
+
 
 
 /* 频谱 */
@@ -573,11 +616,14 @@ const resetPlayState = (ignore) => {
     mmssPreseekTime.value = null
     progressState.value = 0
     if (!ignore) setPlayState(PLAY_STATE.NONE)
+
+    setProgressSeekingState(false)
 }
 
 EventBus.on('track-pos', secs => {
-    if (videoPlayingViewShow.value) {
-        if (isPlaying()) togglePlay()
+    if (videoPlayingViewShow.value && isPlaying()
+        && isPauseOnPlayingVideoEnable.value) {
+        togglePlay()
         return
     }
     const track = currentTrack.value
@@ -602,6 +648,9 @@ EventBus.on('track-nextPlaylistRadioTrack', track =>
 
 
 //播放进度
+const progressSeekingState = ref(false)
+const setProgressSeekingState = (value) => progressSeekingState.value = value
+
 const seekTrack = (percent) => {
     //清除预备状态
     mmssPreseekTime.value = null
@@ -617,6 +666,7 @@ const seekTrack = (percent) => {
             playTrackDirectly(currentTrack.value)
         }
     }
+    setProgressSeekingState(false)
     //setTimeout(() => seekTrackDirectly(percent), delay)
 }
 
@@ -625,6 +675,7 @@ const markTrackSeekPending = (percent) => EventBus.emit('track-markSeekPending',
 EventBus.on('track-seekFinish', () => {
     //清除预备状态
     mmssPreseekTime.value = null
+    setProgressSeekingState(false)
 })
 
 //播放进度，更新预备状态
@@ -634,6 +685,7 @@ const preseekTrack = (percent) => {
     const duration = track ? track.duration : 0
     if (duration <= 0) return
     mmssPreseekTime.value = toMmss(duration * percent)
+    setProgressSeekingState(true)
 }
 
 const isTrackSeekable = computed(() => {
@@ -646,8 +698,9 @@ const playMv = (track) => {
     const { platform, mv } = track
     getVideoDetail(platform, mv).then(result => {
         const playing = isPlaying()
-        if (playing) togglePlay()
-        setPendingPlay(playing)
+        const pending = playing && isPauseOnPlayingVideoEnable.value
+        if (pending) togglePlay()
+        setPendingPlay(pending)
 
         playVideo(result)
         traceRecentTrack(track)
@@ -671,11 +724,13 @@ const playVideo = async (video) => {
 const setupRadioPlayer = () => EventBus.emit('radio-init', document.querySelector('.audio-node'))
 
 //应用启动时，恢复歌曲信息
-const restoreTrack = () => {
+const restoreTrack = (callback) => {
     bootstrapTrack(currentTrack.value, true).then(track => {
         EventBus.emit("track-restore", track)
+        if (callback && typeof (callback) == 'function') callback()
     }).catch(error => {
         if (error) console.log(error)
+        if (callback && typeof (callback) == 'function') callback()
     })
 }
 
@@ -808,6 +863,16 @@ const registryIpcRendererListeners = () => {
 }
 registryIpcRendererListeners()
 
+const handleStartupPlay = () => {
+    if (!ipcRenderer) return
+    ipcRenderer.on('app-startup-playTracks', (event, tracks) => {
+        addAndPlayTracks(tracks, false, '即将为您播放歌曲！')
+        ipcRenderer.send('app-startup-playDone', tracks)
+    })
+
+    ipcRenderer.send('app-startup-playReady')
+}
+
 
 let messagePort = null
 const setupMessagePort = (channel, callback) => {
@@ -857,12 +922,28 @@ EventBus.on('setting-syncToDesktopLyric', data => {
     postMessageToDesktopLryic('s-setting-sync', toRaw(data))
 })
 
+//设置音频输出设备
+const setupOutputDevices = () => {
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+        const audioOutputDevices = devices.filter(device => (device.kind == 'audiooutput'))
+        setAudioOutputDevices(audioOutputDevices)
+
+        //检查并设置音频输出设备
+        const index = audioOutputDevices.findIndex(item => (item.deviceId == selectedAudioOutputDeviceId.value))
+        if (index < 0) setAudioOutputDeviceId(audioOutputDevices[0].deviceId)
+        else setupAudioOutputDevice()
+    })
+}
+
 onMounted(() => {
     setupRadioPlayer()
-    restoreTrack()
 
     setupStateRefreshFrequency()
     setupSpectrumRefreshFrequency()
+
+    restoreTrack(handleStartupPlay)
+
+    //setupOutputDevices()
 })
 
 watch(queueTracksSize, (nv, ov) => {
@@ -918,6 +999,7 @@ provide('player', {
     preseekTrack,
     mmssPreseekTime,
     isTrackSeekable,
+    progressSeekingState,
 })
 </script>
 

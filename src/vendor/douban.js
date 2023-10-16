@@ -19,9 +19,7 @@ const moduleReq = (module, method, param) => {
 }
 
 const getAlbumCover = (albummid) => {
-    if (!albummid) return null
-    return "http://y.gtimg.cn/music/photo_new/T002R500x500M000"
-        + albummid + ".jpg"
+    return albummid ? `http://y.gtimg.cn/music/photo_new/T002R500x500M000${albummid}.jpg` : null
 }
 
 const getArtistCover = (artistmid) => {
@@ -510,8 +508,8 @@ export class DouBan {
             const result = new Playlist(id, DouBan.CODE, DouBan.MAIN_BG, titles[pos])
             Object.assign(result, {
                 about: '每一次的不期而遇，也许都会有别样的风景。'
-                    + '<br>一起去发现美吧，让内心来指引方向。 '
-                    + '<br><br>PS: 歌曲数据，在每次页面重新进入后，可能会随时刷新哦 ~'
+                    + '<br>一起去发现美吧，让内心来指引我们方向。 '
+                    + '<br><br>PS: 每次重新进入页面时，歌曲数据可能会随时被刷新哦 ~'
             })
             const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=SongSection"
             const reqBody = JSON.stringify({
@@ -735,8 +733,8 @@ export class DouBan {
     static artistDetailAllSongs(id, offset, limit, page) {
         if (page < 2) return DouBan.artistDetail(id)
         return new Promise((resolve, reject) => {
-            const result = { id, offset, limit, page, total: 0, data: [] }
-            resolve(result)
+            //const result = { id, offset, limit, page, total: 0, data: [] }
+            resolve({ id, offset, limit, page, total: 0, data: [] })
         })
     }
 

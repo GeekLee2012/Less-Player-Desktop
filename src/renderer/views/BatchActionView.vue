@@ -47,7 +47,7 @@ const { addTracks, playTrack } = usePlayStore()
 const { commonCtxMenuShow, commonCtxItem, searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, updateCommonCtxItem,
     hideAllCtxMenus, setSearchBarExclusiveAction,
-    showPlaylistExportToolbar } = useAppCommonStore()
+    showPlaylistExportToolbar, updateCommonCtxMenuCacheItem } = useAppCommonStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform } = usePlatformStore()
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
@@ -389,6 +389,7 @@ const addToQueue = () => {
 }
 
 //TODO
+/*
 const showAddToList = (event, dataType, elSelector, actionType) => {
     event.stopPropagation()
     const el = document.querySelector(elSelector)
@@ -399,6 +400,26 @@ const showAddToList = (event, dataType, elSelector, actionType) => {
     EventBus.emit("commonCtxMenu-show", {
         event: { x, y: (bottom + 3), clientX, clientY },
         data: sortCheckData()
+    })
+}
+*/
+
+const showAddToList = (event, dataType, elSelector, actionType) => {
+    event.stopPropagation()
+    const el = document.querySelector(elSelector)
+    const clientRect = el.getBoundingClientRect()
+    const { x, y, width, height, bottom } = clientRect
+    const { clientX, clientY } = event
+    updateCommonCtxMenuCacheItem(sortCheckData())
+    EventBus.emit("addToListSubmenu-init", {
+        mode: (actionType || 0),
+        dataType,
+        callback: ({ total }) => {
+            EventBus.emit("addToListSubmenu-show", {
+                event: { x, y: (bottom + 3), clientX, clientY },
+                total
+            })
+        }
     })
 }
 

@@ -59,7 +59,7 @@ app.use(pinia)
     lifecycle: {
       error: (el) => {
         //此库有坑，还是巨坑，且停更已久
-        //按上面简单的配置后，若图片加载失败时，此库会无限循环尝试加载图片......
+        //按上面简单的配置后，若图片加载失败时，会无限循环尝试加载图片......
 
         //看了源码，尝试hack一下，发现没起作用，保留下面一行代码，作为入口，备忘
         //const lazy = app.config.globalProperties.$Lazyload

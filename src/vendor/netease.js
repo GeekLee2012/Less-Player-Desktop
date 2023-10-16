@@ -352,8 +352,7 @@ export class NetEase {
     //歌手详情: 专辑
     static artistDetailAlbums(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/artist/album"
-                + "?id=" + id + "&limit=" + limit + "&offset=" + offset
+            const url = `https://music.163.com/artist/album?id=${id}&limit=${limit}&offset=${offset}`
             getDoc(url).then(doc => {
                 const data = []
 

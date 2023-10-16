@@ -25,11 +25,16 @@ const targetPlaying = () => {
     if (queueTracksSize.value < 1) return
     const queueItemsWrap = document.querySelector('.playback-queue-view .center')
     const queueItems = document.querySelectorAll('.playback-queue-view .center .item')
+    //算法1：基于百分比的定位，不够准确
     //const { clientHeight, scrollHeight } = queueItemsWrap
     //const maxScroll = scrollHeight - clientHeight
     //queueItemsWrap.scrollTop = maxScroll * (playingIndex.value / (queueTracksSize.value - 1))
+
+    //算法2：基于offsetTop，实现真正（播放器内）垂直居中
+    const queueItem = queueItems[playingIndex.value]
+    const queueItemHeight = queueItem.clientHeight
     const { clientHeight } = document.documentElement
-    const destScrollTop = queueItems[playingIndex.value].offsetTop - (clientHeight / 2 - queueItemsWrap.offsetTop)
+    const destScrollTop = queueItem.offsetTop - (clientHeight / 2 - queueItemsWrap.offsetTop) + queueItemHeight / 2
     smoothScroll(queueItemsWrap, destScrollTop, 314, 8)
 }
 
@@ -95,7 +100,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
 
 <template>
     <!-- click事件: 必须阻止冒泡，因为document全局监听click事件 -->
-    <div class="playback-queue-view" @click.stop="hidePlaybackQueueItemCtxMenu" ref="pbqRef">
+    <div class="playback-queue-view" @click.stop="" ref="pbqRef">
         <div class="container">
             <div class="header">
                 <div class="title-wrap">

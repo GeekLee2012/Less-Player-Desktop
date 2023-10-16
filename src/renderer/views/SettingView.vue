@@ -41,7 +41,9 @@ const { setThemeIndex,
     toggleCategoryBarRandom,
     togglePlaylistCategoryBarFlowBtnShow,
     toggleListenNumShow,
+    togglePauseOnPlayingVideo,
     toggleResumePlayAfterVideo,
+    toggleQuitVideoAfterEnded,
     togglePlayingWithoutSleeping,
     toggleStorePlayState,
     toggleStoreLocalMusic,
@@ -72,6 +74,7 @@ const { setThemeIndex,
     togglePlaybackQueueAutoPositionOnShow,
     togglePlaybackQueueCloseBtnShow,
     togglePlaybackQueueHistoryBtnShow,
+    togglePlaybackQueueMvBtnShow,
     toggleHightlightCtxMenuItem,
     toggleUseOnlineCover,
     toggleUseDndForCreateLocalPlaylist,
@@ -102,10 +105,12 @@ const { setThemeIndex,
     setDesktopLyricLayoutMode,
     toggleDesktopLyricAutoSize,
     setDesktopLyricTextDirection,
+    setAudioOutputDeviceId,
 } = useSettingStore()
 
 const { showToast, showImportantToast } = useAppCommonStore()
 const { isMaxScreen } = storeToRefs(useAppCommonStore())
+const { audioOutputDevices } = storeToRefs(usePlayStore())
 
 
 const switchLayout = (index) => {
@@ -217,6 +222,7 @@ const githubLastVersion = ref(version)
 const isLastRelease = ref(true)
 const giteeHasNewRelease = ref(false)
 const githubHasNewRelease = ref(false)
+
 /*
 const downloadState = ref(0)
 const progressBarRef = ref(null)
@@ -229,6 +235,7 @@ const setGiteeLastVersion = (value) => giteeLastVersion.value = value
 const setGithubLastVersion = (value) => githubLastVersion.value = value
 const setGiteeHasNewRelease = (value) => giteeHasNewRelease.value = value
 const setGithubHasNewRelease = (value) => githubHasNewRelease.value = value
+
 /*
 const setDownloadState = (value) => downloadState.value = value
 const isDownloadError = () => (downloadState.value == -1)
@@ -263,6 +270,11 @@ const resetDownloadProgress = () => {
     updateDownloadProgress(0, 0)
 }
 */
+
+const hasNewRelease = computed(() => {
+    return !isLastRelease.value && (giteeHasNewRelease.value || githubHasNewRelease.value)
+})
+
 const getLastReleaseVersion = () => {
     return new Promise((resolve, reject) => {
         setLastRelease(true)
@@ -282,14 +294,19 @@ const getLastReleaseVersion = () => {
             })
         } else { //正式版
             getDoc(changelogUrl).then(doc => {
-                const changeLogLastVersion = doc.querySelector('.file_content h3').textContent.trim()
-                resolve({ version: changeLogLastVersion, giteeVersion: changeLogLastVersion, githubVersion: changeLogLastVersion })
+                const versionTextEls = doc.querySelectorAll('.file_content h2')
+                const changeLogLastVersion = versionTextEls.length > 1 ? versionTextEls[1].textContent.trim() : `v${version}`
+                resolve({
+                    giteeVersion: changeLogLastVersion,
+                    githubVersion: changeLogLastVersion
+                })
             }).catch(reason => {
                 reject({ version })
             })
         }
     })
 }
+
 /*
 const getVersionReleaseUrl = (version) => {
     return new Promise((resolve, reject) => {
@@ -312,12 +329,12 @@ const getVersionReleaseUrl = (version) => {
         })
     })
 }
-*/
+
 const getTagReleasePageUrl = (version) => {
     //`https://gitee.com/rive08/less-player-desktop/releases/tag/${version}`
     return isCheckPreReleaseVersion.value ? githubReleasesUrl : giteeReleasesUrl
 }
-/*
+
 //是否已经下载，且存在下载文件但未进行安装
 const checkDownloaded = async () => {
     if (!ipcRenderer) return
@@ -364,23 +381,20 @@ const startDownload = async () => {
 const checkForUpdate = async () => {
     const result = await getLastReleaseVersion()
     if (!result) return
-    const { version: releaseVersion, giteeVersion, githubVersion } = result
-    const currentVersion = ("v" + version)
-    if (releaseVersion) {
-        lastVersion.value = releaseVersion
-    } else if (isCheckPreReleaseVersion.value) {
-        const maxVersion = giteeVersion >= githubVersion ? giteeVersion : githubVersion
-        lastVersion.value = maxVersion
-    } else {
-        lastVersion.value = currentVersion
-    }
+    const { giteeVersion, githubVersion } = result
+    const currentVersion = `v${version}`
+    lastVersion.value = currentVersion
     if (giteeVersion) {
         setGiteeLastVersion(giteeVersion)
         setGiteeHasNewRelease(giteeVersion > currentVersion)
+
+        if (giteeVersion >= lastVersion.value) lastVersion.value = giteeVersion
     }
     if (githubVersion) {
         setGithubLastVersion(githubVersion)
         setGithubHasNewRelease(githubVersion > currentVersion)
+
+        if (githubVersion >= lastVersion.value) lastVersion.value = githubVersion
     }
     setLastRelease(currentVersion >= lastVersion.value)
 }
@@ -448,6 +462,11 @@ const clearSessionCache = async () => {
         updateSessionCacheSize()
         showToast('资源缓存已清理！')
     }
+}
+
+const changeAudioOutputDevices = (event) => {
+    const deviceId = event.target.value
+    setAudioOutputDeviceId(deviceId)
 }
 
 /* 生命周期、监听 */
@@ -574,13 +593,21 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         <span class="sec-title">功能管理：</span>
                         <SvgTextButton text="前往设置" :leftAction="visitModulesSetting">
                         </SvgTextButton>
-                        <div class="tip-text spacing">提示：实验性功能，设置开启、关闭部分功能</div>
+                        <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                 </div>
             </div>
             <div class="track row">
                 <span class="cate-name">播放歌曲</span>
                 <div class="content">
+                    <div v-show="false">
+                        <span class="cate-subtitle">音频输出设备：</span>
+                        <select class="select-list-ctl" @change="changeAudioOutputDevices">
+                            <option v-for="(item, index) in audioOutputDevices" :value="item.deviceId"
+                                :selected="item.deviceId == track.audioOutputDeviceId">{{ item.label }}
+                            </option>
+                        </select>
+                    </div>
                     <div>
                         <span class="cate-subtitle">优先音质（暂未支持）：</span>
                         <span v-for="(item, index) in allQualities()" class="quality-item"
@@ -633,13 +660,28 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </ToggleControl>
                     </div>
                     <div>
+                        <span class="cate-subtitle">当前播放列表MV按钮：</span>
+                        <ToggleControl @click="togglePlaybackQueueMvBtnShow" :value="track.playbackQueueMvBtnShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">右键菜单显示时，高亮歌曲：</span>
                         <ToggleControl @click="toggleHightlightCtxMenuItem" :value="track.highlightCtxMenuItem">
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">视频退出后，自动续播歌曲：</span>
+                        <span class="cate-subtitle">视频播放时，自动暂停歌曲：</span>
+                        <ToggleControl @click="togglePauseOnPlayingVideo" :value="track.pauseOnPlayingVideo">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">视频播完时，自动关闭页面：</span>
                         <ToggleControl @click="toggleResumePlayAfterVideo" :value="track.resumePlayAfterVideo">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">视频退出后，自动续播歌曲：</span>
+                        <ToggleControl @click="toggleQuitVideoAfterEnded" :value="track.quitVideoAfterEnded">
                         </ToggleControl>
                     </div>
                     <div>
@@ -950,8 +992,9 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         <div class="tip-text" v-show="false">提示：目前暂时不支持自定义</div>
                     </div>
                     <div class="tip-text">提示：一般不建议开启全局快捷键，容易与其他应用的快捷键产生冲突</div>
-                    <div v-for="(item, index) in keys.data" :class="{ last: index == (keys.data.length - 1) }">
-                        <span class="cate-subtitle cate-text">{{ item.name }}：</span>
+                    <div class="local-keys" v-for="(item, index) in keys.data"
+                        :class="{ last: index == (keys.data.length - 1) }">
+                        <span class="cate-subtitle">{{ item.name }}：</span>
                         <KeysInputControl :value="item.binding" :class="{ keysInputAdptWidth: !keys.global }">
                         </KeysInputControl>
                         <KeysInputControl :value="item.gBinding" class="global-keys-ctrl" v-show="keys.global">
@@ -1112,7 +1155,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                             <span>检查更新，不忽略Pre-release开发预览版</span>
                         </div>
                     </div>
-                    <div :class="{ last: !isLastRelease }" v-show="!isLastRelease">
+                    <div :class="{ last: hasNewRelease }" v-show="hasNewRelease">
                         <div class="new-version-wrap">
                             <span class="newflag content-text-highlight">最新版本</span>
                             <div class="release-url-link spacing">
@@ -1297,8 +1340,9 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 }
 */
 
-#setting-view .keys .cate-text {
-    width: 202px !important;
+#setting-view .keys .local-keys .cate-subtitle {
+    width: 188px !important;
+    margin-right: 15px;
 }
 
 
@@ -1471,7 +1515,8 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 
 #setting-view .keys-input-ctl input {
     min-width: 159px;
-    width: 93.5%;
+    /*width: 93.5%;*/
+    width: 93%;
     padding: 8px;
 }
 

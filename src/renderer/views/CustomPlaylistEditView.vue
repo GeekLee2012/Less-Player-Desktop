@@ -6,10 +6,13 @@ export default {
 </script>
 
 <script setup>
-import { onMounted, ref, reactive, inject } from 'vue';
+import { onMounted, ref, reactive, inject, computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { useIpcRenderer } from '../../common/Utils';
+import { toTrimString, useIpcRenderer } from '../../common/Utils';
+import ArtistControl from '../components/ArtistControl.vue';
+import AlbumControl from '../components/AlbumControl.vue';
 
 
 
@@ -21,7 +24,8 @@ const props = defineProps({
 
 const ipcRenderer = useIpcRenderer()
 
-const { showToast } = useAppCommonStore()
+const { showToast, showFailToast, setRouterCtxCacheItem } = useAppCommonStore()
+const { routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const titleRef = ref(null)
 const aboutRef = ref(null)
 const coverRef = ref(null)
@@ -29,7 +33,8 @@ const invalid = ref(false)
 const detail = reactive({ title: null, about: null, cover: null })
 
 //TODO
-const { addCustomPlaylist, updateCustomPlaylist, getCustomPlaylist } = useUserProfileStore()
+const { addCustomPlaylist, updateCustomPlaylist,
+    getCustomPlaylist, moveToCustomPlaylist } = useUserProfileStore()
 
 const loadCustomPlaylist = () => {
     if (!props.id) return
@@ -57,14 +62,36 @@ const submit = () => {
         invalid.value = true
         return
     }
-    let text = "歌单创建成功!"
+    let text = "歌单创建成功！", data = []
     if (!props.id) {
-        addCustomPlaylist(title, about, cover)
+        let isMoveAction = false, fromId = null
+        if (routerCtxCacheItem.value
+            && routerCtxCacheItem.value.id == 'createPlaylistWithData') {
+            const { data: cacheData, isMoveAction: cacheMoveAction, fromId: cacheFromId } = routerCtxCacheItem.value
+            text = (isMoveAction ? "歌单已创建！<br>且歌曲已移动成功！" : "歌单已创建！<br>且歌曲已添加成功！")
+            data = cacheData
+            isMoveAction = cacheMoveAction
+            fromId = cacheFromId
+        }
+        if (isMoveAction && fromId) {
+            const toId = addCustomPlaylist(title, about, cover)
+            data.forEach(item => {
+                moveToCustomPlaylist(toId, fromId, item)
+            })
+        } else {
+            addCustomPlaylist(title, about, cover, data)
+        }
+        if (routerCtxCacheItem.value) setRouterCtxCacheItem(null)
     } else {
         updateCustomPlaylist(props.id, title, about, cover)
-        text = "歌单已保存!"
+        text = "歌单已保存！"
     }
     showToast(text, backward)
+}
+
+const cancel = () => {
+    if (routerCtxCacheItem.value) setRouterCtxCacheItem(null)
+    backward()
 }
 
 //TODO
@@ -79,6 +106,47 @@ const updateCover = async () => {
     }
 }
 
+const computedAddWithDataAvailable = computed(() => {
+    if (!routerCtxCacheItem.value) return false
+    const { id } = routerCtxCacheItem.value
+    return id == 'createPlaylistWithData'
+})
+
+const computedCacheTitle = computed(() => {
+    if (!routerCtxCacheItem.value) return
+    const { isMoveAction } = routerCtxCacheItem.value
+    return isMoveAction ? '待移动歌曲' : '待添加歌曲'
+})
+
+
+const computedSumbitText = computed(() => {
+    if (!routerCtxCacheItem.value) return
+    const { isMoveAction } = routerCtxCacheItem.value
+    return isMoveAction ? '保存并移动歌曲' : '保存并添加歌曲'
+})
+
+
+const computedRouterCache = computed(() => {
+    if (!routerCtxCacheItem.value) return []
+
+    const { id, data } = routerCtxCacheItem.value
+    if (id != 'createPlaylistWithData') return []
+
+    const cache = []
+    if (Array.isArray(data)) {
+        cache.push(...data)
+    } else if (data) {
+        cache.push(data)
+    }
+    return cache
+})
+
+const shortenCacheData = (data) => {
+    if (!data || !Array.isArray(data)) return []
+    if (data.length <= 5) return data
+    return [data[0], data[1], { title: '......' }, data[data.length - 2], data[data.length - 1]]
+}
+
 onMounted(() => loadCustomPlaylist())
 </script>
 
@@ -89,9 +157,15 @@ onMounted(() => loadCustomPlaylist())
             <span class="title" v-show="id">编辑歌单</span>
         </div>
         <div class="center">
-            <div>
+            <div class="left">
                 <img class="cover" v-lazy="detail.cover" ref="coverRef" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
+                <div class="cache-data" v-show="computedRouterCache.length > 0">
+                    <div class="content-text-highlight">{{ computedCacheTitle }}({{ computedRouterCache.length }})</div>
+                    <div v-for="(item, index) in shortenCacheData(computedRouterCache)" class="cache-item"
+                        v-html="toTrimString(item.title)">
+                    </div>
+                </div>
             </div>
             <div class="right">
                 <div class="form-row">
@@ -101,20 +175,23 @@ onMounted(() => loadCustomPlaylist())
                     </div>
                     <div @keydown.stop="">
                         <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
-                            placeholder="歌单名称，最多允许输入99个字符" />
+                            placeholder="歌单名称，最多支持输入99个字符" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
                         <textarea :value="detail.about" ref="aboutRef" maxlength="1024"
-                            placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多允许输入1024个字符">
+                            placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多支持输入1024个字符">
                                 </textarea>
                     </div>
                 </div>
                 <div class="action">
                     <SvgTextButton :leftAction="submit" text="保存"></SvgTextButton>
-                    <SvgTextButton :leftAction="backward" text="取消" class="spacing"></SvgTextButton>
+                    <SvgTextButton v-show="computedAddWithDataAvailable" :leftAction="submit" :text="computedSumbitText"
+                        class="spacing">
+                    </SvgTextButton>
+                    <SvgTextButton :leftAction="cancel" text="取消" class="spacing"></SvgTextButton>
                 </div>
             </div>
         </div>
@@ -167,6 +244,36 @@ onMounted(() => loadCustomPlaylist())
     cursor: pointer;
 }
 
+
+#custom-playlist-edit-view .center .left .cache-data {
+    margin-top: 36px;
+    width: 175px;
+    line-height: var(--content-text-line-height);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: hidden;
+    text-align: left;
+    vertical-align: middle;
+}
+
+#custom-playlist-edit-view .center .left .cache-data .content-text-highlight {
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+#custom-playlist-edit-view .center .left .cache-item {
+    overflow: hidden;
+    word-wrap: break-all;
+    white-space: pre-wrap;
+    line-break: anywhere;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    color: var(--content-subtitle-text-color);
+}
 
 #custom-playlist-edit-view .center .right {
     display: flex;

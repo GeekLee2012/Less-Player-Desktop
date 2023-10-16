@@ -6,6 +6,7 @@ import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 
 
 const { visitAlbum } = inject('appRoute')
+const { playAlbum } = inject('player')
 
 const props = defineProps({
     data: Array,
@@ -28,8 +29,8 @@ const visitItem = (item) => {
     <div class="albumlist-ctl">
         <div class="content" v-show="!loading">
             <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title"
-                :subtitle="item.subtitle || item.publishTime" @click="visitItem(item)" :checkbox="checkbox"
-                :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
+                :subtitle="item.subtitle || item.publishTime" @click="visitItem(item)" :checkbox="checkbox" :playable="true"
+                :playAction="() => playAlbum(item)" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>
         </div>

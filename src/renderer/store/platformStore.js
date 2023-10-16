@@ -25,17 +25,17 @@ const T_TYPES = [{
     name: '歌单',
     weight: 8,    //包括歌单电台
 }, {
-    code: 'albums',
-    name: '专辑',
-    weight: 3
-}, {
     code: 'artists',
     name: '歌手',
+    weight: 6
+}, {
+    code: 'albums',
+    name: '专辑',
     weight: 5
 }, {
     code: 'fmRadios',
     name: '广播电台',
-    weight: 3
+    weight: 4
 }, {
     code: 'anchorRadios',
     name: '主播电台',
@@ -88,15 +88,15 @@ const ALL_PLATFORMS = [
         name: '豆瓣FM',
         shortName: 'DB',
         online: true,
-        types: ['playlists', 'artists', 'albums'],
-        weight: 5
+        types: ['playlists', 'albums'],
+        weight: 8
     },
     {
         code: LocalMusic.CODE,
         name: '本地歌曲',
         shortName: 'LO',
         online: false,
-        types: null
+        types: ['playlists', 'artists']
     },
     {
         code: RadioCN.CODE,
@@ -138,7 +138,7 @@ const scopePlatforms = {
         return ALL_PLATFORMS.slice(1, 7)
     },
     artists: () => {
-        return ALL_PLATFORMS.slice(1, 5)
+        return ALL_PLATFORMS.filter(item => (item.types && item.types.includes('artists')))
     },
     radios: () => {
         const platforms = ALL_PLATFORMS.slice(7)
@@ -159,7 +159,10 @@ const scopePlatforms = {
         const platforms = ALL_PLATFORMS.slice(0, ALL_PLATFORMS.length)
         platforms.splice(6, 1)
         return platforms
-    }
+    },
+    albums: () => {
+        return ALL_PLATFORMS.filter(item => (item.types && item.types.includes('albums')))
+    },
 }
 
 const getScopePlatforms = (scope) => {
@@ -223,9 +226,10 @@ export const usePlatformStore = defineStore('platforms', {
             return this.currentPlatform ? this.currentPlatform.code : ''
         },
         randomMusicTypes() {
-            const types = T_TYPES.slice(1)
-            types.splice(1, 2)
-            return types
+            //const types = T_TYPES.slice(1)
+            //types.splice(1, 2)
+            //return types
+            return T_TYPES.filter(item => (item.code != 'songs'))
         },
     },
     //Actions
@@ -301,6 +305,12 @@ export const usePlatformStore = defineStore('platforms', {
         },
         isPlaylistType(type) {
             return type === 'playlists'
+        },
+        isArtistType(type) {
+            return type === 'artists'
+        },
+        isAlbumType(type) {
+            return type === 'albums'
         },
         isAnchorRadioType(type) {
             return type === 'anchorRadios'

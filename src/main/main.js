@@ -17,7 +17,7 @@ const { scanDirTracks, parseTracks,
   parsePlsFile, parseM3uPlaylist,
   writePlsFile, writeM3uFile,
   IMAGE_PROTOCAL, parseImageMetaFromFile,
-  statPathSync, MD5, SHA1,
+  statPathSync, MD5, SHA1, transformPath,
 } = require('./common')
 
 const path = require('path')
@@ -38,7 +38,7 @@ const appLayoutConfig = {
     appHeight: 588
   }
 }
-let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT
+let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT, currentZoom = 85
 let powerSaveBlockerId = -1
 let appTray = null, appTrayMenu = null, appTrayShow = false
 let playState = false, desktopLyricLockState = false
@@ -47,12 +47,15 @@ let isDesktopLyricAutoSize = true, isVerticalDesktopLyric = false, desktopLyricL
 const proxyAuthRealms = []
 //TODO 下载队列
 let downloadingItem = null
+//待打开播放歌曲列表
+let pendigTracks = []
 
 
 /* 自定义函数 */
 const startup = () => {
   init()
   registryGlobalListeners()
+  handleStartupPlay()
 }
 
 //清理缓存
@@ -219,6 +222,67 @@ const registryGlobalShortcuts = () => {
   }
 }
 
+const addToPendingTracks = (files) => {
+  if (!files || !Array.isArray(files) || files.length < 1) return
+  pendigTracks.push(...files)
+}
+
+const removePendingTracks = (tracks) => {
+  if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
+  if (pendigTracks.length < 1) return
+  //pendigTracks.length = 0
+  tracks.forEach(track => {
+    const path = transformPath(track.url)
+    let index = pendigTracks.indexOf(path)
+    let count = 0
+    while (index > -1) {
+      if (count >= 10) break
+      pendigTracks.splice(index, 1)
+      index = pendigTracks.indexOf
+        (path)
+      ++count
+    }
+  })
+}
+
+const parseAndPlayTracks = (files) => {
+  if (!files || !Array.isArray(files) || files.length < 1) return
+  try {
+    parseTracks(files).then(tracks => {
+      sendToMainRenderer('app-startup-playTracks', tracks)
+    })
+  } catch (error) {
+    if (isDevEnv) console.log(error)
+  }
+}
+
+//启动时播放
+//即关联打开，播放音频文件
+const handleStartupPlay = (argv) => {
+  let tracks = null
+  try {
+    if (isMacOS) {
+      app.on('open-file', (event, path) => {
+        event.preventDefault()
+
+        tracks = [path]
+        addToPendingTracks(tracks)
+        parseAndPlayTracks(tracks)
+
+        showMainWindow()
+      })
+    } else {
+      tracks = argv || process.argv
+      addToPendingTracks(tracks)
+      parseAndPlayTracks(tracks)
+
+      showMainWindow()
+    }
+  } catch (error) {
+    if (isDevEnv) console.log(error)
+  }
+}
+
 //在菜单栏显示
 const setupTray = (forceShow) => {
   if (appTrayShow || forceShow) {
@@ -275,6 +339,10 @@ const registryGlobalListeners = () => {
     }
     cleanupBeforeQuit()
     app.quit()
+  }).on('app-startup-playReady', (event) => {
+    parseAndPlayTracks(pendigTracks)
+  }).on('app-startup-playDone', (event, tracks) => {
+    removePendingTracks(tracks)
   }).on('app-min', (event, isHideToTray) => {
     if (isHideToTray) {
       if (isMacOS) app.hide()
@@ -293,6 +361,14 @@ const registryGlobalListeners = () => {
       mainWin.setFullScreen(isFullScreen)
     }
     sendToMainRenderer('app-max', isFullScreen)
+  }).on('app-normalize', () => {
+    if (!mainWin) return
+    if (isWinOS && mainWin.isMaximized()) {
+      mainWin.unmaximize()
+    } else if (mainWin.isFullScreen()) {
+      mainWin.setFullScreen(false)
+    }
+    sendToMainRenderer('app-max', false)
   }).on('app-suspension', (event, data) => {
     if (data === true) {
       powerSaveBlockerId = powerSaveBlocker.start('prevent-app-suspension')
@@ -708,11 +784,12 @@ const createMainWindow = () => {
     transparent: true,
     frame: false,
     webPreferences: {
+      //zoomFactor: 0.85, //默认缩放
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
       contextIsolation: false, //Electron太坑，不得不关闭，毕竟没找到什么好的方式
-      webSecurity: false  //TODO 有风险，暂时保留此方案，留待后期调整
+      webSecurity: false  //TODO 有风险，暂时保留此方案
     }
   })
   if (isDevEnv) {
@@ -750,7 +827,9 @@ const createMainWindow = () => {
       "*://*.cnr.cn/*",
       "*://*.qingting.fm/*",
       "*://*.qtfm.cn/*",
-      "*://*/* "
+      "*://github.com/*",
+      "*://gitee.com/*",
+      //"*://*/*"
     ]
   }
   const { webRequest } = mainWindow.webContents.session
@@ -769,7 +848,7 @@ const createMainWindow = () => {
 const setupAppLayout = (layout, zoom, isInit) => {
   appLayout = layout
 
-  zoom = Number(zoom) || 100
+  zoom = Number(zoom) || 85
   const zoomFactor = parseFloat(zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 1
   mainWin.webContents.setZoomFactor(zoomFactor)
@@ -841,7 +920,10 @@ const sendToMainRenderer = (channel, args) => {
 }
 
 const showMainWindow = () => {
-  if (mainWin && !mainWin.isDestroyed()) mainWin.show()
+  if (mainWin && !mainWin.isDestroyed()) {
+    mainWin.show()
+    mainWin.focus()
+  }
 }
 
 const sendTrayAction = (action, showMain) => {
@@ -943,8 +1025,8 @@ const toggleWinOSFullScreen = () => {
 
 const setupAppWindowZoom = (zoom, noResize) => {
   if (!mainWin || !zoom) return
-  zoom = Number(zoom) || 85
-  const zoomFactor = zoom / 100
+  currentZoom = Number(zoom) || 85
+  const zoomFactor = currentZoom / 100
   if (zoomFactor < 0.5 || zoomFactor > 3) return
   mainWin.webContents.setZoomFactor(zoomFactor)
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
@@ -1179,15 +1261,18 @@ const overrideRequest = (details) => {
     origin = "https://www.qingting.fm/"
     referer = origin
   } else if (url.includes("ximalaya")) {
-    origin = " https://www.ximalaya.com/"
+    origin = "https://www.ximalaya.com/"
     referer = origin
   }
+
   //默认Referer
-  if (!referer) {
-    const urlParts = url.split('://')
-    const scheme = urlParts[0]
-    const host = urlParts[1].split('/')[0]
-    referer = `${scheme}://${host}/`
+  if (!referer || referer.includes('localhost')) {
+    if (!url.includes('localhost')) {
+      const urlParts = url.split('://')
+      const scheme = urlParts[0]
+      const host = urlParts[1].split('/')[0]
+      referer = `${scheme}://${host}/`
+    }
   }
 
   /*
@@ -1195,7 +1280,7 @@ const overrideRequest = (details) => {
   details.requestHeaders['Access-Control-Allow-Origin'] = "*"
   */
 
-  //if(origin) details.requestHeaders['Origin'] = origin
+  if (origin) details.requestHeaders['Origin'] = origin
   if (userAgent) details.requestHeaders['User-Agent'] = userAgent
   if (referer) details.requestHeaders['Referer'] = referer
   if (cookie) details.requestHeaders['Cookie'] = cookie
@@ -1259,4 +1344,18 @@ const isLyricWindowShow = () => {
 }
 
 //启动应用
-startup()
+if (isDevEnv) return startup()
+
+const instanceLock = app.requestSingleInstanceLock()
+if (!instanceLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, argv, workingDirectory, additionalData) => {
+    if (mainWin) {
+      //if (mainWin.isMinimized()) mainWin.restore()
+      //mainWin.focus()
+      handleStartupPlay(argv)
+    }
+  })
+  startup()
+}

@@ -1,5 +1,6 @@
 //import analyze from 'rgbaster';
 import CryptoJS from 'crypto-js';
+import { pinyin } from 'pinyin-pro';
 
 
 const tryCall = (call, fallbackValue) => {
@@ -58,11 +59,15 @@ export const randomTextWithinAlphabet = (len) => (randomText(ALPHABETS, len))
 export const randomTextWithinAlphabetNums = (len) => (randomText(ALPHABET_NUMS, len))
 
 export const toTrimString = (value) => {
-    value = value === 0 ? '0' : value
+    value = (value === 0 ? '0' : value)
     return (value || '').toString().trim()
 }
 
 export const toLowerCaseTrimString = (value) => {
+    return toTrimString(value).toLowerCase()
+}
+
+export const toUpperCaseTrimString = (value) => {
     return toTrimString(value).toLowerCase()
 }
 
@@ -97,6 +102,7 @@ export const useRgbaster = async (src, opts) => {
 
 //TODO 随机数不随机！
 export const nextInt = (max) => {
+    max = max || 1024
     const limit = max < 1024 ? 1024 : max
     return Math.floor(Math.random() * limit) % max
 }
@@ -291,4 +297,17 @@ export const parsePlsText = (text, mapFn) => {
         console.log(error)
     }
     return result
+}
+
+
+export const isChineseChar = (ch) => {
+    return /[\u4e00-\u9fa5]/.test(ch)
+}
+
+export const isEnglishChar = (ch) => {
+    return /[A-Za-z]/.test(ch)
+}
+
+export const firstCharOfPinyin = (ch) => {
+    return pinyin(ch, { toneType: 'none' }).substring(0, 1)
 }

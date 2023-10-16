@@ -118,13 +118,16 @@ const renderLyric = (currentTime) => {
 
   const isVeritical = (textDirection == 1)
   const offsetProp = isVeritical ? 'offsetLeft' : 'offsetTop'
+  const sizeProp = isVeritical ? 'clientWidth' : 'clientHeight'
 
-  if (!lines[index] || !lines[index][offsetProp]) return
+  if (!lines[index] || !lines[index][offsetProp] || !lines[index][sizeProp]) return
+
   //const { offsetTop } = lyricWrap
+  const lineSize = lines[index][sizeProp]
   const { clientHeight, clientWidth } = document.documentElement
   const clientSize = isVeritical ? clientWidth : clientHeight
   //const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop)
-  const destScrollValue = lines[index][offsetProp] - clientSize / 2
+  const destScrollValue = lines[index][offsetProp] - clientSize / 2 + lineSize / 2
 
   const scrollAction = isVeritical ? smoothScrollHorizional : smoothScroll
   //const frequency = getStateRefreshFrequency()
@@ -165,8 +168,14 @@ const setupLyricScrollLocator = () => {
 
   const { alignment, textDirection } = desktopLyric.value
   const locatorPositions = ['33', '33', leftAlignPos]
-  if (textDirection == 0) locatorEl.style.right = locatorPositions[alignment] + 'px'
-  if (textDirection == 1) locatorEl.style.top = (clientHeight - 33 - locatorPositions[alignment]) + 'px'
+  switch (textDirection) {
+    case 0:
+      locatorEl.style.right = locatorPositions[alignment] + 'px'
+      break
+    case 1:
+      locatorEl.style.top = (clientHeight - 33 - locatorPositions[alignment]) + 'px'
+      break
+  }
 }
 
 const updateScrollLocatorTime = () => {

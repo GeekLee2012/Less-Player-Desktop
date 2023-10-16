@@ -60,7 +60,7 @@
 }
 
 .use-winos-win-ctl .classic-main-top .win-ctl-wrap {
-  margin-left: 15px !important;
+  margin-left: 12px !important;
 }
 
 
@@ -97,6 +97,11 @@
 
 .use-winos-win-ctl .win-ctl-wrap .close-btn:hover svg,
 .use-winos-win-ctl .video-playing-view .win-ctl-wrap .ctl-btn svg {
+  fill: #fff !important;
+  stroke: #fff !important;
+}
+
+.use-winos-win-ctl .video-playing-view .win-ctl-wrap .close-btn:hover svg {
   fill: #fff !important;
   stroke: #fff !important;
 }

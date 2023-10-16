@@ -68,6 +68,7 @@ const getCtxMenuAutoHeight = () => {
 }
 
 const menuWidth = 208 + 10
+const submenuWidth = 208 + 10 + 33
 
 const adjustMenuPosition = (event) => {
   const { x, y, clientX, clientY } = event
@@ -107,19 +108,24 @@ const adjustSubmenuPosition = (event) => {
   const { x, y, clientX, clientY } = event
   const pos = { x, y }
   const { clientWidth, clientHeight } = document.documentElement
-  const menuHeight = getCtxSubmenuAutoHeight(), padding = 10
-  const gapX = clientX + menuWidth - clientWidth
-  const tGapY = clientY - menuHeight
-  const bGapY = clientY + menuHeight - clientHeight
-  //右边界
-  if (gapX > 0) {
-    //pos.x = pos.x - gapX - padding
+  const submenuHeight = getCtxSubmenuAutoHeight(), padding = 10
+  //直接显示二级菜单，而一级菜单并没有在显示
+  if (!ctxMenuPos) {
+    return pos
   }
+  //一级菜单正在显示
+  const gapX = clientX + submenuWidth - clientWidth
+  const tGapY = clientY - submenuHeight
+  const bGapY = clientY + submenuHeight - clientHeight
+  //右边界
+  //if (gapX > 0) {
+  //  pos.x = pos.x - gapX - padding
+  //}
   //TODO 菜单有可能溢出顶部边界
   if (tGapY <= 0) { //溢出底部边界
     pos.y = ctxMenuPos.y - padding * 2.58
   } else {
-    pos.y = pos.y - menuHeight / 2
+    pos.y = pos.y - submenuHeight / 2
   }
   //防止溢出上下边界
   pos.y = Math.max(pos.y, padding)
@@ -131,8 +137,12 @@ const setSubmenuPosition = (event) => {
   const pos = adjustSubmenuPosition(event)
   const padding = submenuItemNums > 6 ? 12 : 6
   //const padding = 10
-  ctxSubmenuPosStyle.left = ctxMenuPos.x - menuWidth - padding + 'px !important'
-  ctxSubmenuPosStyle.top = pos.y + 'px !important'
+  let left = pos.x, top = pos.y
+  if (ctxMenuPos) { //存在一级菜单
+    left = ctxMenuPos.x - submenuWidth - padding
+  }
+  ctxSubmenuPosStyle.left = `${left}px !important`
+  ctxSubmenuPosStyle.top = `${top}px !important`
 }
 
 EventBus.on('commonCtxMenu-show', ({ event, data, index }) => {
@@ -175,10 +185,10 @@ const bindEventListeners = () => {
     showAddToListSubmenu()
   })
 
-  EventBus.on('artistListSubmenu-show', e => {
+  EventBus.on('artistListSubmenu-show', event => {
     const { artist } = commonCtxMenuCacheItem.value
     submenuItemNums = artist.length
-    setSubmenuPosition(e)
+    setSubmenuPosition(event)
     showArtistListSubmenu()
   })
 
@@ -263,6 +273,9 @@ const setupPlaylistExportToolbarPos = () => {
 
 
 //TODO
+watch(commonCtxMenuShow, (nv, ov) => {
+  if (!nv) ctxMenuPos = null
+})
 watch(playbackQueueViewShow, hideAllCtxMenus)
 watch(playingViewThemeIndex, (nv) => setupPlayingView(nv))
 
@@ -344,7 +357,7 @@ watch(() => getCurrentTheme(), (nv) => {
     <!-- 通用通知 -->
     <transition>
       <Notification class="common-ntf" :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
-        v-show="commonNotificationShow">
+        v-show="commonNotificationShow" @click.stop="">
         <template #text>
           <svg v-show="commonNotificationType == 0" width="36" height="36" viewBox="0 0 938.64 938.69"
             xmlns="http://www.w3.org/2000/svg">
@@ -395,32 +408,38 @@ watch(() => getCurrentTheme(), (nv) => {
     </transition>
 
     <SoundEffectView id="sound-effect-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.soundEffectView }"
-      v-show="soundEffectViewShow">
+      v-show="soundEffectViewShow" @click.stop="">
     </SoundEffectView>
 
     <LyricToolbar id="lyric-toolbar" :class="{ 'app-custom-theme-bg': appBackgroundScope.lyricToolbar }"
-      v-show="lyricToolbarShow">
+      v-show="lyricToolbarShow" @click.stop="">
     </LyricToolbar>
 
     <RandomMusicToolbar id="random-music-toolbar"
-      :class="{ 'app-custom-theme-bg': appBackgroundScope.randomMusicToolbar }" v-show="randomMusicToolbarShow">
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.randomMusicToolbar }" v-show="randomMusicToolbarShow"
+      @click.stop="">
     </RandomMusicToolbar>
 
-    <CustomThemeEditView id="custom-theme-edit-view" v-show="customThemeEditViewShow">
+    <CustomThemeEditView id="custom-theme-edit-view" v-show="customThemeEditViewShow" @click.stop="">
     </CustomThemeEditView>
 
-    <ColorPickerToolbar id="color-picker-toolbar" ref="colorPickerToolbarRef" v-show="colorPickerToolbarShow" />
+    <ColorPickerToolbar id="color-picker-toolbar" ref="colorPickerToolbarRef" v-show="colorPickerToolbarShow"
+      @click.stop="">
+    </ColorPickerToolbar>
 
-    <GradientColorToolbar id="gradient-color-toolbar" ref="gradientColorToolbarRef" v-show="gradientColorToolbarShow" />
+    <GradientColorToolbar id="gradient-color-toolbar" ref="gradientColorToolbarRef" v-show="gradientColorToolbarShow"
+      @click.stop="">
+    </GradientColorToolbar>
 
     <Notification class="popover-hint" :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
-      v-show="popoverHintShow">
+      v-show="popoverHintShow" @click.stop="">
       <template #text>
         <div v-html="popoverHintText"></div>
       </template>
     </Notification>
 
-    <PlaylistExportToolbar id="playlist-export-toolbar" v-show="playlistExportToolbarShow"></PlaylistExportToolbar>
+    <PlaylistExportToolbar id="playlist-export-toolbar" v-show="playlistExportToolbarShow" @click.stop="">
+    </PlaylistExportToolbar>
   </div>
 </template>
 

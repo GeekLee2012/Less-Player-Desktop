@@ -15,7 +15,7 @@ import { isWinOS, toLowerCaseTrimString, useIpcRenderer, useUseCustomTrafficLigh
 
 
 const { visitSetting, visitSearch,
-  visitFreeFM, visitThemes,
+  visitRadio, visitThemes,
   visitModulesSetting, visitDataBackup,
   visitDataRestore, visitUserHome,
   visitFreeVideoCreate, visitRecents } = inject('appRoute')
@@ -286,7 +286,7 @@ const searchDefault = async (keyword) => {
   } else if (keyword === '自由FM'
     || keyword === 'fm'
     || keyword === 'freefm') {
-    visitFreeFM()
+    visitRadio('freefm')
     return
   } else if (keyword === '主题'
     || keyword === 'theme') {

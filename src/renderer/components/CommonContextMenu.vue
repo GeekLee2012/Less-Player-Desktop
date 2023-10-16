@@ -125,21 +125,29 @@ const visitTrackDetail = () => {
 }
 
 const removeQueueItem = () => {
-    removeTrack(commonCtxMenuCacheItem.value)
-    toastAndHideMenu("歌曲已删除！")
+    const track = commonCtxMenuCacheItem.value
+    removeTrack(track)
+    let msg = "歌曲已删除！"
+    if (Playlist.isFMRadioType(track)) msg = "电台已删除！"
+    else if (Playlist.isAnchorRadioType(track)) msg = "音频已删除！"
+    toastAndHideMenu(msg)
+    return true
 }
 
 const removeLocalItem = (item, index) => {
-    const { id } = commonCtxItem.value // Playlist
     const track = commonCtxMenuCacheItem.value
+    const { id } = commonCtxItem.value || { id: track.pid }
     removeFromLocalPlaylist(id, track)
     toastAndHideMenu("歌曲已删除！")
+    if (currentDataType == 11) EventBus.emit('ctxMenu-removeFromLocal')
+    return true
 }
 
 const removeFavoriteItem = () => {
     const { id, platform } = commonCtxMenuCacheItem.value
     removeFavoriteSong(id, platform)
     toastAndHideMenu("歌曲已取消收藏！")
+    return true
 }
 
 const playCustom = () => {
@@ -162,6 +170,7 @@ const removeCustom = () => {
     const { id } = commonCtxMenuCacheItem.value
     removeCustomPlaylist(id)
     toastAndHideMenu("歌单已删除！")
+    return true
 }
 
 //TODO
@@ -170,11 +179,13 @@ const removeFromCustom = () => {
     const track = commonCtxMenuCacheItem.value
     removeFromCustomPlaylist(id, track)
     toastAndHideMenu("歌曲已删除！")
+    return true
 }
 
 const removeSongFromRecent = () => {
     removeRecentSong(commonCtxMenuCacheItem.value)
     toastAndHideMenu("歌曲记录已删除！")
+    return true
 }
 
 //TODO
@@ -192,8 +203,9 @@ const showAddToList = (event, mode) => {
     const track = commonCtxMenuCacheItem.value
     if (!track || Playlist.isFMRadioType(track)) return
     const { platform } = track
-    const dataType = isLocalMusic(platform) ? 10 : 6
+    const dataType = isLocalMusic(platform) ? 10 : currentDataType
     doShowAddToListSubmenu(event, mode, dataType)
+    return true
 }
 
 const doPlayPlaylist = (playlist) => {
@@ -206,6 +218,7 @@ const removePlaylistFromFavorite = () => {
     removeFavoritePlaylist(id, platform)
     toastAndHideMenu("歌单已取消收藏！")
     EventBus.emit("refresh-favorite")
+    return true
 }
 
 const visitPlaylistCreate = () => {
@@ -375,8 +388,8 @@ const moveToAction = (dataType, item) => {
     } else {
         tracks.push(item)
     }
-    const fromId = commonCtxItem.value.id
-    const toId = item.id
+    const { id: fromId } = commonCtxItem.value
+    const { id: toId } = item
 
     const action = isLocalMusicType(dataType) ? moveToLocalPlaylist : moveToCustomPlaylist
     if (action) {
@@ -387,6 +400,7 @@ const moveToAction = (dataType, item) => {
     }
 }
 
+//已废弃
 const initBatchActionPopupMenuData = (dataType, isMoveAction) => {
     const data = []
     const fixedItems = [MenuItems.addToQueue, MenuItems.createCustom]
@@ -395,7 +409,7 @@ const initBatchActionPopupMenuData = (dataType, isMoveAction) => {
 
     playlists.forEach(item => {
         //跳过自身
-        if (item.id == commonCtxItem.value.id) return
+        if (commonCtxItem.value && commonCtxItem.value.id == item.id) return
         data.push({
             name: item.title,
             action: (event) => {
@@ -419,12 +433,15 @@ const showSubmenu = (item, index, event) => {
 
 const visitMenuItem = (item, index, event) => {
     if (!item || !item.action) return
-    item.action(item, index, event)
-    EventBus.emit("commonCtxMenuItem-finish")
+    const { action } = item
+    if (typeof (action) == 'function') {
+        const needTriggerEvent = action(item, index, event)
+        if (needTriggerEvent) EventBus.emit("commonCtxMenuItem-finish")
+    }
 }
 
 EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
-    currentDataType = dataType
+    currentDataType = dataType || 0
     let data = []
     switch (dataType) {
         case 0: //在线音乐平台 - 歌单页、歌手页、专辑页 - 普通歌曲列表
@@ -437,6 +454,7 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
             const addToQueueMenuItem = Object.assign({}, { ...MenuItems.addToQueue })
             addToQueueMenuItem.name = "添加到当前播放"
             data = [MenuItems.play, addToQueueMenuItem, MenuItems.playLater,
+            MenuItems.sp, MenuItems.addToList, MenuItems.moveToList,
             MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
             MenuItems.sp, MenuItems.removeFromLocal]
             break;
@@ -460,7 +478,7 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
             MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
             MenuItems.sp, MenuItems.removeSongFromRecent,]
             break;
-        case 6: //我的主页 - 批量操作 - 移动到菜单、移动到菜单 
+        case 6: //我的主页 - 批量操作 - 添加到菜单、移动到菜单
             data = initBatchActionPopupMenuData(dataType, actionType == 1)
             break;
         case 8: //首页-收藏的歌单
@@ -474,6 +492,12 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
             break;
         case 10: //本地歌曲 - 批量操作 - 添加到菜单、移动到菜单 
             data = initBatchActionPopupMenuData(dataType, actionType == 1)
+            break;
+        case 11: //本地歌曲 - 歌手页、专辑页 - 歌曲列表
+            data = [MenuItems.play, MenuItems.playLater,
+            /*MenuItems.sp, MenuItems.addToList, MenuItems.addFavorite,*/
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
+            MenuItems.visitTrack, MenuItems.sp, MenuItems.removeFromLocal]
             break;
     }
     doInit(data)
@@ -533,7 +557,7 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
 }
 
 .common-ctx-menu .menuItem {
-    width: 168px;
+    /*width: 168px;*/
     width: 178px;
     display: flex;
     flex-direction: row;

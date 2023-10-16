@@ -4,6 +4,7 @@ import EventBus from '../common/EventBus';
 import { Track } from './Track';
 import { WebAudioApi } from './WebAudioApi';
 import { toRaw } from 'vue';
+import { isDevEnv } from './Utils';
 
 
 
@@ -34,6 +35,8 @@ export class Player {
         //桌面歌词
         this.desktopLyricMessagePort = null
         this.desktopLyricMessagePortActiveState = null
+
+        this.pendingOutputDeviceId = null
     }
 
     static get() {
@@ -61,6 +64,7 @@ export class Player {
             .on('track-noLyric', value => player.postLyricStateToDesktopLyric(value, false))
             .on('track-lyricLoaded', value => player.postLyricStateToDesktopLyric(value, true))
             .on('desktopLyric-showState', value => player.setMessagePortActiveState(value))
+            .on('outputDevice-setup', value => player._setAudioOutputDevice(value))
     }
 
     _isTrackAvailable() {
@@ -114,6 +118,8 @@ export class Player {
         this._tryUnlockHowlAudios()
         this.currentTime = 0
         this.notifyStateChanged(PLAY_STATE.INIT)
+
+        if (this.pendingOutputDeviceId) this._setAudioOutputDevice(this.pendingOutputDeviceId)
         return this.sound
     }
 
@@ -408,5 +414,24 @@ export class Player {
             this.animationFrameTimeCnt = 0
         }
         return reset
+    }
+
+    //TODO 切换音频输出设备
+    async _setAudioOutputDevice(deviceId) {
+        try {
+            this.pendingOutputDeviceId = null
+            let audioSource = null
+            if ("setSinkId" in AudioContext.prototype) {
+                audioSource = Howler.ctx
+            } else {
+                audioSource = this.sound._sounds[0]._node
+            }
+            if (audioSource) {
+                await audioSource.setSinkId(deviceId)
+            }
+        } catch (error) {
+            if (isDevEnv()) console.log(`音频输出设置失败，DeviceId: ${deviceId}\n`, error)
+            this.pendingOutputDeviceId = deviceId
+        }
     }
 }

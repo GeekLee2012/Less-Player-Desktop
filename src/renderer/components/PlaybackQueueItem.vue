@@ -1,22 +1,26 @@
 <script setup>
-import { inject, } from 'vue';
+import { computed, inject, } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
+import { usePlatformStore } from '../store/platformStore';
 import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
+import { Playlist } from '../../common/Playlist';
+import { toTrimString } from '../../common/Utils';
 
 
 
-const { visitPlaylist } = inject('appRoute')
+const { playMv } = inject('player')
+const { visitPlaylist, visitRadio, visitAlbum } = inject('appRoute')
 const { showContextMenu } = inject('appCommon')
 
 const { queueTracksSize } = storeToRefs(usePlayStore())
 const { playTrack, removeTrack, isCurrentTrack, togglePlay } = usePlayStore()
 const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
-const { isHighlightCtxMenuItemEnable } = storeToRefs(useSettingStore())
+const { isHighlightCtxMenuItemEnable, isPlaybackQueueMvBtnShow, } = storeToRefs(useSettingStore())
 
 
 const props = defineProps({
@@ -36,20 +40,37 @@ const playItem = () => {
 
 const linkItem = () => {
     const track = props.data
-    if (!Track.hasPid(track)) return
-    const { pid, platform } = track
-    visitPlaylist(platform, pid)
+    const { pid, platform, album } = track
+    if (Track.hasPid(track)) {
+        if (album && toTrimString(album.id) == toTrimString(pid)) {
+            visitAlbum({ platform, id: pid })
+        } else {
+            visitPlaylist(platform, pid)
+        }
+    } else if (Playlist.isFMRadioType(track)) {
+        visitRadio(platform)
+    }
 }
 
 const removeItem = () => {
-    removeTrack(props.data)
-    if (queueTracksSize.value > 0) showToast("歌曲已删除！")
+    const { data: track } = props
+    removeTrack(track)
+    if (queueTracksSize.value > 0) {
+        let msg = "歌曲已删除！"
+        if (Playlist.isFMRadioType(track)) msg = "电台已删除！"
+        else if (Playlist.isAnchorRadioType(track)) msg = "音频已删除！"
+        showToast(msg)
+    }
 }
 
 const onContextMenu = (event) => {
     const { data, index } = props
     showContextMenu(event, data, 9, index, true)
 }
+
+const isMvBtnShow = computed(() => {
+    return isPlaybackQueueMvBtnShow.value && props.data.mv
+})
 </script>
 
 <template>
@@ -63,6 +84,9 @@ const onContextMenu = (event) => {
             <div class="right">
                 <div class="data">
                     <div class="title" :class="{ 'content-text-highlight': active }" v-html="data.title"></div>
+                    <div class="textflag mvflag" v-show="isMvBtnShow">
+                        <span>MV</span>
+                    </div>
                     <div class="bottom">
                         <div class="artist" :class="{ 'content-text-highlight': active }">
                             <ArtistControl :visitable="true" :platform="data.platform" :data="data.artist"
@@ -74,8 +98,17 @@ const onContextMenu = (event) => {
                     </div>
                 </div>
                 <div class="action">
-                    <svg @click="playItem" width="18" height="18" viewBox="0 0 139 139" xmlns="http://www.w3.org/2000/svg"
-                        xml:space="preserve" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <svg v-show="isMvBtnShow" @click="playMv(data)" width="18" height="15" viewBox="0 0 1024 853.52"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M1024,158.76v536c-.3,1.61-.58,3.21-.92,4.81-2.52,12-3.91,24.43-7.76,36-23.93,72-88.54,117.91-165.13,117.92q-338.19,0-676.4-.1a205.81,205.81,0,0,1-32.3-2.69C76,840.18,19.81,787.63,5,723.14c-2.15-9.35-3.36-18.91-5-28.38v-537c.3-1.26.66-2.51.89-3.79,1.6-8.83,2.52-17.84,4.85-26.48C26.32,51.12,93.47.05,173.29,0Q512,0,850.72.13a200.6,200.6,0,0,1,31.8,2.68C948.44,13.47,1004,65.66,1019.09,130.88,1021.21,140.06,1022.39,149.46,1024,158.76ZM384,426.39c0,45.66-.09,91.32,0,137,.07,24.51,19.76,43.56,43.38,42.47,8.95-.42,15.83-5.3,23.06-9.86q69.25-43.74,138.74-87.11,40.63-25.42,81.44-50.6c23.18-14.34,23.09-49-.25-63.14-3.27-2-6.69-3.72-9.93-5.74q-30.08-18.81-60.08-37.69Q522.2,302.46,444,253.2a34.65,34.65,0,0,0-26.33-4.87c-19.87,4.13-33.64,21.28-33.68,42.09Q383.9,358.42,384,426.39Z" />
+                            </g>
+                        </g>
+                    </svg>
+                    <svg :class="{ spacing1: isMvBtnShow }" @click="playItem" width="18" height="18" viewBox="0 0 139 139"
+                        xmlns="http://www.w3.org/2000/svg" xml:space="preserve" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <path
                             d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
                     </svg>
@@ -132,6 +165,10 @@ const onContextMenu = (event) => {
 
 .playback-queue-item .spacing {
     margin-left: 12px;
+}
+
+.playback-queue-item .spacing1 {
+    margin-left: 15px;
 }
 
 .playback-queue-item-active .item-wrap {
@@ -275,5 +312,38 @@ const onContextMenu = (event) => {
 
 .playback-queue-item:hover .duration {
     visibility: hidden;
+}
+
+.playback-queue-item .textflag span {
+    background: var(--content-text-highlight-color);
+    background: var(--content-subtitle-text-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+
+    border-radius: 3px;
+    border: 1.3px solid var(--content-subtitle-text-color);
+    padding: 1px 3px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.playback-queue-item .mvflag {
+    position: absolute;
+    right: 15px;
+    top: 9px;
+}
+
+.playback-queue-item:hover .mvflag {
+    visibility: hidden;
+}
+
+.playback-queue-item-active .textflag span {
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    border: 1.3px solid var(--content-highlight-color);
 }
 </style>

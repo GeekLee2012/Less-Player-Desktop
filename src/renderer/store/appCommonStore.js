@@ -203,6 +203,9 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.toggleMaxScreen()
             if (ipcRenderer) ipcRenderer.send('app-max')
         },
+        normalize() {
+            if (ipcRenderer) ipcRenderer.send('app-normalize')
+        },
         setExploreMode(index) {
             if (!index || index < 0) index = 0
             this.exploreModeIndex = index % this.exploreModeLength
@@ -450,7 +453,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setDesktopLyricCtxData(value) {
             this.desktopLyricCtxData = value
-        }
+        },
     },
     persist: {
         enabled: true,

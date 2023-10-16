@@ -14,7 +14,6 @@ const parseJson = (jsonp, callbackName) => {
 
 const secretKey = 'f0fc4c668392f9f9a447e48584c214ee'
 
-// // 获取sign参数(使用其它参数排序后，拼接Key，转为大写MD5串)
 const getParamsOrderByKey = function (params, methodType) {
     if (!methodType) methodType = 'get'
     methodType = methodType.toUpperCase()
@@ -34,6 +33,7 @@ const getParamsOrderByKey = function (params, methodType) {
     }
 }
 
+//获取sign参数(使用其它参数排序后，拼接Key，转为大写MD5串)
 const getSign = (tm, data, methodType) => {
     const signText = (data ? (getParamsOrderByKey(data, methodType) + '&') : '') + 'timestamp=' + tm + '&key=' + secretKey
     return md5(signText).toUpperCase()
@@ -385,7 +385,7 @@ export class RadioCN {
     //歌词
     static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            resolve(resolve({ id, platform: RadioCN.CODE, lyric: null, trans: null }))
+            resolve({ id, platform: RadioCN.CODE, lyric: null, trans: null })
         })
     }
 
