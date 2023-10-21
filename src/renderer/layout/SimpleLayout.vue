@@ -327,7 +327,7 @@ const randomPlay = async () => {
         (rmPlatformCodes.length < 1 ? 1 : -1)
     if (errorType > -1) {
         const errorTypeName = ['类型', '平台'][errorType]
-        showCurrentTracFailToast(traceId, `随机设置中${errorTypeName}未开启`)
+        showCurrentTraceFailToast(traceId, `随机设置中${errorTypeName}未开启`)
         return
     }
     //获取完整类型信息
@@ -350,7 +350,7 @@ const randomPlay = async () => {
     } while (retry > 0 && retry < maxRetry)
     //超出最大重试次数，匹配不到任何平台
     if (!availablePlatforms || availablePlatforms.length < 1) {
-        showCurrentTracFailToast(traceId, '平台类型不匹配<br>请重新检查随机设置')
+        showCurrentTraceFailToast(traceId, '平台类型不匹配<br>请重新检查随机设置')
         return
     }
 
@@ -359,12 +359,13 @@ const randomPlay = async () => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
     const platformName = getPlatformName(platform)
     if (!isCurrentTraceId(traceId)) return
     showToast(`正在连接：${platformName}`)
+
     //获取可播放数据
     if (isPlaylistType(rmTypeCode)) {
         pickPlaylist(platform, traceId)
@@ -380,8 +381,8 @@ const randomPlay = async () => {
 }
 
 //显示当前调用链路的Toast
-const showCurrentTracFailToast = (traceId, text) => {
-    if (isCurrentTraceId(traceId)) showFailToast(text || '网络异常！请稍候重试')
+const showCurrentTraceFailToast = (traceId, text) => {
+    if (isCurrentTraceId(traceId)) showFailToast(text || '网络异常！请稍候再重试')
 }
 
 //获取歌单分类
@@ -390,7 +391,7 @@ const pickPlaylistCategory = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.categories) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
     let cachedCategories = getCategories(platform)
@@ -443,7 +444,7 @@ const pickPlaylist = async (platform, traceId, noPlayAction) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.square) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
     //重试
@@ -461,7 +462,7 @@ const pickPlaylist = async (platform, traceId, noPlayAction) => {
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
         if (isDevEnv()) console.log(`获取不到数据：${platform}, ${cateName}`)
-        showCurrentTracFailToast(traceId)
+        showCurrentTraceFailToast(traceId)
         return
     }
     //重置，下面会再次复用
@@ -471,8 +472,12 @@ const pickPlaylist = async (platform, traceId, noPlayAction) => {
     do {
         if (!isCurrentTraceId(traceId)) return
         //获取随机一个分页数据
-        //由于部分平台总页数不准确，故采用Math.pow() + retry变量 + maxRetry变量干预随机
+        //部分平台存在问题：返回总页数不准确
+        //平台有数据，网络也正常，不应该由于上述平台问题，随机到不存在的页码而失败
+        //故采用Math.pow() + retry变量 + maxRetry变量实现倍除来干预随机，使页码尽量到靠前
         page = Math.max(parseInt(nextInt(total) / Math.pow(2, (retry ? retry + maxRetry : 0))), 1)
+        //兜底写法，最后一次尝试时，不再随机，而是强制获取第1页数据
+        page = (retry == maxRetry ? 1 : page)
         const offset = (page - 1) * limit
         result = await vendor.square(cate, offset, limit, page, order)
         if (!result || result.data.length < 1) {
@@ -491,20 +496,20 @@ const pickPlaylist = async (platform, traceId, noPlayAction) => {
         }
         //特殊情况，歌单电台
         if (Playlist.isNormalRadioType(playlist)) {
-            const titleParts = playlist.title.replaceAll(' ', '').split('|')
+            const titleParts = toTrimString(playlist.title).replaceAll(' ', '').split('|')
             cateName = titleParts.length > 1 ? titleParts[1] : titleParts[0]
         }
 
         if (!isCurrentTraceId(traceId)) return
-        setCurrentMusicCategoryName(cateName)
+        setCurrentMusicCategoryName(toTrimString(cateName))
         const playAction = (dataType && dataType == 1) ? playAlbum : playPlaylist
         playAction(playlist, null, traceId)
         success = true
         break
-    } while (retry > 0 && retry < maxRetry)
+    } while (retry > 0 && retry < (maxRetry + 1))
     if (!success) {
         if (isDevEnv()) console.log(`获取不到数据：${platform}, ${cateName}, ${page}`)
-        showCurrentTracFailToast(traceId)
+        showCurrentTraceFailToast(traceId)
     }
 }
 
@@ -515,7 +520,7 @@ const pickAnchorRadioCategory = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.radioCategories) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
     let cachedCategories = getCategories(platform)
@@ -580,7 +585,7 @@ const pickAnchorRadio = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.radioSquare) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
     do {
@@ -594,7 +599,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
-        showCurrentTracFailToast(traceId)
+        showCurrentTraceFailToast(traceId)
         return
     }
     //重置，下面会再次复用
@@ -620,13 +625,13 @@ const pickAnchorRadio = async (platform, traceId) => {
         const playlists = result.data
         const playlist = playlists[nextInt(playlists.length)]
         if (isCurrentTraceId(traceId)) {
-            setCurrentMusicCategoryName(cateName)
+            setCurrentMusicCategoryName(toTrimString(cateName))
             playPlaylist(playlist, '即将为您打开主播电台', traceId)
         }
         success = true
         break
     } while (retry > 0 && retry < maxRetry)
-    if (!success) showCurrentTracFailToast(traceId)
+    if (!success) showCurrentTraceFailToast(traceId)
 }
 
 //获取广播电台分类
@@ -636,7 +641,7 @@ const pickFMRadioCategory = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.radioCategories) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
     let cachedCategories = getCategories(platform)
@@ -703,7 +708,7 @@ const pickFMRadio = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.radioSquare) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
     do {
@@ -717,7 +722,7 @@ const pickFMRadio = async (platform, traceId) => {
         ++retry
     } while (retry > 0 && retry < maxRetry)
     if (total < 0) { //获取不到数据，暂时返回
-        showCurrentTracFailToast(traceId)
+        showCurrentTraceFailToast(traceId)
         return
     }
     //重置，下面会再次复用
@@ -743,13 +748,13 @@ const pickFMRadio = async (platform, traceId) => {
         const playlists = result.data
         const playlist = playlists[nextInt(playlists.length)]
         if (isCurrentTraceId(traceId)) {
-            setCurrentMusicCategoryName(cateName)
+            setCurrentMusicCategoryName(toTrimString(cateName))
             playPlaylist(playlist, '即将为您收听广播电台', traceId)
         }
         success = true
         break
     } while (retry > 0 && retry < maxRetry)
-    if (!success) showCurrentTracFailToast(traceId)
+    if (!success) showCurrentTraceFailToast(traceId)
 }
 
 //获取歌手分类
@@ -759,7 +764,7 @@ const pickArtistsCategory = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.artistCategories) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
     let cachedCategories = getCategory(platform)
@@ -822,7 +827,7 @@ const pickArtist = async (platform, traceId, noPlayAction) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.artistSquare) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
 
@@ -840,7 +845,7 @@ const pickArtist = async (platform, traceId, noPlayAction) => {
     } while (retry > 0 && retry < maxRetry)
     if (!result || result.data.length < 0) { //获取不到数据，暂时返回
         if (isDevEnv()) console.log(`获取不到数据：${platform}`, category)
-        showCurrentTracFailToast(traceId)
+        showCurrentTraceFailToast(traceId)
         return
     }
 
@@ -862,7 +867,7 @@ const pickArtist = async (platform, traceId, noPlayAction) => {
 
         let artistName = toTrimString(artist.title)
         artistName = artistName.length <= 16 ? artistName : (artistName.substring(0, 15) + '...')
-        setCurrentMusicCategoryName(artistName)
+        setCurrentMusicCategoryName(toTrimString(artistName))
 
         if (vendor.artistDetailHotSongs) {
             result = await vendor.artistDetailHotSongs(artist.id)
@@ -880,7 +885,7 @@ const pickArtist = async (platform, traceId, noPlayAction) => {
     } while (retry > 0 && retry < maxRetry)
     if (!success) {
         if (isDevEnv()) console.log(`获取不到数据：${platform}, ${page}`, category)
-        showCurrentTracFailToast(traceId)
+        showCurrentTraceFailToast(traceId)
     }
 }
 
@@ -898,7 +903,7 @@ const pickAlbumFromPlaylist = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
 
@@ -950,7 +955,7 @@ const pickAlbumFromArtist = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.artistDetailAlbums) {
-        showCurrentTracFailToast(traceId, '服务异常！请稍候重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
         return
     }
 
@@ -972,12 +977,11 @@ const pickAlbumFromArtist = async (platform, traceId) => {
     } while (retry > 0 && retry < maxRetry)
     if (!success) {
         if (isDevEnv()) console.log(`获取不到数据：${platform}`, artist)
-        showCurrentTracFailToast(traceId)
+        showCurrentTraceFailToast(traceId)
         return
     }
     return result.data[nextInt(result.data.length)]
 }
-
 
 //随机获取平台里的一张专辑 
 const pickAlbum = async (platform, traceId) => {
@@ -990,14 +994,14 @@ const pickAlbum = async (platform, traceId) => {
         album = await pickAlbumFromArtist(platform, traceId)
     }
     if (!album) {
-        showCurrentTracFailToast(traceId)
+        showCurrentTraceFailToast(traceId)
         return
     }
     if (traceId && !isCurrentTraceId(traceId)) return
 
     let albumName = toTrimString(album.title)
     albumName = albumName.length <= 12 ? albumName : (albumName.substring(0, 10) + '...')
-    setCurrentMusicCategoryName(albumName)
+    setCurrentMusicCategoryName(toTrimString(albumName))
 
     playAlbum(album, `即将为您播放专辑<br>${albumName}`, traceId)
 }
@@ -1080,7 +1084,7 @@ watch([textColorIndex], setupTextColor)
 <template>
     <div class="simple-layout" :class="{ 'simple-layout-use-winos-win-ctl': useWindowsStyleWinCtl }">
         <div class="center" @contextmenu.stop="toggleRandomMusicToolbar()">
-            <div class="top" :class="{ 'top-fixed': !isMacOS() }">
+            <div class="top" :class="{ 'non-macos-top': !isMacOS() }">
                 <div class="left">
                     <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
                         <WinTrafficLightBtn :hideMaxBtn="true"></WinTrafficLightBtn>
@@ -1477,14 +1481,14 @@ watch([textColorIndex], setupTextColor)
     /*padding-top: 3px;*/
 }
 
-.simple-layout>.center .top-fixed .action,
-.simple-layout>.center .top-fixed .win-action-left {
+.simple-layout>.center .non-macos-top .action,
+.simple-layout>.center .non-macos-top .win-action-left {
     -webkit-app-region: none;
 }
 
-.simple-layout>.center .top-fixed .left,
-.simple-layout>.center .top-fixed .flex-space,
-.simple-layout>.center .top-fixed .action,
+.simple-layout>.center .non-macos-top .left,
+.simple-layout>.center .non-macos-top .flex-space,
+.simple-layout>.center .non-macos-top .action,
 .simple-layout>.center .top:hover .left,
 .simple-layout>.center .top:hover .flex-space,
 .simple-layout>.center .top:hover .action {

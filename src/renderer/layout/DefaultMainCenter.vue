@@ -101,9 +101,9 @@ const setImageTextTileSize = () => {
     */
     const changes = {
         '--others-image-text-tile-cover-size': `${tileWidth}px`,
-        '--others-card-image-text-tile-title-width': `${tileWidth - 20}px`,
+        //'--others-card-image-text-tile-title-width': `${tileWidth - 20}px`,
         '--others-image-text-tile-card-cover-height': `${cardTileHeight}px`,
-        '--others-image-text-tile-card-min-height': `${cardTileHeight + 66}px`
+        '--others-image-text-tile-card-min-height': `${cardTileHeight + 73}px`
     }
     for (const [key, value] of Object.entries(changes)) {
         document.documentElement.style.setProperty(key, value)

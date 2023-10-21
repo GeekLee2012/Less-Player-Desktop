@@ -13,7 +13,7 @@ import { usePlayStore } from '../store/playStore';
 import ArtistControl from '../components/ArtistControl.vue';
 import AlbumControl from '../components/AlbumControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
-import { Track } from '../../common/Track';
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -38,21 +38,21 @@ const playItem = () => {
     const track = routerCtxCacheItem.value
     if (!track) return
     playTrack(track)
-    showToast('即将为您播放歌曲！')
+    showToast('即将为您播放歌曲')
 }
 
 const addItem = () => {
     const track = routerCtxCacheItem.value
     if (!track) return
     addTrack(track)
-    showToast('歌曲添加成功！')
+    showToast('歌曲添加成功')
 }
 
 const playItemLater = () => {
     const track = routerCtxCacheItem.value
     if (!track) return
     playTrackLater(track)
-    showToast('下一曲将为您播放！')
+    showToast('下一曲将为您播放')
 }
 </script>
 
@@ -60,7 +60,7 @@ const playItemLater = () => {
     <div id="track-detail-view">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="Track.coverDefault({ cover })" />
+                <img class="cover" v-lazy="coverDefault(cover)" />
             </div>
             <div class="right">
                 <div class="title" v-html="title"></div>

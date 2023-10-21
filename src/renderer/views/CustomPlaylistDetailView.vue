@@ -12,6 +12,7 @@ import SongListControl from '../components/SongListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -37,7 +38,7 @@ const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { isShowDialogBeforeBatchDelete } = storeToRefs(useSettingStore())
 
 const resetView = () => {
-    Object.assign(detail, { cover: 'default_cover.png', title: '', about: '', data: [] })
+    Object.assign(detail, { cover: '', title: '', about: '', data: [] })
     offset = 0
     page = 1
     total = 0
@@ -81,14 +82,14 @@ const getAbout = () => {
 const playAll = () => {
     if (!detail.data || detail.data.length < 1) return
     resetQueue()
-    addAll("即将为您播放全部！")
+    addAll("即将为您播放全部")
     playNextTrack()
 }
 
 const addAll = (text) => {
     if (!detail.data || detail.data.length < 1) return
     addTracks(detail.data)
-    showToast(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加")
 }
 
 const markScrollState = () => {
@@ -132,7 +133,7 @@ const removeAll = async () => {
     if (!ok) return
 
     removeAllFromCustomPlaylist(props.id)
-    showToast("全部歌曲已删除！")
+    showToast("全部歌曲已删除")
 }
 
 const titleRef = ref(null)
@@ -180,7 +181,7 @@ onUpdated(() => {
     <div id="custom-playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="detail.cover" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" />
             </div>
             <div class="right">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>

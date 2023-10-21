@@ -11,6 +11,8 @@ export const PLAY_STATE = {
     PLAYING: 1,
     PAUSE: 2,
     END: 3,
+    LOAD_ERROR: -2,
+    PLAY_ERROR: -3,
 }
 
 export const PLAY_MODE = {

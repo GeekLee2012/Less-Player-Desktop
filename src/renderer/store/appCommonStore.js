@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from "../../common/Utils";
+import { isDevEnv, useIpcRenderer } from "../../common/Utils";
 
 
 
@@ -112,8 +112,11 @@ export const useAppCommonStore = defineStore('appCommon', {
         }
     },
     actions: {
+        setMaxScreen(value) {
+            this.isMaxScreen = value
+        },
         toggleMaxScreen() {
-            this.isMaxScreen = !this.isMaxScreen
+            this.setMaxScreen(!this.isMaxScreen)
         },
         hidePlaybackQueueView() {
             this.playbackQueueViewShow = false
@@ -274,22 +277,22 @@ export const useAppCommonStore = defineStore('appCommon', {
             toastTimer = setTimeout(() => {
                 this.hideCommonNotification()
                 try {
-                    if (callback) callback()
+                    if (callback && typeof (callback) == 'function') callback()
                 } catch (error) {
-                    console.log(error)
+                    if (isDevEnv()) console.log(error)
                 }
             }, (delay || 1500))
         },
         showToast(text, callback, delay) {
             if (this.commonNotificationImportant) return
-            this.doToast(text || "操作成功！", 0, callback, delay || 1688)
+            this.doToast(text || "当前操作成功", 0, callback, delay || 1688)
         },
         showFailToast(text, callback, delay) {
-            this.doToast(text || "操作失败！", 1, callback, delay || 2233)
+            this.doToast(text || "当前操作失败", 1, callback, delay || 2233)
         },
         showImportantToast(text, callback, delay, type) {
             this.commonNotificationImportant = true
-            this.doToast(text || "操作成功！", type || 0, callback, delay || 1688)
+            this.doToast(text || "当前操作成功", type || 0, callback, delay || 1688)
         },
         updateCommonCtxItem(value) {
             this.commonCtxItem = value

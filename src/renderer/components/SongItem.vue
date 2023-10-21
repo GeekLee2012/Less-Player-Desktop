@@ -53,14 +53,14 @@ const playItem = () => {
 
 const addItem = () => {
     addTrack(props.data)
-    showToast("歌曲添加成功！")
+    showToast("歌曲添加成功")
 }
 
 const deleteItem = () => {
     const { deleteFn, index, data } = props
     if (deleteFn) {
         deleteFn(index)
-        showToast("歌曲已删除！")
+        showToast("歌曲已删除")
     }
 }
 

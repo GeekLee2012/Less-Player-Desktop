@@ -1,6 +1,7 @@
 //import analyze from 'rgbaster';
 import CryptoJS from 'crypto-js';
 import { pinyin } from 'pinyin-pro';
+import { DEFAULT_COVER_BASE64 } from './Constants';
 
 
 const tryCall = (call, fallbackValue) => {
@@ -107,20 +108,34 @@ export const nextInt = (max) => {
     return Math.floor(Math.random() * limit) % max
 }
 
-export const toUtf8 = (text) => {
+export const utf8Parse = (text) => {
     return CryptoJS.enc.Utf8.parse(text)
 }
 
-export const base64Encode = (text) => {
-    return text ? CryptoJS.enc.Base64.stringify(toUtf8(text)) : null
+export const utf8Stringify = (wordArray) => {
+    return CryptoJS.enc.Utf8.stringify(wordArray)
 }
 
-export const base64Decode = (text) => {
+export const base64Stringify = (wordArray) => {
+    if (!wordArray) return null
+    if (typeof (wordArray) == 'string') wordArray = utf8Parse(wordArray)
+    return CryptoJS.enc.Base64.stringify(wordArray)
+}
+
+export const base64Parse = (text) => {
     return text ? CryptoJS.enc.Base64.parse(text).toString(CryptoJS.enc.Utf8) : null
 }
 
+export const hexStringify = (wordArray) => {
+    return CryptoJS.enc.Hex.stringify(wordArray)
+}
+
+export const hexParse = (text) => {
+    return CryptoJS.enc.Hex.parse(text)
+}
+
 export const hexDecode = (text) => {
-    return text ? CryptoJS.enc.Hex.parse(text).toString() : null
+    return text ? hexParse(text).toString() : null
 }
 
 export const md5 = (text) => {
@@ -310,4 +325,8 @@ export const isEnglishChar = (ch) => {
 
 export const firstCharOfPinyin = (ch) => {
     return pinyin(ch, { toneType: 'none' }).substring(0, 1)
+}
+
+export const coverDefault = (cover) => {
+    return cover || DEFAULT_COVER_BASE64
 }

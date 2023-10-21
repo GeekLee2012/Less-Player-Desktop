@@ -13,7 +13,7 @@ import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { usePlatformStore } from '../store/platformStore';
 import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from "../../common/Utils";
+import { useIpcRenderer, coverDefault } from "../../common/Utils";
 
 
 
@@ -41,7 +41,7 @@ const { isUseDndForAddLocalTracksEnable, isUseDeeplyScanForDirectoryEnable,
 
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
-const detail = reactive({})
+const detail = reactive({ cover: '', title: '', tags: '', about: '', data: [] })
 let offset = 0, page = 1, limit = 1000, total = 0
 let markScrollTop = 0
 const isLoading = ref(false)
@@ -50,7 +50,7 @@ const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
 
 const resetView = () => {
-    Object.assign(detail, { cover: 'default_cover.png', title: '', tags: null, about: '', data: [] })
+    Object.assign(detail, { cover: '', title: '', tags: '', about: '', data: [] })
     offset = 0
     page = 1
     total = 0
@@ -122,14 +122,14 @@ const getAbout = () => {
 const playAll = () => {
     if (detail.data.length < 1) return
     resetQueue()
-    addAll("即将为您播放全部！")
+    addAll("即将为您播放全部")
     playNextTrack()
 }
 
 const addAll = (text) => {
     if (detail.data.length < 1) return
     addTracks(detail.data)
-    showToast(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加")
 }
 
 const markScrollState = () => {
@@ -175,13 +175,13 @@ const removeAll = async () => {
 
     removeAllFromLocalPlaylist(props.id)
     detail.data.length = 0
-    showToast("全部歌曲已删除！")
+    showToast("全部歌曲已删除")
 }
 
 const addFolders = async () => {
     if (!ipcRenderer) return
     const dirs = await ipcRenderer.invoke('open-dirs')
-    let msg = '文件夹添加失败！', success = false
+    let msg = '文件夹添加失败', success = false
     if (!dirs) return
     setLoading(true)
     const result = await ipcRenderer.invoke('open-audio-dirs', dirs, isUseDeeplyScanForDirectoryEnable.value)
@@ -191,7 +191,7 @@ const addFolders = async () => {
             addToLocalPlaylist(props.id, item)
             ++count
         }))
-        msg = `文件夹添加成功！<br>共新增${count}首歌曲！`
+        msg = `文件夹添加成功！<br>共新增${count}首歌曲`
         success = true
     }
     if (success) showToast(msg)
@@ -205,7 +205,7 @@ const addFiles = async () => {
     if (!result || result.length < 1) return
     //let msg = '文件添加失败！', success = false
     result.forEach(item => addToLocalPlaylist(props.id, item))
-    const msg = `文件添加成功！<br>共新增${result.length}首歌曲！`
+    const msg = `文件添加成功！<br>共新增${result.length}首歌曲`
     showToast(msg)
     //success = true
     //if (success) showToast(msg)
@@ -215,27 +215,27 @@ const addFiles = async () => {
 const onDrop = async (event) => {
     if (!ipcRenderer) return
     if (!isUseDndForAddLocalTracksEnable.value) {
-        showFailToast('拖拽还没有启用哦！<br>请重新检查设置。')
+        showFailToast('拖拽还没有启用哦！<br>请重新检查设置')
         return
     }
     event.preventDefault()
 
     const { files } = event.dataTransfer
     if (files.length > 1) {
-        showFailToast('还不支持多文件拖拽！')
+        showFailToast('还不支持多文件拖拽')
         return
     }
     const { name, path } = files[0]
     setLoading(true)
     const result = await ipcRenderer.invoke('dnd-open-audios', path, isUseDeeplyScanForDirectoryEnable.value)
-    let msg = '添加操作失败！', success = false
+    let msg = '添加操作失败', success = false
     if (result && result.length > 0) {
         let count = 0
         result.forEach(({ data }) => data.forEach(item => {
             addToLocalPlaylist(props.id, item)
             ++count
         }))
-        msg = `添加操作成功！<br>共新增${count}首歌曲！`
+        msg = `添加操作成功！<br>共新增${count}首歌曲`
         success = true
     }
     setLoading(false)
@@ -263,6 +263,7 @@ const detectTitleHeight = () => {
 EventBus.on('app-resize', detectTitleHeight)
 
 onActivated(() => {
+    resetView()
     restoreScrollState()
     nextTick(detectTitleHeight)
     loadContent()
@@ -277,11 +278,13 @@ watch(() => props.id, () => {
 
 watch([currentPlatformCode, searchKeyword], loadContent)
 
+/*
 onMounted(() => {
     resetView()
     resetBack2TopBtn()
     loadContent()
 })
+*/
 
 
 //TODO
@@ -300,7 +303,7 @@ onDeactivated(() => {
         @drop="onDrop">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="detail.cover" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" />
             </div>
             <div class="right">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>

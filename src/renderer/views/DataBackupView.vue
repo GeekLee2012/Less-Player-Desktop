@@ -202,7 +202,7 @@ const backup = async () => {
         name: filename,
         data: JSON.stringify(backupData)
     })
-    if (result) showToast('数据备份成功！')
+    if (result) showToast('数据备份成功')
 }
 
 const hasChildren = (item) => {

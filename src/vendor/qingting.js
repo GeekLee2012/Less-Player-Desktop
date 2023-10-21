@@ -12,7 +12,7 @@ const parseJson = (jsonp, callbackName) => {
 }
 
 const getSign = (src) => {
-    return hmacMd5(src, "fpMn12&38f_2e")
+    return hmacMd5(src, 'fpMn12&38f_2e')
 }
 
 export class Qingting {
@@ -30,10 +30,11 @@ export class Qingting {
 
     static anchorRadioCategories() {
         return new Promise((resolve, reject) => {
-            const url = "https://i.qingting.fm/capi/neo-channel-filter?category=545&attrs=0&curpage=1"
+            const url = 'https://i.qingting.fm/capi/neo-channel-filter?category=545&attrs=0&curpage=1'
+
             getJson(url).then(json => {
                 const result = { platform: Qingting.CODE, data: [], orders: [] }
-                const category = new Category("分类")
+                const category = new Category('分类')
                 result.data.push(category)
 
                 const list = json.data.categories
@@ -48,8 +49,8 @@ export class Qingting {
     static anchorRadioSquare(cate, offset, limit, page, order) {
         return new Promise((resolve, reject) => {
             const result = { platform: Qingting.CODE, cate, offset, limit, page, total: 0, data: [] }
-            const url = "https://i.qingting.fm/capi/neo-channel-filter"
-                + "?category=" + cate + "&attrs=0&curpage=" + page
+            const url = `https://i.qingting.fm/capi/neo-channel-filter?category=${cate}&attrs=0&curpage=${page}`
+
             getJson(url).then(json => {
                 const list = json.data.channels
                 //TODO 目前每页数据 12条，后期可能会变动
@@ -106,11 +107,13 @@ export class Qingting {
     //歌曲播放详情：url、cover、lyric等
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
+            const result = new Track(id, Qingting.CODE)
+
             const pid = track.pid.replace(Playlist.ANCHOR_RADIO_ID_PREFIX, '')
             const ts = Date.now()
             const src = `/audiostream/redirect/${pid}/${id}?access_token=&device_id=MOBILESITE&qingting_id=&t=${ts}`
             const sign = getSign(src)
-            const result = new Track(id, Qingting.CODE)
+
             result.url = `https://audio.qtfm.cn${src}&sign=${sign}`
             resolve(result)
         })

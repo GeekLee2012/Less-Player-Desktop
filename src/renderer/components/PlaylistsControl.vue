@@ -25,6 +25,7 @@ const props = defineProps({
     loadPage: Function,
     nextPagePendingMark: Number,
     refreshAllPendingMark: Number,
+    videoStyle: Boolean
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
@@ -41,8 +42,9 @@ const visitItem = (item) => {
     if (isFreeFM(platform)) {
         visitFreeFMEdit(id)
     } else if (Playlist.isFMRadioType(item)
-        || Playlist.isNormalRadioType(item)) {
-        //FM广播电台、普通歌单电台
+        || Playlist.isNormalRadioType(item)
+        || Playlist.isVideoType(item)) {
+        //FM广播电台、普通歌单电台、视频
         playPlaylist(item)
     } else if (visitable) {
         //其他，如普通歌单、主播电台歌单等
@@ -51,6 +53,7 @@ const visitItem = (item) => {
 }
 
 const getSubtitle = (item) => {
+    if (Playlist.isVideoType(item)) return item.subtitle
     return getListenNumText(item) || item.subtitle || item.tags
 }
 
@@ -81,21 +84,22 @@ const computedMaxPage = computed(() => {
             :loadPage="loadPage" :nextPagePendingMark="nextPagePendingMark" :refreshAllPendingMark="refreshAllPendingMark"
             :loading="loading">
             <template v-slot="{ item, index }">
-                <ImageTextTile @click="visitItem(item)" :cover="item.cover" :title="item.title"
+                <ImageTextTile @click="visitItem(item)" :videoStyle="videoStyle" :cover="item.cover" :title="item.title"
                     :subtitle="getSubtitle(item)" :platform="item.platform" :color="item.color" :playable="true"
                     :playAction="() => playPlaylist(item)" :checkbox="checkbox" :checked="checkedAll"
                     :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkChangedFn="(checked) => checkChangedFn(checked, item)">
                 </ImageTextTile>
             </template>
             <template #loading1>
-                <ImageTextTileLoadingMask :count="customLoadingCount" v-show="customLoadingCount && customLoadingCount > 0">
+                <ImageTextTileLoadingMask :videoStyle="videoStyle" :count="customLoadingCount"
+                    v-show="customLoadingCount && customLoadingCount > 0">
                 </ImageTextTileLoadingMask>
             </template>
             <template #loading2>
-                <ImageTextTileLoadingMask :count="customLoadingCount"
+                <ImageTextTileLoadingMask :videoStyle="videoStyle" :count="customLoadingCount"
                     v-show="data && data.length < 1 && customLoadingCount && customLoadingCount > 0">
                 </ImageTextTileLoadingMask>
-                <ImageTextTileLoadingMask :count="20" v-show="!customLoadingCount && loading">
+                <ImageTextTileLoadingMask :videoStyle="videoStyle" :count="20" v-show="!customLoadingCount && loading">
                 </ImageTextTileLoadingMask>
             </template>
         </PaginationTiles>

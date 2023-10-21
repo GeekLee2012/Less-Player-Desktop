@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 
 
 
+//TODO 古早版本，大部分逻辑都写在store里啦
 const TAB_LIST = [
     {
         code: 'all-songs',
@@ -19,7 +20,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         albumId: '',
         platform: '',
         albumName: '山川湖海，日月星辰',
-        albumCover: 'default_cover.png',
+        albumCover: '',
         artistName: '未知歌手',
         company: '',
         publishTime: '',
@@ -47,7 +48,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
             this.about = ''
         },
         resetAlbumDetail() {
-            this.updateAlbum('山川湖海，日月星辰', 'default_cover.png', '未知歌手', '', '')
+            this.updateAlbum('山川湖海，日月星辰', '', '未知歌手', '', '')
         },
         resetAll() {
             this.resetAlbumDetail()

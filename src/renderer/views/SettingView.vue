@@ -25,7 +25,7 @@ const { showConfirm } = inject('appCommon')
 const ipcRenderer = useIpcRenderer()
 
 const { theme, layout, common, track, desktopLyric,
-    keys, tray, navigation, dialog, cache,
+    keys, keysDefault, tray, navigation, dialog, cache,
     network, others, search, isHttpProxyEnable, isSocksProxyEnable,
     isShowDialogBeforeResetSetting, isCheckPreReleaseVersion } = storeToRefs(useSettingStore())
 const { setThemeIndex,
@@ -145,7 +145,7 @@ const resetData = async () => {
     }
 
     EventBus.emit('setting-reset')
-    showImportantToast("数据已重置成功!")
+    showImportantToast("数据已重置成功")
 }
 
 /* 数据 - 恢复默认设置 */
@@ -160,7 +160,7 @@ const resetSettingData = async () => {
         localStorage.removeItem(key)
     })
     EventBus.emit('setting-reset')
-    showImportantToast("已恢复默认设置!")
+    showImportantToast("已恢复默认设置")
 }
 
 /* 通用设置 */
@@ -460,7 +460,7 @@ const clearSessionCache = async () => {
     const result = await ipcRenderer.invoke('app-clearCaches')
     if (result) {
         updateSessionCacheSize()
-        showToast('资源缓存已清理！')
+        showToast('资源缓存已清理')
     }
 }
 
@@ -757,7 +757,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     </div>
                     <div>
                         <span class="sec-title">字体大小：</span>
-                        <input type="number" :value="desktopLyric.fontSize" placeholder="10-365，默认20" min="10" max="365"
+                        <input type="number" :value="desktopLyric.fontSize" placeholder="10-365，默认23" min="10" max="365"
                             step="0.1" @keydown.enter="updateDesktopLyricFontSize" @focusout="updateDesktopLyricFontSize" />
                     </div>
                     <div>
@@ -772,7 +772,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     </div>
                     <div>
                         <span class="sec-title">行间距：</span>
-                        <input type="number" :value="desktopLyric.lineSpacing" placeholder="0-1024，默认22" min="0" max="1024"
+                        <input type="number" :value="desktopLyric.lineSpacing" placeholder="0-1024，默认23" min="0" max="1024"
                             step="1" @keydown.enter="updateDesktopLyricLineSpacing"
                             @focusout="updateDesktopLyricLineSpacing" />
                     </div>
@@ -992,8 +992,8 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         <div class="tip-text" v-show="false">提示：目前暂时不支持自定义</div>
                     </div>
                     <div class="tip-text">提示：一般不建议开启全局快捷键，容易与其他应用的快捷键产生冲突</div>
-                    <div class="local-keys" v-for="(item, index) in keys.data"
-                        :class="{ last: index == (keys.data.length - 1) }">
+                    <div class="local-keys" v-for="(item, index) in keysDefault.data"
+                        :class="{ last: index == (keysDefault.data.length - 1) }">
                         <span class="cate-subtitle">{{ item.name }}：</span>
                         <KeysInputControl :value="item.binding" :class="{ keysInputAdptWidth: !keys.global }">
                         </KeysInputControl>

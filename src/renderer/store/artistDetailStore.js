@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { usePlatformStore } from "./platformStore";
 
 
-
+//TODO 古早版本，大部分逻辑都写在store里啦
 const TAB_LIST = [{
     code: 'hot-songs',
     name: '热门歌曲',
@@ -30,7 +30,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         platform: '',
         artistName: '未知歌手',
         artistAlias: '',
-        artistCover: 'default_cover.png',
+        artistCover: '',
         hotSongs: [],
         allSongs: [],
         albums: [],
@@ -65,7 +65,7 @@ export const useArtistDetailStore = defineStore('artistDetail', {
             this.about = ''
         },
         resetArtistDetail() {
-            this.updateArtist('未知歌手', 'default_cover.png', '')
+            this.updateArtist('未知歌手', '', '')
         },
         resetAll() {
             this.resetArtistDetail()

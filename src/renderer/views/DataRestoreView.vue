@@ -267,7 +267,7 @@ const restore = async () => {
             _store.$patch(backupData)
         }
     }
-    showToast("数据还原成功!")
+    showToast("数据还原成功")
 }
 
 const hasChildren = (item) => {

@@ -7,10 +7,10 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { ref, inject } from 'vue';
+import { ref, inject, reactive, onMounted } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { useIpcRenderer } from '../../common/Utils';
+import { coverDefault, isBlank, toTrimString, useIpcRenderer } from '../../common/Utils';
 
 
 
@@ -24,29 +24,41 @@ const ipcRenderer = useIpcRenderer()
 
 const { showToast } = useAppCommonStore()
 const titleRef = ref(null)
-const aboutRef = ref(null)
-const coverRef = ref(null)
+//const coverRef = ref(null)
 const invalid = ref(false)
+const isActionDisabled = ref(false)
+const setActionDisabled = (value) => isActionDisabled.value = value
 
-//TODO
 const { user } = storeToRefs(useUserProfileStore())
 const { updateUser } = useUserProfileStore()
 
+const detail = reactive({ nickname: '', cover: '', about: '' })
+const loadUserInfo = () => {
+    const { nickname, cover, about, } = user.value
+    Object.assign(detail, { nickname, cover, about })
+}
+
+
 const checkValid = () => {
-    let title = titleRef.value.value
-    invalid.value = (!title || title.trim().length < 1)
+    const title = titleRef.value.value
+    invalid.value = isBlank(title)
 }
 
 const submit = () => {
-    let nickname = titleRef.value.value.trim()
-    let about = aboutRef.value.value.trim()
-    let cover = coverRef.value.src
     checkValid()
     if (invalid.value) {
         return
     }
+    let { nickname, about, cover } = detail
+    nickname = toTrimString(nickname)
+    about = toTrimString(about)
+    cover = toTrimString(cover)
+
     updateUser(nickname, about, cover)
-    showToast("用户信息已更新", backward)
+
+    setActionDisabled(true)
+    showToast("用户信息已更新")
+    backward()
 }
 
 //TODO 使用本地文件图片，不利于迁移共享
@@ -54,9 +66,13 @@ const updateCover = async () => {
     if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-image')
     if (result.length > 0) {
-        coverRef.value.src = result[0]
+        //coverRef.value.src = result[0]
+        const cover = result[0]
+        Object.assign(detail, { cover })
     }
 }
+
+onMounted(() => loadUserInfo())
 </script>
 
 <template>
@@ -66,7 +82,7 @@ const updateCover = async () => {
         </div>
         <div class="center">
             <div>
-                <img class="cover" v-lazy="user.cover" ref="coverRef" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑头像</div>
             </div>
             <div class="right">
@@ -76,20 +92,28 @@ const updateCover = async () => {
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="user.nickname" ref="titleRef" :class="{ invalid }" maxlength="64"
+                        <input type="text" v-model="detail.nickname" ref="titleRef" :class="{ invalid }" maxlength="64"
                             placeholder="请输入用户昵称，最多支持输入64个字符">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div><span>封面图片</span></div>
+                    <div @keydown.stop="">
+                        <input type="text" v-model="detail.cover" placeholder="封面图片URL，支持本地文件URL、在线URL" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介 / 说说</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="user.about" ref="aboutRef" maxlength="512"
-                            placeholder="今天想要对自己说些什么呀~ 最多支持输入512个字符"></textarea>
+                        <textarea v-model="detail.about" maxlength="512" placeholder="今天想要对自己说些什么呀~ 最多支持输入512个字符">
+                        </textarea>
                     </div>
                 </div>
                 <div class="action">
-                    <SvgTextButton :leftAction="submit" text="保存"></SvgTextButton>
-                    <SvgTextButton :leftAction="() => backward()" text="取消" class="spacing"></SvgTextButton>
+                    <SvgTextButton :leftAction="submit" text="保存" :disabled="isActionDisabled">
+                    </SvgTextButton>
+                    <SvgTextButton :leftAction="() => backward()" text="取消" class="spacing" :disabled="isActionDisabled">
+                    </SvgTextButton>
                 </div>
             </div>
         </div>
@@ -184,7 +208,8 @@ const updateCover = async () => {
 }
 
 #user-info-edit-view .center .form-row textarea {
-    height: 280px;
+    /*height: 280px;*/
+    height: 202px;
     padding: 8px;
 }
 

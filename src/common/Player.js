@@ -17,7 +17,6 @@ export class Player {
         this.sound = null
         this.playState = PLAY_STATE.NONE
         this.currentTime = 0
-        this.retry = 0
         this.webAudioApi = null
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
         this.pendingSoundEffect = null
@@ -73,6 +72,7 @@ export class Player {
 
     createSound() {
         if (!this._isTrackAvailable()) return null
+
         var self = this
         this.sound = new Howl({
             src: [this.currentTrack.url],
@@ -81,8 +81,7 @@ export class Player {
             preload: false,
             pool: 1,
             onplay: function () {
-                self.retry = 0
-                self.notifyStateChanged(PLAY_STATE.PLAYING)
+                self.setState(PLAY_STATE.PLAYING)
 
                 if (self.seekPendingMark) { //存在未处理seek事件
                     self.animationFrameCnt = 0
@@ -94,10 +93,10 @@ export class Player {
             },
             onpause: function () {
                 self._stopAnimationFrame()
-                self.notifyStateChanged(PLAY_STATE.PAUSE)
+                self.setState(PLAY_STATE.PAUSE)
             },
             onend: function () {
-                self.notifyStateChanged(PLAY_STATE.END)
+                self.setState(PLAY_STATE.END)
             },
             onseek: function () {
                 //重置动画帧
@@ -109,15 +108,15 @@ export class Player {
                 */
             },
             onloaderror: function () {
-                self._retryPlay(1)
+                self.setState(PLAY_STATE.LOAD_ERROR)
             },
             onplayerror: function () {
-                self._retryPlay(1)
+                self.setState(PLAY_STATE.PLAY_ERROR)
             }
         })
         this._tryUnlockHowlAudios()
         this.currentTime = 0
-        this.notifyStateChanged(PLAY_STATE.INIT)
+        this.setState(PLAY_STATE.INIT)
 
         if (this.pendingOutputDeviceId) this._setAudioOutputDevice(this.pendingOutputDeviceId)
         return this.sound
@@ -142,7 +141,7 @@ export class Player {
     togglePlay() {
         const sound = this.getSound()
         if (!sound) {
-            this._retryPlay(1)
+            this.setState(PLAY_STATE.PLAY_ERROR)
             return
         }
         if (sound.playing()) {
@@ -165,9 +164,7 @@ export class Player {
         this.stop()
         this.currentTrack = track
         this.createSound()
-        if (!track) {
-            this.notifyStateChanged(PLAY_STATE.NONE)
-        }
+        if (!track) this.setState(PLAY_STATE.NONE)
     }
 
     playTrack(track) {
@@ -187,6 +184,7 @@ export class Player {
     seek(percent) {
         const sound = this.getSound()
         if (!sound || !sound.playing()) return
+
         const duration = sound.duration()
         if (duration) {
             sound.seek(Math.min(duration * percent, duration))
@@ -216,8 +214,9 @@ export class Player {
         try {
             this._resolveSound()
         } catch (error) {
-            console.log(error)
-            this._retryPlay(1)
+            if (isDevEnv()) console.log(error)
+
+            this.setState(PLAY_STATE.PLAY_ERROR)
         }
         this._countAnimationFrame()
         //循环动画
@@ -234,26 +233,12 @@ export class Player {
         return this
     }
 
-    notifyStateChanged(state) {
+    setState(state) {
         this.playState = state
-        this.notify('track-state', this.playState)
+        const { currentTrack: track, currentTime } = this
+        this.notify('track-state', { state, track, currentTime })
 
         this.postPlayStateToDesktopLryic()
-    }
-
-    _notifyError(isRetry) {
-        const { currentTrack: track, currentTime } = this
-        this.notify('track-error', { isRetry, track, currentTime })
-    }
-
-    _retryPlay(maxRetry) {
-        const isRetry = this.retry < maxRetry
-        this._notifyError(isRetry)
-        if (isRetry) {
-            ++this.retry
-        } else {
-            this.retry = 0
-        }
     }
 
     _createWebAudioApi() {
@@ -261,9 +246,7 @@ export class Player {
             const audioCtx = Howler.ctx
             if (audioCtx) {
                 const audioNode = this.sound._sounds[0]._node
-                if (audioNode) {
-                    this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
-                }
+                if (audioNode) this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
             }
         }
         return this.webAudioApi
@@ -410,9 +393,7 @@ export class Player {
         }
         this.lastAnimationFrameUpdateTime = _now
         const reset = this.animationFrameTimeCnt >= 990
-        if (reset) {
-            this.animationFrameTimeCnt = 0
-        }
+        if (reset) this.animationFrameTimeCnt = 0
         return reset
     }
 
@@ -420,15 +401,9 @@ export class Player {
     async _setAudioOutputDevice(deviceId) {
         try {
             this.pendingOutputDeviceId = null
-            let audioSource = null
-            if ("setSinkId" in AudioContext.prototype) {
-                audioSource = Howler.ctx
-            } else {
-                audioSource = this.sound._sounds[0]._node
-            }
-            if (audioSource) {
-                await audioSource.setSinkId(deviceId)
-            }
+            const audioSource = ("setSinkId" in AudioContext.prototype)
+                ? Howler.ctx : this.sound._sounds[0]._node
+            if (audioSource) await audioSource.setSinkId(deviceId)
         } catch (error) {
             if (isDevEnv()) console.log(`音频输出设置失败，DeviceId: ${deviceId}\n`, error)
             this.pendingOutputDeviceId = deviceId

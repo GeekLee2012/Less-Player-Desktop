@@ -34,6 +34,7 @@ const props = defineProps({
 })
 
 
+const { playPlaylist, addPlaylistToQueue, addFmRadioToQueue, playAlbum, addAlbumToQueue } = inject('player')
 const { currentRoutePath, backward } = inject('appRoute')
 const { showConfirm } = inject('appCommon')
 const ipcRenderer = useIpcRenderer()
@@ -45,7 +46,7 @@ const { removeFavoriteSong, removeFavoritePlaylist,
     getCustomPlaylist, removeFromCustomPlaylist } = useUserProfileStore()
 const { addTracks, playTrack } = usePlayStore()
 const { commonCtxMenuShow, commonCtxItem, searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
-const { showToast, updateCommonCtxItem,
+const { showToast, showFailToast, updateCommonCtxItem,
     hideAllCtxMenus, setSearchBarExclusiveAction,
     showPlaylistExportToolbar, updateCommonCtxMenuCacheItem } = useAppCommonStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
@@ -207,7 +208,7 @@ const updateTipText = () => {
 const switchTab = () => {
     resetTab()
     const platform = currentPlatformCode.value
-    if (activeTab.value == 0) {
+    if (activeTab.value == 0) { //歌曲
         Object.assign(actionShowCtl, {
             playBtn: true,
             addToBtn: true,
@@ -235,11 +236,26 @@ const switchTab = () => {
             tabData.push(...loadLocalPlaylist())
         }
         currentTabView.value = SongListControl
-    } else if (activeTab.value == 1) {
-        if (isFavorites()) tabData.push(...filterByTitleWithKeyword(getFavoritePlaylilsts.value(platform)))
-        if (isRecents()) tabData.push(...filterByTitleWithKeyword(getRecentPlaylilsts.value(platform)))
+    } else if (activeTab.value == 1) { //歌单
+        if (isFavorites()) {
+            Object.assign(actionShowCtl, {
+                playBtn: true,
+                addToQueueBtn: true,
+                deleteBtn: true
+            })
+            tabData.push(...filterByTitleWithKeyword(getFavoritePlaylilsts.value(platform)))
+        }
+        if (isRecents()) {
+            Object.assign(actionShowCtl, {
+                playBtn: true,
+                addToQueueBtn: true,
+                deleteBtn: true
+            })
+            tabData.push(...filterByTitleWithKeyword(getRecentPlaylilsts.value(platform)))
+        }
         if (isLocalMusic()) {
             Object.assign(actionShowCtl, {
+                playBtn: true,
                 addToQueueBtn: true,
                 deleteBtn: true,
                 exportBtn: true
@@ -247,13 +263,41 @@ const switchTab = () => {
             tabData.push(...filterByTitleWithKeyword(localPlaylists.value))
         }
         currentTabView.value = PlaylistsControl
-    } else if (activeTab.value == 2) {
-        if (isFavorites()) tabData.push(...filterByTitleWithKeyword(getFavoriteAlbums.value(platform)))
-        if (isRecents()) tabData.push(...filterByTitleWithKeyword(getRecentAlbums.value(platform)))
+    } else if (activeTab.value == 2) { //专辑
+        if (isFavorites()) {
+            Object.assign(actionShowCtl, {
+                playBtn: true,
+                addToQueueBtn: true,
+                deleteBtn: true
+            })
+            tabData.push(...filterByTitleWithKeyword(getFavoriteAlbums.value(platform)))
+        }
+        if (isRecents()) {
+            Object.assign(actionShowCtl, {
+                playBtn: true,
+                addToQueueBtn: true,
+                deleteBtn: true
+            })
+            tabData.push(...filterByTitleWithKeyword(getRecentAlbums.value(platform)))
+        }
         currentTabView.value = AlbumListControl
-    } else if (activeTab.value == 3) {
-        if (isFavorites()) tabData.push(...filterByTitleWithKeyword(getFavoriteRadios.value(platform)))
-        if (isRecents()) tabData.push(...filterByTitleWithKeyword(getRecentRadios.value(platform)))
+    } else if (activeTab.value == 3) { //电台
+        if (isFavorites()) {
+            Object.assign(actionShowCtl, {
+                playBtn: true,
+                addToQueueBtn: true,
+                deleteBtn: true
+            })
+            tabData.push(...filterByTitleWithKeyword(getFavoriteRadios.value(platform)))
+        }
+        if (isRecents()) {
+            Object.assign(actionShowCtl, {
+                playBtn: true,
+                addToQueueBtn: true,
+                deleteBtn: true
+            })
+            tabData.push(...filterByTitleWithKeyword(getRecentRadios.value(platform)))
+        }
         if (isFreeFM()) {
             Object.assign(actionShowCtl, {
                 deleteBtn: true,
@@ -374,17 +418,53 @@ const sortCheckData = () => {
 
 const playChecked = () => {
     const sortedData = sortCheckData()
-    addTracks(sortedData)
-    playTrack(sortedData[0])
-    showToast("即将为您播放歌曲！")
+    if (activeTab.value == 0) { //歌曲
+        addTracks(sortedData)
+        playTrack(sortedData[0])
+        showToast("即将为您播放歌曲")
+    } else if (activeTab.value == 1) { //歌单
+        //当前播放列表太长易卡顿
+        if (sortedData.length > 1) {
+            return showFailToast('当前操作不支持！<br>无法同时播放多个歌单')
+        }
+        playPlaylist(sortedData[0])
+    } else if (activeTab.value == 2) { //专辑
+        if (sortedData.length > 1) {
+            return showFailToast('当前操作不支持！<br>无法同时播放多个专辑')
+        }
+        playAlbum(sortedData[0])
+    } else if (activeTab.value == 3) { //电台
+        if (sortedData.length > 1) {
+            return showFailToast('当前操作不支持！<br>无法同时播放多个电台')
+        }
+        playPlaylist(sortedData[0])
+    }
     refresh()
 }
 
-const addToQueue = () => {
+const addToQueue = async () => {
     if (!actionShowCtl.addToQueueBtn) return
     const sortedData = sortCheckData()
-    addTracks(sortedData)
-    showToast("歌曲添加成功！")
+    if (activeTab.value == 0) { //歌曲
+        addTracks(sortedData)
+        showToast("歌曲添加成功")
+    } else if (activeTab.value == 1) { //歌单
+        //当前播放列表太长易卡顿
+        if (sortedData.length > 1) {
+            return showFailToast('当前操作不支持！<br>无法同时添加多个歌单')
+        }
+        addPlaylistToQueue(sortedData[0], "歌曲已全部添加")
+    } else if (activeTab.value == 2) { //专辑
+        let failCnt = 0
+        for (var i = 0; i < sortedData.length; i++) {
+            const album = await addAlbumToQueue(sortedData[i])
+            if (!album) ++failCnt
+        }
+        const msg = failCnt ? `部分专辑已添加！<br>${failCnt}张专辑添加失败` : "专辑已全部添加"
+        showToast(msg)
+    } else if (activeTab.value == 3) { //电台
+        sortedData.forEach(item => addFmRadioToQueue(item, "电台已全部添加"))
+    }
     refresh()
 }
 
@@ -480,7 +560,7 @@ const removeChecked = async () => {
             checkedData.forEach(item => deleteFn(item))
         }
         refresh()
-        showToast("删除操作成功!")
+        showToast("删除操作成功")
     }
 }
 
@@ -504,8 +584,8 @@ const exportRadios = async (radios) => {
         name: filename,
         data: JSON.stringify({ created: now, data: radioData })
     })
-    if (result) showToast('FM电台导出成功！')
-    else showFailToast('FM电台导出失败！')
+    if (result) showToast('FM电台导出成功')
+    else showFailToast('FM电台导出失败')
 }
 */
 const formatRadios = (radios, format) => {
@@ -786,7 +866,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 
 #batch-action-view .header,
 #batch-action-view .center .action,
-#batch-action-view .center .content {
+#batch-action-view .center>.content {
     padding-left: 33px;
     padding-right: 33px;
 }

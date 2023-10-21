@@ -17,6 +17,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import CustomPlaylistListControl from '../components/CustomPlaylistListControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -114,14 +115,14 @@ const visitTab = (index) => {
 const playAllSongs = () => {
     if (tabData.length < 1) return
     resetQueue()
-    addAllSongs("即将为您播放全部！")
+    addAllSongs("即将为您播放全部")
     playNextTrack()
 }
 
 const addAllSongs = (text) => {
     if (tabData.length < 1) return
     addTracks(tabData)
-    showToast(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加")
 }
 
 const switchTab = () => {
@@ -211,19 +212,19 @@ const clearAll = () => {
     store.$reset()
     EventBus.emit("userProfile-reset")
     visitTab(0)
-    showToast("全部数据已清空！")
+    showToast("全部数据已清空")
     //updateUser(nickname, about, cover)
     store.$patch({ user: { nickname, about, cover } })
 }
 
 const clearFavorites = () => {
     removeAllFavorites()
-    showToast("我的收藏已清空！")
+    showToast("我的收藏已清空")
 }
 
 const clearRecents = () => {
     removeAllRecents()
-    showToast("最近播放已清空！")
+    showToast("最近播放已清空")
 }
 
 const refresh = () => {
@@ -309,7 +310,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
         </div>
         <div class="header">
             <div>
-                <img class="cover" v-lazy="getUserCover" />
+                <img class="cover" v-lazy="coverDefault(getUserCover)" />
             </div>
             <div class="right">
                 <div class="titleWrap">

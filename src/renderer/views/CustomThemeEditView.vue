@@ -50,7 +50,7 @@ const saveTheme = () => {
 
     const theme = JSON.parse(JSON.stringify(customTheme))
     saveCustomTheme(theme)
-    showToast('主题保存成功！')
+    showToast('主题保存成功')
     hideCustomThemeEditView()
     if (isCurrentTheme(theme)) EventBus.emit('theme-applyTheme')
 }
@@ -64,7 +64,7 @@ const saveThemeAs = () => {
     const theme = JSON.parse(JSON.stringify(customTheme))
     theme.id = null
     saveCustomTheme(theme)
-    showToast('主题另存为操作成功！')
+    showToast('主题另存为操作成功')
     hideCustomThemeEditView()
 }
 
@@ -74,7 +74,7 @@ const resetTheme = (event) => {
     const theme = copiedTheme
     Object.keys(customTheme).forEach(key => Reflect.deleteProperty(customTheme, key))
     Object.assign(customTheme, { ...theme }) //注意，此处Object.assign()有坑
-    if (isUserAction) showToast('主题重置成功！')
+    if (isUserAction) showToast('主题重置成功')
 }
 
 //TODO 主题相关设置，写得太繁琐
@@ -833,10 +833,22 @@ watch(workingCustomTheme, (nv, ov) => {
     cursor: default;
 }
 
-.custom-theme-edit-view .center .row-content .img-item .action {
+.custom-theme-edit-view .center .row-content .img-item .preview {
     display: flex;
-    /*justify-content: center;
-    align-items: center;*/
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-theme-edit-view .center .row-content .img-item .action {
+    margin-top: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-theme-edit-view .center .row-content .img-item .action .remove-btn {
+    margin-left: 0px;
 }
 
 .custom-theme-edit-view .invalid {

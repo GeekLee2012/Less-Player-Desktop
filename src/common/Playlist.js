@@ -11,6 +11,8 @@ export class Playlist {
     static FM_RADIO_TYPE = 2
     //主播电台歌单
     static ANCHOR_RADIO_TYPE = 3
+    //视频
+    static VIDEO_TYPE = 4
     //TODO
     static ANCHOR_RADIO_ID_PREFIX = "ARP_"
     //自定义列表
@@ -72,6 +74,10 @@ export class Playlist {
 
     static isAnchorRadioType(item) {
         return Playlist._assertType(item, Playlist.ANCHOR_RADIO_TYPE)
+    }
+
+    static isVideoType(item) {
+        return Playlist._assertType(item, Playlist.VIDEO_TYPE)
     }
 
     static isCustomType(item) {

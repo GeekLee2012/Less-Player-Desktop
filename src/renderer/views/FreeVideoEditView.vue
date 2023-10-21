@@ -8,7 +8,7 @@ export default {
 <script setup>
 import { ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useIpcRenderer } from '../../common/Utils';
+import { coverDefault, useIpcRenderer } from '../../common/Utils';
 
 
 
@@ -55,7 +55,7 @@ const submit = () => {
             playVideo(detail)
         })
     } else {
-        showFailToast(text)
+        showFailToast('视频播放失败')
     }
 }
 
@@ -82,7 +82,7 @@ const updateCover = async () => {
         </div>
         <div class="center">
             <div v-show="isCoverShow">
-                <img class="cover" v-lazy="detail.cover" ref="coverRef" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" ref="coverRef" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
             </div>
             <div class="right" :class="{ 'no-cover': !isCoverShow }">

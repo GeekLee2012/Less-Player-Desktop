@@ -10,7 +10,7 @@ import { Playlist } from '../../common/Playlist';
 const NO_TRACK = new Track('0', '', '听你想听，爱你所爱',
     [{ id: '0', name: '不枉青春' }],
     { id: '0', name: '山川湖海，日月星辰' },
-    0, 'default_cover.png')
+    0, '')
 
 export const usePlayStore = defineStore('player', {
     state: () => ({
@@ -27,6 +27,8 @@ export const usePlayStore = defineStore('player', {
         //是否正在自动下一曲
         isAutoPlaying: false,
         videoSrc: null,
+        queueVideos: [],
+        playingVideoIndex: -1,
         //音频输出设备
         audioOutputDevices: []
     }),

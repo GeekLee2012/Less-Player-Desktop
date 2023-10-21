@@ -29,6 +29,7 @@ import VideoPlayingView from './views/VideoPlayingView.vue';
 import PlaybackQueueView from './views/PlaybackQueueView.vue';
 //Directives
 import { bindDragAndMove } from './directives/gesture';
+import { coverDefault } from '../common/Utils';
 
 
 //状态管理
@@ -53,8 +54,8 @@ app.config.errorHandler = (err, vm, info) => {
 app.use(pinia)
   .use(router)
   .use(VueLazyLoad, {
-    loading: 'default_cover.png',
-    error: 'default_cover.png',
+    loading: coverDefault(),
+    error: coverDefault(),
     log: false,
     lifecycle: {
       error: (el) => {

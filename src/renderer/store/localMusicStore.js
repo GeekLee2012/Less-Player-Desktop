@@ -40,7 +40,7 @@ export const useLocalMusicStore = defineStore('localMusic', {
             const updated = created
             tags = tags || ''
             about = about || ''
-            cover = cover || 'default_cover.png'
+            cover = cover || ''
             data = data || []
             data.forEach(item => item.pid = id)
             this.localPlaylists.push({ id, platform: 'local', type: Playlist.NORMAL_TYPE, title, tags, about, cover, data, created, updated })

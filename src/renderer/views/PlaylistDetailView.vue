@@ -12,7 +12,7 @@ import Back2TopBtn from '../components/Back2TopBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import { Playlist } from '../../common/Playlist';
-import { trimExtraChars } from '../../common/Utils';
+import { coverDefault, trimExtraChars } from '../../common/Utils';
 
 
 
@@ -21,7 +21,7 @@ const props = defineProps({
     id: String
 })
 
-const { addAndPlayTracks, playPlaylist } = inject('player')
+const { addAndPlayTracks, playPlaylist, addPlaylistToQueue } = inject('player')
 
 const { getVendor } = usePlatformStore()
 const { addTracks } = usePlayStore()
@@ -31,7 +31,7 @@ const { isSearchForOnlinePlaylistShow } = storeToRefs(useSettingStore())
 
 
 
-const detail = reactive({})
+const detail = reactive({ cover: '', title: '', about: '', data: [] })
 const filteredData = ref(null)
 const listSizeText = ref("0")
 const playlistDetailRef = ref(null)
@@ -55,7 +55,7 @@ const updateListSizeText = () => {
 }
 
 const resetView = () => {
-    Object.assign(detail, { cover: 'default_cover.png', title: '', about: '', data: [] })
+    Object.assign(detail, { cover: '', title: '', about: '', data: [] })
     offset = 0
     page = 1
     detail.total = 0
@@ -94,7 +94,7 @@ const loadContent = async (noLoadingMask) => {
     if (!success) { //回退分页信息，并提示
         page = page - 1
         offset = page * limit
-        if (offset < detail.total) showToast('网络异常！请稍候重试')
+        if (offset < detail.total) showToast('网络异常！请稍候再重试')
     }
 }
 
@@ -108,13 +108,17 @@ const playAll = () => {
     if (filteredData.value) {
         addAndPlayTracks(filteredData.value, true)
     } else {
-        playPlaylist(detail)
+        playPlaylist(detail, '即将为您播放全部')
     }
 }
 
 const addAll = (text) => {
-    addTracks(filteredData.value || detail.data)
-    showToast(text || "歌曲已全部添加！")
+    if (filteredData.value) {
+        addTracks(filteredData.value)
+        showToast(text || "歌曲已全部添加")
+    } else {
+        addPlaylistToQueue(detail, (text || "歌曲已全部添加"))
+    }
 }
 
 //TODO
@@ -122,13 +126,13 @@ const { addFavoritePlaylist, removeFavoritePlaylist, isFavoritePlaylist } = useU
 const favorited = ref(false)
 const toggleFavorite = () => {
     favorited.value = !favorited.value
-    let text = "歌单收藏成功！"
+    let text = "歌单收藏成功"
     if (favorited.value) {
         const { title, cover } = detail
         addFavoritePlaylist(props.id, props.platform, title, cover, Playlist.NORMAL_TYPE)
     } else {
         removeFavoritePlaylist(props.id, props.platform)
-        text = "歌单已取消收藏！"
+        text = "歌单已取消收藏"
     }
     showToast(text)
 }
@@ -257,7 +261,7 @@ EventBus.on('app-resize', detectTitleHeight)
     <div id="playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="detail.cover" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" />
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>

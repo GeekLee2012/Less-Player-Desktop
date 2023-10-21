@@ -69,8 +69,8 @@ onActivated(initVideoPlayer)
                 </WinTrafficLightBtn>
             </div>
             <div class="action" :class="{ 'winstyle-action': useWindowsStyleWinCtl }" v-show="false">
-                <div class="next-btn text-btn">
-                    <svg width="17" height="17" viewBox="0 0 853.72 597.61" xmlns="http://www.w3.org/2000/svg">
+                <div class="list-btn text-btn btn">
+                    <svg width="20" height="20" viewBox="0 0 853.72 597.61" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -84,7 +84,19 @@ onActivated(initVideoPlayer)
                             </g>
                         </g>
                     </svg>
-                    <span>播放列表</span>
+                    <span v-show="false">当前播放</span>
+                </div>
+                <div class="search-video-btn btn spacing">
+                    <svg width="25" height="21" viewBox="0 0 1024 753.07" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M0,110.05c1.62-7.78,2.77-15.69,4.93-23.3C19.26,36.32,65.9.28,118.3.17q208.5-.44,417-.13,123,0,246,0c60.07,0,108.83,40,120.19,98.93a127.69,127.69,0,0,1,2,23.86c.17,59,.1,118,.09,177,0,1.62-.15,3.23-.26,5.55-58.91-34.91-120.89-43.71-186.17-24.34-43,12.76-78.82,36.91-107.48,71.34-33.35,40.06-50.86,86.38-52.32,138.44-1.45,51.83,13.72,98.73,44.87,141.67h-6.26q-236.75,0-473.49,0C63.1,632.42,15.18,594,2.59,536.74c-1-4.53-1.73-9.12-2.59-13.68Zm376.79,86V436.57L569.08,316.29Z" />
+                                <path
+                                    d="M1024,728.06c-.36.91-.79,1.79-1.06,2.72-6.69,22.72-34,29.9-50.63,13-15.63-15.94-30.76-32.37-46.1-48.59q-26.28-27.78-52.55-55.56c-.68-.72-1.44-1.37-2.3-2.17-43.23,25.74-89.08,32.37-137.31,17.68-39.13-11.92-69.48-35.85-91.44-70.34-42.77-67.15-29.78-158.62,29.93-211.12,62.14-54.64,153.15-56.34,215.9-4.57C953.1,422.43,971,521.42,915.86,596.5c9.06,9.61,18.16,19.29,27.28,28.94,23.7,25.06,47.57,50,71,75.29,4.23,4.57,6.63,10.84,9.88,16.33ZM888.39,497.27A105.32,105.32,0,1,0,783,602.3,105.22,105.22,0,0,0,888.39,497.27Z" />
+                            </g>
+                        </g>
+                    </svg>
                 </div>
             </div>
             <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
@@ -122,6 +134,7 @@ onActivated(initVideoPlayer)
             </svg>
         </div>
         <div class="sidebar" v-show="sidebarShow">
+            <span>路漫漫其修远兮，<br> 吾将上下而求索！</span>
         </div>
     </div>
 </template>
@@ -132,21 +145,29 @@ onActivated(initVideoPlayer)
     flex-direction: column;
     overflow: hidden;
     --view-bg: #000;
-    --sidebar-bg: #373737;
+    --sidebar-btn-bg: #373737;
+    --sidebar-bg: var(--sidebar-btn-bg);
+    --sidebar-btn-svg-color: #fff;
+    --sidebar-collapse-btn-svg-color: #fff;
     background: var(--view-bg);
 }
 
 .video-playing-view .spacing {
-    margin-left: 15px;
+    margin-left: 20px;
 }
 
 .video-playing-view .header {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
     height: 56px;
     min-height: 56px;
     display: flex;
     align-items: center;
     -webkit-app-region: drag;
-    z-index: 89;
+    /*z-index: 89;*/
+    z-index: 90;
     background: var(--view-bg);
 }
 
@@ -172,14 +193,20 @@ onActivated(initVideoPlayer)
     padding-bottom: 8px;
 }
 
-.video-playing-view .header .action .text-btn {
+.video-playing-view .header .action .btn {
     color: #fff;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.video-playing-view .next-btn svg {
+.video-playing-view .search-video-btn svg {
+    position: relative;
+    top: 2px;
+}
+
+.video-playing-view .search-video-btn svg,
+.video-playing-view .list-btn svg {
     fill: #fff;
     stroke: #fff;
 }
@@ -223,10 +250,10 @@ onActivated(initVideoPlayer)
 .video-playing-view .sidebar-btn {
     position: absolute;
     right: 0px;
-    top: 45%;
+    top: calc(50% - 57px);
     width: 30px;
     height: 114px;
-    background: var(--sidebar-bg);
+    background: var(--sidebar-btn-bg);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -235,10 +262,15 @@ onActivated(initVideoPlayer)
     border-bottom-left-radius: 5px;
     z-index: 99;
     opacity: 0.68;
+    cursor: pointer;
 }
 
 .video-playing-view:hover .sidebar-btn {
-    visibility: hidden;
+    visibility: visible;
+}
+
+.video-playing-view .sidebar-btn svg {
+    fill: var(--sidebar-btn-svg-color);
 }
 
 .video-playing-view .sidebar-btn:hover {
@@ -247,12 +279,18 @@ onActivated(initVideoPlayer)
 
 .video-playing-view .sidebar-collapse-btn {
     visibility: visible;
-    right: 404px;
+    right: 403px;
     opacity: 1;
+    z-index: 100;
+    background: var(--sidebar-bg);
+    /*
+    border-right: 1px solid transparent;
+    box-shadow: -3px 0px 3px #222;
+    */
 }
 
-.video-playing-view .sidebar-btn svg {
-    fill: #fff;
+.video-playing-view .sidebar-collapse-btn svg {
+    fill: var(--sidebar-collapse-btn-svg-color);
 }
 
 .video-playing-view .sidebar {
@@ -264,5 +302,13 @@ onActivated(initVideoPlayer)
     width: 404px;
     height: 100%;
     z-index: 99;
+    box-shadow: -1px 0px 3px #000;
+
+    color: var(--sidebar-collapse-btn-svg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--content-text-module-title3-size);
+    line-height: 43px;
 }
 </style>

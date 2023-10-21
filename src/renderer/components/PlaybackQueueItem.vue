@@ -8,7 +8,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
 import { Playlist } from '../../common/Playlist';
-import { toTrimString } from '../../common/Utils';
+import { coverDefault, toTrimString } from '../../common/Utils';
 
 
 
@@ -56,9 +56,9 @@ const removeItem = () => {
     const { data: track } = props
     removeTrack(track)
     if (queueTracksSize.value > 0) {
-        let msg = "歌曲已删除！"
-        if (Playlist.isFMRadioType(track)) msg = "电台已删除！"
-        else if (Playlist.isAnchorRadioType(track)) msg = "音频已删除！"
+        let msg = "歌曲已删除"
+        if (Playlist.isFMRadioType(track)) msg = "电台已删除"
+        else if (Playlist.isAnchorRadioType(track)) msg = "音频已删除"
         showToast(msg)
     }
 }
@@ -79,7 +79,7 @@ const isMvBtnShow = computed(() => {
         @dblclick="" @contextmenu="onContextMenu">
         <div class="item-wrap">
             <div class="left">
-                <img class="cover" v-lazy="data.cover" />
+                <img class="cover" v-lazy="coverDefault(data.cover)" />
             </div>
             <div class="right">
                 <div class="data">
@@ -98,7 +98,7 @@ const isMvBtnShow = computed(() => {
                     </div>
                 </div>
                 <div class="action">
-                    <svg v-show="isMvBtnShow" @click="playMv(data)" width="18" height="15" viewBox="0 0 1024 853.52"
+                    <svg v-show="isMvBtnShow" @click="playMv(data)" width="18" height="16" viewBox="0 0 1024 853.52"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">

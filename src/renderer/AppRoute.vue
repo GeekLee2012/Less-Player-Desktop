@@ -37,6 +37,7 @@ const router = useRouter()
 const setupRouter = () => {
     router.beforeResolve((to, from) => {
         if (isDevEnv()) console.log("[ ROUTE ] ==>>> " + to.path)
+
         autoSwitchExploreMode(to, from)
         highlightPlatform(to)
         highlightNavigationCustomPlaylist(to, from)
@@ -100,10 +101,11 @@ const autoSwitchSearchPlaceHolder = (to) => {
     } else if (path.includes('/userhome')) {
         index = 7
     }
+    const MINUTE = 60000
     setSearchPlaceHolderIndex(index)
     searchPlaceHolderTimer = setTimeout(() => {
         if (index != 0) setSearchPlaceHolderIndex(0)
-    }, 60000)
+    }, MINUTE)
 
 }
 

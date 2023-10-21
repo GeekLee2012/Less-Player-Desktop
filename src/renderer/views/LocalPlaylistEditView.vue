@@ -9,7 +9,7 @@ export default {
 import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
-import { useIpcRenderer } from '../../common/Utils';
+import { useIpcRenderer, coverDefault } from '../../common/Utils';
 
 
 
@@ -24,10 +24,12 @@ const ipcRenderer = useIpcRenderer()
 const { showToast } = useAppCommonStore()
 const titleRef = ref(null)
 const tagsRef = ref(null)
-const aboutRef = ref(null)
-const coverRef = ref(null)
+//const aboutRef = ref(null)
+//const coverRef = ref(null)
 const invalid = ref(false)
-const detail = reactive({ title: null, tags: null, about: null, cover: null })
+const detail = reactive({ title: '', tags: '', about: '', cover: '' })
+const isActionDisabled = ref(false)
+const setActionDisabled = (value) => isActionDisabled.value = value
 
 //TODO
 const { addLocalPlaylist, updateLocalPlaylist, getLocalPlaylist } = useLocalMusicStore()
@@ -39,11 +41,7 @@ const loadLocalPlaylist = () => {
     const playlist = getLocalPlaylist(id)
     if (!playlist) return
     const { title, tags, about, cover } = playlist
-    Object.assign(detail, { id })
-    if (cover) Object.assign(detail, { cover })
-    if (tags) Object.assign(detail, { tags })
-    if (title) Object.assign(detail, { title })
-    if (about) Object.assign(detail, { about })
+    Object.assign(detail, { id, title, tags, about, cover })
 }
 
 const checkValid = () => {
@@ -52,22 +50,27 @@ const checkValid = () => {
 }
 
 const submit = () => {
+    /*
     let title = titleRef.value.value.trim()
     let tags = tagsRef.value.value.trim()
     let about = aboutRef.value.value.trim()
     let cover = coverRef.value.src
+    */
+    let { title, tags, about, cover } = detail
     if (title.length < 1) {
         invalid.value = true
         return
     }
-    let text = "歌单创建成功！"
+    let text = "歌单创建成功"
     if (!props.id) {
         addLocalPlaylist(title, tags, about, cover)
     } else {
         updateLocalPlaylist(props.id, title, tags, about, cover)
-        text = "歌单已保存！"
+        text = "歌单已保存"
     }
-    showToast(text, backward)
+    setActionDisabled(true)
+    showToast(text)
+    backward()
 }
 
 //TODO
@@ -75,11 +78,15 @@ const updateCover = async () => {
     if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-image')
     if (result.length > 0) {
+        /*
         const title = titleRef.value.value.trim()
         const tags = tagsRef.value.value.trim()
         const about = aboutRef.value.value.trim()
         const cover = result[0]
         Object.assign(detail, { title, tags, about, cover })
+        */
+        const cover = result[0]
+        Object.assign(detail, { cover })
     }
 }
 
@@ -95,7 +102,7 @@ onMounted(() => loadLocalPlaylist())
         </div>
         <div class="center">
             <div>
-                <img class="cover" v-lazy="detail.cover" ref="coverRef" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
             </div>
             <div class="right">
@@ -105,31 +112,39 @@ onMounted(() => loadLocalPlaylist())
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
+                        <input type="text" v-model="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
                             placeholder="歌单名称，最多支持输入99个字符" />
                     </div>
                 </div>
-                <div class="form-row">
+                <div class="form-row" v-show="false">
                     <div>
                         <span>标签</span>
                         <span class="required"> （暂时还不支持）</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="detail.tags" ref="tagsRef" :class="{ invalid }" maxlength="128"
+                        <input type="text" v-model="detail.tags" ref="tagsRef" :class="{ invalid }" maxlength="128"
                             placeholder="标签，歌单分类；多个标签时，以英文状态下的逗号(,)分隔" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div><span>封面图片</span></div>
+                    <div @keydown.stop="">
+                        <input type="text" v-model="detail.cover" placeholder="封面图片URL，支持本地文件URL、在线URL" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="detail.about" ref="aboutRef" maxlength="1024"
+                        <textarea v-model="detail.about" maxlength="1024"
                             placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多支持输入1024个字符">
-                                </textarea>
+                        </textarea>
                     </div>
                 </div>
                 <div class="action">
-                    <SvgTextButton :leftAction="submit" text="保存"></SvgTextButton>
-                    <SvgTextButton :leftAction="backward" text="取消" class="spacing"></SvgTextButton>
+                    <SvgTextButton :leftAction="submit" text="保存" :disabled="isActionDisabled">
+                    </SvgTextButton>
+                    <SvgTextButton :leftAction="backward" text="取消" class="spacing" :disabled="isActionDisabled">
+                    </SvgTextButton>
                 </div>
             </div>
         </div>
@@ -224,7 +239,8 @@ onMounted(() => loadLocalPlaylist())
 }
 
 #local-playlist-edit-view .center .form-row textarea {
-    height: 188px;
+    /*height: 188px;*/
+    height: 193px;
     padding: 8px;
 }
 

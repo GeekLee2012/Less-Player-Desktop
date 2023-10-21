@@ -21,8 +21,7 @@ import TextListControl from '../components/TextListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { Album } from '../../common/Album';
-import { Track } from '../../common/Track';
-
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -31,7 +30,7 @@ const props = defineProps({
     id: String
 })
 
-const { playAlbum } = inject('player')
+const { playAlbum, addAlbumToQueue } = inject('player')
 
 const { albumId, albumName, albumCover, platform,
     artistName, publishTime, company,
@@ -72,12 +71,17 @@ const visitTab = (index, isClick) => {
 
 const playAll = () => {
     const data = allSongs.value
-    playAlbum({ ...toRaw(detail), data })
+    const album = { ...toRaw(detail), data }
+    playAlbum(album, '即将为您播放全部')
 }
 
 const addAll = (text) => {
-    addTracks(allSongs.value)
-    showToast(text || "歌曲已全部添加！")
+    //addTracks(allSongs.value)
+    //showToast(text || "歌曲已全部添加")
+
+    const data = allSongs.value
+    const album = { ...toRaw(detail), data }
+    addAlbumToQueue(album, text || "歌曲已全部添加")
 }
 
 //TODO
@@ -85,13 +89,13 @@ const { addFavoriteAlbum, removeFavoriteAlbum, isFavoriteAlbum } = useUserProfil
 const favorited = ref(false)
 const toggleFavorite = () => {
     favorited.value = !favorited.value
-    let text = "专辑收藏成功！"
+    let text = "专辑收藏成功"
     if (favorited.value) {
         const { title, cover, publishTime } = detail
         addFavoriteAlbum(albumId.value, platform.value, title, cover, publishTime)
     } else {
         removeFavoriteAlbum(albumId.value, platform.value)
-        text = "专辑已取消收藏！"
+        text = "专辑已取消收藏"
     }
     showToast(text)
 }
@@ -223,7 +227,7 @@ const detectTitleHeight = () => {
 EventBus.on('ctxMenu-removeFromLocal', reloadAll)
 
 //TODO 需要梳理优化
-watch([platform, albumId], reloadAll, { immediate: true })
+watch([() => (props.platform), () => (props.id)], reloadAll, { immediate: true })
 watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
 
 EventBus.on('app-resize', detectTitleHeight)
@@ -233,7 +237,7 @@ EventBus.on('app-resize', detectTitleHeight)
     <div id="album-detail-view" ref="detailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="Track.coverDefault({ cover: albumCover })" />
+                <img class="cover" v-lazy="coverDefault(albumCover)" />
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="albumName" ref="titleRef"></div>

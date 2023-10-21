@@ -35,7 +35,7 @@ const visitItem = (item) => {
 <style>
 .artistlist-ctl .image-text-tile {
     margin-top: 25px !important;
-    margin-bottom: 15px;
+    margin-bottom: 10px !important;
 }
 
 .artistlist-ctl .content {
@@ -51,7 +51,17 @@ const visitItem = (item) => {
 
 .artistlist-ctl .image-text-tile .title {
     text-align: center !important;
-    margin-top: 10px !important;
+    margin-top: 5px !important;
+}
+
+
+.artistlist-ctl .image-text-tile-card {
+    box-shadow: none !important;
+    background-color: transparent !important;
+}
+
+.artistlist-ctl .image-text-tile-card .cover {
+    height: var(--others-image-text-tile-cover-size) !important;
 }
 
 .artistlist-ctl .tiles-loading-mask .tile {
@@ -68,15 +78,18 @@ const visitItem = (item) => {
 .artistlist-ctl .tiles-loading-mask .tile .title {
     text-align: center !important;
     margin-top: 10px !important;
-    width: 75%;
+    width: 80%;
+    height: 36px !important;
+    border-radius: 3px;
 }
 
-.artistlist-ctl .image-text-tile-card .cover {
+.artistlist-ctl .tiles-card-loading-mask .tile {
+    min-height: auto !important;
+    margin-top: 25px !important;
+    margin-bottom: 10px !important;
+}
+
+.artistlist-ctl .tiles-card-loading-mask .tile .cover {
     height: var(--others-image-text-tile-cover-size) !important;
-}
-
-.artistlist-ctl .image-text-tile-card {
-    box-shadow: none !important;
-    background-color: transparent !important;
 }
 </style>

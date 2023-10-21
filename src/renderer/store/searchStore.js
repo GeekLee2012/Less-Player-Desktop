@@ -19,8 +19,11 @@ const ALL_TABS = [{
     code: 'artists',
     name: '歌手',
     text: '约找到0个歌手'
-}
-]
+}, {
+    code: 'videos',
+    name: '视频',
+    text: '约找到0个视频'
+}]
 
 export const useSearchStore = defineStore('search', {
     state: () => ({
@@ -32,7 +35,8 @@ export const useSearchStore = defineStore('search', {
         foundSongs: [],
         foundPlaylists: [],
         foundAlbums: [],
-        foundArtists: []
+        foundArtists: [],
+        foundVideos: []
     }),
     getters: {
         platforms() {
@@ -40,8 +44,7 @@ export const useSearchStore = defineStore('search', {
             return activePlatforms('search')
         },
         activeTabCode(state) {
-            if (this.activeTab < 0) return ''
-            return this.tabs[this.activeTab].code
+            return this.activeTab < 0 ? '' : this.tabs[this.activeTab].code
         }
     },
     actions: {
@@ -60,14 +63,11 @@ export const useSearchStore = defineStore('search', {
             this.foundPlaylists.length = 0
             this.foundAlbums.length = 0
             this.foundArtists.length = 0
+            this.foundVideos.length = 0
         },
         updateTabTipText(length) {
             const index = this.activeTab
-            if (index < 0) {
-                this.tabTipText = ''
-            } else {
-                this.tabTipText = this.tabs[index].text.replace('0', length)
-            }
+            this.tabTipText = index < 0 ? '' : this.tabs[index].text.replace('0', length)
         },
         currentPlatform() {
             const index = this.currentPlatformIndex
@@ -89,6 +89,9 @@ export const useSearchStore = defineStore('search', {
         },
         isArtistsTab() {
             return this.activeTabCode == 'artists'
+        },
+        isVideosTab() {
+            return this.activeTabCode == 'videos'
         },
         resetSearch() {
             this.setActiveTab(0)

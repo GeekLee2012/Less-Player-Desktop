@@ -47,7 +47,7 @@
   --others-image-text-tile-mask-width: var(--others-image-text-tile-cover-size);
   --others-card-image-text-tile-title-width: 152px;
   --others-image-text-tile-card-cover-height: 152px;
-  --others-image-text-tile-card-min-height: 218px;
+  --others-image-text-tile-card-min-height: 224px;
   --others-theme-preview-tile-width: 160px;
   --others-theme-preview-tile-height: 95px;
   --others-progressbar-height: 3px;
@@ -176,6 +176,10 @@ textarea {
 
 .list-item-ctx-menu-trigger {
   background: var(--content-list-item-hover-bg-color);
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 

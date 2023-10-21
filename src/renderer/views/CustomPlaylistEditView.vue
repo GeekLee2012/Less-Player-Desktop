@@ -10,7 +10,7 @@ import { onMounted, ref, reactive, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { toTrimString, useIpcRenderer } from '../../common/Utils';
+import { toTrimString, useIpcRenderer, coverDefault } from '../../common/Utils';
 import ArtistControl from '../components/ArtistControl.vue';
 import AlbumControl from '../components/AlbumControl.vue';
 
@@ -27,10 +27,12 @@ const ipcRenderer = useIpcRenderer()
 const { showToast, showFailToast, setRouterCtxCacheItem } = useAppCommonStore()
 const { routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const titleRef = ref(null)
-const aboutRef = ref(null)
-const coverRef = ref(null)
+//const aboutRef = ref(null)
+//const coverRef = ref(null)
 const invalid = ref(false)
-const detail = reactive({ title: null, about: null, cover: null })
+const detail = reactive({ title: '', about: '', cover: '' })
+const isActionDisabled = ref(false)
+const setActionDisabled = (value) => isActionDisabled.value = value
 
 //TODO
 const { addCustomPlaylist, updateCustomPlaylist,
@@ -43,10 +45,7 @@ const loadCustomPlaylist = () => {
     const playlist = getCustomPlaylist(id)
     if (!playlist) return
     const { title, about, cover } = playlist
-    Object.assign(detail, { id })
-    if (cover) Object.assign(detail, { cover })
-    if (title) Object.assign(detail, { title })
-    if (about) Object.assign(detail, { about })
+    Object.assign(detail, { id, title, about, cover })
 }
 
 const checkValid = () => {
@@ -54,21 +53,24 @@ const checkValid = () => {
     invalid.value = (!title || title.trim().length < 1)
 }
 
-const submit = () => {
+const submit = (isWithData) => {
+    /*
     let title = titleRef.value.value.trim()
     let about = aboutRef.value.value.trim()
     let cover = coverRef.value.src
+    */
+    let { title, about, cover } = detail
     if (title.length < 1) {
         invalid.value = true
         return
     }
-    let text = "歌单创建成功！", data = []
+    let text = "歌单创建成功", data = []
     if (!props.id) {
         let isMoveAction = false, fromId = null
-        if (routerCtxCacheItem.value
+        if (isWithData && routerCtxCacheItem.value
             && routerCtxCacheItem.value.id == 'createPlaylistWithData') {
             const { data: cacheData, isMoveAction: cacheMoveAction, fromId: cacheFromId } = routerCtxCacheItem.value
-            text = (isMoveAction ? "歌单已创建！<br>且歌曲已移动成功！" : "歌单已创建！<br>且歌曲已添加成功！")
+            text = (isMoveAction ? "歌单已创建！<br>且歌曲已移动成功" : "歌单已创建！<br>且歌曲已添加成功")
             data = cacheData
             isMoveAction = cacheMoveAction
             fromId = cacheFromId
@@ -84,9 +86,11 @@ const submit = () => {
         if (routerCtxCacheItem.value) setRouterCtxCacheItem(null)
     } else {
         updateCustomPlaylist(props.id, title, about, cover)
-        text = "歌单已保存！"
+        text = "歌单已保存"
     }
-    showToast(text, backward)
+    setActionDisabled(true)
+    showToast(text)
+    backward()
 }
 
 const cancel = () => {
@@ -99,10 +103,8 @@ const updateCover = async () => {
     if (!ipcRenderer) return
     const result = await ipcRenderer.invoke('open-image')
     if (result.length > 0) {
-        const title = titleRef.value.value.trim()
-        const about = aboutRef.value.value.trim()
         const cover = result[0]
-        Object.assign(detail, { title, about, cover })
+        Object.assign(detail, { cover })
     }
 }
 
@@ -158,7 +160,7 @@ onMounted(() => loadCustomPlaylist())
         </div>
         <div class="center">
             <div class="left">
-                <img class="cover" v-lazy="detail.cover" ref="coverRef" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
                 <div class="cache-data" v-show="computedRouterCache.length > 0">
                     <div class="content-text-highlight">{{ computedCacheTitle }}({{ computedRouterCache.length }})</div>
@@ -174,24 +176,32 @@ onMounted(() => loadCustomPlaylist())
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" :value="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
+                        <input type="text" v-model="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
                             placeholder="歌单名称，最多支持输入99个字符" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div><span>封面图片</span></div>
+                    <div @keydown.stop="">
+                        <input type="text" v-model="detail.cover" placeholder="封面图片URL，支持本地文件URL、在线URL" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
-                        <textarea :value="detail.about" ref="aboutRef" maxlength="1024"
+                        <textarea v-model="detail.about" maxlength="1024"
                             placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多支持输入1024个字符">
-                                </textarea>
+                        </textarea>
                     </div>
                 </div>
                 <div class="action">
-                    <SvgTextButton :leftAction="submit" text="保存"></SvgTextButton>
-                    <SvgTextButton v-show="computedAddWithDataAvailable" :leftAction="submit" :text="computedSumbitText"
-                        class="spacing">
+                    <SvgTextButton :leftAction="() => submit()" text="保存" :disabled="isActionDisabled">
                     </SvgTextButton>
-                    <SvgTextButton :leftAction="cancel" text="取消" class="spacing"></SvgTextButton>
+                    <SvgTextButton v-show="computedAddWithDataAvailable" :leftAction="() => submit(true)"
+                        :text="computedSumbitText" class="spacing" :disabled="isActionDisabled">
+                    </SvgTextButton>
+                    <SvgTextButton :leftAction="cancel" text="取消" class="spacing" :disabled="isActionDisabled">
+                    </SvgTextButton>
                 </div>
             </div>
         </div>
@@ -316,7 +326,7 @@ onMounted(() => loadCustomPlaylist())
 }
 
 #custom-playlist-edit-view .center .form-row textarea {
-    height: 280px;
+    height: 200px;
     padding: 8px;
 }
 

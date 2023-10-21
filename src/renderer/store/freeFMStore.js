@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { Track } from "../../common/Track";
-import { randomTextWithinAlphabetNums } from "../../common/Utils";
+import { coverDefault, randomTextWithinAlphabetNums } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 
 
@@ -33,7 +33,7 @@ export const useFreeFMStore = defineStore('freeFM', {
             const updated = created
             tags = tags || ''
             about = about || ''
-            cover = cover || 'default_cover.png'
+            cover = cover || ''
 
             const platform = 'freefm'
             const artist = [{ id: '', name: '自由FM' }]
@@ -56,7 +56,7 @@ export const useFreeFMStore = defineStore('freeFM', {
             const { data } = this.freeRadios[index]
             if (data && data.length > 0) {
                 const album = { id: '', name: tags || '自由FM' }
-                cover = cover || 'default_cover.png'
+                cover = coverDefault(cover)
 
                 data[0].lyric = null    //重置歌词
                 Object.assign(data[0], {

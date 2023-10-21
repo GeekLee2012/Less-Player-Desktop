@@ -1,7 +1,6 @@
 import { Lyric } from './Lyric';
-import { isBlank, toTrimString } from './Utils';
+import { isBlank, toTrimString, coverDefault } from './Utils';
 import { toMmss } from './Times';
-import { DEFAULT_COVER_BASE64 } from './Constants';
 
 
 
@@ -195,7 +194,7 @@ export class Track {
     }
 
     static coverDefault(track) {
-        return Track.hasCover(track) ? track.cover : DEFAULT_COVER_BASE64
+        return track ? coverDefault(track.cover) : coverDefault()
     }
 
     static hasAlbum(track) {

@@ -81,13 +81,13 @@ const importRadios = async () => {
                 item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
                 return item
             })
-        let msg = '导入FM电台失败！', success = false
+        let msg = '导入FM电台失败', success = false
         if (radios && radios.length > 0) {
             radios.forEach(item => {
                 const { title, url, streamType, cover, tags, about } = item
                 addFreeRadio(title, url, streamType, tags, about, cover)
             })
-            msg = `导入FM电台已完成！<br>共${radios.length}个电台！`
+            msg = `导入FM电台已完成！<br>共${radios.length}个电台`
             success = true
         }
         decreaseImportTaskCount()
@@ -105,7 +105,7 @@ const removeAll = async () => {
 
     resetAll()
     filteredData.value = null
-    showToast('自由FM已全部清空!')
+    showToast('自由FM已全部清空')
 }
 
 const toggleUseSearchBar = () => {

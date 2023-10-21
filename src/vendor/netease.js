@@ -4,29 +4,35 @@ import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { toMillis, toYmd } from "../common/Times";
 import { Lyric } from "../common/Lyric";
-import forge from 'node-forge';
+import forge from "node-forge";
 import { Album } from "../common/Album";
-import { isBlank, randomText, toUtf8 } from "../common/Utils";
-import CryptoJS from 'crypto-js';
+import {
+    base64Parse, base64Stringify, isBlank,
+    md5, randomText, hexParse,
+    toTrimString, utf8Parse, hexStringify, utf8Stringify
+} from "../common/Utils";
+import CryptoJS from "crypto-js";
 import { useSettingStore } from "../renderer/store/settingStore";
 
 
 
 //常量
-const MODULUS = "00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b72"
-    + "5152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbd"
-    + "a92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe48"
-    + "75d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7"
-const NONCE = "0CoJUm6Qyw8W8jud"
-const PUBLIC_KEY = "010001"
-const IV = "0102030405060708"
-const CHOICE = "012345679abcdef"
+const MODULUS = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b72'
+    + '5152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbd'
+    + 'a92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe48'
+    + '75d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7'
+const NONCE = '0CoJUm6Qyw8W8jud'
+const PUBLIC_KEY = '010001'
+const IV = '0102030405060708'
+const CHOICE = '012345679abcdef'
+const EAPI_KEY = 'e82ckenh8dichen8'
+const EAPI_PADDING_KEY = '36cd479b6b5'
 
 //URL
-const BASE_URL = "https://music.163.com"
+const BASE_URL = 'https://music.163.com'
 
 const rsaEncrypt = (src, publicKey, modulus) => {
-    src = src.split('').reverse().join('')
+    src = toTrimString(src).split('').reverse().join('')
 
     const m = new forge.jsbn.BigInteger(modulus, 16)
     const k = new forge.jsbn.BigInteger(publicKey, 16)
@@ -35,33 +41,65 @@ const rsaEncrypt = (src, publicKey, modulus) => {
     return s.modPow(k, m).toString(16).padStart(256, '0')
 }
 
-const aesEncrypt = (src, secKey, iv) => {
-    secKey = toUtf8(secKey)
-    iv = toUtf8(iv)
-    src = toUtf8(src)
-    const buffer = CryptoJS.AES.encrypt(src, secKey,
-        { iv, mode: CryptoJS.mode.CBC })
+const aesEncrypt = (src, mode, secKey, iv) => {
+    src = utf8Parse(src)
+    mode = mode || CryptoJS.mode.CBC
+    secKey = utf8Parse(secKey)
+    iv = utf8Parse(iv)
+    return CryptoJS.AES.encrypt(src, secKey, { mode, iv, padding: CryptoJS.pad.Pkcs7 })
+}
+
+const aesEncryptText = (src, mode, secKey, iv) => {
+    return aesEncrypt(src, mode, secKey, iv).toString()
+}
+
+const aesEncryptHexText = (src, mode, secKey, iv) => {
+    const buffer = aesEncrypt(src, mode, secKey, iv)
+    return hexStringify(buffer.ciphertext)
+}
+
+const aesDecryptText = (src, mode, secKey, iv) => {
+    src = base64Stringify(hexParse(src))
+    mode = mode || CryptoJS.mode.CBC
+    secKey = utf8Parse(secKey)
+    iv = utf8Parse(iv)
+    const buffer = CryptoJS.AES.decrypt(src, secKey, { mode, iv, padding: CryptoJS.pad.Pkcs7 })
     return buffer.toString()
 }
 
+//Web版本API
 const weapi = (text) => {
     if (typeof (text) === 'object') text = JSON.stringify(text)
-    let secretkey = randomText(CHOICE, 16)
-    let base64Text = aesEncrypt(text, NONCE, IV)
-    const params = aesEncrypt(base64Text, secretkey, IV)
+    const secretkey = randomText(CHOICE, 16)
+    const base64Text = aesEncryptText(text, null, NONCE, IV)
+    const params = aesEncryptText(base64Text, null, secretkey, IV)
     const encSecKey = rsaEncrypt(secretkey, PUBLIC_KEY, MODULUS)
     return { params, encSecKey }
 }
 
-const trackIdsParam = (ids) => {
-    const c = []
-    ids.forEach(id => {
-        c.push({ id })
-    })
-    return { c: JSON.stringify(c), ids: JSON.stringify(ids) }
+//客户端版本API，参考：https://github.com/Binaryify/NeteaseCloudMusicApi
+const eapi = (url, text) => {
+    if (typeof (text) === 'object') text = JSON.stringify(text)
+    const digest = md5(`nobody${url}use${text}md5forencrypt`)
+    const data = [url, EAPI_PADDING_KEY, text, EAPI_PADDING_KEY, digest]
+    const src = data.join('-')
+    const params = aesEncryptHexText(src, CryptoJS.mode.ECB, EAPI_KEY, '').toUpperCase()
+    return { params }
 }
 
-const searchParam = (keyword, type) => {
+const eapiDecrypt = (src) => {
+    return aesDecryptText(src, CryptoJS.mode.ECB, EAPI_KEY, '')
+}
+
+const trackIdsParam = (ids) => {
+    const c = ids.map(id => ({ id }))
+    return {
+        c: JSON.stringify(c),
+        ids: JSON.stringify(ids)
+    }
+}
+
+const searchParam = (keyword, type, limit) => {
     return {
         hlpretag: '<span class="s-fc7">',
         hlposttag: '</span>',
@@ -69,8 +107,18 @@ const searchParam = (keyword, type) => {
         type,
         offset: 0,
         total: 0,
-        limit: 30,
-        csrf_token: ''
+        limit: limit || 30,
+        csrf_token: '',
+    }
+}
+
+const searchParam_v1 = (keyword, type, limit) => {
+    return {
+        s: keyword,
+        type: type,
+        offset: 0,
+        limit: limit || 30,
+        total: true
     }
 }
 
@@ -84,8 +132,8 @@ const getCoverByQuality = (url) => {
     ])
 }
 
-const DEFAULT_CATE = new Category("推荐")
-DEFAULT_CATE.add("默认", '')
+const DEFAULT_CATE = new Category('推荐')
+DEFAULT_CATE.add('默认', '')
 
 export class NetEase {
     static CODE = 'netease'
@@ -95,7 +143,7 @@ export class NetEase {
     //全部分类
     static categories() {
         return new Promise((resolve) => {
-            const url = "https://music.163.com/discover/playlist"
+            const url = 'https://music.163.com/discover/playlist'
             getDoc(url).then(doc => {
                 const result = { platform: NetEase.CODE, data: [], orders: [] }
                 result.data.push(DEFAULT_CATE)
@@ -122,9 +170,8 @@ export class NetEase {
     static square(cate, offset, limit, page, order) {
         if (cate == NetEase.TOPLIST_CODE) return NetEase.toplist(cate, offset, limit, page)
         return new Promise((resolve) => {
-            const url = "https://music.163.com/discover/playlist"
-                + "?cat=" + encodeURIComponent(cate) + "&order=hot"
-                + "&limit=" + limit + "&offset=" + offset
+            const encCate = encodeURIComponent(cate)
+            const url = `https://music.163.com/discover/playlist?cat=${encCate}&order=hot&limit=${limit}&offset=${offset}`
             getDoc(url).then(doc => {
                 const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
                 const listEl = doc.querySelectorAll("#m-pl-container li")
@@ -142,7 +189,7 @@ export class NetEase {
 
                     if (titleEl) {
                         title = titleEl.textContent
-                        itemUrl = BASE_URL + titleEl.getAttribute('href')
+                        itemUrl = titleEl.getAttribute('href')
                         id = itemUrl.split('=')[1]
                     }
 
@@ -151,7 +198,7 @@ export class NetEase {
                     }
 
                     if (id && itemUrl) {
-                        const playlist = new Playlist(id, NetEase.CODE, cover, title, itemUrl)
+                        const playlist = new Playlist(id, NetEase.CODE, cover, title, `${BASE_URL}${itemUrl}`)
                         playlist.listenNum = listenNum
                         result.data.push(playlist)
                     }
@@ -191,7 +238,7 @@ export class NetEase {
 
                     if (titleEl) {
                         title = titleEl.textContent
-                        itemUrl = BASE_URL + titleEl.getAttribute('href')
+                        itemUrl = titleEl.getAttribute('href')
                         id = itemUrl.split('=')[1]
                     }
 
@@ -210,14 +257,14 @@ export class NetEase {
         if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) return NetEase.anchorRadioDetail(id, offset, limit, page)
         return new Promise((resolve, reject) => {
             const result = new Playlist()
-            let url = "https://music.163.com/weapi/v3/playlist/detail"
+            let url = 'https://music.163.com/weapi/v3/playlist/detail'
             let param = {
                 id,
                 offset: 0,
                 total: true,
                 limit: 1000,
                 n: 1000,
-                csrf_token: ""
+                csrf_token: ''
             }
             let reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
@@ -237,7 +284,7 @@ export class NetEase {
                 result.total = ids.length
                 const end = Math.min((offset + limit), result.total)
 
-                url = "https://music.163.com/weapi/v3/song/detail"
+                url = 'https://music.163.com/weapi/v3/song/detail'
                 param = trackIdsParam(ids.slice(offset, end))
                 reqBody = weapi(param)
                 postJson(url, reqBody).then(json => {
@@ -261,7 +308,7 @@ export class NetEase {
     static playDetail(id, track) {
         return new Promise((resolve, reject) => {
             NetEase.resolveAnchorRadio(id, track).then(resolvedId => {
-                const url = "https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token="
+                const url = 'https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token='
                 const param = {
                     ids: [resolvedId],
                     level: 'standard',
@@ -282,7 +329,7 @@ export class NetEase {
     //歌词
     static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/weapi/song/lyric?csrf_token="
+            const url = 'https://music.163.com/weapi/song/lyric?csrf_token='
             const param = {
                 id,
                 lv: -1,
@@ -380,7 +427,7 @@ export class NetEase {
     //歌手详情: 简介
     static artistDetailAbout(id) {
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/artist/desc" + "?id=" + id
+            const url = `https://music.163.com/artist/desc?id=${id}`
             getDoc(url).then(doc => {
                 const desc = doc.querySelector(".n-artdesc")
                 const result = desc ? desc.innerHTML : null
@@ -392,7 +439,7 @@ export class NetEase {
     //专辑详情
     static albumDetail(id) {
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/album" + "?id=" + id
+            const url = `https://music.163.com/album?id=${id}`
             getDoc(url).then(doc => {
                 const infoEl = doc.querySelector('.m-info ')
                 let cover = infoEl.querySelector('.u-cover img').getAttribute('src')
@@ -441,11 +488,18 @@ export class NetEase {
 
     //搜索: 歌曲
     static searchSongs(keyword, offset, limit, page) {
+        keyword = toTrimString(keyword)
         return new Promise((resolve, reject) => {
-            keyword = keyword.trim()
-            const url = "https://music.163.com/weapi/cloudsearch/get/web"
+            /*
+            const url = 'https://music.163.com/weapi/cloudsearch/get/web'
             const param = searchParam(keyword, 1)
             const reqBody = weapi(param)
+            */
+
+            const url = 'https://music.163.com/eapi/cloudsearch/pc'
+            const param = searchParam_v1(keyword, 1, 60)
+            const reqBody = eapi('/api/cloudsearch/pc', param)
+
             const result = { platform: NetEase.CODE, offset, limit, page, data: [] }
             postJson(url, reqBody).then(json => {
                 const list = json.result.songs
@@ -464,28 +518,44 @@ export class NetEase {
 
     //搜索: 歌单
     static searchPlaylists(keyword, offset, limit, page) {
+        keyword = toTrimString(keyword)
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/weapi/cloudsearch/get/web"
+            /*
+            const url = 'https://music.163.com/weapi/cloudsearch/get/web'
             const param = searchParam(keyword, 1000)
             const reqBody = weapi(param)
+            */
+            const url = 'https://music.163.com/eapi/cloudsearch/pc'
+            const param = searchParam_v1(keyword, 1000, 100)
+            const reqBody = eapi('/api/cloudsearch/pc', param)
+
+            const result = { platform: NetEase.CODE, offset, limit, page, data: [] }
             postJson(url, reqBody).then(json => {
                 const list = json.result.playlists
                 const data = list.map(item => {
                     const playlist = new Playlist(item.id, NetEase.CODE, item.coverImgUrl, item.name)
                     return playlist
                 })
-                const result = { platform: NetEase.CODE, offset, limit, page, data }
+                if (data && data.length > 0) result.data.push(...data)
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 
     //搜索: 专辑
     static searchAlbums(keyword, offset, limit, page) {
+        keyword = toTrimString(keyword)
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/weapi/cloudsearch/get/web"
+            /*
+            const url = 'https://music.163.com/weapi/cloudsearch/get/web'
             const param = searchParam(keyword, 10)
             const reqBody = weapi(param)
+            */
+            const url = 'https://music.163.com/eapi/cloudsearch/pc'
+            const param = searchParam_v1(keyword, 10, 75)
+            const reqBody = eapi('/api/cloudsearch/pc', param)
+
+            const result = { platform: NetEase.CODE, offset, limit, page, data: [] }
             postJson(url, reqBody).then(json => {
                 const list = json.result.albums
                 const data = list.map(item => {
@@ -493,21 +563,28 @@ export class NetEase {
                     album.publishTime = toYmd(item.publishTime)
                     return album
                 })
-                const result = { platform: NetEase.CODE, offset, limit, page, data }
+                if (data && data.length > 0) result.data.push(...data)
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
     }
 
     //搜索: 歌手
     static searchArtists(keyword, offset, limit, page) {
+        keyword = toTrimString(keyword)
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/weapi/cloudsearch/get/web"
+            /*
+            const url = 'https://music.163.com/weapi/cloudsearch/get/web'
             const param = searchParam(keyword, 100)
             const reqBody = weapi(param)
+            */
+            const url = 'https://music.163.com/eapi/cloudsearch/pc'
+            const param = searchParam_v1(keyword, 100)
+            const reqBody = eapi('/api/cloudsearch/pc', param)
+
+            const result = { platform: NetEase.CODE, offset, limit, page, data: [] }
             postJson(url, reqBody).then(json => {
                 const list = json.result.artists
-                const result = { platform: NetEase.CODE, offset, limit, page, data: [] }
                 if (list) {
                     result.data = list.map(item => ({
                         id: item.id,
@@ -518,8 +595,52 @@ export class NetEase {
                     }))
                 }
                 resolve(result)
-            })
+            }).catch(error => resolve(result))
         })
+    }
+
+    //搜索: 视频
+    static searchVideos(keyword, offset, limit, page) {
+        keyword = toTrimString(keyword)
+        return new Promise((resolve, reject) => {
+            /*
+            const url = 'https://music.163.com/weapi/cloudsearch/get/web'
+            const param = searchParam(keyword, 1014)
+            const reqBody = weapi(param)
+            */
+            const url = 'https://music.163.com/eapi/cloudsearch/pc'
+            const param = searchParam_v1(keyword, 1014, 60)
+            const reqBody = eapi('/api/cloudsearch/pc', param)
+
+            const result = { platform: NetEase.CODE, offset, limit, page, data: [] }
+            postJson(url, reqBody).then(json => {
+                const list = json.result.videos
+                if (list) {
+                    result.data = list.map(item => ({
+                        id: item.vid,
+                        vid: item.vid,
+                        platform: NetEase.CODE,
+                        title: item.title,
+                        cover: item.coverUrl,
+                        type: Playlist.VIDEO_TYPE,
+                        subtitle: NetEase.getVideoSutitle(item.creator),
+                        duration: item.durationms,
+                        listenNum: item.playTime
+                    }))
+                }
+                resolve(result)
+            }).catch(error => resolve(result))
+        })
+    }
+
+    static getVideoSutitle(user) {
+        let subtitle = ''
+        if (user && Array.isArray(user) && user.length > 0) {
+            const names = []
+            user.forEach(e => names.push(e.userName));
+            subtitle = names.join('、')
+        }
+        return subtitle
     }
 
     //歌手分类
@@ -712,7 +833,7 @@ export class NetEase {
 
     static anchorRadioCategories() {
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/discover/djradio"
+            const url = 'https://music.163.com/discover/djradio'
             getDoc(url).then(doc => {
                 const result = { platform: NetEase.CODE, data: [], orders: [] }
                 const category = new Category("分类")
@@ -741,10 +862,7 @@ export class NetEase {
     static anchorRadioSquare(cate, offset, limit, page, order) {
         order = order || 1
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/discover/djradio/category"
-                + "?id=" + cate + "&order=" + order + "&_hash=allradios"
-                + "&limit=" + limit + "&offset=" + offset
-
+            const url = `https://music.163.com/discover/djradio/category?id=${cate}&order=${order}&_hash=allradios&limit=${limit}&offset=${offset}`
             getDoc(url).then(doc => {
                 const result = { platform: NetEase.CODE, cate, offset, limit, page, total: 0, data: [] }
                 //优质新电台
@@ -765,12 +883,12 @@ export class NetEase {
 
                         if (titleEl) {
                             title = titleEl.textContent
-                            itemUrl = BASE_URL + titleEl.getAttribute('href')
+                            itemUrl = titleEl.getAttribute('href')
                             id = Playlist.ANCHOR_RADIO_ID_PREFIX + itemUrl.split('=')[1]
                         }
 
                         if (id && itemUrl) {
-                            const detail = new Playlist(id, NetEase.CODE, cover, title, itemUrl)
+                            const detail = new Playlist(id, NetEase.CODE, cover, title, `${BASE_URL}${itemUrl}`)
                             result.data.push(detail)
                         }
                     })
@@ -797,12 +915,12 @@ export class NetEase {
 
                     if (titleEl) {
                         title = titleEl.textContent
-                        itemUrl = BASE_URL + titleEl.getAttribute('href')
+                        itemUrl = titleEl.getAttribute('href')
                         id = Playlist.ANCHOR_RADIO_ID_PREFIX + itemUrl.split('=')[1]
                     }
 
                     if (id && itemUrl) {
-                        const detail = new Playlist(id, NetEase.CODE, cover, title, itemUrl)
+                        const detail = new Playlist(id, NetEase.CODE, cover, title, `${BASE_URL}${itemUrl}`)
                         result.data.push(detail)
                     }
                 })
@@ -813,9 +931,9 @@ export class NetEase {
 
     static anchorRadioDetail(id, offset, limit, page) {
         const resolvedId = id.replace(Playlist.ANCHOR_RADIO_ID_PREFIX, "")
+        const resolveOffset = (page - 1) * 100
         return new Promise((resolve, reject) => {
-            const url = "https://music.163.com/djradio?id=" + resolvedId
-                + "&order=1&_hash=programlist&limit=100&offset=" + ((page - 1) * 100)
+            const url = `https://music.163.com/djradio?id=${resolvedId}&order=1&_hash=programlist&limit=100&offset=${resolveOffset}`
             getDoc(url).then(doc => {
                 const coverEl = doc.querySelector(".m-info .cover img")
                 const title = doc.querySelector(".m-info .tit").textContent.trim()
@@ -868,13 +986,12 @@ export class NetEase {
 
     //视频播放详情：url、cover等
     static videoDetail(id, quality) {
-        //quality = quality || 1080
         return new Promise((resolve, reject) => {
-            let url = "https://music.163.com/weapi/v1/mv/detail?csrf_token="
+            let url = 'https://music.163.com/weapi/v1/mv/detail?csrf_token='
             let param = {
                 id,
-                type: 'MP4',
-                csrf_token: ""
+                type: 'MP4', //TODO
+                csrf_token: ''
             }
             let reqBody = weapi(param)
             postJson(url, reqBody).then(json => {
@@ -883,7 +1000,7 @@ export class NetEase {
                     maxQuality = Math.max(maxQuality, item.br)
                 })
                 maxQuality = maxQuality || 1080
-                url = "https://music.163.com/weapi/song/enhance/play/mv/url?csrf_token="
+                url = 'https://music.163.com/weapi/song/enhance/play/mv/url?csrf_token='
                 param = {
                     id,
                     r: maxQuality,

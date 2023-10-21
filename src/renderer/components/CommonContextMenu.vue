@@ -64,25 +64,25 @@ const addItemToQueue = () => {
     } else {
         addTrack(cache)
     }
-    toastAndHideMenu("歌曲添加成功！")
+    toastAndHideMenu("歌曲添加成功")
 }
 
 const playItemLater = () => {
     playTrackLater(commonCtxMenuCacheItem.value)
-    toastAndHideMenu("下一曲将为您播放！")
+    toastAndHideMenu("下一曲将为您播放")
 }
 
 const addFavoriteItem = () => {
     const track = commonCtxMenuCacheItem.value
     if (!track) return
     const { platform } = track
-    let text = "歌曲收藏成功！", success = true
+    let text = "歌曲收藏成功", success = true
     if (Playlist.isFMRadioType(track)) {
         addFavoriteRadio(track)
-        text = "FM电台收藏成功！"
+        text = "FM电台收藏成功"
     } else if (isLocalMusic(platform)) {
         success = false
-        text = "本地歌曲不支持收藏！"
+        text = "本地歌曲不支持收藏"
     } else {
         addFavoriteTrack(track)
     }
@@ -127,9 +127,9 @@ const visitTrackDetail = () => {
 const removeQueueItem = () => {
     const track = commonCtxMenuCacheItem.value
     removeTrack(track)
-    let msg = "歌曲已删除！"
-    if (Playlist.isFMRadioType(track)) msg = "电台已删除！"
-    else if (Playlist.isAnchorRadioType(track)) msg = "音频已删除！"
+    let msg = "歌曲已删除"
+    if (Playlist.isFMRadioType(track)) msg = "电台已删除"
+    else if (Playlist.isAnchorRadioType(track)) msg = "音频已删除"
     toastAndHideMenu(msg)
     return true
 }
@@ -138,7 +138,7 @@ const removeLocalItem = (item, index) => {
     const track = commonCtxMenuCacheItem.value
     const { id } = commonCtxItem.value || { id: track.pid }
     removeFromLocalPlaylist(id, track)
-    toastAndHideMenu("歌曲已删除！")
+    toastAndHideMenu("歌曲已删除")
     if (currentDataType == 11) EventBus.emit('ctxMenu-removeFromLocal')
     return true
 }
@@ -146,7 +146,7 @@ const removeLocalItem = (item, index) => {
 const removeFavoriteItem = () => {
     const { id, platform } = commonCtxMenuCacheItem.value
     removeFavoriteSong(id, platform)
-    toastAndHideMenu("歌曲已取消收藏！")
+    toastAndHideMenu("歌曲已取消收藏")
     return true
 }
 
@@ -169,7 +169,7 @@ const visitBatchCustom = () => {
 const removeCustom = () => {
     const { id } = commonCtxMenuCacheItem.value
     removeCustomPlaylist(id)
-    toastAndHideMenu("歌单已删除！")
+    toastAndHideMenu("歌单已删除")
     return true
 }
 
@@ -178,13 +178,13 @@ const removeFromCustom = () => {
     const { id } = commonCtxItem.value // Playlist
     const track = commonCtxMenuCacheItem.value
     removeFromCustomPlaylist(id, track)
-    toastAndHideMenu("歌曲已删除！")
+    toastAndHideMenu("歌曲已删除")
     return true
 }
 
 const removeSongFromRecent = () => {
     removeRecentSong(commonCtxMenuCacheItem.value)
-    toastAndHideMenu("歌曲记录已删除！")
+    toastAndHideMenu("歌曲记录已删除")
     return true
 }
 
@@ -216,7 +216,7 @@ const doPlayPlaylist = (playlist) => {
 const removePlaylistFromFavorite = () => {
     const { id, platform } = commonCtxMenuCacheItem.value
     removeFavoritePlaylist(id, platform)
-    toastAndHideMenu("歌单已取消收藏！")
+    toastAndHideMenu("歌单已取消收藏")
     EventBus.emit("refresh-favorite")
     return true
 }
@@ -376,7 +376,7 @@ const addToAction = (dataType, item) => {
         tracks.forEach(track => {
             action(item.id, track)
         })
-        toastAndHideMenu("歌曲添加成功！")
+        toastAndHideMenu("歌曲添加成功")
     }
 }
 
@@ -396,7 +396,7 @@ const moveToAction = (dataType, item) => {
         tracks.forEach(track => {
             action(toId, fromId, track)
         })
-        toastAndHideMenu("歌曲移动成功！")
+        toastAndHideMenu("歌曲移动成功")
     }
 }
 

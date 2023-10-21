@@ -573,6 +573,12 @@ watch(() => getCurrentTheme(), (nv) => {
   background-image: var(--app-bg-image);
 }
 
+#popovers .common-ntf {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+
 #popovers .common-ntf,
 #popovers .common-ntf .ntf-dialog-mask {
   border-radius: 12px;

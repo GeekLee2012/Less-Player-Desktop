@@ -41,12 +41,13 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
   hideAllCategoryViews, showToast, hideLyricToolbar,
   hideSoundEffectView, hideCustomThemeEditView,
-  hideColorPickerToolbar, resetExploreModeActiveStates } = useAppCommonStore()
+  hideColorPickerToolbar, resetExploreModeActiveStates,
+  setMaxScreen, } = useAppCommonStore()
 
 
 const isReservedPath = (path) => {
   const reservedPaths = ['id', 'name', 'binding', 'gBinding']
-  return reservedPaths.indexOf(path) > -1
+  return reservedPaths.indexOf(path) >= 0
 }
 
 const deepInState = (state, cache) => {
@@ -98,9 +99,14 @@ const cleanupSetting = () => {
   const cache = localStorage.getItem(key)
   if (cache) {
     const cacheStates = JSON.parse(cache)
-    store.$reset()
+    store.$reset() //方法失效，与期望值不符
     localStorage.removeItem(key)
     deepInState(store.$state, cacheStates)
+    /*
+    const _state = JSON.parse(JSON.stringify(store.$state))
+    deepInState(_state, cacheStates)
+    store.$patch({ ..._state })
+    */
   }
   store.$patch({ blackHole: Math.random() * 100000000 })
 }
@@ -368,11 +374,19 @@ const useWindowsStyleWinCtl = computed(() => {
   return false
 })
 
+const checkMaxScreenState = async () => {
+  if (!ipcRenderer) return
+  const isMaxScreen = await ipcRenderer.invoke('app-maxScreenState')
+  setMaxScreen(isMaxScreen)
+}
+
 onMounted(() => {
   //窗口大小变化事件监听
   window.addEventListener('resize', event => {
     //自适应视频页面大小
     setVideoViewSize()
+    //重新检查窗口最大化状态
+    checkMaxScreenState()
     EventBus.emit('app-resize', event)
   })
 

@@ -21,7 +21,7 @@ const props = defineProps({
 })
 
 const { queueTracks } = storeToRefs(usePlayStore())
-const { addTrack } = usePlayStore()
+const { addTrack, addTracks } = usePlayStore()
 const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast,
     hideAllCtxMenus, hidePlaybackQueueView,
@@ -44,8 +44,17 @@ const toastAndHideMenu = (text, failed) => {
 }
 
 const addToQueue = () => {
-    addTrack(commonCtxMenuCacheItem.value)
-    toastAndHideMenu("歌曲添加成功！")
+    const cache = commonCtxMenuCacheItem.value
+    const tracks = []
+    if (Array.isArray(cache)) {
+        tracks.push(...cache)
+    } else if (cache) {
+        tracks.push(cache)
+    }
+    if (tracks.length < 1) return
+
+    addTracks(tracks)
+    toastAndHideMenu("歌曲添加成功")
 }
 
 const createPlaylist = () => {
@@ -97,14 +106,14 @@ const handleClick = (item, actionMode, dataType) => {
         moveToAction = moveToLocalPlaylist
     }
 
-    let text = "操作失败！<br>歌曲可能已经存在！"
+    let text = "操作失败！<br>歌曲可能已经存在"
     let success = false, needTriggerEvent = false
 
     //TODO 无法保证事务一致性
     for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i]
         if (Playlist.isFMRadioType(track)) {
-            text = "添加到歌单<br>不支持FM电台！"
+            text = "添加到歌单<br>不支持FM电台"
             if (tracks.length == 1) {
                 success = false
                 toastAndHideMenu(text, true)
@@ -115,7 +124,7 @@ const handleClick = (item, actionMode, dataType) => {
         if (actionMode == 1 && commonCtxItem.value) {
             const { id } = commonCtxItem.value
             if (moveToAction(item.id, id, track)) {
-                text = "歌曲移动成功！"
+                text = "歌曲移动成功"
                 success = true
                 needTriggerEvent = true
             }
@@ -126,10 +135,10 @@ const handleClick = (item, actionMode, dataType) => {
                 if (Playlist.isFMRadioType(qItem)) return
                 addToAction(item.id, qItem)
             })
-            text = "全部歌曲添加成功！"
+            text = "全部歌曲添加成功"
             success = true
         } else if (addToAction(item.id, track)) {
-            text = "歌曲添加成功！"
+            text = "歌曲添加成功"
             success = true
         }
     }

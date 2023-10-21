@@ -4,7 +4,7 @@ import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { Album } from "../common/Album";
-import { base64Encode, base64Decode, hexDecode } from "../common/Utils";
+import { base64Stringify, base64Parse, hexDecode, toTrimString, nextInt } from "../common/Utils";
 import { useSettingStore } from "../renderer/store/settingStore";
 
 
@@ -29,15 +29,15 @@ const changeImageSize = (url, oSize, nSize) => {
 }
 
 const getArtistCover = (artistmid, size) => {
+    if (!artistmid) return null
     size = size || 500
-    return !artistmid ? null :
-        `http://y.gtimg.cn/music/photo_new/T001R${size}x${size}M000${artistmid}.jpg`
+    return `http://y.gtimg.cn/music/photo_new/T001R${size}x${size}M000${artistmid}.jpg`
 }
 
 const getAlbumCover = (albummid, size) => {
+    if (!albummid) return null
     size = size || 500
-    return !albummid ? null :
-        `https://y.qq.com/music/photo_new/T002R${size}x${size}M000${albummid}.jpg?max_age=2592000`
+    return `https://y.qq.com/music/photo_new/T002R${size}x${size}M000${albummid}.jpg?max_age=2592000`
 }
 
 const getCoverByQuality = ({ artistMid, albumMid }) => {
@@ -83,16 +83,15 @@ const getTrackTypeMeta = (typeName) => {
     }[typeName]
 }
 
+//TODO
 const vkeyReqData = (trackInfo, type) => {
-    //TODO
-    const mediaId = trackInfo.mid
-    const songtype = [trackInfo.type]
+    const { mid: mediaId, type: songtype } = trackInfo
     const filename = [type].map(item => {
-        const typeMeta = getTrackTypeMeta(item)
-        return typeMeta.prefix + mediaId + mediaId + typeMeta.ext
+        const { prefix, ext } = getTrackTypeMeta(item)
+        return `${prefix}${mediaId}${mediaId}${ext}`
     })
 
-    const guid = (Math.random() * 10000000).toFixed(0);
+    const guid = nextInt(10000000).toFixed(0)
     const uin = "0"
     return {
         comm: {
@@ -106,7 +105,7 @@ const vkeyReqData = (trackInfo, type) => {
                 filename,
                 guid,
                 songmid: [mediaId],
-                songtype,
+                songtype: [songtype],
                 uin,
                 loginflag: 1,
                 platform: "20"
@@ -194,7 +193,7 @@ const searchParam = (keyword, type, offset, limit, page) => {
         9: 'singer',
         12: 'mv'
     }
-    keyword = keyword ? keyword.trim() : ''
+    keyword = toTrimString(keyword)
     return {
         format: 'json',
         n: limit,
@@ -206,8 +205,8 @@ const searchParam = (keyword, type, offset, limit, page) => {
     }
 }
 
-const searchParamNew = (keyword, type, offset, limit, page) => {
-    keyword = keyword ? keyword.trim() : ''
+const searchParam_v1 = (keyword, type, offset, limit, page) => {
+    keyword = toTrimString(keyword)
     return {
         comm: {
             ct: '6',
@@ -369,9 +368,9 @@ const getWeek = (dt) => {
 //新版本歌词信息
 const lyricExtReqBody = (id, track) => {
     const { title, artist, album, duration, songID } = track
-    const songName = base64Encode(title)
-    const singerName = base64Encode(artist[0].name)
-    const albumName = base64Encode(album.name)
+    const songName = base64Stringify(title)
+    const singerName = base64Stringify(artist[0].name)
+    const albumName = base64Stringify(album.name)
     const interval = parseInt(duration / 1000)
     return {
         data: JSON.stringify({
@@ -413,8 +412,7 @@ const lyricExtReqBody = (id, track) => {
     }
 }
 
-/* 旧版API */
-//参考： https://github.com/jsososo/QQMusicApi/
+//旧版API，参考： https://github.com/jsososo/QQMusicApi/
 export class QQ {
     static CODE = "qq"
     static DEFAULT_CATE = 10000000
@@ -864,9 +862,9 @@ export class QQ {
             getJson(url, reqBody).then(json => {
                 const { lyric, trans } = json
                 //lyric = escapeHtml(lyric)
-                Object.assign(result, { lyric: Lyric.parseFromText(base64Decode(lyric)) })
+                Object.assign(result, { lyric: Lyric.parseFromText(base64Parse(lyric)) })
                 if (trans) {
-                    Object.assign(result, { trans: Lyric.parseFromText(base64Decode(trans)) })
+                    Object.assign(result, { trans: Lyric.parseFromText(base64Parse(trans)) })
                 }
                 resolve(result)
             })
@@ -881,12 +879,12 @@ export class QQ {
             const result = { id, platform: QQ.CODE, lyric: null, trans: null }
             getJson(url, reqBody).then(json => {
                 const { lyric, roma, trans } = json.req_1.data
-                Object.assign(result, { lyric: Lyric.parseFromText(base64Decode(lyric)) })
+                Object.assign(result, { lyric: Lyric.parseFromText(base64Parse(lyric)) })
                 if (roma) { //TODO
                     Object.assign(result, { roma: Lyric.parseFromText(hexDecode(roma)) })
                 }
                 if (trans) {
-                    Object.assign(result, { trans: Lyric.parseFromText(base64Decode(trans)) })
+                    Object.assign(result, { trans: Lyric.parseFromText(base64Parse(trans)) })
                 }
                 resolve(result)
             })
@@ -896,7 +894,7 @@ export class QQ {
     //歌手详情：Name、Cover、简介(如果有)、热门歌曲等
     static artistDetail(id) {
         return new Promise((resolve, reject) => {
-            const result = { id, title: '未知歌手', cover: 'default_cover.png', data: [], about: '' }
+            const result = { id, title: '未知歌手', cover: '', data: [], about: '' }
 
             const url = `https://y.qq.com/n/ryqq/singer/${id}`
             getDoc(url).then(doc => {
@@ -1051,13 +1049,14 @@ export class QQ {
         })
     }
 
-    static doMultiPageSearch({ keyword, type, offset, limit, page, count }, { getList, mapItem }) {
+    static doMultiPageSearch_old({ keyword, type, offset, limit, page, count }, { getList, mapItem }) {
         return new Promise(async (resolve, reject) => {
             count = count || 2
             const result = { platform: QQ.CODE, offset, limit, page, data: [] }
-            const url = "https://u.y.qq.com/cgi-bin/musicu.fcg"
+            const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+
             for (var i = 0; i < count; i++) {
-                const reqBody = JSON.stringify(searchParamNew(keyword, type, offset, limit, (page + i)))
+                const reqBody = JSON.stringify(searchParam_v1(keyword, type, offset, limit, (page + i)))
                 const json = await postJson(url, reqBody)
                 const { list } = getList(json)
                 const hitNum = list ? list.length : 0
@@ -1068,6 +1067,33 @@ export class QQ {
                 if (dataSize < 30) break
             }
             resolve(result)
+        })
+    }
+
+    static doMultiPageSearch({ keyword, type, offset, limit, page, count }, { getList, mapItem, beforeResolve }) {
+        return new Promise((resolve, reject) => {
+            count = count || 2
+            const result = { platform: QQ.CODE, offset, limit, page, data: [] }
+            const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+
+            const tasks = []
+            for (var i = 0; i < count; i++) {
+                const reqBody = JSON.stringify(searchParam_v1(keyword, type, offset, limit, (page + i)))
+                tasks.push(postJson(url, reqBody))
+            }
+            Promise.all(tasks).then(jsons => {
+                for (var i = 0; i < jsons.length; i++) {
+                    const { list } = getList(jsons[i])
+                    const hitNum = list ? list.length : 0
+                    if (hitNum < 1) continue
+                    const data = list.map(item => mapItem(item))
+                    const dataSize = data ? data.length : 0
+                    if (dataSize > 0) result.data.push(...data)
+                    //if (dataSize < 30) break
+                }
+                if (beforeResolve && typeof (beforeResolve) == 'function') beforeResolve(result)
+                resolve(result)
+            }).catch(error => resolve(result))
         })
     }
 
@@ -1137,6 +1163,29 @@ export class QQ {
                     title: item.singerName,
                     //cover: item.singerPic
                     cover: getCoverByQuality({ artistMid: item.singerMID })
+                })
+            })
+    }
+
+    //搜索: MV视频
+    static searchVideos(keyword, offset, limit, page) {
+        return QQ.doMultiPageSearch({ keyword, type: 4, offset, limit, page },
+            {
+                getList: json => json.req_1.data.body.mv,
+                mapItem: item => ({
+                    id: item.mv_id,
+                    vid: item.v_id,
+                    mvid: item.mv_id,
+                    watchid: item.watchid,
+                    platform: QQ.CODE,
+                    title: item.mv_name,
+                    subtitle: item.singer_name,
+                    cover: item.mv_pic_url,
+                    type: Playlist.VIDEO_TYPE,
+                    publicTime: item.publish_date,
+                    pay: (item.pay > 0),
+                    duration: (item.duration * 1000),
+                    listenNum: item.play_count
                 })
             })
     }
@@ -1304,6 +1353,7 @@ export class QQ {
             const result = { id, platform: QQ.CODE, quality, url: '' }
             getJson(url, reqBody).then(json => {
                 const data = json.req_1.data
+                if (!data) return resolve(result)
                 const mvData = {}
                 Object.keys(data).forEach(vid => {
                     let keyHits = 0

@@ -186,21 +186,21 @@ const registryGlobalShortcuts = () => {
     // 播放或暂停
     'Alt+Shift+Space': 'togglePlay',
     // 播放模式切换
-    'Shift+M': 'switchPlayMode',
+    'Alt+Shift+M': 'switchPlayMode',
     // 上 / 下一曲
-    'Shift+Left': 'playPrev',
-    'Shift+Right': 'playNext',
+    'Alt+Shift+Left': 'playPrev',
+    'Alt+Shift+Right': 'playNext',
     // 增 / 减音量
-    'Shift+Up': 'volumeUp',
-    'Shift+Down': 'volumeDown',
+    'Alt+Shift+Up': 'volumeUp',
+    'Alt+Shift+Down': 'volumeDown',
     // 最大音量 / 静音
-    'Shift+O': 'toggleVolumeMute',
+    'Alt+Shift+O': 'toggleVolumeMute',
     // 打开设置
-    'Shift+P': 'visitSetting',
+    'Alt+Shift+P': 'visitSetting',
     // 打开 / 关闭当前播放
-    'Shift+Q': 'togglePlaybackQueue',
+    'Alt+Shift+Q': 'togglePlaybackQueue',
     // 打开 / 关闭歌词设置
-    'Shift+L': 'toggleLyricToolbar',
+    'Alt+Shift+L': 'toggleLyricToolbar',
     // 打开 开发者工具
     'Control+Alt+Shift+I': () => openDevTools(mainWin),
     'Command+Alt+Shift+I': () => openDevTools(mainWin),
@@ -404,6 +404,11 @@ const registryGlobalListeners = () => {
     cancelDownload()
   }).on('path-showInFolder', (event, path) => {
     if (path) shell.showItemInFolder(path)
+  })
+
+  ipcMain.handle('app-maxScreenState', (event, ...args) => {
+    if (!isMainWindowShow()) return false
+    return mainWin && (mainWin.isMaximized() || mainWin.isFullScreen())
   })
 
   ipcMain.handle('open-audio-playlist', async (event, ...args) => {
@@ -1208,8 +1213,9 @@ const overrideRequest = (details) => {
     referer = origin
   } else if (url.includes("163.com") || url.includes("126.net")) {
     origin = "https://music.163.com/"
-    referer = origin
-    //if(url.includes("/dj/program/listen")) referer = null
+    if (url.includes("/cloudsearch/")) referer = 'https://music.163.com/search/'
+
+    if (!referer) referer = origin
   } else if (url.includes("u6.kuwo.cn")) {
     userAgent = 'fm 7010001}(android 7.1.2)'
     cookie = ''
@@ -1226,7 +1232,7 @@ const overrideRequest = (details) => {
     const kwCookie = getCookie(origin, true)
     if (kwCookie) {
       for (const [key, value] of Object.entries(kwCookie)) {
-        if (key.toLocaleLowerCase().includes('hm_iuvt_')) {
+        if (key.toLowerCase().includes('hm_iuvt_')) {
           Object.assign(hm_iuvt, { key, value })
           break
         }
@@ -1252,7 +1258,7 @@ const overrideRequest = (details) => {
     const bid = randomTextWithinAlphabetNums(11)
     origin = "https://fm.douban.com/"
     referer = origin
-    cookie = "bid=" + bid
+    cookie = `bid=${bid}`
     //cookie = 'bid=' + bid + '; __utma=30149280.1685369897.1647928743.1648005141.1648614477.3; __utmz=30149280.1648005141.2.2.utmcsr=cn.bing.com|utmccn=(referral)|utmcmd=referral|utmcct=/; _pk_ref.100001.f71f=%5B%22%22%2C%22%22%2C1650723346%2C%22https%3A%2F%2Fmusic.douban.com%2Ftag%2F%22%5D; _pk_id.100001.f71f=5c371c0960a75aeb.1647928769.4.1650723346.1648618102.; ll="118306"; _ga=GA1.2.1685369897.1647928743; douban-fav-remind=1; viewed="2995812"; ap_v=0,6.0'
   } else if (url.includes("radio.cn") || url.includes("cnr.cn")) {
     origin = "http://www.radio.cn/"

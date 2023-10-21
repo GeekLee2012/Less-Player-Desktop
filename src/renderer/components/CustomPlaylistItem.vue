@@ -4,6 +4,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { toYyyymmddHhMmSs } from "../../common/Times";
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlayStore } from '../store/playStore';
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -36,7 +37,7 @@ const playItem = () => {
     if (!playlist || playlist.data.length < 1) return
     resetQueue()
     addTracks(playlist.data)
-    showToast("即将为您播放歌单！")
+    showToast("即将为您播放歌单")
     playNextTrack()
 }
 
@@ -47,7 +48,7 @@ const visitBatch = () => visitBatchCustomPlaylist(props.data.id)
 const removeItem = () => {
     const { id } = props.data
     removeCustomPlaylist(id)
-    toastAndHideMenu("歌单已删除！")
+    toastAndHideMenu("歌单已删除")
 }
 
 const onContextMenu = (event) => {
@@ -59,7 +60,7 @@ const onContextMenu = (event) => {
     <div class="custom-playlist-item" @contextmenu="onContextMenu">
         <div class="sqno">{{ index + 1 }}</div>
         <div class="cover" @click="visitItem">
-            <img v-lazy="data.cover" />
+            <img v-lazy="coverDefault(data.cover)" />
         </div>
         <div class="title-wrap spacing1">
             <div class="content" @click="visitItem">

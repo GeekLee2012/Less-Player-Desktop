@@ -16,9 +16,6 @@
 
 <style>
 .ntf {
-    position: fixed;
-    left: 50%;
-    top: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -34,8 +31,8 @@
 }
 
 .ntf-dialog {
-    width: 265px;
-    height: 163px;
+    width: 266px;
+    height: 168px;
     background: var(--content-bg-color);
     background: var(--content-bg-color-no-transparent);
     display: flex;

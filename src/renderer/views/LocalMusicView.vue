@@ -50,7 +50,7 @@ const onScroll = () => {
 const onDrop = async (event) => {
     if (!ipcRenderer) return
     if (!isUseDndForCreateLocalPlaylistEnable.value) {
-        showFailToast('拖拽还没有启用哦！<br>请重新检查设置。')
+        showFailToast('拖拽还没有启用哦！<br>请重新检查设置')
         return
     }
     if (importTaskCount.value > 0) return
@@ -59,14 +59,14 @@ const onDrop = async (event) => {
 
     const { files } = event.dataTransfer
     if (files.length > 1) {
-        showFailToast('还不支持多文件拖拽！')
+        showFailToast('还不支持多文件拖拽')
         return
     }
     const { name, path } = files[0]
     increaseImportTaskCount()
     const result = await ipcRenderer.invoke('dnd-open-audio-playlist', path, isUseDeeplyScanForDirectoryEnable.value)
     if (result) {
-        let msg = '导入歌单失败！', success = false
+        let msg = '导入歌单失败', success = false
         if (result) {
             const { name, data, total } = result
             if (name && data && data.length > 0) {
@@ -76,13 +76,13 @@ const onDrop = async (event) => {
                     if (isDevEnv()) console.log(error)
                 }
                 const numText = total ? `${data.length} / ${total}` : `${data.length}`
-                msg = `导入歌单已完成！<br>共${numText}首歌曲！`
+                msg = `导入歌单已完成！<br>共${numText}首歌曲`
                 success = true
             }
         }
         decreaseImportTaskCount()
         if (success) showToast(msg)
-        if (!success) showFailToast(msg)
+        else showFailToast(msg)
     }
 }
 
@@ -93,7 +93,7 @@ const importPlaylist = async () => {
     if (file) {
         increaseImportTaskCount()
         const result = await ipcRenderer.invoke('parse-audio-playlist', file)
-        let msg = '导入歌单失败！', success = false
+        let msg = '导入歌单失败', success = false
         if (result) {
             const { name, data, total } = result
             if (name && data && data.length > 0) {
@@ -103,7 +103,7 @@ const importPlaylist = async () => {
                     if (isDevEnv()) console.log(error)
                 }
                 const numText = total ? `${data.length} / ${total}` : `${data.length}`
-                msg = `导入歌单已完成！<br>共${numText}首歌曲！`
+                msg = `导入歌单已完成！<br>共${numText}首歌曲`
                 success = true
             }
         }
@@ -121,7 +121,7 @@ const removeAll = async () => {
     if (isShowDialogBeforeClearLocalMusics.value) ok = await showConfirm({ msg: '确定要清空本地歌曲吗？' })
     if (!ok) return
 
-    showToast('本地歌曲已全部清空!')
+    showToast('本地歌曲已全部清空')
     resetAll()
     refreshTime.value = Date.now()
 }
@@ -137,7 +137,7 @@ onMounted(() => {
             <div class="title">本地歌曲</div>
             <div class="about">
                 <p>支持播放的音频格式：.mp3、.flac、.ogg、.wav、.aac、.m4a</p>
-                <p>支持导入的歌单格式：.m3u、.pls</p>
+                <p>支持导入的歌单格式：.m3u、.m3u8、.pls</p>
                 <p>歌单导入、导出功能，并不支持跨设备，而是为兼容当前设备下的其他播放器</p>
                 <p>最近播放、收藏功能，暂时还不支持本地歌曲</p>
                 <p>歌曲信息乱码时，建议使用第三方音乐标签工具修正后，再重新添加到当前播放器</p>

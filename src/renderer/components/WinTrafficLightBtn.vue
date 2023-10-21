@@ -150,7 +150,7 @@ const toggleMaximize = () => {
 
 .win-traffic-light-btn .max-btn {
     background-color: #34c648;
-    /*margin-right: 0px !important;*/
+    margin-right: 0px !important;
 }
 
 .win-traffic-light-btn .max-btn svg {
@@ -163,6 +163,7 @@ const toggleMaximize = () => {
     /*margin-right: 8px;*/
     -webkit-app-region: none;
     padding-right: 8px;
+    margin-left: calc(var(--others-win-ctl-btn-margin-right) + 5px);
     /*display: flex;
     align-items: center;*/
 }

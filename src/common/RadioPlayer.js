@@ -1,7 +1,8 @@
 import EventBus from '../common/EventBus';
 import Hls from 'hls.js';
 import { WebAudioApi } from './WebAudioApi';
-import { toTrimString } from './Utils';
+import { isBlank } from './Utils';
+import { PLAY_STATE } from './Constants';
 
 
 
@@ -11,9 +12,8 @@ export class RadioPlayer {
     constructor(channel) {
         this.channel = channel
         this.hls = new Hls()
-        this.playing = false
+        this.playState = PLAY_STATE.NONE
         this.channelChanged = false
-        this.retry = 0
         this.isBindHlsEvent = false
         this.webAudioApi = null
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
@@ -31,7 +31,8 @@ export class RadioPlayer {
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = RadioPlayer.get()
-        return player.on('radio-init', node => player._createWebAudioApi(node))
+        return player.initWebAudio()
+            //.on('radio-init', node => player._createWebAudioApi(node))
             .on('radio-channelChange', channel => player.setChannel(channel))
             .on('radio-play', channel => player.playChannel(channel))
             .on('radio-togglePlay', () => player.togglePlay())
@@ -48,16 +49,13 @@ export class RadioPlayer {
 
     //播放
     play() {
-        if (!Hls.isSupported()) return
-        if (!audioNode) return
-        if (!this.channel) return
-        if (toTrimString(this.channel.url).length < 1) {
-            //this._retryPlay(1)
-            return
+        //非可处理异常，直接返回
+        if (!Hls.isSupported() || !audioNode) return
+        //数据异常，设置错误状态，让程序处理
+        if (!this.channel || isBlank(this.channel.url)) {
+            return this.setState(PLAY_STATE.PLAY_ERROR)
         }
 
-        //this.hls.loadSource('http://ngcdn001.cnr.cn/live/zgzs/index.m3u8')
-        //this.channel.url = "https://npr-ice.streamguys1.com/live.mp3"
         this.hls.loadSource(this.channel.url)
         this.hls.attachMedia(audioNode)
 
@@ -66,31 +64,34 @@ export class RadioPlayer {
             const self = this
             this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 audioNode.play()
-                self.setState(true)
+                self.setState(PLAY_STATE.PLAYING)
                 self.channelChanged = false
-                self.retry = 0
                 lastPlayTime = Date.now()
                 this.animationFrameCnt = 0
                 requestAnimationFrame(self._step.bind(self))
             })
             this.hls.on(Hls.Events.ERROR, function () {
-                self._retryPlay(1)
+                self.setState(PLAY_STATE.PLAY_ERROR)
             })
             this.isBindHlsEvent = true
         }
     }
 
+    playing() {
+        return this.playState == PLAY_STATE.PLAYING
+    }
+
     //暂停
     pause() {
-        if (!Hls.isSupported()) return
-        if (!audioNode) return
-        if (!this.playing) return
+        if (!Hls.isSupported() || !audioNode) return
+        if (!this.playing()) return
+
         this.hls.detachMedia()
-        this.setState(false)
+        this.setState(PLAY_STATE.PAUSE)
     }
 
     togglePlay() {
-        if (this.playing) {
+        if (this.playing()) {
             this.pause()
         } else {
             this.play()
@@ -98,8 +99,9 @@ export class RadioPlayer {
     }
 
     setState(state) {
-        this.playing = state
-        this.notify('radio-state', state)
+        this.playState = state
+        const { channel: track } = this
+        this.notify('radio-state', { state, track, currentTime: 0, radio: true })
     }
 
     setChannel(channel) {
@@ -115,18 +117,17 @@ export class RadioPlayer {
     }
 
     volume(value) {
-        if (!Hls.isSupported()) return
-        if (!audioNode) return
+        if (!Hls.isSupported() || !audioNode) return
         audioNode.volume = value
     }
 
     _step() {
-        if (!this.channel) return
-        if (!this.playing) return
+        if (!this.playing()) return
+
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
-        const currentSecs = currentTime / 1000
-        if (this.isStateRefreshEnabled()) this.notify('track-pos', currentSecs)
+        const currentSeconds = currentTime / 1000
+        if (this.isStateRefreshEnabled()) this.notify('track-pos', currentSeconds)
         this._resolveSound()
         this._countAnimationFrame()
         requestAnimationFrame(this._step.bind(this))
@@ -139,6 +140,22 @@ export class RadioPlayer {
 
     notify(event, args) {
         EventBus.emit(event, args)
+        return this
+    }
+
+    initWebAudio() {
+        if (!audioNode) {
+            //以这种方式创建的Element元素
+            //好处，在浏览器开发者工具源码里看不到，而坏处也是源码里看不到......
+            audioNode = document.createElement('audio')
+            audioNode.setAttribute('crossOrigin', 'anonymous')
+            audioNode.classList.add('audio-node')
+            audioNode.classList.add('hidden')
+            //默认优先查找id=app的元素作为父节点
+            const parentNode = document.body.querySelector('#app') || document.body
+            parentNode.appendChild(audioNode)
+        }
+        this._createWebAudioApi(audioNode)
         return this
     }
 
@@ -202,18 +219,4 @@ export class RadioPlayer {
         return this.animationFrameCnt % this.spectrumRefreshFrequency == 0
     }
 
-    _notifyError(isRetry) {
-        const { channel: track } = this
-        this.notify('track-error', { isRetry, track, currentTime: 0, radio: true })
-    }
-
-    _retryPlay(maxRetry) {
-        const isRetry = this.retry < maxRetry
-        this._notifyError(isRetry)
-        if (isRetry) {
-            ++this.retry
-        } else {
-            this.retry = 0
-        }
-    }
 }

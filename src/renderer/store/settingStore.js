@@ -70,22 +70,34 @@ export const useSettingStore = defineStore('setting', {
         /* 主题 */
         theme: {
             index: 1,
+            //主题分类，0 => 推荐，1 => 自定义
             type: 0,
         },
         layout: {
+            //当前index
             index: 1,
+            //回退index，即从简约模式退出时，返回的普通布局index
             fallbackIndex: 1
         },
         common: {
+            //窗口缩放
             winZoom: 85,
-            winCtlStyle: 0, // 0 => 自动，1 => macOS, 2 => Windows
+            //窗口控件风格，0 => 自动，1 => macOS, 2 => Windows
+            winCtlStyle: 0,
+            //字体名称
             fontFamily: '',
-            fontWeight: 400,
-            fontSizeLevel: 3,
+            //字体大小
             fontSize: 17.5,
+            //预设字体大小等级index
+            fontSizeLevel: 3,
+            //字体粗细
+            fontWeight: 400,
+            //图片质量，0 => 普通，1 => 中等，2 => 高清
             imgQualityIndex: 1,
-            paginationStyleIndex: 1,
-            imageTextTileStyleIndex: 0, //歌单、专辑等Tile样式
+            //分页方式，0 => 普通，1 => 瀑布流
+            paginationStyleIndex: 0,
+            //歌单、专辑等Tile样式，0 => 普通，1 => 卡片
+            imageTextTileStyleIndex: 1,
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -105,17 +117,20 @@ export const useSettingStore = defineStore('setting', {
             },
             //VIP收费歌曲，是否自动切换到免费歌曲（可能来自不同平台）
             vipTransfer: true,
+            //VIP标识，无用之物
             vipFlagShow: false,
             //歌单分类栏随机显示
             playlistCategoryBarRandom: false,
+            //歌单分类浮动按钮
             playlistCategoryBarFlowBtnShow: false,
+            //当前播放列表自动定位
             playbackQueueAutoPositionOnShow: false,
             //关闭按钮，Electron平台兼容性问题，主要为Windows等平台冗余设计
             playbackQueueCloseBtnShow: false,
             //历史播放按钮，即最近播放快捷入口
-            playbackQueueHistoryBtnShow: false,
+            playbackQueueHistoryBtnShow: true,
             //MV标识、MV播放按钮
-            playbackQueueMvBtnShow: false,
+            playbackQueueMvBtnShow: true,
             //歌单播放量
             listenNumShow: false,
             //视频播放时，自动暂停播放歌曲
@@ -130,7 +145,7 @@ export const useSettingStore = defineStore('setting', {
             stateRefreshFrequency: 60,
             //歌曲频谱刷新频度，默认为3，范围：1 - 256
             spectrumRefreshFrequency: 3,
-            ////本地歌曲
+            /* 本地歌曲 */
             //启用在线封面
             useOnlineCover: true,
             //显示音频格式
@@ -147,75 +162,124 @@ export const useSettingStore = defineStore('setting', {
             highlightCtxMenuItem: true
         },
         search: {
+            //场景化提示
             autoPlaceholder: true,
+            //在线歌单页
             onlinePlaylistShow: false,
+            //本地歌单页
             localPlaylistShow: false,
+            //批量操作页
             batchActionShow: true,
+            //自由FM
             freeFMShow: true
         },
         /* 普通歌词 */
         lyric: {
-            fontSize: 22,   //普通行字号
-            hlFontSize: 22, //高亮行字号
+            //普通行字号
+            fontSize: 24,
+            //高亮行字号
+            hlFontSize: 25,
+            //字重，即字体粗细
             fontWeight: 400,
-            lineHeight: 28,
+            //行高
+            lineHeight: 33,
+            //行间距
             lineSpacing: 28,
-            offset: 0,  //时间补偿值，快慢
-            metaPos: 0, //歌曲信息, 0 => 默认, 1 => 隐藏, 2 => 顶部
-            alignment: 0,   //对齐方式, 0 => 左, 1 => 中, 2 => 右
-            trans: true,    //翻译
-            roma: true  //发音
+            //时间补偿值，快慢
+            offset: 0,
+            //歌曲信息, 0 => 默认, 1 => 隐藏, 2 => 顶部
+            metaPos: 0,
+            //对齐方式, 0 => 左, 1 => 中, 2 => 右
+            alignment: 0,
+            //翻译
+            trans: true,
+            //发音 
+            roma: true
         },
         /* 桌面歌词 */
         desktopLyric: {
-            fontSize: 20,   //普通行字号
+            //普通行字号
+            fontSize: 23,
             /*
-            hlFontSize: 30, //高亮行字号
+            //高亮行字号
+            hlFontSize: 30, 
             fontWeight: 400,
             lineHeight: 36,
             */
-            lineSpacing: 22, //行间距
-            alignment: 1,   //对齐方式, 0 => 左, 1 => 中, 2 => 右
-            layoutMode: 0,   // 显示模式（布局），0 => 单行， 1 => 双行, 2 => 全显
-            color: null,    //普通行颜色
-            hlColor: null,  //高亮行颜色
-            autoHeight: true,   //已废弃，窗口自动高度，跟随显示模式
-            autoSize: true,     //窗口自动大小，跟随显示模式
-            textDirection: 0,   //文字显示方向，0 => 横屏，1 => 竖屏
+            //行间距
+            lineSpacing: 23,
+            //对齐方式, 0 => 左, 1 => 中, 2 => 右
+            alignment: 1,
+            // 显示模式（布局），0 => 单行， 1 => 双行, 2 => 全显
+            layoutMode: 0,
+            //普通行颜色
+            color: null,
+            //高亮行颜色
+            hlColor: null,
+            //已废弃，窗口自动高度，跟随显示模式
+            autoHeight: true,
+            //窗口自动大小，跟随显示模式
+            autoSize: true,
+            //文字显示方向，0 => 横屏，1 => 竖屏   
+            textDirection: 0,
         },
         /* 缓存 */
         cache: {
-            storePlayState: true,   //退出后保存播放状态：包括当前歌曲、播放列表等
-            storeLocalMusic: true, //退出后记录已经添加的本地歌曲
-            storeRecentPlay: true,  //记录最近播放
+            //退出后保存播放状态：包括当前歌曲、播放列表等
+            storePlayState: true,
+            //退出后记录已经添加的本地歌曲
+            storeLocalMusic: true,
+            //记录最近播放
+            storeRecentPlay: true,
         },
         /* 菜单栏、Windows平台为系统托盘 */
         tray: {
-            show: false, //是否在菜单栏显示
-            showOnMinimized: false, //是否最小化到菜单栏
+            //是否在菜单栏显示
+            show: false,
+            //是否最小化到菜单栏
+            showOnMinimized: false,
         },
         /* 导航栏 */
         navigation: {
+            /* 左侧导航 */
+            //自建歌单
             customPlaylistsShow: false,
+            //我的收藏
             favoritePlaylistsShow: false,
+            //我关注的歌手
             followArtistsShow: false,
+            /* 顶部导航*/
+            //相约电波模式按钮
             radioModeShortcut: true,
+            //功能管理按钮
             modulesSettingShortcut: false,
+            //主题按钮
             themesShortcut: true,
+            //我的主页按钮
             userHomeShortcut: true,
+            //简约布局按钮
             simpleLayoutShortcut: true,
         },
         /* 对话框 */
         dialog: {
+            //批量删除
             batchDelete: true,
+            //清空最近播放
             clearRecents: true,
+            //恢复默认设置
             resetSetting: true,
+            //清空本地歌曲
             clearLocalMusics: true,
+            //清空自由FM
             clearFreeFM: true,
         },
-        /* 快捷键 */
+        /* 快捷键，可修改 */
         keys: {
-            global: false, //是否全局（系统平台级别）快捷键
+            //是否全局（系统平台级别）快捷键
+            global: false,
+        },
+        /* 快捷键 - 默认值，只读 */
+        keysDefault: {
             data: [{
                 id: 'togglePlay',
                 name: '播放 / 暂停',
@@ -225,47 +289,47 @@ export const useSettingStore = defineStore('setting', {
                 id: 'togglePlayMode',
                 name: '切换播放模式',
                 binding: 'M',
-                gBinding: 'Shift + M'
+                gBinding: 'Alt + Shift + M'
             }, {
                 id: 'playPrev',
                 name: '上一曲',
                 binding: 'Left',
-                gBinding: 'Shift + Left'
+                gBinding: 'Alt + Shift + Left'
             }, {
                 id: 'playNext',
                 name: '下一曲',
                 binding: 'Right',
-                gBinding: 'Shift + Right'
+                gBinding: 'Alt + Shift + Right'
             }, {
                 id: 'volumeUp',
                 name: '增加音量',
                 binding: 'Up',
-                gBinding: 'Shift + Up'
+                gBinding: 'Alt + Shift + Up'
             }, {
                 id: 'volumeDown',
                 name: '减小音量',
                 binding: 'Down',
-                gBinding: 'Shift + Down'
+                gBinding: 'Alt + Shift + Down'
             }, {
                 id: 'volumeMuteOrMax',
                 name: '静音 / 最大音量',
                 binding: 'O',
-                gBinding: 'Shift + O'
+                gBinding: 'Alt + Shift + O'
             }, {
                 id: 'toggleSetting',
                 name: '打开设置',
                 binding: 'P',
-                gBinding: 'Shift + P'
+                gBinding: 'Alt + Shift + P'
             }, {
                 id: 'togglePlaybackQueue',
                 name: '打开 / 关闭当前播放',
                 binding: 'Q',
-                gBinding: 'Shift + Q'
+                gBinding: 'Alt + Shift + Q'
             }, {
                 id: 'toggleLyricToolbar',
                 name: '打开 / 关闭歌词设置',
                 binding: 'L',
-                gBinding: 'Shift + L'
+                gBinding: 'Alt + Shift + L'
             }]
         },
         /* 网络 */
@@ -288,7 +352,7 @@ export const useSettingStore = defineStore('setting', {
         /* 其他 */
         others: {
             //版本 - 检查更新时，是否忽略开发预览版
-            checkPreReleaseVersion: false
+            checkPreReleaseVersion: true
         },
         //“黑洞 ”state，永远不需要持久化
         //仅用于触发某些机制，但现在暂时已经用处不大啦
@@ -802,13 +866,13 @@ export const useSettingStore = defineStore('setting', {
             this.setupFontWeight()
         },
         setLyricFontSize(value) {
-            const fontSize = parseInt(value || 22)
+            const fontSize = parseInt(value || 24)
             if (fontSize < 10 || fontSize > 100) return
             this.lyric.fontSize = fontSize
             this.setupLyricFontSize()
         },
         setLyricHighlightFontSize(value) {
-            const fontSize = parseInt(value || 22)
+            const fontSize = parseInt(value || 25)
             if (fontSize < 10 || fontSize > 100) return
             this.lyric.hlFontSize = fontSize
             this.setupLyricHighlightFontSize()
@@ -820,7 +884,7 @@ export const useSettingStore = defineStore('setting', {
             this.setupLyricFontWeight()
         },
         setLyricLineHeight(value) {
-            const lineHeight = parseInt(value || 28)
+            const lineHeight = parseInt(value || 33)
             if (lineHeight < 10 || lineHeight > 168) return
             this.lyric.lineHeight = lineHeight
             this.setupLyricLineHeight()
@@ -855,11 +919,11 @@ export const useSettingStore = defineStore('setting', {
             this.setLyricAlignment()
         },
         setupLyricFontSize() {
-            const fontSize = this.lyric.fontSize || 18
+            const fontSize = this.lyric.fontSize || 24
             EventBus.emit('lyric-fontSize', fontSize)
         },
         setupLyricHighlightFontSize() {
-            const fontSize = this.lyric.hlFontSize || 21
+            const fontSize = this.lyric.hlFontSize || 25
             EventBus.emit('lyric-hlFontSize', fontSize)
         },
         setupLyricFontWeight() {
@@ -867,11 +931,11 @@ export const useSettingStore = defineStore('setting', {
             EventBus.emit('lyric-fontWeight', fontWeight)
         },
         setupLyricLineHeight() {
-            const lineHeight = this.lyric.lineHeight || 28
+            const lineHeight = this.lyric.lineHeight || 33
             EventBus.emit('lyric-lineHeight', lineHeight)
         },
         setupLyricLineSpacing() {
-            const lineSpacing = this.lyric.lineSpacing || 26
+            const lineSpacing = this.lyric.lineSpacing || 28
             EventBus.emit('lyric-lineSpacing', lineSpacing)
         },
         setupLyricOffset() {
@@ -993,7 +1057,7 @@ export const useSettingStore = defineStore('setting', {
             EventBus.emit('modules-toggleSearchPlatform')
         },
         setDesktopLyricFontSize(value) {
-            const fontSize = parseInt(value || 20)
+            const fontSize = parseInt(value || 23)
             if (fontSize < 10 || fontSize > 365) return
             this.desktopLyric.fontSize = fontSize
             this.syncSettingToDesktopLyric()
@@ -1007,7 +1071,7 @@ export const useSettingStore = defineStore('setting', {
             this.syncSettingToDesktopLyric()
         },
         setDesktopLyricLineSpacing(value) {
-            value = parseInt(value || 22)
+            value = parseInt(value || 23)
             if (value < 0 || value > 1024) return
             this.desktopLyric.lineSpacing = value
             this.syncSettingToDesktopLyric()

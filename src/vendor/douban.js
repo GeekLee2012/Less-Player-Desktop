@@ -4,7 +4,7 @@ import { Category } from "../common/Category";
 import { Playlist } from "../common/Playlist";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
-import { base64Decode, base64Encode, hexDecode, toTrimString } from "../common/Utils";
+import { base64Parse, base64Stringify, hexDecode, toTrimString } from "../common/Utils";
 import { Album } from "../common/Album";
 
 
@@ -23,9 +23,7 @@ const getAlbumCover = (albummid) => {
 }
 
 const getArtistCover = (artistmid) => {
-    if (!artistmid) return null
-    return "http://y.gtimg.cn/music/photo_new/T001R500x500M000"
-        + artistmid + ".jpg"
+    return artistmid ? `http://y.gtimg.cn/music/photo_new/T001R500x500M000${artistmid}.jpg` : null
 }
 
 const getTrackTypeMeta = (typeName) => {
@@ -62,9 +60,9 @@ const getTrackTypeMeta = (typeName) => {
 //新版本歌词信息
 const lyricExtReqBody = (id, track) => {
     const { title, artist, album, duration, songID } = track
-    const songName = base64Encode(title)
-    const singerName = base64Encode(artist[0].name)
-    const albumName = base64Encode(album.name)
+    const songName = base64Stringify(title)
+    const singerName = base64Stringify(artist[0].name)
+    const albumName = base64Stringify(album.name)
     const interval = parseInt(duration / 1000)
     return {
         data: JSON.stringify({
@@ -151,7 +149,8 @@ export class DouBan {
     static tagPlaylistCategories() {
         const result = { platform: DouBan.CODE, data: [] }
         return new Promise(async (resolve, reject) => {
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListTag"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListTag'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -213,7 +212,8 @@ export class DouBan {
         //精选歌单
         return new Promise(async (resolve, reject) => {
             const result = { platform: DouBan.CODE, cate: originCate, offset, limit, page, total: 10, data: [] }
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=MergePage"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=MergePage'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -262,10 +262,10 @@ export class DouBan {
         return new Promise(async (resolve, reject) => {
             const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 1, data: [] }
             if (page > 1) {
-                resolve(result)
-                return
+                return resolve(result)
             }
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=RadioPage"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=RadioPage'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -328,7 +328,8 @@ export class DouBan {
         const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 100, data: [] }
         const tagId = parseInt((cate || '').replace(DouBan.TAG_PLAYLIST_CODE + '_', '').trim())
         return new Promise(async (resolve, reject) => {
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListGenreSongPlayList"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListGenreSongPlayList'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -398,10 +399,10 @@ export class DouBan {
         return new Promise(async (resolve, reject) => {
             const result = { platform: DouBan.CODE, cate, offset, limit, page, total: 1, data: [] }
             if (page > 1) {
-                resolve(result)
-                return
+                return resolve(result)
             }
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=Discover"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=Discover'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -456,10 +457,10 @@ export class DouBan {
         //const cateId = parseInt(toTrimString(cate).replace(DouBan.RECOMMAND_ALBUM_CODE + '_', ''))
         return new Promise(async (resolve, reject) => {
             if (page > 1) {
-                resolve(result)
-                return
+                return resolve(result)
             }
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=AlbumMergePage"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=AlbumMergePage'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -511,7 +512,8 @@ export class DouBan {
                     + '<br>一起去发现美吧，让内心来指引我们方向。 '
                     + '<br><br>PS: 每次重新进入页面时，歌曲数据可能会随时被刷新哦 ~'
             })
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=SongSection"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=SongSection'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -567,7 +569,8 @@ export class DouBan {
         id = parseInt(id.replace(DouBan.TAG_PLAYLIST_CODE + '_', ''))
         return new Promise(async (resolve, reject) => {
             const result = new Playlist(id, DouBan.CODE)
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=QueryPlaylistDetailEx"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=QueryPlaylistDetailEx'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -645,17 +648,18 @@ export class DouBan {
     //歌词
     static lyric(id, track) {
         return new Promise((resolve, reject) => {
-            const url = "http://u.y.qq.com/cgi-bin/musicu.fcg"
+            const url = 'http://u.y.qq.com/cgi-bin/musicu.fcg'
+
             const reqBody = lyricExtReqBody(id, track)
             const result = { id, platform: QQ.CODE, lyric: null, trans: null }
             getJson(url, reqBody).then(json => {
                 const { lyric, roma, trans } = json.req_1.data
-                Object.assign(result, { lyric: Lyric.parseFromText(base64Decode(lyric)) })
+                Object.assign(result, { lyric: Lyric.parseFromText(base64Parse(lyric)) })
                 if (roma) { //TODO
                     Object.assign(result, { roma: Lyric.parseFromText(hexDecode(roma)) })
                 }
                 if (trans) {
-                    Object.assign(result, { trans: Lyric.parseFromText(base64Decode(trans)) })
+                    Object.assign(result, { trans: Lyric.parseFromText(base64Parse(trans)) })
                 }
                 resolve(result)
             })
@@ -665,7 +669,9 @@ export class DouBan {
     //歌手详情：Name、Cover、简介(如果有)、热门歌曲等
     static artistDetail(id) {
         return new Promise(async (resolve, reject) => {
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListSingerSong"
+            const result = { id, platform: DouBan.CODE, title: '未知歌手', cover: '', data: [], about: '' }
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListSingerSong'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -696,7 +702,7 @@ export class DouBan {
                     "cursor": 0
                 })
             })
-            const result = { id, platform: DouBan.CODE, title: '未知歌手', cover: 'default_cover.png', data: [], about: '' }
+
             postJson(url, reqBody).then(json => {
                 const { songList: songs } = json.cgi.data
                 songs.forEach(item => {
@@ -708,7 +714,7 @@ export class DouBan {
                                     title: ar.name || ar.title
                                 })
                             }
-                            if (result.cover === 'default_cover.png') {
+                            if (result.cover === '') {
                                 Object.assign(result, {
                                     cover: getArtistCover(ar.mid)
                                 })
@@ -741,7 +747,9 @@ export class DouBan {
     //歌手详情: 专辑
     static artistDetailAlbums(id, offset, limit, page) {
         return new Promise(async (resolve, reject) => {
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListSingerAlbum"
+            const result = { id, platform: DouBan.CODE, offset, limit, page, total: 1, data: [] }
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListSingerAlbum'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -772,7 +780,7 @@ export class DouBan {
                     "cursor": 0
                 })
             })
-            const result = { id, platform: DouBan.CODE, offset, limit, page, total: 1, data: [] }
+
             postJson(url, reqBody).then(json => {
                 const { albumList: list } = json.cgi.data
                 list.forEach(item => {
@@ -816,7 +824,8 @@ export class DouBan {
             DouBan.RADIO_CACHE.data.length = 0
             //拉取数据
 
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListRadioSong"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=ListRadioSong'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -866,7 +875,8 @@ export class DouBan {
     static albumDetail(id) {
         id = parseInt(toTrimString(id).replace(DouBan.RECOMMAND_ALBUM_CODE + '_', ''))
         return new Promise(async (resolve, reject) => {
-            const url = "https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=QueryAlbumDetailEx"
+            const url = 'https://u6.kuwo.cn/cgi-bin/musicu.fcg?cgiKey=QueryAlbumDetailEx'
+
             const reqBody = JSON.stringify({
                 "comm": {
                     "OpenUDID": "ffffffffe3950e2e000000000033c587",
@@ -899,6 +909,7 @@ export class DouBan {
                 const { album, songs } = json.cgi.data
                 const { id, name: title, pic: cover, desc: about, publish_date: publishTime, album_mid: mid, artists } = album
                 const artist = artists.map(ar => ({ id: ar.id, name: ar.name }))
+
                 const result = new Album(id, DouBan.CODE, title, cover, artist, null, publishTime, about)
                 result.mid = mid
 

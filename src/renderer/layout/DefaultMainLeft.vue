@@ -57,9 +57,11 @@ const updatePlatformIndex = (index, isSwitchMode) => {
     } else if (isPlaylistMode.value || isArtistMode.value || isRadioMode.value) {
         path = `/${exploreMode}/square/${platform}`
     }
-    visitRoute(path).catch(error => {
-        if (isDevEnv() && error) console.log(error)
-    })
+    if (path) {
+        visitRoute(path).catch(error => {
+            if (isDevEnv() && error) console.log(error)
+        })
+    }
 }
 
 const switchExploreMode = () => {

@@ -10,7 +10,7 @@ import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useFreeFMStore } from '../store/freeFMStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { useIpcRenderer } from '../../common/Utils';
+import { coverDefault, useIpcRenderer } from '../../common/Utils';
 import { FreeFM } from '../../vendor/freefm';
 
 
@@ -24,12 +24,12 @@ const props = defineProps({
 const ipcRenderer = useIpcRenderer()
 
 const { showToast, showFailToast } = useAppCommonStore()
-const coverRef = ref(null)
 const detail = reactive({ title: null, url: null, streamType: 0, tags: null, about: null, cover: null })
 const setStreamType = (value) => Object.assign(detail, { streamType: value })
 const titleInvalid = ref(false)
 const urlInvalid = ref(false)
 const isActionDisabled = ref(false)
+const setActionDisabled = (value) => isActionDisabled.value = value
 
 
 const { addFreeRadio, updateFreeRadio, getFreeRadio, removeFreeRadio } = useFreeFMStore()
@@ -42,12 +42,12 @@ const loadRadio = () => {
     const radio = getFreeRadio(id)
     if (!radio) return
     const { title, data, tags, about, cover } = radio
-    Object.assign(detail, { id })
-    if (cover) Object.assign(detail, { cover })
-    if (tags) Object.assign(detail, { tags })
-    if (title) Object.assign(detail, { title })
-    if (about) Object.assign(detail, { about })
-    if (data && data.length > 0) Object.assign(detail, { url: data[0].url, streamType: data[0].streamType })
+    Object.assign(detail, { id, title, data, tags, about, cover })
+    if (data && data.length > 0) {
+        Object.assign(detail, {
+            url: data[0].url, streamType: data[0].streamType
+        })
+    }
 }
 
 const resetCheckStatus = () => {
@@ -62,7 +62,8 @@ const submit = () => {
         titleInvalid.value = true
         return
     }
-    if (!url || url.trim().length < 10 || !url.trim().startsWith('http')) {
+    if (!url || url.trim().length < 10
+        || !url.trim().startsWith('http')) {
         urlInvalid.value = true
         return
     }
@@ -75,6 +76,7 @@ const submit = () => {
         text = success ? '电台已保存!' : '电台无法保存！<br>当前电台可能不存在'
     }
     if (success) {
+        setActionDisabled(true)
         showToast(text, backward)
     } else {
         showFailToast(text)
@@ -85,10 +87,10 @@ const remove = () => {
     const success = removeFreeRadio({ id: props.id })
     removeFavoriteRadio(props.id, FreeFM.CODE)
     if (success) {
-        isActionDisabled.value = true
-        showToast('电台已删除！', backward)
+        setActionDisabled(true)
+        showToast('电台已删除', backward)
     } else {
-        showFailToast('电台删除失败！')
+        showFailToast('电台删除失败')
     }
 }
 
@@ -114,7 +116,7 @@ onMounted(() => loadRadio())
         </div>
         <div class="center">
             <div>
-                <img class="cover" v-lazy="detail.cover" ref="coverRef" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
             </div>
             <div class="right">
@@ -176,7 +178,8 @@ onMounted(() => loadRadio())
                     </div>
                 </div>
                 <div class="action">
-                    <SvgTextButton :leftAction="submit" text="保存" :disabled="isActionDisabled"></SvgTextButton>
+                    <SvgTextButton :leftAction="submit" text="保存" :disabled="isActionDisabled">
+                    </SvgTextButton>
                     <SvgTextButton :leftAction="remove" text="删除" v-show="id" class="spacing" :disabled="isActionDisabled">
                     </SvgTextButton>
                     <SvgTextButton :leftAction="backward" text="取消" class="spacing" :disabled="isActionDisabled">

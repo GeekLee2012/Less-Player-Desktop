@@ -27,7 +27,7 @@ const transformPath = (path) => {
 
 const isExtentionValid = (name, exts) => {
     for (var ext of exts) {
-        if (name && name.endsWith(ext)) {
+        if (name && name.toLowerCase().endsWith(ext.toLowerCase())) {
             return true
         }
     }

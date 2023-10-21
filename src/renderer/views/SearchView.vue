@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, onMounted, ref, shallowRef, watch } from 'vue';
+import { computed, onActivated, onMounted, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSearchStore } from '../store/searchStore';
 import AlbumListControl from '../components/AlbumListControl.vue';
@@ -8,6 +8,7 @@ import SongListControl from '../components/SongListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
+import { usePlatformStore } from '../store/platformStore';
 
 
 
@@ -25,15 +26,21 @@ const { setActiveTab,
     isPlaylistsTab,
     isAlbumsTab,
     isArtistsTab,
+    isVideosTab,
     currentVender,
     currentPlatform
 } = useSearchStore()
 const { hideAllCtxMenus } = useAppCommonStore()
+const { isKuGou, isLocalMusic } = usePlatformStore()
+
 
 const currentTabView = shallowRef(null)
 const tabData = ref([])
 let offset = 0, limit = 50, page = 1
 const isLoading = ref(false)
+const videoStyle = ref(false)
+const setVideoStyle = (value) => videoStyle.value = value
+
 
 const setLoading = (value) => {
     isLoading.value = value
@@ -111,16 +118,43 @@ const loadArtists = async () => {
     setLoading(false)
 }
 
+const loadVideos = async () => {
+    currentTabView.value = PlaylistsControl
+    setVideoStyle(true)
+    setLoading(true)
+    const vendor = currentVender()
+    if (!vendor || !vendor.searchVideos) return
+    let result = null, retry = 1
+    do {
+        result = await vendor.searchVideos(props.keyword, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!isVideosTab() || !result) return
+    if (currentPlatform() != result.platform) return
+    updateTabData(result.data)
+    setLoading(false)
+}
+
 const resetTabView = () => {
     currentTabView.value = null
     tabData.value.length = 0
     updateTabTipText(0)
     resetScrollState()
+    setVideoStyle(false)
 }
 
 const loadTab = () => {
     setLoading(true)
     resetTabView()
+
+    //不支持歌手
+    if (isKuGou(currentPlatform()) && isArtistsTab()) {
+        setActiveTab(0)
+    }
+    //不支持视频
+    if (isLocalMusic(currentPlatform()) && isVideosTab()) {
+        setActiveTab(0)
+    }
+
     if (isSongsTab()) {
         loadSongs()
     } else if (isPlaylistsTab()) {
@@ -129,6 +163,8 @@ const loadTab = () => {
         loadAlbums()
     } else if (isArtistsTab()) {
         loadArtists()
+    } else if (isVideosTab()) {
+        loadVideos()
     }
 }
 
@@ -162,6 +198,14 @@ const restoreScrollState = () => {
 }
 
 
+const computedTabShow = computed(() => {
+    return (index) => {
+        if (isKuGou(currentPlatform()) && index == 3) return false
+        if (isLocalMusic(currentPlatform()) && index == 4) return false
+        return true
+    }
+})
+
 EventBus.on('modules-toggleSearchPlatform', () => visitTab(0, true))
 
 onMounted(() => visitTab(0, true))
@@ -189,12 +233,12 @@ watch(() => props.keyword, (nv, ov) => loadTab())
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
-                    v-for="(tab, index) in tabs" @click="visitTab(index)" v-html="tab.name">
+                    v-for="(tab, index) in tabs" @click="visitTab(index)" v-html="tab.name" v-show="computedTabShow(index)">
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
-                :loading="isLoading">
+                :loading="isLoading" :videoStyle="videoStyle">
             </component>
         </div>
     </div>

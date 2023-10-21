@@ -21,8 +21,8 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { Track } from '../../common/Track';
 import EventBus from '../../common/EventBus';
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -98,25 +98,25 @@ const playAllSongs = () => addAndPlayTracks(allSongs.value, true)
 
 const addHotSongs = (text) => {
     addTracks(hotSongs.value)
-    showToast(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加")
 }
 
 const addAllSongs = (text) => {
     addTracks(allSongs.value)
-    showToast(text || "歌曲已全部添加！")
+    showToast(text || "歌曲已全部添加")
 }
 
 const { addFollowArtist, removeFollowArtist, isFollowArtist } = useUserProfileStore()
 const follow = ref(false)
 const toggleFollow = () => {
     follow.value = !follow.value
-    let text = "歌手关注成功！"
+    let text = "歌手关注成功"
     if (follow.value) {
         const { title, cover } = detail
         addFollowArtist(props.id, props.platform, title, cover)
     } else {
         removeFollowArtist(props.id, props.platform)
-        text = "歌手已取消关注！"
+        text = "歌手已取消关注"
     }
     showToast(text)
 }
@@ -394,14 +394,14 @@ EventBus.on('ctxMenu-removeFromLocal', reloadAll)
 onActivated(() => {
     restoreScrollState()
 })
-watch([platform, artistId], reloadAll, { immediate: true })
+watch([() => (props.platform), () => (props.id)], reloadAll, { immediate: true })
 </script>
 
 <template>
     <div id="artist-detail-view" ref="artistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="Track.coverDefault({ cover: artistCover })" />
+                <img class="cover" v-lazy="coverDefault(artistCover)" />
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="artistName"></div>

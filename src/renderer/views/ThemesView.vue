@@ -28,7 +28,7 @@ const removeTheme = (item, index) => {
     if (index === currentIndex) {
         setThemeIndex(1, 0)
     }
-    showToast('主题已删除！')
+    showToast('主题已删除')
 }
 
 const customThemeItemPreviewStyle = (item) => {

@@ -29,7 +29,8 @@ export class Ximalaya {
     //全部电台分类
     static fmRadioCategories() {
         return new Promise((resolve, reject) => {
-            const url = "https://www.ximalaya.com/radio/"
+            const url = 'https://www.ximalaya.com/radio/'
+
             getDoc(url).then(doc => {
                 const result = { platform: Ximalaya.CODE, data: [], orders: [], multiMode: true }
                 const cateListWraps = doc.querySelectorAll(".category-list .all-wrap > .all")
@@ -98,10 +99,12 @@ export class Ximalaya {
         const { location, locationId, locationTypeId, categoryId, category } = parsedCate
         return new Promise((resolve, reject) => {
             const result = { platform: Ximalaya.CODE, cate, offset, limit, page, total: 0, data: [] }
+
             const pageSize = 48
-            const url = "https://mobile.ximalaya.com/radio-first-page-app/search"
+            const url = 'https://mobile.ximalaya.com/radio-first-page-app/search'
                 + `?locationId=${locationId}&locationTypeId=${locationTypeId}`
                 + `&categoryId=${categoryId}&pageNum=${page}&pageSize=${pageSize}`
+
             getJson(url).then(json => {
                 const list = json.data.radios
                 const total = json.data.total

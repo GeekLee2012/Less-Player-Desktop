@@ -9,7 +9,7 @@ import { useIpcRenderer, isWinOS, toTrimString } from '../../common/Utils';
 const ipcRenderer = useIpcRenderer()
 
 const { playlistExportContextItem } = storeToRefs(useAppCommonStore())
-const { showToast, hidePlaylistExportToolbar } = useAppCommonStore()
+const { showToast, showFailToast, hidePlaylistExportToolbar } = useAppCommonStore()
 
 const title = ref('导出Playlist')
 const setTitle = (value) => {
@@ -57,12 +57,12 @@ const exportPlaylist = async () => {
     data = toRaw(data)
 
     const result = await ipcRenderer.invoke('export-playlists', { path, format, data, looseMode })
-    let msg = '导出失败！'
     if (result) {
         hidePlaylistExportToolbar()
-        msg = '导出成功！'
+        showToast('导出操作成功')
+        return
     }
-    showToast(msg)
+    showFailToast('导出操作失败')
 }
 
 watch(playlistExportContextItem, (nv, ov) => {

@@ -40,7 +40,7 @@ const targetPlaying = () => {
 
 const onQueueEmpty = () => {
     if (queueTracksSize.value > 0) return
-    showToast("当前播放列表已清空！", () => {
+    showToast("当前播放已清空", () => {
         hidePlaybackQueueView()
         hidePlayingView()
     })

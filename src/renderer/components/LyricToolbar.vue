@@ -88,12 +88,12 @@ const getLyricOffsetText = () => {
                 </div>
                 <div class="row text v-spacing">字号 (普通)：</div>
                 <div class="row">
-                    <input type="number" placeholder="默认值22" :value="lyric.fontSize" min="10" max="100" step="1"
+                    <input type="number" placeholder="默认值24" :value="lyric.fontSize" min="10" max="100" step="1"
                         @input="updateLyricFontSize" />
                 </div>
                 <div class="row text v-spacing">字号 (高亮)：</div>
                 <div class="row">
-                    <input type="number" placeholder="默认值22" :value="lyric.hlFontSize" min="10" max="100" step="1"
+                    <input type="number" placeholder="默认值25" :value="lyric.hlFontSize" min="10" max="100" step="1"
                         @input="updateLyricHighlightFontSize" />
                 </div>
                 <div class="row text v-spacing">字重 (粗细)：</div>
@@ -103,7 +103,7 @@ const getLyricOffsetText = () => {
                 </div>
                 <div class="row text v-spacing">行高：</div>
                 <div class="row">
-                    <input type="number" placeholder="默认值28" :value="lyric.lineHeight" min="10" max="168" step="1"
+                    <input type="number" placeholder="默认值33" :value="lyric.lineHeight" min="10" max="168" step="1"
                         @input="updateLyricLineHeight" />
                 </div>
                 <div class="row text v-spacing">行间距：</div>

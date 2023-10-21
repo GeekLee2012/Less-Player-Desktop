@@ -4,7 +4,7 @@ import EventBus from '../../common/EventBus';
 import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../../renderer/store/platformStore';
 import { useSettingStore } from '../../renderer/store/settingStore';
-import { Track } from '../../common/Track';
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -19,7 +19,8 @@ const props = defineProps({
     checked: Boolean,
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function,
-    platform: String
+    platform: String,
+    videoStyle: Boolean
 })
 
 const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
@@ -54,10 +55,11 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     <div class="image-text-tile" :class="{
         'image-text-tile-card': isUseCardStyleImageTextTile,
         'image-text-tile-radio': isFMRadioPlatform(platform),
-        'image-text-tile-color-mode': color
+        'image-text-tile-color-mode': color,
+        'image-text-tile-video': videoStyle
     }" @click="toggleCheck">
         <div class="cover-wrap">
-            <img class="cover" v-lazy="Track.coverDefault({ cover })" v-show="!color"
+            <img class="cover" v-lazy="coverDefault(cover)" v-show="!color"
                 :class="{ 'obj-fit-contain': notCardStyleFreeFM }" />
             <div class="cover" v-show="color" :style="{ background: color }"></div>
             <div class=" cover-mask" :class="{ selectable: checkbox }">
@@ -241,7 +243,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     box-shadow: 0px 0px 3px #181818;
     border-radius: 6px;
     min-height: var(--others-image-text-tile-card-min-height);
-    margin-top: 20px;
+    margin-top: 18px;
     margin-bottom: 18px;
 }
 
@@ -272,8 +274,9 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile-card .title-wrap {
-    padding: 5px 10px;
-    width: var(--others-card-image-text-tile-title-width);
+    padding: 8px 15px 10px 15px;
+    /*width: var(--others-card-image-text-tile-title-width);*/
+    width: calc(var(--others-image-text-tile-cover-size) - 30px);
 }
 
 .image-text-tile-card .radio-title-wrap {
@@ -300,5 +303,32 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 
 .image-text-tile-color-mode .title {
     line-break: normal;
+}
+
+
+.image-text-tile-video {
+    margin: 18px 15px;
+}
+
+.image-text-tile-video .cover,
+.image-text-tile-video .title-wrap,
+.image-text-tile-video .title,
+.image-text-tile-video .subtitle {
+    width: calc(var(--others-image-text-tile-cover-size) * 1.36);
+}
+
+.image-text-tile-video .cover {
+    height: calc(var(--others-image-text-tile-cover-size * 0.85));
+}
+
+
+.image-text-tile-card.image-text-tile-video .title-wrap {
+    padding: 10px 21px 16px 21px;
+    width: calc(var(--others-image-text-tile-cover-size) * 1.36 - 42px);
+}
+
+.image-text-tile-card.image-text-tile-video .title,
+.image-text-tile-card.image-text-tile-video .subtitle {
+    width: auto;
 }
 </style>
