@@ -115,15 +115,25 @@
       "icon": "dist/icon@256X256.icns",
       "category": "Audio"
     },
-    "fileAssociations": {
-      "ext": [
-        "mp3",
-        "flac",
-        "ogg",
-        "wav",
-        "aac",
-        "m4a"
-      ]
-    }
+    "fileAssociations": [
+      {
+        "ext": "mp3"
+      },
+      {
+        "ext": "flac"
+      },
+      {
+        "ext": "ogg"
+      },
+      {
+        "ext": "wav"
+      },
+      {
+        "ext": "aac"
+      },
+      {
+        "ext": "m4a"
+      }
+    ]
   }
 }
