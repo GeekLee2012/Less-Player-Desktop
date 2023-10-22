@@ -94,7 +94,7 @@ const loadContent = async (noLoadingMask) => {
     if (!success) { //回退分页信息，并提示
         page = page - 1
         offset = page * limit
-        if (offset < detail.total) showToast('网络异常！请稍候再重试')
+        if (offset < detail.total) showToast('网络异常！请稍候重试')
     }
 }
 

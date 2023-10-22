@@ -34,7 +34,7 @@ const toggleMaximize = () => {
 </script>
 
 <template>
-    <div class="win-traffic-light-btn">
+    <div class="win-traffic-light-btn" @dblclick.stop="">
         <div @click="quit" class="ctl-btn close-btn">
             <svg viewBox="0 -1 32 32" xmlns="http://www.w3.org/2000/svg">
                 <g id="cross">

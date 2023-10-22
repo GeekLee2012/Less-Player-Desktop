@@ -98,6 +98,11 @@ const tabData = reactive([])
 const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
 
+const isSongTab = () => (activeTab.value == 0)
+const isPlaylistTab = () => (activeTab.value == 1)
+const isAlbumTab = () => (activeTab.value == 2)
+const isFmRadioTab = () => (activeTab.value == 3)
+
 //TODO
 const actionShowCtl = reactive({
     playBtn: false,
@@ -208,7 +213,7 @@ const updateTipText = () => {
 const switchTab = () => {
     resetTab()
     const platform = currentPlatformCode.value
-    if (activeTab.value == 0) { //歌曲
+    if (isSongTab()) { //歌曲
         Object.assign(actionShowCtl, {
             playBtn: true,
             addToBtn: true,
@@ -236,7 +241,7 @@ const switchTab = () => {
             tabData.push(...loadLocalPlaylist())
         }
         currentTabView.value = SongListControl
-    } else if (activeTab.value == 1) { //歌单
+    } else if (isPlaylistTab()) { //歌单
         if (isFavorites()) {
             Object.assign(actionShowCtl, {
                 playBtn: true,
@@ -263,7 +268,7 @@ const switchTab = () => {
             tabData.push(...filterByTitleWithKeyword(localPlaylists.value))
         }
         currentTabView.value = PlaylistsControl
-    } else if (activeTab.value == 2) { //专辑
+    } else if (isAlbumTab()) { //专辑
         if (isFavorites()) {
             Object.assign(actionShowCtl, {
                 playBtn: true,
@@ -281,7 +286,7 @@ const switchTab = () => {
             tabData.push(...filterByTitleWithKeyword(getRecentAlbums.value(platform)))
         }
         currentTabView.value = AlbumListControl
-    } else if (activeTab.value == 3) { //电台
+    } else if (isFmRadioTab()) { //电台
         if (isFavorites()) {
             Object.assign(actionShowCtl, {
                 playBtn: true,
@@ -418,22 +423,22 @@ const sortCheckData = () => {
 
 const playChecked = () => {
     const sortedData = sortCheckData()
-    if (activeTab.value == 0) { //歌曲
+    if (isSongTab()) { //歌曲
         addTracks(sortedData)
         playTrack(sortedData[0])
         showToast("即将为您播放歌曲")
-    } else if (activeTab.value == 1) { //歌单
+    } else if (isPlaylistTab()) { //歌单
         //当前播放列表太长易卡顿
         if (sortedData.length > 1) {
             return showFailToast('当前操作不支持！<br>无法同时播放多个歌单')
         }
         playPlaylist(sortedData[0])
-    } else if (activeTab.value == 2) { //专辑
+    } else if (isAlbumTab()) { //专辑
         if (sortedData.length > 1) {
             return showFailToast('当前操作不支持！<br>无法同时播放多个专辑')
         }
         playAlbum(sortedData[0])
-    } else if (activeTab.value == 3) { //电台
+    } else if (isFmRadioTab()) { //电台
         if (sortedData.length > 1) {
             return showFailToast('当前操作不支持！<br>无法同时播放多个电台')
         }
@@ -445,16 +450,16 @@ const playChecked = () => {
 const addToQueue = async () => {
     if (!actionShowCtl.addToQueueBtn) return
     const sortedData = sortCheckData()
-    if (activeTab.value == 0) { //歌曲
+    if (isSongTab()) { //歌曲
         addTracks(sortedData)
         showToast("歌曲添加成功")
-    } else if (activeTab.value == 1) { //歌单
+    } else if (isPlaylistTab()) { //歌单
         //当前播放列表太长易卡顿
         if (sortedData.length > 1) {
             return showFailToast('当前操作不支持！<br>无法同时添加多个歌单')
         }
         addPlaylistToQueue(sortedData[0], "歌曲已全部添加")
-    } else if (activeTab.value == 2) { //专辑
+    } else if (isAlbumTab()) { //专辑
         let failCnt = 0
         for (var i = 0; i < sortedData.length; i++) {
             const album = await addAlbumToQueue(sortedData[i])
@@ -462,7 +467,7 @@ const addToQueue = async () => {
         }
         const msg = failCnt ? `部分专辑已添加！<br>${failCnt}张专辑添加失败` : "专辑已全部添加"
         showToast(msg)
-    } else if (activeTab.value == 3) { //电台
+    } else if (isFmRadioTab()) { //电台
         sortedData.forEach(item => addFmRadioToQueue(item, "电台已全部添加"))
     }
     refresh()
@@ -531,19 +536,19 @@ const removeChecked = async () => {
     if (!ok) return
 
     let deleteFn = null
-    if (activeTab.value == 0) {
+    if (isSongTab()) {
         if (isFavorites()) deleteFn = removeFavoriteSong
         if (isRecents()) deleteFn = removeRecentSong
         if (isCustomPlaylist()) deleteFn = removeFromCustomPlaylist
         if (isLocalMusic()) deleteFn = removeFromLocalPlaylist
-    } else if (activeTab.value == 1) {
+    } else if (isPlaylistTab()) {
         if (isFavorites()) deleteFn = removeFavoritePlaylist
         if (isRecents()) deleteFn = removeRecentPlaylist
         if (isLocalMusic()) deleteFn = removeLocalPlaylist
-    } else if (activeTab.value == 2) {
+    } else if (isAlbumTab()) {
         if (isFavorites()) deleteFn = removeFavoriteAlbum
         if (isRecents()) deleteFn = removeRecentAlbum
-    } else if (activeTab.value == 3) {
+    } else if (isFmRadioTab()) {
         if (isFavorites()) deleteFn = removeFavoriteRadio
         if (isRecents()) deleteFn = removeRecentRadio
         if (isFreeFM()) deleteFn = removeFreeRadio
@@ -551,10 +556,10 @@ const removeChecked = async () => {
     if (deleteFn) {
         if (isFavorites()) checkedData.forEach(item => deleteFn(item.id, item.platform))
         //else if (isRecents()) checkedData.forEach(item => deleteFn(item))
-        else if (activeTab.value == 0 && (isCustomPlaylist() || isLocalMusic())) {
+        else if (isSongTab() && (isCustomPlaylist() || isLocalMusic())) {
             const { id } = commonCtxItem.value
             checkedData.forEach(item => deleteFn(id, item))
-        } else if (activeTab.value == 1 && isLocalMusic()) {
+        } else if (isPlaylistTab() && isLocalMusic()) {
             checkedData.forEach(item => deleteFn(item.id))
         } else { //默认情况
             checkedData.forEach(item => deleteFn(item))
@@ -952,23 +957,23 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     flex-direction: column;
 }
 
-#batch-action-view .action {
+#batch-action-view .center>.action {
     display: flex;
     flex-direction: row;
     position: relative;
     margin-bottom: 10px;
 }
 
-#batch-action-view .action svg {
+#batch-action-view .center>.action svg {
     fill: var(--button-icon-text-btn-text-color);
 }
 
-#batch-action-view .action .to-right {
+#batch-action-view .center>.action .to-right {
     position: absolute;
     right: 33px;
 }
 
-#batch-action-view .action .checkbox {
+#batch-action-view .center>.action .checkbox {
     flex-direction: row;
     margin-left: 8px;
     margin-right: 15px;
@@ -987,7 +992,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 }
 */
 
-#batch-action-view .action .checkbox>span {
+#batch-action-view .center>.action .checkbox>span {
     text-align: left;
     margin: 0px 20px;
     /*width: 65px;*/
@@ -995,11 +1000,11 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     cursor: pointer;
 }
 
-#batch-action-view .action .checkall span {
+#batch-action-view .center>.action .checkall span {
     margin-left: 13px;
 }
 
-#batch-action-view .content {
+#batch-action-view .center>.content {
     overflow: scroll;
 }
 

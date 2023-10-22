@@ -1,39 +1,39 @@
 <script setup>
-import { inject, onActivated, ref } from 'vue';
+import { computed, inject, onActivated, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
-import { usePlayStore } from '../store/playStore';
+import { useVideoPlayStore } from '../store/videoPlayStore';
 import EventBus from '../../common/EventBus';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useUseCustomTrafficLight } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
+import { PLAY_STATE } from '../../common/Constants';
 
 
 
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
-//是否使用自定义交通灯控件
-const useCustomTrafficLight = useUseCustomTrafficLight()
-
 const { hideVideoPlayingView, normalize } = useAppCommonStore()
 const { isMaxScreen, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { isSimpleLayout, isQuitVideoAfterEndedEnable } = storeToRefs(useSettingStore())
-const { videoSrc } = storeToRefs(usePlayStore())
-const { setVideoSrc } = usePlayStore()
+const { setPlaying, removeVideo } = useVideoPlayStore()
+const { currentVideo } = storeToRefs(useVideoPlayStore())
 
 
+let videoNode = null
 const initVideoPlayer = () => {
-    const videoEls = document.querySelectorAll('.video-holder')
+    const videoEls = document.querySelectorAll('.video-node')
     let index = 0 //正常情况，只有 1个
     //异常情况
     if (videoEls.length == 2) index = isSimpleLayout.value ? 0 : 1
-    EventBus.emit('video-init', videoEls[index])
+    videoNode = videoEls[index]
+    EventBus.emit('video-init', videoNode)
 }
 
 const stopVideo = (callback) => {
-    if (videoSrc.value) {
-        setVideoSrc(null)
+    if (currentVideo.value) {
+        setPlaying(false)
+        removeVideo(currentVideo.value)
         EventBus.emit('video-stop')
     }
     if (callback && typeof (callback) == 'function') callback()
@@ -50,12 +50,31 @@ const quitVideo = (callback) => {
     }, 666)
 }
 
+const currentVideoTitle = computed(() => {
+    return currentVideo.value ? currentVideo.value.title : ''
+})
+
+const currentVideoUrl = computed(() => {
+    return currentVideo.value ? currentVideo.value.url : null
+})
+
 const sidebarShow = ref(false)
 const toggleSidebarShow = () => sidebarShow.value = !sidebarShow.value
 
+const handleVideoDoubleClick = (event) => {
+    event.preventDefault()
+    if (!videoNode || !currentVideo.value) return
+    EventBus.emit('video-togglePlay')
+}
+
+const requestFullscreen = (event) => {
+    event.preventDefault()
+    if (videoNode && videoNode.requestFullscreen) videoNode.requestFullscreen()
+}
+
 EventBus.on("app-beforeRoute", quitVideo)
-EventBus.on("video-ended", event => {
-    if (isQuitVideoAfterEndedEnable.value) quitVideo()
+EventBus.on("video-state", ({ state, video }) => {
+    if (state == PLAY_STATE.END && isQuitVideoAfterEndedEnable.value) quitVideo()
 })
 
 onActivated(initVideoPlayer)
@@ -63,11 +82,13 @@ onActivated(initVideoPlayer)
 
 <template>
     <div class="video-playing-view">
-        <div class="header">
+        <div class="header" @dblclick.prevent="requestFullscreen">
             <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
-                <WinTrafficLightBtn :hideMaxBtn="isSimpleLayout" :showCollapseBtn="true" :collapseAction="quitVideo">
+                <WinTrafficLightBtn :hideMaxBtn="isSimpleLayout" :showCollapseBtn="true" :collapseAction="quitVideo"
+                    :isMaximized="isMaxScreen">
                 </WinTrafficLightBtn>
             </div>
+            <div class="title" v-html="currentVideoTitle"></div>
             <div class="action" :class="{ 'winstyle-action': useWindowsStyleWinCtl }" v-show="false">
                 <div class="list-btn text-btn btn">
                     <svg width="20" height="20" viewBox="0 0 853.72 597.61" xmlns="http://www.w3.org/2000/svg">
@@ -105,11 +126,40 @@ onActivated(initVideoPlayer)
             </div>
         </div>
         <div class="center">
-            <video class="video-holder" controls controlslist="nodownload" disablepictureinpicture="true"
+            <!--
+            <video class="video-node" controls controlslist="nodownload" disablepictureinpicture="true"
+                disableRemotePlayback="true" @click.prevent="" @dblclick.prevent="handleVideoDoubleClick">
+                <source :src="currentVideoUrl" type="video/mp4">
+            </video>
+            -->
+            <video class="video-node" controls controlslist="nodownload" disablepictureinpicture="true"
                 disableRemotePlayback="true">
-                <source :src="videoSrc" type="video/mp4">
+                <source :src="currentVideoUrl" type="video/mp4">
             </video>
         </div>
+        <div class="play-next-btn btn">
+            <svg width="15" height="15" viewBox="0 0 892.89 974.72" xmlns="http://www.w3.org/2000/svg">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="Layer_1-2" data-name="Layer 1">
+                        <path
+                            d="M0,487.1q0-214.48.11-429c0-10.43.55-21.09,2.72-31.24C7.49,5.16,21.25-3.21,43,1.09A75.6,75.6,0,0,1,71.71,13.35Q238,129.06,404.36,244.75,551,346.75,697.57,448.84c14.66,10.26,20.1,26.31,19.71,43.82-.43,19.08-8.14,34.53-24.32,45.64Q386.35,748.89,79.78,959.58a131.15,131.15,0,0,1-19.56,11c-26.27,12-54-3.06-59-32.1A96.76,96.76,0,0,1,.06,922.05Q0,704.58,0,487.1Z" />
+                        <path
+                            d="M794,486.76q0-217.47,0-434.95c0-23.46,12.26-41.43,32.93-48.47,30-10.21,60.81,8,65.73,39.13.64,4-.13,8.26-.13,12.4q0,432.21.09,864.41c0,14-2.45,26.8-11.92,37.6a49.8,49.8,0,0,1-55.1,13.81c-19.25-7.11-31.56-25-31.57-46.47q-.12-133.49,0-267Z" />
+                    </g>
+                </g>
+            </svg>
+        </div>
+        <div class="sidebar-btn" v-show="!sidebarShow" @click="toggleSidebarShow">
+            <svg width="18" height="18" viewBox="0 0 455.71 818.05" xmlns="http://www.w3.org/2000/svg">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="Layer_1-2" data-name="Layer 1">
+                        <path
+                            d="M101.17,405.1c2.89,1.94,5,2.89,6.47,4.41Q274.29,576.23,440.9,743c13.06,13.06,18.24,28.17,12.47,46-9.58,29.54-46.92,38.79-69.57,17.37-7.87-7.44-15.35-15.29-23-23L15.22,437.44C-5,417.2-5.07,392.34,15,372.23Q193.44,193.58,371.81,14.88C380.93,5.74,391.29-.19,404.44,0c17.18.25,30.24,8,37.94,23.27,7.79,15.43,6.19,30.66-3.89,44.78a60.83,60.83,0,0,1-6.7,7.4Q269.45,238,107.05,400.5C105.77,401.78,104.18,402.76,101.17,405.1Z" />
+                    </g>
+                </g>
+            </svg>
+        </div>
+        <!--
         <div class="sidebar-btn" :class="{ 'sidebar-collapse-btn': sidebarShow }" @click="toggleSidebarShow">
             <svg width="18" height="18" v-show="!sidebarShow" viewBox="0 0 455.71 818.05"
                 xmlns="http://www.w3.org/2000/svg">
@@ -133,9 +183,28 @@ onActivated(initVideoPlayer)
                 </g>
             </svg>
         </div>
-        <div class="sidebar" v-show="sidebarShow">
-            <span>路漫漫其修远兮，<br> 吾将上下而求索！</span>
-        </div>
+        -->
+        <transition name="fade-ex">
+            <div class="sidebar" v-show="sidebarShow">
+                <div class="sidebar-btn sidebar-collapse-btn" @click="toggleSidebarShow">
+                    <svg width="18" height="18" viewBox="0 0 455.71 818.08" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <g id="Layer_2-2" data-name="Layer 2">
+                                    <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                        <path
+                                            d="M354.54,413c-2.89-1.94-5-2.89-6.47-4.41Q181.42,241.85,14.81,75.08C1.75,62-3.43,46.91,2.34,29.08,11.92-.46,49.26-9.71,71.91,11.71c7.87,7.44,15.35,15.29,23,23L440.49,380.64c20.22,20.24,20.29,45.1.22,65.21Q262.27,624.5,83.9,803.2c-9.12,9.14-19.48,15.07-32.63,14.88-17.18-.25-30.24-8-37.94-23.27C5.54,779.38,7.14,764.15,17.22,750a61.07,61.07,0,0,1,6.7-7.4q162.34-162.55,324.74-325C349.94,416.3,351.53,415.32,354.54,413Z" />
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                <div class="content">
+                    <span>路漫漫其修远兮，<br> 吾将上下而求索！</span>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -177,6 +246,27 @@ onActivated(initVideoPlayer)
     align-items: center;
     /*width: 105px;*/
     margin-left: var(--others-win-ctl-margin-left);
+}
+
+.video-playing-view .header .title {
+    position: fixed;
+    width: 520px;
+    left: calc(50% - 260px);
+    top: 10px;
+    font-weight: bold;
+    color: var(--content-subtitle-text-color);
+    text-align: center;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    align-items: center;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    word-wrap: break-word;
+    line-break: anywhere;
+
+    color: #ccc;
 }
 
 .video-playing-view .header .action {
@@ -247,6 +337,17 @@ onActivated(initVideoPlayer)
     background: var(--view-bg);
 }
 
+.video-playing-view .play-next-btn {
+    position: absolute;
+    left: 126px;
+    bottom: 65px;
+    visibility: hidden;
+}
+
+.video-playing-view .play-next-btn svg {
+    fill: #fff;
+}
+
 .video-playing-view .sidebar-btn {
     position: absolute;
     right: 0px;
@@ -278,7 +379,6 @@ onActivated(initVideoPlayer)
 }
 
 .video-playing-view .sidebar-collapse-btn {
-    visibility: visible;
     right: 403px;
     opacity: 1;
     z-index: 100;
@@ -287,6 +387,11 @@ onActivated(initVideoPlayer)
     border-right: 1px solid transparent;
     box-shadow: -3px 0px 3px #222;
     */
+    border-left: 0.1px solid #000;
+    border-top: 0.1px solid #000;
+    border-bottom: 0.1px solid #000;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
 
 .video-playing-view .sidebar-collapse-btn svg {
@@ -297,17 +402,22 @@ onActivated(initVideoPlayer)
     position: absolute;
     right: 0px;
     top: 0px;
-    display: flex;
     background: var(--sidebar-bg);
     width: 404px;
     height: 100%;
     z-index: 99;
-    box-shadow: -1px 0px 3px #000;
+    border-top-right-radius: var(--border-macstyle-border-radius);
+    border-bottom-right-radius: var(--border-macstyle-border-radius);
+    box-shadow: 0px 0px 3px #000;
 
-    color: var(--sidebar-collapse-btn-svg-color);
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.video-playing-view .sidebar>.content {
+    color: var(--sidebar-collapse-btn-svg-color);
+    color: #ccc;
     font-size: var(--content-text-module-title3-size);
     line-height: 43px;
 }

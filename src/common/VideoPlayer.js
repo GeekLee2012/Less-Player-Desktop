@@ -1,10 +1,11 @@
 import Hls from 'hls.js';
 import EventBus from './EventBus';
+import { PLAY_STATE } from './Constants';
 
 
 
 let singleton = null
-let gVideoHolder = null
+let videoNode = null
 let lastPlayTime = null
 
 export class VideoPlayer {
@@ -12,8 +13,8 @@ export class VideoPlayer {
     constructor(video) {
         this.video = video
         this.hls = new Hls()
-        this.playing = false
         this.videoChanged = false
+        this.playState = PLAY_STATE.NONE
     }
 
     static get() {
@@ -24,43 +25,52 @@ export class VideoPlayer {
     /* 初始化并配置播放器 */
     static initAndSetup() {
         const player = VideoPlayer.get()
-        return player.on('video-init', videoHolder => VideoPlayer.setVideoHolder(videoHolder))
+        return player.on('video-init', node => player.setVideoNode(node))
             .on('video-change', video => player.setVideo(video))
             .on('video-play', video => player.playVideo(video))
             .on('video-togglePlay', () => player.togglePlay())
-            .on('volume-set', volume => player.volume(volume))
+            .on('video-setVolume', volume => player.volume(volume))
             .on('video-stop', () => player.setVideo(null))
     }
 
-    static setVideoHolder(videoHolder) {
-        gVideoHolder = videoHolder
-        gVideoHolder.addEventListener("ended", event => EventBus.emit('video-ended', event))
+    setVideoNode(node) {
+        videoNode = node
+        if (videoNode) {
+            const self = this
+            videoNode.addEventListener('playing', event => self.setPlayState(PLAY_STATE.PLAYING))
+            videoNode.addEventListener('pause', event => self.setPlayState(PLAY_STATE.PAUSE))
+            videoNode.addEventListener("ended", event => self.setPlayState(PLAY_STATE.END))
+            videoNode.addEventListener("error", event => self.setPlayState(PLAY_STATE.PLAY_ERROR))
+        }
     }
 
     //播放
     play() {
-        if (!Hls.isSupported()) return
-        if (!gVideoHolder) return
-        if (!this.video || !this.video.url) return
-        const self = this
+        if (!Hls.isSupported() || !videoNode) return
+        if (!this.video || !this.video.url) return this.setPlayState(PLAY_STATE.PLAY_ERROR)
 
+        const self = this
         const { url: src } = this.video
+
         if (VideoPlayer.isHlsVideo()) {
             this.hls.loadSource(src)
-            this.hls.attachMedia(gVideoHolder)
+            this.hls.attachMedia(videoNode)
 
             this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                gVideoHolder.play()
-                self.setPlayState(true)
-                self.videoChanged = false
+                this.setPlayState(PLAY_STATE.INIT)
+                videoNode.play()
+
                 lastPlayTime = Date.now()
                 requestAnimationFrame(self._step.bind(self))
             })
         } else { //TODO
-            gVideoHolder.load()
-            gVideoHolder.play()
-            this.setPlayState(true)
+            if (this.videoChanged) {
+                videoNode.load()
+                this.setPlayState(PLAY_STATE.INIT)
+            }
+            videoNode.play()
         }
+        this.videoChanged = false
     }
 
     static isHlsVideo(url) {
@@ -82,29 +92,35 @@ export class VideoPlayer {
         source.type = type
     }
 
+    playing() {
+        return this.playState == PLAY_STATE.PLAYING
+    }
+
     //暂停
     pause() {
-        if (!Hls.isSupported() || !gVideoHolder) return
-        if (!this.playing) return
+        if (!Hls.isSupported() || !videoNode) return
+        if (!this.playing()) return
+
         if (VideoPlayer.isHlsVideo()) {
             this.hls.detachMedia()
         } else {
-            gVideoHolder.pause()
+            videoNode.pause()
         }
-        this.setPlayState(false)
+        this.setPlayState(PLAY_STATE.PAUSE)
     }
 
     togglePlay() {
-        if (this.playing) {
+        if (this.playing()) {
             this.pause()
         } else {
             this.play()
         }
     }
 
-    setPlayState(playing) {
-        this.playing = playing
-        EventBus.emit('video-state', playing)
+    setPlayState(state) {
+        this.playState = state
+        const { video } = this
+        this.notify('video-state', { state, video })
     }
 
     setVideo(video) {
@@ -112,11 +128,12 @@ export class VideoPlayer {
         if (VideoPlayer.isHlsVideo()) this.hls.stopLoad()
         this.video = video
         this.videoChanged = true
+        this.playState = PLAY_STATE.NONE
         if (!video) this.reloadVideo()
     }
 
     reloadVideo() {
-        if (gVideoHolder) gVideoHolder.load()
+        if (videoNode) videoNode.load()
     }
 
     playVideo(video) {
@@ -126,23 +143,27 @@ export class VideoPlayer {
 
 
     volume(value) {
-        if (!Hls.isSupported()) return
-        if (!gVideoHolder) return
-        gVideoHolder.volume = value
+        if (!Hls.isSupported() || !videoNode) return
+        videoNode.volume = value
     }
 
     _step() {
         if (!this.video) return
-        if (!this.playing) return
+        if (!this.playing()) return
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
         const currentSecs = currentTime / 1000
-        EventBus.emit('video-pos', currentSecs)
+        this.notify('video-pos', currentSecs)
         requestAnimationFrame(this._step.bind(this))
     }
 
     on(event, handler) {
         EventBus.on(event, handler)
+        return this
+    }
+
+    notify(event, args) {
+        EventBus.emit(event, args)
         return this
     }
 

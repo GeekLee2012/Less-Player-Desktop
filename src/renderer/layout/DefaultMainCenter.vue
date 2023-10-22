@@ -204,7 +204,7 @@ const setVisualPlayingViewCanvasSize = () => {
 const setBatchViewListSize = () => {
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
-    const el = document.querySelector('#batch-action-view .content')
+    const el = document.querySelector('#batch-action-view .center > .content')
     const { clientHeight } = mainContent
     const padding = isDefaultClassicLayout.value ? 8 : 30
     //header 87, margin 15, action 31

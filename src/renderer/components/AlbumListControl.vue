@@ -27,7 +27,7 @@ const visitItem = (item) => {
 
 <template>
     <div class="albumlist-ctl">
-        <div class="content" v-show="!loading">
+        <div class="pag-content" v-show="!loading">
             <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title"
                 :subtitle="item.subtitle || item.publishTime" @click="visitItem(item)" :checkbox="checkbox" :playable="true"
                 :playAction="() => playAlbum(item)" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
@@ -44,7 +44,7 @@ const visitItem = (item) => {
     /* margin-top: 25px; */
 }
 
-.albumlist-ctl .content {
+.albumlist-ctl .pag-content {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;

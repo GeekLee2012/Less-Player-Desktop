@@ -5,6 +5,8 @@ import { toYyyymmddHhMmSs } from "../../common/Times";
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlayStore } from '../store/playStore';
 import { coverDefault } from '../../common/Utils';
+import { storeToRefs } from 'pinia';
+import { useSettingStore } from '../store/settingStore';
 
 
 
@@ -15,11 +17,12 @@ const props = defineProps({
 
 const { visitCustomPlaylist, visitCustomPlaylistEdit,
     visitBatchCustomPlaylist } = inject('appRoute')
-const { showContextMenu } = inject('appCommon')
+const { showContextMenu, showConfirm } = inject('appCommon')
 
 const { hideAllCtxMenus, showToast } = useAppCommonStore()
 const { getCustomPlaylist, removeCustomPlaylist } = useUserProfileStore()
 const { resetQueue, playNextTrack, addTracks } = usePlayStore()
+const { isShowDialogBeforeDeleteCustomPlaylist } = storeToRefs(useSettingStore())
 
 const toastAndHideMenu = (text) => {
     showToast(text)
@@ -45,7 +48,11 @@ const editItem = () => visitCustomPlaylistEdit(props.data.id)
 
 const visitBatch = () => visitBatchCustomPlaylist(props.data.id)
 
-const removeItem = () => {
+const removeItem = async () => {
+    let ok = true
+    if (isShowDialogBeforeDeleteCustomPlaylist.value) ok = await showConfirm({ msg: '确定要删除歌单吗？' })
+    if (!ok) return
+
     const { id } = props.data
     removeCustomPlaylist(id)
     toastAndHideMenu("歌单已删除")

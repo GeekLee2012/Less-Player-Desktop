@@ -88,6 +88,7 @@ const { setThemeIndex,
     toggleSearchForBatchActionShow,
     toggleSearchForFreeFMShow,
     toggleShowDialogBeforeBatchDelete,
+    toggleShowDialogBeforeCustomPlaylistDelete,
     toggleShowDialogBeforeClearRecents,
     toggleShowDialogBeforeResetSetting,
     toggleShowDialogBeforeClearLocalMusics,
@@ -365,7 +366,7 @@ const startDownload = async () => {
     const lastReleaseUrl = await getVersionReleaseUrl(lastVersion.value)
     if (!lastReleaseUrl) {
         setDownloadState(-1)
-        downloadProgress.value = '下载失败！请稍候再重试'
+        downloadProgress.value = '下载失败！请稍候重试'
         return
     }
     setDownloadState(1)
@@ -957,6 +958,12 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     <div>
                         <span class="cate-subtitle">批量删除：</span>
                         <ToggleControl @click="toggleShowDialogBeforeBatchDelete" :value="dialog.batchDelete">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">删除创建的歌单：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeCustomPlaylistDelete"
+                            :value="dialog.deleteCustomPlaylist">
                         </ToggleControl>
                     </div>
                     <div>

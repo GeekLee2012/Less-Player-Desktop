@@ -23,7 +23,7 @@ const ipcRenderer = useIpcRenderer()
 
 const { showToast, showFailToast } = useAppCommonStore()
 const coverRef = ref(null)
-const detail = reactive({ title: null, url: null, streamType: 0, tags: null, about: null, cover: null })
+const detail = reactive({ title: '', url: '', streamType: 0, tags: '', about: '', cover: '' })
 const setStreamType = (value) => Object.assign(detail, { streamType: value })
 const titleInvalid = ref(false)
 const urlInvalid = ref(false)

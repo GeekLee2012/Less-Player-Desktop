@@ -24,7 +24,7 @@ const visitItem = (item) => {
 
 <template>
     <div class="artistlist-ctl">
-        <div class="content" v-show="!loading">
+        <div class="pag-content" v-show="!loading">
             <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title" @click="visitItem(item)">
             </ImageTextTile>
         </div>
@@ -38,7 +38,7 @@ const visitItem = (item) => {
     margin-bottom: 10px !important;
 }
 
-.artistlist-ctl .content {
+.artistlist-ctl>.pag-content {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;

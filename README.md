@@ -6,11 +6,10 @@
 ![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)  
     
   
-一款基于Electron + Vue 3开发的播放器。  
-  
-由于个人工作和生活等方面原因，计划从2023-08-01起暂缓更新，待到2024年再回归。 
-请朋友们见谅，也感谢大家的理解和支持。
+一款基于Electron + Vue 3开发的播放器。   
 
+<b>本项目正式长久停更！也可能永久停更！</b>
+  
 <b>`郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>   
   
 ### 前言  

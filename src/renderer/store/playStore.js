@@ -15,8 +15,8 @@ const NO_TRACK = new Track('0', '', '听你想听，爱你所爱',
 export const usePlayStore = defineStore('player', {
     state: () => ({
         playing: false,
-        playingIndex: -1,
         playMode: PLAY_MODE.REPEAT_ALL,
+        playingIndex: -1,
         queueTracks: [],
         //单位: ms
         currentTime: 0,
@@ -26,9 +26,6 @@ export const usePlayStore = defineStore('player', {
         volume: 0.5,
         //是否正在自动下一曲
         isAutoPlaying: false,
-        videoSrc: null,
-        queueVideos: [],
-        playingVideoIndex: -1,
         //音频输出设备
         audioOutputDevices: []
     }),
@@ -97,8 +94,8 @@ export const usePlayStore = defineStore('player', {
         },
         addTracks(tracks) {
             //TODO 暂时不去重, 超级列表如何保证时效
-            if (!tracks || tracks.length < 1) return
-            tracks.forEach(item => this.addTrack(item));
+            if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
+            tracks.forEach(item => this.addTrack(item))
         },
         playTrackLater(track) {
             let index = this.findIndex(track)
@@ -243,12 +240,9 @@ export const usePlayStore = defineStore('player', {
         setAutoPlaying(value) {
             this.isAutoPlaying = value
         },
-        setVideoSrc(value) {
-            this.videoSrc = value
-        },
         setAudioOutputDevices(devices) {
             this.audioOutputDevices = devices
-        }
+        },
     },
     persist: {
         enabled: true,

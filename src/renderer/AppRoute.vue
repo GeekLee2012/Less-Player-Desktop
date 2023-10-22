@@ -260,11 +260,11 @@ const visitAlbumDetail = (platform, id, callback, data) => {
         let exploreMode = resolveExploreMode()
         let moduleName = 'album', isAlbum = true
         if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
-            exploreMode = exploreMode == 'userhome' ? 'userhome' : 'radios'
+            exploreMode = (exploreMode == 'userhome') ? 'userhome' : 'radios'
             moduleName = 'playlist'
             isAlbum = false
         } else { //TODO 单一责任
-            exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
+            exploreMode = (exploreMode == 'radios') ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
         visitCommonRoute(toPath).then(() => {
@@ -292,11 +292,13 @@ provide('appRoute', {
     visitSearch: (keyword) => (visitCommonRoute(`/search/${keyword}`)),
     visitLocalMusic: () => (visitCommonRoute('/playlists/local')),
     visitPlaylistSquare: (platform) => (visitCommonRoute(`/playlists/square/${platform}`)),
-    visitPlaylist: (platform, id) => {
-        const exploreMode = resolveExploreMode()
+    visitPlaylist: (platform, id, exploreMode) => {
+        const noArgMode = !exploreMode
+        exploreMode = resolveExploreMode(exploreMode)
         if (platform === 'local') {
             return visitCommonRoute(`/${exploreMode}/local/${id}`)
         }
+        if (exploreMode == 'radios' && noArgMode) exploreMode = 'playlists'
         return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)
     },
     visitArtist: ({ platform, item, index, callback, onRouteReady }) => {

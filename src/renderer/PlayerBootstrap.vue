@@ -15,6 +15,9 @@ import { Playlist } from '../common/Playlist';
 import { toMmss } from '../common/Times';
 import { Lyric } from '../common/Lyric';
 import { United } from '../vendor/united';
+import { useVideoPlayStore } from './store/videoPlayStore';
+
+
 
 
 const ipcRenderer = useIpcRenderer()
@@ -25,27 +28,22 @@ const { playTrack, playNextTrack,
     setAutoPlaying, playPrevTrack,
     togglePlay, switchPlayMode,
     toggleVolumeMute, updateVolumeByOffset,
-    updateCurrentTime, setPlaying,
-    resetQueue, addTracks,
+    setPlaying, resetQueue, addTracks,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying,
-    setVideoSrc, setAudioOutputDevices,
-    playTrackLater } = usePlayStore()
+    setAudioOutputDevices, playTrackLater } = usePlayStore()
 const { getVendor, isLocalMusic,
     isRadioCN, isXimalaya, isFreeFM } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
-    playingViewThemeIndex, spectrumIndex,
-    desktopLyricShow } = storeToRefs(useAppCommonStore())
+    playingViewThemeIndex, spectrumIndex, } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId,
-    toggleDesktopLyricShow, toggleDesktopLyricAlwaysOnTop,
     setDesktopLyricShow, setCurrentTraceId } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
-const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
-    theme, layout, desktopLyric, isStoreRecentPlay,
+const { theme, layout, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
     isResumePlayAfterVideoEnable, isPauseOnPlayingVideoEnable,
     selectedAudioOutputDeviceId, } = storeToRefs(useSettingStore())
@@ -55,7 +53,8 @@ const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setAudioOutputDeviceId, setupAudioOutputDevice } = useSettingStore()
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
-
+const { playVideoNow } = useVideoPlayStore()
+const { currentVideo } = storeToRefs(useVideoPlayStore())
 
 
 const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
@@ -287,7 +286,7 @@ const playPlaylist = async (playlist, text, traceId) => {
     } catch (error) {
         if (isDevEnv) console.log(error)
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候再重试')
+        showFailToast('网络异常！请稍候重试')
     }
 }
 
@@ -318,7 +317,7 @@ const addPlaylistToQueue = async (playlist, text, traceId, limit) => {
     playlist = await loadPlaylist(playlist, text, traceId)
     if (!playlist.data || playlist.data.length < 1) {
         const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
-            : '网络异常！请稍候再重试'
+            : '网络异常！请稍候重试'
         if (traceId && !isCurrentTraceId(traceId)) return
         return showFailToast(failMsg)
     }
@@ -354,8 +353,9 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         playNextPlaylistRadioTrack(platform, id, null, traceId)
         return
     } else if (Playlist.isVideoType(playlist)) { //视频
-        showToast(text || '即将为您播放视频')
-        playMv({ ...playlist, mv: playlist.vid })
+        showToast(text || '即将为您播放视频', () => {
+            playMv({ ...playlist, mv: playlist.vid }, '当前视频无法播放')
+        }, 666)
         return
     } else if (Playlist.isNormalType(playlist)
         || Playlist.isAnchorRadioType(playlist)) {
@@ -364,7 +364,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     //检查数据，再次确认
     if (!playlist.data || playlist.data.length < 1) {
         const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
-            : '网络异常！请稍候再重试'
+            : '网络异常！请稍候重试'
         if (traceId && !isCurrentTraceId(traceId)) return
         showFailToast(failMsg)
         return
@@ -395,7 +395,7 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId) => 
 
     const vendor = getVendor(platform)
     if (!vendor || !vendor.nextPlaylistRadioTrack) {
-        showFailToast('服务异常！请稍候再重试')
+        showFailToast('服务异常！请稍候重试')
         return
     }
     const needReset = !Track.hasId(track)
@@ -417,7 +417,7 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId) => 
 
     if (!success) {
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候再重试')
+        showFailToast('网络异常！请稍候重试')
     }
 }
 
@@ -430,7 +430,7 @@ const playAlbum = (album, text, traceId) => {
     } catch (error) {
         if (isDevEnv()) console.log(error)
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候再重试')
+        showFailToast('网络异常！请稍候重试')
     }
 }
 
@@ -465,7 +465,7 @@ const addAlbumToQueue = async (album, text, traceId) => {
     album = await loadAlbum(album, text, traceId)
     if (!album || !album.data || album.data.length < 1) {
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候再重试')
+        showFailToast('网络异常！请稍候重试')
         return
     }
 
@@ -483,7 +483,7 @@ const doPlayAlbum = async (album, text, traceId) => {
     album = await loadAlbum(album, text, traceId)
     if (!album || !album.data || album.data.length < 1) {
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候再重试')
+        showFailToast('网络异常！请稍候重试')
         return
     }
 
@@ -596,7 +596,7 @@ const drawCanvasSpectrum = () => {
 }
 
 //获取视频信息 
-const getVideoDetail = (platform, id) => {
+const getVideoDetail = (id, platform) => {
     return new Promise((resolve, reject) => {
         if (!platform) return reject('noService')
         const vendor = getVendor(platform)
@@ -615,7 +615,7 @@ const getVideoDetail = (platform, id) => {
 
 const setupCurrentMediaSession = async () => {
     if ("mediaSession" in navigator) {
-        const track = currentTrack.value
+        const track = currentVideo.value || currentTrack.value
         if (!track) return
         const { title, cover } = track
         //TODO 本地歌曲可能使用在线封面，会导致数据不一致
@@ -823,30 +823,42 @@ const isTrackSeekable = computed(() => {
 })
 
 //播放MV
-const playMv = (video) => {
+const playMv = (video, failText) => {
     const { platform, mv } = video
     if (!mv || !platform) return
-    getVideoDetail(platform, mv).then(result => {
+    getVideoDetail(mv, platform).then(result => {
+        playVideo({ ...video, ...result })
+        traceRecentTrack(video)
+    }, reason => showFailToast(failText || '当前MV无法播放'))
+}
+
+//video => { title, cover, url }
+const playVideo = async (video) => {
+    try {
+        //是否需要暂停音频播放并挂起
         const playing = isPlaying()
         const pending = playing && isPauseOnPlayingVideoEnable.value
         if (pending) togglePlay()
         setPendingPlay(pending)
 
-        playVideo(result)
-        traceRecentTrack(video)
-    }, reason => showFailToast('当前MV无法播放'))
-}
-
-//video => { url }
-const playVideo = async (video) => {
-    try {
+        //开始播放视频
         if (!videoPlayingViewShow.value) toggleVideoPlayingView()
-        setVideoSrc(video.url)
-        EventBus.emit('video-play', video)
+        playVideoNow(video)
+        setupCurrentMediaSession()
     } catch (error) {
-        //
+        showFailToast('当前视频无法播放')
     }
 }
+
+const resumeTrackPendingPlay = () => {
+    if (isResumePlayAfterVideoEnable.value
+        && !isPlaying.value && pendingPlay.value) {
+        togglePlay()
+        setPendingPlay(false)
+    }
+}
+
+EventBus.on('video-stop', resumeTrackPendingPlay)
 
 //应用启动时，恢复歌曲信息
 const restoreTrack = (callback) => {
@@ -1101,13 +1113,11 @@ watch(theme, () => {
     postMessageToDesktopLryic('s-theme-apply', toRaw(getCurrentTheme()))
 }, { deep: true })
 
+/*
 watch(videoPlayingViewShow, (nv, ov) => {
-    if (!nv && isResumePlayAfterVideoEnable.value
-        && !isPlaying.value && pendingPlay.value) {
-        togglePlay()
-        setPendingPlay(false)
-    }
+    if (!nv) resumeTrackPendingPlay()
 })
+*/
 
 //TODO
 watch(playingIndex, (nv, ov) => resetTrackRetry())

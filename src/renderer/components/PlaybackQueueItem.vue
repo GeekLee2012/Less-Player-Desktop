@@ -42,7 +42,9 @@ const linkItem = () => {
     const track = props.data
     const { pid, platform, album } = track
     if (Track.hasPid(track)) {
-        if (album && toTrimString(album.id) == toTrimString(pid)) {
+        if (Playlist.isAnchorRadioType(track)) {
+            visitPlaylist(platform, pid, 'radios')
+        } else if (album && toTrimString(album.id) == toTrimString(pid)) {
             visitAlbum({ platform, id: pid })
         } else {
             visitPlaylist(platform, pid)

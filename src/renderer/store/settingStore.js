@@ -264,6 +264,8 @@ export const useSettingStore = defineStore('setting', {
         dialog: {
             //批量删除
             batchDelete: true,
+            //删除创建的歌单
+            deleteCustomPlaylist: true,
             //清空最近播放
             clearRecents: true,
             //恢复默认设置
@@ -498,6 +500,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeBatchDelete() {
             return this.dialog.batchDelete
+        },
+        isShowDialogBeforeDeleteCustomPlaylist() {
+            return this.dialog.deleteCustomPlaylist
         },
         isShowDialogBeforeClearRecents() {
             return this.dialog.clearRecents
@@ -1009,6 +1014,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeBatchDelete() {
             this.dialog.batchDelete = !this.dialog.batchDelete
+        },
+        toggleShowDialogBeforeCustomPlaylistDelete() {
+            this.dialog.deleteCustomPlaylist = !this.dialog.deleteCustomPlaylist
         },
         toggleShowDialogBeforeClearRecents() {
             this.dialog.clearRecents = !this.dialog.clearRecents

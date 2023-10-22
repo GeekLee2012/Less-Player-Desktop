@@ -359,7 +359,7 @@ const randomPlay = async () => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     const platformName = getPlatformName(platform)
@@ -382,7 +382,7 @@ const randomPlay = async () => {
 
 //显示当前调用链路的Toast
 const showCurrentTraceFailToast = (traceId, text) => {
-    if (isCurrentTraceId(traceId)) showFailToast(text || '网络异常！请稍候再重试')
+    if (isCurrentTraceId(traceId)) showFailToast(text || '网络异常！请稍候重试')
 }
 
 //获取歌单分类
@@ -391,7 +391,7 @@ const pickPlaylistCategory = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.categories) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     let cachedCategories = getCategories(platform)
@@ -444,7 +444,7 @@ const pickPlaylist = async (platform, traceId, noPlayAction) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.square) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     //重试
@@ -520,7 +520,7 @@ const pickAnchorRadioCategory = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.radioCategories) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     let cachedCategories = getCategories(platform)
@@ -585,7 +585,7 @@ const pickAnchorRadio = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.radioSquare) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     do {
@@ -641,7 +641,7 @@ const pickFMRadioCategory = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.radioCategories) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     let cachedCategories = getCategories(platform)
@@ -708,7 +708,7 @@ const pickFMRadio = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.radioSquare) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     do {
@@ -764,7 +764,7 @@ const pickArtistsCategory = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.artistCategories) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
     let cachedCategories = getCategory(platform)
@@ -827,7 +827,7 @@ const pickArtist = async (platform, traceId, noPlayAction) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.artistSquare) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
 
@@ -903,7 +903,7 @@ const pickAlbumFromPlaylist = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
 
@@ -955,7 +955,7 @@ const pickAlbumFromArtist = async (platform, traceId) => {
     //平台服务
     const vendor = getVendor(platform)
     if (!vendor || !vendor.artistDetailAlbums) {
-        showCurrentTraceFailToast(traceId, '服务异常！请稍候再重试')
+        showCurrentTraceFailToast(traceId, '服务异常！请稍候重试')
         return
     }
 

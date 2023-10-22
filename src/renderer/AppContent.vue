@@ -151,12 +151,12 @@ const setupTrafficLightWinCtlBtn = () => {
 //TODO
 const setVideoViewSize = () => {
   const { clientWidth, clientHeight } = document.documentElement
-  const els = document.querySelectorAll('.video-holder')
+  const els = document.querySelectorAll('.video-node')
   if (!els) return
   els.forEach(el => {
-    el.style.width = clientWidth + "px"
-    el.style.height = (clientHeight - 56) + "px"
-    el.style.maxHeight = (clientHeight - 56) + "px"
+    el.style.width = `${clientWidth}px`
+    el.style.height = `${clientHeight - 56}px`
+    el.style.maxHeight = `${clientHeight - 56}px`
   })
 }
 
@@ -269,6 +269,7 @@ let isConfirmDialogShowing = false
 const showConfirm = async ({ title, msg }) => {
   if (!ipcRenderer || isConfirmDialogShowing) return false
   isConfirmDialogShowing = true
+  hideAllCtxMenus()
   const ok = await ipcRenderer.invoke('show-confirm', {
     title: title || '确认',
     msg
