@@ -149,7 +149,7 @@ const hideThumb = () => {
     //const delay = props.disableOptimize ? 0 : 1000
 
     let delay = props.thumbAutoHideDelay
-    if (typeof (delay) == 'undefined') delay = 1000
+    if (typeof delay == 'undefined') delay = 1000
     delay = Math.max(delay, 0)
     thumbHideTimer = setTimeout(() => {
         thumbShow.value = false
@@ -159,7 +159,7 @@ const hideThumb = () => {
 watch(() => props.value, (nv, ov) => {
     if (onDrag.value || onUserScroll.value) return
     updateProgress(nv, ov)
-})
+}, { immediate: true })
 
 onMounted(() => updateProgress(props.value))
 

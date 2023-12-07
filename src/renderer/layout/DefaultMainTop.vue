@@ -15,7 +15,8 @@ const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('ap
 const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('player')
 
 const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
-const { isMaxScreen } = storeToRefs(useAppCommonStore())
+const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
+
 </script>
 
 <template>
@@ -28,7 +29,7 @@ const { isMaxScreen } = storeToRefs(useAppCommonStore())
             <div class="action">
                 <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
                 </SearchBar>
-                <div class="userhome-btn btn" @click="visitUserHome" v-show="!useWindowsStyleWinCtl">
+                <div class="userhome-btn btn" @click="() => visitUserHome()" v-show="!useWindowsStyleWinCtl">
                     <svg width="22" height="21" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -38,7 +39,7 @@ const { isMaxScreen } = storeToRefs(useAppCommonStore())
                         </g>
                     </svg>
                 </div>
-                <div class="setting-btn btn" v-show="!useWindowsStyleWinCtl" @click="visitSetting">
+                <div class="setting-btn btn" v-show="!useWindowsStyleWinCtl" @click="() => visitSetting()">
                     <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">

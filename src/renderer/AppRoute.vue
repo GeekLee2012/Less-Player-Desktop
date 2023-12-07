@@ -1,6 +1,6 @@
 <script setup>
 import { provide } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, isNavigationFailure, NavigationFailureType } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import EventBus from '../common/EventBus';
 import { useUserProfileStore } from './store/userProfileStore';
@@ -38,12 +38,15 @@ const setupRouter = () => {
     router.beforeResolve((to, from) => {
         if (isDevEnv()) console.log("[ ROUTE ] ==>>> " + to.path)
 
+        if (to.matched.length < 1) return visitNotFound(to, from)
+
         autoSwitchExploreMode(to, from)
         highlightPlatform(to)
         highlightNavigationCustomPlaylist(to, from)
         hideRelativeComponents(to)
         autoSwitchSearchPlaceHolder(to)
     })
+
 }
 
 //TODO 数据量大时，可能有卡顿风险
@@ -88,10 +91,12 @@ const autoSwitchSearchPlaceHolder = (to) => {
     let index = 0
     if (path.includes('/local')) {
         index = 1
-    } else if (path.includes('/radios')) {
-        index = 2
     } else if (path.includes('/setting')) {
-        index = path.includes('/modules') ? 8 : 3
+        index = 2
+        if (path.includes('/modules')) index = 8
+        else if (path.includes('/plugins')) index = 9
+    } else if (path.includes('/radios')) {
+        index = 3
     } else if (path.includes('/themes')) {
         index = 4
     } else if (path.includes('/data/backup')) {
@@ -123,7 +128,7 @@ const hideRelativeComponents = (to) => {
 
 const createCommonRoute = (route, onRouteReady) => {
     route = route || { path: '/' }
-    if (typeof (route) === 'string') route = { path: route }
+    if (typeof route === 'string') route = { path: route }
     return {
         ...route,
         path: (route.path || route.toPath),
@@ -142,7 +147,7 @@ const createCommonRoute = (route, onRouteReady) => {
 
 const currentRoutePath = () => (router.currentRoute.value.path)
 const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
-const resolveRoute = (route) => (typeof (route) == 'object' ? route : { path: toTrimString(route) })
+const resolveRoute = (route) => ((typeof route == 'object') ? route : { path: toTrimString(route) })
 
 const visitRoute = (route) => {
     return new Promise((resolve, reject) => {
@@ -155,7 +160,7 @@ const visitRoute = (route) => {
             return reject('noRoute')
         }
         //beforeRoute设置后，一般都会执行，除非route不存在
-        if (beforeRoute && typeof (beforeRoute) == 'function') beforeRoute(toPath)
+        if (beforeRoute && (typeof beforeRoute == 'function')) beforeRoute(toPath)
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
         if (isSame && !replace && !override) {
@@ -164,7 +169,7 @@ const visitRoute = (route) => {
         //相同且要求覆盖，才进行替换
         if (isSame && override) Object.assign(route, { replace: true })
         //onRouteReady设置后，仅在route有效时执行
-        if (onRouteReady && typeof (onRouteReady) == 'function') onRouteReady(toPath)
+        if (onRouteReady && (typeof onRouteReady == 'function')) onRouteReady(toPath)
         router.push(route)
         resolve(route)
     })
@@ -172,6 +177,10 @@ const visitRoute = (route) => {
 
 const visitCommonRoute = (route, onRouteReady) => {
     return visitRoute(createCommonRoute(route, onRouteReady))
+}
+
+const visitNotFound = (to, from) => {
+    return visitCommonRoute('/')
 }
 
 const refresh = () => {
@@ -211,7 +220,7 @@ const visitRadio = async (platform) => {
 
 const valiadateArtistId = (id) => {
     id = id || ''
-    return (typeof (id) == 'string') ? !isBlank(id) : (parseInt(id) > 0)
+    return (typeof id == 'string') ? !isBlank(id) : (parseInt(id) > 0)
 }
 
 const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onRouteReady }) => {
@@ -239,21 +248,21 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
         visitCommonRoute(toPath, onRouteReady)
-            .then(() => updateArtistDetailKeys(platform, id))
+            //.then(() => updateArtistDetailKeys(platform, id))
             .catch(error => { })
         hideAllCtxMenus()
     } else if (isFMRadioPlatform(platform)) {
         visitRadio(platform)
         hideAllCtxMenus()
     }
-    if (callback && typeof (callback) == 'function') callback(visitable)
+    if (callback && (typeof callback == 'function')) callback(visitable)
 }
 
 
 const visitAlbumDetail = (platform, id, callback, data) => {
     if (isLocalMusic(platform)) id = data.name || data.title
     const platformValid = isAlbumDetailVisitable(platform)
-    const idValid = (typeof (id) == 'string') ? (id.trim().length > 0) : (id > 0)
+    const idValid = (typeof id == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
     platform = platform.trim()
     if (visitable) {
@@ -267,12 +276,13 @@ const visitAlbumDetail = (platform, id, callback, data) => {
             exploreMode = (exploreMode == 'radios') ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
-        visitCommonRoute(toPath).then(() => {
+        visitCommonRoute(toPath)
+        /*.then(() => {
             if (isAlbum) updateAlbumDetailKeys(platform, id)
-        })
+        })*/
         hideAllCtxMenus()
     }
-    if (callback && typeof (callback) == 'function') callback(visitable)
+    if (callback && (typeof callback == 'function')) callback(visitable)
 }
 
 setupRouter()
@@ -298,7 +308,7 @@ provide('appRoute', {
         if (platform === 'local') {
             return visitCommonRoute(`/${exploreMode}/local/${id}`)
         }
-        if (exploreMode == 'radios' && noArgMode) exploreMode = 'playlists'
+        if (exploreMode != 'radios' && noArgMode) exploreMode = 'playlists'
         return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)
     },
     visitArtist: ({ platform, item, index, callback, onRouteReady }) => {
@@ -396,6 +406,13 @@ provide('appRoute', {
             })
     },
     visitRadio,
+    visitPlugins: () => {
+        return visitCommonRoute('/setting/plugins')
+    },
+    addCustomRoute: (route) => {
+        return router.addRoute('appmain', route)
+    },
+    visitNotFound
 })
 </script>
 

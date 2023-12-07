@@ -1,4 +1,5 @@
 export const toMmss = (millis) => {
+    if(!millis && millis !== 0) return 
     let minutes = Math.floor(millis / 60000);
     let seconds = ((millis % 60000) / 1000).toFixed(0);
     if (seconds >= 60) { //toFixed()是否引起进位
@@ -68,9 +69,9 @@ export const toYyyymmddHhMmSs = (timestamp, sp1, sp2, sp3) => {
 }
 
 
-export const toMillis = (mmssMMM) => {
+export const toMillis = (mmssSSS) => {
     try {
-        let timeParts = mmssMMM.split(':')
+        let timeParts = mmssSSS.split(':')
         const minutes = parseInt(timeParts[0].trim())
         timeParts = timeParts[1].split('.')
         const seconds = parseInt(timeParts[0].trim())
@@ -78,7 +79,7 @@ export const toMillis = (mmssMMM) => {
         if (timeParts.length > 1) millis = parseInt(timeParts[1].trim())
         return (minutes * 60 + seconds) * 1000 + millis
     } catch (error) {
-        console.log(mmssMMM, "\n", error)
+        console.log(mmssSSS, "\n", error)
     }
     return -1
 }

@@ -651,7 +651,7 @@ export class DouBan {
             const url = 'http://u.y.qq.com/cgi-bin/musicu.fcg'
 
             const reqBody = lyricExtReqBody(id, track)
-            const result = { id, platform: QQ.CODE, lyric: null, trans: null }
+            const result = { id, platform: DouBan.CODE, lyric: null, trans: null }
             getJson(url, reqBody).then(json => {
                 const { lyric, roma, trans } = json.req_1.data
                 Object.assign(result, { lyric: Lyric.parseFromText(base64Parse(lyric)) })

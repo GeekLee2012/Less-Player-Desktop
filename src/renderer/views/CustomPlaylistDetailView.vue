@@ -213,7 +213,9 @@ onUpdated(() => {
             </div>
         </div>
         <div class="center">
-            <div class="list-title content-text-highlight">歌曲({{ detail.data.length }})</div>
+            <div class="list-title">
+                <div class="size-text content-text-highlight">歌曲({{ detail.data.length }})</div>
+            </div>
             <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="4" :id="id">
             </SongListControl>
         </div>
@@ -322,10 +324,17 @@ onUpdated(() => {
 }
 
 #custom-playlist-detail-view .list-title {
-    margin-left: 3px;
-    margin-bottom: 3px;
+    margin-bottom: 6px;
     text-align: left;
-    font-size: 16px;
     font-weight: bold;
+    display: flex;
+    position: relative;
+}
+
+#custom-playlist-detail-view .list-title .size-text {
+    margin-left: 3px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--content-highlight-color);
+    font-size: calc(var(--content-text-tab-title-size) - 2px);
 }
 </style>

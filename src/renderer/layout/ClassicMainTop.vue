@@ -11,13 +11,14 @@ import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 
 
 
-const { visitThemes, visitUserHome, visitSetting, visitModulesSetting } = inject('appRoute')
+const { visitThemes, visitUserHome, visitSetting, visitModulesSetting, visitPlugins } = inject('appRoute')
 const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
 
 
 const { setLayoutIndex } = useSettingStore()
 const { isRadioModeShortcutEnable,
     isModulesSettingShortcutEnable,
+    isPluginsSettingShortcutEnable,
     isThemesShortcutEnable,
     isUserHomeShortcutEnable,
     isSimpleLayoutShortcutEnable, } = storeToRefs(useSettingStore())
@@ -83,6 +84,18 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
+            <div id="plugin-btn" @click="visitPlugins" v-show="isPluginsSettingShortcutEnable">
+                <svg width="19" height="19" viewBox="0 0 918.34 919" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Layer_2" data-name="Layer 2">
+                        <g id="Layer_1-2" data-name="Layer 1">
+                            <path
+                                d="M684.21,919h-227a5.25,5.25,0,0,0-1.72-.77,109.28,109.28,0,0,1-58.19-19.77c-1.06-.74-3.73-.28-5,.58a105,105,0,0,1-37.14,16.4c-7.24,1.56-14.64,2.4-22,3.56h-58a34.39,34.39,0,0,0-5.28-.8q-59.25-.06-118.5,0a33.64,33.64,0,0,0-5.22.8h-43c-2.75-.41-5.5-.84-8.26-1.23C38.53,909.8.26,865.87.22,808.85Q.15,698.12.23,587.38c0-20.84,5.46-40.27,17.24-57.47,3.53-5.16,3.49-8.6.23-13.48C4.6,496.83-.19,475.18,0,451.57c.57-70.65.18-141.31.24-212,0-5.81.31-11.65.89-17.44,5-49.57,48.25-90.89,98-93.2,16-.75,32-.76,48-.76q92.24,0,184.46.38a106.71,106.71,0,0,1,20.34,2c51.28,10.27,86.34,53.34,86.35,105.77q0,111.48-.08,223c0,6.12-1.09,12.24-1.71,18.36-.17,1.7-.47,3.39-.59,4.19,13.24-.46,26-1.26,38.79-1.29q104-.18,208-.05c59.78,0,107.24,46.68,107.53,106.53q.55,112.49,0,225c-.18,51.14-35.55,93.92-85.45,104C697.94,917.39,691,918,684.21,919ZM572.37,832.49q51.5,0,103,0c2.32,0,4.66-.34,7-.22,12.22.64,22-8.72,21.94-23.57-.15-72.33-.06-144.65-.11-217a44.4,44.4,0,0,0-.93-8.91c-1.84-9-7.45-14.31-16.49-15.74a51.69,51.69,0,0,0-8-.54q-108,0-216,0c-16.64,0-24.62,7.93-24.61,24.4q.07,107.73.17,215.47c0,18.63,7.43,26.11,26,26.11Zm-352.86-352h104c2,0,4,0,6-.17,15.82-1.23,22.7-8.55,22.71-24.34q0-108.24,0-216.48c0-17.24-7.78-25-25.07-25h-216c-17.26,0-25,7.75-25,25.1V455.09c0,17.16,7.2,24.68,24.31,25.38,1.49.06,3,0,4.5,0ZM86.21,699.82v104c0,22,6.68,28.68,28.53,28.68h209c1.66,0,3.33,0,5-.07,16.69-1.1,23.49-8.38,23.51-25.16q0-30.25,0-60.5,0-78,0-156c0-7.57-1.43-14.66-7.78-19.68-5-3.93-10.92-4.61-17-4.61H110.93c-16.92,0-24.71,7.85-24.72,24.83Q86.2,645.58,86.21,699.82Z" />
+                            <path
+                                d="M816.21,0C821.58.88,827,1.56,832.3,2.68,883,13.34,918,55.75,918.15,107.38q.35,112.71,0,225.42c-.23,57-46.23,104.42-103,105.19-60.79.82-121.6.18-182.4.17-17.82,0-35.68.8-53.44-.23-51.2-3-93.51-44.34-98.2-95.25-.55-6-.86-12-.86-17.94q-.09-107.71,0-215.43C480.21,51.05,521.48,6,579.49.83A13.51,13.51,0,0,0,582.21,0Zm16,219.35V111.89c0-17.66-7.57-25.37-25.12-25.37q-108.45,0-216.91,0c-15.9,0-24,8.13-24,24V328.45c0,15.45,7.6,23.24,23.2,23.69,7.32.21,14.65.34,22,.34q96.21,0,192.42,0c2.16,0,4.33-.06,6.48-.23,14.92-1.14,21.93-8.63,21.93-23.45Q832.23,274.08,832.21,219.35Z" />
+                        </g>
+                    </g>
+                </svg>
+            </div>
             <div id="theme-btn" @click="visitThemes" v-show="isThemesShortcutEnable">
                 <svg width="19" height="19" viewBox="0 -10 940.66 926.15" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
@@ -93,7 +106,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="userhome-btn" @click="visitUserHome" v-show="isUserHomeShortcutEnable">
+            <div id="userhome-btn" @click="() => visitUserHome()" v-show="isUserHomeShortcutEnable">
                 <svg width="21" height="21" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -103,7 +116,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="setting-btn" @click="visitSetting" :class="{ 'last-btn': !isSimpleLayoutShortcutEnable }">
+            <div id="setting-btn" @click="() => visitSetting()" :class="{ 'last-btn': !isSimpleLayoutShortcutEnable }">
                 <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -167,6 +180,7 @@ const toggleRadioMode = () => {
 }
 
 .classic-main-top #radio-btn svg,
+.classic-main-top #plugin-btn svg,
 .classic-main-top #module-btn svg,
 .classic-main-top #theme-btn svg,
 .classic-main-top #userhome-btn svg,
@@ -176,6 +190,7 @@ const toggleRadioMode = () => {
 }
 
 .classic-main-top #radio-btn,
+.classic-main-top #plugin-btn svg,
 .classic-main-top #module-btn svg,
 .classic-main-top #theme-btn,
 .classic-main-top #userhome-btn,

@@ -41,7 +41,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         artistListSubmenuShow: false,
         exitToHomeBtnShow: false,
         playingViewThemeIndex: 0,
-        spectrumIndex: 0,
+        spectrumIndex: 1,
         //歌词设置
         lyricToolbarShow: false,
         //随便听听设置
@@ -57,8 +57,8 @@ export const useAppCommonStore = defineStore('appCommon', {
         popoverHintShow: false,
         popoverHintText: null,
         popoverHintTarget: null,
-        //独占搜索框
-        searchBarExclusiveAction: null,
+        //搜索框
+        searchBarExclusiveAction: null, //独占模式
         playlistExportToolbarShow: false,
         playlistExportContextItem: null,
         searchPlaceHolderIndex: 0,
@@ -68,6 +68,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         desktopLyricShow: false,
         desktopLyricLocked: false,
         desktopLyricCtxData: null,
+        //播放挂起状态
+        pendingPlay: false,
+        pendingPlayPercent: 0,
     }),
     getters: {
         isPlaylistMode() {
@@ -260,7 +263,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         showCommonNotification(text) {
             //没有内容就不显示
-            if (!text || typeof (text) != 'string' || text.trim().length < 1) return
+            if (!text || (typeof text != 'string') || text.trim().length < 1) return
             this.commonNotificationText = text
             this.commonNotificationShow = true
         },
@@ -277,7 +280,7 @@ export const useAppCommonStore = defineStore('appCommon', {
             toastTimer = setTimeout(() => {
                 this.hideCommonNotification()
                 try {
-                    if (callback && typeof (callback) == 'function') callback()
+                    if (callback && (typeof callback == 'function')) callback()
                 } catch (error) {
                     if (isDevEnv()) console.log(error)
                 }
@@ -355,7 +358,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         }
         ,
         switchSpectrumIndex() {
-            this.setSpectrumIndex((this.spectrumIndex + 1) % 3)
+            this.setSpectrumIndex(this.spectrumIndex + 1)
         },
         setSpectrumIndex(value) {
             this.spectrumIndex = value
@@ -457,6 +460,12 @@ export const useAppCommonStore = defineStore('appCommon', {
         setDesktopLyricCtxData(value) {
             this.desktopLyricCtxData = value
         },
+        setPendingPlay(value) {
+            this.pendingPlay = value
+        },
+        setPendingPlayPercent(value) {
+            this.pendingPlayPercent = value
+        }
     },
     persist: {
         enabled: true,
@@ -466,7 +475,8 @@ export const useAppCommonStore = defineStore('appCommon', {
                 storage: localStorage,
                 paths: ['playingViewThemeIndex', 'spectrumIndex',
                     'randomMusicPlatformCodes', 'randomMusicTypeCodes',
-                    'currentMusicCategoryName', 'exploreModeActiveStates']
+                    'currentMusicCategoryName', 'exploreModeActiveStates', 
+                    'pendingPlay', 'pendingPlayPercent']
             },
         ],
     },

@@ -22,6 +22,7 @@ import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { Album } from '../../common/Album';
 import { coverDefault } from '../../common/Utils';
+import { useSettingStore } from '../store/settingStore';
 
 
 
@@ -30,25 +31,27 @@ const props = defineProps({
     id: String
 })
 
-const { playAlbum, addAlbumToQueue } = inject('player')
+const { playAlbum, addAlbumToQueue, dndSaveCover } = inject('player')
 
 const { albumId, albumName, albumCover, platform,
     artistName, publishTime, company,
     activeTab, tabs, tabTipText,
-    allSongs, about
+    allSongs, about, activeTabCode,
 } = storeToRefs(useAlbumDetailStore())
 const { setActiveTab, updateTabTipText,
-    isAllSongsTab, isAboutTab,
     isAllSongsTabLoaded, isAlbumDetailLoaded,
     updateAllSongs, updateAlbum,
     updateAbout, resetAll,
     updateCover, updateArtistName,
     updatePublishTime,
+    updateAlbumDetailKeys,
 } = useAlbumDetailStore()
 
-const { getVendor, isLocalMusic } = usePlatformStore()
+const { getVendor, isLocalMusic, isAllSongsTab, isAboutTab, } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
+const { isDndSaveEnable } = storeToRefs(useSettingStore())
+
 
 let currentTabView = shallowRef(null)
 const tabData = ref([])
@@ -91,8 +94,8 @@ const toggleFavorite = () => {
     favorited.value = !favorited.value
     let text = "专辑收藏成功"
     if (favorited.value) {
-        const { title, cover, publishTime } = detail
-        addFavoriteAlbum(albumId.value, platform.value, title, cover, publishTime)
+        const { title, cover, publishTime, artist, company } = detail
+        addFavoriteAlbum(albumId.value, platform.value, title, cover, publishTime, artist, company)
     } else {
         removeFavoriteAlbum(albumId.value, platform.value)
         text = "专辑已取消收藏"
@@ -106,7 +109,7 @@ const checkFavorite = () => {
 
 const updateTabData = (data) => {
     tabData.value.length = 0
-    if (typeof (data) === 'string') {
+    if (typeof data === 'string' && isAboutTab(activeTabCode.value)) {
         tabData.value.push(data)
         updateTabTipText(0)
     } else if (Array.isArray(data) && data.length > 0) {
@@ -129,7 +132,7 @@ const getAlbumDetail = async () => {
         result = await vendor.albumDetail(id)
     } while (!result && retry++ <= 3)
     if (!result) return
-    const artistName = result.artist.length > 0 ? (result.artist[0].name) : ''
+    const artistName = Album.artistName(result)
     updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
     updateAbout(result.about)
     Object.assign(detail, result)
@@ -157,7 +160,7 @@ const loadAllSongs = async () => {
     do {
         result = await vendor.albumDetailAllSongs(id, 0, 100)
     } while (!result && retry++ <= 3)
-    if (!isAllSongsTab() || !result) return
+    if (!isAllSongsTab(activeTabCode.value) || !result) return
     updateAllSongs(result.data)
     updateTabData(allSongs.value)
     if (isLocalMusic(platform.value)) {
@@ -170,7 +173,7 @@ const loadAllSongs = async () => {
 
 const loadAbout = () => {
     currentTabView.value = TextListControl
-    if (!isAboutTab()) return
+    if (!isAboutTab(activeTabCode.value)) return
     updateTabData(about.value)
 }
 
@@ -207,9 +210,10 @@ const resetView = () => {
 const switchTab = () => {
     resetView()
     setLoading(true)
-    if (isAllSongsTab()) {
+    const code = activeTabCode.value
+    if (isAllSongsTab(code)) {
         loadAllSongs()
-    } else if (isAboutTab()) {
+    } else if (isAboutTab(code)) {
         loadAbout()
         setLoading(false)
     }
@@ -227,7 +231,10 @@ const detectTitleHeight = () => {
 EventBus.on('ctxMenu-removeFromLocal', reloadAll)
 
 //TODO 需要梳理优化
-watch([() => (props.platform), () => (props.id)], reloadAll, { immediate: true })
+watch(() => [props.platform, props.id], ([nv1, nv2]) => {
+    updateAlbumDetailKeys(nv1, nv2)
+    reloadAll()
+}, { immediate: true })
 watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
 
 EventBus.on('app-resize', detectTitleHeight)
@@ -237,7 +244,8 @@ EventBus.on('app-resize', detectTitleHeight)
     <div id="album-detail-view" ref="detailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="coverDefault(albumCover)" />
+                <img class="cover" v-lazy="coverDefault(albumCover)" :class="{ 'draggable': isDndSaveEnable }"
+                    :draggable="isDndSaveEnable" @dragstart="(event) => dndSaveCover(event, detail)" />
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="albumName" ref="titleRef"></div>
@@ -282,7 +290,7 @@ EventBus.on('app-resize', detectTitleHeight)
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
             <component :id="id" :is="currentTabView" :data="tabData" :dataType="dataType" :artistVisitable="true"
-                :albumVisitable="true" :loading="isLoading">
+                :albumVisitable="true" :loading="isLoading" :platform="platform">
             </component>
         </div>
     </div>
@@ -333,6 +341,10 @@ EventBus.on('app-resize', detectTitleHeight)
     height: 236px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
+}
+
+#album-detail-view .header .cover.draggable {
+    -webkit-user-drag: auto;
 }
 
 #album-detail-view .header .info {
@@ -397,15 +409,18 @@ EventBus.on('app-resize', detectTitleHeight)
     position: relative;
     display: flex;
     height: 36px;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
+    margin-left: 2px;
     border-bottom: 1px solid transparent;
 }
 
 #album-detail-view .tab {
     font-size: var(--content-text-tab-title-size);
-    padding-left: 15px;
+    /*padding-left: 15px;
     padding-right: 15px;
     margin-right: 15px;
+    */
+    margin-right: 36px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
@@ -432,6 +447,6 @@ EventBus.on('app-resize', detectTitleHeight)
 }
 
 #album-detail-view .textlist-ctl {
-    padding: 0 8px 10px 8px;
+    padding: 0px 2px 10px 2px;
 }
 </style>

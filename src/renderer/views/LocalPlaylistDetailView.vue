@@ -340,7 +340,7 @@ onDeactivated(() => {
         </div>
         <div class="center">
             <div class="list-title">
-                <span class="content-text-highlight">歌曲({{ detail.data.length }})</span>
+                <span class="size-text content-text-highlight">歌曲({{ detail.data.length }})</span>
                 <div class="search-wrap checkbox text-btn" @click="toggleUseSearchBar"
                     v-show="isSearchForLocalPlaylistShow">
                     <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
@@ -476,12 +476,17 @@ onDeactivated(() => {
 
 #local-playlist-detail-view .list-title {
     position: relative;
-    margin-left: 3px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     text-align: left;
-    font-size: 16px;
     font-weight: bold;
     display: flex;
+}
+
+#local-playlist-detail-view .list-title .size-text {
+    margin-left: 2px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--content-highlight-color);
+    font-size: calc(var(--content-text-tab-title-size) - 2px);
 }
 
 #local-playlist-detail-view .checkbox {

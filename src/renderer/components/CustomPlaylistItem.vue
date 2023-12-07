@@ -176,6 +176,7 @@ const onContextMenu = (event) => {
 .custom-playlist-item .cover img {
     width: 52px;
     height: 52px;
+    border-radius: 2px;
     -webkit-user-drag: none;
 }
 

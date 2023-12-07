@@ -115,13 +115,13 @@ const setPlayingCoverSize = () => {
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
     let size = 356 * Math.min(wScaleRatio, hScaleRatio)
-    const coverEl = document.querySelector('.playing-view .cover')
+    const coverWrapEl = document.querySelector('.playing-view .cover-wrap')
+    if (!coverWrapEl) return
+    coverWrapEl.style.marginRight = 41 * Math.min(wScaleRatio, hScaleRatio) + 'px'
+    const coverEl = coverWrapEl.querySelector('.cover')
     if (!coverEl) return
-    coverEl.style.marginRight = 41 * Math.min(wScaleRatio, hScaleRatio) + 'px'
-    const imgEl = coverEl.querySelector('img')
-    if (!imgEl) return
-    imgEl.style.width = `${size + 3}px`
-    imgEl.style.height = `${size + 3}px`
+    coverEl.style.width = `${size + 3}px`
+    coverEl.style.height = `${size + 3}px`
 }
 
 const setPlayingLyricCtlSize = () => {
@@ -181,10 +181,10 @@ const setVisualPlayingViewCoverSize = () => {
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
     const size = 365 * Math.min(wScaleRatio, hScaleRatio)
-    const el = document.querySelector('.visual-playing-view .cover img')
-    if (!el) return
-    el.style.width = `${size}px`
-    el.style.height = `${size}px`
+    const coverEl = document.querySelector('.visual-playing-view .cover-wrap .cover')
+    if (!coverEl) return
+    coverEl.style.width = `${size}px`
+    coverEl.style.height = `${size}px`
 }
 
 const setVisualPlayingViewCanvasSize = () => {
@@ -193,11 +193,12 @@ const setVisualPlayingViewCanvasSize = () => {
     const hScaleRatio = clientHeight / minAppHeight
     const width = 404 * Math.min(wScaleRatio, hScaleRatio)
     const height = 66 * Math.min(wScaleRatio, hScaleRatio)
-    const canvasEl = document.querySelector('.visual-playing-view .center canvas')
+    const canvasEl = document.querySelector('.visual-playing-view .center .spectrum-canvas')
     if (!canvasEl) return
-    //canvasEl.width = width
-    //canvasEl.height = height
-    canvasEl.style.height = `${height}px`
+    //canvasEl.style.width = `${width}px`
+    //canvasEl.style.height = `${height}px`
+    canvasEl.width = width
+    canvasEl.height = height
 }
 
 //TODO
@@ -209,6 +210,21 @@ const setBatchViewListSize = () => {
     const padding = isDefaultClassicLayout.value ? 8 : 30
     //header 87, margin 15, action 31
     const height = (clientHeight - 87 - 15 - 31 - padding)
+    if (el) el.style.height = `${height}px`
+}
+
+//TODO
+const setPluginsViewListSize = () => {
+    const mainContent = document.getElementById('default-main-content')
+    if (!mainContent) return
+    const el = document.querySelector('#plugins-view .center > .content')
+    const headerEl = document.querySelector('#plugins-view>.header')
+    if (!el || !headerEl) return
+    const { clientHeight } = mainContent
+    const { clientHeight: headerClientHeight } = headerEl
+    const padding = isDefaultClassicLayout.value ? 8 : 30
+    //header 136, margin 15, action 36
+    const height = (clientHeight - headerClientHeight - 36 - padding)
     if (el) el.style.height = `${height}px`
 }
 
@@ -306,6 +322,8 @@ onMounted(() => {
         setPlayingViewSize()
         //自适应批量操作页面列表大小
         setBatchViewListSize()
+        //插件管理
+        setPluginsViewListSize()
         //主题页
         setThemeViewItemsSize()
         //分页组件
@@ -313,7 +331,7 @@ onMounted(() => {
 
         //隐藏上下文菜单
         hideAllCtxMenus()
-        //TODO 窗口缩放Bug，放在最后执行确保缩放
+        //TODO Electron窗口缩放Bug，放在最后执行确保缩放
         setupWindowZoom(true)
         //nextTick(() => setupWindowZoom(true))
         if (isDevEnv()) console.log('[ RESIZE ]')
@@ -328,6 +346,7 @@ onMounted(() => {
 })
 
 EventBus.on('batchView-show', setBatchViewListSize)
+EventBus.on('pluginsView-show', setPluginsViewListSize)
 EventBus.on('playingView-changed', setPlayingViewSize)
 EventBus.on('app-layout-default', setupDefaultLayout)
 
@@ -389,6 +408,7 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding #setting-view .title,
 #default-main-center .autopadding #home-page-view .title,
 #default-main-center .autopadding #modules-setting-view .title,
+#default-main-center .autopadding #plugins-view,
 #default-main-center .autopadding #freefm-view,
 #default-main-center .autopadding #search-view,
 #default-main-center .autopadding #user-profile-view,

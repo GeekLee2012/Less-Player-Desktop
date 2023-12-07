@@ -7,15 +7,16 @@ import { useVideoPlayStore } from '../store/videoPlayStore';
 import EventBus from '../../common/EventBus';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
-import { PLAY_STATE } from '../../common/Constants';
+import { PlayState } from '../../common/Constants';
 
 
 
 const { useWindowsStyleWinCtl } = inject('appCommon')
+const { dndSaveVideo } = inject('player')
 
 const { hideVideoPlayingView, normalize } = useAppCommonStore()
 const { isMaxScreen, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
-const { isSimpleLayout, isQuitVideoAfterEndedEnable } = storeToRefs(useSettingStore())
+const { isSimpleLayout, isQuitVideoAfterEndedEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { setPlaying, removeVideo } = useVideoPlayStore()
 const { currentVideo } = storeToRefs(useVideoPlayStore())
 
@@ -36,7 +37,7 @@ const stopVideo = (callback) => {
         removeVideo(currentVideo.value)
         EventBus.emit('video-stop')
     }
-    if (callback && typeof (callback) == 'function') callback()
+    if (callback && (typeof callback == 'function')) callback()
 }
 
 const quitVideo = (callback) => {
@@ -74,7 +75,7 @@ const requestFullscreen = (event) => {
 
 EventBus.on("app-beforeRoute", quitVideo)
 EventBus.on("video-state", ({ state, video }) => {
-    if (state == PLAY_STATE.END && isQuitVideoAfterEndedEnable.value) quitVideo()
+    if (state == PlayState.END && isQuitVideoAfterEndedEnable.value) quitVideo()
 })
 
 onActivated(initVideoPlayer)
@@ -200,7 +201,7 @@ onActivated(initVideoPlayer)
                         </g>
                     </svg>
                 </div>
-                <div class="content">
+                <div class="content" :draggable="isDndSaveEnable" @dragstart="(event) => dndSaveVideo(event, currentVideo)">
                     <span>路漫漫其修远兮，<br> 吾将上下而求索！</span>
                 </div>
             </div>
@@ -246,13 +247,15 @@ onActivated(initVideoPlayer)
     align-items: center;
     /*width: 105px;*/
     margin-left: var(--others-win-ctl-margin-left);
+    z-index: 91;
+    height: 100%;
 }
 
 .video-playing-view .header .title {
     position: fixed;
     width: 520px;
     left: calc(50% - 260px);
-    top: 10px;
+    top: 13px;
     font-weight: bold;
     color: var(--content-subtitle-text-color);
     text-align: center;

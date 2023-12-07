@@ -383,7 +383,7 @@ watch(() => getCurrentTheme(), (nv) => {
               </g>
             </g>
           </svg>
-          <p v-html="commonNotificationText"></p>
+          <p class="ntf-text" v-html="commonNotificationText"></p>
         </template>
       </Notification>
     </transition>
@@ -582,6 +582,19 @@ watch(() => getCurrentTheme(), (nv) => {
 #popovers .common-ntf,
 #popovers .common-ntf .ntf-dialog-mask {
   border-radius: 12px;
+}
+
+#popovers .common-ntf .ntf-text {
+  overflow: hidden;
+  word-wrap: break-word;
+  line-break: anywhere;
+  /*white-space: pre-wrap;*/
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-height: calc(var(--ntf-height) - 50px);
+  width: calc(var(--ntf-width) - 30px);
 }
 
 #popovers .common-ctx-menu,

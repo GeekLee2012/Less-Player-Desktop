@@ -15,9 +15,8 @@ const volumeBarRef = ref(null)
 
 const { volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
-const { desktopLyricShow } = storeToRefs(useAppCommonStore())
+const { desktopLyricShow, playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
-
 
 onMounted(() => {
     //setDisactived(false)

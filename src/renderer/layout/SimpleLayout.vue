@@ -29,7 +29,8 @@ const { seekTrack, playPlaylist,
     favoritedState, toggleFavoritedState,
     preseekTrack, mmssPreseekTime,
     isTrackSeekable, playAlbum,
-    addAndPlayTracks, } = inject('player')
+    addAndPlayTracks, dndSaveCover,
+    dndSaveLyric } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 
@@ -49,9 +50,10 @@ const { showToast, toggleSoundEffectView,
     toggleRandomMusicToolbar, showFailToast,
     setCurrentMusicCategoryName, setCurrentTraceId,
     isCurrentTraceId, hideLyricToolbar,
-    hideRandomMusicToolbar, hideSoundEffectView } = useAppCommonStore()
+    hideRandomMusicToolbar, hideSoundEffectView,
+    switchSpectrumIndex } = useAppCommonStore()
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
-const { lyric, isSimpleLayout } = storeToRefs(useSettingStore())
+const { lyric, isSimpleLayout, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
 const { randomMusicTypes } = storeToRefs(usePlatformStore())
@@ -60,12 +62,6 @@ const { getVendor, platforms,
     isFMRadioType, getPlatformName,
     getPlatformShortName, isArtistType,
     isAlbumType } = usePlatformStore()
-
-const spectrumCanvasShow = ref(spectrumIndex.value >= 0)
-
-const setSpectrumCanvasShow = () => {
-    spectrumCanvasShow.value = spectrumIndex.value >= 0
-}
 
 const setTextColorIndex = (value) => {
     textColorIndex.value = value
@@ -111,13 +107,6 @@ const setLyricToolbarPos = () => {
     //el.style.right = padding + 'px'
     el.style.left = left + 'px'
     el.style.top = top + 'px'
-}
-
-const switchSpectrum = () => {
-    let index = spectrumIndex.value
-    index = index < 2 ? (index + 1) % 3 : -1
-    setSpectrumIndex(index)
-    setSpectrumCanvasShow()
 }
 
 const switchTextColor = () => {
@@ -1164,7 +1153,8 @@ watch([textColorIndex], setupTextColor)
                 </div>
             </div>
             <div class="cover">
-                <img v-lazy="Track.coverDefault(currentTrack)" :class="{ rotation: false }" />
+                <img v-lazy="Track.coverDefault(currentTrack)" :class="{ 'rotation': false, 'draggable': isDndSaveEnable }"
+                    :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
             </div>
             <div class="meta-wrap" v-show="lyric.metaPos != 1">
                 <div class="audio-title" v-html="Track.title(currentTrack)"></div>
@@ -1175,9 +1165,9 @@ watch([textColorIndex], setupTextColor)
             </div>
             <div class="audio-time-wrap" v-show="lyric.metaPos != 1">
                 <span class="t-current" v-html="mmssPreseekTime || mmssCurrentTime"></span>
-                <span class="t-duration" v-html="Track.mmssDuration(currentTrack)"></span>
+                <span class="t-duration" v-html="Track.mmssDuration(currentTrack, 0)"></span>
             </div>
-            <div class="canvas-wrap" v-show="spectrumCanvasShow">
+            <div class="canvas-wrap" v-show="spectrumIndex > 0">
                 <canvas class="spectrum-canvas" width="500" height="100"></canvas>
             </div>
         </div>
@@ -1216,7 +1206,7 @@ watch([textColorIndex], setupTextColor)
                     <PlayControl></PlayControl>
                 </div>
                 <div class="btm-right">
-                    <div @click="switchSpectrum" :class="{ active: spectrumCanvasShow }">
+                    <div @click="switchSpectrumIndex" :class="{ active: spectrumIndex > 0 }">
                         <svg width="18" height="17" viewBox="0 0 1003.7 910.4" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -1251,7 +1241,7 @@ watch([textColorIndex], setupTextColor)
                     </div>
                 </div>
             </div>
-            <div class="lyric-ctl" v-show="isLyricShow">
+            <div class="lyric-ctl" v-show="isLyricShow" :draggable="isDndSaveEnable" @dragstart="dndSaveLyric">
                 <div class="line" :class="{ 'current-line': hlLineIndex == 0, 'content-text-highlight': hlLineIndex == 0 }"
                     v-html="line1Text"></div>
                 <div class="line v-spacing"
@@ -1539,6 +1529,10 @@ watch([textColorIndex], setupTextColor)
 .simple-layout>.center .cover img {
     width: 100%;
     height: 100%;
+}
+
+.simple-layout>.center .cover img.draggable {
+    -webkit-user-drag: auto;
 }
 
 .simple-layout>.center .audio-time-wrap {

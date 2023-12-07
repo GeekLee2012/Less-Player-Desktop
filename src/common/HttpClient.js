@@ -1,64 +1,100 @@
 import axios from "axios";
 import qs from "qs";
+import { isBlank, isDevEnv } from "./Utils";
 
 
 
-//TODO
-const DOM_PARSER = new DOMParser()
 //axios.defaults.withCredentials = true
+//axios.defaults.timeout = 60000
 
-const _get = (url, data, config, callback) => {
-    return new Promise((resolve, reject) => {
-        if (data && (typeof (data) === 'object')) {
-            data = qs.stringify(data)
-            url = url.includes('?') ? url : url + '?'
-            url = url.endsWith('?') ? (url + data) : (url + "&" + data)
-        }
-        axios.get(url, config).then(resp => {
-            try {
-                const result = callback(resp)
-                resolve(result)
-            } catch (err) {
-                resolve(resp.data)
-            }
-        }, error => reject(error)).catch(error => reject(error))
-    })
+export const parseHtml = (text) => {
+    try {
+        return new DOMParser().parseFromString(text, 'text/html')
+    } catch(error) {
+        if(isDevEnv()) console.log(error)
+    }
+    return text
 }
 
-const _post = (url, data, config, callback) => {
-    return new Promise((resolve, reject) => {
-        if (data && (typeof (data) === 'object')) {
-            data = qs.stringify(data)
-        }
-        axios.post(url, data, config).then(resp => {
+export const parseJsonp = (jsonp) => {
+    if(isDevEnv()) console.log('[ JSONP ]', jsonp)
+    if(isBlank(jsonp)) return 
+    if(typeof jsonp == 'object') return jsonp
+    const index = jsonp.indexOf('(')
+    const json = Function(jsonp.substring(index))()
+    if(!json || (typeof json != 'object')) return
+    return json
+}
+
+export const qsStringify = (data) => (qs.stringify(data))
+
+const tryResponseCallback = (callback, resp) => {
+    try {
+        if(callback && (typeof callback == 'function')) return callback(resp)
+    } catch (error) {
+        console.log(error)
+    }
+    return resp
+}
+
+const tryResponseJson = (resp) => {
+    if(!resp || !resp.data) return 
+    const { data } = resp
+    if(typeof data == 'string') {
+        try {
+            return JSON.parse(data)
+        } catch(error1) {
             try {
-                const result = callback(resp)
-                resolve(result)
-            } catch (err) {
-                resolve(resp.data)
+                return parseJsonp(data)
+            } catch(error2) {
+                console.log(error2)
             }
-        }, error => reject(error)).catch(error => reject(error))
-    })
+        }
+    }
+    return data
+}
+
+export const get = async (url, data, config, callback) => {
+    return new Promise((resolve, reject) => {
+        if (data && (typeof data === 'object')) {
+            data = qsStringify(data)
+            if(!url.includes('?')) url = `${url}?`
+            const _and = url.endsWith('?') ? '' : '&'
+            url = `${url}${_and}${data}`
+        }
+        axios.get(url, config)
+            .then(resp => resolve(tryResponseCallback(callback, resp)))
+            .catch(error => reject(error))
+    }).catch(error => Promise.reject(error))
+}
+
+export const post = async (url, data, config, callback) => {
+    return new Promise((resolve, reject) => {
+        if (data && (typeof data === 'object')) data = qsStringify(data)
+        axios.post(url, data, config)
+            .then(resp => resolve(tryResponseCallback(callback, resp)))
+            .catch(error => reject(error))
+    }).catch(error => Promise.reject(error))
 }
 
 export const getRaw = (url, data, config) => {
-    return _get(url, data, config, resp => resp.data)
+    return get(url, data, config, resp => resp.data)
 }
 
 export const getDoc = (url, data, config) => {
-    return _get(url, data, config, resp => DOM_PARSER.parseFromString(resp.data, "text/html"))
+    return get(url, data, config, resp => parseHtml(resp.data))
 }
 
 export const getJson = (url, data, config) => {
-    return _get(url, data, config, resp => JSON.parse(resp.data))
+    return get(url, data, config, resp => tryResponseJson(resp))
 }
 
 export const postRaw = (url, data, config) => {
-    return _post(url, data, config, resp => resp.data)
+    return post(url, data, config, resp => resp.data)
 }
 
 export const postJson = (url, data, config) => {
-    return _post(url, data, config, resp => JSON.parse(resp.data))
+    return post(url, data, config, resp => tryResponseJson(resp))
 }
 
 //获取国内IPv4

@@ -25,7 +25,7 @@
   /* 行高 - 左导航 */
   --content-left-nav-line-height: 36.5px;
   --content-left-nav-line-spacing: 10.5px;
-  --content-error-color: red;
+  --content-error-color: #fc605c;
 
   /*边框 */
   --border-macstyle-border-radius: 0px;
@@ -122,11 +122,14 @@ textarea {
 }
 
 .obj-fit-contain {
-  object-fit: contain;
+  object-fit: contain !important;
 }
 
-.text-btn {
+.btn,
+.text-btn,
+.checkbox {
   cursor: pointer;
+  -webkit-app-region: no-drag !important;
 }
 
 .text-btn:hover {

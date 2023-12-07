@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
 import { usePlatformStore } from '../store/platformStore';
 import ToggleControl from '../components/ToggleControl.vue';
+import { computed } from 'vue';
 
 
 
@@ -16,10 +17,14 @@ const { isModulesPlaylistsOff,
     isModulesRadiosOff,
     isModulesSearchOff } = storeToRefs(useSettingStore())
 
-const playlistsPlatforms = platforms.value('playlists')
+const playlistsPlatforms = computed(() => {
+    return platforms.value('playlists').filter(item => (item.code != 'local'))
+})
 const artistsPlatforms = platforms.value('artists')
 const radiosPlatforms = platforms.value('radios')
-const searchPlatforms = platforms.value('search')
+const searchPlatforms = computed(() => {
+    return platforms.value('search').filter(item => (item.code != 'local'))
+})
 
 </script>
 
@@ -33,14 +38,17 @@ const searchPlatforms = platforms.value('search')
         <div class="center">
             <div class="row">
                 <span class="cate-name">分类歌单</span>
-                <div class="content">
+                <div class="content" v-show="playlistsPlatforms.length > 0">
                     <div v-for="(item, index) in playlistsPlatforms"
-                        :class="{ last: index == playlistsPlatforms.length - 2 }" v-show="item.code != 'local'">
+                        :class="{ last: index == playlistsPlatforms.length - 1 }">
                         <span class="cate-subtitle">{{ item.name }}：</span>
                         <ToggleControl @click="toggleModulesPlaylistsOff(item.code)"
                             :value="!isModulesPlaylistsOff(item.code)">
                         </ToggleControl>
                     </div>
+                </div>
+                <div class="content" v-show="playlistsPlatforms.length < 1">
+                    <div class="tip-text last">还没有歌单平台，空空如也 ~</div>
                 </div>
             </div>
             <div class="row">
@@ -65,13 +73,15 @@ const searchPlatforms = platforms.value('search')
             </div>
             <div class="row last-row">
                 <span class="cate-name">搜索</span>
-                <div class="content">
-                    <div v-for="(item, index) in searchPlatforms" :class="{ last: index == searchPlatforms.length - 2 }"
-                        v-show="item.code != 'local'">
+                <div class="content" v-show="searchPlatforms.length > 0">
+                    <div v-for="(item, index) in searchPlatforms" :class="{ last: index == searchPlatforms.length - 1 }">
                         <span class="cate-subtitle">{{ item.name }}：</span>
                         <ToggleControl @click="toggleModulesSearchOff(item.code)" :value="!isModulesSearchOff(item.code)">
                         </ToggleControl>
                     </div>
+                </div>
+                <div class="content" v-show="searchPlatforms.length < 1">
+                    <div class="tip-text last">还没有搜索平台，空空如也 ~</div>
                 </div>
             </div>
         </div>

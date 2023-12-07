@@ -1,5 +1,5 @@
 import { Howl, Howler } from 'howler';
-import { PLAY_STATE } from '../common/Constants';
+import { PlayState } from '../common/Constants';
 import EventBus from '../common/EventBus';
 import { Track } from './Track';
 import { WebAudioApi } from './WebAudioApi';
@@ -15,7 +15,7 @@ export class Player {
     constructor(track) {
         this.currentTrack = track
         this.sound = null
-        this.playState = PLAY_STATE.NONE
+        this.playState = PlayState.NONE
         this.currentTime = 0
         this.webAudioApi = null
         this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
@@ -48,7 +48,7 @@ export class Player {
         const player = Player.get()
         return player.on('track-play', track => player.playTrack(track))
             .on('track-restore', track => player.restore(track))
-            .on('track-changed', () => player.setCurrent(null))
+            .on('track-changed', track => player.setCurrent(track))
             .on('track-togglePlay', () => player.togglePlay())
             .on('track-seek', percent => player.seek(percent))
             .on('volume-set', volume => player.volume(volume))
@@ -81,7 +81,7 @@ export class Player {
             preload: false,
             pool: 1,
             onplay: function () {
-                self.setState(PLAY_STATE.PLAYING)
+                self.setState(PlayState.PLAYING)
 
                 if (self.seekPendingMark) { //存在未处理seek事件
                     self.animationFrameCnt = 0
@@ -93,10 +93,10 @@ export class Player {
             },
             onpause: function () {
                 self._stopAnimationFrame()
-                self.setState(PLAY_STATE.PAUSE)
+                self.setState(PlayState.PAUSE)
             },
             onend: function () {
-                self.setState(PLAY_STATE.END)
+                self.setState(PlayState.END)
             },
             onseek: function () {
                 //重置动画帧
@@ -107,16 +107,19 @@ export class Player {
                 self.animationFrameTimeCnt = 1000
                 */
             },
+            onload: function() {
+                self.setState(PlayState.LOADED)
+            },
             onloaderror: function () {
-                self.setState(PLAY_STATE.LOAD_ERROR)
+                self.setState(PlayState.LOAD_ERROR)
             },
             onplayerror: function () {
-                self.setState(PLAY_STATE.PLAY_ERROR)
+                self.setState(PlayState.PLAY_ERROR)
             }
         })
         this._tryUnlockHowlAudios()
         this.currentTime = 0
-        this.setState(PLAY_STATE.INIT)
+        this.setState(PlayState.INIT)
 
         if (this.pendingOutputDeviceId) this._setAudioOutputDevice(this.pendingOutputDeviceId)
         return this.sound
@@ -140,10 +143,7 @@ export class Player {
 
     togglePlay() {
         const sound = this.getSound()
-        if (!sound) {
-            this.setState(PLAY_STATE.PLAY_ERROR)
-            return
-        }
+        if (!sound) return
         if (sound.playing()) {
             sound.pause()
         } else {
@@ -161,10 +161,14 @@ export class Player {
     }
 
     setCurrent(track) {
-        this.stop()
+        try {
+            this.stop()
+        } catch(error) {
+            if(isDevEnv()) console.log(error)
+        }
         this.currentTrack = track
+        this.setState(PlayState.NONE)
         this.createSound()
-        if (!track) this.setState(PLAY_STATE.NONE)
     }
 
     playTrack(track) {
@@ -195,7 +199,7 @@ export class Player {
     _step() {
         const sound = this.getSound()
         if (!sound) return
-        if (!sound.playing() && this.playState != PLAY_STATE.PLAYING) {
+        if (!sound.playing() && this.playState != PlayState.PLAYING) {
             this._stopAnimationFrame()
             return
         }
@@ -216,7 +220,7 @@ export class Player {
         } catch (error) {
             if (isDevEnv()) console.log(error)
 
-            this.setState(PLAY_STATE.PLAY_ERROR)
+            this.setState(PlayState.PLAY_ERROR)
         }
         this._countAnimationFrame()
         //循环动画
@@ -256,12 +260,13 @@ export class Player {
         if (!this._createWebAudioApi()) return
         this._resolvePendingSoundEffect()
         if (!this.isSpectrumRefreshEnabled()) return
-        const { analyser } = this.webAudioApi
+        const { analyser, audioCtx } = this.webAudioApi
         if (!analyser) return
-        const { frequencyBinCount } = analyser
-        const freqData = new Uint8Array(frequencyBinCount)
+        const { frequencyBinCount: freqBinCount } = analyser
+        const { sampleRate } = audioCtx
+        const freqData = new Uint8Array(freqBinCount)
         analyser.getByteFrequencyData(freqData)
-        this.notify('track-spectrumData', freqData)
+        this.notify('track-spectrumData', { freqData, freqBinCount, sampleRate, analyser })
     }
 
     _tryUnlockHowlAudios() {
@@ -305,11 +310,11 @@ export class Player {
     }
 
     isStateRefreshEnabled() {
-        return this.animationFrameCnt % this.stateRefreshFrequency == 0
+        return this.animationFrameCnt % (this.stateRefreshFrequency || 60) == 0
     }
 
     isSpectrumRefreshEnabled() {
-        return this.animationFrameCnt % this.spectrumRefreshFrequency == 0
+        return this.animationFrameCnt % (this.spectrumRefreshFrequency || 3) == 0
     }
 
     _stopAnimationFrame(noReset) {
@@ -340,18 +345,18 @@ export class Player {
     postPlayStateToDesktopLryic() {
         if (!this.desktopLyricMessagePortActiveState) return
         switch (this.playState) {
-            case PLAY_STATE.NONE:
+            case PlayState.NONE:
                 this.postMessageToDesktopLryic('s-track-none')
                 break
-            case PLAY_STATE.INIT:
+            case PlayState.INIT:
                 this.postMessageToDesktopLryic('s-track-init', {
                     track: Player.getRawTrack(this.currentTrack)
                 })
                 break
-            case PLAY_STATE.PLAYING:
+            case PlayState.PLAYING:
                 this.postMessageToDesktopLryic('s-track-play')
                 break
-            case PLAY_STATE.PAUSE:
+            case PlayState.PAUSE:
                 this.postMessageToDesktopLryic('s-track-pause')
                 break
         }
@@ -364,7 +369,7 @@ export class Player {
                 //self.setMessagePortActiveState(true)
                 self.postMessageToDesktopLryic('s-track-init', {
                     track: Player.getRawTrack(self.currentTrack),
-                    playing: (self.playState == PLAY_STATE.PLAYING)
+                    playing: (self.playState == PlayState.PLAYING)
                 })
             } else if (action == 'c-track-pos') {
                 const sound = self.getSound()

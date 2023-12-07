@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, reactive, ref, inject } from 'vue';
+import { onMounted, onUnmounted, reactive, ref, inject, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
@@ -19,7 +19,8 @@ const { seekTrack, playMv,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
-    mmssPreseekTime, isTrackSeekable } = inject('player')
+    mmssPreseekTime, isTrackSeekable,
+    dndSaveCover, dndSaveLyric } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 //是否使用自定义交通灯控件
@@ -35,13 +36,16 @@ const { getCurrentThemeHighlightColor } = useSettingStore()
 const { currentTrack, playingIndex,
     playing, volume, queueTracksSize } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
-const { getWindowZoom, lyricMetaPos, theme, layout } = storeToRefs(useSettingStore())
+const { getWindowZoom, lyricMetaPos, theme, layout,
+    isDndSaveEnable, isPlayingViewUseBgCoverEffect
+} = storeToRefs(useSettingStore())
 
 
 const volumeBarRef = ref(null)
 const disactived = ref(true)
-const viewStyle = reactive({})
-const filterStyle = reactive({})
+const hasBackgroudCover = ref(false)
+const bgEffectStyle = reactive({})
+const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
 
 const setDisactived = (value) => {
     disactived.value = value
@@ -71,36 +75,30 @@ const roundedRect = (ctx, x, y, width, height, radius) => {
     ctx.quadraticCurveTo(x, y, x, y + radius);
     ctx.stroke();
 }
+*/
 
-//目前比较耗性能 
-const setBackgroudEffect = () => {
-    const { cover } = currentTrack.value
-    Object.assign(viewStyle, {
-        "background": "rgba(255, 255, 255, 0.2)",
-        "background-image": `url('${cover}')`,
-        "background-position": "center",
-        "background-size": "cover",
-    })
+const setupBackgroudEffect = () => {
+    if (!isPlayingViewUseBgCoverEffect.value) return
+    const track = currentTrack.value
+    if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
+    setHasBackgroudCover(true)
 
-    Object.assign(filterStyle, {
-        "backdrop-filter": "blur(666rem)",
-        "transform": "translateZ(0)",
+    const { cover } = track
+    Object.assign(bgEffectStyle, {
+        background: `url('${cover}')`
     })
 }
-*/
 
-const onUserMouseWheel = (e) => EventBus.emit('lyric-userMouseWheel', e)
+const onUserMouseWheel = (event) => EventBus.emit('lyric-userMouseWheel', event)
 
 
-/*
 watch([currentTrack, playingViewShow], () => {
-    //setBackgroudEffect()
+    setupBackgroudEffect()
 })
-*/
 
 onMounted(() => {
     setDisactived(false)
-    //setBackgroudEffect()
+    setupBackgroudEffect()
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 
@@ -110,8 +108,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="visual-playing-view" :style="viewStyle">
-        <div class="container" :style="filterStyle">
+    <div class="visual-playing-view">
+        <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
                     <WinTrafficLightBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
@@ -148,12 +146,16 @@ onUnmounted(() => {
             </div>
             <div class="center">
                 <div class="left">
-                    <div class="cover">
-                        <img v-lazy="Track.coverDefault(currentTrack)"
-                            :class="{ rotation: (playingViewShow && playing) }" />
+                    <div class="cover-wrap">
+                        <img class="cover" v-lazy="Track.coverDefault(currentTrack)"
+                            :class="{ rotation: (playingViewShow && playing), 'obj-fit-contain': (currentTrack.coverFit == 1), 'draggable': isDndSaveEnable }"
+                            :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
+                    </div>
+                    <div class="cover-spectrum" v-show="false">
+                        <canvas class="cover-spectrum-canvas"></canvas>
                     </div>
                     <div class="canvas-wrap" @click="switchSpectrumIndex">
-                        <canvas class="spectrum-canvas" width="404" height="56"></canvas>
+                        <canvas class="spectrum-canvas" width="404" height="66"></canvas>
                     </div>
                     <div class="progress-wrap">
                         <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack"
@@ -163,7 +165,7 @@ onUnmounted(() => {
                     </div>
                     <div class="audio-time-wrap">
                         <span class="t-current" v-html="mmssPreseekTime || mmssCurrentTime"></span>
-                        <span class="t-duration" v-html="Track.mmssDuration(currentTrack)"></span>
+                        <span class="t-duration" v-html="Track.mmssDuration(currentTrack, 0)"></span>
                     </div>
                     <div class="action">
                         <div class="btm-left">
@@ -266,6 +268,10 @@ onUnmounted(() => {
             </div>
             <div class="bottom">
             </div>
+            <canvas class="fullpage-spectrum-canvas" v-show="false">
+            </canvas>
+        </div>
+        <div class="bg-effect" :style="bgEffectStyle" v-show="hasBackgroudCover && isPlayingViewUseBgCoverEffect">
         </div>
     </div>
 </template>
@@ -400,17 +406,21 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-top: 33px;
+    padding-top: 33px;
     margin-right: 28px;
 }
 
-.visual-playing-view .cover img {
+.visual-playing-view .cover-wrap .cover {
     width: 365px;
     height: 365px;
     border: 6px solid #292929;
     border-radius: 99rem;
     animation: rotate 10s linear infinite;
     animation-play-state: paused;
+}
+
+.visual-playing-view .cover-wrap .cover.draggable {
+    -webkit-user-drag: auto;
 }
 
 .visual-playing-view .rotation {
@@ -461,10 +471,10 @@ onUnmounted(() => {
     flex-direction: row;
     justify-content: center;
     cursor: pointer;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
-.visual-playing-view canvas {
+.visual-playing-view .canvas-wrap .spectrum-canvas {
     flex: 1;
     overflow: hidden;
 }
@@ -530,5 +540,22 @@ onUnmounted(() => {
 
 .visual-playing-view .bottom {
     height: 56px;
+}
+
+.visual-playing-view .fullpage-spectrum-canvas {
+    position: absolute;
+    z-index: 3 !important;
+}
+
+.visual-playing-view .bg-effect {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    /*backdrop-filter: blur(20px);*/
+    filter: blur(8px);
+    z-index: -10;
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 </style>

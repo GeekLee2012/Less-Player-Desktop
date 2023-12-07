@@ -23,6 +23,7 @@ import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import EventBus from '../../common/EventBus';
 import { coverDefault } from '../../common/Utils';
+import { useSettingStore } from '../store/settingStore';
 
 
 
@@ -32,29 +33,32 @@ const props = defineProps({
     id: String
 })
 
-const { addAndPlayTracks } = inject('player')
+const { addAndPlayTracks, dndSaveCover } = inject('player')
 
 const { artistId, artistName, artistCover, platform,
     artistAlias, tabTipText, activeTab,
     tabs, hotSongs, allSongs,
-    albums, about, hasHotSongTab, hasAllSongTab
+    albums, about, activeTabCode,
+    hasHotSongsTab, hasAllSongsTab,
 } = storeToRefs(useArtistDetailStore())
 const { setActiveTab, updateArtist,
     updateHotSongs, updateAllSongs, appendAllSongs,
     updateAlbums, updateAbout,
     resetAll, updateTabTipText,
-    isHotSongsTab, isAllSongsTab,
-    isAlbumsTab, isAboutTab,
     isHotSongsTabLoaded,
     isAllSongsTabLoaded,
     isAlbumsTabLoaded,
     isAboutTabLoaded,
-    isArtistDetailLoaded
+    isArtistDetailLoaded,
+    updateArtistDetailKeys
 } = useArtistDetailStore()
 
-const { getVendor, isLocalMusic } = usePlatformStore()
+const { getVendor, isLocalMusic,
+    isHotSongsTab, isAllSongsTab,
+    isAlbumsTab, isAboutTab, } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
+const { isDndSaveEnable } = storeToRefs(useSettingStore())
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
@@ -67,6 +71,7 @@ const isLoadingSongs = ref(false)
 const isLoadingAlbums = ref(false)
 const isLoading = ref(false)
 const back2TopBtnRef = ref(null)
+const isAllSongsTabMoreData = ref(false)
 let markScrollTop = 0
 
 const setLoadingDetail = (value) => {
@@ -124,14 +129,16 @@ const toggleFollow = () => {
 const checkFollow = () => {
     follow.value = isFollowArtist(props.id, props.platform)
 }
+
 const updateTabData = (data) => {
     tabData.length = 0
-    if (typeof (data) === 'string') {
+    if (typeof data === 'string' && isAboutTab(activeTabCode.value)) {
         tabData.push(data)
         updateTabTipText(0)
     } else if (Array.isArray(data) && data.length > 0) {
         tabData.push(...data)
-        updateTabTipText(tabData.length)
+        const moreFlag = isAllSongsTab(activeTabCode.value) && isAllSongsTabMoreData.value ? '+' : ''
+        updateTabTipText(`${tabData.length}${moreFlag}`)
     }
 }
 
@@ -175,8 +182,7 @@ const loadHotSongs = async () => {
     do {
         result = await vendor.artistDetailHotSongs(id)
     } while (!result && retry++ <= 3)
-    if (!isHotSongsTab()) return
-    if (!result) return
+    if (!isHotSongsTab(activeTabCode.value) || !result) return
     const { name, cover, data } = result
     if (name && cover) updateArtist(name, cover)
     updateHotSongs(data)
@@ -186,6 +192,8 @@ const loadHotSongs = async () => {
 
 //TODO
 const loadMoreSongs = async () => {
+    if (!isAllSongsTabMoreData.value) return
+    offset = ++page * limit
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailAllSongs) return
     const id = artistId.value
@@ -193,11 +201,11 @@ const loadMoreSongs = async () => {
     do {
         result = await vendor.artistDetailAllSongs(id, offset, limit, page)
     } while (!result && retry++ <= 3)
-    if (!isAllSongsTab() || !result) return
+    if (!isAllSongsTab(activeTabCode.value) || !result) return
     appendAllSongs(result.data)
+    isAllSongsTabMoreData.value = (allSongs.value.length < result.total) || (page < result.totalPage)
     updateTabData(allSongs.value)
     currentTabView.value = SongListControl
-    offset = page++ * limit
 }
 
 const loadAllSongs = async () => {
@@ -214,11 +222,11 @@ const loadAllSongs = async () => {
     do {
         result = await vendor.artistDetailAllSongs(id, offset, limit, page)
     } while (!result && retry++ <= 3)
-    if (!isAllSongsTab() || !result) return
+    if (!isAllSongsTab(activeTabCode.value) || !result) return
     updateAllSongs(result.data)
+    isAllSongsTabMoreData.value = (allSongs.value.length < result.total) || (page < result.totalPage)
     updateTabData(allSongs.value)
     setLoadingSongs(false)
-    offset = page++ * limit
 }
 
 const loadAlbums = async () => {
@@ -240,7 +248,7 @@ const loadAlbums = async () => {
     do {
         result = await vendor.artistDetailAlbums(id, 0, 365, 1)
     } while (!result && retry++ <= 3)
-    if (!isAlbumsTab() || !result) return
+    if (!isAlbumsTab(activeTabCode.value) || !result) return
     updateAlbums(result.data)
     updateTabData(result.data)
     setLoadingAlbums(false)
@@ -259,7 +267,7 @@ const loadAbout = () => {
     if (!vendor || !vendor.artistDetailAbout) return
     const id = artistId.value
     vendor.artistDetailAbout(id).then(result => {
-        if (!isAboutTab()) return
+        if (!isAboutTab(activeTabCode.value)) return
         updateAbout(result)
         updateTabData(result)
         updateTabTipText(0)
@@ -272,7 +280,7 @@ const scrollToLoad = () => {
     const scrollHeight = artistDetailRef.value.scrollHeight
     const clientHeight = artistDetailRef.value.clientHeight
     markScrollState()
-    const allowedError = 3 //允许误差
+    const allowedError = 20 //允许误差
     if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
         loadMoreSongs()
     }
@@ -288,7 +296,7 @@ const resetTabView = () => {
 
 const onScroll = () => {
     hideAllCtxMenus()
-    if (isAllSongsTab()) {
+    if (isAllSongsTab(activeTabCode.value)) {
         scrollToLoad()
     } else {
         markScrollState()
@@ -298,37 +306,26 @@ const onScroll = () => {
 const switchTab = () => {
     setLoading(true)
     resetTabView()
-    if (isHotSongsTab()) {
+    const code = activeTabCode.value
+    if (isHotSongsTab(code)) {
         currentTabView.value = SongListControl
         loadHotSongs()
-    } else if (isAllSongsTab()) {
+    } else if (isAllSongsTab(code)) {
         currentTabView.value = SongListControl
         loadAllSongs()
-    } else if (isAlbumsTab()) {
+    } else if (isAlbumsTab(code)) {
         currentTabView.value = AlbumListControl
         loadAlbums()
-    } else if (isAboutTab()) {
+    } else if (isAboutTab(code)) {
         currentTabView.value = TextListControl
         loadAbout()
     }
 }
 
-const isAvailableTab = (btnType) => {
-    const isPlayHotSongBtn = (btnType === 0)
-    const isPlayAllSongBtn = (btnType === 1)
-    if (isPlayHotSongBtn) {
-        if (isAllSongsTab()) return false
-        else if (hasAllSongTab.value) return false
-    } else if (isPlayAllSongBtn) {
-        if (isHotSongsTab()) return false
-        else if (hasHotSongTab.value) return false
-    }
-    return true
-}
-
 const resetBack2TopBtn = () => {
-    if (!back2TopBtnRef.value) return
-    back2TopBtnRef.value.setScrollTarget(artistDetailRef.value)
+    if (back2TopBtnRef.value) {
+        back2TopBtnRef.value.setScrollTarget(artistDetailRef.value)
+    }
 }
 
 const resetScrollState = () => {
@@ -360,7 +357,7 @@ const reloadAll = () => {
 
     setLoadingDetail(true)
     setLoadingSongs(true)
-    resetBack2TopBtn()
+    //resetBack2TopBtn()
     resetAll()
     loadAll()
 }
@@ -393,26 +390,33 @@ EventBus.on('ctxMenu-removeFromLocal', reloadAll)
 //TODO 需要梳理优化，容易出现重复加载Bug
 onActivated(() => {
     restoreScrollState()
+    resetBack2TopBtn()
 })
-watch([() => (props.platform), () => (props.id)], reloadAll, { immediate: true })
+
+watch(() => [props.platform, props.id], ([nv1, nv2]) => {
+    updateArtistDetailKeys(nv1, nv2)
+    reloadAll()
+}, { immediate: true })
 </script>
 
 <template>
     <div id="artist-detail-view" ref="artistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="coverDefault(artistCover)" />
+                <img class="cover" v-lazy="coverDefault(artistCover)" :class="{ 'draggable': isDndSaveEnable }"
+                    :draggable="isDndSaveEnable" @dragstart="(event) => dndSaveCover(event, detail)" />
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="artistName"></div>
                 <div class="alias" v-html="artistAlias"></div>
                 <div class="about">{{ trimExtraHtml(about) }}</div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)"
-                        text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
+                        v-show="hasHotSongsTab && !isAllSongsTab(activeTabCode)" text="播放热门歌曲" class="spacing">
+                    </PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
-                        v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
-                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing"
+                        v-show="isAllSongsTab(activeTabCode)" class="spacing"></PlayAddAllBtn>
+                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow"
                         :disabled="isLocalMusic(platform)" v-show="!isLocalMusic(platform)">
                     </FavoriteShareBtn>
                 </div>
@@ -432,11 +436,12 @@ watch([() => (props.platform), () => (props.id)], reloadAll, { immediate: true }
                         style="width: 168px; height: 36px; display: inline-block;"></div>
                 </div>
                 <div class="action" v-show="!isLoadingDetail">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()" v-show="isAvailableTab(0)"
-                        text="播放热门歌曲" class="spacing"></PlayAddAllBtn>
+                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
+                        v-show="hasHotSongsTab && !isAllSongsTab(activeTabCode)" text="播放热门歌曲" class="spacing">
+                    </PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
-                        v-show="isAvailableTab(1)" class="spacing"></PlayAddAllBtn>
-                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow" class="spacing">
+                        v-show="isAllSongsTab(activeTabCode)" class="spacing"></PlayAddAllBtn>
+                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow">
                     </FavoriteShareBtn>
                 </div>
             </div>
@@ -528,6 +533,10 @@ watch([() => (props.platform), () => (props.id)], reloadAll, { immediate: true }
     box-shadow: 0px 0px 1px #161616;
 }
 
+#artist-detail-view .header .cover.draggable {
+    -webkit-user-drag: auto;
+}
+
 #artist-detail-view .action {
     display: flex;
     flex-direction: row;
@@ -541,15 +550,17 @@ watch([() => (props.platform), () => (props.id)], reloadAll, { immediate: true }
     position: relative;
     display: flex;
     height: 36px;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
+    margin-left: 2px;
     border-bottom: 1px solid transparent;
 }
 
 #artist-detail-view .tab {
     font-size: var(--content-text-tab-title-size);
-    padding-left: 15px;
+    /*padding-left: 15px;
     padding-right: 15px;
-    margin-right: 15px;
+    margin-right: 15px;*/
+    margin-right: 36px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
@@ -571,6 +582,6 @@ watch([() => (props.platform), () => (props.id)], reloadAll, { immediate: true }
 }
 
 #artist-detail-view .textlist-ctl {
-    padding: 0 8px 10px 8px;
+    padding: 0px 2px 10px 2px;
 }
 </style>

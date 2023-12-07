@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import AppContent from '../AppContent.vue';
 import AppMain from '../AppMain.vue';
 import HomePageView from '../views/HomePageView.vue';
 import PlaylistSquareView from '../views/PlaylistSquareView.vue';
@@ -26,6 +25,7 @@ import FreeFMEditView from '../views/FreeFMEditView.vue';
 import ModulesSettingView from '../views/ModulesSettingView.vue';
 import FreeVideoEditView from '../views/FreeVideoEditView.vue';
 import TrackDetailView from '../views/TrackDetailView.vue';
+import PluginsView from '../views/PluginsView.vue';
 import AppDesktopLyric from '../AppDesktopLyric.vue';
 
 
@@ -33,7 +33,7 @@ import AppDesktopLyric from '../AppDesktopLyric.vue';
 const routes = [
     { //默认
         path: '/',
-        //redirect: '/playlists/square/qq'
+        name: 'appmain',
         component: AppMain,
         children: [
             {
@@ -163,7 +163,11 @@ const routes = [
             {  //视频 - 创建播放源
                 path: '/videos/video/create',
                 component: FreeVideoEditView
-            }
+            },
+            {  //设置 - 插件管理（音源等）
+                path: '/setting/plugins',
+                component: PluginsView
+            },
         ]
     },
     {

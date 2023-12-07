@@ -6,6 +6,7 @@ import { useSettingStore } from '../store/settingStore';
 import PaginationTiles from './PaginationTiles.vue';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { Playlist } from '../../common/Playlist';
+import { toUpperCaseTrimString } from '../../common/Utils';
 
 
 
@@ -29,14 +30,14 @@ const props = defineProps({
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
-const { isListenNumShow, isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
+const { isPlayCountShow, isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 
 const visitItem = (item) => {
     const { checkbox } = props
     if (checkbox) return
     const { id, platform } = item
     const platformValid = isPlatformValid(platform)
-    const idValid = (typeof (id) == 'string') ? (id.trim().length > 0) : (id > 0)
+    const idValid = (typeof id == 'string') ? (id.trim().length > 0) : (id > 0)
     const visitable = platformValid && idValid
 
     if (isFreeFM(platform)) {
@@ -48,22 +49,25 @@ const visitItem = (item) => {
         playPlaylist(item)
     } else if (visitable) {
         //其他，如普通歌单、主播电台歌单等
-        visitPlaylist(platform, id)
+        const exploreMode = Playlist.isAnchorRadioType(item) ? 'radios' : null
+        visitPlaylist(platform, id, exploreMode)
     }
 }
 
 const getSubtitle = (item) => {
     if (Playlist.isVideoType(item)) return item.subtitle
-    return getListenNumText(item) || item.subtitle || item.tags
+    return getPlayCountText(item) || item.subtitle || item.tags
 }
 
-const getListenNumText = (item) => {
-    if (!isListenNumShow.value) return null
-    let num = item.listenNum
-    if (!num) return null
+const getPlayCountText = (item) => {
+    if (!isPlayCountShow.value) return null
+    //listenNum为旧版本名称，简单做下兼容处理
+    let num = item.playCount || item.listenNum
+    if (!num) return
     const unit = 10000
-    if (num >= (unit * unit)) num = parseFloat(num / (unit * unit)).toFixed(5) + "亿"
-    else if (num >= unit) num = parseFloat(num / unit).toFixed(1) + "万"
+    if (num >= (unit * unit)) num = parseFloat(num / (unit * unit)).toFixed(5) + '亿'
+    else if (num >= unit) num = parseFloat(num / unit).toFixed(1) + '万'
+    if (typeof num == 'string') num = toUpperCaseTrimString(num).replace('W', '万')
     if (!isUseCardStyleImageTextTile.value) return `播放量：${num}`
     return `<div class='play-cnt'><svg width="14" height="14" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -87,7 +91,8 @@ const computedMaxPage = computed(() => {
                 <ImageTextTile @click="visitItem(item)" :videoStyle="videoStyle" :cover="item.cover" :title="item.title"
                     :subtitle="getSubtitle(item)" :platform="item.platform" :color="item.color" :playable="true"
                     :playAction="() => playPlaylist(item)" :checkbox="checkbox" :checked="checkedAll"
-                    :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkChangedFn="(checked) => checkChangedFn(checked, item)">
+                    :coverFit="item.coverFit" :ignoreCheckAllEvent="ignoreCheckAllEvent"
+                    :checkChangedFn="(checked) => checkChangedFn(checked, item)">
                 </ImageTextTile>
             </template>
             <template #loading1>

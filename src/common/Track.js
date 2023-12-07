@@ -1,7 +1,8 @@
 import { Lyric } from './Lyric';
-import { isBlank, toTrimString, coverDefault } from './Utils';
+import { isBlank, toTrimString, coverDefault, 
+    toLowerCaseTrimString, useAudioExts, useExtraAudioExts,
+} from './Utils';
 import { toMmss } from './Times';
-
 
 
 export class Track {
@@ -74,8 +75,8 @@ export class Track {
         return Track.lyricData(this)
     }
 
-    static mmssDuration(track) {
-        return toMmss(track.duration || 0)
+    static mmssDuration(track, defaultValue) {
+        return toMmss(track.duration || defaultValue)
     }
 
     hasPid() {
@@ -92,7 +93,7 @@ export class Track {
 
     static artistName(track) {
         let artistName = ''
-        if (track && track.artist) {
+        if (track && track.artist && track.artist.length > 0) {
             const names = []
             track.artist.forEach(e => names.push(e.name));
             artistName = names.join('、')
@@ -124,8 +125,8 @@ export class Track {
     static hasId(track) {
         if (!track || !track.id) return false
         const id = track.id
-        if (typeof (id) == 'number') return id > 0
-        if (typeof (id) == 'string') return toTrimString(id).length > 0
+        if (typeof id == 'number') return id > 0
+        if (typeof id == 'string') return toTrimString(id).length > 0
     }
 
     static firstArtistName(track) {
@@ -137,7 +138,7 @@ export class Track {
     }
 
     static lyricOffset(track) {
-        return track && track.lyric ? (track.lyric.offset || 0) : 0
+        return track && track.lyric ? Number(track.lyric.offset || 0) : 0
     }
 
     static hasLyricTrans(track) {
@@ -164,15 +165,15 @@ export class Track {
     static hasMv(track) {
         if (!track || !track.mv) return false
         const mv = track.mv.toString()
-        if (typeof (mv) == 'number') return mv > 0
-        if (typeof (mv) == 'string') return toTrimString(mv).length > 0
+        if (typeof mv == 'number') return mv > 0
+        if (typeof mv == 'string') return toTrimString(mv).length > 0
     }
 
     static hasPid(track) {
         if (!track || !track.pid) return false
         const pid = track.pid
-        if (typeof (pid) == 'number') return pid > 0
-        if (typeof (pid) == 'string') return toTrimString(pid).length > 0
+        if (typeof pid == 'number') return pid > 0
+        if (typeof pid == 'string') return toTrimString(pid).length > 0
     }
 
     static isVip(track) {
@@ -200,6 +201,27 @@ export class Track {
     static hasAlbum(track) {
         return track && track.album
             && !isBlank(track.album.name)
+    }
+
+    static normalName(track) {
+        if(!track) return 
+        const artistNames = Track.artistName(track)
+        const { title } = track
+        return isBlank(artistNames) ? `${title}` 
+            : `${title} - ${artistNames}`
+    }
+
+    static suffix(track) {
+        if(!track) return 
+        if(!Track.hasUrl(track)) return 
+        
+        const { url } = track
+        const _url = toLowerCaseTrimString(url)
+        const exts = [...useAudioExts(), ...useExtraAudioExts()]
+        for(let i = 0; i < exts.length; i++) {
+            const suffix = `.${exts[i]}`
+            if(_url.includes(suffix)) return suffix
+        }
     }
 
 }

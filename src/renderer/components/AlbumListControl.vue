@@ -1,7 +1,8 @@
 <script setup>
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import PaginationTiles from './PaginationTiles.vue';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
+import { Track } from '../../common/Track';
 
 
 
@@ -14,7 +15,8 @@ const props = defineProps({
     checkedAll: Boolean,
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function,
-    loading: Boolean
+    loading: Boolean,
+    isAlbumArtistSutitle: Boolean
 })
 
 const visitItem = (item) => {
@@ -23,13 +25,22 @@ const visitItem = (item) => {
     const { id, platform } = item
     visitAlbum({ platform, id, data: item })
 }
+
+const computedItemSubtitle = computed(() => {
+    return (item) => {
+        const { isAlbumArtistSutitle } = props
+        if (isAlbumArtistSutitle) return Track.artistName(item).replace('未知艺人', '')
+        return item.subtitle
+    }
+})
 </script>
 
 <template>
     <div class="albumlist-ctl">
         <div class="pag-content" v-show="!loading">
             <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title"
-                :subtitle="item.subtitle || item.publishTime" @click="visitItem(item)" :checkbox="checkbox" :playable="true"
+                :singleLineTitleStyle="isAlbumArtistSutitle" :subtitle="computedItemSubtitle(item)"
+                :extraText="item.publishTime" @click="visitItem(item)" :checkbox="checkbox" :playable="true"
                 :playAction="() => playAlbum(item)" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>

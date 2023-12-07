@@ -112,6 +112,7 @@ export class Lyric {
         }
         */
         const propName = META_TAGS[name] || name
+        if(propName == 'offset') value = Number(value)
         lyric[propName] = value
     }
 
@@ -146,6 +147,26 @@ export class Lyric {
             data: new Map(mapDatas.map(item => [item[0], item[1]]))
         })
         return lyric
+    }
+
+    static stringify(lyric) {
+        if (!lyric || !lyric.data) return ''
+        if (!lyric.data.size || lyric.data.size < 1) return ''
+        lyric = Lyric.sort(lyric)
+        const { title, artist, album, by, offset } = lyric
+        let text = `[ti: ${title || ''}]\n`
+            + `[ar: ${artist || ''}]\n`
+            + `[al: ${album || ''}]\n`
+            + `[by: ${by || ''}]\n`
+            + `[offset: ${offset}]\n\n`
+        Array.from(lyric.data).forEach(line => {
+            if(!line) return
+            //当前应用时间格式：00:00.000，一般格式：00:00.00
+            const lineTime = line[0].slice(0, line[0].length - 1)
+            const lineText = line[1] || ''
+            text += `[${lineTime}] ${lineText}\n`
+        })
+        return text
     }
 
 }

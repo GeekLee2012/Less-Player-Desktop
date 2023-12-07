@@ -27,7 +27,6 @@ import { toYyyymmddHhMmSs } from '../../common/Times';
 
 
 
-
 const props = defineProps({
     source: String, //数据源，所属功能/模块
     id: String //记录ID
@@ -50,7 +49,8 @@ const { showToast, showFailToast, updateCommonCtxItem,
     hideAllCtxMenus, setSearchBarExclusiveAction,
     showPlaylistExportToolbar, updateCommonCtxMenuCacheItem } = useAppCommonStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
-const { updateCurrentPlatform } = usePlatformStore()
+const { updateCurrentPlatform, getPreferTypeTabs,
+    isAllSongsTab, isPlaylistsTab, isAlbumsTab, isFMRadiosTab, } = usePlatformStore()
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { getLocalPlaylist, removeFromLocalPlaylist, removeLocalPlaylist } = useLocalMusicStore()
 const { freeRadios } = storeToRefs(useFreeFMStore())
@@ -68,26 +68,12 @@ const isCustomPlaylist = () => props.source == "custom"
 const isLocalMusic = () => props.source == "local"
 const isFreeFM = () => props.source == "freefm"
 
-const typeTabs = [{
-    code: 'songs',
-    name: '歌曲',
-    text: '已选择0首歌曲'
-},
-{
-    code: 'playlists',
-    name: '歌单',
-    text: '已选择0个歌单'
-},
-{
-    code: 'albums',
-    name: '专辑',
-    text: '已选择0张专辑'
-},
-{
-    code: 'radios',
-    name: 'FM电台',
-    text: '已选择0个FM电台'
-}]
+const typeTabs = getPreferTypeTabs()
+const activeTabCode = () => (typeTabs[activeTab.value].code)
+const isSongTab = () => (isAllSongsTab(activeTabCode()))
+const isPlaylistTab = () => (isPlaylistsTab(activeTabCode()))
+const isAlbumTab = () => (isAlbumsTab(activeTabCode()))
+const isFmRadioTab = () => (isFMRadiosTab(activeTabCode()))
 
 const title = ref("")
 const subtitle = ref("")
@@ -97,11 +83,6 @@ const currentTabView = shallowRef(null)
 const tabData = reactive([])
 const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
-
-const isSongTab = () => (activeTab.value == 0)
-const isPlaylistTab = () => (activeTab.value == 1)
-const isAlbumTab = () => (activeTab.value == 2)
-const isFmRadioTab = () => (activeTab.value == 3)
 
 //TODO
 const actionShowCtl = reactive({
@@ -207,7 +188,7 @@ const resetTab = () => {
 }
 
 const updateTipText = () => {
-    tabTipText.value = typeTabs[activeTab.value].text.replace('0', checkedData.length)
+    tabTipText.value = typeTabs[activeTab.value].ctext.replace('0', checkedData.length)
 }
 
 const switchTab = () => {
@@ -599,10 +580,10 @@ const formatRadios = (radios, format) => {
     const now = Date.now()
     const radioData = []
     radios.forEach(item => {
-        const { platform, type, title, cover, tags, about, data } = item
+        const { platform, type, title, cover, coverFit, tags, about, data } = item
         if (data && data.length > 0) {
             const { url, streamType } = data[0]
-            radioData.push({ title, url, streamType, cover, tags, about })
+            radioData.push({ title, url, streamType, cover, coverFit, tags, about })
         }
     })
     const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')
@@ -924,7 +905,9 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 
 #batch-action-view .header .tab {
     font-size: var(--content-text-tab-title-size);
-    padding: 8px 15px;
+    /*padding: 8px 15px;*/
+    padding: 8px 0px;
+    margin-right: 36px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
@@ -997,7 +980,6 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
     margin: 0px 20px;
     /*width: 65px;*/
     min-width: 80px;
-    cursor: pointer;
 }
 
 #batch-action-view .center>.action .checkall span {
@@ -1006,6 +988,7 @@ EventBus.on("commonCtxMenuItem-finish", refresh)
 
 #batch-action-view .center>.content {
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 #batch-action-view .pagination-tiles .pag-action {

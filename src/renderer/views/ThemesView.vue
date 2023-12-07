@@ -62,7 +62,7 @@ const ceateTheme = () => editTheme()
     <div id="themes-view">
         <div class="header">
             <div class="title">主题</div>
-            <div class="tabs">
+            <div class="tab-nav">
                 <span v-for="(item, index) in ['推荐', '自定义']" class="tab"
                     :class="{ active: currentTabIndex == index, 'content-text-highlight': currentTabIndex == index, spacing: index > 0 }"
                     @click="switchTab(index)" v-html="item">
@@ -191,21 +191,23 @@ const ceateTheme = () => editTheme()
     font-weight: bold;
 }
 
-#themes-view .tabs {
+#themes-view .tab-nav {
     text-align: left;
-    padding-bottom: 5px;
+    margin-bottom: 6px;
     position: relative;
 }
 
 #themes-view .tab {
     /*font-weight: bold;*/
     font-size: var(--content-text-tab-title-size);
-    padding: 8px 15px;
+    /*padding: 8px 15px;*/
+    padding-bottom: 8px;
+    margin-right: 36px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
 
-#themes-view .header .tabs .active {
+#themes-view .header .tab-nav .active {
     font-weight: bold;
     border-bottom: 3px solid var(--content-highlight-color);
 }

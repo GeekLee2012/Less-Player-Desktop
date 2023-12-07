@@ -49,7 +49,7 @@ const onPageChanged = async ({ offset, limit, page }) => {
 
     const { data, total } = result
 
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && (typeof data[0] == 'object')) {
         setCurrentPageMatchLimit(data.length === limit)
         dataFromLoad.push(...data)
     }

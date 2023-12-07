@@ -19,7 +19,7 @@ export const useFreeFMStore = defineStore('freeFM', {
         resetAll() {
             this.freeRadios.length = 0
         },
-        addFreeRadio(title, url, streamType, tags, about, cover) {
+        addFreeRadio(title, url, streamType, tags, about, cover, coverFit) {
             const index = this.freeRadios.findIndex(e => {
                 if (e.data && e.data.length > 0) {
                     return e.data[0].url === url
@@ -41,14 +41,15 @@ export const useFreeFMStore = defineStore('freeFM', {
             const channelTrack = new Track(id, platform, title, artist, album, 0, cover, url)
             Object.assign(channelTrack, {
                 streamType,
-                type: Playlist.FM_RADIO_TYPE
+                type: Playlist.FM_RADIO_TYPE,
+                coverFit
             })
 
             const data = [channelTrack]
-            this.freeRadios.push({ id, platform, type: Playlist.FM_RADIO_TYPE, title, tags, about, cover, data, created, updated })
+            this.freeRadios.push({ id, platform, type: Playlist.FM_RADIO_TYPE, title, tags, about, cover, coverFit, data, created, updated })
             return id
         },
-        updateFreeRadio(id, title, url, streamType, tags, about, cover) {
+        updateFreeRadio(id, title, url, streamType, tags, about, cover, coverFit) {
             if (this.freeRadios.length < 1) return false
             const index = this.freeRadios.findIndex(e => e.id === id)
             if (index < 0) return false
@@ -65,10 +66,11 @@ export const useFreeFMStore = defineStore('freeFM', {
                     streamType,
                     album,
                     cover,
+                    coverFit,
                     type: Playlist.FM_RADIO_TYPE
                 })
             }
-            Object.assign(this.freeRadios[index], { platform: 'freefm', title, about, tags, cover, data, updated })
+            Object.assign(this.freeRadios[index], { platform: 'freefm', title, about, tags, cover, coverFit, data, updated })
             return true
         },
         getFreeRadio(id) {

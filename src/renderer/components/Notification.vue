@@ -21,6 +21,8 @@
     align-items: center;
     justify-content: center;
     z-index: 202;
+    --ntf-width: 266px;
+    --ntf-height: 168px;
 }
 
 .ntf-dialog-mask {
@@ -31,8 +33,8 @@
 }
 
 .ntf-dialog {
-    width: 266px;
-    height: 168px;
+    width: var(--ntf-width);
+    height: var(--ntf-height);
     background: var(--content-bg-color);
     background: var(--content-bg-color-no-transparent);
     display: flex;

@@ -38,7 +38,7 @@ onMounted(() => {
     <div class="play-meta">
         <div class="cover-wrap" @mouseenter="toggleCoverMask" @mouseleave="toggleCoverMask">
             <img class="audio-cover" v-lazy="Track.coverDefault(currentTrack)"
-                :class="{ 'obj-fit-contain': isFreeFM(currentTrack.platform) }" />
+                :class="{ 'obj-fit-contain': (currentTrack.coverFit == 1) }" />
             <div class="cover-mask" v-show="coverMaskShow" @click="showPlayingView">
                 <svg width="19" height="19" viewBox="0 0 763.32 424.57" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
@@ -73,7 +73,7 @@ onMounted(() => {
                 </div>
             </div>
             <div class="time-volume-wrap">
-                <AudioTime :current="mmssPreseekTime || mmssCurrentTime" :duration="Track.mmssDuration(currentTrack)">
+                <AudioTime :current="mmssPreseekTime || mmssCurrentTime" :duration="Track.mmssDuration(currentTrack, 0)">
                 </AudioTime>
                 <div class="volume-bar">
                     <VolumeBar ref="volumeBarRef" v-show="!hideVolumeBar"></VolumeBar>

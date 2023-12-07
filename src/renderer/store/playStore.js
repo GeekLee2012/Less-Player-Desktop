@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { PLAY_MODE } from '../../common/Constants';
+import { PlayMode } from '../../common/Constants';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { toMmss } from '../../common/Times';
@@ -15,7 +15,7 @@ const NO_TRACK = new Track('0', '', '听你想听，爱你所爱',
 export const usePlayStore = defineStore('player', {
     state: () => ({
         playing: false,
-        playMode: PLAY_MODE.REPEAT_ALL,
+        playMode: PlayMode.REPEAT_ALL,
         playingIndex: -1,
         queueTracks: [],
         //单位: ms
@@ -174,13 +174,13 @@ export const usePlayStore = defineStore('player', {
             const maxSize = this.queueTracksSize
             if (maxSize < 1) return
             switch (this.playMode) {
-                case PLAY_MODE.REPEAT_ALL:
+                case PlayMode.REPEAT_ALL:
                     --this.playingIndex
                     this.playingIndex = this.playingIndex < 0 ? maxSize - 1 : this.playingIndex
                     break
-                case PLAY_MODE.REPEAT_ONE:
+                case PlayMode.REPEAT_ONE:
                     break
-                case PLAY_MODE.RANDOM:
+                case PlayMode.RANDOM:
                     break
             }
             this.__validPlayingIndex()
@@ -195,12 +195,12 @@ export const usePlayStore = defineStore('player', {
             const maxSize = this.queueTracksSize
             if (maxSize < 1) return
             switch (this.playMode) {
-                case PLAY_MODE.REPEAT_ALL:
+                case PlayMode.REPEAT_ALL:
                     this.playingIndex = ++this.playingIndex % maxSize
                     break
-                case PLAY_MODE.REPEAT_ONE:
+                case PlayMode.REPEAT_ONE:
                     break
-                case PLAY_MODE.RANDOM:
+                case PlayMode.RANDOM:
                     this.playingIndex = Math.ceil(Math.random() * maxSize)
                     break
             }

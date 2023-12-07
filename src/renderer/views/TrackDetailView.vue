@@ -101,7 +101,7 @@ const playItemLater = () => {
             <div class="tab-nav">
                 <span class="tab content-text-highlight active">详情</span>
             </div>
-            <div>
+            <div class="info-wrap">
                 <div class="info-row">
                     <span class="title">歌手：</span>
                     <div>
@@ -186,9 +186,11 @@ const playItemLater = () => {
 
 #track-detail-view .tab {
     font-size: var(--content-text-tab-title-size);
-    padding-left: 15px;
+    /*padding-left: 15px;
     padding-right: 15px;
     margin-right: 15px;
+    */
+    margin-right: 36px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
@@ -196,6 +198,10 @@ const playItemLater = () => {
 #track-detail-view .tab-nav .active {
     font-weight: bold;
     border-color: var(--content-highlight-color);
+}
+
+#track-detail-view .info-wrap {
+    margin-left: 2px;
 }
 
 #track-detail-view .info-row {

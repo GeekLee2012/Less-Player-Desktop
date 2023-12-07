@@ -2,28 +2,8 @@ import { defineStore } from "pinia";
 import { usePlatformStore } from "./platformStore";
 
 
-//TODO 古早版本，大部分逻辑都写在store里啦
-const TAB_LIST = [{
-    code: 'hot-songs',
-    name: '热门歌曲',
-    text: '共0首歌曲'
-},
-{
-    code: 'all-songs',
-    name: '歌曲',
-    text: '共0首歌曲'
-},
-{
-    code: 'albums',
-    name: '专辑',
-    text: '共0张专辑'
-},
-{
-    code: 'about',
-    name: '歌手详情',
-    text: ''
-}]
 
+//TODO 古早版本，大部分逻辑都写在store里啦
 export const useArtistDetailStore = defineStore('artistDetail', {
     state: () => ({
         artistId: '',
@@ -37,15 +17,19 @@ export const useArtistDetailStore = defineStore('artistDetail', {
         about: '',
         activeTab: -1,
         tabTipText: '',
-        tabs: TAB_LIST,
-        hasHotSongTab: true,
-        hasAllSongTab: true
+        tabs: [],
     }),
     getters: {
         activeTabCode() {
             if (this.activeTab < 0) return ''
             return this.tabs[this.activeTab].code
-        }
+        },
+        hasHotSongsTab() {
+            return this.tabs.findIndex(tab => (tab.code === 'hot-songs')) > -1
+        },
+        hasAllSongsTab() {
+            return this.tabs.findIndex(tab => (tab.code === 'all-songs')) > -1
+        },
     },
     actions: {
         setActiveTab(index) {
@@ -135,37 +119,11 @@ export const useArtistDetailStore = defineStore('artistDetail', {
                 this.tabTipText = this.tabs[this.activeTab].text.replace('0', length)
             }
         },
-        setupSongTabs(hasHotSongs, hasAllSongs) {
-            this.hasHotSongTab = hasHotSongs
-            this.hasAllSongTab = hasAllSongs
-        },
         updateTabs() {
-            const { isQQ, isNetEase, isKuWo, isKuGou, isDouBan } = usePlatformStore()
-            if (isQQ(this.platform)
-                || isNetEase(this.platform)) {
-                this.tabs = [TAB_LIST[0], TAB_LIST[2], TAB_LIST[3]]
-                this.setupSongTabs(true, false)
-            } else if (isKuWo(this.platform)
-                || isKuGou(this.platform)
-                || isDouBan(this.platform)) {
-                this.tabs = [TAB_LIST[1], TAB_LIST[2], TAB_LIST[3]]
-                this.setupSongTabs(false, true)
-            } else {
-                this.tabs = [TAB_LIST[1], TAB_LIST[3]]
-                this.setupSongTabs(false, true)
-            }
+            const { getArtistTabs } = usePlatformStore()
+            const tabs = getArtistTabs(this.platform)
+            this.tabs.length = 0
+            if(tabs && tabs.length > 0) this.tabs.push(...tabs)
         },
-        isHotSongsTab() {
-            return this.activeTabCode == 'hot-songs'
-        },
-        isAllSongsTab() {
-            return this.activeTabCode == 'all-songs'
-        },
-        isAlbumsTab() {
-            return this.activeTabCode == 'albums'
-        },
-        isAboutTab() {
-            return this.activeTabCode == 'about'
-        }
     }
 })

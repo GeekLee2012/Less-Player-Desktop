@@ -1,6 +1,8 @@
 #.npmrc配置文件（注意：名称以.开头）
-#解决npm install失败问题 
+#下载源
 registry=http://registry.npmmirror.com
+
+#解决npm install失败问题 
 ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
 
 #解决npm run dist失败问题

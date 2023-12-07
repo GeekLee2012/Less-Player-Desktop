@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, inject } from 'vue';
+import { onMounted, ref, inject, computed, watch, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
@@ -9,9 +9,9 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useUseCustomTrafficLight } from '../../common/Utils';
-import { Track } from '../../common/Track';
+import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
+import { Track } from '../../common/Track';
 
 
 
@@ -19,11 +19,13 @@ const { seekTrack, playMv,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
-    mmssPreseekTime, isTrackSeekable } = inject('player')
+    mmssPreseekTime, isTrackSeekable,
+    dndSaveCover, dndSaveLyric } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
+const ipcRenderer = useIpcRenderer()
 
 
 const { isMaxScreen, playingViewShow, desktopLyricShow } = storeToRefs(useAppCommonStore())
@@ -32,16 +34,38 @@ const { hidePlayingView, minimize,
     toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
 const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
-const { getWindowZoom, lyricMetaPos } = storeToRefs(useSettingStore())
+const { getWindowZoom, lyricMetaPos,
+    isDndSaveEnable, isPlayingViewUseBgCoverEffect
+} = storeToRefs(useSettingStore())
 
 const volumeBarRef = ref(null)
 
-const onUserMouseWheel = (e) => EventBus.emit('lyric-userMouseWheel', e)
+const onUserMouseWheel = (event) => EventBus.emit('lyric-userMouseWheel', event)
 
+const hasBackgroudCover = ref(false)
+const bgEffectStyle = reactive({})
+const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
+
+const setupBackgroudEffect = () => {
+    if (!isPlayingViewUseBgCoverEffect.value) return
+    const track = currentTrack.value
+    if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
+    setHasBackgroudCover(true)
+
+    const { cover } = track
+    Object.assign(bgEffectStyle, {
+        background: `url('${cover}')`
+    })
+}
+
+watch([currentTrack, playingViewShow], () => {
+    setupBackgroudEffect()
+})
 
 onMounted(() => {
     EventBus.emit('playingView-changed')
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
+    setupBackgroudEffect()
 })
 </script>
 
@@ -83,8 +107,10 @@ onMounted(() => {
                 </div>
             </div>
             <div class="center">
-                <div class="cover">
-                    <img v-lazy="Track.coverDefault(currentTrack)" />
+                <div class="cover-wrap">
+                    <img class="cover"
+                        :class="{ 'obj-fit-contain': currentTrack.coverFit == 1, 'draggable': isDndSaveEnable }"
+                        v-lazy="Track.coverDefault(currentTrack)" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
                 </div>
                 <div class="lyric-wrap">
                     <LyricControl :track="currentTrack" :currentTime="currentTimeState" @mousewheel="onUserMouseWheel">
@@ -131,7 +157,7 @@ onMounted(() => {
                     </div>
                     <div>
                         <AudioTime :current="mmssPreseekTime || mmssCurrentTime"
-                            :duration="Track.mmssDuration(currentTrack)">
+                            :duration="Track.mmssDuration(currentTrack, 0)">
                         </AudioTime>
                     </div>
                     <div class="btm-center">
@@ -185,6 +211,8 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="bg-effect" :style="bgEffectStyle" v-show="hasBackgroudCover && isPlayingViewUseBgCoverEffect">
         </div>
     </div>
 </template>
@@ -305,26 +333,30 @@ onMounted(() => {
     padding: 0px 60px;
 }
 
-.playing-view .center .cover,
+.playing-view .center .cover-wrap,
 .playing-view .center .lyric-wrap {
     /* 偶尔有少数歌曲，歌词太长，会强行挤占左边Cover空间*/
     flex: 1;
     max-width: 50%;
 }
 
-.playing-view .center .cover {
+.playing-view .center .cover-wrap {
     margin-right: 41px;
     margin-bottom: 0px;
     display: flex;
     justify-content: flex-end;
 }
 
-.playing-view .center .cover img {
+.playing-view .center .cover-wrap .cover {
     width: 356px;
     height: 356px;
     border: 6px solid #292929;
     border-radius: 3px;
     background-size: cover;
+}
+
+.playing-view .center .cover-wrap .cover.draggable {
+    -webkit-user-drag: auto;
 }
 
 .playing-view .center .lyric-wrap {
@@ -376,5 +408,17 @@ onMounted(() => {
 
 .playing-view .bottom .action .lyric-btn:hover {
     color: var(--content-highlight-color);
+}
+
+.playing-view .bg-effect {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    /*backdrop-filter: blur(20px);*/
+    filter: blur(8px);
+    z-index: -10;
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 </style>

@@ -100,14 +100,15 @@ export const useRecentsStore = defineStore("recents", {
         addRecentSong(track) {
             const { id, platform, title, artist, album, duration, cover,
                 type, pid, songlistId, extra1, extra2, mv,
-                payPlay, payDownload } = track
+                payPlay, payDownload, songID, strMediaMid, hash, extraHash,  
+            } = track
             if (!platform || platform.trim().length < 1) return
             //TODO
             const url = Playlist.isAnchorRadioType(track) ? track.url : null
             this.uniqueInsertFirst(this.recents.songs, {
                 id, platform, title, artist, album, duration, cover, url,
-                type, pid, songlistId, extra1, extra2, mv,
-                payPlay, payDownload
+                type, pid, songlistId, extra1, extra2, mv, 
+                payPlay, payDownload, songID, strMediaMid, hash, extraHash, 
             })
             trimArray(this.recents.songs, 999).then(deleteCount => {
                 if (deleteCount) this.refreshUserHome()

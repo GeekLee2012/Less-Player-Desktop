@@ -200,7 +200,7 @@ const openBackupFile = async () => {
         } else if (key === 'customPlaylists') {
             customPlaylistsLength.value = value.length
             continue
-        } else if (typeof (value) === 'object') {
+        } else if (typeof value === 'object') {
             const children = []
             for (const [childKey, childValue] of Object.entries(value)) {
                 children.push({
@@ -360,6 +360,7 @@ watch(sourcesCategories, () => {
             <div class="title">数据还原
                 <span class="subtitle" v-html="backupFile"></span>
             </div>
+            <div class="tip-text">提示：实验性功能，有待完善，无法保证可用性</div>
             <div class="action">
                 <div class="checkbox checkall">
                     <svg @click="toggleCheckAll" v-show="!isCheckedAll" width="16" height="16" viewBox="0 0 731.64 731.66"
@@ -432,6 +433,7 @@ watch(sourcesCategories, () => {
 
 #data-restore-view .header {
     margin: 0px 33px 5px 33px;
+    text-align: left;
 }
 
 #data-restore-view .header .title {
@@ -440,7 +442,7 @@ watch(sourcesCategories, () => {
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
     padding-bottom: 15px;
-    margin-bottom: 15px;
+    /*margin-bottom: 15px;*/
     border-bottom: 1px solid var(--border-color);
     border-bottom: 1px solid transparent;
     position: relative;
@@ -464,6 +466,10 @@ watch(sourcesCategories, () => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+}
+
+#data-restore-view .header .tip-text {
+    margin-bottom: 15px;
 }
 
 #data-restore-view .action {

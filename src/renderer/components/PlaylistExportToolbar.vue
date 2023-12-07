@@ -116,10 +116,10 @@ watch(playlistExportContextItem, (nv, ov) => {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="cate-name">存储目录：</div>
+                    <div class="cate-name">保存位置：</div>
                     <div class="row-content">
                         <div class="dir-input-ctl">
-                            <input class="text-input-ctl" ref="exportPathRef" placeholder="文件存储目录" />
+                            <input class="text-input-ctl" ref="exportPathRef" placeholder="文件保存位置" />
                             <div class="select-btn" @click="selectDir">选择</div>
                         </div>
                     </div>

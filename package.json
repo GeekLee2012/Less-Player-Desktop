@@ -1,7 +1,7 @@
 {
   "name": "less-player",
   "private": true,
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "Less Player, Less is More ! ",
   "author": {
     "name": "RIVE2012",
@@ -38,6 +38,7 @@
     "electron-fetch": "^1.9.1",
     "hls.js": "^1.4.12",
     "howler": "^2.2.4",
+    "jsencrypt": "^3.3.2",
     "mitt": "^3.0.1",
     "mousetrap": "^1.6.5",
     "music-metadata": "^7.13.4",
@@ -133,6 +134,21 @@
       },
       {
         "ext": "m4a"
+      },
+      {
+        "ext": "caf"
+      },
+      {
+        "ext": "oga"
+      },
+      {
+        "ext": "opus"
+      },
+      {
+        "ext": "weba"
+      },
+      {
+        "ext": "webm"
       }
     ]
   }

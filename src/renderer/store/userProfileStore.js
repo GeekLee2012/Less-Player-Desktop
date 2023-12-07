@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { toRaw } from "vue";
 import EventBus from "../../common/EventBus";
 import { randomTextWithinAlphabetNums, trimArray } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
@@ -161,32 +162,42 @@ export const useUserProfileStore = defineStore("userProfile", {
                 id, platform, title, cover, type
             })
         },
-        addFavoriteAlbum(id, platform, title, cover, publishTime) {
+        addFavoriteAlbum(id, platform, title, cover, publishTime, artist, company) {
             this.addItem(this.favorites.albums, {
-                id, platform, title, cover, publishTime
+                id, platform, title, cover, publishTime, artist, company
             })
         },
         addFavoriteTrack(track) {
+            /*
             const { id, platform, title, artist, album, duration, cover,
-                type, pid, songlistId, extra1, extra2, mv,
-                payPlay, payDownload } = track
+                type, pid, mv, songlistId, extra1, extra2, 
+                payPlay, payDownload, songID, strMediaMid, hash, extraHash,
+            } = track
+            */
+            const _track = { ...track }
+            const excludeProps = ['lyric', 'lyricTran', 'lyricRoma', 
+                'score', 'isCandidate']
             //TODO
-            const url = Playlist.isAnchorRadioType(track) ? track.url : null
-            if (platform === 'local') return false
-            this.addItem(this.favorites.songs, {
-                id, platform, title, artist, album, duration, cover, url,
-                type, pid, songlistId, extra1, extra2, mv,
-                payPlay, payDownload
-            })
+            if(!Playlist.isAnchorRadioType(track)) excludeProps.push('url')
+            excludeProps.forEach(prop => Reflect.deleteProperty(_track, prop))
+            //本地歌曲暂不支持
+            const { isLocalMusic } = usePlatformStore()
+            if (isLocalMusic(_track.platform)) return false
+
+            this.addItem(this.favorites.songs, _track)
             return true
         },
         addFavoriteRadio(track) {
+            /*
             const { id, platform, title, cover, artist, url,
                 type, pid, songlistId, extra1, extra2, position } = track
-            this.addItem(this.favorites.radios, {
-                id, platform, title, cover, artist, url,
-                type, pid, songlistId, extra1, extra2, position
-            })
+            */
+            const _track = { ...toRaw(track) }
+            const excludeProps = ['lyric', 'lyricTran', 'lyricRoma', 
+                'payPlay', 'payDownload', 
+                'publishTime', 'score', 'isCandidate']
+            excludeProps.forEach(prop => Reflect.deleteProperty(_track, prop))
+            this.addItem(this.favorites.radios, _track)
         },
         removeFavoritePlaylist(id, platform) {
             this.removeItem(this.favorites.playlists, { id, platform })
@@ -273,7 +284,8 @@ export const useUserProfileStore = defineStore("userProfile", {
             const playlist = this.getCustomPlaylist(id)
             if (!playlist) return false
             const { platform } = track
-            if (platform === 'local') return false
+            const { isLocalMusic } = usePlatformStore()
+            if (isLocalMusic(platform)) return false
             if (Playlist.isFMRadioType(track)) return false
 
             const index = this.findItemIndex(playlist.data, track)

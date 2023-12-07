@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, inject } from 'vue';
+import { ref, watch, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
@@ -10,6 +10,7 @@ import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { toTrimString } from '../../common/Utils';
+import { Playlist } from '../../common/Playlist';
 
 
 
@@ -26,14 +27,14 @@ const props = defineProps({
     checkChangedFn: Function,
 })
 
-const { playMv } = inject('player')
+const { playMv, dndSaveTrack } = inject('player')
 const { showContextMenu } = inject('appCommon')
 
 const { playing } = storeToRefs(usePlayStore())
 const { addTrack, playTrack, togglePlay } = usePlayStore()
 const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
-const { track, isHighlightCtxMenuItemEnable } = storeToRefs(useSettingStore())
+const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
 
@@ -77,7 +78,7 @@ watch(() => props.checked, (nv, ov) => {
 
 const isExtra1Available = () => {
     const { extra1 } = props.data
-    if (typeof (extra1) === 'string') {
+    if (typeof extra1 === 'string') {
         return extra1 ? extra1.trim().length > 0 : false
     }
     return false
@@ -85,7 +86,7 @@ const isExtra1Available = () => {
 
 const isExtra2Available = () => {
     const { extra2 } = props.data
-    if (typeof (extra2) === 'string') {
+    if (typeof extra2 === 'string') {
         return extra2 ? extra2.trim().length > 0 : false
     }
     return false
@@ -111,12 +112,20 @@ const getAudioTypeFlagText = (data) => {
     return null
 }
 
+const isDraggable = computed(() => {
+    const { platform } = props.data
+    return isDndSaveEnable.value
+        && !isLocalMusic(platform)
+        && !Playlist.isFMRadioType(props.data)
+})
+
 EventBus.on("checkbox-refresh", () => setChecked(false))
 </script>
 
 <template>
     <div class="song-item" @click="toggleCheck" @contextmenu="onContextMenu"
-        :class="{ 'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data) }">
+        :class="{ 'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data) }"
+        :draggable="isDraggable" @dragstart="(event) => dndSaveTrack(event, data)">
         <div v-show="checkbox" class="checkbox">
             <svg v-show="!isChecked" width="16" height="16" viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
@@ -276,6 +285,10 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     width: 35px;
     padding-left: 8px;
     text-align: left;
+}
+
+.song-item .sqno {
+    color: var(--content-subtitle-text-color);
 }
 
 .song-item .checkbox {

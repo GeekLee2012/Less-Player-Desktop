@@ -440,7 +440,7 @@ const showSubmenu = (item, index, event) => {
 const visitMenuItem = (item, index, event) => {
     if (!item || !item.action) return
     const { action } = item
-    if (typeof (action) == 'function') {
+    if (typeof action == 'function') {
         const needTriggerEvent = action(item, index, event)
         if (needTriggerEvent) EventBus.emit("commonCtxMenuItem-finish")
     }

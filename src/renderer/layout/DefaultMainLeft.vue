@@ -141,7 +141,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
             <WinTrafficLightBtn v-show="!useWindowsStyleWinCtl" :isMaximized="isMaxScreen">
             </WinTrafficLightBtn>
             <div class="top-left-navigator-wrap" v-show="isDefaultOldLayout">
-                <div class="userhome-btn btn" @click="visitUserHome" v-show="useWindowsStyleWinCtl">
+                <div class="userhome-btn btn" @click="() => visitUserHome()" v-show="useWindowsStyleWinCtl">
                     <svg width="23" height="20.88" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -151,7 +151,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                         </g>
                     </svg>
                 </div>
-                <div class="setting-btn btn" v-show="useWindowsStyleWinCtl" @click="visitSetting">
+                <div class="setting-btn btn" v-show="useWindowsStyleWinCtl" @click="() => visitSetting()">
                     <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">

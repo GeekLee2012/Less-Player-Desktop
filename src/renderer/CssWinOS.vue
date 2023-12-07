@@ -85,7 +85,7 @@
 .use-winos-win-ctl .video-playing-view .win-ctl-wrap {
   position: absolute;
   right: 10px;
-  top: 10px;
+  top: -2px;
 }
 
 .use-winos-win-ctl .video-playing-view .win-ctl-wrap .ctl-btn:hover,

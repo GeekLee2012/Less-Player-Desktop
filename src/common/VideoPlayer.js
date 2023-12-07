@@ -1,6 +1,6 @@
 import Hls from 'hls.js';
 import EventBus from './EventBus';
-import { PLAY_STATE } from './Constants';
+import { PlayState } from './Constants';
 
 
 
@@ -14,7 +14,7 @@ export class VideoPlayer {
         this.video = video
         this.hls = new Hls()
         this.videoChanged = false
-        this.playState = PLAY_STATE.NONE
+        this.playState = PlayState.NONE
     }
 
     static get() {
@@ -37,17 +37,17 @@ export class VideoPlayer {
         videoNode = node
         if (videoNode) {
             const self = this
-            videoNode.addEventListener('playing', event => self.setPlayState(PLAY_STATE.PLAYING))
-            videoNode.addEventListener('pause', event => self.setPlayState(PLAY_STATE.PAUSE))
-            videoNode.addEventListener("ended", event => self.setPlayState(PLAY_STATE.END))
-            videoNode.addEventListener("error", event => self.setPlayState(PLAY_STATE.PLAY_ERROR))
+            videoNode.addEventListener('playing', event => self.setPlayState(PlayState.PLAYING))
+            videoNode.addEventListener('pause', event => self.setPlayState(PlayState.PAUSE))
+            videoNode.addEventListener("ended", event => self.setPlayState(PlayState.END))
+            videoNode.addEventListener("error", event => self.setPlayState(PlayState.PLAY_ERROR))
         }
     }
 
     //播放
     play() {
         if (!Hls.isSupported() || !videoNode) return
-        if (!this.video || !this.video.url) return this.setPlayState(PLAY_STATE.PLAY_ERROR)
+        if (!this.video || !this.video.url) return this.setPlayState(PlayState.PLAY_ERROR)
 
         const self = this
         const { url: src } = this.video
@@ -57,7 +57,7 @@ export class VideoPlayer {
             this.hls.attachMedia(videoNode)
 
             this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                this.setPlayState(PLAY_STATE.INIT)
+                this.setPlayState(PlayState.INIT)
                 videoNode.play()
 
                 lastPlayTime = Date.now()
@@ -66,7 +66,7 @@ export class VideoPlayer {
         } else { //TODO
             if (this.videoChanged) {
                 videoNode.load()
-                this.setPlayState(PLAY_STATE.INIT)
+                this.setPlayState(PlayState.INIT)
             }
             videoNode.play()
         }
@@ -93,7 +93,7 @@ export class VideoPlayer {
     }
 
     playing() {
-        return this.playState == PLAY_STATE.PLAYING
+        return this.playState == PlayState.PLAYING
     }
 
     //暂停
@@ -106,7 +106,7 @@ export class VideoPlayer {
         } else {
             videoNode.pause()
         }
-        this.setPlayState(PLAY_STATE.PAUSE)
+        this.setPlayState(PlayState.PAUSE)
     }
 
     togglePlay() {
@@ -128,7 +128,7 @@ export class VideoPlayer {
         if (VideoPlayer.isHlsVideo()) this.hls.stopLoad()
         this.video = video
         this.videoChanged = true
-        this.playState = PLAY_STATE.NONE
+        this.playState = PlayState.NONE
         if (!video) this.reloadVideo()
     }
 

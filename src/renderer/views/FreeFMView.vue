@@ -84,8 +84,8 @@ const importRadios = async () => {
         let msg = '导入FM电台失败', success = false
         if (radios && radios.length > 0) {
             radios.forEach(item => {
-                const { title, url, streamType, cover, tags, about } = item
-                addFreeRadio(title, url, streamType, tags, about, cover)
+                const { title, url, streamType, cover, coverFit, tags, about } = item
+                addFreeRadio(title, url, streamType, tags, about, cover, coverFit)
             })
             msg = `导入FM电台已完成！<br>共${radios.length}个电台`
             success = true
@@ -202,7 +202,6 @@ const restoreScrollState = () => {
 const resetScrollState = () => {
     markScrollTop = 0
     if (freefmRef.value) freefmRef.value.scrollTop = markScrollTop
-    resetBack2TopBtn()
 }
 
 onMounted(() => {
@@ -211,6 +210,7 @@ onMounted(() => {
 
 onActivated(() => {
     restoreScrollState()
+    resetBack2TopBtn()
 })
 
 onDeactivated(() => {
@@ -259,7 +259,7 @@ watch(searchKeyword, filterContent)
         </div>
         <div class="center">
             <div class="list-title">
-                <div class="size-text content-text-highlight">FM电台({{ computedListSizeText }})</div>
+                <div class="size-text content-text-highlight">电台列表({{ computedListSizeText }})</div>
                 <div class="search-wrap checkbox text-btn" @click="toggleUseSearchBar" v-show="isSearchForFreeFMShow">
                     <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">
@@ -322,7 +322,7 @@ watch(searchKeyword, filterContent)
 #freefm-view .header {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
+    margin-bottom: 28px;
 }
 
 #freefm-view .header .title {
@@ -335,8 +335,8 @@ watch(searchKeyword, filterContent)
 #freefm-view .header .about {
     text-align: left;
     margin-left: 5px;
-    margin-bottom: 15px;
-    line-height: 28px;
+    margin-bottom: 20px;
+    line-height: 29px;
     color: var(--content-subtitle-text-color);
 }
 
@@ -345,16 +345,18 @@ watch(searchKeyword, filterContent)
 }
 
 #freefm-view .list-title {
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     text-align: left;
-    font-size: 16px;
     font-weight: bold;
     display: flex;
     position: relative;
 }
 
 #freefm-view .list-title .size-text {
-    margin-left: 3px;
+    margin-left: 5px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--content-highlight-color);
+    font-size: calc(var(--content-text-tab-title-size) - 2px);
 }
 
 #freefm-view .checkbox {

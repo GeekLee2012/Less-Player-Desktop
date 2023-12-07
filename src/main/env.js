@@ -35,6 +35,7 @@ const USER_AGENTS = [
 ]
 //支持的音频文件扩展名（本地文件）
 const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
+const EXTRA_AUDIO_EXTS = ['caf', 'oga', 'opus', 'weba', 'webm']
 //支持的图片文件扩展名（本地文件）
 const IMAGE_EXTS = ['jpg', 'jpeg', 'png']
 //支持导入的歌单格式
@@ -53,6 +54,8 @@ const isDevEnv = (process.env['NODE_ENV'] === 'dev')
 //应用Icon
 const APP_ICON = isMacOS ? '../../public/icon.png' : '../../public/icon@2x.png'
 
+const DOWNLOADS_PATH = (process.env['HOME'] || process.env['USERPROFILE']) + '/Downloads'
+
 //导出
 module.exports = {
     isMacOS,
@@ -61,8 +64,10 @@ module.exports = {
     isDevEnv,
     USER_AGENTS,
     AUDIO_EXTS,
+    EXTRA_AUDIO_EXTS,
     IMAGE_EXTS,
     AUDIO_PLAYLIST_EXTS,
     BACKUP_FILE_EXTS,
-    APP_ICON
+    APP_ICON,
+    DOWNLOADS_PATH
 }

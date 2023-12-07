@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref, inject, nextTick, computed, } from 'vue';
+import { watch, ref, inject, nextTick, computed, onUnmounted, } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
@@ -9,8 +9,8 @@ import AlbumControl from './AlbumControl.vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
-import { PLAY_STATE } from '../../common/Constants';
-import { smoothScroll } from '../../common/Utils';
+import { PlayState } from '../../common/Constants';
+import { isDevEnv, smoothScroll } from '../../common/Utils';
 
 
 
@@ -20,11 +20,12 @@ const props = defineProps({
 })
 
 const { playMv, loadLyric, currentTimeState,
-    seekTrack, playState, progressSeekingState } = inject('player')
+    seekTrack, playState, progressSeekingState,
+    dndSaveLyric } = inject('player')
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
-const { lyric, lyricTransActived, lyricRomaActived, } = storeToRefs(useSettingStore())
+const { lyric, lyricTransActived, lyricRomaActived, isDndSaveEnable, } = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 //const { currentTrack } = storeToRefs(usePlayStore())
 
@@ -114,11 +115,17 @@ const renderAndScrollLyric = (secs) => {
 
     ////算法3：播放页垂直居中，依赖offsetParent定位；与算法2相似，只是参考系不同而已 ////
     //基本保证：准确定位，当前高亮行在播放页垂直居中，且基本与ScrollLocator在同一水平线上
-    if (!lines[index] || !lines[index].offsetTop || !lines[index].clientHeight) return
+    const line = lines[index]
+    if (!line || !line.offsetTop || !line.clientHeight) return
     const { offsetTop } = lyricWrap
+    if (!offsetTop) return
     const { clientHeight } = document.documentElement
-    const lineHeight = lines[index].clientHeight
-    const destScrollTop = lines[index].offsetTop - (clientHeight / 2 - offsetTop) + lineHeight / 2
+    const { offsetTop: lineOffsetTop, clientHeight: lineHeight } = line
+    //高度误差修正值
+    const adjustHeight = (lineHeight && lineHeight > 0) ? (lineHeight / 2) : 0
+    const destScrollTop = lineOffsetTop - (clientHeight / 2 - offsetTop) + adjustHeight
+
+    //console.log({ index, offsetTop, clientHeight, lineOffsetTop, lineHeight, adjustHeight, destScrollTop })
     //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
     const frequency = getStateRefreshFrequency()
     const duration = 300 * frequency / 60
@@ -185,7 +192,7 @@ const reloadLyricData = (track) => {
     nextTick(() => {
         //setupLyricLines()
         setupLyricExtra()
-        safeRenderAndScrollLyric(props.currentTime, true)
+        safeRenderAndScrollLyric(currentTimeState.value, true)
     })
     //setTimeout(setupLyricLines, 300)
 }
@@ -309,7 +316,7 @@ const seekFromLyric = () => {
 
 //TODO 暂停状态下，歌词状态没有同步
 const restoreLyricPausedState = () => {
-    if (playState.value == PLAY_STATE.PAUSE) safeRenderAndScrollLyric(props.currentTime)
+    if (playState.value == PlayState.PAUSE) safeRenderAndScrollLyric(props.currentTime)
 }
 
 
@@ -421,7 +428,7 @@ watch(() => props.track, (nv, ov) => {
                 </span>
             </div>
         </div>
-        <div class="center" ref="lyricWrapRef">
+        <div class="center" ref="lyricWrapRef" :draggable="isDndSaveEnable" @dragstart="dndSaveLyric">
             <div v-show="lyricExistState == -1" class="no-lyric">
                 <span>歌词加载中，请先欣赏音乐吧~</span>
             </div>

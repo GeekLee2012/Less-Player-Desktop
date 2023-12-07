@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { toTrimString } from '../../common/Utils';
 
 
 
@@ -15,7 +16,11 @@ const hasText = ref(false)
 
 const submitSearch = () => {
     const kwInputEl = keywordRef.value
-    const keyword = kwInputEl.value.trim()
+    //简单处理特殊字符
+    let keyword = toTrimString(kwInputEl.value)
+    keyword = toTrimString(keyword.replace(/[#\\?]/g, ''))
+    if (/^[@]+$/.test(keyword)) return
+
     const { submitAction } = props
     if (submitAction) submitAction(keyword)
 }

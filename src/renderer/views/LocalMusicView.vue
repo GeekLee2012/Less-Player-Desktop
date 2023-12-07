@@ -48,14 +48,13 @@ const onScroll = () => {
 }
 
 const onDrop = async (event) => {
+    event.preventDefault()
     if (!ipcRenderer) return
     if (!isUseDndForCreateLocalPlaylistEnable.value) {
         showFailToast('拖拽还没有启用哦！<br>请重新检查设置')
         return
     }
     if (importTaskCount.value > 0) return
-
-    event.preventDefault()
 
     const { files } = event.dataTransfer
     if (files.length > 1) {
@@ -165,7 +164,9 @@ onMounted(() => {
             </div>
         </div>
         <div class="center">
-            <div class="list-title content-text-highlight">歌单({{ localPlaylists.length }})</div>
+            <div class="list-title">
+                <div class="size-text content-text-highlight">歌单列表({{ localPlaylists.length }})</div>
+            </div>
             <PlaylistsControl :data="localPlaylists" :customLoadingCount="importTaskCount">
             </PlaylistsControl>
         </div>
@@ -204,7 +205,7 @@ onMounted(() => {
     text-align: left;
     margin-left: 5px;
     margin-bottom: 15px;
-    line-height: 28px;
+    line-height: 29px;
     color: var(--content-subtitle-text-color);
     /*
     overflow: hidden;
@@ -223,9 +224,17 @@ onMounted(() => {
 }
 
 #local-music-view .center .list-title {
-    margin-bottom: 5px;
+    margin-bottom: 0px;
     text-align: left;
-    font-size: 16px;
     font-weight: bold;
+    display: flex;
+    position: relative;
+}
+
+#local-music-view .list-title .size-text {
+    margin-left: 3px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--content-highlight-color);
+    font-size: calc(var(--content-text-tab-title-size) - 2px);
 }
 </style>

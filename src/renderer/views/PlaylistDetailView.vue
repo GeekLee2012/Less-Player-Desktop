@@ -7,6 +7,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore'
 import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
+import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
@@ -21,19 +22,21 @@ const props = defineProps({
     id: String
 })
 
-const { addAndPlayTracks, playPlaylist, addPlaylistToQueue } = inject('player')
+const { addAndPlayTracks, playPlaylist, addPlaylistToQueue, dndSaveCover } = inject('player')
+
 
 const { getVendor } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus, setSearchBarExclusiveAction } = useAppCommonStore()
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
-const { isSearchForOnlinePlaylistShow } = storeToRefs(useSettingStore())
-
+const { isSearchForOnlinePlaylistShow, isDndSaveEnable } = storeToRefs(useSettingStore())
+const { currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
 
 
 const detail = reactive({ cover: '', title: '', about: '', data: [] })
 const filteredData = ref(null)
-const listSizeText = ref("0")
+const listTitle = ref('歌曲')
+const listSizeText = ref('0')
 const playlistDetailRef = ref(null)
 const back2TopBtnRef = ref(null)
 let offset = 0, page = 1, limit = 1000
@@ -46,11 +49,28 @@ const titleRef = ref(null)
 const isTwoLinesTitle = ref(false)
 const setTwoLinesTitle = (value) => isTwoLinesTitle.value = value
 
+const setListTitle = (detail) => {
+    let title = '歌曲'
+    if (Playlist.isAnchorRadioType(detail)) {
+        title = '列表'
+    }
+    listTitle.value = title
+}
 
 const updateListSizeText = () => {
-    const total = detail.total
-    const length = filteredData.value ? filteredData.value.length : detail.data.length
-    const text = total > length ? `${length} / ${total}` : length
+    //const length = filteredData.value ? filteredData.value.length : detail.data.length
+    //const text = total > length ? `${length} / ${total}` : length
+    let text = '0'
+    if (filteredData.value) {
+        text = filteredData.value.length
+    } else {
+        const { data, total, totalPage } = detail
+        text = (page < totalPage) ?
+            (total >= 0 ?
+                (data.length < total ? `${data.length} / ${total}` : data.length)
+                : `${data.length}+`)
+            : data.length
+    }
     listSizeText.value = text
 }
 
@@ -62,9 +82,17 @@ const resetView = () => {
     updateListSizeText()
 }
 
+/*
 const nextPage = () => {
     //TODO
     if (detail.total < 1) return false
+    offset = page * limit
+    page = page + 1
+    return true
+}
+*/
+const nextPage = () => {
+    if (page >= detail.totalPage) return false
     offset = page * limit
     page = page + 1
     return true
@@ -76,9 +104,10 @@ const loadContent = async (noLoadingMask) => {
 
     const vendor = getVendor(props.platform)
     if (!vendor || !vendor.playlistDetail) return
-    let maxRetry = 3, retry = 0, success = false
+    let maxRetry = 3, retry = 0, success = false, result = null
     do {
-        const result = await vendor.playlistDetail(props.id, offset, limit, page)
+        result = await vendor.playlistDetail(props.id, offset, limit, page,
+            currentCategoryCode.value, currentOrder.value.value)
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -86,6 +115,7 @@ const loadContent = async (noLoadingMask) => {
         if (page > 1) result.data.unshift(...detail.data)
         if (!result.total) detail.total = 0
         Object.assign(detail, result)
+        setListTitle(detail)
         updateListSizeText()
         setLoading(false)
         success = true
@@ -175,7 +205,9 @@ const onScroll = () => {
 }
 
 const resetBack2TopBtn = () => {
-    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
+    if (back2TopBtnRef.value) {
+        back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
+    }
 }
 
 const toggleUseSearchBar = () => {
@@ -236,6 +268,7 @@ const detectTitleHeight = () => {
 onActivated(() => {
     restoreScrollState()
     detectTitleHeight()
+    resetBack2TopBtn()
 })
 
 onDeactivated(() => {
@@ -246,7 +279,7 @@ onDeactivated(() => {
 watch(() => props.id, () => {
     resetView()
     resetScrollState()
-    resetBack2TopBtn()
+    //resetBack2TopBtn()
     loadContent()
 }, { immediate: true })
 
@@ -261,7 +294,8 @@ EventBus.on('app-resize', detectTitleHeight)
     <div id="playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="coverDefault(detail.cover)" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" :class="{ 'draggable': isDndSaveEnable }"
+                    :draggable="isDndSaveEnable" @dragstart="(event) => dndSaveCover(event, detail)" />
             </div>
             <div class="right" v-show="!isLoading">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>
@@ -289,7 +323,7 @@ EventBus.on('app-resize', detectTitleHeight)
         </div>
         <div class="center">
             <div class="list-title">
-                <div class="size-text content-text-highlight" v-show="!isLoading">列表({{ listSizeText }})</div>
+                <div class="size-text content-text-highlight" v-show="!isLoading">{{ listTitle }}({{ listSizeText }})</div>
                 <div class="search-wrap checkbox text-btn" v-show="!isLoading && isSearchForOnlinePlaylistShow"
                     @click="toggleUseSearchBar">
                     <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
@@ -397,6 +431,10 @@ EventBus.on('app-resize', detectTitleHeight)
     box-shadow: 0px 0px 1px #161616;
 }
 
+#playlist-detail-view .header .cover.draggable {
+    -webkit-user-drag: auto !important;
+}
+
 #playlist-detail-view .action {
     display: flex;
     flex-direction: row;
@@ -407,16 +445,18 @@ EventBus.on('app-resize', detectTitleHeight)
 }
 
 #playlist-detail-view .list-title {
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     text-align: left;
-    font-size: 16px;
+    font-size: calc(var(--content-text-tab-title-size) - 2px);
     font-weight: bold;
     display: flex;
     position: relative;
 }
 
 #playlist-detail-view .list-title .size-text {
-    margin-left: 3px;
+    margin-left: 2px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--content-highlight-color);
 }
 
 #playlist-detail-view .checkbox {

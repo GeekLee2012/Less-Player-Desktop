@@ -3,6 +3,7 @@
 //拖拽移动
 //TODO 似是而非，暂且也归类于此吧
 export const bindDragAndMove = (el, binding) => {
+    if(!binding) return
     const { trigger } = binding
     const triggerEl = el.querySelector(trigger)
     if (!triggerEl) return

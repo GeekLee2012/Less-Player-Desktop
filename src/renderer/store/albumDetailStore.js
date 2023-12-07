@@ -1,20 +1,9 @@
 import { defineStore } from "pinia";
+import { usePlatformStore } from "./platformStore";
 
 
 
 //TODO 古早版本，大部分逻辑都写在store里啦
-const TAB_LIST = [
-    {
-        code: 'all-songs',
-        name: '歌曲',
-        text: '共0首歌曲'
-    },
-    {
-        code: 'about',
-        name: '专辑详情',
-        text: ''
-    }]
-
 export const useAlbumDetailStore = defineStore('albumDetail', {
     state: () => ({
         albumId: '',
@@ -28,7 +17,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
         about: '',
         activeTab: -1,
         tabTipText: '',
-        tabs: TAB_LIST
+        tabs: []
     }),
     getters: {
         activeTabCode(state) {
@@ -61,6 +50,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
             this.platform = platform
             this.albumId = id
             //this.resetAlbumDetail()
+            if(this.tabs.length < 1) this.updateTabs()
         },
         updateAlbum(title, cover, artistName, company, publishTime) {
             this.albumName = title
@@ -103,11 +93,11 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
                 this.tabTipText = this.tabs[this.activeTab].text.replace('0', length)
             }
         },
-        isAllSongsTab() {
-            return this.activeTabCode == 'all-songs'
+        updateTabs() {
+            const { getAlbumTabs } = usePlatformStore()
+            const tabs = getAlbumTabs(this.platform)
+            this.tabs.length = 0
+            if(tabs && tabs.length > 0) this.tabs.push(...tabs)
         },
-        isAboutTab() {
-            return this.activeTabCode == 'about'
-        }
     }
 })

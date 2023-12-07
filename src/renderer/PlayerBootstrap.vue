@@ -9,8 +9,11 @@ import { useRecentsStore } from './store/recentsStore';
 import { useSettingStore } from './store/settingStore';
 import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
-import { coverDefault, isBlank, isDevEnv, toTrimString, useIpcRenderer } from '../common/Utils';
-import { PLAY_STATE, TRAY_ACTION, IMAGE_PROTOCAL } from '../common/Constants';
+import {
+    coverDefault, isBlank, isDevEnv,
+    useIpcRenderer, useStartDrag, useDownloadsPath, tryCall
+} from '../common/Utils';
+import { PlayState, TrayAction, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
 import { toMmss } from '../common/Times';
 import { Lyric } from '../common/Lyric';
@@ -19,8 +22,8 @@ import { useVideoPlayStore } from './store/videoPlayStore';
 
 
 
-
 const ipcRenderer = useIpcRenderer()
+const startDrag = useStartDrag()
 
 const { currentTrack, queueTracksSize,
     playingIndex, playing } = storeToRefs(usePlayStore())
@@ -32,37 +35,43 @@ const { playTrack, playNextTrack,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying,
     setAudioOutputDevices, playTrackLater } = usePlayStore()
-const { getVendor, isLocalMusic,
-    isRadioCN, isXimalaya, isFreeFM } = usePlatformStore()
+const { getVendor, isLocalMusic, isFreeFM } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
-    playingViewThemeIndex, spectrumIndex, } = storeToRefs(useAppCommonStore())
+    playingViewThemeIndex, spectrumIndex,
+    pendingPlay, pendingPlayPercent, } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId,
-    setDesktopLyricShow, setCurrentTraceId } = useAppCommonStore()
+    setDesktopLyricShow, setCurrentTraceId,
+    setPendingPlay, setPendingPlayPercent,
+    setSpectrumIndex, } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
 const { theme, layout, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
     isResumePlayAfterVideoEnable, isPauseOnPlayingVideoEnable,
-    selectedAudioOutputDeviceId, } = storeToRefs(useSettingStore())
+    selectedAudioOutputDeviceId, isDndSaveEnable, } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray,
     syncSettingFromDesktopLyric, getCurrentTheme,
-    setAudioOutputDeviceId, setupAudioOutputDevice } = useSettingStore()
+    setAudioOutputDeviceId, setupAudioOutputDevice,
+    getDndSavePath, setDndSavePath,
+    getCurrentThemeContentBgColor } = useSettingStore()
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
 const { playVideoNow } = useVideoPlayStore()
 const { currentVideo } = storeToRefs(useVideoPlayStore())
 
 
-const { visitHome, visitUserHome, visitSetting } = inject('appRoute')
+const { visitHome, visitUserHome, visitSetting, visitModulesSetting, visitSearch, visitThemes, visitPlugins } = inject('appRoute')
+const { hasExTrackPlayUrlHandlers, hasExVideoPlayUrlHandlers, hasExDrawSpectrumHandlers, hasExDrawFullpageSpectrumHandlers,
+    getExTrackPlayUrl, getExVideoPlayUrl, drawExSpectrum, drawExFullPageSpectrum } = inject('apiExpose')
 
-const playState = ref(PLAY_STATE.NONE)
+const playState = ref(PlayState.NONE)
 const setPlayState = (value) => playState.value = value
-const pendingPlay = ref(false)
-const setPendingPlay = (value) => pendingPlay.value = value
+//const pendingPlay = ref(false)
+//const setPendingPlay = (value) => pendingPlay.value = value
 let desktopLyricShowState = false, trackRetry = 0
 const TRACK_MAX_RETRY = 1
 
@@ -120,6 +129,7 @@ const loadLyric = (track) => {
         if (isCurrentTrack(track)) EventBus.emit('track-noLyric', track)
         return
     }
+
     //获取歌词
     vendor.lyric(track.id, track).then(result => {
         //再次确认，可能歌曲已经被切走
@@ -128,9 +138,21 @@ const loadLyric = (track) => {
 }
 
 const updateLyric = (track, { lyric, roma, trans }) => {
-    if (track || Lyric.hasData(lyric)) Object.assign(track, { lyric })
-    if (track || Lyric.hasData(roma)) Object.assign(track, { lyricRoma: roma })
-    if (track || Lyric.hasData(trans)) Object.assign(track, { lyricTrans: trans })
+    //歌曲 - 普通歌词
+    if (track && Lyric.hasData(lyric)) {
+        //歌词元数据补全
+        const { title, artist, album } = lyric
+        if (isBlank(title)) Object.assign(lyric, { title: track.title })
+        if (isBlank(artist)) Object.assign(lyric, { artist: Track.artistName(track) })
+        if (isBlank(album)) Object.assign(lyric, { album: Track.albumName(track) })
+
+        Object.assign(track, { lyric })
+    }
+    //TODO 暂未支持
+    //歌曲 - 罗马音
+    if (track && Lyric.hasData(roma)) Object.assign(track, { lyricRoma: roma })
+    //歌曲 - 歌词翻译
+    if (track && Lyric.hasData(trans)) Object.assign(track, { lyricTrans: trans })
     EventBus.emit('track-lyricLoaded', track)
 }
 
@@ -185,12 +207,10 @@ const handleUnplayableTrack = (track, msg) => {
     showFailToast(OVERTRY_MSG)
 }
 
-//获取和设置歌曲播放信息
+//获取并更新歌曲播放信息
 const bootstrapTrack = (track) => {
     return new Promise(async (resolve, reject) => {
-        if (!track) {
-            return reject('none')
-        }
+        if (!track) return reject('none')
         //FM电台
         if (Playlist.isFMRadioType(track) && Track.hasUrl(track)) {
             return resolve(track)
@@ -199,6 +219,24 @@ const bootstrapTrack = (track) => {
         //平台服务
         const vendor = getVendor(platform)
         if (!vendor || !vendor.playDetail) {
+            //外部音源，优先级高于内置平台
+            //当前功能也包括FM广播，不过广播高音质资源不容易找；国外广播的高音质资源多些，但网络连接不太稳定
+            //TODO 功能尚待完善，比如考虑支持多个音源插件同时开启，处理流程、优先级等等
+            if (hasExTrackPlayUrlHandlers()) {
+                try {
+                    const exResult = await getExTrackPlayUrl(track).catch(error => console.log(error))
+                    if (exResult) {
+                        const { url: purl, exurl } = exResult
+                        if (!isBlank(purl)) {
+                            Object.assign(track, { url: purl, exurl })
+                            showToast('插件音源加载成功')
+                            return resolve(track)
+                        }
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
+            }
             return reject('noService')
         }
         //播放相关数据
@@ -207,22 +245,54 @@ const bootstrapTrack = (track) => {
         const { lyric, cover, artist, url } = result
         //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
         if (Track.hasUrl(result)) Object.assign(track, { url })
-        //无法获取到有效url，VIP收费歌曲或其他
-        if (!Track.hasUrl(track)) return reject('noUrl')
-        setAutoPlaying(false)
-        //设置歌词
+
+        //外部音源，优先级高于内置平台
+        //当前功能也包括FM广播，不过广播高音质资源不容易找；国外广播的高音质资源多些，但网络连接不太稳定
+        //TODO 功能尚待完善，比如考虑支持多个音源插件同时开启，处理流程、优先级等等
+        if (hasExTrackPlayUrlHandlers()) {
+            try {
+                const exResult = await getExTrackPlayUrl(track).catch(error => console.log(error))
+                if (exResult) {
+                    const { url: purl, exurl } = exResult
+                    if (!isBlank(purl)) {
+                        Object.assign(track, { url: purl, exurl })
+                        showToast('插件音源加载成功')
+                    }
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        //更新歌词
         if (Track.hasLyric(result)) {
             updateLyric(track, { lyric })
         }
-        //设置封面
+        //更新封面
         if (Track.hasCover(result)) Object.assign(track, { cover })
-        //设置歌手信息
+        //更新歌手
         //TODO 部分音乐平台artist信息无法在同一API中完整获取
         if (artistNotCompleted && artist) {
             Object.assign(track, { artist })
             EventBus.emit('track-artistUpdated', { trackId: id, artist })
         }
+
+        //无法获取到有效url，VIP收费歌曲或其他原因
+        if (!Track.hasUrl(track)) return reject('noUrl')
         resolve(track)
+    })
+}
+
+const bootstrapTrackWithTransfer = async (track) => {
+    return bootstrapTrack(track).catch(async (reason) => {
+        if (reason == 'noUrl' || 'noService') {
+            const { platform } = track
+            if (isLocalMusic(platform) || Playlist.isFMRadioType(track)) return
+            const candidate = await United.transferTrack(track)
+            if (!Track.hasUrl(candidate)) return
+            const { url, isCandidate } = candidate
+            Object.assign(track, { url, isCandidate })
+        }
     })
 }
 
@@ -262,8 +332,8 @@ const onPlayerErrorRetry = ({ track, currentTime, radio }) => {
         return handleUnplayableTrack(track)
     } else { //普通歌曲、广播电台
         increaseTrackRetry()
-
-        if (duration > 0 && !radio) { //TODO 尝试恢复播放进度
+        //TODO 尝试恢复播放进度
+        if (duration > 0 && !radio) {
             const percent = currentTime / duration
             markTrackSeekPending(percent)
         }
@@ -271,7 +341,7 @@ const onPlayerErrorRetry = ({ track, currentTime, radio }) => {
         if (isLocalMusic(platform) || isFreeFM(platform)) return
 
         //强行重置url，并尝试重新获取
-        if (!radio || isRadioCN(platform) || isXimalaya(platform)) track.url = ''
+        if (!radio || Playlist.isFMRadioType(track)) track.url = ''
         if (!radio) track.isCandidate = false
         EventBus.emit('track-changed', track)
     }
@@ -296,7 +366,7 @@ const loadPlaylist = async (playlist, text, traceId) => {
     if (Playlist.isNormalType(playlist)
         || Playlist.isAnchorRadioType(playlist)) {
         let maxRetry = 3, retry = 0
-        while (!playlist.data || playlist.data.length < 1) {
+        while (!playlist || !playlist.data || playlist.data.length < 1) {
             if (traceId && !isCurrentTraceId(traceId)) return
 
             if (++retry > maxRetry) break
@@ -315,7 +385,7 @@ const addPlaylistToQueue = async (playlist, text, traceId, limit) => {
     if (traceId && !isCurrentTraceId(traceId)) return
 
     playlist = await loadPlaylist(playlist, text, traceId)
-    if (!playlist.data || playlist.data.length < 1) {
+    if (!playlist || !playlist.data || playlist.data.length < 1) {
         const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
             : '网络异常！请稍候重试'
         if (traceId && !isCurrentTraceId(traceId)) return
@@ -353,16 +423,14 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         playNextPlaylistRadioTrack(platform, id, null, traceId)
         return
     } else if (Playlist.isVideoType(playlist)) { //视频
-        showToast(text || '即将为您播放视频', () => {
-            playMv({ ...playlist, mv: playlist.vid }, '当前视频无法播放')
-        }, 666)
+        playMv({ ...playlist }, '当前视频无法播放', text || '即将为您播放视频')
         return
     } else if (Playlist.isNormalType(playlist)
         || Playlist.isAnchorRadioType(playlist)) {
         playlist = await loadPlaylist(playlist, text, traceId)
     }
     //检查数据，再次确认
-    if (!playlist.data || playlist.data.length < 1) {
+    if (!playlist || !playlist.data || playlist.data.length < 1) {
         const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
             : '网络异常！请稍候重试'
         if (traceId && !isCurrentTraceId(traceId)) return
@@ -440,7 +508,7 @@ const loadAlbum = async (album, text, traceId) => {
 
     const { id, platform } = album
     let maxRetry = 3, retry = 0
-    while (!album.data || album.data.length < 1) {
+    while (!album || !album.data || album.data.length < 1) {
         if (traceId && !isCurrentTraceId(traceId)) return
 
         if (++retry > maxRetry) return
@@ -448,7 +516,7 @@ const loadAlbum = async (album, text, traceId) => {
         const vendor = getVendor(platform)
         if (!vendor || !vendor.albumDetail) return
         album = await vendor.albumDetail(id)
-        if ((!album.data || album.data.length < 1) && vendor.albumDetailAllSongs) {
+        if ((!album || !album.data || album.data.length < 1) && vendor.albumDetailAllSongs) {
             const result = await vendor.albumDetailAllSongs(id, 0, 100)
             if (result.data && result.data.length > 0) {
                 album.data.push(...result.data)
@@ -495,40 +563,60 @@ const doPlayAlbum = async (album, text, traceId) => {
 
 
 /* 频谱 */
-let cachedSpectrumFreqData = null, spectrumColor = null, stroke = null
-const drawSpectrum = (canvas, freqData, alignment) => {
-    //TODO
-    spectrumColor = getCurrentThemeHighlightColor()
-    stroke = spectrumColor
+const spectrumParams = {}
 
-    const dataLen = freqData.length
-    const WIDTH = canvas.width, HEIGHT = canvas.height
+const drawEmptySpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) => {
+    alignment = alignment || 'bottom'
+
+    const { width: cWidth, height: cHeight } = canvas
 
     const canvasCtx = canvas.getContext("2d")
-    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT)
+    canvasCtx.clearRect(0, 0, cWidth, cHeight)
 
     canvasCtx.fillStyle = 'transparent'
-    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
+    canvasCtx.fillRect(0, 0, cWidth, cHeight)
+}
+
+//TODO
+const drawSpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) => {
+    alignment = alignment || 'bottom'
+
+    const { width: cWidth, height: cHeight } = canvas
+
+    const canvasCtx = canvas.getContext("2d")
+    canvasCtx.clearRect(0, 0, cWidth, cHeight)
+
+    canvasCtx.fillStyle = 'transparent'
+    canvasCtx.fillRect(0, 0, cWidth, cHeight)
 
     if (!freqData || freqData.length < 1) return
-    let barWidth = 1 / 2, barHeight, x = 2, spacing = 3
-    //barWidth = (WIDTH / (dataLen * 3))
+    const dataLen = freqData.length
+    let barWidth = (alignment == 'bottom') ? 4 : (1 / 2)
+    let barHeight, x = 2, spacing = 3, step = 1
+    //barWidth = (cWidth / (dataLen * 3))
 
-    for (var i = 0; i < dataLen; i++) {
-        //if( (x + barWidth + spacing) >= WIDTH) break
+    let freqCnt = 0
+    const limit = (alignment == 'bottom') ? 100 : 188
+    for (var i = 0; i < dataLen; i = i + step) {
 
-        barHeight = freqData[i] / 255 * HEIGHT
+        //if( (x + barWidth + spacing) >= cWidth) break
+        step = (i >= (dataLen / 3) && i <= (dataLen * 3 / 4)) ? 1 : 2
+        //数据量控制一下，减少点CPU占用
+
+        if (++freqCnt >= limit) break
+
+        barHeight = freqData[i] / 255 * cHeight
         barHeight = barHeight > 0 ? barHeight : 1
 
         canvasCtx.fillStyle = spectrumColor
         canvasCtx.strokeStyle = stroke
-        canvasCtx.shadowBlur = stroke
-        canvasCtx.shadowColor = stroke
+        //canvasCtx.shadowBlur = 1
+        //canvasCtx.shadowColor = stroke
 
-        //roundedRect(canvasCtx, x, HEIGHT - barHeight, barWidth, barHeight, 5)
-        let y = (HEIGHT - barHeight) //alignment => bottom
+        //roundedRect(canvasCtx, x, cHeight - barHeight, barWidth, barHeight, 5)
+        let y = (cHeight - barHeight) //alignment => bottom
         if (alignment == 'top') y = 0
-        else if (alignment == 'center') y = (HEIGHT - barHeight) / 2
+        else if (alignment == 'center') y = (cHeight - barHeight) / 2
 
         canvasCtx.fillRect(x, y, barWidth, barHeight)
         if (barHeight > 0) canvasCtx.strokeRect(x, y, barWidth, barHeight)
@@ -537,35 +625,44 @@ const drawSpectrum = (canvas, freqData, alignment) => {
     }
 }
 
-const drawGridSpectrum = (canvas, freqData, alignment) => {
-    spectrumColor = getCurrentThemeHighlightColor()
-    stroke = spectrumColor
-    const WIDTH = canvas.width, HEIGHT = canvas.height
+/*
+const drawGridSpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) => {
+    alignment = alignment || 'bottom'
+
+    const { width: cWidth, height: cHeight } = canvas
     const canvasCtx = canvas.getContext("2d")
 
-    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT)
+    canvasCtx.clearRect(0, 0, cWidth, cHeight)
 
     canvasCtx.fillStyle = 'transparent'
-    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
+    canvasCtx.fillRect(0, 0, cWidth, cHeight)
 
     if (!freqData || freqData.length < 1) return
-    let barWidth = 6, barHeight, cellHeight = 2, x = 2, hspacing = 2, vspacing = 1
+    const dataLen = freqData.length
 
-    for (var i = 0; i < 100; i++) {
-        if ((x + barWidth + hspacing) >= WIDTH) break
+    let barWidth = 6.5, barHeight, cellHeight = 3, x = 2,
+        hspacing = 2, vspacing = 1, step = 1
 
-        barHeight = freqData[i] / 255 * HEIGHT
+    let freqCnt = 0
+    for (var i = 0; i < dataLen; i = i + step) {
+        if ((x + barWidth + hspacing) >= cWidth) break
+        //step = i >= (dataLen / 2) && i <= (dataLen * 2 / 3) ? 1 : 2
+
+        //数据量控制一下，减少点CPU占用
+        if (++freqCnt >= 88) break
+
+        barHeight = freqData[i] / 255 * cHeight
         barHeight = barHeight > 0 ? barHeight : cellHeight
         const cellSize = Math.floor(barHeight / (cellHeight + vspacing))
 
         canvasCtx.fillStyle = spectrumColor
         canvasCtx.strokeStyle = stroke
-        canvasCtx.shadowBlur = stroke
-        canvasCtx.shadowColor = stroke
+        //canvasCtx.shadowBlur = 1
+        //canvasCtx.shadowColor = stroke
 
         for (var j = 0; j < cellSize; j++) {
             const barHeight = j * (cellHeight + vspacing)
-            let y = HEIGHT - barHeight //alignment => bottom
+            let y = cHeight - barHeight //alignment => bottom
             if (alignment == 'top') y = barHeight
             else if (alignment == 'center') y = y / 2
 
@@ -576,52 +673,137 @@ const drawGridSpectrum = (canvas, freqData, alignment) => {
         x += barWidth + hspacing
     }
 }
+*/
+
+let flipBarHeights = []
+const drawFlippingSpectrum = (canvas, { freqData, spectrumColor, stroke }) => {
+    const { width: cWidth, height: cHeight } = canvas
+
+    const canvasCtx = canvas.getContext("2d")
+    canvasCtx.clearRect(0, 0, cWidth, cHeight)
+
+    canvasCtx.fillStyle = 'transparent'
+    canvasCtx.fillRect(0, 0, cWidth, cHeight)
+
+    if (!freqData || freqData.length < 1) return
+    const dataLen = freqData.length
+    let barWidth = 4, barHeight = null, x = 2, spacing = 3, step = 2
+    //barWidth = (cWidth / (dataLen * 3))
+    const flipBarHeight = 1, flipStep = 1
+
+    let freqCnt = 0
+    for (var i = 0; i < dataLen; i = i + step) {
+        //数据量控制一下，减少点CPU占用
+        if (++freqCnt >= 100) break
+        //if( (x + barWidth + spacing) >= cWidth) break
+        //step = i >= (dataLen / 2) && i <= (dataLen * 3 / 4) ? 1 : 2
+
+        barHeight = freqData[i] / 255 * cHeight
+        barHeight = barHeight > 0 ? barHeight : 1
+
+        //roundedRect(canvasCtx, x, cHeight - barHeight, barWidth, barHeight, 5)
+        const y = (cHeight - barHeight) //alignment => bottom
+        const gradient = canvasCtx.createLinearGradient(x, y, x + barWidth, y)
+        gradient.addColorStop(0, spectrumColor)
+        gradient.addColorStop(0.5, `${spectrumColor}cb`)
+        gradient.addColorStop(1, `${spectrumColor}66`)
+
+        canvasCtx.fillStyle = gradient || spectrumColor
+        canvasCtx.strokeStyle = gradient || stroke
+        //canvasCtx.shadowBlur = 1
+        //canvasCtx.shadowColor = gradient || stroke
+
+        canvasCtx.fillRect(x, y, barWidth, barHeight)
+        if (barHeight > 0) canvasCtx.strokeRect(x, y, barWidth, barHeight)
+
+        //顶部跳块
+        //未初始化时，设置默认值
+        flipBarHeights[i] = flipBarHeights[i] || flipBarHeight
+        const minFlipHeight = barHeight + flipBarHeight + 1
+        const dropHeight = (flipBarHeights[i] - flipStep)
+        //const heightGap = minFlipHeight - flipBarHeights[i]
+        const flipWeight = 15
+        const maxFlipHeight = barHeight > 1 ? barHeight + flipBarHeight * flipWeight : 0
+
+        flipBarHeights[i] = dropHeight >= minFlipHeight ? dropHeight : maxFlipHeight
+
+        //偷懒，不做下落过程的其他过渡色啦
+        let flipBarColor = dropHeight >= minFlipHeight ? `${spectrumColor}88` : `${spectrumColor}aa`
+        flipBarColor = dropHeight > (barHeight + flipBarHeight * 5 + 1) ? flipBarColor : `${spectrumColor}66`
+
+        canvasCtx.fillStyle = flipBarColor
+        canvasCtx.strokeStyle = flipBarColor
+
+        const flipY = (cHeight - flipBarHeights[i])
+        canvasCtx.fillRect(x, flipY, barWidth, flipBarHeight)
+        canvasCtx.strokeRect(x, flipY, barWidth, flipBarHeight)
+
+        x += barWidth + spacing
+    }
+}
 
 const drawCanvasSpectrum = () => {
     const canvas = document.querySelector(".spectrum-canvas")
-    if (!canvas) return
-    const index = spectrumIndex.value
-    let alignment = 'bottom'
-    switch (index) {
-        case 1:
-        case 3:
-            drawGridSpectrum(canvas, cachedSpectrumFreqData, alignment)
-            break
-        case 2:
-            alignment = 'center'
-        default:
-            drawSpectrum(canvas, cachedSpectrumFreqData, alignment)
-            break
+    if (canvas) {
+        const index = spectrumIndex.value
+        let alignment = 'bottom'
+        switch (index) {
+            case 0:
+                drawEmptySpectrum(canvas, { ...spectrumParams, alignment })
+                break
+            case 1:
+                drawSpectrum(canvas, { ...spectrumParams, alignment })
+                break
+            /*
+            case 2:
+                drawGridSpectrum(canvas, { ...spectrumParams, alignment })
+                break
+            case 3:
+                alignment = 'center'
+                drawSpectrum(canvas, { ...spectrumParams, alignment })
+                break
+            */
+            case 2:
+                drawFlippingSpectrum(canvas, spectrumParams)
+                break
+            default:
+                if (!hasExDrawSpectrumHandlers() || index < 0) return setSpectrumIndex(0)
+                const exSpectrumIndex = Math.max((index - 3), 0)
+                return drawExSpectrum(canvas, { ...spectrumParams, alignment }, exSpectrumIndex)
+                    .catch(error => {
+                        if (error == 'noHandler') setSpectrumIndex(0)
+                        else console.log(error)
+                    })
+        }
     }
 }
 
 //获取视频信息 
-const getVideoDetail = (id, platform) => {
+const getVideoDetail = (video) => {
     return new Promise((resolve, reject) => {
+        const { platform, mv, id } = video
+        if (!id || !mv) return reject('noId')
         if (!platform) return reject('noService')
         const vendor = getVendor(platform)
-        if (!vendor || !vendor.videoDetail) {
-            return reject('noService')
-        }
-        const quality = null
-        vendor.videoDetail(id, quality).then(result => {
-            if (!result || isBlank(result.url)) {
-                return reject('noUrl')
-            }
+        if (!vendor || !vendor.videoDetail) return reject('noService')
+
+        const _id = (mv || id)
+        vendor.videoDetail(_id, video).then(result => {
+            if (!result || isBlank(result.url)) return reject('noUrl')
             resolve(result)
         })
     })
 }
 
+//TODO 貌似Electron Bug：主窗口刷新后，MediaSession无法重新关联
 const setupCurrentMediaSession = async () => {
     if ("mediaSession" in navigator) {
-        const track = currentVideo.value || currentTrack.value
-        if (!track) return
+        const track = currentVideo.value || currentTrack.value || { title: '听你想听，爱你所爱' }
         const { title, cover } = track
         //TODO 本地歌曲可能使用在线封面，会导致数据不一致
         // 暂时忽略，仍然使用旧封面，不去尝试进行更新，得不偿失
         let coverSrc = cover
-        if (cover && cover.startsWith(IMAGE_PROTOCAL.prefix)) {
+        if (cover && cover.startsWith(ImageProtocal.prefix)) {
             if (ipcRenderer) coverSrc = await ipcRenderer.invoke('open-image-base64', cover)
         }
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -630,7 +812,19 @@ const setupCurrentMediaSession = async () => {
             album: Track.albumName(track),
             artwork: [{
                 src: coverDefault(coverSrc),
+                sizes: "240x240",
+                type: "image/png",
+            }, {
+                src: coverDefault(coverSrc),
+                sizes: "300x300",
+                type: "image/png",
+            }, {
+                src: coverDefault(coverSrc),
                 sizes: "500x500",
+                type: "image/png",
+            }, {
+                src: coverDefault(coverSrc),
+                sizes: "1000x1000",
                 type: "image/png",
             }]
         })
@@ -645,16 +839,15 @@ const setupCurrentMediaSession = async () => {
 EventBus.on('radio-play', traceRecentTrack)
 EventBus.on('radio-state', ({ state, track, currentTime, radio }) => {
     checkFavoritedState()
-
     switch (state) {
-        case PLAY_STATE.PLAYING:
+        case PlayState.PLAYING:
             setPlaying(true)
             setupCurrentMediaSession()
             break
-        case PLAY_STATE.PAUSE:
+        case PlayState.PAUSE:
             setPlaying(false)
             break
-        case PLAY_STATE.PLAY_ERROR:
+        case PlayState.PLAY_ERROR:
             setPlaying(false)
             onPlayerErrorRetry({ track, currentTime, radio })
             break
@@ -670,8 +863,9 @@ EventBus.on('track-changed', track => {
             playTrackDirectly(track)
         }
     }, async (reason) => {
-        if (reason == 'noUrl') { //TODO
-            if (!isVipTransferEnable.value || isLocalMusic(track.platform)
+        if (reason == 'noUrl' || reason == 'noService') { //TODO
+            const { platform } = track
+            if (!isVipTransferEnable.value || isLocalMusic(platform)
                 || Playlist.isFMRadioType(track)) {
                 handleUnplayableTrack(track)
                 return
@@ -693,6 +887,9 @@ EventBus.on('track-changed', track => {
                 }
             })
         }
+    }).catch(error => {
+        console.log(error)
+        handleUnplayableTrack(track)
     })
 })
 EventBus.on('track-play', track => {
@@ -701,31 +898,32 @@ EventBus.on('track-play', track => {
     //loadLyric(track)
 })
 
-EventBus.on('track-error', onPlayerErrorRetry)
 EventBus.on('track-state', ({ state, track, currentTime }) => {
     //播放刚开始时，更新MediaSession
-    if (playState.value == PLAY_STATE.INIT && state == PLAY_STATE.PLAYING) {
+    if ((playState.value == PlayState.INIT
+        || playState.value == PlayState.LOADED)
+        && state == PlayState.PLAYING) {
         setupCurrentMediaSession()
         resetAutoSkip()
     }
 
     setPlayState(state)
     switch (state) {
-        case PLAY_STATE.INIT:
+        case PlayState.INIT:
             resetPlayState(true)
             checkFavoritedState()
             break
-        case PLAY_STATE.PLAYING:
+        case PlayState.PLAYING:
             setPlaying(true)
             break
-        case PLAY_STATE.PAUSE:
+        case PlayState.PAUSE:
             setPlaying(false)
             break
-        case PLAY_STATE.END:
+        case PlayState.END:
             playNextTrack()
             break
-        case PLAY_STATE.LOAD_ERROR:
-        case PLAY_STATE.PLAY_ERROR:
+        case PlayState.LOAD_ERROR:
+        case PlayState.PLAY_ERROR:
             setPlaying(false)
             onPlayerErrorRetry({ track, currentTime })
             break
@@ -744,7 +942,7 @@ const resetPlayState = (ignore) => {
     mmssCurrentTime.value = '00:00'
     mmssPreseekTime.value = null
     progressState.value = 0
-    if (!ignore) setPlayState(PLAY_STATE.NONE)
+    if (!ignore) setPlayState(PlayState.NONE)
 
     setProgressSeekingState(false)
 }
@@ -763,8 +961,13 @@ EventBus.on('track-pos', secs => {
     progressState.value = duration > 0 ? (currentTime / duration) : 0
 })
 
-EventBus.on("track-spectrumData", freqData => {
-    cachedSpectrumFreqData = freqData
+EventBus.on("track-spectrumData", ({ freqData, freqBinCount, sampleRate, analyser }) => {
+    const spectrumColor = getCurrentThemeHighlightColor()
+    const canvasBgColor = getCurrentThemeContentBgColor()
+    Object.assign(spectrumParams, {
+        freqData, freqBinCount, sampleRate, analyser,
+        spectrumColor, stroke: spectrumColor, canvasBgColor,
+    })
     //简约布局、可视化播放页
     if (isSimpleLayout.value || (playingViewShow.value && playingViewThemeIndex.value == 1)) {
         drawCanvasSpectrum()
@@ -790,7 +993,7 @@ const seekTrack = (percent) => {
     } else { //非播放状态
         markTrackSeekPending(percent)
         //播放歌曲
-        if (playState.value == PLAY_STATE.PAUSE) {
+        if (playState.value == PlayState.PAUSE) {
             togglePlay()
         } else {
             playTrackDirectly(currentTrack.value)
@@ -823,17 +1026,32 @@ const isTrackSeekable = computed(() => {
 })
 
 //播放MV
-const playMv = (video, failText) => {
-    const { platform, mv } = video
-    if (!mv || !platform) return
-    getVideoDetail(mv, platform).then(result => {
-        playVideo({ ...video, ...result })
-        traceRecentTrack(video)
-    }, reason => showFailToast(failText || '当前MV无法播放'))
+const playMv = (video, failText, text) => {
+    if (!video || !video.mv) return
+    failText = (failText || '当前MV无法播放')
+    getVideoDetail(video).then(result => {
+        showToast(text || '即将为您播放MV', () => {
+            playVideo({ ...video, ...result }, failText)
+            traceRecentTrack(video)
+        }, 666)
+    }, async error => {
+        if (hasExVideoPlayUrlHandlers()) {
+            const result = await getExVideoPlayUrl(video)
+            if (result && !isBlank(result.url)) {
+                const { url } = result
+                return showToast(text || '即将为您播放MV', () => {
+                    playVideo({ ...video, url }, failText)
+                    traceRecentTrack(video)
+                }, 666)
+            }
+        }
+        console.log(error)
+        showFailToast(failText)
+    })
 }
 
 //video => { title, cover, url }
-const playVideo = async (video) => {
+const playVideo = async (video, failText) => {
     try {
         //是否需要暂停音频播放并挂起
         const playing = isPlaying()
@@ -846,7 +1064,7 @@ const playVideo = async (video) => {
         playVideoNow(video)
         setupCurrentMediaSession()
     } catch (error) {
-        showFailToast('当前视频无法播放')
+        showFailToast(failText || '当前视频无法播放')
     }
 }
 
@@ -862,13 +1080,28 @@ EventBus.on('video-stop', resumeTrackPendingPlay)
 
 //应用启动时，恢复歌曲信息
 const restoreTrack = (callback) => {
-    bootstrapTrack(currentTrack.value, true).then(track => {
+    if (isDevEnv()) console.log('[ RESTORE TRACK ]')
+
+    const _callback = (track) => {
         EventBus.emit("track-restore", track)
-        if (callback && typeof (callback) == 'function') callback()
-    }).catch(error => {
-        if (isDevEnv()) console.log(error)
-        if (callback && typeof (callback) == 'function') callback()
-    })
+        if (pendingPlay.value && Track.hasUrl(track)) {
+            seekTrack(pendingPlayPercent.value || 0)
+            setPendingPlayPercent(0)
+            if (!playing.value) {
+                togglePlay()
+                setPendingPlay(false)
+            }
+        }
+        tryCall(callback, track)
+    }
+
+    const track = currentTrack.value
+    bootstrapTrack(track, true)
+        .then(track => tryCall(_callback, track))
+        .catch(error => {
+            if (isDevEnv()) console.log(error)
+            tryCall(_callback, track)
+        })
 }
 
 //歌曲收藏
@@ -922,6 +1155,13 @@ const checkFavoritedState = () => {
 EventBus.on("userProfile-reset", checkFavoritedState)
 EventBus.on("track-refreshFavoritedState", checkFavoritedState)
 
+const quickSearch = () => {
+    visitSearch(LESS_MAGIC_CODE).then(() => {
+        const keywordInputEl = document.querySelector('.search-bar .keyword')
+        if (keywordInputEl) keywordInputEl.focus()
+    })
+}
+
 //注册ipcRenderer消息监听器
 const registryIpcRendererListeners = () => {
     if (!ipcRenderer) return
@@ -930,49 +1170,50 @@ const registryIpcRendererListeners = () => {
         //TODO 视频播放中，暂时不允许中断
         if (videoPlayingViewShow.value) return
         switch (action) {
-            case TRAY_ACTION.RESTORE:
+            case TrayAction.RESTORE:
                 setupTray()
                 break
-            case TRAY_ACTION.PLAY:
-            case TRAY_ACTION.PAUSE:
+            case TrayAction.PLAY:
+            case TrayAction.PAUSE:
                 togglePlay()
                 break
-            case TRAY_ACTION.PLAY_PREV:
+            case TrayAction.PLAY_PREV:
                 playPrevTrack()
                 break
-            case TRAY_ACTION.PLAY_NEXT:
+            case TrayAction.PLAY_NEXT:
                 playNextTrack()
                 break
-            case TRAY_ACTION.HOME:
+            case TrayAction.HOME:
                 visitHome()
                 setupTray()
                 break
-            case TRAY_ACTION.USERHOME:
+            case TrayAction.USERHOME:
                 visitUserHome()
                 setupTray()
                 break
-            case TRAY_ACTION.SETTING:
+            case TrayAction.SETTING:
                 visitSetting()
                 setupTray()
                 break
-            case TRAY_ACTION.DESKTOP_LYRIC_OPEN:
+            case TrayAction.DESKTOP_LYRIC_OPEN:
                 setDesktopLyricShow(true, true)
                 break
-            case TRAY_ACTION.DESKTOP_LYRIC_CLOSE:
+            case TrayAction.DESKTOP_LYRIC_CLOSE:
                 setDesktopLyricShow(false, true)
                 break
-            case TRAY_ACTION.DESKTOP_LYRIC_LOCK:
-            case TRAY_ACTION.DESKTOP_LYRIC_UNLOCK:
+            case TrayAction.DESKTOP_LYRIC_LOCK:
+            case TrayAction.DESKTOP_LYRIC_UNLOCK:
                 postMessageToDesktopLryic('s-desktopLyric-lockState')
                 break
-            case TRAY_ACTION.DESKTOP_LYRIC_PIN:
-            case TRAY_ACTION.DESKTOP_LYRIC_UNPIN:
+            case TrayAction.DESKTOP_LYRIC_PIN:
+            case TrayAction.DESKTOP_LYRIC_UNPIN:
                 postMessageToDesktopLryic('s-desktopLyric-pinState')
                 break
         }
     })
 
     //全局快捷键
+    ipcRenderer.on('globalShortcut-visitShortcutKeys', () => EventBus.emit('route-visitShortcutKeys'))
     ipcRenderer.on('globalShortcut-togglePlay', togglePlay)
     ipcRenderer.on('globalShortcut-switchPlayMode', switchPlayMode)
     ipcRenderer.on('globalShortcut-playPrev', playPrevTrack)
@@ -985,6 +1226,13 @@ const registryIpcRendererListeners = () => {
     ipcRenderer.on('globalShortcut-toggleLyricToolbar', () => {
         if (playingViewShow.value) toggleLyricToolbar()
     })
+    ipcRenderer.on('globalShortcut-resetSetting', () => {
+        EventBus.emit('app-resetSetting')
+    })
+    ipcRenderer.on('globalShortcut-quickSearch', () => quickSearch())
+    ipcRenderer.on('globalShortcut-visitThemes', () => visitThemes())
+    ipcRenderer.on('globalShortcut-visitModulesSetting', () => visitModulesSetting())
+    ipcRenderer.on('globalShortcut-visitPlugins', () => visitPlugins())
 
     //其他事件
     ipcRenderer.on('app-desktopLyric-showSate', (event, isShow) => {
@@ -996,6 +1244,27 @@ const registryIpcRendererListeners = () => {
             EventBus.emit('desktopLyric-messagePort', messagePort)
         })
         ipcRenderer.send('app-messagePort-pair')
+    })
+    ipcRenderer.on('dnd-saveToLocal-done', (event, { file, name, type, noDragIcon }) => {
+        const typeMappings = {
+            image: {
+                name: '图片',
+            },
+            lyric: {
+                name: '歌词'
+            },
+            audio: {
+                name: '歌曲',
+                extra: name
+            },
+            video: {
+                name: '视频',
+                extra: name
+            }
+        }
+        const { name: typeName, extra } = (typeMappings[type] || { name: '文件' })
+        const _extra = extra ? `<br/>${extra}` : ''
+        showToast(`${typeName}已下载${_extra}`)
     })
 }
 registryIpcRendererListeners()
@@ -1064,6 +1333,20 @@ EventBus.on('setting-syncToDesktopLyric', data => {
     postMessageToDesktopLryic('s-setting-sync', toRaw(data))
 })
 
+//TODO
+const reloadApp = () => {
+    showToast('即将为您刷新播放器')
+    if (playing.value) setPendingPlay(true)
+    setPendingPlayPercent(progressState.value)
+    setTimeout(() => {
+        if (ipcRenderer) ipcRenderer.send('app-reload')
+    }, 1888)
+}
+
+/*
+EventBus.on('app-removePlugin', reloadApp)
+*/
+
 //设置音频输出设备
 const setupOutputDevices = () => {
     navigator.mediaDevices.enumerateDevices().then(devices => {
@@ -1075,6 +1358,95 @@ const setupOutputDevices = () => {
         if (index < 0) setAudioOutputDeviceId(audioOutputDevices[0].deviceId)
         else setupAudioOutputDevice()
     })
+}
+
+
+//拖拽保存 - 图片、歌词、歌曲
+//应用场景：播放页、歌曲列表
+const getPreferredDndSavePath = ({ platform, url }) => {
+    let savePath = getDndSavePath() || useDownloadsPath()
+    if (isLocalMusic(platform) && !isBlank(url)) { //本地歌曲默认下载到：歌曲所在目录
+        const _url = url.replace(FILE_PREFIX, '')
+        const index = _url.lastIndexOf('/')
+        savePath = _url.slice(0, index)
+    }
+    return savePath
+}
+
+const dndSaveCover = async (event, item) => {
+    if (!isDndSaveEnable.value) return
+    if (event) event.preventDefault()
+    if (!startDrag) return showFailToast('当前操作异常')
+    item = item || currentTrack.value
+    if (!Track.hasCover(item)) return
+
+    const dndSavePath = getPreferredDndSavePath(currentTrack.value)
+    if (!dndSavePath) return showFailToast('当前操作异常')
+
+    const normalName = Track.normalName(item)
+    const file = `${dndSavePath}/${normalName}.png`
+    const { cover } = item
+    startDrag({ file, type: 'image', url: cover })
+}
+
+const dndSaveLyric = async (event) => {
+    if (!isDndSaveEnable.value) return
+    if (!currentTrack.value) return
+    if (event) event.preventDefault()
+    if (!startDrag) return showFailToast('当前操作异常')
+
+    const dndSavePath = getPreferredDndSavePath(currentTrack.value)
+    if (!dndSavePath) return showFailToast('当前操作异常')
+
+    const normalName = Track.normalName(currentTrack.value)
+    const file = `${dndSavePath}/${normalName}.lrc`
+    const { lyric } = currentTrack.value
+    const data = Lyric.stringify(lyric)
+    startDrag({ file, type: 'lyric', data })
+}
+
+const dndSaveTrack = async (event, track) => {
+    if (!isDndSaveEnable.value) return
+    //if (event) event.preventDefault()
+    track = toRaw(track)
+    if (!track) return
+    if (!startDrag) return showFailToast('当前操作异常')
+
+    const dndSavePath = getPreferredDndSavePath(track)
+    if (!dndSavePath) return showFailToast('当前操作异常')
+
+    const { platform } = track
+    if (isLocalMusic(platform)) return showFailToast('当前为本地歌曲')
+    if (Playlist.isFMRadioType(track)) return
+
+    if (!Track.hasUrl(track)) { //TODO 网络请求，操作响应有些滞后
+        await bootstrapTrackWithTransfer(track)
+    }
+    if (!Track.hasUrl(track) && !track.exurl) return showFailToast('当前歌曲无法下载')
+    const { url, exurl } = track
+
+    const normalName = Track.normalName(track)
+    const suffix = Track.suffix(track) || '.mp3'
+    const file = `${dndSavePath}/${normalName}${suffix}`
+    startDrag({ file, name: normalName, type: 'audio', url: (url || exurl), useDefaultIcon: true })
+}
+
+const dndSaveVideo = async (event, video) => {
+    if (!isDndSaveEnable.value) return
+    if (event) event.preventDefault()
+    video = toRaw(video)
+    if (!video) return
+    if (!startDrag) return showFailToast('当前操作异常')
+
+    const dndSavePath = getPreferredDndSavePath(video)
+    if (!dndSavePath) return showFailToast('当前操作异常')
+
+    if (!Track.hasUrl(video)) return showFailToast('当前视频无法下载')
+    const { title, url } = video
+
+    const suffix = '.mp4'
+    const file = `${dndSavePath}/${title}${suffix}`
+    startDrag({ file, name: title, type: 'video', url })
 }
 
 onMounted(() => {
@@ -1096,6 +1468,7 @@ watch(queueTracksSize, (nv, ov) => {
 
 watch(playing, (nv, ov) => {
     if (ipcRenderer) ipcRenderer.send('app-playState', nv)
+    if (!nv && spectrumIndex.value == 3) drawCanvasSpectrum()
 })
 
 /*
@@ -1112,12 +1485,6 @@ watch(theme, () => {
     }
     postMessageToDesktopLryic('s-theme-apply', toRaw(getCurrentTheme()))
 }, { deep: true })
-
-/*
-watch(videoPlayingViewShow, (nv, ov) => {
-    if (!nv) resumeTrackPendingPlay()
-})
-*/
 
 //TODO
 watch(playingIndex, (nv, ov) => resetTrackRetry())
@@ -1144,6 +1511,12 @@ provide('player', {
     mmssPreseekTime,
     isTrackSeekable,
     progressSeekingState,
+    dndSaveCover,
+    dndSaveLyric,
+    dndSaveTrack,
+    dndSaveVideo,
+    quickSearch,
+    reloadApp,
 })
 </script>
 

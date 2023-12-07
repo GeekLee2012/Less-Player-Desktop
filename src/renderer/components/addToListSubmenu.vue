@@ -178,7 +178,7 @@ onMounted(() => initData())
 
 EventBus.on("addToListSubmenu-init", ({ mode, dataType, callback }) => {
     const total = initData(mode, dataType)
-    if (callback && typeof (callback) == 'function') callback({ total })
+    if (callback && (typeof callback == 'function')) callback({ total })
 })
 </script>
 

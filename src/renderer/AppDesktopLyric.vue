@@ -378,7 +378,7 @@ const setupLyricSetting = (needResize) => {
     desktopLyricRef.value.style.setProperty(key, value)
   }
 
-  if (typeof (needResize) == 'boolean') {
+  if (typeof needResize == 'boolean') {
     sendLyricLayoutStateToMain(needResize)
     setupDesktopLyricAutoSize(needResize)
   }

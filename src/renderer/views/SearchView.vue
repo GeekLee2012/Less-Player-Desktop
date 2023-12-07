@@ -1,14 +1,18 @@
 <script setup>
-import { computed, onActivated, onMounted, ref, shallowRef, watch } from 'vue';
+import { computed, inject, onActivated, onMounted, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+import EventBus from '../../common/EventBus';
 import { useSearchStore } from '../store/searchStore';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { usePlatformStore } from '../store/platformStore';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
-import { useAppCommonStore } from '../store/appCommonStore';
-import EventBus from '../../common/EventBus';
-import { usePlatformStore } from '../store/platformStore';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
+import { LESS_MAGIC_CODE } from '../../common/Constants';
+import { toTrimString } from '../../common/Utils';
+
 
 
 
@@ -16,22 +20,19 @@ const props = defineProps({
     keyword: String
 })
 
-const { platforms, tabs, activeTab,
+const { platforms, tabs, activeTab, activeTabCode,
     currentPlatformIndex, tabTipText
 } = storeToRefs(useSearchStore())
 const { setActiveTab,
     setCurrentPlatformIndex,
     updateTabTipText,
-    isSongsTab,
-    isPlaylistsTab,
-    isAlbumsTab,
-    isArtistsTab,
-    isVideosTab,
     currentVender,
-    currentPlatform
+    currentPlatform,
+    updateTabs,
+    getTabIndex,
 } = useSearchStore()
 const { hideAllCtxMenus } = useAppCommonStore()
-const { isKuGou, isLocalMusic } = usePlatformStore()
+const { isLocalMusic, isAllSongsTab, isPlaylistsTab, isAlbumsTab, isArtistsTab, isVideosTab, } = usePlatformStore()
 
 
 const currentTabView = shallowRef(null)
@@ -40,15 +41,18 @@ let offset = 0, limit = 50, page = 1
 const isLoading = ref(false)
 const videoStyle = ref(false)
 const setVideoStyle = (value) => videoStyle.value = value
+const setLoading = (value) => isLoading.value = value
+const back2TopBtnRef = ref(null)
 
 
-const setLoading = (value) => {
-    isLoading.value = value
-}
+const computedKeyword = computed(() => {
+    //忽略魔法字符
+    return (toTrimString(props.keyword) == LESS_MAGIC_CODE) ? '' : props.keyword
+})
 
-const visitTab = (index, force) => {
+const visitTab = (index, code, force) => {
     if (!force && (index < 0 || activeTab.value == index)) return
-    setActiveTab(index)
+    setActiveTab(index, code)
     loadTab()
 }
 
@@ -67,7 +71,7 @@ const loadSongs = async () => {
     do {
         result = await vendor.searchSongs(props.keyword, offset, limit, page)
     } while (!result && retry++ <= 3)
-    if (!isSongsTab() || !result) return
+    if (!isAllSongsTab(activeTabCode.value) || !result) return
     if (currentPlatform() != result.platform) return
     updateTabData(result.data)
     setLoading(false)
@@ -82,7 +86,7 @@ const loadPlaylists = async () => {
     do {
         result = await vendor.searchPlaylists(props.keyword, offset, limit, page)
     } while (!result && retry++ <= 3)
-    if (!isPlaylistsTab() || !result) return
+    if (!isPlaylistsTab(activeTabCode.value) || !result) return
     if (currentPlatform() != result.platform) return
     updateTabData(result.data)
     setLoading(false)
@@ -97,7 +101,7 @@ const loadAlbums = async () => {
     do {
         result = await vendor.searchAlbums(props.keyword, offset, limit, page)
     } while (!result && retry++ <= 3)
-    if (!isAlbumsTab() || !result) return
+    if (!isAlbumsTab(activeTabCode.value) || !result) return
     if (currentPlatform() != result.platform) return
     updateTabData(result.data)
     setLoading(false)
@@ -112,7 +116,7 @@ const loadArtists = async () => {
     do {
         result = await vendor.searchArtists(props.keyword, offset, limit, page)
     } while (!result && retry++ <= 3)
-    if (!isArtistsTab() || !result) return
+    if (!isArtistsTab(activeTabCode.value) || !result) return
     if (currentPlatform() != result.platform) return
     updateTabData(result.data)
     setLoading(false)
@@ -128,7 +132,7 @@ const loadVideos = async () => {
     do {
         result = await vendor.searchVideos(props.keyword, offset, limit, page)
     } while (!result && retry++ <= 3)
-    if (!isVideosTab() || !result) return
+    if (!isVideosTab(activeTabCode.value) || !result) return
     if (currentPlatform() != result.platform) return
     updateTabData(result.data)
     setLoading(false)
@@ -143,27 +147,20 @@ const resetTabView = () => {
 }
 
 const loadTab = () => {
-    setLoading(true)
     resetTabView()
+    if (!computedKeyword.value) return
+    setLoading(true)
 
-    //不支持歌手
-    if (isKuGou(currentPlatform()) && isArtistsTab()) {
-        setActiveTab(0)
-    }
-    //不支持视频
-    if (isLocalMusic(currentPlatform()) && isVideosTab()) {
-        setActiveTab(0)
-    }
-
-    if (isSongsTab()) {
+    const code = activeTabCode.value
+    if (isAllSongsTab(code)) {
         loadSongs()
-    } else if (isPlaylistsTab()) {
+    } else if (isPlaylistsTab(code)) {
         loadPlaylists()
-    } else if (isAlbumsTab()) {
+    } else if (isAlbumsTab(code)) {
         loadAlbums()
-    } else if (isArtistsTab()) {
+    } else if (isArtistsTab(code)) {
         loadArtists()
-    } else if (isVideosTab()) {
+    } else if (isVideosTab(code)) {
         loadVideos()
     }
 }
@@ -197,32 +194,47 @@ const restoreScrollState = () => {
     if (searchViewRef.value) searchViewRef.value.scrollTop = markScrollTop
 }
 
-
-const computedTabShow = computed(() => {
-    return (index) => {
-        if (isKuGou(currentPlatform()) && index == 3) return false
-        if (isLocalMusic(currentPlatform()) && index == 4) return false
-        return true
+const resetBack2TopBtn = () => {
+    if (back2TopBtnRef.value) {
+        back2TopBtnRef.value.setScrollTarget(searchViewRef.value)
     }
+}
+
+EventBus.on('modules-toggleSearchPlatform', () => visitTab(0, null, true))
+
+onMounted(() => {
+    updateTabs()
+    visitTab(0, null, true)
 })
 
-EventBus.on('modules-toggleSearchPlatform', () => visitTab(0, true))
-
-onMounted(() => visitTab(0, true))
 onActivated(() => {
     restoreScrollState()
+    resetBack2TopBtn()
 })
 
-watch(currentPlatformIndex, (nv, ov) => loadTab())
+watch(currentPlatformIndex, (nv, ov) => {
+    updateTabs()
+
+    //tabs被更新，需要重新检查index、code是否匹配
+    const index = activeTab
+    const code = activeTabCode.value
+    const _index = getTabIndex(code)
+    if (_index == -1) return resetTabView()
+    if (_index != index) setActiveTab(_index, code)
+
+    loadTab()
+})
 watch(activeTab, (nv, ov) => visitTab(nv))
-watch(() => props.keyword, (nv, ov) => loadTab())
+watch(() => props.keyword, (nv, ov) => {
+    loadTab()
+})
 </script>
 
 <template>
     <div id="search-view" ref="searchViewRef" @scroll="onScroll">
         <div class="header">
             <div class="keyword">
-                <b>搜 </b><span class="text content-text-highlight">{{ keyword }}</span>
+                <b>搜 </b><span class="text content-text-highlight">{{ computedKeyword }}</span>
             </div>
             <div class="platform">
                 <span class="item" :class="{ active: currentPlatformIndex == index }" v-for="(item, index) in platforms"
@@ -233,14 +245,15 @@ watch(() => props.keyword, (nv, ov) => loadTab())
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
-                    v-for="(tab, index) in tabs" @click="visitTab(index)" v-html="tab.name" v-show="computedTabShow(index)">
+                    v-for="(tab, index) in tabs" @click="visitTab(index, tab.code)" v-html="tab.name">
                 </span>
-                <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
+                <span class="tab-tip content-text-highlight" v-html="tabTipText" v-show="tabs.length > 0"></span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
-                :loading="isLoading" :videoStyle="videoStyle">
+                :isAlbumArtistSutitle="true" :loading="isLoading" :videoStyle="videoStyle">
             </component>
         </div>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 
@@ -273,8 +286,6 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 }
 
 #search-view .keyword .text {
-
-
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -283,12 +294,15 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 }
 
 #search-view .platform {
-    margin-top: 20px;
+    /*margin-top: 20px;*/
     margin-bottom: 6px;
     text-align: left;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 #search-view .platform .item {
+    margin-top: 10px;
     margin-right: 20px;
     border-radius: 10rem;
     padding: 8px 18px;
@@ -312,17 +326,19 @@ watch(() => props.keyword, (nv, ov) => loadTab())
 #search-view .tab-nav {
     display: flex;
     position: relative;
-    height: 33px;
-    margin-bottom: 3px;
+    height: 36px;
+    margin-left: 2px;
+    margin-bottom: 6px;
     border-bottom: 1px solid var(--border-color);
     border-bottom: 1px solid transparent;
 }
 
 #search-view .tab {
     font-size: var(--content-text-tab-title-size);
-    padding-left: 12px;
+    /*padding-left: 12px;
     padding-right: 12px;
-    margin-right: 15px;
+    margin-right: 15px;*/
+    margin-right: 36px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }

@@ -12,7 +12,7 @@ import { coverDefault, toTrimString } from '../../common/Utils';
 
 
 
-const { playMv } = inject('player')
+const { playMv, dndSaveTrack } = inject('player')
 const { visitPlaylist, visitRadio, visitAlbum } = inject('appRoute')
 const { showContextMenu } = inject('appCommon')
 
@@ -20,7 +20,8 @@ const { queueTracksSize } = storeToRefs(usePlayStore())
 const { playTrack, removeTrack, isCurrentTrack, togglePlay } = usePlayStore()
 const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
-const { isHighlightCtxMenuItemEnable, isPlaybackQueueMvBtnShow, } = storeToRefs(useSettingStore())
+const { isHighlightCtxMenuItemEnable, isPlaybackQueueMvBtnShow, isDndSaveEnable } = storeToRefs(useSettingStore())
+const { isLocalMusic } = usePlatformStore()
 
 
 const props = defineProps({
@@ -73,15 +74,23 @@ const onContextMenu = (event) => {
 const isMvBtnShow = computed(() => {
     return isPlaybackQueueMvBtnShow.value && props.data.mv
 })
+
+const isDraggable = computed(() => {
+    const { platform } = props.data
+    return isDndSaveEnable.value
+        && !isLocalMusic(platform)
+        && !Playlist.isFMRadioType(props.data)
+})
 </script>
 
 <template>
     <div class="playback-queue-item"
         :class="{ 'playback-queue-item-active': active, 'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data) }"
-        @dblclick="" @contextmenu="onContextMenu">
+        @dblclick="" @contextmenu="onContextMenu" :draggable="isDraggable"
+        @dragstart="(event) => dndSaveTrack(event, data)">
         <div class="item-wrap">
             <div class="left">
-                <img class="cover" v-lazy="coverDefault(data.cover)" />
+                <img class="cover" :class="{ 'obj-fit-contain': (data.coverFit == 1) }" v-lazy="coverDefault(data.cover)" />
             </div>
             <div class="right">
                 <div class="data">
@@ -189,6 +198,7 @@ const isMvBtnShow = computed(() => {
     margin-right: 8px;
     -webkit-user-drag: none;
     box-shadow: 0px 0px 1px #161616;
+    border-radius: 2px;
 }
 
 .playback-queue-item .left {
@@ -227,11 +237,10 @@ const isMvBtnShow = computed(() => {
 .playback-queue-item .title {
     width: 258px;
     width: 77%;
+    /* 
+    position: relative;
     top: 2px;
-}
-
-.playback-queue-item .bottom {
-    /*position: relative;*/
+    */
 }
 
 .playback-queue-item .artist,

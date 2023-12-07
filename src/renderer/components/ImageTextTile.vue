@@ -12,6 +12,7 @@ const props = defineProps({
     cover: String,
     title: String,
     subtitle: String,
+    extraText: String,
     color: String,
     playable: Boolean,
     playAction: Function,
@@ -20,7 +21,9 @@ const props = defineProps({
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function,
     platform: String,
-    videoStyle: Boolean
+    videoStyle: Boolean,
+    coverFit: Number,
+    singleLineTitleStyle: Boolean,
 })
 
 const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
@@ -55,14 +58,15 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     <div class="image-text-tile" :class="{
         'image-text-tile-card': isUseCardStyleImageTextTile,
         'image-text-tile-radio': isFMRadioPlatform(platform),
+        'image-text-tile-non-freefm': !isFreeFM(platform),
         'image-text-tile-color-mode': color,
         'image-text-tile-video': videoStyle
     }" @click="toggleCheck">
         <div class="cover-wrap">
             <img class="cover" v-lazy="coverDefault(cover)" v-show="!color"
-                :class="{ 'obj-fit-contain': notCardStyleFreeFM }" />
+                :class="{ 'obj-fit-contain': (coverFit == 1) }" />
             <div class="cover" v-show="color" :style="{ background: color }"></div>
-            <div class=" cover-mask" :class="{ selectable: checkbox }">
+            <div class="cover-mask" :class="{ selectable: checkbox }">
                 <div class="play-btn" v-show="playable && !checkbox" @click.stop="playAction">
                     <svg width="21" height="21" viewBox="0 0 139 139" xml:space="preserve"
                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -99,8 +103,9 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
             </picture>
             -->
         <div class="title-wrap">
-            <div class="title" v-html="title"></div>
+            <div class="title" :class="{ 'singleline-title': singleLineTitleStyle }" v-html="title"></div>
             <div class="subtitle" v-show="subtitle" v-html="subtitle"></div>
+            <div class="extra-text" v-show="extraText" v-html="extraText"></div>
         </div>
     </div>
 </template>
@@ -142,6 +147,16 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     -webkit-box-orient: vertical;
 }
 
+.image-text-tile .singleline-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    line-break: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
 .image-text-tile .title:hover {
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
@@ -150,7 +165,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 /*强制换行、截断英文单词，虽然不好看，但尽量避免文字超长，撑开并挤掉其他UI元素*/
-.image-text-tile .subtitle {
+.image-text-tile .subtitle,
+.image-text-tile .extra-text {
     width: var(--others-image-text-tile-cover-size);
     text-align: left;
     line-height: 25px;
@@ -296,9 +312,15 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 .image-text-tile-card .subtitle,*/
 .image-text-tile-card.image-text-tile-radio .title,
 .image-text-tile-card.image-text-tile-radio .subtitle,
+.image-text-tile-card.image-text-tile-radio .extra-text,
 .image-text-tile-card.image-text-tile-color-mode .title,
-.image-text-tile-card.image-text-tile-color-mode .subtitle {
+.image-text-tile-card.image-text-tile-color-mode .subtitle,
+.image-text-tile-card.image-text-tile-color-mode .extra-text {
     text-align: center;
+}
+
+.image-text-tile-card.image-text-tile-radio.image-text-tile-non-freefm:hover .cover-mask {
+    visibility: visible;
 }
 
 .image-text-tile-color-mode .title {
@@ -313,7 +335,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 .image-text-tile-video .cover,
 .image-text-tile-video .title-wrap,
 .image-text-tile-video .title,
-.image-text-tile-video .subtitle {
+.image-text-tile-video .subtitle,
+.image-text-tile-video .extra-text {
     width: calc(var(--others-image-text-tile-cover-size) * 1.36);
 }
 
@@ -330,5 +353,10 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 .image-text-tile-card.image-text-tile-video .title,
 .image-text-tile-card.image-text-tile-video .subtitle {
     width: auto;
+}
+
+.image-text-tile img[lazy=loading].obj-fit-contain,
+.image-text-tile img[lazy=error].obj-fit-contain {
+    object-fit: cover !important;
 }
 </style>

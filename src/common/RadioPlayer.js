@@ -2,7 +2,7 @@ import EventBus from '../common/EventBus';
 import Hls from 'hls.js';
 import { WebAudioApi } from './WebAudioApi';
 import { isBlank } from './Utils';
-import { PLAY_STATE } from './Constants';
+import { PlayState } from './Constants';
 
 
 
@@ -12,7 +12,7 @@ export class RadioPlayer {
     constructor(channel) {
         this.channel = channel
         this.hls = new Hls()
-        this.playState = PLAY_STATE.NONE
+        this.playState = PlayState.NONE
         this.channelChanged = false
         this.isBindHlsEvent = false
         this.webAudioApi = null
@@ -39,6 +39,7 @@ export class RadioPlayer {
             .on('volume-set', volume => player.volume(volume))
             .on('radio-stop', () => player.setChannel(null))
             .on('playbackQueue-empty', () => player.setChannel(null))
+            .on('track-changed', () => player.setChannel(null))
             .on('track-play', () => player.setChannel(null))
             .on('track-restore', channel => player.setChannel(channel))
             .on('track-updateEQ', values => player.updateEQ(values))
@@ -53,7 +54,7 @@ export class RadioPlayer {
         if (!Hls.isSupported() || !audioNode) return
         //数据异常，设置错误状态，让程序处理
         if (!this.channel || isBlank(this.channel.url)) {
-            return this.setState(PLAY_STATE.PLAY_ERROR)
+            return this.setState(PlayState.PLAY_ERROR)
         }
 
         this.hls.loadSource(this.channel.url)
@@ -64,21 +65,21 @@ export class RadioPlayer {
             const self = this
             this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 audioNode.play()
-                self.setState(PLAY_STATE.PLAYING)
+                self.setState(PlayState.PLAYING)
                 self.channelChanged = false
                 lastPlayTime = Date.now()
                 this.animationFrameCnt = 0
                 requestAnimationFrame(self._step.bind(self))
             })
             this.hls.on(Hls.Events.ERROR, function () {
-                self.setState(PLAY_STATE.PLAY_ERROR)
+                self.setState(PlayState.PLAY_ERROR)
             })
             this.isBindHlsEvent = true
         }
     }
 
     playing() {
-        return this.playState == PLAY_STATE.PLAYING
+        return this.playState == PlayState.PLAYING
     }
 
     //暂停
@@ -87,7 +88,7 @@ export class RadioPlayer {
         if (!this.playing()) return
 
         this.hls.detachMedia()
-        this.setState(PLAY_STATE.PAUSE)
+        this.setState(PlayState.PAUSE)
     }
 
     togglePlay() {
@@ -170,11 +171,13 @@ export class RadioPlayer {
         if (!this.webAudioApi) return
         this._resolvePendingSoundEffect()
         if (!this.isSpectrumRefreshEnabled()) return
-        const { analyser } = this.webAudioApi
+        const { analyser, audioCtx } = this.webAudioApi
         if (!analyser) return
-        const freqData = new Uint8Array(analyser.frequencyBinCount)
+        const { frequencyBinCount: freqBinCount } = analyser
+        const { sampleRate } = audioCtx
+        const freqData = new Uint8Array(freqBinCount)
         analyser.getByteFrequencyData(freqData)
-        this.notify('track-spectrumData', freqData)
+        this.notify('track-spectrumData', { freqData, freqBinCount, sampleRate, analyser })
     }
 
     updateEQ(values) {

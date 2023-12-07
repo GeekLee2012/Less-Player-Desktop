@@ -19,8 +19,8 @@ import EventBus from '../../common/EventBus';
 
 const { visitThemes, visitDataBackup,
     visitDataRestore, visitModulesSetting,
-    visitBatchRecents, } = inject('appRoute')
-const { showConfirm } = inject('appCommon')
+    visitBatchRecents, visitPlugins } = inject('appRoute')
+const { showConfirm, resetSetting, visitLink } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
 
@@ -40,11 +40,12 @@ const { setThemeIndex,
     toggleVipFlagShow,
     toggleCategoryBarRandom,
     togglePlaylistCategoryBarFlowBtnShow,
-    toggleListenNumShow,
+    togglePlayCountShow,
     togglePauseOnPlayingVideo,
     toggleResumePlayAfterVideo,
     toggleQuitVideoAfterEnded,
     togglePlayingWithoutSleeping,
+    togglePlayingViewUseBgCoverEffect,
     toggleStorePlayState,
     toggleStoreLocalMusic,
     toggleStoreRecentPlay,
@@ -69,6 +70,8 @@ const { setThemeIndex,
     setImageQualityIndex,
     setPaginationStyleIndex,
     setImageTextTileStyleIndex,
+    toggleDndSave,
+    setDndSavePath,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
@@ -95,6 +98,7 @@ const { setThemeIndex,
     toggleShowDialogBeforeClearFreeFM,
     toggleCheckPreReleaseVersion,
     toggleModulesSettingShortcut,
+    togglePluginsSettingShortcut,
     toggleThemesShortcut,
     toggleUserHomeShortcut,
     toggleSimpleLayoutShortcut,
@@ -120,15 +124,10 @@ const switchLayout = (index) => {
     setLayoutIndex(index)
 }
 
-//打开默认浏览器，并访问超链接
-const visitLink = (url) => {
-    if (ipcRenderer) ipcRenderer.send('visit-link', url)
-}
-
 /* 数据 - 重置 */
 const resetData = async () => {
     const ok = await showConfirm({
-        msg: '数据重置，将会清空我的主页、当前播放等全部数据，同时恢复默认设置。但不会清空本地歌曲、自由FM的数据。  确定要继续吗？'
+        msg: '数据重置，将会清空我的主页、当前播放等全部数据，并恢复默认设置。但不会清空本地歌曲、自由FM、插件等数据。  确定要继续吗？'
     })
     if (!ok) return
 
@@ -150,6 +149,7 @@ const resetData = async () => {
 }
 
 /* 数据 - 恢复默认设置 */
+/*
 const resetSettingData = async () => {
     let ok = true
     if (isShowDialogBeforeResetSetting.value) ok = await showConfirm({ msg: '确定要恢复默认设置吗？' })
@@ -163,6 +163,7 @@ const resetSettingData = async () => {
     EventBus.emit('setting-reset')
     showImportantToast("已恢复默认设置")
 }
+*/
 
 /* 通用设置 */
 const zoomTickmarks = [50, 70, 85, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
@@ -465,6 +466,12 @@ const clearSessionCache = async () => {
     }
 }
 
+const selectDir = async () => {
+    if (!ipcRenderer) return
+    const result = await ipcRenderer.invoke('open-dirs')
+    if (result) setDndSavePath(result[0])
+}
+
 const changeAudioOutputDevices = (event) => {
     const deviceId = event.target.value
     setAudioOutputDeviceId(deviceId)
@@ -590,9 +597,15 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </span>
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="sec-title">功能管理：</span>
                         <SvgTextButton text="前往设置" :leftAction="visitModulesSetting">
+                        </SvgTextButton>
+                        <div class="tip-text spacing">提示：实验性功能</div>
+                    </div>
+                    <div class="last">
+                        <span class="sec-title">插件管理：</span>
+                        <SvgTextButton text="前往设置" :leftAction="visitPlugins">
                         </SvgTextButton>
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
@@ -640,7 +653,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     </div>
                     <div>
                         <span class="cate-subtitle">歌单显示播放量：</span>
-                        <ToggleControl @click="toggleListenNumShow" :value="track.listenNumShow">
+                        <ToggleControl @click="togglePlayCountShow" :value="track.playCountShow">
                         </ToggleControl>
                     </div>
                     <div>
@@ -690,6 +703,26 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         <ToggleControl @click="togglePlayingWithoutSleeping" :value="track.playingWithoutSleeping">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：不会影响系统正常熄屏、锁屏</div>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">播放页封面图片背景效果：</span>
+                        <ToggleControl @click="togglePlayingViewUseBgCoverEffect"
+                            :value="track.playingViewUseBgCoverEffect">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：实验性功能</div>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">封面图片、歌词等拖拽保存：</span>
+                        <ToggleControl @click="toggleDndSave" :value="track.dndSave">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：实验性功能</div>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">拖拽保存位置：</span>
+                        <div class="dir-input-ctl">
+                            <input class="text-input-ctl" v-model="track.dndSavePath" placeholder="默认为用户目录下的Downloads" />
+                            <div class="select-btn" @click="selectDir">选择</div>
+                        </div>
                     </div>
                     <div class="tip-text">提示：当前应用，更新频度，是指每多少个动画帧进行一次更新操作<br>
                         频度值越小，动画可能越流畅，而CPU占用则会越高<br>
@@ -935,6 +968,11 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </ToggleControl>
                     </div>
                     <div>
+                        <span class="cate-subtitle">插件管理：</span>
+                        <ToggleControl @click="togglePluginsSettingShortcut" :value="navigation.pluginsSettingShortcut">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">主题页：</span>
                         <ToggleControl @click="toggleThemesShortcut" :value="navigation.themesShortcut">
                         </ToggleControl>
@@ -1109,7 +1147,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                                 <div class="text">还原</div>
                             </template>
                         </SvgTextButton>
-                        <SvgTextButton text="恢复默认设置" :leftAction="resetSettingData" class="spacing">
+                        <SvgTextButton text="恢复默认设置" :leftAction="resetSetting" class="spacing">
                         </SvgTextButton>
                         <SvgTextButton text="重置" :leftAction="resetData" class="spacing">
                             <template #left-img>
@@ -1691,5 +1729,35 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
     margin-bottom: -2px;
     padding-right: 6px;
     cursor: pointer;
+}
+
+#setting-view .center .dir-input-ctl {
+    display: flex;
+    align-items: center;
+}
+
+#setting-view .center .dir-input-ctl .text-input-ctl {
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+}
+
+#setting-view .center .dir-input-ctl .select-btn {
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-icon-color);
+    width: 68px;
+    height: 37.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--button-icon-text-btn-bg-color);
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    font-size: var(--content-text-tip-text-size);
+    cursor: pointer;
+}
+
+/* 别扭挖坑的方式 */
+#setting-view .container-win-style .dir-input-ctl .select-btn {
+    height: 40px;
 }
 </style>

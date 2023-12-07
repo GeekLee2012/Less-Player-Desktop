@@ -1,36 +1,15 @@
 import { defineStore } from "pinia";
 import { usePlatformStore } from "./platformStore";
+import { toLowerCaseTrimString } from "../../common/Utils";
 
-
-
-const ALL_TABS = [{
-    code: 'songs',
-    name: '歌曲',
-    text: '约找到0首歌曲'
-}, {
-    code: 'playlists',
-    name: '歌单',
-    text: '约找到0个歌单'
-}, {
-    code: 'albums',
-    name: '专辑',
-    text: '约找到0张专辑'
-}, {
-    code: 'artists',
-    name: '歌手',
-    text: '约找到0个歌手'
-}, {
-    code: 'videos',
-    name: '视频',
-    text: '约找到0个视频'
-}]
 
 export const useSearchStore = defineStore('search', {
     state: () => ({
         keyword: '',
         currentPlatformIndex: 0,
-        tabs: ALL_TABS,
+        tabs: [],
         activeTab: -1,
+        _activeTabCode: null,
         tabTipText: '',
         foundSongs: [],
         foundPlaylists: [],
@@ -44,15 +23,17 @@ export const useSearchStore = defineStore('search', {
             return activePlatforms('search')
         },
         activeTabCode(state) {
+            if(this._activeTabCode) return this._activeTabCode
             return this.activeTab < 0 ? '' : this.tabs[this.activeTab].code
-        }
+        },
     },
     actions: {
         setKeyword(keyword) {
             this.keyword = keyword
         },
-        setActiveTab(index) {
+        setActiveTab(index, code) {
             this.activeTab = index
+            this._activeTabCode = code
         },
         setCurrentPlatformIndex(index) {
             this.currentPlatformIndex = index
@@ -67,7 +48,7 @@ export const useSearchStore = defineStore('search', {
         },
         updateTabTipText(length) {
             const index = this.activeTab
-            this.tabTipText = index < 0 ? '' : this.tabs[index].text.replace('0', length)
+            this.tabTipText = index < 0 ? '' : (this.tabs[index].stext || this.tabs[index].text).replace('0', length)
         },
         currentPlatform() {
             const index = this.currentPlatformIndex
@@ -78,24 +59,19 @@ export const useSearchStore = defineStore('search', {
             const platform = this.currentPlatform()
             return getVendor(platform)
         },
-        isSongsTab() {
-            return this.activeTabCode == 'songs'
-        },
-        isPlaylistsTab() {
-            return this.activeTabCode == 'playlists'
-        },
-        isAlbumsTab() {
-            return this.activeTabCode == 'albums'
-        },
-        isArtistsTab() {
-            return this.activeTabCode == 'artists'
-        },
-        isVideosTab() {
-            return this.activeTabCode == 'videos'
-        },
         resetSearch() {
             this.setActiveTab(0)
             this.resetAll()
+        },
+        updateTabs() {
+            const code = this.currentPlatform()
+            const { getSearchTabs } = usePlatformStore()
+            const tabs = getSearchTabs(code)
+            this.tabs.length = 0
+            if(tabs && tabs.length > 0) this.tabs.push(...tabs)
+        },
+        getTabIndex(code) {
+            return this.tabs.findIndex(tab => (tab.code == code))
         }
     }
 })

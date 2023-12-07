@@ -132,7 +132,8 @@ export const useSettingStore = defineStore('setting', {
             //MV标识、MV播放按钮
             playbackQueueMvBtnShow: true,
             //歌单播放量
-            listenNumShow: false,
+            //listenNumShow: false,
+            playCountShow: false,
             //视频播放时，自动暂停播放歌曲
             pauseOnPlayingVideo: true,
             //视频播放退出后，自动继续播放歌曲
@@ -159,7 +160,12 @@ export const useSettingStore = defineStore('setting', {
             //普通分页，本地歌曲每页记录数
             limitPerPageForLocalPlaylist: 30,
             //高亮当前右键菜单对应的歌曲
-            highlightCtxMenuItem: true
+            highlightCtxMenuItem: true,
+            //拖拽保存
+            dndSave: false, 
+            dndSavePath: null, 
+            //播放页封面图片背景效果
+            playingViewUseBgCoverEffect: false,
         },
         search: {
             //场景化提示
@@ -253,6 +259,8 @@ export const useSettingStore = defineStore('setting', {
             radioModeShortcut: true,
             //功能管理按钮
             modulesSettingShortcut: false,
+            //插件管理按钮
+            pluginsSettingShortcut: true,
             //主题按钮
             themesShortcut: true,
             //我的主页按钮
@@ -283,6 +291,11 @@ export const useSettingStore = defineStore('setting', {
         /* 快捷键 - 默认值，只读 */
         keysDefault: {
             data: [{
+                id: 'visitShortcutKeys',
+                name: '查看快捷键设置',
+                binding: 'K',
+                gBinding: 'Alt + Shift + K'
+            }, {
                 id: 'togglePlay',
                 name: '播放 / 暂停',
                 binding: 'Space',
@@ -332,6 +345,36 @@ export const useSettingStore = defineStore('setting', {
                 name: '打开 / 关闭歌词设置',
                 binding: 'L',
                 gBinding: 'Alt + Shift + L'
+            }, {
+                id: 'visitThemes',
+                name: '打开主题页',
+                binding: 'T',
+                gBinding: 'Alt + Shift + T'
+            }, {
+                id: 'visitUserHome',
+                name: '打开我的主页',
+                binding: 'H',
+                gBinding: 'Alt + Shift + H'
+            }, {
+                id: 'visitModulesSetting',
+                name: '打开功能管理',
+                binding: 'G',
+                gBinding: 'Alt + Shift + G'
+            }, {
+                id: 'visitPlugins',
+                name: '打开插件管理',
+                binding: 'U',
+                gBinding: 'Alt + Shift + U'
+            }, {
+                id: 'quickSearch',
+                name: '快速打开搜索',
+                binding: 'S',
+                gBinding: 'Ctrl + Alt + Shift + S'
+            }, {
+                id: 'resetSetting',
+                name: '恢复默认设置',
+                binding: 'Ctrl + P',
+                gBinding: 'Ctrl + Alt + Shift + P'
             }]
         },
         /* 网络 */
@@ -404,8 +447,9 @@ export const useSettingStore = defineStore('setting', {
         isUseWindowsWinCtl() {
             return this.common.winCtlStyle == 2
         },
-        isListenNumShow() {
-            return this.track.listenNumShow
+        isPlayCountShow() {
+            //listenNumShow为旧版本名称
+            return this.track.playCountShow || this.track.listenNumShow
         },
         lyricMetaPos() {
             return this.lyric.metaPos
@@ -427,6 +471,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isModulesSettingShortcutEnable() {
             return this.navigation.modulesSettingShortcut
+        },
+        isPluginsSettingShortcutEnable() {
+            return this.navigation.pluginsSettingShortcut
         },
         isThemesShortcutEnable() {
             return this.navigation.themesShortcut
@@ -557,6 +604,12 @@ export const useSettingStore = defineStore('setting', {
         },
         selectedAudioOutputDeviceId() {
             return this.track.audioOutputDeviceId
+        },
+        isDndSaveEnable() {
+            return this.track.dndSave
+        },
+        isPlayingViewUseBgCoverEffect() {
+            return this.track.playingViewUseBgCoverEffect
         }
     },
     actions: {
@@ -594,6 +647,11 @@ export const useSettingStore = defineStore('setting', {
             const { getTheme } = useThemeStore()
             const { type, index } = this.theme
             return getTheme(type, index).content.highlightColor
+        },
+        getCurrentThemeContentBgColor() {
+            const { getTheme } = useThemeStore()
+            const { type, index } = this.theme
+            return getTheme(type, index).content.bgColor
         },
         setWindowZoom(value) {
             if (!value) return
@@ -665,6 +723,15 @@ export const useSettingStore = defineStore('setting', {
         setPaginationStyleIndex(index) {
             this.common.paginationStyleIndex = index
         },
+        toggleDndSave() {
+            this.track.dndSave = !this.track.dndSave
+        },
+        getDndSavePath() {
+            return this.track.dndSavePath
+        },
+        setDndSavePath(path) {
+            this.track.dndSavePath = path
+        },
         setTrackQualityIndex(index) {
             this.track.quality.index = index
         },
@@ -702,8 +769,13 @@ export const useSettingStore = defineStore('setting', {
         togglePlaybackQueueMvBtnShow() {
             this.track.playbackQueueMvBtnShow = !this.track.playbackQueueMvBtnShow
         },
+        /*
         toggleListenNumShow() {
             this.track.listenNumShow = !this.track.listenNumShow
+        },
+        */
+        togglePlayCountShow() {
+            this.track.playCountShow = !this.track.playCountShow
         },
         toggleVipFlagShow() {
             this.track.vipFlagShow = !this.track.vipFlagShow
@@ -788,6 +860,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleModulesSettingShortcut() {
             this.navigation.modulesSettingShortcut = !this.navigation.modulesSettingShortcut
+        },
+        togglePluginsSettingShortcut() {
+            this.navigation.pluginsSettingShortcut = !this.navigation.pluginsSettingShortcut
         },
         toggleThemesShortcut() {
             this.navigation.themesShortcut = !this.navigation.themesShortcut
@@ -1128,7 +1203,10 @@ export const useSettingStore = defineStore('setting', {
         },
         setupAudioOutputDevice() {
             EventBus.emit('outputDevice-setup', this.track.audioOutputDeviceId)
-        }
+        },
+        togglePlayingViewUseBgCoverEffect() {
+            this.track.playingViewUseBgCoverEffect = !this.track.playingViewUseBgCoverEffect
+        },
     },
     persist: {
         enabled: true,

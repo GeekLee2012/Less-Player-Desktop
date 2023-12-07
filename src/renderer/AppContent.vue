@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, shallowRef, inject, provide, computed } from 'vue';
+import { onMounted, shallowRef, inject, provide, computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
@@ -7,10 +7,13 @@ import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
+import EventBus from '../common/EventBus';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
-import EventBus from '../common/EventBus';
-import { isWinOS, toLowerCaseTrimString, useIpcRenderer, useUseCustomTrafficLight } from '../common/Utils';
+import {
+  useIpcRenderer, useUseCustomTrafficLight, isWinOS,
+  isBlank, toLowerCaseTrimString,
+} from '../common/Utils';
 
 
 
@@ -18,14 +21,18 @@ const { visitSetting, visitSearch,
   visitRadio, visitThemes,
   visitModulesSetting, visitDataBackup,
   visitDataRestore, visitUserHome,
-  visitFreeVideoCreate, visitRecents } = inject('appRoute')
+  visitFreeVideoCreate, visitRecents,
+  visitPlugins, } = inject('appRoute')
+const { quickSearch } = inject('player')
 const ipcRenderer = useIpcRenderer()
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const currentAppLayout = shallowRef(null)
 
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
-  getWindowZoom, isSimpleLayout, isUseAutoWinCtl, isUseWindowsWinCtl } = storeToRefs(useSettingStore())
+  getWindowZoom, isSimpleLayout,
+  isUseAutoWinCtl, isUseWindowsWinCtl,
+  isShowDialogBeforeResetSetting } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
   setupAppGlobalProxy } = useSettingStore()
@@ -36,13 +43,13 @@ const { togglePlay, switchPlayMode,
 const { playingViewShow, videoPlayingViewShow,
   playingViewThemeIndex, commonNotificationText,
   commonNotificationShow, searchBarExclusiveAction,
-  searchPlaceHolderIndex, } = storeToRefs(useAppCommonStore())
+  searchPlaceHolderIndex } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
   hideAllCategoryViews, showToast, hideLyricToolbar,
   hideSoundEffectView, hideCustomThemeEditView,
   hideColorPickerToolbar, resetExploreModeActiveStates,
-  setMaxScreen, } = useAppCommonStore()
+  setMaxScreen, showImportantToast } = useAppCommonStore()
 
 
 const isReservedPath = (path) => {
@@ -53,12 +60,16 @@ const isReservedPath = (path) => {
 const deepInState = (state, cache) => {
   for (let path in state) {
     const value = state[path]
-    if (value && typeof (value) === 'object' && !Array.isArray(value)) {
+    if (value && (typeof value === 'object') && !Array.isArray(value)) {
       deepInState(state[path], cache[path])
     } else if (cache) {
       state[path] = (isReservedPath(path) ? state[path] : cache[path])
     }
   }
+}
+
+const visitShortcutKeys = () => {
+  searchDefault('@查看快捷键')
 }
 
 //注册默认应用级别快捷键
@@ -90,6 +101,21 @@ const registryDefaultLocalKeys = () => {
     if (videoPlayingViewShow.value) return
     if (playingViewShow.value || isSimpleLayout.value) toggleLyricToolbar()
   }, 'keyup')
+  // 恢复默认设置
+  Mousetrap.bind(['ctrl+p'], resetSetting, 'keyup')
+  Mousetrap.bind(['command+p'], resetSetting, 'keyup')
+  // 打开主题页
+  Mousetrap.bind(['t'], visitThemes, 'keyup')
+  // 打开我的主页
+  Mousetrap.bind(['h'], visitUserHome, 'keyup')
+  // 打开功能管理
+  Mousetrap.bind(['g'], visitModulesSetting, 'keyup')
+  // 打开插件管理
+  Mousetrap.bind(['u'], visitPlugins, 'keyup')
+  // 快速打开搜索
+  Mousetrap.bind(['s'], quickSearch, 'keyup')
+  // 快速查看快捷键
+  Mousetrap.bind(['k'], visitShortcutKeys, 'keyup')
 }
 
 //TODO 清理设置，解决不同版本导致的数据不一致问题
@@ -109,6 +135,21 @@ const cleanupSetting = () => {
     */
   }
   store.$patch({ blackHole: Math.random() * 100000000 })
+}
+
+// 恢复默认设置
+const resetSetting = async () => {
+  let ok = true
+  if (isShowDialogBeforeResetSetting.value) ok = await showConfirm({ msg: '确定要恢复默认设置吗？' })
+  if (!ok) return
+  const settingStore = useSettingStore()
+  settingStore.$reset()
+  const storeKeys = ['setting']
+  storeKeys.forEach(key => {
+    localStorage.removeItem(key)
+  })
+  EventBus.emit('setting-reset')
+  showImportantToast("已恢复默认设置")
 }
 
 const setupCache = () => {
@@ -261,20 +302,23 @@ EventBus.on("app-elementAlignCenter", value => {
 })
 EventBus.on('setting-restore', restoreSetting)
 EventBus.on('setting-reset', restoreSetting)
+EventBus.on('route-visitShortcutKeys', visitShortcutKeys)
 
 //直接在setup()时初始化，不需要等待其他生命周期
 initialize()
 
-let isConfirmDialogShowing = false
+let isConfirmDialogShowing = ref(false)
+const setConfirmDialogShowing = (value) => isConfirmDialogShowing.value = value
+
 const showConfirm = async ({ title, msg }) => {
-  if (!ipcRenderer || isConfirmDialogShowing) return false
-  isConfirmDialogShowing = true
+  if (!ipcRenderer || isConfirmDialogShowing.value) return false
+  setConfirmDialogShowing(true)
   hideAllCtxMenus()
   const ok = await ipcRenderer.invoke('show-confirm', {
     title: title || '确认',
     msg
   })
-  isConfirmDialogShowing = false
+  setConfirmDialogShowing(false)
   return ok
 }
 
@@ -326,6 +370,11 @@ const searchDefault = async (keyword) => {
     || keyword.toLowerCase() === 'video') {
     visitFreeVideoCreate()
     return
+  } else if (keyword === '插件管理'
+    || keyword === '插件'
+    || keyword.toLowerCase() === 'plugins') {
+    visitPlugins()
+    return
   } else {
     visitSetting()
   }
@@ -345,11 +394,10 @@ const searchAction = computed(() => {
 })
 
 const searchPlaceHolders = [
-  '现在想听点什么 ~', '搜一搜本地歌曲 ~',
-  '试搜一下“@FM”吧 ~', '试试关键字"@"开头吧 ~',
-  '试搜一下“@主题”吧 ~', '试搜一下“@备份”吧 ~',
-  '试搜一下“@还原”吧 ~', '试搜一下“@主页”吧 ~',
-  '试搜一下“@功能”吧 ~'
+  '现在想听点什么 ~', '搜一搜本地歌曲 ~', '试试关键字"@"开头吧 ~',
+  '@FM', '@主题', '@备份',
+  '@还原', '@主页', '@功能',
+  '@插件'
 ]
 const searchBarPlaceholder = computed(() => {
   const index = searchPlaceHolderIndex.value
@@ -403,6 +451,22 @@ onMounted(() => {
   registryDefaultLocalKeys()
 })
 
+const onDrop = async (event) => {
+  event.preventDefault()
+  if (!ipcRenderer) return
+
+  const { files } = event.dataTransfer
+  const urls = Array.from(files).map(file => (file.path))
+  ipcRenderer.send('app-dnd-parsePlay', urls)
+}
+
+//打开默认浏览器，并访问超链接
+const visitLink = (url) => {
+  if (ipcRenderer && !isBlank(url)) ipcRenderer.send('visit-link', url)
+}
+
+EventBus.on('app-resetSetting', resetSetting)
+
 //通用API
 provide('appCommon', {
   showConfirm,
@@ -410,11 +474,13 @@ provide('appCommon', {
   searchAction,
   searchBarPlaceholder,
   useWindowsStyleWinCtl,
+  resetSetting,
+  visitLink,
 })
 </script>
 
 <template>
-  <div id="app-content">
+  <div id="app-content" @dragover="e => e.preventDefault()" @drop="onDrop">
     <keep-alive :max="2">
       <component :is="currentAppLayout" :class="{
         'winos-style': isWinOS(),

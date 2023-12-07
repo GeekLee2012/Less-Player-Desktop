@@ -31,10 +31,12 @@ const targetPlaying = () => {
     //queueItemsWrap.scrollTop = maxScroll * (playingIndex.value / (queueTracksSize.value - 1))
 
     //算法2：基于offsetTop，实现真正（播放器内）垂直居中
-    const queueItem = queueItems[playingIndex.value]
-    const queueItemHeight = queueItem.clientHeight
     const { clientHeight } = document.documentElement
-    const destScrollTop = queueItem.offsetTop - (clientHeight / 2 - queueItemsWrap.offsetTop) + queueItemHeight / 2
+    const queueItem = queueItems[playingIndex.value]
+    const { clientHeight: itemHeight, offsetTop: itemOffsetTop } = queueItem
+    const { offsetTop: itemWrapOffsetTop } = queueItemsWrap
+    const adjustHeight = itemHeight ? itemHeight / 2 : 0
+    const destScrollTop = itemOffsetTop - (clientHeight / 2 - itemWrapOffsetTop) + adjustHeight
     smoothScroll(queueItemsWrap, destScrollTop, 314, 8)
 }
 

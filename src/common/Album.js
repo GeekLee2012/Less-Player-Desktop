@@ -24,9 +24,7 @@ export class Album {
     }
 
     addTrack(track) {
-        if (!this.data) {
-            this.data = []
-        }
+        this.data = this.data || []
         this.data.push(track)
     }
 
@@ -34,4 +32,26 @@ export class Album {
         return album && album.data && album.data.length > 0
     }
 
+    static artistName(album) {
+        let artistName = ''
+        if (album && album.artist && album.artist.length > 0) {
+            const names = []
+            album.artist.forEach(e => names.push(e.name));
+            artistName = names.join('、')
+            artistName = artistName.slice(0, artistName.length)
+        }
+        return artistName
+    }
+
+    static firstArtistName(album) {
+        return album ? Album.artistName(album).split('、')[0].split('&')[0] : ''
+    }
+
+    static hasCover(album) {
+        if (!album || !album.cover) return false
+        album.cover = toTrimString(album.cover)
+        if (album.cover.length < 1) return false
+        if (album.cover == 'default_cover.png') return false
+        return true
+    }
 }

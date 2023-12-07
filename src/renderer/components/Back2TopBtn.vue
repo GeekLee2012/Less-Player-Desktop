@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { useSettingStore } from '../store/settingStore';
 import { smoothScroll } from '../../common/Utils';
 
@@ -13,7 +13,7 @@ const props = defineProps({
 
 const { layout } = storeToRefs(useSettingStore())
 
-let threshold = (props.threshold || 1024 * 2.33)
+let threshold = (props.threshold || 1024)
 let scrollTarget = props.target
 const isBtnShow = ref(false)
 const maxScrollTopThreshold = 1024 * 5.20
@@ -29,12 +29,10 @@ const setScrollTarget = (target) => {
 }
 
 const showAsNeeded = () => {
-    const scrollTop = scrollTarget.scrollTop
-    const scrollHeight = scrollTarget.scrollHeight
-    const clientHeight = scrollTarget.clientHeight
+    const { scrollTop, scrollHeight, clientHeight } = scrollTarget
     const maxScrollTop = scrollHeight - clientHeight
 
-    if (maxScrollTop < maxScrollTopThreshold) return
+    //if (maxScrollTop < maxScrollTopThreshold) return
     setBtnShow(scrollTop >= threshold)
 }
 

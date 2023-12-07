@@ -1,44 +1,69 @@
 //import analyze from 'rgbaster';
 import CryptoJS from 'crypto-js';
+import forge from "node-forge";
+import JSEncrypt from 'jsencrypt';
 import { pinyin } from 'pinyin-pro';
 import { DEFAULT_COVER_BASE64 } from './Constants';
 
 
-const tryCall = (call, fallbackValue) => {
+export const tryCall = (fn, params, onSuccess, onError) => {
     try {
-        return call()
+        if(fn && (typeof fn == 'function')) {
+            const result = fn(params)
+            if (onSuccess && (typeof onSuccess == 'function')) return onSuccess(result)
+        }
     } catch (error) {
-        //Do Nothing
+        console.log(error)
+        if (onError && (typeof onError == 'function')) return onError(params)
     }
-    return fallbackValue
+}
+
+export const tryCallDefault = (fn, params, defaultValue) => {
+    return tryCall(fn, params, result => (result), (params) => (defaultValue))
 }
 
 export const useIpcRenderer = () => {
-    return tryCall(() => (electronAPI.ipcRenderer), null)
+    return tryCallDefault(() => (electronAPI.ipcRenderer))
+}
+
+export const useStartDrag = () => {
+    return tryCallDefault(() => (electronAPI.startDrag))
 }
 
 export const isMacOS = () => {
-    return tryCall(() => (electronAPI.isMacOS), null)
+    return tryCallDefault(() => (electronAPI.isMacOS))
 }
 
 export const isWinOS = () => {
-    return tryCall(() => (electronAPI.isWinOS), null)
+    return tryCallDefault(() => (electronAPI.isWinOS))
 }
 
 export const useUseCustomTrafficLight = () => {
-    return tryCall(() => (electronAPI.useCustomTrafficLight), false)
+    return tryCallDefault(() => (electronAPI.useCustomTrafficLight))
 }
 
 export const isDevEnv = () => {
-    return tryCall(() => (electronAPI.isDevEnv), null)
+    return tryCallDefault(() => (electronAPI.isDevEnv))
+}
+
+export const useDownloadsPath = () => {
+    return tryCallDefault(() => (electronAPI.downloadsPath))
+}
+
+export const useAudioExts = () => {
+    return tryCallDefault(() => (electronAPI.AUDIO_EXTS))
+}
+
+export const useExtraAudioExts = () => {
+    return tryCallDefault(() => (electronAPI.EXTRA_AUDIO_EXTS))
 }
 
 export const useMessagePort = () => {
-    return tryCall(() => (electronAPI.messagePort), null)
+    return tryCallDefault(() => (electronAPI.messagePort))
 }
 
 export const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz'
-export const ALPHABET_NUMS = ALPHABETS + '01234567890'
+export const ALPHABET_NUMS = `${ALPHABETS}01234567890`
 
 /** 随机字符串
  * @param src 限定组成元素的字符串，如：ABCDEFGHIJKLMNOPQRSTUVWSYZ
@@ -69,7 +94,7 @@ export const toLowerCaseTrimString = (value) => {
 }
 
 export const toUpperCaseTrimString = (value) => {
-    return toTrimString(value).toLowerCase()
+    return toTrimString(value).toUpperCase()
 }
 
 export const isBlank = (text) => {
@@ -118,7 +143,7 @@ export const utf8Stringify = (wordArray) => {
 
 export const base64Stringify = (wordArray) => {
     if (!wordArray) return null
-    if (typeof (wordArray) == 'string') wordArray = utf8Parse(wordArray)
+    if (typeof wordArray == 'string') wordArray = utf8Parse(wordArray)
     return CryptoJS.enc.Base64.stringify(wordArray)
 }
 
@@ -146,6 +171,98 @@ export const hmacMd5 = (text, key) => {
     return text ? CryptoJS.HmacMD5(text, key).toString() : null
 }
 
+export const sha1 = (text) => {
+    return text ? CryptoJS.SHA1(text).toString() : null
+}
+
+export const sha256 = (text) => {
+    return text ? CryptoJS.SHA256(text).toString() : null
+}
+
+export const sha512 = (text) => {
+    return text ? CryptoJS.SHA512(text).toString() : null
+}
+
+export const rsaEncrypt = (src, publicKey, modulus) => {
+    src = toTrimString(src)
+    const m = new forge.jsbn.BigInteger(modulus, 16)
+    const k = new forge.jsbn.BigInteger(publicKey, 16)
+    const s = new forge.jsbn.BigInteger(forge.util.bytesToHex(src), 16)
+
+    return s.modPow(k, m).toString(16).padStart(256, '0')
+}
+
+/*
+export const rsaEncryptDefault = (src, publicKey) => {
+    const publicObj = forge.pki.publicKeyFromPem(publicKey)
+    const bytes = publicObj.encrypt(src)
+    //转换成 bytes 对象之后输出不同类型的结果
+    const encrypted = forge.util.encode64(bytes)
+    return encrypted
+}
+*/
+
+export const rsaEncryptDefault = (src, publicKey) => {
+    const encrypt = new JSEncrypt()
+    encrypt.setPublicKey(publicKey)
+    return encrypt.encrypt(src)
+}
+
+const toCryptoMode = (mode) => {
+    if(!mode) return CryptoJS.mode.CBC
+    if(typeof mode !== 'string') return mode
+    mode = toLowerCaseTrimString(mode)
+    if(mode.endsWith('-cbc') || mode === 'cbc') return CryptoJS.mode.CBC
+    if(mode.endsWith('-cfb') || mode === 'cfb') return CryptoJS.mode.CFB
+    if(mode.endsWith('-ecb') || mode === 'ecb') return CryptoJS.mode.ECB
+    if(mode.endsWith('-ctr') || mode === 'ctr') return CryptoJS.mode.CTR
+    if(mode.endsWith('-ofb') || mode === 'ofb') return CryptoJS.mode.OFB
+    return CryptoJS.mode.CBC
+}
+
+const toCryptoPadding = (padding) => {
+    if(!padding) return CryptoJS.pad.Pkcs7
+    if(typeof padding !== 'string') return padding
+    padding = toLowerCaseTrimString(padding)
+    if(padding === 'pkcs7') return CryptoJS.pad.Pkcs7
+    if(padding === 'nopadding') return CryptoJS.pad.NoPadding
+    if(padding === 'ansix923') return CryptoJS.pad.AnsiX923
+    if(padding === 'iso10126') return CryptoJS.pad.Iso10126
+    if(padding === 'iso97971') return CryptoJS.pad.Iso97971
+    if(padding === 'zeropadding') return CryptoJS.pad.ZeroPadding
+    return CryptoJS.pad.Pkcs7
+}
+
+export const aesEncrypt = (src, mode, key, iv, padding) => {
+    src = utf8Parse(src)
+    mode = toCryptoMode(mode)
+    key = utf8Parse(key)
+    iv = utf8Parse(iv)
+    padding = toCryptoPadding(padding)
+    const params = { mode, iv }
+    if(padding) Object.assign(params, { padding})
+    return CryptoJS.AES.encrypt(src, key, params)
+}
+
+export const aesEncryptDefault = (src, mode, key, iv, padding) => {
+    return aesEncrypt(src, mode, key, iv, padding).toString()
+}
+
+export const aesEncryptHexText = (src, mode, key, iv, padding) => {
+    const buffer = aesEncrypt(src, mode, key, iv, padding)
+    return hexStringify(buffer.ciphertext)
+}
+
+export const aesDecryptText = (src, mode, secKey, iv, padding) => {
+    src = base64Stringify(hexParse(src))
+    mode = toCryptoMode(mode)
+    secKey = utf8Parse(secKey)
+    iv = utf8Parse(iv)
+    padding = toCryptoPadding(padding) 
+    const buffer = CryptoJS.AES.decrypt(src, secKey, { mode, iv, padding })
+    return buffer.toString()
+}
+
 //参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
 const easeInOutQuad = (currentTime, startValue, changeValue, duration) => {
     currentTime /= duration / 2
@@ -157,6 +274,7 @@ const easeInOutQuad = (currentTime, startValue, changeValue, duration) => {
 //TODO 平滑算法，基本可行，但感觉有点呆！暂时先这样吧
 export const smoothAnimation = (target, animationAlgoFn, start, dest, duration, step, updateAction, interruptAction) => {
     if (!target || !animationAlgoFn || !updateAction) return
+    if(typeof animationAlgoFn != 'function') return
     step = step || 5
     const distance = dest - start
 
@@ -164,11 +282,10 @@ export const smoothAnimation = (target, animationAlgoFn, start, dest, duration, 
     const updateAnimation = () => {
         const needInterrupt = (interruptAction && interruptAction())
         if (current > duration || needInterrupt) {
-            cancelAnimationFrame(animationFrameId)
-            return
+            return cancelAnimationFrame(animationFrameId)
         }
         let updateValue = animationAlgoFn(current, start, distance, duration)
-        if (target && typeof (updateAction) == 'function') updateAction(updateValue)
+        if (target && typeof updateAction == 'function') updateAction(updateValue)
         current += step
         cancelAnimationFrame(animationFrameId)
         animationFrameId = requestAnimationFrame(updateAnimation)
@@ -243,7 +360,7 @@ export const parseM3uText = (text, mapFn) => {
                     cover,
                     url
                 }
-                if (mapFn && typeof (mapFn) == 'function') item = mapFn(item)
+                if (mapFn && (typeof mapFn == 'function')) item = mapFn(item)
                 result.data.push(item)
                 //重置
                 title = null
@@ -299,7 +416,7 @@ export const parsePlsText = (text, mapFn) => {
                     length,
                     cover: null
                 }
-                if (mapFn && typeof (mapFn) == 'function') item = mapFn(item)
+                if (mapFn && (typeof mapFn == 'function')) item = mapFn(item)
                 result.data.push(item)
                 //重置
                 title = null
@@ -330,3 +447,10 @@ export const firstCharOfPinyin = (ch) => {
 export const coverDefault = (cover) => {
     return cover || DEFAULT_COVER_BASE64
 }
+
+export const transformUrl = (url, protocal) => {
+    url = toTrimString(url)
+    protocal = protocal || 'https'
+    if(url.includes('://')) return url
+    return `${protocal}://${url}`.replace(':////', '://')
+  }

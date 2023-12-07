@@ -24,7 +24,7 @@ const props = defineProps({
 const ipcRenderer = useIpcRenderer()
 
 const { showToast, showFailToast } = useAppCommonStore()
-const detail = reactive({ title: null, url: null, streamType: 0, tags: null, about: null, cover: null })
+const detail = reactive({ title: null, url: null, streamType: 0, tags: null, about: null, cover: null, coverFit: 0 })
 const setStreamType = (value) => Object.assign(detail, { streamType: value })
 const titleInvalid = ref(false)
 const urlInvalid = ref(false)
@@ -41,8 +41,8 @@ const loadRadio = () => {
     if (id.length < 1) return
     const radio = getFreeRadio(id)
     if (!radio) return
-    const { title, data, tags, about, cover } = radio
-    Object.assign(detail, { id, title, data, tags, about, cover })
+    const { title, data, tags, about, cover, coverFit } = radio
+    Object.assign(detail, { id, title, data, tags, about, cover, coverFit })
     if (data && data.length > 0) {
         Object.assign(detail, {
             url: data[0].url, streamType: data[0].streamType
@@ -57,7 +57,7 @@ const resetCheckStatus = () => {
 
 const submit = () => {
     resetCheckStatus()
-    const { title, url, streamType, tags, about, cover } = detail
+    const { title, url, streamType, tags, about, cover, coverFit } = detail
     if (!title || title.length < 1) {
         titleInvalid.value = true
         return
@@ -69,11 +69,11 @@ const submit = () => {
     }
     let success = false, text = null
     if (!props.id) {
-        success = addFreeRadio(title, url, streamType, tags, about, cover)
-        text = success ? '电台创建成功!' : '电台创建失败！<br>已存在相同URL的电台'
+        success = addFreeRadio(title, url, streamType, tags, about, cover, coverFit)
+        text = success ? '电台创建成功' : '电台创建失败！<br>已存在相同URL的电台'
     } else {
-        success = updateFreeRadio(props.id, title, url, streamType, tags, about, cover)
-        text = success ? '电台已保存!' : '电台无法保存！<br>当前电台可能不存在'
+        success = updateFreeRadio(props.id, title, url, streamType, tags, about, cover, coverFit)
+        text = success ? '电台已保存' : '电台无法保存！<br>当前电台可能不存在'
     }
     if (success) {
         setActionDisabled(true)
@@ -104,6 +104,10 @@ const updateCover = async () => {
     }
 }
 
+const setCoverFit = (index) => {
+    Object.assign(detail, { coverFit: index })
+}
+
 onMounted(() => loadRadio())
 
 </script>
@@ -116,8 +120,14 @@ onMounted(() => loadRadio())
         </div>
         <div class="center">
             <div>
-                <img class="cover" v-lazy="coverDefault(detail.cover)" />
+                <img class="cover" :class="{ 'obj-fit-contain': detail.coverFit == 1 }"
+                    v-lazy="coverDefault(detail.cover)" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
+                <div class="cover-fit">
+                    <span v-for="(item, index) in ['填充', '平铺']" v-html="item" class="list-item"
+                        :class="{ active: index == detail.coverFit, spacing: index > 0 }" @click="setCoverFit(index)">
+                    </span>
+                </div>
             </div>
             <div class="right">
                 <div class="form-row">
@@ -136,8 +146,8 @@ onMounted(() => loadRadio())
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }" maxlength="512"
-                            placeholder="音频流URL，仅支持http / https协议，最多支持输入512个字符" />
+                        <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }"
+                            placeholder="音频流URL，仅支持http / https协议" />
                     </div>
                 </div>
                 <div class="form-row">
@@ -227,8 +237,9 @@ onMounted(() => loadRadio())
     border-radius: 6px;
     /* border: 1px solid var(--border-left-nav-border-color); */
     box-shadow: 0px 0px 1px #161616;
-    object-fit: contain;
+    object-fit: cover;
 }
+
 
 #freefm-edit-view .center .cover-eidt-btn {
     background: var(--button-icon-text-btn-bg-color);
@@ -330,4 +341,26 @@ onMounted(() => loadRadio())
     color: var(--input-placeholder-color);
 }
 */
+
+#freefm-edit-view .cover-fit {
+    margin-top: 8px;
+}
+
+#freefm-edit-view .cover-fit .list-item {
+    padding: 6px 15px;
+    text-align: center;
+    border-radius: var(--border-list-item-border-radius);
+    border: 0px solid var(--border-color);
+    cursor: pointer;
+}
+
+#freefm-edit-view .list-item:hover {
+    background-color: var(--border-color);
+    background-color: var(--content-list-item-hover-bg-color);
+}
+
+#freefm-edit-view .list-item.active {
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color) !important;
+}
 </style>

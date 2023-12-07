@@ -1,4 +1,4 @@
-import { toTrimString } from './Utils';
+import { toLowerCaseTrimString, toTrimString } from './Utils';
 
 
 
@@ -20,35 +20,39 @@ export class Playlist {
     //本地自建歌单
     static LOCAL_PLAYLIST_ID_PREFIX = "LLP_"
 
-    constructor(id, platform, cover, title, url, about, data, total, type, listenNum) {
+    constructor(id, platform, cover, title, url, about, data, total, type, playCount) {
         this.id = id
-        this.platform = platform
+        this.platform = toLowerCaseTrimString(platform)
         this.cover = cover
         this.title = toTrimString(title)
         this.url = toTrimString(url)
         this.about = toTrimString(about)
         this.data = data || []
         this.total = total || 0
+        this.totalPage = 1
         //歌单类型：普通歌单、电台歌单、FM广播电台歌单、主播电台歌单
         this.type = type || 0
         //播放量
-        this.listenNum = listenNum
+        this.playCount = playCount
     }
 
     addTrack(track) {
+        this.data = this.data || []
         this.data.push(track)
         return this
     }
 
-    static resolveOldVersionType(item) {
-        if (item.type >= 0) {
+    static _resolveOldVersionType(item) {
+        if(!item) return item
+        const { type, isFMRadio, isRadioType } = item
+        if (type >= 0) {
             //存在type属性，直接忽略
-        } else if (item.isFMRadio) {
-            item.type = Playlist.FM_RADIO_TYPE
-        } else if (item.isRadioType) {
-            item.type = Playlist.NORMAL_RADIO_TYPE
+        } else if (isFMRadio) {
+            Object.assign(item,  { type: Playlist.FM_RADIO_TYPE })
+        } else if (isRadioType) {
+            Object.assign(item,  { type: Playlist.NORMAL_RADIO_TYPE })
         } else {
-            item.type = Playlist.NORMAL_TYPE
+            Object.assign(item,  { type: Playlist.NORMAL_TYPE })
         }
         return item
     }
@@ -56,7 +60,7 @@ export class Playlist {
     static _assertType(item, type) {
         if (!item) return false
         item.type = (item.type || Playlist.NORMAL_TYPE)
-        //item = Playlist.resolveOldVersionType(item)
+        //item = Playlist._resolveOldVersionType(item)
         return item.type === type
     }
 
@@ -81,10 +85,18 @@ export class Playlist {
     }
 
     static isCustomType(item) {
+        if(!item) return false
         const id = toTrimString(item.id)
         return id.startsWith(Playlist.CUSTOM_ID_PREFIX)
             //下面写法为兼容旧版本数据
             || (id.length == 16 && !item.platform)
     }
 
+    static hasCover(playlist) {
+        if (!playlist || !playlist.cover) return false
+        playlist.cover = toTrimString(playlist.cover)
+        if (playlist.cover.length < 1) return false
+        if (playlist.cover == 'default_cover.png') return false
+        return true
+    }
 }

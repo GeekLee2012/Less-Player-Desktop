@@ -33,13 +33,13 @@ const tabs = [{
     hasSubTabs: true
 },
 {
-    code: 'customPlaylist',
+    code: 'custom-playlist',
     name: '创建的歌单',
     text: '共0个歌单',
     hasSubTabs: false
 },
 {
-    code: 'favoriteArtists',
+    code: 'favorite-artists',
     name: '关注的歌手',
     text: '共0个歌手',
     hasSubTabs: false
@@ -51,30 +51,9 @@ const tabs = [{
     hasSubTabs: true
 }]
 
-const typeTabs = [{
-    code: 'songs',
-    name: '歌曲',
-    text: '共0首歌曲'
-},
-{
-    code: 'playlists',
-    name: '歌单',
-    text: '共0个歌单'
-},
-{
-    code: 'albums',
-    name: '专辑',
-    text: '共0张专辑'
-},
-{
-    code: 'radios',
-    name: 'FM电台',
-    text: '共0个FM电台'
-}]
-
-
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
-const { updateCurrentPlatform } = usePlatformStore()
+const { updateCurrentPlatform, getPreferTypeTabs,
+    isAllSongsTab, isPlaylistsTab, isAlbumsTab, isFMRadiosTab, } = usePlatformStore()
 const { addTracks, playNextTrack, resetQueue } = usePlayStore()
 const { playingViewShow, isUserHomeMode, routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
@@ -89,6 +68,7 @@ const { getRecentSongs, getRecentPlaylilsts,
 const { removeAllRecents } = useRecentsStore()
 const { isShowDialogBeforeClearRecents } = storeToRefs(useSettingStore())
 
+const typeTabs = getPreferTypeTabs()
 
 const currentTabView = shallowRef(null)
 const tabData = reactive([])
@@ -166,19 +146,20 @@ const switchSubTab = () => {
     currentTabView.value = null
     subTabTipText.value = ""
     const platform = currentPlatformCode.value
-    if (activeSubTab.value == 0) {
+    const { code: typeCode } = typeTabs[activeSubTab.value]
+    if (isAllSongsTab(typeCode)) {
         if (activeTab.value == 0) tabData.push(...getFavoriteSongs.value(platform))
         if (activeTab.value == 3) tabData.push(...getRecentSongs.value(platform))
         currentTabView.value = SongListControl
-    } else if (activeSubTab.value == 1) {
+    } else if (isPlaylistsTab(typeCode)) {
         if (activeTab.value == 0) tabData.push(...getFavoritePlaylilsts.value(platform))
         if (activeTab.value == 3) tabData.push(...getRecentPlaylilsts.value(platform))
         currentTabView.value = PlaylistsControl
-    } else if (activeSubTab.value == 2) {
+    } else if (isAlbumsTab(typeCode)) {
         if (activeTab.value == 0) tabData.push(...getFavoriteAlbums.value(platform))
         if (activeTab.value == 3) tabData.push(...getRecentAlbums.value(platform))
         currentTabView.value = AlbumListControl
-    } else if (activeSubTab.value == 3) {
+    } else if (isFMRadiosTab(typeCode)) {
         if (activeTab.value == 0) tabData.push(...getFavoriteRadios.value(platform))
         if (activeTab.value == 3) tabData.push(...getRecentRadios.value(platform))
         currentTabView.value = PlaylistsControl
@@ -241,8 +222,9 @@ const isAvailableSongTab = () => {
 }
 
 const resetBack2TopBtn = () => {
-    if (!back2TopBtnRef.value || !userProfileRef.value) return
-    back2TopBtnRef.value.setScrollTarget(userProfileRef.value)
+    if (back2TopBtnRef.value) {
+        back2TopBtnRef.value.setScrollTarget(userProfileRef.value)
+    }
 }
 
 const markScrollState = () => {
@@ -354,6 +336,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
                     :class="{ active: activeSubTab == index, 'content-text-highlight': activeSubTab == index }"
                     @click="visitSubTab(index)" v-html="tab.name">
                 </span>
+                <span class="tip-text" v-show="false">暂不支持本地歌曲</span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
                 :dataType="dataType" :id="dataListId">
@@ -461,15 +444,18 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
     position: relative;
     display: flex;
     height: 36px;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    margin-left: 2px;
     border-bottom: 1px solid transparent;
 }
 
 #user-profile-view .tab {
     font-size: var(--content-text-tab-title-size);
-    padding-left: 10px;
+    /*padding-left: 10px;
     padding-right: 10px;
     margin-right: 15px;
+    */
+    margin-right: 36px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
@@ -489,23 +475,31 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
     position: relative;
     display: flex;
     height: 20px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin: 12px 0px 6px 2px;
 }
 
 #user-profile-view .sub-tab {
     /*font-size: 14px;*/
     font-size: var(--content-text-subtitle-size);
     font-weight: 520;
-    padding-left: 6px;
+    /*padding-left: 6px;
     padding-right: 6px;
-    margin-right: 15px;
+    margin-right: 15px;*/
+    margin-right: 30px;
     cursor: pointer;
 }
 
 #user-profile-view .sub-tab-nav .active {
     /*color: var(--content-highlight-color);*/
     font-weight: bold;
+}
+
+#user-profile-view .sub-tab-nav .tip-text {
+    position: absolute;
+    right: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #user-profile-view .songlist {

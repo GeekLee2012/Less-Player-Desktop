@@ -16,16 +16,21 @@ const { scanDirTracks, parseTracks,
   getDownloadDir, removePath, listFiles,
   parsePlsFile, parseM3uPlaylist,
   writePlsFile, writeM3uFile,
-  IMAGE_PROTOCAL, parseImageMetaFromFile,
+  ImageProtocal, parseImageMetaFromFile,
   statPathSync, MD5, SHA1, transformPath,
+  DEFAULT_COVER_BASE64, getSimpleFileName,
+  getFileExtName,
+  walkSync,
 } = require('./common')
 
 const path = require('path')
 const Url = require('url')
+const { writeFile, mkdirSync, writeFileSync, rmSync, readdirSync } = require('fs')
 const fetch = require('electron-fetch').default
 
 
 let messagePortPair = null, messagePortChannel = null
+let appUserAgent =  null, exRequestHandlers = []
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
@@ -60,7 +65,7 @@ const startup = () => {
 
 //清理缓存
 const clearCaches = async (force) => {
-  if (!mainWin) return false
+  if (!isWindowAccessible(mainWin)) return false
   try {
     const { session } = mainWin.webContents
     const cacheSize = await session.getCacheSize()
@@ -76,10 +81,12 @@ const clearCaches = async (force) => {
   return false
 }
 
-const responseDefaultCover = async () => {
-  const response = await fetch('default_cover.png')
-  const data = await response.arrayBuffer()
-  return { mimeType: 'image/png', data }
+//当data存在时，直接返回data，完全忽略url
+//当url不存在时，直接返回data
+const fetchBuffer = async (url, data) => {
+  if(data || !url) return data
+  const response = await fetch(url)
+  return response.buffer()
 }
 
 const init = () => {
@@ -90,7 +97,8 @@ const init = () => {
     //全局快捷键
     //registryGlobalShortcuts()
     //全局UserAgent
-    app.userAgentFallback = USER_AGENTS[nextInt(USER_AGENTS.length)]
+    appUserAgent = USER_AGENTS[nextInt(USER_AGENTS.length)]
+    app.userAgentFallback = appUserAgent
     mainWin = createMainWindow()
 
     //清理缓存
@@ -127,18 +135,16 @@ const init = () => {
     })
 
     //自定义协议
-    protocol.registerBufferProtocol(IMAGE_PROTOCAL.scheme, async (request, callback) => {
-      const file = decodeURI(request.url.slice(IMAGE_PROTOCAL.prefix.length))
-      parseImageMetaFromFile(file).then(async result => {
-        if (result) {
-          const { format: mimeType, data } = result
-          callback({ mimeType, data })
-        } else {
-          callback(Buffer.from(''))
+    protocol.registerBufferProtocol(ImageProtocal.scheme, (request, callback) => {
+      const file = decodeURI(request.url.slice(ImageProtocal.prefix.length))
+      parseImageMetaFromFile(file).then(image => {
+        if (image) {
+          const { format: mimeType, data } = image
+          return callback({ mimeType, data })
         }
+        callback({ mimeType: 'image/png', data: Buffer.from(DEFAULT_COVER_BASE64, 'base64')})
       })
     })
-
   })
 
   app.on('activate', (event) => {
@@ -183,6 +189,8 @@ const init = () => {
 //全局快捷键
 const registryGlobalShortcuts = () => {
   const config = {
+    // 查看快捷键设置
+    'Alt+Shift+K': 'visitShortcutKeys',
     // 播放或暂停
     'Alt+Shift+Space': 'togglePlay',
     // 播放模式切换
@@ -201,6 +209,20 @@ const registryGlobalShortcuts = () => {
     'Alt+Shift+Q': 'togglePlaybackQueue',
     // 打开 / 关闭歌词设置
     'Alt+Shift+L': 'toggleLyricToolbar',
+    // 恢复默认设置
+    'Ctrl+Alt+Shift+P': 'resetSetting',
+    'Command+Alt+Shift+P': 'resetSetting',
+    // 快速打开搜索
+    'Control+Alt+Shift+S': 'quickSearch',
+    'Command+Alt+Shift+S': 'quickSearch',
+    // 打开主题页
+    'Alt+Shift+T': 'visitThemes',
+    // 打开我的主页
+    'Alt+Shift+H': 'visitUserHome',
+    // 打开功能管理
+    'Alt+Shift+U': 'visitModulesSetting',
+    // 打开插件管理
+    'Alt+Shift+U': 'visitPlugins',
     // 打开 开发者工具
     'Control+Alt+Shift+I': () => openDevTools(mainWin),
     'Command+Alt+Shift+I': () => openDevTools(mainWin),
@@ -211,7 +233,7 @@ const registryGlobalShortcuts = () => {
   const activeWindowValues = ['visitSetting', 'togglePlaybackQueue', 'toggleLyricToolbar']
   for (const [key, value] of Object.entries(config)) {
     globalShortcut.register(key, () => {
-      const valueType = typeof (value)
+      const valueType = typeof value
       if (valueType === 'function') {
         value()
       } else if (valueType === 'string') {
@@ -232,14 +254,14 @@ const removePendingTracks = (tracks) => {
   if (pendigTracks.length < 1) return
   //pendigTracks.length = 0
   tracks.forEach(track => {
-    const path = transformPath(track.url)
-    let index = pendigTracks.indexOf(path)
+    const _path = transformPath(track.url)
+    let index = pendigTracks.indexOf(_path)
     let count = 0
     while (index > -1) {
       if (count >= 10) break
       pendigTracks.splice(index, 1)
       index = pendigTracks.indexOf
-        (path)
+        (_path)
       ++count
     }
   })
@@ -256,27 +278,25 @@ const parseAndPlayTracks = (files) => {
   }
 }
 
+
+
 //启动时播放
 //即关联打开，播放音频文件
+const doStartupPlay = (tracks) => {
+  addToPendingTracks(tracks)
+  parseAndPlayTracks(tracks)
+  showMainWindow()
+}
+
 const handleStartupPlay = (argv) => {
-  let tracks = null
   try {
     if (isMacOS) {
       app.on('open-file', (event, path) => {
         event.preventDefault()
-
-        tracks = [path]
-        addToPendingTracks(tracks)
-        parseAndPlayTracks(tracks)
-
-        showMainWindow()
+        doStartupPlay([path])
       })
     } else {
-      tracks = argv || process.argv
-      addToPendingTracks(tracks)
-      parseAndPlayTracks(tracks)
-
-      showMainWindow()
+      doStartupPlay(argv || process.argv)
     }
   } catch (error) {
     if (isDevEnv) console.log(error)
@@ -324,7 +344,7 @@ const setupTrayMenu = () => {
 const registryGlobalListeners = () => {
   //主进程事件监听
   ipcMain.on('app-quit', () => {
-    if (mainWin && !mainWin.isDestroyed()) {
+    if (isWindowAccessible(mainWin)) {
       if (isLyricWindowShow()) {
         setupTray(true)
         mainWin.hide()
@@ -343,6 +363,8 @@ const registryGlobalListeners = () => {
     parseAndPlayTracks(pendigTracks)
   }).on('app-startup-playDone', (event, tracks) => {
     removePendingTracks(tracks)
+  }).on('app-dnd-parsePlay', (event, files) => {
+    parseAndPlayTracks(files)
   }).on('app-min', (event, isHideToTray) => {
     if (isHideToTray) {
       if (isMacOS) app.hide()
@@ -362,7 +384,7 @@ const registryGlobalListeners = () => {
     }
     sendToMainRenderer('app-max', isFullScreen)
   }).on('app-normalize', () => {
-    if (!mainWin) return
+    if (!isWindowAccessible(mainWin)) return
     if (isWinOS && mainWin.isMaximized()) {
       mainWin.unmaximize()
     } else if (mainWin.isFullScreen()) {
@@ -399,11 +421,34 @@ const registryGlobalListeners = () => {
   }).on('visit-link', (event, data) => {
     shell.openExternal(data)
   }).on('download-item', (event, { url }) => {
-    if (mainWin) mainWin.webContents.downloadURL(url)
+    if (isWindowAccessible(mainWin)) mainWin.webContents.downloadURL(url)
   }).on('download-cancel', (event, data) => {
     cancelDownload()
   }).on('path-showInFolder', (event, path) => {
     if (path) shell.showItemInFolder(path)
+  }).on('dnd-saveToLocal', async (event, { file, name, type, data, url, useDefaultIcon }) => {
+    if(!file) return
+    if(!data && !url) return 
+
+    if(!useDefaultIcon) {
+      //Electron拖拽支持文件，其他类型暂不支持
+      //此处仅为改变拖拽图标样式，并无其他意义
+      event.sender.startDrag({
+        file: path.join(__dirname, file),
+        icon: path.join(__dirname, 'dnd_icon.png')
+      })
+    }
+    
+    file = transformPath(file)
+    fetchBuffer(url, data).then(_data => {
+      writeFile(file, _data, error => {
+        if(!error) { //成功
+          sendToMainRenderer('dnd-saveToLocal-done', { file, name, type, data, url, useDefaultIcon })
+        } else {
+          console.log('[WriteError]', error)
+        }
+      })
+    })
   })
 
   ipcMain.handle('app-maxScreenState', (event, ...args) => {
@@ -533,7 +578,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-image-base64', async (event, ...args) => {
-    const file = args[0].trim().slice(IMAGE_PROTOCAL.prefix.length)
+    const file = args[0].trim().slice(ImageProtocal.prefix.length)
     const imageResult = await parseImageMetaFromFile(file)
     return imageResult ? imageResult.text : null
   })
@@ -561,7 +606,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-file', async (event, ...args) => {
-    const { title, filterExts } = args[0]
+    const { title, filterExts } = args[0] || { title: '请选择文件',filterExts: ['*'] }
     const result = await dialog.showOpenDialog(mainWin, {
       title: title || '请选择文件',
       filters: [{ name: '数据文件', extensions: filterExts || ['*'] }],
@@ -569,7 +614,14 @@ const registryGlobalListeners = () => {
     })
     if (result.canceled) return null
     const filePath = result.filePaths[0]
-    const data = readText(filePath, 'utf8')
+    const data = readText(filePath)
+    return { filePath, data }
+  })
+
+  ipcMain.handle('read-text', async (event, ...args) => {
+    const filePath = args[0]
+    if(!filePath) return
+    const data = readText(filePath)
     return { filePath, data }
   })
 
@@ -604,11 +656,11 @@ const registryGlobalListeners = () => {
 
   ipcMain.handle('find-in-page', async (event, ...args) => {
     const keyword = args[0]
-    if (mainWin) mainWin.webContents.findInPage(keyword)
+    if (isWindowAccessible(mainWin)) mainWin.webContents.findInPage(keyword)
   })
 
   ipcMain.handle('app-cacheSize', async (event, ...args) => {
-    if (!mainWin) return -1
+    if (!isWindowAccessible(mainWin)) return -1
     const { session } = mainWin.webContents
     const cacheSize = await session.getCacheSize()
     return cacheSize
@@ -616,6 +668,91 @@ const registryGlobalListeners = () => {
 
   ipcMain.handle('app-clearCaches', async (event, ...args) => {
     return await clearCaches(true)
+  })
+
+  ipcMain.handle('app-importPlugin', async (event, ...args) => {
+     //拷贝插件到当前应用数据缓存位置
+    const { filePath, data } = args[0] 
+    const originFilePath = transformPath(filePath)
+   
+    const hashName = MD5(getSimpleFileName(originFilePath))
+    const extName = getFileExtName(originFilePath)
+    const flags = isDevEnv ? 'dev-' : '' 
+    const rootName = `${flags}${hashName}`
+    const rootPath = getPluginsRootPath(rootName)
+    const main = `main.${extName}`
+    const destFilePath = `${rootPath}/${main}`
+    try {
+      writeFileSync(destFilePath, data)
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
+    return { filePath, path: rootPath, main, data }
+  })
+
+  ipcMain.handle('app-removePlugin', async (event, ...args) => {
+    const filePath = transformPath(args[0])
+    if(!filePath) return
+    const index = filePath.lastIndexOf('/')
+    if(index < 0) return 
+    const fileRoot = filePath.substring(0, index)
+    const pluginRoot = getPluginsRootPath()
+    if(!fileRoot.includes(pluginRoot)) return
+    try {
+      removePath(fileRoot)
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
+  })
+
+  ipcMain.handle('app-cleanupPlugins', async (event, ...args) => {
+    const pluginsRoot = getPluginsRootPath()
+    try {
+      const devFlags = ['dev-', '-dev']
+      readdirSync(pluginsRoot, { withFileTypes: true }).forEach(dirent => {
+        if(!dirent) return
+        const pathName = path.join(pluginsRoot, dirent.name)
+        if (dirent.isDirectory()) {
+          const hasDevFlag = (dirent.name.startsWith(devFlags[0]) || dirent.name.endsWith(devFlags[1]))
+          if((isDevEnv && hasDevFlag) 
+            || (!isDevEnv && !hasDevFlag)) {
+            removePath(pathName)
+          }
+        }
+    })
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
+  })
+
+  ipcMain.handle('app-userAgent', async (event, ...args) => {
+    return appUserAgent || USER_AGENTS[nextInt(USER_AGENTS.length)]
+  })
+
+  ipcMain.handle('app-getCookie', async (event, ...args) => {
+    const url = args[0]
+    const cookie = getCookie(url)
+    if(cookie) return cookie
+    return await fetchCookie(url)
+  })
+
+  ipcMain.handle('app-addRequestHandler', async (event, ...args) => {
+    const { id } = args[0]
+    if(!id) return 'id未设置'
+    
+    const _id = id.toString().trim()
+    const index = exRequestHandlers.findIndex(item => (item.id == _id))
+    if(index > -1) exRequestHandlers.splice(index, 1)
+    exRequestHandlers.push(args[0])
+  })
+
+  ipcMain.handle('app-removeRequestHandler', async (event, ...args) => {
+    const { id } = args[0]
+    if(!id) return '获取不到参数：id'
+
+    const _id = id.toString().trim()
+    const index = exRequestHandlers.findIndex(item => (item.id == _id))
+    if(index > -1) exRequestHandlers.splice(index, 1)
   })
 
   ipcMain.on('app-desktopLyric-toggle', (event, ...args) => {
@@ -661,7 +798,30 @@ const registryGlobalListeners = () => {
     sendToMainRenderer('app-messagePort-channel', messagePortChannel)
   }).on('app-messagePort-pair', (event, ...args) => {
     messagePortPair = setupMessagePortPair(mainWin, lyricWin)
+  }).on('app-openDevTools', (event, ...args) => {
+    openDevTools(mainWin)
+  }).on('app-closeDevTools', (event, ...args) => {
+    closeDevTools(mainWin)
+  }).on('app-reload', (event, ...args) => {
+      if(isWindowAccessible(mainWin)) {
+        mainWin.reload()
+        //mainWin.webContents.reload()
+      }
   })
+
+}
+
+const getPluginsRootPath = (dirName) => {
+  const _path = app.getPath('userData') 
+      + '/User/Plugins' 
+      + (dirName ? `/${dirName}` : '')
+  try {
+    const result = statPathSync(_path)
+    if(!result) mkdirSync(_path, { recursive: true })
+  } catch(error) {
+    if(isDevEnv) console.log(error)
+  }
+  return _path
 }
 
 const setupDesktopLyricWindowSize = (needResize) => {
@@ -738,8 +898,8 @@ const toggleLyricWindow = () => {
 //应用显示时，待执行任务
 const onReadyToShowTasks = async () => {
   //预先获取Cookie
-  const urls = ['https://www.kuwo.cn/']
-  urls.forEach(url => fetchCookie(url, true))
+  //const urls = ['https://www.kuwo.cn/']
+  //urls.forEach(url => fetchCookie(url, true))
   //其他任务
 }
 
@@ -783,13 +943,13 @@ const createMainWindow = () => {
     minWidth: width,
     minHeight: height,
     titleBarStyle: 'hidden',
-    title: 'Less Player - Less is More !',
+    title: '听你想听，爱你所爱',
     //trafficLightPosition: { x: 20, y: 18 },
     trafficLightPosition: { x: -404, y: -404 }, // 404 => 神秘数字 
     transparent: true,
     frame: false,
     webPreferences: {
-      //zoomFactor: 0.85, //默认缩放
+      zoomFactor: 1, //默认缩放
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
@@ -821,6 +981,7 @@ const createMainWindow = () => {
   //配置请求过滤
   const filter = {
     urls: [
+      /*
       "*://*.qq.com/*",
       "*://music.163.com/*",
       "*://*.126.net/*",
@@ -828,18 +989,25 @@ const createMainWindow = () => {
       "*://*.kugou.com/*",
       "*://*.douban.com/*",
       "*://*.doubanio.com/*",
-      "*://*.ridio.cn/*",
+      "*://*.radio.cn/*",
+      */
       "*://*.cnr.cn/*",
       "*://*.qingting.fm/*",
       "*://*.qtfm.cn/*",
       "*://github.com/*",
       "*://gitee.com/*",
-      //"*://*/*"
+      "*://*.cgtn.com/*",
+      "*://*/*"
     ]
   }
   const { webRequest } = mainWindow.webContents.session
   webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    const { requestHeaders } = overrideRequest(details)
+    let { requestHeaders } = details
+    try {
+      requestHeaders = overrideRequestHeaders(details)
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
     callback({ requestHeaders })
   })
 
@@ -855,9 +1023,8 @@ const setupAppLayout = (layout, zoom, isInit) => {
 
   zoom = Number(zoom) || 85
   const zoomFactor = parseFloat(zoom / 100)
-  if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 1
-  mainWin.webContents.setZoomFactor(zoomFactor)
-
+  if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 0.85
+  //mainWin.webContents.setZoomFactor(zoomFactor)
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = parseInt(appWidth * zoomFactor), height = parseInt(appHeight * zoomFactor)
   const isSimpleLayout = (appLayout === SIMPLE_LAYOUT)
@@ -868,6 +1035,7 @@ const setupAppLayout = (layout, zoom, isInit) => {
     mainWin.setMinimumSize(width, height)
     mainWin.setSize(width, height)
   }
+  mainWin.webContents.setZoomFactor(zoomFactor)
   mainWin.center()
 }
 
@@ -918,14 +1086,14 @@ const initAppMenuTemplate = () => {
 
 const sendToMainRenderer = (channel, args) => {
   try {
-    if (mainWin && mainWin.webContents) mainWin.webContents.send(channel, args)
+    if (isWindowAccessible(mainWin) && mainWin.webContents) mainWin.webContents.send(channel, args)
   } catch (error) {
     if (isDevEnv) console.log(error)
   }
 }
 
 const showMainWindow = () => {
-  if (mainWin && !mainWin.isDestroyed()) {
+  if (isWindowAccessible(mainWin)) {
     mainWin.show()
     mainWin.focus()
   }
@@ -1018,7 +1186,7 @@ const setWindowButtonVisibility = (win, visible) => {
 }
 
 const toggleWinOSFullScreen = () => {
-  if (!mainWin || !isWinOS) return null
+  if (!isWindowAccessible(mainWin) || !isWinOS) return null
   const isMax = mainWin.isMaximized()
   if (isMax) {
     mainWin.unmaximize()
@@ -1029,20 +1197,21 @@ const toggleWinOSFullScreen = () => {
 }
 
 const setupAppWindowZoom = (zoom, noResize) => {
-  if (!mainWin || !zoom) return
+  if (!isWindowAccessible(mainWin) || !zoom) return
   currentZoom = Number(zoom) || 85
-  const zoomFactor = currentZoom / 100
+  const zoomFactor = parseFloat(currentZoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return
-  mainWin.webContents.setZoomFactor(zoomFactor)
+  //mainWin.webContents.setZoomFactor(zoomFactor)
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = parseInt(appWidth * zoomFactor)
   const height = parseInt(appHeight * zoomFactor)
   mainWin.setMinimumSize(width, height)
-  if (noResize) return
-  if (mainWin.isNormal()) {
+  
+  if (!noResize && mainWin.isNormal()) {
     mainWin.setSize(width, height)
     mainWin.center()
   }
+  mainWin.webContents.setZoomFactor(zoomFactor)
 }
 
 const cancelDownload = () => {
@@ -1106,13 +1275,17 @@ const getProxyAuthRealm = (scheme, host, port) => {
 }
 
 const openDevTools = (win) => {
-  if (win && win.webContents) win.webContents.openDevTools()
+  if (isWindowAccessible(win) && win.webContents) win.webContents.openDevTools()
+}
+
+const closeDevTools = (win) => {
+  if (isWindowAccessible(win) && win.webContents) win.webContents.closeDevTools()
 }
 
 const cleanupBeforeQuit = () => {
   cancelDownload()
 }
-
+/*
 const getSecretOffical = (t, e) => {
   if (null == e || e.length <= 0) return console.log('Please enter a password with which to encrypt the message.'),
     null;
@@ -1139,10 +1312,12 @@ const getSecretOffical = (t, e) => {
   for (d = d.toString(16); d.length < 8;) d = '0' + d;
   return f += d
 }
+*/
 
 const cookiesMap = {} //格式: { url: cookie }
 const cookiesPendingMap = {} //格式: { url: true }
 const getCookie = (url, fetchOnMissing) => {
+  if(!url) return 
   let cookie = cookiesMap[url]
   try {
     if (cookie) {
@@ -1162,11 +1337,10 @@ const getCookie = (url, fetchOnMissing) => {
 }
 
 //暂时使用内存做缓存
-const cacheCookie = (url, cookie) => {
-  cookiesMap[url] = cookie
-}
+const cacheCookie = (url, cookie) => { cookiesMap[url] = cookie }
 
 const fetchCookie = async (url, ignoreCache) => {
+  if(!url) return
   let cookie = ignoreCache ? null : getCookie(url)
   //缓存命中
   if (cookie) return cookie
@@ -1197,105 +1371,93 @@ const fetchCookie = async (url, ignoreCache) => {
 }
 
 //覆盖(包装)请求
-const overrideRequest = (details) => {
-  const { url } = details
-  if (url.includes('localhost')) return details
+const overrideRequestHeaders = (details) => {
+  const { url, requestHeaders } = details
+  if (url.includes('localhost')) return details.requestHeaders
+  
+  //支持运行时重新设置请求Headers
+  //TODO 发生匹配规则冲突时，尚待考虑
+  for(var i = 0; i < exRequestHandlers.length; i++) {
+    const handler = exRequestHandlers[i]
+    if(!handler) continue
+    //hosts为必需值，其他可选
+    const { hosts, ignoreHosts, defaultHeaders, includes, startsWith, endsWith, equals, regex } = handler
 
-  let origin = null, referer = null, xrouter = null
-  let cookie = null, userAgent = null
-  let csrf = null, cross = null, secret = null
-
-
-  if (url.includes("qq.com")) {
-    origin = "https://y.qq.com/"
-    if (url.includes('moviets.tc.qq.com')) origin = "https://v.qq.com/"
-
-    referer = origin
-  } else if (url.includes("163.com") || url.includes("126.net")) {
-    origin = "https://music.163.com/"
-    if (url.includes("/cloudsearch/")) referer = 'https://music.163.com/search/'
-
-    if (!referer) referer = origin
-  } else if (url.includes("u6.kuwo.cn")) {
-    userAgent = 'fm 7010001}(android 7.1.2)'
-    cookie = ''
-    //referer = 'https://www.kuwo.cn/'
-  } else if (url.includes("kuwo")) {
-    origin = "https://www.kuwo.cn/"
-    referer = origin
-
-    //Cookie
-    const hm_iuvt = {
-      key: 'Hm_Iuvt_cdb524f42f0ce19b169a8071123a4727',
-      value: randomTextWithinAlphabetNums(32)
-    }
-    const kwCookie = getCookie(origin, true)
-    if (kwCookie) {
-      for (const [key, value] of Object.entries(kwCookie)) {
-        if (key.toLowerCase().includes('hm_iuvt_')) {
-          Object.assign(hm_iuvt, { key, value })
-          break
+    if(!hosts || !Array.isArray(hosts) || hosts.length < 1) continue
+    let hostMatched = false
+    //忽略Hosts
+    if(ignoreHosts && Array.isArray(ignoreHosts)) {
+      for(var j = 0; j < ignoreHosts.length; j++) {
+        if(url.includes(ignoreHosts[j])) {
+          hostMatched = true
+          break 
         }
       }
     }
-    const kw_token = randomTextWithinAlphabetNums(10).toUpperCase()
-    //const hm_token = 'JBKeCaitKM6jTWMfdef4kJMF2BBf4T3z'
-    const hm_token = randomTextWithinAlphabetNums(32)
-    //cookie = "Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1651222601; _ga=GA1.2.1036906485.1647595722; kw_token=" + csrf
-    cookie = `kw_token=${kw_token};Hm_token=${hm_token};${hm_iuvt.key}=${hm_iuvt.value};`
-
-    //其他
-    cross = MD5(SHA1(hm_token).toLowerCase()).toLowerCase()
-    secret = getSecretOffical(hm_iuvt.value, hm_iuvt.key)
-
-    if (url.includes('bangId')) referer = 'https://www.kuwo.cn/rankList'
-  } else if (url.includes("kugou")) {
-    origin = "https://www.kugou.com/"
-    referer = origin
-    if (url.includes("mac.kugou.com")) userAgent = USER_AGENTS[0]
-    if (url.includes("&cmd=123&ext=mp4&hash=")) xrouter = 'trackermv.kugou.com'
-  } else if (url.includes("douban")) {
-    const bid = randomTextWithinAlphabetNums(11)
-    origin = "https://fm.douban.com/"
-    referer = origin
-    cookie = `bid=${bid}`
-    //cookie = 'bid=' + bid + '; __utma=30149280.1685369897.1647928743.1648005141.1648614477.3; __utmz=30149280.1648005141.2.2.utmcsr=cn.bing.com|utmccn=(referral)|utmcmd=referral|utmcct=/; _pk_ref.100001.f71f=%5B%22%22%2C%22%22%2C1650723346%2C%22https%3A%2F%2Fmusic.douban.com%2Ftag%2F%22%5D; _pk_id.100001.f71f=5c371c0960a75aeb.1647928769.4.1650723346.1648618102.; ll="118306"; _ga=GA1.2.1685369897.1647928743; douban-fav-remind=1; viewed="2995812"; ap_v=0,6.0'
-  } else if (url.includes("radio.cn") || url.includes("cnr.cn")) {
-    origin = "http://www.radio.cn/"
-    referer = origin
-  } else if (url.includes("qingting") || url.includes("qtfm.cn")) {
-    origin = "https://www.qingting.fm/"
-    referer = origin
-  } else if (url.includes("ximalaya")) {
-    origin = "https://www.ximalaya.com/"
-    referer = origin
-  }
-
-  //默认Referer
-  if (!referer || referer.includes('localhost')) {
-    if (!url.includes('localhost')) {
-      const urlParts = url.split('://')
-      const scheme = urlParts[0]
-      const host = urlParts[1].split('/')[0]
-      referer = `${scheme}://${host}/`
+    if(hostMatched) continue
+    //必须匹配Hosts
+    for(var j = 0; j < hosts.length; j++) {
+      if(url.includes(hosts[j])) {
+        hostMatched = true
+        break 
+      }
+    }
+    if(!hostMatched) continue
+    
+    let headers = {}
+    if(defaultHeaders) Object.assign(headers, { ...defaultHeaders })
+    if(includes && Array.isArray(includes)) {
+      includes.forEach(item => {
+        const { pattern, headers: _headers } = item
+        if(pattern && url.includes(pattern) && _headers) Object.assign(headers, { ..._headers })
+      })
+    } else if(startsWith && Array.isArray(startsWith)) {
+      startsWith.forEach(item => {
+        const { pattern, headers: _headers } = item
+        if(pattern && url.startsWith(pattern) && _headers) Object.assign(headers, { ..._headers })
+      })
+    } else if(endsWith && Array.isArray(endsWith)) {
+      endsWith.forEach(item => {
+        const { pattern, headers: _headers } = item
+        if(pattern && url.endsWith(pattern) && _headers) Object.assign(headers, { ..._headers })
+      })
+    } else if(equals && Array.isArray(equals)) {
+      equals.forEach(item => {
+        const { pattern, headers: _headers } = item
+        if(pattern && url == pattern && _headers) Object.assign(headers, { ..._headers })
+      })
+    } else if(regex && Array.isArray(regex)) {
+      regex.forEach(item => {
+        const { pattern, headers: _headers } = item
+        if(pattern && url.search(pattern) > -1 && _headers) Object.assign(headers, { ..._headers })
+      })
+    } 
+    
+    if(headers) {
+      for(const [key, value] of Object.entries(headers)) {
+        if(!key) continue
+        const _value = (value || '').toString().trim()
+        details.requestHeaders[key] = _value
+      }
     }
   }
+  
+  //优先级最高，兼容处理，对外提供的API，不允许设置相关请求头问题
+  ['_origin', '_Origin', '_referer', '_Referer', '_cookie', '_Cookie'].forEach(key => {
+    if(requestHeaders[key]) {
+      const value = details.requestHeaders[key]
+      details.requestHeaders[key.substring(1)] = value
+      Reflect.deleteProperty(details.requestHeaders, key)
+    }
+  })
 
-  /*
-  details.requestHeaders['Access-Control-Allow-Headers'] = "Origin, X-Requested-With, Content-Type, Accept"
-  details.requestHeaders['Access-Control-Allow-Origin'] = "*"
-  */
-
-  if (origin) details.requestHeaders['Origin'] = origin
-  if (userAgent) details.requestHeaders['User-Agent'] = userAgent
-  if (referer) details.requestHeaders['Referer'] = referer
-  if (cookie) details.requestHeaders['Cookie'] = cookie
-  if (xrouter) details.requestHeaders['x-router'] = xrouter
-  if (csrf) details.requestHeaders['CSRF'] = csrf
-  if (cross) details.requestHeaders['Cross'] = cross
-  if (secret) details.requestHeaders['Secret'] = secret
-
-  return details
+  //移除被Electron默认设置的Referer，格式为: xxx://localhost:xxx
+  const preferReferer = details.requestHeaders['Referer']
+  if (preferReferer && preferReferer.includes('localhost') && !url.includes('localhost')) {
+    Reflect.deleteProperty(details.requestHeaders, 'Referer')
+  }
+  
+  return details.requestHeaders
 }
 
 //创建桌面歌词窗口
@@ -1307,7 +1469,7 @@ const createLyricWindow = () => {
     minWidth: 100,
     minHeight: 100,
     titleBarStyle: 'hidden',
-    title: 'Less Player - 桌面歌词',
+    title: '桌面歌词',
     trafficLightPosition: { x: -404, y: -404 },
     transparent: true,
     frame: false,
@@ -1336,13 +1498,18 @@ const createLyricWindow = () => {
   win.once('ready-to-show', () => {
     setWindowButtonVisibility(win, false)
     win.showInactive()
+    win.setTitle('桌面歌词')
   })
 
   return win
 }
 
+const isWindowAccessible = (win) => {
+  return win && !win.isDestroyed()
+}
+
 const isMainWindowShow = () => {
-  return mainWin && !mainWin.isDestroyed() && mainWin.isVisible()
+  return isWindowAccessible(mainWin) && mainWin.isVisible()
 }
 
 const isLyricWindowShow = () => {
@@ -1357,7 +1524,7 @@ if (!instanceLock) {
   app.quit()
 } else {
   app.on('second-instance', (event, argv, workingDirectory, additionalData) => {
-    if (mainWin) {
+    if (isWindowAccessible(mainWin)) {
       //if (mainWin.isMinimized()) mainWin.restore()
       //mainWin.focus()
       handleStartupPlay(argv)
