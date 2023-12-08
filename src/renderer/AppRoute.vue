@@ -146,31 +146,31 @@ const createCommonRoute = (route, onRouteReady) => {
 }
 
 const currentRoutePath = () => (router.currentRoute.value.path)
-const resolveExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
-const resolveRoute = (route) => ((typeof route == 'object') ? route : { path: toTrimString(route) })
+const transformExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
+const transformRoute = (route) => ((typeof route == 'object') ? route : { path: toTrimString(route) })
 
 const visitRoute = (route) => {
     return new Promise((resolve, reject) => {
-        if (!route) {
-            return reject('noRoute')
-        }
-        route = resolveRoute(route)
+        if (!route) return reject('noRoute')
+        route = transformRoute(route)
         const { path: toPath, beforeRoute, onRouteReady, replace, override, rejectOnSame } = route
-        if (!toPath) {
-            return reject('noRoute')
-        }
+        if (!toPath) return reject('noRoute')
+
         //beforeRoute设置后，一般都会执行，除非route不存在
         if (beforeRoute && (typeof beforeRoute == 'function')) beforeRoute(toPath)
+
         const fromPath = currentRoutePath()
         const isSame = (fromPath == toPath)
         if (isSame && !replace && !override) {
-            return rejectOnSame ? reject('sameRoute') : null
+            return (rejectOnSame && typeof rejectOnSame == 'boolean') ? reject('sameRoute') : null
         }
         //相同且要求覆盖，才进行替换
-        if (isSame && override) Object.assign(route, { replace: true })
+        if (isSame && (override && typeof override == 'boolean')) Object.assign(route, { replace: true })
+
         //onRouteReady设置后，仅在route有效时执行
         if (onRouteReady && (typeof onRouteReady == 'function')) onRouteReady(toPath)
         router.push(route)
+
         resolve(route)
     })
 }
@@ -244,7 +244,7 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
     const visitable = platformValid && idValid
     platform = toTrimString(platform)
     if (visitable) {
-        let exploreMode = resolveExploreMode()
+        let exploreMode = transformExploreMode()
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
         visitCommonRoute(toPath, onRouteReady)
@@ -266,7 +266,7 @@ const visitAlbumDetail = (platform, id, callback, data) => {
     const visitable = platformValid && idValid
     platform = platform.trim()
     if (visitable) {
-        let exploreMode = resolveExploreMode()
+        let exploreMode = transformExploreMode()
         let moduleName = 'album', isAlbum = true
         if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = (exploreMode == 'userhome') ? 'userhome' : 'radios'
@@ -304,7 +304,7 @@ provide('appRoute', {
     visitPlaylistSquare: (platform) => (visitCommonRoute(`/playlists/square/${platform}`)),
     visitPlaylist: (platform, id, exploreMode) => {
         const noArgMode = !exploreMode
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         if (platform === 'local') {
             return visitCommonRoute(`/${exploreMode}/local/${id}`)
         }
@@ -319,26 +319,26 @@ provide('appRoute', {
     },
     //类似visitPlaylist，但有些区别
     visitFavoritePlaylist: (platform, id) => {
-        let exploreMode = resolveExploreMode()
+        let exploreMode = transformExploreMode()
         if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = (exploreMode == 'userhome') ? 'userhome' : 'radios'
         }
         return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)
     },
     visitCustomPlaylistCreate: (exploreMode, onRouteReady) => {
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         return visitCommonRoute({ path: `/${exploreMode}/custom/create`, override: true }, onRouteReady)
     },
     visitCustomPlaylist: (id, exploreMode) => {
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         return visitCommonRoute(`/${exploreMode}/custom/${id}`)
     },
     visitCustomPlaylistEdit: (id, exploreMode) => {
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         return visitCommonRoute({ path: `/${exploreMode}/custom/edit/${id}`, override: true })
     },
     visitBatchCustomPlaylist: (id, exploreMode) => {
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         return visitCommonRoute(`/${exploreMode}/batch/custom/${id}`)
     },
     visitBatchLocalMusic: () => {
@@ -357,19 +357,19 @@ provide('appRoute', {
         return visitCommonRoute('/userhome/user/edit')
     },
     visitLocalPlaylistCreate: (exploreMode) => {
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         return visitCommonRoute({ path: `/${exploreMode}/local/create`, override: true })
     },
     visitLocalPlaylistEdit: (id, exploreMode) => {
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         return visitCommonRoute({ path: `/${exploreMode}/local/edit/${id}`, override: true })
     },
     visitFreeFMCreate: (exploreMode) => {
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         return visitCommonRoute({ path: `/${exploreMode}/freefm/create`, override: true })
     },
     visitFreeFMEdit: (id, exploreMode) => {
-        exploreMode = resolveExploreMode(exploreMode)
+        exploreMode = transformExploreMode(exploreMode)
         return visitCommonRoute({ path: `/${exploreMode}/freefm/edit/${id}`, override: true })
     },
     visitBatchFreeFM: () => {
@@ -385,7 +385,7 @@ provide('appRoute', {
         return visitCommonRoute('/videos/video/create')
     },
     visitTrack: ({ id, platform, title, cover, artist, album }, onRouteReady) => {
-        const exploreMode = resolveExploreMode()
+        const exploreMode = transformExploreMode()
         return visitCommonRoute({
             path: `/${exploreMode}/${platform}/track/${id}`,
             //replace: false,   //Vue-Router原生支持选项，但有副作用
@@ -409,10 +409,15 @@ provide('appRoute', {
     visitPlugins: () => {
         return visitCommonRoute('/setting/plugins')
     },
+    visitPlugins: () => {
+        return visitCommonRoute('/setting/plugins')
+    },
+    visitPluginDetail: (id) => {
+        return visitCommonRoute(`/plugins/plugin/${id}`)
+    },
     addCustomRoute: (route) => {
         return router.addRoute('appmain', route)
-    },
-    visitNotFound
+    }
 })
 </script>
 

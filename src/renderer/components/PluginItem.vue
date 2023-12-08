@@ -2,7 +2,9 @@
 import { ref, watch, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
+import { useSettingStore } from '../store/settingStore';
 import { ActivateState } from '../../common/Constants';
+import { transformUrl } from '../../common/Utils';
 
 
 
@@ -17,8 +19,9 @@ const props = defineProps({
     checkChangedFn: Function,
 })
 
-const { showContextMenu, visitLink } = inject('appCommon')
+const { showContextMenu, showConfirm, visitLink } = inject('appCommon')
 
+const { isShowDialogBeforeVisitPluginRepository } = storeToRefs(useSettingStore())
 
 const isChecked = ref(props.checked)
 const toggleCheck = () => {
@@ -31,9 +34,17 @@ const toggleCheck = () => {
 const setChecked = (value) => isChecked.value = value
 
 
+const visitRepository = async (url) => {
+    let ok = true
+    const _url = transformUrl(url)
+    const msg = `即将打开浏览器，前往插件官网：${_url}。\n确定要继续吗？`
+    if (isShowDialogBeforeVisitPluginRepository.value) ok = await showConfirm({ msg })
+    if (!ok) return
+    visitLink(_url)
+}
+
 const onContextMenu = (event) => {
     if (props.checkbox) return
-
 }
 
 const computedStateText = computed(() => {
@@ -78,7 +89,7 @@ EventBus.on("plugin-checkbox-refresh", () => setChecked(false))
         <div class="stateflag textflag" v-show="data.state" :class="{ warning: (data.state == ActivateState.INVALID) }">
             <span v-html="computedStateText"></span>
         </div>
-        <div class="repository" v-show="data.repository" @click.stop="visitLink(data.repository)"
+        <div class="repository" v-show="data.repository" @click.stop="visitRepository(data.repository)"
             :class="{ spacing1: (data.state) }">
             <svg width="16" height="16" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
@@ -90,7 +101,7 @@ EventBus.on("plugin-checkbox-refresh", () => setChecked(false))
             </svg>
         </div>
         <div class="title-wrap" :class="{ spacing1: (data.state || data.repository) }">
-            <span v-html="data.name"></span>
+            <span v-html="data.alias || data.name"></span>
         </div>
         <div class="author spacing">
             <span v-html="data.author"></span>

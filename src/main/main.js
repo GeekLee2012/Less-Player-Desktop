@@ -442,11 +442,8 @@ const registryGlobalListeners = () => {
     file = transformPath(file)
     fetchBuffer(url, data).then(_data => {
       writeFile(file, _data, error => {
-        if(!error) { //成功
-          sendToMainRenderer('dnd-saveToLocal-done', { file, name, type, data, url, useDefaultIcon })
-        } else {
-          console.log('[WriteError]', error)
-        }
+        sendToMainRenderer('dnd-saveToLocal-result', { file, name, type, data, url, useDefaultIcon, error })
+        if(error) console.log('[WriteError]', error)
       })
     })
   })

@@ -97,6 +97,16 @@ export const toUpperCaseTrimString = (value) => {
     return toTrimString(value).toUpperCase()
 }
 
+export const stringEquals = (value1, value2) => {
+    if(!value1 || !value2) return false
+    return toTrimString(value1) === toTrimString(value2)
+}
+
+export const stringEqualsIgnoreCase = (value1, value2) => {
+    if(!value1 || !value2) return false
+    return toLowerCaseTrimString(value1) === toLowerCaseTrimString(value2)
+}
+
 export const isBlank = (text) => {
     return toTrimString(text).length < 1
 }

@@ -103,13 +103,13 @@ const playItemLater = () => {
             </div>
             <div class="info-wrap">
                 <div class="info-row">
-                    <span class="title">歌手：</span>
+                    <b class="title">歌手：</b>
                     <div>
                         <ArtistControl :visitable="true" :platform="platform" :data="JSON.parse(artist)"></ArtistControl>
                     </div>
                 </div>
                 <div class="info-row">
-                    <span class="title">专辑：</span>
+                    <b class="title">专辑：</b>
                     <div>
                         <AlbumControl :visitable="true" :platform="platform" :data="JSON.parse(album)"></AlbumControl>
                     </div>
@@ -208,6 +208,10 @@ const playItemLater = () => {
     display: flex;
     margin-bottom: 25px;
     text-align: left;
+}
+
+#track-detail-view .info-row b {
+    color: var(--content-subtitle-text-color);
 }
 
 #track-detail-view .info-row .title {

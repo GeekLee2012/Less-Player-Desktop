@@ -26,6 +26,7 @@ import ModulesSettingView from '../views/ModulesSettingView.vue';
 import FreeVideoEditView from '../views/FreeVideoEditView.vue';
 import TrackDetailView from '../views/TrackDetailView.vue';
 import PluginsView from '../views/PluginsView.vue';
+import PluginDetailView from '../views/PluginDetailView.vue';
 import AppDesktopLyric from '../AppDesktopLyric.vue';
 
 
@@ -167,6 +168,11 @@ const routes = [
             {  //设置 - 插件管理（音源等）
                 path: '/setting/plugins',
                 component: PluginsView
+            },
+            {  //插件管理 - 插件详情
+                path: '/plugins/plugin/:id',
+                props: true,
+                component: PluginDetailView
             },
         ]
     },

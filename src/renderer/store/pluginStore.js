@@ -1,13 +1,17 @@
 import { defineStore } from 'pinia';
-import { randomTextWithinAlphabetNums } from '../../common/Utils';
+import { randomTextWithinAlphabetNums, toTrimString } from '../../common/Utils';
 
 
 
 export const usePluginStore = defineStore('plugins', {
     state: () => ({
+        ignoreErrorPlugins: false,
         plugins: []
     }),
     actions: {
+        toggleIgnoreErrorPlugins() {
+            this.ignoreErrorPlugins = !this.ignoreErrorPlugins
+        },
         pluginIndex({ id, name, version, author }) {
             if(id) return this.plugins.findIndex(item => (item.id == id))
             if(title && version) {
@@ -18,6 +22,11 @@ export const usePluginStore = defineStore('plugins', {
                 })
             }
             return -1
+        },
+        getPlugin(id) {
+            const index = this.pluginIndex({ id })
+            if(index < 0) return
+            return this.plugins[index]
         },
         addPlugin(plugin) {
             if(!plugin) return 
@@ -33,9 +42,14 @@ export const usePluginStore = defineStore('plugins', {
             this.plugins.push(plugin)
             return id
         },
-        updatePluginState(plugin, state) {
+        updatePlugin(plugin, changes) {
             const index = this.pluginIndex(plugin)
-            if(index > -1) this.plugins[index].state = state || 0
+            if(index < 0) return
+            if(!changes || typeof changes != 'object') return 
+            for(const [key, value] of Object.entries(changes)) {
+                if(!'state|path|main|mainModule|alias'.includes(key)) continue
+                this.plugins[index][key] = value
+            }
         },
         removePlugin(plugin) {
             const index = this.pluginIndex(plugin)

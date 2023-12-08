@@ -74,6 +74,8 @@ const setPlayState = (value) => playState.value = value
 //const setPendingPlay = (value) => pendingPlay.value = value
 let desktopLyricShowState = false, trackRetry = 0
 const TRACK_MAX_RETRY = 1
+const pendingBootstrapTrack = ref(null)
+const setPendingBootstrapTrack = (value) => pendingBootstrapTrack.value = value
 
 /* 记录最近播放 */
 //歌曲、电台、MV、视频
@@ -603,7 +605,8 @@ const drawSpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) =>
         step = (i >= (dataLen / 3) && i <= (dataLen * 3 / 4)) ? 1 : 2
         //数据量控制一下，减少点CPU占用
 
-        if (++freqCnt >= limit) break
+        //if (++freqCnt >= limit) break
+        if (x >= cWidth) break
 
         barHeight = freqData[i] / 255 * cHeight
         barHeight = barHeight > 0 ? barHeight : 1
@@ -694,8 +697,8 @@ const drawFlippingSpectrum = (canvas, { freqData, spectrumColor, stroke }) => {
     let freqCnt = 0
     for (var i = 0; i < dataLen; i = i + step) {
         //数据量控制一下，减少点CPU占用
-        if (++freqCnt >= 100) break
-        //if( (x + barWidth + spacing) >= cWidth) break
+        //if (++freqCnt >= 100) break
+        if (x >= cWidth) break
         //step = i >= (dataLen / 2) && i <= (dataLen * 3 / 4) ? 1 : 2
 
         barHeight = freqData[i] / 255 * cHeight
@@ -964,12 +967,14 @@ EventBus.on('track-pos', secs => {
 EventBus.on("track-spectrumData", ({ freqData, freqBinCount, sampleRate, analyser }) => {
     const spectrumColor = getCurrentThemeHighlightColor()
     const canvasBgColor = getCurrentThemeContentBgColor()
+    const isSimpleLayoutMode = isSimpleLayout.value
     Object.assign(spectrumParams, {
         freqData, freqBinCount, sampleRate, analyser,
         spectrumColor, stroke: spectrumColor, canvasBgColor,
+        isSimpleLayoutMode,
     })
     //简约布局、可视化播放页
-    if (isSimpleLayout.value || (playingViewShow.value && playingViewThemeIndex.value == 1)) {
+    if (isSimpleLayoutMode || (playingViewShow.value && playingViewThemeIndex.value == 1)) {
         drawCanvasSpectrum()
     }
 })
@@ -1096,13 +1101,27 @@ const restoreTrack = (callback) => {
     }
 
     const track = currentTrack.value
-    bootstrapTrack(track, true)
+    bootstrapTrack(track)
         .then(track => tryCall(_callback, track))
         .catch(error => {
             if (isDevEnv()) console.log(error)
+            if ('noService | noUrl'.includes(error)) {
+                setPendingBootstrapTrack(track)
+            }
             tryCall(_callback, track)
         })
 }
+
+EventBus.on('plugins-accessResult-addPlatform', ({ code }) => {
+    const pendingTrack = pendingBootstrapTrack.value
+    if (!pendingTrack) return
+    if (pendingTrack.platform != code) return
+    if (!isCurrentTrack(pendingTrack)) {
+        return setPendingBootstrapTrack(null)
+    }
+    loadLyric(pendingTrack)
+    setPendingBootstrapTrack(null)
+})
 
 //歌曲收藏
 const favoritedState = ref(false)
@@ -1245,7 +1264,7 @@ const registryIpcRendererListeners = () => {
         })
         ipcRenderer.send('app-messagePort-pair')
     })
-    ipcRenderer.on('dnd-saveToLocal-done', (event, { file, name, type, noDragIcon }) => {
+    ipcRenderer.on('dnd-saveToLocal-result', (event, { file, name, type, data, url, useDefaultIcon, error }) => {
         const typeMappings = {
             image: {
                 name: '图片',
@@ -1264,7 +1283,11 @@ const registryIpcRendererListeners = () => {
         }
         const { name: typeName, extra } = (typeMappings[type] || { name: '文件' })
         const _extra = extra ? `<br/>${extra}` : ''
-        showToast(`${typeName}已下载${_extra}`)
+        if (error) {
+            showFailToast(`${typeName}下载失败${_extra}`)
+        } else {
+            showToast(`${typeName}已下载${_extra}`)
+        }
     })
 }
 registryIpcRendererListeners()

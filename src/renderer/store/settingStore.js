@@ -282,6 +282,8 @@ export const useSettingStore = defineStore('setting', {
             clearLocalMusics: true,
             //清空自由FM
             clearFreeFM: true,
+            //访问插件官网链接
+            visitPluginRepository: true,
         },
         /* 快捷键，可修改 */
         keys: {
@@ -562,6 +564,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeClearFreeFM() {
             return this.dialog.clearFreeFM
+        },
+        isShowDialogBeforeVisitPluginRepository() {
+            return this.dialog.visitPluginRepository
         },
         isCheckPreReleaseVersion() {
             return this.others.checkPreReleaseVersion
@@ -1104,6 +1109,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeClearFreeFM() {
             this.dialog.clearFreeFM = !this.dialog.clearFreeFM
+        },
+        toggleShowDialogBeforeVisitPluginRepository() {
+            this.dialog.visitPluginRepository = !this.dialog.visitPluginRepository
         },
         toggleCheckPreReleaseVersion() {
             this.others.checkPreReleaseVersion = !this.others.checkPreReleaseVersion

@@ -1,8 +1,8 @@
 <script setup>
-import { computed, inject, onActivated, onDeactivated, reactive, ref, watch } from 'vue';
+import { computed, inject, nextTick, onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import PluginItem from '../components/PluginItem.vue';
-import { isBlank, isDevEnv, toLowerCaseTrimString, toTrimString, useIpcRenderer } from '../../common/Utils';
+import { isBlank, isDevEnv, toLowerCaseTrimString, toTrimString, tryCall, useIpcRenderer } from '../../common/Utils';
 import { FILE_PREFIX, ActivateState } from '../../common/Constants';
 import { usePluginStore } from '../store/pluginStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -11,15 +11,15 @@ import EventBus from '../../common/EventBus';
 
 
 
-const { backward } = inject('appRoute')
+const { backward, visitPluginDetail } = inject('appRoute')
 const { activatePluginNow, deactivatePluginNow, removePluginNow } = inject('apiExpose')
 const { reloadApp } = inject('player')
 
 const ipcRenderer = useIpcRenderer()
 
-const { plugins } = storeToRefs(usePluginStore())
-const { addPlugin, updatePluginState, removePlugin } = usePluginStore()
-const { showFailToast, setSearchBarExclusiveAction } = useAppCommonStore()
+const { ignoreErrorPlugins, plugins } = storeToRefs(usePluginStore())
+const { toggleIgnoreErrorPlugins, addPlugin, updatePlugin, removePlugin } = usePluginStore()
+const { showToast, showFailToast, setSearchBarExclusiveAction } = useAppCommonStore()
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 
 const checkedAll = ref(false)
@@ -117,7 +117,10 @@ const doImportPlugin = async (fileItem) => {
     if (isBlank(name)) return showFailToast('插件导入失败<br>无法解析元数据')
 
     const plugin = { ...metadata, type: 0 }
-    let needFallback = false
+    //基本信息存在时，无论后续是否成功，先将插件写入store
+    const id = addPlugin(plugin)
+    Object.assign(plugin, { id })
+
     import(/* @vite-ignore */ `${FILE_PREFIX}${filePath}`).then(async mainModule => {
         const { activate, deactivate } = mainModule
         if (!activate || (typeof activate != 'function')) {
@@ -129,21 +132,18 @@ const doImportPlugin = async (fileItem) => {
 
         //导入插件
         const result = await ipcRenderer.invoke('app-importPlugin', { filePath, data })
-        if (!result) return
-        needFallback = true
-
+        if (!result) return Promise.reject('noImportResult')
         const { path, main } = result
-        if (!path || !main) return
+        if (!path || !main) return Promise.reject('noImportResult')
 
-        //写入插件元数据
-        Object.assign(plugin, { path, main })
-        addPlugin({ ...plugin, mainModule })
-        needFallback = false
+        //更新插件
+        updatePlugin(plugin, { path, main, mainModule })
     }).catch(error => {
         console.log(error)
         showFailToast('插件导入失败<br>发生未知错误')
+        updatePlugin(plugin, { state: ActivateState.INVALID })
+        if (ignoreErrorPlugins.value) tryCall(removePlugin, plugin)
     })
-    if (needFallback) removePluginNow(plugin)
     refreshCheckData()
 }
 
@@ -155,13 +155,19 @@ const importPlugin = async () => {
 
 const enablePlugins = () => {
     if (checkedData.length < 1) return
-    checkedData.forEach(plugin => activatePluginNow(plugin, () => updatePluginState(plugin, ActivateState.ACTIVATED)))
+    checkedData.forEach(plugin => activatePluginNow(plugin, () => updatePlugin(plugin, { state: ActivateState.ACTIVATED })))
     refreshCheckData()
+}
+
+const visitCheckedPlugin = () => {
+    if (checkedData.length < 1) return
+    if (checkedData.length > 1) return showFailToast('查看详情不支持多选')
+    visitPluginDetail(checkedData[0].id)
 }
 
 const disablePlugins = () => {
     if (checkedData.length < 1) return
-    checkedData.forEach(plugin => deactivatePluginNow(plugin, () => updatePluginState(plugin, ActivateState.DEACTIVATED)))
+    checkedData.forEach(plugin => deactivatePluginNow(plugin, () => updatePlugin(plugin, { state: ActivateState.DEACTIVATED })))
     refreshCheckData()
 }
 
@@ -237,8 +243,10 @@ const refreshCheckData = () => {
     EventBus.emit("plugin-checkbox-refresh")
 }
 
+const refreshViewSize = () => EventBus.emit('pluginsView-show')
+
 onActivated(() => {
-    EventBus.emit('pluginsView-show')
+    nextTick(refreshViewSize)
 })
 
 onDeactivated(() => {
@@ -254,26 +262,49 @@ watch(searchKeyword, filterContent)
         <div class="header">
             <div class="title-wrap">
                 <div class="title">插件管理</div>
-                <div class="search-wrap checkbox text-btn" @click="toggleUseSearchBar" v-show="true">
-                    <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Layer_1-2" data-name="Layer 1">
-                                <path
-                                    d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
+                <div class="options-wrap">
+                    <div class="checkbox text-btn" @click="toggleIgnoreErrorPlugins" v-show="true">
+                        <svg v-show="!ignoreErrorPlugins" width="16" height="16" viewBox="0 0 731.64 731.66"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
+                                </g>
                             </g>
-                        </g>
-                    </svg>
-                    <svg v-show="searchBarExclusiveAction" class="checked-svg" width="16" height="16"
-                        viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Layer_1-2" data-name="Layer 1">
-                                <path
-                                    d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
+                        </svg>
+                        <svg v-show="ignoreErrorPlugins" class="checked-svg" width="16" height="16"
+                            viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
+                                </g>
                             </g>
-                        </g>
-                    </svg>
-                    <span>独占搜索框模式</span>
+                        </svg>
+                        <span>导入时忽略错误插件</span>
+                    </div>
+                    <div class="search-wrap checkbox text-btn spacing" @click="toggleUseSearchBar" v-show="true">
+                        <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        <svg v-show="searchBarExclusiveAction" class="checked-svg" width="16" height="16"
+                            viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        <span>独占搜索框模式</span>
+                    </div>
                 </div>
             </div>
             <div class="tip-text">提示：实验性功能；插件未生效时，请手动刷新；支持拖拽导入<br>
@@ -338,7 +369,7 @@ watch(searchKeyword, filterContent)
                     </template>
                 </SvgTextButton>
                 <SvgTextButton :disabled="checkedData.length < 1" text="启用" class="spacing" v-show="actionShowCtl.enableBtn"
-                    :leftAction="enablePlugins">
+                    :leftAction="enablePlugins" :rightAction="visitCheckedPlugin">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 0 770.66 779.07" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -347,6 +378,20 @@ watch(searchKeyword, filterContent)
                                         d="M389.25,779.07c-159.7-.12-300.57-94.26-359.94-238C7.08,487.28-2.83,431.21.7,373.16Q9.58,226.89,112.39,121.9c14.86-15.19,37.84-15.85,52.51-1.76,15.21,14.6,15.7,37.7.44,53.21-35.93,36.52-63,78.61-77,127.91-34.1,120.26-7.39,226.16,80.06,315.33,46.87,47.81,105.26,75.33,171.47,85.2,159.1,23.71,311.08-77.86,347.77-234.45,25.78-110.07-1.77-207.32-78.77-290.26-7.43-8-14-16-14.64-27.5-.94-15.85,7.21-29.93,21.3-36.46a36.48,36.48,0,0,1,41.55,7.42,380.44,380.44,0,0,1,63.25,82.7C746,248.55,762.2,297.09,768,348.84c9.89,88.24-7.81,170.78-54.37,246.44C665.82,673,598.21,726.86,512.25,757.5A374.22,374.22,0,0,1,389.25,779.07Z" />
                                     <path
                                         d="M422.07,208.11q0,85.26,0,170.5c0,17.27-8.62,30.59-23.1,36.4-24.65,9.89-50.71-7.94-50.7-34.91q0-129.75.29-259.5c0-27.33,0-54.66.19-82,.13-19.32,11.62-33.89,29.35-37.76C400.45-4,422.25,12.64,422.46,35.62c.36,37.83,0,75.67,0,113.5q0,29.49,0,59Z" />
+                                </g>
+                            </g>
+                        </svg>
+                    </template>
+                    <template #right-img>
+                        <svg width="17" height="17" viewBox="0 0 971.81 971.81" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M486.07,0c268,.22,486.31,218.73,485.74,486.19-.58,268.32-218.65,486.07-486.33,485.62C217.41,971.36-.41,753.1,0,485.35S218.54-.22,486.07,0ZM906,480.4C903.12,249.81,713.68,62.49,479.65,65.83,249.27,69.11,61.33,258.93,65.87,494.4,70.28,723.62,259.11,909.23,492.16,906,722.37,902.74,908.91,713.58,906,480.4Z" />
+                                    <path
+                                        d="M541.8,575.89c0,41.66.09,83.32,0,125-.07,26.85-17,48.76-42.16,55.12a55.73,55.73,0,0,1-69.56-53.86c-.18-58.66-.05-117.32-.05-176,0-25.33-.16-50.66,0-76,.26-32.6,26.76-57.77,58.73-56.07a55.76,55.76,0,0,1,53,55.81C541.91,491.9,541.8,533.9,541.8,575.89Z" />
+                                    <path
+                                        d="M549.8,281.74c.08,35.75-27.83,63.92-63.49,64.06-36,.14-64.23-27.85-64.31-63.74-.08-35.72,27.87-63.92,63.49-64.06C521.5,217.87,549.71,245.83,549.8,281.74Z" />
                                 </g>
                             </g>
                         </svg>
@@ -367,7 +412,7 @@ watch(searchKeyword, filterContent)
                 </SvgTextButton>
                 <SvgTextButton text="刷新" class="spacing" v-show="actionShowCtl.reloadBtn" :leftAction="reloadApp">
                     <template #left-img>
-                        <svg width="16" height="16" viewBox="0 0 639.99 732.03" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="17" height="17" viewBox="0 0 639.99 732.03" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path
@@ -422,9 +467,10 @@ watch(searchKeyword, filterContent)
     border-bottom: 2px solid transparent;
 }
 
-#plugins-view .header .search-wrap {
+#plugins-view .header .options-wrap {
     position: absolute;
     right: 0px;
+    display: flex;
 }
 
 #plugins-view .header .tip-text {

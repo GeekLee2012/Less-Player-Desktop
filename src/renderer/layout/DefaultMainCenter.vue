@@ -409,6 +409,7 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding #home-page-view .title,
 #default-main-center .autopadding #modules-setting-view .title,
 #default-main-center .autopadding #plugins-view,
+#default-main-center .autopadding #plugin-detail-view,
 #default-main-center .autopadding #freefm-view,
 #default-main-center .autopadding #search-view,
 #default-main-center .autopadding #user-profile-view,

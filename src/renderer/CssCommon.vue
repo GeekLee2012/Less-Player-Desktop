@@ -185,6 +185,18 @@ textarea {
   visibility: hidden;
 }
 
+.no-link {
+  text-decoration: none;
+  cursor: default;
+  color: var(--content-text-color);
+}
+
+.link {
+  text-decoration: underline;
+  cursor: pointer;
+  color: var(--content-text-color);
+}
+
 
 ::-webkit-scrollbar {
   width: var(--others-scrollbar-width);

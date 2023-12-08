@@ -8,7 +8,7 @@
 ![GitHub Forks](https://img.shields.io/github/forks/GeekLee2012/Less-Player-Desktop)    
     
   
-一款基于Electron + Vue 3开发的`插件化`播放器。   
+基于Electron + Vue 3开发、`插件化`的播放器。   
 
 <b>~~本项目正式长久停更！也可能永久停更！~~</b>
   

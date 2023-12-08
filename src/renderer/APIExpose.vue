@@ -16,6 +16,7 @@ import {
     md5, hmacMd5, sha1, sha256, sha512, base64Parse, base64Stringify, hexDecode,
     aesEncryptDefault, aesEncryptHexText, rsaEncrypt, rsaEncryptDefault,
     aesDecryptText, tryCallDefault, tryCall, transformUrl,
+    stringEquals, stringEqualsIgnoreCase,
 } from '../common/Utils';
 import { toMmss, toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs } from '../common/Times';
 import { FILE_PREFIX, ActivateState } from '../common/Constants';
@@ -32,7 +33,7 @@ const { addCustomRoute, visitCommonRoute } = inject('appRoute')
 const ipcRenderer = useIpcRenderer()
 
 const { plugins } = storeToRefs(usePluginStore())
-const { removePlugin, updatePluginState } = usePluginStore()
+const { removePlugin, updatePlugin } = usePluginStore()
 const { addPlatform, removePlatform } = usePlatformStore()
 const { showToast, showFailToast } = useAppCommonStore()
 const { getImageUrlByQuality } = useSettingStore()
@@ -103,6 +104,7 @@ const EventHandlerRegistrations = {
 const activatePluginNow = async (plugin, onSuccess, onError) => {
     if (!plugin) return
     const { path, main, mainModule } = plugin
+    if (!path || !main) return tryCall(onError, plugin)
     if (!mainModule || !mainModule.activate) {
         import(/* @vite-ignore */ `${FILE_PREFIX}${path}/${main}`).then(mainModule => {
             Object.assign(plugin, { mainModule })
@@ -119,6 +121,7 @@ const activatePluginNow = async (plugin, onSuccess, onError) => {
 const deactivatePluginNow = async (plugin, onSuccess, onError) => {
     if (!plugin) return
     const { path, main, mainModule } = plugin
+    if (!path || !main) return tryCall(onError, plugin)
     if (!mainModule || !mainModule.deactivate) {
         import(/* @vite-ignore */ `${FILE_PREFIX}${path}/${main}`).then(mainModule => {
             Object.assign(plugin, { mainModule })
@@ -156,12 +159,21 @@ const loadPluginsOnStartup = async () => {
         const { state } = plugin
         if (state != ActivateState.ACTIVATED) return
         activatePluginNow(plugin, null, (plugin) => {
-            updatePluginState(plugin, ActivateState.INVALID)
+            updatePlugin(plugin, { state: ActivateState.INVALID })
         })
     })
 }
 
+const onAccessResult = async (permission, result, options) => {
+    const eventPrefix = 'plugins-accessResult-'
+    if (permission === APIPermissions.ADD_PLATFORM) {
+        EventBus.emit(`${eventPrefix}addPlatform`, options[0])
+    }
+}
+
 //对外提供API
+//暂时仅在Renderer端提供，所以API能力也有限
+//Nodejs端（ Main进程 ）的API计划实现中，但安全性、依赖等问题不好处理
 window.lessAPI = {
     version: '1.0.0',
     common: {
@@ -182,6 +194,8 @@ window.lessAPI = {
         toTrimString,
         toLowerCaseTrimString,
         toUpperCaseTrimString,
+        stringEquals,
+        stringEqualsIgnoreCase,
         nextInt,
         getImageUrlByQuality,
         tryCallDefault,
@@ -230,31 +244,30 @@ window.lessAPI = {
     permissions: {
         APIPermissions,
         async access(permission, ...options) { //获取访问权限
+            let result = null
             //开发者工具
             if (permission == APIPermissions.OPEN_DEV_TOOLS) {
                 if (ipcRenderer) ipcRenderer.send('app-openDevTools')
-                return
             } else if (permission == APIPermissions.CLOSE_DEV_TOOLS) {
                 if (ipcRenderer) ipcRenderer.send('app-closeDevTools')
-                return
             }
             //获取相关信息
             else if (permission == APIPermissions.GET_USER_AGENT) {
-                return ipcRenderer ? (await ipcRenderer.invoke('app-userAgent')) : ''
+                result = ipcRenderer ? (await ipcRenderer.invoke('app-userAgent')) : ''
             } else if (permission == APIPermissions.GET_COOKIE) {
-                return ipcRenderer ? (await ipcRenderer.invoke('app-getCookie', options[0])) : ''
+                result = ipcRenderer ? (await ipcRenderer.invoke('app-getCookie', options[0])) : ''
             }
             //请求头信息
             else if (permission == APIPermissions.ADD_REQUEST_HANDLER) {
-                return ipcRenderer ? (await ipcRenderer.invoke('app-addRequestHandler', options[0])) : ''
+                result = ipcRenderer ? (await ipcRenderer.invoke('app-addRequestHandler', options[0])) : ''
             } else if (permission == APIPermissions.REMOVE_REQUEST_HANDLER) {
-                return ipcRenderer ? (await ipcRenderer.invoke('app-removeRequestHandler', options[0])) : ''
+                result = ipcRenderer ? (await ipcRenderer.invoke('app-removeRequestHandler', options[0])) : ''
             }
             //路由
             else if (permission == APIPermissions.ADD_ROUTE) {
-                return addCustomRoute(options[0])
+                result = addCustomRoute(options[0])
             } else if (permission == APIPermissions.VISIT_ROUTE) {
-                return visitCommonRoute(options[0])
+                result = visitCommonRoute(options[0])
             }
             //自定义平台
             else if (permission == APIPermissions.ADD_PLATFORM) {
@@ -263,6 +276,8 @@ window.lessAPI = {
             } else if (permission == APIPermissions.REMOVE_PLATFORM) {
                 removePlatform(options[0])
             }
+            onAccessResult(permission, result, options)
+            return result
         },
     },
     renderers: {
