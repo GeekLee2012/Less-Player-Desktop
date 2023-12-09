@@ -307,7 +307,7 @@ watch(searchKeyword, filterContent)
                     </div>
                 </div>
             </div>
-            <div class="tip-text">提示：实验性功能；插件未生效时，请手动刷新；支持拖拽导入<br>
+            <div class="tip-text">提示：实验性功能；支持多文件拖拽导入；插件未生效时，请手动刷新；<br>
                 <b>郑重声明：当前应用并未提供安全性检查和保障，概不承担任何插件使用时引发的一切不良后果<br>
                     插件有风险，使用需谨慎！建议不要使用任何来源不明的插件</b>
             </div>
