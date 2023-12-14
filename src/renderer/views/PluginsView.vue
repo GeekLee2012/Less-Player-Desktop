@@ -1,17 +1,19 @@
 <script setup>
 import { computed, inject, nextTick, onActivated, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import PluginItem from '../components/PluginItem.vue';
-import { isBlank, isDevEnv, toLowerCaseTrimString, toTrimString, tryCall, useIpcRenderer } from '../../common/Utils';
-import { FILE_PREFIX, ActivateState } from '../../common/Constants';
 import { usePluginStore } from '../store/pluginStore';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { useSettingStore } from '../store/settingStore';
 import EventBus from '../../common/EventBus';
+import PluginItem from '../components/PluginItem.vue';
+import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
+import { isBlank, isDevEnv, toLowerCaseTrimString, toTrimString, tryCall, useIpcRenderer, readLines } from '../../common/Utils';
+import { FILE_PREFIX, ActivateState } from '../../common/Constants';
 
 
 
 
-const { backward, visitPluginDetail } = inject('appRoute')
+const { visitPluginDetail } = inject('appRoute')
 const { activatePluginNow, deactivatePluginNow, removePluginNow } = inject('apiExpose')
 const { reloadApp } = inject('player')
 
@@ -19,15 +21,14 @@ const ipcRenderer = useIpcRenderer()
 
 const { ignoreErrorPlugins, plugins } = storeToRefs(usePluginStore())
 const { toggleIgnoreErrorPlugins, addPlugin, updatePlugin, removePlugin } = usePluginStore()
-const { showToast, showFailToast, setSearchBarExclusiveAction } = useAppCommonStore()
-const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
+const { showToast, showFailToast } = useAppCommonStore()
+const { isSearchForPluginsViewShow } = storeToRefs(useSettingStore())
+
 
 const checkedAll = ref(false)
 const ignoreCheckAllEvent = ref(false)
 const checkedData = reactive([])
 const filteredData = ref(null)
-const searchKeyword = ref(null)
-const setSearchKeyword = (value) => searchKeyword.value = value
 
 
 const actionShowCtl = reactive({
@@ -57,11 +58,11 @@ const toggleSelectAll = () => {
     if (checkedAll.value) checkedData.push(...plugins.value)
 }
 
-//仅最前面的20行，尝试获取元数据
+//仅扫描最前面的20行，尝试获取元数据
 const parsePluginMetadata = (text) => {
-    if (!text) return
-    const lines = text.split('\n')
-    const metadata = {}
+    if (isBlank(text)) return
+    const lines = readLines(text)
+    const metadata = {}, metaFieldLengths = 5, maxScanLines = 20
     let hit = 0
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i]
@@ -102,7 +103,7 @@ const parsePluginMetadata = (text) => {
             Object.assign(metadata, { about })
             ++hit
         }
-        if (hit >= 5 || i > 20) break
+        if (hit >= metaFieldLengths || i > maxScanLines) break
     }
     return metadata
 }
@@ -147,10 +148,19 @@ const doImportPlugin = async (fileItem) => {
     refreshCheckData()
 }
 
-const importPlugin = async () => {
+const importPlugins = async () => {
     if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-file', { filterExts: ['js'] })
-    doImportPlugin(result)
+    const result = await ipcRenderer.invoke('choose-files', { filterExts: ['js'] })
+    if (result) {
+        const { filePaths: files } = result
+        if (!files || files.length < 1) return
+        for (var i = 0; i < files.length; i++) {
+            const path = files[i]
+            const result = await ipcRenderer.invoke('read-text', path)
+            if (!result) continue
+            doImportPlugin(result)
+        }
+    }
 }
 
 const enablePlugins = () => {
@@ -163,6 +173,7 @@ const visitCheckedPlugin = () => {
     if (checkedData.length < 1) return
     if (checkedData.length > 1) return showFailToast('查看详情不支持多选')
     visitPluginDetail(checkedData[0].id)
+    refreshCheckData()
 }
 
 const disablePlugins = () => {
@@ -177,17 +188,15 @@ const removePlugins = () => {
         removeFromFilteredData(plugin)
         deactivatePluginNow(plugin, () => removePluginNow(plugin), () => removePluginNow(plugin))
     })
-    //checkedData.length = 0
-    //checkedAll.value = (plugins.value.length > 0) && (checkedData.length == plugins.value.length)
     refreshCheckData()
 }
 
 const onDrop = async (event) => {
-    event.preventDefault()
     if (!ipcRenderer) return
-
+    event.preventDefault()
     const { files } = event.dataTransfer
-    if (files.length < 1) return
+    if (!files || files.length < 1) return
+
     for (var i = 0; i < files.length; i++) {
         const { name, path } = files[i]
         const result = await ipcRenderer.invoke('read-text', path)
@@ -196,10 +205,6 @@ const onDrop = async (event) => {
     }
 }
 
-const toggleUseSearchBar = () => {
-    const action = searchBarExclusiveAction.value ? null : setSearchKeyword
-    setSearchBarExclusiveAction(action)
-}
 
 const removeFromFilteredData = (plugin) => {
     const list = filteredData.value
@@ -208,8 +213,7 @@ const removeFromFilteredData = (plugin) => {
     if (index > -1) list.splice(index, 1)
 }
 
-const filterWithKeyword = (list) => {
-    let keyword = searchKeyword.value
+const filterWithKeyword = (list, keyword) => {
     let result = list
     if (keyword) {
         keyword = toLowerCaseTrimString(keyword)
@@ -223,9 +227,9 @@ const filterWithKeyword = (list) => {
     return result
 }
 
-const filterContent = () => {
+const filterContent = (keyword) => {
     const data = plugins.value
-    const listData = filterWithKeyword(data)
+    const listData = filterWithKeyword(data, keyword)
     filteredData.value = null
     if (listData && listData.length != data.length) {
         filteredData.value = listData
@@ -248,13 +252,6 @@ const refreshViewSize = () => EventBus.emit('pluginsView-show')
 onActivated(() => {
     nextTick(refreshViewSize)
 })
-
-onDeactivated(() => {
-    setSearchBarExclusiveAction(null)
-    setSearchKeyword(null)
-})
-
-watch(searchKeyword, filterContent)
 </script>
 
 <template>
@@ -284,30 +281,12 @@ watch(searchKeyword, filterContent)
                         </svg>
                         <span>导入时忽略错误插件</span>
                     </div>
-                    <div class="search-wrap checkbox text-btn spacing" @click="toggleUseSearchBar" v-show="true">
-                        <svg v-show="!searchBarExclusiveAction" width="16" height="16" viewBox="0 0 731.64 731.66"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <g id="Layer_2" data-name="Layer 2">
-                                <g id="Layer_1-2" data-name="Layer 1">
-                                    <path
-                                        d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
-                                </g>
-                            </g>
-                        </svg>
-                        <svg v-show="searchBarExclusiveAction" class="checked-svg" width="16" height="16"
-                            viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
-                            <g id="Layer_2" data-name="Layer 2">
-                                <g id="Layer_1-2" data-name="Layer 1">
-                                    <path
-                                        d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
-                                </g>
-                            </g>
-                        </svg>
-                        <span>独占搜索框模式</span>
-                    </div>
+                    <SearchBarExclusiveModeControl class="spacing" v-show="isSearchForPluginsViewShow"
+                        :onKeywordChanged="filterContent">
+                    </SearchBarExclusiveModeControl>
                 </div>
             </div>
-            <div class="tip-text">提示：实验性功能；支持多文件拖拽导入；插件未生效时，请手动刷新；<br>
+            <div class="tip-text">提示：实验性功能；支持文件多选导入（包括拖拽方式）；插件未生效时，请手动刷新；<br>
                 <b>郑重声明：当前应用并未提供安全性检查和保障，概不承担任何插件使用时引发的一切不良后果<br>
                     插件有风险，使用需谨慎！建议不要使用任何来源不明的插件</b>
             </div>
@@ -336,7 +315,7 @@ watch(searchKeyword, filterContent)
                     </svg>
                     <span>{{ (checkedAll ? "取消全选" : "全选") }}</span>
                 </div>
-                <SvgTextButton text="导入" class="spacing" v-show="actionShowCtl.importBtn" :leftAction="importPlugin"
+                <SvgTextButton text="导入" class="spacing" v-show="actionShowCtl.importBtn" :leftAction="importPlugins"
                     :rightAction="removePlugins">
                     <template #left-img>
                         <svg width="16" height="16" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
@@ -481,7 +460,6 @@ watch(searchKeyword, filterContent)
     /*padding-left: 35px;
     padding-right: 35px;
     */
-    padding-bottom: 30px;
     display: flex;
     flex-direction: column;
 }

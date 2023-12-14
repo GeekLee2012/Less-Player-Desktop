@@ -24,8 +24,6 @@ const { isRadioModeShortcutEnable,
     isSimpleLayoutShortcutEnable, } = storeToRefs(useSettingStore())
 const { isMaxScreen, isRadioMode, isRadioModeEnable } = storeToRefs(useAppCommonStore())
 
-//是否使用自定义交通灯控件
-const useCustomTrafficLight = useUseCustomTrafficLight()
 
 
 const switchToSimpleLayout = () => {
@@ -44,8 +42,8 @@ const toggleRadioMode = () => {
         <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
         </SearchBar>
         <div class="action">
-            <div id="radio-btn" @click="toggleRadioMode" v-show="isRadioModeEnable && isRadioModeShortcutEnable">
-                <svg v-show="!isRadioMode" width="20" height="19" viewBox="0 0 939.22 940.41"
+            <div id="radio-playlist-btn" @click="toggleRadioMode" v-show="isRadioModeEnable && isRadioModeShortcutEnable">
+                <svg class="radio-btn" v-show="!isRadioMode" width="21" height="18.8" viewBox="0 0 939.22 940.41"
                     xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -58,7 +56,7 @@ const toggleRadioMode = () => {
                         </g>
                     </g>
                 </svg>
-                <svg v-show="isRadioMode" width="20" height="19" viewBox="0 -50 895.95 703.92"
+                <svg class="playlist-btn" v-show="isRadioMode" width="20" height="20" viewBox="0 -50 895.95 703.92"
                     xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -179,7 +177,15 @@ const toggleRadioMode = () => {
     fill: var(--content-highlight-color);
 }
 
-.classic-main-top #radio-btn svg,
+.classic-main-top #radio-playlist-btn .radio-btn {
+    transform: translateY(0.5px);
+}
+
+.classic-main-top #radio-playlist-btn .playlist-btn {
+    transform: translateY(0.5px);
+}
+
+.classic-main-top #radio-playlist-btn svg,
 .classic-main-top #plugin-btn svg,
 .classic-main-top #module-btn svg,
 .classic-main-top #theme-btn svg,
@@ -189,7 +195,7 @@ const toggleRadioMode = () => {
     margin-top: 4px;
 }
 
-.classic-main-top #radio-btn,
+.classic-main-top #radio-playlist-btn,
 .classic-main-top #plugin-btn svg,
 .classic-main-top #module-btn svg,
 .classic-main-top #theme-btn,

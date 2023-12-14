@@ -8,7 +8,7 @@ export default {
 -->
 
 <script setup>
-import { onMounted, onActivated, ref, shallowRef, watch, reactive, inject } from 'vue';
+import { onMounted, onActivated, ref, shallowRef, watch, reactive, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -383,6 +383,19 @@ const trimExtraHtml = (text) => {
         .trim()
 }
 
+const computedPlayAllSongsBtnShow = computed(() => {
+    if (!hasAllSongsTab.value) return false
+    if (!hasHotSongsTab.value) return true
+    return isAllSongsTab(activeTabCode.value)
+})
+
+const computedTabName = computed(() => {
+    return (tab) => {
+        const { code, name } = tab
+        return (tab.code === 'about') ? `歌手${name}` : name
+    }
+})
+
 //TODO
 EventBus.on('ctxMenu-removeFromLocal', reloadAll)
 
@@ -412,10 +425,10 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
                 <div class="about">{{ trimExtraHtml(about) }}</div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
-                        v-show="hasHotSongsTab && !isAllSongsTab(activeTabCode)" text="播放热门歌曲" class="spacing">
+                        v-show="hasHotSongsTab && !isAllSongsTab(activeTabCode)" text="播放热歌" class="spacing">
                     </PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
-                        v-show="isAllSongsTab(activeTabCode)" class="spacing"></PlayAddAllBtn>
+                        v-show="computedPlayAllSongsBtnShow" class="spacing"></PlayAddAllBtn>
                     <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow"
                         :disabled="isLocalMusic(platform)" v-show="!isLocalMusic(platform)">
                     </FavoriteShareBtn>
@@ -437,10 +450,10 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
                 </div>
                 <div class="action" v-show="!isLoadingDetail">
                     <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
-                        v-show="hasHotSongsTab && !isAllSongsTab(activeTabCode)" text="播放热门歌曲" class="spacing">
+                        v-show="hasHotSongsTab && !isAllSongsTab(activeTabCode)" text="播放热歌" class="spacing">
                     </PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
-                        v-show="isAllSongsTab(activeTabCode)" class="spacing"></PlayAddAllBtn>
+                        v-show="computedPlayAllSongsBtnShow" class="spacing"></PlayAddAllBtn>
                     <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow">
                     </FavoriteShareBtn>
                 </div>
@@ -449,7 +462,7 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
-                    v-for="(tab, index) in tabs" @click="visitTab(index, true)" v-html="tab.name">
+                    v-for="(tab, index) in tabs" @click="visitTab(index, true)" v-html="computedTabName(tab)">
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
@@ -549,6 +562,7 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
 #artist-detail-view .tab-nav {
     position: relative;
     display: flex;
+    align-items: center;
     height: 36px;
     margin-bottom: 5px;
     margin-left: 2px;
@@ -561,6 +575,7 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
     padding-right: 15px;
     margin-right: 15px;*/
     margin-right: 36px;
+    padding-bottom: 5px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }

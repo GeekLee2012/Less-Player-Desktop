@@ -164,11 +164,13 @@ watch(inputValue, (nv, ov) => {
 
 .color-input-ctl .name {
     min-width: 66px;
-    background-color: var(--content-header-nav-bg-color);
+    /*background-color: var(--content-header-nav-bg-color);*/
     border: 1px solid var(--border-inputs-border-color);
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;
     border-right: 1px solid var(--border-inputs-border-color);
+    background-color: var(--content-inputs-bg-color);
+    color: var(--content-inputs-text-color);
 }
 
 .color-input-ctl .name,
@@ -206,5 +208,7 @@ watch(inputValue, (nv, ov) => {
     width: 137px;
     text-align: left;
     font-size: var(--content-text-subtitle-size);
+    background-color: var(--content-inputs-bg-color);
+    color: var(--content-inputs-text-color);
 }
 </style>

@@ -31,7 +31,7 @@ const { setActiveTab,
     updateTabs,
     getTabIndex,
 } = useSearchStore()
-const { hideAllCtxMenus } = useAppCommonStore()
+const { togglePlatformCategoryView, hideAllCtxMenus, hidePlaybackQueueView } = useAppCommonStore()
 const { isLocalMusic, isAllSongsTab, isPlaylistsTab, isAlbumsTab, isArtistsTab, isVideosTab, } = usePlatformStore()
 
 
@@ -200,6 +200,11 @@ const resetBack2TopBtn = () => {
     }
 }
 
+const togglePlatformCategory = () => {
+    hidePlaybackQueueView()
+    togglePlatformCategoryView()
+}
+
 EventBus.on('modules-toggleSearchPlatform', () => visitTab(0, null, true))
 
 onMounted(() => {
@@ -237,6 +242,16 @@ watch(() => props.keyword, (nv, ov) => {
                 <b>搜 </b><span class="text content-text-highlight">{{ computedKeyword }}</span>
             </div>
             <div class="platform">
+                <span class="more-platform-btn">
+                    <svg @click.stop="togglePlatformCategory" width="17" height="17" viewBox="0 0 29.3 29.3">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z" />
+                            </g>
+                        </g>
+                    </svg>
+                </span>
                 <span class="item" :class="{ active: currentPlatformIndex == index }" v-for="(item, index) in platforms"
                     @click="byPlatform(index)" v-html="item.name">
                 </span>
@@ -270,7 +285,7 @@ watch(() => props.keyword, (nv, ov) => {
 #search-view .header {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #search-view .keyword {
@@ -295,19 +310,43 @@ watch(() => props.keyword, (nv, ov) => {
 
 #search-view .platform {
     /*margin-top: 20px;*/
-    margin-bottom: 6px;
+    margin-top: 13px;
+    margin-left: 3px;
     text-align: left;
-    display: flex;
-    flex-wrap: wrap;
+    height: 40px;
+    /*display: flex;
+    align-items: center;*/
+    overflow: hidden;
+    /*flex-wrap: wrap;*/
+}
+
+#search-view .platform .more-platform-btn {
+    margin-right: 15px;
+    line-height: 40px;
+    display: inline-flex;
+    align-items: center;
+}
+
+#search-view .platform .more-platform-btn svg {
+    fill: var(--button-icon-btn-color);
+    cursor: pointer;
+    transform: translateY(3px);
+}
+
+#search-view .platform .more-platform-btn svg:hover {
+    fill: var(--content-highlight-color);
 }
 
 #search-view .platform .item {
-    margin-top: 10px;
-    margin-right: 20px;
+    /*margin-top: 10px;*/
+    /*margin-right: 20px;*/
+    margin-right: 15px;
     border-radius: 10rem;
     padding: 8px 18px;
+    line-height: 40px;
     /* border: 1px solid var(--border-color); */
     cursor: pointer;
+    white-space: nowrap;
 }
 
 #search-view .platform .item:hover {
@@ -325,6 +364,7 @@ watch(() => props.keyword, (nv, ov) => {
 
 #search-view .tab-nav {
     display: flex;
+    align-items: center;
     position: relative;
     height: 36px;
     margin-left: 2px;
@@ -339,6 +379,7 @@ watch(() => props.keyword, (nv, ov) => {
     padding-right: 12px;
     margin-right: 15px;*/
     margin-right: 36px;
+    padding-bottom: 5px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }

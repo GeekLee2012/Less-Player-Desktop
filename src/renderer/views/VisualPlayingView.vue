@@ -9,9 +9,10 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useUseCustomTrafficLight } from '../../common/Utils';
+import { stringEquals, useUseCustomTrafficLight } from '../../common/Utils';
 import { Track } from '../../common/Track';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
+import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
 
 
 
@@ -81,9 +82,13 @@ const setupBackgroudEffect = () => {
     if (!isPlayingViewUseBgCoverEffect.value) return
     const track = currentTrack.value
     if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
-    setHasBackgroudCover(true)
-
     const { cover } = track
+    //默认封面
+    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return setHasBackgroudCover(false)
+    //本地歌曲
+    if (cover.startsWith(ImageProtocal.prefix)) return setHasBackgroudCover(false)
+
+    setHasBackgroudCover(true)
     Object.assign(bgEffectStyle, {
         background: `url('${cover}')`
     })
@@ -92,7 +97,7 @@ const setupBackgroudEffect = () => {
 const onUserMouseWheel = (event) => EventBus.emit('lyric-userMouseWheel', event)
 
 
-watch([currentTrack, playingViewShow], () => {
+watch([() => (currentTrack.value && currentTrack.value.cover), playingViewShow], () => {
     setupBackgroudEffect()
 })
 
@@ -398,8 +403,8 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .center .lyric-wrap {
-    /*padding-right: 33px;*/
     margin-left: 28px;
+    margin-top: 15px;
 }
 
 .visual-playing-view .center .left {

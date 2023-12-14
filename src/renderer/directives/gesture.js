@@ -3,34 +3,37 @@
 //拖拽移动
 //TODO 似是而非，暂且也归类于此吧
 export const bindDragAndMove = (el, binding) => {
-    if(!binding) return
-    const { trigger } = binding
-    const triggerEl = el.querySelector(trigger)
+    if(!el || !binding || !binding.trigger) return
+    
+    const triggerEl = el.querySelector(binding.trigger)
     if (!triggerEl) return
-    let x = 0, y = 0
-    triggerEl.onmousedown = (e) => {
-        x = e.x
-        y = e.y
-        document.onmousemove = (e) => {
-            const gx = e.x - x
-            const gy = e.y - y
-            x = e.x
-            y = e.y
 
-            const width = el.clientWidth, height = el.clientHeight
+    triggerEl.onmousedown = (e1) => {
+        let  { x, y } = e1
+
+        document.onmousemove = (e2) => {
+            const gx = e2.x - x
+            const gy = e2.y - y
+            x = e2.x
+            y = e2.y
+
             const { clientWidth, clientHeight } = document.documentElement
+            const { clientWidth: width, clientHeight: height, offsetLeft, offsetTop } = el
 
-            let left = (el.offsetLeft + gx)
-            let top = (el.offsetTop + gy)
+            let left = (offsetLeft + gx)
+            let top = (offsetTop + gy)
             //边界检查
             left = Math.max(0, left)
             left = Math.min((clientWidth - width), left)
             top = Math.max(0, top)
             top = Math.min((clientHeight - height), top)
 
-            el.style.left = left + "px"
-            el.style.top = top + "px"
+            Object.assign(el.style, {
+                left: `${left}px`,
+                top: `${top}px`
+            })
         }
+
         document.onmouseup = () => {
             document.onmousemove = document.onmouseup = null
         }

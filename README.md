@@ -76,11 +76,7 @@ PS
 * 播放器设置相对灵活，部分功能会默认“关闭”，需前往“设置页”开启或切换
 * 最新开发预览版（测试版），会在项目自身仓库，不定期打包发布，欢迎愿意尝鲜的朋友体验
 * 当前顶部分别有release、tag、license、downloads等图标按钮，请点击<b>`release按钮`</b>直达发行版本列表页面
-* 开发预览版，均为Pre-release版本，且tag标签名称以发布日期结尾
-* 以下资源库，暂时不再使用（因为分开单独管理，并没有解决任何问题）：
-* [Github资源库（废弃）](https://github.com/GeekLee2012/Resources/releases/)  
-* [Gitee资源库（废弃）](https://gitee.com/rive08/resources/releases/)  
-* PS: 变动带来的不便，请朋友们谅解！有时我也想做一些尝试，然而结果也并非总在预料之中
+* 开发预览版，均为Pre-release版本，且tag标签名称以发布日期结尾  
   
 ### 发行版  
 * 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  

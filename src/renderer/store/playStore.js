@@ -55,7 +55,7 @@ export const usePlayStore = defineStore('player', {
         }
     },
     actions: {
-        findIndex(track) {
+        findTrackIndex(track) {
             return this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
         },
         isCurrentTrack(track) {
@@ -67,7 +67,7 @@ export const usePlayStore = defineStore('player', {
         setPlaying(value) {
             this.playing = value
         },
-        isDefaultFMRadioType(track) {
+        isDefaultFMRadioType(track) { 
             return track && Playlist.isFMRadioType(track) && !track.streamType
         },
         togglePlay() {
@@ -89,16 +89,15 @@ export const usePlayStore = defineStore('player', {
         },
         addTrack(track) {
             //TODO 超级列表如何保证时效
-            const index = this.findIndex(track)
+            const index = this.findTrackIndex(track)
             if (index == -1) this.queueTracks.push(track)
         },
         addTracks(tracks) {
-            //TODO 暂时不去重, 超级列表如何保证时效
             if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
             tracks.forEach(item => this.addTrack(item))
         },
         playTrackLater(track) {
-            let index = this.findIndex(track)
+            let index = this.findTrackIndex(track)
             if (index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
@@ -113,7 +112,7 @@ export const usePlayStore = defineStore('player', {
             }
         },
         removeTrack(track) {
-            const index = this.findIndex(track)
+            const index = this.findTrackIndex(track)
             if (index > -1) {
                 const isCurrent = (index == this.playingIndex)
                 this.queueTracks.splice(index, 1)
@@ -136,21 +135,21 @@ export const usePlayStore = defineStore('player', {
             this.isAutoPlaying = false
             this.queueTracks.length = 0
             this.playingIndex = -1
-            this.__resetPlayState()
+            this._resetPlayState()
         },
-        __resetPlayState() {
+        _resetPlayState() {
             this.playing = false
             this.currentTime = 0
             this.progress = 0.0
         },
-        __validPlayingIndex() {
+        _validPlayingIndex() {
             const maxSize = this.queueTracksSize
             this.playingIndex = this.playingIndex > 0 ? this.playingIndex : 0
             this.playingIndex = this.playingIndex < maxSize ? this.playingIndex : (maxSize - 1)
         },
         //直接播放，其他状态一概不管
         playTrackDirectly(track) {
-            this.__resetPlayState()
+            this._resetPlayState()
             let playEventName = 'track-play'
             if (this.isDefaultFMRadioType(track)) { //FM广播, 默认Live Stream
                 playEventName = 'radio-play'
@@ -161,7 +160,7 @@ export const usePlayStore = defineStore('player', {
         },
         //播放，并更新当前播放列表相关状态
         playTrack(track) {
-            let index = this.findIndex(track)
+            let index = this.findTrackIndex(track)
             if (index < 0) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
@@ -183,7 +182,7 @@ export const usePlayStore = defineStore('player', {
                 case PlayMode.RANDOM:
                     break
             }
-            this.__validPlayingIndex()
+            this._validPlayingIndex()
             this.playTrackDirectly(this.currentTrack)
         },
         playNextTrack() {
@@ -204,20 +203,8 @@ export const usePlayStore = defineStore('player', {
                     this.playingIndex = Math.ceil(Math.random() * maxSize)
                     break
             }
-            this.__validPlayingIndex()
+            this._validPlayingIndex()
             this.playTrackDirectly(this.currentTrack)
-        },
-        //TODO 已废弃
-        updateCurrentTime(secs) {
-            const currentTime = secs * 1000
-            this.currentTime = currentTime
-            let duration = 0
-            try {
-                duration = this.currentTrack.duration
-            } catch (error) {
-                console.log(error)
-            }
-            this.progress = duration > 0 ? (currentTime / duration) : 0
         },
         updateVolume(value) {
             value = parseFloat(value)
@@ -235,7 +222,6 @@ export const usePlayStore = defineStore('player', {
         },
         switchPlayMode() {
             this.playMode = ++this.playMode % 3
-            //TODO
         },
         setAutoPlaying(value) {
             this.isAutoPlaying = value
@@ -243,6 +229,29 @@ export const usePlayStore = defineStore('player', {
         setAudioOutputDevices(devices) {
             this.audioOutputDevices = devices
         },
+        moveTrackTo(index, toIndex) {
+            if(this.queueTracks.length < 1) return
+            if(index < 0 || toIndex < 0) return 
+            if(index == toIndex) return 
+
+            //移动分解为2步实现：1、删除当前元素；2、在目标位置重新插入当前元素
+            const maxIndex = this.queueTracksSize - 1
+            //移除当前元素
+            const track = this.queueTracks[index]
+            this.queueTracks.splice(index, 1)
+            //插入当前元素到目标位置
+            if(toIndex > index && toIndex < maxIndex) --toIndex
+            this.queueTracks.splice(toIndex, 0, track)
+
+            //列表存在删除、插入操作时，需更新当前播放playingIndex
+            if(index == this.playingIndex) {
+                this.playingIndex = toIndex
+            } else if(index < this.playingIndex && toIndex >= this.playingIndex) {
+                --this.playingIndex
+            } else if(index > this.playingIndex && toIndex <= this.playingIndex){
+                ++this.playingIndex
+            }
+        }
     },
     persist: {
         enabled: true,

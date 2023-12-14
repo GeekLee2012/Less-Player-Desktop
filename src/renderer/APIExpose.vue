@@ -16,10 +16,10 @@ import {
     md5, hmacMd5, sha1, sha256, sha512, base64Parse, base64Stringify, hexDecode,
     aesEncryptDefault, aesEncryptHexText, rsaEncrypt, rsaEncryptDefault,
     aesDecryptText, tryCallDefault, tryCall, transformUrl,
-    stringEquals, stringEqualsIgnoreCase,
+    stringEquals, stringEqualsIgnoreCase, readLines,
 } from '../common/Utils';
 import { toMmss, toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs } from '../common/Times';
-import { FILE_PREFIX, ActivateState } from '../common/Constants';
+import { FILE_PREFIX, ActivateState, LESS_MAGIC_CODE } from '../common/Constants';
 import { Category } from '../common/Category';
 import { Playlist } from '../common/Playlist';
 import { Track } from '../common/Track';
@@ -74,29 +74,28 @@ const EventHandlerRegistrations = {
             handlers[handlers.length - 1] : null
     },
     register(event, handler) {
+        if (!event || !handler) return
         if (!Object.hasOwn(APIEvents, event)) return
-        if (handler && (typeof handler == 'function')) {
-            this.mappings[event] = this.mappings[event] || []
-            const index = this.mappings[event].findIndex(item => (item == handler))
-            if (index > -1) this.mappings[event].splice(index, 1)
-            this.mappings[event].push(handler)
-        }
+        if (typeof handler != 'object' && typeof handler != 'function') return
+        if (Array.isArray(handler)) return
+
+        this.mappings[event] = this.mappings[event] || []
+        const index = this.mappings[event].findIndex(item => (item == handler))
+        if (index > -1) this.mappings[event].splice(index, 1)
+        this.mappings[event].push(handler)
     },
     unregister(event, handler) {
+        if (!event || !handler) return
         if (!Object.hasOwn(APIEvents, event)) return
-        if (handler) {
-            const handlers = this.mappings[event]
-            if (handlers && handlers.length > 0) {
-                for (let i = 0; i < handlers.length; i++) {
-                    if (handlers[i] == handler) {
-                        handlers.splice(i, 1)
-                        break
-                    }
+        const handlers = this.mappings[event]
+        if (handlers && handlers.length > 0) {
+            for (let i = 0; i < handlers.length; i++) {
+                if (handlers[i] == handler) {
+                    handlers.splice(i, 1)
+                    break
                 }
-                if (handlers.length < 1) Reflect.deleteProperty(this.mappings, event)
             }
-        } else {
-            Reflect.deleteProperty(this.mappings, event)
+            if (handlers.length < 1) Reflect.deleteProperty(this.mappings, event)
         }
     }
 }
@@ -171,9 +170,10 @@ const onAccessResult = async (permission, result, options) => {
     }
 }
 
-//对外提供API
+//TODO 对外提供API
 //暂时仅在Renderer端提供，所以API能力也有限
 //Nodejs端（ Main进程 ）的API计划实现中，但安全性、依赖等问题不好处理
+//目前存在问题：无法感知当前获取权限的是哪个插件
 window.lessAPI = {
     version: '1.0.0',
     common: {
@@ -196,6 +196,7 @@ window.lessAPI = {
         toUpperCaseTrimString,
         stringEquals,
         stringEqualsIgnoreCase,
+        readLines,
         nextInt,
         getImageUrlByQuality,
         tryCallDefault,
@@ -203,9 +204,9 @@ window.lessAPI = {
         transformUrl,
     },
     crypto: {
-        md5,
         randomText,
         randomTextDefault,
+        md5,
         hmacMd5,
         sha1,
         sha256,
@@ -307,15 +308,12 @@ provide('apiExpose', {
      * @param {*} track 
      */
     getExTrackPlayUrl: async (track) => {
-        /*
-        const { id, title, platform, artist, album, cover, duration,
-            hash, extraHash, songID: songId, strMediaMid } = track
-        */
         const _track = { ...toRaw(track) }
+        //移除非必要信息
         const excludeProps = ['url', 'lyric', 'lyricTran', 'lyricRoma',
             'publishTime', 'score', 'isCandidate']
         excludeProps.forEach(prop => Reflect.deleteProperty(_track, prop))
-
+        //TODO 选择策略
         const handler = EventHandlerRegistrations.lastHandler(APIEvents.TRACK_GET_PLAY_URL)
         if (handler && (typeof handler == 'function')) {
             showToast(`尝试从插件获取音源<br>请耐心等待一下哟`)

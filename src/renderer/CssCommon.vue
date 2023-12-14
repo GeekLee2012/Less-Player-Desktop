@@ -173,6 +173,10 @@ textarea {
   cursor: pointer;
 }
 
+.checkbox.text-btn svg {
+  margin-top: 1px;
+}
+
 .checkbox .checked-svg {
   fill: var(--content-highlight-color) !important;
 }

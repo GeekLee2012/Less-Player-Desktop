@@ -90,6 +90,7 @@ const { setThemeIndex,
     toggleSearchForLocalPlaylistShow,
     toggleSearchForBatchActionShow,
     toggleSearchForFreeFMShow,
+    toggleSearchForPluginsViewShow,
     toggleShowDialogBeforeBatchDelete,
     toggleShowDialogBeforeCustomPlaylistDelete,
     toggleShowDialogBeforeClearRecents,
@@ -469,7 +470,7 @@ const clearSessionCache = async () => {
 
 const selectDir = async () => {
     if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-dirs')
+    const result = await ipcRenderer.invoke('choose-dirs')
     if (result) setDndSavePath(result[0])
 }
 
@@ -875,6 +876,11 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     <div>
                         <span class="cate-subtitle">自由FM：</span>
                         <ToggleControl @click="toggleSearchForFreeFMShow" :value="search.freeFMShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">插件管理：</span>
+                        <ToggleControl @click="toggleSearchForPluginsViewShow" :value="search.pluginsViewShow">
                         </ToggleControl>
                     </div>
                     <div class="last">

@@ -686,6 +686,10 @@ watch(workingCustomTheme, (nv, ov) => {
     border-bottom: 1px solid transparent !important;
 }
 
+.custom-theme-preview-mode .header .title-wrap {
+    margin-left: 20px !important;
+}
+
 .custom-theme-edit-view .spacing {
     margin-left: 15px;
 }

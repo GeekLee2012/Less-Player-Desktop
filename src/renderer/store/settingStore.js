@@ -171,13 +171,15 @@ export const useSettingStore = defineStore('setting', {
             //场景化提示
             autoPlaceholder: true,
             //在线歌单页
-            onlinePlaylistShow: false,
+            onlinePlaylistShow: true,
             //本地歌单页
             localPlaylistShow: false,
             //批量操作页
             batchActionShow: true,
             //自由FM
-            freeFMShow: true
+            freeFMShow: true,
+            //插件管理
+            pluginsViewShow: true
         },
         /* 普通歌词 */
         lyric: {
@@ -214,7 +216,7 @@ export const useSettingStore = defineStore('setting', {
             */
             //行间距
             lineSpacing: 23,
-            //对齐方式, 0 => 左, 1 => 中, 2 => 右
+            //对齐方式, 0 => 左, 1 => 中, 2 => 右, 3 => 左、右分开（双行模式）
             alignment: 1,
             // 显示模式（布局），0 => 单行， 1 => 双行, 2 => 全显
             layoutMode: 0,
@@ -547,6 +549,9 @@ export const useSettingStore = defineStore('setting', {
         isSearchForFreeFMShow() {
             return this.search.freeFMShow
         },
+        isSearchForPluginsViewShow() {
+            return this.search.pluginsViewShow
+        },
         isShowDialogBeforeBatchDelete() {
             return this.dialog.batchDelete
         },
@@ -843,6 +848,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleSearchForFreeFMShow() {
             this.search.freeFMShow = !this.search.freeFMShow
+        },
+        toggleSearchForPluginsViewShow() {
+            this.search.pluginsViewShow = !this.search.pluginsViewShow
         },
         toggleTrayShow() {
             this.tray.show = !this.tray.show

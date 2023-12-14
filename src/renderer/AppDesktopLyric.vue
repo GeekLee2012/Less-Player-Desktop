@@ -157,6 +157,7 @@ const setScrollLocatorTime = (value) => scrollLocatorTime.value = value
 const setScrollLocatorTimeText = (value) => scrollLocatorTimeText.value = value
 const setScrollLocatorCurrentIndex = (value) => scrollLocatorCurrentIndex.value = value
 
+/*
 const setupLyricScrollLocator = () => {
   const locatorEl = document.querySelector('.desktop-lyric .scroll-locator')
   if (!locatorEl) return
@@ -177,6 +178,7 @@ const setupLyricScrollLocator = () => {
       break
   }
 }
+*/
 
 const updateScrollLocatorTime = () => {
   const locatorEl = document.querySelector('.desktop-lyric .scroll-locator')
@@ -436,7 +438,7 @@ const switchTextDirectionState = () => {
   setDesktopLyricTextDirection(direction)
   setupLyricSetting(true)
   syncSettingToMain()
-  setupLyricScrollLocator()
+  //setupLyricScrollLocator()
 }
 
 //对齐方式
@@ -446,7 +448,7 @@ const switchAlignState = () => {
   const lastAlign = layoutMode == 1 ? 3 : 2
   setDesktopLyricAlignment(align >= 0 ? align : lastAlign)
   syncSettingToMain()
-  setupLyricScrollLocator()
+  //setupLyricScrollLocator()
 }
 
 //字体调节
@@ -556,7 +558,7 @@ const applyThemeFromMain = (theme) => {
   }
 }
 
-watch(isUserMouseWheel, setupLyricScrollLocator)
+//watch(isUserMouseWheel, setupLyricScrollLocator)
 
 //注册默认应用级别快捷键  
 const registryDefaultLocalKeys = () => {
@@ -864,6 +866,7 @@ onMounted(() => {
       </div>
     </div>
     <div class="scroll-locator"
+      :class="{ 'scroll-locator-vertical': (desktopLyric.textDirection == 1), 'scroll-locator-left': (desktopLyric.alignment == 2) }"
       v-show="!lockState && desktopLyric.layoutMode == 2 && (lyricExistState == 1) && isUserMouseWheel">
       <span class="time-text" v-html="scrollLocatorTimeText"></span>
       <div class="play-btn" @click="seekFromLyric">
@@ -1020,6 +1023,22 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.desktop-lyric .scroll-locator-vertical {
+  top: auto;
+  bottom: 33px;
+  left: 50%;
+}
+
+.desktop-lyric .scroll-locator-left {
+  right: auto;
+  left: 33px;
+}
+
+.desktop-lyric .scroll-locator-vertical.scroll-locator-left {
+  bottom: auto;
+  top: 33px;
 }
 
 .desktop-lyric .center .locator-current,

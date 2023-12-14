@@ -178,6 +178,7 @@ defineExpose({
     width: 218px;
     height: 369px;
     -webkit-app-region: none;
+    background: #ffffff !important;
 }
 
 .color-picker-toolbar .header {
@@ -188,7 +189,8 @@ defineExpose({
     border-radius: 5px;
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
-    background-color: var(--content-header-nav-bg-color);
+    background-color: #eeeeee88 !important;
+    background: #eeeeee88 !important;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -198,10 +200,15 @@ defineExpose({
     padding-right: 9px;
     font-size: var(--content-text-tip-text-size);
     font-size: 14.5px;
+    color: #393939;
 }
 
 .color-picker-toolbar .header .btn {
     width: 30px;
+}
+
+.color-picker-toolbar .header .btn svg {
+    fill: #393939;
 }
 
 .color-picker-toolbar .value {

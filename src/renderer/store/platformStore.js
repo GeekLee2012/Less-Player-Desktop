@@ -62,7 +62,7 @@ const PRESET_TABS = [{
     stext: '约找到0个视频',
 }, {
     code: 'about',
-    name: '歌手详情',
+    name: '详情',
     text: '',
     ctext: '',
     stext: '',
@@ -403,7 +403,7 @@ export const usePlatformStore = defineStore('platforms', {
             const tabs = []
             artistTabs.forEach(tcode => {
                 const tab = this.getPlatformTab(tcode)
-                if(tab) tabs.push(tab)
+                if(tab) tabs.push(tab) 
             })
             return tabs
         },

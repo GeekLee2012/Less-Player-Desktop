@@ -10,7 +10,10 @@ export const tryCall = (fn, params, onSuccess, onError) => {
     try {
         if(fn && (typeof fn == 'function')) {
             const result = fn(params)
-            if (onSuccess && (typeof onSuccess == 'function')) return onSuccess(result)
+            if (onSuccess && (typeof onSuccess == 'function')) {
+                return onSuccess(result)
+            }
+            return result
         }
     } catch (error) {
         console.log(error)
@@ -97,6 +100,12 @@ export const toUpperCaseTrimString = (value) => {
     return toTrimString(value).toUpperCase()
 }
 
+export const readLines = (text, seperator) => {
+    if(isBlank(text)) return []
+    seperator = seperator || '\n'
+    return toTrimString(text).split(seperator)
+}
+
 export const stringEquals = (value1, value2) => {
     if(!value1 || !value2) return false
     return toTrimString(value1) === toTrimString(value2)
@@ -107,6 +116,27 @@ export const stringEqualsIgnoreCase = (value1, value2) => {
     return toLowerCaseTrimString(value1) === toLowerCaseTrimString(value2)
 }
 
+export const stringEqualsEscapeHtml = (value1, value2) => {
+    if(!value1 || !value2) return false
+    const _value1 = escapeHtml(toTrimString(value1))
+    const _value2 = escapeHtml(toTrimString(value2))
+    return _value1 === _value2
+}
+
+export const stringEqualsIgnoreCaseEscapeHtml = (value1, value2) => {
+    if(!value1 || !value2) return false
+    const _value1 = escapeHtml(toLowerCaseTrimString(value1))
+    const _value2 = escapeHtml(toLowerCaseTrimString(value2))
+    return _value1 === _value2
+}
+
+export const stringIncludesIgnoreCaseEscapeHtml = (value1, value2) => {
+    if(!value1 || !value2) return false
+    const _value1 = escapeHtml(toLowerCaseTrimString(value1))
+    const _value2 = escapeHtml(toLowerCaseTrimString(value2))
+    return _value1.includes(_value2)
+}
+
 export const isBlank = (text) => {
     return toTrimString(text).length < 1
 }
@@ -114,6 +144,11 @@ export const isBlank = (text) => {
 //TODO 处理空白无效字符
 export const trimExtraChars = (text) => {
     return toTrimString(text).replace(/(\\n\\n)/g, '')
+}
+
+//去掉HTML标签、转义实体等
+export const escapeHtml = (text) => {
+    return toTrimString(text).replace(/<[^>]+>/g, '').trim()
 }
 
 /*
@@ -138,8 +173,9 @@ export const useRgbaster = async (src, opts) => {
 
 //TODO 随机数不随机！
 export const nextInt = (max) => {
-    max = max || 1024
-    const limit = max < 1024 ? 1024 : max
+    max = tryCallDefault(parseInt, max, 1024)
+    const randomLimit = parseInt(Math.random() * 1024 + 66)
+    const limit = Math.max(max, randomLimit)
     return Math.floor(Math.random() * limit) % max
 }
 

@@ -61,28 +61,24 @@ const onDrop = async (event) => {
         showFailToast('还不支持多文件拖拽')
         return
     }
-    const { name, path } = files[0]
+    const { path } = files[0]
     increaseImportTaskCount()
     const result = await ipcRenderer.invoke('dnd-open-audio-playlist', path, isUseDeeplyScanForDirectoryEnable.value)
-    if (result) {
-        let msg = '导入歌单失败', success = false
-        if (result) {
-            const { name, data, total } = result
-            if (name && data && data.length > 0) {
-                try {
-                    addLocalPlaylist(name, null, null, null, data)
-                } catch (error) {
-                    if (isDevEnv()) console.log(error)
-                }
-                const numText = total ? `${data.length} / ${total}` : `${data.length}`
-                msg = `导入歌单已完成！<br>共${numText}首歌曲`
-                success = true
-            }
+    if (!result) return decreaseImportTaskCount()
+    let msg = '导入歌单失败', success = false
+    const { name, data, total } = result
+    if (name && data && data.length > 0) {
+        try {
+            addLocalPlaylist(name, null, null, null, data)
+        } catch (error) {
+            if (isDevEnv()) console.log(error)
         }
-        decreaseImportTaskCount()
-        if (success) showToast(msg)
-        else showFailToast(msg)
+        const numText = total ? `${data.length} / ${total}` : `${data.length}`
+        msg = `导入歌单已完成！<br>共${numText}首歌曲`
+        success = true
     }
+    decreaseImportTaskCount()
+    success ? showToast(msg) : showFailToast(msg)
 }
 
 const refreshTime = ref(0)

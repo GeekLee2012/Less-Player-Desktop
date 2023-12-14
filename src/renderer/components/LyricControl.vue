@@ -142,15 +142,6 @@ const safeRenderAndScrollLyric = (secs) => {
     }
 }
 
-//TODO
-const resetDefaultLyricScrollTop = () => {
-    const lyricWrap = document.querySelector(".lyric-ctl .center")
-    if (!lyricWrap) return
-    //const { offsetTop } = lyricWrap
-    //const { clientHeight } = document.documentElement
-    lyricWrap.scrollTop = 129
-}
-
 const resetLyricState = (track, state) => {
     state = state >= -1 ? state : -1
     //重置状态
@@ -186,8 +177,6 @@ const reloadLyricData = (track) => {
     }
     //重置数据
     resetLyricState(track, isExist ? 1 : 0)
-    //重置滚动条位置
-    //resetDefaultLyricScrollTop()
     //重新设置样式
     nextTick(() => {
         //setupLyricLines()
@@ -247,7 +236,6 @@ const setupLyricAlignment = () => {
     if (albumEls) albumEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
     if (noLyricEls) noLyricEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
 
-    setupLyricScrollLocator()
 }
 
 const isHeaderVisible = () => (lyric.value.metaPos == 0)
@@ -261,23 +249,6 @@ const setScrollLocatorTime = (value) => scrollLocatorTime.value = value
 const setScrollLocatorTimeText = (value) => scrollLocatorTimeText.value = value
 const setScrollLocatorCurrentIndex = (value) => scrollLocatorCurrentIndex.value = value
 
-const setupLyricScrollLocator = () => {
-    const locatorEl = document.querySelector('.lyric-ctl .scroll-locator')
-    if (!locatorEl) return
-    //const { clientHeight, clientWidth } = document.documentElement
-    //locatorEl.style.top = (clientHeight / 2) + 'px'
-
-    const { clientWidth } = document.documentElement
-    const lyricEl = document.querySelector('.lyric-ctl .center')
-    let leftAlignPos = clientWidth / 2 - 100
-    if (lyricEl) leftAlignPos = Math.max(lyricEl.clientWidth, leftAlignPos)
-
-    const { alignment } = lyric.value
-    //const flexAligns = ['flex-start', 'center', 'flex-end']
-    const locatorPositions = ['80', '80', leftAlignPos]
-    locatorEl.style.right = locatorPositions[alignment] + 'px'
-    //locatorEl.style.justifyContent = flexAligns[alignment]
-}
 
 const updateScrollLocatorTime = () => {
     const locatorEl = document.querySelector('.lyric-ctl .scroll-locator')
@@ -374,13 +345,11 @@ EventBus.on('lyric-fontWeight', setupLyricLines)
 EventBus.on('lyric-lineHeight', setupLyricLines)
 EventBus.on('lyric-lineSpacing', setupLyricLines)
 EventBus.on('lyric-alignment', setupLyricAlignment)
-//EventBus.on('app-resize', setupLyricScrollLocator)
 EventBus.on('playingView-changed', () => {
     //restoreLyricPausedState()
     setupLyricAlignment()
 })
 
-watch(isUserMouseWheel, setupLyricScrollLocator)
 
 watch(() => props.currentTime, (nv, ov) => {
     //TODO 暂时简单处理，播放页隐藏时直接返回
@@ -447,7 +416,8 @@ watch(() => props.track, (nv, ov) => {
                 <div class="extra-text" v-show="isExtraTextActived"></div>
             </div>
         </div>
-        <div class="scroll-locator" v-show="(lyricExistState == 1) && isUserMouseWheel">
+        <div class="scroll-locator" :class="{ 'scroll-locator-left': (lyric.alignment == 2) }"
+            v-show="(lyricExistState == 1) && isUserMouseWheel">
             <span class="time-text" v-html="scrollLocatorTimeText"></span>
             <div class="play-btn" @click="seekFromLyric">
                 <svg width="9" height="9" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
@@ -596,12 +566,18 @@ watch(() => props.track, (nv, ov) => {
 
 .lyric-ctl .scroll-locator {
     position: fixed;
-    right: 80px;
+    right: 50px;
     top: 50%;
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.lyric-ctl .scroll-locator-left {
+    right: auto;
+    left: 50%;
+    margin-left: 33px;
 }
 
 .lyric-ctl .center .locatorCurrent,

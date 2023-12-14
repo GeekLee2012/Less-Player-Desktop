@@ -39,6 +39,7 @@ const routes = [
         children: [
             {
                 path: '/',
+                //name: 'homepage',
                 component: HomePageView
             },
             { //歌单广场

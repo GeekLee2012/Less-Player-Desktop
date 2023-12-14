@@ -48,6 +48,9 @@ const statPathSync = (path) => {
 const scanDirTracks = async (dir, exts, deep) => {
     const result = { path: dir, data: [], name: getSimpleFileName(dir) }
     try {
+        const statResult = statSync(dir, { throwIfNoEntry: false })
+        if (!statResult || !statResult.isDirectory()) return null
+       
         exts = exts || []
         if (!exts || exts.length < 1) {
             exts.push(...AUDIO_EXTS)

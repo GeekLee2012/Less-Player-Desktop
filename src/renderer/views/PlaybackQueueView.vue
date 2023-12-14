@@ -13,7 +13,7 @@ import { smoothScroll } from '../../common/Utils';
 const { visitRecents } = inject('appRoute')
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
-const { resetQueue } = usePlayStore()
+const { resetQueue, moveTrackTo } = usePlayStore()
 const { showToast, hidePlaybackQueueView,
     hidePlayingView, hideAllCtxMenus,
     setRouterCtxCacheItem, } = useAppCommonStore()
@@ -56,15 +56,16 @@ const clearAll = () => {
 
 const queueState = () => {
     const total = queueTracks.value.length
-    const current = Math.min(Math.max(playingIndex.value + 1, 0), total)
+    let current = Math.min(Math.max(playingIndex.value + 1, 0), total)
+    //TODO dragOverIndex有些情况下不准确
+    if (dragOverIndex.value > -1) current = Math.min(Math.max(dragOverIndex.value + 1, 1), total)
     return total > 0 ? (current > 0 ? `${current} / ${total}首` : `共${total}首`) : '共0首'
 }
 
 EventBus.on("playbackQueue-empty", onQueueEmpty)
 EventBus.on("playbackQueue-targetPlaying", targetPlaying)
 
-let isUserMouseWheel = false
-let isPendingTargetPlaying = false
+let isUserMouseWheel = false, isPendingTargetPlaying = false
 let userMouseWheelTimer = null
 const onUserMouseWheel = () => {
     isUserMouseWheel = true
@@ -76,18 +77,43 @@ const onUserMouseWheel = () => {
     }, 3000)
 }
 
+/* 拖拽移动重排序 */
+const dragTargetIndex = ref(-1)
+const dragOverIndex = ref(-1)
+const dragging = ref(false)
+const setDragTargetIndex = (value) => dragTargetIndex.value = value
+const setDragOverIndex = (value) => dragOverIndex.value = value
+const setDragging = (value) => dragging.value = value
+
+const markDragStart = (event, item, index) => {
+    setDragging(true)
+    //当前拖拽对象index
+    setDragTargetIndex(index)
+    //仅为改变默认鼠标样式
+    const { dataTransfer } = event
+    if (dataTransfer) dataTransfer.effectAllowed = 'move'
+}
+
+const markDragOverIndex = (event, item, index) => {
+    if (!dragging.value) return
+    //拖拽悬停时所在的Item对象对应的index
+    setDragOverIndex(index)
+}
+
+const moveDragItem = (event) => {
+    moveTrackTo(dragTargetIndex.value, dragOverIndex.value)
+    //重置状态
+    setDragging(false)
+    setDragOverIndex(-1)
+    setDragTargetIndex(-1)
+}
+
 const pbqRef = ref(null)
 const listRef = ref(null)
 onMounted(() => {
     if (pbqRef.value) pbqRef.value.addEventListener('click', hideAllCtxMenus)
     if (listRef.value) listRef.value.addEventListener('scroll', hideAllCtxMenus)
 })
-/*
-onUnmounted(() => {
-    if (pbqRef.value) pbqRef.value.removeEventListener('click', hideAllCtxMenus)
-    if (listRef.value) listRef.value.removeEventListener('scroll', hideAllCtxMenus)
-})
-*/
 
 watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     if (isShow && isPlaybackQueueAutoPositionOnShow.value) {
@@ -179,7 +205,10 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
             </div>
             <div class="center" ref="listRef" :onmousewheel="onUserMouseWheel">
                 <template v-for="(item, index) in queueTracks">
-                    <PlaybackQueueItem class="item" :data="item" :active="playingIndex == index" :index="index">
+                    <PlaybackQueueItem class="item" :data="item" :active="playingIndex == index" :index="index"
+                        :class="{ 'drag-target': (dragTargetIndex == index), 'drag-over-mark': (dragOverIndex == index), 'first': (dragOverIndex == 0) }"
+                        :draggable="true" @dragstart="(event) => markDragStart(event, item, index)"
+                        @dragenter="(event) => markDragOverIndex(event, item, index)" @dragend="moveDragItem">
                     </PlaybackQueueItem>
                 </template>
             </div>
@@ -272,5 +301,28 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     flex: 1;
     overflow: scroll;
     overflow-x: hidden;
+}
+
+.playback-queue-view .center .item {
+    position: relative;
+}
+
+.playback-queue-view .center .item.drag-target {
+    background: var(--content-list-item-hover-bg-color);
+}
+
+.playback-queue-view .center .item.drag-over-mark::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 0px;
+    border-bottom: 2.5px solid var(--content-highlight-color);
+    position: absolute;
+    top: -1px;
+    z-index: 3;
+}
+
+.playback-queue-view .center .item.first.drag-over-mark::before {
+    top: 0px;
 }
 </style>

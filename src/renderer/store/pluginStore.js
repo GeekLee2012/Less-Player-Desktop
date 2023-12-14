@@ -46,8 +46,9 @@ export const usePluginStore = defineStore('plugins', {
             const index = this.pluginIndex(plugin)
             if(index < 0) return
             if(!changes || typeof changes != 'object') return 
+            const updatableKeys = 'state|path|main|mainModule|alias'.split('|')
             for(const [key, value] of Object.entries(changes)) {
-                if(!'state|path|main|mainModule|alias'.includes(key)) continue
+                if(!updatableKeys.includes(key)) continue
                 this.plugins[index][key] = value
             }
         },

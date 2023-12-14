@@ -15,6 +15,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         artistCategoryViewShow: false,
         radioCategoryViewShow: false,
         tagsCategoryViewShow: false,
+        platformCategoryViewShow: false,
         playbackQueueViewShow: false,
         playingViewShow: false,
         videoPlayingViewShow: false,
@@ -166,6 +167,12 @@ export const useAppCommonStore = defineStore('appCommon', {
         hideTagsCategoryView() {
             this.tagsCategoryViewShow = false
             EventBus.emit("tagsCategory-resetScroll")
+        },
+        togglePlatformCategoryView() {
+            this.platformCategoryViewShow = !this.platformCategoryViewShow
+        },
+        hidePlatformCategoryView() {
+            this.platformCategoryViewShow = false
         },
         showPlayingView() {
             this.playingViewShow = true
@@ -343,6 +350,7 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.hideArtistCategoryView()
             this.hideRadioCategoryView()
             this.hideTagsCategoryView()
+            this.hidePlatformCategoryView()
         },
         hideAllCtxMenus() {
             this.hideCommonCtxMenu(true)

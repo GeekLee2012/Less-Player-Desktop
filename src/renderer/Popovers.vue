@@ -22,6 +22,7 @@ import ColorPickerToolbar from './components/ColorPickerToolbar.vue';
 import GradientColorToolbar from './components/GradientColorToolbar.vue';
 import PlaylistExportToolbar from './components/PlaylistExportToolbar.vue';
 import TagsCategoryView from './views/TagsCategoryView.vue';
+import PlatformCategoryView from './views/PlatformCategoryView.vue';
 
 
 
@@ -45,7 +46,8 @@ const { commonNotificationShow, commonNotificationText,
   gradientColorToolbarShow, playlistCategoryViewShow,
   artistCategoryViewShow, radioCategoryViewShow,
   popoverHintShow, popoverHintText,
-  playlistExportToolbarShow, tagsCategoryViewShow } = storeToRefs(useAppCommonStore())
+  playlistExportToolbarShow, tagsCategoryViewShow,
+  platformCategoryViewShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -342,6 +344,13 @@ watch(() => getCurrentTheme(), (nv) => {
       </TagsCategoryView>
     </transition>
 
+    <transition name="fade-ex">
+      <PlatformCategoryView id="platform-category-view"
+        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        v-show="platformCategoryViewShow">
+      </PlatformCategoryView>
+    </transition>
+
     <CommonContextMenu v-show="commonCtxMenuShow" :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
       :posStyle="ctxMenuPosStyle" :data="commonCtxMenuData">
     </CommonContextMenu>
@@ -447,7 +456,8 @@ watch(() => getCurrentTheme(), (nv) => {
 #playlist-category-view,
 #artist-category-view,
 #radio-category-view,
-#tags-category-view {
+#tags-category-view,
+#platform-category-view {
   position: fixed;
   top: 85px;
   right: 0px;

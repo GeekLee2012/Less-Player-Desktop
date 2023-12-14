@@ -13,7 +13,7 @@ import { Track } from '../../common/Track';
 const { mmssCurrentTime, mmssPreseekTime } = inject('player')
 
 const props = defineProps({
-    hideVolumeBar: Boolean,
+    enableVolumeBar: Boolean,
 })
 
 const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
@@ -76,7 +76,7 @@ onMounted(() => {
                 <AudioTime :current="mmssPreseekTime || mmssCurrentTime" :duration="Track.mmssDuration(currentTrack, 0)">
                 </AudioTime>
                 <div class="volume-bar">
-                    <VolumeBar ref="volumeBarRef" v-show="!hideVolumeBar"></VolumeBar>
+                    <VolumeBar ref="volumeBarRef" v-show="enableVolumeBar"></VolumeBar>
                 </div>
             </div>
         </div>

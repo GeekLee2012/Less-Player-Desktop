@@ -8,7 +8,7 @@ export default {
 -->
 
 <script setup>
-import { inject, ref, reactive, shallowRef, watch, toRaw, nextTick } from 'vue';
+import { inject, ref, reactive, shallowRef, watch, toRaw, nextTick, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -227,6 +227,13 @@ const detectTitleHeight = () => {
     setTwoLinesTitle(clientHeight > 50)
 }
 
+const computedTabName = computed(() => {
+    return (tab) => {
+        const { code, name } = tab
+        return (tab.code === 'about') ? `专辑${name}` : name
+    }
+})
+
 //TODO
 EventBus.on('ctxMenu-removeFromLocal', reloadAll)
 
@@ -285,7 +292,7 @@ EventBus.on('app-resize', detectTitleHeight)
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
-                    v-for="(  tab, index  ) in   tabs  " @click="visitTab(index, true)" v-html="tab.name">
+                    v-for="(  tab, index  ) in   tabs  " @click="visitTab(index, true)" v-html="computedTabName(tab)">
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
@@ -408,6 +415,7 @@ EventBus.on('app-resize', detectTitleHeight)
 #album-detail-view .tab-nav {
     position: relative;
     display: flex;
+    align-items: center;
     height: 36px;
     margin-bottom: 5px;
     margin-left: 2px;
@@ -421,6 +429,7 @@ EventBus.on('app-resize', detectTitleHeight)
     margin-right: 15px;
     */
     margin-right: 36px;
+    padding-bottom: 5px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }

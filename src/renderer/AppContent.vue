@@ -12,7 +12,7 @@ import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import {
   useIpcRenderer, useUseCustomTrafficLight, isWinOS,
-  isBlank, toLowerCaseTrimString,
+  isBlank, toLowerCaseTrimString, transformUrl,
 } from '../common/Utils';
 
 
@@ -462,7 +462,7 @@ const onDrop = async (event) => {
 
 //打开默认浏览器，并访问超链接
 const visitLink = (url) => {
-  if (ipcRenderer && !isBlank(url)) ipcRenderer.send('visit-link', url)
+  if (ipcRenderer && !isBlank(url)) ipcRenderer.send('visit-link', transformUrl(url))
 }
 
 EventBus.on('app-resetSetting', resetSetting)

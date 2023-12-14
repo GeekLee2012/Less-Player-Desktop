@@ -16,13 +16,13 @@
   font-weight: normal !important;
 }
 
+
 .use-winos-win-ctl #main-left .header {
   margin-bottom: -8px !important;
 }
 
 .use-winos-win-ctl #main-left.main-left-default-old-layout .header {
-  margin-bottom: 10px !important;
-  /*padding-bottom: 8px;*/
+  margin-bottom: 8px !important;
 }
 
 .use-winos-win-ctl #main-left.main-left-default-old-layout .header .userhome-btn,

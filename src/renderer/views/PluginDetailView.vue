@@ -35,12 +35,6 @@ const withDefaultText = (text, defaultText) => {
     return text ? text : toTrimString(defaultText)
 }
 
-const visitRepository = () => {
-    const url = toTrimString(detail.repository)
-    if (!url) return
-    visitLink(transformUrl(url))
-}
-
 const updateAlias = () => {
     const { id } = props
     let { alias } = detail
@@ -80,7 +74,8 @@ onActivated(loadPlugin)
                     <div class="sec-title">官网：</div>
                     <div class="sec-content">
                         <a href="#" class="no-link" :class="{ link: !isBlank(detail.repository) }"
-                            @click.prevent="visitRepository" v-html="withDefaultText(detail.repository, '未知')"></a>
+                            @click.prevent="visitLink(detail.repository)"
+                            v-html="withDefaultText(detail.repository, '未知')"></a>
                     </div>
                 </div>
                 <div class="about info-row">

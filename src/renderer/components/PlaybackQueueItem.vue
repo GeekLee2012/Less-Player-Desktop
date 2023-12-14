@@ -86,10 +86,9 @@ const isDraggable = computed(() => {
 <template>
     <div class="playback-queue-item"
         :class="{ 'playback-queue-item-active': active, 'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data) }"
-        @dblclick="" @contextmenu="onContextMenu" :draggable="isDraggable"
-        @dragstart="(event) => dndSaveTrack(event, data)">
+        @dblclick="" @contextmenu="onContextMenu">
         <div class="item-wrap">
-            <div class="left">
+            <div class="left" :draggable="isDraggable" @dragstart.stop="(event) => dndSaveTrack(event, data)">
                 <img class="cover" :class="{ 'obj-fit-contain': (data.coverFit == 1) }" v-lazy="coverDefault(data.cover)" />
             </div>
             <div class="right">
@@ -162,12 +161,12 @@ const isDraggable = computed(() => {
 
 .playback-queue-item .item-wrap {
     margin: 0px;
-    padding-left: 10px;
+    /*padding-left: 12.5px;*/
     height: var(--item-height);
     display: flex;
     flex: 1;
     align-items: center;
-    border-left: 2px solid transparent;
+    border-left: 2.5px solid transparent;
 }
 
 .playback-queue-item:hover {
@@ -183,7 +182,7 @@ const isDraggable = computed(() => {
 }
 
 .playback-queue-item-active .item-wrap {
-    border-image: var(--content-border-image) 0 0 0 2;
+    border-image: var(--content-border-image) 0 0 0 2.5;
 }
 
 .playback-queue-item-active .title,
@@ -195,10 +194,11 @@ const isDraggable = computed(() => {
 .playback-queue-item .cover {
     width: var(--cover-size);
     height: var(--cover-size);
-    margin-right: 8px;
     -webkit-user-drag: none;
     box-shadow: 0px 0px 1px #161616;
     border-radius: 2px;
+    margin-right: 10px;
+    margin-left: 12.5px;
 }
 
 .playback-queue-item .left {
@@ -314,6 +314,7 @@ const isDraggable = computed(() => {
 .playback-queue-item:hover .artist {
     width: 158px;
     width: 47.16%;
+    width: 50%;
 }
 
 .playback-queue-item:hover .action {

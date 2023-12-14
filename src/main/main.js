@@ -184,6 +184,7 @@ const init = () => {
   nativeTheme.on('updated', () => {
     //console.log(nativeTheme.themeSource)
   })
+
 }
 
 //全局快捷键
@@ -418,8 +419,8 @@ const registryGlobalListeners = () => {
     }
   }).on('app-setGlobalProxy', (event, data) => {
     setupAppGlobalProxy(data)
-  }).on('visit-link', (event, data) => {
-    shell.openExternal(data)
+  }).on('visit-link', (event, url) => {
+    if(url) shell.openExternal(url)
   }).on('download-item', (event, { url }) => {
     if (isWindowAccessible(mainWin)) mainWin.webContents.downloadURL(url)
   }).on('download-cancel', (event, data) => {
@@ -531,7 +532,7 @@ const registryGlobalListeners = () => {
     return result
   })
 
-  ipcMain.handle('open-dirs', async (event, ...args) => {
+  ipcMain.handle('choose-dirs', async (event, ...args) => {
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件夹',
       properties: ['openDirectory']
@@ -613,6 +614,18 @@ const registryGlobalListeners = () => {
     const filePath = result.filePaths[0]
     const data = readText(filePath)
     return { filePath, data }
+  })
+
+  ipcMain.handle('choose-files', async (event, ...args) => {
+    const { title, filterExts } = args[0] || { title: '请选择文件', filterExts: ['*'] }
+    const result = await dialog.showOpenDialog(mainWin, {
+      title: title || '请选择文件',
+      filters: [{ name: '数据文件', extensions: filterExts || ['*'] }],
+      properties: ['openFile', 'multiSelections']
+    })
+    if (result.canceled) return null
+    const { filePaths } = result
+    return { filePaths }
   })
 
   ipcMain.handle('read-text', async (event, ...args) => {
@@ -1370,7 +1383,12 @@ const fetchCookie = async (url, ignoreCache) => {
 //覆盖(包装)请求
 const overrideRequestHeaders = (details) => {
   const { url, requestHeaders } = details
-  if (url.includes('localhost')) return details.requestHeaders
+  //不处理本地请求、非http请求
+  if (url.includes('localhost') || !url.startsWith('http')) return details.requestHeaders
+  // 从url中解析host，虽然requestHeaders也可能有Host信息，但有可能已经被被修改过，不一定准确
+  const fromIndex = url.indexOf('://') + 3
+  const toIndex = url.indexOf('/', fromIndex)
+  const hostOfUrl = url.substring(fromIndex, toIndex)
   
   //支持运行时重新设置请求Headers
   //TODO 发生匹配规则冲突时，尚待考虑
@@ -1385,7 +1403,7 @@ const overrideRequestHeaders = (details) => {
     //忽略Hosts
     if(ignoreHosts && Array.isArray(ignoreHosts)) {
       for(var j = 0; j < ignoreHosts.length; j++) {
-        if(url.includes(ignoreHosts[j])) {
+        if(hostOfUrl.includes(ignoreHosts[j])) {
           hostMatched = true
           break 
         }
@@ -1394,7 +1412,7 @@ const overrideRequestHeaders = (details) => {
     if(hostMatched) continue
     //必须匹配Hosts
     for(var j = 0; j < hosts.length; j++) {
-      if(url.includes(hosts[j])) {
+      if(hostOfUrl.includes(hosts[j])) {
         hostMatched = true
         break 
       }

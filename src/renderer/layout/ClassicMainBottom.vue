@@ -30,7 +30,7 @@ onMounted(() => {
             :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack" :onDragMove="preseekTrack">
         </SliderBar>
         <div id="play-nav">
-            <PlayMeta id="play-meta" :hideVolumeBar="true"></PlayMeta>
+            <PlayMeta id="play-meta"></PlayMeta>
             <div class="play-ctl-wrap">
                 <PlayControl></PlayControl>
             </div>

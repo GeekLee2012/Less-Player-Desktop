@@ -179,12 +179,12 @@ const ceateTheme = () => editTheme()
 #themes-view .header {
     padding-left: 35px;
     padding-right: 35px;
-    margin-bottom: 10px;
+    margin-bottom: 3px;
 }
 
 
 #themes-view .header .title {
-    margin-bottom: 35px;
+    margin-bottom: 25px;
     padding-top: 20px;
     /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
@@ -195,13 +195,15 @@ const ceateTheme = () => editTheme()
     text-align: left;
     margin-bottom: 6px;
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 #themes-view .tab {
     /*font-weight: bold;*/
     font-size: var(--content-text-tab-title-size);
     /*padding: 8px 15px;*/
-    padding-bottom: 8px;
+    padding-bottom: 5px;
     margin-right: 36px;
     border-bottom: 3px solid transparent;
     cursor: pointer;

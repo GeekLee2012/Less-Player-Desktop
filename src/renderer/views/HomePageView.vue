@@ -11,11 +11,11 @@ const { activePlatforms } = storeToRefs(usePlatformStore())
 const { isLocalMusic } = usePlatformStore()
 
 const visitFirstActivePlatform = () => {
-    const platform = activePlatforms.value('playlists')[0].code
-    if (isLocalMusic(platform)) {
+    const { code } = activePlatforms.value('playlists')[0]
+    if (isLocalMusic(code)) {
         visitLocalMusic()
     } else {
-        visitPlaylistSquare(platform)
+        visitPlaylistSquare(code)
     }
 }
 

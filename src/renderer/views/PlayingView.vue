@@ -9,9 +9,10 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath } from '../../common/Utils';
+import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath, stringEquals } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
+import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
 
 
 
@@ -50,15 +51,19 @@ const setupBackgroudEffect = () => {
     if (!isPlayingViewUseBgCoverEffect.value) return
     const track = currentTrack.value
     if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
-    setHasBackgroudCover(true)
-
     const { cover } = track
+    //默认封面
+    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return setHasBackgroudCover(false)
+    //本地歌曲
+    if (cover.startsWith(ImageProtocal.prefix)) return setHasBackgroudCover(false)
+
+    setHasBackgroudCover(true)
     Object.assign(bgEffectStyle, {
         background: `url('${cover}')`
     })
 }
 
-watch([currentTrack, playingViewShow], () => {
+watch([() => (currentTrack.value && currentTrack.value.cover), playingViewShow], () => {
     setupBackgroudEffect()
 })
 

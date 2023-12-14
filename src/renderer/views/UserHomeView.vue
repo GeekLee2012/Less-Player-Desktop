@@ -295,9 +295,9 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
                 <img class="cover" v-lazy="coverDefault(getUserCover)" />
             </div>
             <div class="right">
-                <div class="titleWrap">
-                    <div @click="visitUserInfoEdit">
-                        <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
+                <div class="title-wrap">
+                    <div class="edit-btn" @click="visitUserInfoEdit">
+                        <svg width="19" height="19" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path
@@ -372,7 +372,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
     margin-left: 20px;
 }
 
-#user-profile-view .header .titleWrap {
+#user-profile-view .header .title-wrap {
     margin-top: 5px;
     margin-bottom: 10px;
     display: flex;
@@ -380,12 +380,18 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
     align-items: center;
 }
 
-#user-profile-view .header .titleWrap svg {
-    fill: var(--button-icon-btn-color);
-    cursor: pointer;
+#user-profile-view .header .title-wrap .edit-btn {
+    display: flex;
+    align-items: center;
 }
 
-#user-profile-view .header .titleWrap svg:hover {
+#user-profile-view .header .title-wrap .edit-btn svg {
+    fill: var(--button-icon-btn-color);
+    cursor: pointer;
+    transform: translateY(1.5px);
+}
+
+#user-profile-view .header .title-wrap .edit-btn svg:hover {
     fill: var(--content-highlight-color);
 }
 
@@ -394,7 +400,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
     /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
-    margin-left: 10px;
+    margin-left: 6px;
     overflow: hidden;
     word-wrap: break-all;
     white-space: pre-wrap;
@@ -443,6 +449,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
 #user-profile-view .tab-nav {
     position: relative;
     display: flex;
+    align-items: center;
     height: 36px;
     margin-bottom: 8px;
     margin-left: 2px;
@@ -456,6 +463,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
     margin-right: 15px;
     */
     margin-right: 36px;
+    padding-bottom: 5px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
@@ -464,6 +472,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
     position: absolute;
     right: 10px;
     font-weight: bold;
+    padding-bottom: 5px;
 }
 
 #user-profile-view .tab-nav .active {

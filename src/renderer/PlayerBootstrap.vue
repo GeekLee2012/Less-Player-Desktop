@@ -10,7 +10,7 @@ import { useSettingStore } from './store/settingStore';
 import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
 import {
-    coverDefault, isBlank, isDevEnv,
+    coverDefault, isBlank, isDevEnv, escapeHtml,
     useIpcRenderer, useStartDrag, useDownloadsPath, tryCall
 } from '../common/Utils';
 import { PlayState, TrayAction, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
@@ -757,22 +757,13 @@ const drawCanvasSpectrum = () => {
             case 1:
                 drawSpectrum(canvas, { ...spectrumParams, alignment })
                 break
-            /*
-            case 2:
-                drawGridSpectrum(canvas, { ...spectrumParams, alignment })
-                break
-            case 3:
-                alignment = 'center'
-                drawSpectrum(canvas, { ...spectrumParams, alignment })
-                break
-            */
             case 2:
                 drawFlippingSpectrum(canvas, spectrumParams)
                 break
             default:
                 if (!hasExDrawSpectrumHandlers() || index < 0) return setSpectrumIndex(0)
                 const exSpectrumIndex = Math.max((index - 3), 0)
-                return drawExSpectrum(canvas, { ...spectrumParams, alignment }, exSpectrumIndex)
+                drawExSpectrum(canvas, { ...spectrumParams, alignment }, exSpectrumIndex)
                     .catch(error => {
                         if (error == 'noHandler') setSpectrumIndex(0)
                         else console.log(error)
@@ -1085,6 +1076,8 @@ EventBus.on('video-stop', resumeTrackPendingPlay)
 
 //应用启动时，恢复歌曲信息
 const restoreTrack = (callback) => {
+    const track = currentTrack.value
+    if (!track) return
     if (isDevEnv()) console.log('[ RESTORE TRACK ]')
 
     const _callback = (track) => {
@@ -1099,8 +1092,10 @@ const restoreTrack = (callback) => {
         }
         tryCall(callback, track)
     }
+    const { platform } = track
+    //稍候加载歌词、封面
+    if (isLocalMusic(platform)) setPendingBootstrapTrack(track)
 
-    const track = currentTrack.value
     bootstrapTrack(track)
         .then(track => tryCall(_callback, track))
         .catch(error => {
@@ -1115,10 +1110,10 @@ const restoreTrack = (callback) => {
 EventBus.on('plugins-accessResult-addPlatform', ({ code }) => {
     const pendingTrack = pendingBootstrapTrack.value
     if (!pendingTrack) return
-    if (pendingTrack.platform != code) return
-    if (!isCurrentTrack(pendingTrack)) {
-        return setPendingBootstrapTrack(null)
-    }
+    if (pendingTrack.platform != code && !isLocalMusic(pendingTrack.platform)) return
+    //pendingTrack已非当前歌曲，清理一下
+    if (!isCurrentTrack(pendingTrack)) return setPendingBootstrapTrack(null)
+
     loadLyric(pendingTrack)
     setPendingBootstrapTrack(null)
 })
@@ -1448,7 +1443,7 @@ const dndSaveTrack = async (event, track) => {
     if (!Track.hasUrl(track) && !track.exurl) return showFailToast('当前歌曲无法下载')
     const { url, exurl } = track
 
-    const normalName = Track.normalName(track)
+    const normalName = escapeHtml(Track.normalName(track))
     const suffix = Track.suffix(track) || '.mp3'
     const file = `${dndSavePath}/${normalName}${suffix}`
     startDrag({ file, name: normalName, type: 'audio', url: (url || exurl), useDefaultIcon: true })

@@ -1,5 +1,5 @@
 import { toMillis } from './Times';
-import { toLowerCaseTrimString, toTrimString } from './Utils';
+import { toLowerCaseTrimString, toTrimString, readLines } from './Utils';
 
 
 
@@ -47,8 +47,7 @@ export class Lyric {
 
     static parseFromText(text, seperator) {
         if (!text) return new Lyric()
-        const sp = seperator || '\n'
-        return Lyric.parseFromLines(text.trim().split(sp))
+        return Lyric.parseFromLines(readLines(text, seperator))
     }
 
     //@param lines - array

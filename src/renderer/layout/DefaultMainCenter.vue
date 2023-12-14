@@ -56,8 +56,11 @@ const setCategoryViewSize = () => {
     const artistCategory = document.querySelector('#artist-category-view')
     const radioCategory = document.querySelector('#radio-category-view')
     const tagsCategory = document.querySelector('#tags-category-view')
+    const platformCategory = document.querySelector('#platform-category-view')
 
-    const categories = [playlistCategory, artistCategory, radioCategory, tagsCategory]
+    const categories = [playlistCategory, artistCategory,
+        radioCategory, tagsCategory,
+        platformCategory]
 
     const { clientHeight } = mainContent, padding = 0
     const height = (clientHeight - padding)
@@ -207,7 +210,7 @@ const setBatchViewListSize = () => {
     if (!mainContent) return
     const el = document.querySelector('#batch-action-view .center > .content')
     const { clientHeight } = mainContent
-    const padding = isDefaultClassicLayout.value ? 8 : 30
+    const padding = isDefaultClassicLayout.value ? 25 : 43
     //header 87, margin 15, action 31
     const height = (clientHeight - 87 - 15 - 31 - padding)
     if (el) el.style.height = `${height}px`
@@ -222,7 +225,7 @@ const setPluginsViewListSize = () => {
     if (!el || !headerEl) return
     const { clientHeight } = mainContent
     const { clientHeight: headerClientHeight } = headerEl
-    const padding = isDefaultClassicLayout.value ? 8 : 30
+    const padding = isDefaultClassicLayout.value ? 20 : 36
     //header 136, margin 15, action 36
     const height = (clientHeight - headerClientHeight - 36 - padding)
     if (el) el.style.height = `${height}px`
@@ -331,7 +334,9 @@ onMounted(() => {
 
         //隐藏上下文菜单
         hideAllCtxMenus()
-        //TODO Electron窗口缩放Bug，放在最后执行确保缩放
+        //TODO Electron窗口缩放Bug
+        // 目前现象: 窗口内容时不时“抽一下......”，其实是缩放比由100% => 用户自定义缩放百分比（下面的代码强制设置的结果）
+        // 放在最后执行确保按用户设置百分比缩放
         setupWindowZoom(true)
         //nextTick(() => setupWindowZoom(true))
         if (isDevEnv()) console.log('[ RESIZE ]')

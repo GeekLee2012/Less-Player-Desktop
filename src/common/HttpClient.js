@@ -1,6 +1,6 @@
 import axios from "axios";
 import qs from "qs";
-import { isBlank, isDevEnv } from "./Utils";
+import { isBlank, isDevEnv, tryCallDefault } from "./Utils";
 
 
 
@@ -28,19 +28,10 @@ export const parseJsonp = (jsonp) => {
 
 export const qsStringify = (data) => (qs.stringify(data))
 
-const tryResponseCallback = (callback, resp) => {
-    try {
-        if(callback && (typeof callback == 'function')) return callback(resp)
-    } catch (error) {
-        console.log(error)
-    }
-    return resp
-}
-
 const tryResponseJson = (resp) => {
     if(!resp || !resp.data) return 
     const { data } = resp
-    if(typeof data == 'string') {
+    if(data && typeof data == 'string') {
         try {
             return JSON.parse(data)
         } catch(error1) {
@@ -63,7 +54,7 @@ export const get = async (url, data, config, callback) => {
             url = `${url}${_and}${data}`
         }
         axios.get(url, config)
-            .then(resp => resolve(tryResponseCallback(callback, resp)))
+            .then(resp => resolve(tryCallDefault(callback, resp, resp)))
             .catch(error => reject(error))
     }).catch(error => Promise.reject(error))
 }
@@ -72,7 +63,7 @@ export const post = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
         if (data && (typeof data === 'object')) data = qsStringify(data)
         axios.post(url, data, config)
-            .then(resp => resolve(tryResponseCallback(callback, resp)))
+            .then(resp => resolve(tryCallDefault(callback, resp, resp)))
             .catch(error => reject(error))
     }).catch(error => Promise.reject(error))
 }

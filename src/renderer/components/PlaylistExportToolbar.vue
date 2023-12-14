@@ -37,7 +37,7 @@ const filteredPlaylistFormats = ref(playlistFormats)
 const exportPathRef = ref(null)
 const selectDir = async () => {
     if (!ipcRenderer || !exportPathRef.value) return
-    const result = await ipcRenderer.invoke('open-dirs')
+    const result = await ipcRenderer.invoke('choose-dirs')
     if (result) {
         exportPathRef.value.value = result[0]
     }

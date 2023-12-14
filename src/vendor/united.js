@@ -1,7 +1,8 @@
 import { Track } from "../common/Track";
-import { toTrimString } from "../common/Utils";
+import { toTrimString, stringIncludesIgnoreCaseEscapeHtml, stringEqualsIgnoreCaseEscapeHtml } from "../common/Utils";
 import { LESS_MAGIC_CODE } from "../common/Constants";
 import { usePlatformStore } from "../renderer/store/platformStore";
+import { Lyric } from "../common/Lyric";
 
 
 
@@ -61,7 +62,7 @@ export class United {
     }
 
     //互惠互助、互通有无、移花接木？奏是介些说法啦 ~
-    static transferTrack(track, ignoreUrl, ignoreAlbum) {
+    static transferTrack(track, options) {
         return new Promise(async (resolve, reject) => {
             let result = null
             const { platform: fromPlatform, title } = track
@@ -82,7 +83,7 @@ export class United {
                 if (!searchResult) continue
                 const { data: candidates } = searchResult
                 if (!candidates || candidates.length < 1) continue
-                result = await United.matchFromCandidates({ ...track, tTitle, tArtistName }, candidates.slice(0, Math.min(candidates.length, 20)), ignoreUrl, ignoreAlbum)
+                result = await United.matchFromCandidates({ ...track, tTitle, tArtistName }, candidates.slice(0, Math.min(candidates.length, 20)), options)
                 if (result) break
             }
             resolve(result)
@@ -90,7 +91,22 @@ export class United {
     }
 
     //TODO 匹配算法，后续再完善
-    static matchFromCandidates(track, candidates, ignoreUrl, ignoreAlbum) {
+    static matchFromCandidates(track, candidates, options) {
+        let ignoreAlbum = false, ignoreUrl = false
+        let ignoreCover = true, ignoreLyric = true
+        if(options) {
+            const { isGetCover, isGetLyric } = options
+            if(isGetCover) {
+                ignoreAlbum = true
+                ignoreUrl = true
+                ignoreCover = false
+            }
+            if(isGetLyric) {
+                ignoreAlbum = true
+                ignoreUrl = true
+                ignoreLyric = false
+            }
+        }
         return new Promise(async (resolve, reject) => {
             let result = null
             const { id, platform, title, artist, duration, tTitle, tArtistName } = track
@@ -101,6 +117,7 @@ export class United {
                     platform: cPlatform, duration: cDuration } = candidate
                 //跳过自身
                 if (id == cId && platform == cPlatform) continue
+                if(!ignoreCover && !Track.hasCover(candidate)) continue
 
                 //开始评估、匹配
                 const cArtistName = Track.artistName(candidate)
@@ -109,18 +126,32 @@ export class United {
                 //歌曲名称
                 const _title = (title || LESS_MAGIC_CODE)
                 //title格式：[名称], [名称 - 歌手], [歌手 - 名称]
+                /*
                 const isSimilar = cTitle.toLowerCase().includes(_title.toLowerCase()) 
                     || cTitle.toLowerCase().includes(tTitle.toLowerCase()) 
                     || cTitle.toLowerCase().includes(tArtistName.toLowerCase())
+                */
+                const isSimilar = stringIncludesIgnoreCaseEscapeHtml(cTitle, _title)
+                    || stringIncludesIgnoreCaseEscapeHtml(cTitle, tTitle)
+                    || stringIncludesIgnoreCaseEscapeHtml(cTitle, tArtistName)
                 //歌曲名称没有任何相同
                 if (!isSimilar) continue
                 score += 0.25
                 //在线歌曲title格式，直接比较
                 //本地歌曲title格式：[名称 - 歌手]，或[歌手 - 名称]
+                /*
                 if (title == cTitle || tTitle == cTitle || tArtistName == cTitle) {
                     score += 0.05
                     ++hits
                 }
+                */
+                if (stringEqualsIgnoreCaseEscapeHtml(title, cTitle) 
+                    || stringEqualsIgnoreCaseEscapeHtml(tTitle, cTitle) 
+                    || stringEqualsIgnoreCaseEscapeHtml(tArtistName, cTitle)) {
+                    score += 0.05
+                    ++hits
+                }
+                
 
                 //歌手
                 let isArtistMissed = true //未命中歌手
@@ -128,7 +159,7 @@ export class United {
                     for (var j = 0; j < artist.length; j++) {
                         const { name } = artist[j]
                         const _name = (name || LESS_MAGIC_CODE)
-                        if (cArtistName.toLowerCase().includes(_name.toLowerCase())) {
+                        if (stringIncludesIgnoreCaseEscapeHtml(cArtistName, _name)) {
                             score += 0.2
                             isArtistMissed = false
                             ++hits
@@ -140,7 +171,7 @@ export class United {
                     const _tArtists = [tArtistName, tTitle]
                     for(var j = 0; j < _tArtists.length; j++) {
                         const _name = (_tArtists[j] || LESS_MAGIC_CODE)
-                        if (cArtistName.toLowerCase().includes(_name.toLowerCase())) {
+                        if (stringIncludesIgnoreCaseEscapeHtml(cArtistName, _name)) {
                             score += 0.2
                             isArtistMissed = false
                             ++hits
@@ -149,11 +180,11 @@ export class United {
                     }
                 }
                 //专辑
-                if (ignoreAlbum || albumName == cAlbumName
+                if (ignoreAlbum || stringIncludesIgnoreCaseEscapeHtml(albumName, cAlbumName)
                     || albumName == LESS_MAGIC_CODE) {
                     score += 0.2
                     ++hits
-                } else if (cAlbumName.toLowerCase().includes(albumName.toLowerCase())) {
+                } else if (stringIncludesIgnoreCaseEscapeHtml(albumName, cAlbumName)) {
                     score += 0.15
                 }
 
@@ -180,7 +211,7 @@ export class United {
 
                 if (score < 0.6 || hits < 2) continue
                 Object.assign(candidate, { isCandidate: true, score })
-                result = candidate
+                //result = candidate
                 const vendor = United.getVendor(cPlatform)
                 if (!vendor) continue
                 if (!ignoreUrl) {
@@ -193,8 +224,9 @@ export class United {
                 const cLyric = await vendor.lyric(candidate.id, candidate)
                 if (!cLyric) continue
                 const { lyric, trans: lyricTrans, roma: lyricRoma } = cLyric
+                if(!ignoreLyric && !Lyric.hasData(lyric)) continue
                 Object.assign(candidate, { lyric, lyricTrans, lyricRoma })
-                //result = candidate
+                result = candidate
                 break
             }
             resolve(result)

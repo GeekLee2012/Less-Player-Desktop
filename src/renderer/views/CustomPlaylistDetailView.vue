@@ -186,9 +186,9 @@ onUpdated(() => {
             <div class="right">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>
                 <div class="about" v-html="getAbout()" :class="{ 'short-about': isTwoLinesTitle }"></div>
-                <div class="edit">
-                    <div @click="() => visitCustomPlaylistEdit(id)">
-                        <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
+                <div class="edit-wrap">
+                    <div class="edit-btn" @click="() => visitCustomPlaylistEdit(id)">
+                        <svg width="19" height="19" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path
@@ -199,7 +199,7 @@ onUpdated(() => {
                             </g>
                         </svg>
                     </div>
-                    <div class="time spacing">
+                    <div class="time">
                         <span>最后更新：{{ toYyyymmddHhMmSs(detail.updated) }}</span>
                     </div>
                 </div>
@@ -279,23 +279,26 @@ onUpdated(() => {
     margin-bottom: 10px;
 }
 
-#custom-playlist-detail-view .right .edit {
+#custom-playlist-detail-view .right .edit-wrap {
     display: flex;
     flex-direction: row;
     align-items: center;
     margin-bottom: 15px;
 }
 
-#custom-playlist-detail-view .spacing {
-    margin-left: 6px;
+#custom-playlist-detail-view .right .edit-wrap .edit-btn {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
 }
 
-#custom-playlist-detail-view .edit svg {
+#custom-playlist-detail-view .edit-btn svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
+    transform: translateY(-1px);
 }
 
-#custom-playlist-detail-view .edit svg:hover {
+#custom-playlist-detail-view .edit-btn svg:hover {
     fill: var(--content-highlight-color);
 }
 
