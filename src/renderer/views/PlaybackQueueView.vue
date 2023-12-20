@@ -6,7 +6,7 @@ import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import EventBus from '../../common/EventBus';
-import { smoothScroll } from '../../common/Utils';
+import { smoothScroll, stringEqualsIgnoreCase } from '../../common/Utils';
 
 
 
@@ -85,6 +85,13 @@ const setDragTargetIndex = (value) => dragTargetIndex.value = value
 const setDragOverIndex = (value) => dragOverIndex.value = value
 const setDragging = (value) => dragging.value = value
 
+//重置状态
+const resetDragState = () => {
+    setDragging(false)
+    setDragOverIndex(-1)
+    setDragTargetIndex(-1)
+}
+
 const markDragStart = (event, item, index) => {
     setDragging(true)
     //当前拖拽对象index
@@ -101,11 +108,8 @@ const markDragOverIndex = (event, item, index) => {
 }
 
 const moveDragItem = (event) => {
+    if (!dragging.value) return
     moveTrackTo(dragTargetIndex.value, dragOverIndex.value)
-    //重置状态
-    setDragging(false)
-    setDragOverIndex(-1)
-    setDragTargetIndex(-1)
 }
 
 const pbqRef = ref(null)
@@ -208,7 +212,8 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
                     <PlaybackQueueItem class="item" :data="item" :active="playingIndex == index" :index="index"
                         :class="{ 'drag-target': (dragTargetIndex == index), 'drag-over-mark': (dragOverIndex == index), 'first': (dragOverIndex == 0) }"
                         :draggable="true" @dragstart="(event) => markDragStart(event, item, index)"
-                        @dragenter="(event) => markDragOverIndex(event, item, index)" @dragend="moveDragItem">
+                        @dragenter="(event) => markDragOverIndex(event, item, index)" @drop="moveDragItem"
+                        @dragend="resetDragState">
                     </PlaybackQueueItem>
                 </template>
             </div>

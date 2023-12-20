@@ -59,7 +59,7 @@ const refreshPageList = () => {
 //转换特殊页
 const resolvePresetPage = (page, index) => {
     if (page === ellipsisPage && index === 1) { //左边
-        return Math.ceil((pagination.page - 3) / 2 + 1)
+        return Math.ceil((pagination.page - 1) / 2 + 1)
     } else if (page === ellipsisPage) { //右边
         const { max } = getMaxPage()
         return Math.ceil((max - pagination.page) / 2 + pagination.page)

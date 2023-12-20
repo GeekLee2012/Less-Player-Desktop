@@ -242,6 +242,10 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         customEQValues: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         //混响 Impulse Response
         currentIRIndex: 0,
+        //声道（立体声）
+        stereoPanValue: 0,  //范围： -1.0 ~ 1.0，默认为0
+        //音量
+        volumeGain: 1.0,    //范围：0.0 ~ 3.0，默认为1.0
     }),
     getters: {
         currentEffectName() {
@@ -275,7 +279,13 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         },
         currentIRSource() {
             return this.currentIR.source
-        }
+        },
+        currentStereoPanValueToPercent() {
+            return (Number(this.stereoPanValue) + 1.0) / 2.0 
+        },
+        currentVolumeGainToPercent() {
+            return Number(this.volumeGain) / 3.0  
+        },
     },
     actions: {
         setUseEffect(type, index, ignore) {
@@ -290,8 +300,7 @@ export const useSoundEffectStore = defineStore('soundEffect', {
                 this.currentEQIndex = index
                 this.currentIRIndex = 0
             }
-            EventBus.emit('track-updateEQ', this.currentEQValues)
-            EventBus.emit('track-updateIR', this.currentIRSource)
+            this.setupSoundEffect()
         },
         //TODO 暂时简单处理：关闭时，相当于快捷关闭; 开启时，并不开启任何音效
         toggleSoundEffect() {
@@ -339,13 +348,36 @@ export const useSoundEffectStore = defineStore('soundEffect', {
                 this.updateCustomEQValue(index, value)
             })
             return true
+        },
+        setStereoPanValue(value) {
+            value = Number(value || 0.0)
+            value = Math.max(-1.0, value)
+            value = Math.min(1.0, value)
+            this.stereoPanValue = value
+            EventBus.emit('track-updateStereoPan', this.stereoPanValue)
+        },
+        setVolumeGain(value) {
+            value = Number(value)
+            value = Math.max(0, value)
+            value = Math.min(3.0, value)
+            if(Math.abs(1 - value) <= 0.01) value = 1.0
+            this.volumeGain = value
+            EventBus.emit('track-updateVolumeGain', this.volumeGain)
+        },
+        setupSoundEffect() {
+            EventBus.emit('track-setupSoundEffect', {
+                eqValues: this.currentEQValues,
+                irSource: this.currentIRSource,
+                type: this.currentEffectType,
+                stereoPan: this.stereoPanValue,
+                volumeGain: this.volumeGain,
+            })
         }
     },
     persist: {
         enabled: true,
         strategies: [{
             storage: localStorage,
-            //paths: []
-        },]
+        }]
     }
 })

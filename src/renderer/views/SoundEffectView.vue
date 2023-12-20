@@ -1,10 +1,13 @@
 <script setup>
-import { inject, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import VerticalSliderBar from '../components/VerticalSliderBar.vue';
+import SideSliderBar from '../components/SideSliderBar.vue';
+import SliderBar from '../components/SliderBar.vue';
+
 
 
 
@@ -13,11 +16,14 @@ const { useWindowsStyleWinCtl } = inject('appCommon')
 const { hideSoundEffectView } = useAppCommonStore()
 const { currentEQIndex, currentEffectName,
     currentEQValue, currentEQValueToPercent,
-    isUseEffect, currentIRIndex, } = storeToRefs(useSoundEffectStore())
+    isUseEffect, currentIRIndex,
+    currentStereoPanValueToPercent,
+    volumeGain, currentVolumeGainToPercent, } = storeToRefs(useSoundEffectStore())
 const { setUseEffect, toggleSoundEffect,
     getPresetEQs, getEQNames,
     updateCustomEQValue, percentToEQValue,
-    getPresetIRs, syncCurrentEQToCustom } = useSoundEffectStore()
+    getPresetIRs, syncCurrentEQToCustom,
+    setStereoPanValue, setVolumeGain } = useSoundEffectStore()
 const activeTabIndex = ref(0)
 
 const setActiveTab = (index) => activeTabIndex.value = index
@@ -40,6 +46,32 @@ const updateEQValue = (percent, item, index) => {
 const switchIR = (item, index) => {
     if (item.enabled) setUseEffect(1, index)
 }
+
+const updateStereoPan = (percent) => {
+    const panValue = 2.0 * Number(percent) - 1.0
+    setStereoPanValue(panValue)
+}
+
+const computedStereoPanText = computed(() => {
+    //进度条值，小数：0.0 - 1.0
+    const fPercent = currentStereoPanValueToPercent.value
+    //距离中点位置的偏移量
+    const offset = fPercent - 0.5
+    //偏移量对应的百分比，整数：0 - 100
+    const offsetPercent = parseInt(Math.abs(offset) / 0.5 * 100)
+    if (offset == 0) return '平衡居中'
+    return offset < 0 ? `偏左${offsetPercent}%` : `偏右${offsetPercent}%`
+})
+
+const updateVolumeGain = (percent) => {
+    const volume = 3.0 * Number(percent)
+    setVolumeGain(volume)
+}
+
+const computedVolumeGainText = computed(() => {
+    const percent = parseInt(volumeGain.value / 1.0 * 100)
+    return `音量${percent}%`
+})
 </script>
 
 <template>
@@ -107,6 +139,23 @@ const switchIR = (item, index) => {
                         </svg>
                         <div class="text" :class="{ 'content-text-highlight': activeTabIndex == 1 }">混响</div>
                     </div>
+                    <div class="nav-item" :class="{ active: activeTabIndex == 2 }" @click="() => setActiveTab(2)">
+                        <svg width="36" height="36" viewBox="0 0 875.14 917" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M461,0c5.91.57,11.82,1.23,17.74,1.71C576.82,9.54,660.56,49.4,732.92,115,802.41,178,847,255.16,865.64,347.17A475.74,475.74,0,0,1,875,441q.18,136.24.14,272.48c0,18.29.42,36.59-4,54.66C857.06,826.21,808.5,868.37,749,873a429.58,429.58,0,0,1-46.93.81c-22.77-.71-39.48-19.13-39.53-42.65q-.24-103.48-.33-207c0-23,.2-46,.31-69,.13-25.27,17.93-43.13,43.17-43.22q39.24-.15,78.49-.18h6.33c0-9.42.11-18.36,0-27.29-.37-24.47.18-49-1.47-73.39-4.64-68.7-27.5-131-69.5-185.72C669.4,160.12,605.4,115.3,524.82,95.56A377.81,377.81,0,0,0,441.29,84.8c-94.8-1.71-175.55,32.66-244.7,95.93-57.73,52.82-91.32,119-105.63,195.49a320.87,320.87,0,0,0-5.15,60.63c.12,23,0,46,0,69v6h5.8q39.26.09,78.5.18c25.52.08,43.33,18,43.36,43.48q.18,134.49.18,269a72.38,72.38,0,0,1-3.62,23.47c-5.62,16.1-18.35,24.83-34.87,25.63-23.74,1.15-47.61,1.7-71-4.35C47.79,854.64,7.5,808.18,2,750.2.61,735.65,1,720.92.88,706.27c-.17-23.5,0-47-.08-70.49A42.48,42.48,0,0,0,0,630V510a35.66,35.66,0,0,0,.8-5.28c.11-23.32,0-46.65.23-70,.31-33.23,3.44-66.22,11.4-98.51C45,204.22,123.73,108.3,243,45.13,292.92,18.68,347.17,6.25,403.33,1.9,410.23,1.36,417.11.64,424,0ZM85.84,597.24v6.27q0,62.68,0,125.36c0,4.16-.08,8.33.19,12.48,1.41,21.74,21,43.33,42.14,46.19V597.24Zm661.95,190.2c19.07-2.09,37.71-19.74,41-40.65,2-12.55,1.61-25.52,1.69-38.31.19-35.14.06-70.27.06-105.41v-5.79h-42.7Z" />
+                                    <path
+                                        d="M433,917a7.44,7.44,0,0,0-1.69-.85c-22.19-4.63-35.19-20.16-35.81-42.84,0-1,0-2,0-3q0-219.7,0-439.42c0-13.94,3.36-26.49,14.12-36,12.87-11.36,27.78-14.16,43.73-8C469.06,393.07,478,405,480.08,421.9a66.17,66.17,0,0,1,.41,8q0,219.46,0,438.93c0,10.14-1.39,19.92-7,28.68-6.57,10.25-16.05,16.15-27.87,18.53a16.1,16.1,0,0,0-2.63,1Z" />
+                                    <path
+                                        d="M341.51,650.75c0,31.63-.27,63.26.08,94.89.31,27.75-21,41.23-38.73,43.09C281.17,791,261.17,775,257.4,752.63a61.24,61.24,0,0,1-.55-10q0-88.7,0-177.39c0-6.3,0-12.72,1.08-18.88C262,524.17,281.4,510,304.12,512.07c21.16,2,37.27,20,37.35,42.28C341.59,586.48,341.5,618.61,341.51,650.75Z" />
+                                    <path
+                                        d="M619,650.52q0,47.75,0,95.5c0,23.89-18.66,42.69-42.3,42.81s-42.12-18.7-42.18-42.78c-.07-27,0-54,0-81-.05-27.5-.24-55-.3-82.48,0-9.67.17-19.33.32-29,.37-23.41,18.46-41.53,41.61-41.71,23.46-.19,42.5,17.65,42.79,41.12C619.3,585.52,619,618,619,650.52Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        <div class="text" :class="{ 'content-text-highlight': activeTabIndex == 2 }">其他</div>
+                    </div>
                 </div>
                 <div class="content" v-show="activeTabIndex == 0">
                     <div class="presets">
@@ -131,6 +180,33 @@ const switchIR = (item, index) => {
                     <div v-for="(item, index) in getPresetIRs()" v-show="item.enabled" v-html="item.name"
                         class="item spacing1" :class="{ active: currentIRIndex == index, disabled: !item.enabled }"
                         @click="switchIR(item, index)">
+                    </div>
+                </div>
+                <div class="others-content" v-show="activeTabIndex == 2">
+                    <div class="item stereo-pan">
+                        <div class="item-center">
+                            <span class="text-btn" @click="setStereoPanValue(-1)">左声道</span>
+                            <SideSliderBar class="value" :value="currentStereoPanValueToPercent" :onSeek="updateStereoPan"
+                                :onScroll="updateStereoPan" :onDragMove="updateStereoPan">
+                            </SideSliderBar>
+                            <span class="text-btn" @click="setStereoPanValue(1)">右声道</span>
+                        </div>
+                        <div class="item-bottom">
+                            <span class="text-btn tip-text" @click="setStereoPanValue(0)"
+                                v-html="computedStereoPanText"></span>
+                        </div>
+                    </div>
+                    <div class="item volume">
+                        <div class="item-center">
+                            <span class="text-btn" @click="setVolumeGain(0)">静音</span>
+                            <SliderBar :value="currentVolumeGainToPercent" :scopeType="1" :onSeek="updateVolumeGain"
+                                :onScroll="updateVolumeGain" :onDragMove="updateVolumeGain"></SliderBar>
+                            <span class="text-btn" @click="setVolumeGain(3)">最大</span>
+                        </div>
+                        <div class="item-bottom">
+                            <span class="text-btn tip-text" @click="setVolumeGain(1)"
+                                v-html="computedVolumeGainText"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -328,5 +404,46 @@ const switchIR = (item, index) => {
 .sound-effect-view .center .impulse-content .disabled {
     cursor: not-allowed;
     color: var(--toggle-thumb-bg) !important;
+}
+
+.sound-effect-view .center .others-content {
+    flex: 1;
+    padding: 35px 25px 25px 25px;
+    margin-left: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.sound-effect-view .center .others-content .item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 95%;
+    margin-bottom: 35px;
+}
+
+.sound-effect-view .center .others-content .item .item-center {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+.sound-effect-view .center .others-content .item .item-center .text-btn {
+    min-width: 60px;
+}
+
+.sound-effect-view .center .others-content .item .side-slider-bar,
+.sound-effect-view .center .others-content .item .slider-bar {
+    --others-sliderbar-ctl-height: 3px;
+    margin-left: 15px;
+    margin-right: 15px;
+    flex: 1;
+    height: 3px;
 }
 </style>

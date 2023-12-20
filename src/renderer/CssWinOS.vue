@@ -44,7 +44,9 @@
 */
 
 .use-winos-win-ctl .default-main-top .play-nav>.action {
-  margin-right: 10px !important;
+  /*margin-right: 10px !important;*/
+  padding-right: 10px !important;
+  width: 39.33%;
 }
 
 .use-winos-win-ctl .default-main-top .search-bar .keyword {

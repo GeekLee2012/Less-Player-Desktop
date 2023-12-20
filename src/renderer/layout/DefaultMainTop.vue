@@ -142,20 +142,24 @@ const switchToSimpleLayout = () => {
 }
 
 .default-main-top .play-nav>.action {
-    width: 39.33%;
+    /*width: 39.33%;*/
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    /*margin-right: 28px;*/
+    /*margin-right: 28px;
     margin-right: 15px;
+    */
 }
 
 .default-main-top .play-nav>.action .spacing {
     margin-left: 15px;
 }
 
+
 .default-main-top .play-nav>.action.not-windows-style-win-ctl {
-    margin-right: 39px;
+    /*margin-right: 39px;*/
+    padding-right: 33px;
+    width: 34.33%;
 }
 
 .default-main-top .play-nav>.action .btn {

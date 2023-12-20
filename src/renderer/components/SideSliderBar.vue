@@ -2,7 +2,7 @@
 import { watch, ref, onMounted } from 'vue';
 
 
-//TODO 组件写得复杂化了，且效果一般
+//“中间 -> 单边（两边）”滑动条
 const props = defineProps({
     value: Number,      //0.0 - 1.0
     disable: Boolean,
@@ -20,7 +20,6 @@ const props = defineProps({
     onDragRelease: Function,
     thumbStyle: Number,  //0 => 默认， 1 => 加大
     thumbAutoHideDelay: Number, //单位ms, 默认1000
-    scopeType: Number //类型，主界面为0，非主界面为1（比如弹窗）
 })
 
 const sliderCtlRef = ref(null)
@@ -39,10 +38,16 @@ const seekProgress = (event) => {
     }
     const { disable, onSeek } = props
     if (disable) return
+    if (onDrag.value) return
 
     const { target, offsetX } = event
     if (thumbRef.value.contains(target)) {
         updateProgressByDeltaWidth(offsetX)
+    } else if (progressRef.value.contains(target)) {
+        const { offsetWidth } = sliderCtlRef.value
+        const sign = value > 0.5 ? 1 : -1
+        const width = offsetWidth / 2 + offsetX * sign
+        updateProgressByWidth(width)
     } else {
         updateProgressByWidth(offsetX)
     }
@@ -78,11 +83,19 @@ const scrollProgress = (event) => {
 }
 
 const updateProgress = (percent) => {
-    percent = percent * 100
+    percent = Number(percent) * 100
     percent = percent > 0 ? percent : 0
     percent = percent < 100 ? percent : 100
 
-    progressRef.value.style.width = `${percent}%`
+    if (percent == 50) {
+        progressRef.value.style.width = '0%'
+    } else if (percent > 50) {
+        progressRef.value.style.width = `${percent - 50}%`
+        progressRef.value.style.left = '50%'
+    } else {
+        progressRef.value.style.width = `${50 - percent}%`
+        progressRef.value.style.left = `${percent}%`
+    }
     thumbRef.value.style.left = `${percent}%`
 
     value = (percent / 100).toFixed(2)
@@ -101,12 +114,12 @@ const updateProgressByWidth = (width) => {
 }
 
 const updateProgressByDeltaWidth = (delta) => {
-    if (delta == 0) return
-    const totalWidth = sliderCtlRef.value.offsetWidth
-    const oPercent = parseFloat(progressRef.value.style.width.replace('%', '')) / 100
-    if (isNaN(oPercent)) return
-    let oWidth = totalWidth * oPercent
-    updateProgressByWidth(oWidth + delta)
+    //if (delta == 0) return
+    const { offsetWidth: sWidth } = sliderCtlRef.value
+    const { offsetWidth: pWidth } = progressRef.value
+    const sign = value >= 0.5 ? 1 : -1
+    const width = sWidth / 2 + (pWidth + delta) * sign
+    updateProgressByWidth(width)
 }
 
 const startDrag = (event) => {
@@ -123,13 +136,10 @@ const dragMove = (event) => {
     event.stopPropagation()
     if (props.disable) return
     if (!onDrag.value) return
-    let percent = value
+
     const { offsetLeft, clientWidth: sliderWidth } = sliderCtlRef.value
-    if (props.scopeType === 1) {
-        percent = Number(value) + event.movementX / sliderWidth
-    } else {
-        percent = (event.clientX - offsetLeft) / sliderWidth
-    }
+    const percent = Number(value) + event.movementX / sliderWidth
+
     updateProgress(percent)
     const { onDragMove } = props
     if (onDragMove) onDragMove(value, event)
@@ -139,11 +149,14 @@ const dragMove = (event) => {
 const releaseDrag = (event) => {
     event.stopPropagation()
     if (props.disable) return
-    onDrag.value = false
+    //onDrag.value = false
     document.removeEventListener("mousemove", dragMove)
     document.removeEventListener("mouseup", releaseDrag)
     const { onDragRelease } = props
-    if (onDragRelease) onDragRelease(value, event)
+    setTimeout(() => {
+        onDrag.value = false
+        if (onDragRelease) onDragRelease(value, event)
+    }, 200);
 }
 
 //优化拖动体验
@@ -181,25 +194,25 @@ defineExpose({
 </script>
 
 <template>
-    <div class="slider-bar" @mousewheel="scrollProgress" @mouseenter="showThumb" @mouseleave="hideThumb">
-        <div class="slider-bar-ctl"
-            :class="{ 'slider-bar-ctl-ondrag': onDrag, 'slider-bar-ctl-with-thumb': thumbShow, 'slider-bar-ctl-disable': disable }"
-            ref="sliderCtlRef" @click="seekProgress">
+    <div class="side-slider-bar" @mousewheel="scrollProgress" @mouseenter="showThumb" @mouseleave="hideThumb">
+        <div class="side-slider-bar-ctl"
+            :class="{ 'side-slider-bar-ctl-ondrag': onDrag, 'side-slider-bar-ctl-with-thumb': thumbShow, 'side-slider-bar-ctl-disable': disable }"
+            ref="sliderCtlRef" @click.stop="seekProgress">
             <div class="progress" ref="progressRef"></div>
-            <div class="thumb" :class="{ 'big-thumb': (thumbStyle == 1) }" ref="thumbRef" @mousedown="startDrag">
+            <div class="thumb" :class="{ 'big-thumb': (thumbStyle == 1) }" ref="thumbRef" @mousedown.stop="startDrag">
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.slider-bar {
+.side-slider-bar {
     height: 3px;
     background: transparent;
     -webkit-app-region: none;
 }
 
-.slider-bar .slider-bar-ctl {
+.side-slider-bar .side-slider-bar-ctl {
     height: var(--others-sliderbar-ctl-height);
     border-radius: 10rem;
     background: var(--others-progressbar-bg-color);
@@ -210,20 +223,21 @@ defineExpose({
     position: relative;
 }
 
-.slider-bar .slider-bar-ctl-disable {
+.side-slider-bar .side-slider-bar-ctl-disable {
     cursor: default;
 }
 
-.slider-bar .progress {
+.side-slider-bar .progress {
     width: 0%;
     height: 100%;
     border-radius: 10rem;
     background: var(--content-text-highlight-color);
     z-index: 1;
     position: absolute;
+    left: 50%;
 }
 
-.slider-bar .thumb {
+.side-slider-bar .thumb {
     width: 13px;
     height: 13px;
     border-radius: 10rem;
@@ -233,16 +247,16 @@ defineExpose({
     position: absolute;
     left: 0%;
     -webkit-app-region: none;
-    visibility: hidden;
+    visibility: visible;
 }
 
-.slider-bar .big-thumb {
+.side-slider-bar .big-thumb {
     border: 1px solid var(--content-highlight-color);
 }
 
-/*.slider-bar:hover .thumb,*/
-.slider-bar .slider-bar-ctl-with-thumb .thumb,
-.slider-bar .slider-bar-ctl-ondrag .thumb {
+/*.side-slider-bar:hover .thumb,*/
+.side-slider-bar .side-slider-bar-ctl-with-thumb .thumb,
+.side-slider-bar .side-slider-bar-ctl-ondrag .thumb {
     visibility: visible;
 }
 </style>

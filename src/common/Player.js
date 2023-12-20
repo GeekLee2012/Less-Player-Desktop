@@ -18,8 +18,9 @@ export class Player {
         this.playState = PlayState.NONE
         this.currentTime = 0
         this.webAudioApi = null
-        this.pendingSoundEffectType = 0 // 0 =>均衡器， 1 => 混响
         this.pendingSoundEffect = null
+        this.pendingStereoPan = null
+        this.pendingVolumeGain = null
         this.animationFrameId = 0
         this.seekPendingMark = 0 //percent
         //动画帧 - 进度刷新
@@ -54,8 +55,9 @@ export class Player {
             .on('volume-set', volume => player.volume(volume))
             .on('radio-play', () => player.setCurrent(null))
             .on('playbackQueue-empty', () => player.setCurrent(null))
-            .on('track-updateEQ', values => player.updateEQ(values))
-            .on('track-updateIR', source => player.updateIR(source))
+            .on('track-setupSoundEffect', options => player.setupSoundEffect(options))
+            .on('track-updateStereoPan', value => player.updateStereoPan(value))
+            .on('track-updateVolumeGain', value => player.updateVolumeGain(value))
             .on('track-stateRefreshFrequency', value => player.stateRefreshFrequency = value)
             .on('track-spectrumRefreshFrequency', value => player.spectrumRefreshFrequency = value)
             .on('track-markSeekPending', value => player.seekPendingMark = value)
@@ -183,6 +185,7 @@ export class Player {
 
     volume(value) {
         Howler.volume(value)
+        this.updateVolumeGain(value)
     }
 
     seek(percent) {
@@ -280,8 +283,8 @@ export class Player {
             this.webAudioApi.updateEQ(values)
             this.pendingSoundEffect = null
         } else {
-            this.pendingSoundEffectType = 0
-            this.pendingSoundEffect = values
+            this.pendingSoundEffect = this.pendingSoundEffect || {}
+            Object.assign(this.pendingSoundEffect, { eqValues: values })
         }
     }
 
@@ -290,17 +293,45 @@ export class Player {
             this.webAudioApi.updateIR(source)
             this.pendingSoundEffect = null
         } else {
-            this.pendingSoundEffectType = 1
-            this.pendingSoundEffect = source
+            this.pendingSoundEffect = this.pendingSoundEffect || {}
+            Object.assign(this.pendingSoundEffect, { irSource: source })
         }
     }
 
-    _resolvePendingSoundEffect() {
-        if (!this.pendingSoundEffect) return
-        if (this.pendingSoundEffectType === 1) {
-            this.updateIR(this.pendingSoundEffect)
+    updateStereoPan(value) {
+        if (this.webAudioApi) {
+            this.webAudioApi.updateStereoPan(value)
+            this.pendingStereoPan = null
         } else {
-            this.updateEQ(this.pendingSoundEffect)
+            this.pendingStereoPan = value
+        }
+    }
+
+    updateVolumeGain(value) {
+        if (this.webAudioApi) {
+            this.webAudioApi.updateVolumeGain(value)
+            this.pendingVolumeGain = null
+        } else {
+            this.pendingVolumeGain = value
+        }
+    }
+
+    setupSoundEffect(options) {
+        const { eqValues, irSource, stereoPan, volumeGain } = options
+        this.updateEQ(eqValues)
+        this.updateIR(irSource)
+        this.updateStereoPan(stereoPan)
+        this.updateVolumeGain(volumeGain)
+    }
+
+    _resolvePendingSoundEffect() {
+        if (this.pendingSoundEffect) {
+            const { eqValues, irSource } = this.pendingSoundEffect
+            if(irSource) this.updateIR(irSource)
+            if(eqValues) this.updateEQ(eqValues)
+        }
+        if(typeof this.pendingStereoPan == 'number') {
+            this.updateStereoPan(this.pendingStereoPan)
         }
     }
 

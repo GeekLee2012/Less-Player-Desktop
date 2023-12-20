@@ -164,10 +164,14 @@ const loadPluginsOnStartup = async () => {
 }
 
 const onAccessResult = async (permission, result, options) => {
-    const eventPrefix = 'plugins-accessResult-'
+    let eventName = null, args = null
+    //平台权限
     if (permission === APIPermissions.ADD_PLATFORM) {
-        EventBus.emit(`${eventPrefix}addPlatform`, options[0])
+        eventName = 'addPlatform'
+        args = options[0]
     }
+    //事件通知
+    if (eventName) EventBus.emit(`plugins-accessResult-${eventName}`, args)
 }
 
 //TODO 对外提供API
@@ -350,6 +354,7 @@ provide('apiExpose', {
     },
 })
 </script>
+
 <template>
     <slot></slot>
 </template>

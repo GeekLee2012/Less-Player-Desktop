@@ -26,8 +26,8 @@ const detail = reactive({ name: '', alias: '', author: '', version: '', reposito
 const loadPlugin = () => {
     const plugin = getPlugin(props.id)
     if (!plugin) return
-    const { name, author, version, repository, about } = plugin
-    Object.assign(detail, { name, author, version, repository, about })
+    const { name, alias, author, version, repository, about } = plugin
+    Object.assign(detail, { name, alias, author, version, repository, about })
 }
 
 const withDefaultText = (text, defaultText) => {

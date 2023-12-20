@@ -427,7 +427,8 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-top: 8px;
+    margin-bottom: 20px;
 }
 
 #main-left .search-bar .keyword {

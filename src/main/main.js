@@ -50,9 +50,9 @@ let playState = false, desktopLyricLockState = false
 //let lyricWinMinWidth = 450, lyricWinMinHeight = 168
 let isDesktopLyricAutoSize = true, isVerticalDesktopLyric = false, desktopLyricLayoutMode = 0
 const proxyAuthRealms = []
-//TODO 下载队列
-let downloadingItem = null
-//待打开播放歌曲列表
+// 下载队列
+const downloadingQueue = []
+// 待打开播放歌曲列表
 let pendigTracks = []
 
 
@@ -106,11 +106,27 @@ const init = () => {
 
     session.defaultSession.on('will-download', (event, item, webContents) => {
       //event.preventDefault()
-      downloadingItem = item
-      const filename = item.getFilename()
-      const savePath = getDownloadDir() + filename
-      removePath(savePath)
-      item.setSavePath(savePath)
+
+      const urlChain = item.getURLChain()
+      let queuedItemMeta = null
+      if(downloadingQueue.length > 0) {
+        for(var i = 0; i < urlChain.length; i++) {
+          const url = urlChain[i]
+          const index = downloadingQueue.findIndex(qItem => {
+            return qItem.url == decodeURIComponent(url)
+          })
+          queuedItemMeta = downloadingQueue[index]
+          if(queuedItemMeta) break
+        }
+      }
+      if(queuedItemMeta) {
+        const { file, savePath } = queuedItemMeta
+        const _savePath = file || savePath
+        if(_savePath) item.setSavePath(_savePath)
+      } else { //不在下载队列，直接忽略，不允许下载
+        event.preventDefault()
+      }
+      /*
       item.on('updated', (event, state) => {
         if (state == 'progressing') {
           const received = item.getReceivedBytes()
@@ -123,14 +139,20 @@ const init = () => {
           })
         }
       })
+      */
 
       item.on('done', (event, state) => {
-        downloadingItem = null
-        sendToMainRenderer('download-done', {
-          url: item.getURL(),
-          savePath
-        })
-        //console.log("[ Download - Done ]")
+        const { fromAction } = queuedItemMeta
+        if (state === 'completed') { //下载完成
+          if(fromAction == 'dnd-saveToLocal') {
+            sendToMainRenderer('dnd-saveToLocal-result', { ...queuedItemMeta, error: null })
+          }
+        } else { //下载失败
+          if(fromAction == 'dnd-saveToLocal') {
+            sendToMainRenderer('dnd-saveToLocal-result', { ...queuedItemMeta, error: 'Unknown Error' })
+          }
+        }
+        removeFromDownloadingQueue(queuedItemMeta)
       })
     })
 
@@ -421,11 +443,11 @@ const registryGlobalListeners = () => {
     setupAppGlobalProxy(data)
   }).on('visit-link', (event, url) => {
     if(url) shell.openExternal(url)
-  }).on('download-item', (event, { url }) => {
-    if (isWindowAccessible(mainWin)) mainWin.webContents.downloadURL(url)
+  })/*.on('download-item', (event, { url }) => {
+    downloadDefault(url)
   }).on('download-cancel', (event, data) => {
     cancelDownload()
-  }).on('path-showInFolder', (event, path) => {
+  })*/.on('path-showInFolder', (event, path) => {
     if (path) shell.showItemInFolder(path)
   }).on('dnd-saveToLocal', async (event, { file, name, type, data, url, useDefaultIcon }) => {
     if(!file) return
@@ -440,12 +462,18 @@ const registryGlobalListeners = () => {
       })
     }
     
+    const fileMeta = { file, name, type, data, url, useDefaultIcon }
     file = transformPath(file)
     fetchBuffer(url, data).then(_data => {
       writeFile(file, _data, error => {
-        sendToMainRenderer('dnd-saveToLocal-result', { file, name, type, data, url, useDefaultIcon, error })
-        if(error) console.log('[WriteError]', error)
+        sendToMainRenderer('dnd-saveToLocal-result', { ...fileMeta, error })
+        if(error && isDevEnv) console.log('[WriteFile - Error]', error)
       })
+    }).catch(error => {
+      if(error) {
+        downloadDefault(url, { ...fileMeta, fromAction: 'dnd-saveToLocal' })
+        if(isDevEnv) console.log('[FetchBuffer - Error]', error)
+      }
     })
   })
 
@@ -1224,10 +1252,23 @@ const setupAppWindowZoom = (zoom, noResize) => {
   mainWin.webContents.setZoomFactor(zoomFactor)
 }
 
-const cancelDownload = () => {
-  if (downloadingItem) {
-    downloadingItem.cancel()
-    downloadingItem = null
+const addToDownloadingQueue = (url, meta) => {
+  if(!url) return
+  meta = meta || { url }
+  const index = downloadingQueue.findIndex(item => (item.url == url))
+  if(index == -1) downloadingQueue.push(meta) 
+}
+
+const removeFromDownloadingQueue = (meta) => {
+  if(!meta) return 
+  const index = downloadingQueue.indexOf(meta)
+  if(index > -1) downloadingQueue.splice(index, 1)
+}
+
+const downloadDefault = (url, meta) => {
+  if (isWindowAccessible(mainWin)) {
+    addToDownloadingQueue(url, meta)
+    mainWin.webContents.downloadURL(url)
   }
 }
 
@@ -1293,36 +1334,8 @@ const closeDevTools = (win) => {
 }
 
 const cleanupBeforeQuit = () => {
-  cancelDownload()
+  
 }
-/*
-const getSecretOffical = (t, e) => {
-  if (null == e || e.length <= 0) return console.log('Please enter a password with which to encrypt the message.'),
-    null;
-  for (var n = '', i = 0; i < e.length; i++) n += e.charCodeAt(i).toString();
-  var r = Math.floor(n.length / 5),
-    o = parseInt(
-      n.charAt(r) + n.charAt(2 * r) + n.charAt(3 * r) + n.charAt(4 * r) + n.charAt(5 * r)
-    ),
-    l = Math.ceil(e.length / 2),
-    c = Math.pow(2, 31) - 1;
-  if (o < 2) return console.log(
-    'Algorithm cannot find a suitable hash. Please choose a different password. \nPossible considerations are to choose a more complex or longer password.'
-  ),
-    null;
-  var d = Math.round(1000000000 * Math.random()) % 100000000;
-  for (n += d; n.length > 10;) n = (
-    parseInt(n.substring(0, 10)) + parseInt(n.substring(10, n.length))
-  ).toString();
-  n = (o * n + l) % c;
-  var h = '',
-    f = '';
-  for (i = 0; i < t.length; i++) f += (h = parseInt(t.charCodeAt(i) ^ Math.floor(n / c * 255))) < 16 ? '0' + h.toString(16) : h.toString(16),
-    n = (o * n + l) % c;
-  for (d = d.toString(16); d.length < 8;) d = '0' + d;
-  return f += d
-}
-*/
 
 const cookiesMap = {} //格式: { url: cookie }
 const cookiesPendingMap = {} //格式: { url: true }

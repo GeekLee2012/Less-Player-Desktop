@@ -58,13 +58,16 @@ export class WebAudioApi {
         this.analyser = audioCtx.createAnalyser()
         this.analyser.fftSize = 512
         this.distortion = audioCtx.createWaveShaper()
+        this.stereoPanNode = audioCtx.createStereoPanner()
         this.gainNode = audioCtx.createGain()
         this.biquadFilters = this.createBiquadFilters()
         if (!this.audioSource) this.audioSource = audioCtx.createMediaElementSource(audioNode)
         this.audioSource.connect(this.analyser)
         this.analyser.connect(this.distortion)
-        this.connectBiquadFilters(this.biquadFilters, this.distortion, this.gainNode)
+        this.connectBiquadFilters(this.biquadFilters, this.distortion, this.stereoPanNode)
+        this.stereoPanNode.connect(this.gainNode)
         this.gainNode.connect(audioCtx.destination)
+        //this.audioSource.connect(audioCtx.destination)
         return this
     }
 
@@ -132,4 +135,19 @@ export class WebAudioApi {
         return this.convolver
     }
 
+    updateStereoPan(value) {
+        value = value || 0.0
+        value = Math.max(-1.0, value)
+        value = Math.min(1.0, value)
+        
+        this.stereoPanNode.pan.setValueAtTime(value, this.audioCtx.currentTime)
+    }
+
+    updateVolumeGain(value) {
+        value = Number(value)
+        value = Math.max(0, value)
+        value = Math.min(3.0, value)
+        
+        this.gainNode.gain.setValueAtTime(value, this.audioCtx.currentTime)
+    }
 }

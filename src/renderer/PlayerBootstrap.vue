@@ -19,6 +19,7 @@ import { toMmss } from '../common/Times';
 import { Lyric } from '../common/Lyric';
 import { United } from '../vendor/united';
 import { useVideoPlayStore } from './store/videoPlayStore';
+import { useSoundEffectStore } from './store/soundEffectStore';
 
 
 
@@ -62,6 +63,8 @@ const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
 const { playVideoNow } = useVideoPlayStore()
 const { currentVideo } = storeToRefs(useVideoPlayStore())
+const { setupSoundEffect } = useSoundEffectStore()
+
 
 
 const { visitHome, visitUserHome, visitSetting, visitModulesSetting, visitSearch, visitThemes, visitPlugins } = inject('appRoute')
@@ -165,7 +168,7 @@ const NO_NEXT_MSG = '当前歌曲无法播放<br>列表无可播放歌曲'
 const OVERTRY_MSG = '尝试播放次数太多<br>请手动播放其他歌曲吧'
 const TRY_TRANSFRER_MSG = '当前歌曲无法播放<br>即将尝试切换其他版本'
 const TRANSFRER_OK_MSG = '版本切换已完成<br>即将为您播放歌曲'
-const TRANSFRER_FAIL_MSG = '没有其他版本切换<br>即将为您播放下一曲'
+const TRANSFRER_FAIL_MSG = '没有合适版本切换<br>即将为您播放下一曲'
 
 //连跳计数器
 let autoSkipCnt = 0
@@ -1171,8 +1174,10 @@ EventBus.on("track-refreshFavoritedState", checkFavoritedState)
 
 const quickSearch = () => {
     visitSearch(LESS_MAGIC_CODE).then(() => {
-        const keywordInputEl = document.querySelector('.search-bar .keyword')
-        if (keywordInputEl) keywordInputEl.focus()
+        // 不同布局下都会有搜索框组件
+        // 由于单页面应用，切换布局时，其他非当前布局的搜索框也可能会被获取到，全部遍历聚焦就好
+        const keywordInputEls = document.querySelectorAll('.search-bar .keyword')
+        if (keywordInputEls) keywordInputEls.forEach(el => el.focus())
     })
 }
 
@@ -1391,34 +1396,41 @@ const getPreferredDndSavePath = ({ platform, url }) => {
     return savePath
 }
 
+//item对象必须具有属性: { platform, title, cover }
 const dndSaveCover = async (event, item) => {
     if (!isDndSaveEnable.value) return
     if (event) event.preventDefault()
     if (!startDrag) return showFailToast('当前操作异常')
-    item = item || currentTrack.value
-    if (!Track.hasCover(item)) return
 
-    const dndSavePath = getPreferredDndSavePath(currentTrack.value)
+    const track = currentTrack.value
+    // Track、Playlist、Artist、Album等类型的封面图片
+    item = item || track
+    if (!Track.hasCover(item)) return
+    const { cover } = item
+
+    const dndSavePath = getPreferredDndSavePath(item)
     if (!dndSavePath) return showFailToast('当前操作异常')
 
     const normalName = Track.normalName(item)
     const file = `${dndSavePath}/${normalName}.png`
-    const { cover } = item
     startDrag({ file, type: 'image', url: cover })
 }
 
 const dndSaveLyric = async (event) => {
+    const track = currentTrack.value
+    if (!track) return
     if (!isDndSaveEnable.value) return
-    if (!currentTrack.value) return
+
     if (event) event.preventDefault()
     if (!startDrag) return showFailToast('当前操作异常')
 
-    const dndSavePath = getPreferredDndSavePath(currentTrack.value)
+    const dndSavePath = getPreferredDndSavePath(track)
     if (!dndSavePath) return showFailToast('当前操作异常')
+    if (!Track.hasLyric(track)) return
 
-    const normalName = Track.normalName(currentTrack.value)
+    const normalName = Track.normalName(track)
     const file = `${dndSavePath}/${normalName}.lrc`
-    const { lyric } = currentTrack.value
+    const { lyric } = track
     const data = Lyric.stringify(lyric)
     startDrag({ file, type: 'lyric', data })
 }
@@ -1426,10 +1438,10 @@ const dndSaveLyric = async (event) => {
 const dndSaveTrack = async (event, track) => {
     if (!isDndSaveEnable.value) return
     //if (event) event.preventDefault()
-    track = toRaw(track)
     if (!track) return
     if (!startDrag) return showFailToast('当前操作异常')
 
+    track = toRaw(track)
     const dndSavePath = getPreferredDndSavePath(track)
     if (!dndSavePath) return showFailToast('当前操作异常')
 
@@ -1446,7 +1458,8 @@ const dndSaveTrack = async (event, track) => {
     const normalName = escapeHtml(Track.normalName(track))
     const suffix = Track.suffix(track) || '.mp3'
     const file = `${dndSavePath}/${normalName}${suffix}`
-    startDrag({ file, name: normalName, type: 'audio', url: (url || exurl), useDefaultIcon: true })
+    const _url = (url || exurl)
+    startDrag({ file, name: normalName, type: 'audio', url: _url, useDefaultIcon: true })
 }
 
 const dndSaveVideo = async (event, video) => {
@@ -1470,6 +1483,7 @@ const dndSaveVideo = async (event, video) => {
 onMounted(() => {
     setupStateRefreshFrequency()
     setupSpectrumRefreshFrequency()
+    setupSoundEffect()
 
     restoreTrack(handleStartupPlay)
 
