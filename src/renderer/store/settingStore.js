@@ -173,7 +173,7 @@ export const useSettingStore = defineStore('setting', {
             //在线歌单页
             onlinePlaylistShow: true,
             //本地歌单页
-            localPlaylistShow: false,
+            localPlaylistShow: true,
             //批量操作页
             batchActionShow: true,
             //自由FM
@@ -286,6 +286,8 @@ export const useSettingStore = defineStore('setting', {
             clearFreeFM: true,
             //访问插件官网链接
             visitPluginRepository: true,
+            //删除插件
+            deletePlugins: true,
         },
         /* 快捷键，可修改 */
         keys: {
@@ -572,6 +574,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeVisitPluginRepository() {
             return this.dialog.visitPluginRepository
+        },
+        isShowDialogBeforeDeletePlugins() {
+            return this.dialog.deletePlugins
         },
         isCheckPreReleaseVersion() {
             return this.others.checkPreReleaseVersion
@@ -1120,6 +1125,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeVisitPluginRepository() {
             this.dialog.visitPluginRepository = !this.dialog.visitPluginRepository
+        },
+        toggleShowDialogBeforeDeletePlugins() {
+            this.dialog.deletePlugins = !this.dialog.deletePlugins
         },
         toggleCheckPreReleaseVersion() {
             this.others.checkPreReleaseVersion = !this.others.checkPreReleaseVersion

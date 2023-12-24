@@ -213,7 +213,8 @@ const handleUnplayableTrack = (track, msg) => {
 }
 
 //获取并更新歌曲播放信息
-const bootstrapTrack = (track) => {
+const bootstrapTrack = (track, options) => {
+    const { noToast } = (options || {})
     return new Promise(async (resolve, reject) => {
         if (!track) return reject('none')
         //FM电台
@@ -229,12 +230,12 @@ const bootstrapTrack = (track) => {
             //TODO 功能尚待完善，比如考虑支持多个音源插件同时开启，处理流程、优先级等等
             if (hasExTrackPlayUrlHandlers()) {
                 try {
-                    const exResult = await getExTrackPlayUrl(track).catch(error => console.log(error))
+                    const exResult = await getExTrackPlayUrl(track, noToast).catch(error => console.log(error))
                     if (exResult) {
                         const { url: purl, exurl } = exResult
                         if (!isBlank(purl)) {
                             Object.assign(track, { url: purl, exurl })
-                            showToast('插件音源加载成功')
+                            if (!noToast) showToast('插件音源加载成功')
                             return resolve(track)
                         }
                     }
@@ -256,12 +257,12 @@ const bootstrapTrack = (track) => {
         //TODO 功能尚待完善，比如考虑支持多个音源插件同时开启，处理流程、优先级等等
         if (hasExTrackPlayUrlHandlers()) {
             try {
-                const exResult = await getExTrackPlayUrl(track).catch(error => console.log(error))
+                const exResult = await getExTrackPlayUrl(track, noToast).catch(error => console.log(error))
                 if (exResult) {
                     const { url: purl, exurl } = exResult
                     if (!isBlank(purl)) {
                         Object.assign(track, { url: purl, exurl })
-                        showToast('插件音源加载成功')
+                        if (!noToast) showToast('插件音源加载成功')
                     }
                 }
             } catch (error) {
@@ -289,7 +290,7 @@ const bootstrapTrack = (track) => {
 }
 
 const bootstrapTrackWithTransfer = async (track) => {
-    return bootstrapTrack(track).catch(async (reason) => {
+    return bootstrapTrack(track, { noToast: true }).catch(async (reason) => {
         if (reason == 'noUrl' || 'noService') {
             const { platform } = track
             if (isLocalMusic(platform) || Playlist.isFMRadioType(track)) return
@@ -631,56 +632,6 @@ const drawSpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) =>
     }
 }
 
-/*
-const drawGridSpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) => {
-    alignment = alignment || 'bottom'
-
-    const { width: cWidth, height: cHeight } = canvas
-    const canvasCtx = canvas.getContext("2d")
-
-    canvasCtx.clearRect(0, 0, cWidth, cHeight)
-
-    canvasCtx.fillStyle = 'transparent'
-    canvasCtx.fillRect(0, 0, cWidth, cHeight)
-
-    if (!freqData || freqData.length < 1) return
-    const dataLen = freqData.length
-
-    let barWidth = 6.5, barHeight, cellHeight = 3, x = 2,
-        hspacing = 2, vspacing = 1, step = 1
-
-    let freqCnt = 0
-    for (var i = 0; i < dataLen; i = i + step) {
-        if ((x + barWidth + hspacing) >= cWidth) break
-        //step = i >= (dataLen / 2) && i <= (dataLen * 2 / 3) ? 1 : 2
-
-        //数据量控制一下，减少点CPU占用
-        if (++freqCnt >= 88) break
-
-        barHeight = freqData[i] / 255 * cHeight
-        barHeight = barHeight > 0 ? barHeight : cellHeight
-        const cellSize = Math.floor(barHeight / (cellHeight + vspacing))
-
-        canvasCtx.fillStyle = spectrumColor
-        canvasCtx.strokeStyle = stroke
-        //canvasCtx.shadowBlur = 1
-        //canvasCtx.shadowColor = stroke
-
-        for (var j = 0; j < cellSize; j++) {
-            const barHeight = j * (cellHeight + vspacing)
-            let y = cHeight - barHeight //alignment => bottom
-            if (alignment == 'top') y = barHeight
-            else if (alignment == 'center') y = y / 2
-
-            canvasCtx.fillRect(x, y, barWidth, cellHeight)
-            //canvasCtx.strokeRect(x, y, barWidth, cellHeight)
-        }
-
-        x += barWidth + hspacing
-    }
-}
-*/
-
 let flipBarHeights = []
 const drawFlippingSpectrum = (canvas, { freqData, spectrumColor, stroke }) => {
     const { width: cWidth, height: cHeight } = canvas
@@ -768,8 +719,8 @@ const drawCanvasSpectrum = () => {
                 const exSpectrumIndex = Math.max((index - 3), 0)
                 drawExSpectrum(canvas, { ...spectrumParams, alignment }, exSpectrumIndex)
                     .catch(error => {
-                        if (error == 'noHandler') setSpectrumIndex(0)
-                        else console.log(error)
+                        if (error == 'noHandler') return setSpectrumIndex(0)
+                        console.log(error)
                     })
         }
     }
@@ -1416,8 +1367,8 @@ const dndSaveCover = async (event, item) => {
     startDrag({ file, type: 'image', url: cover })
 }
 
-const dndSaveLyric = async (event) => {
-    const track = currentTrack.value
+const dndSaveLyric = async (event, track) => {
+    track = track || currentTrack.value
     if (!track) return
     if (!isDndSaveEnable.value) return
 

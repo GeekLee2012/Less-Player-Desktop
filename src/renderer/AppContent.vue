@@ -76,8 +76,15 @@ const visitShortcutKeys = () => {
 const registryDefaultLocalKeys = () => {
   //按键事件监听
   window.addEventListener('keydown', event => {
-    //Space键
-    if (event.key == ' ') event.preventDefault()
+    const { key, code, target } = event
+    let isTextInputTarget = false
+    if (target && target.localName) {
+      isTextInputTarget = 'input|textarea'.split('|').includes(toLowerCaseTrimString(target.localName))
+    }
+    //Space键，当target为输入框 / 文本框时放行，否则阻止默认行为，如滚动条下滑
+    if (toLowerCaseTrimString(code) == 'space' && !isTextInputTarget) {
+      event.preventDefault()
+    }
   })
 
   // 播放或暂停

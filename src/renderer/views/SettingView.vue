@@ -98,6 +98,7 @@ const { setThemeIndex,
     toggleShowDialogBeforeClearLocalMusics,
     toggleShowDialogBeforeClearFreeFM,
     toggleShowDialogBeforeVisitPluginRepository,
+    toggleShowDialogBeforeDeletePlugins,
     toggleCheckPreReleaseVersion,
     toggleModulesSettingShortcut,
     togglePluginsSettingShortcut,
@@ -1024,6 +1025,12 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     <div>
                         <span class="cate-subtitle">清空自由FM：</span>
                         <ToggleControl @click="toggleShowDialogBeforeClearFreeFM" :value="dialog.clearFreeFM">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">删除插件：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeDeletePlugins"
+                            :value="dialog.deletePlugins">
                         </ToggleControl>
                     </div>
                     <div>

@@ -106,7 +106,6 @@ const init = () => {
 
     session.defaultSession.on('will-download', (event, item, webContents) => {
       //event.preventDefault()
-
       const urlChain = item.getURLChain()
       let queuedItemMeta = null
       if(downloadingQueue.length > 0) {
@@ -119,24 +118,23 @@ const init = () => {
           if(queuedItemMeta) break
         }
       }
+
       if(queuedItemMeta) {
         const { file, savePath } = queuedItemMeta
-        const _savePath = file || savePath
-        if(_savePath) item.setSavePath(_savePath)
+        let _savePath = transformPath(file || savePath)
+        if(_savePath) {
+          if(isWinOS) _savePath = _savePath.replace(/\//g, '\\')
+          item.setSavePath(_savePath)
+        }
       } else { //不在下载队列，直接忽略，不允许下载
         event.preventDefault()
       }
+
       /*
       item.on('updated', (event, state) => {
         if (state == 'progressing') {
           const received = item.getReceivedBytes()
           const total = item.getTotalBytes()
-          sendToMainRenderer('download-progressing', {
-            url: item.getURL(),
-            savePath,
-            received,
-            total
-          })
         }
       })
       */

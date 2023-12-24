@@ -311,7 +311,7 @@ provide('apiExpose', {
      * 获取音频播放url
      * @param {*} track 
      */
-    getExTrackPlayUrl: async (track) => {
+    getExTrackPlayUrl: async (track, noToast) => {
         const _track = { ...toRaw(track) }
         //移除非必要信息
         const excludeProps = ['url', 'lyric', 'lyricTran', 'lyricRoma',
@@ -320,7 +320,7 @@ provide('apiExpose', {
         //TODO 选择策略
         const handler = EventHandlerRegistrations.lastHandler(APIEvents.TRACK_GET_PLAY_URL)
         if (handler && (typeof handler == 'function')) {
-            showToast(`尝试从插件获取音源<br>请耐心等待一下哟`)
+            if (!noToast) showToast(`尝试从插件获取音源<br>请耐心等待一下哟`)
             return handler(_track)
         }
     },
@@ -339,7 +339,9 @@ provide('apiExpose', {
     /**
      * 绘制频谱
      * @param {*} canvas 
-     * @param {*} params  { freqData, freqBinCount, sampleRate, spectrumColor, analyser }
+     * @param {*} params  { freqData, freqBinCount, sampleRate, 
+     *                      analyser, spectrumColor, stroke, 
+     *                      canvasBgColor, isSimpleLayoutMode }
      */
     drawExSpectrum: async (canvas, params, index) => {
         try {

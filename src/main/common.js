@@ -17,9 +17,12 @@ const ImageProtocal = {
 
 const transformPath = (path) => {
     try {
-        return path.replace(FILE_PREFIX, '')
-            .replace(/\\/g, '/')
-            .replace(/\/\//g, '').trim()
+        if(path) {
+            return path.replace(FILE_PREFIX, '')
+                .replace(/\\/g, '/')
+                .replace(/\/\//g, '')
+                .trim()
+        }
     } catch (error) {
         console.log(error)
     }

@@ -16,13 +16,14 @@ import { FILE_PREFIX, ActivateState } from '../../common/Constants';
 const { visitPluginDetail } = inject('appRoute')
 const { activatePluginNow, deactivatePluginNow, removePluginNow } = inject('apiExpose')
 const { reloadApp } = inject('player')
+const { showConfirm } = inject('appCommon')
 
 const ipcRenderer = useIpcRenderer()
 
 const { ignoreErrorPlugins, plugins } = storeToRefs(usePluginStore())
 const { toggleIgnoreErrorPlugins, addPlugin, updatePlugin, removePlugin } = usePluginStore()
 const { showToast, showFailToast } = useAppCommonStore()
-const { isSearchForPluginsViewShow } = storeToRefs(useSettingStore())
+const { isSearchForPluginsViewShow, isShowDialogBeforeDeletePlugins } = storeToRefs(useSettingStore())
 
 
 const checkedAll = ref(false)
@@ -182,8 +183,12 @@ const disablePlugins = () => {
     refreshCheckData()
 }
 
-const removePlugins = () => {
+const removePlugins = async () => {
     if (checkedData.length < 1) return
+    let ok = true
+    if (isShowDialogBeforeDeletePlugins.value) ok = await showConfirm({ msg: '确定要删除插件吗？' })
+    if (!ok) return
+
     checkedData.forEach(plugin => {
         removeFromFilteredData(plugin)
         deactivatePluginNow(plugin, () => removePluginNow(plugin), () => removePluginNow(plugin))

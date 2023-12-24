@@ -229,7 +229,7 @@ export const usePlayStore = defineStore('player', {
         setAudioOutputDevices(devices) {
             this.audioOutputDevices = devices
         },
-        moveTrackTo(index, toIndex) {
+        moveTrack(index, toIndex) {
             if(this.queueTracks.length < 1) return
             if(index < 0 || toIndex < 0) return 
             if(index == toIndex) return 
@@ -243,7 +243,10 @@ export const usePlayStore = defineStore('player', {
             if(toIndex > index && toIndex < maxIndex) --toIndex
             this.queueTracks.splice(toIndex, 0, track)
 
-            //列表存在删除、插入操作时，需更新当前播放playingIndex
+            //前置检查，无当前播放直接返回
+            //虽然不做检查，后面的代码也没有问题，但执行下去也毫无意义
+            if(this.playingIndex < 0) return
+            //当列表存在删除、插入操作时，需更新当前播放playingIndex
             if(index == this.playingIndex) {
                 this.playingIndex = toIndex
             } else if(index < this.playingIndex && toIndex >= this.playingIndex) {
