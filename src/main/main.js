@@ -58,7 +58,7 @@ let pendigTracks = []
 
 /* 自定义函数 */
 const startup = () => {
-  init()
+  initialize()
   registryGlobalListeners()
   handleStartupPlay()
 }
@@ -89,7 +89,7 @@ const fetchBuffer = async (url, data) => {
   return response.buffer()
 }
 
-const init = () => {
+const initialize = () => {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
@@ -985,7 +985,7 @@ const createMainWindow = () => {
     transparent: true,
     frame: false,
     webPreferences: {
-      zoomFactor: 1, //默认缩放
+      //zoomFactor: 1, //默认缩放
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
@@ -1062,7 +1062,8 @@ const setupAppLayout = (layout, zoom, isInit) => {
   if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 0.85
   //mainWin.webContents.setZoomFactor(zoomFactor)
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
-  const width = parseInt(appWidth * zoomFactor), height = parseInt(appHeight * zoomFactor)
+  const width = parseInt(appWidth * zoomFactor)
+  const height = parseInt(appHeight * zoomFactor)
   const isSimpleLayout = (appLayout === SIMPLE_LAYOUT)
   const maxWidth = (isSimpleLayout ? width : 102400)
   const maxHeight = (isSimpleLayout ? height : 102400)
@@ -1234,6 +1235,7 @@ const toggleWinOSFullScreen = () => {
 
 const setupAppWindowZoom = (zoom, noResize) => {
   if (!isWindowAccessible(mainWin) || !zoom) return
+  
   currentZoom = Number(zoom) || 85
   const zoomFactor = parseFloat(currentZoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return

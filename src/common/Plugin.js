@@ -11,6 +11,8 @@ export class Plugin {
         this.mainModule = mainModule
         this.type = 0   //0 => SF插件（single file）, 1 => Bundle插件
         this.state = 0
+        this.created = Date.now()
+        this.updated = Date.now()
     }
 
 }

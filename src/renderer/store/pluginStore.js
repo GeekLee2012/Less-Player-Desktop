@@ -17,8 +17,8 @@ export const usePluginStore = defineStore('plugins', {
             if(title && version) {
                 return this.plugins.findIndex(item => {
                     return item.name == name 
-                        && item.version == version
                         && item.author == author
+                        && item.version == version
                 })
             }
             return -1
@@ -33,12 +33,13 @@ export const usePluginStore = defineStore('plugins', {
             const { name, version, author } = plugin
             const index = this.plugins.findIndex(item => {
                 return item.name == name 
-                    && item.version == version
                     && item.author == author
+                    && item.version == version
             })
             if(index > -1) return
             const id = randomTextWithinAlphabetNums(10)
-            Object.assign(plugin, { id })
+            const created = Date.now()
+            Object.assign(plugin, { id, created })
             this.plugins.push(plugin)
             return id
         },
@@ -51,6 +52,8 @@ export const usePluginStore = defineStore('plugins', {
                 if(!updatableKeys.includes(key)) continue
                 this.plugins[index][key] = value
             }
+            const updated = Date.now()
+            Object.assign(this.plugins[index], { updated })
         },
         removePlugin(plugin) {
             const index = this.pluginIndex(plugin)

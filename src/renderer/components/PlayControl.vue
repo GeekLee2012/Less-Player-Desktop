@@ -7,11 +7,13 @@ import { useAppCommonStore } from '../store/appCommonStore';
 
 const { playing, playMode } = storeToRefs(usePlayStore())
 const { playPrevTrack, togglePlay, playNextTrack, switchPlayMode } = usePlayStore()
-const { togglePlaybackQueueView, hideAllCategoryViews, hideAllCtxMenus } = useAppCommonStore()
+const { togglePlaybackQueueView, hideAllCategoryViews, 
+    hideAllCtxMenus, hidePlayingThemeListView } = useAppCommonStore()
 
 const togglePlaybackQueue = () => {
     hideAllCategoryViews()
     hideAllCtxMenus()
+    hidePlayingThemeListView()
     togglePlaybackQueueView()
 }
 </script>

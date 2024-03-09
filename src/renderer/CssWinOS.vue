@@ -68,12 +68,17 @@
 
 /* 播放页 */
 .use-winos-win-ctl .playing-view .win-ctl-wrap,
-.use-winos-win-ctl .visual-playing-view .win-ctl-wrap {
+.use-winos-win-ctl .visual-playing-view .win-ctl-wrap,
+.use-winos-win-ctl .dynamic-playing-view .win-ctl-wrap  {
   position: absolute;
   right: 0px;
   top: 10px;
   padding-right: 25px;
   justify-content: flex-end !important;
+}
+
+.use-winos-win-ctl .dynamic-playing-view .win-ctl-wrap .ctl-btn:hover{
+  background-color: #ffffff66;
 }
 
 .use-winos-win-ctl .playing-view .meta-wrap,

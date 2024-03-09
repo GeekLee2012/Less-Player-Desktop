@@ -117,7 +117,7 @@ const setPlayingCoverSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    let size = 356 * Math.min(wScaleRatio, hScaleRatio)
+    let size = 366 * Math.min(wScaleRatio, hScaleRatio)
     const coverWrapEl = document.querySelector('.playing-view .cover-wrap')
     if (!coverWrapEl) return
     coverWrapEl.style.marginRight = 41 * Math.min(wScaleRatio, hScaleRatio) + 'px'
@@ -166,17 +166,32 @@ const setVisualPlayingViewLyricCtlSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    //const height = 435 * Math.min(hScaleRatio, hScaleRatio)
+    /*
     const padding = hScaleRatio >= 1.25 ? 50 : 0
     let height = 439 * Math.min(hScaleRatio, hScaleRatio) + padding
     if (lyricMetaPos.value > 0) {
         const centerEl = document.querySelector('.visual-playing-view .center')
-        if (centerEl) height = (centerEl.clientHeight || 628)
+        height = centerEl && (centerEl.clientHeight - 33) || 618
     }
-    const el = document.querySelector('.visual-playing-view .lyric-ctl .center')
-    const noLyricEl = document.querySelector('.visual-playing-view .no-lyric')
-    if (el) el.style.height = `${height}px`
-    if (noLyricEl) noLyricEl.style.height = `${height}px`
+    */
+
+    const lyricWrapEl = document.querySelector('.visual-playing-view .center .lyric-wrap')
+    if (!lyricWrapEl) return
+
+    //const headerEl = document.querySelector('.visual-playing-view .lyric-ctl .header')
+    //const lyricContentEl = document.querySelector('.visual-playing-view .lyric-ctl .center')
+    //const noLyricEl = document.querySelector('.visual-playing-view .no-lyric')
+
+    const marginTop = 15 * Math.min(wScaleRatio, hScaleRatio)
+    const isHeaderShow = (lyricMetaPos.value == 0)
+    //const headerHeight = isHeaderShow ? (headerEl && (headerEl.clientHeight + marginTop)) : 0
+    //let { clientHeight: wrapHeight } = lyricWrapEl
+    //wrapHeight = wrapHeight || (clientHeight - 56 * 2)
+    //const height = wrapHeight - headerHeight - 33
+
+    if (lyricWrapEl && isHeaderShow) lyricWrapEl.style.marginTop = `${marginTop}px`
+    //if (lyricContentEl) lyricContentEl.style.height = `${height}px`
+    //if (noLyricEl) noLyricEl.style.height = `${height}px`
 }
 
 const setVisualPlayingViewCoverSize = () => {
@@ -194,14 +209,38 @@ const setVisualPlayingViewCanvasSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    const width = 404 * Math.min(wScaleRatio, hScaleRatio)
-    const height = 66 * Math.min(wScaleRatio, hScaleRatio)
+
+    const progressWrapEl = document.querySelector('.visual-playing-view .center .progress-wrap')
+    const coverCanvasWrapEl = document.querySelector('.visual-playing-view .center .cover-spectrum-wrap')
+    const canvasWrapEl = document.querySelector('.visual-playing-view .center .canvas-wrap')
+
+    let width = 480 * Math.min(wScaleRatio, hScaleRatio)
+    width = progressWrapEl ? (progressWrapEl.clientWidth || width) : width
+
     const canvasEl = document.querySelector('.visual-playing-view .center .spectrum-canvas')
-    if (!canvasEl) return
-    //canvasEl.style.width = `${width}px`
-    //canvasEl.style.height = `${height}px`
-    canvasEl.width = width
-    canvasEl.height = height
+    const exVisualCanvasWrapEl = document.querySelector('.visual-playing-view .center .ex-visual-canvas-wrap')
+    //const exCanvasEl = document.querySelector('.visual-playing-view .center .ex-spectrum-canvas')
+
+    if (coverCanvasWrapEl) {
+        const paddingTop = 33 * Math.min(wScaleRatio, hScaleRatio)
+        coverCanvasWrapEl.style.paddingTop = `${paddingTop}px`
+    }
+
+    if (canvasWrapEl) {
+        const marginTop = 15 * Math.min(wScaleRatio, hScaleRatio)
+        canvasWrapEl.style.marginTop = `${marginTop}px`
+    }
+
+    if (canvasEl) {
+        const height = 66 * Math.min(wScaleRatio, hScaleRatio)
+        canvasEl.width = width
+        canvasEl.height = height
+    }
+
+    if (exVisualCanvasWrapEl) {
+        const height = 494 * Math.min(hScaleRatio, hScaleRatio)
+        exVisualCanvasWrapEl.style.height = `${height}px`
+    }
 }
 
 //TODO
@@ -221,7 +260,7 @@ const setPluginsViewListSize = () => {
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const el = document.querySelector('#plugins-view .center > .content')
-    const headerEl = document.querySelector('#plugins-view>.header')
+    const headerEl = document.querySelector('#plugins-view > .header')
     if (!el || !headerEl) return
     const { clientHeight } = mainContent
     const { clientHeight: headerClientHeight } = headerEl
@@ -305,49 +344,54 @@ const setPaginationSize = () => {
     if (el) el.style.setProperty('--content-min-height', `${minHeight}px`)
 }
 
-onActivated(setupDefaultLayout)
+const resizeViewItems = (event) => {
+    if (!isDefaultLayout.value) return
+
+    //TODO 窗口缩放Bug
+    //nextTick(() => setupWindowZoom(true))
+    //自适应播放元信息组件大小
+    setPlayMetaSize()
+    //自适应搜索框大小
+    //setSearchBarSize()
+    //自适应ImageTextTile组件大小
+    setImageTextTileSize()
+    //自适应分类列表大小
+    setCategoryViewSize()
+    //自适应播放页组件大小
+    setPlayingViewSize()
+    //自适应批量操作页面列表大小
+    setBatchViewListSize()
+    //插件管理
+    setPluginsViewListSize()
+    //主题页
+    setThemeViewItemsSize()
+    //分页组件
+    setPaginationSize()
+
+    //隐藏上下文菜单
+    hideAllCtxMenus()
+    //TODO Electron窗口缩放Bug
+    // 目前现象: 窗口内容时不时“抽一下......”，其实是缩放比由100% => 用户自定义缩放百分比（下面的代码强制设置的结果）
+    // 放在最后执行确保按用户设置百分比缩放
+    setupWindowZoom(true)
+
+    if (isDevEnv()) console.log('[ RESIZE ]')
+}
+
+onActivated(() => {
+    setupDefaultLayout()
+    nextTick(resizeViewItems)
+})
 
 onMounted(() => {
     //窗口大小变化事件监听
-    window.addEventListener('resize', event => {
-        if (!isDefaultLayout.value) return
-        //TODO 窗口缩放Bug
-        //nextTick(() => setupWindowZoom(true))
-        //自适应播放元信息组件大小
-        setPlayMetaSize()
-        //自适应搜索框大小
-        //setSearchBarSize()
-        //自适应ImageTextTile组件大小
-        setImageTextTileSize()
-        //自适应分类列表大小
-        setCategoryViewSize()
-        //自适应播放页组件大小
-        setPlayingViewSize()
-        //自适应批量操作页面列表大小
-        setBatchViewListSize()
-        //插件管理
-        setPluginsViewListSize()
-        //主题页
-        setThemeViewItemsSize()
-        //分页组件
-        setPaginationSize()
-
-        //隐藏上下文菜单
-        hideAllCtxMenus()
-        //TODO Electron窗口缩放Bug
-        // 目前现象: 窗口内容时不时“抽一下......”，其实是缩放比由100% => 用户自定义缩放百分比（下面的代码强制设置的结果）
-        // 放在最后执行确保按用户设置百分比缩放
-        setupWindowZoom(true)
-        //nextTick(() => setupWindowZoom(true))
-        if (isDevEnv()) console.log('[ RESIZE ]')
-    })
+    window.addEventListener('resize', resizeViewItems)
 
     //点击事件监听
     document.addEventListener('click', e => {
         //强制分类列表重置大小
         setCategoryViewSize()
     })
-
 })
 
 EventBus.on('batchView-show', setBatchViewListSize)

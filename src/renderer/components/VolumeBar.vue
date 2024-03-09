@@ -87,6 +87,7 @@ defineExpose({
 
 .volume-bar .volume-status svg {
     fill: var(--button-icon-btn-color);
+    stroke: none !important;
 }
 
 .volume-bar .st-slient,

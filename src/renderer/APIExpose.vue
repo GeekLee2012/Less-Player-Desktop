@@ -15,16 +15,21 @@ import {
     isBlank, randomTextWithinAlphabetNums as randomTextDefault, randomText, nextInt,
     md5, hmacMd5, sha1, sha256, sha512, base64Parse, base64Stringify, hexDecode,
     aesEncryptDefault, aesEncryptHexText, rsaEncrypt, rsaEncryptDefault,
-    aesDecryptText, tryCallDefault, tryCall, transformUrl,
+    aesDecryptText, tryCallDefault, tryCall, tryCallOnObject, transformUrl,
     stringEquals, stringEqualsIgnoreCase, readLines,
 } from '../common/Utils';
 import { toMmss, toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs } from '../common/Times';
-import { FILE_PREFIX, ActivateState, LESS_MAGIC_CODE } from '../common/Constants';
+import {
+    FILE_PREFIX, ActivateState,
+    LESS_MAGIC_CODE, ImageProtocal,
+    DEFAULT_COVER_BASE64
+} from '../common/Constants';
 import { Category } from '../common/Category';
 import { Playlist } from '../common/Playlist';
 import { Track } from '../common/Track';
 import { Album } from '../common/Album';
 import { Lyric } from '../common/Lyric';
+import { usePlayStore } from './store/playStore';
 
 
 
@@ -35,13 +40,17 @@ const ipcRenderer = useIpcRenderer()
 const { plugins } = storeToRefs(usePluginStore())
 const { removePlugin, updatePlugin } = usePluginStore()
 const { addPlatform, removePlatform } = usePlatformStore()
+const { spectrumParams } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast } = useAppCommonStore()
 const { getImageUrlByQuality } = useSettingStore()
+const { currentTrack } = storeToRefs(usePlayStore())
+
 
 const APIEvents = {
     TRACK_GET_PLAY_URL: 'TRACK_GET_PLAY_URL',
     VIDEO_GET_PLAY_URL: 'VIDEO_GET_PLAY_URL',
     TRACK_DRAW_SPECTRUM: 'TRACK_DRAW_SPECTRUM',
+    TRACK_VISUAL_CANVAS: 'TRACK_VISUAL_CANVAS'
 }
 
 const APIPermissions = {
@@ -58,6 +67,9 @@ const APIPermissions = {
     //自定义请求处理器，主要目的为重新设置请求头信息
     ADD_REQUEST_HANDLER: 'ADD_REQUEST_HANDLER',
     REMOVE_REQUEST_HANDLER: 'REMOVE_REQUEST_HANDLER',
+    //播放相关
+    TRACK_CURRENT_PLAYING: 'TRACK_CURRENT_PLAYING',
+    TRACK_SPECTRUM_PARAMS: 'TRACK_SPECTRUM_PARAMS',
 }
 
 //事件处理器注册中心
@@ -76,7 +88,8 @@ const EventHandlerRegistrations = {
     register(event, handler) {
         if (!event || !handler) return
         if (!Object.hasOwn(APIEvents, event)) return
-        if (typeof handler != 'object' && typeof handler != 'function') return
+        //支持类型：function、object
+        if (!'object|function'.includes(typeof handler)) return
         if (Array.isArray(handler)) return
 
         this.mappings[event] = this.mappings[event] || []
@@ -91,6 +104,10 @@ const EventHandlerRegistrations = {
         if (handlers && handlers.length > 0) {
             for (let i = 0; i < handlers.length; i++) {
                 if (handlers[i] == handler) {
+                    if (typeof handler == 'object') {
+                        const { unmounted } = handler
+                        if (unmounted) tryCallOnObject(unmounted, handler)
+                    }
                     handlers.splice(i, 1)
                     break
                 }
@@ -180,6 +197,10 @@ const onAccessResult = async (permission, result, options) => {
 //目前存在问题：无法感知当前获取权限的是哪个插件
 window.lessAPI = {
     version: '1.0.0',
+    constants: {
+        LESS_IMAGE_PREFIX: ImageProtocal.prefix,
+        DEFAULT_COVER_BASE64, DEFAULT_COVER_BASE64,
+    },
     common: {
         Category,
         Playlist,
@@ -205,6 +226,7 @@ window.lessAPI = {
         getImageUrlByQuality,
         tryCallDefault,
         tryCall,
+        tryCallOnObject,
         transformUrl,
     },
     crypto: {
@@ -240,48 +262,67 @@ window.lessAPI = {
     events: {
         APIEvents,
         register(event, handler) {
-            EventHandlerRegistrations.register(event, handler)
+            try {
+                EventHandlerRegistrations.register(event, handler)
+            } catch (error) {
+                console.log(error)
+            }
         },
         unregister(event, handler) {
-            EventHandlerRegistrations.unregister(event, handler)
+            try {
+                EventHandlerRegistrations.unregister(event, handler)
+            } catch (error) {
+                console.log(error)
+            }
         },
     },
     permissions: {
         APIPermissions,
         async access(permission, ...options) { //获取访问权限
             let result = null
-            //开发者工具
-            if (permission == APIPermissions.OPEN_DEV_TOOLS) {
-                if (ipcRenderer) ipcRenderer.send('app-openDevTools')
-            } else if (permission == APIPermissions.CLOSE_DEV_TOOLS) {
-                if (ipcRenderer) ipcRenderer.send('app-closeDevTools')
+            try {
+                //开发者工具
+                if (permission == APIPermissions.OPEN_DEV_TOOLS) {
+                    if (ipcRenderer) ipcRenderer.send('app-openDevTools')
+                } else if (permission == APIPermissions.CLOSE_DEV_TOOLS) {
+                    if (ipcRenderer) ipcRenderer.send('app-closeDevTools')
+                }
+                //获取相关信息
+                else if (permission == APIPermissions.GET_USER_AGENT) {
+                    result = ipcRenderer ? (await ipcRenderer.invoke('app-userAgent')) : ''
+                } else if (permission == APIPermissions.GET_COOKIE) {
+                    result = ipcRenderer ? (await ipcRenderer.invoke('app-getCookie', options[0])) : ''
+                }
+                //请求头信息
+                else if (permission == APIPermissions.ADD_REQUEST_HANDLER) {
+                    result = ipcRenderer ? (await ipcRenderer.invoke('app-addRequestHandler', options[0])) : ''
+                } else if (permission == APIPermissions.REMOVE_REQUEST_HANDLER) {
+                    result = ipcRenderer ? (await ipcRenderer.invoke('app-removeRequestHandler', options[0])) : ''
+                }
+                //路由
+                else if (permission == APIPermissions.ADD_ROUTE) {
+                    result = addCustomRoute(options[0])
+                } else if (permission == APIPermissions.VISIT_ROUTE) {
+                    result = visitCommonRoute(options[0])
+                }
+                //自定义平台
+                else if (permission == APIPermissions.ADD_PLATFORM) {
+                    //{ code, vendor, name, shortName, online, types, scopes, artistTabs, searchTabs, weight }
+                    addPlatform(options[0])
+                } else if (permission == APIPermissions.REMOVE_PLATFORM) {
+                    removePlatform(options[0])
+                }
+                //播放相关
+                else if (permission == APIPermissions.TRACK_CURRENT_PLAYING) {
+                    const { id, platform, title, cover, artist, album, duration } = toRaw(currentTrack.value || {})
+                    result = { id, platform, title, cover, artist, album, duration }
+                } else if (permission == APIPermissions.TRACK_SPECTRUM_PARAMS) {
+                    result = toRaw(spectrumParams.value)
+                }
+                onAccessResult(permission, result, options)
+            } catch (error) {
+                console.log(error)
             }
-            //获取相关信息
-            else if (permission == APIPermissions.GET_USER_AGENT) {
-                result = ipcRenderer ? (await ipcRenderer.invoke('app-userAgent')) : ''
-            } else if (permission == APIPermissions.GET_COOKIE) {
-                result = ipcRenderer ? (await ipcRenderer.invoke('app-getCookie', options[0])) : ''
-            }
-            //请求头信息
-            else if (permission == APIPermissions.ADD_REQUEST_HANDLER) {
-                result = ipcRenderer ? (await ipcRenderer.invoke('app-addRequestHandler', options[0])) : ''
-            } else if (permission == APIPermissions.REMOVE_REQUEST_HANDLER) {
-                result = ipcRenderer ? (await ipcRenderer.invoke('app-removeRequestHandler', options[0])) : ''
-            }
-            //路由
-            else if (permission == APIPermissions.ADD_ROUTE) {
-                result = addCustomRoute(options[0])
-            } else if (permission == APIPermissions.VISIT_ROUTE) {
-                result = visitCommonRoute(options[0])
-            }
-            //自定义平台
-            else if (permission == APIPermissions.ADD_PLATFORM) {
-                //{ code, vendor, name, shortName, online, types, scopes, artistTabs, searchTabs, weight }
-                addPlatform(options[0])
-            } else if (permission == APIPermissions.REMOVE_PLATFORM) {
-                removePlatform(options[0])
-            }
-            onAccessResult(permission, result, options)
             return result
         },
     },
@@ -307,6 +348,10 @@ provide('apiExpose', {
     hasExDrawSpectrumHandlers: () => {
         return EventHandlerRegistrations.hasHanlders(APIEvents.TRACK_DRAW_SPECTRUM)
     },
+    getExVisualCanvasHandlersLength: () => {
+        const handlers = EventHandlerRegistrations.handlers(APIEvents.TRACK_VISUAL_CANVAS) || []
+        return handlers.length
+    },
     /**
      * 获取音频播放url
      * @param {*} track 
@@ -328,11 +373,11 @@ provide('apiExpose', {
      * 获取视频播放url
      * @param {*} video 
      */
-    getExVideoPlayUrl: async (video) => {
+    getExVideoPlayUrl: async (video, noToast) => {
         const _video = { ...toRaw(video) }
         const handler = EventHandlerRegistrations.lastHandler(APIEvents.VIDEO_GET_PLAY_URL)
         if (handler && (typeof handler == 'function')) {
-            showToast(`尝试从插件获取视频源<br>请耐心等待一下哟`)
+            if (!noToast) showToast(`尝试从插件获取视频源<br>请耐心等待一下哟`)
             return handler(_video)
         }
     },
@@ -342,6 +387,7 @@ provide('apiExpose', {
      * @param {*} params  { freqData, freqBinCount, sampleRate, 
      *                      analyser, spectrumColor, stroke, 
      *                      canvasBgColor, isSimpleLayoutMode }
+     * @param {*} index
      */
     drawExSpectrum: async (canvas, params, index) => {
         try {
@@ -350,6 +396,29 @@ provide('apiExpose', {
             const handler = handlers[index]
             if (!handler || (typeof handler != 'function')) return Promise.reject('noHandler')
             return handler(canvas, params)
+        } catch (error) {
+            Promise.reject(error)
+        }
+    },
+    /**
+     * 
+     * @param {*} params  { freqData, freqBinCount, sampleRate, 
+     *                      analyser, spectrumColor, stroke, 
+     *                      canvasBgColor, isSimpleLayoutMode }
+     * @param {*} index
+     */
+    toggleExVisualCanvas: async (containerElSelector, index, visible) => {
+        try {
+            const handlers = EventHandlerRegistrations.handlers(APIEvents.TRACK_VISUAL_CANVAS)
+            if (!handlers || handlers.length < 1) return Promise.reject('noHandler')
+            const handler = handlers[index]
+            if (!handler || (typeof handler != 'object')) return Promise.reject('noHandler')
+            const containerEl = document.querySelector(containerElSelector)
+            if (!containerEl) return Promise.reject('noContainer')
+
+            const { mounted, unmounted } = handler
+            if (visible) tryCallOnObject(unmounted, handler, containerEl)
+            tryCallOnObject(visible ? mounted : unmounted, handler, containerEl)
         } catch (error) {
             Promise.reject(error)
         }

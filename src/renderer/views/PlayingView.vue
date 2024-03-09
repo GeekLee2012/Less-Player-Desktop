@@ -32,7 +32,8 @@ const ipcRenderer = useIpcRenderer()
 const { isMaxScreen, playingViewShow, desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize,
     showToast, switchPlayingViewTheme,
-    toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
+    toggleSoundEffectView, toggleDesktopLyricShow,
+    togglePlayingThemeListView, } = useAppCommonStore()
 const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos,
@@ -172,7 +173,7 @@ onMounted(() => {
                         <VolumeBar ref="volumeBarRef"></VolumeBar>
                     </div>
                     <div class="btm-right">
-                        <div class="theme-btn btn" @click="switchPlayingViewTheme">
+                        <div class="theme-btn btn" @click.stop="togglePlayingThemeListView">
                             <svg width="17" height="17" viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
@@ -353,8 +354,10 @@ onMounted(() => {
 }
 
 .playing-view .center .cover-wrap .cover {
-    width: 356px;
-    height: 356px;
+    /*width: 356px;
+    height: 356px;*/
+    width: 366px;
+    height: 366px;
     border: 6px solid #292929;
     border-radius: 3px;
     background-size: cover;

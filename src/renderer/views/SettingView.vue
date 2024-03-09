@@ -1000,6 +1000,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
             <div class="dialog row">
                 <span class="cate-name">对话框</span>
                 <div class="content">
+                    <div class="tip-text">提示：当前使用系统提供的对话框，可能会和当前应用的风格不一致</div>
                     <div>当进行下列操作时，需要确认：</div>
                     <div>
                         <span class="cate-subtitle">批量删除：</span>
@@ -1029,8 +1030,7 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                     </div>
                     <div>
                         <span class="cate-subtitle">删除插件：</span>
-                        <ToggleControl @click="toggleShowDialogBeforeDeletePlugins"
-                            :value="dialog.deletePlugins">
+                        <ToggleControl @click="toggleShowDialogBeforeDeletePlugins" :value="dialog.deletePlugins">
                         </ToggleControl>
                     </div>
                     <div>

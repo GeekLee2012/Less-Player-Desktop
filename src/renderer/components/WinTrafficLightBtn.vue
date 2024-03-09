@@ -124,12 +124,13 @@ const toggleMaximize = () => {
 }
 
 .win-traffic-light-btn .ctl-btn svg {
-    fill: #555;
+    fill: #555 !important;
     stroke-width: 3.6px;
-    stroke: #555;
+    stroke: #555 !important;
     padding: 1px;
     visibility: hidden;
 }
+
 
 .win-traffic-light-btn:hover .ctl-btn svg {
     visibility: visible;

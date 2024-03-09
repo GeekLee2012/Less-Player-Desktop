@@ -173,13 +173,28 @@ export class RadioPlayer {
         if (!this.webAudioApi) return
         this._resolvePendingSoundEffect()
         if (!this.isSpectrumRefreshEnabled()) return
-        const { analyser, audioCtx } = this.webAudioApi
-        if (!analyser) return
+        
+        const { leftChannelAnalyser, rightChannelAnalyser, analyser, audioCtx } = this.webAudioApi
+        if (!analyser || !leftChannelAnalyser || !rightChannelAnalyser) return
+        
+        const { frequencyBinCount: leftFreqBinCount } = leftChannelAnalyser
+        const { frequencyBinCount: rightFreqBinCount } = rightChannelAnalyser
         const { frequencyBinCount: freqBinCount } = analyser
-        const { sampleRate } = audioCtx
+        
+        const leftFreqData = new Uint8Array(leftFreqBinCount)
+        const rightFreqData = new Uint8Array(rightFreqBinCount)
         const freqData = new Uint8Array(freqBinCount)
+        leftChannelAnalyser.getByteFrequencyData(leftFreqData)
+        rightChannelAnalyser.getByteFrequencyData(rightFreqData)
         analyser.getByteFrequencyData(freqData)
-        this.notify('track-spectrumData', { freqData, freqBinCount, sampleRate, analyser })
+
+        const { sampleRate } = audioCtx
+        this.notify('track-spectrumData', { 
+            leftFreqData, leftFreqBinCount, 
+            rightFreqData, rightFreqBinCount, 
+            freqData, freqBinCount, sampleRate, 
+            analyser, leftChannelAnalyser, rightChannelAnalyser 
+        })
     }
 
     updateEQ(values) {

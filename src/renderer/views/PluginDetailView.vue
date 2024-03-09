@@ -10,7 +10,7 @@ import { inject, onActivated, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePluginStore } from '../store/pluginStore';
-import { isBlank, toTrimString, transformUrl } from '../../common/Utils';
+import { isBlank, toTrimString, textDefault, transformUrl } from '../../common/Utils';
 
 
 
@@ -28,11 +28,6 @@ const loadPlugin = () => {
     if (!plugin) return
     const { name, alias, author, version, repository, about } = plugin
     Object.assign(detail, { name, alias, author, version, repository, about })
-}
-
-const withDefaultText = (text, defaultText) => {
-    text = toTrimString(text)
-    return text ? text : toTrimString(defaultText)
 }
 
 const updateAlias = () => {
@@ -54,7 +49,7 @@ onActivated(loadPlugin)
             <div class="info-wrap">
                 <div class="name info-row">
                     <div class="sec-title">名称：</div>
-                    <div class="sec-content" v-html="withDefaultText(detail.name, '未知')"></div>
+                    <div class="sec-content" v-html="textDefault(detail.name, '未知')"></div>
                 </div>
                 <div class="alias info-row">
                     <div class="sec-title">备注：</div>
@@ -64,23 +59,22 @@ onActivated(loadPlugin)
                 </div>
                 <div class="author info-row">
                     <div class="sec-title">作者：</div>
-                    <div class="sec-content" v-html="withDefaultText(detail.author, '未知')"></div>
+                    <div class="sec-content" v-html="textDefault(detail.author, '未知')"></div>
                 </div>
                 <div class="version info-row">
                     <div class="sec-title">版本：</div>
-                    <div class="sec-content" v-html="withDefaultText(detail.version, '未知')"></div>
+                    <div class="sec-content" v-html="textDefault(detail.version, '未知')"></div>
                 </div>
                 <div class="repository info-row">
                     <div class="sec-title">官网：</div>
                     <div class="sec-content">
                         <a href="#" class="no-link" :class="{ link: !isBlank(detail.repository) }"
-                            @click.prevent="visitLink(detail.repository)"
-                            v-html="withDefaultText(detail.repository, '未知')"></a>
+                            @click.prevent="visitLink(detail.repository)" v-html="textDefault(detail.repository, '未知')"></a>
                     </div>
                 </div>
                 <div class="about info-row">
                     <div class="sec-title">简介：</div>
-                    <div class="sec-content" v-html="withDefaultText(detail.about, '暂无')"></div>
+                    <div class="sec-content" v-html="textDefault(detail.about, '暂无')"></div>
                 </div>
             </div>
         </div>

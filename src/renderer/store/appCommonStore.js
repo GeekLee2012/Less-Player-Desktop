@@ -7,6 +7,7 @@ import { isDevEnv, useIpcRenderer } from "../../common/Utils";
 const ipcRenderer = useIpcRenderer()
 let toastTimer = null
 
+
 export const useAppCommonStore = defineStore('appCommon', {
     state: () => ({
         isMaxScreen: false, //Electron存在系统兼容性问题，部分OS平台下无法全屏FullScreen显示
@@ -18,6 +19,28 @@ export const useAppCommonStore = defineStore('appCommon', {
         platformCategoryViewShow: false,
         playbackQueueViewShow: false,
         playingViewShow: false,
+        playingThemeListViewShow: false,
+        playingViewThemes: [{
+                id: 'default_cover',
+                name: '默认封面',
+                light: false,
+            }, {
+                id: 'spectrum_cover',
+                name: '动感频谱',
+                light: false,
+            }, {
+                id: 'dynamic_pyramid',
+                name: '波光嶙嶙',
+                light: false,
+            }, {
+                id: 'dynamic_zoom',
+                name: '时空穿越',
+                light: false,
+            }, {
+                id: 'dynamic_purple',
+                name: '紫色记忆',
+                light: true,
+            }],
         videoPlayingViewShow: false,
         soundEffectViewShow: false,
         customThemeEditViewShow: false,
@@ -43,6 +66,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         exitToHomeBtnShow: false,
         playingViewThemeIndex: 0,
         spectrumIndex: 1,
+        spectrumParams: null,
+        exVisualCanvasShow: false,
+        exVisualCanvasIndex: 0,
         //歌词设置
         lyricToolbarShow: false,
         //随便听听设置
@@ -182,6 +208,16 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         togglePlayingView() {
             this.playingViewShow = !this.playingViewShow
+        },
+        showPlayingThemeListView() {
+            this.playingThemeListViewShow = true
+        },
+        hidePlayingThemeListView() {
+            this.playingThemeListViewShow = false
+        },
+        togglePlayingThemeListView() {
+            this.playingThemeListViewShow = !this.playingThemeListViewShow
+            this.hidePlaybackQueueView()
         },
         hideVideoPlayingView() {
             this.videoPlayingViewShow = false
@@ -361,15 +397,21 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.exitToHomeBtnShow = value
         },
         switchPlayingViewTheme() {
-            this.playingViewThemeIndex = (this.playingViewThemeIndex + 1) % 2
+            this.playingViewThemeIndex = (this.playingViewThemeIndex + 1) % 5
             this.hideSoundEffectView()
-        }
-        ,
+        },
+        setPlayingViewThemeIndex(index) {
+            this.playingViewThemeIndex = index
+            this.hideSoundEffectView()
+        },
         switchSpectrumIndex() {
             this.setSpectrumIndex(this.spectrumIndex + 1)
         },
         setSpectrumIndex(value) {
             this.spectrumIndex = value
+        },
+        setSpectrumParams(params) {
+            this.spectrumParams = params
         },
         hideLyricToolbar() {
             this.lyricToolbarShow = false
@@ -473,7 +515,13 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setPendingPlayPercent(value) {
             this.pendingPlayPercent = value
-        }
+        },
+        toggleExVisualCanvasShow() {
+            this.exVisualCanvasShow = !this.exVisualCanvasShow
+        },
+        setExVisualCanvasIndex(index) {
+            this.exVisualCanvasIndex = index
+        },
     },
     persist: {
         enabled: true,
@@ -481,10 +529,11 @@ export const useAppCommonStore = defineStore('appCommon', {
             {
                 //key: 'appCommon',
                 storage: localStorage,
-                paths: ['playingViewThemeIndex', 'spectrumIndex',
+                paths: ['playingViewThemeIndex', 'spectrumIndex', 
                     'randomMusicPlatformCodes', 'randomMusicTypeCodes',
                     'currentMusicCategoryName', 'exploreModeActiveStates', 
-                    'pendingPlay', 'pendingPlayPercent']
+                    'pendingPlay', 'pendingPlayPercent',
+                    'exVisualCanvasShow', 'exVisualCanvasIndex']
             },
         ],
     },

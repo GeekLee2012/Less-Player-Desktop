@@ -75,7 +75,7 @@ export class Player {
     createSound() {
         if (!this._isTrackAvailable()) return null
 
-        var self = this
+        const self = this
         this.sound = new Howl({
             src: [this.currentTrack.url],
             html5: true,
@@ -263,13 +263,28 @@ export class Player {
         if (!this._createWebAudioApi()) return
         this._resolvePendingSoundEffect()
         if (!this.isSpectrumRefreshEnabled()) return
-        const { analyser, audioCtx } = this.webAudioApi
-        if (!analyser) return
+        
+        const { leftChannelAnalyser, rightChannelAnalyser, analyser, audioCtx } = this.webAudioApi
+        if (!analyser || !leftChannelAnalyser || !rightChannelAnalyser) return
+        
+        const { frequencyBinCount: leftFreqBinCount } = leftChannelAnalyser
+        const { frequencyBinCount: rightFreqBinCount } = rightChannelAnalyser
         const { frequencyBinCount: freqBinCount } = analyser
-        const { sampleRate } = audioCtx
+        
+        const leftFreqData = new Uint8Array(leftFreqBinCount)
+        const rightFreqData = new Uint8Array(rightFreqBinCount)
         const freqData = new Uint8Array(freqBinCount)
+        leftChannelAnalyser.getByteFrequencyData(leftFreqData)
+        rightChannelAnalyser.getByteFrequencyData(rightFreqData)
         analyser.getByteFrequencyData(freqData)
-        this.notify('track-spectrumData', { freqData, freqBinCount, sampleRate, analyser })
+
+        const { sampleRate } = audioCtx
+        this.notify('track-spectrumData', { 
+            leftFreqData, leftFreqBinCount, 
+            rightFreqData, rightFreqBinCount, 
+            freqData, freqBinCount, sampleRate, 
+            analyser, leftChannelAnalyser, rightChannelAnalyser 
+        })
     }
 
     _tryUnlockHowlAudios() {
@@ -370,6 +385,7 @@ export class Player {
     postMessageToDesktopLryic(action, data) {
         if (!this.desktopLyricMessagePortActiveState) return
         const messagePort = this.desktopLyricMessagePort
+        data = data ? toRaw(data) : data
         if (messagePort) messagePort.postMessage({ action, data })
     }
 
@@ -414,7 +430,7 @@ export class Player {
     postLyricStateToDesktopLyric(track, hasLyric) {
         if (!this.desktopLyricMessagePortActiveState) return
         const action = hasLyric ? 's-track-lyricLoaded' : 's-track-noLyric'
-        this.postMessageToDesktopLryic(action, Player.getRawTrack(track))
+        this.postMessageToDesktopLryic(action, track)
     }
 
     static getRawTrack(track) {

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, shallowRef, inject, provide, computed, ref } from 'vue';
+import { onMounted, shallowRef, inject, provide, computed, ref, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
@@ -49,7 +49,8 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   hideAllCategoryViews, showToast, hideLyricToolbar,
   hideSoundEffectView, hideCustomThemeEditView,
   hideColorPickerToolbar, resetExploreModeActiveStates,
-  setMaxScreen, showImportantToast } = useAppCommonStore()
+  setMaxScreen, showImportantToast, 
+  hidePlayingThemeListView } = useAppCommonStore()
 
 
 const isReservedPath = (path) => {
@@ -167,15 +168,15 @@ const setupCache = () => {
 
 const setupLayout = (isInit) => {
   hideAllPopoverViewsAndToolbars()
-  let channel = 'app-layout-default'
+  let eventName = 'app-layout-default'
   if (isSimpleLayout.value) {
     currentAppLayout.value = SimpleLayout
-    channel = 'app-layout-simple'
+    eventName = 'app-layout-simple'
   } else {
     currentAppLayout.value = DefaultLayout
-    EventBus.emit(channel)
   }
-  if (ipcRenderer) ipcRenderer.send(channel, { zoom: getWindowZoom.value, isInit })
+  EventBus.emit(eventName)
+  if (ipcRenderer) ipcRenderer.send(eventName, { zoom: getWindowZoom.value, isInit })
   //triggerRef(currentAppLayout)
 }
 
@@ -211,6 +212,8 @@ const setVideoViewSize = () => {
 const hideAllPopoverViews = () => {
   //隐藏当前播放
   hidePlaybackQueueView()
+  //隐藏播放样式设置
+  hidePlayingThemeListView()
   //隐藏全部分类
   hideAllCategoryViews()
   //隐藏上下文菜单
@@ -256,7 +259,7 @@ const restoreSetting = (isInit) => {
   setupCache()
   setupTray()
   setupGlobalShortcut()
-  setupLayout(true)
+  setupLayout(isInit)
   setupWindowZoom()
   //非初始化，比如重置设置、还原备份数据 
   if (!isInit) {
@@ -268,7 +271,9 @@ const restoreSetting = (isInit) => {
 const registryIpcRendererListeners = () => {
   if (!ipcRenderer) return
 
-  ipcRenderer.on('app-active', hideEmptyToast)
+  ipcRenderer.on('app-active', () => {
+    hideEmptyToast()
+  })
   ipcRenderer.on('app-quit', setupCache)
 }
 
@@ -299,6 +304,7 @@ const initialize = () => {
   restoreSetting(true)
   registryIpcRendererListeners()
   migrateRecentsData()
+  //EventBus.emit('app-init')
 }
 
 EventBus.on("app-zoom", setupTrafficLightWinCtlBtn)
@@ -312,7 +318,7 @@ EventBus.on('setting-reset', restoreSetting)
 EventBus.on('route-visitShortcutKeys', visitShortcutKeys)
 
 //直接在setup()时初始化，不需要等待其他生命周期
-initialize()
+//initialize()
 
 let isConfirmDialogShowing = ref(false)
 const setConfirmDialogShowing = (value) => isConfirmDialogShowing.value = value
@@ -425,9 +431,11 @@ const showContextMenu = (event, data, dataType, index, isPlaybackQueue) => {
 }
 
 const useWindowsStyleWinCtl = computed(() => {
-  if (isUseWindowsWinCtl.value) return true
-  if (isUseAutoWinCtl.value) return isWinOS()
-  return false
+  //if (isUseWindowsWinCtl.value) return true
+  //if (isUseAutoWinCtl.value) return isWinOS()
+  //return false
+  return isUseWindowsWinCtl.value ? true :
+    (isUseAutoWinCtl.value ? isWinOS() : false)
 })
 
 const checkMaxScreenState = async () => {
@@ -473,6 +481,9 @@ const visitLink = (url) => {
 }
 
 EventBus.on('app-resetSetting', resetSetting)
+
+//直接在setup()时初始化，不需要等待其他生命周期
+initialize()
 
 //通用API
 provide('appCommon', {

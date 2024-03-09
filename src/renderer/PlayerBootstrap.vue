@@ -1,5 +1,5 @@
 <script setup>
-import { inject, provide, onMounted, watch, ref, computed, toRaw } from 'vue';
+import { inject, provide, onMounted, watch, ref, computed, toRaw, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -11,7 +11,7 @@ import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
 import {
     coverDefault, isBlank, isDevEnv, escapeHtml,
-    useIpcRenderer, useStartDrag, useDownloadsPath, tryCall
+    useIpcRenderer, useStartDrag, useDownloadsPath, tryCall, toTrimString
 } from '../common/Utils';
 import { PlayState, TrayAction, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
@@ -39,13 +39,16 @@ const { playTrack, playNextTrack,
 const { getVendor, isLocalMusic, isFreeFM } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
     playingViewThemeIndex, spectrumIndex,
-    pendingPlay, pendingPlayPercent, } = storeToRefs(useAppCommonStore())
+    pendingPlay, pendingPlayPercent,
+    exVisualCanvasShow, exVisualCanvasIndex,
+    spectrumParams } = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId,
     setDesktopLyricShow, setCurrentTraceId,
     setPendingPlay, setPendingPlayPercent,
-    setSpectrumIndex, } = useAppCommonStore()
+    setSpectrumIndex, setSpectrumParams,
+    setExVisualCanvasIndex, } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
@@ -67,9 +70,14 @@ const { setupSoundEffect } = useSoundEffectStore()
 
 
 
-const { visitHome, visitUserHome, visitSetting, visitModulesSetting, visitSearch, visitThemes, visitPlugins } = inject('appRoute')
-const { hasExTrackPlayUrlHandlers, hasExVideoPlayUrlHandlers, hasExDrawSpectrumHandlers, hasExDrawFullpageSpectrumHandlers,
-    getExTrackPlayUrl, getExVideoPlayUrl, drawExSpectrum, drawExFullPageSpectrum } = inject('apiExpose')
+const { visitHome, visitUserHome, visitSetting,
+    visitModulesSetting, visitSearch,
+    visitThemes, visitPlugins
+} = inject('appRoute')
+const { hasExTrackPlayUrlHandlers, hasExVideoPlayUrlHandlers, hasExDrawSpectrumHandlers,
+    getExTrackPlayUrl, getExVideoPlayUrl,
+    drawExSpectrum, toggleExVisualCanvas
+} = inject('apiExpose')
 
 const playState = ref(PlayState.NONE)
 const setPlayState = (value) => playState.value = value
@@ -569,8 +577,6 @@ const doPlayAlbum = async (album, text, traceId) => {
 
 
 /* 频谱 */
-const spectrumParams = {}
-
 const drawEmptySpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) => {
     alignment = alignment || 'bottom'
 
@@ -612,7 +618,7 @@ const drawSpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) =>
         //if (++freqCnt >= limit) break
         if (x >= cWidth) break
 
-        barHeight = freqData[i] / 255 * cHeight
+        barHeight = freqData[i] / 256 * cHeight
         barHeight = barHeight > 0 ? barHeight : 1
 
         canvasCtx.fillStyle = spectrumColor
@@ -644,9 +650,9 @@ const drawFlippingSpectrum = (canvas, { freqData, spectrumColor, stroke }) => {
 
     if (!freqData || freqData.length < 1) return
     const dataLen = freqData.length
-    let barWidth = 4, barHeight = null, x = 2, spacing = 3, step = 2
+    let barWidth = 4, barHeight = null, x = 2, spacing = 3, step = 1
     //barWidth = (cWidth / (dataLen * 3))
-    const flipBarHeight = 1, flipStep = 1
+    const flipBarHeight = 1, flipStep = 1 / 2
 
     let freqCnt = 0
     for (var i = 0; i < dataLen; i = i + step) {
@@ -655,7 +661,7 @@ const drawFlippingSpectrum = (canvas, { freqData, spectrumColor, stroke }) => {
         if (x >= cWidth) break
         //step = i >= (dataLen / 2) && i <= (dataLen * 3 / 4) ? 1 : 2
 
-        barHeight = freqData[i] / 255 * cHeight
+        barHeight = freqData[i] / 256 * cHeight
         barHeight = barHeight > 0 ? barHeight : 1
 
         //roundedRect(canvasCtx, x, cHeight - barHeight, barWidth, barHeight, 5)
@@ -699,25 +705,27 @@ const drawFlippingSpectrum = (canvas, { freqData, spectrumColor, stroke }) => {
     }
 }
 
+//普通频谱
 const drawCanvasSpectrum = () => {
     const canvas = document.querySelector(".spectrum-canvas")
     if (canvas) {
         const index = spectrumIndex.value
+        const params = spectrumParams.value || {}
         let alignment = 'bottom'
         switch (index) {
             case 0:
-                drawEmptySpectrum(canvas, { ...spectrumParams, alignment })
+                drawEmptySpectrum(canvas, { ...params, alignment })
                 break
             case 1:
-                drawSpectrum(canvas, { ...spectrumParams, alignment })
+                drawSpectrum(canvas, { ...params, alignment })
                 break
             case 2:
-                drawFlippingSpectrum(canvas, spectrumParams)
+                drawFlippingSpectrum(canvas, params)
                 break
             default:
                 if (!hasExDrawSpectrumHandlers() || index < 0) return setSpectrumIndex(0)
                 const exSpectrumIndex = Math.max((index - 3), 0)
-                drawExSpectrum(canvas, { ...spectrumParams, alignment }, exSpectrumIndex)
+                drawExSpectrum(canvas, { ...params, alignment }, exSpectrumIndex)
                     .catch(error => {
                         if (error == 'noHandler') return setSpectrumIndex(0)
                         console.log(error)
@@ -726,11 +734,33 @@ const drawCanvasSpectrum = () => {
     }
 }
 
+//TODO 插件加载状态无法感知
+const containerElSelector = '.visual-playing-view .center .ex-visual-canvas-wrap'
+watch(() => exVisualCanvasShow.value && playingViewThemeIndex.value, (nv, ov) => {
+    const index = exVisualCanvasIndex.value
+    const tIndex = playingViewThemeIndex.value
+    toggleExVisualCanvas(containerElSelector, index, tIndex == 1)
+        .catch(error => {
+            if (error == 'noHandler' && index > 0) {
+                setExVisualCanvasIndex(Math.max(0, index - 1))
+            }
+        })
+}, { immediate: true, flush: 'post' })
+
+watch(exVisualCanvasIndex, (nv, ov) => {
+    toggleExVisualCanvas(containerElSelector, ov, false).catch(error => {
+        if (isDevEnv()) console.log(error)
+    })
+    toggleExVisualCanvas(containerElSelector, nv, true).catch(error => {
+        if (isDevEnv()) console.log(error)
+    })
+}, { flush: 'post' })
+
 //获取视频信息 
 const getVideoDetail = (video) => {
     return new Promise((resolve, reject) => {
         const { platform, mv, id } = video
-        if (!id || !mv) return reject('noId')
+        if (!id && !mv) return reject('noId')
         if (!platform) return reject('noService')
         const vendor = getVendor(platform)
         if (!vendor || !vendor.videoDetail) return reject('noService')
@@ -746,13 +776,13 @@ const getVideoDetail = (video) => {
 //TODO 貌似Electron Bug：主窗口刷新后，MediaSession无法重新关联
 const setupCurrentMediaSession = async () => {
     if ("mediaSession" in navigator) {
-        const track = currentVideo.value || currentTrack.value || { title: '听你想听，爱你所爱' }
+        const track = (currentVideo.value || currentTrack.value || { title: '听你想听，爱你所爱' })
         const { title, cover } = track
         //TODO 本地歌曲可能使用在线封面，会导致数据不一致
         // 暂时忽略，仍然使用旧封面，不去尝试进行更新，得不偿失
         let coverSrc = cover
-        if (cover && cover.startsWith(ImageProtocal.prefix)) {
-            if (ipcRenderer) coverSrc = await ipcRenderer.invoke('open-image-base64', cover)
+        if (ipcRenderer && toTrimString(cover).startsWith(ImageProtocal.prefix)) {
+            coverSrc = await ipcRenderer.invoke('open-image-base64', cover)
         }
         navigator.mediaSession.metadata = new MediaMetadata({
             title,
@@ -777,6 +807,8 @@ const setupCurrentMediaSession = async () => {
             }]
         })
 
+        //上、下一曲按钮功能绑定，不支持视频
+        if (currentVideo.value) return
         navigator.mediaSession.setActionHandler("previoustrack", playPrevTrack)
         navigator.mediaSession.setActionHandler("nexttrack", playNextTrack)
     }
@@ -909,19 +941,31 @@ EventBus.on('track-pos', secs => {
     progressState.value = duration > 0 ? (currentTime / duration) : 0
 })
 
-EventBus.on("track-spectrumData", ({ freqData, freqBinCount, sampleRate, analyser }) => {
+EventBus.on("track-spectrumData", ({
+    leftFreqData, leftFreqBinCount, rightFreqData, rightFreqBinCount, freqData, freqBinCount,
+    sampleRate, analyser, leftChannelAnalyser, rightChannelAnalyser, }) => {
+    if (!currentTrack.value) return setSpectrumParams(null)
+
     const spectrumColor = getCurrentThemeHighlightColor()
     const canvasBgColor = getCurrentThemeContentBgColor()
     const isSimpleLayoutMode = isSimpleLayout.value
-    Object.assign(spectrumParams, {
-        freqData, freqBinCount, sampleRate, analyser,
+    const isPlaying = playing.value
+
+    setSpectrumParams({
+        leftFreqData, leftFreqBinCount,
+        rightFreqData, rightFreqBinCount,
+        freqData, freqBinCount, sampleRate,
+        analyser, leftChannelAnalyser, rightChannelAnalyser,
         spectrumColor, stroke: spectrumColor, canvasBgColor,
-        isSimpleLayoutMode,
+        isSimpleLayoutMode, isPlaying
     })
+
     //简约布局、可视化播放页
-    if (isSimpleLayoutMode || (playingViewShow.value && playingViewThemeIndex.value == 1)) {
-        drawCanvasSpectrum()
+    if (!isSimpleLayoutMode && (!playingViewShow.value || playingViewThemeIndex.value != 1)) {
+        return setSpectrumParams(null)
     }
+    if (exVisualCanvasShow.value && !isSimpleLayoutMode) return
+    drawCanvasSpectrum()
 })
 
 //歌单电台 - 下一曲
@@ -977,10 +1021,15 @@ const isTrackSeekable = computed(() => {
 
 //播放MV
 const playMv = (video, failText, text) => {
-    if (!video || !video.mv) return
+    if (!video) return
+    const { id, mv } = video
+    if (!id && !mv) return
+
     failText = (failText || '当前MV无法播放')
+    text = text || '即将为您播放MV'
+
     getVideoDetail(video).then(result => {
-        showToast(text || '即将为您播放MV', () => {
+        showToast(text, () => {
             playVideo({ ...video, ...result }, failText)
             traceRecentTrack(video)
         }, 666)
@@ -989,7 +1038,7 @@ const playMv = (video, failText, text) => {
             const result = await getExVideoPlayUrl(video)
             if (result && !isBlank(result.url)) {
                 const { url } = result
-                return showToast(text || '即将为您播放MV', () => {
+                return showToast(text, () => {
                     playVideo({ ...video, url }, failText)
                     traceRecentTrack(video)
                 }, 666)
@@ -1005,7 +1054,7 @@ const playVideo = async (video, failText) => {
     try {
         //是否需要暂停音频播放并挂起
         const playing = isPlaying()
-        const pending = playing && isPauseOnPlayingVideoEnable.value
+        const pending = (playing && isPauseOnPlayingVideoEnable.value)
         if (pending) togglePlay()
         setPendingPlay(pending)
 
@@ -1277,6 +1326,7 @@ const setupMessagePort = (channel, callback) => {
 
 const postMessageToDesktopLryic = (action, data) => {
     if (!desktopLyricShowState) return
+    data = data ? toRaw(data) : data
     if (messagePort) messagePort.postMessage({ action, data })
 }
 
@@ -1297,15 +1347,13 @@ const handleMessageFromDesktopLyric = (action, data) => {
     } else if (action === 'c-track-playNext') {
         playNextTrack()
     } else if (action === 'c-track-init-retry') {
-        postMessageToDesktopLryic('s-track-init-retry', toRaw(currentTrack.value))
+        postMessageToDesktopLryic('s-track-init-retry', currentTrack.value)
     } else if (messagePort.onPlayerMessage) { //必须放在最后
         messagePort.onPlayerMessage(action, data)
     }
 }
 
-EventBus.on('setting-syncToDesktopLyric', data => {
-    postMessageToDesktopLryic('s-setting-sync', toRaw(data))
-})
+EventBus.on('setting-syncToDesktopLyric', data => postMessageToDesktopLryic('s-setting-sync', data))
 
 //TODO
 const reloadApp = () => {
@@ -1451,7 +1499,9 @@ watch(queueTracksSize, (nv, ov) => {
 
 watch(playing, (nv, ov) => {
     if (ipcRenderer) ipcRenderer.send('app-playState', nv)
-    if (!nv && spectrumIndex.value == 3) drawCanvasSpectrum()
+    if (!nv && spectrumIndex.value != 0) drawCanvasSpectrum()
+    const params = spectrumParams.value || {}
+    setSpectrumParams({ ...params, isPlaying: nv })
 })
 
 /*
@@ -1466,7 +1516,7 @@ watch(theme, () => {
         || layout.value.index == 2)) {
         drawCanvasSpectrum()
     }
-    postMessageToDesktopLryic('s-theme-apply', toRaw(getCurrentTheme()))
+    postMessageToDesktopLryic('s-theme-apply', getCurrentTheme())
 }, { deep: true })
 
 //TODO

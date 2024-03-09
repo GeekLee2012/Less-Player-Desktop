@@ -23,16 +23,20 @@ const { seekTrack, playMv,
     mmssPreseekTime, isTrackSeekable,
     dndSaveCover, dndSaveLyric } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
+const { getExVisualCanvasHandlersLength } = inject('apiExpose')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const { isMaxScreen, playingViewShow,
     spectrumIndex, playingViewThemeIndex,
-    desktopLyricShow } = storeToRefs(useAppCommonStore())
+    desktopLyricShow, exVisualCanvasShow,
+    exVisualCanvasIndex, } = storeToRefs(useAppCommonStore())
 const { hidePlayingView, minimize, showToast,
     switchPlayingViewTheme, switchSpectrumIndex,
-    toggleSoundEffectView, toggleDesktopLyricShow } = useAppCommonStore()
+    toggleSoundEffectView, toggleDesktopLyricShow,
+    toggleExVisualCanvasShow, setExVisualCanvasIndex,
+    togglePlayingThemeListView } = useAppCommonStore()
 const { getCurrentThemeHighlightColor } = useSettingStore()
 const { currentTrack, playingIndex,
     playing, volume, queueTracksSize } = storeToRefs(usePlayStore())
@@ -96,6 +100,12 @@ const setupBackgroudEffect = () => {
 
 const onUserMouseWheel = (event) => EventBus.emit('lyric-userMouseWheel', event)
 
+const switchVisualCanvas = () => {
+    const len = getExVisualCanvasHandlersLength()
+    if (len < 1) return
+    const index = exVisualCanvasIndex.value
+    setExVisualCanvasIndex((index + 1) % len)
+}
 
 watch([() => (currentTrack.value && currentTrack.value.cover), playingViewShow], () => {
     setupBackgroudEffect()
@@ -109,6 +119,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     setDisactived(true)
+    EventBus.emit('visualPlayingView-disactived')
 })
 </script>
 
@@ -151,16 +162,19 @@ onUnmounted(() => {
             </div>
             <div class="center">
                 <div class="left">
-                    <div class="cover-wrap">
-                        <img class="cover" v-lazy="Track.coverDefault(currentTrack)"
-                            :class="{ rotation: (playingViewShow && playing), 'obj-fit-contain': (currentTrack.coverFit == 1), 'draggable': isDndSaveEnable }"
-                            :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
+                    <div class="cover-spectrum-wrap" v-show="!exVisualCanvasShow">
+                        <div class="cover-wrap">
+                            <img class="cover" v-lazy="Track.coverDefault(currentTrack)"
+                                :class="{ rotation: (playingViewShow && playing), 'obj-fit-contain': (currentTrack.coverFit == 1), 'draggable': isDndSaveEnable }"
+                                :draggable="isDndSaveEnable" @dragstart="dndSaveCover"
+                                @contextmenu="toggleExVisualCanvasShow" />
+                        </div>
+                        <div class="canvas-wrap" @click="switchSpectrumIndex">
+                            <canvas class="spectrum-canvas" width="480" height="66"></canvas>
+                        </div>
                     </div>
-                    <div class="cover-spectrum" v-show="false">
-                        <canvas class="cover-spectrum-canvas"></canvas>
-                    </div>
-                    <div class="canvas-wrap" @click="switchSpectrumIndex">
-                        <canvas class="spectrum-canvas" width="404" height="66"></canvas>
+                    <div class="ex-visual-canvas-wrap" v-show="exVisualCanvasShow" @click.stop="switchVisualCanvas"
+                        @contextmenu="toggleExVisualCanvasShow">
                     </div>
                     <div class="progress-wrap">
                         <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack"
@@ -222,7 +236,7 @@ onUnmounted(() => {
                             <PlayControl></PlayControl>
                         </div>
                         <div class="btm-right">
-                            <div class="theme-btn btn" @click="switchPlayingViewTheme">
+                            <div class="theme-btn btn" @click.stop="togglePlayingThemeListView">
                                 <svg width="17" height="17" viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">
@@ -266,7 +280,7 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </div>
-                <div class="lyric-wrap">
+                <div class="lyric-wrap" :class="{ 'meta-show': (lyricMetaPos == 0) }">
                     <LyricControl :track="currentTrack" :currentTime="currentTimeState" @mousewheel="onUserMouseWheel">
                     </LyricControl>
                 </div>
@@ -404,15 +418,27 @@ onUnmounted(() => {
 
 .visual-playing-view .center .lyric-wrap {
     margin-left: 28px;
+}
+
+.visual-playing-view .center .lyric-wrap.meta-show {
     margin-top: 15px;
+}
+
+.visual-playing-view .center .lyric-wrap .lyric-ctl {
+    height: calc(100% - 15px);
 }
 
 .visual-playing-view .center .left {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-top: 33px;
+    /*padding-top: 33px;*/
     margin-right: 28px;
+}
+
+.visual-playing-view .cover-spectrum-wrap {
+    padding-top: 33px;
+    padding-bottom: 0px;
 }
 
 .visual-playing-view .cover-wrap .cover {
@@ -422,6 +448,7 @@ onUnmounted(() => {
     border-radius: 99rem;
     animation: rotate 10s linear infinite;
     animation-play-state: paused;
+    cursor: pointer;
 }
 
 .visual-playing-view .cover-wrap .cover.draggable {
@@ -435,6 +462,12 @@ onUnmounted(() => {
 
 .visual-playing-view .center .left .audio-time {
     margin: 0px 8px;
+}
+
+.visual-playing-view .center .ex-visual-canvas-wrap {
+    cursor: pointer;
+    width: 100%;
+    height: 494px;
 }
 
 .visual-playing-view .progress-wrap {

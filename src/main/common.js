@@ -172,7 +172,7 @@ async function createTrackFromMetadata(file) {
             const ID3v23 = metadata.native['ID3v2.3']
             for (var i in ID3v23) {
                 const { id, value } = ID3v23[i]
-                if (id === 'USLT') { //Unsynchronised lyrics
+                if (id === 'USLT') { //Unsynchronised Lyrics
                     lyricText = value.text
                     break
                 }

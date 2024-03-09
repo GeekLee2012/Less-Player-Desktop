@@ -23,7 +23,8 @@ import GradientColorToolbar from './components/GradientColorToolbar.vue';
 import PlaylistExportToolbar from './components/PlaylistExportToolbar.vue';
 import TagsCategoryView from './views/TagsCategoryView.vue';
 import PlatformCategoryView from './views/PlatformCategoryView.vue';
-
+import DynamicPlayingView from './views/DynamicPlayingView.vue';
+import PlayingThemeListView from './views/PlayingThemeListView.vue';
 
 
 
@@ -47,7 +48,7 @@ const { commonNotificationShow, commonNotificationText,
   artistCategoryViewShow, radioCategoryViewShow,
   popoverHintShow, popoverHintText,
   playlistExportToolbarShow, tagsCategoryViewShow,
-  platformCategoryViewShow } = storeToRefs(useAppCommonStore())
+  platformCategoryViewShow, playingThemeListViewShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -283,8 +284,8 @@ watch(playingViewThemeIndex, (nv) => setupPlayingView(nv))
 
 const setupPlayingView = (index) => {
   index = index || playingViewThemeIndex.value
-  const playingViewThemes = [PlayingView, VisualPlayingView]
-  currentPlayingView.value = playingViewThemes[index]
+  const playingViewThemes = [PlayingView, VisualPlayingView, DynamicPlayingView]
+  currentPlayingView.value = playingViewThemes[Math.min(index, 2)]
 }
 
 const appBackgroundScope = reactive({
@@ -410,6 +411,11 @@ watch(() => getCurrentTheme(), (nv) => {
       </PlaybackQueueView>
     </transition>
 
+    <transition name="fade-ex">
+      <PlayingThemeListView id="playing-theme-list-view" v-show="playingThemeListViewShow">
+      </PlayingThemeListView>
+    </transition>
+
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
       <VideoPlayingView id="video-playing-view" v-show="videoPlayingViewShow">
@@ -497,6 +503,20 @@ watch(() => getCurrentTheme(), (nv) => {
   background-position: center;
   background-size: cover;
   border-radius: var(--border-macstyle-border-radius);
+}
+
+#playing-theme-list-view {
+  position: absolute;
+  top: 0;
+  right: 0px;
+  width: 335px;
+  max-width: 404px;
+  width: 33.5%;
+  height: 100%;
+  z-index: 100;
+  box-shadow: var(--box-shadow);
+  border-top-right-radius: var(--border-macstyle-border-radius);
+  border-bottom-right-radius: var(--border-macstyle-border-radius);
 }
 
 #video-playing-view {

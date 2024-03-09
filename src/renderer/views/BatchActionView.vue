@@ -287,6 +287,8 @@ const switchTab = () => {
         }
         if (isFreeFM()) {
             Object.assign(actionShowCtl, {
+                playBtn: true,
+                addToQueueBtn: true,
                 deleteBtn: true,
                 exportBtn: true
             })

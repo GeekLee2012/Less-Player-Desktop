@@ -55,14 +55,28 @@ export class WebAudioApi {
     setup() {
         const audioCtx = this.audioCtx
         const audioNode = this.audioNode
+        this.splitterNode = audioCtx.createChannelSplitter(2)
+        this.mergerNode = audioCtx.createChannelMerger(2)
+
+        this.leftChannelAnalyser = audioCtx.createAnalyser()
+        this.rightChannelAnalyser = audioCtx.createAnalyser()
         this.analyser = audioCtx.createAnalyser()
+
+        this.leftChannelAnalyser.fftSize = 512
+        this.rightChannelAnalyser.fftSize = 512
         this.analyser.fftSize = 512
+
         this.distortion = audioCtx.createWaveShaper()
         this.stereoPanNode = audioCtx.createStereoPanner()
         this.gainNode = audioCtx.createGain()
         this.biquadFilters = this.createBiquadFilters()
         if (!this.audioSource) this.audioSource = audioCtx.createMediaElementSource(audioNode)
-        this.audioSource.connect(this.analyser)
+        this.audioSource.connect(this.splitterNode)
+        this.splitterNode.connect(this.leftChannelAnalyser, 0)
+        this.splitterNode.connect(this.rightChannelAnalyser, 1)
+        this.leftChannelAnalyser.connect(this.mergerNode, 0, 0)
+        this.rightChannelAnalyser.connect(this.mergerNode, 0, 1)
+        this.mergerNode.connect(this.analyser)
         this.analyser.connect(this.distortion)
         this.connectBiquadFilters(this.biquadFilters, this.distortion, this.stereoPanNode)
         this.stereoPanNode.connect(this.gainNode)

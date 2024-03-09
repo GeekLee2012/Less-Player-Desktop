@@ -21,6 +21,21 @@ export const tryCall = (fn, params, onSuccess, onError) => {
     }
 }
 
+export const tryCallOnObject = (fn, obj, params, onSuccess, onError) => {
+    try {
+        if(fn && obj && (typeof obj == 'object') && (typeof fn == 'function')) {
+            const result = fn.call(obj, params)
+            if (onSuccess && (typeof onSuccess == 'function')) {
+                return onSuccess(result)
+            }
+            return result
+        }
+    } catch (error) {
+        console.log(error)
+        if (onError && (typeof onError == 'function')) return onError(params)
+    }
+}
+
 export const tryCallDefault = (fn, params, defaultValue) => {
     return tryCall(fn, params, result => (result), (params) => (defaultValue))
 }
@@ -139,6 +154,10 @@ export const stringIncludesIgnoreCaseEscapeHtml = (value1, value2) => {
 
 export const isBlank = (text) => {
     return toTrimString(text).length < 1
+}
+
+export const textDefault = (text, defaultText) => {
+    return toTrimString(text) || toTrimString(defaultText)
 }
 
 //TODO 处理空白无效字符
@@ -499,4 +518,4 @@ export const transformUrl = (url, protocal) => {
     protocal = protocal || 'https'
     if(url.includes('://')) return url
     return `${protocal}://${url}`.replace(':////', '://')
-  }
+}

@@ -61,7 +61,7 @@ const renderAndScrollLyric = (secs) => {
     const userOffset = lyric.value.offset
     const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
 
-    //Highlight
+    //Highlight 查找当前高亮行index
     const lyricWrap = document.querySelector(".lyric-ctl .center")
     if (!lyricWrap) return
     const lines = lyricWrap.querySelectorAll('.line')
@@ -96,8 +96,7 @@ const renderAndScrollLyric = (secs) => {
     //且当前高亮行也无法保证在可视区居中
     /*
     const scrollIndex = index > 1 ? (index - 1) : 0
-    const scrollHeight = lyricWrap.scrollHeight
-    const clientHeight = lyricWrap.clientHeight
+    const { clientHeight, scrollHeight } = lyricWrap
     const maxScrollTop = scrollHeight - clientHeight
     const destScrollTop = maxScrollTop * (scrollIndex / (lines.length - 1))
     lyricWrap.scrollTop = destScrollTop
@@ -125,8 +124,7 @@ const renderAndScrollLyric = (secs) => {
     const adjustHeight = (lineHeight && lineHeight > 0) ? (lineHeight / 2) : 0
     const destScrollTop = lineOffsetTop - (clientHeight / 2 - offsetTop) + adjustHeight
 
-    //console.log({ index, offsetTop, clientHeight, lineOffsetTop, lineHeight, adjustHeight, destScrollTop })
-    //暂时随意设置时间值300左右吧，懒得再计算相邻两句歌词之间的时间间隔了，感觉不是很必要
+    //懒得再计算相邻两句歌词之间的时间间隔了，暂时感觉不是很必要
     const frequency = getStateRefreshFrequency()
     const duration = 300 * frequency / 60
     smoothScroll(lyricWrap, destScrollTop, duration, 5, () => {
@@ -138,7 +136,7 @@ const safeRenderAndScrollLyric = (secs) => {
     try {
         renderAndScrollLyric(secs)
     } catch (error) {
-        console.log(error)
+        if (isDevEnv()) console.log(error)
     }
 }
 
@@ -500,7 +498,8 @@ watch(() => props.track, (nv, ov) => {
 
 .lyric-ctl .center {
     position: relative;
-    height: 399px;
+    /*height: 399px;*/
+    height: 100%;
     overflow: auto;
     margin-top: 15px;
     padding-right: 6px;
