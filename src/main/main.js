@@ -591,6 +591,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-image', async (event, ...args) => {
+    const { noFilePrefix } = args[0] || {}
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件',
       filters: [
@@ -598,7 +599,7 @@ const registryGlobalListeners = () => {
       ],
       properties: ['openFile']
     })
-    return result.filePaths.map(item => (FILE_PREFIX + item))
+    return result.filePaths.map(item => (noFilePrefix ? item : (FILE_PREFIX + item)))
   })
 
   ipcMain.handle('open-image-base64', async (event, ...args) => {
@@ -643,11 +644,13 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('choose-files', async (event, ...args) => {
-    const { title, filterExts } = args[0] || { title: '请选择文件', filterExts: ['*'] }
+    const { title, filterExts, single } = args[0] || { title: '请选择文件', filterExts: ['*'] }
+    const properties = ['openFile']
+    if(!single) properties.push('multiSelections') 
     const result = await dialog.showOpenDialog(mainWin, {
       title: title || '请选择文件',
       filters: [{ name: '数据文件', extensions: filterExts || ['*'] }],
-      properties: ['openFile', 'multiSelections']
+      properties
     })
     if (result.canceled) return null
     const { filePaths } = result

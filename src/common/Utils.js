@@ -3,7 +3,7 @@ import CryptoJS from 'crypto-js';
 import forge from "node-forge";
 import JSEncrypt from 'jsencrypt';
 import { pinyin } from 'pinyin-pro';
-import { DEFAULT_COVER_BASE64 } from './Constants';
+import { FILE_PREFIX, DEFAULT_COVER_BASE64 } from './Constants';
 
 
 export const tryCall = (fn, params, onSuccess, onError) => {
@@ -509,13 +509,13 @@ export const firstCharOfPinyin = (ch) => {
     return pinyin(ch, { toneType: 'none' }).substring(0, 1)
 }
 
-export const coverDefault = (cover) => {
-    return cover || DEFAULT_COVER_BASE64
+export const coverDefault = (cover, defaultCover) => {
+    return cover || defaultCover || DEFAULT_COVER_BASE64
 }
 
 export const transformUrl = (url, protocal) => {
     url = toTrimString(url)
+    if(url.length < 1 || url.includes('://')) return url
     protocal = protocal || 'https'
-    if(url.includes('://')) return url
     return `${protocal}://${url}`.replace(':////', '://')
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, shallowRef, watch } from 'vue';
+import { nextTick, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
@@ -25,6 +25,7 @@ import TagsCategoryView from './views/TagsCategoryView.vue';
 import PlatformCategoryView from './views/PlatformCategoryView.vue';
 import DynamicPlayingView from './views/DynamicPlayingView.vue';
 import PlayingThemeListView from './views/PlayingThemeListView.vue';
+import CustomPlayingThemeEditView from './views/CustomPlayingThemeEditView.vue';
 
 
 
@@ -48,7 +49,9 @@ const { commonNotificationShow, commonNotificationText,
   artistCategoryViewShow, radioCategoryViewShow,
   popoverHintShow, popoverHintText,
   playlistExportToolbarShow, tagsCategoryViewShow,
-  platformCategoryViewShow, playingThemeListViewShow } = storeToRefs(useAppCommonStore())
+  platformCategoryViewShow, playingThemeListViewShow,
+  customPlayingThemeEditViewShow, playingViewThemeType,
+  playingViewCustomThemes, } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -249,6 +252,15 @@ const setupCustomThemeEditViewPos = () => {
   })
 }
 
+const setupCustomPlayingThemeEditViewPos = () => {
+  if (!customPlayingThemeEditViewShow.value) return
+  EventBus.emit('app-elementAlignCenter', {
+    selector: '#custom-playing-theme-edit-view',
+    width: 768,
+    height: 520
+  })
+}
+
 const setupGradientColorToolbarPos = () => {
   if (!gradientColorToolbarShow.value) return
   EventBus.emit('app-elementAlignCenter', {
@@ -274,19 +286,58 @@ const setupPlaylistExportToolbarPos = () => {
   })
 }
 
+const setupPlayingViewCustomTheme = (customTheme) => {
+  const index = playingViewThemeIndex.value
+  const type = playingViewThemeType.value
+  const customThemes = playingViewCustomThemes.value
+  customTheme = customTheme || (type == 0 ? null : customThemes[index])
+  if(!customTheme) return
+
+  const dpvEl = document.querySelector('.dynamic-playing-view')
+  if(!dpvEl) return 
+
+  const { fontName, fontSize, fontWeight, textColor, btnColor } = customTheme
+  const properties = {
+    '--content-dynamicpv-font-name': fontName || 'Wawati SC',
+    '--content-dynamicpv-font-size': (fontSize || 80) + 'px',
+    '--content-dynamicpv-font-weight': fontWeight,
+    '--content-dynamicpv-text-color': textColor || '#fff',
+    '--content-dynamicpv-btn-color': btnColor || '#cacaca',
+  }
+  for(const [key, value] of Object.entries(properties)) {
+    value && dpvEl.style.setProperty(key, value)
+  }
+}
+
+const setupPlayingView = (theme, isPreviewMode) => {
+  const index = playingViewThemeIndex.value
+  const type = isPreviewMode ? -1 : playingViewThemeType.value
+  const views = [PlayingView, VisualPlayingView, DynamicPlayingView]
+  switch(type) {
+    case 0:
+      currentPlayingView.value = views[Math.min(index, 2)]
+      break
+    case 1:
+    default:
+      currentPlayingView.value = views[2]
+      nextTick(() => setupPlayingViewCustomTheme(theme))
+      break
+  }
+}
+
+EventBus.on('playingViewCustomTheme-applyTheme', param => {
+  const { theme, isPreviewMode } = param || {}
+  setupPlayingView(theme, isPreviewMode)
+})
 
 //TODO
 watch(commonCtxMenuShow, (nv, ov) => {
   if (!nv) ctxMenuPos = null
 })
 watch(playbackQueueViewShow, hideAllCtxMenus)
-watch(playingViewThemeIndex, (nv) => setupPlayingView(nv))
-
-const setupPlayingView = (index) => {
-  index = index || playingViewThemeIndex.value
-  const playingViewThemes = [PlayingView, VisualPlayingView, DynamicPlayingView]
-  currentPlayingView.value = playingViewThemes[Math.min(index, 2)]
-}
+watch(() => `${playingViewThemeType.value}-${playingViewThemeIndex.value}`, () => {
+  setupPlayingView()
+})
 
 const appBackgroundScope = reactive({
   playingView: true,
@@ -307,6 +358,7 @@ watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
 watch(gradientColorToolbarShow, setupGradientColorToolbarPos)
 watch(soundEffectViewShow, setupSoundEffectViewPos)
 watch(playlistExportToolbarShow, setupPlaylistExportToolbarPos)
+watch(customPlayingThemeEditViewShow, setupCustomPlayingThemeEditViewPos)
 
 watch(() => getCurrentTheme(), (nv) => {
   const { appBackgroundScope: scope } = nv
@@ -438,6 +490,9 @@ watch(() => getCurrentTheme(), (nv) => {
     <CustomThemeEditView id="custom-theme-edit-view" v-show="customThemeEditViewShow" @click.stop="">
     </CustomThemeEditView>
 
+    <CustomPlayingThemeEditView id="custom-playing-theme-edit-view" v-show="customPlayingThemeEditViewShow" @click.stop="">
+    </CustomPlayingThemeEditView>
+
     <ColorPickerToolbar id="color-picker-toolbar" ref="colorPickerToolbarRef" v-show="colorPickerToolbarShow"
       @click.stop="">
     </ColorPickerToolbar>
@@ -517,6 +572,18 @@ watch(() => getCurrentTheme(), (nv) => {
   box-shadow: var(--box-shadow);
   border-top-right-radius: var(--border-macstyle-border-radius);
   border-bottom-right-radius: var(--border-macstyle-border-radius);
+}
+
+#custom-playing-theme-edit-view {
+  position: absolute;
+  right: 30px;
+  bottom: 80px;
+  width: 768px;
+  height: 520px;
+  z-index: 100;
+  background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
+  border-radius: 15px;
 }
 
 #video-playing-view {

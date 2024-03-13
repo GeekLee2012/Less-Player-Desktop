@@ -8,11 +8,11 @@ import { useSettingStore } from '../store/settingStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath, stringEquals } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
-import { isDevEnv, smoothScroll, } from '../../common/Utils';
-import { toMMssSSS, toMillis } from '../../common/Times';
+import { isDevEnv, smoothScroll, transformUrl, } from '../../common/Utils';
+import { toMillis } from '../../common/Times';
+import { FILE_SCHEME } from '../../common/Constants';
 
 
 
@@ -27,7 +27,9 @@ const { useWindowsStyleWinCtl } = inject('appCommon')
 
 const { isMaxScreen, playingViewShow, 
     desktopLyricShow, playingViewThemeIndex,
-    playingViewThemes } = storeToRefs(useAppCommonStore())
+    playingViewPresetThemes, playingViewCustomThemes,
+    playingViewThemeType, isPlayingViewCustomThemePreview,
+    playingViewCustomThemePreviewCache, } = storeToRefs(useAppCommonStore())
 const { hidePlayingView,  toggleSoundEffectView, 
     toggleDesktopLyricShow, togglePlayingThemeListView } = useAppCommonStore()
 const { currentTrack, volume } = storeToRefs(usePlayStore())
@@ -106,6 +108,7 @@ const renderAndScrollLyric = (secs) => {
     let index = -1, timeKey = null
     for (var i = 0; i < lines.length; i++) {
         timeKey = lines[i].getAttribute('timeKey')
+        if(!timeKey) continue
         const lineTime = toMillis(timeKey)
         if (trackTime >= lineTime) {
             index = i
@@ -147,16 +150,32 @@ const safeRenderAndScrollLyric = (secs) => {
 }
 
 const computedDynamicName = computed(() => {
-    const index = Math.max(playingViewThemeIndex.value, 2)
-    const items = playingViewThemes.value
+    const items = playingViewPresetThemes.value
+    let index = playingViewThemeIndex.value
+    index = Math.max(index, 2)
+    index = Math.min(index, items.length - 1)
     const item = items[index]
     return `${item.id}.mp4`
 })
 
+const computedCustomDynamicName = computed(() => {
+    const index = playingViewThemeIndex.value
+    const items = playingViewCustomThemes.value
+    const isPreviewMode = isPlayingViewCustomThemePreview.value
+    const previewCache = playingViewCustomThemePreviewCache.value
+    const item = isPreviewMode ? previewCache : items[index]
+    const { bgVideoUrl } = item || {}
+    return transformUrl(bgVideoUrl, FILE_SCHEME)
+})
+
+//TODO 待统一实现方式
 const isLightTheme = computed(() => {
+    const type = playingViewThemeType.value
+    if(type != 0) return false
     const index = Math.max(playingViewThemeIndex.value, 2)
-    const items = playingViewThemes.value
-    return items[index].light
+    const items = playingViewPresetThemes.value
+    const item = items[index]
+    return item && item.light
 })
 
 //EventBus事件
@@ -183,7 +202,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="dynamic-playing-view" :class="{ light: isLightTheme }">
+    <div class="dynamic-playing-view" :class="{ light: isLightTheme, custom: (playingViewThemeType == 1), 'preview-mode': isPlayingViewCustomThemePreview }">
         <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
@@ -221,15 +240,18 @@ onMounted(() => {
             </div>
             <div class="center">
                 <div v-show="lyricExistState == 1" v-for="([key, value], index) in lyricData" class="line" :timeKey="key"
-                :index="index" :class="{
-                    first: index == 0,
-                    last: index == (lyricData.size - 1),
-                    'content-text-highlight': index == currentIndex,
-                    current: index == currentIndex,
-                }">
-                <div class="text" :timeKey="key" :index="index" v-html="value"></div>
-                <div class="extra-text" v-show="false"></div>
-            </div>
+                    :index="index" :class="{
+                        first: index == 0,
+                        last: index == (lyricData.size - 1),
+                        'content-text-highlight': (index == currentIndex),
+                        current: (index == currentIndex),
+                    }">
+                    <div class="text" :timeKey="key" :index="index" v-html="value"></div>
+                    <div class="extra-text" v-show="false"></div>
+                </div>
+                <div v-show="lyricExistState < 1" class="no-lyric line current" 
+                    v-html="Track.normalName(currentTrack)">
+                </div> 
             </div>
             <div class="bottom">
                 <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
@@ -327,7 +349,12 @@ onMounted(() => {
             </div>
         </div>
         <div class="bg-video">
-            <video :src="`dynamics/${computedDynamicName}`" loop="true" autoplay="true"></video>
+            <video v-show="playingViewThemeType == 0 && !isPlayingViewCustomThemePreview" :src="`dynamics/${computedDynamicName}`" 
+                loop="true" autoplay="true" muted="true">
+            </video>
+            <video v-show="playingViewThemeType == 1 || isPlayingViewCustomThemePreview" :src="computedCustomDynamicName" 
+                loop="true" autoplay="true" muted="true">
+            </video>
         </div>
     </div>
 </template>
@@ -497,10 +524,6 @@ onMounted(() => {
     color: var(--button-icon-btn-color);
 }
 
-.dynamic-playing-view .bottom .action .lyric-btn:hover {
-    color: var(--content-highlight-color) !important;
-}
-
 .dynamic-playing-view .bg-video {
     /*background-position: center;
     background-repeat: no-repeat;
@@ -551,10 +574,6 @@ onMounted(() => {
     stroke: #eee !important;
 }
 
-.dynamic-playing-view svg:hover {
-    fill: var(--content-highlight-color) !important;
-}
-
 .dynamic-playing-view.light .win-non-macos-ctl-btn .max-btn svg:hover {
     fill: #eee !important;
     stroke: #eee !important;
@@ -592,6 +611,15 @@ onMounted(() => {
     */
 }
 
+.dynamic-playing-view  .center .no-lyric {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: var(--text-lyric-color);
+}
+
 /*
 @keyframes dynamic_lyric {
   from {
@@ -606,5 +634,54 @@ onMounted(() => {
 
 .dynamic-playing-view:hover .bottom {
     visibility: visible;
+}
+
+.dynamic-playing-view.preview-mode .center .line,
+.dynamic-playing-view.custom .center .line {
+    font-family: var(--content-dynamicpv-font-name) !important;
+    font-size: var(--content-dynamicpv-font-size) !important;
+}
+
+.dynamic-playing-view.preview-mode  .center .current,
+.dynamic-playing-view.custom  .center .current {
+    font-weight: var(--content-dynamicpv-font-weight) !important;
+    /* color: var(--content-dynamicpv-text-color) !important; */
+    background: var(--content-dynamicpv-text-color);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent !important;
+}
+
+.dynamic-playing-view.preview-mode svg,
+.dynamic-playing-view.custom svg {
+    fill: var(--content-dynamicpv-btn-color) !important;
+}
+
+.dynamic-playing-view.custom .audio-time,
+.dynamic-playing-view.custom .lyric-btn,
+.dynamic-playing-view.preview-mode .audio-time,
+.dynamic-playing-view.preview-mode .lyric-btn {    
+    color: var(--content-dynamicpv-btn-color) !important;
+}
+
+.dynamic-playing-view.preview-mode .win-non-macos-ctl-btn svg,
+.dynamic-playing-view.custom .win-non-macos-ctl-btn svg {
+    stroke: var(--content-dynamicpv-btn-color) !important;
+}
+
+.dynamic-playing-view.preview-mode .win-non-macos-ctl-btn .max-btn svg:hover,
+.dynamic-playing-view.custom .win-non-macos-ctl-btn .max-btn svg:hover {
+    fill: var(--content-dynamicpv-btn-color) !important;
+    stroke: var(--content-dynamicpv-btn-color) !important;
+}
+
+
+/* 避免被覆盖，必须放在最后 */
+.dynamic-playing-view svg:hover {
+    fill: var(--content-highlight-color) !important;
+}
+
+.dynamic-playing-view .bottom .action .lyric-btn:hover {
+    color: var(--content-highlight-color) !important;
 }
 </style>

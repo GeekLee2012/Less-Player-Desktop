@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import EventBus from '../../common/EventBus';
-import { isDevEnv, useIpcRenderer } from "../../common/Utils";
+import { isDevEnv, useIpcRenderer, randomTextWithinAlphabetNums } from "../../common/Utils";
 
 
 
@@ -20,7 +20,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         playbackQueueViewShow: false,
         playingViewShow: false,
         playingThemeListViewShow: false,
-        playingViewThemes: [{
+        playingViewPresetThemes: [{
                 id: 'default_cover',
                 name: '默认封面',
                 light: false,
@@ -34,13 +34,24 @@ export const useAppCommonStore = defineStore('appCommon', {
                 light: false,
             }, {
                 id: 'dynamic_zoom',
-                name: '时空穿越',
+                name: '时空穿梭',
                 light: false,
             }, {
                 id: 'dynamic_purple',
-                name: '紫色记忆',
+                name: '紫色心情',
                 light: true,
-            }],
+            }/*, {
+                id: 'dynamic_sky',
+                name: '浩瀚星空',
+                light: false,
+            }*/],
+        playingViewCustomThemes: [],
+        customPlayingThemeEditViewShow: false,
+        playingViewThemeIndex: 0,
+        playingViewThemeType: 0, // 0 => 预设， 1 => 自定义
+        isPlayingViewCustomThemePreview: false,
+        playingViewCustomThemePreviewCache: null,
+        workingCustomPlayingTheme: null, //当前工作区的自定义播放样式，即正在编辑的播放样式
         videoPlayingViewShow: false,
         soundEffectViewShow: false,
         customThemeEditViewShow: false,
@@ -64,7 +75,6 @@ export const useAppCommonStore = defineStore('appCommon', {
         addToListSubmenuShow: false,
         artistListSubmenuShow: false,
         exitToHomeBtnShow: false,
-        playingViewThemeIndex: 0,
         spectrumIndex: 1,
         spectrumParams: null,
         exVisualCanvasShow: false,
@@ -218,6 +228,26 @@ export const useAppCommonStore = defineStore('appCommon', {
         togglePlayingThemeListView() {
             this.playingThemeListViewShow = !this.playingThemeListViewShow
             this.hidePlaybackQueueView()
+        },
+        showCustomPlayingThemeEditView(customPlayingTheme) {
+            this.customPlayingThemeEditViewShow = true
+            this.workingCustomPlayingTheme = customPlayingTheme
+        },
+        hideCustomPlayingThemeEditView() {
+            this.customPlayingThemeEditViewShow = false
+            this.workingCustomPlayingTheme = null
+        },
+        toggleCustomPlayingThemeEditView() {
+            this.customPlayingThemeEditViewShow = !this.customPlayingThemeEditViewShow
+            if(!this.customPlayingThemeEditViewShow) {
+                this.workingCustomPlayingTheme = null
+            }
+        },
+        setPlayingViewCustomThemePreview(value) {
+            this.isPlayingViewCustomThemePreview = value
+        },
+        setPlayingViewCustomThemePreviewCache(value) {
+            this.playingViewCustomThemePreviewCache = value
         },
         hideVideoPlayingView() {
             this.videoPlayingViewShow = false
@@ -400,8 +430,9 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.playingViewThemeIndex = (this.playingViewThemeIndex + 1) % 5
             this.hideSoundEffectView()
         },
-        setPlayingViewThemeIndex(index) {
+        setPlayingViewThemeIndex(index, type) {
             this.playingViewThemeIndex = index
+            this.playingViewThemeType = type || 0
             this.hideSoundEffectView()
         },
         switchSpectrumIndex() {
@@ -522,6 +553,38 @@ export const useAppCommonStore = defineStore('appCommon', {
         setExVisualCanvasIndex(index) {
             this.exVisualCanvasIndex = index
         },
+        savePlayingViewCustomTheme(theme) {
+            if (!theme) return
+            let index = -1
+            const prefix = 'custom_'
+            if (theme.id) {
+                if (!theme.id.startsWith(prefix)) return
+                index = this.playingViewCustomThemes.findIndex(item => item.id == theme.id)
+            }
+            if (index < 0) {
+                const id = prefix + randomTextWithinAlphabetNums(8)
+                Object.assign(theme, { id })
+                this.playingViewCustomThemes.push(theme)
+            } else {
+                const _theme = this.playingViewCustomThemes[index]
+                Object.assign(_theme, { ...theme })
+            }
+        },
+        removePlayingViewCustomTheme({ id }) {
+            const prefix = 'custom_'
+            if (!id || !id.startsWith(prefix)) return
+            const index = this.playingViewCustomThemes.findIndex(item => item.id === id)
+            if (index > -1) this.playingViewCustomThemes.splice(index, 1)
+        },
+        isCurrentPlayingTheme(theme) {
+            const { id } = theme
+            const prefix = 'custom_'
+            if (!id || !id.startsWith(prefix)) return
+            const index = this.playingViewCustomThemes.findIndex(item => item.id === id)
+            if(index < 0) return false
+            return this.playingViewThemeType == 1 
+                && this.playingViewThemeIndex == index
+        }
     },
     persist: {
         enabled: true,
@@ -533,7 +596,8 @@ export const useAppCommonStore = defineStore('appCommon', {
                     'randomMusicPlatformCodes', 'randomMusicTypeCodes',
                     'currentMusicCategoryName', 'exploreModeActiveStates', 
                     'pendingPlay', 'pendingPlayPercent',
-                    'exVisualCanvasShow', 'exVisualCanvasIndex']
+                    'exVisualCanvasShow', 'exVisualCanvasIndex', 
+                    'playingViewCustomThemes', 'playingViewThemeType']
             },
         ],
     },

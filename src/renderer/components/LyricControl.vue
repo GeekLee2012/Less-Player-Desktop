@@ -283,12 +283,6 @@ const seekFromLyric = () => {
     setScrollLocatorCurrentIndex(-1)
 }
 
-//TODO 暂停状态下，歌词状态没有同步
-const restoreLyricPausedState = () => {
-    if (playState.value == PlayState.PAUSE) safeRenderAndScrollLyric(props.currentTime)
-}
-
-
 const isExtraTextActived = computed(() => {
     const { track } = props
     return (Track.hasLyricTrans(track) && lyricTransActived.value)
@@ -343,10 +337,7 @@ EventBus.on('lyric-fontWeight', setupLyricLines)
 EventBus.on('lyric-lineHeight', setupLyricLines)
 EventBus.on('lyric-lineSpacing', setupLyricLines)
 EventBus.on('lyric-alignment', setupLyricAlignment)
-EventBus.on('playingView-changed', () => {
-    //restoreLyricPausedState()
-    setupLyricAlignment()
-})
+EventBus.on('playingView-changed', setupLyricAlignment)
 
 
 watch(() => props.currentTime, (nv, ov) => {

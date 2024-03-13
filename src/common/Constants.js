@@ -1,3 +1,4 @@
+export const FILE_SCHEME = 'file'
 export const FILE_PREFIX = 'file:///'
 export const LESS_MAGIC_CODE = '£€$$'
 
