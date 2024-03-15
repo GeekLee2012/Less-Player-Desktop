@@ -242,9 +242,17 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     border-bottom: none;
 }
 
+
 .playback-queue-view .header .title-wrap {
     display: flex;
     flex-direction: row;
+}
+
+.playback-queue-view .header .title {
+    text-align: left;
+    /*font-size: 23px;*/
+    font-size: var(--content-text-module-subtitle-size);
+    font-weight: bold;
 }
 
 .playback-queue-view .header .title-wrap .subtitle {
@@ -265,6 +273,10 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     text-align: left;
     font-size: var(--content-text-tip-text-size);
     display: flex;
+}
+
+.playback-queue-view .detail .subtitle {
+    color: var(--content-subtitle-text-color);
 }
 
 .playback-queue-view .detail .action {
@@ -292,13 +304,6 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
 
 .playback-queue-view .more-btn:hover svg {
     fill: var(--content-highlight-color);
-}
-
-.playback-queue-view .header .title {
-    text-align: left;
-    /*font-size: 23px;*/
-    font-size: var(--content-text-module-subtitle-size);
-    font-weight: bold;
 }
 
 .playback-queue-view .center {

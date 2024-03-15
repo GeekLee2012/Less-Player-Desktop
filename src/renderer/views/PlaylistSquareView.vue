@@ -21,16 +21,19 @@ const playlistCategoryFlowBtnRef = ref(null)
 //全部分类
 const categories = reactive([])
 const orders = reactive([])
+const isWhiteWrap = ref(false)
 const playlists = reactive([])
 const pagination = { offset: 0, limit: 35, page: 1 }
 let markScrollTop = 0
 const isAlbumType = ref(false)
 const setAlbumType = (value) => isAlbumType.value = value || false
+const setWhiteWrap = (value) => isWhiteWrap.value = value || false
 
 const { currentPlatformCode, currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
 const { currentVender, currentPlatformCategories, putCategories,
     putOrders, currentPlatformOrders,
-    resetOrder, updateCurrentOrderByValue } = usePlaylistSquareStore()
+    resetOrder, updateCurrentOrderByValue,
+    currentPlatformWhiteWrap, putWhiteWrap, } = usePlaylistSquareStore()
 const { isPlaylistMode } = storeToRefs(useAppCommonStore())
 const { getPaginationStyleIndex } = storeToRefs(useSettingStore())
 
@@ -63,11 +66,13 @@ const nextPage = () => {
 const loadCategories = async () => {
     categories.length = 0
     orders.length = 0
+    setWhiteWrap(false)
     setLoadingCategories(true)
     setLoadingContent(true)
     resetOrder()
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
+    let cachedWhiteWrap = currentPlatformWhiteWrap()
     if (!cachedCates) {
         const vendor = currentVender()
         if (!vendor || !vendor.categories) return
@@ -77,14 +82,18 @@ const loadCategories = async () => {
         } while (!result && retry++ <= 3)
         if (!result || result.data.length < 1) return
 
-        cachedCates = result.data
-        cachedOrders = result.orders
+        const { platform, data, orders, isWhiteWrap } = result
+        cachedCates = data
+        cachedOrders = orders
+        cachedWhiteWrap = isWhiteWrap
         if (!cachedCates) return
-        putCategories(result.platform, cachedCates)
-        if (cachedOrders) putOrders(result.platform, result.orders)
+        putCategories(platform, cachedCates)
+        if (cachedOrders) putOrders(platform, orders)
+        putWhiteWrap(platform, isWhiteWrap)
     }
     categories.push(...cachedCates)
     if (cachedOrders) orders.push(...cachedOrders)
+    setWhiteWrap(cachedWhiteWrap)
     EventBus.emit('playlistCategory-update')
     setLoadingCategories(false)
 }
@@ -208,7 +217,7 @@ EventBus.on("playlistSquare-refresh", refreshData)
 
 <template>
     <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
-        <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories">
+        <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories" :isWhiteWrap="isWhiteWrap">
         </PlaylistCategoryBar>
         <PlaylistsControl :loading="isLoadingContent" :paginationStyleType="getPaginationStyleIndex"
             :limit="pagination.limit" :loadPage="loadPageContent" :nextPagePendingMark="nextPagePendingMark"

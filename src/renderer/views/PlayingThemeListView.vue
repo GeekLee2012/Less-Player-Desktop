@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { coverDefault, transformUrl } from '../../common/Utils';
@@ -20,6 +20,20 @@ const removeTheme = (item, index) => {
     removePlayingViewCustomTheme(item)
     setPlayingViewThemeIndex(0)
 }
+
+const computedPresetThemeSectionTitle = computed(() => {
+   const type = playingViewThemeType.value
+   const index = playingViewThemeIndex.value
+   const total = playingViewPresetThemes.value.length
+   return (type == 0 && total > 0) ? `${index + 1} / ${total}` : total
+})
+
+const computedCustomThemeSectionTitle = computed(() => {
+   const type = playingViewThemeType.value
+   const index = playingViewThemeIndex.value
+   const total = playingViewCustomThemes.value.length
+   return (type != 0 && total > 0) ? `${index + 1} / ${total}` : total
+})
 </script>
 
 <template>
@@ -47,7 +61,7 @@ const removeTheme = (item, index) => {
                 </div>
             </div>
             <div class="center" ref="listRef">
-                <div class="sec-title">预设({{ playingViewPresetThemes.length }})</div>
+                <div class="sec-title">预设({{ computedPresetThemeSectionTitle }})</div>
                 <template v-for="(item, index) in playingViewPresetThemes">
                     <div class="item" :class="{ current: (playingViewThemeIndex == index && playingViewThemeType == 0) }" 
                         :index="index">
@@ -71,7 +85,7 @@ const removeTheme = (item, index) => {
                         </div>
                     </div>
                 </template>
-                <div class="sec-title">自定义({{ playingViewCustomThemes.length }})</div>
+                <div class="sec-title">自定义({{ computedCustomThemeSectionTitle }})</div>
                 <template v-for="(item, index) in playingViewCustomThemes">
                     <div class="item" :class="{ current:  (playingViewThemeIndex == index && playingViewThemeType == 1) }" 
                         :index="index">

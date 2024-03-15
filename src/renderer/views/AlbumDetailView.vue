@@ -255,7 +255,7 @@ EventBus.on('app-resize', detectTitleHeight)
                     :draggable="isDndSaveEnable" @dragstart="(event) => dndSaveCover(event, detail)" />
             </div>
             <div class="right" v-show="!isLoading">
-                <div class="title" v-html="albumName" ref="titleRef"></div>
+                <div class="title" v-html="albumName || 未知专辑" ref="titleRef"></div>
                 <div class="info" :class="{ 'short-info': isTwoLinesTitle }">
                     <div class="info-row">
                         <p><b>歌手:</b> <span class="artist">{{ artistName || '未知歌手' }} </span></p>

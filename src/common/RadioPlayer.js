@@ -130,7 +130,7 @@ export class RadioPlayer {
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
         const currentSeconds = currentTime / 1000
-        if (this.isStateRefreshEnabled()) this.notify('track-pos', currentSeconds)
+        if (this.isStateRefreshEnabled()) this.notify('track-pos', { currentTime: currentSeconds, duration: 0 })
         this._resolveSound()
         this._countAnimationFrame()
         requestAnimationFrame(this._step.bind(this))

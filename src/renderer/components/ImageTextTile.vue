@@ -145,6 +145,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    color: var(--content-text-color);
 }
 
 .image-text-tile .singleline-title {

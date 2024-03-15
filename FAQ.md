@@ -54,7 +54,7 @@ npm update
   在electron-builder命令后添加参数   
   【配置点2】   
   `build/平台Code/target` 加入相关配置  
-* 请参考官方文档：[Electron-Builder](https://www.electron.build/cli) 
+* 请参考官方文档：[Electron-Builder](https://www.electron.build/) 
 
 ### 二、其他
 > 为何还要自己造轮子，Listen1、洛雪音乐助手不香吗？  

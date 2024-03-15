@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -16,7 +16,8 @@ const { isPlaylistCategoryBarRandom } = storeToRefs(useSettingStore())
 
 const props = defineProps({
     data: Array,
-    loading: Boolean
+    loading: Boolean,
+    isWhiteWrap: Boolean
 })
 
 const toggleCategory = () => {
@@ -98,7 +99,8 @@ EventBus.on('playlistCategory-update', () => {
             <template v-for="item in getFlatData()" v-show="data.length > 0">
                 <span @click="visitCateItem(item, item.row, item.col)" :class="{
                     active: (item.row == currentCategoryItem.row
-                        && item.col == currentCategoryItem.col)
+                        && item.col == currentCategoryItem.col),
+                    whitewrap: isWhiteWrap
                 }" v-html="item.key" :data="item.value">
                 </span>
             </template>
@@ -111,7 +113,7 @@ EventBus.on('playlistCategory-update', () => {
 .playlist-category-bar {
     margin-left: 10px;
     height: 36px;
-    overflow: hidden;
+    overflow: hidden !important;
     text-align: left;
 }
 
@@ -123,10 +125,17 @@ EventBus.on('playlistCategory-update', () => {
     line-height: 36px;
     font-size: var(--content-text-size);
     cursor: pointer;
-    white-space: nowrap;
     border-radius: var(--border-list-item-border-radius);
     /*border: 1px solid transparent;*/
     color: var(--content-text-color);
+
+    white-space: nowrap;
+    overflow: hidden;
+    word-break: break-all;
+}
+
+.playlist-category-bar span.whitewrap {
+    white-space: pre-wrap;
 }
 
 .playlist-category-bar span:hover {

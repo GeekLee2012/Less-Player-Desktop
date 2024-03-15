@@ -434,7 +434,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     } else if (Playlist.isNormalRadioType(playlist)) { //歌单电台
         //提示前置，避免因网络卡顿导致用户多次请求
         showToast(text || '即将为您播放电台')
-        playNextPlaylistRadioTrack(platform, id, null, traceId)
+        playNextPlaylistRadioTrack(platform, id, null, traceId, playlist)
         return
     } else if (Playlist.isVideoType(playlist)) { //视频
         playMv({ ...playlist }, '当前视频无法播放', text || '即将为您播放视频')
@@ -472,7 +472,7 @@ const addFmRadioToQueue = async (playlist, text, traceId) => {
 }
 
 //播放电台
-const playNextPlaylistRadioTrack = async (platform, channel, track, traceId) => {
+const playNextPlaylistRadioTrack = async (platform, channel, track, traceId, playlist) => {
     if (traceId && !isCurrentTraceId(traceId)) return
 
     const vendor = getVendor(platform)
@@ -485,7 +485,7 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId) => 
     do {
         if (traceId && !isCurrentTraceId(traceId)) return
 
-        const result = await vendor.nextPlaylistRadioTrack(channel, track)
+        const result = await vendor.nextPlaylistRadioTrack(channel, track, playlist)
         if (!Track.hasId(result)) {
             ++retry
             continue
@@ -927,18 +927,19 @@ const resetPlayState = (ignore) => {
     setProgressSeekingState(false)
 }
 
-EventBus.on('track-pos', secs => {
+EventBus.on('track-pos', ({ currentTime: currentSecs, duration }) => {
     if (videoPlayingViewShow.value && isPlaying()
         && isPauseOnPlayingVideoEnable.value) {
         togglePlay()
         return
     }
     const track = currentTrack.value
-    const currentTime = secs * 1000
+    if(duration != track.duration) Object.assign(track, { duration })
+    const currentTime = currentSecs * 1000
     mmssCurrentTime.value = toMmss(currentTime)
-    currentTimeState.value = secs
-    const duration = track.duration || 0
-    progressState.value = duration > 0 ? (currentTime / duration) : 0
+    currentTimeState.value = currentSecs
+    const _duration = track.duration || 0
+    progressState.value = _duration > 0 ? (currentTime / _duration) : 0
 })
 
 EventBus.on("track-spectrumData", ({
@@ -970,7 +971,7 @@ EventBus.on("track-spectrumData", ({
 
 //歌单电台 - 下一曲
 EventBus.on('track-nextPlaylistRadioTrack', track => {
-    playNextPlaylistRadioTrack(track.platform, track.channel, track)
+    playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)
 })
 
 
@@ -1016,7 +1017,9 @@ const preseekTrack = (percent) => {
 }
 
 const isTrackSeekable = computed(() => {
-    return playing.value && !Playlist.isFMRadioType(currentTrack.value)
+    const { duration } = currentTrack.value || {}
+    return playing.value && !Playlist.isFMRadioType(currentTrack.value) 
+        && (duration > 0)
 })
 
 //播放MV

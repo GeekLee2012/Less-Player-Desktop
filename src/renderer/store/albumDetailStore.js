@@ -8,7 +8,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
     state: () => ({
         albumId: '',
         platform: '',
-        albumName: '山川湖海，日月星辰',
+        albumName: '未知专辑',
         albumCover: '',
         artistName: '未知歌手',
         company: '',
@@ -37,7 +37,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
             this.about = ''
         },
         resetAlbumDetail() {
-            this.updateAlbum('山川湖海，日月星辰', '', '未知歌手', '', '')
+            this.updateAlbum('未知专辑', '', '未知歌手', '', '')
         },
         resetAll() {
             this.resetAlbumDetail()
@@ -77,7 +77,7 @@ export const useAlbumDetailStore = defineStore('albumDetail', {
             this.about = about
         },
         isAlbumDetailLoaded() {
-            return this.albumName != '山川湖海，日月星辰'
+            return this.albumName != '未知专辑'
                 && this.artistName != '未知歌手'
         },
         isAllSongsTabLoaded() {

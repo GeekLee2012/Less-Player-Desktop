@@ -14,7 +14,7 @@ const props = defineProps({
 
 const { layout, isPlaylistCategoryBarFlowBtnShow } = storeToRefs(useSettingStore())
 
-let threshold = (props.threshold || 1024 * 2.33)
+let threshold = (props.threshold || 1024)
 let scrollTarget = props.target
 const isBtnShow = ref(false)
 const maxScrollTopThreshold = 1024 * 5.20
@@ -35,7 +35,7 @@ const showAsNeeded = () => {
     const clientHeight = scrollTarget.clientHeight
     const maxScrollTop = scrollHeight - clientHeight
 
-    if (maxScrollTop < maxScrollTopThreshold) return
+    //if (maxScrollTop < maxScrollTopThreshold) return
     setBtnShow(scrollTop >= threshold)
 }
 

@@ -19,6 +19,8 @@ export const usePlaylistSquareStore = defineStore('playlistSquare', {
             value: null,
             index: 0,
         },
+        // TODO 控制CSS样式white-space
+        whiteWrapMap: new Map(),
     }),
     getters: {
         currentPlatformCode(state) {
@@ -83,6 +85,12 @@ export const usePlaylistSquareStore = defineStore('playlistSquare', {
         },
         resetOrder() {
             this.updateCurrentOrder(null, null, 0)
-        }
+        },
+        putWhiteWrap(key, value) {
+            this.whiteWrapMap.set(key, value)
+        },
+        currentPlatformWhiteWrap() {
+            return this.whiteWrapMap.get(this.currentPlatformCode)
+        },
     }
 })

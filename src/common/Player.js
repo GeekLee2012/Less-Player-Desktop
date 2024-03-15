@@ -111,6 +111,7 @@ export class Player {
             },
             onload: function() {
                 self.setState(PlayState.LOADED)
+                self.updateMetadata()
             },
             onloaderror: function () {
                 self.setState(PlayState.LOAD_ERROR)
@@ -208,14 +209,15 @@ export class Player {
         }
         //当前播放时间
         this.currentTime = sound.seek() || 0
-
+        const duration = (sound.duration() || 0) * 1000
         //刷新进度
         /*
         const isTimeReset = this._countAnimationFrameTime()
         const needRefreshState = this.useStateRefreshAutoDetector ? isTimeReset : this.isStateRefreshEnabled()
         if (needRefreshState) this.notify('track-pos', this.currentTime)
         */
-        if (this.isStateRefreshEnabled()) this.notify('track-pos', this.currentTime)
+        
+        if (this.isStateRefreshEnabled()) this.notify('track-pos', { currentTime: this.currentTime, duration })
 
         //声音处理
         try {
@@ -460,5 +462,12 @@ export class Player {
             if (isDevEnv()) console.log(`音频输出设置失败，DeviceId: ${deviceId}\n`, error)
             this.pendingOutputDeviceId = deviceId
         }
+    }
+
+    updateMetadata() {
+        if(!this.currentTrack) return 
+        const { duration } = this.currentTrack
+        const _duration = this.sound.duration() * 1000
+        if(duration != _duration) Object.assign(this.currentTrack, { duration: _duration })
     }
 }

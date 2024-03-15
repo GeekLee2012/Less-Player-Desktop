@@ -519,3 +519,23 @@ export const transformUrl = (url, protocal) => {
     protocal = protocal || 'https'
     return `${protocal}://${url}`.replace(':////', '://')
 }
+
+export const isSupportedVideo = (path) => {
+    path = toLowerCaseTrimString(path)
+    if(!path) return false
+    const suffixes = ['.mp4', '.mov', '.flv', '.avi']
+    for(let i = 0; i < suffixes.length; i++) {
+        if(path.endsWith(suffixes[i])) return true
+    }
+    return false
+}
+
+export const isSupportedImage = (path) => {
+    path = toLowerCaseTrimString(path)
+    if(!path) return false
+    const suffixes = ['.png', '.jpg', '.jpeg']
+    for(let i = 0; i < suffixes.length; i++) {
+        if(path.endsWith(suffixes[i])) return true
+    }
+    return false
+}

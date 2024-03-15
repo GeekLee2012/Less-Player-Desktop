@@ -350,10 +350,10 @@ onMounted(() => {
         </div>
         <div class="bg-video">
             <video v-show="playingViewThemeType == 0 && !isPlayingViewCustomThemePreview" :src="`dynamics/${computedDynamicName}`" 
-                loop="true" autoplay="true" muted="true">
+                loop="true" autoplay="true" muted="true" crossorigin="anonymous">
             </video>
             <video v-show="playingViewThemeType == 1 || isPlayingViewCustomThemePreview" :src="computedCustomDynamicName" 
-                loop="true" autoplay="true" muted="true">
+                loop="true" autoplay="true" muted="true" crossorigin="anonymous">
             </video>
         </div>
     </div>

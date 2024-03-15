@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import ColorInputControl from '../components/ColorInputControl.vue';
 import EventBus from '../../common/EventBus';
-import { useIpcRenderer, transformUrl } from '../../common/Utils';
+import { useIpcRenderer, transformUrl, isSupportedVideo, isSupportedImage } from '../../common/Utils';
 import { PlayingViewTheme } from '../../common/PlayingViewTheme';
 import { FILE_SCHEME } from '../../common/Constants';
 
@@ -18,6 +18,7 @@ const { workingCustomPlayingTheme, isPlayingViewCustomThemePreview } = storeToRe
 const { hideCustomPlayingThemeEditView, showToast, 
     savePlayingViewCustomTheme, isCurrentPlayingTheme,
     setPlayingViewCustomThemePreview, setPlayingViewCustomThemePreviewCache, 
+    showFailToast,
 } = useAppCommonStore()
 
 const blankTheme = new PlayingViewTheme()
@@ -101,16 +102,38 @@ const setupPreviewCover = (value) => Object.assign(customTheme, { previewCover: 
 const setupTextColor = (value) => Object.assign(customTheme, { textColor: value })
 const setupBtnColor = (value) => Object.assign(customTheme, { btnColor: value })
 
+
+const onDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length > 1) return showFailToast('还不支持多文件拖拽')
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if(isSupportedVideo(path)) {
+        setupBgVideoUrl(path)
+    } else if(isSupportedImage(path)) {
+        setupPreviewCover(path)
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
+    }
+    if(isEventStopped) event.stopPropagation()
+}
+
+const contentRef = ref(null)
 watch(workingCustomPlayingTheme, (nv, ov) => {
     resetTheme()
     setNameInvalid(false)
     setBgViewUrlInvalid(false)
+    if(contentRef.value) contentRef.value.scrollTop = 0
 }, { immediate: true })
 </script>
 
 <template>
     <div class="custom-playing-theme-edit-view" :class="{ 'custom-playing-theme-preview-mode': isPlayingViewCustomThemePreview }"
-        v-gesture-dnm="{ trigger: '.header' }">
+        v-gesture-dnm="{ trigger: '.header' }" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="container">
             <div class="header">
                 <div class="action left-action">
@@ -208,7 +231,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                     </div>
                 </div>
             </div>
-            <div class="center">
+            <div class="center" ref="contentRef">
                 <div class="row first">
                     <div class="cate-name">样式名称</div>
                     <div class="row-content">
@@ -502,7 +525,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 .custom-playing-theme-edit-view .center .row-content .img-item img,
 .custom-playing-theme-edit-view .center .row-content .img-item .upload-action {
     width: 66%;
-    height: 168px;
+    height: 178px;
     display: flex;
     align-items: center;
     justify-content: center;
