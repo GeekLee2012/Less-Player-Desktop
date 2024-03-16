@@ -143,11 +143,23 @@ const loadLyric = (track) => {
         return
     }
 
-    //获取歌词
+    //获取歌词，优先顺序：当前平台 -> 其他平台
     vendor.lyric(track.id, track).then(result => {
         //再次确认，可能歌曲已经被切走
-        if (isCurrentTrack(track)) updateLyric(track, result)
-    })
+        if (!isCurrentTrack(track)) return
+        //若当前平台获取到歌词，则直接更新
+        if(Track.hasLyric(result)) return updateLyric(track, result)
+        //否则，尝试从其他平台获取歌词
+        United.transferTrack(track, { isGetLyric: true }).then(uResult => {
+            //再次确认，可能歌曲已经被切走
+            if (!isCurrentTrack(track)) return
+            //仍然无法获取，直接返回
+            if(!uResult) return EventBus.emit('track-lyricLoaded', track)
+            //更新歌词
+            const { lyric, lyricRoma: roma, lyricTrans: trans } = uResult 
+            updateLyric(track, { lyric, roma, trans })
+        }).catch(error => EventBus.emit('track-lyricLoaded', track))
+    }).catch(error => EventBus.emit('track-lyricLoaded', track))
 }
 
 const updateLyric = (track, { lyric, roma, trans }) => {
