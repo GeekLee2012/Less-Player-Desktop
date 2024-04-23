@@ -87,12 +87,10 @@ export class LocalMusic {
     //歌手详情: 全部歌曲
     static artistDetailAllSongs(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const _name = (id || '').toLowerCase().trim()
+            const _name = toLowerCaseTrimString(id || '')
             const result = { id, platform: LocalMusic.CODE, offset, limit, page, total: 0, data: [] }
-            if (_name.length < 1 || page > 1) {
-                resolve(result)
-                return
-            }
+            if (_name.length < 1 || page > 1) return resolve(result)
+
             const { localPlaylists } = useLocalMusicStore()
             localPlaylists.forEach(playlist => {
                 const filteredPlaylist = playlist.data.filter(item => {
@@ -100,14 +98,11 @@ export class LocalMusic {
                     if (artist && artist.length > 0) {
                         for (var i = 0; i < artist.length; i++) {
                             const { name } = artist[i]
-                            if (toLowerCaseTrimString(name) === _name) {
-                                return true
-                            }
+                            if (toLowerCaseTrimString(name) === _name) return true
                         }
                     }
                     return false
                 })
-                //if (filteredPlaylist.length > 0) result.data.push(...filteredPlaylist)
                 //去重
                 if (filteredPlaylist.length > 0) {
                     for (var i = 0; i < filteredPlaylist.length; i++) {
@@ -132,7 +127,7 @@ export class LocalMusic {
     //专辑详情: 全部歌曲
     static albumDetailAllSongs(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
-            const _name = (id || '').toLowerCase().trim()
+            const _name = toLowerCaseTrimString(id || '')
             const result = new Album(id, LocalMusic.CODE, id)
             if (_name.length < 1 || page > 1) {
                 resolve(result)
@@ -143,7 +138,7 @@ export class LocalMusic {
                 const filteredPlaylist = playlist.data.filter(item => {
                     const { album } = item
                     if (album && album.name) {
-                        if (album.name.toLowerCase().trim() === _name) {
+                        if (toLowerCaseTrimString(album.name) === _name) {
                             const { cover, publishTime } = item
                             Object.assign(result, { cover, artistName: Track.firstArtistName(item), publishTime })
                             return true
@@ -151,7 +146,6 @@ export class LocalMusic {
                     }
                     return false
                 })
-                //if (filteredPlaylist.length > 0) result.data.push(...filteredPlaylist)
                 //去重
                 if (filteredPlaylist.length > 0) {
                     for (var i = 0; i < filteredPlaylist.length; i++) {
@@ -273,7 +267,6 @@ export class LocalMusic {
         category.add('全部', '-1')
         const array = alphabet.split('')
         for (var i = 0; i < array.length; i++) {
-            //category.add(array[i], array[i].charCodeAt(0))
             category.add(array[i], toLowerCaseTrimString(array[i]))
         }
         category.add('其他', '0')
@@ -293,9 +286,7 @@ export class LocalMusic {
             //category.add('韩文名', 3)
 
             result.data.push(category)
-            setTimeout(() => {
-                resolve(result)
-            }, Math.random() * 520)
+            setTimeout(() => resolve(result), Math.random() * 520)
         })
     }
 
@@ -393,9 +384,7 @@ export class LocalMusic {
                     }
                 })
             })
-            setTimeout(() => {
-                resolve(result)
-            }, Math.random() * 666)
+            setTimeout(() => resolve(result), Math.random() * 666)
         })
     }
 }

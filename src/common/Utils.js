@@ -123,26 +123,26 @@ export const readLines = (text, seperator) => {
 
 export const stringEquals = (value1, value2) => {
     if(!value1 || !value2) return false
-    return toTrimString(value1) === toTrimString(value2)
+    return toTrimString(value1) == toTrimString(value2)
 }
 
 export const stringEqualsIgnoreCase = (value1, value2) => {
     if(!value1 || !value2) return false
-    return toLowerCaseTrimString(value1) === toLowerCaseTrimString(value2)
+    return toLowerCaseTrimString(value1) == toLowerCaseTrimString(value2)
 }
 
 export const stringEqualsEscapeHtml = (value1, value2) => {
     if(!value1 || !value2) return false
     const _value1 = escapeHtml(toTrimString(value1))
     const _value2 = escapeHtml(toTrimString(value2))
-    return _value1 === _value2
+    return _value1 == _value2
 }
 
 export const stringEqualsIgnoreCaseEscapeHtml = (value1, value2) => {
     if(!value1 || !value2) return false
     const _value1 = escapeHtml(toLowerCaseTrimString(value1))
     const _value2 = escapeHtml(toLowerCaseTrimString(value2))
-    return _value1 === _value2
+    return _value1 == _value2
 }
 
 export const stringIncludesIgnoreCaseEscapeHtml = (value1, value2) => {
@@ -168,6 +168,17 @@ export const trimExtraChars = (text) => {
 //去掉HTML标签、转义实体等
 export const escapeHtml = (text) => {
     return toTrimString(text).replace(/<[^>]+>/g, '').trim()
+}
+
+
+//去掉括号内的全部内容
+export const trimTextWithinBrackets = (text) => {
+    text = toTrimString(text)
+        .replace(/（/g, '(')
+        .replace(/）/g, ')')
+    if(isBlank(text)) return text
+    const index = text.indexOf('(')
+    return text.substring(0, index)
 }
 
 /*

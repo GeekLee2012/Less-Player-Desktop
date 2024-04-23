@@ -36,10 +36,10 @@ import { coverDefault } from '../common/Utils';
 const pinia = createPinia()
 pinia.use(piniaPersist)
 
-//播放器：初始化并配置
-Player.initAndSetup()
-RadioPlayer.initAndSetup()
-VideoPlayer.initAndSetup()
+//播放器：创建、初始化
+Player.create()
+RadioPlayer.create()
+VideoPlayer.create()
 
 //应用：创建、配置
 const app = createApp(App)
@@ -81,5 +81,6 @@ app.use(pinia)
   //.component('PlayingView', PlayingView)
   .component('VideoPlayingView', VideoPlayingView)
   .component('PlaybackQueueView', PlaybackQueueView)
+  //Directive
   .directive('gesture-dnm', (el, binding) => bindDragAndMove(el, binding.value))
   .mount('#app')

@@ -586,9 +586,9 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .bg-effect {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
     /*backdrop-filter: blur(20px);*/
     filter: blur(8px);
     z-index: -10;

@@ -9,7 +9,8 @@ import APIExpose from "./APIExpose.vue";
   <AppRoute>
     <APIExpose>
       <PlayerBootstrap>
-        <AppContent></AppContent>
+        <AppContent>
+        </AppContent>
       </PlayerBootstrap>
     </APIExpose>
   </AppRoute>

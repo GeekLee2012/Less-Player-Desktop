@@ -17,20 +17,15 @@ export class VideoPlayer {
         this.playState = PlayState.NONE
     }
 
-    static get() {
-        if (!singleton) singleton = new VideoPlayer()
-        return singleton
-    }
-
-    /* 初始化并配置播放器 */
-    static initAndSetup() {
-        const player = VideoPlayer.get()
-        return player.on('video-init', node => player.setVideoNode(node))
-            .on('video-change', video => player.setVideo(video))
-            .on('video-play', video => player.playVideo(video))
-            .on('video-togglePlay', () => player.togglePlay())
-            .on('video-setVolume', volume => player.volume(volume))
-            .on('video-stop', () => player.setVideo(null))
+    static create() {
+        if (singleton) return singleton
+        singleton = new VideoPlayer()
+        return singleton.on('video-init', node => singleton.setVideoNode(node))
+            .on('video-change', video => singleton.setVideo(video))
+            .on('video-play', video => singleton.playVideo(video))
+            .on('video-togglePlay', () => singleton.togglePlay())
+            .on('video-setVolume', volume => singleton.volume(volume))
+            .on('video-stop', () => singleton.setVideo(null))
     }
 
     setVideoNode(node) {

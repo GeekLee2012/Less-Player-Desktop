@@ -48,7 +48,7 @@ const { togglePlaybackQueueView, toggleVideoPlayingView,
     setDesktopLyricShow, setCurrentTraceId,
     setPendingPlay, setPendingPlayPercent,
     setSpectrumIndex, setSpectrumParams,
-    setExVisualCanvasIndex, } = useAppCommonStore()
+    setExVisualCanvasIndex, togglePlayingThemeListView } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
@@ -125,41 +125,43 @@ const traceRecentAlbum = (album) => {
 
 /* 歌词获取 */
 const loadLyric = (track) => {
-    if (!track) {
-        if (isCurrentTrack(track)) EventBus.emit('track-noLyric', track)
-        return
-    }
-    if (!isCurrentTrack(track)) return
-    if (Track.hasLyric(track)) {
-        if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
-        return
-    }
-    //检查有效性
-    const platform = track.platform
-    const vendor = getVendor(platform)
-    if (!vendor || !vendor.lyric
-        || Playlist.isAnchorRadioType(track)) {
-        if (isCurrentTrack(track)) EventBus.emit('track-noLyric', track)
-        return
-    }
+    if (!track || !isCurrentTrack(track)) return
+    //已有歌词
+    if (Track.hasLyric(track)) return isCurrentTrack(track) && EventBus.emit('track-lyricLoaded', track)
+    //主播电台
+    if (Playlist.isAnchorRadioType(track)) return isCurrentTrack(track) && EventBus.emit('track-lyricLoaded', track)
 
+    //检查有效性
+    const { id, platform } = track
+    const vendor = getVendor(platform)
+    
+    //当前平台不存在时，直接尝试从其他平台获取歌词
+    //可能由于插件化原因，平台插件未加载、未启用或不支持获取歌词
+    if (!vendor || !vendor.lyric) return loadLyricFromUnited(track)
+    
+    //当前平台存在时
     //获取歌词，优先顺序：当前平台 -> 其他平台
-    vendor.lyric(track.id, track).then(result => {
+    vendor.lyric(id, track).then(result => {
         //再次确认，可能歌曲已经被切走
         if (!isCurrentTrack(track)) return
         //若当前平台获取到歌词，则直接更新
-        if(Track.hasLyric(result)) return updateLyric(track, result)
+        if (Track.hasLyric(result)) return updateLyric(track, result)
         //否则，尝试从其他平台获取歌词
-        United.transferTrack(track, { isGetLyric: true }).then(uResult => {
+        loadLyricFromUnited(track)
+    }, error => EventBus.emit('track-lyricLoaded', track))
+}
+
+const loadLyricFromUnited = (track) => {
+    if (!track || !isCurrentTrack(track)) return
+    return United.transferTrack(track, { isGetLyric: true }).then(uResult => {
             //再次确认，可能歌曲已经被切走
             if (!isCurrentTrack(track)) return
             //仍然无法获取，直接返回
-            if(!uResult) return EventBus.emit('track-lyricLoaded', track)
+            if (!uResult) return EventBus.emit('track-lyricLoaded', track)
             //更新歌词
-            const { lyric, lyricRoma: roma, lyricTrans: trans } = uResult 
+            const { lyric, lyricRoma: roma, lyricTrans: trans } = uResult
             updateLyric(track, { lyric, roma, trans })
-        }).catch(error => EventBus.emit('track-lyricLoaded', track))
-    }).catch(error => EventBus.emit('track-lyricLoaded', track))
+        }, error => EventBus.emit('track-lyricLoaded', track))
 }
 
 const updateLyric = (track, { lyric, roma, trans }) => {
@@ -178,7 +180,8 @@ const updateLyric = (track, { lyric, roma, trans }) => {
     if (track && Lyric.hasData(roma)) Object.assign(track, { lyricRoma: roma })
     //歌曲 - 歌词翻译
     if (track && Lyric.hasData(trans)) Object.assign(track, { lyricTrans: trans })
-    EventBus.emit('track-lyricLoaded', track)
+    //通知歌词已更新
+    if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
 }
 
 
@@ -212,20 +215,15 @@ const handleUnplayableTrack = (track, msg) => {
     ++autoSkipCnt
     const queueSize = queueTracksSize.value
     if (Playlist.isNormalRadioType(track)) { //普通歌单电台
-        toastAndPlayNext(track, msg)
-        return
+        return toastAndPlayNext(track, msg)
     } else if (autoSkipCnt >= queueSize) { //非电台歌曲，且没有下一曲
         resetPlayState()
         resetAutoSkip()
-        showFailToast(NO_NEXT_MSG)
-        return
+        return showFailToast(NO_NEXT_MSG)
     }
     //普通歌曲
     //频繁切换下一曲，体验不好，对音乐平台也不友好
-    if (autoSkipCnt <= 10) {
-        toastAndPlayNext(track, msg)
-        return
-    }
+    if (autoSkipCnt <= 10) return toastAndPlayNext(track, msg)
     resetPlayState()
     //10连跳啦，暂停一下吧
     resetAutoSkip()
@@ -353,8 +351,7 @@ const onPlayerErrorRetry = ({ track, currentTime, radio }) => {
         return handleUnplayableTrack(track)
     }
     //尝试继续播放
-    if (isTrackOverretry()) {
-        //超出最大重试次数
+    if (isTrackOverretry()) { //超出最大重试次数
         return handleUnplayableTrack(track)
     } else { //普通歌曲、广播电台
         increaseTrackRetry()
@@ -901,6 +898,9 @@ EventBus.on('track-state', ({ state, track, currentTime }) => {
 
     setPlayState(state)
     switch (state) {
+        case PlayState.NONE:
+            resetPlayState(true)
+            break
         case PlayState.INIT:
             resetPlayState(true)
             checkFavoritedState()
@@ -946,7 +946,7 @@ EventBus.on('track-pos', ({ currentTime: currentSecs, duration }) => {
         return
     }
     const track = currentTrack.value
-    if(duration != track.duration) Object.assign(track, { duration })
+    if (duration != track.duration) Object.assign(track, { duration })
     const currentTime = currentSecs * 1000
     mmssCurrentTime.value = toMmss(currentTime)
     currentTimeState.value = currentSecs
@@ -1030,7 +1030,7 @@ const preseekTrack = (percent) => {
 
 const isTrackSeekable = computed(() => {
     const { duration } = currentTrack.value || {}
-    return playing.value && !Playlist.isFMRadioType(currentTrack.value) 
+    return playing.value && !Playlist.isFMRadioType(currentTrack.value)
         && (duration > 0)
 })
 
@@ -1096,7 +1096,7 @@ EventBus.on('video-stop', resumeTrackPendingPlay)
 const restoreTrack = (callback) => {
     const track = currentTrack.value
     if (!track) return
-    if (isDevEnv()) console.log('[ RESTORE TRACK ]')
+    //if (isDevEnv()) console.log('[ RESTORE TRACK ]')
 
     const _callback = (track) => {
         EventBus.emit("track-restore", track)
@@ -1114,26 +1114,28 @@ const restoreTrack = (callback) => {
     //稍候加载歌词、封面
     if (isLocalMusic(platform)) setPendingBootstrapTrack(track)
 
-    bootstrapTrack(track)
-        .then(track => tryCall(_callback, track))
-        .catch(error => {
-            if (isDevEnv()) console.log(error)
-            if ('noService | noUrl'.includes(error)) {
-                setPendingBootstrapTrack(track)
-            }
+    bootstrapTrack(track).then(
+        track => tryCall(_callback, track), 
+        error => {
+            if (isDevEnv()) console.log('[ STARTUP - Restore Track ]', error)
+            if ('noService | noUrl'.includes(error)) setPendingBootstrapTrack(track)
             tryCall(_callback, track)
         })
+        
 }
 
 EventBus.on('plugins-accessResult-addPlatform', ({ code }) => {
     const pendingTrack = pendingBootstrapTrack.value
     if (!pendingTrack) return
     if (pendingTrack.platform != code && !isLocalMusic(pendingTrack.platform)) return
-    //pendingTrack已非当前歌曲，清理一下
+    //pendingTrack已非当前歌曲
     if (!isCurrentTrack(pendingTrack)) return setPendingBootstrapTrack(null)
-
-    loadLyric(pendingTrack)
+    
+    //延迟加载歌词
+    EventBus.emit('track-lyricRestore')
+    const _track = { ...pendingTrack }
     setPendingBootstrapTrack(null)
+    setTimeout(() => loadLyric(_track), 1888)
 })
 
 //歌曲收藏
@@ -1267,6 +1269,10 @@ const registryIpcRendererListeners = () => {
     ipcRenderer.on('globalShortcut-visitThemes', () => visitThemes())
     ipcRenderer.on('globalShortcut-visitModulesSetting', () => visitModulesSetting())
     ipcRenderer.on('globalShortcut-visitPlugins', () => visitPlugins())
+    ipcRenderer.on('globalShortcut-togglePlayingThemes', () => {
+        if (playingViewShow.value) togglePlayingThemeListView()
+    })
+    
 
     //其他事件
     ipcRenderer.on('app-desktopLyric-showSate', (event, isShow) => {

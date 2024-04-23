@@ -244,6 +244,8 @@ const registryGlobalShortcuts = () => {
     'Alt+Shift+U': 'visitModulesSetting',
     // 打开插件管理
     'Alt+Shift+U': 'visitPlugins',
+    // 打开 / 关闭播放样式
+    'Alt+Shift+V': 'togglePlayingThemes',
     // 打开 开发者工具
     'Control+Alt+Shift+I': () => openDevTools(mainWin),
     'Command+Alt+Shift+I': () => openDevTools(mainWin),
@@ -1029,13 +1031,13 @@ const createMainWindow = () => {
       "*://*.douban.com/*",
       "*://*.doubanio.com/*",
       "*://*.radio.cn/*",
-      */
       "*://*.cnr.cn/*",
       "*://*.qingting.fm/*",
       "*://*.qtfm.cn/*",
+      "*://*.cgtn.com/*",
+      */
       "*://github.com/*",
       "*://gitee.com/*",
-      "*://*.cgtn.com/*",
       "*://*/*"
     ]
   }
@@ -1085,12 +1087,14 @@ const initAppMenuTemplate = () => {
   const TEXT_CONFIG = {
     'en-US': {
       about: 'About',
+      settings: 'Settings',
       devTools: 'Developer Tools',
       quit: 'Quit',
       edit: 'Edit'
     },
     'zh-CN': {
       about: '关于',
+      settings: '设置',
       devTools: '开发者工具',
       quit: '退出',
       edit: '编辑'
@@ -1099,6 +1103,7 @@ const initAppMenuTemplate = () => {
   const menuText = TEXT_CONFIG[locale] || TEXT_CONFIG['zh-CN']
   let menuItems = [{ role: 'about', label: menuText.about },
   { role: 'toggleDevTools', label: menuText.devTools },
+  { click: (menuItem, browserWindow, event) => sendTrayAction(6, true), label: menuText.settings },
   { role: 'quit', label: menuText.quit },]
   if (!isDevEnv) menuItems.splice(1, 1)
   const appName = app.name.replace('-', '')

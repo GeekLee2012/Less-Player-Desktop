@@ -27,7 +27,8 @@ const { setExploreMode, setArtistExploreMode,
     setPlaylistExploreMode, hideVideoPlayingView,
     hideLyricToolbar, hideRandomMusicToolbar,
     hideSoundEffectView, hidePopoverHint,
-    setSearchPlaceHolderIndex, setRouterCtxCacheItem } = useAppCommonStore()
+    setSearchPlaceHolderIndex, setRouterCtxCacheItem,
+    hidePlayingThemeListView } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -124,6 +125,7 @@ const hideRelativeComponents = (to) => {
     hideLyricToolbar()
     hideRandomMusicToolbar()
     hideSoundEffectView()
+    hidePlayingThemeListView()
 }
 
 const createCommonRoute = (route, onRouteReady) => {
@@ -262,13 +264,14 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
 const visitAlbumDetail = (platform, id, callback, data) => {
     if (isLocalMusic(platform)) id = data.name || data.title
     const platformValid = isAlbumDetailVisitable(platform)
-    const idValid = (typeof id == 'string') ? (id.trim().length > 0) : (id > 0)
+    const idValid = (typeof id == 'string') ? !isBlank(id) : (id > 0)
     const visitable = platformValid && idValid
-    platform = platform.trim()
+    platform = toTrimString(platform)
+    id = toTrimString(id)
     if (visitable) {
         let exploreMode = transformExploreMode()
         let moduleName = 'album', isAlbum = true
-        if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
+        if (id.startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = (exploreMode == 'userhome') ? 'userhome' : 'radios'
             moduleName = 'playlist'
             isAlbum = false
@@ -277,9 +280,6 @@ const visitAlbumDetail = (platform, id, callback, data) => {
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
         visitCommonRoute(toPath)
-        /*.then(() => {
-            if (isAlbum) updateAlbumDetailKeys(platform, id)
-        })*/
         hideAllCtxMenus()
     }
     if (callback && (typeof callback == 'function')) callback(visitable)
@@ -320,7 +320,7 @@ provide('appRoute', {
     //类似visitPlaylist，但有些区别
     visitFavoritePlaylist: (platform, id) => {
         let exploreMode = transformExploreMode()
-        if (id.toString().startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
+        if (toTrimString(id).startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = (exploreMode == 'userhome') ? 'userhome' : 'radios'
         }
         return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)

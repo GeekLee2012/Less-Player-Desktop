@@ -24,6 +24,8 @@ export const useRadioSquareStore = defineStore('radioSquare', {
         //多选模式
         multiSelectMode: false,
         currentCategoryItems: {},
+        // TODO 控制CSS样式white-space
+        whiteWrapMap: new Map(),
     }),
     getters: {
         currentPlatformCode(state) {
@@ -106,6 +108,12 @@ export const useRadioSquareStore = defineStore('radioSquare', {
         },
         setMultiSelectMode(value) {
             this.multiSelectMode = (value === true)
-        }
+        },
+        putWhiteWrap(key, value) {
+            this.whiteWrapMap.set(key, value)
+        },
+        currentPlatformWhiteWrap() {
+            return this.whiteWrapMap.get(this.currentPlatformCode)
+        },
     }
 })

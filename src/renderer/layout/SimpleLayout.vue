@@ -648,9 +648,7 @@ const pickFMRadioCategory = async (platform, traceId) => {
                 }
                 cachedOrders = result.orders
                 putCategories(result.platform, cachedCategories)
-                if (cachedOrders) {
-                    putOrders(result.platform, cachedOrders)
-                }
+                if (cachedOrders) putOrders(result.platform, cachedOrders)
                 break
             }
             ++retry
@@ -661,17 +659,23 @@ const pickFMRadioCategory = async (platform, traceId) => {
     if (!cachedCategories || !cachedCategories.data.length < 0) {
         return null
     }
-    //单个分类，且名称约定为电台或地区，如央广云听平台
+    //TODO 单个分类，且名称约定为电台，如央广云听平台
     let filtedData = cachedCategories.data.filter(item => item.name == '电台')
     if (filtedData.length == 1) {
         const data = filtedData[0].data
         return !data || data.length < 1 ? null
             : data[nextInt(data.length)]
-
     }
-    //两个个分类，且名称约定为地区、分类，如喜马拉雅FM
+    //多个分类，但非多选
+    if(!cachedCategories.multiSelectMode) {
+        filtedData = cachedCategories.data
+        const index = nextInt(filtedData.length)
+        const data = filtedData[index].data
+        return !data || data.length < 1 ? null
+            : data[nextInt(data.length)]
+    }
+    //多个分类，且多选，名称约定为地区、分类，如喜马拉雅FM
     //暂时默认全部就好，避免过渡复杂无意义
-    //filtedData = cachedCategories.filter(item => (item.name == '地区' || item.name == '分类'))
     return null
 }
 

@@ -50,7 +50,7 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   hideSoundEffectView, hideCustomThemeEditView,
   hideColorPickerToolbar, resetExploreModeActiveStates,
   setMaxScreen, showImportantToast, 
-  hidePlayingThemeListView } = useAppCommonStore()
+  hidePlayingThemeListView, togglePlayingThemeListView } = useAppCommonStore()
 
 
 const isReservedPath = (path) => {
@@ -124,6 +124,11 @@ const registryDefaultLocalKeys = () => {
   Mousetrap.bind(['s'], quickSearch, 'keyup')
   // 快速查看快捷键
   Mousetrap.bind(['k'], visitShortcutKeys, 'keyup')
+  // 打开/关闭播放样式
+  Mousetrap.bind(['v'], () => {
+    if (videoPlayingViewShow.value) return
+    if (playingViewShow.value) togglePlayingThemeListView()
+  }, 'keyup')
 }
 
 //TODO 清理设置，解决不同版本导致的数据不一致问题

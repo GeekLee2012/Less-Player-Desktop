@@ -135,9 +135,7 @@ export class WebAudioApi {
             return
         }
         const audioCtx = this.audioCtx
-        if (!this.convolver) {
-            this.convolver = audioCtx.createConvolver()
-        }
+        if (!this.convolver) this.convolver = audioCtx.createConvolver()
         this.connectReverb()
 
         //TODO

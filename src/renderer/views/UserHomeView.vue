@@ -284,7 +284,7 @@ watch(currentPlatformCode, (nv, ov) => {
 EventBus.on("userHome-refresh", refresh)
 EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
 </script>
-    
+
 <template>
     <div id="user-profile-view" ref="userProfileRef" @scroll="onScroll">
         <div class="decoration">
@@ -317,8 +317,8 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
                     </PlayAddAllBtn>
                     <CreatePlaylistBtn :leftAction="visitCustomPlaylistCreate" class="spacing">
                     </CreatePlaylistBtn>
-                    <BatchActionBtn v-show="activeTab == 0 || activeTab == 3" class="spacing" :deleteBtn="activeTab == 3"
-                        :leftAction="visitBatchActionView" :rightAction="batchRemoveAll">
+                    <BatchActionBtn v-show="activeTab == 0 || activeTab == 3" class="spacing"
+                        :deleteBtn="activeTab == 3" :leftAction="visitBatchActionView" :rightAction="batchRemoveAll">
                     </BatchActionBtn>
                 </div>
             </div>
@@ -349,7 +349,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
-    
+
 <style scoped>
 #user-profile-view {
     display: flex;

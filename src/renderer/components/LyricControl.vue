@@ -3,6 +3,7 @@ import { watch, ref, inject, nextTick, computed, onUnmounted, } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
+import { Playlist } from '../../common/Playlist';
 import { toMMssSSS, toMillis } from '../../common/Times';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
@@ -38,7 +39,7 @@ const lyricRomaData = ref(Track.lyricRomaData(props.track))
 
 
 const isUserMouseWheel = ref(false)
-let userMouseWheelCancelTimer = null
+let userMouseWheelTimer = null
 const isSeeking = ref(false)
 const lyricExistState = ref(-1)
 
@@ -70,21 +71,14 @@ const renderAndScrollLyric = (secs) => {
     for (var i = 0; i < lines.length; i++) {
         timeKey = lines[i].getAttribute('timeKey')
         const lineTime = toMillis(timeKey)
-        if (trackTime >= lineTime) {
-            index = i
-        } else if (trackTime < lineTime) {
-            break
-        }
+        if (trackTime < lineTime) break
+        index = i
     }
 
     nextTick(setupLyricLines)
 
-
-    if (index >= 0) {
-        setLyricCurrentIndex(index)
-    } else {
-        index = 0
-    }
+    if (index >= 0) setLyricCurrentIndex(index)
+    index = Math.max(index, 0)
 
     //是否为用户主动改变进度，如手动滚动歌词、拖动进度条
     if (isUserMouseWheel.value || isSeeking.value || progressSeekingState.value) return
@@ -95,7 +89,7 @@ const renderAndScrollLyric = (secs) => {
     //当歌词存在换行时，无法保证准确定位
     //且当前高亮行也无法保证在可视区居中
     /*
-    const scrollIndex = index > 1 ? (index - 1) : 0
+    const scrollIndex = Math.max(index - 1, 0)
     const { clientHeight, scrollHeight } = lyricWrap
     const maxScrollTop = scrollHeight - clientHeight
     const destScrollTop = maxScrollTop * (scrollIndex / (lines.length - 1))
@@ -141,10 +135,8 @@ const safeRenderAndScrollLyric = (secs) => {
 }
 
 const resetLyricState = (track, state) => {
-    state = state >= -1 ? state : -1
     //重置状态
-    //setLyricExist(isExist)
-    setLyricExistState(state)
+    setLyricExistState(state >= -1 ? state : -1)
     setLyricData(Track.lyricData(track))
     setLyricTransData(Track.lyricTransData(track))
     setLyricRomaData(Track.lyricRomaData(track))
@@ -159,12 +151,13 @@ const reloadLyricData = (track) => {
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
         const lyricData = track.lyric.data
         let isValidLyric = true
-        if (lyricData.size <= 6) {
+        if (lyricData.size <= 8) {
             const linesIter = lyricData.values()
             let line = linesIter.next()
             while (!line.done) {
                 const lineText = line.value
                 isValidLyric = !(lineText.includes('纯音乐')
+                    || lineText.includes('暂无歌词')
                     || lineText.includes('没有填词')
                     || lineText.includes('没有歌词'))
                 if (!isValidLyric) break
@@ -184,13 +177,11 @@ const reloadLyricData = (track) => {
     //setTimeout(setupLyricLines, 300)
 }
 
-const onUserMouseWheel = (e) => {
-    //e.preventDefault()
+const onUserMouseWheel = (event) => {
+    //event.preventDefault()
     setUserMouseWheel(true)
-    if (userMouseWheelCancelTimer) clearTimeout(userMouseWheelCancelTimer)
-    userMouseWheelCancelTimer = setTimeout(() => {
-        setUserMouseWheel(false)
-    }, 2888)
+    if (userMouseWheelTimer) clearTimeout(userMouseWheelTimer)
+    userMouseWheelTimer = setTimeout(() => setUserMouseWheel(false), 2888)
     updateScrollLocatorTime()
 }
 
@@ -206,14 +197,10 @@ const setLyricLineStyle = (line) => {
     textEl.style.marginTop = `${lineSpacing}px`
     extraTextEl.style.lineHeight = `${lineHeight}px`
 
-    //const classAttr = line.getAttribute('class')
-    if (line.classList.contains('current')) { //高亮行
-        line.style.fontSize = hlFontSize + "px"
-        line.style.fontWeight = 'bold'
-    } else { //普通行
-        line.style.fontSize = fontSize + "px"
-        line.style.fontWeight = fontWeight
-    }
+    //是否为当前高亮行
+    const isCurrent = line.classList.contains('current')
+    line.style.fontSize = isCurrent ? `${hlFontSize}px` : `${fontSize}px`
+    line.style.fontWeight = isCurrent ? 'bold' : fontWeight
 }
 
 const setupLyricLines = () => {
@@ -313,9 +300,13 @@ const setupLyricExtra = () => {
                 if (!timeKey) return
                 let extraText = null
                 //算法简单粗暴，最坏情况11次尝试！！！
+                //一般来说，同一平台下同一首歌曲的所有歌词行的误差值基本是一样的，因此可以利用这点简单优化一下
+                //即只要确定第一行的误差值，后面的歌词行全部直接优先使用该误差值进行匹配，不必每次都按固定顺序遍历数组
+                //目前来说，即使不优化，对性能方面影响也不算大
                 const timeErrors = [0, 10, -10, 20, -20, 30, -30, 40, -40, 50, -50]
                 for (var i = 0; i < timeErrors.length; i++) {
-                    extraText = extraTextMap.get(getExtraTimeKey(timeKey, timeErrors[i]))
+                    const timeError = timeErrors[i]
+                    extraText = extraTextMap.get(getExtraTimeKey(timeKey, timeError))
                     if (extraText) break
                 }
                 if (extraText && extraText != '//') extraTextEl.innerHTML = extraText
@@ -338,6 +329,7 @@ EventBus.on('lyric-lineHeight', setupLyricLines)
 EventBus.on('lyric-lineSpacing', setupLyricLines)
 EventBus.on('lyric-alignment', setupLyricAlignment)
 EventBus.on('playingView-changed', setupLyricAlignment)
+EventBus.on('track-lyricRestore', () => setLyricExistState(-1))
 
 
 watch(() => props.currentTime, (nv, ov) => {
@@ -371,7 +363,8 @@ watch(() => props.track, (nv, ov) => {
                 <span v-html="track.title"></span>
             </div>
             <div class="audio-artist spacing">
-                <b>歌手:</b>
+                <b v-show="!Playlist.isFMRadioType(track)">歌手:</b>
+                <b v-show="Playlist.isFMRadioType(track)">平台:</b>
                 <span>
                     <ArtistControl :visitable="true" :platform="track.platform" :data="track.artist" :trackId="track.id"
                         class="ar-ctl">
@@ -379,7 +372,8 @@ watch(() => props.track, (nv, ov) => {
                 </span>
             </div>
             <div class="audio-album spacing">
-                <b>专辑:</b>
+                <b v-show="!Playlist.isFMRadioType(track)">专辑:</b>
+                <b v-show="Playlist.isFMRadioType(track)">标签:</b>
                 <span>
                     <AlbumControl :visitable="true" :platform="track.platform" :data="track.album" class="al-ctl">
                     </AlbumControl>
@@ -388,19 +382,21 @@ watch(() => props.track, (nv, ov) => {
         </div>
         <div class="center" ref="lyricWrapRef" :draggable="isDndSaveEnable" @dragstart="dndSaveLyric">
             <div v-show="lyricExistState == -1" class="no-lyric">
-                <span>歌词加载中，请先欣赏音乐吧~</span>
+                <span v-show="!Playlist.isFMRadioType(track)">歌词加载中，请先欣赏音乐吧~</span>
+                <span v-show="Playlist.isFMRadioType(track)">简介加载中，请先欣赏音乐吧~</span>
             </div>
             <div v-show="lyricExistState == 0" class="no-lyric">
-                <span>暂无歌词，请继续欣赏音乐吧~</span>
+                <span v-show="!Playlist.isFMRadioType(track)">暂无歌词，请继续欣赏音乐吧~</span>
+                <span v-show="Playlist.isFMRadioType(track)">暂无简介，请继续聆听电台吧~</span>
             </div>
             <div v-show="lyricExistState == 1" v-for="([key, value], index) in lyricData" class="line" :timeKey="key"
                 :index="index" :class="{
-                    first: index == 0,
-                    last: index == (lyricData.size - 1),
-                    'content-text-highlight': index == currentIndex,
-                    current: index == currentIndex,
-                    locatorCurrent: (index == scrollLocatorCurrentIndex && index != currentIndex && isUserMouseWheel)
-                }">
+        first: index == 0,
+        last: index == (lyricData.size - 1),
+        'content-text-highlight': index == currentIndex,
+        current: index == currentIndex,
+        locatorCurrent: (index == scrollLocatorCurrentIndex && index != currentIndex && isUserMouseWheel)
+    }">
                 <div class="text" :timeKey="key" :index="index" v-html="value"></div>
                 <div class="extra-text" v-show="isExtraTextActived"></div>
             </div>

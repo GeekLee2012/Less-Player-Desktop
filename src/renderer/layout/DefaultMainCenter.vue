@@ -375,7 +375,7 @@ const resizeViewItems = (event) => {
     // 放在最后执行确保按用户设置百分比缩放
     setupWindowZoom(true)
 
-    if (isDevEnv()) console.log('[ RESIZE ]')
+    if (isDevEnv()) console.log('[ WINDOW - Resize ]')
 }
 
 onActivated(() => {

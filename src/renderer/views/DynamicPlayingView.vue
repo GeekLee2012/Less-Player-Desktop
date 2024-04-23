@@ -10,6 +10,7 @@ import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
+import { Playlist } from '../../common/Playlist';
 import { isDevEnv, smoothScroll, transformUrl, } from '../../common/Utils';
 import { toMillis } from '../../common/Times';
 import { FILE_SCHEME } from '../../common/Constants';
@@ -178,6 +179,12 @@ const isLightTheme = computed(() => {
     return item && item.light
 })
 
+const isLyricShowable = computed(() => {
+    const state = lyricExistState.value
+    const track = currentTrack.value
+    return state == 1 && !Playlist.isFMRadioType(track)
+})
+
 //EventBus事件
 EventBus.on('track-lyricLoaded', reloadLyricData)
 EventBus.on('track-noLyric', reloadLyricData)
@@ -239,7 +246,7 @@ onMounted(() => {
                 </div>
             </div>
             <div class="center">
-                <div v-show="lyricExistState == 1" v-for="([key, value], index) in lyricData" class="line" :timeKey="key"
+                <div v-show="isLyricShowable" v-for="([key, value], index) in lyricData" class="line" :timeKey="key"
                     :index="index" :class="{
                         first: index == 0,
                         last: index == (lyricData.size - 1),
@@ -249,7 +256,7 @@ onMounted(() => {
                     <div class="text" :timeKey="key" :index="index" v-html="value"></div>
                     <div class="extra-text" v-show="false"></div>
                 </div>
-                <div v-show="lyricExistState < 1" class="no-lyric line current" 
+                <div v-show="!isLyricShowable" class="no-lyric line current" 
                     v-html="Track.normalName(currentTrack)">
                 </div> 
             </div>

@@ -25,12 +25,15 @@ const { currentPlatformCode, currentCategoryCode,
     currentOrder, multiSelectMode,
     currentCategoryItems } = storeToRefs(useRadioSquareStore())
 const { currentVender, currentPlatformCategories, putCategories,
-    putOrders, currentPlatformOrders, setMultiSelectMode } = useRadioSquareStore()
+    putOrders, currentPlatformOrders, setMultiSelectMode,
+    currentPlatformWhiteWrap, putWhiteWrap, } = useRadioSquareStore()
 const { isRadioMode } = storeToRefs(useAppCommonStore())
 const { getPaginationStyleIndex } = storeToRefs(useSettingStore())
 
 const isLoadingCategories = ref(true)
 const isLoadingContent = ref(true)
+const isWhiteWrap = ref(false)
+const setWhiteWrap = (value) => isWhiteWrap.value = value || false
 
 const setLoadingCategories = (value) => {
     isLoadingCategories.value = value
@@ -59,25 +62,29 @@ const loadCategories = async () => {
     setLoadingContent(true)
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
+    let cachedWhiteWrap = currentPlatformWhiteWrap()
     if (!cachedCates) {
         const vendor = currentVender()
         if (!vendor || !vendor.radioCategories) return
         const result = await vendor.radioCategories()
         if (!result) return
-        const multiSelectMode = (result.multiMode === true)
-        cachedCates = { data: result.data, multiSelectMode }
-        cachedOrders = result.orders
+
+        const { data, platform, orders, multiMode, isWhiteWrap } = result
+        const multiSelectMode = (multiMode === true)
+        cachedCates = { data, multiSelectMode }
+        cachedOrders = orders
+        cachedWhiteWrap = isWhiteWrap
 
         if (!cachedCates) return
-        putCategories(result.platform, cachedCates)
-        if (cachedOrders) {
-            putOrders(result.platform, cachedOrders)
-        }
+        putCategories(platform, cachedCates)
+        if (cachedOrders) putOrders(platform, cachedOrders)
+        putWhiteWrap(platform, isWhiteWrap)
     }
 
     setMultiSelectMode(cachedCates.multiSelectMode)
     categories.push(...cachedCates.data)
     if (cachedOrders) orders.push(...cachedOrders)
+    setWhiteWrap(cachedWhiteWrap)
     EventBus.emit('radioCategory-update')
     setLoadingCategories(false)
 }
@@ -192,7 +199,7 @@ EventBus.on("radioSquare-refresh", refreshData)
 
 <template>
     <div class="radio-square-view" ref="squareContentRef" @scroll="onScroll">
-        <RadioCategoryBar :data="categories" :loading="isLoadingCategories"></RadioCategoryBar>
+        <RadioCategoryBar :data="categories" :loading="isLoadingCategories" :isWhiteWrap="isWhiteWrap"></RadioCategoryBar>
         <PlaylistsControl :loading="isLoadingContent" :loadPage="loadPageContent" :limit="35"
             :paginationStyleType="getPaginationStyleIndex" :nextPagePendingMark="nextPagePendingMark"
             :refreshAllPendingMark="refreshAllPendingMark">

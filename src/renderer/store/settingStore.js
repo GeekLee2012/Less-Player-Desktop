@@ -376,7 +376,12 @@ export const useSettingStore = defineStore('setting', {
                 name: '快速打开搜索',
                 binding: 'S',
                 gBinding: 'Ctrl + Alt + Shift + S'
-            }, {
+            },{
+                id: 'togglePlayingThemes',
+                name: '打开 / 关闭播放样式',
+                binding: 'V',
+                gBinding: 'Alt + Shift + V'
+            },{
                 id: 'resetSetting',
                 name: '恢复默认设置',
                 binding: 'Ctrl + P',

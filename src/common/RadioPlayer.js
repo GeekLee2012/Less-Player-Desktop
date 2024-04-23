@@ -24,30 +24,25 @@ export class RadioPlayer {
         this.spectrumRefreshFrequency = 3 //歌曲频谱更新频度
     }
 
-    static get() {
-        if (!singleton) singleton = new RadioPlayer()
-        return singleton
-    }
-
-    /* 初始化并配置播放器 */
-    static initAndSetup() {
-        const player = RadioPlayer.get()
-        return player.initWebAudio()
-            //.on('radio-init', node => player._createWebAudioApi(node))
-            .on('radio-channelChange', channel => player.setChannel(channel))
-            .on('radio-play', channel => player.playChannel(channel))
-            .on('radio-togglePlay', () => player.togglePlay())
-            .on('volume-set', volume => player.volume(volume))
-            .on('radio-stop', () => player.setChannel(null))
-            .on('playbackQueue-empty', () => player.setChannel(null))
-            .on('track-changed', () => player.setChannel(null))
-            .on('track-play', () => player.setChannel(null))
-            .on('track-restore', channel => player.setChannel(channel))
-            .on('track-setupSoundEffect', options => player.setupSoundEffect(options))
-            .on('track-updateStereoPan', value => player.updateStereoPan(value))
-            .on('track-updateVolumeGain', value => player.updateVolumeGain(value))
-            .on('track-stateRefreshFrequency', value => player.stateRefreshFrequency = value)
-            .on('track-spectrumRefreshFrequency', value => player.spectrumRefreshFrequency = value)
+    static create() {
+        if(singleton) return singleton
+        singleton = new RadioPlayer()
+        return singleton.initWebAudio()
+            //.on('radio-init', node => singleton._createWebAudioApi(node))
+            .on('radio-channelChange', channel => singleton.setChannel(channel))
+            .on('radio-play', channel => singleton.playChannel(channel))
+            .on('radio-togglePlay', () => singleton.togglePlay())
+            .on('volume-set', volume => singleton.volume(volume))
+            .on('radio-stop', () => singleton.setChannel(null))
+            .on('playbackQueue-empty', () => singleton.setChannel(null))
+            .on('track-changed', () => singleton.setChannel(null))
+            .on('track-play', () => singleton.setChannel(null))
+            .on('track-restore', channel => singleton.setChannel(channel))
+            .on('track-setupSoundEffect', options => singleton.setupSoundEffect(options))
+            .on('track-updateStereoPan', value => singleton.updateStereoPan(value))
+            .on('track-updateVolumeGain', value => singleton.updateVolumeGain(value))
+            .on('track-stateRefreshFrequency', value => singleton.stateRefreshFrequency = value)
+            .on('track-spectrumRefreshFrequency', value => singleton.spectrumRefreshFrequency = value)
     }
 
     //播放

@@ -15,9 +15,9 @@ const { useWindowsStyleWinCtl } = inject('appCommon')
 const ipcRenderer = useIpcRenderer()
 
 const { workingCustomPlayingTheme, isPlayingViewCustomThemePreview } = storeToRefs(useAppCommonStore())
-const { hideCustomPlayingThemeEditView, showToast, 
+const { hideCustomPlayingThemeEditView, showToast,
     savePlayingViewCustomTheme, isCurrentPlayingTheme,
-    setPlayingViewCustomThemePreview, setPlayingViewCustomThemePreviewCache, 
+    setPlayingViewCustomThemePreview, setPlayingViewCustomThemePreviewCache,
     showFailToast,
 } = useAppCommonStore()
 
@@ -30,18 +30,19 @@ const toggleCustomPlayingThemePreview = () => {
     const isPreviewMode = isPlayingViewCustomThemePreview.value
     const theme = isPreviewMode ? customTheme : null
     //简单校验，缺少必要信息时，中断预览
-    if(isPreviewMode && (!theme || !theme.bgVideoUrl)) {
+    if (isPreviewMode && (!theme || !theme.bgVideoUrl)) {
         setBgViewUrlInvalid(true)
         return setPlayingViewCustomThemePreview(false)
     }
+    setBgViewUrlInvalid(false)
     setPlayingViewCustomThemePreviewCache(theme)
     EventBus.emit('playingViewCustomTheme-applyTheme', { theme, isPreviewMode })
 }
 
 const selectVideoFile = async () => {
     if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('choose-files', { title: '请选择视频文件', filterExts: ['mp4', 'mov', 'flv', 'avi'] } )
-    if(!result) return 
+    const result = await ipcRenderer.invoke('choose-files', { title: '请选择视频文件', filterExts: ['mp4', 'mov', 'flv', 'avi'] })
+    if (!result) return
     const { filePaths } = result
     if (filePaths && filePaths.length > 0) setupBgVideoUrl(filePaths[0])
 }
@@ -111,15 +112,15 @@ const onDrop = (event) => {
 
     const { path } = files[0]
     let isEventStopped = true
-    if(isSupportedVideo(path)) {
+    if (isSupportedVideo(path)) {
         setupBgVideoUrl(path)
-    } else if(isSupportedImage(path)) {
+    } else if (isSupportedImage(path)) {
         setupPreviewCover(path)
     } else {
         //其他文件，直接放行，继续事件冒泡
         isEventStopped = false
     }
-    if(isEventStopped) event.stopPropagation()
+    if (isEventStopped) event.stopPropagation()
 }
 
 const contentRef = ref(null)
@@ -127,12 +128,13 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     resetTheme()
     setNameInvalid(false)
     setBgViewUrlInvalid(false)
-    if(contentRef.value) contentRef.value.scrollTop = 0
+    if (contentRef.value) contentRef.value.scrollTop = 0
 }, { immediate: true })
 </script>
 
 <template>
-    <div class="custom-playing-theme-edit-view" :class="{ 'custom-playing-theme-preview-mode': isPlayingViewCustomThemePreview }"
+    <div class="custom-playing-theme-edit-view"
+        :class="{ 'custom-playing-theme-preview-mode': isPlayingViewCustomThemePreview }"
         v-gesture-dnm="{ trigger: '.header' }" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="container">
             <div class="header">
@@ -151,7 +153,8 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                     <div class="title">播放样式 - 自定义</div>
                 </div>
                 <div class="action right-action">
-                    <div class="preview-btn btn text-btn" v-show="!isPlayingViewCustomThemePreview" @click="toggleCustomPlayingThemePreview">
+                    <div class="preview-btn btn text-btn" v-show="!isPlayingViewCustomThemePreview"
+                        @click="toggleCustomPlayingThemePreview">
                         <svg width="17" height="17" viewBox="0 -60 1024 712.45" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -164,7 +167,8 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                         </svg>
                         <span>预览</span>
                     </div>
-                    <div class="no-preview-btn btn text-btn" v-show="isPlayingViewCustomThemePreview" @click="toggleCustomPlayingThemePreview">
+                    <div class="no-preview-btn btn text-btn" v-show="isPlayingViewCustomThemePreview"
+                        @click="toggleCustomPlayingThemePreview">
                         <svg width="18" height="18" viewBox="0 0 938.9 853.33" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -208,8 +212,8 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                         </svg>
                         <span>另存为</span>
                     </div>
-                    <div class="save-btn btn text-btn" v-show="!isPlayingViewCustomThemePreview && customTheme.id !== 'CUSTDEMO'"
-                        @click="saveTheme">
+                    <div class="save-btn btn text-btn"
+                        v-show="!isPlayingViewCustomThemePreview && customTheme.id !== 'CUSTDEMO'" @click="saveTheme">
                         <svg width="15" height="15" viewBox="0 0 853.61 853.59" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -236,8 +240,8 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                     <div class="cate-name">样式名称</div>
                     <div class="row-content">
                         <div class="item" @keydown.stop="">
-                            <input type="text" class="text-input-ctl" :class="{ invalid: isNameInvalid }" maxlength="128"
-                                placeholder="样式名称，最多支持输入128个字符" v-model="customTheme.name"  />
+                            <input type="text" class="text-input-ctl" :class="{ invalid: isNameInvalid }"
+                                maxlength="128" placeholder="样式名称，最多支持输入128个字符" v-model="customTheme.name" />
                         </div>
                     </div>
                 </div>
@@ -247,8 +251,9 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                         <div class="item">
                             <div class="name">视频URL</div>
                             <div class="url-input-ctl">
-                                <input type="text" class="text-input-ctl short-ctl" :class="{ invalid: isBgVideoUrlInvalid }" maxlength="2048"
-                                placeholder="本地、在线URL，最多支持输入2048个字符" v-model="customTheme.bgVideoUrl"  />
+                                <input type="text" class="text-input-ctl short-ctl"
+                                    :class="{ invalid: isBgVideoUrlInvalid }" maxlength="2048"
+                                    placeholder="本地、在线URL，最多支持输入2048个字符" v-model="customTheme.bgVideoUrl" />
                                 <div class="select-btn" @click="selectVideoFile">选择</div>
                             </div>
                         </div>
@@ -257,7 +262,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                             <div>
                                 <div>
                                     <input type="text" class="text-input-ctl short-ctl" maxlength="2048"
-                                    placeholder="本地、在线URL，最多支持输入2048个字符" v-model="customTheme.previewCover" />
+                                        placeholder="本地、在线URL，最多支持输入2048个字符" v-model="customTheme.previewCover" />
                                 </div>
                                 <div>
                                     <div class="preview" v-show="customTheme.previewCover">
@@ -308,7 +313,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -332,8 +337,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                         </div>
                         <div class="item">
                             <div class="name">文字颜色</div>
-                            <ColorInputControl :value="customTheme.textColor"
-                                :onChanged="setupTextColor">
+                            <ColorInputControl :value="customTheme.textColor" :onChanged="setupTextColor">
                             </ColorInputControl>
                         </div>
                     </div>
@@ -564,18 +568,18 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     border-color: var(--content-error-color) !important;
 }
 
-.custom-playing-theme-edit-view  .center .url-input-ctl {
+.custom-playing-theme-edit-view .center .url-input-ctl {
     display: flex;
     align-items: center;
 }
 
-.custom-playing-theme-edit-view  .center .url-input-ctl .text-input-ctl {
+.custom-playing-theme-edit-view .center .url-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
     width: 325px !important;
 }
 
-.custom-playing-theme-edit-view  .center .url-input-ctl  .select-btn {
+.custom-playing-theme-edit-view .center .url-input-ctl .select-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
@@ -591,7 +595,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 }
 
 /* 别扭挖坑的方式 */
-.custom-playing-theme-edit-view  .center .url-input-ctl  .select-btn {
+.custom-playing-theme-edit-view .center .url-input-ctl .select-btn {
     height: 38px;
 }
 </style>

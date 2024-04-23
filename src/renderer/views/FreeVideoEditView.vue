@@ -38,25 +38,16 @@ const resetCheckStatus = () => {
 const submit = () => {
     resetCheckStatus()
     const { title, url, streamType, tags, about, cover } = detail
-    /*
-    if (!title || title.length < 1) {
-        titleInvalid.value = true
-        return
-    }
-    */
-    if (!url || url.trim().length < 10 || !url.trim().startsWith('http')) {
+    if (!url || url.trim().length < 10 || (!url.trim().startsWith('http') 
+        && !url.trim().startsWith('blob:http'))) {
         urlInvalid.value = true
         return
     }
     let success = true, text = '即将为您播放视频'
-    if (success) {
-        backward()
-        showToast(text, () => {
-            playVideo(detail)
-        })
-    } else {
-        showFailToast('视频播放失败')
-    }
+    if (!success) return showFailToast('视频播放失败')
+
+    backward()
+    showToast(text, () => playVideo(detail))
 }
 
 const remove = () => {

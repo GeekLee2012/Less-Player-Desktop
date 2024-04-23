@@ -15,7 +15,8 @@ const { toggleRadioCategoryView, hidePlaybackQueueView } = useAppCommonStore()
 
 const props = defineProps({
     data: Array,
-    loading: Boolean
+    loading: Boolean,
+    isWhiteWrap: Boolean
 })
 
 const toggleCategory = () => {
@@ -101,7 +102,11 @@ EventBus.on('radioCategory-update', () => {
                 </g>
             </svg>
             <template v-for="item in getFlatData()" v-show="data.length > 0">
-                <span @click="visitCateItem(item, item.row, item.col)" :class="{ active: isItemActive(item) }"
+                <span @click="visitCateItem(item, item.row, item.col)" 
+                    :class="{ 
+                        active: isItemActive(item),
+                        whitewrap: isWhiteWrap 
+                    }"
                     v-html="item.key">
                 </span>
             </template>
@@ -114,7 +119,7 @@ EventBus.on('radioCategory-update', () => {
 .radio-category-bar {
     margin-left: 10px;
     height: 36px;
-    overflow: hidden;
+    overflow: hidden !important;
     text-align: left;
 }
 
@@ -126,15 +131,23 @@ EventBus.on('radioCategory-update', () => {
     line-height: 36px;
     font-size: var(--content-text-size);
     cursor: pointer;
-    white-space: nowrap;
+    /*white-space: nowrap;*/
     border-radius: var(--border-list-item-border-radius);
     /*border: 1px solid transparent;*/
     color: var(--content-text-color);
+
+    white-space: nowrap;
+    overflow: hidden;
+    word-break: break-all;
 }
 
 .radio-category-bar span:hover {
     background: var(--content-list-item-hover-bg-color);
     color: var(--content-text-color);
+}
+
+.radio-category-bar span.whitewrap {
+    white-space: pre-wrap;
 }
 
 .radio-category-bar svg {

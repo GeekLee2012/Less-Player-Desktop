@@ -69,7 +69,7 @@
 /* 播放页 */
 .use-winos-win-ctl .playing-view .win-ctl-wrap,
 .use-winos-win-ctl .visual-playing-view .win-ctl-wrap,
-.use-winos-win-ctl .dynamic-playing-view .win-ctl-wrap  {
+.use-winos-win-ctl .dynamic-playing-view .win-ctl-wrap {
   position: absolute;
   right: 0px;
   top: 10px;
@@ -77,7 +77,7 @@
   justify-content: flex-end !important;
 }
 
-.use-winos-win-ctl .dynamic-playing-view .win-ctl-wrap .ctl-btn:hover{
+.use-winos-win-ctl .dynamic-playing-view .win-ctl-wrap .ctl-btn:hover {
   background-color: #ffffff66;
 }
 
@@ -133,12 +133,14 @@
 }
 
 .use-winos-win-ctl .custom-theme-edit-view .right-action .close-btn,
+.use-winos-win-ctl .custom-playing-theme-edit-view .right-action .close-btn,
 .use-winos-win-ctl .gradient-color-toolbar .right-action .close-btn {
   margin-left: 33px;
   margin-right: -8px;
 }
 
 .use-winos-win-ctl .custom-theme-edit-view .header .title-wrap,
+.use-winos-win-ctl .custom-playing-theme-edit-view .header .title-wrap,
 .use-winos-win-ctl .gradient-color-toolbar .header .title-wrap {
   margin-left: 10px !important;
 }

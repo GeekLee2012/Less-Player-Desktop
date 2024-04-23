@@ -39,33 +39,28 @@ export class Player {
         this.pendingOutputDeviceId = null
     }
 
-    static get() {
-        if (!singleton) singleton = new Player()
-        return singleton
-    }
-
-    /* 初始化并配置播放器 */
-    static initAndSetup() {
-        const player = Player.get()
-        return player.on('track-play', track => player.playTrack(track))
-            .on('track-restore', track => player.restore(track))
-            .on('track-changed', track => player.setCurrent(track))
-            .on('track-togglePlay', () => player.togglePlay())
-            .on('track-seek', percent => player.seek(percent))
-            .on('volume-set', volume => player.volume(volume))
-            .on('radio-play', () => player.setCurrent(null))
-            .on('playbackQueue-empty', () => player.setCurrent(null))
-            .on('track-setupSoundEffect', options => player.setupSoundEffect(options))
-            .on('track-updateStereoPan', value => player.updateStereoPan(value))
-            .on('track-updateVolumeGain', value => player.updateVolumeGain(value))
-            .on('track-stateRefreshFrequency', value => player.stateRefreshFrequency = value)
-            .on('track-spectrumRefreshFrequency', value => player.spectrumRefreshFrequency = value)
-            .on('track-markSeekPending', value => player.seekPendingMark = value)
-            .on('desktopLyric-messagePort', value => player.setupDesktopLyricMessagePort(value))
-            .on('track-noLyric', value => player.postLyricStateToDesktopLyric(value, false))
-            .on('track-lyricLoaded', value => player.postLyricStateToDesktopLyric(value, true))
-            .on('desktopLyric-showState', value => player.setMessagePortActiveState(value))
-            .on('outputDevice-setup', value => player._setAudioOutputDevice(value))
+    static create() {
+        if (singleton) return singleton
+        singleton = new Player()
+        return singleton.on('track-play', track => singleton.playTrack(track))
+            .on('track-restore', track => singleton.restore(track))
+            .on('track-changed', track => singleton.setCurrent(track))
+            .on('track-togglePlay', () => singleton.togglePlay())
+            .on('track-seek', percent => singleton.seek(percent))
+            .on('volume-set', volume => singleton.volume(volume))
+            .on('radio-play', () => singleton.setCurrent(null))
+            .on('playbackQueue-empty', () => singleton.setCurrent(null))
+            .on('track-setupSoundEffect', options => singleton.setupSoundEffect(options))
+            .on('track-updateStereoPan', value => singleton.updateStereoPan(value))
+            .on('track-updateVolumeGain', value => singleton.updateVolumeGain(value))
+            .on('track-stateRefreshFrequency', value => singleton.stateRefreshFrequency = value)
+            .on('track-spectrumRefreshFrequency', value => singleton.spectrumRefreshFrequency = value)
+            .on('track-markSeekPending', value => singleton.seekPendingMark = value)
+            .on('desktopLyric-messagePort', value => singleton.setupDesktopLyricMessagePort(value))
+            .on('track-noLyric', value => singleton.postLyricStateToDesktopLyric(value, false))
+            .on('track-lyricLoaded', value => singleton.postLyricStateToDesktopLyric(value, true))
+            .on('desktopLyric-showState', value => singleton.setMessagePortActiveState(value))
+            .on('outputDevice-setup', value => singleton._setAudioOutputDevice(value))
     }
 
     _isTrackAvailable() {
@@ -84,14 +79,15 @@ export class Player {
             pool: 1,
             onplay: function () {
                 self.setState(PlayState.PLAYING)
-
-                if (self.seekPendingMark) { //存在未处理seek事件
+                //存在未处理seek事件
+                if (self.seekPendingMark) { 
                     self.animationFrameCnt = 0
                     self.seek(self.seekPendingMark)
                     self.seekPendingMark = 0
-                } else { //正常情况
-                    self._rewindAnimationFrame(self._step.bind(self))
+                    return 
                 }
+                //正常情况
+                self._rewindAnimationFrame(self._step.bind(self))
             },
             onpause: function () {
                 self._stopAnimationFrame()
@@ -156,20 +152,22 @@ export class Player {
 
     //停止
     stop() {
-        const sound = this.getSound()
-        if (sound) { //释放资源
-            sound.stop()
-            sound.unload()
+        try {
+            const sound = this.getSound()
+            //释放资源
+            if (sound) { 
+                sound.stop()
+                sound.unload()
+            }
+        } catch(error) {
+            if(isDevEnv()) console.log(error)
         }
     }
 
     setCurrent(track) {
-        try {
-            this.stop()
-        } catch(error) {
-            if(isDevEnv()) console.log(error)
-        }
+        this.stop()
         this.currentTrack = track
+        this.currentTime = 0
         this.setState(PlayState.NONE)
         this.createSound()
     }
@@ -209,7 +207,7 @@ export class Player {
         }
         //当前播放时间
         this.currentTime = sound.seek() || 0
-        const duration = (sound.duration() || 0) * 1000
+        const duration = Number.isFinite(sound.duration()) ? sound.duration() * 1000 : 0
         //刷新进度
         /*
         const isTimeReset = this._countAnimationFrameTime()
@@ -412,6 +410,7 @@ export class Player {
     }
 
     onDesktopLyricMessage() {
+        if(!this.desktopLyricMessagePort) return
         const self = this
         this.desktopLyricMessagePort.onPlayerMessage = (action, data) => {
             if (action == 'c-track-init') {
@@ -467,7 +466,7 @@ export class Player {
     updateMetadata() {
         if(!this.currentTrack) return 
         const { duration } = this.currentTrack
-        const _duration = this.sound.duration() * 1000
+        const _duration = Number.isFinite(this.sound.duration()) ? this.sound.duration() * 1000 : 0
         if(duration != _duration) Object.assign(this.currentTrack, { duration: _duration })
     }
 }

@@ -199,7 +199,7 @@ window.lessAPI = {
     version: '1.0.0',
     constants: {
         LESS_IMAGE_PREFIX: ImageProtocal.prefix,
-        DEFAULT_COVER_BASE64, DEFAULT_COVER_BASE64,
+        DEFAULT_COVER_BASE64,
     },
     common: {
         Category,

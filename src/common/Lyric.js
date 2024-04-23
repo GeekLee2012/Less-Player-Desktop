@@ -135,7 +135,7 @@ export class Lyric {
     }
 
     static hasData(lyric) {
-        return lyric && lyric.data.size > 0
+        return lyric && lyric.data.size && lyric.data.size > 0
     }
 
     static sort(lyric) {
