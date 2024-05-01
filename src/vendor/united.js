@@ -110,13 +110,15 @@ export class United {
 
             for (var i = 0; i < filteredVendors.length; i++) {
                 const vendor = filteredVendors[i]
-                if(!vendor) continue
-                //if (vendor.CODE == fromPlatform || vendor.CODE == DouBan.CODE) continue
+                if(!vendor || !vendor.searchSongs) continue
                 const searchResult = await vendor.searchSongs(keyword)
                 if (!searchResult) continue
                 const { data: candidates } = searchResult
                 if (!candidates || candidates.length < 1) continue
-                result = await United.matchFromCandidates({ ...track, tTitle, tArtistName }, candidates.slice(0, Math.min(candidates.length, 20)), options)
+                result = await United.matchTrack(
+                    { ...track, tTitle, tArtistName }, 
+                    candidates.slice(0, Math.min(candidates.length, 20)), 
+                    options)
                 if (result) break
             }
             resolve(result)
@@ -124,19 +126,22 @@ export class United {
     }
 
     //TODO 匹配算法，后续再完善
-    static matchFromCandidates(track, candidates, options) {
+    static matchTrack(track, candidates, options) {
         const ignore = {
             album: false,
             url: false,
             cover: true,
-            lyric: true
+            lyric: false
         }
-        if(options) {
-            const { isGetCover, isGetLyric } = options
-            if(isGetCover) Object.assign(ignore, { album: true, url: true, cover: false})
-            if(isGetLyric) Object.assign(ignore, { album: true, url: true, lyric: false})
-        }
+        const { isGetCover, isGetLyric } = options || { isGetCover: false, isGetLyric: false }
+        if(isGetCover) Object.assign(ignore, { album: true, url: true, cover: false, lyric: true })
+        if(isGetLyric) Object.assign(ignore, { album: true, url: true, lyric: false })
+        
         return new Promise(async (resolve, reject) => {
+            if(!track || !Array.isArray(candidates) || candidates.length < 1) {
+                return resolve(null)
+            }
+
             let result = null
             const { id, platform, title, artist, duration, tTitle, tArtistName } = track
             const albumName = United.tranformAlbum(Track.albumName(track)) || LESS_MAGIC_CODE
@@ -164,7 +169,7 @@ export class United {
                     || stringIncludesIgnoreCaseEscapeHtml(cTitle, tTitle)
                     || stringIncludesIgnoreCaseEscapeHtml(cTitle, tArtistName)
                     //兼容处理：歌曲/歌手名称 + 单个任意字符（数字、符号等），例如：
-                    //1、同一本地目录下，可能存在多首“同名”歌曲，如：青春纪念册.mp3、青春纪念册2.mp3
+                    //1、本地歌曲：同一目录下，可能存在多首“同名”歌曲，如：青春纪念册.mp3、青春纪念册2.mp3
                     //2、歌手名称：S.H.E、S.H.E.
                     || stringIncludesIgnoreCaseEscapeHtml(cTitle, title && title.slice(0, -1))
                     || stringIncludesIgnoreCaseEscapeHtml(cTitle, tTitle && tTitle.slice(0, -1))
@@ -179,7 +184,7 @@ export class United {
                 score.title += 25
 
                 //在线歌曲title格式，直接比较
-                //本地歌曲title格式：[名称 - 歌手]、[歌手 - 名称]
+                //本地歌曲title格式：[名称]、[名称 - 歌手]、[歌手 - 名称]
                 if (stringEqualsIgnoreCaseEscapeHtml(cTitle, _title) 
                     || stringEqualsIgnoreCaseEscapeHtml(cTitle, tTitle) 
                     || stringEqualsIgnoreCaseEscapeHtml(cTitle, tArtistName)
@@ -195,8 +200,12 @@ export class United {
                     hit.title = true
                 }
 
-                //歌曲候选版本不推荐（当原歌曲非这些版本时）：纯音乐、伴奏、DJ版
-                const notRecommendTitles = ['伴奏', '(DJ版)', '纯音乐']
+                //当原歌曲并非这类版本时，候选歌曲不推荐：纯音乐、伴奏、DJ版等
+                const notRecommendTitles = [
+                    '伴奏', '(DJ', '(纯音', 
+                    '轻音乐', '钢琴版', '翻自', 
+                    '翻唱', '改编', '抖音', 
+                    '片段', '铃声']
                 for(let i = 0; i < notRecommendTitles.length; i++) {
                     const nrTitle = notRecommendTitles[i]
                     if(!_title.includes(nrTitle) && cTitle.includes(nrTitle)) {
@@ -258,8 +267,17 @@ export class United {
 
                 //时长，误差Error
                 const dError = Math.abs(duration - cDuration)
-                if(duration <= 0) {
-                    score.duration = 0
+                if(duration <= 0) { 
+                    //TODO 此处逻辑，当歌曲时长确实比较短时，匹配将会发生偏差
+                    if(dError <= 30 * 1000) {
+                        score.duration -= 15
+                    } else if(dError <= 45 * 1000) {
+                        score.duration -= 10
+                    } else if(dError <= 60 * 1000) {
+                        score.duration -= 5
+                    } else {
+                        score.duration = 0
+                    }
                 } else if (dError == 0) {
                     score.duration += 15
                     hit.duration = true
@@ -285,7 +303,8 @@ export class United {
                 if (!vendor) continue
                 //URL
                 if (!ignore.url) {
-                    if(!vendor.playDetail) continue
+                    //平台若不支持获取歌曲URL，直接中断
+                    if(!vendor.playDetail) break
                     const cDetail = await vendor.playDetail(cId, candidate)
                     if (!Track.hasUrl(cDetail)) continue
 
@@ -294,12 +313,16 @@ export class United {
                 }
 
                 //歌词
-                if(!ignore.lyric && !vendor.lyric) continue
-                const cLyric = await vendor.lyric(candidate.id, candidate)
-                if (!cLyric) continue
-                const { lyric, trans: lyricTrans, roma: lyricRoma } = cLyric
-                if(!ignore.lyric && !Lyric.hasData(lyric)) continue
-                Object.assign(candidate, { lyric, lyricTrans, lyricRoma })
+                //若时长相同，且已有歌词，仍需重新获取，可能缺少翻译
+                if(!ignore.lyric) {
+                    //平台若不支持获取歌词，直接中断
+                    if(!vendor.lyric) break
+                    const cLyric = await vendor.lyric(candidate.id, candidate)
+                    if (!cLyric) continue
+                    const { lyric, trans: lyricTrans, roma: lyricRoma } = cLyric
+                    if(!Lyric.hasData(lyric) && isGetLyric) continue
+                    Object.assign(candidate, { lyric, lyricTrans, lyricRoma })    
+                }
                 
                 result = candidate
                 break

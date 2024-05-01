@@ -76,8 +76,10 @@ const { setThemeIndex,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
     togglePlaybackQueueCloseBtnShow,
+    togglePlaybackQueuePositionBtnShow,
     togglePlaybackQueueHistoryBtnShow,
     togglePlaybackQueueMvBtnShow,
+    togglePlaybackQueueBatchActionBtnShow,
     toggleHightlightCtxMenuItem,
     toggleUseOnlineCover,
     toggleUseDndForCreateLocalPlaylist,
@@ -94,6 +96,7 @@ const { setThemeIndex,
     toggleShowDialogBeforeBatchDelete,
     toggleShowDialogBeforeCustomPlaylistDelete,
     toggleShowDialogBeforeClearRecents,
+    toggleShowDialogBeforeClearPlaybackQueue,
     toggleShowDialogBeforeResetSetting,
     toggleShowDialogBeforeClearLocalMusics,
     toggleShowDialogBeforeClearFreeFM,
@@ -671,9 +674,21 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         </ToggleControl>
                     </div>
                     <div>
+                        <span class="cate-subtitle">当前播放列表定位按钮：</span>
+                        <ToggleControl @click="togglePlaybackQueuePositionBtnShow"
+                            :value="track.playbackQueuePositionBtnShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">当前播放列表历史按钮：</span>
                         <ToggleControl @click="togglePlaybackQueueHistoryBtnShow"
                             :value="track.playbackQueueHistoryBtnShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">当前播放列表批量按钮：</span>
+                        <ToggleControl @click="togglePlaybackQueueBatchActionBtnShow"
+                            :value="track.playbackQueueBatchActionBtnShow">
                         </ToggleControl>
                     </div>
                     <div>
@@ -1012,6 +1027,12 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                         <ToggleControl @click="toggleShowDialogBeforeCustomPlaylistDelete"
                             :value="dialog.deleteCustomPlaylist">
                         </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">清空当前播放（列表）：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeClearPlaybackQueue" :value="dialog.clearPlaybackQueue">
+                        </ToggleControl>
+                        <div class="tip-text spacing" >提示：仅对电台歌单有效</div>
                     </div>
                     <div>
                         <span class="cate-subtitle">清空最近播放：</span>

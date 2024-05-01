@@ -595,6 +595,7 @@ onMounted(() => {
     font-family: "Wawati SC", system-ui;
     font-size: 80px;
     visibility: hidden;
+    word-break: break-word !important;
 }
 
 /*TODO 窗口大小变化后，无法自适应 */

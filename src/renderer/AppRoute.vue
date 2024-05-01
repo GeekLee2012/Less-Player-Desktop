@@ -347,6 +347,9 @@ provide('appRoute', {
     visitBatchLocalPlaylist: (id) => {
         return visitCommonRoute(`/playlists/batch/local/${id}`)
     },
+    visitBatchPlaybackQueue: () => {
+        return visitCommonRoute('/playlists/batch/playbackQueue/0')
+    },
     visitDataBackup: () => {
         return visitCommonRoute('/data/backup')
     },

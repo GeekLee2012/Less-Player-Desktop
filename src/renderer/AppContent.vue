@@ -124,6 +124,8 @@ const registryDefaultLocalKeys = () => {
   Mousetrap.bind(['s'], quickSearch, 'keyup')
   // 快速查看快捷键
   Mousetrap.bind(['k'], visitShortcutKeys, 'keyup')
+  // 打开插件管理
+  Mousetrap.bind(['r'], visitRecents, 'keyup')
   // 打开/关闭播放样式
   Mousetrap.bind(['v'], () => {
     if (videoPlayingViewShow.value) return

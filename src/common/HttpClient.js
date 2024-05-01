@@ -47,6 +47,7 @@ const tryResponseJson = (resp) => {
 
 export const get = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
+        if(isBlank(url)) return Promise.reject('noUrl')
         if (data && (typeof data === 'object')) {
             data = qsStringify(data)
             if(!url.includes('?')) url = `${url}?`
@@ -61,6 +62,7 @@ export const get = async (url, data, config, callback) => {
 
 export const post = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
+        if(isBlank(url)) return Promise.reject('noUrl')
         if (data && (typeof data === 'object')) data = qsStringify(data)
         axios.post(url, data, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)))
@@ -88,7 +90,7 @@ export const postJson = (url, data, config) => {
     return post(url, data, config, resp => tryResponseJson(resp))
 }
 
-//获取国内IPv4
+//获取国内IPv4，失败时随机返回内置IP池中的IP
 export const getInternalIpv4 = async () => {
     try {
         const url = 'https://qifu-api.baidubce.com/ip/local/geo/v1/district'
@@ -97,7 +99,7 @@ export const getInternalIpv4 = async () => {
     } catch (error) {
         console.log(error)
     }
-    //随机IP池
+    //兜底，随机IP池
     const ipPools = [
         '128.108.208.188', '116.233.123.121', '116.181.153.135',
         '115.102.151.135', '112.102.11.138', '116.233.188.121',

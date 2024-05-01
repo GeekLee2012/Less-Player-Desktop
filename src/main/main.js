@@ -244,6 +244,8 @@ const registryGlobalShortcuts = () => {
     'Alt+Shift+U': 'visitModulesSetting',
     // 打开插件管理
     'Alt+Shift+U': 'visitPlugins',
+    // 打开最近播放
+    'Alt+Shift+R': 'visitRecents',
     // 打开 / 关闭播放样式
     'Alt+Shift+V': 'togglePlayingThemes',
     // 打开 开发者工具
@@ -1103,6 +1105,7 @@ const initAppMenuTemplate = () => {
   const menuText = TEXT_CONFIG[locale] || TEXT_CONFIG['zh-CN']
   let menuItems = [{ role: 'about', label: menuText.about },
   { role: 'toggleDevTools', label: menuText.devTools },
+  //accelerator: 'Alt+Shift+P'
   { click: (menuItem, browserWindow, event) => sendTrayAction(6, true), label: menuText.settings },
   { role: 'quit', label: menuText.quit },]
   if (!isDevEnv) menuItems.splice(1, 1)

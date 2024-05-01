@@ -44,7 +44,8 @@ const { getFavoriteSongs, getFavoritePlaylilsts,
 const { removeFavoriteSong, removeFavoritePlaylist,
     removeFavoriteAlbum, removeFavoriteRadio,
     getCustomPlaylist, removeFromCustomPlaylist } = useUserProfileStore()
-const { addTracks, playTrack } = usePlayStore()
+const { queueTracks } = storeToRefs(usePlayStore())
+const { addTracks, playTrack, removeTrack } = usePlayStore()
 const { commonCtxMenuShow, commonCtxItem } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, updateCommonCtxItem,
     hideAllCtxMenus, showPlaylistExportToolbar,
@@ -68,6 +69,7 @@ const isRecents = () => props.source == "recents"
 const isCustomPlaylist = () => props.source == "custom"
 const isLocalMusic = () => props.source == "local"
 const isFreeFM = () => props.source == "freefm"
+const isPlaybackQueue = () => props.source == "playbackQueue"
 
 const typeTabs = getPreferTypeTabs()
 const activeTabCode = () => (typeTabs[activeTab.value].code)
@@ -114,6 +116,9 @@ const updateTitle = () => {
     if (isFreeFM()) {
         text = "自由FM"
     }
+    if (isPlaybackQueue()) {
+        text = "当前播放"
+    }
     title.value = text
     subtitle.value = subtext
 }
@@ -125,15 +130,13 @@ const isTabsVisible = (tab, index) => {
     if (isLocalMusic() && props.id !== '0' && index == 0) return true
     if (isLocalMusic() && props.id === '0' && index == 1) return true
     if (isFreeFM() && props.id === '0' && index == 3) return true
+    if (isPlaybackQueue() && index == 0) return true
     return false
 }
 
 const getFirstVisibleTabIndex = () => {
-    if (isLocalMusic() && props.id === '0') {
-        return 1
-    } else if (isFreeFM()) {
-        return 3
-    }
+    if (isLocalMusic() && props.id === '0') return 1
+    if (isFreeFM()) return 3
     return 0
 }
 
@@ -221,6 +224,14 @@ const switchTab = () => {
                 deleteBtn: true
             })
             tabData.push(...loadLocalPlaylist())
+        }
+        if(isPlaybackQueue()) {
+            Object.assign(actionShowCtl, {
+                playBtn: false,
+                addToQueueBtn: true,
+                deleteBtn: true
+            })
+           tabData.push(...filterPlaybackQueueSongs())
         }
         currentTabView.value = SongListControl
     } else if (isPlaylistTab()) { //歌单
@@ -346,6 +357,10 @@ const filterRecentSongs = () => {
     let platform = currentPlatformCode.value
     if (!platform || platform.trim() == 'all') platform = null
     return filterSongsWithKeyword(getRecentSongs.value(platform))
+}
+
+const filterPlaybackQueueSongs = () => {
+    return filterSongsWithKeyword(queueTracks.value)
 }
 
 const filterByTitleWithKeyword = (list) => {
@@ -494,7 +509,9 @@ const showAddToList = (event, dataType, elSelector, actionType) => {
 
 let eventMode = 0
 const doToggleCheckedPopupMenu = (event, actionType) => {
-    const mode = isLocalMusic() ? 10 : 6
+    let mode = 6
+    if(isLocalMusic()) mode = 10
+    if(isPlaybackQueue()) actionType = 2
     const elSelector = (actionType == 1) ? "#batch-action-view .moveToBtn" : "#batch-action-view .addToBtn"
     if (commonCtxMenuShow.value && eventMode == mode) {
         hideAllCtxMenus()
@@ -525,6 +542,7 @@ const removeChecked = async () => {
         if (isRecents()) deleteFn = removeRecentSong
         if (isCustomPlaylist()) deleteFn = removeFromCustomPlaylist
         if (isLocalMusic()) deleteFn = removeFromLocalPlaylist
+        if (isPlaybackQueue()) deleteFn = removeTrack
     } else if (isPlaylistTab()) {
         if (isFavorites()) deleteFn = removeFavoritePlaylist
         if (isRecents()) deleteFn = removeRecentPlaylist

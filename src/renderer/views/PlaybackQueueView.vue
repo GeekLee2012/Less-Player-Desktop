@@ -1,5 +1,5 @@
 <script setup>
-import { inject, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
@@ -10,7 +10,7 @@ import { smoothScroll, stringEqualsIgnoreCase } from '../../common/Utils';
 
 
 
-const { visitRecents } = inject('appRoute')
+const { visitRecents, visitBatchPlaybackQueue } = inject('appRoute')
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue, moveTrack } = usePlayStore()
@@ -18,7 +18,9 @@ const { showToast, hidePlaybackQueueView,
     hidePlayingView, hideAllCtxMenus,
     setRouterCtxCacheItem, } = useAppCommonStore()
 const { isPlaybackQueueAutoPositionOnShow, isPlaybackQueueCloseBtnShow,
-    isPlaybackQueueHistoryBtnShow, } = storeToRefs(useSettingStore())
+    isPlaybackQueueHistoryBtnShow, isPlaybackQueuePositionBtnShow, 
+    isPlaybackQueueBatchActionBtnShow
+} = storeToRefs(useSettingStore())
 const { playbackQueueViewShow } = storeToRefs(useAppCommonStore())
 
 const targetPlaying = () => {
@@ -112,6 +114,12 @@ const moveDragItem = (event) => {
     moveTrack(dragTargetIndex.value, dragOverIndex.value)
 }
 
+const isIconMode = computed(() => {
+    return isPlaybackQueuePositionBtnShow.value 
+        && isPlaybackQueueBatchActionBtnShow.value 
+        && isPlaybackQueueHistoryBtnShow.value 
+})
+
 const pbqRef = ref(null)
 const listRef = ref(null)
 onMounted(() => {
@@ -151,7 +159,18 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
                 <div class="detail">
                     <!--<div class="subtext">共{{ queueTracks.length }}首</div>-->
                     <div class="subtitle" v-html="queueState()"></div>
-                    <div class="action">
+                    <div class="action" :class="{ 'icon-mode': isIconMode }">
+                        <div class="batch-action-btn text-btn" @click="visitBatchPlaybackQueue" v-show="isPlaybackQueueBatchActionBtnShow">
+                            <svg width="15" height="15" viewBox="0 0 160 125" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M55,20h95a10,10,0,0,0,0-20H55a10,10,0,0,0,0,20ZM20,0H10a10,10,0,0,0,0,20H20A10,10,0,0,0,20,0ZM55,70h75a10,10,0,0,0,0-20H55a10,10,0,0,0,0,20ZM20,50H10a10,10,0,0,0,0,20H20a10,10,0,0,0,0-20Zm130,55H55a10,10,0,0,0,0,20h95a10,10,0,0,0,0-20ZM20,105H10a10,10,0,0,0,0,20H20a10,10,0,0,0,0-20Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <span>批量</span>
+                        </div>
                         <div class="history-btn text-btn" @click="visitRecents" v-show="isPlaybackQueueHistoryBtnShow">
                             <svg width="15" height="15" viewBox="0 0 767.87 750.82" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
@@ -165,7 +184,7 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
                             </svg>
                             <span>历史</span>
                         </div>
-                        <div class="target-btn text-btn" @click="targetPlaying">
+                        <div class="target-btn text-btn" @click="targetPlaying" v-show="isPlaybackQueuePositionBtnShow">
                             <svg width="16" height="16" viewBox="0 -1 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <g id="aim">
                                     <path d="M12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
@@ -284,6 +303,20 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     flex-direction: row;
     position: absolute;
     right: 18px;
+}
+
+.playback-queue-view .detail .action.icon-mode span {
+    display: none;
+}
+
+.playback-queue-view .detail .action.icon-mode svg {
+    width: 17px;
+    height: 17px;
+}
+
+.playback-queue-view .detail .action.icon-mode .target-btn svg {
+    width: 19px;
+    height: 19px;
 }
 
 .playback-queue-view .text-btn {

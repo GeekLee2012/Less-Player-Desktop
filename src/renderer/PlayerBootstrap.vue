@@ -48,14 +48,16 @@ const { togglePlaybackQueueView, toggleVideoPlayingView,
     setDesktopLyricShow, setCurrentTraceId,
     setPendingPlay, setPendingPlayPercent,
     setSpectrumIndex, setSpectrumParams,
-    setExVisualCanvasIndex, togglePlayingThemeListView } = useAppCommonStore()
+    setExVisualCanvasIndex, togglePlayingThemeListView,
+    hideAllCtxMenus } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
 const { theme, layout, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
     isResumePlayAfterVideoEnable, isPauseOnPlayingVideoEnable,
-    selectedAudioOutputDeviceId, isDndSaveEnable, } = storeToRefs(useSettingStore())
+    selectedAudioOutputDeviceId, isDndSaveEnable,
+    isShowDialogBeforeClearPlaybackQueue, } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray,
     syncSettingFromDesktopLyric, getCurrentTheme,
@@ -72,7 +74,7 @@ const { setupSoundEffect } = useSoundEffectStore()
 
 const { visitHome, visitUserHome, visitSetting,
     visitModulesSetting, visitSearch,
-    visitThemes, visitPlugins
+    visitThemes, visitPlugins, visitRecents,
 } = inject('appRoute')
 const { hasExTrackPlayUrlHandlers, hasExVideoPlayUrlHandlers, hasExDrawSpectrumHandlers,
     getExTrackPlayUrl, getExVideoPlayUrl,
@@ -126,10 +128,10 @@ const traceRecentAlbum = (album) => {
 /* 歌词获取 */
 const loadLyric = (track) => {
     if (!track || !isCurrentTrack(track)) return
-    //已有歌词
-    if (Track.hasLyric(track)) return isCurrentTrack(track) && EventBus.emit('track-lyricLoaded', track)
-    //主播电台
-    if (Playlist.isAnchorRadioType(track)) return isCurrentTrack(track) && EventBus.emit('track-lyricLoaded', track)
+    //已有歌词、主播电台
+    if (Track.hasLyric(track) || Playlist.isAnchorRadioType(track)) {
+        return notifyLyricLoaded(track)
+    }
 
     //检查有效性
     const { id, platform } = track
@@ -145,10 +147,12 @@ const loadLyric = (track) => {
         //再次确认，可能歌曲已经被切走
         if (!isCurrentTrack(track)) return
         //若当前平台获取到歌词，则直接更新
-        if (Track.hasLyric(result)) return updateLyric(track, result)
-        //否则，尝试从其他平台获取歌词
-        loadLyricFromUnited(track)
-    }, error => EventBus.emit('track-lyricLoaded', track))
+        if (Track.hasLyric(result)) {
+            updateLyric(track, result)
+        } else { //否则，尝试从其他平台获取歌词
+            loadLyricFromUnited(track)
+        }
+    }, error => notifyLyricLoaded(track))
 }
 
 const loadLyricFromUnited = (track) => {
@@ -157,11 +161,11 @@ const loadLyricFromUnited = (track) => {
             //再次确认，可能歌曲已经被切走
             if (!isCurrentTrack(track)) return
             //仍然无法获取，直接返回
-            if (!uResult) return EventBus.emit('track-lyricLoaded', track)
+            if (!uResult) return notifyLyricLoaded(track)
             //更新歌词
             const { lyric, lyricRoma: roma, lyricTrans: trans } = uResult
             updateLyric(track, { lyric, roma, trans })
-        }, error => EventBus.emit('track-lyricLoaded', track))
+        }, error => notifyLyricLoaded(track))
 }
 
 const updateLyric = (track, { lyric, roma, trans }) => {
@@ -180,7 +184,12 @@ const updateLyric = (track, { lyric, roma, trans }) => {
     if (track && Lyric.hasData(roma)) Object.assign(track, { lyricRoma: roma })
     //歌曲 - 歌词翻译
     if (track && Lyric.hasData(trans)) Object.assign(track, { lyricTrans: trans })
-    //通知歌词已更新
+    //歌词更新后，进行通知
+    notifyLyricLoaded(track)
+}
+
+//通知歌词已更新
+const notifyLyricLoaded = (track) => {
     if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
 }
 
@@ -499,7 +508,12 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId, pla
             ++retry
             continue
         }
-        if (needReset) resetQueue()
+        if (needReset && queueTracksSize.value > 0) {
+            let ok = true
+            if (isShowDialogBeforeClearPlaybackQueue.value) ok = await showConfirm({ msg: '电台歌单播放前，需清空当前播放。确定要继续吗？' })
+            if (!ok) return
+            resetQueue()
+        }
         addTrack(result)
         playTrack(result)
         success = true
@@ -613,7 +627,7 @@ const drawSpectrum = (canvas, { freqData, spectrumColor, stroke, alignment }) =>
     if (!freqData || freqData.length < 1) return
     const dataLen = freqData.length
     let barWidth = (alignment == 'bottom') ? 4 : (1 / 2)
-    let barHeight, x = 2, spacing = 3, step = 1
+    let barHeight, x = 2, spacing = 3.5, step = 1
     //barWidth = (cWidth / (dataLen * 3))
 
     let freqCnt = 0
@@ -659,7 +673,7 @@ const drawFlippingSpectrum = (canvas, { freqData, spectrumColor, stroke }) => {
 
     if (!freqData || freqData.length < 1) return
     const dataLen = freqData.length
-    let barWidth = 4, barHeight = null, x = 2, spacing = 3, step = 1
+    let barWidth = 4, barHeight = null, x = 2, spacing = 3.5, step = 1
     //barWidth = (cWidth / (dataLen * 3))
     const flipBarHeight = 1, flipStep = 1 / 2
 
@@ -1269,6 +1283,7 @@ const registryIpcRendererListeners = () => {
     ipcRenderer.on('globalShortcut-visitThemes', () => visitThemes())
     ipcRenderer.on('globalShortcut-visitModulesSetting', () => visitModulesSetting())
     ipcRenderer.on('globalShortcut-visitPlugins', () => visitPlugins())
+    ipcRenderer.on('globalShortcut-visitRecents', () => visitRecents())
     ipcRenderer.on('globalShortcut-togglePlayingThemes', () => {
         if (playingViewShow.value) togglePlayingThemeListView()
     })
@@ -1525,12 +1540,6 @@ watch(playing, (nv, ov) => {
     setSpectrumParams({ ...params, isPlaying: nv })
 })
 
-/*
-watch(desktopLyricShow, (nv, ov) => {
-    if (ipcRenderer) ipcRenderer.send('app-desktopLyricOpenState', nv)
-})
-*/
-
 //TODO
 watch(theme, () => {
     if (!isPlaying() && (playingViewThemeIndex.value == 1
@@ -1542,6 +1551,21 @@ watch(theme, () => {
 
 //TODO
 watch(playingIndex, (nv, ov) => resetTrackRetry())
+
+
+//TODO 暂时采用冗余代码方式实现
+let isConfirmDialogShowing = false
+const showConfirm = async ({ title, msg }) => {
+  if (!ipcRenderer || isConfirmDialogShowing) return false
+  isConfirmDialogShowing = true
+  hideAllCtxMenus()
+  const ok = await ipcRenderer.invoke('show-confirm', {
+    title: title || '确认',
+    msg
+  })
+  isConfirmDialogShowing = false
+  return ok
+}
 
 //播放器API
 provide('player', {

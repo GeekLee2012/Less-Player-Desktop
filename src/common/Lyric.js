@@ -55,7 +55,7 @@ export class Lyric {
         const lyric = new Lyric()
         try {
             lines.forEach(line => {
-                line = line.trim()
+                line = toTrimString(line)
                 if (line.length < 1) return
                 if (!line.startsWith(TAG_BEGIN) || !line.includes(TAG_END)) return
                 if (Lyric._isTimeDataLine(line)) {
@@ -78,10 +78,10 @@ export class Lyric {
         const tokens = text.split(/[\[\]]/)
         const len = tokens.length
         if (len < 3) return
-        const value = tokens[len - 1].trim()
+        const value = toTrimString(tokens[len - 1])
         if (value.length < 1) return
         for (var i = 0; i < len - 1; i++) {
-            const time = tokens[i].trim()
+            const time = toTrimString(tokens[i])
             if (time.length < 1) continue
             lyric.addLine(time, value)
         }
@@ -121,14 +121,14 @@ export class Lyric {
 
     static _unifyTime(time) {
         const timeParts = time.split('.')
-        if (timeParts.length >= 2) {
-            const millisPart = timeParts[1].trim()
+        if (Array.isArray(timeParts) && timeParts.length >= 2) {
+            const millisPart = toTrimString(timeParts[1])
             if (millisPart.length == 2) { //10ms
                 return `${time}0`
             } else if (millisPart.length == 1) { //格式错误，暂时当成ms处理
-                return timeParts[0].trim() + '.00' + millisPart
+                return toTrimString(timeParts[0]) + '.00' + millisPart
             } else if (millisPart.length >= 3) { //格式错误，暂时截断，然后当成ms处理
-                return timeParts[0].trim() + '.' + millisPart.substring(0, 3)
+                return toTrimString(timeParts[0]) + '.' + millisPart.substring(0, 3)
             }
         }
         return `${time}.000`

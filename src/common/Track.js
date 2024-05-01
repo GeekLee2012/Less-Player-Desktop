@@ -93,7 +93,7 @@ export class Track {
 
     static artistName(track) {
         let artistName = ''
-        if (track && track.artist && track.artist.length > 0) {
+        if (track && Array.isArray(track.artist) && track.artist.length > 0) {
             const names = []
             track.artist.forEach(e => names.push(e.name));
             artistName = names.join('、')
@@ -111,7 +111,7 @@ export class Track {
     }
 
     static hasUrl(track) {
-        return track && track.url && toTrimString(track.url).length > 0
+        return track && track.url && !isBlank(track.url)
     }
 
     static hasCover(track) {
@@ -126,7 +126,7 @@ export class Track {
         if (!track || !track.id) return false
         const id = track.id
         if (typeof id == 'number') return id > 0
-        if (typeof id == 'string') return toTrimString(id).length > 0
+        if (typeof id == 'string') return !isBlank(id)
     }
 
     static firstArtistName(track) {
@@ -159,21 +159,22 @@ export class Track {
 
     static isEquals(t1, t2) {
         if (!t1 || !t2) return false
-        return t1.id == t2.id && t1.platform == t2.platform
+        return t1.id == t2.id 
+            && t1.platform == t2.platform
     }
 
     static hasMv(track) {
         if (!track || !track.mv) return false
         const mv = track.mv.toString()
         if (typeof mv == 'number') return mv > 0
-        if (typeof mv == 'string') return toTrimString(mv).length > 0
+        if (typeof mv == 'string') return !isBlank(mv)
     }
 
     static hasPid(track) {
         if (!track || !track.pid) return false
         const pid = track.pid
         if (typeof pid == 'number') return pid > 0
-        if (typeof pid == 'string') return toTrimString(pid).length > 0
+        if (typeof pid == 'string') return !isBlank(pid)
     }
 
     static isVip(track) {

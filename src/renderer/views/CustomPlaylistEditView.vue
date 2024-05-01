@@ -110,8 +110,10 @@ const updateCover = async () => {
 
 const computedAddWithDataAvailable = computed(() => {
     if (!routerCtxCacheItem.value) return false
-    const { id } = routerCtxCacheItem.value
-    return id == 'createPlaylistWithData'
+    const { id, data } = routerCtxCacheItem.value
+    if(id != 'createPlaylistWithData' || !data) return false
+    if(Array.isArray(data)) return data.length > 0
+    return true
 })
 
 const computedCacheTitle = computed(() => {

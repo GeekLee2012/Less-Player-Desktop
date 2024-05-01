@@ -127,10 +127,14 @@ export const useSettingStore = defineStore('setting', {
             playbackQueueAutoPositionOnShow: false,
             //关闭按钮，Electron平台兼容性问题，主要为Windows等平台冗余设计
             playbackQueueCloseBtnShow: false,
+            //定位按钮
+            playbackQueuePositionBtnShow: true,
             //历史播放按钮，即最近播放快捷入口
             playbackQueueHistoryBtnShow: true,
             //MV标识、MV播放按钮
             playbackQueueMvBtnShow: true,
+            //批量操作按钮
+            playbackQueueBatchActionBtnShow: true,
             //歌单播放量
             //listenNumShow: false,
             playCountShow: false,
@@ -278,6 +282,8 @@ export const useSettingStore = defineStore('setting', {
             deleteCustomPlaylist: true,
             //清空最近播放
             clearRecents: true,
+            //清空当前播放（列表）
+            clearPlaybackQueue: true,
             //恢复默认设置
             resetSetting: true,
             //清空本地歌曲
@@ -376,6 +382,11 @@ export const useSettingStore = defineStore('setting', {
                 name: '快速打开搜索',
                 binding: 'S',
                 gBinding: 'Ctrl + Alt + Shift + S'
+            },{
+                id: 'visitRecents',
+                name: '打开最近播放',
+                binding: 'R',
+                gBinding: 'Alt + Shift + R'
             },{
                 id: 'togglePlayingThemes',
                 name: '打开 / 关闭播放样式',
@@ -501,11 +512,17 @@ export const useSettingStore = defineStore('setting', {
         isPlaybackQueueCloseBtnShow() {
             return this.track.playbackQueueCloseBtnShow
         },
+        isPlaybackQueuePositionBtnShow() {
+            return this.track.playbackQueuePositionBtnShow
+        },
         isPlaybackQueueHistoryBtnShow() {
             return this.track.playbackQueueHistoryBtnShow
         },
         isPlaybackQueueMvBtnShow() {
             return this.track.playbackQueueMvBtnShow
+        },
+        isPlaybackQueueBatchActionBtnShow() {
+            return this.track.playbackQueueBatchActionBtnShow
         },
         isHideToTrayOnMinimized() {
             return this.tray.showOnMinimized
@@ -567,6 +584,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeClearRecents() {
             return this.dialog.clearRecents
+        },
+        isShowDialogBeforeClearPlaybackQueue() {
+            return this.dialog.clearPlaybackQueue
         },
         isShowDialogBeforeResetSetting() {
             return this.dialog.resetSetting
@@ -783,17 +803,18 @@ export const useSettingStore = defineStore('setting', {
         togglePlaybackQueueCloseBtnShow() {
             this.track.playbackQueueCloseBtnShow = !this.track.playbackQueueCloseBtnShow
         },
+        togglePlaybackQueuePositionBtnShow() {
+            this.track.playbackQueuePositionBtnShow = !this.track.playbackQueuePositionBtnShow
+        },
         togglePlaybackQueueHistoryBtnShow() {
             this.track.playbackQueueHistoryBtnShow = !this.track.playbackQueueHistoryBtnShow
         },
         togglePlaybackQueueMvBtnShow() {
             this.track.playbackQueueMvBtnShow = !this.track.playbackQueueMvBtnShow
         },
-        /*
-        toggleListenNumShow() {
-            this.track.listenNumShow = !this.track.listenNumShow
+        togglePlaybackQueueBatchActionBtnShow() {
+            this.track.playbackQueueBatchActionBtnShow = !this.track.playbackQueueBatchActionBtnShow
         },
-        */
         togglePlayCountShow() {
             this.track.playCountShow = !this.track.playCountShow
         },
@@ -1118,6 +1139,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeClearRecents() {
             this.dialog.clearRecents = !this.dialog.clearRecents
+        },
+        toggleShowDialogBeforeClearPlaybackQueue() {
+            this.dialog.clearPlaybackQueue = !this.dialog.clearPlaybackQueue
         },
         toggleShowDialogBeforeResetSetting() {
             this.dialog.resetSetting = !this.dialog.resetSetting

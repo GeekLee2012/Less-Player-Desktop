@@ -295,7 +295,7 @@ const setupLyricExtra = () => {
 
                 //2、重新赋值
                 const extraTextMap = lyricTransData.value || lyricRomaData.value
-                if (!extraTextMap) return
+                if (!extraTextMap || !extraTextMap.get) return
                 const timeKey = line.getAttribute('timeKey')
                 if (!timeKey) return
                 let extraText = null
