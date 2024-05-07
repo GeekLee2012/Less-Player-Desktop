@@ -79,18 +79,12 @@ export class United {
 
     static getVendors() {
         const { platforms } = usePlatformStore()
-        const _platforms = platforms('united') || []
-        const vendors = []
-        for(var i = 0; i < _platforms.length; i++) vendors.push(_platforms[i].vendor)
-        return vendors
+        return (platforms('united') || []).map(item => (item.vendor))
     }
 
     static getVendor(code) {
-        const vendors = United.getVendors()
-        for(var i = 0; i < vendors.length; i++) {
-            if(vendors[i].CODE == code) return vendors[i]
-        }
-        return null
+        const vendors = (United.getVendors() || []).filter(item => (item && (item.CODE == code)))
+        return Array.isArray(vendors) && vendors[0]
     }
 
     //互惠互助、互通有无、移花接木？奏是介些说法啦 ~
@@ -201,6 +195,9 @@ export class United {
                 }
 
                 //当原歌曲并非这类版本时，候选歌曲不推荐：纯音乐、伴奏、DJ版等
+                //名称也只是个约定，至于对应的音频内容是否正确，也无法判断
+                //有不少伴奏、纯音乐、翻唱版、改编版、片段等，名称上并没有标明
+                //所以整体上，匹配准确率也不高
                 const notRecommendTitles = [
                     '伴奏', '(DJ', '(纯音', 
                     '轻音乐', '钢琴版', '翻自', 
@@ -220,26 +217,38 @@ export class United {
                     for (var j = 0; j < artist.length; j++) {
                         const { name } = artist[j]
                         const _name = (name || LESS_MAGIC_CODE)
+                        const _name1 = _name && _name.slice(0, -1)
+                        const _name2 = trimTextWithinBrackets(_name)
                         if (stringIncludesIgnoreCaseEscapeHtml(cArtistName, _name)
+                            || stringIncludesIgnoreCaseEscapeHtml(_name, cAlbumName)
                             //兼容处理：名称 + 单个任意字符（数字、符号等） 
-                            || stringIncludesIgnoreCaseEscapeHtml(cArtistName, _name && _name.slice(0, -1))
+                            || stringIncludesIgnoreCaseEscapeHtml(cArtistName, _name1)
+                            || stringIncludesIgnoreCaseEscapeHtml(_name1, cArtistName)
                             //去掉括号内的全部内容
-                            || stringIncludesIgnoreCaseEscapeHtml(trimTextWithinBrackets(cArtistName), trimTextWithinBrackets(_name))) {
+                            || stringIncludesIgnoreCaseEscapeHtml(trimTextWithinBrackets(cArtistName), _name2)
+                            || stringIncludesIgnoreCaseEscapeHtml(_name2, trimTextWithinBrackets(cArtistName))
+                        ) {
                             score.artist += 20
                             hit.artist = true
                             break
                         }
                     }
                 } else if(cArtistName) {
-                    //处理本地歌曲title格式：[名称 - 歌手]，或[歌手 - 名称]
+                    //处理本地歌曲title格式：[名称 - 歌手]、[歌手 - 名称]
                     const _tArtists = [tArtistName, tTitle]
                     for(var j = 0; j < _tArtists.length; j++) {
                         const _name = (_tArtists[j] || LESS_MAGIC_CODE)
+                        const _name1 = _name && _name.slice(0, -1)
+                        const _name2 = trimTextWithinBrackets(_name)
                         if (stringIncludesIgnoreCaseEscapeHtml(cArtistName, _name) 
+                            || stringIncludesIgnoreCaseEscapeHtml(_name, cArtistName) 
                             //兼容处理：名称 + 单个任意字符（数字、符号等） 
-                            || stringIncludesIgnoreCaseEscapeHtml(cArtistName, _name && _name.slice(0, -1))
+                            || stringIncludesIgnoreCaseEscapeHtml(cArtistName, _name1)
+                            || stringIncludesIgnoreCaseEscapeHtml(_name1, cArtistName)
                             //去掉括号内的全部内容
-                            || stringIncludesIgnoreCaseEscapeHtml(trimTextWithinBrackets(cArtistName), trimTextWithinBrackets(_name))) {
+                            || stringIncludesIgnoreCaseEscapeHtml(trimTextWithinBrackets(cArtistName), _name2)
+                            || stringIncludesIgnoreCaseEscapeHtml(_name2, trimTextWithinBrackets(cArtistName))
+                        ) {
                             score.artist += 20
                             hit.artist = true
                             break

@@ -92,4 +92,9 @@ const visitItem = (item) => {
 .artistlist-ctl .tiles-card-loading-mask .tile .cover {
     height: var(--others-image-text-tile-cover-size) !important;
 }
+
+.artistlist-ctl .image-text-tile-card .layer {
+    display: none !important;
+    background: transparent !important;
+}
 </style>

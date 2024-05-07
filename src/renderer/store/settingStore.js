@@ -98,6 +98,8 @@ export const useSettingStore = defineStore('setting', {
             paginationStyleIndex: 0,
             //歌单、专辑等Tile样式，0 => 普通，1 => 卡片
             imageTextTileStyleIndex: 1,
+            //卡片Tile样式阴影效果
+            shadowForCardStyleTile: true,
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -650,6 +652,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isPlayingViewUseBgCoverEffect() {
             return this.track.playingViewUseBgCoverEffect
+        },
+        isUseShadowForCardStyleTile() {
+            return this.common.shadowForCardStyleTile
         }
     },
     actions: {
@@ -840,6 +845,9 @@ export const useSettingStore = defineStore('setting', {
             const index = parseInt(value || 0)
             if (index < 0 || index > 1) return
             this.common.imageTextTileStyleIndex = index
+        },
+        toggleUseShadowForCardStyleTile() {
+            this.common.shadowForCardStyleTile = !this.common.shadowForCardStyleTile
         },
         toggleUseOnlineCover() {
             this.track.useOnlineCover = !this.track.useOnlineCover

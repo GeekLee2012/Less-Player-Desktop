@@ -55,9 +55,9 @@ export const get = async (url, data, config, callback) => {
             url = `${url}${_and}${data}`
         }
         axios.get(url, config)
-            .then(resp => resolve(tryCallDefault(callback, resp, resp)))
+            .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))
-    }).catch(error => Promise.reject(error))
+    }, error => Promise.reject(error)).catch(error => Promise.reject(error))
 }
 
 export const post = async (url, data, config, callback) => {
@@ -65,9 +65,9 @@ export const post = async (url, data, config, callback) => {
         if(isBlank(url)) return Promise.reject('noUrl')
         if (data && (typeof data === 'object')) data = qsStringify(data)
         axios.post(url, data, config)
-            .then(resp => resolve(tryCallDefault(callback, resp, resp)))
+            .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))
-    }).catch(error => Promise.reject(error))
+    }, error => Promise.reject(error)).catch(error => Promise.reject(error))
 }
 
 export const getRaw = (url, data, config) => {

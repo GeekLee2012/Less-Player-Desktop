@@ -27,7 +27,8 @@ const ipcRenderer = useIpcRenderer()
 const { theme, layout, common, track, desktopLyric,
     keys, keysDefault, tray, navigation, dialog, cache,
     network, others, search, isHttpProxyEnable, isSocksProxyEnable,
-    isShowDialogBeforeResetSetting, isCheckPreReleaseVersion } = storeToRefs(useSettingStore())
+    isShowDialogBeforeResetSetting, isCheckPreReleaseVersion,
+    isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
     setWindowZoom,
@@ -46,6 +47,7 @@ const { setThemeIndex,
     toggleQuitVideoAfterEnded,
     togglePlayingWithoutSleeping,
     togglePlayingViewUseBgCoverEffect,
+    toggleUseShadowForCardStyleTile,
     toggleStorePlayState,
     toggleStoreLocalMusic,
     toggleStoreRecentPlay,
@@ -386,9 +388,16 @@ const startDownload = async () => {
 }
 */
 
-const checkForUpdate = async () => {
+let checkingUpdates = ref(false)
+
+const checkForUpdates = async () => {
+    if(checkingUpdates.value) return 
+    checkingUpdates.value = true
     const result = await getLastReleaseVersion()
-    if (!result) return
+    if (!result) {
+        checkingUpdates.value = false
+        return
+    } 
     const { giteeVersion, githubVersion } = result
     const currentVersion = `v${version}`
     lastVersion.value = currentVersion
@@ -405,6 +414,7 @@ const checkForUpdate = async () => {
         if (githubVersion >= lastVersion.value) lastVersion.value = githubVersion
     }
     setLastRelease(currentVersion >= lastVersion.value)
+    checkingUpdates.value = false
 }
 
 /*
@@ -483,15 +493,17 @@ const changeAudioOutputDevices = (event) => {
     setAudioOutputDeviceId(deviceId)
 }
 
+EventBus.on('setting-checkForUpdates', checkForUpdates)
+
 /* 生命周期、监听 */
 onActivated(() => {
     updateSessionCacheSize()
     updateBlackHole(Math.random() * 100000000)
 })
 
-onMounted(checkForUpdate)
+onMounted(checkForUpdates)
 
-watch(isCheckPreReleaseVersion, checkForUpdate)
+watch(isCheckPreReleaseVersion, checkForUpdates)
 </script>
 
 <template>
@@ -586,6 +598,12 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
                             {{ item }}
                         </span>
                         <div class="tip-text spacing">提示：歌单、专辑等预览控件</div>
+                    </div>
+                    <div v-show="isUseCardStyleImageTextTile">
+                        <span class="cate-subtitle">卡片风格控件阴影效果：</span>
+                        <ToggleControl @click="toggleUseShadowForCardStyleTile" :value="common.shadowForCardStyleTile">
+                        </ToggleControl>
+                        <div class="tip-text spacing3">提示：仅支持部分主题</div>
                     </div>
                     <div>
                         <span class="sec-title">图片清晰度：</span>
@@ -1620,6 +1638,10 @@ watch(isCheckPreReleaseVersion, checkForUpdate)
 
 #setting-view .center .spacing2 {
     margin-left: 72px;
+}
+
+#setting-view .center .spacing3 {
+    margin-left: 40px;
 }
 
 #setting-view .link {

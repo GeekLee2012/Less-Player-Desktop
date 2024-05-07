@@ -93,6 +93,8 @@ const applyTheme = (theme) => {
     //'--others-checkbox-bg-color': theme.others.checkboxBgColor,
 
     "--content-border-image": contentBorderImage,
+    "--content-regular-bg-color": theme.content.regularBgColor,
+    "--content-light-bg-color": theme.content.lightBgColor,
   }
 
   for (const [key, value] of Object.entries(themeProperties)) {

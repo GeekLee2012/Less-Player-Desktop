@@ -39,6 +39,7 @@ export const TrayAction = {
     DESKTOP_LYRIC_UNLOCK: 10,
     DESKTOP_LYRIC_PIN: 11,
     DESKTOP_LYRIC_UNPIN: 12,
+    CHECK_FOR_UPDATES: 99,
 }
 
 export const ActivateState = {

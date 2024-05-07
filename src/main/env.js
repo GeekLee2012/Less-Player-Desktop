@@ -56,6 +56,23 @@ const APP_ICON = isMacOS ? '../../public/icon.png' : '../../public/icon@2x.png'
 
 const DOWNLOADS_PATH = (process.env['HOME'] || process.env['USERPROFILE']) + '/Downloads'
 
+const TrayAction = {
+    RESTORE: 0, //什么也不做，仅恢复上次显示
+    PLAY: 1,
+    PAUSE: 2,
+    PLAY_PREV: 3,
+    PLAY_NEXT: 4,
+    USERHOME: 5,
+    SETTING: 6,
+    DESKTOP_LYRIC_OPEN: 7,
+    DESKTOP_LYRIC_CLOSE: 8,
+    DESKTOP_LYRIC_LOCK: 9,
+    DESKTOP_LYRIC_UNLOCK: 10,
+    DESKTOP_LYRIC_PIN: 11,
+    DESKTOP_LYRIC_UNPIN: 12,
+    CHECK_FOR_UPDATES: 99,
+}
+
 //导出
 module.exports = {
     isMacOS,
@@ -69,5 +86,6 @@ module.exports = {
     AUDIO_PLAYLIST_EXTS,
     BACKUP_FILE_EXTS,
     APP_ICON,
-    DOWNLOADS_PATH
+    DOWNLOADS_PATH,
+    TrayAction
 }

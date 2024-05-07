@@ -101,7 +101,9 @@
                 "listItemHoverBgColor": "#eeeeee",
                 "leftNavBgColor": "#f8f8f8ff",
                 "inputsBgColor": "#ffffff",
-                "inputsTextColor": "#272727"
+                "inputsTextColor": "#272727",
+                "regularBgColor": "#d3d5d7",
+                "lightBgColor": "#f1f2f3"
             },
             "border": {
                 "borderColor": "#eeeeee",
@@ -171,7 +173,9 @@
                 "listItemHoverBgColor": "#faf4f6",
                 "leftNavBgColor": "#e7e1e3cb",
                 "inputsBgColor": "#ffffff",
-                "inputsTextColor": "#313131"
+                "inputsTextColor": "#313131",
+                "regularBgColor": "#d3d5d7",
+                "lightBgColor": "#f1f2f3"
             },
             "border": {
                 "borderColor": "#eeeeee",
@@ -241,7 +245,9 @@
                 "listItemHoverBgColor": "#eeeeee",
                 "leftNavBgColor": "#f8f8f8ff",
                 "inputsBgColor": "#ffffff",
-                "inputsTextColor": "#212121"
+                "inputsTextColor": "#212121",
+                "regularBgColor": "#d3d5d7",
+                "lightBgColor": "#f1f2f3"
             },
             "border": {
                 "borderColor": "#f4f4f4",
@@ -451,7 +457,9 @@
                 "listItemHoverBgColor": "#f7314d0f",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
-                "inputsTextColor": "#313131"
+                "inputsTextColor": "#313131",
+                "regularBgColor": "#d3d5d7",
+                "lightBgColor": "#f1f2f3"
             },
             "border": {
                 "borderColor": null,
@@ -731,7 +739,9 @@
                 "listItemHoverBgColor": "#ababab36",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffffcb",
-                "inputsTextColor": "#161616"
+                "inputsTextColor": "#161616",
+                "regularBgColor": "#c3c5c7",
+                "lightBgColor": "#e1e2e3"
             },
             "border": {
                 "borderColor": "#dddddd66",
@@ -801,7 +811,9 @@
                 "listItemHoverBgColor": "#91b6c036",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffffcb",
-                "inputsTextColor": "#273b42"
+                "inputsTextColor": "#273b42",
+                "regularBgColor": "#d3d5d7",
+                "lightBgColor": "#f1f2f3"
             },
             "border": {
                 "borderColor": "#dddddd",
@@ -871,7 +883,9 @@
                 "listItemHoverBgColor": "#ffb30025",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
-                "inputsTextColor": "#000000"
+                "inputsTextColor": "#000000",
+                "regularBgColor": "#d3d5d7",
+                "lightBgColor": "#f1f2f3"
             },
             "border": {
                 "borderColor": "#eeeeee",
@@ -1011,7 +1025,9 @@
                 "listItemHoverBgColor": "#9c27b025",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
-                "inputsTextColor": "#000000"
+                "inputsTextColor": "#000000",
+                "regularBgColor": "#d3d5d7",
+                "lightBgColor": "#f1f2f3"
             },
             "border": {
                 "borderColor": null,

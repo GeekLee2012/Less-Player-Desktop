@@ -275,7 +275,8 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                 </div>
                 <ul>
                     <li v-for="(item, index) in activePlatforms()" :class="{ active: (currentPlatformIndex == index) }"
-                        @click="updatePlatformIndex(index)" v-html="item.name">
+                        @click="updatePlatformIndex(index)">
+                        <span v-html="item.name"></span>
                     </li>
                 </ul>
             </div>
@@ -557,6 +558,7 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     padding-right: 20px;
     cursor: pointer;
     border-radius: 5px;
+    
     text-align: left;
     overflow: hidden;
     word-wrap: break-all;

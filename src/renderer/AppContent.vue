@@ -488,6 +488,9 @@ const visitLink = (url) => {
 }
 
 EventBus.on('app-resetSetting', resetSetting)
+EventBus.on('check-for-updates', () => {
+  searchDefault('@检查更新').then(() => EventBus.emit('setting-checkForUpdates'))
+})
 
 //直接在setup()时初始化，不需要等待其他生命周期
 initialize()

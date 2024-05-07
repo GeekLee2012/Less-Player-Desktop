@@ -42,7 +42,9 @@ export class Theme {
             listItemHoverBgColor: null,
             leftNavBgColor: null,
             inputsBgColor: null,
-            inputsTextColor: null
+            inputsTextColor: null,
+            regularBgColor: null,
+            lightBgColor: null
         }
 
         /*边框*/
@@ -93,25 +95,5 @@ export class Theme {
             //checkboxBgColor: null
         }
     }
-
-    /*
-    static getAppBgImageLinearGradientText(theme) {
-        if (!theme) return null
-        const { appBackground } = theme
-        if (!appBackground) return null
-        const { bgImageGradient } = appBackground
-        if (!bgImageGradient) return null
-        const { sideOrCorner, angle, colorStops } = bgImageGradient
-        if (!colorStops || colorStops.length < 1) return nulll
-        const colors = colorStops.join(',')
-        if (sideOrCorner) {
-            return `linear-gradient(to ${sideOrCorner}, ${colors})`
-        }
-        if (angle) {
-            return `linear-gradient(${angle}deg, ${colors})`
-        }
-        return `linear-gradient(${colors})`
-    }
-    */
 
 }

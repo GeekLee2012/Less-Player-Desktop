@@ -27,7 +27,7 @@ const props = defineProps({
 })
 
 const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
-const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
+const { isUseCardStyleImageTextTile, isUseShadowForCardStyleTile } = storeToRefs(useSettingStore())
 
 
 const isChecked = ref(props.checked)
@@ -51,12 +51,14 @@ watch(() => props.checked, (nv, ov) => {
     setChecked(nv)
 })
 
+
 EventBus.on("checkbox-refresh", () => setChecked(false))
 </script>
 
 <template>
     <div class="image-text-tile" :class="{
         'image-text-tile-card': isUseCardStyleImageTextTile,
+        'image-text-tile-card-shadow': isUseShadowForCardStyleTile,
         'image-text-tile-radio': isFMRadioPlatform(platform),
         'image-text-tile-non-freefm': !isFreeFM(platform),
         'image-text-tile-color-mode': color,
@@ -107,6 +109,8 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
             <div class="subtitle" v-show="subtitle" v-html="subtitle"></div>
             <div class="extra-text" v-show="extraText" v-html="extraText"></div>
         </div>
+        <div class="layer"></div>
+        <div class="layer layer-tiny"></div>
     </div>
 </template>
 
@@ -114,6 +118,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 .image-text-tile {
     margin: 15px 13px;
     --tile-border-radius: 6px;
+    position: relative;
 }
 
 .image-text-tile .cover {
@@ -128,7 +133,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 }
 
 .image-text-tile .cover-wrap:hover {
-    transform: scale(1.05) translateY(-4px);
+    transform: scale(1.11) translateY(-4px);
 }
 
 .image-text-tile .title {
@@ -183,6 +188,7 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     -webkit-box-orient: vertical;
     word-wrap: break-word;
     line-break: anywhere;
+    cursor: pointer;
 }
 
 .image-text-tile svg {
@@ -224,8 +230,6 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     cursor: pointer;
 }
 
-.image-text-tile .cover-mask .checkbox {}
-
 .image-text-tile .checkbox svg {
     fill: var(--content-highlight-color);
 }
@@ -252,7 +256,6 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
     margin-left: 2px;
     fill: var(--button-icon-text-btn-icon-color) !important;
 }
-
 
 /* 实验性CSS */
 .image-text-tile-card {
@@ -359,5 +362,36 @@ EventBus.on("checkbox-refresh", () => setChecked(false))
 .image-text-tile img[lazy=loading].obj-fit-contain,
 .image-text-tile img[lazy=error].obj-fit-contain {
     object-fit: cover !important;
+}
+
+.image-text-tile .layer,
+.image-text-tile .layer-tiny {
+    display: none;
+}
+
+.image-text-tile-card.image-text-tile-card-shadow .layer {
+    display: block;
+    z-index: -1;
+    width: 90%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translate(-50%, var(--tile-border-radius));
+    border-radius: var(--tile-border-radius);
+    background: var(--content-regular-bg-color);
+}
+
+.image-text-tile-card.image-text-tile-card-shadow .layer-tiny {
+    z-index: -2;
+    width: 80%;
+    transform: translate(-50%, calc(var(--tile-border-radius) * 2));
+    background: var(--content-light-bg-color);
+}
+
+.image-text-tile-card:hover .layer,
+.image-text-tile-card:hover .layer-tiny {
+    background: transparent;
+    display: none;
 }
 </style>

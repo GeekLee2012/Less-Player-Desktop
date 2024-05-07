@@ -285,8 +285,10 @@ export const useUserProfileStore = defineStore("userProfile", {
             if (!playlist) return false
             const { platform } = track
             const { isLocalMusic } = usePlatformStore()
-            if (isLocalMusic(platform)) return false
-            if (Playlist.isFMRadioType(track)) return false
+            if (isLocalMusic(platform) 
+                || Playlist.isFMRadioType(track)) {
+                return false
+            }
 
             const index = this.findItemIndex(playlist.data, track)
             if (index > -1) return false

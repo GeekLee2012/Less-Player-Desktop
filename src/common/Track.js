@@ -37,9 +37,15 @@ export class Track {
         this.payDownload = payDownload
         //是否为替换版本
         this.isCandidate = false
+        //格式信息
+        this.bitrate = null
+        this.sampleRate = null
+        this.bitDepth = null
+        this.codec = null
 
         //本地歌曲属性
         this.publishTime = null
+
     }
 
     mmssDuration() {

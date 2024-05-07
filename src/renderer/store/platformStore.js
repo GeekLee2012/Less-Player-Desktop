@@ -271,16 +271,10 @@ export const usePlatformStore = defineStore('platforms', {
             this.currentPlatformIndex = index
         },
         updateCurrentPlatformByCode(code) {
-            if (!code || code.trim().length < 1) {
-                this.updateCurrentPlatform(-1)
-                return
-            }
+            if (!code || code.trim().length < 1) return this.updateCurrentPlatform(-1)
             const platformArr = this.activePlatforms()
             for (var i = 0; i < platformArr.length; i++) {
-                if (code === platformArr[i].code) {
-                    this.updateCurrentPlatform(i)
-                    return
-                }
+                if (code === platformArr[i].code) return this.updateCurrentPlatform(i)
             }
             this.updateCurrentPlatform(-1)
         },
@@ -303,7 +297,8 @@ export const usePlatformStore = defineStore('platforms', {
         },
         isFMRadioPlatform(code) {
             const platform = this.getPlatform(code)
-            return platform && platform.types && platform.types.includes('fm-radios')
+            return platform && platform.types 
+                && platform.types.includes('fm-radios')
         },
         isArtistDetailVisitable(code) {
             return this.isPlatformValid(code)

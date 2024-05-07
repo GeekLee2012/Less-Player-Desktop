@@ -1259,6 +1259,9 @@ const registryIpcRendererListeners = () => {
             case TrayAction.DESKTOP_LYRIC_UNPIN:
                 postMessageToDesktopLryic('s-desktopLyric-pinState')
                 break
+            case TrayAction.CHECK_FOR_UPDATES:
+                EventBus.emit('check-for-updates')
+                break
         }
     })
 

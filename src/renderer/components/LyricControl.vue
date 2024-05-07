@@ -12,6 +12,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import { PlayState } from '../../common/Constants';
 import { isDevEnv, smoothScroll } from '../../common/Utils';
+import { Lyric } from '../../common/Lyric';
 
 
 
@@ -59,7 +60,7 @@ const renderAndScrollLyric = (secs) => {
     if (!isLyricReady()) return
     if (isSeeking.value) return
 
-    const userOffset = lyric.value.offset
+    const { offset: userOffset } = lyric.value
     const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
 
     //Highlight 查找当前高亮行index
@@ -147,9 +148,10 @@ const resetLyricState = (track, state) => {
 
 //重新加载歌词
 const reloadLyricData = (track) => {
+    /*
     let isExist = false
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
-        const lyricData = track.lyric.data
+        const lyricData = Track.lyricData(track)
         let isValidLyric = true
         if (lyricData.size <= 8) {
             const linesIter = lyricData.values()
@@ -165,6 +167,21 @@ const reloadLyricData = (track) => {
             }
         }
         isExist = isValidLyric
+    }
+    */
+    let isExist = Track.hasLyric(track)
+    //歌词存在，但需进一步确认是否有效
+    if(isExist) {
+        const lyricData = Track.lyricData(track)
+        const lyricText = Lyric.stringify(track.lyric)
+        //一般情况，歌曲无有效歌词时，歌词行数都不会多
+        if (lyricData.size <= 10) { 
+            isExist = !lyricText.includes('纯音乐')
+                    && !lyricText.includes('暂无歌词')
+                    && !lyricText.includes('无歌词')
+                    && !lyricText.includes('没有歌词')
+                    && !lyricText.includes('没有填词')
+        }
     }
     //重置数据
     resetLyricState(track, isExist ? 1 : 0)

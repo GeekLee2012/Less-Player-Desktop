@@ -125,6 +125,9 @@ const setPlayingCoverSize = () => {
     if (!coverEl) return
     coverEl.style.width = `${size + 3}px`
     coverEl.style.height = `${size + 3}px`
+    const formatEl = coverWrapEl.querySelector('.format')
+    if (!formatEl) return
+    formatEl.style.width = `${size + 3 + 12}px`
 }
 
 const setPlayingLyricCtlSize = () => {

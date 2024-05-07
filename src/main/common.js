@@ -5,7 +5,6 @@ const path = require('path');
 const CryptoJS = require('crypto-js');
 const MusicMetadata = require('music-metadata');
 const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv } = require('./env');
-const { error } = require('console');
 
 
 
@@ -117,6 +116,13 @@ function SHA1(text) {
     return text ? CryptoJS.SHA1(text).toString() : null
 }
 
+function stringIncludesIgnoreCase(value1, value2) {
+    if(!value1 || !value2) return false
+    const _value1 = value1.trim().toLowerCase()
+    const _value2 = value2.trim().toLowerCase()
+    return _value1.includes(_value2)
+}
+
 async function createTrackFromMetadata(file) {
     file = transformPath(file)
     const statResult = statSync(file, { throwIfNoEntry: false })
@@ -128,6 +134,8 @@ async function createTrackFromMetadata(file) {
     const album = { id: 0, name: '' }
     //let coverData = 'default_cover.png'
     let title = null, duration = 0, lyricText = null, publishTime = null
+    let container = null, codec = null
+    let bitrate = null, sampleRate = null, bitDepth = null
     try {
         if (metadata.common) {
             const { title: mTitle, artist: mArtist, 
@@ -167,8 +175,33 @@ async function createTrackFromMetadata(file) {
             if (!publishTime && mYear) publishTime = mYear
         }
         if (metadata.format) {
-            const { duration: mDuration } = metadata.format
+            const { duration: mDuration, bitrate: mBitrate, 
+                sampleRate: mSampleRate, bitsPerSample: mBitDepth,
+                container: mContainer, codec: mCodec
+            } = metadata.format
             if (mDuration) duration = mDuration * 1000
+
+            bitrate = mBitrate
+            sampleRate = mSampleRate
+            bitDepth = mBitDepth
+
+            if(!mContainer) {
+                codec = ''
+            } if(stringIncludesIgnoreCase(mContainer, 'OGG')) {
+                codec = 'OGG'
+            } else if(stringIncludesIgnoreCase(mContainer, 'WAVE')) {
+                codec = 'WAV'
+            } else if(stringIncludesIgnoreCase(mContainer, 'M4A')) {
+                codec = 'M4A'
+            } else {
+                //TODO 待定，需查阅资料
+                codec = (mCodec || '').trim()
+                    .replace('MPEG 1 Layer 3', 'MP3')
+                    .replace('MPEG 2 Layer 3', 'MP3')
+                    .replace('MPEG 1 Layer 2', 'AAC')
+                    .replace('MPEG 2 Layer 1', 'AAC')
+                    
+            }
         }
 
         //内嵌歌词
@@ -197,7 +230,11 @@ async function createTrackFromMetadata(file) {
             cover: (ImageProtocal.prefix + file),
             embeddedLyricText: lyricText,
             url: (FILE_PREFIX + file),
-            publishTime
+            publishTime,
+            bitrate,
+            sampleRate,
+            bitDepth,
+            codec
         }
 
     } catch (error) {

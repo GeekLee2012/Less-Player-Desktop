@@ -9,10 +9,11 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath, stringEquals } from '../../common/Utils';
+import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath, stringEquals, isBlank } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
+import { usePlatformStore } from '../store/platformStore';
 
 
 
@@ -39,6 +40,7 @@ const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos,
     isDndSaveEnable, isPlayingViewUseBgCoverEffect
 } = storeToRefs(useSettingStore())
+const { isLocalMusic } = usePlatformStore()
 
 const volumeBarRef = ref(null)
 
@@ -63,6 +65,19 @@ const setupBackgroudEffect = () => {
         background: `url('${cover}')`
     })
 }
+
+const computedFormatShow = computed(() => {
+    const { platform, bitrate, sampleRate } = currentTrack.value
+    return false && isLocalMusic(platform) && bitrate && sampleRate
+})
+
+const trackFormat = computed(() => {
+    const { bitrate, sampleRate, codec } = currentTrack.value
+    if(!bitrate || !sampleRate) return
+    const _bitrate = parseInt(bitrate / 1000)
+    const _codec = isBlank(codec) ? '' : `, ${codec}`
+    return `${_bitrate} kbps , ${sampleRate} Hz ${_codec}`
+})
 
 watch([() => (currentTrack.value && currentTrack.value.cover), playingViewShow], () => {
     setupBackgroudEffect()
@@ -113,10 +128,11 @@ onMounted(() => {
                 </div>
             </div>
             <div class="center">
-                <div class="cover-wrap">
+                <div class="cover-wrap" :class="{ 'with-format': computedFormatShow}">
                     <img class="cover"
-                        :class="{ 'obj-fit-contain': currentTrack.coverFit == 1, 'draggable': isDndSaveEnable }"
-                        v-lazy="Track.coverDefault(currentTrack)" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
+                            :class="{ 'obj-fit-contain': currentTrack.coverFit == 1, 'draggable': isDndSaveEnable }"
+                            v-lazy="Track.coverDefault(currentTrack)" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
+                    <div class="format" v-show="computedFormatShow" v-html="trackFormat"></div>
                 </div>
                 <div class="lyric-wrap">
                     <LyricControl :track="currentTrack" :currentTime="currentTimeState" @mousewheel="onUserMouseWheel">
@@ -351,6 +367,12 @@ onMounted(() => {
     margin-bottom: 0px;
     display: flex;
     justify-content: flex-end;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.playing-view .center .cover-wrap.with-format {
+    margin-top: 18px;
 }
 
 .playing-view .center .cover-wrap .cover {
@@ -365,6 +387,18 @@ onMounted(() => {
 
 .playing-view .center .cover-wrap .cover.draggable {
     -webkit-user-drag: auto;
+}
+
+.playing-view .center .cover-wrap .format {
+    display: flex;
+    width: 366px;
+    margin: 15px 0px 0px 0px;
+    justify-content: center;
+    align-items: center;
+    color: var(--content-subtitle-text-color);
+    font-weight: bold;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .playing-view .center .lyric-wrap {

@@ -7,7 +7,7 @@ const { app, BrowserWindow, ipcMain,
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
   USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON,
-  AUDIO_PLAYLIST_EXTS, BACKUP_FILE_EXTS
+  AUDIO_PLAYLIST_EXTS, BACKUP_FILE_EXTS, TrayAction
 } = require('./env')
 
 const { scanDirTracks, parseTracks,
@@ -800,7 +800,8 @@ const registryGlobalListeners = () => {
 
   ipcMain.on('app-desktopLyric-toggle', (event, ...args) => {
     toggleLyricWindow()
-    sendTrayAction(isLyricWindowShow() ? 7 : 8)
+    sendTrayAction(isLyricWindowShow() ? TrayAction.DESKTOP_LYRIC_OPEN 
+      : TrayAction.DESKTOP_LYRIC_CLOSE)
     /*
     const fromDesktopLyric = args[0]
     if (fromDesktopLyric) {
@@ -1089,6 +1090,7 @@ const initAppMenuTemplate = () => {
   const TEXT_CONFIG = {
     'en-US': {
       about: 'About',
+      update: 'Check for Updates...',
       settings: 'Settings',
       devTools: 'Developer Tools',
       quit: 'Quit',
@@ -1096,6 +1098,7 @@ const initAppMenuTemplate = () => {
     },
     'zh-CN': {
       about: '关于',
+      update: '检查更新',
       settings: '设置',
       devTools: '开发者工具',
       quit: '退出',
@@ -1104,11 +1107,14 @@ const initAppMenuTemplate = () => {
   }
   const menuText = TEXT_CONFIG[locale] || TEXT_CONFIG['zh-CN']
   let menuItems = [{ role: 'about', label: menuText.about },
-  { role: 'toggleDevTools', label: menuText.devTools },
+  { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.CHECK_FOR_UPDATES, true), label: menuText.update },
+  { type: 'separator' },
   //accelerator: 'Alt+Shift+P'
-  { click: (menuItem, browserWindow, event) => sendTrayAction(6, true), label: menuText.settings },
+  { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.SETTING, true), label: menuText.settings },
+  { role: 'toggleDevTools', label: menuText.devTools },
+  { type: 'separator' },
   { role: 'quit', label: menuText.quit },]
-  if (!isDevEnv) menuItems.splice(1, 1)
+  if (!isDevEnv) menuItems.splice(menuItems.length - 3, 1)
   const appName = app.name.replace('-', '')
   const template = [
     ...[{
@@ -1157,63 +1163,66 @@ const sendTrayAction = (action, showMain) => {
 const initTrayMenuTemplate = () => {
   const template = [{
     label: '听你想听，爱你所爱',
-    click: () => sendTrayAction(0, true)
+    click: () => sendTrayAction(TrayAction.RESTORE, true)
   }, {
     type: 'separator'
   }, {
     id: 'desktop-lyric-open',
     label: '开启桌面歌词',
     click: () => {
-      sendTrayAction(7)
+      sendTrayAction(TrayAction.DESKTOP_LYRIC_OPEN)
       toggleLyricWindow()
     }
   }, {
     id: 'desktop-lyric-close',
     label: '关闭桌面歌词',
     click: () => {
-      sendTrayAction(8)
+      sendTrayAction(TrayAction.DESKTOP_LYRIC_CLOSE)
       toggleLyricWindow()
     }
   }, {
     id: 'desktop-lyric-lock',
     label: '锁定桌面歌词',
-    click: () => sendTrayAction(9)
+    click: () => sendTrayAction(TrayAction.DESKTOP_LYRIC_LOCK)
   }, {
     id: 'desktop-lyric-unlock',
     label: '解锁桌面歌词',
-    click: () => sendTrayAction(10)
+    click: () => sendTrayAction(TrayAction.DESKTOP_LYRIC_UNLOCK)
   }, {
     id: 'desktop-lyric-pin',
     label: '置顶桌面歌词',
-    click: () => sendTrayAction(11)
+    click: () => sendTrayAction(TrayAction.DESKTOP_LYRIC_PIN)
   }, {
     id: 'desktop-lyric-unpin',
     label: '取消置顶桌面歌词',
-    click: () => sendTrayAction(12)
+    click: () => sendTrayAction(TrayAction.DESKTOP_LYRIC_UNPIN)
   }, {
     type: 'separator'
   }, {
     id: 'play',
     label: '播放',
-    click: () => sendTrayAction(1)
+    click: () => sendTrayAction(TrayAction.PLAY)
   }, {
     id: 'pause',
     label: '暂停',
-    click: () => sendTrayAction(2)
+    click: () => sendTrayAction(TrayAction.PAUSE)
   }, {
     label: '上一曲',
-    click: () => sendTrayAction(3)
+    click: () => sendTrayAction(TrayAction.PLAY_PREV)
   }, {
     label: '下一曲',
-    click: () => sendTrayAction(4)
+    click: () => sendTrayAction(TrayAction.PLAY_NEXT)
   }, {
     type: 'separator'
   }, {
     label: '我的主页',
-    click: () => sendTrayAction(5, true)
+    click: () => sendTrayAction(TrayAction.USERHOME, true)
   }, {
     label: '设置',
-    click: () => sendTrayAction(6, true)
+    click: () => sendTrayAction(TrayAction.SETTING, true)
+  }, {
+    label: '检查更新',
+    click: () => sendTrayAction(TrayAction.CHECK_FOR_UPDATES, true)
   }, {
     type: 'separator'
   }, {
