@@ -21,7 +21,7 @@ const { seekTrack, playMv,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
     mmssPreseekTime, isTrackSeekable,
-    dndSaveCover, dndSaveLyric } = inject('player')
+    dndSaveCover } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 const { getExVisualCanvasHandlersLength } = inject('apiExpose')
 

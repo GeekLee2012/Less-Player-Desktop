@@ -9,12 +9,12 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath, stringEquals, isBlank } from '../../common/Utils';
+import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath, stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
 import { usePlatformStore } from '../store/platformStore';
-
+import analyze from 'rgbaster-plus';
 
 
 const { seekTrack, playMv,
@@ -22,7 +22,7 @@ const { seekTrack, playMv,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
     mmssPreseekTime, isTrackSeekable,
-    dndSaveCover, dndSaveLyric } = inject('player')
+    dndSaveCover } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 //是否使用自定义交通灯控件
@@ -48,9 +48,39 @@ const onUserMouseWheel = (event) => EventBus.emit('lyric-userMouseWheel', event)
 
 const hasBackgroudCover = ref(false)
 const bgEffectStyle = reactive({})
+const isCoverNoneBorder = ref(false)
 const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
+const setCoverNoneBorder = (value) => isCoverNoneBorder.value = value
 
-const setupBackgroudEffect = () => {
+const extractRgbColor = (rgb) => {
+    let _rgb = toLowerCaseTrimString(rgb)
+    if(!_rgb || !_rgb.startsWith('rgb')) return null
+    const index = _rgb.indexOf('(')
+    _rgb = _rgb.substring(index + 1, _rgb.length - 1)
+    const parts = _rgb.split(',')
+    if(!Array.isArray(parts) || parts.length != 3) return null
+    try {
+        const r = parseInt(toTrimString(parts[0]))
+        const g = parseInt(toTrimString(parts[1]))
+        const b = parseInt(toTrimString(parts[2]))
+        return { r, g, b }
+    } catch(error) {
+        if(isDevEnv()) console.log(error)
+    }
+    return rgb
+}
+
+const toDarkerRgbColor = (rgb) => {
+    const _rgb = extractRgbColor(rgb)
+    if(!_rgb) return null
+    const { r, g, b } = _rgb
+    const _r = parseInt(Math.max(52, r - (255 - r) * 0.5))
+    const _g = parseInt(Math.max(52, g - (255 - g) * 0.5))
+    const _b = parseInt(Math.max(52, b - (255 - b) * 0.5))
+    return `rgb(${_r},${_g},${_b})`
+}
+
+const setupBackgroudEffect = async () => {
     if (!isPlayingViewUseBgCoverEffect.value) return
     const track = currentTrack.value
     if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
@@ -60,10 +90,26 @@ const setupBackgroudEffect = () => {
     //本地歌曲
     if (cover.startsWith(ImageProtocal.prefix)) return setHasBackgroudCover(false)
 
+    
     setHasBackgroudCover(true)
     Object.assign(bgEffectStyle, {
         background: `url('${cover}')`
     })
+
+    /*
+    const ignoreColors = ['rgb(255,255,255)', 'rgb(0,0,0)']
+    analyze(cover, { ignore: ignoreColors, scale: 0.6 })
+        .then(result => {
+            const { color } = result[2]
+            if(ignoreColors.includes(color)) return
+            const darkColor = toDarkerRgbColor(color)
+            const _color = darkColor ? `linear-gradient(to right bottom, ${color}, ${darkColor})` : color
+            Object.assign(bgEffectStyle, {
+                background: `${_color} !important`
+            })
+            //setCoverNoneBorder(true)
+        })
+    */
 }
 
 const computedFormatShow = computed(() => {
@@ -92,7 +138,7 @@ onMounted(() => {
 
 <template>
     <div class="playing-view">
-        <div class="container">
+        <div class="container" :style="bgEffectStyle">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
                     <WinTrafficLightBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
@@ -130,7 +176,7 @@ onMounted(() => {
             <div class="center">
                 <div class="cover-wrap" :class="{ 'with-format': computedFormatShow}">
                     <img class="cover"
-                            :class="{ 'obj-fit-contain': currentTrack.coverFit == 1, 'draggable': isDndSaveEnable }"
+                            :class="{ 'obj-fit-contain': currentTrack.coverFit == 1, 'draggable': isDndSaveEnable, 'none-border': isCoverNoneBorder }"
                             v-lazy="Track.coverDefault(currentTrack)" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
                     <div class="format" v-show="computedFormatShow" v-html="trackFormat"></div>
                 </div>
@@ -257,6 +303,10 @@ onMounted(() => {
     flex-direction: column;
     background: var(--content-bg-color);
     background: var(--content-bg-color-no-transparent);
+    /*
+    background: linear-gradient(135deg, #292a3a, #536976);
+    background: #355c7d;   
+    */
 }
 
 .playing-view .header {
@@ -383,6 +433,10 @@ onMounted(() => {
     border: 6px solid #292929;
     border-radius: 3px;
     background-size: cover;
+}
+
+.playing-view .center .cover-wrap .cover.none-border {
+    border: 6px solid transparent;
 }
 
 .playing-view .center .cover-wrap .cover.draggable {

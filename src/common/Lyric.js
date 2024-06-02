@@ -161,8 +161,9 @@ export class Lyric {
         Array.from(lyric.data).forEach(line => {
             if(!line) return
             //当前应用时间格式：00:00.000，一般格式：00:00.00
-            const lineTime = line[0].slice(0, line[0].length - 1)
-            const lineText = line[1] || ''
+            const len = line[0].length
+            const lineTime = toTrimString(len == 9 ? line[0].slice(0, len - 1) : line[0])
+            const lineText = toTrimString(line[1])
             text += `[${lineTime}] ${lineText}\n`
         })
         return text

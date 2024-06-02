@@ -11,9 +11,10 @@ import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
 import {
     coverDefault, isBlank, isDevEnv, escapeHtml,
-    useIpcRenderer, useStartDrag, useDownloadsPath, tryCall, toTrimString
+    useIpcRenderer, useStartDrag, useDownloadsPath, 
+    tryCall, toTrimString, useTrayAction,
 } from '../common/Utils';
-import { PlayState, TrayAction, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
+import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
 import { toMmss } from '../common/Times';
 import { Lyric } from '../common/Lyric';
@@ -1215,51 +1216,58 @@ const quickSearch = () => {
 //注册ipcRenderer消息监听器
 const registryIpcRendererListeners = () => {
     if (!ipcRenderer) return
+    const { RESTORE, PLAY, PAUSE,  PLAY_PREV, PLAY_NEXT, 
+        HOME, USERHOME, SETTING, 
+        DESKTOP_LYRIC_OPEN, DESKTOP_LYRIC_CLOSE, 
+        DESKTOP_LYRIC_LOCK, DESKTOP_LYRIC_UNLOCK,
+        DESKTOP_LYRIC_PIN, DESKTOP_LYRIC_UNPIN,
+        CHECK_FOR_UPDATES,
+    } = useTrayAction()
     //Tray事件
     ipcRenderer.on("tray-action", (event, action) => {
         //TODO 视频播放中，暂时不允许中断
         if (videoPlayingViewShow.value) return
         switch (action) {
-            case TrayAction.RESTORE:
+            case RESTORE:
                 setupTray()
                 break
-            case TrayAction.PLAY:
-            case TrayAction.PAUSE:
+            case PLAY:
+            case PAUSE:
                 togglePlay()
                 break
-            case TrayAction.PLAY_PREV:
+            case PLAY_PREV:
                 playPrevTrack()
                 break
-            case TrayAction.PLAY_NEXT:
+            case PLAY_NEXT:
                 playNextTrack()
                 break
-            case TrayAction.HOME:
+            case HOME:
                 visitHome()
                 setupTray()
                 break
-            case TrayAction.USERHOME:
+            case USERHOME:
                 visitUserHome()
                 setupTray()
                 break
-            case TrayAction.SETTING:
+            case SETTING:
                 visitSetting()
                 setupTray()
                 break
-            case TrayAction.DESKTOP_LYRIC_OPEN:
+            case DESKTOP_LYRIC_OPEN:
                 setDesktopLyricShow(true, true)
                 break
-            case TrayAction.DESKTOP_LYRIC_CLOSE:
+            case DESKTOP_LYRIC_CLOSE:
                 setDesktopLyricShow(false, true)
                 break
-            case TrayAction.DESKTOP_LYRIC_LOCK:
-            case TrayAction.DESKTOP_LYRIC_UNLOCK:
+            case DESKTOP_LYRIC_LOCK:
+            case DESKTOP_LYRIC_UNLOCK:
                 postMessageToDesktopLryic('s-desktopLyric-lockState')
                 break
-            case TrayAction.DESKTOP_LYRIC_PIN:
-            case TrayAction.DESKTOP_LYRIC_UNPIN:
+            case DESKTOP_LYRIC_PIN:
+            case DESKTOP_LYRIC_UNPIN:
                 postMessageToDesktopLryic('s-desktopLyric-pinState')
                 break
-            case TrayAction.CHECK_FOR_UPDATES:
+            case CHECK_FOR_UPDATES:
                 EventBus.emit('check-for-updates')
                 break
         }

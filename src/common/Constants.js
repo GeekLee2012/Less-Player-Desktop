@@ -25,23 +25,6 @@ export const PlayMode = {
     RANDOM: 2
 }
 
-export const TrayAction = {
-    RESTORE: 0, //什么也不做，仅恢复上次显示
-    PLAY: 1,
-    PAUSE: 2,
-    PLAY_PREV: 3,
-    PLAY_NEXT: 4,
-    USERHOME: 5,
-    SETTING: 6,
-    DESKTOP_LYRIC_OPEN: 7,
-    DESKTOP_LYRIC_CLOSE: 8,
-    DESKTOP_LYRIC_LOCK: 9,
-    DESKTOP_LYRIC_UNLOCK: 10,
-    DESKTOP_LYRIC_PIN: 11,
-    DESKTOP_LYRIC_UNPIN: 12,
-    CHECK_FOR_UPDATES: 99,
-}
-
 export const ActivateState = {
     INVALID: -1,
     DEACTIVATED: 0,

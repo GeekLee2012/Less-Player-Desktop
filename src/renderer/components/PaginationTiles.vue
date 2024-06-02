@@ -164,7 +164,7 @@ watch(paginationStyleType, refreshAll, { immediate: true })
 
 .pagination-tiles .pag-content {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: wrap !important;
     flex-direction: row;
     flex: 1;
 }

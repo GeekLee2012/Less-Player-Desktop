@@ -8,7 +8,8 @@ const props = defineProps({
     value: String,
     colorMode: Boolean, //单色模式，排除渐变
     gradientMode: Boolean, //渐变模式，排除单色
-    onChanged: Function
+    onChanged: Function,
+    label: String, //标题
 })
 
 const { colorMode, gradientMode, onChanged } = props
@@ -99,7 +100,8 @@ const openColorPicker = (event) => {
         event, value: rgba, onChanged: ({ rgba, hexa }) => {
             color.value = hexa
             gradient.value = null
-        }
+        },
+        title: props.label
     })
 }
 

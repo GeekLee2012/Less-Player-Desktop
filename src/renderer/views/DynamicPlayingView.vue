@@ -12,7 +12,7 @@ import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
 import { isDevEnv, smoothScroll, transformUrl, } from '../../common/Utils';
-import { toMillis } from '../../common/Times';
+import { toMillis, toMMssSSS } from '../../common/Times';
 import { FILE_SCHEME } from '../../common/Constants';
 
 
@@ -35,8 +35,8 @@ const { hidePlayingView,  toggleSoundEffectView,
     toggleDesktopLyricShow, togglePlayingThemeListView } = useAppCommonStore()
 const { currentTrack, volume } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
-const { lyricMetaPos, lyric, } = storeToRefs(useSettingStore())
-const { getStateRefreshFrequency } = useSettingStore()
+const { lyricMetaPos, lyric, lyricTransActived, lyricRomaActived, } = storeToRefs(useSettingStore())
+const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 
 const volumeBarRef = ref(null)
 const currentIndex = ref(-1)
@@ -45,6 +45,8 @@ let presetOffset = Track.lyricOffset(currentTrack.value)
 const isUserMouseWheel = ref(false)
 const isSeeking = ref(false)
 const lyricExistState = ref(-1)
+const lyricTransData = ref(Track.lyricTransData(currentTrack.value))
+const lyricRomaData = ref(Track.lyricRomaData(currentTrack.value))
 
 const setLyricData = (value) => lyricData.value = value
 const setPresetOffset = (value) => presetOffset = value
@@ -53,6 +55,8 @@ const setUserMouseWheel = (value) => isUserMouseWheel.value = value
 const setSeeking = (value) => isSeeking.value = value
 const setLyricExistState = (value) => lyricExistState.value = value
 const isLyricReady = () => lyricExistState.value == 1
+const setLyricTransData = (value) => lyricTransData.value = value
+const setLyricRomaData = (value) => lyricRomaData.value = value
 
 
 const resetLyricState = (track, state) => {
@@ -61,6 +65,8 @@ const resetLyricState = (track, state) => {
     //setLyricExist(isExist)
     setLyricExistState(state)
     setLyricData(Track.lyricData(track))
+    setLyricTransData(Track.lyricTransData(track))
+    setLyricRomaData(Track.lyricRomaData(track))
     setPresetOffset(Track.lyricOffset(track))
     setLyricCurrentIndex(-1)
     setSeeking(false)
@@ -90,6 +96,7 @@ const reloadLyricData = (track) => {
     resetLyricState(track, isExist ? 1 : 0)
     //重新设置样式
     nextTick(() => {
+        setupLyricExtra()
         safeRenderAndScrollLyric(currentTimeState.value, true)
     })
 }
@@ -149,6 +156,53 @@ const safeRenderAndScrollLyric = (secs) => {
         if (isDevEnv()) console.log(error)
     }
 }
+
+//额外歌词（如翻译、发音）对应的时间
+const getExtraTimeKey = (mmssSSS, offset) => {
+    return toMMssSSS(toMillis(mmssSSS) + (offset || 0))
+        || mmssSSS
+}
+
+//歌词翻译、罗马发音
+const setupLyricExtra = () => {
+    const lines = document.querySelectorAll('.dynamic-playing-view .center  .line')
+    if (lines) {
+        try {
+            lines.forEach((line, index) => {
+                const extraTextEl = line.querySelector('.extra-text')
+                if (!extraTextEl) return
+                //1、重置
+                extraTextEl.innerHTML = null
+
+                //2、重新赋值
+                const extraTextMap = lyricTransData.value || lyricRomaData.value
+                if (!extraTextMap || !extraTextMap.get) return
+                const timeKey = line.getAttribute('timeKey')
+                if (!timeKey) return
+                let extraText = null
+                //算法简单粗暴，最坏情况11次尝试！！！
+                //一般来说，同一平台下同一首歌曲的所有歌词行的误差值基本是一样的，因此可以利用这点简单优化一下
+                //即只要确定第一行的误差值，后面的歌词行全部直接优先使用该误差值进行匹配，不必每次都按固定顺序遍历数组
+                //目前来说，即使不优化，对性能方面影响也不算大
+                const timeErrors = [0, 10, -10, 20, -20, 30, -30, 40, -40, 50, -50]
+                for (var i = 0; i < timeErrors.length; i++) {
+                    const timeError = timeErrors[i]
+                    extraText = extraTextMap.get(getExtraTimeKey(timeKey, timeError))
+                    if (extraText) break
+                }
+                if (extraText && extraText != '//') extraTextEl.innerHTML = extraText
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+}
+
+const isExtraTextActived = computed(() => {
+    const track =  currentTrack.value
+    return (Track.hasLyricTrans(track) && lyricTransActived.value)
+        || (Track.hasLyricRoma(track) && lyricRomaActived.value)
+})
 
 const computedDynamicName = computed(() => {
     const items = playingViewPresetThemes.value
@@ -254,11 +308,21 @@ onMounted(() => {
                         current: (index == currentIndex),
                     }">
                     <div class="text" :timeKey="key" :index="index" v-html="value"></div>
-                    <div class="extra-text" v-show="false"></div>
+                    <div class="extra-text" v-show="isExtraTextActived"></div>
                 </div>
                 <div v-show="!isLyricShowable" class="no-lyric line current" 
                     v-html="Track.normalName(currentTrack)">
-                </div> 
+                </div>
+                <div class="trans-btn extra-btn" 
+                    :class="{ 'extra-exist': Track.hasLyricTrans(currentTrack) }"
+                    v-show="Track.hasLyricTrans(currentTrack)">
+                    <span :class="{ active: lyricTransActived }" @click="toggleLyricTrans">译</span>
+                </div>
+                <div class="roma-btn extra-btn" 
+                    :class="{ 'extra-exist': Track.hasLyricRoma(currentTrack) }"
+                    v-show="Track.hasLyricRoma(currentTrack)">
+                    <span :class="{ active: lyricRomaActived }" @click="toggleLyricRoma">音</span>
+                </div>
             </div>
             <div class="bottom">
                 <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
@@ -486,6 +550,33 @@ onMounted(() => {
     position: relative;
 }
 
+.dynamic-playing-view .center .extra-btn {
+    position: fixed;
+    right: 35px;
+    bottom: 99px;
+    visibility: hidden;
+}
+
+.dynamic-playing-view .center .extra-btn span {
+    border: 1.25px solid #eee;
+    border-radius: 3px;
+    padding: 1px 2px;
+    font-size: var(--content-text-size);
+    cursor: pointer;
+    color: #eee;
+    font-weight: bold;
+}
+
+/*
+.dynamic-playing-view .center .extra-btn .active,
+.dynamic-playing-view .center .extra-btn span:hover {
+    background: var(--content-dynamicpv-btn-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    border-color: var(--content-dynamicpv-btn-color);
+}
+*/
 
 .dynamic-playing-view .bottom {
     height: 77px;
@@ -619,6 +710,10 @@ onMounted(() => {
     */
 }
 
+.dynamic-playing-view .center .current .extra-text {
+    font-size: 60px;
+}
+
 .dynamic-playing-view  .center .no-lyric {
     flex: 1;
     height: 100%;
@@ -640,6 +735,10 @@ onMounted(() => {
 }
 */
 
+.dynamic-playing-view:hover .extra-btn.extra-exist {
+    visibility: visible;
+}
+
 .dynamic-playing-view:hover .bottom {
     visibility: visible;
 }
@@ -660,6 +759,11 @@ onMounted(() => {
     color: transparent !important;
 }
 
+.dynamic-playing-view.custom .center .current .extra-text {
+    font-family: var(--content-dynamicpv-font-name) !important;
+    font-size: calc(var(--content-dynamicpv-font-size) - 20px) !important;
+}
+
 .dynamic-playing-view.preview-mode svg,
 .dynamic-playing-view.custom svg {
     fill: var(--content-dynamicpv-btn-color) !important;
@@ -668,7 +772,9 @@ onMounted(() => {
 .dynamic-playing-view.custom .audio-time,
 .dynamic-playing-view.custom .lyric-btn,
 .dynamic-playing-view.preview-mode .audio-time,
-.dynamic-playing-view.preview-mode .lyric-btn {    
+.dynamic-playing-view.preview-mode .lyric-btn,
+.dynamic-playing-view.custom .center .extra-btn  span,
+.dynamic-playing-view.preview-mode .center .extra-btn  span {    
     color: var(--content-dynamicpv-btn-color) !important;
 }
 

@@ -65,7 +65,7 @@ export const isDevEnv = () => {
 }
 
 export const useDownloadsPath = () => {
-    return tryCallDefault(() => (electronAPI.downloadsPath))
+    return tryCallDefault(() => (electronAPI.DOWNLOADS_PATH))
 }
 
 export const useAudioExts = () => {
@@ -78,6 +78,14 @@ export const useExtraAudioExts = () => {
 
 export const useMessagePort = () => {
     return tryCallDefault(() => (electronAPI.messagePort))
+}
+
+export const useGitRepository = () => {
+    return tryCallDefault(() => (electronAPI.GitRepository))
+}
+
+export const useTrayAction = () => {
+    return tryCallDefault(() => (electronAPI.TrayAction))
 }
 
 export const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz'

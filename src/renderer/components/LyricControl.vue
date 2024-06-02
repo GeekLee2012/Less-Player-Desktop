@@ -203,6 +203,7 @@ const onUserMouseWheel = (event) => {
 }
 
 const setLyricLineStyle = (line) => {
+    if(!line) return
     const { fontSize, hlFontSize, fontWeight, lineHeight, lineSpacing } = lyric.value
 
     const textEl = line.querySelector('.text')
@@ -212,7 +213,7 @@ const setLyricLineStyle = (line) => {
 
     textEl.style.lineHeight = `${lineHeight}px`
     textEl.style.marginTop = `${lineSpacing}px`
-    extraTextEl.style.lineHeight = `${lineHeight}px`
+    if(extraTextEl) extraTextEl.style.lineHeight = `${lineHeight}px`
 
     //是否为当前高亮行
     const isCurrent = line.classList.contains('current')
@@ -221,15 +222,15 @@ const setLyricLineStyle = (line) => {
 }
 
 const setupLyricLines = () => {
-    const lines = document.querySelectorAll(".lyric-ctl .center .line")
-    if (lines) lines.forEach(line => setLyricLineStyle(line))
+    const lines = document.querySelectorAll('.lyric-ctl .center .line') || []
+    lines.forEach(line => setLyricLineStyle(line))
 }
 
 const setupLyricAlignment = () => {
-    const lyricCtlEls = document.querySelectorAll(".lyric-ctl")
-    const artistEls = document.querySelectorAll(".lyric-ctl .audio-artist")
-    const albumEls = document.querySelectorAll(".lyric-ctl .audio-album")
-    const noLyricEls = document.querySelectorAll(".lyric-ctl .no-lyric")
+    const lyricCtlEls = document.querySelectorAll('.lyric-ctl')
+    const artistEls = document.querySelectorAll('.lyric-ctl .audio-artist')
+    const albumEls = document.querySelectorAll('.lyric-ctl .audio-album')
+    const noLyricEls = document.querySelectorAll('.lyric-ctl .no-lyric')
     const textAligns = ['left', 'center', 'right']
     const flexAligns = ['flex-start', 'center', 'flex-end']
     const { alignment } = lyric.value
@@ -301,36 +302,34 @@ const getExtraTimeKey = (mmssSSS, offset) => {
 
 //歌词翻译、罗马发音
 const setupLyricExtra = () => {
-    const lines = document.querySelectorAll(".lyric-ctl .center .line")
-    if (lines) {
-        try {
-            lines.forEach((line, index) => {
-                const extraTextEl = line.querySelector('.extra-text')
-                if (!extraTextEl) return
-                //1、重置
-                extraTextEl.innerHTML = null
+    const lines = document.querySelectorAll('.lyric-ctl .center .line') || []
+    try {
+        lines.forEach((line, index) => {
+            const extraTextEl = line.querySelector('.extra-text')
+            if (!extraTextEl) return
+            //1、重置
+            extraTextEl.innerHTML = null
 
-                //2、重新赋值
-                const extraTextMap = lyricTransData.value || lyricRomaData.value
-                if (!extraTextMap || !extraTextMap.get) return
-                const timeKey = line.getAttribute('timeKey')
-                if (!timeKey) return
-                let extraText = null
-                //算法简单粗暴，最坏情况11次尝试！！！
-                //一般来说，同一平台下同一首歌曲的所有歌词行的误差值基本是一样的，因此可以利用这点简单优化一下
-                //即只要确定第一行的误差值，后面的歌词行全部直接优先使用该误差值进行匹配，不必每次都按固定顺序遍历数组
-                //目前来说，即使不优化，对性能方面影响也不算大
-                const timeErrors = [0, 10, -10, 20, -20, 30, -30, 40, -40, 50, -50]
-                for (var i = 0; i < timeErrors.length; i++) {
-                    const timeError = timeErrors[i]
-                    extraText = extraTextMap.get(getExtraTimeKey(timeKey, timeError))
-                    if (extraText) break
-                }
-                if (extraText && extraText != '//') extraTextEl.innerHTML = extraText
-            })
-        } catch (error) {
-            console.log(error)
-        }
+            //2、重新赋值
+            const extraTextMap = lyricTransData.value || lyricRomaData.value
+            if (!extraTextMap || !extraTextMap.get) return
+            const timeKey = line.getAttribute('timeKey')
+            if (!timeKey) return
+            let extraText = null
+            //算法简单粗暴，最坏情况11次尝试！！！
+            //一般来说，同一平台下同一首歌曲的所有歌词行的误差值基本是一样的，因此可以利用这点简单优化一下
+            //即只要确定第一行的误差值，后面的歌词行全部直接优先使用该误差值进行匹配，不必每次都按固定顺序遍历数组
+            //目前来说，即使不优化，对性能方面影响也不算大
+            const timeErrors = [0, 10, -10, 20, -20, 30, -30, 40, -40, 50, -50]
+            for (var i = 0; i < timeErrors.length; i++) {
+                const timeError = timeErrors[i]
+                extraText = extraTextMap.get(getExtraTimeKey(timeKey, timeError))
+                if (extraText) break
+            }
+            if (extraText && extraText != '//') extraTextEl.innerHTML = extraText
+        })
+    } catch (error) {
+        console.log(error)
     }
 }
 

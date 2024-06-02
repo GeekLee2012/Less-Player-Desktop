@@ -165,6 +165,10 @@ export const useSettingStore = defineStore('setting', {
             useDndForAddLocalTracks: true,
             //普通分页，本地歌曲每页记录数
             limitPerPageForLocalPlaylist: 30,
+            //本地歌曲首页提示
+            localMusicHomepageTipsShow: true,
+            //自由FM首页提示
+            freeFMHomepageTipsShow: true,
             //高亮当前右键菜单对应的歌曲
             highlightCtxMenuItem: true,
             //拖拽保存
@@ -172,6 +176,7 @@ export const useSettingStore = defineStore('setting', {
             dndSavePath: null, 
             //播放页封面图片背景效果
             playingViewUseBgCoverEffect: false,
+            
         },
         search: {
             //场景化提示
@@ -655,6 +660,12 @@ export const useSettingStore = defineStore('setting', {
         },
         isUseShadowForCardStyleTile() {
             return this.common.shadowForCardStyleTile
+        },
+        isLocalMusicHomepageTipsShow() {
+            return this.track.localMusicHomepageTipsShow
+        },
+        isFreeFMHomepageTipsShow() {
+            return this.track.freeFMHomepageTipsShow
         }
     },
     actions: {
@@ -868,6 +879,12 @@ export const useSettingStore = defineStore('setting', {
             value = parseInt(value || 30)
             if (value < 10 || value > 200) return
             this.track.limitPerPageForLocalPlaylist = value
+        },
+        toggleLocalMusicHomepageTipsShow() {
+            this.track.localMusicHomepageTipsShow = !this.track.localMusicHomepageTipsShow
+        },
+        toggleFreeFMHomepageTipsShow() {
+            this.track.freeFMHomepageTipsShow = !this.track.freeFMHomepageTipsShow
         },
         toggleSearchBarAutoPlaceholder() {
             this.search.autoPlaceholder = !this.search.autoPlaceholder

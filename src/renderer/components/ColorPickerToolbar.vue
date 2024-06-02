@@ -1,8 +1,10 @@
 <script setup>
-import { nextTick, onMounted, ref, } from 'vue';
+import { computed, nextTick, onMounted, ref, } from 'vue';
 import { ColorPicker } from 'vue-color-kit';
 import 'vue-color-kit/dist/vue-color-kit.css';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { storeToRefs } from 'pinia';
+import { toTrimString } from '../../common/Utils';
 
 
 /*
@@ -13,6 +15,7 @@ const props = defineProps({
 */
 
 const { hideColorPickerToolbar } = useAppCommonStore()
+const { colorPickerToolbarTitle } = storeToRefs(useAppCommonStore())
 
 const colorPickerRef = ref(null)
 //const value = toRef(props, 'value')
@@ -136,6 +139,11 @@ const VueColorKitHack = {
 const onVueColorKitColorChanged = ({ rgba, hsv, hex }) => VueColorKitHack.changeColor({ rgba, hsv, hex })
 const applyChange = () => VueColorKitHack.applyChange()
 
+const computedTitle = computed(() => {
+    const title = toTrimString(colorPickerToolbarTitle.value)
+    return title || '颜色设置'
+})
+
 onMounted(() => VueColorKitHack.hack())
 
 defineExpose({
@@ -157,7 +165,7 @@ defineExpose({
                         transform="translate(-663.4 -243.46)" />
                 </svg>
             </div>
-            <div class="title">颜色设置</div>
+            <div class="title" v-html="computedTitle"></div>
             <div class="save-btn btn" @click="applyChange">
                 <svg width="15" height="15" viewBox="0 0 1024 750.33" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">

@@ -73,6 +73,11 @@ const TrayAction = {
     CHECK_FOR_UPDATES: 99,
 }
 
+const GitRepository = {
+    GITHUB: 'https://github.com/GeekLee2012/Less-Player-Desktop',
+    GITEE: 'https://gitee.com/rive08/less-player-desktop'
+}
+
 //导出
 module.exports = {
     isMacOS,
@@ -87,5 +92,6 @@ module.exports = {
     BACKUP_FILE_EXTS,
     APP_ICON,
     DOWNLOADS_PATH,
-    TrayAction
+    TrayAction,
+    GitRepository,
 }

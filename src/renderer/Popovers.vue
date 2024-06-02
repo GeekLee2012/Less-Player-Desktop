@@ -206,7 +206,7 @@ const bindEventListeners = () => {
     hideArtistListSubmenu()
   })
 
-  EventBus.on('color-picker-toolbar-show', ({ event: mouseEvent, onChanged, value }) => {
+  EventBus.on('color-picker-toolbar-show', ({ event: mouseEvent, onChanged, value, title }) => {
     //根据鼠标点击位置，确定弹出位置
     const tbWidth = 218, tbHeight = 369
     const { x, y, offsetX, offsetY } = mouseEvent
@@ -224,7 +224,7 @@ const bindEventListeners = () => {
     if (!colorPickerToolbarRef.value) return
     if (value) value = value.replace(/\s/g, '')
     colorPickerToolbarRef.value.init({ onChanged, value })
-    showColorPickerToolbar()
+    showColorPickerToolbar(title)
   })
 
   EventBus.on('gradient-color-toolbar-show', ({ event: mouseEvent, value, onChanged }) => {

@@ -31,7 +31,9 @@ const { addFreeRadio, resetAll,
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,
     setSearchBarExclusiveAction, toggleTagsCategoryView } = useAppCommonStore()
-const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM, } = storeToRefs(useSettingStore())
+const { isSearchForFreeFMShow, 
+    isShowDialogBeforeClearFreeFM,
+    isFreeFMHomepageTipsShow, } = storeToRefs(useSettingStore())
 
 
 const freefmRef = ref(null)
@@ -221,13 +223,13 @@ const interruptSearchBarExclusiveModeCtl = () => {
     <div id="freefm-view" ref="freefmRef" @scroll="onScroll" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <div class="title">自由FM</div>
-            <div class="about">
+            <div class="about" v-show="isFreeFMHomepageTipsShow">
                 <p>初衷：期待汇集全球主流电台，跟随电波一起，更多地了解、感知世界</p>
                 <p>世界那么大，一起来静心聆听吧</p>
                 <p>去探索、去发现，世界的美好</p>
                 <p>去思考、去追寻，自己的人生</p>
             </div>
-            <div class="action">
+            <div class="action" :class="{ 'none-about': !isFreeFMHomepageTipsShow }">
                 <SvgTextButton text="新建FM电台" :leftAction="visitFreeFMCreate">
                 </SvgTextButton>
                 <SvgTextButton text="导入FM电台" :leftAction="importRadios" :disabled="importTaskCount > 0" class="spacing">
@@ -316,6 +318,10 @@ const interruptSearchBarExclusiveModeCtl = () => {
 
 #freefm-view .header .action {
     display: flex;
+}
+
+#freefm-view .header .action.none-about {
+    margin-top: 10px;
 }
 
 #freefm-view .list-title {

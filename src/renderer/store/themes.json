@@ -137,7 +137,7 @@
                 "appNameTextColor": "linear-gradient(to top right, #1ca388, #28c83f)"
             },
             "others": {
-                "scrollBarColor": "#787878",
+                "scrollBarColor": "#bebebe",
                 "progressBarBgColor": "#cccccc",
                 "volumeBarThumbColor": "#28c83f"
             }
@@ -463,7 +463,7 @@
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#cccccc",
+                "leftNavBorderColor": "#e8e8e8",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#cccccc"
             },
@@ -493,8 +493,8 @@
                 "appNameTextColor": "linear-gradient(to top right, #f84860, #f7314d)"
             },
             "others": {
-                "scrollBarColor": "#eeeeee",
-                "progressBarBgColor": "#e7e1e3",
+                "scrollBarColor": "#bebebe",
+                "progressBarBgColor": "#d7d1d3",
                 "volumeBarThumbColor": "#f7314d"
             }
         },
@@ -745,7 +745,7 @@
             },
             "border": {
                 "borderColor": "#dddddd66",
-                "leftNavBorderColor": "#bababa",
+                "leftNavBorderColor": "#cccccc",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#cccccc"
             },
@@ -775,7 +775,7 @@
                 "appNameTextColor": "#0753cb"
             },
             "others": {
-                "scrollBarColor": "#989898",
+                "scrollBarColor": "#bababa",
                 "progressBarBgColor": "#99999966",
                 "volumeBarThumbColor": "#2783fb"
             }

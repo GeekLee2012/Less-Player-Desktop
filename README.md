@@ -8,7 +8,7 @@
 ![GitHub Forks](https://img.shields.io/github/forks/GeekLee2012/Less-Player-Desktop)    
     
   
-基于Electron + Vue 3开发、`插件化`的播放器。   
+基于[Electron](https://www.electronjs.org/) + [Vue 3](https://cn.vuejs.org/)开发、[插件化](https://github.com/GeekLee2012/Less-Player-Desktop-Plugins/)的播放器。   
   
 <b>`郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>   
   
@@ -17,21 +17,21 @@
 * 开发模式：循序渐进模式，边学习边开发（学以致用）  
   
 ### 开发/测试环境
-* OS：macOS Monterey（开发、测试）、Windows 10（虚拟机，仅测试）  
-* IDE：[Visual Studio Code](https://code.visualstudio.com/)
-* [Nodejs](https://nodejs.org/)：v16.17.0 LTS +  
+* OS：macOS Monterey（开发 + 测试）、Windows 10（虚拟机，仅测试）  
+* IDE：[Visual Studio Code](https://code.visualstudio.com/)  
+* [Nodejs](https://nodejs.org/)：>= 18.0.0  
 * 其他：详见 [package.json](package.json)    
   
 ### 功能特性
-* <b>插件扩展</b>：支持插件管理，通过插件扩展播放器的内容、外观、功能等  
+* <b>插件扩展</b>：支持插件管理，可通过插件扩展播放器的内容、外观、功能等  
 * <b>普通功能</b>：播放/暂停、上/下一首、进度条/播放时间、播放模式、音量控制、歌词等  
-* <b>本地歌曲</b>：支持音频格式，包括: mp3、flac、ogg、wav、aac、m4a; 支持导入歌单格式：m3u、pls 
-* <b>自由FM</b>：支持新建/编辑FM广播电台；支持导入导出，格式包括: m3u、pls、json等  
+* <b>本地歌曲</b>：支持音频格式：mp3、flac、ogg、wav、aac、m4a; 支持导入歌单格式：m3u、pls 
+* <b>自由FM</b>：支持新增/删除/修改FM广播电台；支持导入导出，格式包括：m3u、pls、json  
 * <b>我的主页</b>：包括我的收藏、自定义歌单、关注的歌手、最近播放等  
 * <b>动态频谱</b>：内置2种简单的频谱样式，支持插件扩展   
-* <b>简单音效</b>：包括均衡器、混响两大基本功能  
+* <b>简单音效</b>：包括均衡器、混响等基本功能  
 * <b>设置页</b>：包括主题、布局、窗口缩放、导航栏、快捷键、网络代理等  
-* <b>播放页</b>：目前支持2种样式，“一静一动”; 歌词设置灵活，支持通过歌词调整歌曲进度、外文翻译（需平台支持） 
+* <b>播放页</b>：目前预设5种播放样式，“静动结合”; 歌词设置灵活，支持通过歌词调整歌曲进度、外文翻译（需平台支持） 
 * <b>窗口缩放</b>：屏幕大小，适应自如  
 * <b>桌面歌词</b>：支持横屏、竖屏歌词；支持3种显示模式，即单行、双行、全部；同时可对字体大小、颜色、行间距等进行设置 
   
@@ -51,7 +51,7 @@ PS
 ### For开发者  
 * 请先下载安装最新版（或最新LTS版本） [Nodejs](https://nodejs.org/)  
 
-* <b>若有问题，建议优先查看项目文档</b>：[FAQ.md](FAQ.md) 
+* <b>`若有问题，建议优先查看项目文档`</b>：[FAQ.md](FAQ.md) 
   
 * <b>安装依赖</b>  
   `npm install`
@@ -73,8 +73,8 @@ PS
 * 建议多熟悉一下，播放器设置功能，不同设置会带来一些些不同的使用体验哦  
 * 播放器设置相对灵活，部分功能会默认“关闭”，需前往“设置页”开启或切换  
 * 最新开发预览版（测试版），会在项目自身仓库，不定期打包发布，欢迎愿意尝鲜的朋友一起体验  
-* 开发预览版，均为<b>`Pre-release`</b>版本，且tag标签名称或版本号<b>`以发布日期结尾`</b>   
-* 当前页顶部分别有<b>`release、tag、license、downloads`</b>等图标按钮，请点击<b>`release按钮`</b>直达发行版本列表页面  
+* 开发预览版，即为<b>`Pre-release`</b>版本，tag标签名称或版本号里<b>`带有发布日期`</b>   
+* 当前页面顶部，分别有<b>`release、tag、license、downloads`</b>等图标按钮，请点击<b>`release按钮`</b>直达发行版本列表页面  
 
   
 ### 发行版  

@@ -7,7 +7,8 @@ const { app, BrowserWindow, ipcMain,
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
   USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON,
-  AUDIO_PLAYLIST_EXTS, BACKUP_FILE_EXTS, TrayAction
+  AUDIO_PLAYLIST_EXTS, BACKUP_FILE_EXTS, 
+  TrayAction, GitRepository
 } = require('./env')
 
 const { scanDirTracks, parseTracks,
@@ -444,7 +445,7 @@ const registryGlobalListeners = () => {
   }).on('app-setGlobalProxy', (event, data) => {
     setupAppGlobalProxy(data)
   }).on('visit-link', (event, url) => {
-    if(url) shell.openExternal(url)
+    visitLink(url)
   })/*.on('download-item', (event, { url }) => {
     downloadDefault(url)
   }).on('download-cancel', (event, data) => {
@@ -1086,15 +1087,17 @@ const setupAppLayout = (layout, zoom, isInit) => {
 
 //菜单模板
 const initAppMenuTemplate = () => {
-  const locale = app.getLocale()
-  const TEXT_CONFIG = {
+  const i18nText = {
     'en-US': {
       about: 'About',
       update: 'Check for Updates...',
       settings: 'Settings',
       devTools: 'Developer Tools',
       quit: 'Quit',
-      edit: 'Edit'
+      edit: 'Edit',
+      plugins: 'Plugins',
+      github: 'Github Repository',
+      gitee: 'Gitee Repository'
     },
     'zh-CN': {
       about: '关于',
@@ -1102,10 +1105,14 @@ const initAppMenuTemplate = () => {
       settings: '设置',
       devTools: '开发者工具',
       quit: '退出',
-      edit: '编辑'
+      edit: '编辑',
+      plugins: '插件',
+      github: 'Github仓库',
+      gitee: 'Gitee仓库'
     }
   }
-  const menuText = TEXT_CONFIG[locale] || TEXT_CONFIG['zh-CN']
+  const locale = app.getLocale() || 'zh-CN'
+  const menuText = i18nText[locale]
   let menuItems = [{ role: 'about', label: menuText.about },
   { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.CHECK_FOR_UPDATES, true), label: menuText.update },
   { type: 'separator' },
@@ -1132,6 +1139,12 @@ const initAppMenuTemplate = () => {
         { role: 'delete' },
         { type: 'separator' },
         { role: 'selectAll' }
+      ]
+    }, {
+      label: menuText.plugins,
+      submenu: [
+        { click: (menuItem, browserWindow, event) => visitLink(GitRepository.GITHUB + '-Plugins'), label: menuText.github },
+        { click: (menuItem, browserWindow, event) => visitLink(GitRepository.GITEE+ '-plugins'), label: menuText.gitee },
       ]
     }]
   ]
@@ -1411,6 +1424,10 @@ const fetchCookie = async (url, ignoreCache) => {
   }
   Reflect.deleteProperty(cookiesPendingMap, url)
   return cookie
+}
+
+const visitLink = (url) => {
+  return url && shell.openExternal(url)
 }
 
 //覆盖(包装)请求

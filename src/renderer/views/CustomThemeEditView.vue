@@ -274,7 +274,7 @@ watch(workingCustomTheme, (nv, ov) => {
                         </div>
                         <div class="item" @click="">
                             <div class="name">背景颜色：</div>
-                            <ColorInputControl :value="customTheme.appBackground.bgColor" :onChanged="setupAppBackground">
+                            <ColorInputControl label="背景颜色" :value="customTheme.appBackground.bgColor" :onChanged="setupAppBackground">
                             </ColorInputControl>
                         </div>
                         <div class="item img-item">
@@ -391,71 +391,71 @@ watch(workingCustomTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">文字颜色：</div>
-                            <ColorInputControl :value="customTheme.content.textColor" :colorMode="true"
+                            <ColorInputControl label="文字颜色" :value="customTheme.content.textColor" :colorMode="true"
                                 :onChanged="setupContentTextColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">文字高亮颜色：</div>
-                            <ColorInputControl :value="customTheme.content.textHighlightColor"
+                            <ColorInputControl label="文字高亮颜色" :value="customTheme.content.textHighlightColor"
                                 :onChanged="setupContentTextHighlightColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">非文字类高亮颜色：</div>
-                            <ColorInputControl :value="customTheme.content.highlightColor"
+                            <ColorInputControl label="非文字类高亮颜色" :value="customTheme.content.highlightColor"
                                 :onChanged="setupContentHighlightColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">副标题类文字颜色：</div>
-                            <ColorInputControl :value="customTheme.content.subtitleTextColor" :colorMode="true"
+                            <ColorInputControl label="副标题类文字颜色" :value="customTheme.content.subtitleTextColor" :colorMode="true"
                                 :onChanged="setupContentSubtitleTextColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">次要 / 提示类文字颜色：</div>
-                            <ColorInputControl :value="customTheme.content.secondaryTextColor" :colorMode="true"
+                            <ColorInputControl label="次要/提示类文字颜色" :value="customTheme.content.secondaryTextColor" :colorMode="true"
                                 :onChanged="setupContentSecondaryTextColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">内容区背景颜色：</div>
-                            <ColorInputControl :value="customTheme.content.bgColor" :onChanged="setupContentBgColor">
+                            <ColorInputControl label="内容区背景颜色" :value="customTheme.content.bgColor" :onChanged="setupContentBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">标题导航类内容区背景颜色：</div>
-                            <ColorInputControl :value="customTheme.content.headerNavBgColor"
+                            <ColorInputControl label="标题导航类内容区背景颜色" :value="customTheme.content.headerNavBgColor"
                                 :onChanged="setupContentHeaderNavBgColor"></ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">左侧导航栏背景颜色：</div>
-                            <ColorInputControl :value="customTheme.content.leftNavBgColor"
+                            <ColorInputControl label="左侧导航栏背景颜色" :value="customTheme.content.leftNavBgColor"
                                 :onChanged="setupContentLeftNavBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">内容区加载时遮罩颜色：</div>
-                            <ColorInputControl :value="customTheme.content.loadingMaskColor"
+                            <ColorInputControl label="内容区加载时遮罩颜色" :value="customTheme.content.loadingMaskColor"
                                 :onChanged="setupContentLoadingMaskColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">列表项类光标悬停时背景颜色：</div>
-                            <ColorInputControl :value="customTheme.content.listItemHoverBgColor"
+                            <ColorInputControl label="列表项类光标悬停时背景颜色" :value="customTheme.content.listItemHoverBgColor"
                                 :onChanged="setupContentListItemHoverBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">输入框类文字颜色：</div>
-                            <ColorInputControl :value="customTheme.content.inputsTextColor" :colorMode="true"
+                            <ColorInputControl label="输入框类文字颜色" :value="customTheme.content.inputsTextColor" :colorMode="true"
                                 :onChanged="setupContentInputsTextColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">输入框类背景颜色：</div>
-                            <ColorInputControl :value="customTheme.content.inputsBgColor" :colorMode="true"
+                            <ColorInputControl label="输入框类背景颜色" :value="customTheme.content.inputsBgColor" :colorMode="true"
                                 :onChanged="setupContentInputsBgColor">
                             </ColorInputControl>
                         </div>
@@ -466,25 +466,25 @@ watch(workingCustomTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">边框 / 分隔线类颜色：</div>
-                            <ColorInputControl :value="customTheme.border.borderColor" :colorMode="true"
+                            <ColorInputControl label="边框/分隔线类颜色" :value="customTheme.border.borderColor" :colorMode="true"
                                 :onChanged="setupBorderColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">左侧导航栏边框颜色：</div>
-                            <ColorInputControl :value="customTheme.border.leftNavBorderColor" :colorMode="true"
+                            <ColorInputControl label="左侧导航栏边框颜色" :value="customTheme.border.leftNavBorderColor" :colorMode="true"
                                 :onChanged="setupBorderLeftNavBorderColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">弹窗类边框颜色：</div>
-                            <ColorInputControl :value="customTheme.border.popoversBorderColor" :colorMode="true"
+                            <ColorInputControl label="弹窗类边框颜色" :value="customTheme.border.popoversBorderColor" :colorMode="true"
                                 :onChanged="setupBorderPopoversBorderColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">输入框类边框颜色：</div>
-                            <ColorInputControl :value="customTheme.border.inputsBorderColor" :colorMode="true"
+                            <ColorInputControl label="输入框类边框颜色" :value="customTheme.border.inputsBorderColor" :colorMode="true"
                                 :onChanged="setupBorderInputsBorderColor">
                             </ColorInputControl>
                         </div>
@@ -495,49 +495,49 @@ watch(workingCustomTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">图标按钮颜色：</div>
-                            <ColorInputControl :value="customTheme.button.iconBtnColor" :colorMode="true"
+                            <ColorInputControl label="图标按钮颜色" :value="customTheme.button.iconBtnColor" :colorMode="true"
                                 :onChanged="setupButtonIconBtnColor">
                             </ColorInputControl>
                         </div>
                         <div class="item" v-show="false">
                             <div class="name">图标按钮光标悬停时颜色：</div>
-                            <ColorInputControl :value="customTheme.button.iconBtnHoverColor" :colorMode="true"
+                            <ColorInputControl label="图标按钮光标悬停时颜色" :value="customTheme.button.iconBtnHoverColor" :colorMode="true"
                                 :onChanged="setupButtonIconBtnHoverColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">胶囊按钮背景颜色：</div>
-                            <ColorInputControl :value="customTheme.button.iconTextBtnBgColor"
+                            <ColorInputControl label="胶囊按钮背景颜色" :value="customTheme.button.iconTextBtnBgColor"
                                 :onChanged="setupButtonIconTextBtnBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">胶囊按钮文字颜色：</div>
-                            <ColorInputControl :value="customTheme.button.iconTextBtnTextColor" :colorMode="true"
+                            <ColorInputControl label="胶囊按钮文字颜色" :value="customTheme.button.iconTextBtnTextColor" :colorMode="true"
                                 :onChanged="setupButtonIconTextBtnTextColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">胶囊按钮图标颜色：</div>
-                            <ColorInputControl :value="customTheme.button.iconTextBtnIconColor" :colorMode="true"
+                            <ColorInputControl label="胶囊按钮图标颜色" :value="customTheme.button.iconTextBtnIconColor" :colorMode="true"
                                 :onChanged="setupButtonIconTextBtnIconColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">胶囊按钮光标悬停时背景颜色：</div>
-                            <ColorInputControl :value="customTheme.button.iconTextBtnHoverBgColor"
+                            <ColorInputControl label="胶囊按钮光标悬停时背景颜色" :value="customTheme.button.iconTextBtnHoverBgColor"
                                 :onChanged="setupButtonIconTextBtnHoverBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">开关按钮背景颜色：</div>
-                            <ColorInputControl :value="customTheme.button.toggleBtnBgColor" :colorMode="true"
+                            <ColorInputControl label="开关按钮背景颜色" :value="customTheme.button.toggleBtnBgColor" :colorMode="true"
                                 :onChanged="setupButtonToggleBtnBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">开关按钮滑块颜色：</div>
-                            <ColorInputControl :value="customTheme.button.toggleBtnThumbColor" :colorMode="true"
+                            <ColorInputControl label="开关按钮滑块颜色" :value="customTheme.button.toggleBtnThumbColor" :colorMode="true"
                                 :onChanged="setupButtonToggleBtnThumbColor">
                             </ColorInputControl>
                         </div>
@@ -548,48 +548,48 @@ watch(workingCustomTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">边框颜色：</div>
-                            <ColorInputControl :value="customTheme.searchBar.borderColor" :colorMode="true"
+                            <ColorInputControl label="边框颜色" :value="customTheme.searchBar.borderColor" :colorMode="true"
                                 :onChanged="setupSearchBarBorderColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">背景颜色：</div>
-                            <ColorInputControl :value="customTheme.searchBar.bgColor" :onChanged="setupSearchBarBgColor">
+                            <ColorInputControl label="背景颜色" :value="customTheme.searchBar.bgColor" :onChanged="setupSearchBarBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">文字颜色：</div>
-                            <ColorInputControl :value="customTheme.searchBar.textColor"
+                            <ColorInputControl label="文字颜色" :value="customTheme.searchBar.textColor"
                                 :onChanged="setupSearchBarTextColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">搜索按钮背景颜色：</div>
-                            <ColorInputControl :value="customTheme.searchBar.searchBtnBgColor"
+                            <ColorInputControl label="搜索按钮背景颜色" :value="customTheme.searchBar.searchBtnBgColor"
                                 :onChanged="setupSearchBarSearchBtnBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">搜索按钮光标悬停时背景颜色：</div>
-                            <ColorInputControl :value="customTheme.searchBar.searchBtnHoverBgColor"
+                            <ColorInputControl label="搜索按钮光标悬停时背景颜色" :value="customTheme.searchBar.searchBtnHoverBgColor"
                                 :onChanged="setupSearchBarSearchBtnHoverBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">搜索按钮图标颜色：</div>
-                            <ColorInputControl :value="customTheme.searchBar.searchBtnIconColor" :colorMode="true"
+                            <ColorInputControl label="搜索按钮图标颜色" :value="customTheme.searchBar.searchBtnIconColor" :colorMode="true"
                                 :onChanged="setupSearchBarSearchBtnIconColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">搜索按钮光标悬停时图标颜色：</div>
-                            <ColorInputControl :value="customTheme.searchBar.searchBtnHoverIconColor" :colorMode="true"
+                            <ColorInputControl label="搜索按钮光标悬停时图标颜色" :value="customTheme.searchBar.searchBtnHoverIconColor" :colorMode="true"
                                 :onChanged="setupSearchBarSearchBtnHoverIconColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">清除按钮图标颜色：</div>
-                            <ColorInputControl :value="customTheme.searchBar.clearBtnIconColor" :colorMode="true"
+                            <ColorInputControl label="清除按钮图标颜色" :value="customTheme.searchBar.clearBtnIconColor" :colorMode="true"
                                 :onChanged="setupSearchBarClearBtnIconColor">
                             </ColorInputControl>
                         </div>
@@ -600,24 +600,24 @@ watch(workingCustomTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">背景颜色：</div>
-                            <ColorInputControl :value="customTheme.appLogo.bgColor" :onChanged="setupAppLogoBgColor">
+                            <ColorInputControl label="背景颜色" :value="customTheme.appLogo.bgColor" :onChanged="setupAppLogoBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">内部小圆圈背景颜色：</div>
-                            <ColorInputControl :value="customTheme.appLogo.innerBgColor"
+                            <ColorInputControl label="内部小圆圈背景颜色" :value="customTheme.appLogo.innerBgColor"
                                 :onChanged="setupAppLogoInnerBgColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">内部字母L颜色：</div>
-                            <ColorInputControl :value="customTheme.appLogo.innerTextColor" :colorMode="true"
+                            <ColorInputControl label="内部字母L颜色" :value="customTheme.appLogo.innerTextColor" :colorMode="true"
                                 :onChanged="setupAppLogoInnerTextColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">右边文字颜色：</div>
-                            <ColorInputControl :value="customTheme.appLogo.appNameTextColor"
+                            <ColorInputControl label="右边文字颜色" :value="customTheme.appLogo.appNameTextColor"
                                 :onChanged="setupAppLogoAppNameTextColor">
                             </ColorInputControl>
                         </div>
@@ -628,13 +628,13 @@ watch(workingCustomTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">滚动条颜色：</div>
-                            <ColorInputControl :value="customTheme.others.scrollBarColor"
+                            <ColorInputControl label="滚动条颜色" :value="customTheme.others.scrollBarColor"
                                 :onChanged="setupOthersScrollBarColor">
                             </ColorInputControl>
                         </div>
                         <div class="item">
                             <div class="name">进度条背景颜色：</div>
-                            <ColorInputControl :value="customTheme.others.progressBarBgColor"
+                            <ColorInputControl label="进度条背景颜色" :value="customTheme.others.progressBarBgColor"
                                 :onChanged="setupOthersProgressBarBgColor">
                             </ColorInputControl>
                         </div>

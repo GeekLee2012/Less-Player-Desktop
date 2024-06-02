@@ -31,7 +31,8 @@ const { addLocalPlaylist, resetAll,
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { isUseDndForCreateLocalPlaylistEnable,
     isUseDeeplyScanForDirectoryEnable,
-    isShowDialogBeforeClearLocalMusics } = storeToRefs(useSettingStore())
+    isShowDialogBeforeClearLocalMusics,
+    isLocalMusicHomepageTipsShow, } = storeToRefs(useSettingStore())
 
 const localMusicRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -130,14 +131,14 @@ onMounted(() => {
     <div id="local-music-view" ref="localMusicRef" @scroll="onScroll" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <div class="title">本地歌曲</div>
-            <div class="about">
+            <div class="about" v-show="isLocalMusicHomepageTipsShow">
                 <p>支持播放的音频格式：.mp3、.flac、.ogg、.wav、.aac、.m4a</p>
                 <p>支持导入的歌单格式：.m3u、.m3u8、.pls</p>
                 <p>歌单导入、导出功能，并不支持跨设备，而是为兼容当前设备下的其他播放器</p>
                 <p>最近播放、收藏功能，暂时还不支持本地歌曲</p>
                 <p>歌曲信息乱码时，建议使用第三方音乐标签工具修正后，再重新添加到当前播放器</p>
             </div>
-            <div class="action">
+            <div class="action" :class="{ 'none-about': !isLocalMusicHomepageTipsShow }">
                 <CreatePlaylistBtn :leftAction="visitLocalPlaylistCreate">
                 </CreatePlaylistBtn>
                 <SvgTextButton text="导入歌单" :leftAction="importPlaylist" :disabled="importTaskCount > 0" class="spacing">
@@ -217,6 +218,10 @@ onMounted(() => {
 
 #local-music-view .header .action {
     display: flex;
+}
+
+#local-music-view .header .action.none-about {
+    margin-top: 10px;
 }
 
 #local-music-view .center .list-title {

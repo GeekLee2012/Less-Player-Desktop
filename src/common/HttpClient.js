@@ -28,9 +28,9 @@ export const parseJsonp = (jsonp) => {
 
 export const qsStringify = (data) => (qs.stringify(data))
 
-const tryResponseJson = (resp) => {
-    if(!resp || !resp.data) return 
-    const { data } = resp
+const parseJson = (data) => {
+    //if(!resp || !resp.data) return 
+    //const { data } = resp
     if(data && typeof data == 'string') {
         try {
             return JSON.parse(data)
@@ -47,7 +47,7 @@ const tryResponseJson = (resp) => {
 
 export const get = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
-        if(isBlank(url)) return Promise.reject('noUrl')
+        if(isBlank(url)) return reject('noUrl')
         if (data && (typeof data === 'object')) {
             data = qsStringify(data)
             if(!url.includes('?')) url = `${url}?`
@@ -62,7 +62,7 @@ export const get = async (url, data, config, callback) => {
 
 export const post = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
-        if(isBlank(url)) return Promise.reject('noUrl')
+        if(isBlank(url)) return reject('noUrl')
         if (data && (typeof data === 'object')) data = qsStringify(data)
         axios.post(url, data, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
@@ -79,7 +79,7 @@ export const getDoc = (url, data, config) => {
 }
 
 export const getJson = (url, data, config) => {
-    return get(url, data, config, resp => tryResponseJson(resp))
+    return get(url, data, config, resp => parseJson(resp.data))
 }
 
 export const postRaw = (url, data, config) => {
@@ -87,7 +87,7 @@ export const postRaw = (url, data, config) => {
 }
 
 export const postJson = (url, data, config) => {
-    return post(url, data, config, resp => tryResponseJson(resp))
+    return post(url, data, config, resp => parseJson(resp.data))
 }
 
 //获取国内IPv4，失败时随机返回内置IP池中的IP

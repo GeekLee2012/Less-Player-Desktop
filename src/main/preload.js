@@ -18,10 +18,11 @@ window.addEventListener('DOMContentLoaded', () => {
 const { contextBridge, ipcRenderer } = require('electron')
 const { isMacOS, isWinOS, useCustomTrafficLight, 
   isDevEnv, DOWNLOADS_PATH, AUDIO_EXTS, EXTRA_AUDIO_EXTS,
+  TrayAction, GitRepository
 } = require('./env')
-const path = require('path')
-const { createCipheriv, publicEncrypt, constants, randomBytes, createHash } = require('crypto')
-const zlib = require('zlib')
+//const path = require('path')
+//const { createCipheriv, publicEncrypt, constants, randomBytes, createHash } = require('crypto')
+//const zlib = require('zlib')
 
 
 
@@ -38,9 +39,11 @@ window.electronAPI = {
   isWinOS,
   isDevEnv,
   useCustomTrafficLight,
-  downloadsPath: DOWNLOADS_PATH,
+  DOWNLOADS_PATH,
   AUDIO_EXTS,
   EXTRA_AUDIO_EXTS,
+  TrayAction,
+  GitRepository,
 }
 /*
 window.lessAPI = {

@@ -89,6 +89,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         //当前调用链路追踪ID
         currentTraceId: null,
         colorPickerToolbarShow: false,
+        colorPickerToolbarTitle: '颜色设置',
         gradientColorToolbarShow: false,
         //悬浮提示
         popoverHintShow: false,
@@ -484,12 +485,17 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleColorPickerToolbar() {
             this.colorPickerToolbarShow = !this.colorPickerToolbarShow
+            if(!this.colorPickerToolbarShow) {
+                this.colorPickerToolbarTitle = null
+            }
         },
         hideColorPickerToolbar() {
             this.colorPickerToolbarShow = false
+            this.colorPickerToolbarTitle = null
         },
-        showColorPickerToolbar() {
+        showColorPickerToolbar(title) {
             this.colorPickerToolbarShow = true
+            this.colorPickerToolbarTitle = title || '颜色设置'
         },
         toggleGradientColorToolbar() {
             this.gradientColorToolbarShow = !this.gradientColorToolbarShow

@@ -1,4 +1,5 @@
-#.npmrc配置文件（注意：名称以.开头）
+#.npmrc配置文件（注意：名称以.开头）  
+#配置国内阿里镜像
 #下载源
 registry=http://registry.npmmirror.com
 
