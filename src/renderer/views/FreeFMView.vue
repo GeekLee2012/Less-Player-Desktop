@@ -100,9 +100,10 @@ const importRadios = async () => {
 const removeAll = async () => {
     if (freeRadios.value.length < 1) return
 
-    let ok = true
-    if (isShowDialogBeforeClearFreeFM.value) ok = await showConfirm({ msg: '确定要清空自由FM电台吗？' })
-    if (!ok) return
+    if (isShowDialogBeforeClearFreeFM.value) {
+        const ok = await showConfirm({ msg: '确定要清空自由FM电台吗？' })
+        if (!ok) return
+    }
 
     resetAll()
     filteredData.value = null

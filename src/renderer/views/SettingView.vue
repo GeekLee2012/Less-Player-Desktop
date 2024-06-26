@@ -28,9 +28,10 @@ const { theme, layout, common, track, desktopLyric,
     keys, keysDefault, tray, navigation, dialog, cache,
     network, others, search, isHttpProxyEnable, isSocksProxyEnable,
     isShowDialogBeforeResetSetting, isCheckPreReleaseVersion,
-    isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
+    isUseCardStyleImageTextTile, isSettingViewTipsShow, } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
+    toggleSettingViewTipsShow,
     setWindowZoom,
     setWindowCtlStyle,
     setFontFamily,
@@ -47,6 +48,7 @@ const { setThemeIndex,
     toggleQuitVideoAfterEnded,
     togglePlayingWithoutSleeping,
     togglePlayingViewUseBgCoverEffect,
+    togglePlayingViewCoverBorderShow,
     toggleUseShadowForCardStyleTile,
     toggleStorePlayState,
     toggleStoreLocalMusic,
@@ -161,9 +163,10 @@ const resetData = async () => {
 /* 数据 - 恢复默认设置 */
 /*
 const resetSettingData = async () => {
-    let ok = true
-    if (isShowDialogBeforeResetSetting.value) ok = await showConfirm({ msg: '确定要恢复默认设置吗？' })
-    if (!ok) return
+    if (isShowDialogBeforeResetSetting.value) {
+        const ok = await showConfirm({ msg: '确定要恢复默认设置吗？' })
+        if (!ok) return
+    }
     const settingStore = useSettingStore()
     settingStore.$reset()
     const storeKeys = ['setting']
@@ -494,6 +497,12 @@ const changeAudioOutputDevices = (event) => {
     setAudioOutputDeviceId(deviceId)
 }
 
+const refreshSettingViewTips = (nv) => {
+    const visibility = nv ? 'block' : 'none'
+    const tipTextEls = document.querySelectorAll('#setting-view .tip-text') || []
+    tipTextEls.forEach(el => el.style.display = visibility)
+}
+
 EventBus.on('setting-checkForUpdates', checkForUpdates)
 
 /* 生命周期、监听 */
@@ -505,6 +514,7 @@ onActivated(() => {
 onMounted(checkForUpdates)
 
 watch(isCheckPreReleaseVersion, checkForUpdates)
+watch(isSettingViewTipsShow, refreshSettingViewTips)
 </script>
 
 <template>
@@ -538,6 +548,11 @@ watch(isCheckPreReleaseVersion, checkForUpdates)
                 <span class="cate-name">通用</span>
                 <div class="content">
                     <div class="tip-text">提示：当前应用，所有输入框，按Enter键生效，或光标焦点离开后自动生效</div>
+                    <div>
+                        <span class="cate-subtitle">设置页显示提示：</span>
+                        <ToggleControl @click="toggleSettingViewTipsShow" :value="common.settingViewTipsShow">
+                        </ToggleControl>
+                    </div>
                     <div class="window-zoom">
                         <div class="zoom-title">
                             <span>窗口缩放：</span>
@@ -747,6 +762,12 @@ watch(isCheckPreReleaseVersion, checkForUpdates)
                             :value="track.playingViewUseBgCoverEffect">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：实验性功能</div>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">播放页封面图片边框：</span>
+                        <ToggleControl @click="togglePlayingViewCoverBorderShow"
+                            :value="track.playingViewCoverBorderShow">
+                        </ToggleControl>
                     </div>
                     <div>
                         <span class="cate-subtitle">封面图片、歌词等拖拽保存：</span>

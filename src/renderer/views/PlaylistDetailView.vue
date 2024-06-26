@@ -14,7 +14,7 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import { Playlist } from '../../common/Playlist';
-import { coverDefault, trimExtraChars } from '../../common/Utils';
+import { coverDefault, isBlank, trimExtraChars } from '../../common/Utils';
 
 
 
@@ -24,11 +24,12 @@ const props = defineProps({
 })
 
 const { addAndPlayTracks, playPlaylist, addPlaylistToQueue, dndSaveCover } = inject('player')
-
+const { searchDefault, } = inject('appCommon')
 
 const { getVendor } = usePlatformStore()
 const { addTracks } = usePlayStore()
-const { showToast, hideAllCtxMenus, } = useAppCommonStore()
+const { routerCtxCacheItem, } = storeToRefs(useAppCommonStore())
+const { showToast, hideAllCtxMenus,  } = useAppCommonStore()
 const { isSearchForOnlinePlaylistShow, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
 
@@ -254,12 +255,24 @@ const detectTitleHeight = () => {
     setTwoLinesTitle(clientHeight > 50)
 }
 
+const visitLinkItem = (title) => {
+    if(isBlank(title)) return
+    searchDefault(`@:${title}`)
+}
+
+const visitRouterCtxCacheItem = () => {
+    if (!routerCtxCacheItem.value) return
+    const { id, title } = routerCtxCacheItem.value
+    if (id == 'linkItem')  setTimeout(() => visitLinkItem(title), 202)
+}
+
 
 /* 生命周期、监听 */
 onActivated(() => {
     restoreScrollState()
     detectTitleHeight()
     resetBack2TopBtn()
+    //visitRouterCtxCacheItem()
 })
 
 watch(() => props.id, () => {
@@ -273,6 +286,7 @@ watch(isLoading, () => nextTick(detectTitleHeight))
 
 EventBus.on("refresh-favorite", checkFavorite)
 EventBus.on('app-resize', detectTitleHeight)
+//EventBus.on('playlist-linkItem', visitLinkItem)
 </script>
 
 <template>

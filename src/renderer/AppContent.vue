@@ -333,7 +333,7 @@ const setConfirmDialogShowing = (value) => isConfirmDialogShowing.value = value
 const showConfirm = async ({ title, msg }) => {
   if (!ipcRenderer || isConfirmDialogShowing.value) return false
   setConfirmDialogShowing(true)
-  hideAllCtxMenus()
+  hideAllCtxMenus(false)
   const ok = await ipcRenderer.invoke('show-confirm', {
     title: title || '确认',
     msg
@@ -395,6 +395,8 @@ const searchDefault = async (keyword) => {
     || keyword.toLowerCase() === 'plugins') {
     visitPlugins()
     return
+  } else if (keyword.startsWith(":")) {
+    keyword = toLowerCaseTrimString(keyword.slice(1))
   } else {
     visitSetting()
   }
@@ -500,6 +502,7 @@ provide('appCommon', {
   showConfirm,
   showContextMenu,
   searchAction,
+  searchDefault,
   searchBarPlaceholder,
   useWindowsStyleWinCtl,
   resetSetting,

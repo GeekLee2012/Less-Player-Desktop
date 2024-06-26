@@ -49,9 +49,10 @@ const editItem = () => visitCustomPlaylistEdit(props.data.id)
 const visitBatch = () => visitBatchCustomPlaylist(props.data.id)
 
 const removeItem = async () => {
-    let ok = true
-    if (isShowDialogBeforeDeleteCustomPlaylist.value) ok = await showConfirm({ msg: '确定要删除歌单吗？' })
-    if (!ok) return
+    if (isShowDialogBeforeDeleteCustomPlaylist.value) {
+        const ok = await showConfirm({ msg: '确定要删除歌单吗？' })
+        if(!ok) return
+    }
 
     const { id } = props.data
     removeCustomPlaylist(id)

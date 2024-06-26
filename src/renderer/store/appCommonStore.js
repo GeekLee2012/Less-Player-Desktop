@@ -419,8 +419,9 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.hideTagsCategoryView()
             this.hidePlatformCategoryView()
         },
-        hideAllCtxMenus() {
-            this.hideCommonCtxMenu(true)
+        hideAllCtxMenus(clearCache) {
+            clearCache = (clearCache === undefined) ? true : clearCache
+            this.hideCommonCtxMenu(clearCache)
             this.hideAddToListSubmenu()
             this.hideArtistListSubmenu()
         },

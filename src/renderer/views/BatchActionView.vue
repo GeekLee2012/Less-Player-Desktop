@@ -532,9 +532,10 @@ const toggleMoveCheckedMenu = (event) => {
 
 const removeChecked = async () => {
     if (checkedData.length < 1) return
-    let ok = true
-    if (isShowDialogBeforeBatchDelete.value) ok = await showConfirm({ msg: '确定要删除所选数据吗？' })
-    if (!ok) return
+    if (isShowDialogBeforeBatchDelete.value) {
+        const ok = await showConfirm({ msg: '确定要删除所选数据吗？' })
+        if(!ok) return
+    }
 
     let deleteFn = null
     if (isSongTab()) {

@@ -128,9 +128,10 @@ const resetBack2TopBtn = () => {
 const removeAll = async () => {
     if (!detail.data || detail.data.length < 1) return
 
-    let ok = true
-    if (isShowDialogBeforeBatchDelete.value) ok = await showConfirm({ msg: '确定要清空歌单吗？' })
-    if (!ok) return
+    if (isShowDialogBeforeBatchDelete.value) {
+        const ok = await showConfirm({ msg: '确定要清空歌单吗？' })
+        if (!ok) return
+    }
 
     removeAllFromCustomPlaylist(props.id)
     showToast("全部歌曲已删除")

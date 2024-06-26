@@ -53,8 +53,8 @@ const scanDirTracks = async (dir, exts, deep) => {
         const statResult = statSync(dir, { throwIfNoEntry: false })
         if (!statResult || !statResult.isDirectory()) return null
        
-        exts = exts || []
-        if (!exts || exts.length < 1) {
+        exts = Array.isArray(exts) ? exts : []
+        if (exts.length < 1) {
             exts.push(...AUDIO_EXTS)
             exts.push(...EXTRA_AUDIO_EXTS)
         }

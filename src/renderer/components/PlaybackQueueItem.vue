@@ -9,17 +9,18 @@ import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
 import { Playlist } from '../../common/Playlist';
 import { coverDefault, toTrimString } from '../../common/Utils';
+import EventBus from '../../common/EventBus';
 
 
 
 const { playMv, dndSaveTrack } = inject('player')
 const { visitPlaylist, visitRadio, visitAlbum } = inject('appRoute')
-const { showContextMenu } = inject('appCommon')
+const { showContextMenu, } = inject('appCommon')
 
 const { queueTracksSize } = storeToRefs(usePlayStore())
 const { playTrack, removeTrack, isCurrentTrack, togglePlay } = usePlayStore()
 const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
-const { showToast } = useAppCommonStore()
+const { showToast, setRouterCtxCacheItem } = useAppCommonStore()
 const { isHighlightCtxMenuItemEnable, isPlaybackQueueMvBtnShow, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
@@ -41,13 +42,25 @@ const playItem = () => {
 
 const linkItem = () => {
     const track = props.data
-    const { pid, platform, album } = track
+    const { pid, title, platform, album } = track
     if (Track.hasPid(track)) {
         if (Playlist.isAnchorRadioType(track)) {
-            visitPlaylist(platform, pid, 'radios')
+            /*
+            visitPlaylist(platform, pid, 'radios', () => setRouterCtxCacheItem({ id: 'linkItem', title }), true)
+                .catch(error => {
+                    if (error == 'sameRoute') EventBus.emit('playlist-linkItem', title)
+                })
+            */
+           visitPlaylist(platform, pid, 'radios')
         } else if (album && toTrimString(album.id) == toTrimString(pid)) {
             visitAlbum({ platform, id: pid })
         } else {
+            /*
+            visitPlaylist(platform, pid, null, () => setRouterCtxCacheItem({ id: 'linkItem', title }), true)
+                .catch(error => {
+                    if (error == 'sameRoute') EventBus.emit('playlist-linkItem', title)
+                })
+            */
             visitPlaylist(platform, pid)
         }
     } else if (Playlist.isFMRadioType(track)) {

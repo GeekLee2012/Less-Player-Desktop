@@ -169,9 +169,10 @@ const visitBatchCustom = () => {
 
 //删除创建的歌单
 const removeCustom = async () => {
-    let ok = true
-    if (isShowDialogBeforeDeleteCustomPlaylist.value) ok = await showConfirm({ msg: '确定要删除歌单吗？' })
-    if (!ok) return
+    if (isShowDialogBeforeDeleteCustomPlaylist.value) {
+        const ok = await showConfirm({ msg: '确定要删除歌单吗？' })
+        if(!ok) return
+    }
 
     const { id } = commonCtxMenuCacheItem.value
     removeCustomPlaylist(id)

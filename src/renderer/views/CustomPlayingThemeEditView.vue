@@ -337,7 +337,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                         </div>
                         <div class="item">
                             <div class="name">文字颜色</div>
-                            <ColorInputControl :value="customTheme.textColor" :onChanged="setupTextColor">
+                            <ColorInputControl label="文字颜色" :value="customTheme.textColor" :onChanged="setupTextColor">
                             </ColorInputControl>
                         </div>
                     </div>
@@ -347,7 +347,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">按钮颜色</div>
-                            <ColorInputControl :value="customTheme.btnColor" :colorMode="true"
+                            <ColorInputControl label="按钮颜色" :value="customTheme.btnColor" :colorMode="true"
                                 :onChanged="setupBtnColor">
                             </ColorInputControl>
                         </div>

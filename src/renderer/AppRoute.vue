@@ -134,8 +134,8 @@ const createCommonRoute = (route, onRouteReady) => {
     return {
         ...route,
         path: (route.path || route.toPath),
-        onRouteReady,
-        //不完全等价 router.beforeResovle()
+        onRouteReady: (onRouteReady || route.onRouteReady),
+        //不完全等价于 router.beforeResovle()
         beforeRoute: (toPath, fromPath) => {
             //hidePlayingView()
             setRouterCtxCacheItem(null)
@@ -181,6 +181,14 @@ const visitCommonRoute = (route, onRouteReady) => {
     return visitRoute(createCommonRoute(route, onRouteReady))
 }
 
+const visitCommonRouteCatchError = (route, onRouteReady, onError) => {
+    visitCommonRoute(route, onRouteReady)
+        .catch(error => {
+            if(onError && typeof onError == 'function') onError(error)
+        })
+}
+
+
 const visitNotFound = (to, from) => {
     return visitCommonRoute('/')
 }
@@ -213,11 +221,11 @@ const highlightPlatform = (to) => {
     if (platform) updateCurrentPlatformByCode(platform)
 }
 
-const visitUserHome = (onRouteReady, rejectOnSame) => (visitCommonRoute({ path: '/userhome/all', rejectOnSame }, onRouteReady))
+const visitUserHome = (onRouteReady, rejectOnSame) => (visitCommonRoute({ path: '/userhome/all', rejectOnSame, onRouteReady } ))
 
 const visitRadio = async (platform) => {
     const toPath = isFreeFM(platform) ? `/radios/${platform}` : `/radios/square/${platform}`
-    return visitCommonRoute(toPath).catch(error => { })
+    return visitCommonRouteCatchError(toPath)
 }
 
 const valiadateArtistId = (id) => {
@@ -249,9 +257,7 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
         let exploreMode = transformExploreMode()
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
-        visitCommonRoute(toPath, onRouteReady)
-            //.then(() => updateArtistDetailKeys(platform, id))
-            .catch(error => { })
+        visitCommonRouteCatchError(toPath, onRouteReady)
         hideAllCtxMenus()
     } else if (isFMRadioPlatform(platform)) {
         visitRadio(platform)
@@ -279,7 +285,7 @@ const visitAlbumDetail = (platform, id, callback, data) => {
             exploreMode = (exploreMode == 'radios') ? 'playlists' : exploreMode
         }
         const toPath = `/${exploreMode}/${moduleName}/${platform}/${id}`
-        visitCommonRoute(toPath)
+        visitCommonRouteCatchError(toPath)
         hideAllCtxMenus()
     }
     if (callback && (typeof callback == 'function')) callback(visitable)
@@ -302,14 +308,16 @@ provide('appRoute', {
     visitSearch: (keyword) => (visitCommonRoute(`/search/${keyword}`)),
     visitLocalMusic: () => (visitCommonRoute('/playlists/local')),
     visitPlaylistSquare: (platform) => (visitCommonRoute(`/playlists/square/${platform}`)),
-    visitPlaylist: (platform, id, exploreMode) => {
+    visitPlaylist: (platform, id, exploreMode, onRouteReady, rejectOnSame) => {
         const noArgMode = !exploreMode
         exploreMode = transformExploreMode(exploreMode)
         if (platform === 'local') {
             return visitCommonRoute(`/${exploreMode}/local/${id}`)
         }
         if (exploreMode != 'radios' && noArgMode) exploreMode = 'playlists'
-        return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)
+        return visitCommonRoute({
+            path: `/${exploreMode}/playlist/${platform}/${id}`, onRouteReady, rejectOnSame
+        })
     },
     visitArtist: ({ platform, item, index, callback, onRouteReady }) => {
         visitArtistDetail({ platform, item, index, callback, onRouteReady })
@@ -327,7 +335,7 @@ provide('appRoute', {
     },
     visitCustomPlaylistCreate: (exploreMode, onRouteReady) => {
         exploreMode = transformExploreMode(exploreMode)
-        return visitCommonRoute({ path: `/${exploreMode}/custom/create`, override: true }, onRouteReady)
+        return visitCommonRoute({ path: `/${exploreMode}/custom/create`, override: true, onRouteReady })
     },
     visitCustomPlaylist: (id, exploreMode) => {
         exploreMode = transformExploreMode(exploreMode)
@@ -393,8 +401,9 @@ provide('appRoute', {
             path: `/${exploreMode}/${platform}/track/${id}`,
             //replace: false,   //Vue-Router原生支持选项，但有副作用
             override: true,     //自定义选项
-            query: { id, platform, title, cover, artist, album }
-        }, onRouteReady)
+            query: { id, platform, title, cover, artist, album },
+            onRouteReady
+        })
     },
     visitRecents: () => {
         //实现方式1：通过setTimeout函数延时调用

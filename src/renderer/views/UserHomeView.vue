@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, ref, shallowRef, watch, reactive, inject, computed } from 'vue';
+import { onActivated, ref, shallowRef, watch, reactive, inject, computed, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
@@ -178,9 +178,10 @@ const batchRemoveAll = async () => {
     const index = activeTab.value
     //if(index == 0) clearFavorites()
     if (index == 3) {
-        let ok = true
-        if (isShowDialogBeforeClearRecents.value) ok = await showConfirm({ msg: '确定要清空最近播放吗？' })
-        if (!ok) return
+        if (isShowDialogBeforeClearRecents.value) {
+            const ok = await showConfirm({ msg: '确定要清空最近播放吗？' })
+            if(!ok) return 
+        }
         clearRecents()
     }
 }

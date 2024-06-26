@@ -1221,7 +1221,7 @@ const registryIpcRendererListeners = () => {
         DESKTOP_LYRIC_OPEN, DESKTOP_LYRIC_CLOSE, 
         DESKTOP_LYRIC_LOCK, DESKTOP_LYRIC_UNLOCK,
         DESKTOP_LYRIC_PIN, DESKTOP_LYRIC_UNPIN,
-        CHECK_FOR_UPDATES,
+        PLUGINS, CHECK_FOR_UPDATES, 
     } = useTrayAction()
     //Tray事件
     ipcRenderer.on("tray-action", (event, action) => {
@@ -1266,6 +1266,9 @@ const registryIpcRendererListeners = () => {
             case DESKTOP_LYRIC_PIN:
             case DESKTOP_LYRIC_UNPIN:
                 postMessageToDesktopLryic('s-desktopLyric-pinState')
+                break
+            case PLUGINS:
+                visitPlugins()
                 break
             case CHECK_FOR_UPDATES:
                 EventBus.emit('check-for-updates')
@@ -1569,7 +1572,7 @@ let isConfirmDialogShowing = false
 const showConfirm = async ({ title, msg }) => {
   if (!ipcRenderer || isConfirmDialogShowing) return false
   isConfirmDialogShowing = true
-  hideAllCtxMenus()
+  hideAllCtxMenus(false)
   const ok = await ipcRenderer.invoke('show-confirm', {
     title: title || '确认',
     msg

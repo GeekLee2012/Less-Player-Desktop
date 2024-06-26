@@ -1096,6 +1096,7 @@ const initAppMenuTemplate = () => {
       quit: 'Quit',
       edit: 'Edit',
       plugins: 'Plugins',
+      installedPlugins: 'Installed Plugins',
       github: 'Github Repository',
       gitee: 'Gitee Repository'
     },
@@ -1107,6 +1108,7 @@ const initAppMenuTemplate = () => {
       quit: '退出',
       edit: '编辑',
       plugins: '插件',
+      installedPlugins: '已安装插件',
       github: 'Github仓库',
       gitee: 'Gitee仓库'
     }
@@ -1143,6 +1145,7 @@ const initAppMenuTemplate = () => {
     }, {
       label: menuText.plugins,
       submenu: [
+        { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.PLUGINS), label: menuText.installedPlugins },
         { click: (menuItem, browserWindow, event) => visitLink(GitRepository.GITHUB + '-Plugins'), label: menuText.github },
         { click: (menuItem, browserWindow, event) => visitLink(GitRepository.GITEE+ '-plugins'), label: menuText.gitee },
       ]
@@ -1183,7 +1186,7 @@ const initTrayMenuTemplate = () => {
     id: 'desktop-lyric-open',
     label: '开启桌面歌词',
     click: () => {
-      sendTrayAction(TrayAction.DESKTOP_LYRIC_OPEN)
+      (TrayAction.DESKTOP_LYRIC_OPEN)
       toggleLyricWindow()
     }
   }, {

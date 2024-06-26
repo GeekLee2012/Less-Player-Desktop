@@ -38,7 +38,8 @@ const { hidePlayingView, minimize,
 const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos,
-    isDndSaveEnable, isPlayingViewUseBgCoverEffect
+    isDndSaveEnable, isPlayingViewUseBgCoverEffect,
+    isPlayingViewCoverBorderShow,
 } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
@@ -48,9 +49,7 @@ const onUserMouseWheel = (event) => EventBus.emit('lyric-userMouseWheel', event)
 
 const hasBackgroudCover = ref(false)
 const bgEffectStyle = reactive({})
-const isCoverNoneBorder = ref(false)
 const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
-const setCoverNoneBorder = (value) => isCoverNoneBorder.value = value
 
 const extractRgbColor = (rgb) => {
     let _rgb = toLowerCaseTrimString(rgb)
@@ -176,7 +175,11 @@ onMounted(() => {
             <div class="center">
                 <div class="cover-wrap" :class="{ 'with-format': computedFormatShow}">
                     <img class="cover"
-                            :class="{ 'obj-fit-contain': currentTrack.coverFit == 1, 'draggable': isDndSaveEnable, 'none-border': isCoverNoneBorder }"
+                            :class="{ 
+                                'obj-fit-contain': currentTrack.coverFit == 1, 
+                                'draggable': isDndSaveEnable, 
+                                'none-border': !isPlayingViewCoverBorderShow 
+                            }"
                             v-lazy="Track.coverDefault(currentTrack)" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
                     <div class="format" v-show="computedFormatShow" v-html="trackFormat"></div>
                 </div>
@@ -436,7 +439,8 @@ onMounted(() => {
 }
 
 .playing-view .center .cover-wrap .cover.none-border {
-    border: 6px solid transparent;
+    border: 0px solid transparent;
+    box-shadow: 0px 0px 6px var(--border-popovers-border-color);
 }
 
 .playing-view .center .cover-wrap .cover.draggable {

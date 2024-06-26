@@ -108,6 +108,7 @@ const toggleMaximize = () => {
     height: var(--others-win-ctl-btn-size);
     margin-right: var(--others-win-ctl-btn-margin-right);
     border-radius: 100rem;
+    box-shadow: 0px 0px 1px var(--border-popovers-border-color);
     -webkit-app-region: none;
     cursor: pointer;
     display: flex;
@@ -121,6 +122,10 @@ const toggleMaximize = () => {
 
 .win-traffic-light-btn .close-btn {
     background-color: #fc605c;
+}
+
+.win-traffic-light-btn .close-btn svg {
+    transform: translateX(0.4px) scale(0.9);
 }
 
 .win-traffic-light-btn .ctl-btn svg {
@@ -138,10 +143,12 @@ const toggleMaximize = () => {
 
 .win-traffic-light-btn .min-btn svg {
     stroke-width: 28px !important;
+    transform: scale(0.9);
 }
 
 .win-traffic-light-btn .max-btn svg {
     stroke-width: 3px !important;
+    transform: translateY(0.3px) scale(0.9);
 }
 
 

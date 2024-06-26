@@ -100,6 +100,9 @@ export const useSettingStore = defineStore('setting', {
             imageTextTileStyleIndex: 1,
             //卡片Tile样式阴影效果
             shadowForCardStyleTile: true,
+            //设置页面提示
+            settingViewTipsShow: true,
+
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -174,9 +177,10 @@ export const useSettingStore = defineStore('setting', {
             //拖拽保存
             dndSave: false, 
             dndSavePath: null, 
-            //播放页封面图片背景效果
+            //播放页 - 封面图片背景效果
             playingViewUseBgCoverEffect: false,
-            
+            //播放页 - 封面图片边框
+            playingViewCoverBorderShow: true,
         },
         search: {
             //场景化提示
@@ -666,7 +670,13 @@ export const useSettingStore = defineStore('setting', {
         },
         isFreeFMHomepageTipsShow() {
             return this.track.freeFMHomepageTipsShow
-        }
+        },
+        isSettingViewTipsShow() {
+            return this.common.settingViewTipsShow
+        },
+        isPlayingViewCoverBorderShow() {
+            return this.track.playingViewCoverBorderShow
+        },
     },
     actions: {
         setThemeIndex(index, type) {
@@ -708,6 +718,9 @@ export const useSettingStore = defineStore('setting', {
             const { getTheme } = useThemeStore()
             const { type, index } = this.theme
             return getTheme(type, index).content.bgColor
+        },
+        toggleSettingViewTipsShow() {
+            this.common.settingViewTipsShow = !this.common.settingViewTipsShow
         },
         setWindowZoom(value) {
             if (!value) return
@@ -851,6 +864,9 @@ export const useSettingStore = defineStore('setting', {
             if (freq < 1 || freq > 256) return
             this.track.spectrumRefreshFrequency = freq
             this.setupSpectrumRefreshFrequency()
+        },
+        togglePlayingViewCoverBorderShow() {
+            this.track.playingViewCoverBorderShow = !this.track.playingViewCoverBorderShow
         },
         setImageTextTileStyleIndex(value) {
             const index = parseInt(value || 0)

@@ -113,10 +113,11 @@ const importPlaylist = async () => {
 const removeAll = async () => {
     if (localPlaylists.value.length < 1) return
 
-    let ok = true
-    if (isShowDialogBeforeClearLocalMusics.value) ok = await showConfirm({ msg: '确定要清空本地歌曲吗？' })
-    if (!ok) return
-
+    if (isShowDialogBeforeClearLocalMusics.value) {
+        const ok = await showConfirm({ msg: '确定要清空本地歌曲吗？' })
+        if (!ok) return
+    }
+    
     showToast('本地歌曲已全部清空')
     resetAll()
     refreshTime.value = Date.now()

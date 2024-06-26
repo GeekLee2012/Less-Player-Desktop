@@ -42,7 +42,8 @@ const { currentTrack, playingIndex,
     playing, volume, queueTracksSize } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos, theme, layout,
-    isDndSaveEnable, isPlayingViewUseBgCoverEffect
+    isDndSaveEnable, isPlayingViewUseBgCoverEffect,
+    isPlayingViewCoverBorderShow
 } = storeToRefs(useSettingStore())
 
 
@@ -165,7 +166,12 @@ onUnmounted(() => {
                     <div class="cover-spectrum-wrap" v-show="!exVisualCanvasShow">
                         <div class="cover-wrap">
                             <img class="cover" v-lazy="Track.coverDefault(currentTrack)"
-                                :class="{ rotation: (playingViewShow && playing), 'obj-fit-contain': (currentTrack.coverFit == 1), 'draggable': isDndSaveEnable }"
+                                :class="{ 
+                                    rotation: (playingViewShow && playing), 
+                                    'obj-fit-contain': (currentTrack.coverFit == 1), 
+                                    'draggable': isDndSaveEnable, 
+                                    'none-border': !isPlayingViewCoverBorderShow 
+                                }"
                                 :draggable="isDndSaveEnable" @dragstart="dndSaveCover"
                                 @contextmenu="toggleExVisualCanvasShow" />
                         </div>
@@ -453,6 +459,11 @@ onUnmounted(() => {
 
 .visual-playing-view .cover-wrap .cover.draggable {
     -webkit-user-drag: auto;
+}
+
+.visual-playing-view .cover-wrap .cover.none-border {
+    border: 0px solid transparent;
+    box-shadow: 0px 0px 6px var(--border-popovers-border-color);
 }
 
 .visual-playing-view .rotation {
