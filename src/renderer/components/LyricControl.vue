@@ -442,6 +442,7 @@ watch(() => props.track, (nv, ov) => {
     display: flex;
     flex-direction: column;
     text-align: left;
+    --lyric-mask: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
 }
 
 .lyric-ctl .spacing {
@@ -507,8 +508,8 @@ watch(() => props.track, (nv, ov) => {
     margin-top: 15px;
     padding-right: 6px;
     padding-bottom: 15px;
-    -webkit-mask-image: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
-    mask-image: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
+    -webkit-mask-image: var(--lyric-mask);
+    mask-image: var(--lyric-mask);
 }
 
 .lyric-ctl .lyric-content {

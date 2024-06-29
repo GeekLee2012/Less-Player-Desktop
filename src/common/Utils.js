@@ -10,9 +10,7 @@ export const tryCall = (fn, params, onSuccess, onError) => {
     try {
         if(fn && (typeof fn == 'function')) {
             const result = fn(params)
-            if (onSuccess && (typeof onSuccess == 'function')) {
-                return onSuccess(result)
-            }
+            if (onSuccess && (typeof onSuccess == 'function')) return onSuccess(result)
             return result
         }
     } catch (error) {
@@ -25,9 +23,7 @@ export const tryCallOnObject = (fn, obj, params, onSuccess, onError) => {
     try {
         if(fn && obj && (typeof obj == 'object') && (typeof fn == 'function')) {
             const result = fn.call(obj, params)
-            if (onSuccess && (typeof onSuccess == 'function')) {
-                return onSuccess(result)
-            }
+            if (onSuccess && (typeof onSuccess == 'function'))  return onSuccess(result)
             return result
         }
     } catch (error) {
@@ -365,9 +361,7 @@ export const smoothAnimation = (target, animationAlgoFn, start, dest, duration, 
     let current = 0, animationFrameId = 0
     const updateAnimation = () => {
         const needInterrupt = (interruptAction && interruptAction())
-        if (current > duration || needInterrupt) {
-            return cancelAnimationFrame(animationFrameId)
-        }
+        if (current > duration || needInterrupt) return cancelAnimationFrame(animationFrameId)
         let updateValue = animationAlgoFn(current, start, distance, duration)
         if (target && typeof updateAction == 'function') updateAction(updateValue)
         current += step

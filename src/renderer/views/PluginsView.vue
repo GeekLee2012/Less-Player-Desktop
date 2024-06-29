@@ -256,7 +256,7 @@ const removePlugins = async () => {
         const ok = await showConfirm({ msg: '确定要删除插件吗？' })
         if(!ok) return
     }
-
+    
     checkedData.forEach(plugin => {
         removeFromFilteredData(plugin)
         deactivatePluginNow(plugin, () => removePluginNow(plugin), () => removePluginNow(plugin))
@@ -288,8 +288,8 @@ const removeFromFilteredData = (plugin) => {
 
 const filterWithKeyword = (list, keyword) => {
     let result = list
+    keyword = toLowerCaseTrimString(keyword)
     if (keyword) {
-        keyword = toLowerCaseTrimString(keyword)
         result = result.filter(item => {
             const { name, author, about, repository } = item
             return toLowerCaseTrimString(name).includes(keyword)
