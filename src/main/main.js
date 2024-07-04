@@ -1085,6 +1085,11 @@ const setupAppLayout = (layout, zoom, isInit) => {
   mainWin.center()
 }
 
+const getAppLocale = () => {
+  const locale = app.getLocale()
+  return locale && locale.startsWith('en-') ? 'en-US' : 'zh-CN'
+}
+
 //菜单模板
 const initAppMenuTemplate = () => {
   const i18nText = {
@@ -1113,7 +1118,7 @@ const initAppMenuTemplate = () => {
       gitee: 'Gitee仓库'
     }
   }
-  const locale = app.getLocale() || 'zh-CN'
+  const locale = getAppLocale()
   const menuText = i18nText[locale]
   let menuItems = [{ role: 'about', label: menuText.about },
   { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.CHECK_FOR_UPDATES, true), label: menuText.update },

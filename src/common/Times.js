@@ -71,7 +71,7 @@ export const toYyyymmddHhMmSs = (timestamp, sp1, sp2, sp3) => {
 
 export const toMillis = (mmssSSS) => {
     try {
-        let timeParts = mmssSSS.split(':')
+        let timeParts = mmssSSS.trim().split(':')
         const minutes = parseInt(timeParts[0].trim())
         timeParts = timeParts[1].split('.')
         const seconds = parseInt(timeParts[0].trim())

@@ -7,7 +7,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
-import { useIpcRenderer, isMacOS, isWinOS, useGitRepository } from '../../common/Utils';
+import { useIpcRenderer, isMacOS, isWinOS, useGitRepository, toTrimString, toLowerCaseTrimString } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
 import ColorInputControl from '../components/ColorInputControl.vue';
@@ -292,12 +292,13 @@ const hasNewRelease = computed(() => {
 })
 
 const getLastReleaseVersion = () => {
+    const _version = `v${version}`
     return new Promise((resolve, reject) => {
         setLastRelease(true)
         setGiteeHasNewRelease(false)
         setGithubHasNewRelease(false)
-        setGiteeLastVersion(version)
-        setGithubLastVersion(version)
+        setGiteeLastVersion(_version)
+        setGithubLastVersion(_version)
 
         if (isCheckPreReleaseVersion.value) { //开发预览版
             Promise.all([getDoc(giteeReleasesUrl), getDoc(githubReleasesUrl)]).then(docs => {
@@ -305,18 +306,19 @@ const getLastReleaseVersion = () => {
                 const giteeVersion = giteeDoc.querySelector('.releases-tag-content .release-tag-item .release-meta .tag-name').textContent.trim()
                 const githubVersion = githubDoc.querySelector('.repository-content .col-md-2 .mr-3 span').textContent.trim()
                 resolve({ giteeVersion, githubVersion })
-            }, error => Promise.reject({ version }))
-            .catch(error => reject({ version }))
+            }, error => Promise.reject(error))
+            .catch(error => reject(error))
         } else { //正式版
             getDoc(changelogUrl).then(doc => {
                 const versionTextEls = doc.querySelectorAll('.file_content h2')
-                const changeLogLastVersion = versionTextEls.length > 1 ? versionTextEls[1].textContent.trim() : `v${version}`
+                const hasVersionText = (versionTextEls && versionTextEls.length > 1)
+                const changeLogLastVersion = hasVersionText ? toTrimString(versionTextEls[1].textContent) : _version
                 resolve({
                     giteeVersion: changeLogLastVersion,
                     githubVersion: changeLogLastVersion
                 })
-            }, error => Promise.reject({ version }))
-            .catch(error => reject({ version }))
+            }, error => Promise.reject(error))
+            .catch(error => reject(error))
         }
     })
 }
@@ -397,7 +399,10 @@ let checkingUpdates = ref(false)
 const checkForUpdates = async () => {
     if(checkingUpdates.value) return 
     checkingUpdates.value = true
-    const result = await getLastReleaseVersion()
+    const result = await getLastReleaseVersion().catch(error => {
+            checkingUpdates.value = false
+            return { version }
+        })
     if (!result) {
         checkingUpdates.value = false
         return
@@ -419,6 +424,18 @@ const checkForUpdates = async () => {
     }
     setLastRelease(currentVersion >= lastVersion.value)
     checkingUpdates.value = false
+}
+
+const formatVersion = (version) => {
+    const _version = toLowerCaseTrimString(version)
+
+    const prefix = 'v'
+    const hasPrefix = _version.startsWith(prefix)
+    const needPrefix = false
+
+    if(hasPrefix && !needPrefix) return _version.replace('v', '')
+    if(!hasPrefix && needPrefix) return `${prefix}${_version}`
+    return _version
 }
 
 /*
@@ -741,13 +758,13 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">视频播完时，自动关闭页面：</span>
-                        <ToggleControl @click="toggleResumePlayAfterVideo" :value="track.resumePlayAfterVideo">
+                        <span class="cate-subtitle">视频播完时，自动退出页面：</span>
+                        <ToggleControl @click="toggleQuitVideoAfterEnded" :value="track.quitVideoAfterEnded">
                         </ToggleControl>
                     </div>
                     <div>
                         <span class="cate-subtitle">视频退出后，自动续播歌曲：</span>
-                        <ToggleControl @click="toggleQuitVideoAfterEnded" :value="track.quitVideoAfterEnded">
+                        <ToggleControl @click="toggleResumePlayAfterVideo" :value="track.resumePlayAfterVideo">
                         </ToggleControl>
                     </div>
                     <div>
@@ -1266,7 +1283,9 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                 <span class="cate-name">版本</span>
                 <div class="content">
                     <div :class="{ last: isLastRelease }">
-                        <div><span v-html="packageCfg.version"></span></div>
+                        <div>
+                            <span v-html="formatVersion(version)"></span>
+                        </div>
                         <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing link">更新日志</a>
                         <!--<div class="tip-text spacing">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
                         <div class="update-check checkbox text-btn spacing1" @click="toggleCheckPreReleaseVersion">
@@ -1306,7 +1325,8 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                                         </g>
                                     </svg>
                                     <a href="#" @click.prevent="visitLink(githubReleasesUrl)" class="link"
-                                        v-html="githubLastVersion"></a>
+                                        v-html="formatVersion(githubLastVersion)">
+                                    </a>
                                 </span>
                                 <span :class="{ spacing: githubHasNewRelease }" v-show="giteeHasNewRelease">
                                     <svg width="15" height="15" @click.prevent="visitLink(giteeReleasesUrl)"
@@ -1331,7 +1351,8 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                                         </g>
                                     </svg>
                                     <a href="#" @click.prevent="visitLink(giteeReleasesUrl)" class="link"
-                                        v-html="giteeLastVersion"></a>
+                                        v-html="formatVersion(giteeLastVersion)">
+                                    </a>
                                 </span>
                             </div>
                         </div>

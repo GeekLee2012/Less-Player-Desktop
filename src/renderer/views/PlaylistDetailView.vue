@@ -388,6 +388,7 @@ EventBus.on('app-resize', detectTitleHeight)
     line-height: var(--content-text-line-height);
     font-size: var(--content-text-subtitle-size);
     color: var(--content-subtitle-text-color);
+    letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 
     overflow: hidden;
     word-wrap: break-word;
