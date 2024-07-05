@@ -390,6 +390,7 @@ onUpdated(() => {
     -webkit-line-clamp: 3;
     margin-bottom: 15px;
     /*font-size: 15px;*/
+    letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 }
 
 #local-playlist-detail-view .header .short-about {

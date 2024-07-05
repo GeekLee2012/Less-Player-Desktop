@@ -427,6 +427,7 @@ EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 }
 
 #user-profile-view .header .cover {

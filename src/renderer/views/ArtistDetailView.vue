@@ -537,6 +537,7 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
     text-align: left;
+    letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 }
 
 #artist-detail-view .header .cover {

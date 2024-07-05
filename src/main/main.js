@@ -1085,57 +1085,72 @@ const setupAppLayout = (layout, zoom, isInit) => {
   mainWin.center()
 }
 
-const getAppLocale = () => {
-  const locale = app.getLocale()
-  return locale && locale.startsWith('en-') ? 'en-US' : 'zh-CN'
+const getAppMenuI18nConfig = () => {
+  return {
+    defaultLocale: 'zh-CN',
+    candidateLocale: 'en-US',
+    data: {
+      'en-US': {
+        About: 'About',
+        Update: 'Check for Updates...',
+        Settings: 'Settings',
+        DevTools: 'Developer Tools',
+        Quit: 'Quit',
+        Edit: 'Edit',
+        Plugins: 'Plugins',
+        InstalledPlugins: 'Installed Plugins',
+        Github: 'Github Repository',
+        Gitee: 'Gitee Repository'
+      },
+      'zh-CN': {
+        About: '关于',
+        Update: '检查更新',
+        Settings: '设置',
+        DevTools: '开发者工具',
+        Quit: '退出',
+        Edit: '编辑',
+        Plugins: '插件',
+        InstalledPlugins: '已安装插件',
+        Github: 'Github仓库',
+        Gitee: 'Gitee仓库'
+      }
+    }
+  }
+}
+
+//根据locale取值（前缀），从defaultLocale和candidateLocale中二选一返回
+const resolveAppLocale = (locale, defaultLocale, candidateLocale) => {
+  const delimiter = '-'
+  const prefix = defaultLocale.split(delimiter)[0] + delimiter
+  return locale && !locale.startsWith(prefix) ? candidateLocale : defaultLocale
 }
 
 //菜单模板
 const initAppMenuTemplate = () => {
-  const i18nText = {
-    'en-US': {
-      about: 'About',
-      update: 'Check for Updates...',
-      settings: 'Settings',
-      devTools: 'Developer Tools',
-      quit: 'Quit',
-      edit: 'Edit',
-      plugins: 'Plugins',
-      installedPlugins: 'Installed Plugins',
-      github: 'Github Repository',
-      gitee: 'Gitee Repository'
-    },
-    'zh-CN': {
-      about: '关于',
-      update: '检查更新',
-      settings: '设置',
-      devTools: '开发者工具',
-      quit: '退出',
-      edit: '编辑',
-      plugins: '插件',
-      installedPlugins: '已安装插件',
-      github: 'Github仓库',
-      gitee: 'Gitee仓库'
-    }
-  }
-  const locale = getAppLocale()
-  const menuText = i18nText[locale]
-  let menuItems = [{ role: 'about', label: menuText.about },
-  { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.CHECK_FOR_UPDATES, true), label: menuText.update },
-  { type: 'separator' },
-  //accelerator: 'Alt+Shift+P'
-  { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.SETTING, true), label: menuText.settings },
-  { role: 'toggleDevTools', label: menuText.devTools },
-  { type: 'separator' },
-  { role: 'quit', label: menuText.quit },]
-  if (!isDevEnv) menuItems.splice(menuItems.length - 3, 1)
+  const { defaultLocale, candidateLocale, data: i18nData } = getAppMenuI18nConfig()
+  const locale = resolveAppLocale(app.getLocale(), defaultLocale, candidateLocale)
+  const i18nText = i18nData[locale]
+
+  let menuItems = [
+    { role: 'about', label: i18nText.About },
+    { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.CHECK_FOR_UPDATES, true), label: i18nText.Update },
+    { type: 'separator' },
+    //accelerator: 'Alt+Shift+P'
+    { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.SETTING, true), label: i18nText.Settings },
+    { role: 'toggleDevTools', label: i18nText.DevTools },
+    { type: 'separator' },
+    { role: 'quit', label: i18nText.Quit },
+  ]
+  
+  if(!isDevEnv) menuItems = menuItems.filter(item => item.label != i18nText.DevTools)
+
   const appName = app.name.replace('-', '')
   const template = [
     ...[{
       label: appName,
       submenu: menuItems,
     }, {
-      label: menuText.edit,
+      label: i18nText.Edit,
       submenu: [
         { role: 'undo' },
         { role: 'redo' },
@@ -1148,11 +1163,11 @@ const initAppMenuTemplate = () => {
         { role: 'selectAll' }
       ]
     }, {
-      label: menuText.plugins,
+      label: i18nText.Plugins,
       submenu: [
-        { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.PLUGINS), label: menuText.installedPlugins },
-        { click: (menuItem, browserWindow, event) => visitLink(GitRepository.GITHUB + '-Plugins'), label: menuText.github },
-        { click: (menuItem, browserWindow, event) => visitLink(GitRepository.GITEE+ '-plugins'), label: menuText.gitee },
+        { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.PLUGINS), label: i18nText.InstalledPlugins },
+        { click: (menuItem, browserWindow, event) => visitLink(`${GitRepository.GITHUB}-Plugins`), label: i18nText.Github },
+        { click: (menuItem, browserWindow, event) => visitLink(`${GitRepository.GITEE}-plugins`), label: i18nText.Gitee },
       ]
     }]
   ]
@@ -1174,10 +1189,8 @@ const showMainWindow = () => {
   }
 }
 
-const sendTrayAction = (action, showMain) => {
-  if (showMain) {
-    showMainWindow()
-  }
+const sendTrayAction = (action, isForceShowMainWin) => {
+  if (isForceShowMainWin) showMainWindow()
   sendToMainRenderer('tray-action', action)
 }
 
@@ -1556,14 +1569,13 @@ const createLyricWindow = () => {
   })
 
   win.loadURL(
-    app.isPackaged
-      ? Url.format({
-        pathname: path.join(__dirname, '../../dist/index.html'),
-        protocol: 'file:',
-        slashes: true,
-        hash: 'desktopLyric',
-      })
-      : 'http://localhost:5173/#/desktopLyric',
+    app.isPackaged ? Url.format({
+          pathname: path.join(__dirname, '../../dist/index.html'),
+          protocol: 'file:',
+          slashes: true,
+          hash: 'desktopLyric',
+        })
+      : 'http://localhost:5173/#/desktopLyric'
   )
 
   if (isDevEnv) openDevTools(win)
@@ -1593,15 +1605,14 @@ const isLyricWindowShow = () => {
 if (isDevEnv) return startup()
 
 const instanceLock = app.requestSingleInstanceLock()
-if (!instanceLock) {
-  app.quit()
-} else {
-  app.on('second-instance', (event, argv, workingDirectory, additionalData) => {
-    if (isWindowAccessible(mainWin)) {
-      //if (mainWin.isMinimized()) mainWin.restore()
-      //mainWin.focus()
-      handleStartupPlay(argv)
-    }
-  })
-  startup()
-}
+if (!instanceLock) return app.quit()
+  
+app.on('second-instance', (event, argv, workingDirectory, additionalData) => {
+  if (isWindowAccessible(mainWin)) {
+    //if (mainWin.isMinimized()) mainWin.restore()
+    //mainWin.focus()
+    handleStartupPlay(argv)
+  }
+})
+
+startup()

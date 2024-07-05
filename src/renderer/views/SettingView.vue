@@ -433,7 +433,7 @@ const formatVersion = (version) => {
     const hasPrefix = _version.startsWith(prefix)
     const needPrefix = false
 
-    if(hasPrefix && !needPrefix) return _version.replace('v', '')
+    if(hasPrefix && !needPrefix) return _version.substring(prefix.length)
     if(!hasPrefix && needPrefix) return `${prefix}${_version}`
     return _version
 }
