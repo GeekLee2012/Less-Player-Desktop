@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, reactive, ref, inject, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -13,6 +12,7 @@ import { stringEquals, useUseCustomTrafficLight } from '../../common/Utils';
 import { Track } from '../../common/Track';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -55,7 +55,7 @@ const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
 
 const setDisactived = (value) => {
     disactived.value = value
-    EventBus.emit('playingView-changed')
+    emitEvents('playingView-changed')
 }
 
 
@@ -99,7 +99,7 @@ const setupBackgroudEffect = () => {
     })
 }
 
-const onUserMouseWheel = (event) => EventBus.emit('lyric-userMouseWheel', event)
+const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
 const switchVisualCanvas = () => {
     const len = getExVisualCanvasHandlersLength()
@@ -120,7 +120,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     setDisactived(true)
-    EventBus.emit('visualPlayingView-disactived')
+    emitEvents('visualPlayingView-disactived')
 })
 </script>
 

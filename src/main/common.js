@@ -267,9 +267,7 @@ function readBufferSync(file, encoding) {
     try {
         file = transformPath(file)
         const statResult = statSync(file, { throwIfNoEntry: false })
-        if (statResult) {
-            return readFileSync(file, { encoding })
-        }
+        if (statResult) return readFileSync(file, { encoding })
     } catch (error) {
         console.log(error)
     }

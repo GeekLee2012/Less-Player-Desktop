@@ -1,25 +1,22 @@
 <script setup>
-import { computed, nextTick, ref, toRaw, watch } from 'vue';
+import { computed, inject, nextTick, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import Mousetrap from 'mousetrap';
-import { randomTextWithinAlphabetNums, smoothScroll, useIpcRenderer, smoothScrollHorizional } from '../common/Utils';
+import { randomTextWithinAlphabetNums, smoothScroll, smoothScrollHorizional,
+  ipcRendererSend as sendToMain, ipcRendererBind,
+  toMMssSSS, toMillis } from '../common/Utils';
 import { Track } from '../common/Track';
-import { toMMssSSS, toMillis } from '../common/Times';
 
 
 
-const ipcRenderer = useIpcRenderer()
+const { applyDocumentStyle } = inject('appStyle')
 
 const { desktopLyric } = storeToRefs(useSettingStore())
 const { setDesktopLyricFontSize, setDesktopLyricTextDirection,
   setDesktopLyricAlignment, setDesktopLyricLayoutMode,
   setDesktopLyricColor, setDesktopLyricHighlightColor,
   setDesktopLyricLineSpacing, setupDesktopLyricAutoSize, } = useSettingStore()
-
-const sendToMain = (channel, data) => {
-  if (ipcRenderer) ipcRenderer.send(channel, data)
-}
 
 //TODO 歌词处理逻辑, 几乎与LyricControl组件重复
 const currenTrack = ref(null)
@@ -132,9 +129,7 @@ const renderLyric = (currentTime) => {
   const scrollAction = isVeritical ? smoothScrollHorizional : smoothScroll
   //const frequency = getStateRefreshFrequency()
   //const duration = 300 * frequency / 60
-  scrollAction(lyricWrap, destScrollValue, 300, 5, () => {
-    return (isUserMouseWheel.value || isSeeking.value)
-  })
+  scrollAction(lyricWrap, destScrollValue, 300, 5, () => (isUserMouseWheel.value || isSeeking.value))
 
 }
 
@@ -352,9 +347,9 @@ const setupMessagePort = (callback) => {
 */
 
 const setupMessagePort = (callback) => {
-  if (!ipcRenderer) return
-  const pairChannel = randomTextWithinAlphabetNums(16)
-  ipcRenderer.on(pairChannel, event => {
+  //Desktop Lyric Message Port
+  const pairChannel = 'DLMP_' + randomTextWithinAlphabetNums(11)
+  ipcRendererBind(pairChannel, event => {
     messagePort = event.ports[0]
 
     messagePort.onmessage = (event) => {
@@ -554,9 +549,7 @@ const applyThemeFromMain = (theme) => {
     '--button-icon-text-btn-icon-color': theme.button.iconTextBtnIconColor,
   }
 
-  for (const [key, value] of Object.entries(themeProperties)) {
-    document.documentElement.style.setProperty(key, value)
-  }
+  applyDocumentStyle(themeProperties)
 }
 
 //watch(isUserMouseWheel, setupLyricScrollLocator)

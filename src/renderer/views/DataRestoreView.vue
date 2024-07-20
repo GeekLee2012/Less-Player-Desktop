@@ -11,14 +11,12 @@ import CheckboxTextItem from '../components/CheckboxTextItem.vue';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
-import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from '../../common/Utils';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
 const { backward } = inject('appRoute')
-const ipcRenderer = useIpcRenderer()
 
 const userProfileStore = useUserProfileStore()
 const recentsStore = useRecentsStore()
@@ -179,8 +177,7 @@ const resovleFilename = (filePath) => {
 }
 
 const openBackupFile = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-file', { title: '请选择备份文件', filterExts: ['json'] })
+    const result = await ipcRendererInvoke('open-file', { title: '请选择备份文件', filterExts: ['json'] })
     if (!result) return
 
     sourcesCategories.length = 0
@@ -250,7 +247,7 @@ const restore = async () => {
             //$patch仅改变值但并没有触发任何监听器
             _store.$patch(backupSetting)
             //手动触发监听器
-            EventBus.emit("setting-restore")
+            emitEvents("setting-restore")
         } else if (checked) {
             const backupData = {}
             backupData[id] = sourcesData[id]
@@ -300,12 +297,12 @@ const updateCheckedAll = (isTriggerChecked) => {
 const updateItemChecked = (index, checked, id, selfRefresh) => {
     let item = sourcesCategories[index]
     item.checked = checked
-    if (selfRefresh) EventBus.emit("checkeboxTextItem-refresh", { id: item.id, checked })
+    if (selfRefresh) emitEvents("checkeboxTextItem-refresh", { id: item.id, checked })
     for (var i in item.children) {
         const child = item.children[i]
         child.checked = checked
         const childId = id + "." + child.id
-        EventBus.emit("checkeboxTextItem-refresh", { id: childId, checked })
+        emitEvents("checkeboxTextItem-refresh", { id: childId, checked })
     }
 }
 
@@ -324,7 +321,7 @@ const onChildItemCheckChanged = (parentIndex, index, checked, id) => {
     const ov = parent.checked
     parent.checked = all
     if (ov != all) {
-        EventBus.emit("checkeboxTextItem-refresh", { id: parent.id, checked: all })
+        emitEvents("checkeboxTextItem-refresh", { id: parent.id, checked: all })
     }
     updateCheckedAll(checked)
 }

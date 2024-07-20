@@ -1,12 +1,19 @@
 import { defineStore } from "pinia";
-import EventBus from '../../common/EventBus';
-import { isDevEnv, useIpcRenderer, randomTextWithinAlphabetNums } from "../../common/Utils";
+import { isDevEnv, randomTextWithinAlphabetNums,
+    ipcRendererSend, ipcRendererInvoke,
+ } from "../../common/Utils";
+import { onEvents, emitEvents } from "../../common/EventBusWrapper";
 
 
+const resetCategoryScroll = (prefix) => emitEvents(`${prefix}Category-resetScroll`)
+const resetPlaylistCategoryScroll = () => resetCategoryScroll('playlist')
+const resetArtistCategoryScroll = () => resetCategoryScroll('artist')
+const resetRadioCategoryScroll = () => resetCategoryScroll('radio')
+const resetTagsCategoryScroll = () => resetCategoryScroll('tags')
 
-const ipcRenderer = useIpcRenderer()
+
 let toastTimer = null
-
+const playingViewCustomThemePrefix = 'custom_'
 
 export const useAppCommonStore = defineStore('appCommon', {
     state: () => ({
@@ -23,22 +30,32 @@ export const useAppCommonStore = defineStore('appCommon', {
         playingViewPresetThemes: [{
                 id: 'default_cover',
                 name: '默认封面',
+                type: 0,
+                dynamic: false,
                 light: false,
             }, {
                 id: 'spectrum_cover',
                 name: '动感频谱',
+                type: 0,
+                dynamic: false,
                 light: false,
             }, {
                 id: 'dynamic_pyramid',
                 name: '波光嶙嶙',
+                type: 0,
+                dynamic: true,
                 light: false,
             }, {
                 id: 'dynamic_zoom',
                 name: '时空穿梭',
+                type: 0,
+                dynamic: true,
                 light: false,
             }, {
                 id: 'dynamic_purple',
                 name: '紫色心情',
+                type: 0,
+                dynamic: true,
                 light: true,
             }/*, {
                 id: 'dynamic_sky',
@@ -167,43 +184,35 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         togglePlaylistCategoryView() {
             this.playlistCategoryViewShow = !this.playlistCategoryViewShow
-            if (!this.playlistCategoryViewShow) {
-                EventBus.emit("playlistCategory-resetScroll")
-            }
+            if (!this.playlistCategoryViewShow) resetPlaylistCategoryScroll()
         },
         hidePlaylistCategoryView() {
             this.playlistCategoryViewShow = false
-            EventBus.emit("playlistCategory-resetScroll")
+            resetPlaylistCategoryScroll()
         },
         toggleArtistCategoryView() {
             this.artistCategoryViewShow = !this.artistCategoryViewShow
-            if (!this.artistCategoryViewShow) {
-                EventBus.emit("artistCategory-resetScroll")
-            }
+            if (!this.artistCategoryViewShow) resetArtistCategoryScroll()
         },
         hideArtistCategoryView() {
             this.artistCategoryViewShow = false
-            EventBus.emit("artistCategory-resetScroll")
+            resetArtistCategoryScroll()
         },
         toggleRadioCategoryView() {
             this.radioCategoryViewShow = !this.radioCategoryViewShow
-            if (!this.radioCategoryViewShow) {
-                EventBus.emit("radioCategory-resetScroll")
-            }
+            if (!this.radioCategoryViewShow) resetRadioCategoryScroll()
         },
         hideRadioCategoryView() {
             this.radioCategoryViewShow = false
-            EventBus.emit("radioCategory-resetScroll")
+            resetRadioCategoryScroll()
         },
         toggleTagsCategoryView() {
             this.tagsCategoryViewShow = !this.tagsCategoryViewShow
-            if (!this.tagsCategoryViewShow) {
-                EventBus.emit("tagsCategory-resetScroll")
-            }
+            if (!this.tagsCategoryViewShow) resetTagsCategoryScroll()
         },
         hideTagsCategoryView() {
             this.tagsCategoryViewShow = false
-            EventBus.emit("tagsCategory-resetScroll")
+            resetTagsCategoryScroll()
         },
         togglePlatformCategoryView() {
             this.platformCategoryViewShow = !this.platformCategoryViewShow
@@ -274,17 +283,17 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.coverMaskShow = !this.coverMaskShow
         },
         quit() {
-            if (ipcRenderer) ipcRenderer.send('app-quit')
+            ipcRendererSend('app-quit')
         },
         minimize(isToTray) {
-            if (ipcRenderer) ipcRenderer.send('app-min', isToTray)
+            ipcRendererSend('app-min', isToTray)
         },
         maximize() {
             this.toggleMaxScreen()
-            if (ipcRenderer) ipcRenderer.send('app-max')
+            ipcRendererSend('app-max')
         },
         normalize() {
-            if (ipcRenderer) ipcRenderer.send('app-normalize')
+            ipcRendererSend('app-normalize')
         },
         setExploreMode(index) {
             if (!index || index < 0) index = 0
@@ -543,7 +552,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setDesktopLyricShow(value, noSend) {
             this.desktopLyricShow = value
-            if (ipcRenderer && !noSend) ipcRenderer.send('app-desktopLyric-toggle')
+            !noSend && ipcRendererSend('app-desktopLyric-toggle')
         },
         setDesktopLyricCtxData(value) {
             this.desktopLyricCtxData = value
@@ -563,13 +572,14 @@ export const useAppCommonStore = defineStore('appCommon', {
         savePlayingViewCustomTheme(theme) {
             if (!theme) return
             let index = -1
-            const prefix = 'custom_'
+            //强制属性，避免被窜改
+            Object.assign(theme, { type: 1, dynamic: true })
             if (theme.id) {
-                if (!theme.id.startsWith(prefix)) return
+                if (!theme.id.startsWith(playingViewCustomThemePrefix)) return
                 index = this.playingViewCustomThemes.findIndex(item => item.id == theme.id)
             }
             if (index < 0) {
-                const id = prefix + randomTextWithinAlphabetNums(8)
+                const id = playingViewCustomThemePrefix + randomTextWithinAlphabetNums(8)
                 Object.assign(theme, { id })
                 this.playingViewCustomThemes.push(theme)
             } else {
@@ -578,15 +588,13 @@ export const useAppCommonStore = defineStore('appCommon', {
             }
         },
         removePlayingViewCustomTheme({ id }) {
-            const prefix = 'custom_'
-            if (!id || !id.startsWith(prefix)) return
+            if (!id || !id.startsWith(playingViewCustomThemePrefix)) return
             const index = this.playingViewCustomThemes.findIndex(item => item.id === id)
             if (index > -1) this.playingViewCustomThemes.splice(index, 1)
         },
         isCurrentPlayingTheme(theme) {
             const { id } = theme
-            const prefix = 'custom_'
-            if (!id || !id.startsWith(prefix)) return
+            if (!id || !id.startsWith(playingViewCustomThemePrefix)) return
             const index = this.playingViewCustomThemes.findIndex(item => item.id === id)
             if(index < 0) return false
             return this.playingViewThemeType == 1 

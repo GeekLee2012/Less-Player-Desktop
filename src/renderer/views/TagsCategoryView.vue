@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, ref } from 'vue';
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -45,9 +45,11 @@ const toggleTagActive = (tag, index) => {
     notifyChanged()
 }
 
-EventBus.on('tagsCategory-update', ({ data, callback }) => {
-    tagsData.value = data
-    onChangedCallback = callback
+onEvents({
+    'tagsCategory-update': ({ data, callback }) => {
+        tagsData.value = data
+        onChangedCallback = callback
+    },
 })
 </script>
 

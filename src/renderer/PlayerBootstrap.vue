@@ -7,24 +7,24 @@ import { usePlatformStore } from './store/platformStore';;
 import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
 import { useSettingStore } from './store/settingStore';
-import EventBus from '../common/EventBus';
 import { Track } from '../common/Track'
 import {
     coverDefault, isBlank, isDevEnv, escapeHtml,
-    useIpcRenderer, useStartDrag, useDownloadsPath, 
+    useStartDrag, useDownloadsPath, 
     tryCall, toTrimString, useTrayAction,
+    ipcRendererSend, ipcRendererInvoke, 
+    ipcRendererBind, ipcRendererBinds, toMmss,
 } from '../common/Utils';
 import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
-import { toMmss } from '../common/Times';
 import { Lyric } from '../common/Lyric';
 import { United } from '../vendor/united';
 import { useVideoPlayStore } from './store/videoPlayStore';
 import { useSoundEffectStore } from './store/soundEffectStore';
+import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
 
-const ipcRenderer = useIpcRenderer()
 const startDrag = useStartDrag()
 
 const { currentTrack, queueTracksSize,
@@ -79,7 +79,8 @@ const { visitHome, visitUserHome, visitSetting,
 } = inject('appRoute')
 const { hasExTrackPlayUrlHandlers, hasExVideoPlayUrlHandlers, hasExDrawSpectrumHandlers,
     getExTrackPlayUrl, getExVideoPlayUrl,
-    drawExSpectrum, toggleExVisualCanvas
+    drawExSpectrum, toggleExVisualCanvas,
+    showConfirm,
 } = inject('apiExpose')
 
 const playState = ref(PlayState.NONE)
@@ -104,7 +105,7 @@ const traceRecentTrack = (track) => {
     } else { //歌曲、MV关联的歌曲
         addRecentSong(track)
     }
-    EventBus.emit("userHome-refresh")
+    emitEvents("userHome-refresh")
 }
 
 //歌单
@@ -191,7 +192,7 @@ const updateLyric = (track, { lyric, roma, trans }) => {
 
 //通知歌词已更新
 const notifyLyricLoaded = (track) => {
-    if (isCurrentTrack(track)) EventBus.emit('track-lyricLoaded', track)
+    if (isCurrentTrack(track)) emitEvents('track-lyricLoaded', track)
 }
 
 
@@ -308,7 +309,7 @@ const bootstrapTrack = (track, options) => {
         //TODO 部分音乐平台artist信息无法在同一API中完整获取
         if (artistNotCompleted && artist) {
             Object.assign(track, { artist })
-            EventBus.emit('track-artistUpdated', { trackId: id, artist })
+            emitEvents('track-artistUpdated', { trackId: id, artist })
         }
 
         //无法获取到有效url，VIP收费歌曲或其他原因
@@ -376,7 +377,7 @@ const onPlayerErrorRetry = ({ track, currentTime, radio }) => {
         //强行重置url，并尝试重新获取
         if (!radio || Playlist.isFMRadioType(track)) track.url = ''
         if (!radio) track.isCandidate = false
-        EventBus.emit('track-changed', track)
+        emitEvents('track-changed', track)
     }
 }
 
@@ -805,8 +806,8 @@ const setupCurrentMediaSession = async () => {
         //TODO 本地歌曲可能使用在线封面，会导致数据不一致
         // 暂时忽略，仍然使用旧封面，不去尝试进行更新，得不偿失
         let coverSrc = cover
-        if (ipcRenderer && toTrimString(cover).startsWith(ImageProtocal.prefix)) {
-            coverSrc = await ipcRenderer.invoke('open-image-base64', cover)
+        if (toTrimString(cover).startsWith(ImageProtocal.prefix)) {
+            coverSrc = await ipcRendererInvoke('open-image-base64', cover)
         }
         navigator.mediaSession.metadata = new MediaMetadata({
             title,
@@ -838,106 +839,6 @@ const setupCurrentMediaSession = async () => {
     }
 }
 
-/* EventBus事件 */
-//FM广播
-EventBus.on('radio-play', traceRecentTrack)
-EventBus.on('radio-state', ({ state, track, currentTime, radio }) => {
-    checkFavoritedState()
-    switch (state) {
-        case PlayState.PLAYING:
-            setPlaying(true)
-            setupCurrentMediaSession()
-            break
-        case PlayState.PAUSE:
-            setPlaying(false)
-            break
-        case PlayState.PLAY_ERROR:
-            setPlaying(false)
-            onPlayerErrorRetry({ track, currentTime, radio })
-            break
-        default:
-            break
-    }
-
-})
-//普通歌曲
-EventBus.on('track-changed', track => {
-    bootstrapTrack(track).then(track => {
-        if (isCurrentTrack(track)) {
-            playTrackDirectly(track)
-        }
-    }, async (reason) => {
-        if (reason == 'noUrl' || reason == 'noService') { //TODO
-            const { platform } = track
-            if (!isVipTransferEnable.value || isLocalMusic(platform)
-                || Playlist.isFMRadioType(track)) {
-                handleUnplayableTrack(track)
-                return
-            }
-            showFailToast(TRY_TRANSFRER_MSG)
-            const candidate = await United.transferTrack(track)
-            if (!Track.hasUrl(candidate)) {
-                handleUnplayableTrack(track, TRANSFRER_FAIL_MSG)
-                return
-            }
-            if (!isCurrentTrack(track)) return
-            if (isDevEnv()) console.log(candidate)
-            const { url, lyric, lyricTrans, lyricRoma, duration, isCandidate } = candidate
-            Object.assign(track, { url, lyric, lyricTrans, lyricRoma, duration, isCandidate })
-            showToast(TRANSFRER_OK_MSG, () => {
-                if (isCurrentTrack(track)) {
-                    loadLyric(track)
-                    playTrackDirectly(track)
-                }
-            })
-        }
-    }).catch(error => {
-        console.log(error)
-        handleUnplayableTrack(track)
-    })
-})
-EventBus.on('track-play', track => {
-    //resetAutoSkip()
-    traceRecentTrack(track)
-    //loadLyric(track)
-})
-
-EventBus.on('track-state', ({ state, track, currentTime }) => {
-    //播放刚开始时，更新MediaSession
-    if ((playState.value == PlayState.INIT
-        || playState.value == PlayState.LOADED)
-        && state == PlayState.PLAYING) {
-        setupCurrentMediaSession()
-        resetAutoSkip()
-    }
-
-    setPlayState(state)
-    switch (state) {
-        case PlayState.NONE:
-            resetPlayState(true)
-            break
-        case PlayState.INIT:
-            resetPlayState(true)
-            checkFavoritedState()
-            break
-        case PlayState.PLAYING:
-            setPlaying(true)
-            break
-        case PlayState.PAUSE:
-            setPlaying(false)
-            break
-        case PlayState.END:
-            playNextTrack()
-            break
-        case PlayState.LOAD_ERROR:
-        case PlayState.PLAY_ERROR:
-            setPlaying(false)
-            onPlayerErrorRetry({ track, currentTime })
-            break
-        default:
-            break
-    }
-})
 //播放进度
 const mmssCurrentTime = ref('00:00')
 const mmssPreseekTime = ref(null) //格式: 00:00
@@ -953,53 +854,6 @@ const resetPlayState = (ignore) => {
 
     setProgressSeekingState(false)
 }
-
-EventBus.on('track-pos', ({ currentTime: currentSecs, duration }) => {
-    if (videoPlayingViewShow.value && isPlaying()
-        && isPauseOnPlayingVideoEnable.value) {
-        togglePlay()
-        return
-    }
-    const track = currentTrack.value
-    if (duration != track.duration) Object.assign(track, { duration })
-    const currentTime = currentSecs * 1000
-    mmssCurrentTime.value = toMmss(currentTime)
-    currentTimeState.value = currentSecs
-    const _duration = track.duration || 0
-    progressState.value = _duration > 0 ? (currentTime / _duration) : 0
-})
-
-EventBus.on("track-spectrumData", ({
-    leftFreqData, leftFreqBinCount, rightFreqData, rightFreqBinCount, freqData, freqBinCount,
-    sampleRate, analyser, leftChannelAnalyser, rightChannelAnalyser, }) => {
-    if (!currentTrack.value) return setSpectrumParams(null)
-
-    const spectrumColor = getCurrentThemeHighlightColor()
-    const canvasBgColor = getCurrentThemeContentBgColor()
-    const isSimpleLayoutMode = isSimpleLayout.value
-    const isPlaying = playing.value
-
-    setSpectrumParams({
-        leftFreqData, leftFreqBinCount,
-        rightFreqData, rightFreqBinCount,
-        freqData, freqBinCount, sampleRate,
-        analyser, leftChannelAnalyser, rightChannelAnalyser,
-        spectrumColor, stroke: spectrumColor, canvasBgColor,
-        isSimpleLayoutMode, isPlaying
-    })
-
-    //简约布局、可视化播放页
-    if (!isSimpleLayoutMode && (!playingViewShow.value || playingViewThemeIndex.value != 1)) {
-        return setSpectrumParams(null)
-    }
-    if (exVisualCanvasShow.value && !isSimpleLayoutMode) return
-    drawCanvasSpectrum()
-})
-
-//歌单电台 - 下一曲
-EventBus.on('track-nextPlaylistRadioTrack', track => {
-    playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)
-})
 
 
 //播放进度
@@ -1025,13 +879,8 @@ const seekTrack = (percent) => {
     //setTimeout(() => seekTrackDirectly(percent), delay)
 }
 
-const seekTrackDirectly = (percent) => EventBus.emit('track-seek', percent)
-const markTrackSeekPending = (percent) => EventBus.emit('track-markSeekPending', percent)
-EventBus.on('track-seekFinish', () => {
-    //清除预备状态
-    mmssPreseekTime.value = null
-    setProgressSeekingState(false)
-})
+const seekTrackDirectly = (percent) => emitEvents('track-seek', percent)
+const markTrackSeekPending = (percent) => emitEvents('track-markSeekPending', percent)
 
 //播放进度，更新预备状态
 const preseekTrack = (percent) => {
@@ -1105,7 +954,6 @@ const resumeTrackPendingPlay = () => {
     }
 }
 
-EventBus.on('video-stop', resumeTrackPendingPlay)
 
 //应用启动时，恢复歌曲信息
 const restoreTrack = (callback) => {
@@ -1114,7 +962,7 @@ const restoreTrack = (callback) => {
     //if (isDevEnv()) console.log('[ RESTORE TRACK ]')
 
     const _callback = (track) => {
-        EventBus.emit("track-restore", track)
+        emitEvents("track-restore", track)
         if (pendingPlay.value && Track.hasUrl(track)) {
             seekTrack(pendingPlayPercent.value || 0)
             setPendingPlayPercent(0)
@@ -1139,19 +987,6 @@ const restoreTrack = (callback) => {
         
 }
 
-EventBus.on('plugins-accessResult-addPlatform', ({ code }) => {
-    const pendingTrack = pendingBootstrapTrack.value
-    if (!pendingTrack) return
-    if (pendingTrack.platform != code && !isLocalMusic(pendingTrack.platform)) return
-    //pendingTrack已非当前歌曲
-    if (!isCurrentTrack(pendingTrack)) return setPendingBootstrapTrack(null)
-    
-    //延迟加载歌词
-    EventBus.emit('track-lyricRestore')
-    const _track = { ...pendingTrack }
-    setPendingBootstrapTrack(null)
-    setTimeout(() => loadLyric(_track), 1888)
-})
 
 //歌曲收藏
 const favoritedState = ref(false)
@@ -1200,9 +1035,7 @@ const checkFavoritedState = () => {
     const favorited = isFavoriteSong(id, platform) || isFavoriteRadio(id, platform)
     setFavoritedState(favorited)
 }
-//TODO 
-EventBus.on("userProfile-reset", checkFavoritedState)
-EventBus.on("track-refreshFavoritedState", checkFavoritedState)
+
 
 const quickSearch = () => {
     visitSearch(LESS_MAGIC_CODE).then(() => {
@@ -1214,17 +1047,17 @@ const quickSearch = () => {
 }
 
 //注册ipcRenderer消息监听器
-const registryIpcRendererListeners = () => {
-    if (!ipcRenderer) return
-    const { RESTORE, PLAY, PAUSE,  PLAY_PREV, PLAY_NEXT, 
+const { RESTORE, PLAY, PAUSE,  PLAY_PREV, PLAY_NEXT, 
         HOME, USERHOME, SETTING, 
         DESKTOP_LYRIC_OPEN, DESKTOP_LYRIC_CLOSE, 
         DESKTOP_LYRIC_LOCK, DESKTOP_LYRIC_UNLOCK,
         DESKTOP_LYRIC_PIN, DESKTOP_LYRIC_UNPIN,
         PLUGINS, CHECK_FOR_UPDATES, 
     } = useTrayAction()
+    
+ipcRendererBinds({
     //Tray事件
-    ipcRenderer.on("tray-action", (event, action) => {
+    'tray-action': (event, action) => {
         //TODO 视频播放中，暂时不允许中断
         if (videoPlayingViewShow.value) return
         switch (action) {
@@ -1271,50 +1104,49 @@ const registryIpcRendererListeners = () => {
                 visitPlugins()
                 break
             case CHECK_FOR_UPDATES:
-                EventBus.emit('check-for-updates')
+                emitEvents('check-for-updates')
                 break
         }
-    })
+    },
 
     //全局快捷键
-    ipcRenderer.on('globalShortcut-visitShortcutKeys', () => EventBus.emit('route-visitShortcutKeys'))
-    ipcRenderer.on('globalShortcut-togglePlay', togglePlay)
-    ipcRenderer.on('globalShortcut-switchPlayMode', switchPlayMode)
-    ipcRenderer.on('globalShortcut-playPrev', playPrevTrack)
-    ipcRenderer.on('globalShortcut-playNext', playNextTrack)
-    ipcRenderer.on('globalShortcut-volumeUp', () => updateVolumeByOffset(0.05))
-    ipcRenderer.on('globalShortcut-volumeDown', () => updateVolumeByOffset(-0.05))
-    ipcRenderer.on('globalShortcut-toggleVolumeMute', toggleVolumeMute)
-    ipcRenderer.on('globalShortcut-visitSetting', () => visitSetting())
-    ipcRenderer.on('globalShortcut-togglePlaybackQueue', togglePlaybackQueueView)
-    ipcRenderer.on('globalShortcut-toggleLyricToolbar', () => {
+    'globalShortcut-visitShortcutKeys': () => emitEvents('route-visitShortcutKeys'),
+    'globalShortcut-togglePlay': togglePlay,
+    'globalShortcut-switchPlayMode': switchPlayMode,
+    'globalShortcut-playPrev': playPrevTrack,
+    'globalShortcut-playNext': playNextTrack,
+    'globalShortcut-volumeUp': () => updateVolumeByOffset(0.05),
+    'globalShortcut-volumeDown': () => updateVolumeByOffset(-0.05),
+    'globalShortcut-toggleVolumeMute': toggleVolumeMute,
+    'globalShortcut-visitSetting': () => visitSetting(),
+    'globalShortcut-togglePlaybackQueue': togglePlaybackQueueView,
+    'globalShortcut-toggleLyricToolbar': () => {
         if (playingViewShow.value) toggleLyricToolbar()
-    })
-    ipcRenderer.on('globalShortcut-resetSetting', () => {
-        EventBus.emit('app-resetSetting')
-    })
-    ipcRenderer.on('globalShortcut-quickSearch', () => quickSearch())
-    ipcRenderer.on('globalShortcut-visitThemes', () => visitThemes())
-    ipcRenderer.on('globalShortcut-visitModulesSetting', () => visitModulesSetting())
-    ipcRenderer.on('globalShortcut-visitPlugins', () => visitPlugins())
-    ipcRenderer.on('globalShortcut-visitRecents', () => visitRecents())
-    ipcRenderer.on('globalShortcut-togglePlayingThemes', () => {
+    },
+    'globalShortcut-resetSetting': () => {
+        emitEvents('app-resetSetting')
+    },
+    'globalShortcut-quickSearch': () => quickSearch(),
+    'globalShortcut-visitThemes': () => visitThemes(),
+    'globalShortcut-visitModulesSetting': () => visitModulesSetting(),
+    'globalShortcut-visitPlugins': () => visitPlugins(),
+    'globalShortcut-visitRecents': () => visitRecents(),
+    'globalShortcut-togglePlayingThemes': () => {
         if (playingViewShow.value) togglePlayingThemeListView()
-    })
-    
+    },
 
     //其他事件
-    ipcRenderer.on('app-desktopLyric-showSate', (event, isShow) => {
+    'app-desktopLyric-showSate': (event, isShow) => {
         desktopLyricShowState = isShow
-        EventBus.emit('desktopLyric-showState', desktopLyricShowState)
-    })
-    ipcRenderer.on('app-messagePort-channel', (event, channel) => {
+        emitEvents('desktopLyric-showState', desktopLyricShowState)
+    },
+    'app-messagePort-channel': (event, channel) => {
         setupMessagePort(channel, () => {
-            EventBus.emit('desktopLyric-messagePort', messagePort)
+            emitEvents('desktopLyric-messagePort', messagePort)
         })
-        ipcRenderer.send('app-messagePort-pair')
-    })
-    ipcRenderer.on('dnd-saveToLocal-result', (event, { file, name, type, data, url, useDefaultIcon, error }) => {
+        ipcRendererSend('app-messagePort-pair')
+    },
+    'dnd-saveToLocal-result': (event, { file, name, type, data, url, useDefaultIcon, error }) => {
         const typeMappings = {
             image: {
                 name: '图片',
@@ -1338,30 +1170,26 @@ const registryIpcRendererListeners = () => {
         } else {
             showToast(`${typeName}已下载${_extra}`)
         }
-    })
-}
-registryIpcRendererListeners()
+    },
+})
 
 const handleStartupPlay = () => {
-    if (!ipcRenderer) return
-    ipcRenderer.on('app-startup-playTracks', (event, tracks) => {
+    ipcRendererBind('app-startup-playTracks', (event, tracks) => {
         if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
         //addAndPlayTracks(tracks, false, '即将为您播放歌曲')
         //紧跟在当前歌曲后面播放，不扰乱当前播放列表进度
         tracks.forEach(track => playTrackLater(track))
         playTrack(tracks[0])
         showToast('即将为您播放歌曲')
-        ipcRenderer.send('app-startup-playDone', tracks)
+        ipcRendererSend('app-startup-playDone', tracks)
     })
-
-    ipcRenderer.send('app-startup-playReady')
+    ipcRendererSend('app-startup-playReady')
 }
 
 
 let messagePort = null
 const setupMessagePort = (channel, callback) => {
-    if (!ipcRenderer) return
-    ipcRenderer.on(channel, event => {
+    ipcRendererBind(channel, event => {
         messagePort = event.ports[0]
 
         messagePort.onmessage = (event) => {
@@ -1382,10 +1210,9 @@ const postMessageToDesktopLryic = (action, data) => {
 
 const handleMessageFromDesktopLyric = (action, data) => {
     if (action === 'c-setting-visit') {
-        if (!ipcRenderer) return
-        ipcRenderer.send('app-mainWin-show')
+        ipcRendererSend('app-mainWin-show')
         visitSetting()
-        ipcRenderer.invoke('find-in-page', '桌面歌词')
+        ipcRendererInvoke('find-in-page', '桌面歌词')
     } else if (action === 'c-setting-sync') {
         syncSettingFromDesktopLyric(data)
     } else if (action === 'c-track-seek') {
@@ -1403,7 +1230,6 @@ const handleMessageFromDesktopLyric = (action, data) => {
     }
 }
 
-EventBus.on('setting-syncToDesktopLyric', data => postMessageToDesktopLryic('s-setting-sync', data))
 
 //TODO
 const reloadApp = () => {
@@ -1411,13 +1237,9 @@ const reloadApp = () => {
     if (playing.value) setPendingPlay(true)
     setPendingPlayPercent(progressState.value)
     setTimeout(() => {
-        if (ipcRenderer) ipcRenderer.send('app-reload')
+        ipcRendererSend('app-reload')
     }, 1888)
 }
-
-/*
-EventBus.on('app-removePlugin', reloadApp)
-*/
 
 //设置音频输出设备
 const setupOutputDevices = () => {
@@ -1529,6 +1351,174 @@ const dndSaveVideo = async (event, video) => {
     startDrag({ file, name: title, type: 'video', url })
 }
 
+//EventBus监听注册，统一管理
+onEvents({
+    //FM广播
+    'radio-play': traceRecentTrack,
+    'radio-state': ({ state, track, currentTime, radio }) => {
+        checkFavoritedState()
+        switch (state) {
+            case PlayState.PLAYING:
+                setPlaying(true)
+                setupCurrentMediaSession()
+                break
+            case PlayState.PAUSE:
+                setPlaying(false)
+                break
+            case PlayState.PLAY_ERROR:
+                setPlaying(false)
+                onPlayerErrorRetry({ track, currentTime, radio })
+                break
+            default:
+                break
+        }
+    },
+    //普通歌曲
+    'track-changed': track => {
+        bootstrapTrack(track).then(track => {
+            if (isCurrentTrack(track)) {
+                playTrackDirectly(track)
+            }
+        }, async (reason) => {
+            if (reason == 'noUrl' || reason == 'noService') { //TODO
+                const { platform } = track
+                if (!isVipTransferEnable.value || isLocalMusic(platform)
+                    || Playlist.isFMRadioType(track)) {
+                    handleUnplayableTrack(track)
+                    return
+                }
+                showFailToast(TRY_TRANSFRER_MSG)
+                const candidate = await United.transferTrack(track)
+                if (!Track.hasUrl(candidate)) {
+                    handleUnplayableTrack(track, TRANSFRER_FAIL_MSG)
+                    return
+                }
+                if (!isCurrentTrack(track)) return
+                if (isDevEnv()) console.log(candidate)
+                const { url, lyric, lyricTrans, lyricRoma, duration, isCandidate } = candidate
+                Object.assign(track, { url, lyric, lyricTrans, lyricRoma, duration, isCandidate })
+                showToast(TRANSFRER_OK_MSG, () => {
+                    if (isCurrentTrack(track)) {
+                        loadLyric(track)
+                        playTrackDirectly(track)
+                    }
+                })
+            }
+        }).catch(error => {
+            console.log(error)
+            handleUnplayableTrack(track)
+        })
+    },
+    'track-play': track => {
+        //resetAutoSkip()
+        traceRecentTrack(track)
+        //loadLyric(track)
+    },
+    'track-state': ({ state, track, currentTime }) => {
+        //播放刚开始时，更新MediaSession
+        if ((playState.value == PlayState.INIT
+            || playState.value == PlayState.LOADED)
+            && state == PlayState.PLAYING) {
+            setupCurrentMediaSession()
+            resetAutoSkip()
+        }
+
+        setPlayState(state)
+        switch (state) {
+            case PlayState.NONE:
+                resetPlayState(true)
+                break
+            case PlayState.INIT:
+                resetPlayState(true)
+                checkFavoritedState()
+                break
+            case PlayState.PLAYING:
+                setPlaying(true)
+                break
+            case PlayState.PAUSE:
+                setPlaying(false)
+                break
+            case PlayState.END:
+                playNextTrack()
+                break
+            case PlayState.LOAD_ERROR:
+            case PlayState.PLAY_ERROR:
+                setPlaying(false)
+                onPlayerErrorRetry({ track, currentTime })
+                break
+            default:
+                break
+        }
+    },
+    'track-pos': ({ currentTime: currentSecs, duration }) => {
+        if (videoPlayingViewShow.value && isPlaying()
+            && isPauseOnPlayingVideoEnable.value) {
+            togglePlay()
+            return
+        }
+        const track = currentTrack.value
+        if (duration != track.duration) Object.assign(track, { duration })
+        const currentTime = currentSecs * 1000
+        mmssCurrentTime.value = toMmss(currentTime)
+        currentTimeState.value = currentSecs
+        const _duration = track.duration || 0
+        progressState.value = _duration > 0 ? (currentTime / _duration) : 0
+    },
+    'track-spectrumData': ({leftFreqData, leftFreqBinCount, rightFreqData,
+        rightFreqBinCount, freqData, freqBinCount,
+        sampleRate, analyser, leftChannelAnalyser, rightChannelAnalyser, }) => {
+        if (!currentTrack.value) return setSpectrumParams(null)
+
+        const spectrumColor = getCurrentThemeHighlightColor()
+        const canvasBgColor = getCurrentThemeContentBgColor()
+        const isSimpleLayoutMode = isSimpleLayout.value
+        const isPlaying = playing.value
+
+        setSpectrumParams({
+            leftFreqData, leftFreqBinCount,
+            rightFreqData, rightFreqBinCount,
+            freqData, freqBinCount, sampleRate,
+            analyser, leftChannelAnalyser, rightChannelAnalyser,
+            spectrumColor, stroke: spectrumColor, canvasBgColor,
+            isSimpleLayoutMode, isPlaying
+        })
+
+        //简约布局、可视化播放页
+        if (!isSimpleLayoutMode && (!playingViewShow.value || playingViewThemeIndex.value != 1)) {
+            return setSpectrumParams(null)
+        }
+        if (exVisualCanvasShow.value && !isSimpleLayoutMode) return
+        drawCanvasSpectrum()
+    },
+    //歌单电台 - 下一曲
+    'track-nextPlaylistRadioTrack': track => {
+        playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)
+    },
+    'track-seekFinish': () => {
+        //清除预备状态
+        mmssPreseekTime.value = null
+        setProgressSeekingState(false)
+    },
+    'video-stop': resumeTrackPendingPlay,
+    'plugins-accessResult-addPlatform': ({ code }) => {
+        const pendingTrack = pendingBootstrapTrack.value
+        if (!pendingTrack) return
+        if (pendingTrack.platform != code && !isLocalMusic(pendingTrack.platform)) return
+        //pendingTrack已非当前歌曲
+        if (!isCurrentTrack(pendingTrack)) return setPendingBootstrapTrack(null)
+        
+        //延迟加载歌词
+        emitEvents('track-lyricRestore')
+        const _track = { ...pendingTrack }
+        setPendingBootstrapTrack(null)
+        setTimeout(() => loadLyric(_track), 1888)
+    },
+    //TODO
+    'userProfile-reset': checkFavoritedState,
+    'track-refreshFavoritedState': checkFavoritedState,
+    'setting-syncToDesktopLyric': data => postMessageToDesktopLryic('s-setting-sync', data),
+})
+
 onMounted(() => {
     setupStateRefreshFrequency()
     setupSpectrumRefreshFrequency()
@@ -1543,12 +1533,12 @@ watch(queueTracksSize, (nv, ov) => {
     if (nv < 1) {
         resetPlayState()
         setFavoritedState(false)
-        EventBus.emit('playbackQueue-empty')
+        emitEvents('playbackQueue-empty')
     }
 })
 
 watch(playing, (nv, ov) => {
-    if (ipcRenderer) ipcRenderer.send('app-playState', nv)
+    ipcRendererSend('app-playState', nv)
     if (!nv && spectrumIndex.value != 0) drawCanvasSpectrum()
     const params = spectrumParams.value || {}
     setSpectrumParams({ ...params, isPlaying: nv })
@@ -1566,20 +1556,6 @@ watch(theme, () => {
 //TODO
 watch(playingIndex, (nv, ov) => resetTrackRetry())
 
-
-//TODO 暂时采用冗余代码方式实现
-let isConfirmDialogShowing = false
-const showConfirm = async ({ title, msg }) => {
-  if (!ipcRenderer || isConfirmDialogShowing) return false
-  isConfirmDialogShowing = true
-  hideAllCtxMenus(false)
-  const ok = await ipcRenderer.invoke('show-confirm', {
-    title: title || '确认',
-    msg
-  })
-  isConfirmDialogShowing = false
-  return ok
-}
 
 //播放器API
 provide('player', {
@@ -1616,4 +1592,5 @@ provide('player', {
     <slot></slot>
 </template>
 
-<style></style>
+<style>
+</style>

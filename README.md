@@ -33,17 +33,14 @@
 * <b>设置页</b>：包括主题、布局、窗口缩放、导航栏、快捷键、网络代理等  
 * <b>播放页</b>：目前预设5种播放样式，“静动结合”; 歌词设置灵活，支持通过歌词调整歌曲进度、外文翻译（需平台支持） 
 * <b>窗口缩放</b>：屏幕大小，适应自如  
-* <b>桌面歌词</b>：支持横屏、竖屏歌词；支持3种显示模式，即单行、双行、全部；同时可对字体大小、颜色、行间距等进行设置 
-  
-PS  
-*任何删除清空操作（带垃圾桶图标的按钮）请谨慎！其实也没这么夸张，哈哈 ~*  
-*目前部分功能已支持确认，请参考播放器功能“设置页 - 对话框”*  
-  
+* <b>桌面歌词</b>：支持横屏、竖屏歌词；支持3种显示模式，即单行、双行、全部；同时可对字体大小、颜色、行间距等进行设置   
+    
 ### 预览图  
+<!--
 ![Github snap 11.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2011.png)  
 ![Github snap 12.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2012.png)  
 ![Github snap 13.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2013.png)  
-  
+--> 
 ![Gitee snap 01.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2001.png)  
 ![Gitee snap 02.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2002.png)  
 ![Gitee snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2003.png)  
@@ -70,13 +67,14 @@ PS
   `npm update`
   
 ### For普通用户
-* 建议多熟悉一下，播放器设置功能，不同设置会带来一些些不同的使用体验哦  
-* 播放器设置相对灵活，部分功能会默认“关闭”，需前往“设置页”开启或切换  
-* 最新开发预览版（测试版），会在项目自身仓库，不定期打包发布，欢迎愿意尝鲜的朋友一起体验  
-* 开发预览版，即为<b>`Pre-release`</b>版本，tag标签名称或版本号里<b>`带有发布日期`</b>   
-* 当前页面顶部，分别有<b>`release、tag、license、downloads`</b>等图标按钮，请点击<b>`release按钮`</b>直达发行版本列表页面  
-
-  
+* 建议熟悉一下`播放器设置`，不同设置会带来一些些不同的使用体验哦  
+* 播放器设置相对灵活，`部分功能默认“关闭”`，需前往“设置页”开启   
+* `最新开发预览版（测试版）`，会在项目自身仓库，`不定期`打包发布，欢迎愿意尝鲜的朋友一起体验  
+* 开发预览版，即为<b>`Pre-release`</b>版本，版本标题、tag标签名称、版本号里<b>`带有发布日期`</b>   
+* 当前`页面顶部`，分别有<b>`release、tag、license、downloads`</b>等图标按钮，可点击<b>`release按钮`</b>直达`发行版本列表`页面  
+* 任何删除`清空操作`（带垃圾桶图标的按钮）请`谨慎`！其实也没这么夸张，哈哈 ~  
+* 为避免误操作，已部分支持对话框确认，请参考`“设置页 - 对话框”`  
+    
 ### 发行版  
 * 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
 * Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)

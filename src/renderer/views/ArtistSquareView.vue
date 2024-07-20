@@ -1,12 +1,12 @@
 <script setup>
 import { onActivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useArtistSquareStore } from '../store/artistSquareStore';
 import ArtistCategoryBar from '../components/ArtistCategoryBar.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -72,7 +72,7 @@ const loadCategories = async () => {
 
     categories.push(...cached)
     setLoadingCategories(false)
-    EventBus.emit('artistCategory-update')
+    emitEvents('artistCategory-update')
 }
 
 const loadContent = async (noLoadingMask) => {
@@ -124,7 +124,7 @@ const resetScrollState = () => {
 }
 
 const restoreScrollState = () => {
-    //EventBus.emit("imageTextTiles-update")
+    //emitEvents("imageTextTiles-update")
     if (markScrollTop < 1) return
     if (!squareRef.value) return
     squareRef.value.scrollTop = markScrollTop
@@ -162,14 +162,16 @@ watch(currentPlatformCode, (nv, ov) => {
     loadCategories()
 })
 
-EventBus.on("artistSquare-refresh", refreshData)
+onEvents({
+    'artistSquare-refresh': refreshData, 
+})
 </script>
 
 <template>
     <div class="artist-square-view" ref="squareRef" @scroll="onScroll">
         <ArtistCategoryBar :data="categories" :alphabet="currentAlphabet" :loading="isLoadingCategories">
         </ArtistCategoryBar>
-        <ArtistListControl :data="artists" :loading="isLoadingContent"></ArtistListControl>
+        <ArtistListControl :data="artists" :loading="isLoadingCategories || isLoadingContent"></ArtistListControl>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>

@@ -11,19 +11,17 @@ import { storeToRefs } from 'pinia';
 import { useFreeFMStore } from '../store/freeFMStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
-import EventBus from '../../common/EventBus';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { useIpcRenderer, parseM3uText, parsePlsText } from "../../common/Utils";
+import { parseM3uText, parsePlsText, ipcRendererInvoke } from "../../common/Utils";
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
 const { currentRoutePath, visitFreeFMCreate, visitBatchFreeFM } = inject('appRoute')
-const { showConfirm } = inject('appCommon')
-
-const ipcRenderer = useIpcRenderer()
+const { showConfirm } = inject('apiExpose')
 
 const { freeRadios, importTaskCount } = storeToRefs(useFreeFMStore())
 const { addFreeRadio, resetAll,
@@ -59,15 +57,13 @@ const onScroll = () => {
 }
 
 const onDrop = async (event) => {
-    if (!ipcRenderer) return
     if (importTaskCount.value > 0) return
     event.preventDefault()
     //暂时不想支持拖拽
 }
 
 const importRadios = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-file', { title: '请选择数据文件', filterExts: ['json', 'm3u', 'm3u8', 'pls'] })
+    const result = await ipcRendererInvoke('open-file', { title: '请选择数据文件', filterExts: ['json', 'm3u', 'm3u8', 'pls'] })
     if (result) {
         increaseImportTaskCount()
         const { data: rData, filePath } = result
@@ -180,7 +176,7 @@ const filterByTags = (tags) => {
 }
 
 const showTagsView = () => {
-    EventBus.emit('tagsCategory-update', { data: getAllTags(), callback: filterByTags })
+    emitEvents('tagsCategory-update', { data: getAllTags(), callback: filterByTags })
     toggleTagsCategoryView()
 }
 
@@ -338,7 +334,8 @@ const interruptSearchBarExclusiveModeCtl = () => {
     margin-left: 5px;
     padding-bottom: 8px;
     border-bottom: 3px solid var(--content-highlight-color);
-    font-size: calc(var(--content-text-tab-title-size) - 2px);
+    /*font-size: calc(var(--content-text-tab-title-size) - 2px);*/
+    font-size: var(--content-text-tab-title-size);
 }
 
 #freefm-view .checkbox {
@@ -368,6 +365,7 @@ const interruptSearchBarExclusiveModeCtl = () => {
     display: flex;
     align-items: center;
     /* font-weight: bold; */
+    font-size: calc(var(--content-text-tab-title-size) - 1.5px);
 }
 
 #freefm-view .tags-btn {

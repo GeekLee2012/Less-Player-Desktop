@@ -5,9 +5,8 @@ import { useSettingStore } from '../store/settingStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import SearchBar from '../components/SearchBar.vue';
 import Navigator from '../components/Navigator.vue';
-import EventBus from '../../common/EventBus';
-import { useUseCustomTrafficLight } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -32,7 +31,7 @@ const switchToSimpleLayout = () => {
 }
 
 const toggleRadioMode = () => {
-    EventBus.emit("toggleRadioMode")
+    emitEvents("toggleRadioMode")
 }
 </script>
 

@@ -1,17 +1,17 @@
 import { Howl, Howler } from 'howler';
 import { PlayState } from '../common/Constants';
-import EventBus from '../common/EventBus';
 import { Track } from './Track';
-import { WebAudioApi } from './WebAudioApi';
+import { createWebAudioApi } from './WebAudioApi';
 import { toRaw } from 'vue';
 import { isDevEnv } from './Utils';
+import { onEvents, emitEvents } from './EventBusWrapper';
 
 
 
 let singleton = null
 
 //追求简单、组合式API、单一责任
-export class Player {
+class Player {
     constructor(track) {
         this.currentTrack = track
         this.sound = null
@@ -41,26 +41,28 @@ export class Player {
 
     static create() {
         if (singleton) return singleton
-        singleton = new Player()
-        return singleton.on('track-play', track => singleton.playTrack(track))
-            .on('track-restore', track => singleton.restore(track))
-            .on('track-changed', track => singleton.setCurrent(track))
-            .on('track-togglePlay', () => singleton.togglePlay())
-            .on('track-seek', percent => singleton.seek(percent))
-            .on('volume-set', volume => singleton.volume(volume))
-            .on('radio-play', () => singleton.setCurrent(null))
-            .on('playbackQueue-empty', () => singleton.setCurrent(null))
-            .on('track-setupSoundEffect', options => singleton.setupSoundEffect(options))
-            .on('track-updateStereoPan', value => singleton.updateStereoPan(value))
-            .on('track-updateVolumeGain', value => singleton.updateVolumeGain(value))
-            .on('track-stateRefreshFrequency', value => singleton.stateRefreshFrequency = value)
-            .on('track-spectrumRefreshFrequency', value => singleton.spectrumRefreshFrequency = value)
-            .on('track-markSeekPending', value => singleton.seekPendingMark = value)
-            .on('desktopLyric-messagePort', value => singleton.setupDesktopLyricMessagePort(value))
-            .on('track-noLyric', value => singleton.postLyricStateToDesktopLyric(value, false))
-            .on('track-lyricLoaded', value => singleton.postLyricStateToDesktopLyric(value, true))
-            .on('desktopLyric-showState', value => singleton.setMessagePortActiveState(value))
-            .on('outputDevice-setup', value => singleton._setAudioOutputDevice(value))
+        singleton = new Player().on({
+            'track-play': value => singleton.playTrack(value),
+            'track-restore': value => singleton.restore(value),
+            'track-changed': value => singleton.setCurrent(value),
+            'track-togglePlay': () => singleton.togglePlay(),
+            'track-seek': value => singleton.seek(value),
+            'volume-set': value => singleton.volume(value),
+            'radio-play': () => singleton.setCurrent(null),
+            'playbackQueue-empty': () => singleton.setCurrent(null),
+            'track-setupSoundEffect': value => singleton.setupSoundEffect(value),
+            'track-updateStereoPan': value => singleton.updateStereoPan(value),
+            'track-updateVolumeGain': value => singleton.updateVolumeGain(value),
+            'track-stateRefreshFrequency': value => singleton.stateRefreshFrequency = value,
+            'track-spectrumRefreshFrequency': value => singleton.spectrumRefreshFrequency = value,
+            'track-markSeekPending': value => singleton.seekPendingMark = value,
+            'desktopLyric-messagePort': value => singleton.setupDesktopLyricMessagePort(value),
+            'track-noLyric': value => singleton.postLyricStateToDesktopLyric(value, false),
+            'track-lyricLoaded': value => singleton.postLyricStateToDesktopLyric(value, true),
+            'desktopLyric-showState': value => singleton.setMessagePortActiveState(value),
+            'outputDevice-setup': value => singleton._setAudioOutputDevice(value),
+        })
+        return singleton
     }
 
     _isTrackAvailable() {
@@ -229,14 +231,14 @@ export class Player {
         //循环动画
         this._rewindAnimationFrame(this._step.bind(this), true)
     }
-
-    on(event, handler) {
-        EventBus.on(event, handler)
+    
+    on(registration) {
+        onEvents(registration)
         return this
     }
 
-    notify(event, args) {
-        EventBus.emit(event, args)
+    notify(events, data) {
+        emitEvents(events, data)
         return this
     }
 
@@ -248,19 +250,19 @@ export class Player {
         this.postPlayStateToDesktopLryic()
     }
 
-    _createWebAudioApi() {
+    _initWebAudioApi() {
         if (!this.webAudioApi) {
             const audioCtx = Howler.ctx
             if (audioCtx) {
                 const audioNode = this.sound._sounds[0]._node
-                if (audioNode) this.webAudioApi = WebAudioApi.create(audioCtx, audioNode)
+                if (audioNode) this.webAudioApi = createWebAudioApi(audioCtx, audioNode)
             }
         }
         return this.webAudioApi
     }
 
     _resolveSound() {
-        if (!this._createWebAudioApi()) return
+        if (!this._initWebAudioApi()) return
         this._resolvePendingSoundEffect()
         if (!this.isSpectrumRefreshEnabled()) return
         
@@ -469,4 +471,8 @@ export class Player {
         const _duration = Number.isFinite(this.sound.duration()) ? this.sound.duration() * 1000 : 0
         if(duration != _duration) Object.assign(this.currentTrack, { duration: _duration })
     }
+}
+
+export function createPlayer() {
+    return Player.create()
 }

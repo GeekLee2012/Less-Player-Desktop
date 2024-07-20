@@ -1,7 +1,6 @@
 <script setup>
 import { onActivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import PlaylistCategoryBar from '../components/PlaylistCategoryBar.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
@@ -11,6 +10,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import PlaylistCategoryFlowBtn from '../components/PlaylistCategoryFlowBtn.vue';
 import { toTrimString } from '../../common/Utils';
 import { useSettingStore } from '../store/settingStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 //TODO 需要梳理优化, 前期缺少设计，现在全是坑
@@ -94,7 +94,7 @@ const loadCategories = async () => {
     categories.push(...cachedCates)
     if (cachedOrders) orders.push(...cachedOrders)
     setWhiteWrap(cachedWhiteWrap)
-    EventBus.emit('playlistCategory-update')
+    emitEvents('playlistCategory-update')
     setLoadingCategories(false)
 }
 
@@ -170,7 +170,7 @@ const resetScrollState = () => {
 }
 
 const restoreScrollState = () => {
-    //EventBus.emit("imageTextTiles-update")
+    //emitEvents("imageTextTiles-update")
     if (markScrollTop < 1) return
     if (squareContentRef.value) squareContentRef.value.scrollTop = markScrollTop
 }
@@ -212,14 +212,16 @@ watch(currentPlatformCode, (nv, ov) => {
     loadCategories()
 })
 
-EventBus.on("playlistSquare-refresh", refreshData)
+onEvents({
+    'playlistSquare-refresh': refreshData,
+})
 </script>
 
 <template>
     <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
         <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories" :isWhiteWrap="isWhiteWrap">
         </PlaylistCategoryBar>
-        <PlaylistsControl :loading="isLoadingContent" :paginationStyleType="getPaginationStyleIndex"
+        <PlaylistsControl :loading="isLoadingCategories || isLoadingContent" :paginationStyleType="getPaginationStyleIndex"
             :limit="pagination.limit" :loadPage="loadPageContent" :nextPagePendingMark="nextPagePendingMark"
             :refreshAllPendingMark="refreshAllPendingMark" v-show="!isAlbumType">
         </PlaylistsControl>

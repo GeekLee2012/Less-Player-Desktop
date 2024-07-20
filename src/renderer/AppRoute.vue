@@ -1,8 +1,7 @@
 <script setup>
 import { provide } from 'vue';
-import { useRouter, isNavigationFailure, NavigationFailureType } from 'vue-router';
+import { useRouter, } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import EventBus from '../common/EventBus';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useSettingStore } from './store/settingStore';
 import { useArtistDetailStore } from './store/artistDetailStore';
@@ -11,6 +10,7 @@ import { useAppCommonStore } from './store/appCommonStore';
 import { usePlatformStore } from './store/platformStore';
 import { Playlist } from '../common/Playlist';
 import { isDevEnv, toTrimString, isBlank } from '../common/Utils';
+import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
 
@@ -60,7 +60,7 @@ const highlightNavigationCustomPlaylist = (to, from) => {
         const id = path.split('/')[3]
         index = findCustomPlaylistIndex(id)
     }
-    EventBus.emit("navigation-refreshCustomPlaylistIndex", index)
+    emitEvents("navigation-refreshCustomPlaylistIndex", index)
 }
 
 const autoSwitchExploreMode = (to, from) => {
@@ -142,7 +142,7 @@ const createCommonRoute = (route, onRouteReady) => {
             hideRelativeComponents()
             if (isSimpleLayout.value) switchToFallbackLayout()
             if (!toPath.includes('/artist/')) hidePlaybackQueueView()
-            EventBus.emit('app-beforeRoute', { toPath, fromPath })
+            emitEvents('app-beforeRoute', { toPath, fromPath })
         }
     }
 }
@@ -408,13 +408,13 @@ provide('appRoute', {
     visitRecents: () => {
         //实现方式1：通过setTimeout函数延时调用
         //缺点：不确定性，即不同设备性能不一样，路由导航所耗费时间不一样
-        //setTimeout(() => EventBus.emit('userHome-visitRecentsTab'), 66)
+        //setTimeout(() => emitEvents('userHome-visitRecentsTab'), 66)
         //visitUserHome()
 
         //实现方式2：路由上下文对象 + 回调
         visitUserHome(() => setRouterCtxCacheItem({ id: 'visitRecents' }), true)
             .catch(error => {
-                if (error == 'sameRoute') EventBus.emit('userHome-visitRecentsTab')
+                if (error == 'sameRoute') emitEvents('userHome-visitRecentsTab')
             })
     },
     visitRadio,

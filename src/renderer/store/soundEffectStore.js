@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from "../../common/EventBusWrapper";
 
 
 
@@ -354,7 +354,7 @@ export const useSoundEffectStore = defineStore('soundEffect', {
             value = Math.max(-1.0, value)
             value = Math.min(1.0, value)
             this.stereoPanValue = value
-            EventBus.emit('track-updateStereoPan', this.stereoPanValue)
+            emitEvents('track-updateStereoPan', this.stereoPanValue)
         },
         setVolumeGain(value) {
             value = Number(value)
@@ -362,10 +362,10 @@ export const useSoundEffectStore = defineStore('soundEffect', {
             value = Math.min(3.0, value)
             if(Math.abs(1 - value) <= 0.01) value = 1.0
             this.volumeGain = value
-            EventBus.emit('track-updateVolumeGain', this.volumeGain)
+            emitEvents('track-updateVolumeGain', this.volumeGain)
         },
         setupSoundEffect() {
-            EventBus.emit('track-setupSoundEffect', {
+            emitEvents('track-setupSoundEffect', {
                 eqValues: this.currentEQValues,
                 irSource: this.currentIRSource,
                 type: this.currentEffectType,

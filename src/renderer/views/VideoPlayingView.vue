@@ -4,10 +4,10 @@ import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import { useVideoPlayStore } from '../store/videoPlayStore';
-import EventBus from '../../common/EventBus';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { PlayState } from '../../common/Constants';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -28,14 +28,14 @@ const initVideoPlayer = () => {
     //异常情况
     if (videoEls.length == 2) index = isSimpleLayout.value ? 0 : 1
     videoNode = videoEls[index]
-    EventBus.emit('video-init', videoNode)
+    emitEvents('video-init', videoNode)
 }
 
 const stopVideo = (callback) => {
     if (currentVideo.value) {
         setPlaying(false)
         removeVideo(currentVideo.value)
-        EventBus.emit('video-stop')
+        emitEvents('video-stop')
     }
     if (callback && (typeof callback == 'function')) callback()
 }
@@ -65,7 +65,7 @@ const toggleSidebarShow = () => sidebarShow.value = !sidebarShow.value
 const handleVideoDoubleClick = (event) => {
     event.preventDefault()
     if (!videoNode || !currentVideo.value) return
-    EventBus.emit('video-togglePlay')
+    emitEvents('video-togglePlay')
 }
 
 const requestFullscreen = (event) => {
@@ -73,9 +73,11 @@ const requestFullscreen = (event) => {
     if (videoNode && videoNode.requestFullscreen) videoNode.requestFullscreen()
 }
 
-EventBus.on("app-beforeRoute", quitVideo)
-EventBus.on("video-state", ({ state, video }) => {
-    if (state == PlayState.END && isQuitVideoAfterEndedEnable.value) quitVideo()
+onEvents({
+    'app-beforeRoute': quitVideo,
+    'video-state':  ({ state, video }) => {
+        if (state == PlayState.END && isQuitVideoAfterEndedEnable.value) quitVideo()
+    },
 })
 
 onActivated(initVideoPlayer)

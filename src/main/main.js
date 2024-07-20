@@ -286,8 +286,7 @@ const removePendingTracks = (tracks) => {
     while (index > -1) {
       if (count >= 10) break
       pendigTracks.splice(index, 1)
-      index = pendigTracks.indexOf
-        (_path)
+      index = pendigTracks.indexOf(_path)
       ++count
     }
   })
@@ -295,6 +294,7 @@ const removePendingTracks = (tracks) => {
 
 const parseAndPlayTracks = (files) => {
   if (!files || !Array.isArray(files) || files.length < 1) return
+
   try {
     parseTracks(files).then(tracks => {
       sendToMainRenderer('app-startup-playTracks', tracks)
@@ -316,14 +316,12 @@ const doStartupPlay = (tracks) => {
 
 const handleStartupPlay = (argv) => {
   try {
-    if (isMacOS) {
-      app.on('open-file', (event, path) => {
-        event.preventDefault()
-        doStartupPlay([path])
-      })
-    } else {
-      doStartupPlay(argv || process.argv)
-    }
+    if (!isMacOS) return doStartupPlay(argv || process.argv)
+    
+    app.on('open-file', (event, path) => {
+      event.preventDefault()
+      doStartupPlay([path])
+    })
   } catch (error) {
     if (isDevEnv) console.log(error)
   }
@@ -393,10 +391,8 @@ const registryGlobalListeners = () => {
     parseAndPlayTracks(files)
   }).on('app-min', (event, isHideToTray) => {
     if (isHideToTray) {
-      if (isMacOS) app.hide()
-      else mainWin.hide()
-      setupTray(true)
-      return
+      isMacOS ? app.hide() : mainWin.hide()
+      return setupTray(true)
     }
     if (mainWin.isFullScreen()) mainWin.setFullScreen(false)
     if (mainWin.isMaximized() || mainWin.isNormal()) mainWin.minimize()
@@ -453,8 +449,7 @@ const registryGlobalListeners = () => {
   })*/.on('path-showInFolder', (event, path) => {
     if (path) shell.showItemInFolder(path)
   }).on('dnd-saveToLocal', async (event, { file, name, type, data, url, useDefaultIcon }) => {
-    if(!file) return
-    if(!data && !url) return 
+    if(!file || !data && !url) return
 
     if(!useDefaultIcon) {
       //Electron拖拽支持文件，其他类型暂不支持
@@ -619,6 +614,7 @@ const registryGlobalListeners = () => {
     const lyricFile = arg.substring(0, index)
     return readText(`${lyricFile}.lrc`)
       || readText(`${lyricFile}.LRC`)
+      || readText(`${lyricFile}.Lrc`)
   })
 
   ipcMain.handle('invoke-vendor', async (event, ...args) => {
@@ -974,8 +970,9 @@ const setupMessagePortPair = (win1, win2) => {
 
 const closeMessagePortPair = () => {
   if (!messagePortPair) return
-  tryCloseMessagePort(messagePortPair.port1)
-  tryCloseMessagePort(messagePortPair.port2)
+  const { port1, port2 } = messagePortPair
+  tryCloseMessagePort(port1)
+  tryCloseMessagePort(port2)
 }
 
 //创建浏览窗口
@@ -1090,6 +1087,18 @@ const getAppMenuI18nConfig = () => {
     defaultLocale: 'zh-CN',
     candidateLocale: 'en-US',
     data: {
+      'zh-CN': {
+        About: '关于',
+        Update: '检查更新',
+        Settings: '设置',
+        DevTools: '开发者工具',
+        Quit: '退出',
+        Edit: '编辑',
+        Plugins: '插件',
+        InstalledPlugins: '已安装插件',
+        Github: 'Github仓库',
+        Gitee: 'Gitee仓库'
+      },
       'en-US': {
         About: 'About',
         Update: 'Check for Updates...',
@@ -1102,27 +1111,19 @@ const getAppMenuI18nConfig = () => {
         Github: 'Github Repository',
         Gitee: 'Gitee Repository'
       },
-      'zh-CN': {
-        About: '关于',
-        Update: '检查更新',
-        Settings: '设置',
-        DevTools: '开发者工具',
-        Quit: '退出',
-        Edit: '编辑',
-        Plugins: '插件',
-        InstalledPlugins: '已安装插件',
-        Github: 'Github仓库',
-        Gitee: 'Gitee仓库'
-      }
     }
   }
 }
 
 //根据locale取值（前缀），从defaultLocale和candidateLocale中二选一返回
 const resolveAppLocale = (locale, defaultLocale, candidateLocale) => {
+  if(!defaultLocale || !candidateLocale) return locale
   const delimiter = '-'
+  if(defaultLocale.indexOf(delimiter) < 1) return locale
+  
   const prefix = defaultLocale.split(delimiter)[0] + delimiter
-  return locale && !locale.startsWith(prefix) ? candidateLocale : defaultLocale
+  const isSimilarToDefault = (locale || defaultLocale).startsWith(prefix)
+  return isSimilarToDefault ? defaultLocale : candidateLocale
 }
 
 //菜单模板
@@ -1130,6 +1131,7 @@ const initAppMenuTemplate = () => {
   const { defaultLocale, candidateLocale, data: i18nData } = getAppMenuI18nConfig()
   const locale = resolveAppLocale(app.getLocale(), defaultLocale, candidateLocale)
   const i18nText = i18nData[locale]
+  if(!i18nText) return []
 
   let menuItems = [
     { role: 'about', label: i18nText.About },
@@ -1603,16 +1605,10 @@ const isLyricWindowShow = () => {
 
 //启动应用
 if (isDevEnv) return startup()
-
-const instanceLock = app.requestSingleInstanceLock()
-if (!instanceLock) return app.quit()
+if (!app.requestSingleInstanceLock()) return app.quit()
   
 app.on('second-instance', (event, argv, workingDirectory, additionalData) => {
-  if (isWindowAccessible(mainWin)) {
-    //if (mainWin.isMinimized()) mainWin.restore()
-    //mainWin.focus()
-    handleStartupPlay(argv)
-  }
+  isWindowAccessible(mainWin) && handleStartupPlay(argv)
 })
 
 startup()

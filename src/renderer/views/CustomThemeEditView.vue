@@ -6,18 +6,17 @@ import { useThemeStore } from '../store/themeStore';
 import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import ColorInputControl from '../components/ColorInputControl.vue';
-import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from '../../common/Utils';
+import { transformUrl, isSupportedImage, ipcRendererInvoke } from '../../common/Utils';
 import { Theme } from '../../common/Theme';
+import { FILE_SCHEME } from '../../common/Constants';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
-const ipcRenderer = useIpcRenderer()
-
 const { workingCustomTheme } = storeToRefs(useAppCommonStore())
-const { hideCustomThemeEditView, showToast } = useAppCommonStore()
+const { hideCustomThemeEditView, showToast, showFailToast } = useAppCommonStore()
 const { saveCustomTheme } = useThemeStore()
 const { isCurrentTheme } = useSettingStore()
 
@@ -30,13 +29,12 @@ const setPreviewMode = (value) => isPreviewMode.value = value
 const toggleCustomThemePreview = () => {
     setPreviewMode(!isPreviewMode.value)
     const theme = isPreviewMode.value ? customTheme : null
-    EventBus.emit('theme-applyTheme', theme)
+    emitEvents('theme-applyTheme', theme)
 }
 
 //TODO 使用本地文件图片，存在迁移共享问题
 const uploadImage = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-image')
+    const result = await ipcRendererInvoke('open-image')
     if (result && result.length > 0) setupAppBgImage(result[0])
 }
 
@@ -52,7 +50,7 @@ const saveTheme = () => {
     saveCustomTheme(theme)
     showToast('主题保存成功')
     hideCustomThemeEditView()
-    if (isCurrentTheme(theme)) EventBus.emit('theme-applyTheme')
+    if (isCurrentTheme(theme)) emitEvents('theme-applyTheme')
 }
 
 //主题另存为
@@ -148,6 +146,24 @@ const setupOthersProgressBarBgColor = (value) => Object.assign(customTheme.other
 //const setupOthersVolumeBarThumbColor = (value) => Object.assign(customTheme.others, { volumeBarThumbColor: value })
 //const setupOthersCheckboxBgColor = (value) => Object.assign(customTheme.others, { checkboxBgColor: value })
 
+
+const onDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length > 1) return showFailToast('还不支持多文件拖拽')
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        setupAppBgImage(path)
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
+}
+
 watch(workingCustomTheme, (nv, ov) => {
     resetTheme()
     setFormInvalid(false)
@@ -156,7 +172,7 @@ watch(workingCustomTheme, (nv, ov) => {
 
 <template>
     <div class="custom-theme-edit-view" :class="{ 'custom-theme-preview-mode': isPreviewMode }"
-        v-gesture-dnm="{ trigger: '.header' }">
+        v-gesture-dnm="{ trigger: '.header' }" @drapover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="container">
             <div class="header">
                 <div class="action left-action">
@@ -280,7 +296,7 @@ watch(workingCustomTheme, (nv, ov) => {
                         <div class="item img-item">
                             <div class="name">背景图片：</div>
                             <div class="preview" v-show="customTheme.appBackground.bgImage">
-                                <img :src="customTheme.appBackground.bgImage" />
+                                <img :src="transformUrl(customTheme.appBackground.bgImage, FILE_SCHEME)" />
                                 <div class="action">
                                     <div class="remove-btn text-btn" @click="() => setupAppBgImage(null)">
                                         <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"

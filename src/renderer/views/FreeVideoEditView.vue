@@ -8,7 +8,7 @@ export default {
 <script setup>
 import { ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { coverDefault, useIpcRenderer } from '../../common/Utils';
+import { coverDefault, } from '../../common/Utils';
 
 
 
@@ -18,8 +18,6 @@ const { backward } = inject('appRoute')
 const props = defineProps({
     id: String
 })
-
-const ipcRenderer = useIpcRenderer()
 
 const { showToast, showFailToast } = useAppCommonStore()
 const coverRef = ref(null)
@@ -56,8 +54,7 @@ const remove = () => {
 
 //TODO
 const updateCover = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-image')
+    const result = await ipcRendererInvoke('open-image')
     if (result.length > 0) {
         const cover = result[0]
         Object.assign(detail, { cover })

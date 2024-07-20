@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { usePlatformStore } from "./platformStore";
-import { toLowerCaseTrimString } from "../../common/Utils";
 
 
 export const useSearchStore = defineStore('search', {

@@ -1,9 +1,9 @@
 <script setup>
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import EventBus from '../../common/EventBus';
 import { reactive } from 'vue';
 import { storeToRefs } from 'pinia';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -50,7 +50,7 @@ const visitCateItem = (item, row, col) => {
     const needRefresh = isDiffCate(item, row, col)
     updateCurrentCategoryItem(item, row, col)
     if (needRefresh) {
-        EventBus.emit("playlistSquare-refresh")
+        emitEvents("playlistSquare-refresh")
         //prevCate = { item, row, col }
         hidePlaylistCategoryView()
     }
@@ -60,16 +60,18 @@ const visitByOrder = (item, index) => {
     const needRefresh = isDiffOrder(item, index)
     updateCurrentOrder(item.key, item.value, index)
     if (needRefresh) {
-        EventBus.emit("playlistSquare-refresh")
+        emitEvents("playlistSquare-refresh")
         hidePlaylistCategoryView()
     }
 }
 
-EventBus.on('playlistCategory-update', () => {
-    updateCategories()
-    updateOrders()
+onEvents({
+    'playlistCategory-update': () => {
+        updateCategories()
+        updateOrders()
+    },
+    'playlistCategory-resetScroll': resetScroll,
 })
-EventBus.on('playlistCategory-resetScroll', resetScroll)
 </script>
 
 <template>

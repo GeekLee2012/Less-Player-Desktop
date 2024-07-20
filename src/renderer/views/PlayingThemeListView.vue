@@ -2,8 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { coverDefault, transformUrl } from '../../common/Utils';
-import { FILE_SCHEME } from '../../common/Constants';
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -90,7 +89,7 @@ const computedCustomThemeSectionTitle = computed(() => {
                     <div class="item" :class="{ current:  (playingViewThemeIndex == index && playingViewThemeType == 1) }" 
                         :index="index">
                         <div class="preview-wrap">
-                            <img class="preview" :src="coverDefault(transformUrl(item.previewCover, FILE_SCHEME))" :class="{ 'no-cover': !item.previewCover }"
+                            <img class="preview" :src="coverDefault(item.previewCover)" :class="{ 'no-cover': !item.previewCover }"
                                 @click="(event) => setPlayingViewThemeIndex(index, 1)" />
                             <svg v-show="(playingViewThemeIndex == index && playingViewThemeType == 1)" class="checked-svg"
                                 width="21" height="21" viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">

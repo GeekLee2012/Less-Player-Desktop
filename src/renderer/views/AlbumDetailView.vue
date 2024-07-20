@@ -10,7 +10,6 @@ export default {
 <script setup>
 import { inject, ref, reactive, shallowRef, watch, toRaw, nextTick, computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useAlbumDetailStore } from '../store/albumDetailStore';
@@ -23,6 +22,7 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { Album } from '../../common/Album';
 import { coverDefault } from '../../common/Utils';
 import { useSettingStore } from '../store/settingStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -235,7 +235,10 @@ const computedTabName = computed(() => {
 })
 
 //TODO
-EventBus.on('ctxMenu-removeFromLocal', reloadAll)
+onEvents({
+    'ctxMenu-removeFromLocal': reloadAll,
+    'app-resize': detectTitleHeight,
+})
 
 //TODO 需要梳理优化
 watch(() => [props.platform, props.id], ([nv1, nv2]) => {
@@ -243,8 +246,6 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
     reloadAll()
 }, { immediate: true })
 watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
-
-EventBus.on('app-resize', detectTitleHeight)
 </script>
 
 <template>

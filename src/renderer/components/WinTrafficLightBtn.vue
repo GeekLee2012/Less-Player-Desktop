@@ -51,8 +51,8 @@ const toggleMaximize = () => {
                     d="M208,134.4H48c-3.534,0-6.4-2.866-6.4-6.4s2.866-6.4,6.4-6.4h160c3.534,0,6.4,2.866,6.4,6.4S211.534,134.4,208,134.4z" />
             </svg>
         </div>
-        <div @click="toggleMaximize" v-show="!hideMaxBtn" class="ctl-btn max-btn">
-            <svg v-show="!isMaximized" viewBox="-3 -3 30 30" xmlns="http://www.w3.org/2000/svg">
+        <div @click="toggleMaximize" v-show="!hideMaxBtn" class="ctl-btn max-btn" :class="{ 'max-state': isMaximized }">
+            <svg v-show="!isMaximized" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path class="cls-1" d="M2,18V2H18" />
@@ -148,7 +148,11 @@ const toggleMaximize = () => {
 
 .win-traffic-light-btn .max-btn svg {
     stroke-width: 3px !important;
-    transform: translateY(0.3px) scale(0.9);
+    transform: translateX(1px) translateY(1px) scale(0.93);
+}
+
+.win-traffic-light-btn .max-btn.max-state svg {
+    transform: translateX(0.1px) translateY(0.2px) scale(1.1);
 }
 
 

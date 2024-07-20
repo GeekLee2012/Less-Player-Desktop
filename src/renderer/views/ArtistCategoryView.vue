@@ -1,8 +1,8 @@
 <script setup>
 import { useArtistSquareStore } from '../store/artistSquareStore';
-import EventBus from '../../common/EventBus';
 import { reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -28,12 +28,9 @@ const visitCateItem = (name, item, index) => {
     //hideArtistCategoryView()
 }
 
-EventBus.on('artistCategory-update', () => {
-    updateCategory()
-})
-
-EventBus.on('artistCategory-resetScroll', () => {
-    resetScroll()
+onEvents({
+    'artistCategory-update': updateCategory,
+    'artistCategory-resetScroll': resetScroll,
 })
 </script>
 

@@ -10,6 +10,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { Playlist } from '../../common/Playlist';
 import { useSettingStore } from '../store/settingStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -24,7 +25,7 @@ const { visitArtist, visitAlbum, visitCustomPlaylistCreate,
     visitLocalPlaylistCreate, visitTrack,
 } = inject('appRoute')
 const { playPlaylist } = inject('player')
-const { showConfirm } = inject('appCommon')
+const { showConfirm } = inject('apiExpose')
 
 let currentDataType = -1
 
@@ -87,7 +88,7 @@ const addFavoriteItem = () => {
     } else {
         addFavoriteTrack(track)
     }
-    if (success) EventBus.emit('track-refreshFavoritedState')
+    if (success) emitEvents('track-refreshFavoritedState')
     toastAndHideMenu(text, !success)
 }
 
@@ -104,8 +105,8 @@ const visitItemArtist = (event) => {
     if (artist.length == 1) {
         visitArtist({ platform, item: artist[0], index: -1 })
     } else {
-        EventBus.emit("artistListSubmenu-init")
-        EventBus.emit("artistListSubmenu-show", event)
+        emitEvents("artistListSubmenu-init")
+        emitEvents("artistListSubmenu-show", event)
     }
 }
 
@@ -140,7 +141,7 @@ const removeLocalItem = (item, index) => {
     const { id } = commonCtxItem.value || { id: track.pid }
     removeFromLocalPlaylist(id, track)
     toastAndHideMenu("歌曲已删除")
-    if (currentDataType == 11) EventBus.emit('ctxMenu-removeFromLocal')
+    if (currentDataType == 11) emitEvents('ctxMenu-removeFromLocal')
     return true
 }
 
@@ -197,11 +198,11 @@ const removeFromRecent = () => {
 
 //TODO
 const doShowAddToListSubmenu = (event, mode, dataType) => {
-    EventBus.emit("addToListSubmenu-init", {
+    emitEvents("addToListSubmenu-init", {
         mode,
         dataType: (dataType || currentDataType),
         callback: ({ total }) => {
-            EventBus.emit("addToListSubmenu-show", { event, total })
+            emitEvents("addToListSubmenu-show", { event, total })
         }
     })
 }
@@ -224,7 +225,7 @@ const removePlaylistFromFavorite = () => {
     const { id, platform } = commonCtxMenuCacheItem.value
     removeFavoritePlaylist(id, platform)
     toastAndHideMenu("歌单已取消收藏")
-    EventBus.emit("refresh-favorite")
+    emitEvents("refresh-favorite")
     return true
 }
 
@@ -429,8 +430,8 @@ const initBatchActionPopupMenuData = (dataType, isMoveAction) => {
 
 const showSubmenu = (item, index, event) => {
     //TODO
-    EventBus.emit("addToListSubmenu-hide", event)
-    EventBus.emit("artistListSubmenu-hide", event)
+    emitEvents("addToListSubmenu-hide", event)
+    emitEvents("artistListSubmenu-hide", event)
     if (!item || !item.menu || !item.menu()) {
         return
     }
@@ -443,11 +444,11 @@ const visitMenuItem = (item, index, event) => {
     const { action } = item
     if (typeof action == 'function') {
         const needTriggerEvent = action(item, index, event)
-        if (needTriggerEvent) EventBus.emit("commonCtxMenuItem-finish")
+        if (needTriggerEvent) emitEvents("commonCtxMenuItem-finish")
     }
 }
 
-EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
+const initCommonCtxMenu = ({ dataType, actionType }) => {
     currentDataType = dataType || 0
     let data = []
     switch (dataType) {
@@ -508,6 +509,10 @@ EventBus.on("commonCtxMenu-init", ({ dataType, actionType }) => {
             break;
     }
     doInit(data)
+}
+
+onEvents({
+    'commonCtxMenu-init': initCommonCtxMenu,
 })
 </script>
 

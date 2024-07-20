@@ -18,7 +18,7 @@ const props = defineProps({
     onDragStart: Function,
     onDragMove: Function,
     onDragRelease: Function,
-    thumbStyle: Number,  //0 => 默认， 1 => 加大
+    thumbStyle: Number,  //0 => 默认， 1 => 加大, 2 - logo形状
     thumbAutoHideDelay: Number, //单位ms, 默认1000
     scopeType: Number //类型，主界面为0，非主界面为1（比如弹窗）
 })
@@ -186,7 +186,7 @@ defineExpose({
             :class="{ 'slider-bar-ctl-ondrag': onDrag, 'slider-bar-ctl-with-thumb': thumbShow, 'slider-bar-ctl-disable': disable }"
             ref="sliderCtlRef" @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
-            <div class="thumb" :class="{ 'big-thumb': (thumbStyle == 1) }" ref="thumbRef" @mousedown="startDrag">
+            <div class="thumb" :class="{ 'big-thumb': (thumbStyle == 1), 'logo-thumb': (thumbStyle == 2) }" ref="thumbRef" @mousedown="startDrag">
             </div>
         </div>
     </div>
@@ -227,6 +227,7 @@ defineExpose({
     width: 13px;
     height: 13px;
     border-radius: 10rem;
+    /*border-top-right-radius: 0rem;*/
     /*background-color: var(--others-volumebar-thumb-color);*/
     background-color: var(--content-highlight-color);
     z-index: 2;
@@ -238,6 +239,16 @@ defineExpose({
 
 .slider-bar .big-thumb {
     border: 1px solid var(--content-highlight-color);
+}
+
+.slider-bar .logo-thumb {
+    border-top-right-radius: 0rem;
+    /*
+    background: url('/public/deco_1001.png');
+    background-size: contain;
+    width: 36px;
+    height: 36px;
+    */
 }
 
 /*.slider-bar:hover .thumb,*/

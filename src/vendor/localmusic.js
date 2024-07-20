@@ -4,7 +4,7 @@ import { Album } from "../common/Album";
 import {
     firstCharOfPinyin, isChineseChar,
     isEnglishChar, toLowerCaseTrimString,
-    toTrimString, useIpcRenderer
+    toTrimString, ipcRendererInvoke
 } from "../common/Utils";
 import { FILE_PREFIX } from "../common/Constants";
 import { United } from "./united";
@@ -13,8 +13,6 @@ import { useSettingStore } from "../renderer/store/settingStore";
 import { Category } from "../common/Category";
 
 
-
-const ipcRenderer = useIpcRenderer()
 
 export class LocalMusic {
     static CODE = 'local'
@@ -47,8 +45,8 @@ export class LocalMusic {
             let lyricText = track.embeddedLyricText
             //本地歌词（同名文件）
             try {
-                if (!lyricText && ipcRenderer) {
-                    lyricText = await ipcRenderer.invoke('load-lyric-file', track.url)
+                if (!lyricText) {
+                    lyricText = await ipcRendererInvoke('load-lyric-file', track.url)
                 }
             } catch (error) {
                 console.log(error)

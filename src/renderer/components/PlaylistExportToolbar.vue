@@ -2,11 +2,9 @@
 import { computed, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useIpcRenderer, isWinOS, toTrimString } from '../../common/Utils';
+import { isWinOS, toTrimString, ipcRendererInvoke } from '../../common/Utils';
 
 
-
-const ipcRenderer = useIpcRenderer()
 
 const { playlistExportContextItem } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hidePlaylistExportToolbar } = useAppCommonStore()
@@ -36,8 +34,8 @@ const filteredPlaylistFormats = ref(playlistFormats)
 
 const exportPathRef = ref(null)
 const selectDir = async () => {
-    if (!ipcRenderer || !exportPathRef.value) return
-    const result = await ipcRenderer.invoke('choose-dirs')
+    if (!exportPathRef.value) return
+    const result = await ipcRendererInvoke('choose-dirs')
     if (result) {
         exportPathRef.value.value = result[0]
     }
@@ -45,7 +43,7 @@ const selectDir = async () => {
 
 const exportNameRef = ref(null)
 const exportPlaylist = async () => {
-    if (!ipcRenderer || !exportPathRef.value) return
+    if (!exportPathRef.value) return
     const path = toTrimString(exportPathRef.value.value)
     //const name = toTrimString(exportNameRef.value.value)
     if (!path || path.length < 1) return
@@ -56,7 +54,7 @@ const exportPlaylist = async () => {
     if (formatFn) data = formatFn(data, format)
     data = toRaw(data)
 
-    const result = await ipcRenderer.invoke('export-playlists', { path, format, data, looseMode })
+    const result = await ipcRendererInvoke('export-playlists', { path, format, data, looseMode })
     if (result) {
         hidePlaylistExportToolbar()
         showToast('导出操作成功')

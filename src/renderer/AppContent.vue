@@ -7,25 +7,22 @@ import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
-import EventBus from '../common/EventBus';
+import { onEvents, emitEvents } from '../common/EventBusWrapper';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
-import {
-  useIpcRenderer, useUseCustomTrafficLight, isWinOS,
-  isBlank, toLowerCaseTrimString, transformUrl,
-} from '../common/Utils';
+import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
+  ipcRendererInvoke, ipcRendererBinds, isBlank, toTrimString, } from '../common/Utils';
 
 
 
-const { visitSetting, visitSearch,
+const { backward, forward,
+  visitSetting, visitSearch,
   visitRadio, visitThemes,
   visitModulesSetting, visitDataBackup,
   visitDataRestore, visitUserHome,
   visitFreeVideoCreate, visitRecents,
   visitPlugins, } = inject('appRoute')
 const { quickSearch } = inject('player')
-const ipcRenderer = useIpcRenderer()
-const useCustomTrafficLight = useUseCustomTrafficLight()
 
 const currentAppLayout = shallowRef(null)
 
@@ -92,6 +89,13 @@ const registryDefaultLocalKeys = () => {
   Mousetrap.bind('space', togglePlay)
   // 播放模式切换
   Mousetrap.bind(['m'], switchPlayMode, 'keyup')
+  // 导航 - 前进 / 后退
+  /*
+  Mousetrap.bind(['ctrl+left'], backward)
+  Mousetrap.bind(['command+left'], backward)
+  Mousetrap.bind(['ctrl+right'], forward)
+  Mousetrap.bind(['command+right'], forward)
+  */
   // 上 / 下一曲
   Mousetrap.bind(['left'], playPrevTrack)
   Mousetrap.bind(['right'], playNextTrack)
@@ -163,7 +167,7 @@ const resetSetting = async () => {
   storeKeys.forEach(key => {
     localStorage.removeItem(key)
   })
-  EventBus.emit('setting-reset')
+  emitEvents('setting-reset')
   showImportantToast("已恢复默认设置")
 }
 
@@ -182,8 +186,8 @@ const setupLayout = (isInit) => {
   } else {
     currentAppLayout.value = DefaultLayout
   }
-  EventBus.emit(eventName)
-  if (ipcRenderer) ipcRenderer.send(eventName, { zoom: getWindowZoom.value, isInit })
+  emitEvents(eventName)
+  ipcRendererSend(eventName, { zoom: getWindowZoom.value, isInit })
   //triggerRef(currentAppLayout)
 }
 
@@ -275,14 +279,12 @@ const restoreSetting = (isInit) => {
 }
 
 //注册ipcRenderer消息监听器
-const registryIpcRendererListeners = () => {
-  if (!ipcRenderer) return
-
-  ipcRenderer.on('app-active', () => {
+ipcRendererBinds({
+  'app-active': () => {
     hideEmptyToast()
-  })
-  ipcRenderer.on('app-quit', setupCache)
-}
+  },
+  'app-quit': setupCache,
+})
 
 //数据迁移 - 最近播放记录
 const migrateRecentsData = () => {
@@ -309,42 +311,16 @@ const migrateRecentsData = () => {
 
 const initialize = () => {
   restoreSetting(true)
-  registryIpcRendererListeners()
   migrateRecentsData()
-  //EventBus.emit('app-init')
+  //emitEvents('app-init')
 }
-
-EventBus.on("app-zoom", setupTrafficLightWinCtlBtn)
-EventBus.on("app-layout", setupLayout)
-EventBus.on("app-elementAlignCenter", value => {
-  const { selector, width, height, offsetLeft, offsetTop } = value
-  setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
-})
-EventBus.on('setting-restore', restoreSetting)
-EventBus.on('setting-reset', restoreSetting)
-EventBus.on('route-visitShortcutKeys', visitShortcutKeys)
 
 //直接在setup()时初始化，不需要等待其他生命周期
 //initialize()
 
-let isConfirmDialogShowing = ref(false)
-const setConfirmDialogShowing = (value) => isConfirmDialogShowing.value = value
-
-const showConfirm = async ({ title, msg }) => {
-  if (!ipcRenderer || isConfirmDialogShowing.value) return false
-  setConfirmDialogShowing(true)
-  hideAllCtxMenus(false)
-  const ok = await ipcRenderer.invoke('show-confirm', {
-    title: title || '确认',
-    msg
-  })
-  setConfirmDialogShowing(false)
-  return ok
-}
-
 const searchDefault = async (keyword) => {
-  if (!keyword || keyword.trim().length < 1) return
-  keyword = keyword.trim()
+  keyword = toTrimString(keyword)
+  if (isBlank(keyword)) return
 
   let searchType = 0
   if (keyword.startsWith('@')) { //格式：@xxx
@@ -383,16 +359,16 @@ const searchDefault = async (keyword) => {
     return
   } else if (keyword === '最近播放'
     || keyword === '最近'
-    || keyword.toLowerCase() === 'recents') {
+    || toLowerCaseTrimString(keyword) === 'recents') {
     visitRecents()
     return
   } else if (keyword === '视频'
-    || keyword.toLowerCase() === 'video') {
+    || toLowerCaseTrimString(keyword) === 'video') {
     visitFreeVideoCreate()
     return
   } else if (keyword === '插件管理'
     || keyword === '插件'
-    || keyword.toLowerCase() === 'plugins') {
+    || toLowerCaseTrimString(keyword) === 'plugins') {
     visitPlugins()
     return
   } else if (keyword.startsWith(":")) {
@@ -404,7 +380,7 @@ const searchDefault = async (keyword) => {
   //搜索
   switch (searchType) {
     case 1: //页内搜索、定位
-      if (ipcRenderer && keyword.length > 0) ipcRenderer.invoke('find-in-page', keyword)
+      !isBlank(keyword) && ipcRendererInvoke('find-in-page', keyword)
       break
     default: //搜索页
       visitSearch(keyword)
@@ -434,8 +410,10 @@ const showContextMenu = (event, data, dataType, index, isPlaybackQueue) => {
   if (!isPlaybackQueue) hidePlaybackQueueView()
   //const { data, dataType, index } = props
   setTimeout(() => {
-    EventBus.emit("commonCtxMenu-init", { dataType })
-    EventBus.emit("commonCtxMenu-show", { event, data, index })
+    emitEvents({
+      'commonCtxMenu-init': { dataType },
+      'commonCtxMenu-show': { event, data, index },
+    })
   }, 99)
 }
 
@@ -443,13 +421,17 @@ const useWindowsStyleWinCtl = computed(() => {
   //if (isUseWindowsWinCtl.value) return true
   //if (isUseAutoWinCtl.value) return isWinOS()
   //return false
+
+  /*
   return isUseWindowsWinCtl.value ? true :
     (isUseAutoWinCtl.value ? isWinOS() : false)
+  */
+  
+  return isUseWindowsWinCtl.value || (isUseAutoWinCtl.value && isWinOS())
 })
 
 const checkMaxScreenState = async () => {
-  if (!ipcRenderer) return
-  const isMaxScreen = await ipcRenderer.invoke('app-maxScreenState')
+  const isMaxScreen = await ipcRendererInvoke('app-maxScreenState')
   setMaxScreen(isMaxScreen)
 }
 
@@ -460,7 +442,7 @@ onMounted(() => {
     setVideoViewSize()
     //重新检查窗口最大化状态
     checkMaxScreenState()
-    EventBus.emit('app-resize', event)
+    emitEvents('app-resize', event)
   })
 
   //点击事件监听
@@ -477,21 +459,27 @@ onMounted(() => {
 
 const onDrop = async (event) => {
   event.preventDefault()
-  if (!ipcRenderer) return
 
   const { files } = event.dataTransfer
   const urls = Array.from(files).map(file => (file.path))
-  ipcRenderer.send('app-dnd-parsePlay', urls)
+  ipcRendererSend('app-dnd-parsePlay', urls)
 }
 
-//打开默认浏览器，并访问超链接
-const visitLink = (url) => {
-  if (ipcRenderer && !isBlank(url)) ipcRenderer.send('visit-link', transformUrl(url))
-}
-
-EventBus.on('app-resetSetting', resetSetting)
-EventBus.on('check-for-updates', () => {
-  searchDefault('@检查更新').then(() => EventBus.emit('setting-checkForUpdates'))
+//EventBus监听注册，统一管理
+onEvents({
+  'app-zoom': setupTrafficLightWinCtlBtn,
+  'app-layout': setupLayout,
+  'app-elementAlignCenter': value => {
+    const { selector, width, height, offsetLeft, offsetTop } = value
+    setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
+  },
+  'app-resetSetting': restoreSetting,
+  'setting-restore': restoreSetting,
+  'setting-reset': restoreSetting,
+  'route-visitShortcutKeys': visitShortcutKeys,
+  'check-for-updates': () => {
+    searchDefault('@检查更新').then(() => emitEvents('setting-checkForUpdates'))
+  },
 })
 
 //直接在setup()时初始化，不需要等待其他生命周期
@@ -499,14 +487,13 @@ initialize()
 
 //通用API
 provide('appCommon', {
-  showConfirm,
+  //showConfirm,
   showContextMenu,
   searchAction,
   searchDefault,
   searchBarPlaceholder,
   useWindowsStyleWinCtl,
   resetSetting,
-  visitLink,
 })
 </script>
 

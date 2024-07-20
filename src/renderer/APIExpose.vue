@@ -1,24 +1,24 @@
 <script setup>
-import { inject, provide, toRaw, onMounted, h } from 'vue';
+import { inject, provide, toRaw, onMounted, h, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePluginStore } from './store/pluginStore';
 import { usePlatformStore } from './store/platformStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useSettingStore } from './store/settingStore';
-import EventBus from '../common/EventBus';
 import {
     get, post, getJson, getDoc, getRaw, postRaw, postJson,
     parseJsonp, parseHtml, qsStringify, getInternalIpv4,
 } from '../common/HttpClient';
 import {
-    isDevEnv, useIpcRenderer, toTrimString, toLowerCaseTrimString, toUpperCaseTrimString,
+    isDevEnv, toTrimString, toLowerCaseTrimString, toUpperCaseTrimString,
     isBlank, randomTextWithinAlphabetNums as randomTextDefault, randomText, nextInt,
     md5, hmacMd5, sha1, sha256, sha512, base64Parse, base64Stringify, hexDecode,
     aesEncryptDefault, aesEncryptHexText, rsaEncrypt, rsaEncryptDefault,
     aesDecryptText, tryCallDefault, tryCall, tryCallOnObject, transformUrl,
     stringEquals, stringEqualsIgnoreCase, readLines,
+    ipcRendererSend, ipcRendererInvoke,  toMmss, 
+    toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs
 } from '../common/Utils';
-import { toMmss, toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs } from '../common/Times';
 import {
     FILE_PREFIX, ActivateState,
     LESS_MAGIC_CODE, ImageProtocal,
@@ -30,22 +30,43 @@ import { Track } from '../common/Track';
 import { Album } from '../common/Album';
 import { Lyric } from '../common/Lyric';
 import { usePlayStore } from './store/playStore';
+import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
 
 const { addCustomRoute, visitCommonRoute } = inject('appRoute')
 
-const ipcRenderer = useIpcRenderer()
-
 const { plugins } = storeToRefs(usePluginStore())
 const { removePlugin, updatePlugin } = usePluginStore()
 const { addPlatform, removePlatform } = usePlatformStore()
 const { spectrumParams } = storeToRefs(useAppCommonStore())
-const { showToast, showFailToast } = useAppCommonStore()
+const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { getImageUrlByQuality } = useSettingStore()
 const { currentTrack } = storeToRefs(usePlayStore())
 
 
+
+let isConfirmDialogShowing = ref(false)
+const setConfirmDialogShowing = (value) => isConfirmDialogShowing.value = value
+
+const showConfirm = async ({ title, msg }) => {
+  if (isConfirmDialogShowing.value) return false
+  setConfirmDialogShowing(true)
+  hideAllCtxMenus(false)
+  const ok = await ipcRendererInvoke('show-confirm', {
+    title: title || '确认',
+    msg
+  })
+  setConfirmDialogShowing(false)
+  return ok
+}
+
+//打开默认浏览器，并访问超链接
+const visitLink = (url) => {
+    return !isBlank(url) && ipcRendererSend('visit-link', transformUrl(url))
+}
+
+/* 开放API */
 const APIEvents = {
     TRACK_GET_PLAY_URL: 'TRACK_GET_PLAY_URL',
     VIDEO_GET_PLAY_URL: 'VIDEO_GET_PLAY_URL',
@@ -157,10 +178,8 @@ const removePluginNow = (plugin) => {
         removePlugin(plugin)
         const { path, main, type } = plugin
         const filePath = !type ? `${path}/${main}` : path
-        if (ipcRenderer) {
-            EventBus.emit('app-removePlugin')
-            ipcRenderer.invoke('app-removePlugin', filePath)
-        }
+        emitEvents('app-removePlugin')
+        ipcRendererInvoke('app-removePlugin', filePath)
     } catch (error) {
         console.log(error)
     }
@@ -188,11 +207,10 @@ const onAccessResult = async (permission, result, options) => {
         args = options[0]
     }
     //事件通知
-    if (eventName) EventBus.emit(`plugins-accessResult-${eventName}`, args)
+    if (eventName) emitEvents(`plugins-accessResult-${eventName}`, args)
 }
 
-//TODO 对外提供API
-//暂时仅在Renderer端提供，所以API能力也有限
+//TODO 暂时仅在Renderer端提供，所以API能力也有限
 //Nodejs端（ Main进程 ）的API计划实现中，但安全性、依赖等问题不好处理
 //目前存在问题：无法感知当前获取权限的是哪个插件
 window.lessAPI = {
@@ -283,21 +301,21 @@ window.lessAPI = {
             try {
                 //开发者工具
                 if (permission == APIPermissions.OPEN_DEV_TOOLS) {
-                    if (ipcRenderer) ipcRenderer.send('app-openDevTools')
+                    ipcRendererSend('app-openDevTools')
                 } else if (permission == APIPermissions.CLOSE_DEV_TOOLS) {
-                    if (ipcRenderer) ipcRenderer.send('app-closeDevTools')
+                    ipcRendererSend('app-closeDevTools')
                 }
                 //获取相关信息
                 else if (permission == APIPermissions.GET_USER_AGENT) {
-                    result = ipcRenderer ? (await ipcRenderer.invoke('app-userAgent')) : ''
+                    result = await ipcRendererInvoke('app-userAgent') || ''
                 } else if (permission == APIPermissions.GET_COOKIE) {
-                    result = ipcRenderer ? (await ipcRenderer.invoke('app-getCookie', options[0])) : ''
+                    result = await ipcRendererInvoke('app-getCookie', options[0]) || ''
                 }
                 //请求头信息
                 else if (permission == APIPermissions.ADD_REQUEST_HANDLER) {
-                    result = ipcRenderer ? (await ipcRenderer.invoke('app-addRequestHandler', options[0])) : ''
+                    result = await ipcRendererInvoke('app-addRequestHandler', options[0]) || ''
                 } else if (permission == APIPermissions.REMOVE_REQUEST_HANDLER) {
-                    result = ipcRenderer ? (await ipcRenderer.invoke('app-removeRequestHandler', options[0])) : ''
+                    result = await ipcRendererInvoke('app-removeRequestHandler', options[0]) || ''
                 }
                 //路由
                 else if (permission == APIPermissions.ADD_ROUTE) {
@@ -334,7 +352,7 @@ window.lessAPI = {
 //放在后面执行
 loadPluginsOnStartup()
 
-//对外提供API相关
+//API相关
 provide('apiExpose', {
     activatePluginNow,
     deactivatePluginNow,
@@ -423,6 +441,10 @@ provide('apiExpose', {
             Promise.reject(error)
         }
     },
+    showConfirm,
+    visitLink,
+    onEvents,
+    emitEvents,
 })
 </script>
 

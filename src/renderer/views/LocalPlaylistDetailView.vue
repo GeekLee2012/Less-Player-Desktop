@@ -7,14 +7,13 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { useSettingStore } from '../store/settingStore';
 import { usePlatformStore } from '../store/platformStore';
-import EventBus from '../../common/EventBus';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { useIpcRenderer, coverDefault } from "../../common/Utils";
-import { toYyyymmddHhMmSs } from '../../common/Times';
+import { coverDefault, toYyyymmddHhMmSs } from "../../common/Utils";
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -24,9 +23,8 @@ const props = defineProps({
 })
 
 const { visitLocalPlaylistEdit, visitBatchLocalPlaylist } = inject('appRoute')
-const { showConfirm } = inject('appCommon')
+const { showConfirm } = inject('apiExpose')
 
-const ipcRenderer = useIpcRenderer()
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem,
@@ -180,12 +178,11 @@ const removeAll = async () => {
 }
 
 const addFolders = async () => {
-    if (!ipcRenderer) return
-    const dirs = await ipcRenderer.invoke('choose-dirs')
+    const dirs = await ipcRendererInvoke('choose-dirs')
     let msg = '文件夹添加失败', success = false
     if (!dirs) return
     setLoading(true)
-    const result = await ipcRenderer.invoke('open-audio-dirs', dirs, isUseDeeplyScanForDirectoryEnable.value)
+    const result = await ipcRendererInvoke('open-audio-dirs', dirs, isUseDeeplyScanForDirectoryEnable.value)
     if (result && result.length > 0) {
         let count = 0
         result.forEach(({ data }) => data.forEach(item => {
@@ -201,8 +198,7 @@ const addFolders = async () => {
 }
 
 const addFiles = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-audios')
+    const result = await ipcRendererInvoke('open-audios')
     if (!result || result.length < 1) return
     //let msg = '文件添加失败！', success = false
     result.forEach(item => addToLocalPlaylist(props.id, item))
@@ -214,7 +210,6 @@ const addFiles = async () => {
 }
 
 const onDrop = async (event) => {
-    if (!ipcRenderer) return
     if (!isUseDndForAddLocalTracksEnable.value) {
         showFailToast('拖拽还没有启用哦！<br>请重新检查设置')
         return
@@ -228,7 +223,7 @@ const onDrop = async (event) => {
     }
     const { name, path } = files[0]
     setLoading(true)
-    const result = await ipcRenderer.invoke('dnd-open-audios', path, isUseDeeplyScanForDirectoryEnable.value)
+    const result = await ipcRendererInvoke('dnd-open-audios', path, isUseDeeplyScanForDirectoryEnable.value)
     let msg = '添加操作失败', success = false
     if (result && result.length > 0) {
         let count = 0
@@ -260,7 +255,9 @@ const filterContent = (keyword) => {
     loadContent()
 }
 
-EventBus.on('app-resize', detectTitleHeight)
+onEvents({
+    'app-resize': detectTitleHeight,
+})
 
 onActivated(() => {
     resetView()
@@ -459,7 +456,12 @@ onUpdated(() => {
     margin-left: 2px;
     padding-bottom: 8px;
     border-bottom: 3px solid var(--content-highlight-color);
-    font-size: calc(var(--content-text-tab-title-size) - 2px);
+    /*font-size: calc(var(--content-text-tab-title-size) - 2px);*/
+    font-size: var(--content-text-tab-title-size);
+}
+
+#local-playlist-detail-view .list-title .search-wrap {
+    font-size: calc(var(--content-text-tab-title-size) - 1.5px);
 }
 
 #local-playlist-detail-view .checkbox {

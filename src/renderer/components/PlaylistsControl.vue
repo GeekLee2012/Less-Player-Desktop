@@ -6,8 +6,8 @@ import { useSettingStore } from '../store/settingStore';
 import PaginationTiles from './PaginationTiles.vue';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { Playlist } from '../../common/Playlist';
-import { toUpperCaseTrimString } from '../../common/Utils';
-
+import { toUpperCaseTrimString, transformUrl } from '../../common/Utils';
+import { FILE_SCHEME } from '../../common/Constants';
 
 
 const { visitPlaylist, visitFreeFMEdit } = inject('appRoute')
@@ -88,7 +88,7 @@ const computedMaxPage = computed(() => {
             :loadPage="loadPage" :nextPagePendingMark="nextPagePendingMark" :refreshAllPendingMark="refreshAllPendingMark"
             :loading="loading">
             <template v-slot="{ item, index }">
-                <ImageTextTile @click="visitItem(item)" :videoStyle="videoStyle" :cover="item.cover" :title="item.title"
+                <ImageTextTile @click="visitItem(item)" :videoStyle="videoStyle" :cover="transformUrl(item.cover, FILE_SCHEME)" :title="item.title"
                     :subtitle="getSubtitle(item)" :platform="item.platform" :color="item.color" :playable="true"
                     :playAction="() => playPlaylist(item)" :checkbox="checkbox" :checked="checkedAll"
                     :coverFit="item.coverFit" :ignoreCheckAllEvent="ignoreCheckAllEvent"

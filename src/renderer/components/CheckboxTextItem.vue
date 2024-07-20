@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -31,9 +31,11 @@ const setChecked = (id, checked) => {
     isChecked.value = checked
 }
 
-EventBus.on("checkeboxTextItem-refresh", (data) => {
-    const { id, checked } = data
-    setChecked(id, checked)
+onEvents({ 
+    'checkeboxTextItem-refresh': data => {
+        const { id, checked } = data
+        setChecked(id, checked)
+    },
 })
 </script>
 

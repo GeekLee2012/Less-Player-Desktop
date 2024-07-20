@@ -3,16 +3,15 @@ import { inject, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import ColorInputControl from '../components/ColorInputControl.vue';
-import EventBus from '../../common/EventBus';
-import { useIpcRenderer, transformUrl, isSupportedVideo, isSupportedImage } from '../../common/Utils';
+import { transformUrl, isSupportedVideo, isSupportedImage, ipcRendererInvoke } from '../../common/Utils';
 import { PlayingViewTheme } from '../../common/PlayingViewTheme';
 import { FILE_SCHEME } from '../../common/Constants';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
-const ipcRenderer = useIpcRenderer()
 
 const { workingCustomPlayingTheme, isPlayingViewCustomThemePreview } = storeToRefs(useAppCommonStore())
 const { hideCustomPlayingThemeEditView, showToast,
@@ -36,12 +35,11 @@ const toggleCustomPlayingThemePreview = () => {
     }
     setBgViewUrlInvalid(false)
     setPlayingViewCustomThemePreviewCache(theme)
-    EventBus.emit('playingViewCustomTheme-applyTheme', { theme, isPreviewMode })
+    emitEvents('playingViewCustomTheme-applyTheme', { theme, isPreviewMode })
 }
 
 const selectVideoFile = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('choose-files', { title: '请选择视频文件', filterExts: ['mp4', 'mov', 'flv', 'avi'] })
+    const result = await ipcRendererInvoke('choose-files', { title: '请选择视频文件', filterExts: ['mp4', 'mov', 'flv', 'avi'] })
     if (!result) return
     const { filePaths } = result
     if (filePaths && filePaths.length > 0) setupBgVideoUrl(filePaths[0])
@@ -49,8 +47,7 @@ const selectVideoFile = async () => {
 
 //TODO 使用本地文件图片，存在迁移共享问题
 const uploadImage = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-image', { noFilePrefix: true })
+    const result = await ipcRendererInvoke('open-image', { noFilePrefix: true })
     if (result && result.length > 0) setupPreviewCover(result[0])
 }
 
@@ -71,7 +68,7 @@ const saveTheme = () => {
     savePlayingViewCustomTheme(theme)
     showToast('自定义播放样式<br>保存成功')
     hideCustomPlayingThemeEditView()
-    if (isCurrentPlayingTheme(theme)) EventBus.emit('playingViewCustomTheme-applyTheme')
+    if (isCurrentPlayingTheme(theme)) emitEvents('playingViewCustomTheme-applyTheme')
 }
 
 //样式另存为
@@ -135,7 +132,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 <template>
     <div class="custom-playing-theme-edit-view"
         :class="{ 'custom-playing-theme-preview-mode': isPlayingViewCustomThemePreview }"
-        v-gesture-dnm="{ trigger: '.header' }" @dragover="e => e.preventDefault()" @drop="onDrop">
+        v-gesture-dnm="{ trigger: '.header' }" @dragover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="container">
             <div class="header">
                 <div class="action left-action">

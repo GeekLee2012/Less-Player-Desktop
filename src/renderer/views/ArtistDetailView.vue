@@ -21,9 +21,9 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import EventBus from '../../common/EventBus';
 import { coverDefault } from '../../common/Utils';
 import { useSettingStore } from '../store/settingStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -397,7 +397,9 @@ const computedTabName = computed(() => {
 })
 
 //TODO
-EventBus.on('ctxMenu-removeFromLocal', reloadAll)
+onEvents({
+    'ctxMenu-removeFromLocal': reloadAll,
+})
 
 /* 生命周期、监听 */
 //TODO 需要梳理优化，容易出现重复加载Bug

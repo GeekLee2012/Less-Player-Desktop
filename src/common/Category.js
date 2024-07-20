@@ -8,22 +8,17 @@ export class Category {
     }
 
     add(key, value) {
-        const item = { key, value }
-        return this.addItem(item)
+        return this.addItem({ key, value })
     }
 
     addFirst(key, value) {
         const item = { key, value }
-        if (!this.data.includes(item)) {
-            this.data.unshift(item)
-        }
+        if (!this.data.includes(item)) this.data.unshift(item)
         return this
     }
 
     addItem(item) {
-        if (!this.data.includes(item)) {
-            this.data.push(item)
-        }
+        if (!this.data.includes(item)) this.data.push(item)
         return this
     }
 

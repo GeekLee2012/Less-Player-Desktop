@@ -1,8 +1,9 @@
 import { defineStore } from "pinia";
-import EventBus from "../../common/EventBus";
 import { usePlatformStore } from "./platformStore";
+import { onEvents, emitEvents } from "../../common/EventBusWrapper";
 
 
+const notifyRefresh = () =>  emitEvents('artistSquare-refresh')
 
 export const useArtistSquareStore = defineStore('artistSquare', {
     state: () => ({
@@ -37,9 +38,6 @@ export const useArtistSquareStore = defineStore('artistSquare', {
             const { currentVender } = usePlatformStore()
             return currentVender()
         },
-        notifyRefresh() {
-            EventBus.emit("artistSquare-refresh")
-        },
         updateCurrentCategoryItem(name, item, index) {
             const cate = {}
             cate[name] = { item, index }
@@ -47,7 +45,7 @@ export const useArtistSquareStore = defineStore('artistSquare', {
             const newValue = JSON.stringify(cate[name])
             if (oldValue == newValue) return
             Object.assign(this.currentCategoryItems, cate)
-            this.notifyRefresh()
+            notifyRefresh()
         },
         resetCurrentCategoryItems() {
             //TODO
@@ -60,7 +58,7 @@ export const useArtistSquareStore = defineStore('artistSquare', {
             category.forEach(item => {
                 this.currentCategoryItems[item.name] = { item: item.data[0], index: 0 }
             })
-            this.notifyRefresh()
+            notifyRefresh()
         },
         putAlphabet(platform, alphabet) {
             this.alphabetMap.set(platform, alphabet)

@@ -1,7 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { inject, onMounted, reactive, toRaw } from 'vue';
-import EventBus from '../../common/EventBus';
 import { Playlist } from '../../common/Playlist';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
@@ -9,6 +8,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -143,7 +143,7 @@ const handleClick = (item, actionMode, dataType) => {
         }
     }
     toastAndHideMenu(text, !success)
-    if (needTriggerEvent) EventBus.emit('commonCtxMenuItem-finish')
+    if (needTriggerEvent) EventBusHepler.emit('commonCtxMenuItem-finish')
 }
 
 const initData = (actionMode, dataType) => {
@@ -176,9 +176,11 @@ const initData = (actionMode, dataType) => {
 
 onMounted(() => initData())
 
-EventBus.on("addToListSubmenu-init", ({ mode, dataType, callback }) => {
-    const total = initData(mode, dataType)
-    if (callback && (typeof callback == 'function')) callback({ total })
+onEvents({
+    'addToListSubmenu-init': ({ mode, dataType, callback }) => {
+        const total = initData(mode, dataType)
+        if (callback && (typeof callback == 'function')) callback({ total })
+    },
 })
 </script>
 

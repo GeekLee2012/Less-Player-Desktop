@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useSettingStore } from '../store/settingStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -45,7 +45,7 @@ const bindScrollListener = () => {
     scrollTarget.addEventListener('scroll', showAsNeeded)
 }
 
-const toggleCategory = () => EventBus.emit('playlistCategory-toggle')
+const toggleCategory = () => emitEvents('playlistCategory-toggle')
 
 defineExpose({
     setScrollTarget

@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
-import EventBus from "../../common/EventBus";
-import { randomTextWithinAlphabetNums, trimArray } from "../../common/Utils";
+import { trimArray } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 import { usePlatformStore } from "./platformStore";
+import { refreshUserHome } from "./userProfileStore";
 
 
 
@@ -13,7 +13,7 @@ const filterByPlatform = (state, platform) => {
     return state.filter(item => (item.platform == platform.trim()))
 }
 
-export const useRecentsStore = defineStore("recents", {
+export const useRecentsStore = defineStore('recents', {
     state: () => ({
         recents: {
             playlists: [],
@@ -56,7 +56,7 @@ export const useRecentsStore = defineStore("recents", {
             const updated = created
             Object.assign(item, { created, updated })
             state.push(item)
-            this.refreshUserHome()
+            refreshUserHome()
             return true
         },
         insertFirst(state, item, compareFn) {
@@ -67,7 +67,7 @@ export const useRecentsStore = defineStore("recents", {
             const updated = created
             Object.assign(item, { created, updated })
             state.splice(0, 0, item)
-            this.refreshUserHome()
+            refreshUserHome()
             return true
         },
         removeItem(state, item, compareFn) {
@@ -76,7 +76,7 @@ export const useRecentsStore = defineStore("recents", {
             const index = this.findItemIndex(state, item, compareFn)
             if (index != -1) {
                 state.splice(index, 1)
-                this.refreshUserHome()
+                refreshUserHome()
             }
 
         },
@@ -90,7 +90,7 @@ export const useRecentsStore = defineStore("recents", {
                 state.splice(index, 1)
                 ++count
             }
-            if (count) this.refreshUserHome()
+            if (count) refreshUserHome()
         },
         uniqueInsertFirst(state, item, compareFn) {
             this.removeItems(state, item, compareFn)
@@ -111,7 +111,7 @@ export const useRecentsStore = defineStore("recents", {
                 payPlay, payDownload, songID, strMediaMid, hash, extraHash, 
             })
             trimArray(this.recents.songs, 999).then(deleteCount => {
-                if (deleteCount) this.refreshUserHome()
+                if (deleteCount) refreshUserHome()
             })
         },
         addRecentPlaylist(id, platform, title, cover, type) {
@@ -119,7 +119,7 @@ export const useRecentsStore = defineStore("recents", {
                 id, platform, title, cover, type
             })
             trimArray(this.recents.playlists, 666).then(deleteCount => {
-                if (deleteCount) this.refreshUserHome()
+                if (deleteCount) refreshUserHome()
             })
         },
         addRecentAlbum(id, platform, title, cover, publishTime) {
@@ -127,7 +127,7 @@ export const useRecentsStore = defineStore("recents", {
                 id, platform, title, cover, publishTime
             })
             trimArray(this.recents.albums, 666).then(deleteCount => {
-                if (deleteCount) this.refreshUserHome()
+                if (deleteCount) refreshUserHome()
             })
         },
         addRecentRadio(track) {
@@ -144,7 +144,7 @@ export const useRecentsStore = defineStore("recents", {
                 id, platform, title, cover, type, data: [track]
             }, isFreeFM(platform) ? compareFn : null)
             trimArray(this.recents.radios, 366).then(count => {
-                if (count) this.refreshUserHome()
+                if (count) refreshUserHome()
             })
         },
         removeRecentSong(track) {
@@ -168,11 +168,8 @@ export const useRecentsStore = defineStore("recents", {
             this.recents.playlists.length = 0
             this.recents.albums.length = 0
             this.recents.radios.length = 0
-            this.refreshUserHome()
+            refreshUserHome()
         },
-        refreshUserHome() { //TODO
-            EventBus.emit("userHome-refresh")
-        }
     },
     persist: {
         enabled: true,

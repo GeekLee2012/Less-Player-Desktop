@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, ref, inject, computed, watch, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -9,12 +8,13 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { useIpcRenderer, useStartDrag, useUseCustomTrafficLight, useDownloadsPath, stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv } from '../../common/Utils';
+import { stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
 import { usePlatformStore } from '../store/platformStore';
 import analyze from 'rgbaster-plus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 const { seekTrack, playMv,
@@ -24,10 +24,6 @@ const { seekTrack, playMv,
     mmssPreseekTime, isTrackSeekable,
     dndSaveCover } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
-
-//是否使用自定义交通灯控件
-const useCustomTrafficLight = useUseCustomTrafficLight()
-const ipcRenderer = useIpcRenderer()
 
 
 const { isMaxScreen, playingViewShow, desktopLyricShow } = storeToRefs(useAppCommonStore())
@@ -45,7 +41,7 @@ const { isLocalMusic } = usePlatformStore()
 
 const volumeBarRef = ref(null)
 
-const onUserMouseWheel = (event) => EventBus.emit('lyric-userMouseWheel', event)
+const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
 const hasBackgroudCover = ref(false)
 const bgEffectStyle = reactive({})
@@ -129,7 +125,7 @@ watch([() => (currentTrack.value && currentTrack.value.cover), playingViewShow],
 })
 
 onMounted(() => {
-    EventBus.emit('playingView-changed')
+    emitEvents('playingView-changed')
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
     setupBackgroudEffect()
 })

@@ -7,22 +7,23 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
-import { useIpcRenderer, isMacOS, isWinOS, useGitRepository, toTrimString, toLowerCaseTrimString } from '../../common/Utils';
+import { isWinOS, useGitRepository, toTrimString, toLowerCaseTrimString,
+    ipcRendererSend, ipcRendererInvoke, ipcRendererBind,
+} from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
 import ColorInputControl from '../components/ColorInputControl.vue';
 import packageCfg from '../../../package.json';
 import { getDoc } from '../../common/HttpClient';
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
 const { visitThemes, visitDataBackup,
     visitDataRestore, visitModulesSetting,
     visitBatchRecents, visitPlugins } = inject('appRoute')
-const { showConfirm, resetSetting, visitLink } = inject('appCommon')
-
-const ipcRenderer = useIpcRenderer()
+const { resetSetting,  } = inject('appCommon')
+const { showConfirm, visitLink } = inject('apiExpose')
 
 const { theme, layout, common, track, desktopLyric,
     keys, keysDefault, tray, navigation, dialog, cache,
@@ -96,6 +97,7 @@ const { setThemeIndex,
     toggleSearchBarAutoPlaceholder,
     toggleSearchForOnlinePlaylistShow,
     toggleSearchForLocalPlaylistShow,
+    toggleSearchForCustomPlaylistShow,
     toggleSearchForBatchActionShow,
     toggleSearchForFreeFMShow,
     toggleSearchForPluginsViewShow,
@@ -156,7 +158,7 @@ const resetData = async () => {
         localStorage.removeItem(key)
     }
 
-    EventBus.emit('setting-reset')
+    emitEvents('setting-reset')
     showImportantToast("数据已重置成功")
 }
 
@@ -173,7 +175,7 @@ const resetSettingData = async () => {
     storeKeys.forEach(key => {
         localStorage.removeItem(key)
     })
-    EventBus.emit('setting-reset')
+    emitEvents('setting-reset')
     showImportantToast("已恢复默认设置")
 }
 */
@@ -291,9 +293,14 @@ const hasNewRelease = computed(() => {
     return !isLastRelease.value && (giteeHasNewRelease.value || githubHasNewRelease.value)
 })
 
+const getDocWithTimeout = (url, timeout) => (getDoc(url, null, { timeout }))
+
 const getLastReleaseVersion = () => {
-    const _version = `v${version}`
     return new Promise((resolve, reject) => {
+        const _version = `v${version}`
+        const timeout1 = 6000
+        const timeout2 = 10000
+        
         setLastRelease(true)
         setGiteeHasNewRelease(false)
         setGithubHasNewRelease(false)
@@ -301,7 +308,8 @@ const getLastReleaseVersion = () => {
         setGithubLastVersion(_version)
 
         if (isCheckPreReleaseVersion.value) { //开发预览版
-            Promise.all([getDoc(giteeReleasesUrl), getDoc(githubReleasesUrl)]).then(docs => {
+            Promise.all([getDocWithTimeout(giteeReleasesUrl, timeout1), getDocWithTimeout(githubReleasesUrl, timeout2)])
+                .then(docs => {
                 const [giteeDoc, githubDoc] = docs
                 const giteeVersion = giteeDoc.querySelector('.releases-tag-content .release-tag-item .release-meta .tag-name').textContent.trim()
                 const githubVersion = githubDoc.querySelector('.repository-content .col-md-2 .mr-3 span').textContent.trim()
@@ -309,7 +317,7 @@ const getLastReleaseVersion = () => {
             }, error => Promise.reject(error))
             .catch(error => reject(error))
         } else { //正式版
-            getDoc(changelogUrl).then(doc => {
+            getDocWithTimeout(changelogUrl, timeout1).then(doc => {
                 const versionTextEls = doc.querySelectorAll('.file_content h2')
                 const hasVersionText = (versionTextEls && versionTextEls.length > 1)
                 const changeLogLastVersion = hasVersionText ? toTrimString(versionTextEls[1].textContent) : _version
@@ -353,11 +361,10 @@ const getTagReleasePageUrl = (version) => {
 
 //是否已经下载，且存在下载文件但未进行安装
 const checkDownloaded = async () => {
-    if (!ipcRenderer) return
     let targetExt = 'NULL'
     if (isMacOS()) targetExt = '.dmg'
     else if (isWinOS()) targetExt = '.exe'
-    const path = await ipcRenderer.invoke('download-checkExists', {
+    const path = await ipcRendererInvoke('download-checkExists', {
         //必须同时满足
         nameContains: ['Less Player', lastVersion.value, targetExt]
     })
@@ -377,7 +384,6 @@ const startDownload = async () => {
         return
     }
     //macOS平台，使用本应用内置下载功能
-    if (!ipcRenderer) return
     const lastReleaseUrl = await getVersionReleaseUrl(lastVersion.value)
     if (!lastReleaseUrl) {
         setDownloadState(-1)
@@ -385,12 +391,12 @@ const startDownload = async () => {
         return
     }
     setDownloadState(1)
-    ipcRenderer.on('download-progressing', (e, item) => {
+    ipcRendererBind('download-progressing', (e, item) => {
         const { url, savePath, received, total } = item
         localSavePath = savePath
         updateDownloadProgress(received, total)
     })
-    ipcRenderer.send('download-item', { url: lastReleaseUrl })
+    ipcRendererSend('download-item', { url: lastReleaseUrl })
 }
 */
 
@@ -440,13 +446,12 @@ const formatVersion = (version) => {
 
 /*
 const cancelDownload = () => {
-    if (ipcRenderer) ipcRenderer.send('download-cancel')
+    ipcRendererSend('download-cancel')
     resetDownloadProgress()
 }
 
 const showPathInFolder = async () => {
-    if (!ipcRenderer) return
-    ipcRenderer.send('path-showInFolder', localSavePath)
+    ipcRendererSend('path-showInFolder', localSavePath)
 }
 */
 
@@ -462,8 +467,7 @@ const setupProxy = (text) => {
 
 const closeProxy = () => {
     resetProxies()
-    const proxy = { http: null, socks: null }
-    if (ipcRenderer) ipcRenderer.send('app-setGlobalProxy', proxy)
+    ipcRendererSend('app-setGlobalProxy', { http: null, socks: null })
     showToast('网络代理已重置')
 }
 
@@ -489,14 +493,12 @@ const sessionCacheSizeText = computed(() => {
 })
 
 const updateSessionCacheSize = async () => {
-    if (!ipcRenderer) return
-    const cacheSize = await ipcRenderer.invoke('app-cacheSize')
+    const cacheSize = await ipcRendererInvoke('app-cacheSize')
     sessionCacheSize.value = cacheSize
 }
 
 const clearSessionCache = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('app-clearCaches')
+    const result = await ipcRendererInvoke('app-clearCaches')
     if (result) {
         updateSessionCacheSize()
         showToast('资源缓存已清理')
@@ -504,8 +506,7 @@ const clearSessionCache = async () => {
 }
 
 const selectDir = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('choose-dirs')
+    const result = await ipcRendererInvoke('choose-dirs')
     if (result) setDndSavePath(result[0])
 }
 
@@ -520,7 +521,9 @@ const refreshSettingViewTips = (nv) => {
     tipTextEls.forEach(el => el.style.display = visibility)
 }
 
-EventBus.on('setting-checkForUpdates', checkForUpdates)
+onEvents({
+    'setting-checkForUpdates': checkForUpdates,
+})
 
 /* 生命周期、监听 */
 onActivated(() => {
@@ -957,6 +960,11 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                         </ToggleControl>
                     </div>
                     <div>
+                        <span class="cate-subtitle">创建的歌单（详情）页：</span>
+                        <ToggleControl @click="toggleSearchForCustomPlaylistShow" :value="search.customPlaylistShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">自由FM：</span>
                         <ToggleControl @click="toggleSearchForFreeFMShow" :value="search.freeFMShow">
                         </ToggleControl>
@@ -1285,8 +1293,20 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                     <div :class="{ last: isLastRelease }">
                         <div>
                             <span v-html="formatVersion(version)"></span>
+                            <svg class="refresh-flag" v-show="checkingUpdates" width="14" height="14" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <g id="Layer_2-2" data-name="Layer 2">
+                                            <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                                <path d="M722.91,136.61c0-17.65-.35-35.3.09-52.93.58-23,19.65-41,42.64-40.9A42.56,42.56,0,0,1,808,85.56v0c.16,38.17,0,76.33,0,114.49v54.5c-.07,25.68-18.46,44.14-44.12,44.16q-84.75.08-169.49,0c-21.66-.07-38.86-15.64-42.08-37.35-2.94-19.81,9.9-39.91,29.79-45.85a54.59,54.59,0,0,1,15.26-1.9c25.16-.19,50.32-.09,76.53-.09a51.87,51.87,0,0,0-3-4.35c-53.4-65-120.89-107-204.41-119.23-120.29-17.69-221,21.23-301.17,112-43.89,49.66-69.09,108.57-79,174-.8,5.26-1.24,10.59-2.17,15.83-3.89,21.83-24.31,37.22-46,34.82C15.69,424.12-1.76,405.28.14,383A356.16,356.16,0,0,1,9.31,326.4C42,196.44,117.61,100.17,237.93,40.47,302.23,8.56,371-4,442.53,1.11,551,9,642.25,53.63,717.11,132.23l4.7,5Z"/>
+                                                <path d="M125.34,715.25v6.31c0,16.16.27,32.34-.19,48.49-.65,23-19.8,40.89-42.82,40.71-22.63-.18-42-18.42-42.1-41q-.48-87,0-174c.12-22.34,19.12-40.8,41.66-40.89,57.32-.22,114.65-.09,172,0a40.33,40.33,0,0,1,7.43.81A42.52,42.52,0,0,1,296,600.34c-1.35,21.43-18.92,39-40.45,39.47-24.82.49-49.66.18-74.48.21h-6.55a21.06,21.06,0,0,0,1.55,2.93c53.45,65.66,121.36,107.14,205.23,120.83,132.88,21.7,259.15-40.37,328.92-148.61a342.29,342.29,0,0,0,53-149.18c2.45-21.73,19.28-38.14,40-39.15,21.49-1.06,40.64,12.81,44,34.06,1.62,10.24.12,21.26-1.49,31.69-11.52,74.95-40.28,142.66-87.62,202-66,82.72-150.85,135.93-255.6,152.64-144.38,23-267.87-20.37-370.17-124.57C130.27,720.55,128.32,718.41,125.34,715.25Z"/>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
                         </div>
-                        <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing link">更新日志</a>
+                        <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing1 link" :class="{ spacing4: checkingUpdates }">更新日志</a>
                         <!--<div class="tip-text spacing">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
                         <div class="update-check checkbox text-btn spacing1" @click="toggleCheckPreReleaseVersion">
                             <svg v-show="!others.checkPreReleaseVersion" width="16" height="16" viewBox="0 0 731.64 731.66"
@@ -1697,6 +1717,10 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
     margin-left: 40px;
 }
 
+#setting-view .center .spacing4 {
+    margin-left: 28px;
+}
+
 #setting-view .link {
     color: var(--content-text-color);
 }
@@ -1845,6 +1869,14 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
     margin-bottom: -2px;
     padding-right: 6px;
     cursor: pointer;
+}
+
+#setting-view .version .refresh-flag {
+    margin-left: 8px;
+    transform-box: fill-box; 
+    transform-origin: center;
+    transform: translateY(8px);
+    animation: rotate 1s linear infinite;
 }
 
 #setting-view .center .dir-input-ctl {

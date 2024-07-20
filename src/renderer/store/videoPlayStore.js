@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { PlayMode } from '../../common/Constants';
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -102,7 +102,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             if (!video.url) {
                 playEventName = 'video-changed'
             }
-            EventBus.emit(playEventName, video)
+            emitEvents(playEventName, video)
         },
         //播放，并更新当前播放列表相关状态
         playVideoNow(video) {

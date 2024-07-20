@@ -1,7 +1,7 @@
 import { Track } from "../common/Track";
 import { toTrimString, stringIncludesIgnoreCaseEscapeHtml, 
-    stringEqualsIgnoreCaseEscapeHtml, trimTextWithinBrackets, 
-    isDevEnv} from "../common/Utils";
+    stringEqualsIgnoreCaseEscapeHtml, trimTextWithinBrackets, isDevEnv
+ } from "../common/Utils";
 import { LESS_MAGIC_CODE } from "../common/Constants";
 import { usePlatformStore } from "../renderer/store/platformStore";
 import { Lyric } from "../common/Lyric";
@@ -87,7 +87,7 @@ export class United {
         return Array.isArray(vendors) && vendors[0]
     }
 
-    //互惠互助、互通有无、移花接木？奏是介些说法啦 ~
+    //互惠互助、互通有无、移花接木、同舟共济？奏是介些说法啦 ~
     static transferTrack(track, options) {
         return new Promise(async (resolve, reject) => {
             let result = null

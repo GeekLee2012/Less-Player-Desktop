@@ -1,7 +1,6 @@
 <script setup>
 import { onActivated, reactive, ref, watch, inject, nextTick, onDeactivated } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore'
@@ -15,6 +14,7 @@ import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import { Playlist } from '../../common/Playlist';
 import { coverDefault, isBlank, trimExtraChars } from '../../common/Utils';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -284,9 +284,11 @@ watch(() => props.id, () => {
 
 watch(isLoading, () => nextTick(detectTitleHeight))
 
-EventBus.on("refresh-favorite", checkFavorite)
-EventBus.on('app-resize', detectTitleHeight)
-//EventBus.on('playlist-linkItem', visitLinkItem)
+onEvents({
+    'refresh-favorite': checkFavorite,
+    'app-resize': detectTitleHeight, 
+    //'playlist-linkItem': visitLinkItem
+})
 </script>
 
 <template>
@@ -428,7 +430,8 @@ EventBus.on('app-resize', detectTitleHeight)
 #playlist-detail-view .list-title {
     margin-bottom: 6px;
     text-align: left;
-    font-size: calc(var(--content-text-tab-title-size) - 2px);
+    font-size: var(--content-text-tab-title-size);
+    /*font-size: calc(var(--content-text-tab-title-size) - 1px);*/
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -439,6 +442,10 @@ EventBus.on('app-resize', detectTitleHeight)
     margin-left: 2px;
     padding-bottom: 5px;
     border-bottom: 3px solid var(--content-highlight-color);
+}
+
+#playlist-detail-view .list-title .search-wrap {
+    font-size: calc(var(--content-text-tab-title-size) - 1.5px);
 }
 
 #playlist-detail-view .checkbox {

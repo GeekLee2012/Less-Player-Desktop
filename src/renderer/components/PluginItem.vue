@@ -1,10 +1,10 @@
 <script setup>
 import { ref, watch, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useSettingStore } from '../store/settingStore';
 import { ActivateState } from '../../common/Constants';
 import { transformUrl } from '../../common/Utils';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -19,7 +19,8 @@ const props = defineProps({
     checkChangedFn: Function,
 })
 
-const { showContextMenu, showConfirm, visitLink } = inject('appCommon')
+const { showContextMenu,  } = inject('appCommon')
+const { showConfirm, visitLink } = inject('apiExpose')
 
 const { isShowDialogBeforeVisitPluginRepository } = storeToRefs(useSettingStore())
 
@@ -62,7 +63,9 @@ watch(() => props.checked, (nv, ov) => {
     setChecked(nv)
 })
 
-EventBus.on("plugin-checkbox-refresh", () => setChecked(false))
+onEvents({
+    'plugin-checkbox-refresh': () => setChecked(false), 
+})
 </script>
 
 <template>

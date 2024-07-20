@@ -1,12 +1,8 @@
-import { defineStore } from 'pinia';
-import EventBus from '../../common/EventBus';
-import { useIpcRenderer, randomTextWithinAlphabetNums } from '../../common/Utils';
-import { Theme } from '../../common/Theme';
-import { presetThemes, presetCustomThemes } from './themes.json';
+import { defineStore } from "pinia";
+import { randomTextWithinAlphabetNums } from "../../common/Utils";
+import { presetThemes, presetCustomThemes } from "./themes.json";
 
 
-
-const ipcRenderer = useIpcRenderer()
 
 /*
 const PRESET_THEMES = [{
@@ -107,6 +103,7 @@ const PRESET_THEMES = [{
     dark: true
 }]
 */
+const CUSTOM_DEMO_ID_PREFIX = 'CUSTDEMO'
 
 export const useThemeStore = defineStore('themes', {
     state: () => ({
@@ -135,7 +132,7 @@ export const useThemeStore = defineStore('themes', {
             if (!theme) return
             let index = -1
             if (theme.id) {
-                if (theme.id === 'CUSTDEMO') return
+                if (theme.id === CUSTOM_DEMO_ID_PREFIX) return
                 index = this.customThemes.findIndex(item => item.id == theme.id)
             }
             const now = Date.now()
@@ -149,7 +146,7 @@ export const useThemeStore = defineStore('themes', {
             }
         },
         removeCustomTheme({ id }) {
-            if (id === 'CUSTDEMO') return
+            if (id === CUSTOM_DEMO_ID_PREFIX) return
             const index = this.customThemes.findIndex(item => item.id === id)
             if (index > -1) this.customThemes.splice(index, 1)
         }

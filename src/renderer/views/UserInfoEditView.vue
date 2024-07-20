@@ -10,7 +10,7 @@ import { storeToRefs } from 'pinia';
 import { ref, inject, reactive, onMounted } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { coverDefault, isBlank, toTrimString, useIpcRenderer } from '../../common/Utils';
+import { coverDefault, isBlank, toTrimString, isSupportedImage, ipcRendererInvoke } from '../../common/Utils';
 
 
 
@@ -20,9 +20,7 @@ const props = defineProps({
     id: String
 })
 
-const ipcRenderer = useIpcRenderer()
-
-const { showToast } = useAppCommonStore()
+const { showToast, showFailToast } = useAppCommonStore()
 const titleRef = ref(null)
 //const coverRef = ref(null)
 const invalid = ref(false)
@@ -61,22 +59,38 @@ const submit = () => {
     backward()
 }
 
+const setupCover = (cover) => {
+    return Object.assign(detail, { cover })
+}
+
 //TODO 使用本地文件图片，不利于迁移共享
 const updateCover = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-image')
-    if (result.length > 0) {
-        //coverRef.value.src = result[0]
-        const cover = result[0]
-        Object.assign(detail, { cover })
+    const result = await ipcRendererInvoke('open-image')
+    if (result.length > 0) setupCover(result[0])
+}
+
+const onDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length > 1) return showFailToast('还不支持多文件拖拽')
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        setupCover(path)
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
     }
+    if (isEventStopped) event.stopPropagation()
 }
 
 onMounted(() => loadUserInfo())
 </script>
 
 <template>
-    <div id="user-info-edit-view">
+    <div id="user-info-edit-view" @drapover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <span class="title">编辑用户信息</span>
         </div>
@@ -97,9 +111,9 @@ onMounted(() => loadUserInfo())
                     </div>
                 </div>
                 <div class="form-row">
-                    <div><span>封面图片</span></div>
+                    <div><span>头像图片</span></div>
                     <div @keydown.stop="">
-                        <input type="text" v-model="detail.cover" placeholder="封面图片URL，支持本地文件URL、在线URL" />
+                        <input type="text" v-model="detail.cover" placeholder="头像图片URL，支持本地文件URL、在线URL" />
                     </div>
                 </div>
                 <div class="form-row">

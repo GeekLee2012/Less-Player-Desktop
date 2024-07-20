@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, toRef, watch } from 'vue';
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -96,7 +96,7 @@ const toggleMode = () => {
 const openColorPicker = (event) => {
     if (gradientMode) return
     const rgba = getColorByMode(2)
-    EventBus.emit('color-picker-toolbar-show', {
+    emitEvents('color-picker-toolbar-show', {
         event, value: rgba, onChanged: ({ rgba, hexa }) => {
             color.value = hexa
             gradient.value = null
@@ -107,7 +107,7 @@ const openColorPicker = (event) => {
 
 const openGradientColorToolbar = (event) => {
     if (colorMode) return
-    EventBus.emit('gradient-color-toolbar-show', {
+    emitEvents('gradient-color-toolbar-show', {
         event, value: gradient.value, onChanged: (value) => {
             gradient.value = value
             color.value = null

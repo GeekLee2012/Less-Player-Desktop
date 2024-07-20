@@ -10,9 +10,9 @@ import { router } from './route/router';
 import VueLazyLoad from 'vue3-lazyload';
 //import lazyPlugin from 'vue3-lazy';
 //播放器
-import { Player } from '../common/Player';
-import { RadioPlayer } from '../common/RadioPlayer';
-import { VideoPlayer } from '../common/VideoPlayer';
+import { createPlayer } from '../common/Player';
+import { createRadioPlayer } from '../common/RadioPlayer';
+import { createVideoPlayer } from '../common/VideoPlayer';
 
 //Components
 import ProgressBar from './components/ProgressBar.vue';
@@ -33,13 +33,12 @@ import { coverDefault } from '../common/Utils';
 
 
 //状态管理
-const pinia = createPinia()
-pinia.use(piniaPersist)
+const pinia = createPinia().use(piniaPersist)
 
-//播放器：创建、初始化
-Player.create()
-RadioPlayer.create()
-VideoPlayer.create()
+//播放器：创建
+createPlayer()
+createRadioPlayer()
+createVideoPlayer()
 
 //应用：创建、配置
 const app = createApp(App)

@@ -1,6 +1,6 @@
 import Hls from 'hls.js';
-import EventBus from './EventBus';
 import { PlayState } from './Constants';
+import { onEvents, emitEvents } from './EventBusWrapper';
 
 
 
@@ -8,7 +8,7 @@ let singleton = null
 let videoNode = null
 let lastPlayTime = null
 
-export class VideoPlayer {
+class VideoPlayer {
 
     constructor(video) {
         this.video = video
@@ -19,13 +19,15 @@ export class VideoPlayer {
 
     static create() {
         if (singleton) return singleton
-        singleton = new VideoPlayer()
-        return singleton.on('video-init', node => singleton.setVideoNode(node))
-            .on('video-change', video => singleton.setVideo(video))
-            .on('video-play', video => singleton.playVideo(video))
-            .on('video-togglePlay', () => singleton.togglePlay())
-            .on('video-setVolume', volume => singleton.volume(volume))
-            .on('video-stop', () => singleton.setVideo(null))
+        singleton = new VideoPlayer().on({
+                'video-init': value => singleton.setVideoNode(value),
+                'video-change': value => singleton.setVideo(value),
+                'video-play': value => singleton.playVideo(value),
+                'video-togglePlay': () => singleton.togglePlay(),
+                'video-setVolume': value => singleton.volume(value),
+                'video-stop': () => singleton.setVideo(null),
+            })
+        return singleton
     }
 
     setVideoNode(node) {
@@ -151,15 +153,19 @@ export class VideoPlayer {
         this.notify('video-pos', currentSecs)
         requestAnimationFrame(this._step.bind(this))
     }
-
-    on(event, handler) {
-        EventBus.on(event, handler)
+    
+    on(registration) {
+        onEvents(registration)
         return this
     }
 
-    notify(event, args) {
-        EventBus.emit(event, args)
+    notify(events, data) {
+        emitEvents(events, data)
         return this
     }
 
+}
+
+export function createVideoPlayer() {
+    return VideoPlayer.create()
 }

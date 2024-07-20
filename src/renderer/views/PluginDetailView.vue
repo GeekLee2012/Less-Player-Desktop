@@ -18,7 +18,7 @@ const props = defineProps({
     id: String
 })
 
-const { visitLink } = inject('appCommon')
+const { visitLink } = inject('apiExpose')
 
 const { getPlugin, updatePlugin } = usePluginStore()
 const detail = reactive({ name: '', alias: '', author: '', version: '', repository: '', about: '' })

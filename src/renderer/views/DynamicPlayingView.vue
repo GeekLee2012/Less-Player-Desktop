@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, ref, inject, computed, watch, reactive, nextTick, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -11,9 +10,9 @@ import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { isDevEnv, smoothScroll, transformUrl, } from '../../common/Utils';
-import { toMillis, toMMssSSS } from '../../common/Times';
+import { isDevEnv, smoothScroll, transformUrl, toMillis, toMMssSSS, } from '../../common/Utils';
 import { FILE_SCHEME } from '../../common/Constants';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -240,8 +239,10 @@ const isLyricShowable = computed(() => {
 })
 
 //EventBus事件
-EventBus.on('track-lyricLoaded', reloadLyricData)
-EventBus.on('track-noLyric', reloadLyricData)
+onEvents({
+    'track-lyricLoaded': reloadLyricData,
+    'track-noLyric': reloadLyricData,
+})
 
 watch(currentTimeState, (nv, ov) => {
     //TODO 暂时简单处理，播放页隐藏时直接返回
@@ -257,7 +258,7 @@ watch(currentTrack, (nv, ov) => {
 }, { immediate: true })
 
 onMounted(() => {
-    EventBus.emit('playingView-changed')
+    emitEvents('playingView-changed')
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
 </script>

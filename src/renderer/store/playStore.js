@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 import { PlayMode } from '../../common/Constants';
-import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
-import { toMmss } from '../../common/Times';
+import { toMmss } from '../../common/Utils';
 import { Playlist } from '../../common/Playlist';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -74,7 +74,7 @@ export const usePlayStore = defineStore('player', {
             const { currentTrack: track } = this
             //FM广播
             if (this.isDefaultFMRadioType(track)) {
-                EventBus.emit('radio-togglePlay')
+                emitEvents('radio-togglePlay')
                 return
             }
             //播放列表为空
@@ -85,7 +85,7 @@ export const usePlayStore = defineStore('player', {
                 return
             }
             //当前歌曲正常
-            EventBus.emit('track-togglePlay')
+            emitEvents('track-togglePlay')
         },
         addTrack(track) {
             //TODO 超级列表如何保证时效
@@ -156,7 +156,7 @@ export const usePlayStore = defineStore('player', {
             } else if (!Track.hasUrl(track)) {   //普通歌曲
                 playEventName = 'track-changed'
             }
-            EventBus.emit(playEventName, track)
+            emitEvents(playEventName, track)
         },
         //播放，并更新当前播放列表相关状态
         playTrack(track) {
@@ -188,7 +188,7 @@ export const usePlayStore = defineStore('player', {
         playNextTrack() {
             //TODO
             if (Playlist.isNormalRadioType(this.currentTrack)) {
-                EventBus.emit('track-nextPlaylistRadioTrack', this.currentTrack)
+                emitEvents('track-nextPlaylistRadioTrack', this.currentTrack)
                 return
             }
             const maxSize = this.queueTracksSize
@@ -211,7 +211,7 @@ export const usePlayStore = defineStore('player', {
             value = value > 0 ? value : 0
             value = value < 1 ? value : 1
             this.volume = value
-            EventBus.emit("volume-set", value)
+            emitEvents('volume-set', value)
         },
         updateVolumeByOffset(value) {
             value = parseFloat(value)

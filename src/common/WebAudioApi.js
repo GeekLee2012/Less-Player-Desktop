@@ -41,7 +41,7 @@ const EQ = [
     }
 ]
 
-export class WebAudioApi {
+class WebAudioApi {
     constructor(audioCtx, audioNode) {
         this.audioCtx = audioCtx
         this.audioNode = audioNode
@@ -49,10 +49,10 @@ export class WebAudioApi {
     }
 
     static create(audioCtx, audioNode) {
-        return new WebAudioApi(audioCtx, audioNode).setup()
+        return new WebAudioApi(audioCtx, audioNode).init()
     }
 
-    setup() {
+    init() {
         const audioCtx = this.audioCtx
         const audioNode = this.audioNode
         this.splitterNode = audioCtx.createChannelSplitter(2)
@@ -162,4 +162,8 @@ export class WebAudioApi {
         
         this.gainNode.gain.setValueAtTime(value, this.audioCtx.currentTime)
     }
+}
+
+export function createWebAudioApi(audioCtx, audioNode) {
+    return WebAudioApi.create(audioCtx, audioNode)
 }

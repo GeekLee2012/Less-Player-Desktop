@@ -5,6 +5,8 @@ export class PlayingViewTheme {
         this.id = id
         //样式名称
         this.name = name
+        this.type = 1   // 0 => 预设， 1 => 自定义
+        this.dynamic = true //是否为动态视频背景样式主题
         //视频URL
         this.bgVideoUrl = bgVideoUrl 
         //预览图片URL

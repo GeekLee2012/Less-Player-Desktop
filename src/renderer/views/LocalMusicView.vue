@@ -15,15 +15,13 @@ import { useSettingStore } from '../store/settingStore';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { isDevEnv, useIpcRenderer } from "../../common/Utils";
+import { isDevEnv, ipcRendererInvoke } from "../../common/Utils";
 
 
 
 
 const { visitLocalPlaylistCreate, visitBatchLocalMusic } = inject('appRoute')
-const { showConfirm } = inject('appCommon')
-
-const ipcRenderer = useIpcRenderer()
+const { showConfirm } = inject('apiExpose')
 
 const { localPlaylists, importTaskCount } = storeToRefs(useLocalMusicStore())
 const { addLocalPlaylist, resetAll,
@@ -50,7 +48,6 @@ const onScroll = () => {
 
 const onDrop = async (event) => {
     event.preventDefault()
-    if (!ipcRenderer) return
     if (!isUseDndForCreateLocalPlaylistEnable.value) {
         showFailToast('拖拽还没有启用哦！<br>请重新检查设置')
         return
@@ -64,7 +61,7 @@ const onDrop = async (event) => {
     }
     const { path } = files[0]
     increaseImportTaskCount()
-    const result = await ipcRenderer.invoke('dnd-open-audio-playlist', path, isUseDeeplyScanForDirectoryEnable.value)
+    const result = await ipcRendererInvoke('dnd-open-audio-playlist', path, isUseDeeplyScanForDirectoryEnable.value)
     if (!result) return decreaseImportTaskCount()
     let msg = '导入歌单失败', success = false
     const { name, data, total } = result
@@ -84,11 +81,10 @@ const onDrop = async (event) => {
 
 const refreshTime = ref(0)
 const importPlaylist = async () => {
-    if (!ipcRenderer) return
-    const file = await ipcRenderer.invoke('open-audio-playlist')
+    const file = await ipcRendererInvoke('open-audio-playlist')
     if (file) {
         increaseImportTaskCount()
-        const result = await ipcRenderer.invoke('parse-audio-playlist', file)
+        const result = await ipcRendererInvoke('parse-audio-playlist', file)
         let msg = '导入歌单失败', success = false
         if (result) {
             const { name, data, total } = result
@@ -237,6 +233,7 @@ onMounted(() => {
     margin-left: 3px;
     padding-bottom: 8px;
     border-bottom: 3px solid var(--content-highlight-color);
-    font-size: calc(var(--content-text-tab-title-size) - 2px);
+    /*font-size: calc(var(--content-text-tab-title-size) - 2px);*/
+    font-size: var(--content-text-tab-title-size);
 }
 </style>

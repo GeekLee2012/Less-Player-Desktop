@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onActivated, onMounted, shallowRef, watch } from 'vue';
+import { inject, nextTick, onActivated, onMounted, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -8,10 +8,12 @@ import DefaultMainContent from './DefaultMainContent.vue';
 import DefaultMainBottom from './DefaultMainBottom.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
-import EventBus from '../../common/EventBus';
 import { isDevEnv } from '../../common/Utils';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
+
+const { applyDocumentStyle } = inject('appStyle')
 
 const currentMainTop = shallowRef(null)
 const currentMainBottom = shallowRef(null)
@@ -25,6 +27,7 @@ const { lyricMetaPos, isDefaultLayout,
     isDefaultClassicLayout } = storeToRefs(useSettingStore())
 const { setupWindowZoom } = useSettingStore()
 
+//TODO 硬编码
 const minAppWidth = 1080, minAppHeight = 720
 
 const setPlayMetaSize = () => {
@@ -102,15 +105,12 @@ const setImageTextTileSize = () => {
     document.documentElement.style.setProperty('--others-image-text-tile-card-cover-height', `${cardTileHeight}px`)
     document.documentElement.style.setProperty('--others-image-text-tile-card-min-height', `${cardTileHeight + 66}px`)
     */
-    const changes = {
+    applyDocumentStyle({
         '--others-image-text-tile-cover-size': `${tileWidth}px`,
         //'--others-card-image-text-tile-title-width': `${tileWidth - 20}px`,
         '--others-image-text-tile-card-cover-height': `${cardTileHeight}px`,
         '--others-image-text-tile-card-min-height': `${cardTileHeight + 73}px`
-    }
-    for (const [key, value] of Object.entries(changes)) {
-        document.documentElement.style.setProperty(key, value)
-    }
+    })
 }
 
 const setPlayingCoverSize = () => {
@@ -333,8 +333,12 @@ const setThemeViewItemsSize = () => {
     tileWidth = parseInt(tileWidth) - 3
 
     const tileHeight = tileWidth * 95 / 160
-    document.documentElement.style.setProperty('--others-theme-preview-tile-width', `${tileWidth}px`)
-    document.documentElement.style.setProperty('--others-theme-preview-tile-height', `${tileHeight}px`)
+    applyDocumentStyle({
+        '--others-theme-preview-tile-width': `${tileWidth}px`,
+        '--others-theme-preview-tile-height': `${tileHeight}px`
+    })
+    //document.documentElement.style.setProperty('--others-theme-preview-tile-width', `${tileWidth}px`)
+    //document.documentElement.style.setProperty('--others-theme-preview-tile-height', `${tileHeight}px`)
 }
 
 const setPaginationSize = () => {
@@ -397,10 +401,12 @@ onMounted(() => {
     })
 })
 
-EventBus.on('batchView-show', setBatchViewListSize)
-EventBus.on('pluginsView-show', setPluginsViewListSize)
-EventBus.on('playingView-changed', setPlayingViewSize)
-EventBus.on('app-layout-default', setupDefaultLayout)
+onEvents({
+    'batchView-show': setBatchViewListSize,
+    'pluginsView-show': setPluginsViewListSize,
+    'playingView-changed': setPlayingViewSize,
+    'app-layout-default': setupDefaultLayout,
+})
 
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)
@@ -408,7 +414,7 @@ watch(playingViewShow, (nv, ov) => {
     hideLyricToolbar()
     setPlayingViewSize()
     //TODO
-    EventBus.emit('lyric-alignment')
+    emitEvents('lyric-alignment')
 })
 watch(lyricToolbarShow, setLyricToolbarPos)
 watch(lyricMetaPos, () => {

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 const { toggleGradientColorToolbar } = useAppCommonStore()
@@ -69,9 +69,9 @@ const updateValueFromInput = () => {
 
 const openGradientColorToolbar = (event) => {
     if (props.noToolbar) return
-    //EventBus.emit('gradient-color-toolbar-show', { event })
+    //emitEvents('gradient-color-toolbar-show', { event })
     toggleGradientColorToolbar()
-    EventBus.emit('app-elementAlignCenter', {
+    emitEvents('app-elementAlignCenter', {
         selector: '#gradient-color-toolbar',
         width: 768,
         height: 568

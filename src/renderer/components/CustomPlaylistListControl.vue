@@ -1,5 +1,4 @@
 <script setup>
-import { inject } from 'vue';
 import CustomPlaylistItem from './CustomPlaylistItem.vue';
 
 

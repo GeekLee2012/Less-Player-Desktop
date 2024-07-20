@@ -16,7 +16,6 @@ import RandomMusicToolbar from './components/RandomMusicToolbar.vue';
 import PlayingView from './views/PlayingView.vue';
 import VisualPlayingView from './views/VisualPlayingView.vue';
 import SoundEffectView from './views/SoundEffectView.vue';
-import EventBus from '../common/EventBus';
 import CustomThemeEditView from './views/CustomThemeEditView.vue';
 import ColorPickerToolbar from './components/ColorPickerToolbar.vue';
 import GradientColorToolbar from './components/GradientColorToolbar.vue';
@@ -26,6 +25,7 @@ import PlatformCategoryView from './views/PlatformCategoryView.vue';
 import DynamicPlayingView from './views/DynamicPlayingView.vue';
 import PlayingThemeListView from './views/PlayingThemeListView.vue';
 import CustomPlayingThemeEditView from './views/CustomPlayingThemeEditView.vue';
+import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
 
@@ -151,14 +151,6 @@ const setSubmenuPosition = (event) => {
   ctxSubmenuPosStyle.top = `${top}px !important`
 }
 
-EventBus.on('commonCtxMenu-show', ({ event, data, index }) => {
-  hideCommonCtxMenu(true) //强制取消上次的显示
-  hideAddToListSubmenu()
-  hideArtistListSubmenu()
-  setMenuPosition(event)
-  //updateCommonCtxMenuCacheItemIndex(index)
-  showCommonCtxMenu(data)
-})
 
 //TODO 实现方式有待完善
 const registerPopoverHints = () => {
@@ -183,69 +175,9 @@ const registerPopoverHints = () => {
   })
 }
 
-const bindEventListeners = () => {
-  EventBus.on('addToListSubmenu-show', ({ event, total }) => {
-    //submenuItemNums = customPlaylists.value.length + 2
-    submenuItemNums = total
-    setSubmenuPosition(event)
-    showAddToListSubmenu()
-  })
-
-  EventBus.on('artistListSubmenu-show', event => {
-    const { artist } = commonCtxMenuCacheItem.value
-    submenuItemNums = artist.length
-    setSubmenuPosition(event)
-    showArtistListSubmenu()
-  })
-
-  EventBus.on('addToListSubmenu-hide', () => {
-    hideAddToListSubmenu()
-  })
-
-  EventBus.on('artistListSubmenu-hide', () => {
-    hideArtistListSubmenu()
-  })
-
-  EventBus.on('color-picker-toolbar-show', ({ event: mouseEvent, onChanged, value, title }) => {
-    //根据鼠标点击位置，确定弹出位置
-    const tbWidth = 218, tbHeight = 369
-    const { x, y, offsetX, offsetY } = mouseEvent
-    const pickerEl = document.querySelector('#color-picker-toolbar')
-    const { clientHeight, clientWidth } = document.documentElement
-    if (!pickerEl) return
-    const padding = 25
-    let top = Math.max(y + (18 - offsetY) - tbHeight / 2, padding)
-    top = Math.min(top, clientHeight - tbHeight - padding)
-    let left = Math.max(x + padding, padding)
-    left = Math.min(left, clientWidth - tbWidth - padding)
-    pickerEl.style.top = `${top}px`
-    pickerEl.style.left = `${left}px`
-
-    if (!colorPickerToolbarRef.value) return
-    if (value) value = value.replace(/\s/g, '')
-    colorPickerToolbarRef.value.init({ onChanged, value })
-    showColorPickerToolbar(title)
-  })
-
-  EventBus.on('gradient-color-toolbar-show', ({ event: mouseEvent, value, onChanged }) => {
-    if (!gradientColorToolbarRef.value) return
-    gradientColorToolbarRef.value.init({ onChanged, value })
-    showGradientColorToolbar()
-  })
-
-  EventBus.on('app-resize', () => {
-    setupSoundEffectViewPos()
-    setupCustomThemeEditViewPos()
-    setupGradientColorToolbarPos()
-  })
-
-  EventBus.on('popover-hint-register', registerPopoverHints)
-}
-
-
 const setupCustomThemeEditViewPos = () => {
   if (!customThemeEditViewShow.value) return
-  EventBus.emit('app-elementAlignCenter', {
+  emitEvents('app-elementAlignCenter', {
     selector: '#custom-theme-edit-view',
     width: 768,
     height: 520
@@ -254,7 +186,7 @@ const setupCustomThemeEditViewPos = () => {
 
 const setupCustomPlayingThemeEditViewPos = () => {
   if (!customPlayingThemeEditViewShow.value) return
-  EventBus.emit('app-elementAlignCenter', {
+  emitEvents('app-elementAlignCenter', {
     selector: '#custom-playing-theme-edit-view',
     width: 768,
     height: 520
@@ -263,7 +195,7 @@ const setupCustomPlayingThemeEditViewPos = () => {
 
 const setupGradientColorToolbarPos = () => {
   if (!gradientColorToolbarShow.value) return
-  EventBus.emit('app-elementAlignCenter', {
+  emitEvents('app-elementAlignCenter', {
     selector: '#gradient-color-toolbar',
     width: 768,
     height: 568
@@ -271,7 +203,7 @@ const setupGradientColorToolbarPos = () => {
 }
 
 const setupSoundEffectViewPos = () => {
-  EventBus.emit('app-elementAlignCenter', {
+  emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #sound-effect-view',
     width: 725,
     height: 550
@@ -279,7 +211,7 @@ const setupSoundEffectViewPos = () => {
 }
 
 const setupPlaylistExportToolbarPos = () => {
-  EventBus.emit('app-elementAlignCenter', {
+  emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #playlist-export-toolbar',
     width: 520,
     height: 211
@@ -325,11 +257,6 @@ const setupPlayingView = (theme, isPreviewMode) => {
   }
 }
 
-EventBus.on('playingViewCustomTheme-applyTheme', param => {
-  const { theme, isPreviewMode } = param || {}
-  setupPlayingView(theme, isPreviewMode)
-})
-
 //TODO
 watch(commonCtxMenuShow, (nv, ov) => {
   if (!nv) ctxMenuPos = null
@@ -349,10 +276,68 @@ const appBackgroundScope = reactive({
   randomMusicToolbar: false
 })
 
-onMounted(() => {
-  bindEventListeners()
-  setupPlayingView()
+//EventBus监听注册，统一管理
+onEvents({
+  'commonCtxMenu-show': ({ event, data, index }) => {
+    hideCommonCtxMenu(true) //强制取消上次的显示
+    hideAddToListSubmenu()
+    hideArtistListSubmenu()
+    setMenuPosition(event)
+    //updateCommonCtxMenuCacheItemIndex(index)
+    showCommonCtxMenu(data)
+  },
+  'addToListSubmenu-show': ({ event, total }) => {
+    //submenuItemNums = customPlaylists.value.length + 2
+    submenuItemNums = total
+    setSubmenuPosition(event)
+    showAddToListSubmenu()
+  },
+  'artistListSubmenu-show': event => {
+    const { artist } = commonCtxMenuCacheItem.value
+    submenuItemNums = artist.length
+    setSubmenuPosition(event)
+    showArtistListSubmenu()
+  }, 
+  'addToListSubmenu-hide': hideAddToListSubmenu,
+  'artistListSubmenu-hide': hideArtistListSubmenu,
+  'color-picker-toolbar-show': ({ event: mouseEvent, onChanged, value, title }) => {
+    //根据鼠标点击位置，确定弹出位置
+    const tbWidth = 218, tbHeight = 369
+    const { x, y, offsetX, offsetY } = mouseEvent
+    const pickerEl = document.querySelector('#color-picker-toolbar')
+    const { clientHeight, clientWidth } = document.documentElement
+    if (!pickerEl) return
+    const padding = 25
+    let top = Math.max(y + (18 - offsetY) - tbHeight / 2, padding)
+    top = Math.min(top, clientHeight - tbHeight - padding)
+    let left = Math.max(x + padding, padding)
+    left = Math.min(left, clientWidth - tbWidth - padding)
+    pickerEl.style.top = `${top}px`
+    pickerEl.style.left = `${left}px`
+
+    if (!colorPickerToolbarRef.value) return
+    if (value) value = value.replace(/\s/g, '')
+    colorPickerToolbarRef.value.init({ onChanged, value })
+    showColorPickerToolbar(title)
+  },
+  'gradient-color-toolbar-show': ({ event: mouseEvent, value, onChanged }) => {
+    if (!gradientColorToolbarRef.value) return
+    gradientColorToolbarRef.value.init({ onChanged, value })
+    showGradientColorToolbar()
+  },
+  'app-resize': () => {
+    setupSoundEffectViewPos()
+    setupCustomThemeEditViewPos()
+    setupGradientColorToolbarPos()
+  },
+  'popover-hint-register': registerPopoverHints,
+  'playingViewCustomTheme-applyTheme': param => {
+    const { theme, isPreviewMode } = param || {}
+    setupPlayingView(theme, isPreviewMode)
+  },
 })
+
+onMounted(setupPlayingView)
 
 watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
 watch(gradientColorToolbarShow, setupGradientColorToolbarPos)

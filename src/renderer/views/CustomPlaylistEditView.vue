@@ -10,7 +10,7 @@ import { onMounted, ref, reactive, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { toTrimString, useIpcRenderer, coverDefault } from '../../common/Utils';
+import { toTrimString, coverDefault, isSupportedImage, ipcRendererInvoke } from '../../common/Utils';
 import ArtistControl from '../components/ArtistControl.vue';
 import AlbumControl from '../components/AlbumControl.vue';
 
@@ -21,8 +21,6 @@ const { backward } = inject('appRoute')
 const props = defineProps({
     id: String
 })
-
-const ipcRenderer = useIpcRenderer()
 
 const { showToast, showFailToast, setRouterCtxCacheItem } = useAppCommonStore()
 const { routerCtxCacheItem } = storeToRefs(useAppCommonStore())
@@ -98,14 +96,31 @@ const cancel = () => {
     backward()
 }
 
+const setupCover = (cover) => {
+    return Object.assign(detail, { cover })
+}
+
 //TODO
 const updateCover = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-image')
-    if (result.length > 0) {
-        const cover = result[0]
-        Object.assign(detail, { cover })
+    const result = await ipcRendererInvoke('open-image')
+    if (result.length > 0) setupCover(result[0])
+}
+
+const onDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length > 1) return showFailToast('还不支持多文件拖拽')
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        setupCover(path)
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
     }
+    if (isEventStopped) event.stopPropagation()
 }
 
 const computedAddWithDataAvailable = computed(() => {
@@ -155,7 +170,7 @@ onMounted(() => loadCustomPlaylist())
 </script>
 
 <template>
-    <div id="custom-playlist-edit-view">
+    <div id="custom-playlist-edit-view" @drapover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <span class="title" v-show="!id">创建歌单</span>
             <span class="title" v-show="id">编辑歌单</span>

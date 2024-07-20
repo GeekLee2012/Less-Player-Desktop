@@ -1,7 +1,6 @@
 <script setup>
 import { computed, inject, onActivated, onMounted, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useSearchStore } from '../store/searchStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -12,6 +11,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { LESS_MAGIC_CODE } from '../../common/Constants';
 import { toTrimString } from '../../common/Utils';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -189,7 +189,7 @@ const resetScrollState = () => {
 }
 
 const restoreScrollState = () => {
-    //EventBus.emit("imageTextTiles-update")
+    //emitEvents("imageTextTiles-update")
     if (markScrollTop < 1) return
     if (searchViewRef.value) searchViewRef.value.scrollTop = markScrollTop
 }
@@ -205,7 +205,9 @@ const togglePlatformCategory = () => {
     togglePlatformCategoryView()
 }
 
-EventBus.on('modules-toggleSearchPlatform', () => visitTab(0, null, true))
+onEvents({
+    'modules-toggleSearchPlatform': () => visitTab(0, null, true),
+})
 
 onMounted(() => {
     updateTabs()

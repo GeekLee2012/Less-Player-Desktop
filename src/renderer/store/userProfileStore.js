@@ -1,16 +1,17 @@
 import { defineStore } from "pinia";
 import { toRaw } from "vue";
-import EventBus from "../../common/EventBus";
 import { randomTextWithinAlphabetNums, trimArray } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 import { usePlatformStore } from "./platformStore";
+import { onEvents, emitEvents } from "../../common/EventBusWrapper";
 
 
+//TODO
+export const refreshUserHome = () => emitEvents('userHome-refresh')
+export const refreshFavoritedState = emitEvents('track-refreshFavoritedState')
 
 const filterByPlatform = (state, platform) => {
-    if (!platform || platform.trim() == 'all') {
-        return state
-    }
+    if (!platform || platform.trim() == 'all') return state
     return state.filter(item => (item.platform == platform.trim()))
 }
 
@@ -116,7 +117,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             const updated = created
             Object.assign(item, { created, updated })
             state.push(item)
-            this.refreshUserHome()
+            refreshUserHome()
             return true
         },
         insertFirst(state, item, compareFn) {
@@ -127,7 +128,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             const updated = created
             Object.assign(item, { created, updated })
             state.splice(0, 0, item)
-            this.refreshUserHome()
+            refreshUserHome()
             return true
         },
         removeItem(state, item, compareFn) {
@@ -136,7 +137,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             const index = this.findItemIndex(state, item, compareFn)
             if (index != -1) {
                 state.splice(index, 1)
-                this.refreshUserHome()
+                refreshUserHome()
             }
 
         },
@@ -150,7 +151,7 @@ export const useUserProfileStore = defineStore("userProfile", {
                 state.splice(index, 1)
                 ++count
             }
-            if (count) this.refreshUserHome()
+            if (count) refreshUserHome()
         },
         uniqueInsertFirst(state, item, compareFn) {
             this.removeItems(state, item, compareFn)
@@ -207,11 +208,11 @@ export const useUserProfileStore = defineStore("userProfile", {
         },
         removeFavoriteSong(id, platform) {
             this.removeItem(this.favorites.songs, { id, platform })
-            EventBus.emit("track-refreshFavoritedState")
+            refreshFavoritedState()
         },
         removeFavoriteRadio(id, platform) {
             this.removeItem(this.favorites.radios, { id, platform })
-            EventBus.emit("track-refreshFavoritedState")
+            refreshFavoritedState()
         },
         isFavoritePlaylist(id, platform) {
             return this.findItemIndex(this.favorites.playlists, { id, platform }) > -1
@@ -230,7 +231,7 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.favorites.playlists.length = 0
             this.favorites.albums.length = 0
             this.favorites.radios.length = 0
-            this.refreshUserHome()
+            refreshUserHome()
         },
         //TODO 清理, 数据量较大时卡住，暂时废弃不用
         cleanUpAllSongs(states) {
@@ -351,16 +352,13 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.recents.playlists.length = 0
             this.recents.albums.length = 0
             this.recents.radios.length = 0
-            this.refreshUserHome()
-        },
-        refreshUserHome() { //TODO
-            EventBus.emit("userHome-refresh")
+            refreshUserHome()
         },
         nextDecoration() {
-            const start = 1001, count = 3
-            const max = start + count - 1
-            let num = this.decoration.current
-            this.decoration.current = ((++num > max) ? start : num)
+            ++this.decoration.current
+        },
+        resetDecoration() {
+            this.decoration.current = 1001
         }
     },
     persist: {

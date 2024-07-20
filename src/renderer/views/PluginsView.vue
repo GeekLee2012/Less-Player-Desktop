@@ -4,11 +4,11 @@ import { storeToRefs } from 'pinia';
 import { usePluginStore } from '../store/pluginStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
-import EventBus from '../../common/EventBus';
 import PluginItem from '../components/PluginItem.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { isBlank, isDevEnv, toLowerCaseTrimString, toTrimString, tryCall, useIpcRenderer, readLines } from '../../common/Utils';
+import { isBlank, isDevEnv, toLowerCaseTrimString, toTrimString, tryCall, readLines, ipcRendererInvoke } from '../../common/Utils';
 import { FILE_PREFIX, ActivateState } from '../../common/Constants';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -16,9 +16,8 @@ import { FILE_PREFIX, ActivateState } from '../../common/Constants';
 const { visitPluginDetail } = inject('appRoute')
 const { activatePluginNow, deactivatePluginNow, removePluginNow } = inject('apiExpose')
 const { reloadApp } = inject('player')
-const { showConfirm } = inject('appCommon')
+const { showConfirm } = inject('apiExpose')
 
-const ipcRenderer = useIpcRenderer()
 
 const { ignoreErrorPlugins, isReplaceMode, plugins } = storeToRefs(usePluginStore())
 const { toggleIgnoreErrorPlugins, toggleReplaceMode ,addPlugin, updatePlugin, removePlugin } = usePluginStore()
@@ -190,7 +189,7 @@ const doImportPlugin = async (fileItem) => {
         if(!plugin) return Promise.reject(FailMsg.Exists)
        
         //导入（文件）到当前应用的数据目录下
-        const result = await ipcRenderer.invoke('app-importPlugin', { filePath, data })
+        const result = await ipcRendererInvoke('app-importPlugin', { filePath, data })
         if (!isValidImportResult(result)) return Promise.reject(FailMsg.Unknown)
 
         //更新store
@@ -215,14 +214,13 @@ const doImportPlugin = async (fileItem) => {
 }
 
 const importPlugins = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('choose-files', { filterExts: ['js'] })
+    const result = await ipcRendererInvoke('choose-files', { filterExts: ['js'] })
     if (result) {
         const { filePaths: files } = result
         if (!files || files.length < 1) return
         for (var i = 0; i < files.length; i++) {
             const path = files[i]
-            const result = await ipcRenderer.invoke('read-text', path)
+            const result = await ipcRendererInvoke('read-text', path)
             if (!result) continue
             doImportPlugin(result)
         }
@@ -265,14 +263,13 @@ const removePlugins = async () => {
 }
 
 const onDrop = async (event) => {
-    if (!ipcRenderer) return
     event.preventDefault()
     const { files } = event.dataTransfer
     if (!files || files.length < 1) return
 
     for (var i = 0; i < files.length; i++) {
         const { name, path } = files[i]
-        const result = await ipcRenderer.invoke('read-text', path)
+        const result = await ipcRendererInvoke('read-text', path)
         if (!result) continue
         doImportPlugin(result)
     }
@@ -317,10 +314,10 @@ const computedTabTip = computed(() => {
 const refreshCheckData = () => {
     checkedData.length = 0
     checkedAll.value = false
-    EventBus.emit("plugin-checkbox-refresh")
+    emitEvents("plugin-checkbox-refresh")
 }
 
-const refreshViewSize = () => EventBus.emit('pluginsView-show')
+const refreshViewSize = () => emitEvents('pluginsView-show')
 
 onActivated(() => {
     nextTick(refreshViewSize)

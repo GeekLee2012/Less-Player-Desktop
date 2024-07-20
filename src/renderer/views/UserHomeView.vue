@@ -7,7 +7,6 @@ import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
-import EventBus from '../../common/EventBus';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
@@ -18,13 +17,14 @@ import CustomPlaylistListControl from '../components/CustomPlaylistListControl.v
 import ArtistListControl from '../components/ArtistListControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import { coverDefault } from '../../common/Utils';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
 
 const { currentRoutePath, visitCommonRoute,
     visitUserInfoEdit, visitCustomPlaylistCreate } = inject('appRoute')
-const { showConfirm } = inject('appCommon')
+const { showConfirm } = inject('apiExpose')
 
 const tabs = [{
     code: 'favorites',
@@ -62,7 +62,7 @@ const { getFavoriteSongs, getFavoritePlaylilsts,
     getCustomPlaylists, getFollowArtists,
     decoration, getUserCover,
     getUserNickName, getUserAbout } = storeToRefs(useUserProfileStore())
-const { removeAllFavorites, nextDecoration } = useUserProfileStore()
+const { removeAllFavorites, nextDecoration, resetDecoration } = useUserProfileStore()
 const { getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios } = storeToRefs(useRecentsStore())
 const { removeAllRecents } = useRecentsStore()
@@ -192,7 +192,7 @@ const clearAll = () => {
     const store = useUserProfileStore()
     const { nickname, about, cover } = store.user
     store.$reset()
-    EventBus.emit("userProfile-reset")
+    emitEvents("userProfile-reset")
     visitTab(0)
     showToast("全部数据已清空")
     //updateUser(nickname, about, cover)
@@ -282,14 +282,16 @@ watch(currentPlatformCode, (nv, ov) => {
     refresh()
 })
 
-EventBus.on("userHome-refresh", refresh)
-EventBus.on("userHome-visitRecentsTab", visitRecentsTab)
+onEvents({
+    'userHome-refresh': refresh,
+    'userHome-visitRecentsTab': visitRecentsTab,
+})
 </script>
 
 <template>
     <div id="user-profile-view" ref="userProfileRef" @scroll="onScroll">
         <div class="decoration">
-            <img :src="`deco_${decoration.current}.png`" @click="nextDecoration" />
+            <img :src="`deco_${decoration.current}.png`" @error="resetDecoration" @click="nextDecoration" />
         </div>
         <div class="header">
             <div>

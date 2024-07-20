@@ -3,13 +3,11 @@ import { inject, ref } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import ColorInputControl from '../components/ColorInputControl.vue';
 import GradientColorInputControl from '../components/GradientColorInputControl.vue';
-import { useIpcRenderer } from '../../common/Utils';
 
 
 
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
-const ipcRenderer = useIpcRenderer()
 
 const { hideGradientColorToolbar } = useAppCommonStore()
 

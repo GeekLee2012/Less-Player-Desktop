@@ -1,10 +1,10 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import EventBus from '../../common/EventBus';
 import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../../renderer/store/platformStore';
 import { useSettingStore } from '../../renderer/store/settingStore';
 import { coverDefault } from '../../common/Utils';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -52,7 +52,9 @@ watch(() => props.checked, (nv, ov) => {
 })
 
 
-EventBus.on("checkbox-refresh", () => setChecked(false))
+onEvents({
+    'checkbox-refresh': () => setChecked(false),
+})
 </script>
 
 <template>

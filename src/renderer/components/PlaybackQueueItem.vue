@@ -9,7 +9,6 @@ import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
 import { Playlist } from '../../common/Playlist';
 import { coverDefault, toTrimString } from '../../common/Utils';
-import EventBus from '../../common/EventBus';
 
 
 
@@ -48,7 +47,7 @@ const linkItem = () => {
             /*
             visitPlaylist(platform, pid, 'radios', () => setRouterCtxCacheItem({ id: 'linkItem', title }), true)
                 .catch(error => {
-                    if (error == 'sameRoute') EventBus.emit('playlist-linkItem', title)
+                    if (error == 'sameRoute') emitEvents('playlist-linkItem', title)
                 })
             */
            visitPlaylist(platform, pid, 'radios')
@@ -58,7 +57,7 @@ const linkItem = () => {
             /*
             visitPlaylist(platform, pid, null, () => setRouterCtxCacheItem({ id: 'linkItem', title }), true)
                 .catch(error => {
-                    if (error == 'sameRoute') EventBus.emit('playlist-linkItem', title)
+                    if (error == 'sameRoute') emitEvents('playlist-linkItem', title)
                 })
             */
             visitPlaylist(platform, pid)

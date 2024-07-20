@@ -1,10 +1,10 @@
 <script setup>
 import { reactive, } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useRadioSquareStore } from '../store/radioSquareStore';
 import CategoryBarLoadingMask from './CategoryBarLoadingMask.vue';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -40,9 +40,7 @@ const visitCateItem = (item, row, col, forceRefresh) => {
     }
     const needRefresh = isDiffCate(item, row, col) || forceRefresh
     updateCurrentCategoryItem(item, row, col)
-    if (needRefresh) {
-        EventBus.emit("radioSquare-refresh")
-    }
+    if (needRefresh) emitEvents('radioSquare-refresh')
 }
 
 const flatData = reactive([])
@@ -84,9 +82,11 @@ const isItemActive = (item) => {
 }
 
 //TODO 实现方式很别扭
-EventBus.on('radioCategory-update', () => {
-    flatData.length = 0
-    loadFirstCateData()
+onEvents({
+    'radioCategory-update': () => {
+        flatData.length = 0
+        loadFirstCateData()
+    },
 })
 </script>
 
@@ -111,7 +111,8 @@ EventBus.on('radioCategory-update', () => {
                 </span>
             </template>
         </div>
-        <CategoryBarLoadingMask :count="20" v-show="loading"></CategoryBarLoadingMask>
+        <CategoryBarLoadingMask :count="20" v-show="loading">
+        </CategoryBarLoadingMask>
     </div>
 </template>
 

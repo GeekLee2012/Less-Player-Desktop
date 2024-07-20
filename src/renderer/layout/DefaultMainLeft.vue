@@ -1,23 +1,23 @@
 <script setup>
-import { inject, onActivated, onMounted, ref } from 'vue';
+import { computed, inject, onActivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia'
 import { usePlatformStore } from '../store/platformStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
-import EventBus from '../../common/EventBus';
 import { isDevEnv, useUseCustomTrafficLight } from '../../common/Utils';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import Navigator from '../components/Navigator.vue';
 import SearchBar from '../components/SearchBar.vue';
-
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 const { visitRoute, visitArtist, visitHome,
     visitFavoritePlaylist, visitCustomPlaylist,
     visitCustomPlaylistCreate, currentRoutePath,
     visitUserHome, visitSetting, } = inject('appRoute')
-const { showContextMenu, useWindowsStyleWinCtl, searchAction, searchBarPlaceholder, } = inject('appCommon')
+const { showContextMenu, useWindowsStyleWinCtl, 
+    searchAction, searchBarPlaceholder, } = inject('appCommon')
 
 
 
@@ -127,16 +127,99 @@ const isSubtitleVisible = () => {
     return false
 }
 
-EventBus.on("navigation-refreshCustomPlaylistIndex", (index) => {
-    activeCustomPlaylistIndex.value = index
+/* 拖拽移动重排序 */
+/*
+const dragTargetIndex = ref(-1)
+const dragOverIndex = ref(-1)
+const dragging = ref(false)
+const setDragTargetIndex = (value) => dragTargetIndex.value = value
+const setDragOverIndex = (value) => dragOverIndex.value = value
+const setDragging = (value) => dragging.value = value
+
+//重置状态
+const resetDragState = () => {
+    setDragging(false)
+    setDragOverIndex(-1)
+    setDragTargetIndex(-1)
+}
+
+const markDragStart = (event, item, index) => {
+    setDragging(true)
+    //当前拖拽对象index
+    setDragTargetIndex(index)
+    //仅为改变默认鼠标样式
+    const { dataTransfer } = event
+    if (dataTransfer) dataTransfer.effectAllowed = 'move'
+}
+
+const markDragOver = (event, item, index) => {
+    if (!dragging.value) return
+    //拖拽悬停时所在的Item对象对应的index
+    setDragOverIndex(index)
+}
+
+const moveDragItem = (event) => {
+    if (!dragging.value) return
+    movePlaylistPlatform(dragTargetIndex.value, dragOverIndex.value)
+}
+
+
+const sortedActivePlatforms = ref([])
+const needReposition = () => (sortedActivePlatforms.value && sortedActivePlatforms.value.length > 0)
+
+const setupSortedActivePlatforms = (value) => {
+    //TODO 插件变动时，sortedActivePlatforms会被重置
+    //sortedActivePlatforms.value = (value || [])
+    const oValue = sortedActivePlatforms.value || []
+    const _value = (value || [])
+    const nValue = []
+    //合并数据
+    const part1 = oValue.filter(item => (_value.findIndex(e => e.code == item.code) != -1)) || []
+    const part2 = _value.filter(item => (part1.findIndex(e => e.code == item.code) == -1)) || []
+    nValue.push(...part1)
+    nValue.push(...part2)
+    sortedActivePlatforms.value = nValue
+}
+
+const repositionIndex = (index) => {
+    const platfroms = sortedActivePlaylistPlatforms.value
+    const { code } = platfroms[index]
+    return activePlatforms.value().findIndex(item => item.code == code)
+}
+
+const movePlaylistPlatform = (from, to) => {
+    if(from < 0 || to < 0 || from == to) return
+    const platforms = sortedActivePlatforms.value || []
+    const item = platforms[from]
+    platforms.splice(from, 1)
+    platforms.splice(to, 0, item)
+}
+
+const sortedActivePlaylistPlatforms = computed(() => {
+    const _sPlatforms = sortedActivePlatforms.value
+    if(_sPlatforms && _sPlatforms.length > 0) {
+        return sortedActivePlatforms.value
+    }
+    return activePlatforms.value()
 })
 
-EventBus.on("toggleRadioMode", toggleRadioMode)
+watch(() => activePlatforms.value(), setupSortedActivePlatforms)
+*/
+
+onEvents({
+    'navigation-refreshCustomPlaylistIndex': index => {
+        activeCustomPlaylistIndex.value = index
+    },
+    toggleRadioMode,
+})
 </script>
 
 <template>
     <div id="main-left"
-        :class="{ 'main-left-mousewheel-viewpoint': isUserMouseWheel, 'main-left-default-old-layout': isDefaultOldLayout }">
+        :class="{
+            'user-mousewheel': isUserMouseWheel, 
+            'main-left-default-old-layout': isDefaultOldLayout 
+        }">
         <div class="header">
             <WinTrafficLightBtn v-show="!useWindowsStyleWinCtl" :isMaximized="isMaxScreen">
             </WinTrafficLightBtn>
@@ -274,8 +357,9 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
                     <span>音乐平台</span>
                 </div>
                 <ul>
-                    <li v-for="(item, index) in activePlatforms()" :class="{ active: (currentPlatformIndex == index) }"
-                        @click="updatePlatformIndex(index)">
+                    <li v-for="(item, index) in activePlatforms()" 
+                        @click="updatePlatformIndex(index)"
+                        :class="{ active: (currentPlatformIndex == index)}" >
                         <span v-html="item.name"></span>
                     </li>
                 </ul>
@@ -373,9 +457,9 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
     border: 1px solid transparent;
 }
 
-.main-left-mousewheel-viewpoint ::-webkit-scrollbar-thumb {
-    background: var(--others-scrollbar-color) !important;
-    border: 1px solid var(--others-scrollbar-color) !important;
+#main-left.user-mousewheel ::-webkit-scrollbar-thumb {
+    background: var(--others-scrollbar-color);
+    border: 1px solid var(--others-scrollbar-color);
 }
 
 #main-left .secondary-text {
@@ -591,6 +675,11 @@ EventBus.on("toggleRadioMode", toggleRadioMode)
 #main-left .active {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color);
+}
+
+#main-left li.drag-target,
+#main-left li.drag-over-mark {
+    background: var(--content-list-item-hover-bg-color);
 }
 
 #main-left .bottom {

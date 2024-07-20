@@ -1,7 +1,6 @@
 <script setup>
 import { onActivated, ref, watch, toRaw, inject, nextTick, computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -12,14 +11,14 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { toMillis } from '../../common/Times';
-import { isMacOS, isDevEnv, nextInt, randomTextWithinAlphabet, toTrimString } from '../../common/Utils';
+import { isMacOS, isDevEnv, nextInt, randomTextWithinAlphabet, toTrimString, toMillis } from '../../common/Utils';
 import Popovers from '../Popovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { useArtistSquareStore } from '../store/artistSquareStore';
 import { Album } from '../../common/Album';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -1019,13 +1018,15 @@ const computedCategoryName = computed(() => {
 })
 
 /* EventBus事件 */
-EventBus.on('track-lyricLoaded', track => checkLyricValid(track))
-EventBus.on('lyric-fontSize', setupLyricLines)
-EventBus.on('lyric-hlFontSize', setupLyricLines)
-EventBus.on('lyric-fontWeight', setupLyricLines)
-EventBus.on('lyric-lineHeight', setupLyricLines)
-EventBus.on('lyric-lineSpacing', setupLyricLines)
-EventBus.on('lyric-alignment', setupLyricAlignment)
+onEvents({
+    'track-lyricLoaded': track => checkLyricValid(track),
+    'lyric-fontSize': setupLyricLines,
+    'lyric-hlFontSize': setupLyricLines,
+    'lyric-fontWeight': setupLyricLines,
+    'lyric-lineHeight': setupLyricLines,
+    'lyric-lineSpacing': setupLyricLines,
+    'lyric-alignment': setupLyricAlignment, 
+})
 
 /* 组件生命周期、钩子等 */
 onActivated(() => {
@@ -1054,15 +1055,16 @@ watch(currentTrack, (nv, ov) => {
 })
 
 watch(soundEffectViewShow, () => {
-    EventBus.emit('app-elementAlignCenter', {
+    emitEvents('app-elementAlignCenter', {
         selector: '.simple-layout #sound-effect-view',
         width: 404,
         height: 366,
         offsetTop: -20
     })
 })
+
 watch(randomMusicToolbarShow, () => {
-    EventBus.emit('app-elementAlignCenter', {
+    emitEvents('app-elementAlignCenter', {
         selector: '.simple-layout #random-music-toolbar',
         width: 365,
         height: 413,
@@ -1070,6 +1072,7 @@ watch(randomMusicToolbarShow, () => {
         offsetTop: -15
     })
 })
+
 watch([lyricToolbarShow], setLyricToolbarPos)
 watch([textColorIndex], setupTextColor)
 </script>

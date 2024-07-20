@@ -8,7 +8,6 @@ export default {
 <script setup>
 import { storeToRefs } from 'pinia';
 import { inject, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue';
-import EventBus from '../../common/EventBus';
 import Mousetrap from 'mousetrap';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -23,8 +22,8 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { useIpcRenderer } from '../../common/Utils';
-import { toYyyymmddHhMmSs } from '../../common/Times';
+import { toYyyymmddHhMmSs } from '../../common/Utils';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -36,8 +35,7 @@ const props = defineProps({
 
 const { playPlaylist, addPlaylistToQueue, addFmRadioToQueue, playAlbum, addAlbumToQueue } = inject('player')
 const { currentRoutePath, backward } = inject('appRoute')
-const { showConfirm } = inject('appCommon')
-const ipcRenderer = useIpcRenderer()
+const { showConfirm } = inject('apiExpose')
 
 const { getFavoriteSongs, getFavoritePlaylilsts,
     getFavoriteAlbums, getFavoriteRadios, } = storeToRefs(useUserProfileStore())
@@ -188,7 +186,7 @@ const resetTab = () => {
         exportBtn: false,
         deleteBtn: true
     })
-    EventBus.emit("checkbox-refresh")
+    emitEvents("checkbox-refresh")
 }
 
 const updateTipText = () => {
@@ -309,7 +307,7 @@ const switchTab = () => {
     }
     updateTipText()
     //TODO
-    EventBus.emit("batchView-show")
+    emitEvents("batchView-show")
 }
 
 const visitTab = (index) => {
@@ -480,8 +478,8 @@ const showAddToList = (event, dataType, elSelector, actionType) => {
     const clientRect = el.getBoundingClientRect()
     const { x, y, width, height, bottom } = clientRect
     const { clientX, clientY } = event
-    EventBus.emit("commonCtxMenu-init", { dataType, actionType })
-    EventBus.emit("commonCtxMenu-show", {
+    emitEvents("commonCtxMenu-init", { dataType, actionType })
+    emitEvents("commonCtxMenu-show", {
         event: { x, y: (bottom + 3), clientX, clientY },
         data: sortCheckData()
     })
@@ -495,11 +493,11 @@ const showAddToList = (event, dataType, elSelector, actionType) => {
     const { x, y, width, height, bottom } = clientRect
     const { clientX, clientY } = event
     updateCommonCtxMenuCacheItem(sortCheckData())
-    EventBus.emit("addToListSubmenu-init", {
+    emitEvents("addToListSubmenu-init", {
         mode: (actionType || 0),
         dataType,
         callback: ({ total }) => {
-            EventBus.emit("addToListSubmenu-show", {
+            emitEvents("addToListSubmenu-show", {
                 event: { x, y: (bottom + 3), clientX, clientY },
                 total
             })
@@ -587,7 +585,7 @@ const exportRadios = async (radios) => {
     })
     const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')
     const filename = `FreeRadios-${timestamp}.json`
-    const result = await ipcRenderer.invoke('save-file', {
+    const result = await ipcRendererInvoke('save-file', {
         title: 'FM电台导出',
         name: filename,
         data: JSON.stringify({ created: now, data: radioData })
@@ -598,7 +596,6 @@ const exportRadios = async (radios) => {
 */
 const formatRadios = (radios, format) => {
     if (!radios || radios.length < 1) return
-    if (!ipcRenderer) return
     const now = Date.now()
     const radioData = []
     radios.forEach(item => {
@@ -631,7 +628,7 @@ const exportChecked = () => {
 
 //TODO
 const refresh = () => {
-    EventBus.emit("checkbox-refresh")
+    emitEvents("checkbox-refresh")
     visitTab(activeTab.value)
 }
 
@@ -692,7 +689,9 @@ watch([currentPlatformCode], () => {
     refreshContent()
 })
 
-EventBus.on("commonCtxMenuItem-finish", refresh)
+onEvents({
+    'commonCtxMenuItem-finish': refresh, 
+})
 </script>
 
 <template>

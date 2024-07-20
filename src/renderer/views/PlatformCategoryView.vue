@@ -1,5 +1,4 @@
 <script setup>
-import { reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSearchStore } from '../store/searchStore';
 import { useAppCommonStore } from '../store/appCommonStore';

@@ -1,9 +1,9 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { inject, onMounted, reactive } from 'vue';
-import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -32,7 +32,9 @@ const initData = () => {
 
 onMounted(() => initData())
 
-EventBus.on("artistListSubmenu-init", initData)
+onEvents({
+    'artistListSubmenu-init': initData,
+})
 </script>
 
 <template>

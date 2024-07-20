@@ -1,18 +1,17 @@
 <script setup>
 import { watch, ref, inject, nextTick, computed, onUnmounted, } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { toMMssSSS, toMillis } from '../../common/Times';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import { PlayState } from '../../common/Constants';
-import { isDevEnv, smoothScroll } from '../../common/Utils';
+import { isDevEnv, smoothScroll, toMMssSSS, toMillis } from '../../common/Utils';
 import { Lyric } from '../../common/Lyric';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -335,18 +334,19 @@ const setupLyricExtra = () => {
 
 
 //EventBus事件
-EventBus.on('track-lyricLoaded', reloadLyricData)
-EventBus.on('track-noLyric', reloadLyricData)
-EventBus.on('lyric-userMouseWheel', onUserMouseWheel)
-EventBus.on('lyric-fontSize', setupLyricLines)
-EventBus.on('lyric-hlFontSize', setupLyricLines)
-EventBus.on('lyric-fontWeight', setupLyricLines)
-EventBus.on('lyric-lineHeight', setupLyricLines)
-EventBus.on('lyric-lineSpacing', setupLyricLines)
-EventBus.on('lyric-alignment', setupLyricAlignment)
-EventBus.on('playingView-changed', setupLyricAlignment)
-EventBus.on('track-lyricRestore', () => setLyricExistState(-1))
-
+onEvents({
+    'track-lyricLoaded': reloadLyricData,
+    'track-noLyric': reloadLyricData,
+    'lyric-userMouseWheel': onUserMouseWheel,
+    'lyric-fontSize': setupLyricLines,
+    'lyric-hlFontSize': setupLyricLines,
+    'lyric-fontWeight': setupLyricLines,
+    'lyric-lineHeight': setupLyricLines,
+    'lyric-lineSpacing': setupLyricLines,
+    'lyric-alignment': setupLyricAlignment,
+    'playingView-changed': setupLyricAlignment,
+    'track-lyricRestore': () => setLyricExistState(-1),
+})
 
 watch(() => props.currentTime, (nv, ov) => {
     //TODO 暂时简单处理，播放页隐藏时直接返回

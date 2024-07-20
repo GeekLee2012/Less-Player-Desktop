@@ -3,9 +3,11 @@ import CryptoJS from 'crypto-js';
 import forge from "node-forge";
 import JSEncrypt from 'jsencrypt';
 import { pinyin } from 'pinyin-pro';
-import { FILE_PREFIX, DEFAULT_COVER_BASE64 } from './Constants';
+import { FILE_PREFIX, DEFAULT_COVER_BASE64, FILE_SCHEME } from './Constants';
 
 
+
+/************ 函数调用 ************/
 export const tryCall = (fn, params, onSuccess, onError) => {
     try {
         if(fn && (typeof fn == 'function')) {
@@ -36,8 +38,45 @@ export const tryCallDefault = (fn, params, defaultValue) => {
     return tryCall(fn, params, result => (result), (params) => (defaultValue))
 }
 
+
+/************ 从主进程获取到的数据 ************/
 export const useIpcRenderer = () => {
     return tryCallDefault(() => (electronAPI.ipcRenderer))
+}
+
+export const isIpcRendererSupported = () => {
+    const ipcRenderer = useIpcRenderer()
+    return ipcRenderer ? true : false
+}
+
+export const ipcRendererBind = (channel, handler) => {
+    const ipcRenderer = useIpcRenderer()
+    if(!ipcRenderer) return 
+    if(!handler || typeof handler != 'function') return
+    ipcRenderer.on(channel, handler)
+}
+
+export const ipcRendererBinds = (registration) => {
+    const ipcRenderer = useIpcRenderer()
+    if(!ipcRenderer) return
+    if(!registration || typeof registration != 'object') {
+        throw new Error('parameter type error: not a object')
+    }
+    Object.entries(registration).forEach(([channel, handler]) => {
+        ipcRendererBind(channel, handler)
+    })
+}
+
+export const ipcRendererSend = (channel, data) => {
+    const ipcRenderer = useIpcRenderer()
+    if(!ipcRenderer) return 
+    ipcRenderer.send(channel, data)
+}
+
+export const ipcRendererInvoke = async (channel, data) => {
+    const ipcRenderer = useIpcRenderer()
+    if(!ipcRenderer) return 
+    return ipcRenderer.invoke(channel, data)
 }
 
 export const useStartDrag = () => {
@@ -84,6 +123,8 @@ export const useTrayAction = () => {
     return tryCallDefault(() => (electronAPI.TrayAction))
 }
 
+
+/************ 字符串 ************/
 export const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz'
 export const ALPHABET_NUMS = `${ALPHABETS}01234567890`
 
@@ -185,6 +226,8 @@ export const trimTextWithinBrackets = (text) => {
     return text.substring(0, index)
 }
 
+
+/************ 加解密 ************/
 /*
 export const useRgbaster = async (src, opts) => {
     return new Promise((resolve, reject) => {
@@ -343,6 +386,8 @@ export const aesDecryptText = (src, mode, secKey, iv, padding) => {
     return buffer.toString()
 }
 
+
+/************ 平滑滚动 ************/
 //参考: https://aaron-bird.github.io/2019/03/30/%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0(easing%20function)/
 const easeInOutQuad = (currentTime, startValue, changeValue, duration) => {
     currentTime /= duration / 2
@@ -381,17 +426,8 @@ export const smoothScrollHorizional = (target, dest, duration, step, interruptAc
     smoothAnimation(target, easeInOutQuad, target.scrollLeft, dest, duration, step, (value => target.scrollLeft = value), interruptAction)
 }
 
-//限制数组总长度，超出部分会直接删除
-export const trimArray = async (data, limit) => {
-    limit = limit || 999
-    if (data && data.length > limit) {
-        const deleteCount = data.length - limit
-        await data.splice(limit, deleteCount)
-        return deleteCount
-    }
-    return 0
-}
 
+/************ 文件处理 ************/
 /** 支持格式:  
  * #EXTINF: [length], [title], [cover]  
  * [url]  
@@ -510,6 +546,18 @@ export const parsePlsText = (text, mapFn) => {
 }
 
 
+/************ 其他 ************/
+//限制数组总长度，超出部分会直接删除
+export const trimArray = async (data, limit) => {
+    limit = limit || 999
+    if (data && data.length > limit) {
+        const deleteCount = data.length - limit
+        await data.splice(limit, deleteCount)
+        return deleteCount
+    }
+    return 0
+}
+
 export const isChineseChar = (ch) => {
     return /[\u4e00-\u9fa5]/.test(ch)
 }
@@ -523,7 +571,9 @@ export const firstCharOfPinyin = (ch) => {
 }
 
 export const coverDefault = (cover, defaultCover) => {
-    return cover || defaultCover || DEFAULT_COVER_BASE64
+    return transformUrl(cover, FILE_SCHEME) 
+        || transformUrl(defaultCover, FILE_SCHEME)  
+        || DEFAULT_COVER_BASE64
 }
 
 export const transformUrl = (url, protocal) => {
@@ -552,3 +602,92 @@ export const isSupportedImage = (path) => {
     }
     return false
 }
+
+
+/************ 日期时间 ************/
+export const toMmss = (millis) => {
+    if(!millis && millis !== 0) return 
+    let minutes = Math.floor(millis / 60000);
+    let seconds = ((millis % 60000) / 1000).toFixed(0);
+    if (seconds >= 60) { //toFixed()是否引起进位
+        seconds = seconds - 60
+        ++minutes
+    }
+    minutes = (minutes < 10 ? '0' : '') + minutes
+    seconds = (seconds < 10 ? '0' : '') + seconds
+    return minutes + ":" + seconds;
+}
+
+export const toMMssSSS = (millis) => {
+    let minutes = Math.floor(millis / 60000);
+    let fullSecs = ((millis % 60000) / 1000);
+    let seconds = Math.floor(fullSecs);
+    let millsecs = ((fullSecs - seconds) * 1000).toFixed(0);
+    minutes = (minutes < 10 ? '0' : '') + minutes
+    seconds = (seconds < 10 ? '0' : '') + seconds
+    millsecs = (millsecs < 100 ? (millsecs < 10 ? '00' : '0') : '') + millsecs
+    return minutes + ":" + seconds + "." + millsecs;
+}
+
+export const toYyyymmdd = (timestamp, sp) => {
+    sp = sp || '-'
+    const date = new Date(timestamp)
+    const yyyy = date.getFullYear()
+    let mm = (date.getMonth() + 1)
+    mm = mm < 10 ? ('0' + mm) : mm
+    let dd = date.getDate()
+    dd = dd < 10 ? ('0' + dd) : dd
+    return yyyy + sp + mm + sp + dd
+}
+
+export const toYmd = (timestamp, sp) => {
+    sp = sp || '.'
+    const date = new Date(timestamp)
+    const yyyy = date.getFullYear()
+    let m = (date.getMonth() + 1)
+    let d = date.getDate()
+    return yyyy + sp + m + sp + d
+}
+
+/**
+ * @param {*} timestamp 
+ * @param {*} sp1 年月日间隔符
+ * @param {*} sp2 日期与时间的间隔符
+ * @param {*} sp3 时分秒间隔符
+ */
+export const toYyyymmddHhMmSs = (timestamp, sp1, sp2, sp3) => {
+    sp1 = sp1 || '-'
+    sp2 = sp2 || ' '
+    sp3 = sp3 || ':'
+    const date = new Date(timestamp)
+    const yyyy = date.getFullYear()
+    let mm = (date.getMonth() + 1)
+    mm = mm < 10 ? ('0' + mm) : mm
+    let dd = date.getDate()
+    dd = dd < 10 ? ('0' + dd) : dd
+    let Hh = date.getHours()
+    Hh = Hh < 10 ? ('0' + Hh) : Hh
+    let Mm = date.getMinutes()
+    Mm = Mm < 10 ? ('0' + Mm) : Mm
+    let Ss = date.getSeconds()
+    Ss = Ss < 10 ? ('0' + Ss) : Ss
+    return yyyy + sp1 + mm + sp1 + dd + sp2
+        + Hh + sp3 + Mm + sp3 + Ss
+}
+
+export const toMillis = (mmssSSS) => {
+    try {
+        let timeParts = toTrimString(mmssSSS).split(':')
+        const minutes = parseInt(toTrimString(timeParts[0]))
+        timeParts = toTrimString(timeParts[1]).split('.')
+        const seconds = parseInt(toTrimString(timeParts[0]))
+        let millis = 0
+        if (timeParts.length > 1) millis = parseInt(toTrimString(timeParts[1]))
+        return (minutes * 60 + seconds) * 1000 + millis
+    } catch (error) {
+        console.log(mmssSSS, "\n", error)
+    }
+    return -1
+}
+
+

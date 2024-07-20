@@ -1,12 +1,12 @@
 <script setup>
-import { onMounted, watch } from 'vue';
+import { inject, onMounted, provide, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
-import EventBus from '../common/EventBus';
 import { isMacOS } from '../common/Utils';
 import CssWinOS from './CssWinOS.vue';
+import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
 
@@ -15,6 +15,24 @@ const { getCurrentTheme, setupFontFamily,
   setupFontWeight, allFontSizeLevels,
   currentFontSizeLevel, currentFontSize,
 } = useSettingStore()
+
+
+const applyDocumentElementStyle = (prop, value) => {
+  document.documentElement.style.setProperty(prop, value)
+}
+
+const removeDocumentElementStyle = (prop, value) => {
+  document.documentElement.style.removeProperty(prop, value)
+}
+
+const applyDocumentStyle = (changes, valueSuffix) => {
+    valueSuffix = valueSuffix || ''
+    if(!changes || typeof changes != 'object') return
+    for (const [key, value] of Object.entries(changes)) {
+      applyDocumentElementStyle(key, `${value}${valueSuffix}`)
+    }
+}
+
 
 const applyTheme = (theme) => {
   //const theme = new Theme()
@@ -97,10 +115,7 @@ const applyTheme = (theme) => {
     "--content-light-bg-color": theme.content.lightBgColor,
   }
 
-  for (const [key, value] of Object.entries(themeProperties)) {
-    document.documentElement.style.setProperty(key, value)
-  }
-
+  applyDocumentStyle(themeProperties)
 }
 
 //设置主题
@@ -110,7 +125,7 @@ const setupAppTheme = (theme) => {
   const { id } = theme
   const { type } = themeSetting.value
   applyTheme(theme)
-  document.documentElement.setAttribute('theme', id ? id : 'custom-preview')
+  applyDocumentStyle({ 'theme': (id || 'custom-preview') })
 }
 
 //直接在setup()时执行，不需要等待其他生命周期
@@ -127,11 +142,11 @@ const updateFontFamily = (value) => {
 const updateFontFamily = (value) => {
   //const presetFontFamily = document.documentElement.style.getPropertyValue('--content-text-preset-font-family')
   const fontFamily = value.trim()
-  document.documentElement.style.setProperty('font-family', fontFamily)
+  applyDocumentStyle({ 'font-family': fontFamily })
 }
 
 const updateFontWeight = (value) => {
-  document.documentElement.style.setProperty('font-weight', value)
+  applyDocumentStyle({'font-weight': value })
 }
 
 //设置字体大小
@@ -167,9 +182,7 @@ const setupFontSize = (fontSize) => {
     //'--content-text-module-title-size': (fontSize / 17.5 * 30),
     //'--content-text-module-subtitle-size': Math.max((fontSize / 17.5 * 25), 25)
   }
-  for (const [key, value] of Object.entries(changes)) {
-    document.documentElement.style.setProperty(key, `${value}px`)
-  }
+  applyDocumentStyle(changes, 'px')
 }
 
 //设置字体大小
@@ -177,11 +190,7 @@ const setupFontSizeLevel = (index) => {
   const attrName = 'fsLevel'
   const fontSizeLevels = allFontSizeLevels()
   const level = fontSizeLevels[index || currentFontSizeLevel()]
-  if (level) {
-    document.documentElement.setAttribute(attrName, level.id)
-  } else {
-    document.documentElement.removeAttribute(attrName)
-  }
+  level ? applyDocumentElementStyle(attrName, level.id) : removeDocumentElementStyle(attrName)
 }
 
 //设置字体样式
@@ -193,7 +202,7 @@ const setupFontStyle = () => {
 
 const setupMacStyle = () => {
   const borderRadius = isMacOS() ? 0 : 12
-  document.documentElement.style.setProperty('--border-macstyle-border-radius', `${borderRadius}px`)
+  applyDocumentStyle({ '--border-macstyle-border-radius': `${borderRadius}px` })
   //TODO 边框阴影效果, 再看看情况
 }
 
@@ -215,13 +224,17 @@ const setupAutoTheme = () => {
 }
 */
 
-EventBus.on('setting-fontFamily', updateFontFamily)
-EventBus.on('setting-fontWeight', updateFontWeight)
-//EventBus.on('setting-fontSizeLevel', setupFontSizeLevel)
-EventBus.on('setting-fontSize', setupFontSize)
-EventBus.on('setting-reset', setupFontStyle)
-EventBus.on('setting-restore', setupFontStyle)
-EventBus.on('theme-applyTheme', setupAppTheme)
+
+
+//EventBus监听注册，统一管理
+onEvents({
+  'setting-fontFamily': updateFontFamily,
+  'setting-fontWeight': updateFontWeight,
+  'setting-fontSize': setupFontSize,
+  'setting-reset':  setupFontStyle,
+  'setting-restore':  setupFontStyle,
+  'theme-applyTheme': setupAppTheme,
+})
 
 setupMacStyle()
 
@@ -230,6 +243,12 @@ onMounted(() => {
   //setupAppTheme()
 })
 watch(themeSetting, () => setupAppTheme(), { deep: true })
+
+provide('appStyle', {
+  applyDocumentElementStyle,
+  removeDocumentElementStyle,
+  applyDocumentStyle,
+})
 </script>
 
 <template>

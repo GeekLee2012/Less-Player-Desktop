@@ -1,10 +1,9 @@
 <script setup>
 import { inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { toYyyymmddHhMmSs } from "../../common/Times";
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlayStore } from '../store/playStore';
-import { coverDefault } from '../../common/Utils';
+import { coverDefault, toYyyymmddHhMmSs } from '../../common/Utils';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
 
@@ -17,7 +16,8 @@ const props = defineProps({
 
 const { visitCustomPlaylist, visitCustomPlaylistEdit,
     visitBatchCustomPlaylist } = inject('appRoute')
-const { showContextMenu, showConfirm } = inject('appCommon')
+const { showContextMenu,  } = inject('appCommon')
+const { showConfirm } = inject('apiExpose')
 
 const { hideAllCtxMenus, showToast } = useAppCommonStore()
 const { getCustomPlaylist, removeCustomPlaylist } = useUserProfileStore()

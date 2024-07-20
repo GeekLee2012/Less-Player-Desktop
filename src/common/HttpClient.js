@@ -1,6 +1,6 @@
 import axios from "axios";
 import qs from "qs";
-import { isBlank, isDevEnv, tryCallDefault } from "./Utils";
+import { isBlank, isDevEnv, toTrimString, tryCallDefault } from "./Utils";
 
 
 
@@ -48,13 +48,15 @@ const parseJson = (data) => {
 export const get = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
         if(isBlank(url)) return reject('noUrl')
-        if (data && (typeof data === 'object')) {
-            data = qsStringify(data)
-            if(!url.includes('?')) url = `${url}?`
-            const _and = url.endsWith('?') ? '' : '&'
-            url = `${url}${_and}${data}`
+        let _url = toTrimString(url)
+        const hasData = data && (typeof data === 'object')
+        if (hasData) {
+            _url = _url.includes('?') ? _url : `${_url}?`
+            _url = _url.endsWith('?') ? _url : `${_url}&`
+            const _data = qsStringify(data)
+            _url = `${_url}${_data}`
         }
-        axios.get(url, config)
+        axios.get(_url, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))
     }, error => Promise.reject(error)).catch(error => Promise.reject(error))
@@ -63,8 +65,10 @@ export const get = async (url, data, config, callback) => {
 export const post = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
         if(isBlank(url)) return reject('noUrl')
-        if (data && (typeof data === 'object')) data = qsStringify(data)
-        axios.post(url, data, config)
+        const _url = toTrimString(url)
+        const hasData = data && (typeof data === 'object')
+        const _data = hasData ? qsStringify(data) : data
+        axios.post(_url, _data, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))
     }, error => Promise.reject(error)).catch(error => Promise.reject(error))

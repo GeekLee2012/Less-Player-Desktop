@@ -1,11 +1,11 @@
 <script setup>
 import { reactive, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useSettingStore } from '../store/settingStore';
 import CategoryBarLoadingMask from './CategoryBarLoadingMask.vue';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -36,9 +36,7 @@ const isDiffCate = (item, row, col) => {
 const visitCateItem = (item, row, col, forceRefresh) => {
     const needRefresh = isDiffCate(item, row, col) || forceRefresh
     updateCurrentCategoryItem(item, row, col)
-    if (needRefresh) {
-        EventBus.emit("playlistSquare-refresh")
-    }
+    if (needRefresh) emitEvents("playlistSquare-refresh")
 }
 
 const flatData = reactive([])
@@ -76,12 +74,13 @@ const loadFirstCateData = () => {
     visitCateItem(firstItem, firstItem.row, firstItem.col, true)
 }
 
-EventBus.on('playlistCategory-toggle', toggleCategory)
-
 //TODO 实现方式很别扭
-EventBus.on('playlistCategory-update', () => {
-    flatData.length = 0
-    loadFirstCateData()
+onEvents({
+    'playlistCategory-toggle': toggleCategory,
+    'playlistCategory-update': () => {
+        flatData.length = 0
+        loadFirstCateData()
+    }
 })
 </script>
 

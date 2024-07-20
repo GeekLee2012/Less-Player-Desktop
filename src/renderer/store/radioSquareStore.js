@@ -1,8 +1,10 @@
 import { defineStore } from "pinia";
-import EventBus from "../../common/EventBus";
 import { usePlatformStore } from "./platformStore";
+import { onEvents, emitEvents } from "../../common/EventBusWrapper";
 
 
+
+const  notifyRefresh = () => emitEvents('radioSquare-refresh')
 
 export const useRadioSquareStore = defineStore('radioSquare', {
     state: () => ({
@@ -83,9 +85,6 @@ export const useRadioSquareStore = defineStore('radioSquare', {
             this.updateCurrentOrder(null, null, 0)
         },
         //多选模式
-        notifyRefresh() {
-            EventBus.emit("radioSquare-refresh")
-        },
         updateMultiModeCurrentCategoryItem(name, item, index) {
             const cate = {}
             cate[name] = { item, index }
@@ -93,7 +92,7 @@ export const useRadioSquareStore = defineStore('radioSquare', {
             const newValue = JSON.stringify(cate[name])
             if (oldValue == newValue) return
             Object.assign(this.currentCategoryItems, cate)
-            this.notifyRefresh()
+            notifyRefresh()
         },
         resetCurrentCategoryItems() {
             for (var key in this.currentCategoryItems) {
@@ -104,7 +103,7 @@ export const useRadioSquareStore = defineStore('radioSquare', {
             categories.data.forEach(item => {
                 this.currentCategoryItems[item.name] = { item: item.data[0], index: 0 }
             })
-            this.notifyRefresh()
+            notifyRefresh()
         },
         setMultiSelectMode(value) {
             this.multiSelectMode = (value === true)

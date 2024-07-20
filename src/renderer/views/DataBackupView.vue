@@ -13,10 +13,9 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
 import { version } from '../../../package.json';
-import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from '../../common/Utils';
-import { toYyyymmddHhMmSs } from '../../common/Times';
+import { toYyyymmddHhMmSs } from '../../common/Utils';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -26,7 +25,7 @@ const userProfileStore = useUserProfileStore()
 const recentsStore = useRecentsStore()
 const settingStore = useSettingStore()
 const { getCustomPlaylists } = storeToRefs(useUserProfileStore())
-const ipcRenderer = useIpcRenderer()
+
 const { showToast } = useAppCommonStore()
 
 const isCheckedAll = ref(true)
@@ -146,8 +145,6 @@ const toggleCheckAll = () => {
 }
 
 const backup = async () => {
-    if (!ipcRenderer) return
-
     const backupSource = {}
     //const settingPaths = ['theme', 'track', 'cache', 'tray', 'navigation', 'dialog', 'keys']
     const _stores = {
@@ -197,7 +194,7 @@ const backup = async () => {
     }
     const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')
     const filename = `Less.Player.Backup-${timestamp}.json`
-    const result = await ipcRenderer.invoke('save-file', {
+    const result = await ipcRendererInvoke('save-file', {
         title: '数据备份',
         name: filename,
         data: JSON.stringify(backupData)
@@ -235,12 +232,12 @@ const updateCheckedAll = (isTriggerChecked) => {
 const updateItemChecked = (index, checked, id, selfRefresh) => {
     let item = sources[index]
     item.checked = checked
-    if (selfRefresh) EventBus.emit("checkeboxTextItem-refresh", { id: item.id, checked })
+    if (selfRefresh) emitEvents("checkeboxTextItem-refresh", { id: item.id, checked })
     for (var i in item.children) {
         const child = item.children[i]
         child.checked = checked
         const childId = id + "." + child.id
-        EventBus.emit("checkeboxTextItem-refresh", { id: childId, checked })
+        emitEvents("checkeboxTextItem-refresh", { id: childId, checked })
     }
 }
 
@@ -259,7 +256,7 @@ const onChildItemCheckChanged = (parentIndex, index, checked, id) => {
     const ov = parent.checked
     parent.checked = all
     if (ov != all) {
-        EventBus.emit("checkeboxTextItem-refresh", { id: parent.id, checked: all })
+        emitEvents("checkeboxTextItem-refresh", { id: parent.id, checked: all })
     }
     updateCheckedAll(checked)
 }

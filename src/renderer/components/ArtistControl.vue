@@ -1,6 +1,6 @@
 <script setup>
 import { inject } from 'vue';
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -22,10 +22,12 @@ const visitArtistDetail = (platform, item, index, callback) => {
 
 //TODO 下面代码存在问题，惊群效应
 //前期接口未能提供完整数据，后期某个接口更新补全数据
-EventBus.on('track-artistUpdated', data => {
-    if (!data) return
-    if (data.trackId != props.trackId) return
-    updatedArtist = data
+onEvents({
+    'track-artistUpdated': data => {
+        if (!data) return
+        if (data.trackId != props.trackId) return
+        updatedArtist = data
+    },
 })
 </script>
 

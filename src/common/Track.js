@@ -1,8 +1,6 @@
 import { Lyric } from './Lyric';
-import { isBlank, toTrimString, coverDefault, 
-    toLowerCaseTrimString, useAudioExts, useExtraAudioExts,
-} from './Utils';
-import { toMmss } from './Times';
+import { isBlank, toTrimString, coverDefault, toLowerCaseTrimString, 
+    useAudioExts, useExtraAudioExts, toMmss, } from './Utils';
 
 
 export class Track {

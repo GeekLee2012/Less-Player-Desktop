@@ -6,18 +6,18 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
-import EventBus from '../../common/EventBus';
-import { toYyyymmddHhMmSs } from '../../common/Times';
 import SongListControl from '../components/SongListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { coverDefault } from '../../common/Utils';
+import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
+import { coverDefault, toYyyymmddHhMmSs } from '../../common/Utils';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
 const { visitCustomPlaylistEdit, visitBatchCustomPlaylist } = inject('appRoute')
-const { showConfirm } = inject('appCommon')
+const { showConfirm } = inject('apiExpose')
 
 const props = defineProps({
     exploreMode: String,
@@ -30,12 +30,14 @@ const detail = reactive({})
 let offset = 0, page = 1, limit = 1000, total = 0
 let markScrollTop = 0
 const loading = ref(true)
+const searchKeyword = ref(null)
+const setSearchKeyword = (value) => searchKeyword.value = value
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem } = useAppCommonStore()
 const { getCustomPlaylist, removeAllFromCustomPlaylist } = useUserProfileStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
-const { isShowDialogBeforeBatchDelete } = storeToRefs(useSettingStore())
+const { isShowDialogBeforeBatchDelete, isSearchForCustomPlaylistShow } = storeToRefs(useSettingStore())
 
 const resetView = () => {
     Object.assign(detail, { cover: '', title: '', about: '', data: [] })
@@ -51,6 +53,35 @@ const nextPage = () => {
     return true
 }
 
+const filterSongsWithKeyword = (list) => {
+    let keyword = searchKeyword.value
+    let result = list
+    if (keyword) {
+        keyword = keyword.toLowerCase()
+        result = result.filter(item => {
+            const { title, artist, album } = item
+            if (title.toLowerCase().includes(keyword)) {
+                return true
+            }
+            if (album && album.name) {
+                if (album.name.toLowerCase().includes(keyword)) {
+                    return true
+                }
+            }
+            if (artist) {
+                for (var i = 0; i < artist.length; i++) {
+                    const { name } = artist[i]
+                    if (name && name.toLowerCase().includes(keyword)) {
+                        return true
+                    }
+                }
+            }
+            return false
+        })
+    }
+    return result
+}
+
 const loadContent = () => {
     const playlist = getCustomPlaylist(props.id)
     if (!playlist) {
@@ -61,11 +92,11 @@ const loadContent = () => {
     Object.assign(detail, { ...playlist })
     updateCommonCtxItem(playlist)
     const platform = currentPlatformCode.value
-    if (!platform || platform.trim() == 'all') {
-        return
+    let { data } = playlist
+    if (platform && platform.trim() != 'all') {
+        data = playlist.data.filter(item => (item.platform == platform.trim())) || []
     }
-    const data = playlist.data.filter(item => (item.platform == platform.trim())) || []
-    Object.assign(detail, { data })
+    Object.assign(detail, { data: filterSongsWithKeyword(data) })
 }
 
 const loadMoreContent = () => {
@@ -148,7 +179,14 @@ const detectTitleHeight = () => {
     setTwoLinesTitle(clientHeight > 50)
 }
 
-EventBus.on('app-resize', detectTitleHeight)
+onEvents({
+    'app-resize': detectTitleHeight, 
+})
+
+const filterContent = (keyword) => {
+    setSearchKeyword(keyword)
+    loadContent()
+}
 
 onActivated(() => {
     restoreScrollState()
@@ -215,7 +253,10 @@ onUpdated(() => {
         </div>
         <div class="center">
             <div class="list-title">
-                <div class="size-text content-text-highlight">歌曲({{ detail.data.length }})</div>
+                <span class="size-text content-text-highlight">歌曲({{ detail.data.length }})</span>
+                <SearchBarExclusiveModeControl class="search-wrap" v-show="isSearchForCustomPlaylistShow"
+                    :onKeywordChanged="filterContent">
+                </SearchBarExclusiveModeControl>
             </div>
             <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="4" :id="id">
             </SongListControl>
@@ -334,12 +375,21 @@ onUpdated(() => {
     font-weight: bold;
     display: flex;
     position: relative;
+    align-items: center;
 }
 
 #custom-playlist-detail-view .list-title .size-text {
     margin-left: 3px;
     padding-bottom: 8px;
     border-bottom: 3px solid var(--content-highlight-color);
-    font-size: calc(var(--content-text-tab-title-size) - 2px);
+    /*font-size: calc(var(--content-text-tab-title-size) - 2px);*/
+    font-size: var(--content-text-tab-title-size);
+}
+
+#custom-playlist-detail-view .list-title .search-wrap {
+    font-size: calc(var(--content-text-tab-title-size) - 1.5px);
+    position: absolute;
+    right: -10px;
+    font-weight: bold;
 }
 </style>

@@ -1,13 +1,13 @@
 <script setup>
 import { onActivated, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import EventBus from '../../common/EventBus';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import RadioCategoryBar from '../components/RadioCategoryBar.vue';
 import { useRadioSquareStore } from '../store/radioSquareStore';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import { useSettingStore } from '../store/settingStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -34,14 +34,8 @@ const isLoadingCategories = ref(true)
 const isLoadingContent = ref(true)
 const isWhiteWrap = ref(false)
 const setWhiteWrap = (value) => isWhiteWrap.value = value || false
-
-const setLoadingCategories = (value) => {
-    isLoadingCategories.value = value
-}
-
-const setLoadingContent = (value) => {
-    isLoadingContent.value = value
-}
+const setLoadingCategories = (value) => isLoadingCategories.value = value
+const setLoadingContent = (value) => isLoadingContent.value = value
 
 const resetPagination = () => {
     radios.length = 0
@@ -56,10 +50,12 @@ const nextPage = () => {
 
 //TODO
 const loadCategories = async () => {
-    categories.length = 0
-    orders.length = 0
     setLoadingCategories(true)
     setLoadingContent(true)
+    
+    categories.length = 0
+    orders.length = 0
+    
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
     let cachedWhiteWrap = currentPlatformWhiteWrap()
@@ -85,7 +81,7 @@ const loadCategories = async () => {
     categories.push(...cachedCates.data)
     if (cachedOrders) orders.push(...cachedOrders)
     setWhiteWrap(cachedWhiteWrap)
-    EventBus.emit('radioCategory-update')
+    emitEvents('radioCategory-update')
     setLoadingCategories(false)
 }
 
@@ -154,7 +150,7 @@ const resetScrollState = () => {
 }
 
 const restoreScrollState = () => {
-    //EventBus.emit("imageTextTiles-update")
+    //emitEvents("imageTextTiles-update")
     if (markScrollTop < 1) return
     if (!squareContentRef.value) return
     squareContentRef.value.scrollTop = markScrollTop
@@ -194,13 +190,16 @@ watch(currentPlatformCode, (nv, ov) => {
     loadCategories()
 })
 
-EventBus.on("radioSquare-refresh", refreshData)
+onEvents({
+    'radioSquare-refresh': refreshData,
+})
 </script>
 
 <template>
     <div class="radio-square-view" ref="squareContentRef" @scroll="onScroll">
-        <RadioCategoryBar :data="categories" :loading="isLoadingCategories" :isWhiteWrap="isWhiteWrap"></RadioCategoryBar>
-        <PlaylistsControl :loading="isLoadingContent" :loadPage="loadPageContent" :limit="35"
+        <RadioCategoryBar :data="categories" :loading="isLoadingCategories" :isWhiteWrap="isWhiteWrap">
+        </RadioCategoryBar>
+        <PlaylistsControl :loading="isLoadingCategories || isLoadingContent" :loadPage="loadPageContent" :limit="35"
             :paginationStyleType="getPaginationStyleIndex" :nextPagePendingMark="nextPagePendingMark"
             :refreshAllPendingMark="refreshAllPendingMark">
         </PlaylistsControl>

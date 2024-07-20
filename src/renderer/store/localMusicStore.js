@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { Track } from "../../common/Track";
 import { randomTextWithinAlphabetNums } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 

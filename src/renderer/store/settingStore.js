@@ -1,13 +1,11 @@
 import { defineStore } from 'pinia';
-import EventBus from '../../common/EventBus';
-import { useIpcRenderer } from '../../common/Utils';
+import { ipcRendererSend } from '../../common/Utils';
 import { useThemeStore } from './themeStore';
 import { usePlatformStore } from './platformStore';
 import { useAppCommonStore } from './appCommonStore';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
-
-const ipcRenderer = useIpcRenderer()
 
 const TRACK_QUALITIES = [{
     id: 'standard',
@@ -189,6 +187,8 @@ export const useSettingStore = defineStore('setting', {
             onlinePlaylistShow: true,
             //本地歌单页
             localPlaylistShow: true,
+            //我的主页 - 创建的歌单
+            customPlaylistShow: true,
             //批量操作页
             batchActionShow: true,
             //自由FM
@@ -578,6 +578,9 @@ export const useSettingStore = defineStore('setting', {
         isSearchForLocalPlaylistShow() {
             return this.search.localPlaylistShow
         },
+        isSearchForCustomPlaylistShow() {
+            return this.search.customPlaylistShow
+        },
         isSearchForBatchActionShow() {
             return this.search.batchActionShow
         },
@@ -683,13 +686,13 @@ export const useSettingStore = defineStore('setting', {
             this.theme.index = index || 0
             this.theme.type = type || 0
             //const themeId = THEMES[index].id
-            //EventBus.emit("switchTheme", themeId)
+            //emitEvents('switchTheme', themeId)
         },
         setLayoutIndex(index) {
             this.layout.index = index || 0
             const currentIndex = this.layout.index
             if (currentIndex < 2) this.layout.fallbackIndex = currentIndex
-            EventBus.emit("app-layout")
+            emitEvents('app-layout')
         },
         switchToFallbackLayout() {
             this.setLayoutIndex(this.layout.fallbackIndex)
@@ -753,7 +756,7 @@ export const useSettingStore = defineStore('setting', {
                 }
                 this.common.fontSizeLevel = index
             }
-            EventBus.emit('setting-fontSize', this.common.fontSize)
+            emitEvents('setting-fontSize', this.common.fontSize)
         },
         allFontSizeLevels() {
             return FONTSIZE_LEVELS.slice(1)
@@ -765,7 +768,7 @@ export const useSettingStore = defineStore('setting', {
             this.common.fontSizeLevel = index
             const currentLevel = this.allFontSizeLevels()[index]
             if (currentLevel) this.setFontSize(currentLevel.value, true)
-            //EventBus.emit('setting-fontSizeLevel', this.common.fontSizeLevel)
+            //emitEvents('setting-fontSizeLevel', this.common.fontSizeLevel)
         },
         allImageQualities() {
             return IMAGE_QUALITIES
@@ -915,6 +918,9 @@ export const useSettingStore = defineStore('setting', {
         toggleSearchForLocalPlaylistShow() {
             this.search.localPlaylistShow = !this.search.localPlaylistShow
         },
+        toggleSearchForCustomPlaylistShow() {
+            this.search.customPlaylistShow = !this.search.customPlaylistShow
+        },
         toggleSearchForBatchActionShow() {
             this.search.batchActionShow = !this.search.batchActionShow
         },
@@ -973,24 +979,24 @@ export const useSettingStore = defineStore('setting', {
         },
         setupWindowZoom(noResize) {
             const zoom = this.common.winZoom
-            if (ipcRenderer) ipcRenderer.send("app-zoom", { zoom, noResize })
-            EventBus.emit("app-zoom", zoom)
+            ipcRendererSend('app-zoom', { zoom, noResize })
+            emitEvents('app-zoom', zoom)
         },
         setupAppSuspension() {
-            if (ipcRenderer) ipcRenderer.send("app-suspension", this.track.playingWithoutSleeping)
+            ipcRendererSend('app-suspension', this.track.playingWithoutSleeping)
         },
         setupTray() {
-            if (ipcRenderer) ipcRenderer.send("app-tray", this.tray.show)
+            ipcRendererSend('app-tray', this.tray.show)
         },
         setupGlobalShortcut() {
-            if (ipcRenderer) ipcRenderer.send("app-globalShortcut", this.keys.global)
+            ipcRendererSend("app-globalShortcut", this.keys.global)
         },
         setupFontFamily() {
-            EventBus.emit('setting-fontFamily', this.common.fontFamily)
+            emitEvents('setting-fontFamily', this.common.fontFamily)
         },
         setupFontWeight() {
             const weight = this.common.fontWeight || 400
-            EventBus.emit('setting-fontWeight', weight)
+            emitEvents('setting-fontWeight', weight)
         },
         updateBlackHole(value) {
             this.blackHole = value
@@ -1085,35 +1091,35 @@ export const useSettingStore = defineStore('setting', {
         },
         setupLyricFontSize() {
             const fontSize = this.lyric.fontSize || 24
-            EventBus.emit('lyric-fontSize', fontSize)
+            emitEvents('lyric-fontSize', fontSize)
         },
         setupLyricHighlightFontSize() {
             const fontSize = this.lyric.hlFontSize || 25
-            EventBus.emit('lyric-hlFontSize', fontSize)
+            emitEvents('lyric-hlFontSize', fontSize)
         },
         setupLyricFontWeight() {
             const fontWeight = this.lyric.fontWeight || 400
-            EventBus.emit('lyric-fontWeight', fontWeight)
+            emitEvents('lyric-fontWeight', fontWeight)
         },
         setupLyricLineHeight() {
             const lineHeight = this.lyric.lineHeight || 33
-            EventBus.emit('lyric-lineHeight', lineHeight)
+            emitEvents('lyric-lineHeight', lineHeight)
         },
         setupLyricLineSpacing() {
             const lineSpacing = this.lyric.lineSpacing || 28
-            EventBus.emit('lyric-lineSpacing', lineSpacing)
+            emitEvents('lyric-lineSpacing', lineSpacing)
         },
         setupLyricOffset() {
             const offset = this.lyric.offset || 0
-            EventBus.emit('lyric-offset', offset)
+            emitEvents('lyric-offset', offset)
         },
         setupLyricMetaPos() {
             const metaPos = this.lyric.metaPos || 0
-            EventBus.emit('lyric-metaPos', metaPos)
+            emitEvents('lyric-metaPos', metaPos)
         },
         setupLyricAlignment() {
             const alignment = this.lyric.alignment || 0
-            EventBus.emit('lyric-alignment', alignment)
+            emitEvents('lyric-alignment', alignment)
         },
         toggleLyricTrans() {
             this.lyric.trans = !this.lyric.trans
@@ -1161,13 +1167,13 @@ export const useSettingStore = defineStore('setting', {
                 const { host, port, username, password } = this.network.socksProxy
                 Object.assign(proxy, { socks: { host, port, username, password } })
             }
-            if (ipcRenderer) ipcRenderer.send('app-setGlobalProxy', proxy)
+            ipcRendererSend('app-setGlobalProxy', proxy)
         },
         setupStateRefreshFrequency() {
-            EventBus.emit('track-stateRefreshFrequency', this.track.stateRefreshFrequency || 60)
+            emitEvents('track-stateRefreshFrequency', this.track.stateRefreshFrequency || 60)
         },
         setupSpectrumRefreshFrequency() {
-            EventBus.emit('track-spectrumRefreshFrequency', this.track.spectrumRefreshFrequency || 3)
+            emitEvents('track-spectrumRefreshFrequency', this.track.spectrumRefreshFrequency || 3)
         },
         getStateRefreshFrequency() {
             return this.track.stateRefreshFrequency
@@ -1231,7 +1237,7 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleModulesSearchOff(platform) {
             this.toggleModulesPlatformOff(this.modules.off.search, platform)
-            EventBus.emit('modules-toggleSearchPlatform')
+            emitEvents('modules-toggleSearchPlatform')
         },
         setDesktopLyricFontSize(value) {
             const fontSize = parseInt(value || 23)
@@ -1271,14 +1277,14 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleDesktopLyricAutoHeight() {
             this.desktopLyric.autoHeight = !this.desktopLyric.autoHeight
-            if (ipcRenderer) ipcRenderer.send('app-desktopLyric-autoHeight', this.desktopLyric.autoHeight)
+            ipcRendererSend('app-desktopLyric-autoHeight', this.desktopLyric.autoHeight)
         },
         toggleDesktopLyricAutoSize() {
             this.desktopLyric.autoSize = !this.desktopLyric.autoSize
             this.setupDesktopLyricAutoSize()
         },
         setupDesktopLyricAutoSize(isInit) {
-            if (ipcRenderer) ipcRenderer.send('app-desktopLyric-autoSize', this.desktopLyric.autoSize, this.desktopLyric.textDirection == 1, isInit)
+            ipcRendererSend('app-desktopLyric-autoSize', this.desktopLyric.autoSize, this.desktopLyric.textDirection == 1, isInit)
         },
         syncSettingFromDesktopLyric(data) {
             const { alignment, fontSize, layoutMode, lineSpacing, textDirection } = data
@@ -1289,14 +1295,14 @@ export const useSettingStore = defineStore('setting', {
             this.desktopLyric.textDirection = textDirection
         },
         syncSettingToDesktopLyric() {
-            EventBus.emit('setting-syncToDesktopLyric', this.desktopLyric)
+            emitEvents('setting-syncToDesktopLyric', this.desktopLyric)
         },
         setAudioOutputDeviceId(value) {
             this.track.audioOutputDeviceId = value
             this.setupAudioOutputDevice()
         },
         setupAudioOutputDevice() {
-            EventBus.emit('outputDevice-setup', this.track.audioOutputDeviceId)
+            emitEvents('outputDevice-setup', this.track.audioOutputDeviceId)
         },
         togglePlayingViewUseBgCoverEffect() {
             this.track.playingViewUseBgCoverEffect = !this.track.playingViewUseBgCoverEffect

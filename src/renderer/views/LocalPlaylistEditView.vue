@@ -9,8 +9,7 @@ export default {
 import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
-import { useIpcRenderer, coverDefault } from '../../common/Utils';
-
+import { coverDefault, isSupportedImage } from '../../common/Utils';
 
 
 const { backward } = inject('appRoute')
@@ -19,9 +18,7 @@ const props = defineProps({
     id: String
 })
 
-const ipcRenderer = useIpcRenderer()
-
-const { showToast } = useAppCommonStore()
+const { showToast, showFailToast } = useAppCommonStore()
 const titleRef = ref(null)
 const tagsRef = ref(null)
 //const aboutRef = ref(null)
@@ -73,21 +70,31 @@ const submit = () => {
     backward()
 }
 
+const setupCover = (cover) => {
+    return Object.assign(detail, { cover })
+}
+
 //TODO
 const updateCover = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-image')
-    if (result.length > 0) {
-        /*
-        const title = titleRef.value.value.trim()
-        const tags = tagsRef.value.value.trim()
-        const about = aboutRef.value.value.trim()
-        const cover = result[0]
-        Object.assign(detail, { title, tags, about, cover })
-        */
-        const cover = result[0]
-        Object.assign(detail, { cover })
+    const result = await ipcRendererInvoke('open-image')
+    if (result.length > 0) setupCover(result[0])
+}
+
+const onDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length > 1) return showFailToast('还不支持多文件拖拽')
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        setupCover(path)
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
     }
+    if (isEventStopped) event.stopPropagation()
 }
 
 onMounted(() => loadLocalPlaylist())
@@ -95,7 +102,7 @@ onMounted(() => loadLocalPlaylist())
 </script>
 
 <template>
-    <div id="local-playlist-edit-view">
+    <div id="local-playlist-edit-view" @drapover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <span class="title" v-show="!id">创建本地歌单</span>
             <span class="title" v-show="id">编辑本地歌单</span>

@@ -1,14 +1,14 @@
-import EventBus from '../common/EventBus';
 import Hls from 'hls.js';
-import { WebAudioApi } from './WebAudioApi';
+import { createWebAudioApi } from './WebAudioApi';
 import { isBlank } from './Utils';
 import { PlayState } from './Constants';
+import { emitEvents, onEvents } from './EventBusWrapper';
 
 
 
 let audioNode = null, lastPlayTime = null, singleton = null
 
-export class RadioPlayer {
+class RadioPlayer {
     constructor(channel) {
         this.channel = channel
         this.hls = new Hls()
@@ -27,22 +27,25 @@ export class RadioPlayer {
     static create() {
         if(singleton) return singleton
         singleton = new RadioPlayer()
-        return singleton.initWebAudio()
-            //.on('radio-init', node => singleton._createWebAudioApi(node))
-            .on('radio-channelChange', channel => singleton.setChannel(channel))
-            .on('radio-play', channel => singleton.playChannel(channel))
-            .on('radio-togglePlay', () => singleton.togglePlay())
-            .on('volume-set', volume => singleton.volume(volume))
-            .on('radio-stop', () => singleton.setChannel(null))
-            .on('playbackQueue-empty', () => singleton.setChannel(null))
-            .on('track-changed', () => singleton.setChannel(null))
-            .on('track-play', () => singleton.setChannel(null))
-            .on('track-restore', channel => singleton.setChannel(channel))
-            .on('track-setupSoundEffect', options => singleton.setupSoundEffect(options))
-            .on('track-updateStereoPan', value => singleton.updateStereoPan(value))
-            .on('track-updateVolumeGain', value => singleton.updateVolumeGain(value))
-            .on('track-stateRefreshFrequency', value => singleton.stateRefreshFrequency = value)
-            .on('track-spectrumRefreshFrequency', value => singleton.spectrumRefreshFrequency = value)
+            .initWebAudio()
+            .on({
+                //'radio-init': value => singleton._createWebAudioApi(value)
+                'radio-channelChange': value => singleton.setChannel(value),
+                'radio-play': value => singleton.playChannel(value),
+                'radio-togglePlay': () => singleton.togglePlay(),
+                'volume-set': value => singleton.volume(value),
+                'radio-stop': () => singleton.setChannel(null),
+                'playbackQueue-empty': () => singleton.setChannel(null),
+                'track-changed': () => singleton.setChannel(null),
+                'track-play': () => singleton.setChannel(null),
+                'track-restore': value => singleton.setChannel(value),
+                'track-setupSoundEffect': value => singleton.setupSoundEffect(value),
+                'track-updateStereoPan': value => singleton.updateStereoPan(value),
+                'track-updateVolumeGain': value => singleton.updateVolumeGain(value),
+                'track-stateRefreshFrequency': value => singleton.stateRefreshFrequency = value,
+                'track-spectrumRefreshFrequency': value => singleton.spectrumRefreshFrequency = value,
+            })
+        return singleton
     }
 
     //播放
@@ -131,13 +134,13 @@ export class RadioPlayer {
         requestAnimationFrame(this._step.bind(this))
     }
 
-    on(event, handler) {
-        EventBus.on(event, handler)
+    on(registration) {
+        onEvents(registration)
         return this
     }
 
-    notify(event, args) {
-        EventBus.emit(event, args)
+    notify(events, data) {
+        emitEvents(events, data)
         return this
     }
 
@@ -153,15 +156,15 @@ export class RadioPlayer {
             const parentNode = document.body.querySelector('#app') || document.body
             parentNode.appendChild(audioNode)
         }
-        this._createWebAudioApi(audioNode)
+        this._initWebAudioApi(audioNode)
         return this
     }
 
-    _createWebAudioApi(node) {
+    _initWebAudioApi(node) {
         if (!node) return
         audioNode = node
         if (this.webAudioApi) return
-        this.webAudioApi = WebAudioApi.create(new AudioContext(), audioNode)
+        this.webAudioApi = createWebAudioApi(new AudioContext(), audioNode)
     }
 
     _resolveSound() {
@@ -262,4 +265,8 @@ export class RadioPlayer {
         return this.animationFrameCnt % this.spectrumRefreshFrequency == 0
     }
 
+}
+
+export function createRadioPlayer() {
+    return RadioPlayer.create()
 }

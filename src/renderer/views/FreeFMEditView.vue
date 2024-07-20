@@ -10,7 +10,7 @@ import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useFreeFMStore } from '../store/freeFMStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { coverDefault, useIpcRenderer } from '../../common/Utils';
+import { coverDefault, isSupportedImage } from '../../common/Utils';
 import { FreeFM } from '../../vendor/freefm';
 
 
@@ -20,8 +20,6 @@ const { backward } = inject('appRoute')
 const props = defineProps({
     id: String
 })
-
-const ipcRenderer = useIpcRenderer()
 
 const { showToast, showFailToast } = useAppCommonStore()
 const detail = reactive({ title: null, url: null, streamType: 0, tags: null, about: null, cover: null, coverFit: 0 })
@@ -94,18 +92,35 @@ const remove = () => {
     }
 }
 
-//TODO
-const updateCover = async () => {
-    if (!ipcRenderer) return
-    const result = await ipcRenderer.invoke('open-image')
-    if (result.length > 0) {
-        const cover = result[0]
-        Object.assign(detail, { cover })
-    }
-}
-
 const setCoverFit = (index) => {
     Object.assign(detail, { coverFit: index })
+}
+
+const setupCover = (cover) => {
+    return Object.assign(detail, { cover })
+}
+
+//TODO
+const updateCover = async () => {
+    const result = await ipcRendererInvoke('open-image')
+    if (result.length > 0) setupCover(result[0])
+}
+
+const onDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length > 1) return showFailToast('还不支持多文件拖拽')
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        setupCover(path)
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
 }
 
 onMounted(() => loadRadio())
@@ -113,7 +128,7 @@ onMounted(() => loadRadio())
 </script>
 
 <template>
-    <div id="freefm-edit-view">
+    <div id="freefm-edit-view" @drapover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <span class="title" v-show="!id">创建FM电台</span>
             <span class="title" v-show="id">编辑FM电台</span>
@@ -343,7 +358,7 @@ onMounted(() => loadRadio())
 */
 
 #freefm-edit-view .cover-fit {
-    margin-top: 8px;
+    margin-top: 15px;
 }
 
 #freefm-edit-view .cover-fit .list-item {

@@ -3,7 +3,7 @@ import { reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRadioSquareStore } from '../store/radioSquareStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import EventBus from '../../common/EventBus';
+import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -54,7 +54,7 @@ const visitCateItem = (item, row, col) => {
     const needRefresh = isDiffCate(item, row, col)
     updateCurrentCategoryItem(item, row, col)
     if (needRefresh) {
-        EventBus.emit("radioSquare-refresh")
+        emitEvents("radioSquare-refresh")
         hideRadioCategoryView()
     }
 }
@@ -67,16 +67,18 @@ const visitByOrder = (item, index) => {
     const needRefresh = isDiffOrder(item, index)
     updateCurrentOrder(item.key, item.value, index)
     if (needRefresh) {
-        EventBus.emit("radioSquare-refresh")
+        emitEvents("radioSquare-refresh")
         hideRadioCategoryView()
     }
 }
 
-EventBus.on('radioCategory-update', () => {
-    updateCategories()
-    updateOrders()
+onEvents({
+    'radioCategory-update': () => {
+        updateCategories()
+        updateOrders()
+    },
+    'radioCategory-resetScroll': resetScroll
 })
-EventBus.on('radioCategory-resetScroll', resetScroll)
 </script>
 
 <template>
