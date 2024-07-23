@@ -99,7 +99,7 @@ onEvents({
                 <span @click="visitCateItem(item, item.row, item.col)" :class="{
                     active: (item.row == currentCategoryItem.row
                         && item.col == currentCategoryItem.col),
-                    whitewrap: isWhiteWrap
+                        'no-whitewrap': !isWhiteWrap
                 }" v-html="item.key" :data="item.value">
                 </span>
             </template>
@@ -128,13 +128,13 @@ onEvents({
     /*border: 1px solid transparent;*/
     color: var(--content-text-color);
 
-    white-space: nowrap;
+    white-space: pre-wrap;
     overflow: hidden;
     word-break: break-all;
 }
 
-.playlist-category-bar span.whitewrap {
-    white-space: pre-wrap;
+.playlist-category-bar span.no-whitewrap {
+    white-space: nowrap;
 }
 
 .playlist-category-bar span:hover {

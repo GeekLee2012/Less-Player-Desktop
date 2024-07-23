@@ -301,6 +301,8 @@ const nextRandomPlatformCode = (platforms) => {
 
 /* 随便听听 */
 const randomPlay = async () => {
+    //本次操作链路traceId，一次操作涉需要经过许多函数调用才能完成
+    //通过设置新的链路traceId，可实现前一操作的中断，或舍弃其结果
     const traceId = randomTextWithinAlphabet(8) + Date.now()
     setCurrentTraceId(traceId)
 

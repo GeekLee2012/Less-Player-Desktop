@@ -10,7 +10,7 @@ import { toUpperCaseTrimString, transformUrl } from '../../common/Utils';
 import { FILE_SCHEME } from '../../common/Constants';
 
 
-const { visitPlaylist, visitFreeFMEdit } = inject('appRoute')
+const { visitPlaylist, visitFreeFMEdit, visitVideoDetail } = inject('appRoute')
 const { playPlaylist } = inject('player')
 
 const props = defineProps({
@@ -43,10 +43,13 @@ const visitItem = (item) => {
     if (isFreeFM(platform)) {
         visitFreeFMEdit(id)
     } else if (Playlist.isFMRadioType(item)
-        || Playlist.isNormalRadioType(item)
-        || Playlist.isVideoType(item)) {
-        //FM广播电台、普通歌单电台、视频
+        || Playlist.isNormalRadioType(item)) {
+        //FM广播电台、普通歌单电台
         playPlaylist(item)
+    } else if (Playlist.isVideoType(item)) {
+        //视频
+        const { href } = item
+        href ? visitVideoDetail(platform, id, href, item) : playPlaylist(item)
     } else if (visitable) {
         //其他，如普通歌单、主播电台歌单等
         const exploreMode = Playlist.isAnchorRadioType(item) ? 'radios' : null

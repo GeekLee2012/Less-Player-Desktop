@@ -6,19 +6,19 @@ import { useSettingStore } from '../store/settingStore';
 import { useVideoPlayStore } from '../store/videoPlayStore';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
-import { PlayState } from '../../common/Constants';
+import { PlayAction, PlayState } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
 const { useWindowsStyleWinCtl } = inject('appCommon')
-const { dndSaveVideo } = inject('player')
+const { dndSaveVideo, playVideo } = inject('player')
 
 const { hideVideoPlayingView, normalize } = useAppCommonStore()
 const { isMaxScreen, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { isSimpleLayout, isQuitVideoAfterEndedEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
-const { setPlaying, removeVideo } = useVideoPlayStore()
-const { currentVideo } = storeToRefs(useVideoPlayStore())
+const { setPlaying, removeVideo, playNextVideo, resetQueue } = useVideoPlayStore()
+const { playingIndex, currentVideo, queueVideos, queueVideosSize } = storeToRefs(useVideoPlayStore())
 
 
 let videoNode = null
@@ -46,13 +46,15 @@ const quitVideo = (callback) => {
     setTimeout(() => {
         hideVideoPlayingView()
         stopVideo(callback)
-
+        resetQueue()
         sidebarShow.value = false
     }, 666)
 }
 
 const currentVideoTitle = computed(() => {
-    return currentVideo.value ? currentVideo.value.title : ''
+    if(!currentVideo.value) return ''
+    const { title, cTitle } = currentVideo.value
+    return cTitle ? `${cTitle} - ${title}` : title
 })
 
 const currentVideoUrl = computed(() => {
@@ -62,7 +64,7 @@ const currentVideoUrl = computed(() => {
 const sidebarShow = ref(false)
 const toggleSidebarShow = () => sidebarShow.value = !sidebarShow.value
 
-const handleVideoDoubleClick = (event) => {
+const handleSpaceKeyEvents = (event) => {
     event.preventDefault()
     if (!videoNode || !currentVideo.value) return
     emitEvents('video-togglePlay')
@@ -73,18 +75,34 @@ const requestFullscreen = (event) => {
     if (videoNode && videoNode.requestFullscreen) videoNode.requestFullscreen()
 }
 
+const playItem = (item, index) => {
+    playVideo(item)
+} 
+
+const computedCollectionTitle = computed(() => {
+    const video = currentVideo.value
+    if(!video) return ''
+    const { cTitle } = currentVideo.value
+    const size = queueVideosSize.value
+    return cTitle && size > 1 && `${cTitle} ( ${queueVideosSize.value} )` 
+})
+
 onEvents({
     'app-beforeRoute': quitVideo,
     'video-state':  ({ state, video }) => {
         if (state == PlayState.END && isQuitVideoAfterEndedEnable.value) quitVideo()
     },
+    'video-action': ({ action, event, video }) => {
+        const size = queueVideosSize.value
+        if(action == PlayAction.NEXT && size > 1) playNextVideo()
+    }
 })
 
 onActivated(initVideoPlayer)
 </script>
 
 <template>
-    <div class="video-playing-view">
+    <div class="video-playing-view" @keyup.space="handleSpaceKeyEvents">
         <div class="header" @dblclick.prevent="requestFullscreen">
             <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
                 <WinTrafficLightBtn :hideMaxBtn="isSimpleLayout" :showCollapseBtn="true" :collapseAction="quitVideo"
@@ -135,11 +153,14 @@ onActivated(initVideoPlayer)
                 <source :src="currentVideoUrl" type="video/mp4">
             </video>
             -->
-            <video class="video-node" controls controlslist="nodownload" disablepictureinpicture="true"
-                disableRemotePlayback="true">
+            <video class="video-node video-js" controls controlslist="nodownload" disablepictureinpicture="true"
+                disableRemotePlayback="true" preload="auto">
+                <!--
                 <source :src="currentVideoUrl" type="video/mp4">
+                -->
             </video>
         </div>
+        <!--
         <div class="play-next-btn btn">
             <svg width="15" height="15" viewBox="0 0 892.89 974.72" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
@@ -152,6 +173,7 @@ onActivated(initVideoPlayer)
                 </g>
             </svg>
         </div>
+        -->
         <div class="sidebar-btn" v-show="!sidebarShow" @click="toggleSidebarShow">
             <svg width="18" height="18" viewBox="0 0 455.71 818.05" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
@@ -203,8 +225,20 @@ onActivated(initVideoPlayer)
                         </g>
                     </svg>
                 </div>
-                <div class="content" :draggable="isDndSaveEnable" @dragstart="(event) => dndSaveVideo(event, currentVideo)">
-                    <span>路漫漫其修远兮，<br> 吾将上下而求索！</span>
+                <div class="header">
+                    <div class="title" v-show="computedCollectionTitle" 
+                        v-html="computedCollectionTitle">
+                    </div>
+                </div>
+                <div class="content">
+                    <div v-show="queueVideosSize <= 1" class="slogan-item" :draggable="isDndSaveEnable" 
+                        @dragstart="(event) => dndSaveVideo(event, currentVideo)">
+                        路漫漫其修远兮，<br> 吾将上下而求索！
+                    </div>
+                    <div v-show="queueVideosSize > 1" class="video-item" v-for="(item, index) in queueVideos" 
+                        :class="{ active: (playingIndex == index)}"
+                        v-html="item.title" @click="() => playItem(item, index)">
+                    </div>
                 </div>
             </div>
         </transition>
@@ -228,7 +262,7 @@ onActivated(initVideoPlayer)
     margin-left: 20px;
 }
 
-.video-playing-view .header {
+.video-playing-view > .header {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -243,7 +277,7 @@ onActivated(initVideoPlayer)
     background: var(--view-bg);
 }
 
-.video-playing-view .header .win-ctl-wrap {
+.video-playing-view > .header .win-ctl-wrap {
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -253,7 +287,7 @@ onActivated(initVideoPlayer)
     height: 100%;
 }
 
-.video-playing-view .header .title {
+.video-playing-view > .header .title {
     position: fixed;
     width: 520px;
     left: calc(50% - 260px);
@@ -274,7 +308,7 @@ onActivated(initVideoPlayer)
     color: #ccc;
 }
 
-.video-playing-view .header .action {
+.video-playing-view > .header .action {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -283,12 +317,12 @@ onActivated(initVideoPlayer)
     padding-right: 20px;
 }
 
-.video-playing-view .header .winstyle-action {
+.video-playing-view > .header .winstyle-action {
     padding-right: 202px;
     padding-bottom: 8px;
 }
 
-.video-playing-view .header .action .btn {
+.video-playing-view > .header .action .btn {
     color: #fff;
     display: flex;
     justify-content: center;
@@ -342,15 +376,13 @@ onActivated(initVideoPlayer)
     background: var(--view-bg);
 }
 
-.video-playing-view .play-next-btn {
-    position: absolute;
-    left: 126px;
-    bottom: 65px;
-    visibility: hidden;
-}
-
-.video-playing-view .play-next-btn svg {
-    fill: #fff;
+.video-playing-view .play-next-btn::before {
+    content: url('/public/play-next.svg');
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    transform: translateY(1px);
+    cursor: pointer;
 }
 
 .video-playing-view .sidebar-btn {
@@ -416,14 +448,65 @@ onActivated(initVideoPlayer)
     box-shadow: 0px 0px 3px #000;
 
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    padding: 15px 0px;
 }
 
-.video-playing-view .sidebar>.content {
+.video-playing-view .sidebar > .header {
+    display: flex;
+    color: #ccc;
+    font-size: var(--content-text-module-title3-size);
+    font-weight: bold;
+    padding: 5px 10px;
+    margin-left: 10px;
+    margin-bottom: 15px;
+}
+
+.video-playing-view .sidebar > .content {
     color: var(--sidebar-collapse-btn-svg-color);
     color: #ccc;
     font-size: var(--content-text-module-title3-size);
-    line-height: 43px;
+    /*flex: 1;*/
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow: scroll;
+    padding-bottom: 22px;
+}
+
+.video-playing-view .sidebar>.content .slogan-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 168px;
+    line-height: 36px;
+}
+
+.video-playing-view .sidebar>.content .video-item {
+    display: flex;
+    width: 101px;
+    height: 39px;
+    padding: 3px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin: 0px 0px 20px 20px;
+    font-size: var(--content-text-size);
+    border-radius: 5px;
+}
+
+.video-playing-view .sidebar>.content .video-item:hover {
+    background: #666666;
+    color: #ccc;
+}
+
+.video-playing-view .sidebar>.content .video-item.active {
+    background: var(--content-highlight-color);
+    color: #fff;
 }
 </style>

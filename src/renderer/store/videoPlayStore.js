@@ -22,7 +22,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         },
         queueVideosSize(state) {
             return state.queueVideos.length
-        }
+        },
     },
     actions: {
         findIndex(video) {
@@ -114,6 +114,11 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             this.playingIndex = index
             this.playVideoDirectly(video)
         },
+        playVideoByIndex(index) {
+            this.playingIndex = index
+            this.__validPlayingIndex()
+            emitEvents('video-playCurrent', this.currentVideo)
+        },
         playPrevVideo() {
             const maxSize = this.queueVideosSize
             if (maxSize < 1) return
@@ -127,8 +132,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
                 case PlayMode.RANDOM:
                     break
             }
-            this.__validPlayingIndex()
-            this.playVideoDirectly(this.currentVideo)
+            this.playVideoByIndex(this.playingIndex)
         },
         playNextVideo() {
             const maxSize = this.queueVideosSize
@@ -143,8 +147,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
                     this.playingIndex = Math.ceil(Math.random() * maxSize)
                     break
             }
-            this.__validPlayingIndex()
-            this.playVideoDirectly(this.currentVideo)
+            this.playVideoByIndex(this.playingIndex)
         },
         /*
         switchPlayMode() {

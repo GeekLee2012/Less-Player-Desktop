@@ -292,7 +292,7 @@ onEvents({
                     -->
                 <span>万千歌手</span>
             </div>
-            <div class="mode-item" v-show="isRadioMode" @click="switchExploreMode">
+            <div class="mode-item radios-mode" v-show="isRadioMode" @click="switchExploreMode">
                 <svg width="18" height="18" viewBox="0 0 939.22 940.41" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -317,7 +317,7 @@ onEvents({
                     -->
                 <span>相约电波</span>
             </div>
-            <div class="mode-item excluded-mode-item" v-show="isUserHomeMode" @click="">
+            <div class="mode-item userhome-mode excluded-mode-item" v-show="isUserHomeMode" @click="">
                 <!--
                     <svg width="20" height="19" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
@@ -568,6 +568,14 @@ onEvents({
 
 #explore-mode .playlists-mode svg {
     transform: translateY(0.5px);
+}
+
+#explore-mode .radios-mode svg {
+    transform: scale(0.96);
+}
+
+#explore-mode .userhome-mode svg {
+    transform: translateY(-0.01px) scale(0.96);
 }
 
 #explore-mode .exit-btn {

@@ -101,15 +101,18 @@ export const usePlayStore = defineStore('player', {
             if (index == -1) {
                 index = this.playingIndex + 1
                 this.queueTracks.splice(index, 0, track)
+                return true
             } else if (index < this.playingIndex) {
                 this.queueTracks.splice(this.playingIndex + 1, 0, track)
                 this.queueTracks.splice(index, 1)
                 --this.playingIndex
-            } else if (index > this.playingIndex
-                && (index != this.playingIndex + 1)) {
+                return true
+            } else if (index > (this.playingIndex + 1)) {
                 this.queueTracks.splice(this.playingIndex + 1, 0, track)
                 this.queueTracks.splice(index + 1, 1)
+                return true
             }
+            return false
         },
         removeTrack(track) {
             const index = this.findTrackIndex(track)

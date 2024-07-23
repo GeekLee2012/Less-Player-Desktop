@@ -545,6 +545,86 @@ export const parsePlsText = (text, mapFn) => {
     return result
 }
 
+/** 解析levc格式文件
+ * 目前格式松散，对数据的顺序性、重复性等方面并没有强制要求
+ * levc => Less Player Video Collection
+ * @param callback 每个视频项解析成功后的回调处理函数
+ */
+//TODO 冗余代码，main/common.js也存在相同代码
+//虽然可以通过main/preload.js预先暴露给renderer重用
+//但过早引入common.js时，也会过早require里面的music-metadata，然后控制台会输出一堆警告
+//避免看到一堆毫无意义的警告，暂时采取冗余代码方式解决
+export const parseVideoCollectionLines = (lines, callback) => {
+    if(!lines || !Array.isArray(lines) || lines.length < 1) return 
+    if(!callback || typeof callback != 'function') return 
+    
+    const Meta = {
+        DELIMITER: '$',
+        TITLE: 'title',
+        COVER: 'cover',
+        YEAR: 'year',
+        REGION: 'region',
+        LANG: 'lang',
+        ARTISTS: 'artists',
+        TAGS: 'tags',
+        ABOUT: 'about',
+        UPDATED: 'updated',
+        LIST: 'list',
+        keyName: (prop) => (`${Meta.DELIMITER}${prop}${Meta.DELIMITER}`),
+    }
+    const delimiter = Meta.DELIMITER
+    const collection = {}
+    let listBegan = false
+    lines.forEach(line => {
+        line = toTrimString(line)
+        if(!line || !line.includes(delimiter)) return
+        
+        if(line.startsWith(Meta.keyName(Meta.TITLE))) {
+            const cTitle = line.split(Meta.keyName(Meta.TITLE))[1].trim()
+            Object.assign(collection, { cTitle })
+        } else if(line.startsWith(Meta.keyName(Meta.COVER))
+            || line.startsWith(Meta.keyName(Meta.YEAR))
+            || line.startsWith(Meta.keyName(Meta.REGION))
+            || line.startsWith(Meta.keyName(Meta.LANG))
+            || line.startsWith(Meta.keyName(Meta.ARTISTS))
+            || line.startsWith(Meta.keyName(Meta.TAGS))
+            || line.startsWith(Meta.keyName(Meta.ABOUT))
+            || line.startsWith(Meta.keyName(Meta.UPDATED))) {
+            const parts = line.split(delimiter)
+            if(!parts || parts.length < 3) return 
+
+            const key = toTrimString(parts[1])
+            const value = toTrimString(parts[2])
+            collection[key] = value
+        } else if(line.startsWith(Meta.keyName(Meta.LIST))) {
+            listBegan = true
+        } else if(line.startsWith(delimiter) && line.endsWith(delimiter)) {
+            const cTitle = line.substring(1, line.length - 1)
+            Object.assign(collection, { cTitle })
+        } else if(line.includes(delimiter)) {
+            //数据行格式：[标题$url]
+            const parts = line.split(delimiter)
+            if(!parts || parts.length != 2) return
+
+            const subtitle = toTrimString(parts[0])
+            const url = toTrimString(parts[1])
+            if(!url.startsWith('http') 
+                && !url.startsWith('blob:http') 
+                && !url.startsWith('/')) {
+                return
+            }
+
+            callback({ 
+                id: md5(subtitle), 
+                platform: 'free-video', 
+                title: subtitle, 
+                url, 
+                ...collection
+            })
+        }
+    })
+}
+
 
 /************ 其他 ************/
 //限制数组总长度，超出部分会直接删除
@@ -586,7 +666,7 @@ export const transformUrl = (url, protocal) => {
 export const isSupportedVideo = (path) => {
     path = toLowerCaseTrimString(path)
     if(!path) return false
-    const suffixes = ['.mp4', '.mov', '.flv', '.avi']
+    const suffixes = ['.mp4', '.mov', '.flv', '.avi', '.rmvb', '.mkv']
     for(let i = 0; i < suffixes.length; i++) {
         if(path.endsWith(suffixes[i])) return true
     }

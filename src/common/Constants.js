@@ -25,6 +25,11 @@ export const PlayMode = {
     RANDOM: 2
 }
 
+export const PlayAction = {
+    PREVIOUS: 0,
+    NEXT: 1,
+}
+
 export const ActivateState = {
     INVALID: -1,
     DEACTIVATED: 0,

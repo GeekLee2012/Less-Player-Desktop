@@ -439,7 +439,7 @@ onMounted(() => {
   //窗口大小变化事件监听
   window.addEventListener('resize', event => {
     //自适应视频页面大小
-    setVideoViewSize()
+    //setVideoViewSize()
     //重新检查窗口最大化状态
     checkMaxScreenState()
     emitEvents('app-resize', event)

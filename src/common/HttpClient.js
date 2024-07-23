@@ -98,7 +98,7 @@ export const postJson = (url, data, config) => {
 export const getInternalIpv4 = async () => {
     try {
         const url = 'https://qifu-api.baidubce.com/ip/local/geo/v1/district'
-        const { ip } = await getJson(url)
+        const { ip } = await getJson(url, null, { timeout: 3000 })
         return ip
     } catch (error) {
         console.log(error)

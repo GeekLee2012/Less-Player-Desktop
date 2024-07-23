@@ -110,7 +110,7 @@ const toggleMaximize = () => {
     border-radius: 100rem;
     box-shadow: 0px 0px 1px var(--border-popovers-border-color);
     -webkit-app-region: none;
-    cursor: pointer;
+    cursor: pointer !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -148,7 +148,7 @@ const toggleMaximize = () => {
 
 .win-traffic-light-btn .max-btn svg {
     stroke-width: 3px !important;
-    transform: translateX(1px) translateY(1px) scale(0.93);
+    transform: translateX(1px) translateY(1.3px) scale(0.93);
 }
 
 .win-traffic-light-btn .max-btn.max-state svg {

@@ -10,7 +10,7 @@ import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useFreeFMStore } from '../store/freeFMStore';
 import { useUserProfileStore } from '../store/userProfileStore';
-import { coverDefault, isSupportedImage } from '../../common/Utils';
+import { coverDefault, ipcRendererInvoke, isSupportedImage } from '../../common/Utils';
 import { FreeFM } from '../../vendor/freefm';
 
 

@@ -8,7 +8,10 @@ export default {
 <script setup>
 import { ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { coverDefault, } from '../../common/Utils';
+import { useVideoPlayStore } from '../store/videoPlayStore';
+import { coverDefault, transformUrl, isSupportedVideo, toTrimString, md5, parseVideoCollectionLines, ipcRendererInvoke } from '../../common/Utils';
+import { FILE_SCHEME } from '../../common/Constants';
+import { storeToRefs } from 'pinia';
 
 
 
@@ -20,6 +23,9 @@ const props = defineProps({
 })
 
 const { showToast, showFailToast } = useAppCommonStore()
+const { queueVideosSize } = storeToRefs(useVideoPlayStore())
+const { addVideo, playNextVideo, resetQueue } = useVideoPlayStore()
+
 const coverRef = ref(null)
 const detail = reactive({ title: '', url: '', streamType: 0, tags: '', about: '', cover: '' })
 const setStreamType = (value) => Object.assign(detail, { streamType: value })
@@ -33,23 +39,64 @@ const resetCheckStatus = () => {
     urlInvalid.value = false
 }
 
-const submit = () => {
-    resetCheckStatus()
-    const { title, url, streamType, tags, about, cover } = detail
-    if (!url || url.trim().length < 10 || (!url.trim().startsWith('http') 
-        && !url.trim().startsWith('blob:http'))) {
+const setupVideoUrl = (url) => Object.assign(detail, { url })
+
+const playOne = (url) => {
+    if(!url.startsWith('http') 
+        && !url.startsWith('blob:http') 
+        && !url.startsWith('/')) {
         urlInvalid.value = true
         return
     }
+    //缺少协议时，默认指定为文件协议
+    setupVideoUrl(transformUrl(url, FILE_SCHEME))
+
     let success = true, text = '即将为您播放视频'
     if (!success) return showFailToast('视频播放失败')
-
+    
     backward()
     showToast(text, () => playVideo(detail))
 }
 
-const remove = () => {
+const playCollection = (lines) => {
+    if(!lines || !Array.isArray(lines) || lines.length < 1) return
 
+    resetQueue()
+    parseVideoCollectionLines(lines, addVideo)
+    if(queueVideosSize.value < 1) return showFailToast('视频流URL无法解析')
+    
+    backward()
+    showToast('即将为您播放视频合集', playNextVideo)
+}
+
+const submit = () => {
+    resetCheckStatus()
+    const { title, url, streamType, tags, about, cover } = detail
+    //检查合法性
+    if (!url || toTrimString(url).length < 10) {
+        urlInvalid.value = true
+        return
+    }
+    const lines = toTrimString(url).split('\n')
+    if(!lines || lines.length < 1) return 
+    lines.length > 1 ? playCollection(lines) : playOne(url)
+}
+
+const onDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    let isEventStopped = true
+    if (files.length == 1) {
+        const { path } = files[0]
+        if (isSupportedVideo(path)) {
+            setupVideoUrl(path)
+        } 
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
 }
 
 //TODO
@@ -63,7 +110,7 @@ const updateCover = async () => {
 </script>
 
 <template>
-    <div id="free-video-edit-view">
+    <div id="free-video-edit-view" @dragover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <span class="title" v-show="!id">创建Video播放源</span>
             <span class="title" v-show="id">编辑Video播放源</span>
@@ -87,13 +134,18 @@ const updateCover = async () => {
                 </div>
                 -->
                 <div class="form-row">
-                    <div>
+                    <div v-show="false">
                         <span>URL</span>
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
-                        <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }" maxlength="1024"
-                            placeholder="视频流URL，仅支持http / https协议，最多支持输入1024个字符" />
+                        <!--
+                        <input type="text" v-model="detail.url" :class="{ invalid: urlInvalid }" maxlength="2048"
+                            placeholder="视频流URL，仅支持file / http / https协议，最多支持输入2048个字符" />
+                        -->
+                        <textarea class="url-text" v-model="detail.url" :class="{ invalid: urlInvalid }" 
+                            placeholder="视频流URL，支持file / http / https协议">
+                        </textarea>
                     </div>
                 </div>
                 <!--
@@ -133,8 +185,6 @@ const updateCover = async () => {
                 -->
                 <div class="action">
                     <SvgTextButton :leftAction="submit" text="开始播放" :disabled="isActionDisabled"></SvgTextButton>
-                    <SvgTextButton :leftAction="remove" text="删除" v-show="id" class="spacing" :disabled="isActionDisabled">
-                    </SvgTextButton>
                     <SvgTextButton :leftAction="backward" text="取消" class="spacing" :disabled="isActionDisabled">
                     </SvgTextButton>
                 </div>
@@ -237,7 +287,7 @@ const updateCover = async () => {
 }
 
 #free-video-edit-view .center .form-row textarea {
-    height: 188px;
+    height: 314px;
     padding: 8px;
 }
 

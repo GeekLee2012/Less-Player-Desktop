@@ -462,7 +462,7 @@ const applySetupProxy = () => {
 
 const setupProxy = (text) => {
     setupAppGlobalProxy()
-    if (text) showToast(text)
+    text && showToast(text)
 }
 
 const closeProxy = () => {
@@ -499,15 +499,14 @@ const updateSessionCacheSize = async () => {
 
 const clearSessionCache = async () => {
     const result = await ipcRendererInvoke('app-clearCaches')
-    if (result) {
-        updateSessionCacheSize()
-        showToast('资源缓存已清理')
-    }
+    if (!result) return 
+    updateSessionCacheSize()
+    showToast('资源缓存已清理')
 }
 
 const selectDir = async () => {
     const result = await ipcRendererInvoke('choose-dirs')
-    if (result) setDndSavePath(result[0])
+    result && setDndSavePath(result[0])
 }
 
 const changeAudioOutputDevices = (event) => {
@@ -1293,7 +1292,7 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                     <div :class="{ last: isLastRelease }">
                         <div>
                             <span v-html="formatVersion(version)"></span>
-                            <svg class="refresh-flag" v-show="checkingUpdates" width="14" height="14" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
+                            <svg :class="{ 'refresh-flag': checkingUpdates }" v-show="checkingUpdates" width="14" height="14" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <g id="Layer_2-2" data-name="Layer 2">

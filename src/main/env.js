@@ -38,6 +38,9 @@ const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
 const EXTRA_AUDIO_EXTS = ['caf', 'oga', 'opus', 'weba', 'webm']
 //支持的图片文件扩展名（本地文件）
 const IMAGE_EXTS = ['jpg', 'jpeg', 'png']
+//支持的视频文件扩展名（本地文件）
+const VIDEO_EXTS = ['mp4', 'mov', 'mkv', 'avi', 'rmvb', 'flv']
+const EXTRA_VIDEO_EXTS = ['levc']
 //支持导入的歌单格式
 const AUDIO_PLAYLIST_EXTS = ['m3u', 'm3u8', 'pls']
 //支持备份的文件格式
@@ -88,6 +91,8 @@ module.exports = {
     USER_AGENTS,
     AUDIO_EXTS,
     EXTRA_AUDIO_EXTS,
+    VIDEO_EXTS,
+    EXTRA_VIDEO_EXTS,
     IMAGE_EXTS,
     AUDIO_PLAYLIST_EXTS,
     BACKUP_FILE_EXTS,

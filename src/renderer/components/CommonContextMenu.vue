@@ -70,8 +70,8 @@ const addItemToQueue = () => {
 }
 
 const playItemLater = () => {
-    playTrackLater(commonCtxMenuCacheItem.value)
-    toastAndHideMenu("下一曲将为您播放")
+    playTrackLater(commonCtxMenuCacheItem.value) 
+        && toastAndHideMenu("下一曲将为您播放")
 }
 
 const addFavoriteItem = () => {

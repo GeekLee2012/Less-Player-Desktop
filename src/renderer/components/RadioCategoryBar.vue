@@ -105,7 +105,7 @@ onEvents({
                 <span @click="visitCateItem(item, item.row, item.col)" 
                     :class="{ 
                         active: isItemActive(item),
-                        whitewrap: isWhiteWrap 
+                        'no-whitewrap': !isWhiteWrap
                     }"
                     v-html="item.key">
                 </span>
@@ -137,7 +137,7 @@ onEvents({
     /*border: 1px solid transparent;*/
     color: var(--content-text-color);
 
-    white-space: nowrap;
+    white-space: pre-wrap;
     overflow: hidden;
     word-break: break-all;
 }
@@ -147,8 +147,8 @@ onEvents({
     color: var(--content-text-color);
 }
 
-.radio-category-bar span.whitewrap {
-    white-space: pre-wrap;
+.radio-category-bar span.no-whitewrap {
+    white-space: nowrap;
 }
 
 .radio-category-bar svg {

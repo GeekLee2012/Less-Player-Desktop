@@ -476,6 +476,7 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding #custom-playlist-edit-view,
 #default-main-center .autopadding #local-playlist-edit-view,
 #default-main-center .autopadding #freefm-edit-view,
+#default-main-center .autopadding #free-video-edit-view,
 #default-main-center .autopadding #data-backup-view,
 #default-main-center .autopadding #data-restore-view {
     padding-top: 5px;

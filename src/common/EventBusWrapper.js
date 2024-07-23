@@ -16,7 +16,7 @@ class EventBusWrapper {
 
 
     //注册监听 - 多个事件，以对象方式批量注册
-    //链式编程，可使用多个on()进行代码分类/分组管理
+    //链式编程，可使用多个onEvents()进行代码分类/分组管理
     static onEvents(registration) {
         if(!registration || typeof registration != 'object') {
             throw new Error('parameter type error: not a object')
@@ -31,6 +31,7 @@ class EventBusWrapper {
     /**
      * 发送消息
      * @param events 支持类型：string、string数组、object；
+     * @param data 可选参数
      * @desc events为string数组时，将data发送给events数组里的多个元素；
      * events为object时，直接忽略data，对象属性为事件名称、属性值为消息内容，然后按属性顺序批量发送；
      */

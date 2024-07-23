@@ -13,7 +13,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
 import { version } from '../../../package.json';
-import { toYyyymmddHhMmSs } from '../../common/Utils';
+import { ipcRendererInvoke, toYyyymmddHhMmSs } from '../../common/Utils';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
@@ -315,7 +315,8 @@ watch(sources, () => {
                 </div>
                 <SvgTextButton :disabled="!isReady" text="开始备份" :leftAction="backup">
                 </SvgTextButton>
-                <SvgTextButton text="完成" :leftAction="backward" class="to-right"></SvgTextButton>
+                <SvgTextButton text="完成" :leftAction="backward" class="to-right">
+                </SvgTextButton>
             </div>
         </div>
         <div class="center">

@@ -1,6 +1,5 @@
 <script setup>
 import { provide } from 'vue';
-import { useRouter, } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useSettingStore } from './store/settingStore';
@@ -11,11 +10,11 @@ import { usePlatformStore } from './store/platformStore';
 import { Playlist } from '../common/Playlist';
 import { isDevEnv, toTrimString, isBlank } from '../common/Utils';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
+import { currentRoute, currentRoutePath, onBeforeResolve, 
+    backward, forward, addRoute, pushRoute } from './route/router';
 
 
 
-const { updateArtistDetailKeys } = useArtistDetailStore()
-const { updateAlbumDetailKeys } = useAlbumDetailStore()
 const { isArtistDetailVisitable, isAlbumDetailVisitable,
     updateCurrentPlatformByCode, isLocalMusic,
     isFMRadioPlatform, isFreeFM, } = usePlatformStore()
@@ -33,22 +32,6 @@ const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
-/* 全局Router设置  */
-const router = useRouter()
-const setupRouter = () => {
-    router.beforeResolve((to, from) => {
-        if (isDevEnv()) console.log("[ ROUTE ] ==>>> " + to.path)
-
-        if (to.matched.length < 1) return visitNotFound(to, from)
-
-        autoSwitchExploreMode(to, from)
-        highlightPlatform(to)
-        highlightNavigationCustomPlaylist(to, from)
-        hideRelativeComponents(to)
-        autoSwitchSearchPlaceHolder(to)
-    })
-
-}
 
 //TODO 数据量大时，可能有卡顿风险
 const highlightNavigationCustomPlaylist = (to, from) => {
@@ -147,7 +130,6 @@ const createCommonRoute = (route, onRouteReady) => {
     }
 }
 
-const currentRoutePath = () => (router.currentRoute.value.path)
 const transformExploreMode = (exploreMode) => (exploreMode || exploreModeCode.value)
 const transformRoute = (route) => ((typeof route == 'object') ? route : { path: toTrimString(route) })
 
@@ -171,7 +153,7 @@ const visitRoute = (route) => {
 
         //onRouteReady设置后，仅在route有效时执行
         if (onRouteReady && (typeof onRouteReady == 'function')) onRouteReady(toPath)
-        router.push(route)
+        pushRoute(route)
 
         resolve(route)
     })
@@ -194,7 +176,7 @@ const visitNotFound = (to, from) => {
 }
 
 const refresh = () => {
-    const route = router.currentRoute.value
+    const route = currentRoute()
     Object.assign(route, { override: true })
     visitCommonRoute(route)
 }
@@ -218,7 +200,7 @@ const highlightPlatform = (to) => {
         // /userhome/custom/{id}
         if (parts.length === 4 && parts[2] === 'custom') platform = 'all'
     }
-    if (platform) updateCurrentPlatformByCode(platform)
+    updateCurrentPlatformByCode(platform)
 }
 
 const visitUserHome = (onRouteReady, rejectOnSame) => (visitCommonRoute({ path: '/userhome/all', rejectOnSame, onRouteReady } ))
@@ -291,15 +273,28 @@ const visitAlbumDetail = (platform, id, callback, data) => {
     if (callback && (typeof callback == 'function')) callback(visitable)
 }
 
-setupRouter()
+
+/* 全局Router设置  */
+onBeforeResolve((to, from) => {
+    if (isDevEnv()) console.log("[ ROUTE ] ==>>> " + to.path)
+
+    if (to.matched.length < 1) return visitNotFound(to, from)
+
+    autoSwitchExploreMode(to, from)
+    highlightPlatform(to)
+    highlightNavigationCustomPlaylist(to, from)
+    hideRelativeComponents(to)
+    autoSwitchSearchPlaceHolder(to)
+})
 
 //TODO 世界上没有什么是绝对完美的，没有代码提示是硬伤 ~
 provide('appRoute', {
+    currentRoute,
     currentRoutePath,
+    backward,
+    forward,
     visitRoute,
     visitCommonRoute,
-    backward: () => router.back(),
-    forward: () => router.forward(),
     refresh,
     visitHome: () => (visitCommonRoute('/')),
     visitThemes: () => (visitCommonRoute('/themes')),
@@ -428,7 +423,11 @@ provide('appRoute', {
         return visitCommonRoute(`/plugins/plugin/${id}`)
     },
     addCustomRoute: (route) => {
-        return router.addRoute('appmain', route)
+        return addRoute('appmain', route)
+    },
+    visitVideoDetail: (platform, id, href, video) => {
+        href = href ? href.replace(/\//g, '@') : ''
+        return visitCommonRoute(`/videos/video/${platform}/${id}/${href}`)
     }
 })
 </script>

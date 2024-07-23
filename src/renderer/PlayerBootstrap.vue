@@ -14,6 +14,7 @@ import {
     tryCall, toTrimString, useTrayAction,
     ipcRendererSend, ipcRendererInvoke, 
     ipcRendererBind, ipcRendererBinds, toMmss,
+    md5,
 } from '../common/Utils';
 import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
@@ -70,6 +71,7 @@ const { addRecentSong, addRecentRadio,
 const { playVideoNow } = useVideoPlayStore()
 const { currentVideo } = storeToRefs(useVideoPlayStore())
 const { setupSoundEffect } = useSoundEffectStore()
+const { addVideo, playNextVideo, resetQueue: resetVideoQueue } = useVideoPlayStore()
 
 
 
@@ -457,7 +459,9 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         playNextPlaylistRadioTrack(platform, id, null, traceId, playlist)
         return
     } else if (Playlist.isVideoType(playlist)) { //视频
-        playMv({ ...playlist }, '当前视频无法播放', text || '即将为您播放视频')
+        const { href } = playlist
+        href ? playVideoCollection(playlist) 
+            : playMv({ ...playlist }, '当前视频无法播放', text || '即将为您播放视频')
         return
     } else if (Playlist.isNormalType(playlist)
         || Playlist.isAnchorRadioType(playlist)) {
@@ -477,6 +481,45 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     //可播放状态, 记录到最近播放，并开始播放
     traceRecentPlaylist(playlist)
     addAndPlayTracks(playlist.data, true, text || '即将为您播放歌单', traceId)
+}
+
+const playVideoCollection = async (playlist) => {
+    playlist = await loadVideoCollection(playlist)
+    //检查数据，再次确认
+    if (!playlist || !playlist.data || playlist.data.length < 1) {
+        const failMsg = Playlist.isCustomType(playlist) ? '视频无法播放'
+            : '网络异常！请稍候重试'
+        if (traceId && !isCurrentTraceId(traceId)) return
+        showFailToast(failMsg)
+        return
+    }
+    const { id, platform, cover, title, data } = playlist
+    showToast('即将为您播放全部视频')
+    resetVideoQueue()
+    data.forEach(item => addVideo({
+        ...item,
+        id: md5(item.title),
+        platform, 
+        cTitle: title, 
+        cover,
+    }))
+    playNextVideo()
+}
+
+//获取视频详情
+const loadVideoCollection = async (playlist, text, traceId) => {
+    const { id, platform } = playlist
+    let maxRetry = 3, retry = 0
+    while (!playlist || !playlist.data || playlist.data.length < 1) {
+        if (traceId && !isCurrentTraceId(traceId)) return
+
+        if (++retry > maxRetry) break
+        //重试一次加载数据
+        const vendor = getVendor(platform)
+        if (!vendor || !vendor.videoDetail) break
+        playlist = await vendor.videoDetail(id, playlist)
+    }
+    return playlist
 }
 
 //添加FM广播电台到当前播放
@@ -1183,6 +1226,16 @@ const handleStartupPlay = () => {
         showToast('即将为您播放歌曲')
         ipcRendererSend('app-startup-playDone', tracks)
     })
+    ipcRendererBind('app-startup-playVideos', (event, videos) => {
+        if (!videos || !Array.isArray(videos) || videos.length < 1) return
+        
+        resetVideoQueue()
+        videos.forEach(addVideo)
+        playNextVideo()
+
+        showToast(videos.length > 1 ? '即将为您播放视频合集' : '即将为您播放视频')
+        ipcRendererSend('app-startup-playDone', videos)
+    })
     ipcRendererSend('app-startup-playReady')
 }
 
@@ -1490,16 +1543,17 @@ onEvents({
         if (exVisualCanvasShow.value && !isSimpleLayoutMode) return
         drawCanvasSpectrum()
     },
-    //歌单电台 - 下一曲
-    'track-nextPlaylistRadioTrack': track => {
-        playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)
-    },
     'track-seekFinish': () => {
         //清除预备状态
         mmssPreseekTime.value = null
         setProgressSeekingState(false)
     },
+    //歌单电台 - 下一曲
+    'track-nextPlaylistRadioTrack': track => {
+        playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)
+    },
     'video-stop': resumeTrackPendingPlay,
+    'video-playCurrent': playVideo,
     'plugins-accessResult-addPlatform': ({ code }) => {
         const pendingTrack = pendingBootstrapTrack.value
         if (!pendingTrack) return

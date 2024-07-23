@@ -177,7 +177,7 @@ const toggleRadioMode = () => {
 }
 
 .classic-main-top #radio-playlist-btn .radio-btn {
-    transform: translateY(0.5px);
+    transform: translateY(0.5px) scale(0.973);
 }
 
 .classic-main-top #radio-playlist-btn .playlist-btn {

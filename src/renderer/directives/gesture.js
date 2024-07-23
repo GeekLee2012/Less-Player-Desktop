@@ -71,6 +71,6 @@ export const bindDragAndDrop = (el, binding) => {
             isFunctionType(onfile) && onfile(path)
             isEventStopped = false
         }
-        if (isEventStopped) event.stopPropagation()
+        isEventStopped && event.stopPropagation()
     }
 }

@@ -12,7 +12,7 @@ import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { coverDefault, toYyyymmddHhMmSs } from "../../common/Utils";
+import { coverDefault, ipcRendererInvoke, toYyyymmddHhMmSs } from "../../common/Utils";
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 

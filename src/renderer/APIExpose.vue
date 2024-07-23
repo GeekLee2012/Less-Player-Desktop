@@ -213,7 +213,7 @@ const onAccessResult = async (permission, result, options) => {
 //TODO 暂时仅在Renderer端提供，所以API能力也有限
 //Nodejs端（ Main进程 ）的API计划实现中，但安全性、依赖等问题不好处理
 //目前存在问题：无法感知当前获取权限的是哪个插件
-window.lessAPI = {
+const lessAPI = {
     version: '1.0.0',
     constants: {
         LESS_IMAGE_PREFIX: ImageProtocal.prefix,
@@ -349,11 +349,22 @@ window.lessAPI = {
     }
 }
 
+window.lessAPI = {}
+const exposeAPI = (apis) => {
+    if(apis && typeof apis == 'object') {
+        Object.assign(window.lessAPI, { ...apis })
+    }
+    //放在最后执行，保证不被覆盖
+    Object.assign(window.lessAPI, { ...lessAPI })
+}
+
 //放在后面执行
+exposeAPI()
 loadPluginsOnStartup()
 
 //API相关
 provide('apiExpose', {
+    exposeAPI,
     activatePluginNow,
     deactivatePluginNow,
     removePluginNow,

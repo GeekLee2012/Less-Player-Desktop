@@ -573,7 +573,6 @@ const removeChecked = async () => {
 /*
 const exportRadios = async (radios) => {
     if (!radios || radios.length < 1) return
-    if (!ipcRenderer) return
     const now = Date.now()
     const radioData = []
     radios.forEach(item => {
@@ -663,16 +662,20 @@ const registryLocalKeys = (unbind) => {
     }
 }
 
+onEvents({
+    'commonCtxMenuItem-finish': refresh, 
+})
+
 onMounted(() => {
     updateCurrentPlatform(0)
     visitTab(getFirstVisibleTabIndex())
     updateTitle()
     resetBack2TopBtn()
-    registryLocalKeys()
+    //registryLocalKeys()
 })
 
 onUnmounted(() => {
-    registryLocalKeys(true)
+    //registryLocalKeys(true)
 })
 
 const refreshContent = () => {
@@ -687,10 +690,6 @@ const updateKeywordAndRefreshContent = (keyword) => {
 
 watch([currentPlatformCode], () => {
     refreshContent()
-})
-
-onEvents({
-    'commonCtxMenuItem-finish': refresh, 
 })
 </script>
 

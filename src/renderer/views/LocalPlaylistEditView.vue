@@ -9,7 +9,7 @@ export default {
 import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
-import { coverDefault, isSupportedImage } from '../../common/Utils';
+import { coverDefault, ipcRendererInvoke, isSupportedImage } from '../../common/Utils';
 
 
 const { backward } = inject('appRoute')

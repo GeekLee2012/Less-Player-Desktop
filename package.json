@@ -155,6 +155,27 @@
       },
       {
         "ext": "webm"
+      },
+      {
+        "ext": "mp4"
+      },
+      {
+        "ext": "mov"
+      },
+      {
+        "ext": "mkv"
+      },
+      {
+        "ext": "avi"
+      },
+      {
+        "ext": "rmvb"
+      },
+      {
+        "ext": "flv"
+      },
+      {
+        "ext": "levc"
       }
     ]
   }

@@ -29,8 +29,7 @@ const { addFreeRadio, resetAll,
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,
     setSearchBarExclusiveAction, toggleTagsCategoryView } = useAppCommonStore()
-const { isSearchForFreeFMShow, 
-    isShowDialogBeforeClearFreeFM,
+const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM, 
     isFreeFMHomepageTipsShow, } = storeToRefs(useSettingStore())
 
 
@@ -59,51 +58,69 @@ const onScroll = () => {
 const onDrop = async (event) => {
     if (importTaskCount.value > 0) return
     event.preventDefault()
-    //暂时不想支持拖拽
+    const { files } = event.dataTransfer
+
+    let isEventStopped = true
+    if (files.length == 1) {
+        const { path } = files[0]
+        if (path.endsWith('.json') || path.endsWith('.pls') 
+            || path.endsWith('.m3u') || path.endsWith('.m3u8')) {
+            const result = await ipcRendererInvoke('read-text', path)
+            doImportRadios(result)
+        }
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
 }
 
 const importRadios = async () => {
     const result = await ipcRendererInvoke('open-file', { title: '请选择数据文件', filterExts: ['json', 'm3u', 'm3u8', 'pls'] })
-    if (result) {
-        increaseImportTaskCount()
-        const { data: rData, filePath } = result
-        const isJson = filePath.endsWith('.json')
-        const isPls = filePath.endsWith('.pls')
-        const { data: radios } = isJson ?
-            JSON.parse(rData)
-            : isPls ? parsePlsText(rData, item => {
-                item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
-                return item
-            }) : parseM3uText(rData, item => {
-                item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
-                return item
-            })
-        let msg = '导入FM电台失败', success = false
-        if (radios && radios.length > 0) {
-            radios.forEach(item => {
-                const { title, url, streamType, cover, coverFit, tags, about } = item
-                addFreeRadio(title, url, streamType, tags, about, cover, coverFit)
-            })
-            msg = `导入FM电台已完成！<br>共${radios.length}个电台`
-            success = true
-        }
-        decreaseImportTaskCount()
-        if (success) showToast(msg)
-        if (!success) showFailToast(msg)
+    doImportRadios(result)
+}
+
+const doImportRadios = (result) => {
+    if(!result) return
+    const { data: rData, filePath } = result
+    if(!rData || !filePath) return 
+
+    increaseImportTaskCount()
+    const isJson = filePath.endsWith('.json')
+    const isPls = filePath.endsWith('.pls')
+    const { data: radios } = isJson ?
+        JSON.parse(rData)
+        : isPls ? parsePlsText(rData, item => {
+            item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
+            return item
+        }) : parseM3uText(rData, item => {
+            item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
+            return item
+        })
+    let msg = '导入电台失败', success = false
+    if (radios && radios.length > 0) {
+        radios.forEach(item => {
+            const { title, url, streamType, cover, coverFit, tags, about } = item
+            addFreeRadio(title, url, streamType, tags, about, cover, coverFit)
+        })
+        msg = `导入电台已完成！<br>共${radios.length}个电台`
+        success = true
     }
+    decreaseImportTaskCount()
+    success ? showToast(msg) : showFailToast(msg)
 }
 
 const removeAll = async () => {
     if (freeRadios.value.length < 1) return
 
     if (isShowDialogBeforeClearFreeFM.value) {
-        const ok = await showConfirm({ msg: '确定要清空自由FM电台吗？' })
+        const ok = await showConfirm({ msg: '确定要清空全部电台吗？' })
         if (!ok) return
     }
 
     resetAll()
     filteredData.value = null
-    showToast('自由FM已全部清空')
+    showToast('电台已全部清空')
 }
 
 const toggleUseSearchBar = () => {
@@ -227,9 +244,9 @@ const interruptSearchBarExclusiveModeCtl = () => {
                 <p>去思考、去追寻，自己的人生</p>
             </div>
             <div class="action" :class="{ 'none-about': !isFreeFMHomepageTipsShow }">
-                <SvgTextButton text="新建FM电台" :leftAction="visitFreeFMCreate">
+                <SvgTextButton text="新建电台" :leftAction="visitFreeFMCreate">
                 </SvgTextButton>
-                <SvgTextButton text="导入FM电台" :leftAction="importRadios" :disabled="importTaskCount > 0" class="spacing">
+                <SvgTextButton text="导入电台" :leftAction="importRadios" :disabled="importTaskCount > 0" class="spacing">
                     <template #left-img>
                         <svg width="17" height="15" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">

@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory, useRouter } from 'vue-router';
 import AppMain from '../AppMain.vue';
 import HomePageView from '../views/HomePageView.vue';
 import PlaylistSquareView from '../views/PlaylistSquareView.vue';
@@ -28,6 +28,7 @@ import TrackDetailView from '../views/TrackDetailView.vue';
 import PluginsView from '../views/PluginsView.vue';
 import PluginDetailView from '../views/PluginDetailView.vue';
 import AppDesktopLyric from '../AppDesktopLyric.vue';
+import VideoDetailView from '../views/VideoDetailView.vue';
 
 
 
@@ -175,6 +176,11 @@ const routes = [
                 props: true,
                 component: PluginDetailView
             },
+            {  //视频 - 视频详情
+                path: '/videos/video/:platform/:id/:href',
+                props: true,
+                component: VideoDetailView
+            },
         ]
     },
     {
@@ -188,3 +194,23 @@ export const router = createRouter({
     history: createWebHashHistory(),
     routes
 })
+
+export const onBeforeResolve = (callback) => {
+    if(!callback || typeof callback != 'function') return 
+    router.beforeResolve(callback)
+}
+
+export const currentRoute = () => (router.currentRoute.value)
+
+export const currentRoutePath = () => {
+    const { path } = currentRoute()
+    return path
+}
+
+export const backward = () => router.back()
+
+export const forward = () => router.forward()
+
+export const addRoute = (route) => router.addRoute(route)
+
+export const pushRoute = (route) => router.push(route)

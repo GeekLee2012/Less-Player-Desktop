@@ -4,7 +4,7 @@ const { homedir } = require('os');
 const path = require('path');
 const CryptoJS = require('crypto-js');
 const MusicMetadata = require('music-metadata');
-const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv } = require('./env');
+const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv, VIDEO_EXTS, EXTRA_VIDEO_EXTS } = require('./env');
 
 
 
@@ -90,12 +90,21 @@ function getFileExtName(fullname) {
     return fullname.substring(from + 1)
 }
 
+function isSuppotedAudioType(file) {
+    return isExtentionValid(file, AUDIO_EXTS) 
+        || isExtentionValid(file, EXTRA_AUDIO_EXTS)
+}
+
+function isSuppotedVideoType(file) {
+    return isExtentionValid(file, VIDEO_EXTS)
+        || isExtentionValid(file, EXTRA_VIDEO_EXTS)
+}
+
 async function parseTracks(audioFiles) {
     const tracks = []
     for (const file of audioFiles) {
         try {
-            if (!isExtentionValid(file, AUDIO_EXTS) 
-                && !isExtentionValid(file, EXTRA_AUDIO_EXTS)) continue
+            if (!isSuppotedAudioType(file)) continue
             const track = await createTrackFromMetadata(file)
             if (track) {
                 const index = tracks.findIndex(item => track.id == item.id)
@@ -106,6 +115,130 @@ async function parseTracks(audioFiles) {
         }
     }
     return tracks
+}
+
+async function createVideoFrom(file) {
+    file = transformPath(file)
+    const statResult = statSync(file, { throwIfNoEntry: false })
+    if (!statResult) return null
+
+    const filename = getSimpleFileName(file)
+    //TODO
+    const hash = MD5(file)
+    return {
+        id: hash,
+        platform: 'local',
+        title: filename,
+        cover: null,
+        url: (FILE_PREFIX + file),
+    }
+}
+
+/** 解析levc格式文件
+ * 目前格式松散，对数据的顺序性、重复性等方面并没有强制要求
+ * levc => Less Player Video Collection
+ * @param callback 每个视频项解析成功后的回调处理函数
+ */
+function parseVideoCollectionLines(lines, callback) {
+    if(!lines || !Array.isArray(lines) || lines.length < 1) return 
+    if(!callback || typeof callback != 'function') return 
+    
+    const Meta = {
+        DELIMITER: '$',
+        TITLE: 'title',
+        COVER: 'cover',
+        YEAR: 'year',
+        REGION: 'region',
+        LANG: 'lang',
+        ARTISTS: 'artists',
+        TAGS: 'tags',
+        ABOUT: 'about',
+        UPDATED: 'updated',
+        LIST: 'list',
+        keyName: (prop) => (`${Meta.DELIMITER}${prop}${Meta.DELIMITER}`),
+    }
+    const delimiter = Meta.DELIMITER
+    const collection = {}
+    let listBegan = false
+    lines.forEach(line => {
+        line = line.trim()
+        if(!line || !line.includes(delimiter)) return
+        
+        if(line.startsWith(Meta.keyName(Meta.TITLE))) {
+            const cTitle = line.split(Meta.keyName(Meta.TITLE))[1].trim()
+            Object.assign(collection, { cTitle })
+        } else if(line.startsWith(Meta.keyName(Meta.COVER))
+            || line.startsWith(Meta.keyName(Meta.YEAR))
+            || line.startsWith(Meta.keyName(Meta.REGION))
+            || line.startsWith(Meta.keyName(Meta.LANG))
+            || line.startsWith(Meta.keyName(Meta.ARTISTS))
+            || line.startsWith(Meta.keyName(Meta.TAGS))
+            || line.startsWith(Meta.keyName(Meta.ABOUT))
+            || line.startsWith(Meta.keyName(Meta.UPDATED))) {
+            const parts = line.split(delimiter)
+            if(!parts || parts.length < 3) return 
+
+            const key = parts[1].trim()
+            const value = parts[2].trim()
+            collection[key] = value
+        } else if(!listBegan && line.startsWith(Meta.keyName(Meta.LIST))) {
+            listBegan = true
+        } else if(line.startsWith(delimiter) && line.endsWith(delimiter)) {
+            const cTitle = line.substring(1, line.length - 1)
+            Object.assign(collection, { cTitle })
+        } else if(line.includes(delimiter)) {
+            const parts = line.split(delimiter)
+            if(!parts || parts.length != 2) return
+
+            const subtitle = parts[0].trim()
+            const url = parts[1].trim()
+            if(!url.startsWith('http') 
+                && !url.startsWith('blob:http') 
+                && !url.startsWith('/')) {
+                return
+            }
+
+            callback({ 
+                id: MD5(subtitle), 
+                platform: 'free-video', 
+                title: subtitle, 
+                url, 
+                ...collection
+            })
+        }
+    })
+}
+
+function parseVideoCollectionFile(file, callback) {
+    const content = readText(file)
+    if (!content) return 
+    const lines = content.trim().split('\n')
+    parseVideoCollectionLines(lines, callback)
+}
+
+
+
+async function parseVideos(videoFiles) {
+    const videos = []
+    for (const file of videoFiles) {
+        try {
+            if (file.endsWith('.levc')) {
+                parseVideoCollectionFile(file, video => videos.push(video))
+                return videos
+            }
+            
+            if (!isSuppotedVideoType(file)) continue
+            
+            const video = await createVideoFrom(file)
+            if (video) {
+                const index = videos.findIndex(item => video.url == item.url)
+                if (index == -1) videos.push(video)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    return videos
 }
 
 function MD5(text) {
@@ -275,6 +408,7 @@ function readBufferSync(file, encoding) {
 }
 
 function readText(file, encoding) {
+    if(!file) return null
     const data = readBufferSync(file, encoding || 'utf8')
     return data ? data.toString() : null
 }
@@ -547,4 +681,8 @@ module.exports = {
     DEFAULT_COVER_BASE64,
     getSimpleFileName,
     getFileExtName,
+    parseVideos,
+    parseVideoCollectionLines,
+    isSuppotedAudioType,
+    isSuppotedVideoType,
 }

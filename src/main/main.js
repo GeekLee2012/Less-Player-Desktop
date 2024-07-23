@@ -20,8 +20,8 @@ const { scanDirTracks, parseTracks,
   ImageProtocal, parseImageMetaFromFile,
   statPathSync, MD5, SHA1, transformPath,
   DEFAULT_COVER_BASE64, getSimpleFileName,
-  getFileExtName,
-  walkSync,
+  getFileExtName, walkSync, isSuppotedVideoType,
+  parseVideos,
 } = require('./common')
 
 const path = require('path')
@@ -53,8 +53,8 @@ let isDesktopLyricAutoSize = true, isVerticalDesktopLyric = false, desktopLyricL
 const proxyAuthRealms = []
 // 下载队列
 const downloadingQueue = []
-// 待打开播放歌曲列表
-let pendigTracks = []
+// 待播放任务列表
+let pendigPlayTasks = []
 
 
 /* 自定义函数 */
@@ -141,6 +141,7 @@ const initialize = () => {
       */
 
       item.on('done', (event, state) => {
+        if(!queuedItemMeta) return
         const { fromAction } = queuedItemMeta
         if (state === 'completed') { //下载完成
           if(fromAction == 'dnd-saveToLocal') {
@@ -270,32 +271,37 @@ const registryGlobalShortcuts = () => {
   }
 }
 
-const addToPendingTracks = (files) => {
+const addToPendingPlayTasks = (files) => {
   if (!files || !Array.isArray(files) || files.length < 1) return
-  pendigTracks.push(...files)
+  pendigPlayTasks.push(...files)
 }
 
-const removePendingTracks = (tracks) => {
-  if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
-  if (pendigTracks.length < 1) return
-  //pendigTracks.length = 0
-  tracks.forEach(track => {
-    const _path = transformPath(track.url)
-    let index = pendigTracks.indexOf(_path)
+const removePendingPlayTasks = (files) => {
+  if (!files || !Array.isArray(files) || files.length < 1) return
+  if (pendigPlayTasks.length < 1) return
+  //pendigPlayTasks.length = 0
+  files.forEach(file => {
+    const _path = transformPath(file.url)
+    let index = pendigPlayTasks.indexOf(_path)
     let count = 0
     while (index > -1) {
       if (count >= 10) break
-      pendigTracks.splice(index, 1)
-      index = pendigTracks.indexOf(_path)
+      pendigPlayTasks.splice(index, 1)
+      index = pendigPlayTasks.indexOf(_path)
       ++count
     }
   })
 }
 
-const parseAndPlayTracks = (files) => {
+const parseAndPlayTasks = (files) => {
   if (!files || !Array.isArray(files) || files.length < 1) return
 
   try {
+    if(isSuppotedVideoType(files[0])) {
+      return parseVideos(files).then(videos => {
+        sendToMainRenderer('app-startup-playVideos', videos)
+      })
+    }
     parseTracks(files).then(tracks => {
       sendToMainRenderer('app-startup-playTracks', tracks)
     })
@@ -307,10 +313,10 @@ const parseAndPlayTracks = (files) => {
 
 
 //启动时播放
-//即关联打开，播放音频文件
-const doStartupPlay = (tracks) => {
-  addToPendingTracks(tracks)
-  parseAndPlayTracks(tracks)
+//即关联打开，播放音/视频等文件
+const doStartupPlay = (files) => {
+  addToPendingPlayTasks(files)
+  parseAndPlayTasks(files)
   showMainWindow()
 }
 
@@ -384,11 +390,11 @@ const registryGlobalListeners = () => {
     cleanupBeforeQuit()
     app.quit()
   }).on('app-startup-playReady', (event) => {
-    parseAndPlayTracks(pendigTracks)
-  }).on('app-startup-playDone', (event, tracks) => {
-    removePendingTracks(tracks)
+    parseAndPlayTasks(pendigPlayTasks)
+  }).on('app-startup-playDone', (event, files) => {
+    removePendingPlayTasks(files)
   }).on('app-dnd-parsePlay', (event, files) => {
-    parseAndPlayTracks(files)
+    parseAndPlayTasks(files)
   }).on('app-min', (event, isHideToTray) => {
     if (isHideToTray) {
       isMacOS ? app.hide() : mainWin.hide()
@@ -449,7 +455,9 @@ const registryGlobalListeners = () => {
   })*/.on('path-showInFolder', (event, path) => {
     if (path) shell.showItemInFolder(path)
   }).on('dnd-saveToLocal', async (event, { file, name, type, data, url, useDefaultIcon }) => {
-    if(!file || !data && !url) return
+    const hasData = (file && data)
+    const hasUrl = (url && url.startsWith('http'))
+    if(!hasData && !hasUrl) return 
 
     if(!useDefaultIcon) {
       //Electron拖拽支持文件，其他类型暂不支持
@@ -991,7 +999,7 @@ const createMainWindow = () => {
     transparent: true,
     frame: false,
     webPreferences: {
-      //zoomFactor: 1, //默认缩放
+      //zoomFactor: 1,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
@@ -1079,6 +1087,9 @@ const setupAppLayout = (layout, zoom, isInit) => {
     mainWin.setSize(width, height)
   }
   mainWin.webContents.setZoomFactor(zoomFactor)
+  if(mainWin.webContents.zoomFactor) {
+    mainWin.webContents.zoomFactor = zoomFactor
+  }
   mainWin.center()
 }
 
@@ -1309,7 +1320,7 @@ const setupAppWindowZoom = (zoom, noResize) => {
 }
 
 const addToDownloadingQueue = (url, meta) => {
-  if(!url) return
+  if(!url || !url.startsWith('http')) return
   meta = meta || { url }
   const index = downloadingQueue.findIndex(item => (item.url == url))
   if(index == -1) downloadingQueue.push(meta) 
@@ -1543,6 +1554,12 @@ const overrideRequestHeaders = (details) => {
   const preferReferer = details.requestHeaders['Referer']
   if (preferReferer && preferReferer.includes('localhost') && !url.includes('localhost')) {
     Reflect.deleteProperty(details.requestHeaders, 'Referer')
+  }
+
+  if(hostOfUrl.includes('bilivideo')) {
+    details.requestHeaders['Origin'] = 'https://www.bilibili.com'
+    details.requestHeaders['Referer'] = 'https://www.bilibili.com/'
+    details.requestHeaders['Range'] = 'bytes=0-230217861'
   }
   
   return details.requestHeaders
