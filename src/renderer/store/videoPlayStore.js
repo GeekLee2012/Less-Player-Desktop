@@ -15,6 +15,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         playMode: PlayMode.REPEAT_ALL,
         playingIndex: -1,
         queueVideos: [],
+        videoThemeIndex: 1,
     }),
     getters: {
         currentVideo() {
@@ -149,18 +150,16 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             }
             this.playVideoByIndex(this.playingIndex)
         },
-        /*
-        switchPlayMode() {
-            this.playMode = ++this.playMode % 3
+        switchVideoThemeIndex() {
+            this.videoThemeIndex = ++this.videoThemeIndex % 2
         },
-        */
     },
     persist: {
         enabled: true,
         strategies: [
             {
                 storage: localStorage,
-                paths: ['playingIndex', 'queueVideos']
+                paths: ['playingIndex', 'queueVideos', 'videoThemeIndex']
             }
         ]
     }

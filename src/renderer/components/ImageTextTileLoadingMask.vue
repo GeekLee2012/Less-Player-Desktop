@@ -88,4 +88,8 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 .tiles-video-loading-mask .tile .title {
     width: 100%;
 }
+
+.default-old-layout .tiles-card-loading-mask .tile {
+    margin-bottom: 25px;
+}
 </style>

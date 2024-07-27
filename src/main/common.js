@@ -7,8 +7,9 @@ const MusicMetadata = require('music-metadata');
 const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv, VIDEO_EXTS, EXTRA_VIDEO_EXTS } = require('./env');
 
 
+const FILE_SCHEME = 'file'
+const FILE_PREFIX = `${FILE_SCHEME}:///`
 
-const FILE_PREFIX = 'file:///'
 const ImageProtocal = {
     scheme: 'lessimage',
     prefix: 'lessimage://',
@@ -26,6 +27,13 @@ const transformPath = (path) => {
         console.log(error)
     }
     return path
+}
+
+const transformUrl = (url, protocal) => {
+    url = (url || '').trim()
+    if(url.length < 1 || url.includes('://')) return url
+    protocal = protocal || 'https'
+    return `${protocal}://${url}`.replace(':////', '://')
 }
 
 const isExtentionValid = (name, exts) => {
@@ -74,13 +82,15 @@ const scanDirTracks = async (dir, exts, deep) => {
     return result
 }
 
-function getSimpleFileName(fullname) {
-    if (!fullname) return ''
+function getSimpleFileName(fullname, defaultName) {
+    defaultName = defaultName || ''
+    if (!fullname) return defaultName
     fullname = transformPath(fullname)
-    const from = fullname.lastIndexOf('/')
+    const from = fullname.lastIndexOf('/') + 1
     let to = fullname.lastIndexOf('.')
-    to = to >= 0 ? to : fullname.length
-    return fullname.substring(from + 1, to)
+    if(to <= from) return defaultName
+    to = (to >= 0 ? to : fullname.length)
+    return fullname.substring(from, to)
 }
 
 function getFileExtName(fullname) {
@@ -162,7 +172,10 @@ function parseVideoCollectionLines(lines, callback) {
     let listBegan = false
     lines.forEach(line => {
         line = line.trim()
-        if(!line || !line.includes(delimiter)) return
+        if(!line || line.startsWith('#') 
+            || line.startsWith('//')
+            || line.startsWith('/*')
+            || line.startsWith('*')) return
         
         if(line.startsWith(Meta.keyName(Meta.TITLE))) {
             const cTitle = line.split(Meta.keyName(Meta.TITLE))[1].trim()
@@ -190,7 +203,8 @@ function parseVideoCollectionLines(lines, callback) {
             const parts = line.split(delimiter)
             if(!parts || parts.length != 2) return
 
-            const subtitle = parts[0].trim()
+            const subtitle = parts[0].trim() 
+                    || getSimpleFileName(parts[0], randomTextWithinAlphabetNums(8))
             const url = parts[1].trim()
             if(!url.startsWith('http') 
                 && !url.startsWith('blob:http') 
@@ -203,6 +217,25 @@ function parseVideoCollectionLines(lines, callback) {
                 platform: 'free-video', 
                 title: subtitle, 
                 url, 
+                ...collection
+            })
+        } else {
+            line = transformPath(line)
+            if(!line.startsWith('http') 
+                && !line.startsWith('blob:http') 
+                && !line.startsWith('/')) {
+                return
+            }  
+            if(line.startsWith('/')) line = transformUrl(line, FILE_SCHEME)
+
+            //数据行格式：[url]
+            const id = randomTextWithinAlphabetNums(8)
+
+            callback({ 
+                id, 
+                platform: 'free-video', 
+                title: getSimpleFileName(line, id), 
+                url: line, 
                 ...collection
             })
         }
@@ -656,6 +689,7 @@ const writeM3uFile = async (filename, data, looseMode) => {
 
 module.exports = {
     transformPath,
+    transformUrl,
     scanDirTracks,
     parseTracks,
     readText,

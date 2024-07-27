@@ -28,6 +28,7 @@ export const PlayMode = {
 export const PlayAction = {
     PREVIOUS: 0,
     NEXT: 1,
+    CHANGE_RATE: 2
 }
 
 export const ActivateState = {

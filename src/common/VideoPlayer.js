@@ -9,7 +9,7 @@ class VideoPlayer {
     constructor(video) {
         this.video = video
         this.videoNode = null
-        this.rawPlayer = null
+        this.delegatePlayer = null
         this.videoChanged = false
         this.playState = PlayState.NONE
         this.volume = 0.5
@@ -28,50 +28,44 @@ class VideoPlayer {
         return singleton
     }
 
-    initRawPlayer() {
+    initDelegatePlayer() {
         if(!this.videoNode) return 
         
-        const self = this
-        this.rawPlayer = videojs(this.videoNode, { fill: true })
-        this.rawPlayer.volume(this.volume)
-
+        this.delegatePlayer = videojs(this.videoNode, { 
+            fill: true, 
+            playbackRates: [0.5, 1, 1.5, 2], 
+        })
+        this.delegatePlayer.volume(this.volume)
         this.setPlayState(PlayState.INIT)
 
-        this.rawPlayer.on('playing', () => {
-            self.setPlayState(PlayState.PLAYING)
-        })
+        const self = this
+        this.delegatePlayer.on('playing', () => self.setPlayState(PlayState.PLAYING))
+        this.delegatePlayer.on('pause', () => self.setPlayState(PlayState.PAUSE))
+        this.delegatePlayer.on('ended', () => self.setPlayState(PlayState.END))
+        this.delegatePlayer.on('error', () => self.setPlayState(PlayState.PLAY_ERROR))
+        this.delegatePlayer.on('ratechange', (event) => self.setPlayAction(PlayAction.CHANGE_RATE, event, self.delegatePlayer.playbackRate()))
 
-        this.rawPlayer.on('pause', () => {
-            self.setPlayState(PlayState.PAUSE)
-        })
-
-        this.rawPlayer.on('ended', () => {
-            self.setPlayState(PlayState.END)
-        })
-
-        this.rawPlayer.on('error', () => {
-            self.setPlayState(PlayState.PLAY_ERROR)
-        })
-
-        this.extendsPlayerComponents()
+        this.customControlBar()
     }
 
-    extendsPlayerComponents() {
-        if(!this.rawPlayer) return 
+    customControlBar() {
+        if(!this.delegatePlayer) return 
         
         const self = this
-        this.rawPlayer.getChild('ControlBar').addChild('button', {
+        this.delegatePlayer.getChild('ControlBar')
+            .addChild('button', {
                 clickHandler: (event) => {
                     self.setPlayAction(PlayAction.NEXT, event)
                 },
                 controlText: 'Next',
-                className: 'play-next-btn'
+                className: 'c-vjs-play-next-btn'
             }, 1)
+
     }
 
     setVideoNode(node) {
         this.videoNode = node
-        this.initRawPlayer()
+        this.initDelegatePlayer()
     }
 
     //播放
@@ -80,8 +74,9 @@ class VideoPlayer {
         if (!this.video || !this.video.url) return this.setPlayState(PlayState.PLAY_ERROR)
         
         const { url: src } = this.video
-        if(this.videoChanged) this.rawPlayer.src(src)
-        this.rawPlayer.play()
+        if(this.videoChanged) this.delegatePlayer.src(src)
+        
+        this.delegatePlayer.play()
         this.videoChanged = false
     }
 
@@ -94,30 +89,30 @@ class VideoPlayer {
         if (!this.videoNode) return
         if (!this.playing()) return
 
-        this.rawPlayer.pause()
-        this.setPlayState(PlayState.PAUSE)
+        this.delegatePlayer.pause()
     }
 
     togglePlay() {
         this.playing() ? this.pause() : this.play()
     }
 
-    setPlayState(state) {
+    setPlayState(state, isSilent) {
         this.playState = state
         const { video } = this
-        this.notify('video-state', { state, video })
+        if(!isSilent) this.notify('video-state', { state, video })
     }
 
-    setPlayAction(action, event) {
+    setPlayAction(action, event, data) {
         const { video } = this
-        this.notify('video-action', { action, event, video })
+        this.notify('video-action', { action, event, video, data })
     }
 
     setVideo(video) {
-        if(this.rawPlayer) this.rawPlayer.reset()
+        if(this.delegatePlayer) this.delegatePlayer.reset()
+        
         this.video = video
         this.videoChanged = true
-        this.playState = PlayState.NONE
+        this.setPlayState(PlayState.NONE, true)
     }
 
     playVideo(video) {
@@ -127,7 +122,7 @@ class VideoPlayer {
 
     volume(value) {
         this.volume = value
-        if(this.rawPlayer) this.rawPlayer.volume(value)
+        if(this.delegatePlayer) this.delegatePlayer.volume(value)
     }
     
     on(registration) {

@@ -13,8 +13,7 @@ import {
     useStartDrag, useDownloadsPath, 
     tryCall, toTrimString, useTrayAction,
     ipcRendererSend, ipcRendererInvoke, 
-    ipcRendererBind, ipcRendererBinds, toMmss,
-    md5,
+    ipcRendererBind, ipcRendererBinds, toMmss, md5,
 } from '../common/Utils';
 import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
@@ -306,7 +305,9 @@ const bootstrapTrack = (track, options) => {
             updateLyric(track, { lyric })
         }
         //更新封面
-        if (Track.hasCover(result)) Object.assign(track, { cover })
+        if (Track.hasCover(result)) {
+            Object.assign(track, { cover })
+        }
         //更新歌手
         //TODO 部分音乐平台artist信息无法在同一API中完整获取
         if (artistNotCompleted && artist) {
@@ -842,20 +843,18 @@ const getVideoDetail = (video) => {
 }
 
 //TODO 貌似Electron Bug：主窗口刷新后，MediaSession无法重新关联
-const setupCurrentMediaSession = async () => {
+const setupCurrentMediaSession = async (track) => {
     if ("mediaSession" in navigator) {
-        const track = (currentVideo.value || currentTrack.value || { title: '听你想听，爱你所爱' })
-        const { title, cover } = track
-        //TODO 本地歌曲可能使用在线封面，会导致数据不一致
-        // 暂时忽略，仍然使用旧封面，不去尝试进行更新，得不偿失
+        const _track = (currentVideo.value || track || currentTrack.value || { title: '听你想听，爱你所爱' })
+        const { title, cover } = _track
         let coverSrc = cover
         if (toTrimString(cover).startsWith(ImageProtocal.prefix)) {
             coverSrc = await ipcRendererInvoke('open-image-base64', cover)
         }
         navigator.mediaSession.metadata = new MediaMetadata({
             title,
-            artist: Track.artistName(track),
-            album: Track.albumName(track),
+            artist: Track.artistName(_track),
+            album: Track.albumName(_track),
             artwork: [{
                 src: coverDefault(coverSrc),
                 sizes: "240x240",
@@ -1548,6 +1547,7 @@ onEvents({
         mmssPreseekTime.value = null
         setProgressSeekingState(false)
     },
+    'track-coverUpdated': setupCurrentMediaSession,
     //歌单电台 - 下一曲
     'track-nextPlaylistRadioTrack': track => {
         playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)

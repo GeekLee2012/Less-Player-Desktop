@@ -18,27 +18,27 @@
 
 
 .use-winos-win-ctl #main-left .header {
-  margin-bottom: -8px !important;
+  /*margin-bottom: -8px !important;*/
 }
 
-.use-winos-win-ctl #main-left.main-left-default-old-layout .header {
+.use-winos-win-ctl .default-old-layout #main-left .header {
   margin-bottom: 8px !important;
 }
 
-.use-winos-win-ctl #main-left.main-left-default-old-layout .header .userhome-btn,
-.use-winos-win-ctl #main-left.main-left-default-old-layout .header .setting-btn {
+.use-winos-win-ctl .default-old-layout #main-left .header .userhome-btn,
+.use-winos-win-ctl .default-old-layout  #main-left .header .setting-btn {
   margin-right: 18px !important;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.use-winos-win-ctl #main-left.main-left-default-old-layout .navigator {
+.use-winos-win-ctl .default-old-layout  #main-left .navigator {
   margin-left: 36px !important;
 }
 
 /*
-.use-winos-win-ctl #main-left.main-left-default-old-layout .header {
+.use-winos-win-ctl .default-old-layout #main-left .header {
   background-color: var(--content-bg-color);
 }
 */

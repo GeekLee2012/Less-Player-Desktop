@@ -573,11 +573,14 @@ export const parseVideoCollectionLines = (lines, callback) => {
         keyName: (prop) => (`${Meta.DELIMITER}${prop}${Meta.DELIMITER}`),
     }
     const delimiter = Meta.DELIMITER
-    const collection = {}
+    const collection = {}, excludeFilenames = ['index']
     let listBegan = false
     lines.forEach(line => {
         line = toTrimString(line)
-        if(!line || !line.includes(delimiter)) return
+        if(!line || line.startsWith('#') 
+            || line.startsWith('//')
+            || line.startsWith('/*')
+            || line.startsWith('*')) return
         
         if(line.startsWith(Meta.keyName(Meta.TITLE))) {
             const cTitle = line.split(Meta.keyName(Meta.TITLE))[1].trim()
@@ -606,7 +609,8 @@ export const parseVideoCollectionLines = (lines, callback) => {
             const parts = line.split(delimiter)
             if(!parts || parts.length != 2) return
 
-            const subtitle = toTrimString(parts[0])
+            const subtitle = toTrimString(parts[0]) 
+                || guessFilename(parts[0], randomTextWithinAlphabetNums(8), excludeFilenames)
             const url = toTrimString(parts[1])
             if(!url.startsWith('http') 
                 && !url.startsWith('blob:http') 
@@ -621,8 +625,41 @@ export const parseVideoCollectionLines = (lines, callback) => {
                 url, 
                 ...collection
             })
+        } else {
+            line = transformPath(line)
+            if(!line.startsWith('http') 
+                && !line.startsWith('blob:http') 
+                && !line.startsWith('/')) {
+                return
+            } 
+            if(line.startsWith('/')) line = transformUrl(line, FILE_SCHEME)
+            //数据行格式：[url]
+            const id = randomTextWithinAlphabetNums(8)
+
+            callback({ 
+                id, 
+                platform: 'free-video', 
+                title: guessFilename(line, id, excludeFilenames), 
+                url: line, 
+                ...collection
+            })
         }
     })
+}
+
+const guessFilename = (name, defaultName, excludes) => {
+    name = toTrimString(name)
+    if(!name) return defaultName
+    const from = name.lastIndexOf('/') + 1
+    let to = name.lastIndexOf('.')
+    if(to <= from) return defaultName
+    to = (to >= 0 ? to : name.length)
+    const _name = name.substring(from, to)
+    if(excludes && Array.isArray(excludes) 
+        && excludes.includes(_name)) {
+        return defaultName
+    }
+    return  _name
 }
 
 
@@ -681,6 +718,20 @@ export const isSupportedImage = (path) => {
         if(path.endsWith(suffixes[i])) return true
     }
     return false
+}
+
+export const transformPath = (path) => {
+    try {
+        if(path) {
+            return path.replace(FILE_PREFIX, '')
+                .replace(/\\/g, '/')
+                .replace(/\/\//g, '')
+                .trim()
+        }
+    } catch (error) {
+        console.log(error)
+    }
+    return path
 }
 
 

@@ -15,9 +15,9 @@
   --content-text-line-height: 27px;
   --content-text-letter-spacing: 0.25px;
   /* 主标题 */
-  --content-text-module-title-size: 30px;
+  --content-text-module-title-size: 32px;
   /* 标题 - 批量操作页、当前播放列表 */
-  --content-text-module-subtitle-size: 25px;
+  --content-text-module-subtitle-size: 26px;
   /* 标题 - 全部分类界面 */
   --content-text-module-title2-size: 21px;
   /* 标题 - 左导航 */

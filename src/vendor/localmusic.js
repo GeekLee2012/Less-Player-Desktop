@@ -11,8 +11,10 @@ import { United } from "./united";
 import { useLocalMusicStore } from "../renderer/store/localMusicStore";
 import { useSettingStore } from "../renderer/store/settingStore";
 import { Category } from "../common/Category";
+import { emitEvents } from "../common/EventBusWrapper";
 
 
+const onTrackUpdated = (track) => emitEvents('track-coverUpdated', track)
 
 export class LocalMusic {
     static CODE = 'local'
@@ -30,7 +32,10 @@ export class LocalMusic {
                 const onlineCandidate = await United.transferTrack(track, { isGetCover: true })
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
-                    if (cover && track.cover != cover) Object.assign(track, { cover })
+                    if (cover && track.cover != cover) {
+                        Object.assign(track, { cover })
+                        onTrackUpdated(track)
+                    }
                 }
             }
             resolve(result)
@@ -68,7 +73,10 @@ export class LocalMusic {
                 if (!onlineCandidate || !Track.hasCover(onlineCandidate)) onlineCandidate = await United.transferTrack(track, { isGetCover: true })
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
-                    if (cover && track.cover != cover) Object.assign(track, { cover })
+                    if (cover && track.cover != cover) {
+                        Object.assign(track, { cover })
+                        onTrackUpdated(track)
+                    }
                 }
             }
             resolve(result)

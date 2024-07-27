@@ -118,11 +118,11 @@ const onContextMenu = (event) => {
                 </svg>
             </div>
         </div>
-        <div class="time spacing1">
-            <span>{{ toYyyymmddHhMmSs(data.updated) }}</span>
+        <div class="time spacing1" v-show="false">
+            <span v-show="false">{{ toYyyymmddHhMmSs(data.created) }}</span>
         </div>
         <div class="time spacing1">
-            <span>{{ toYyyymmddHhMmSs(data.created) }}</span>
+            <span>{{ toYyyymmddHhMmSs(data.updated) }}</span>
         </div>
     </div>
 </template>

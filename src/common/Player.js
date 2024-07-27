@@ -213,11 +213,11 @@ class Player {
         //刷新进度
         /*
         const isTimeReset = this._countAnimationFrameTime()
-        const needRefreshState = this.useStateRefreshAutoDetector ? isTimeReset : this.isStateRefreshEnabled()
+        const needRefreshState = this.useStateRefreshAutoDetector ? isTimeReset : this.isStateRefreshable()
         if (needRefreshState) this.notify('track-pos', this.currentTime)
         */
         
-        if (this.isStateRefreshEnabled()) this.notify('track-pos', { currentTime: this.currentTime, duration })
+        if (this.isStateRefreshable()) this.notify('track-pos', { currentTime: this.currentTime, duration })
 
         //声音处理
         try {
@@ -264,7 +264,7 @@ class Player {
     _resolveSound() {
         if (!this._initWebAudioApi()) return
         this._resolvePendingSoundEffect()
-        if (!this.isSpectrumRefreshEnabled()) return
+        if (!this.isSpectrumRefreshable()) return
         
         const { leftChannelAnalyser, rightChannelAnalyser, analyser, audioCtx } = this.webAudioApi
         if (!analyser || !leftChannelAnalyser || !rightChannelAnalyser) return
@@ -357,11 +357,11 @@ class Player {
         this.animationFrameCnt = (this.animationFrameCnt + 1) % max
     }
 
-    isStateRefreshEnabled() {
+    isStateRefreshable() {
         return this.animationFrameCnt % (this.stateRefreshFrequency || 60) == 0
     }
 
-    isSpectrumRefreshEnabled() {
+    isSpectrumRefreshable() {
         return this.animationFrameCnt % (this.spectrumRefreshFrequency || 3) == 0
     }
 
@@ -384,7 +384,7 @@ class Player {
         this.desktopLyricMessagePortActiveState = state
     }
 
-    postMessageToDesktopLryic(action, data) {
+    postToDesktopLryic(action, data) {
         if (!this.desktopLyricMessagePortActiveState) return
         const messagePort = this.desktopLyricMessagePort
         data = data ? toRaw(data) : data
@@ -395,18 +395,18 @@ class Player {
         if (!this.desktopLyricMessagePortActiveState) return
         switch (this.playState) {
             case PlayState.NONE:
-                this.postMessageToDesktopLryic('s-track-none')
+                this.postToDesktopLryic('s-track-none')
                 break
             case PlayState.INIT:
-                this.postMessageToDesktopLryic('s-track-init', {
+                this.postToDesktopLryic('s-track-init', {
                     track: Player.getRawTrack(this.currentTrack)
                 })
                 break
             case PlayState.PLAYING:
-                this.postMessageToDesktopLryic('s-track-play')
+                this.postToDesktopLryic('s-track-play')
                 break
             case PlayState.PAUSE:
-                this.postMessageToDesktopLryic('s-track-pause')
+                this.postToDesktopLryic('s-track-pause')
                 break
         }
     }
@@ -417,7 +417,7 @@ class Player {
         this.desktopLyricMessagePort.onPlayerMessage = (action, data) => {
             if (action == 'c-track-init') {
                 //self.setMessagePortActiveState(true)
-                self.postMessageToDesktopLryic('s-track-init', {
+                self.postToDesktopLryic('s-track-init', {
                     track: Player.getRawTrack(self.currentTrack),
                     playing: (self.playState == PlayState.PLAYING)
                 })
@@ -425,7 +425,7 @@ class Player {
                 const sound = self.getSound()
                 if (!sound) return
                 self.currentTime = sound.seek() || 0
-                self.postMessageToDesktopLryic('s-track-pos', self.currentTime)
+                self.postToDesktopLryic('s-track-pos', self.currentTime)
             }
         }
     }
@@ -433,7 +433,7 @@ class Player {
     postLyricStateToDesktopLyric(track, hasLyric) {
         if (!this.desktopLyricMessagePortActiveState) return
         const action = hasLyric ? 's-track-lyricLoaded' : 's-track-noLyric'
-        this.postMessageToDesktopLryic(action, track)
+        this.postToDesktopLryic(action, track)
     }
 
     static getRawTrack(track) {

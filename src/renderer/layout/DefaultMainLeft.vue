@@ -218,7 +218,6 @@ onEvents({
     <div id="main-left"
         :class="{
             'user-mousewheel': isUserMouseWheel, 
-            'main-left-default-old-layout': isDefaultOldLayout 
         }">
         <div class="header">
             <WinTrafficLightBtn v-show="!useWindowsStyleWinCtl" :isMaximized="isMaxScreen">
@@ -481,7 +480,7 @@ onEvents({
 
 #main-left .header {
     -webkit-app-region: drag;
-    height: 72px;
+    height: 58px;
     margin-bottom: 8px;
     display: flex;
     position: relative;
@@ -512,8 +511,8 @@ onEvents({
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 8px;
-    margin-bottom: 20px;
+    margin-top: 33px;
+    margin-bottom: 15px;
 }
 
 #main-left .search-bar .keyword {
@@ -733,5 +732,9 @@ onEvents({
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+}
+
+.default-old-layout #main-left .bottom {
+    height: 68px;
 }
 </style>

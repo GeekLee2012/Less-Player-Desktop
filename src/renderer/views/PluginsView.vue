@@ -271,7 +271,9 @@ const onDrop = async (event) => {
         const { name, path } = files[i]
         const result = await ipcRendererInvoke('read-text', path)
         if (!result) continue
-        doImportPlugin(result)
+        if(toLowerCaseTrimString(path).endsWith('.js')) {
+            doImportPlugin(result)
+        }
     }
 }
 

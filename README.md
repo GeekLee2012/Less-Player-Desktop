@@ -15,7 +15,9 @@
 ### 前言  
 * 项目名字：源于Less is More（少即是多）
 * 开发模式：循序渐进模式，边学习边开发（学以致用）  
-  
+* 项目初衷：抛砖引玉，一起学习交流，共同进步  
+* 项目缺点：目前最大最明显的缺点，就是整体上缺乏架构思想，导致代码松散随意  
+    
 ### 开发/测试环境
 * OS：macOS Monterey（开发 + 测试）、Windows 10（虚拟机，仅测试）  
 * IDE：[Visual Studio Code](https://code.visualstudio.com/)  

@@ -396,4 +396,8 @@ onEvents({
     background: transparent;
     display: none;
 }
+
+.default-old-layout .image-text-tile-card {
+    margin-bottom: 25px;
+}
 </style>

@@ -277,9 +277,10 @@ const addToPendingPlayTasks = (files) => {
 }
 
 const removePendingPlayTasks = (files) => {
-  if (!files || !Array.isArray(files) || files.length < 1) return
-  if (pendigPlayTasks.length < 1) return
-  //pendigPlayTasks.length = 0
+  //if (!files || !Array.isArray(files) || files.length < 1) return
+  //if (pendigPlayTasks.length < 1) return
+  pendigPlayTasks.length = 0
+  /*
   files.forEach(file => {
     const _path = transformPath(file.url)
     let index = pendigPlayTasks.indexOf(_path)
@@ -291,6 +292,7 @@ const removePendingPlayTasks = (files) => {
       ++count
     }
   })
+  */
 }
 
 const parseAndPlayTasks = (files) => {

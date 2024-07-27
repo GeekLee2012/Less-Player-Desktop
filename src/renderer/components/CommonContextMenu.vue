@@ -11,6 +11,7 @@ import { useRecentsStore } from '../store/recentsStore';
 import { Playlist } from '../../common/Playlist';
 import { useSettingStore } from '../store/settingStore';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { ipcRendererSend, transformPath } from '../../common/Utils';
 
 
 
@@ -124,6 +125,15 @@ const visitTrackDetail = () => {
         artist: JSON.stringify(artist),
         album: JSON.stringify(album),
     }, () => setRouterCtxCacheItem(data))
+}
+
+const showInFolder = () => {
+    const data = toRaw(commonCtxMenuCacheItem.value)
+    if(!data) return 
+    const { platform, url } = data
+    if(!isLocalMusic(platform) || !url) return 
+    ipcRendererSend('path-showInFolder', transformPath(url))
+    hideAllCtxMenus()
 }
 
 const removeQueueItem = () => {
@@ -302,6 +312,11 @@ const MenuItems = {
         icon: '<svg width="16" height="16" viewBox="0 0 736 831.94" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M320,447.93V441.7q0-196.23,0-392.47c0-29.06,22.88-51.48,51.13-49,9.79.84,19.43,4.34,29,7.2Q549.54,52.05,698.89,96.94c22.84,6.85,36.94,24.46,37.11,46.39.24,31.8-29.73,55.44-60.32,46.71-39.82-11.37-79.4-23.6-119.08-35.5q-67.39-20.21-134.77-40.49c-1.72-.52-3.49-.89-5.82-1.47v6.77q0,252,0,503.95A208.19,208.19,0,0,1,244.9,828.59C134.4,848.76,26.46,775.72,4.19,665.71c-21.25-104.94,40.19-209.48,142.1-240.43,59.18-18,115.84-10.79,169.31,20.54,1,.59,2,1.18,3,1.76A9.82,9.82,0,0,0,320,447.93ZM207.87,511.85A112,112,0,1,0,320,623.58,112,112,0,0,0,207.87,511.85Z"/></g></g></svg>',
         action: visitTrackDetail,
     },
+    showInFolder: {
+        name: '查看目录',
+        icon: '<svg width="16" height="16" viewBox="0 0 870.27 700.5" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M0,604.32V99.2c.67-3.86,1.41-7.71,2-11.59C9.18,39,52.75.55,101.7.25,159-.11,216.36,0,273.69,0c25.8,0,48.64,8.41,68.48,24.88q46.9,39,93.69,78.06a14.83,14.83,0,0,0,10.38,3.78q28.74-.34,57.48-.37c55,0,110-.11,165,.07a207.6,207.6,0,0,1,30.85,2,101.72,101.72,0,0,1,85.67,95c.56,10.25.9,20.52,1.35,31,2.09.24,3.89.51,5.7.64,51.39,3.65,86.9,50.22,76,100.61-5.36,24.87-12,49.46-18.2,74.16q-28.44,113.81-57,227.57c-9.72,38.4-42,62.93-81.62,63-30.5,0-61,.16-91.49.15l-515-.15c-48.08,0-88.76-31.22-101.1-77.7C2.32,616.62,1.29,610.43,0,604.32Zm104.9,13.85c2.46.13,4.26.31,6,.31q298.5,0,597,.11c4.42,0,6-1.5,7-5.54Q751,468.21,787.3,323.43c1.69-6.77,1.49-7-5.6-7H201.2c-14.52,0-22.59,6.36-26.11,20.43q-31.43,125.67-62.85,251.35C109.79,598,107.43,607.83,104.9,618.17ZM704.49,234.73c0-7.11.21-13.26,0-19.39-.79-19.31-8.81-26.93-28-27q-61.73-.07-123.47-.16-61.49,0-123,.2c-13.46,0-25-4.5-35.23-13.06Q343,132.08,291.12,88.94c-5-4.16-10.57-7-17.22-7-15.15,0-30.3.07-45.46.08Q168.2,82,108,82c-16.46,0-25.72,9.19-25.78,25.59-.07,20.66-.16,41.32-.16,62q0,96.5,0,193v5.25a10.3,10.3,0,0,0,2-4.52C87.7,348.64,91.61,334,95,319.24c12.35-54.39,57.58-84.92,108.68-84.74,164.3.6,328.61.23,492.91.23Z"/></g></g></svg>',
+        action: showInFolder
+    },
     removeFromQueue: {
         name: '删除',
         icon: '<svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z" transform="translate(-833 -413)"/><path d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z" transform="translate(-833 -413)"/><path d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z" transform="translate(-833 -413)"/><path d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z" transform="translate(-833 -413)"/></svg>',
@@ -463,7 +478,7 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
             addToQueueMenuItem.name = "添加到当前播放"
             data = [MenuItems.play, addToQueueMenuItem, MenuItems.playLater,
             MenuItems.sp, MenuItems.addToList, MenuItems.moveToList,
-            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack, MenuItems.showInFolder,
             MenuItems.sp, MenuItems.removeFromLocal]
             break;
         case 2: //我的主页 - 我的收藏 - 歌曲列表
@@ -504,8 +519,8 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
         case 11: //本地歌曲 - 歌手页、专辑页 - 歌曲列表
             data = [MenuItems.play, MenuItems.playLater,
             /*MenuItems.sp, MenuItems.addToList, MenuItems.addFavorite,*/
-            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
-            MenuItems.visitTrack, MenuItems.sp, MenuItems.removeFromLocal]
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack, MenuItems.showInFolder,
+            MenuItems.sp, MenuItems.removeFromLocal,]
             break;
     }
     doInit(data)
@@ -547,6 +562,7 @@ onEvents({
     border: 1px solid var(--border-color);*/
     box-shadow: 0px 0px 6px var(--border-popovers-border-color);
     max-height: 404px;
+    max-height: 460px;
 }
 
 .common-ctx-menu .container {

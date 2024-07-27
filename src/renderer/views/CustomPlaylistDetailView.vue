@@ -239,7 +239,8 @@ onUpdated(() => {
                         </svg>
                     </div>
                     <div class="time">
-                        <span>最后更新：{{ toYyyymmddHhMmSs(detail.updated) }}</span>
+                        <span v-show="false">最后更新：{{ toYyyymmddHhMmSs(detail.updated) }}</span>
+                        <span>创建时间：{{ toYyyymmddHhMmSs(detail.created) }}</span>
                     </div>
                 </div>
                 <div class="action">

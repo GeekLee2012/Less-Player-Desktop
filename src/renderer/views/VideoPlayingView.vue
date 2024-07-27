@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onActivated, ref } from 'vue';
+import { computed, inject, onActivated, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -17,8 +17,8 @@ const { dndSaveVideo, playVideo } = inject('player')
 const { hideVideoPlayingView, normalize } = useAppCommonStore()
 const { isMaxScreen, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { isSimpleLayout, isQuitVideoAfterEndedEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
-const { setPlaying, removeVideo, playNextVideo, resetQueue } = useVideoPlayStore()
-const { playingIndex, currentVideo, queueVideos, queueVideosSize } = storeToRefs(useVideoPlayStore())
+const { setPlaying, removeVideo, playNextVideo, resetQueue, switchVideoThemeIndex } = useVideoPlayStore()
+const { playingIndex, currentVideo, queueVideos, queueVideosSize, videoThemeIndex } = storeToRefs(useVideoPlayStore())
 
 
 let videoNode = null
@@ -29,6 +29,21 @@ const initVideoPlayer = () => {
     if (videoEls.length == 2) index = isSimpleLayout.value ? 0 : 1
     videoNode = videoEls[index]
     emitEvents('video-init', videoNode)
+    setupVideoTheme()
+}
+
+const setupVideoTheme = () => {
+    const el = document.querySelector('.video-node.video-js')
+    if(!el) return
+
+    const index = videoThemeIndex.value
+    if(index === 0) {
+        el.classList.remove('vjs-theme-sea')
+        el.classList.add('vjs-theme-city')
+    } else if(index === 1){
+        el.classList.remove('vjs-theme-city')
+        el.classList.add('vjs-theme-sea')
+    }
 }
 
 const stopVideo = (callback) => {
@@ -87,22 +102,43 @@ const computedCollectionTitle = computed(() => {
     return cTitle && size > 1 && `${cTitle} ( ${queueVideosSize.value} )` 
 })
 
+const playNext = () => {
+    const size = queueVideosSize.value
+    const index = playingIndex.value
+    if(size > 1 && index < (size - 1)) playNextVideo()
+}
+
 onEvents({
     'app-beforeRoute': quitVideo,
     'video-state':  ({ state, video }) => {
-        if (state == PlayState.END && isQuitVideoAfterEndedEnable.value) quitVideo()
+        if (state == PlayState.END) {
+            const size = queueVideosSize.value
+            if(isQuitVideoAfterEndedEnable.value && size <= 1) return quitVideo()
+            
+            playNext()
+        }
     },
-    'video-action': ({ action, event, video }) => {
-        const size = queueVideosSize.value
-        if(action == PlayAction.NEXT && size > 1) playNextVideo()
+    'video-action': ({ action, event, video, data }) => {
+        if(action == PlayAction.NEXT) {
+            playNext()
+        } else if(action == PlayAction.CHANGE_RATE) {
+            const el = document.querySelector('.vjs-playback-rate .vjs-playback-rate-value')
+            el && data && (el.textContent = `${data}x`)
+        }
     }
 })
+
+watch(videoThemeIndex, setupVideoTheme)
 
 onActivated(initVideoPlayer)
 </script>
 
 <template>
-    <div class="video-playing-view" @keyup.space="handleSpaceKeyEvents">
+    <div class="video-playing-view" @keyup.space="handleSpaceKeyEvents" 
+        :class="{
+            'theme-city': (videoThemeIndex == 0),
+            'theme-sea': (videoThemeIndex == 1),
+        }">
         <div class="header" @dblclick.prevent="requestFullscreen">
             <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
                 <WinTrafficLightBtn :hideMaxBtn="isSimpleLayout" :showCollapseBtn="true" :collapseAction="quitVideo"
@@ -110,36 +146,18 @@ onActivated(initVideoPlayer)
                 </WinTrafficLightBtn>
             </div>
             <div class="title" v-html="currentVideoTitle"></div>
-            <div class="action" :class="{ 'winstyle-action': useWindowsStyleWinCtl }" v-show="false">
-                <div class="list-btn text-btn btn">
-                    <svg width="20" height="20" viewBox="0 0 853.72 597.61" xmlns="http://www.w3.org/2000/svg">
+            <div class="action" :class="{ 'winstyle-action': useWindowsStyleWinCtl }" v-show="true">
+                <div class="btn theme-btn" @click="switchVideoThemeIndex">
+                    <svg width="18" height="18" viewBox="0 -10 940.66 926.15" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
-                                    d="M426.61,85.57q-190,0-379.93,0C28.3,85.62,13.75,78.93,5,62.38-10.17,33.53,10.85.27,44.37.11,87.52-.1,130.68.05,173.84.05q316.7,0,633.4,0c14.25,0,26.73,4,36,15.17,11.31,13.69,13.64,29.22,6.27,45.33-7.78,17-22,24.94-40.43,25-33.66.13-67.32,0-101,0Z" />
-                                <path
-                                    d="M597.58,426.29q0-63.24,0-126.48c0-23.54,15.67-41,39-43.45,11.28-1.21,21.31,2.4,30.32,9.17q48.34,36.32,96.74,72.57c23.58,17.68,47.22,35.29,70.75,53.06C854,405.93,859.31,429.57,847,449a52.32,52.32,0,0,1-12.55,13.33q-83.76,63.21-167.86,126c-26.14,19.51-61.85,6-68.28-25.54a56.17,56.17,0,0,1-.72-10.94Q597.55,489,597.58,426.29Z" />
-                                <path
-                                    d="M277.61,256.05q116,0,232,0c21,0,37.47,11.44,43.21,29.83,8.84,28.27-11.83,55.54-42.45,55.63-46.16.14-92.33,0-138.49,0q-163,0-326,0c-18.41,0-32.75-7.17-41.19-23.9-14.6-28.91,6.53-61.44,39.93-61.58,38.17-.15,76.33,0,114.49,0Z" />
-                                <path
-                                    d="M277.31,512.06q116,0,232,0c21.39,0,37.83,11.39,43.56,30,8.66,28.14-11.86,55.25-42.21,55.44-31,.19-62,0-93,0H46.2c-20.87,0-36.72-10.16-43.28-27.66-10.76-28.69,10.22-57.75,41.92-57.81q80-.14,160,0Z" />
-                            </g>
-                        </g>
-                    </svg>
-                    <span v-show="false">当前播放</span>
-                </div>
-                <div class="search-video-btn btn spacing">
-                    <svg width="25" height="21" viewBox="0 0 1024 753.07" xmlns="http://www.w3.org/2000/svg">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Layer_1-2" data-name="Layer 1">
-                                <path
-                                    d="M0,110.05c1.62-7.78,2.77-15.69,4.93-23.3C19.26,36.32,65.9.28,118.3.17q208.5-.44,417-.13,123,0,246,0c60.07,0,108.83,40,120.19,98.93a127.69,127.69,0,0,1,2,23.86c.17,59,.1,118,.09,177,0,1.62-.15,3.23-.26,5.55-58.91-34.91-120.89-43.71-186.17-24.34-43,12.76-78.82,36.91-107.48,71.34-33.35,40.06-50.86,86.38-52.32,138.44-1.45,51.83,13.72,98.73,44.87,141.67h-6.26q-236.75,0-473.49,0C63.1,632.42,15.18,594,2.59,536.74c-1-4.53-1.73-9.12-2.59-13.68Zm376.79,86V436.57L569.08,316.29Z" />
-                                <path
-                                    d="M1024,728.06c-.36.91-.79,1.79-1.06,2.72-6.69,22.72-34,29.9-50.63,13-15.63-15.94-30.76-32.37-46.1-48.59q-26.28-27.78-52.55-55.56c-.68-.72-1.44-1.37-2.3-2.17-43.23,25.74-89.08,32.37-137.31,17.68-39.13-11.92-69.48-35.85-91.44-70.34-42.77-67.15-29.78-158.62,29.93-211.12,62.14-54.64,153.15-56.34,215.9-4.57C953.1,422.43,971,521.42,915.86,596.5c9.06,9.61,18.16,19.29,27.28,28.94,23.7,25.06,47.57,50,71,75.29,4.23,4.57,6.63,10.84,9.88,16.33ZM888.39,497.27A105.32,105.32,0,1,0,783,602.3,105.22,105.22,0,0,0,888.39,497.27Z" />
+                                    d="M697.39,926.15H245.3a14.77,14.77,0,0,0-2.77-.86C190,919.2,153.12,877.8,153.12,824.84V547.51c-3-.55-5.23-1-7.52-1.4-36.41-6.3-72.85-12.4-109.21-19C14.07,523.11.15,506.26.13,483.52c-.1-99-.27-198,.09-297,.12-34.94,16-61.27,47.23-77.57,8.39-4.36,17.28-7.79,26-11.44Q183.53,51.59,293.6,5.66c21.22-8.91,39.62-5.77,56.55,9.91C383.38,46.36,417,76.76,450.41,107.31c6.95,6.35,13.95,12.66,20.93,19l4.16-3.78,120.8-110c14.74-13.43,31.27-16,49.46-8,11,4.82,21.9,9.74,32.84,14.63,70.76,31.66,141.65,63,212.23,95.09,31.49,14.3,49.13,39.56,49.37,74.25.71,98.49.41,197,.35,295.47,0,22.47-14,39.1-36.08,43.19-24.55,4.54-49.18,8.64-73.78,12.93l-41.12,7.12c0,2.14,0,3.95,0,5.76.11,13.49.34,27,.32,40.48q-.1,117.24-.32,234.47c-.07,41-27.26,79.11-66.15,92.07C715,922.8,706.08,924.13,697.39,926.15ZM853.58,447.77v-5.88q0-121.75.14-243.52c0-4.72-1.71-6.59-5.67-8.35Q743.41,143.48,638.89,96.59c-2.86-1.28-4.56-1.15-6.89,1q-26.61,24.59-53.46,48.91c-25.6,23.35-51.13,46.77-76.85,70C490.73,226.38,477.91,231,463,228c-10-2-17.92-7.62-25.29-14.35q-63.44-58-126.93-115.94c-2.46-2.24-4.38-3.12-7.81-1.68Q197.31,140.24,91.49,184.09c-3.58,1.48-4.47,3.39-4.46,7q.15,125.51.08,251v5.48l66,11.49v-6.36c0-45-.07-90,0-135,0-21.06,15.76-39.07,36.64-42.46,20.31-3.29,40.76,8.44,47,27.95a75.22,75.22,0,0,1,3.2,22.6q.27,247.77.14,495.54a51.79,51.79,0,0,0,.21,6.48c.71,5.62,3.79,9.11,9.31,10.35a34.18,34.18,0,0,0,7.42.7q214.29.06,428.58,0a34.47,34.47,0,0,0,5-.24c8.14-1.19,11.59-5.11,11.89-13.37.07-1.83,0-3.67,0-5.5q.16-250.51.34-501c0-24.77,18.7-43.72,43-43.74,24.76,0,43.59,18.77,43.68,43.66q.2,58.74.34,117.49c0,7.3,0,14.59,0,22.49Z" />
                             </g>
                         </g>
                     </svg>
                 </div>
+
             </div>
             <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
                 <WinNonMacOSControlBtn :showCollapseBtn="true" :collapseAction="quitVideo" :isMaximized="isMaxScreen">
@@ -153,8 +171,9 @@ onActivated(initVideoPlayer)
                 <source :src="currentVideoUrl" type="video/mp4">
             </video>
             -->
-            <video class="video-node video-js" controls controlslist="nodownload" disablepictureinpicture="true"
-                disableRemotePlayback="true" preload="auto">
+            <video class="video-node video-js vjs-theme-city"
+                controls controlslist="nodownload" disablepictureinpicture="true"
+                disableRemotePlayback="true" preload="auto" data-setup="{}">
                 <!--
                 <source :src="currentVideoUrl" type="video/mp4">
                 -->
@@ -314,11 +333,11 @@ onActivated(initVideoPlayer)
     align-items: center;
     justify-content: flex-end;
     flex: 1;
-    padding-right: 20px;
+    padding-right: 22px;
 }
 
 .video-playing-view > .header .winstyle-action {
-    padding-right: 202px;
+    padding-right: 175px;
     padding-bottom: 8px;
 }
 
@@ -327,6 +346,7 @@ onActivated(initVideoPlayer)
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .video-playing-view .search-video-btn svg {
@@ -334,8 +354,7 @@ onActivated(initVideoPlayer)
     top: 2px;
 }
 
-.video-playing-view .search-video-btn svg,
-.video-playing-view .list-btn svg {
+.video-playing-view .action .btn svg {
     fill: #fff;
     stroke: #fff;
 }
@@ -376,14 +395,128 @@ onActivated(initVideoPlayer)
     background: var(--view-bg);
 }
 
-.video-playing-view .play-next-btn::before {
-    content: url('/public/play-next.svg');
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    transform: translateY(1px);
-    cursor: pointer;
+.video-playing-view .c-vjs-play-next-btn .vjs-icon-placeholder {
+    font-family: VideoJS;
+    font-weight: 400;
+    font-style: normal;
+    display: block;
 }
+
+.video-playing-view .c-vjs-play-next-btn .vjs-icon-placeholder::before {
+    content: "\f123";
+    cursor: pointer;
+    text-align: center;
+}
+
+.video-playing-view .vjs-playback-rate {
+    display: flex !important;
+    order: 0 !important;
+}
+
+/* vjs-theme-city */
+.video-playing-view .vjs-theme-city .c-vjs-play-next-btn {
+    flex: 1;
+}
+
+.video-playing-view .vjs-theme-city .c-vjs-play-next-btn .vjs-icon-placeholder::before {
+    font-size: 2.9em;
+    line-height: 50px;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.video-playing-view .vjs-theme-city .vjs-control-bar {
+    padding-top: 23px;
+}
+
+.video-playing-view .vjs-theme-city .vjs-play-control {
+    outline: none;
+}
+
+.video-playing-view .vjs-theme-city .vjs-remaining-time {
+    margin-left: 15px;
+    flex: 1;
+    line-height: 50px;
+
+    /*
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    text-align: center;
+
+    flex-grow: 3;
+    flex-shrink: 1;
+    flex-basis: 0%;
+    */
+}
+
+.video-playing-view .vjs-theme-city .vjs-remaining-time-display {
+    font-size: 1.65em;
+}
+
+.video-playing-view .vjs-theme-city .vjs-playback-rate {
+    font-size: 1.2em;
+    width: 4em;
+    margin-left: 15px;
+    /*
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    */
+}
+
+.video-playing-view .vjs-theme-city .vjs-playback-rate .vjs-playback-rate-value {
+    /*padding-top: 5px;*/
+    line-height: 50px;
+}
+
+.video-playing-view .vjs-theme-city .vjs-picture-in-picture-control .vjs-icon-placeholder {
+    font-size: 1.35em;
+}
+
+.video-playing-view .vjs-theme-city .vjs-picture-in-picture-control[title^='Exit'] .vjs-icon-placeholder {
+    font-size: 1.1em;
+}
+
+.video-playing-view .vjs-theme-city .vjs-fullscreen-control .vjs-icon-placeholder {
+    font-size: 1.75em;
+}
+
+
+/* vjs-theme-sea */
+.video-playing-view .vjs-theme-sea .c-vjs-play-next-btn .vjs-icon-placeholder::before {
+    font-size: 1.9em;
+    line-height: 2.2;
+}
+
+.video-playing-view .vjs-theme-sea .vjs-playback-rate {
+    font-size: 0.88em;
+    width: 40px;
+}
+
+.video-playing-view .vjs-theme-sea .vjs-playback-rate .vjs-playback-rate-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-playing-view .vjs-theme-sea .vjs-hover .vjs-playback-rate-value {
+    color: #4176bc !important;
+    z-index: 1;
+}
+
+.video-playing-view .vjs-theme-sea .vjs-playback-rate .vjs-menu .vjs-menu-content {
+    bottom: 26px;
+    width: 80px;
+    max-height: max-content;
+}
+
+.video-playing-view .vjs-theme-sea .vjs-playback-rate .vjs-menu li {
+    font-size: 1.8em;
+    padding: 8px; 
+}
+
 
 .video-playing-view .sidebar-btn {
     position: absolute;
@@ -488,16 +621,28 @@ onActivated(initVideoPlayer)
 }
 
 .video-playing-view .sidebar>.content .video-item {
+    /*
     display: flex;
-    width: 101px;
-    height: 39px;
-    padding: 3px;
     align-items: center;
     justify-content: center;
+    */
+    width: 89px;
+    height: 39px;
+    line-height: 39px;
+    padding: 3px 6px;
     cursor: pointer;
     margin: 0px 0px 20px 20px;
     font-size: var(--content-text-size);
     border-radius: 5px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: center;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 .video-playing-view .sidebar>.content .video-item:hover {
@@ -508,5 +653,14 @@ onActivated(initVideoPlayer)
 .video-playing-view .sidebar>.content .video-item.active {
     background: var(--content-highlight-color);
     color: #fff;
+}
+
+/* vjs-theme */
+.video-playing-view.theme-city .sidebar>.content .video-item.active {
+    background: #bf3b4d;
+}
+
+.video-playing-view.theme-sea .sidebar>.content .video-item.active {
+    background: #4176bc;
 }
 </style>

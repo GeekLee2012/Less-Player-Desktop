@@ -479,7 +479,8 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding #free-video-edit-view,
 #default-main-center .autopadding #data-backup-view,
 #default-main-center .autopadding #data-restore-view {
-    padding-top: 5px;
+    /* padding-top: 5px; */
+    padding-top: 3px;
 }
 
 #default-main-center .autopadding #playlist-detail-view,
@@ -487,6 +488,7 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding #album-detail-view,
 #default-main-center .autopadding #custom-playlist-detail-view,
 #default-main-center .autopadding #local-playlist-detail-view {
-    padding-top: 13px;
+    /* padding-top: 13px; */
+    padding-top: 12px;
 }
 </style>

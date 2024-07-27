@@ -13,7 +13,8 @@ import { usePlayStore } from '../store/playStore';
 import ArtistControl from '../components/ArtistControl.vue';
 import AlbumControl from '../components/AlbumControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
-import { coverDefault } from '../../common/Utils';
+import { coverDefault, ipcRendererSend, transformPath } from '../../common/Utils';
+import { usePlatformStore } from '../store/platformStore';
 
 
 
@@ -30,6 +31,7 @@ const props = defineProps({
 const { playTrack, addTrack, playTrackLater } = usePlayStore()
 const { routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
+const { isLocalMusic } = usePlatformStore()
 
 const isLoading = ref(false)
 const setLoading = (value) => isLoading.value = value
@@ -53,6 +55,15 @@ const playItemLater = () => {
     if (!track) return
     playTrackLater(track)
     showToast('下一曲将为您播放')
+}
+
+const showInFolder = () => {
+    const track = routerCtxCacheItem.value
+    if (!track) return
+    const { platform, url } = track
+    
+    if(!isLocalMusic(platform) || !url) return 
+    ipcRendererSend('path-showInFolder', transformPath(url))
 }
 </script>
 
@@ -79,6 +90,11 @@ const playItemLater = () => {
                                     </g>
                                 </g>
                             </svg>
+                        </template>
+                    </SvgTextButton>
+                    <SvgTextButton text="查看目录" :leftAction="showInFolder" v-show="isLocalMusic(platform)" class="folder-btn">
+                        <template #left-img>
+                            <svg width="18" height="18" viewBox="0 0 870.27 700.5" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M0,604.32V99.2c.67-3.86,1.41-7.71,2-11.59C9.18,39,52.75.55,101.7.25,159-.11,216.36,0,273.69,0c25.8,0,48.64,8.41,68.48,24.88q46.9,39,93.69,78.06a14.83,14.83,0,0,0,10.38,3.78q28.74-.34,57.48-.37c55,0,110-.11,165,.07a207.6,207.6,0,0,1,30.85,2,101.72,101.72,0,0,1,85.67,95c.56,10.25.9,20.52,1.35,31,2.09.24,3.89.51,5.7.64,51.39,3.65,86.9,50.22,76,100.61-5.36,24.87-12,49.46-18.2,74.16q-28.44,113.81-57,227.57c-9.72,38.4-42,62.93-81.62,63-30.5,0-61,.16-91.49.15l-515-.15c-48.08,0-88.76-31.22-101.1-77.7C2.32,616.62,1.29,610.43,0,604.32Zm104.9,13.85c2.46.13,4.26.31,6,.31q298.5,0,597,.11c4.42,0,6-1.5,7-5.54Q751,468.21,787.3,323.43c1.69-6.77,1.49-7-5.6-7H201.2c-14.52,0-22.59,6.36-26.11,20.43q-31.43,125.67-62.85,251.35C109.79,598,107.43,607.83,104.9,618.17ZM704.49,234.73c0-7.11.21-13.26,0-19.39-.79-19.31-8.81-26.93-28-27q-61.73-.07-123.47-.16-61.49,0-123,.2c-13.46,0-25-4.5-35.23-13.06Q343,132.08,291.12,88.94c-5-4.16-10.57-7-17.22-7-15.15,0-30.3.07-45.46.08Q168.2,82,108,82c-16.46,0-25.72,9.19-25.78,25.59-.07,20.66-.16,41.32-.16,62q0,96.5,0,193v5.25a10.3,10.3,0,0,0,2-4.52C87.7,348.64,91.61,334,95,319.24c12.35-54.39,57.58-84.92,108.68-84.74,164.3.6,328.61.23,492.91.23Z"/></g></g></svg>
                         </template>
                     </SvgTextButton>
                     <!--
@@ -170,6 +186,10 @@ const playItemLater = () => {
 #track-detail-view .action {
     display: flex;
     flex-direction: row;
+}
+
+#track-detail-view .action .folder-btn svg {
+    transform: translateY(1px);
 }
 
 #track-detail-view .spacing {

@@ -66,7 +66,8 @@ const playCollection = (lines) => {
     if(queueVideosSize.value < 1) return showFailToast('视频流URL无法解析')
     
     backward()
-    showToast('即将为您播放视频合集', playNextVideo)
+    const tailText = lines.length > 1 ? '合集' : ''
+    showToast(`即将为您播放视频${tailText}`, playNextVideo)
 }
 
 const submit = () => {
@@ -79,7 +80,7 @@ const submit = () => {
     }
     const lines = toTrimString(url).split('\n')
     if(!lines || lines.length < 1) return 
-    lines.length > 1 ? playCollection(lines) : playOne(url)
+    playCollection(lines)
 }
 
 const onDrop = (event) => {
@@ -102,7 +103,7 @@ const onDrop = (event) => {
 //TODO
 const updateCover = async () => {
     const result = await ipcRendererInvoke('open-image')
-    if (result.length > 0) {
+    if (result && result.length > 0) {
         const cover = result[0]
         Object.assign(detail, { cover })
     }
@@ -144,7 +145,7 @@ const updateCover = async () => {
                             placeholder="视频流URL，仅支持file / http / https协议，最多支持输入2048个字符" />
                         -->
                         <textarea class="url-text" v-model="detail.url" :class="{ invalid: urlInvalid }" 
-                            placeholder="视频流URL，支持file / http / https协议">
+                            placeholder="视频流URL，支持file / http / https协议；支持LeVC格式">
                         </textarea>
                     </div>
                 </div>
