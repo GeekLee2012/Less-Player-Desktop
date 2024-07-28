@@ -652,7 +652,7 @@ const guessFilename = (name, defaultName, excludes) => {
     if(!name) return defaultName
     const from = name.lastIndexOf('/') + 1
     let to = name.lastIndexOf('.')
-    if(to <= from) return defaultName
+    //if(to <= from) return defaultName
     to = (to >= 0 ? to : name.length)
     const _name = name.substring(from, to)
     if(excludes && Array.isArray(excludes) 
@@ -713,7 +713,7 @@ export const isSupportedVideo = (path) => {
 export const isSupportedImage = (path) => {
     path = toLowerCaseTrimString(path)
     if(!path) return false
-    const suffixes = ['.png', '.jpg', '.jpeg']
+    const suffixes = ['.png', '.jpg', '.jpeg', 'gif', 'webp', 'bmp', '.avif']
     for(let i = 0; i < suffixes.length; i++) {
         if(path.endsWith(suffixes[i])) return true
     }

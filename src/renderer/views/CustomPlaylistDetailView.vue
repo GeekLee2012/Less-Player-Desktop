@@ -11,7 +11,7 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { coverDefault, toYyyymmddHhMmSs } from '../../common/Utils';
+import { coverDefault, isSupportedImage, toYyyymmddHhMmSs } from '../../common/Utils';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
@@ -35,7 +35,7 @@ const setSearchKeyword = (value) => searchKeyword.value = value
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem } = useAppCommonStore()
-const { getCustomPlaylist, removeAllFromCustomPlaylist } = useUserProfileStore()
+const { getCustomPlaylist, removeAllFromCustomPlaylist, updateCustomPlaylist } = useUserProfileStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { isShowDialogBeforeBatchDelete, isSearchForCustomPlaylistShow } = storeToRefs(useSettingStore())
 
@@ -188,6 +188,25 @@ const filterContent = (keyword) => {
     loadContent()
 }
 
+
+const playlistCoverOnDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length < 1) return
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        const { id, platform, title, about } = detail
+        const cover = path
+        updateCustomPlaylist(id, title, about, cover) && Object.assign(detail, { cover })
+    } else {
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
+}
+
 onActivated(() => {
     restoreScrollState()
     nextTick(detectTitleHeight)
@@ -220,7 +239,8 @@ onUpdated(() => {
     <div id="custom-playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="coverDefault(detail.cover)" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" 
+                @dragover="e => e.preventDefault()" @drop="playlistCoverOnDrop" />
             </div>
             <div class="right">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>

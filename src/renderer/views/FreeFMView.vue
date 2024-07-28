@@ -15,7 +15,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { parseM3uText, parsePlsText, ipcRendererInvoke } from "../../common/Utils";
+import { parseM3uText, parsePlsText, ipcRendererInvoke, isSupportedImage } from "../../common/Utils";
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
@@ -24,7 +24,7 @@ const { currentRoutePath, visitFreeFMCreate, visitBatchFreeFM } = inject('appRou
 const { showConfirm } = inject('apiExpose')
 
 const { freeRadios, importTaskCount } = storeToRefs(useFreeFMStore())
-const { addFreeRadio, resetAll,
+const { addFreeRadio, updateFreeRadio, resetAll,
     increaseImportTaskCount, decreaseImportTaskCount } = useFreeFMStore()
 const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,
@@ -218,6 +218,26 @@ const resetScrollState = () => {
     if (freefmRef.value) freefmRef.value.scrollTop = markScrollTop
 }
 
+const radioTileOnDrop = (event, item, index) => {
+    if(!item) return 
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length < 1) return
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        const { id, platform, title, url, streamType, tags, about, coverFit } = item
+        const cover = path
+        updateFreeRadio(id, title, url, streamType, tags, about, cover, coverFit) 
+            && Object.assign(item, { cover })
+    } else {
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
+}
+
 onMounted(() => {
     resetScrollState()
 })
@@ -283,7 +303,8 @@ const interruptSearchBarExclusiveModeCtl = () => {
                     <span>标签</span>
                 </div>
             </div>
-            <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount">
+            <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount"
+                :tileOnDropFn="radioTileOnDrop">
             </PlaylistsControl>
             <!--
             <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount"

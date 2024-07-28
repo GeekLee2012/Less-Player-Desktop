@@ -1717,4 +1717,17 @@ watch([textColorIndex], setupTextColor)
 .simple-layout #sound-effect-view .center .bands {
     display: none;
 }
+
+.simple-layout .video-playing-view .vjs-theme-city .c-vjs-play-next-btn .vjs-icon-placeholder::before {
+    padding-left: 0.1em;
+    padding-right: 0.5em;
+}
+
+.simple-layout .video-playing-view .vjs-theme-city .vjs-remaining-time {
+    padding-left: 0.5em;
+}
+
+.simple-layout .video-playing-view .vjs-theme-city .vjs-play-control {
+    flex: 5;
+}
 </style>

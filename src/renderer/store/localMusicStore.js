@@ -51,7 +51,7 @@ export const useLocalMusicStore = defineStore('localMusic', {
             if (index < 0) return
 
             const updated = Date.now()
-            Object.assign(this.localPlaylists[index], { platform: 'local', title, about, tags, cover, updated })
+            return Object.assign(this.localPlaylists[index], { platform: 'local', title, about, tags, cover, updated })
         },
         getLocalPlaylist(id) {
             if (this.localPlaylists.length < 1) return null

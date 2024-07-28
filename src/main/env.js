@@ -37,7 +37,7 @@ const USER_AGENTS = [
 const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
 const EXTRA_AUDIO_EXTS = ['caf', 'oga', 'opus', 'weba', 'webm']
 //支持的图片文件扩展名（本地文件）
-const IMAGE_EXTS = ['jpg', 'jpeg', 'png']
+const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', '.avif']
 //支持的视频文件扩展名（本地文件）
 const VIDEO_EXTS = ['mp4', 'mov', 'mkv', 'avi', 'rmvb', 'flv']
 const EXTRA_VIDEO_EXTS = ['levc']

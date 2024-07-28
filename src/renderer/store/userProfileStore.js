@@ -8,7 +8,7 @@ import { onEvents, emitEvents } from "../../common/EventBusWrapper";
 
 //TODO
 export const refreshUserHome = () => emitEvents('userHome-refresh')
-export const refreshFavoritedState = emitEvents('track-refreshFavoritedState')
+export const refreshFavoritedState = () => emitEvents('track-refreshFavoritedState')
 
 const filterByPlatform = (state, platform) => {
     if (!platform || platform.trim() == 'all') return state
@@ -270,7 +270,7 @@ export const useUserProfileStore = defineStore("userProfile", {
                 (e1, e2) => e1.id === e2.id)
             if (index < 0) return
             const updated = Date.now()
-            Object.assign(this.customPlaylists[index], { title, about, cover, updated })
+            return Object.assign(this.customPlaylists[index], { title, about, cover, updated })
         },
         getCustomPlaylist(id) {
             if (this.customPlaylists.length < 1) return { id }

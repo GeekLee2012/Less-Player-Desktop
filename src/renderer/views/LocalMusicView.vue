@@ -15,7 +15,7 @@ import { useSettingStore } from '../store/settingStore';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { isDevEnv, ipcRendererInvoke } from "../../common/Utils";
+import { isDevEnv, ipcRendererInvoke, isSupportedImage } from "../../common/Utils";
 
 
 
@@ -24,7 +24,7 @@ const { visitLocalPlaylistCreate, visitBatchLocalMusic } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
 
 const { localPlaylists, importTaskCount } = storeToRefs(useLocalMusicStore())
-const { addLocalPlaylist, resetAll,
+const { addLocalPlaylist, updateLocalPlaylist, resetAll,
     increaseImportTaskCount, decreaseImportTaskCount } = useLocalMusicStore()
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { isUseDndForCreateLocalPlaylistEnable,
@@ -119,6 +119,25 @@ const removeAll = async () => {
     refreshTime.value = Date.now()
 }
 
+const playlistOnDrop = (event, item, index) => {
+    if(!item) return 
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length < 1) return
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        const { id, platform, title, tags, about, } = item
+        const cover = path
+        updateLocalPlaylist(id, title, tags, about, cover) && Object.assign(item, { cover })
+    } else {
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
+}
+
 onMounted(() => {
     resetBack2TopBtn()
 })
@@ -161,7 +180,8 @@ onMounted(() => {
             <div class="list-title">
                 <div class="size-text content-text-highlight">歌单列表({{ localPlaylists.length }})</div>
             </div>
-            <PlaylistsControl :data="localPlaylists" :customLoadingCount="importTaskCount">
+            <PlaylistsControl :data="localPlaylists" :customLoadingCount="importTaskCount"
+                :tileOnDropFn="playlistOnDrop">
             </PlaylistsControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

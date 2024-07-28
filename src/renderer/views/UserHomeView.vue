@@ -16,7 +16,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import CustomPlaylistListControl from '../components/CustomPlaylistListControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
-import { coverDefault } from '../../common/Utils';
+import { coverDefault, isSupportedImage } from '../../common/Utils';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
@@ -62,7 +62,7 @@ const { getFavoriteSongs, getFavoritePlaylilsts,
     getCustomPlaylists, getFollowArtists,
     decoration, getUserCover,
     getUserNickName, getUserAbout } = storeToRefs(useUserProfileStore())
-const { removeAllFavorites, nextDecoration, resetDecoration } = useUserProfileStore()
+const { removeAllFavorites, nextDecoration, resetDecoration, updateUser } = useUserProfileStore()
 const { getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios } = storeToRefs(useRecentsStore())
 const { removeAllRecents } = useRecentsStore()
@@ -263,6 +263,22 @@ const visitRouterCtxCacheItem = () => {
     if (id == 'visitRecents') visitRecentsTab()
 }
 
+const userCoverOnDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length < 1) return
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        updateUser(getUserNickName.value, getUserAbout.value, path)
+    } else {
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
+} 
+
 /* 生命周期、监听 */
 onActivated(() => {
     resetBack2TopBtn()
@@ -295,7 +311,8 @@ onEvents({
         </div>
         <div class="header">
             <div>
-                <img class="cover" v-lazy="coverDefault(getUserCover)" />
+                <img class="cover" v-lazy="coverDefault(getUserCover)"
+                    @dragover="e => e.preventDefault()" @drop="userCoverOnDrop" />
             </div>
             <div class="right">
                 <div class="title-wrap">

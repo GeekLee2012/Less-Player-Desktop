@@ -26,7 +26,8 @@ const props = defineProps({
     loadPage: Function,
     nextPagePendingMark: Number,
     refreshAllPendingMark: Number,
-    videoStyle: Boolean
+    videoStyle: Boolean,
+    tileOnDropFn: Function,
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
@@ -83,6 +84,13 @@ const computedMaxPage = computed(() => {
     const { data, limit } = props
     return (!data || !limit) ? 0 : Math.ceil(data.length / limit)
 })
+
+const computedTileOnDrop = computed(() => {
+    const { tileOnDropFn } = props
+    return (event, item, index) => {
+        tileOnDropFn && tileOnDropFn(event, item, index)
+    }
+})
 </script>
 
 <template>
@@ -95,7 +103,9 @@ const computedMaxPage = computed(() => {
                     :subtitle="getSubtitle(item)" :platform="item.platform" :color="item.color" :playable="true"
                     :playAction="() => playPlaylist(item)" :checkbox="checkbox" :checked="checkedAll"
                     :coverFit="item.coverFit" :ignoreCheckAllEvent="ignoreCheckAllEvent"
-                    :checkChangedFn="(checked) => checkChangedFn(checked, item)">
+                    :checkChangedFn="(checked) => checkChangedFn(checked, item)"
+                    @dragover="e => e.preventDefault()" 
+                    @drop="(event) => computedTileOnDrop(event, item, index)">
                 </ImageTextTile>
             </template>
             <template #loading1>

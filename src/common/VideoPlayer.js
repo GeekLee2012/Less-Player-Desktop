@@ -34,6 +34,9 @@ class VideoPlayer {
         this.delegatePlayer = videojs(this.videoNode, { 
             fill: true, 
             playbackRates: [0.5, 1, 1.5, 2], 
+            userActions: {
+                click: false
+            }
         })
         this.delegatePlayer.volume(this.volume)
         this.setPlayState(PlayState.INIT)

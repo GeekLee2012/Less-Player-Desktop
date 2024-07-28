@@ -88,7 +88,7 @@ function getSimpleFileName(fullname, defaultName) {
     fullname = transformPath(fullname)
     const from = fullname.lastIndexOf('/') + 1
     let to = fullname.lastIndexOf('.')
-    if(to <= from) return defaultName
+    //if(to <= from) return defaultName
     to = (to >= 0 ? to : fullname.length)
     return fullname.substring(from, to)
 }

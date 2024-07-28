@@ -12,7 +12,7 @@ import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { coverDefault, ipcRendererInvoke, toYyyymmddHhMmSs } from "../../common/Utils";
+import { coverDefault, ipcRendererInvoke, isSupportedImage, toYyyymmddHhMmSs } from "../../common/Utils";
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
@@ -29,7 +29,7 @@ const { showConfirm } = inject('apiExpose')
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem,
     hideAllCtxMenus, showFailToast, } = useAppCommonStore()
-const { getLocalPlaylist, addToLocalPlaylist,
+const { getLocalPlaylist, addToLocalPlaylist, updateLocalPlaylist, 
     removeFromLocalPlaylist, removeAllFromLocalPlaylist } = useLocalMusicStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { isUseDndForAddLocalTracksEnable, isUseDeeplyScanForDirectoryEnable,
@@ -239,6 +239,24 @@ const onDrop = async (event) => {
     if (!success) showFailToast(msg)
 }
 
+const playlistCoverOnDrop = (event) => {
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length < 1) return
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        const { id, platform, title, tags, about, } = detail
+        const cover = path
+        updateLocalPlaylist(id, title, tags, about, cover) && Object.assign(detail, { cover })
+    } else {
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
+}
+
 const titleRef = ref(null)
 const isTwoLinesTitle = ref(false)
 const setTwoLinesTitle = (value) => isTwoLinesTitle.value = value
@@ -287,7 +305,8 @@ onUpdated(() => {
         @drop.stop="onDrop">
         <div class="header">
             <div>
-                <img class="cover" v-lazy="coverDefault(detail.cover)" />
+                <img class="cover" v-lazy="coverDefault(detail.cover)" 
+                 @dragover="e => e.preventDefault()" @drop="playlistCoverOnDrop" />
             </div>
             <div class="right">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>
