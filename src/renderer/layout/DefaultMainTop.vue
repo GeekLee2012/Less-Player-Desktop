@@ -166,4 +166,9 @@ const switchToSimpleLayout = () => {
     display: flex;
     align-items: center;
 }
+
+.default-main-top .module-btn {
+    transform: translateY(1px);
+    margin-right: 2px;
+}
 </style>

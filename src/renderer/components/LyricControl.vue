@@ -211,8 +211,11 @@ const setLyricLineStyle = (line) => {
     if (!textEl || !textEl.style) return
 
     textEl.style.lineHeight = `${lineHeight}px`
-    textEl.style.marginTop = `${lineSpacing}px`
+    //textEl.style.marginTop = `${lineSpacing}px`
     if(extraTextEl) extraTextEl.style.lineHeight = `${lineHeight}px`
+
+    //行间距
+    line.style.marginTop = `${lineSpacing}px`
 
     //是否为当前高亮行
     const isCurrent = line.classList.contains('current')

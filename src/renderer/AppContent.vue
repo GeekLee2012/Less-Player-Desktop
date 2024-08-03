@@ -11,7 +11,7 @@ import { onEvents, emitEvents } from '../common/EventBusWrapper';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
-  ipcRendererInvoke, ipcRendererBinds, isBlank, toTrimString, } from '../common/Utils';
+  ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, } from '../common/Utils';
 
 
 
@@ -279,7 +279,7 @@ const restoreSetting = (isInit) => {
 }
 
 //注册ipcRenderer消息监听器
-ipcRendererBinds({
+onIpcRendererEvents({
   'app-active': () => {
     hideEmptyToast()
   },

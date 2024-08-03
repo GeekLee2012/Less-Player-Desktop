@@ -262,10 +262,16 @@ watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
                         <p><b>歌手:</b> <span class="artist">{{ artistName || '未知歌手' }} </span></p>
                     </div>
                     <div class="info-row">
+                        <!--
                         <span class="col1"><b>发行时间:</b> {{ publishTime || '未知' }} </span>
+                        -->
+                        <p class="col1"><b>发行时间:</b> {{ publishTime || '未知' }} </p>
                     </div>
                     <div class="info-row">
+                        <!--
                         <span class="col2"><b>发行公司:</b> {{ company || '未知' }}</span>
+                        -->
+                        <p class="col2"><b>发行公司:</b> {{ company || '未知' }}</p>
                     </div>
                 </div>
                 <div class="action">
@@ -356,8 +362,8 @@ watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
 }
 
 #album-detail-view .header .info {
-    margin-top: 20px;
-    margin-bottom: 43px;
+    margin-top: 10px;
+    margin-bottom: 50px;
     /*font-size: 16px;*/
     text-align: left;
 }
@@ -365,11 +371,12 @@ watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
 
 #album-detail-view .header .short-info {
     margin-top: 10px;
-    margin-bottom: 13px;
+    margin-bottom: 10px;
 }
 
 #album-detail-view .header .info-row {
-    margin-top: 10px;
+    /*margin-top: 10px;*/
+    margin-top: 6px;
 }
 
 #album-detail-view .header .info-row span {
@@ -383,6 +390,8 @@ watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 #album-detail-view .header .info-row b {
@@ -402,6 +411,8 @@ watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
 #album-detail-view .action {

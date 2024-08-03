@@ -206,4 +206,8 @@ const toggleRadioMode = () => {
 .classic-main-top .last-btn {
     margin-right: 0px !important;
 }
+
+.classic-main-top #module-btn {
+    transform: translateY(1px);
+}
 </style>

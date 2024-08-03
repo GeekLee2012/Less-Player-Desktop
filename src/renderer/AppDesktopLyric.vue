@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import Mousetrap from 'mousetrap';
 import { randomTextWithinAlphabetNums, smoothScroll, smoothScrollHorizional,
-  ipcRendererSend as sendToMain, ipcRendererBind,
+  ipcRendererSend as sendToMain, onIpcRendererEvent,
   toMMssSSS, toMillis } from '../common/Utils';
 import { Track } from '../common/Track';
 
@@ -349,7 +349,7 @@ const setupMessagePort = (callback) => {
 const setupMessagePort = (callback) => {
   //Desktop Lyric Message Port
   const pairChannel = 'DLMP_' + randomTextWithinAlphabetNums(11)
-  ipcRendererBind(pairChannel, event => {
+  onIpcRendererEvent(pairChannel, event => {
     messagePort = event.ports[0]
 
     messagePort.onmessage = (event) => {

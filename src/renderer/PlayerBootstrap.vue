@@ -13,7 +13,7 @@ import {
     useStartDrag, useDownloadsPath, 
     tryCall, toTrimString, useTrayAction,
     ipcRendererSend, ipcRendererInvoke, 
-    ipcRendererBind, ipcRendererBinds, toMmss, md5,
+    onIpcRendererEvent, onIpcRendererEvents, toMmss, md5,
 } from '../common/Utils';
 import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
@@ -1088,6 +1088,118 @@ const quickSearch = () => {
     })
 }
 
+//设置音频输出设备
+const setupOutputDevices = () => {
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+        const audioOutputDevices = devices.filter(device => (device.kind == 'audiooutput'))
+        setAudioOutputDevices(audioOutputDevices)
+
+        //检查并设置音频输出设备
+        const index = audioOutputDevices.findIndex(item => (item.deviceId == selectedAudioOutputDeviceId.value))
+        if (index < 0) setAudioOutputDeviceId(audioOutputDevices[0].deviceId)
+        else setupAudioOutputDevice()
+    })
+}
+
+
+//拖拽保存 - 图片、歌词、歌曲
+//应用场景：播放页、歌曲列表
+const getPreferredDndSavePath = ({ platform, url }) => {
+    let savePath = getDndSavePath() || useDownloadsPath()
+    if (isLocalMusic(platform) && !isBlank(url)) { //本地歌曲默认下载到：歌曲所在目录
+        const _url = url.replace(FILE_PREFIX, '')
+        const index = _url.lastIndexOf('/')
+        savePath = _url.slice(0, index)
+    }
+    return savePath
+}
+
+//item对象必须具有属性: { platform, title, cover }
+const dndSaveCover = async (event, item) => {
+    if (!isDndSaveEnable.value) return
+    if (event) event.preventDefault()
+    if (!startDrag) return showFailToast('当前操作异常')
+
+    const track = currentTrack.value
+    // Track、Playlist、Artist、Album等类型的封面图片
+    item = item || track
+    if (!Track.hasCover(item)) return
+    const { cover } = item
+
+    const dndSavePath = getPreferredDndSavePath(item)
+    if (!dndSavePath) return showFailToast('当前操作异常')
+
+    const normalName = Track.normalName(item)
+    const file = `${dndSavePath}/${normalName}.png`
+    startDrag({ file, type: 'image', url: cover })
+}
+
+const dndSaveLyric = async (event, track) => {
+    track = track || currentTrack.value
+    if (!track) return
+    if (!isDndSaveEnable.value) return
+
+    if (event) event.preventDefault()
+    if (!startDrag) return showFailToast('当前操作异常')
+
+    const dndSavePath = getPreferredDndSavePath(track)
+    if (!dndSavePath) return showFailToast('当前操作异常')
+    if (!Track.hasLyric(track)) return
+
+    const normalName = Track.normalName(track)
+    const file = `${dndSavePath}/${normalName}.lrc`
+    const { lyric } = track
+    const data = Lyric.stringify(lyric)
+    startDrag({ file, type: 'lyric', data })
+}
+
+const dndSaveTrack = async (event, track) => {
+    if (!isDndSaveEnable.value) return
+    //if (event) event.preventDefault()
+    if (!track) return
+    if (!startDrag) return showFailToast('当前操作异常')
+
+    track = toRaw(track)
+    const dndSavePath = getPreferredDndSavePath(track)
+    if (!dndSavePath) return showFailToast('当前操作异常')
+
+    const { platform } = track
+    if (isLocalMusic(platform)) return showFailToast('当前为本地歌曲')
+    if (Playlist.isFMRadioType(track)) return
+
+    if (!Track.hasUrl(track)) { //TODO 网络请求，操作响应有些滞后
+        await bootstrapTrackWithTransfer(track)
+    }
+    if (!Track.hasUrl(track) && !track.exurl) return showFailToast('当前歌曲无法下载')
+    const { url, exurl } = track
+
+    const normalName = escapeHtml(Track.normalName(track))
+    const suffix = Track.suffix(track) || '.mp3'
+    const file = `${dndSavePath}/${normalName}${suffix}`
+    const _url = (url || exurl)
+    startDrag({ file, name: normalName, type: 'audio', url: _url, useDefaultIcon: true })
+}
+
+const dndSaveVideo = async (event, video) => {
+    if (!isDndSaveEnable.value) return
+    if (event) event.preventDefault()
+    video = toRaw(video)
+    if (!video) return
+    if (!startDrag) return showFailToast('当前操作异常')
+
+    const dndSavePath = getPreferredDndSavePath(video)
+    if (!dndSavePath) return showFailToast('当前操作异常')
+
+    if (!Track.hasUrl(video)) return showFailToast('当前视频无法下载')
+    const { title, url } = video
+
+    const suffix = '.mp4'
+    const file = `${dndSavePath}/${title}${suffix}`
+    startDrag({ file, name: title, type: 'video', url })
+}
+
+
+
 //注册ipcRenderer消息监听器
 const { RESTORE, PLAY, PAUSE,  PLAY_PREV, PLAY_NEXT, 
         HOME, USERHOME, SETTING, 
@@ -1097,7 +1209,7 @@ const { RESTORE, PLAY, PAUSE,  PLAY_PREV, PLAY_NEXT,
         PLUGINS, CHECK_FOR_UPDATES, 
     } = useTrayAction()
     
-ipcRendererBinds({
+onIpcRendererEvents({
     //Tray事件
     'tray-action': (event, action) => {
         //TODO 视频播放中，暂时不允许中断
@@ -1216,24 +1328,26 @@ ipcRendererBinds({
 })
 
 const handleStartupPlay = () => {
-    ipcRendererBind('app-startup-playTracks', (event, tracks) => {
-        if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
-        //addAndPlayTracks(tracks, false, '即将为您播放歌曲')
-        //紧跟在当前歌曲后面播放，不扰乱当前播放列表进度
-        tracks.forEach(track => playTrackLater(track))
-        playTrack(tracks[0])
-        showToast('即将为您播放歌曲')
-        ipcRendererSend('app-startup-playDone', tracks)
-    })
-    ipcRendererBind('app-startup-playVideos', (event, videos) => {
-        if (!videos || !Array.isArray(videos) || videos.length < 1) return
-        
-        resetVideoQueue()
-        videos.forEach(addVideo)
-        playNextVideo()
+    onIpcRendererEvents({
+        'app-startup-playTracks': (event, tracks) => {
+            if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
+            //addAndPlayTracks(tracks, false, '即将为您播放歌曲')
+            //紧跟在当前歌曲后面播放，不扰乱当前播放列表进度
+            tracks.forEach(track => playTrackLater(track))
+            playTrack(tracks[0])
+            showToast('即将为您播放歌曲')
+            ipcRendererSend('app-startup-playDone', tracks)
+        },
+        'app-startup-playVideos': (event, videos) => {
+            if (!videos || !Array.isArray(videos) || videos.length < 1) return
+            
+            resetVideoQueue()
+            videos.forEach(addVideo)
+            playNextVideo()
 
-        showToast(videos.length > 1 ? '即将为您播放视频合集' : '即将为您播放视频')
-        ipcRendererSend('app-startup-playDone', videos)
+            showToast(videos.length > 1 ? '即将为您播放视频合集' : '即将为您播放视频')
+            ipcRendererSend('app-startup-playDone', videos)
+        },
     })
     ipcRendererSend('app-startup-playReady')
 }
@@ -1241,7 +1355,7 @@ const handleStartupPlay = () => {
 
 let messagePort = null
 const setupMessagePort = (channel, callback) => {
-    ipcRendererBind(channel, event => {
+    onIpcRendererEvent(channel, event => {
         messagePort = event.ports[0]
 
         messagePort.onmessage = (event) => {
@@ -1288,120 +1402,9 @@ const reloadApp = () => {
     showToast('即将为您刷新播放器')
     if (playing.value) setPendingPlay(true)
     setPendingPlayPercent(progressState.value)
-    setTimeout(() => {
-        ipcRendererSend('app-reload')
-    }, 1888)
+    setTimeout(() => ipcRendererSend('app-reload'), 1888)
 }
 
-//设置音频输出设备
-const setupOutputDevices = () => {
-    navigator.mediaDevices.enumerateDevices().then(devices => {
-        const audioOutputDevices = devices.filter(device => (device.kind == 'audiooutput'))
-        setAudioOutputDevices(audioOutputDevices)
-
-        //检查并设置音频输出设备
-        const index = audioOutputDevices.findIndex(item => (item.deviceId == selectedAudioOutputDeviceId.value))
-        if (index < 0) setAudioOutputDeviceId(audioOutputDevices[0].deviceId)
-        else setupAudioOutputDevice()
-    })
-}
-
-
-//拖拽保存 - 图片、歌词、歌曲
-//应用场景：播放页、歌曲列表
-const getPreferredDndSavePath = ({ platform, url }) => {
-    let savePath = getDndSavePath() || useDownloadsPath()
-    if (isLocalMusic(platform) && !isBlank(url)) { //本地歌曲默认下载到：歌曲所在目录
-        const _url = url.replace(FILE_PREFIX, '')
-        const index = _url.lastIndexOf('/')
-        savePath = _url.slice(0, index)
-    }
-    return savePath
-}
-
-//item对象必须具有属性: { platform, title, cover }
-const dndSaveCover = async (event, item) => {
-    if (!isDndSaveEnable.value) return
-    if (event) event.preventDefault()
-    if (!startDrag) return showFailToast('当前操作异常')
-
-    const track = currentTrack.value
-    // Track、Playlist、Artist、Album等类型的封面图片
-    item = item || track
-    if (!Track.hasCover(item)) return
-    const { cover } = item
-
-    const dndSavePath = getPreferredDndSavePath(item)
-    if (!dndSavePath) return showFailToast('当前操作异常')
-
-    const normalName = Track.normalName(item)
-    const file = `${dndSavePath}/${normalName}.png`
-    startDrag({ file, type: 'image', url: cover })
-}
-
-const dndSaveLyric = async (event, track) => {
-    track = track || currentTrack.value
-    if (!track) return
-    if (!isDndSaveEnable.value) return
-
-    if (event) event.preventDefault()
-    if (!startDrag) return showFailToast('当前操作异常')
-
-    const dndSavePath = getPreferredDndSavePath(track)
-    if (!dndSavePath) return showFailToast('当前操作异常')
-    if (!Track.hasLyric(track)) return
-
-    const normalName = Track.normalName(track)
-    const file = `${dndSavePath}/${normalName}.lrc`
-    const { lyric } = track
-    const data = Lyric.stringify(lyric)
-    startDrag({ file, type: 'lyric', data })
-}
-
-const dndSaveTrack = async (event, track) => {
-    if (!isDndSaveEnable.value) return
-    //if (event) event.preventDefault()
-    if (!track) return
-    if (!startDrag) return showFailToast('当前操作异常')
-
-    track = toRaw(track)
-    const dndSavePath = getPreferredDndSavePath(track)
-    if (!dndSavePath) return showFailToast('当前操作异常')
-
-    const { platform } = track
-    if (isLocalMusic(platform)) return showFailToast('当前为本地歌曲')
-    if (Playlist.isFMRadioType(track)) return
-
-    if (!Track.hasUrl(track)) { //TODO 网络请求，操作响应有些滞后
-        await bootstrapTrackWithTransfer(track)
-    }
-    if (!Track.hasUrl(track) && !track.exurl) return showFailToast('当前歌曲无法下载')
-    const { url, exurl } = track
-
-    const normalName = escapeHtml(Track.normalName(track))
-    const suffix = Track.suffix(track) || '.mp3'
-    const file = `${dndSavePath}/${normalName}${suffix}`
-    const _url = (url || exurl)
-    startDrag({ file, name: normalName, type: 'audio', url: _url, useDefaultIcon: true })
-}
-
-const dndSaveVideo = async (event, video) => {
-    if (!isDndSaveEnable.value) return
-    if (event) event.preventDefault()
-    video = toRaw(video)
-    if (!video) return
-    if (!startDrag) return showFailToast('当前操作异常')
-
-    const dndSavePath = getPreferredDndSavePath(video)
-    if (!dndSavePath) return showFailToast('当前操作异常')
-
-    if (!Track.hasUrl(video)) return showFailToast('当前视频无法下载')
-    const { title, url } = video
-
-    const suffix = '.mp4'
-    const file = `${dndSavePath}/${title}${suffix}`
-    startDrag({ file, name: title, type: 'video', url })
-}
 
 //EventBus监听注册，统一管理
 onEvents({

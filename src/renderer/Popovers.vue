@@ -512,14 +512,11 @@ watch(() => getCurrentTheme(), (nv) => {
   z-index: 55;
   background-color: var(--app-bg-color);
   background-image: var(--app-bg-image);
-  /*
-  box-shadow: 0px 0px 10px var(--border-popovers-border-color);
-  */
   box-shadow: var(--box-shadow);
 }
 
 #playback-queue-view {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0px;
   width: 335px;
@@ -534,7 +531,7 @@ watch(() => getCurrentTheme(), (nv) => {
 
 #playing-view,
 #video-playing-view {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0px;
   width: 100%;
@@ -546,7 +543,7 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #playing-theme-list-view {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0px;
   width: 335px;
@@ -560,7 +557,7 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #custom-playing-theme-edit-view {
-  position: absolute;
+  position: fixed;
   right: 30px;
   bottom: 80px;
   width: 768px;
@@ -576,7 +573,7 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #sound-effect-view {
-  position: absolute;
+  position: fixed;
   right: 30px;
   bottom: 80px;
   width: 725px;
@@ -587,7 +584,7 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #lyric-toolbar {
-  position: absolute;
+  position: fixed;
   top: 202px;
   right: 30px;
   z-index: 99;
@@ -596,7 +593,7 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #random-music-toolbar {
-  position: absolute;
+  position: fixed;
   bottom: 128px;
   right: 30px;
   z-index: 99;
@@ -605,7 +602,7 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #custom-theme-edit-view {
-  position: absolute;
+  position: fixed;
   right: 30px;
   bottom: 80px;
   width: 768px;
@@ -617,7 +614,7 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #color-picker-toolbar {
-  position: absolute;
+  position: fixed;
   left: 50%;
   bottom: 125px;
   z-index: 101;
@@ -627,11 +624,11 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #gradient-color-toolbar {
-  width: 768px;
-  height: 568px;
-  position: absolute;
+  position: fixed;
   left: 50%;
   bottom: 125px;
+  width: 768px;
+  height: 568px;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
@@ -639,11 +636,11 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #playlist-export-toolbar {
-  width: 520px;
-  height: 211px;
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 50%;
+  width: 520px;
+  height: 211px;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
@@ -656,7 +653,7 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #popovers .common-ntf {
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 50%;
 }
@@ -667,6 +664,8 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #popovers .common-ntf .ntf-text {
+  max-height: calc(var(--ntf-height) - 50px);
+  width: calc(var(--ntf-width) - 30px);
   overflow: hidden;
   word-wrap: break-word;
   line-break: anywhere;
@@ -675,8 +674,6 @@ watch(() => getCurrentTheme(), (nv) => {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  max-height: calc(var(--ntf-height) - 50px);
-  width: calc(var(--ntf-width) - 30px);
 }
 
 #popovers .common-ctx-menu,
@@ -711,11 +708,11 @@ watch(() => getCurrentTheme(), (nv) => {
 }
 
 #popovers .popover-hint .ntf-text div {
-  text-align: left;
-  align-items: center;
   min-width: 20px;
   max-width: 520px;
   width: max-content !important;
   height: auto !important;
+  text-align: left;
+  align-items: center;
 }
 </style>

@@ -50,15 +50,15 @@ const nextPage = () => {
 
 //TODO
 const loadCategories = async () => {
+    categories.length = 0
+    orders.length = 0
+    setWhiteWrap(false)
     setLoadingCategories(true)
     setLoadingContent(true)
     
-    categories.length = 0
-    orders.length = 0
-    
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
-    let cachedWhiteWrap = currentPlatformWhiteWrap()
+    let cachedWhiteWrap = currentPlatformWhiteWrap() || false
     if (!cachedCates) {
         const vendor = currentVender()
         if (!vendor || !vendor.radioCategories) return
@@ -66,12 +66,13 @@ const loadCategories = async () => {
         if (!result) return
 
         const { data, platform, orders, multiMode, isWhiteWrap } = result
+        if (currentPlatformCode.value != platform || !data) return
+
         const multiSelectMode = (multiMode === true)
         cachedCates = { data, multiSelectMode }
         cachedOrders = orders
         cachedWhiteWrap = isWhiteWrap
 
-        if (!cachedCates) return
         putCategories(platform, cachedCates)
         if (cachedOrders) putOrders(platform, cachedOrders)
         putWhiteWrap(platform, isWhiteWrap)
@@ -129,7 +130,7 @@ const scrollToLoad = () => {
 }
 
 const loadPageContent = async ({ offset, page, limit }) => {
-    const isNormalType = getPaginationStyleIndex.value === 0
+    const isNormalType = (getPaginationStyleIndex.value === 0)
     if (isNormalType) resetScrollState()
     return loadContent((!isNormalType && page > 1), offset, limit, page)
 }

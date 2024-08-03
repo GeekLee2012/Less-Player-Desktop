@@ -8,7 +8,7 @@ import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { isWinOS, useGitRepository, toTrimString, toLowerCaseTrimString,
-    ipcRendererSend, ipcRendererInvoke, ipcRendererBind,
+    ipcRendererSend, ipcRendererInvoke, onIpcRendererEvent,
 } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
@@ -89,6 +89,7 @@ const { setThemeIndex,
     toggleUseOnlineCover,
     toggleUseDndForCreateLocalPlaylist,
     toggleUseDndForAddLocalTracks,
+    toggleUseDndForExportLocalPlaylist,
     setLimitPerPageForLocalPlaylist,
     toggleLocalMusicHomepageTipsShow,
     toggleFreeFMHomepageTipsShow,
@@ -391,7 +392,7 @@ const startDownload = async () => {
         return
     }
     setDownloadState(1)
-    ipcRendererBind('download-progressing', (e, item) => {
+    onIpcRendererEvent('download-progressing', (e, item) => {
         const { url, savePath, received, total } = item
         localSavePath = savePath
         updateDownloadProgress(received, total)
@@ -861,6 +862,13 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                         <ToggleControl @click="toggleUseDndForAddLocalTracks" :value="track.useDndForAddLocalTracks">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：歌单页有效；支持目录、音频文件</div>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">允许拖拽方式，导出歌单：</span>
+                        <ToggleControl @click="toggleUseDndForExportLocalPlaylist"
+                            :value="track.useDndForExportLocalPlaylist">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：首页图文控件有效；</div>
                     </div>
                     <div class="last">
                         <span class="cate-subtitle">歌单分页时，每页记录数：</span>

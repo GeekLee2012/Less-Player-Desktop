@@ -72,7 +72,7 @@ const loadCategories = async () => {
     resetOrder()
     let cachedCates = currentPlatformCategories()
     let cachedOrders = currentPlatformOrders()
-    let cachedWhiteWrap = currentPlatformWhiteWrap()
+    let cachedWhiteWrap = currentPlatformWhiteWrap() || false
     if (!cachedCates) {
         const vendor = currentVender()
         if (!vendor || !vendor.categories) return
@@ -83,10 +83,12 @@ const loadCategories = async () => {
         if (!result || result.data.length < 1) return
 
         const { platform, data, orders, isWhiteWrap } = result
+        if (currentPlatformCode.value != platform || !data) return
+    
         cachedCates = data
         cachedOrders = orders
         cachedWhiteWrap = isWhiteWrap
-        if (!cachedCates) return
+
         putCategories(platform, cachedCates)
         if (cachedOrders) putOrders(platform, orders)
         putWhiteWrap(platform, isWhiteWrap)
@@ -115,9 +117,7 @@ const loadContent = async (noLoadingMask, offset, limit, page) => {
     if (currentPlatformCode.value != rPlatform) return
     if (toTrimString(currentCategoryCode.value) != toTrimString(rCate)) return
 
-    if (rOrder && order != rOrder) {
-        updateCurrentOrderByValue(rOrder)
-    }
+    if (rOrder && order != rOrder) updateCurrentOrderByValue(rOrder)
 
     setAlbumType(dataType)
     if (isAlbumType) {

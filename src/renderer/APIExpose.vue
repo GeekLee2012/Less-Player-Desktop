@@ -66,6 +66,17 @@ const visitLink = (url) => {
     return !isBlank(url) && ipcRendererSend('visit-link', transformUrl(url))
 }
 
+const onWatches = (arr) => {
+    if(!arr || !Array.isArray(arr) || !arr.length < 1) {
+        throw new Error('parameter type error: not a valid array')
+    }
+    arr.forEach((source, callback, options) => {
+        if(!source) return
+        if(!callback || typeof callback != 'function') return
+        watch(source, callback, options)
+    })
+}
+
 /* 开放API */
 const APIEvents = {
     TRACK_GET_PLAY_URL: 'TRACK_GET_PLAY_URL',

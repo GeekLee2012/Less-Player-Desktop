@@ -403,8 +403,13 @@ onEvents({
 }
 
 #playlist-detail-view .header .short-about {
+    /*
     height: 105px;
     -webkit-line-clamp: 4;
+    */
+    height: 80px;
+    margin-bottom: 23px;
+    -webkit-line-clamp: 3;
 }
 
 #playlist-detail-view .header .cover {

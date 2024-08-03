@@ -28,6 +28,10 @@ const props = defineProps({
     refreshAllPendingMark: Number,
     videoStyle: Boolean,
     tileOnDropFn: Function,
+    draggable: Boolean,
+    tileOnDragStartFn: Function,
+    tileOnDragEnterFn: Function,
+    tileOnDragEndFn: Function,
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
@@ -105,7 +109,10 @@ const computedTileOnDrop = computed(() => {
                     :coverFit="item.coverFit" :ignoreCheckAllEvent="ignoreCheckAllEvent"
                     :checkChangedFn="(checked) => checkChangedFn(checked, item)"
                     @dragover="e => e.preventDefault()" 
-                    @drop="(event) => computedTileOnDrop(event, item, index)">
+                    @drop="(event) => (tileOnDropFn && tileOnDropFn(event, item, index))"
+                    :draggable="draggable" @dragstart="(event) => (tileOnDragStartFn && tileOnDragStartFn(event, item, index))"
+                    @dragenter="(event) => (tileOnDragEnterFn && tileOnDragEnterFn(event, item, index))"
+                    @dragend="(event) => (tileOnDragEndFn && tileOnDragEndFn(event, item, index))">
                 </ImageTextTile>
             </template>
             <template #loading1>

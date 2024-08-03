@@ -164,6 +164,8 @@ export const useSettingStore = defineStore('setting', {
             useDndForCreateLocalPlaylist: true,
             //启用Dnd操作，为本地歌单添加歌曲
             useDndForAddLocalTracks: true,
+            //启用Dnd操作，导出本地歌单
+            useDndForExportLocalPlaylist: true,
             //普通分页，本地歌曲每页记录数
             limitPerPageForLocalPlaylist: 30,
             //本地歌曲首页提示
@@ -558,10 +560,12 @@ export const useSettingStore = defineStore('setting', {
         },
         isUseDndForCreateLocalPlaylistEnable() {
             return this.track.useDndForCreateLocalPlaylist
-        }
-        ,
+        },
         isUseDndForAddLocalTracksEnable() {
             return this.track.useDndForAddLocalTracks
+        },
+        isUseDndForExportLocalPlaylistEnable() {
+            return this.track.useDndForExportLocalPlaylist
         },
         getLimitPerPageForLocalPlaylist() {
             return this.track.limitPerPageForLocalPlaylist
@@ -893,6 +897,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleUseDndForAddLocalTracks() {
             this.track.useDndForAddLocalTracks = !this.track.useDndForAddLocalTracks
+        },
+        toggleUseDndForExportLocalPlaylist() {
+            this.track.useDndForExportLocalPlaylist = !this.track.useDndForExportLocalPlaylist
         },
         setLimitPerPageForLocalPlaylist(value) {
             value = parseInt(value || 30)

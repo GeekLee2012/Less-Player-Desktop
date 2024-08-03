@@ -64,10 +64,14 @@ const loadCategories = async () => {
         if (!vendor || !vendor.artistCategories) return
         const result = await vendor.artistCategories()
         if (!result) return
-        result.data.push(result.alphabet)
+        const { platform, alphabet,  } = result
+        if (currentPlatformCode.value != platform) return
+
+        result.data.push(alphabet)
         cached = result.data
-        putCategory(result.platform, cached)
-        putAlphabet(result.platform, result.alphabet)
+        
+        putCategory(platform, cached)
+        putAlphabet(platform, alphabet)
     }
 
     categories.push(...cached)

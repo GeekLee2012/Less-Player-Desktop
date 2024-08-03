@@ -49,21 +49,21 @@ export const isIpcRendererSupported = () => {
     return ipcRenderer ? true : false
 }
 
-export const ipcRendererBind = (channel, handler) => {
+export const onIpcRendererEvent = (channel, handler) => {
     const ipcRenderer = useIpcRenderer()
     if(!ipcRenderer) return 
     if(!handler || typeof handler != 'function') return
     ipcRenderer.on(channel, handler)
 }
 
-export const ipcRendererBinds = (registration) => {
+export const onIpcRendererEvents = (registration) => {
     const ipcRenderer = useIpcRenderer()
     if(!ipcRenderer) return
     if(!registration || typeof registration != 'object') {
         throw new Error('parameter type error: not a object')
     }
     Object.entries(registration).forEach(([channel, handler]) => {
-        ipcRendererBind(channel, handler)
+        onIpcRendererEvent(channel, handler)
     })
 }
 

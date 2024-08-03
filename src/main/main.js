@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain,
   shell, powerSaveBlocker, Tray,
   globalShortcut, session, utilityProcess,
   protocol, nativeTheme, MessageChannelMain,
+  nativeImage, 
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
@@ -339,6 +340,10 @@ const handleStartupPlay = (argv) => {
 const setupTray = (forceShow) => {
   if (appTrayShow || forceShow) {
     if (appTray) appTray.destroy()
+    /*
+    const icon = nativeImage.createFromPath(path.join(__dirname, APP_ICON))
+    appTray = new Tray(icon)
+    */
     appTray = new Tray(path.join(__dirname, APP_ICON))
     appTrayMenu = Menu.buildFromTemplate(initTrayMenuTemplate())
     appTray.setContextMenu(appTrayMenu)

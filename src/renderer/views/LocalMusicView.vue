@@ -6,7 +6,7 @@ export default {
 </script>
 
 <script setup>
-import { inject, onMounted, ref } from 'vue';
+import { inject, onMounted, ref, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
 import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
 import { useLocalMusicStore } from '../store/localMusicStore';
@@ -26,11 +26,11 @@ const { showConfirm } = inject('apiExpose')
 const { localPlaylists, importTaskCount } = storeToRefs(useLocalMusicStore())
 const { addLocalPlaylist, updateLocalPlaylist, resetAll,
     increaseImportTaskCount, decreaseImportTaskCount } = useLocalMusicStore()
-const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
+const { showToast, showFailToast, hideAllCtxMenus, showPlaylistExportToolbar } = useAppCommonStore()
 const { isUseDndForCreateLocalPlaylistEnable,
     isUseDeeplyScanForDirectoryEnable,
     isShowDialogBeforeClearLocalMusics,
-    isLocalMusicHomepageTipsShow, } = storeToRefs(useSettingStore())
+    isLocalMusicHomepageTipsShow, isUseDndForExportLocalPlaylistEnable, } = storeToRefs(useSettingStore())
 
 const localMusicRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -138,6 +138,13 @@ const playlistOnDrop = (event, item, index) => {
     if (isEventStopped) event.stopPropagation()
 }
 
+const playlistOnDrag = (event, item, index) => {
+    const { title, data } = item || { }
+    if(!title || !data) return
+    const exportCfg = { data: [{ title, data: toRaw(data)}], noJson: true, title: '导出本地歌单' }
+    showPlaylistExportToolbar(exportCfg)
+}
+
 onMounted(() => {
     resetBack2TopBtn()
 })
@@ -181,7 +188,7 @@ onMounted(() => {
                 <div class="size-text content-text-highlight">歌单列表({{ localPlaylists.length }})</div>
             </div>
             <PlaylistsControl :data="localPlaylists" :customLoadingCount="importTaskCount"
-                :tileOnDropFn="playlistOnDrop">
+                :tileOnDropFn="playlistOnDrop" :draggable="isUseDndForExportLocalPlaylistEnable" :tileOnDragEndFn="playlistOnDrag">
             </PlaylistsControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
