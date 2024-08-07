@@ -25,26 +25,27 @@ class RadioPlayer {
     }
 
     static create() {
-        if(singleton) return singleton
-        singleton = new RadioPlayer()
-            .initWebAudio()
-            .on({
-                //'radio-init': value => singleton._createWebAudioApi(value)
-                'radio-channelChange': value => singleton.setChannel(value),
-                'radio-play': value => singleton.playChannel(value),
-                'radio-togglePlay': () => singleton.togglePlay(),
-                'volume-set': value => singleton.volume(value),
-                'radio-stop': () => singleton.setChannel(null),
-                'playbackQueue-empty': () => singleton.setChannel(null),
-                'track-changed': () => singleton.setChannel(null),
-                'track-play': () => singleton.setChannel(null),
-                'track-restore': value => singleton.setChannel(value),
-                'track-setupSoundEffect': value => singleton.setupSoundEffect(value),
-                'track-updateStereoPan': value => singleton.updateStereoPan(value),
-                'track-updateVolumeGain': value => singleton.updateVolumeGain(value),
-                'track-stateRefreshFrequency': value => singleton.stateRefreshFrequency = value,
-                'track-spectrumRefreshFrequency': value => singleton.spectrumRefreshFrequency = value,
-            })
+        if(!singleton) {
+            singleton = new RadioPlayer()
+                .initWebAudio()
+                .on({
+                    //'radio-init': value => singleton._createWebAudioApi(value)
+                    'radio-channelChange': value => singleton.setChannel(value),
+                    'radio-play': value => singleton.playChannel(value),
+                    'radio-togglePlay': () => singleton.togglePlay(),
+                    'volume-set': value => singleton.volume(value),
+                    'radio-stop': () => singleton.setChannel(null),
+                    'playbackQueue-empty': () => singleton.setChannel(null),
+                    'track-changed': () => singleton.setChannel(null),
+                    'track-play': () => singleton.setChannel(null),
+                    'track-restore': value => singleton.setChannel(value),
+                    'track-setupSoundEffect': value => singleton.setupSoundEffect(value),
+                    'track-updateStereoPan': value => singleton.updateStereoPan(value),
+                    'track-updateVolumeGain': value => singleton.updateVolumeGain(value),
+                    'track-stateRefreshFrequency': value => singleton.stateRefreshFrequency = value,
+                    'track-spectrumRefreshFrequency': value => singleton.spectrumRefreshFrequency = value,
+                })
+        }
         return singleton
     }
 
@@ -92,17 +93,13 @@ class RadioPlayer {
     }
 
     togglePlay() {
-        if (this.playing()) {
-            this.pause()
-        } else {
-            this.play()
-        }
+        this.playing() ? this.pause() : this.play()
     }
 
     setState(state) {
         this.playState = state
         const { channel: track } = this
-        this.notify('radio-state', { state, track, currentTime: 0, radio: true })
+        return this.notify('radio-state', { state, track, currentTime: 0, radio: true })
     }
 
     setChannel(channel) {
@@ -110,11 +107,11 @@ class RadioPlayer {
         this.hls.stopLoad()
         this.channel = channel
         this.channelChanged = true
+        return this
     }
 
     playChannel(channel) {
-        this.setChannel(channel)
-        this.play()
+        this.setChannel(channel).play()
     }
 
     volume(value) {
@@ -123,7 +120,7 @@ class RadioPlayer {
     }
 
     _step() {
-        if (!this.playing()) return
+        if (!this.playing()) return 
 
         const nowTime = Date.now()
         const currentTime = (nowTime - lastPlayTime) || 0
@@ -161,7 +158,7 @@ class RadioPlayer {
     }
 
     _initWebAudioApi(node) {
-        if (!node) return
+        if (!node) return 
         audioNode = node
         if (this.webAudioApi) return
         this.webAudioApi = createWebAudioApi(new AudioContext(), audioNode)
@@ -173,7 +170,7 @@ class RadioPlayer {
         if (!this.isSpectrumRefreshEnabled()) return
         
         const { leftChannelAnalyser, rightChannelAnalyser, analyser, audioCtx } = this.webAudioApi
-        if (!analyser || !leftChannelAnalyser || !rightChannelAnalyser) return
+        if (!analyser || !leftChannelAnalyser || !rightChannelAnalyser) return this
         
         const { frequencyBinCount: leftFreqBinCount } = leftChannelAnalyser
         const { frequencyBinCount: rightFreqBinCount } = rightChannelAnalyser
@@ -188,11 +185,11 @@ class RadioPlayer {
 
         const { sampleRate } = audioCtx
         this.notify('track-spectrumData', { 
-            leftFreqData, leftFreqBinCount, 
-            rightFreqData, rightFreqBinCount, 
-            freqData, freqBinCount, sampleRate, 
-            analyser, leftChannelAnalyser, rightChannelAnalyser 
-        })
+                leftFreqData, leftFreqBinCount, 
+                rightFreqData, rightFreqBinCount, 
+                freqData, freqBinCount, sampleRate, 
+                analyser, leftChannelAnalyser, rightChannelAnalyser 
+            })
     }
 
     updateEQ(values) {

@@ -1,10 +1,10 @@
 <script setup>
-import { reactive, } from 'vue';
+import { onActivated, onDeactivated, onMounted, onUnmounted, reactive, } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useRadioSquareStore } from '../store/radioSquareStore';
 import CategoryBarLoadingMask from './CategoryBarLoadingMask.vue';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -19,9 +19,16 @@ const props = defineProps({
     isWhiteWrap: Boolean
 })
 
+let lastToggleTime = -1
 const toggleCategory = () => {
+    const _now = Date.now()
+    const distance = _now - lastToggleTime
+    if(distance < 1000) return
+
     hidePlaybackQueueView()
     toggleRadioCategoryView()
+
+    lastToggleTime = _now
 }
 
 const isDiffCate = (item, row, col) => {
@@ -81,13 +88,18 @@ const isItemActive = (item) => {
         && item.col == currentCategoryItem.value.col
 }
 
+
+/* 生命周期、监听 */
 //TODO 实现方式很别扭
-onEvents({
+const eventsRegistration = {
+    'radioCategory-toggle': toggleCategory,
     'radioCategory-update': () => {
         flatData.length = 0
         loadFirstCateData()
     },
-})
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

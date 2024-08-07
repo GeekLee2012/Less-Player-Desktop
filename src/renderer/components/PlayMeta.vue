@@ -29,6 +29,8 @@ const trackMeta = (track) => {
     return track.title + artistName
 }
 
+
+/* 生命周期、监听 */
 onMounted(() => {
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
 })
@@ -91,16 +93,29 @@ onMounted(() => {
 }
 
 .play-meta .title-wrap {
-    width: 211px;
+    /*width: 211px;*/
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     margin-left: 10px;
+    overflow: hidden;
 }
 
 .play-meta .audio-title-wrap {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: flex-end;
-    height: 33px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-overflow: ellipsis;
+    text-align: left;
+    word-wrap: break-word;
+    /*height: 33px;*/
+    /*width: 211px;*/
+    width: 100%;
+    height: calc(var(--others-playmeta-height) / 2);
 }
 
 .play-meta .cover-wrap {
@@ -145,15 +160,14 @@ onMounted(() => {
 }
 
 .play-meta .audio-title {
-    /*font-size: 14;*/
     font-size: var(--content-text-subtitle-size);
     text-align: left;
 
-    vertical-align: bottom;
+    vertical-align: middle;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    width: 211px;
+    /*width: 211px;*/
 }
 
 .play-meta .favorite-btn {
@@ -174,14 +188,16 @@ onMounted(() => {
 .play-meta .time-volume-wrap {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
-    width: 211px;
+    justify-content: flex-start;
+    align-items: center;
+    /*width: 211px;*/
+    padding-top: 3px;
     /* justify-content: center; */
 }
 
 .play-meta .audio-time,
 .play-meta .volume-bar {
-    height: 30px;
+    /*height: 30px;*/
     display: flex;
     align-items: center;
 }
@@ -191,7 +207,6 @@ onMounted(() => {
     font-size: 14px;
     font-size: var(--content-text-tip-text-size);
     text-align: left;
-    flex: 1;
 }
 
 .play-meta .volume-bar {

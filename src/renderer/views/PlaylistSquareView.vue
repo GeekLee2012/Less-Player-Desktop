@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, onMounted, reactive, ref, watch } from 'vue';
+import { onActivated, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import PlaylistCategoryBar from '../components/PlaylistCategoryBar.vue';
@@ -10,7 +10,8 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import PlaylistCategoryFlowBtn from '../components/PlaylistCategoryFlowBtn.vue';
 import { toTrimString } from '../../common/Utils';
 import { useSettingStore } from '../store/settingStore';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+
 
 
 //TODO 需要梳理优化, 前期缺少设计，现在全是坑
@@ -180,15 +181,6 @@ const resetFlowBtns = () => {
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
 }
 
-/*-------------- 各种监听 --------------*/
-onMounted(() => {
-    resetCommom()
-    loadCategories()
-})
-
-onActivated(() => {
-    restoreScrollState()
-})
 
 const resetCommom = () => {
     //resetPagination()
@@ -207,14 +199,22 @@ const refreshData = async () => {
 /* 生命周期、监听 */
 watch(currentPlatformCode, (nv, ov) => {
     if (!isPlaylistMode.value) return
-    if (!nv) reurn
+    if (!nv) return
     resetCommom()
     loadCategories()
 })
 
-onEvents({
+const eventsRegistration = {
     'playlistSquare-refresh': refreshData,
+}
+onMounted(() => {
+    onEvents(eventsRegistration)
+    resetCommom()
+    loadCategories()
 })
+
+onUnmounted(() => offEvents(eventsRegistration))
+onActivated(() => restoreScrollState())
 </script>
 
 <template>
@@ -227,7 +227,7 @@ onEvents({
         </PlaylistsControl>
         <AlbumListControl :data="playlists" :loading="isLoadingContent" v-show="isAlbumType">
         </AlbumListControl>
-        <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef">
+        <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef" prefix="playlist">
         </PlaylistCategoryFlowBtn>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>

@@ -145,9 +145,9 @@ const playlistOnDrag = (event, item, index) => {
     showPlaylistExportToolbar(exportCfg)
 }
 
-onMounted(() => {
-    resetBack2TopBtn()
-})
+
+/* 生命周期、监听 */
+onMounted(() => resetBack2TopBtn())
 </script>
 
 <template>

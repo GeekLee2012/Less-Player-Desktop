@@ -9,6 +9,9 @@ export const isVideoEquals = (v1, v2) => {
     return v1.id == v2.id && v1.platform == v2.platform
 }
 
+//RGB三色主题
+export const videoThemeNames = ['vjs-theme-city', 'vjs-theme-forest', 'vjs-theme-sea']
+
 export const useVideoPlayStore = defineStore('videoPlayer', {
     state: () => ({
         playing: false,
@@ -151,7 +154,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             this.playVideoByIndex(this.playingIndex)
         },
         switchVideoThemeIndex() {
-            this.videoThemeIndex = ++this.videoThemeIndex % 2
+            this.videoThemeIndex = ++this.videoThemeIndex % videoThemeNames.length
         },
     },
     persist: {

@@ -82,8 +82,8 @@ const updateProgress = (percent) => {
     percent = percent > 0 ? percent : 0
     percent = percent < 100 ? percent : 100
 
-    progressRef.value.style.width = `${percent}%`
-    thumbRef.value.style.left = `${percent}%`
+    if(progressRef.value) progressRef.value.style.width = `${percent}%`
+    if(thumbRef.value) thumbRef.value.style.left = `${percent}%`
 
     value = (percent / 100).toFixed(2)
 }
@@ -166,6 +166,8 @@ const hideThumb = () => {
     }, delay)
 }
 
+
+/* 生命周期、监听 */
 watch(() => props.value, (nv, ov) => {
     if (onDrag.value || onUserScroll.value) return
     updateProgress(nv, ov)

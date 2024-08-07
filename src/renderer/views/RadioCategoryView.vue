@@ -1,9 +1,9 @@
 <script setup>
-import { reactive } from 'vue';
+import { onMounted, onUnmounted, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRadioSquareStore } from '../store/radioSquareStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -72,13 +72,18 @@ const visitByOrder = (item, index) => {
     }
 }
 
-onEvents({
+
+/* 生命周期、监听 */
+const eventsRegistration = {
     'radioCategory-update': () => {
         updateCategories()
         updateOrders()
     },
     'radioCategory-resetScroll': resetScroll
-})
+}
+
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

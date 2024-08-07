@@ -1,18 +1,20 @@
 <script setup>
-import { onActivated, onMounted, reactive, ref, watch } from 'vue';
+import { onActivated, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import RadioCategoryBar from '../components/RadioCategoryBar.vue';
 import { useRadioSquareStore } from '../store/radioSquareStore';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
+import PlaylistCategoryFlowBtn from '../components/PlaylistCategoryFlowBtn.vue';
 import { useSettingStore } from '../store/settingStore';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
 const squareContentRef = ref(null)
 const back2TopBtnRef = ref(null)
+const playlistCategoryFlowBtnRef = ref(null)
 
 //全部分类
 const categories = reactive([])
@@ -140,14 +142,14 @@ const onScroll = () => {
 }
 
 const markScrollState = () => {
-    if (squareContentRef.value)
-        markScrollTop = squareContentRef.value.scrollTop
+    if (squareContentRef.value) markScrollTop = squareContentRef.value.scrollTop
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
     if (!squareContentRef.value) return
     squareContentRef.value.scrollTop = markScrollTop
+    resetFlowBtns()
 }
 
 const restoreScrollState = () => {
@@ -157,25 +159,17 @@ const restoreScrollState = () => {
     squareContentRef.value.scrollTop = markScrollTop
 }
 
-const resetBack2TopBtn = () => {
+const resetFlowBtns = () => {
+    if (playlistCategoryFlowBtnRef.value) playlistCategoryFlowBtnRef.value.setScrollTarget(squareContentRef.value)
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(squareContentRef.value)
 }
 
 //TODO 后期需要梳理优化
-/*-------------- 各种监听 --------------*/
-onMounted(() => {
-    resetCommom()
-    loadCategories()
-})
-
-onActivated(() => {
-    restoreScrollState()
-})
-
 const resetCommom = () => {
     resetPagination()
     resetScrollState()
-    resetBack2TopBtn()
+    //resetBack2TopBtn()
+    resetFlowBtns()
 }
 
 const refreshAllPendingMark = ref(0)
@@ -185,15 +179,25 @@ const refreshData = () => {
     //loadContent()
 }
 
+
+/* 生命周期、监听 */
 watch(currentPlatformCode, (nv, ov) => {
     if (!isRadioMode.value) return
     resetCommom()
     loadCategories()
 })
 
-onEvents({
+const eventsRegistration = {
     'radioSquare-refresh': refreshData,
+}
+onMounted(() => {
+    onEvents(eventsRegistration)
+    resetCommom()
+    loadCategories()
 })
+
+onActivated(() => restoreScrollState())
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
@@ -204,6 +208,8 @@ onEvents({
             :paginationStyleType="getPaginationStyleIndex" :nextPagePendingMark="nextPagePendingMark"
             :refreshAllPendingMark="refreshAllPendingMark">
         </PlaylistsControl>
+        <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef" prefix="radio">
+        </PlaylistCategoryFlowBtn>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>

@@ -12,6 +12,7 @@ import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
   ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, } from '../common/Utils';
+import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 
 
 
@@ -27,7 +28,7 @@ const { quickSearch } = inject('player')
 const currentAppLayout = shallowRef(null)
 
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
-  getWindowZoom, isSimpleLayout,
+  getWindowZoom, isSimpleLayout, isDefaultNewLayout,
   isUseAutoWinCtl, isUseWindowsWinCtl,
   isShowDialogBeforeResetSetting } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
@@ -183,6 +184,8 @@ const setupLayout = (isInit) => {
   if (isSimpleLayout.value) {
     currentAppLayout.value = SimpleLayout
     eventName = 'app-layout-simple'
+  } else if(isDefaultNewLayout.value) {
+    currentAppLayout.value = DefaultNewLayout
   } else {
     currentAppLayout.value = DefaultLayout
   }
@@ -499,11 +502,12 @@ provide('appCommon', {
 
 <template>
   <div id="app-content" @dragover="e => e.preventDefault()" @drop="onDrop">
-    <keep-alive :max="2">
-      <component :is="currentAppLayout" :class="{
-        'winos-style': isWinOS(),
-        'use-winos-win-ctl': useWindowsStyleWinCtl
-      }">
+    <keep-alive :max="1">
+      <component :is="currentAppLayout" 
+          :class="{
+            'winos-style': isWinOS(),
+            'use-winos-win-ctl': useWindowsStyleWinCtl
+          }" >
       </component>
     </keep-alive>
     <slot></slot>

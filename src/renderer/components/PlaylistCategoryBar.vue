@@ -1,11 +1,11 @@
 <script setup>
-import { reactive, toRef } from 'vue';
+import { onActivated, onDeactivated, onMounted, onUnmounted, reactive, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useSettingStore } from '../store/settingStore';
 import CategoryBarLoadingMask from './CategoryBarLoadingMask.vue';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -20,9 +20,15 @@ const props = defineProps({
     isWhiteWrap: Boolean
 })
 
+let lastToggleTime = -1
 const toggleCategory = () => {
+    const _now = Date.now()
+    const distance = _now - lastToggleTime
+    if(distance < 1000) return
+
     hidePlaybackQueueView()
     togglePlaylistCategoryView()
+    lastToggleTime = _now
 }
 
 const isDiffCate = (item, row, col) => {
@@ -74,14 +80,18 @@ const loadFirstCateData = () => {
     visitCateItem(firstItem, firstItem.row, firstItem.col, true)
 }
 
+
+/* 生命周期、监听 */
 //TODO 实现方式很别扭
-onEvents({
+const eventsRegistration = {
     'playlistCategory-toggle': toggleCategory,
     'playlistCategory-update': () => {
         flatData.length = 0
         loadFirstCateData()
-    }
-})
+    },
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

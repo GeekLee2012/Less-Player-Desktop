@@ -1,11 +1,11 @@
 <script setup>
-import { onActivated, reactive, ref, watch, inject, nextTick, onDeactivated } from 'vue';
+import { onActivated, reactive, ref, watch, inject, nextTick, onDeactivated, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore'
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { coverDefault, md5, trimExtraChars } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 import { useVideoPlayStore } from '../store/videoPlayStore';
 
 
@@ -13,10 +13,10 @@ import { useVideoPlayStore } from '../store/videoPlayStore';
 const props = defineProps({
     platform: String,
     id: String,
-    href: String,
 })
 
 const { getVendor } = usePlatformStore()
+const { routerCtxCacheItem  } = storeToRefs( useAppCommonStore())
 const { showToast, hideAllCtxMenus,  } = useAppCommonStore()
 const { resetQueue, addVideo, playNextVideo, playVideoByIndex } = useVideoPlayStore()
 
@@ -58,16 +58,18 @@ const nextPage = () => {
 }
 
 const loadContent = async (noLoadingMask) => {
+    if(!routerCtxCacheItem.value) return
+    const { id, platform } = props
+    const { id: cId, platform: cPlatform, detailUrl } = routerCtxCacheItem.value
+    if(id != cId || platform != cPlatform) return
+
     if (!noLoadingMask) setLoading(true)
     //checkFavorite()
-
     const vendor = getVendor(props.platform)
     if (!vendor || !vendor.videoDetail) return
     let maxRetry = 3, retry = 0, success = false, result = null
-    const { id, platform, href } = props
-    const _href = href ? href.replace(/@/g, '/') : ''
     do {
-        result = await vendor.videoDetail(id, { id, platform, href: _href })
+        result = await vendor.videoDetail(id, { id, platform, detailUrl })
         if (!result || result.data.length < 1) {
             ++retry
             continue
@@ -174,14 +176,8 @@ const playItem = (item, index) => {
     playVideoByIndex(index)
 }
 
-/* 生命周期、监听 */
-onActivated(() => {
-    restoreScrollState()
-    detectTitleHeight()
-    resetBack2TopBtn()
-    //visitRouterCtxCacheItem()
-})
 
+/* 生命周期、监听 */
 watch(() => props.id, () => {
     resetView()
     resetScrollState()
@@ -191,9 +187,20 @@ watch(() => props.id, () => {
 
 watch(isLoading, () => nextTick(detectTitleHeight))
 
-onEvents({
+
+const eventsRegistration = {
     'app-resize': detectTitleHeight, 
     //'playlist-linkItem': visitLinkItem
+}
+
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
+
+onActivated(() => {
+    restoreScrollState()
+    detectTitleHeight()
+    resetBack2TopBtn()
+    //visitRouterCtxCacheItem()
 })
 </script>
 

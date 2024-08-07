@@ -14,13 +14,8 @@ const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('ap
 const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('player')
 
 const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
-const { setLayoutIndex } = useSettingStore()
+const { setLayoutIndex, switchToSimpleLayout } = useSettingStore()
 const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
-
-const switchToSimpleLayout = () => {
-    if (isMaxScreen.value) return
-    setLayoutIndex(2) //TODO 硬编码
-}
 </script>
 
 <template>
@@ -118,6 +113,7 @@ const switchToSimpleLayout = () => {
     height: var(--others-playnav-height);
     -webkit-app-region: drag;
     --others-sliderbar-ctl-height: 3px;
+    --i-width: 34.33%;
 }
 
 .default-main-top .play-nav {
@@ -125,7 +121,11 @@ const switchToSimpleLayout = () => {
 }
 
 .default-main-top .play-nav #play-meta {
-    width: 34.33%;
+    width: var(--i-width);
+}
+
+.default-main-top .play-nav #play-meta .audio-title {
+    width: 211px;
 }
 
 .default-main-top .play-nav .play-ctl-wrap {
@@ -159,7 +159,7 @@ const switchToSimpleLayout = () => {
 .default-main-top .play-nav>.action.not-windows-style-win-ctl {
     /*margin-right: 39px;*/
     padding-right: 33px;
-    width: 34.33%;
+    width: var(--i-width);
 }
 
 .default-main-top .play-nav>.action .btn {
@@ -168,7 +168,7 @@ const switchToSimpleLayout = () => {
 }
 
 .default-main-top .module-btn {
-    transform: translateY(1px);
+    transform: translateY(2px) scale(0.98);
     margin-right: 2px;
 }
 </style>

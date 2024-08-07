@@ -1,10 +1,10 @@
 <script setup>
-import { ref, watch, inject, computed } from 'vue';
+import { ref, watch, inject, computed, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
 import { ActivateState } from '../../common/Constants';
 import { transformUrl } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -58,14 +58,20 @@ const computedStateText = computed(() => {
     else if (state == ActivateState.INVALID) return 'ERROR'
 })
 
+
+
+/* 生命周期、监听 */
 watch(() => props.checked, (nv, ov) => {
     if (props.ignoreCheckAllEvent) return
     setChecked(nv)
 })
 
-onEvents({
+const eventsRegistration = {
     'plugin-checkbox-refresh': () => setChecked(false), 
-})
+}
+
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onActivated, onMounted, ref, watch } from 'vue';
+import { computed, inject, onActivated, onMounted, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
@@ -15,7 +15,7 @@ import KeysInputControl from '../components/KeysInputControl.vue';
 import ColorInputControl from '../components/ColorInputControl.vue';
 import packageCfg from '../../../package.json';
 import { getDoc } from '../../common/HttpClient';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -77,6 +77,7 @@ const { setThemeIndex,
     setImageTextTileStyleIndex,
     toggleDndSave,
     setDndSavePath,
+    toggleSingleLineAlbumTitleStyle,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
@@ -120,6 +121,7 @@ const { setThemeIndex,
     setDesktopLyricFontSize,
     setDesktopLyricColor,
     setDesktopLyricHighlightColor,
+    setDesktopLyricExtraTextHighlightColor,
     setDesktopLyricLineSpacing,
     setDesktopLyricAlignment,
     setDesktopLyricLayoutMode,
@@ -128,16 +130,18 @@ const { setThemeIndex,
     setAudioOutputDeviceId,
 } = useSettingStore()
 
-const { showToast, showImportantToast } = useAppCommonStore()
+const { showToast, showImportantToast, } = useAppCommonStore()
 const { isMaxScreen } = storeToRefs(useAppCommonStore())
 const { audioOutputDevices } = storeToRefs(usePlayStore())
 
 
+/*
 const switchLayout = (index) => {
     //TODO 硬编码
-    if (isMaxScreen.value && index == 2) return
+    if (isMaxScreen.value && index == 3) return
     setLayoutIndex(index)
 }
+*/
 
 /* 数据 - 重置 */
 const resetData = async () => {
@@ -521,20 +525,36 @@ const refreshSettingViewTips = (nv) => {
     tipTextEls.forEach(el => el.style.display = visibility)
 }
 
-onEvents({
-    'setting-checkForUpdates': checkForUpdates,
-})
+
+const displayFrequency = ref(60)
+const setDisplayFrequency = (value) => displayFrequency.value = value
+
+const getDisplayFrequency = async () => {
+    const displayFrequency = await ipcRendererInvoke('app-displayFrequency')
+    setDisplayFrequency(displayFrequency)
+}
+
 
 /* 生命周期、监听 */
+watch(isCheckPreReleaseVersion, checkForUpdates)
+watch(isSettingViewTipsShow, refreshSettingViewTips)
+
+const eventsRegistration = {
+    'setting-checkForUpdates': checkForUpdates,
+}
+/* 生命周期、监听 */
+onMounted(() => {
+    onEvents(eventsRegistration)
+    checkForUpdates()
+})
+
 onActivated(() => {
     updateSessionCacheSize()
     updateBlackHole(Math.random() * 100000000)
+    getDisplayFrequency()
 })
 
-onMounted(checkForUpdates)
-
-watch(isCheckPreReleaseVersion, checkForUpdates)
-watch(isSettingViewTipsShow, refreshSettingViewTips)
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
@@ -557,8 +577,8 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                 <span class="cate-name">布局</span>
                 <div class="content">
                     <div class="last">
-                        <span v-for="(item, index) in ['旧版', '经典主流', '简约']" class="layout-item"
-                            :class="{ active: index == layout.index }" @click="switchLayout(index)">
+                        <span v-for="(item, index) in ['旧版', '经典', '主流','简约']" class="layout-item"
+                            :class="{ active: index == layout.index }" @click="setLayoutIndex(index)">
                             {{ item }}
                         </span>
                     </div>
@@ -567,7 +587,7 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
             <div class="common row">
                 <span class="cate-name">通用</span>
                 <div class="content">
-                    <div class="tip-text">提示：当前应用，所有输入框，按Enter键生效，或光标焦点离开后自动生效</div>
+                    <div class="tip-text">提示：当前应用的输入框，按下Enter键生效，或光标焦点离开后自动生效</div>
                     <div>
                         <span class="cate-subtitle">设置页显示提示：</span>
                         <ToggleControl @click="toggleSettingViewTipsShow" :value="common.settingViewTipsShow">
@@ -781,7 +801,7 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                         <ToggleControl @click="togglePlayingViewUseBgCoverEffect"
                             :value="track.playingViewUseBgCoverEffect">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：实验性功能</div>
+                        <div class="tip-text spacing">提示：实验性功能，内存占用高，较耗性能</div>
                     </div>
                     <div>
                         <span class="cate-subtitle">播放页封面图片边框：</span>
@@ -795,6 +815,7 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                         </ToggleControl>
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
+                    <div class="tip-text">提示：由于系统平台的安全机制，访问用户目录可能需要授权。</div>
                     <div>
                         <span class="cate-subtitle">拖拽保存位置：</span>
                         <div class="dir-input-ctl">
@@ -802,20 +823,33 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                             <div class="select-btn" @click="selectDir">选择</div>
                         </div>
                     </div>
+                    <div>
+                        <span class="cate-subtitle">专辑控件标题单行显示：</span>
+                        <ToggleControl @click="toggleSingleLineAlbumTitleStyle" :value="track.singleLineAlbumTitleStyle">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：仅支持部分页面的图文控件</div>
+                    </div>
+                    <div class="tip-text">提示：应用启动时，会自动检测屏幕刷新率，不可修改；正常值为正整数，仅供参考
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">屏幕刷新率（系统检测值）：</span>
+                        <input type="number" :value="displayFrequency" readonly/>
+                    </div>
                     <div class="tip-text">提示：当前应用，更新频度，是指每多少个动画帧进行一次更新操作<br>
                         频度值越小，动画可能越流畅，而CPU占用则会越高<br>
                         歌曲（歌词）进度更新频度，建议与当前设备的屏幕刷新率保持一致
                     </div>
+                     <!-- 屏幕刷新率检测值，无法完全保证准确性。因此，将下面“xxx更新频度”设置项的主动权交还给用户，自由度也会更高 -->
                     <div>
                         <span class="cate-subtitle">歌曲（歌词）进度更新频度：</span>
                         <input type="number" :value="track.stateRefreshFrequency" placeholder="屏幕刷新率，1-1024，默认60" min="1"
-                            max="1024" step="1" @input="updateStateRefreshFrequency"
+                            max="1024" step="1" @input="" @keydown.enter="updateStateRefreshFrequency"
                             @focusout="updateStateRefreshFrequency" />
                     </div>
                     <div>
                         <span class="cate-subtitle">歌曲频谱更新频度：</span>
                         <input type="number" :value="track.spectrumRefreshFrequency" placeholder="1-256，默认3" min="1"
-                            max="256" step="1" @input="updateSpectrumRefreshFrequency"
+                            max="256" step="1" @input="" @keydown.enter="updateSpectrumRefreshFrequency"
                             @focusout="updateSpectrumRefreshFrequency" />
                     </div>
                     <div class="last">
@@ -868,7 +902,7 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                         <ToggleControl @click="toggleUseDndForExportLocalPlaylist"
                             :value="track.useDndForExportLocalPlaylist">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：首页图文控件有效；</div>
+                        <div class="tip-text spacing">提示：首页图文控件有效</div>
                     </div>
                     <div class="last">
                         <span class="cate-subtitle">歌单分页时，每页记录数：</span>
@@ -897,6 +931,11 @@ watch(isSettingViewTipsShow, refreshSettingViewTips)
                     <div>
                         <span class="sec-title">文字高亮颜色：</span>
                         <ColorInputControl label="文字高亮颜色" :value="desktopLyric.hlColor" :onChanged="setDesktopLyricHighlightColor">
+                        </ColorInputControl>
+                    </div>
+                    <div>
+                        <span class="sec-title">翻译高亮颜色：</span>
+                        <ColorInputControl label="翻译高亮颜色" :value="desktopLyric.extraTextHlColor" :onChanged="setDesktopLyricExtraTextHighlightColor">
                         </ColorInputControl>
                     </div>
                     <div>

@@ -1,13 +1,13 @@
 <script setup>
-import { computed, inject, nextTick, onActivated, ref, watch } from 'vue';
+import { computed, inject, nextTick, onActivated, onMounted, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
-import { useVideoPlayStore } from '../store/videoPlayStore';
+import { videoThemeNames, useVideoPlayStore } from '../store/videoPlayStore';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { PlayAction, PlayState } from '../../common/Constants';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -33,17 +33,20 @@ const initVideoPlayer = () => {
 }
 
 const setupVideoTheme = () => {
+    const rootEl = document.querySelector('.video-playing-view')
     const el = document.querySelector('.video-node.video-js')
-    if(!el) return
 
-    const index = videoThemeIndex.value
-    if(index === 0) {
-        el.classList.remove('vjs-theme-sea')
-        el.classList.add('vjs-theme-city')
-    } else if(index === 1){
-        el.classList.remove('vjs-theme-city')
-        el.classList.add('vjs-theme-sea')
-    }
+    const themeIndex = videoThemeIndex.value
+    videoThemeNames.forEach((theme, index) => {
+        const _theme = theme.replace('vjs-', '')
+        if(themeIndex == index) {
+            rootEl && rootEl.classList.add(_theme)
+            el && el.classList.add(theme)
+        } else {
+            rootEl && rootEl.classList.remove(_theme)
+            el && el.classList.remove(theme)
+        }
+    })
 }
 
 const stopVideo = (callback) => {
@@ -109,7 +112,11 @@ const preventFullScreen = (event) => {
     return false
 }
 
-onEvents({
+
+/* 生命周期、监听 */
+watch(videoThemeIndex, setupVideoTheme)
+
+const eventsRegistration = {
     'app-beforeRoute': quitVideo,
     'video-state':  ({ state, video }) => {
         if (state == PlayState.END) {
@@ -127,19 +134,14 @@ onEvents({
             el && data && (el.textContent = `${data}x`)
         }
     }
-})
-
-watch(videoThemeIndex, setupVideoTheme)
-
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 onActivated(initVideoPlayer)
 </script>
 
 <template>
-    <div class="video-playing-view" @keyup.space="handleSpaceKeyEvents" 
-        :class="{
-            'theme-city': (videoThemeIndex == 0),
-            'theme-sea': (videoThemeIndex == 1),
-        }">
+    <div class="video-playing-view" @keyup.space="handleSpaceKeyEvents">
         <div class="header" @dblclick.prevent="">
             <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
                 <WinTrafficLightBtn :hideMaxBtn="isSimpleLayout" :showCollapseBtn="true" :collapseAction="quitVideo"
@@ -578,6 +580,10 @@ onActivated(initVideoPlayer)
     margin-right: 1em;
 }
 
+.video-playing-view .vjs-theme-city .vjs-control-bar .vjs-time-tooltip {
+    font-size: 0.8em;
+}
+
 .video-playing-view .vjs-theme-city .vjs-remaining-time {
     padding-left: 2.5em;
     flex: 1;
@@ -638,6 +644,10 @@ onActivated(initVideoPlayer)
     justify-content: center;
 }
 
+.video-playing-view .vjs-theme-sea .vjs-control-bar .vjs-time-tooltip {
+    font-size: 0.88em;
+}
+
 .video-playing-view .vjs-theme-sea .vjs-remaining-time {
     font-size: 1.35em;
     line-height: 2.2;
@@ -684,6 +694,97 @@ onActivated(initVideoPlayer)
 .video-playing-view.theme-sea .collapse-btn:hover,
 .video-playing-view.theme-sea .collapse-btn:hover svg {
     fill: #4176bc !important;
+    cursor: pointer;
+}
+
+
+/* vjs-theme-forest */
+.video-playing-view .vjs-theme-forest .c-vjs-play-next-btn {
+   /*flex: 1;*/
+}
+
+.video-playing-view .vjs-theme-forest .c-vjs-play-next-btn .vjs-icon-placeholder::before {
+    font-size: 3em;
+    margin-top: -8px;
+    /*
+    line-height: 50px;
+    padding-left: 1em;
+    padding-right: 1em;
+    */
+}
+
+.video-playing-view .vjs-theme-forest .vjs-control-bar {
+    /*line-height: 50px;*/
+}
+
+.video-playing-view .vjs-theme-forest .vjs-play-control {
+    outline: none;
+    margin-left: 5px;
+    /*margin-right: 1em;*/
+}
+
+.video-playing-view .vjs-theme-forest .vjs-play-control .vjs-icon-placeholder::before {
+    font-size: 1.88em;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-control-bar .vjs-time-tooltip {
+    font-size: 1.3em;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-remaining-time {
+    /*padding-left: 2.5em;
+    flex: 1;
+    line-height: 50px;
+    padding-right: 0em;*/
+    font-size: 1.6em;
+    margin-top: -8px;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-playback-rate {
+    font-size: 1.2em;
+    margin-top: -3px;
+    /*flex: 1;*/
+}
+
+.video-playing-view .vjs-theme-forest .vjs-playback-rate .vjs-menu .vjs-menu-content {
+    bottom: 10px;
+    width: 80px;
+    max-height: max-content;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-picture-in-picture-control {
+    margin-top: -3px;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-picture-in-picture-control[title^='Exit'] {
+    margin-top: 0px;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-picture-in-picture-control .vjs-icon-placeholder {
+    font-size: 1.35em;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-picture-in-picture-control[title^='Exit'] .vjs-icon-placeholder {
+    font-size: 1.1em;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-fullscreen-control {
+    margin-top: -7px;
+    margin-left: 2px;
+}
+
+.video-playing-view .vjs-theme-forest .vjs-fullscreen-control .vjs-icon-placeholder {
+    font-size: 1.65em;
+}
+
+.video-playing-view.theme-forest .sidebar>.content .video-item.active {
+    background: #6fb04e;
+}
+
+.video-playing-view.theme-forest .header svg:hover,
+.video-playing-view.theme-forest .collapse-btn:hover,
+.video-playing-view.theme-forest .collapse-btn:hover svg {
+    fill: #6fb04e !important;
     cursor: pointer;
 }
 </style>

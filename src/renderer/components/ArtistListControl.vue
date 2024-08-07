@@ -19,7 +19,6 @@ const visitItem = (item) => {
     const { platform } = item
     visitArtist({ platform, item, onReadyRoute: () => updateCurrentPlatformByCode(platform) })
 }
-
 </script>
 
 <template>

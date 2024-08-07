@@ -53,8 +53,8 @@ const visitItem = (item) => {
         playPlaylist(item)
     } else if (Playlist.isVideoType(item)) {
         //视频
-        const { href } = item
-        href ? visitVideoDetail(platform, id, href, item) : playPlaylist(item)
+        const { detailUrl } = item
+        detailUrl ? visitVideoDetail(platform, id, detailUrl, item) : playPlaylist(item)
     } else if (visitable) {
         //其他，如普通歌单、主播电台歌单等
         const exploreMode = Playlist.isAnchorRadioType(item) ? 'radios' : null
@@ -95,6 +95,14 @@ const computedTileOnDrop = computed(() => {
         tileOnDropFn && tileOnDropFn(event, item, index)
     }
 })
+
+const computedCenterTitleStyle = computed(() => {
+    return (item) => {
+        const { type } = item
+        return type == Playlist.NORMAL_RADIO_TYPE ||
+            type == Playlist.FM_RADIO_TYPE
+    }
+})
 </script>
 
 <template>
@@ -103,14 +111,19 @@ const computedTileOnDrop = computed(() => {
             :loadPage="loadPage" :nextPagePendingMark="nextPagePendingMark" :refreshAllPendingMark="refreshAllPendingMark"
             :loading="loading">
             <template v-slot="{ item, index }">
-                <ImageTextTile @click="visitItem(item)" :videoStyle="videoStyle" :cover="transformUrl(item.cover, FILE_SCHEME)" :title="item.title"
-                    :subtitle="getSubtitle(item)" :platform="item.platform" :color="item.color" :playable="true"
-                    :playAction="() => playPlaylist(item)" :checkbox="checkbox" :checked="checkedAll"
-                    :coverFit="item.coverFit" :ignoreCheckAllEvent="ignoreCheckAllEvent"
+                <ImageTextTile @click="visitItem(item)" 
+                    :platform="item.platform" :color="item.color"
+                    :cover="transformUrl(item.cover, FILE_SCHEME)" :coverFit="item.coverFit"
+                    :title="item.title" :subtitle="getSubtitle(item)" 
+                    :videoStyle="videoStyle" :centerTitleStyle="computedCenterTitleStyle(item)"
+                    :playable="true" :playAction="() => playPlaylist(item)" 
+                    :checkbox="checkbox" :checked="checkedAll"
+                    :ignoreCheckAllEvent="ignoreCheckAllEvent"
                     :checkChangedFn="(checked) => checkChangedFn(checked, item)"
                     @dragover="e => e.preventDefault()" 
                     @drop="(event) => (tileOnDropFn && tileOnDropFn(event, item, index))"
-                    :draggable="draggable" @dragstart="(event) => (tileOnDragStartFn && tileOnDragStartFn(event, item, index))"
+                    :draggable="draggable" 
+                    @dragstart="(event) => (tileOnDragStartFn && tileOnDragStartFn(event, item, index))"
                     @dragenter="(event) => (tileOnDragEnterFn && tileOnDragEnterFn(event, item, index))"
                     @dragend="(event) => (tileOnDragEndFn && tileOnDragEndFn(event, item, index))">
                 </ImageTextTile>
@@ -134,7 +147,8 @@ const computedTileOnDrop = computed(() => {
 <style>
 .playlists-ctl {
     /* margin-top: 15px; */
-    margin-top: 5px;
+    /* margin-top: 5px; */
+    margin-top: 2px;
 }
 
 .playlists-ctl .play-cnt {

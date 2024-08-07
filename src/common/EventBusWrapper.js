@@ -14,9 +14,19 @@ class EventBusWrapper {
         return this
     }
 
+    static offEvent(event, handler) {
+        EventBus.off(event, handler)
+        return this
+    }
+
+    static clearAll() {
+        EventBus.all.clear()
+        return this
+    }
+
 
     //注册监听 - 多个事件，以对象方式批量注册
-    //链式编程，可使用多个onEvents()进行代码分类/分组管理
+    //链式编程
     static onEvents(registration) {
         if(!registration || typeof registration != 'object') {
             throw new Error('parameter type error: not a object')
@@ -47,6 +57,17 @@ class EventBusWrapper {
         }
         return this
     }
+
+    static offEvents(registration) {
+        if(!registration || typeof registration != 'object') {
+            throw new Error('parameter type error: not a object')
+        }
+        Object.entries(registration).forEach(([event, handler]) => {
+            if(!handler || typeof handler != 'function') return
+            EventBusWrapper.offEvent(event, handler)
+        })
+        return this
+    }
 }
 
 
@@ -58,4 +79,8 @@ function emitEvents(events, data) {
     return EventBusWrapper.emitEvents(events, data)
 }
 
-export { onEvents, emitEvents }
+function offEvents(registration) {
+    return EventBusWrapper.offEvents(registration)
+}
+
+export { onEvents, emitEvents, offEvents }

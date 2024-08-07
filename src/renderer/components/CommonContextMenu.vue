@@ -1,5 +1,5 @@
 <script setup>
-import { inject, toRaw } from 'vue';
+import { inject, onMounted, onUnmounted, toRaw } from 'vue';
 import { storeToRefs } from 'pinia';
 import EventBus from '../../common/EventBus';
 import { useLocalMusicStore } from '../store/localMusicStore';
@@ -10,7 +10,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { Playlist } from '../../common/Playlist';
 import { useSettingStore } from '../store/settingStore';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 import { ipcRendererSend, transformPath } from '../../common/Utils';
 
 
@@ -526,9 +526,13 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
     doInit(data)
 }
 
-onEvents({
+
+/* 生命周期、监听 */
+const eventsRegistration = {
     'commonCtxMenu-init': initCommonCtxMenu,
-})
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

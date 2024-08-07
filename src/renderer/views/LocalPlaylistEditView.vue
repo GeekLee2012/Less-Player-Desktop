@@ -97,8 +97,9 @@ const onDrop = (event) => {
     if (isEventStopped) event.stopPropagation()
 }
 
-onMounted(() => loadLocalPlaylist())
 
+/* 生命周期、监听 */
+onMounted(() => loadLocalPlaylist())
 </script>
 
 <template>

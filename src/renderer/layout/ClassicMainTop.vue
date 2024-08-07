@@ -14,7 +14,7 @@ const { visitThemes, visitUserHome, visitSetting, visitModulesSetting, visitPlug
 const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
 
 
-const { setLayoutIndex } = useSettingStore()
+const { setLayoutIndex, switchToSimpleLayout } = useSettingStore()
 const { isRadioModeShortcutEnable,
     isModulesSettingShortcutEnable,
     isPluginsSettingShortcutEnable,
@@ -24,11 +24,6 @@ const { isRadioModeShortcutEnable,
 const { isMaxScreen, isRadioMode, isRadioModeEnable } = storeToRefs(useAppCommonStore())
 
 
-
-const switchToSimpleLayout = () => {
-    if (isMaxScreen.value) return
-    setLayoutIndex(2) //TODO 硬编码
-}
 
 const toggleRadioMode = () => {
     emitEvents("toggleRadioMode")
@@ -145,7 +140,7 @@ const toggleRadioMode = () => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 60px;
+    height: 68px;
     -webkit-app-region: drag;
     position: relative;
     padding-left: 33px;

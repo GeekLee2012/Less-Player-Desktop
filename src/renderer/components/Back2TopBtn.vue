@@ -11,7 +11,7 @@ const props = defineProps({
     target: Object
 })
 
-const { layout } = storeToRefs(useSettingStore())
+const { isDefaultLayoutWithBottom } = storeToRefs(useSettingStore())
 
 let threshold = (props.threshold || 1024)
 let scrollTarget = props.target
@@ -48,13 +48,15 @@ const scrollToTop = () => {
     smoothScroll(scrollTarget, 0, 520, 8)
 }
 
+
+/* 生命周期、监听 */
 defineExpose({
     setScrollTarget
 })
 </script>
 
 <template>
-    <div class="back2top-btn" :class="{ 'back2top-btn-autolayout': (layout.index == 1) }" @click="scrollToTop"
+    <div class="back2top-btn" :class="{ 'back2top-btn-with-bottom': isDefaultLayoutWithBottom }" @click="scrollToTop"
         v-show="isBtnShow">
         <svg width="14" height="14" viewBox="0 0 597.39 511.99" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
@@ -102,7 +104,7 @@ defineExpose({
 }
 
 /*TODO */
-.back2top-btn-autolayout {
+.back2top-btn-with-bottom {
     bottom: 100px;
     right: 20px;
 }

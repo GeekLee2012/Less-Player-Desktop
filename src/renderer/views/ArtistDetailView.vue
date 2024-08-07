@@ -8,7 +8,7 @@ export default {
 -->
 
 <script setup>
-import { onMounted, onActivated, ref, shallowRef, watch, reactive, inject, computed } from 'vue';
+import { onMounted, onActivated, ref, shallowRef, watch, reactive, inject, computed, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useArtistDetailStore } from '../store/artistDetailStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -23,7 +23,7 @@ import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { coverDefault } from '../../common/Utils';
 import { useSettingStore } from '../store/settingStore';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -58,7 +58,7 @@ const { getVendor, isLocalMusic,
     isAlbumsTab, isAboutTab, } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { showToast, hideAllCtxMenus } = useAppCommonStore()
-const { isDndSaveEnable } = storeToRefs(useSettingStore())
+const { isDndSaveEnable, isSingleLineAlbumTitleStyle } = storeToRefs(useSettingStore())
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
@@ -396,22 +396,25 @@ const computedTabName = computed(() => {
     }
 })
 
-//TODO
-onEvents({
-    'ctxMenu-removeFromLocal': reloadAll,
-})
 
 /* 生命周期、监听 */
-//TODO 需要梳理优化，容易出现重复加载Bug
-onActivated(() => {
-    restoreScrollState()
-    resetBack2TopBtn()
-})
-
 watch(() => [props.platform, props.id], ([nv1, nv2]) => {
     updateArtistDetailKeys(nv1, nv2)
     reloadAll()
 }, { immediate: true })
+
+//TODO 需要梳理优化，容易出现重复加载Bug
+const eventsRegistration = {
+    'ctxMenu-removeFromLocal': reloadAll,
+}
+
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
+
+onActivated(() => {
+    restoreScrollState()
+    resetBack2TopBtn()
+})
 </script>
 
 <template>
@@ -469,7 +472,8 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
             <component :id="id" :is="currentTabView" :data="tabData" :dataType="dataType" :platform="platform"
-                :artistVisitable="true" :albumVisitable="true" :loading="isLoading">
+                :artistVisitable="true" :albumVisitable="true" :loading="isLoading" 
+                :singleLineTitleStyle="isSingleLineAlbumTitleStyle">
             </component>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -567,7 +571,7 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
     display: flex;
     align-items: center;
     height: 36px;
-    margin-bottom: 5px;
+    margin-bottom: 1px;
     margin-left: 2px;
     border-bottom: 1px solid transparent;
 }

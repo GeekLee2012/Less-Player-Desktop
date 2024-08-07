@@ -19,6 +19,8 @@ const visitFirstActivePlatform = () => {
     }
 }
 
+
+/* 生命周期、监听 */
 onActivated(visitFirstActivePlatform)
 </script>
 

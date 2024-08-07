@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onActivated, onMounted, ref, shallowRef, watch } from 'vue';
+import { computed, inject, onActivated, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSearchStore } from '../store/searchStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -11,7 +11,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { LESS_MAGIC_CODE } from '../../common/Constants';
 import { toTrimString } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -205,20 +205,8 @@ const togglePlatformCategory = () => {
     togglePlatformCategoryView()
 }
 
-onEvents({
-    'modules-toggleSearchPlatform': () => visitTab(0, null, true),
-})
 
-onMounted(() => {
-    updateTabs()
-    visitTab(0, null, true)
-})
-
-onActivated(() => {
-    restoreScrollState()
-    resetBack2TopBtn()
-})
-
+/* 生命周期、监听 */
 watch(currentPlatformIndex, (nv, ov) => {
     updateTabs()
 
@@ -235,6 +223,22 @@ watch(activeTab, (nv, ov) => visitTab(nv))
 watch(() => props.keyword, (nv, ov) => {
     loadTab()
 })
+
+const eventsRegistration = {
+    'modules-toggleSearchPlatform': () => visitTab(0, null, true),
+}
+onMounted(() => {
+    onEvents(eventsRegistration)
+    updateTabs()
+    visitTab(0, null, true)
+})
+
+onActivated(() => {
+    restoreScrollState()
+    resetBack2TopBtn()
+})
+
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

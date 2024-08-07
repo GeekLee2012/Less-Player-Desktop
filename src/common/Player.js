@@ -40,28 +40,29 @@ class Player {
     }
 
     static create() {
-        if (singleton) return singleton
-        singleton = new Player().on({
-            'track-play': value => singleton.playTrack(value),
-            'track-restore': value => singleton.restore(value),
-            'track-changed': value => singleton.setCurrent(value),
-            'track-togglePlay': () => singleton.togglePlay(),
-            'track-seek': value => singleton.seek(value),
-            'volume-set': value => singleton.volume(value),
-            'radio-play': () => singleton.setCurrent(null),
-            'playbackQueue-empty': () => singleton.setCurrent(null),
-            'track-setupSoundEffect': value => singleton.setupSoundEffect(value),
-            'track-updateStereoPan': value => singleton.updateStereoPan(value),
-            'track-updateVolumeGain': value => singleton.updateVolumeGain(value),
-            'track-stateRefreshFrequency': value => singleton.stateRefreshFrequency = value,
-            'track-spectrumRefreshFrequency': value => singleton.spectrumRefreshFrequency = value,
-            'track-markSeekPending': value => singleton.seekPendingMark = value,
-            'desktopLyric-messagePort': value => singleton.setupDesktopLyricMessagePort(value),
-            'track-noLyric': value => singleton.postLyricStateToDesktopLyric(value, false),
-            'track-lyricLoaded': value => singleton.postLyricStateToDesktopLyric(value, true),
-            'desktopLyric-showState': value => singleton.setMessagePortActiveState(value),
-            'outputDevice-setup': value => singleton._setAudioOutputDevice(value),
-        })
+        if (!singleton) {
+            singleton = new Player().on({
+                'track-play': value => singleton.playTrack(value),
+                'track-restore': value => singleton.restore(value),
+                'track-changed': value => singleton.setCurrent(value),
+                'track-togglePlay': () => singleton.togglePlay(),
+                'track-seek': value => singleton.seek(value),
+                'volume-set': value => singleton.volume(value),
+                'radio-play': () => singleton.setCurrent(null),
+                'playbackQueue-empty': () => singleton.setCurrent(null),
+                'track-setupSoundEffect': value => singleton.setupSoundEffect(value),
+                'track-updateStereoPan': value => singleton.updateStereoPan(value),
+                'track-updateVolumeGain': value => singleton.updateVolumeGain(value),
+                'track-stateRefreshFrequency': value => singleton.stateRefreshFrequency = value,
+                'track-spectrumRefreshFrequency': value => singleton.spectrumRefreshFrequency = value,
+                'track-markSeekPending': value => singleton.seekPendingMark = value,
+                'desktopLyric-messagePort': value => singleton.setupDesktopLyricMessagePort(value),
+                'track-lyricLoaded': value => singleton.updateLyric(value, true),
+                'track-noLyric': value => singleton.updateLyric(value, false),
+                'desktopLyric-showState': value => singleton.setMessagePortActiveState(value),
+                'outputDevice-setup': value => singleton._setAudioOutputDevice(value),
+            })
+        }
         return singleton
     }
 
@@ -70,7 +71,7 @@ class Player {
     }
 
     createSound() {
-        if (!this._isTrackAvailable()) return null
+        if (!this._isTrackAvailable()) return 
 
         const self = this
         this.sound = new Howl({
@@ -118,8 +119,8 @@ class Player {
                 self.setState(PlayState.PLAY_ERROR)
             }
         })
-        this._tryUnlockHowlAudios()
         this.currentTime = 0
+        this._tryUnlockHowlAudios()
         this.setState(PlayState.INIT)
 
         if (this.pendingOutputDeviceId) this._setAudioOutputDevice(this.pendingOutputDeviceId)
@@ -127,29 +128,27 @@ class Player {
     }
 
     getSound() {
-        return this._isTrackAvailable() ? this.sound : null
+        return this._isTrackAvailable() && this.sound
     }
 
     //播放
     play() {
-        let sound = this.getSound()
-        if (sound) sound.play()
+        const sound = this.getSound()
+        if (!sound) return
+        sound.play()
     }
 
     //暂停
     pause() {
         const sound = this.getSound()
-        if (sound) sound.pause()
+        if (!sound) return
+        sound.pause()
     }
 
     togglePlay() {
         const sound = this.getSound()
         if (!sound) return
-        if (sound.playing()) {
-            sound.pause()
-        } else {
-            sound.play()
-        }
+        sound.playing() ? sound.pause() : sound.play()
     }
 
     //停止
@@ -168,20 +167,19 @@ class Player {
 
     setCurrent(track) {
         this.stop()
-        this.currentTrack = track
+        this.currentTrack = Player.getRawTrack(track)
         this.currentTime = 0
         this.setState(PlayState.NONE)
         this.createSound()
+        return this
     }
 
     playTrack(track) {
-        this.setCurrent(track)
-        this.play()
+       this.setCurrent(track).play()
     }
 
     restore(track) {
         this.setCurrent(track)
-        //this.createSound()
     }
 
     volume(value) {
@@ -191,7 +189,7 @@ class Player {
 
     seek(percent) {
         const sound = this.getSound()
-        if (!sound || !sound.playing()) return
+        if (!sound || !sound.playing()) return 
 
         const duration = sound.duration()
         if (duration) {
@@ -202,10 +200,10 @@ class Player {
 
     _step() {
         const sound = this.getSound()
-        if (!sound) return
+        if (!sound) return 
         if (!sound.playing() && this.playState != PlayState.PLAYING) {
             this._stopAnimationFrame()
-            return
+            return 
         }
         //当前播放时间
         this.currentTime = sound.seek() || 0
@@ -227,8 +225,8 @@ class Player {
 
             this.setState(PlayState.PLAY_ERROR)
         }
-        this._countAnimationFrame()
         //循环动画
+        this._countAnimationFrame()
         this._rewindAnimationFrame(this._step.bind(this), true)
     }
     
@@ -246,7 +244,6 @@ class Player {
         this.playState = state
         const { currentTrack: track, currentTime } = this
         this.notify('track-state', { state, track, currentTime })
-
         this.postPlayStateToDesktopLryic()
     }
 
@@ -282,11 +279,11 @@ class Player {
 
         const { sampleRate } = audioCtx
         this.notify('track-spectrumData', { 
-            leftFreqData, leftFreqBinCount, 
-            rightFreqData, rightFreqBinCount, 
-            freqData, freqBinCount, sampleRate, 
-            analyser, leftChannelAnalyser, rightChannelAnalyser 
-        })
+                leftFreqData, leftFreqBinCount, 
+                rightFreqData, rightFreqBinCount, 
+                freqData, freqBinCount, sampleRate, 
+                analyser, leftChannelAnalyser, rightChannelAnalyser 
+            })
     }
 
     _tryUnlockHowlAudios() {
@@ -385,10 +382,15 @@ class Player {
     }
 
     postToDesktopLryic(action, data) {
-        if (!this.desktopLyricMessagePortActiveState) return
+        if (!this.desktopLyricMessagePortActiveState) return 
         const messagePort = this.desktopLyricMessagePort
-        data = data ? toRaw(data) : data
-        if (messagePort) messagePort.postMessage({ action, data })
+        try {
+            if (messagePort) messagePort.postMessage({ action, data })
+        } catch(error) {
+            if(isDevEnv()) {
+                console.log(error)
+            }
+        }
     }
 
     postPlayStateToDesktopLryic() {
@@ -399,7 +401,7 @@ class Player {
                 break
             case PlayState.INIT:
                 this.postToDesktopLryic('s-track-init', {
-                    track: Player.getRawTrack(this.currentTrack)
+                    track: this.currentTrack
                 })
                 break
             case PlayState.PLAYING:
@@ -412,13 +414,13 @@ class Player {
     }
 
     onDesktopLyricMessage() {
-        if(!this.desktopLyricMessagePort) return
+        if(!this.desktopLyricMessagePort) return 
         const self = this
         this.desktopLyricMessagePort.onPlayerMessage = (action, data) => {
             if (action == 'c-track-init') {
                 //self.setMessagePortActiveState(true)
                 self.postToDesktopLryic('s-track-init', {
-                    track: Player.getRawTrack(self.currentTrack),
+                    track: self.currentTrack,
                     playing: (self.playState == PlayState.PLAYING)
                 })
             } else if (action == 'c-track-pos') {
@@ -430,14 +432,31 @@ class Player {
         }
     }
 
+    updateLyric(track, hasLyric) {
+        this.currentTrack = Player.getRawTrack(track)
+        this.postLyricStateToDesktopLyric(this.currentTrack, hasLyric)
+    }
+
     postLyricStateToDesktopLyric(track, hasLyric) {
         if (!this.desktopLyricMessagePortActiveState) return
         const action = hasLyric ? 's-track-lyricLoaded' : 's-track-noLyric'
         this.postToDesktopLryic(action, track)
     }
 
+    static getRaw(data) {
+        return data ? toRaw(data) : data
+    }
+
     static getRawTrack(track) {
-        return toRaw(track)
+        const _track = Player.getRaw(track)
+        const { artist, album, lyric, lyricTrans, lyricRoma } = _track
+        return Object.assign(_track, {
+            artist: Player.getRaw(artist),
+            album: Player.getRaw(album),
+            lyric: Player.getRaw(lyric),
+            lyricTrans: Player.getRaw(lyricTrans),
+            lyricRoma: Player.getRaw(lyricRoma),
+        })
     }
 
     _countAnimationFrameTime() {

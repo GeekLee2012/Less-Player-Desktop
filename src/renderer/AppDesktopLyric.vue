@@ -16,7 +16,8 @@ const { desktopLyric } = storeToRefs(useSettingStore())
 const { setDesktopLyricFontSize, setDesktopLyricTextDirection,
   setDesktopLyricAlignment, setDesktopLyricLayoutMode,
   setDesktopLyricColor, setDesktopLyricHighlightColor,
-  setDesktopLyricLineSpacing, setupDesktopLyricAutoSize, } = useSettingStore()
+  setDesktopLyricLineSpacing, setDesktopLyricAutoSize,
+  setDesktopLyricExtraTextHighlightColor, } = useSettingStore()
 
 //TODO 歌词处理逻辑, 几乎与LyricControl组件重复
 const currenTrack = ref(null)
@@ -39,7 +40,7 @@ const setLyricExistState = (value) => lyricExistState.value = value
 const isLyricReady = () => lyricExistState.value == 1
 
 
-const setLyricState = (track) => {
+const setLyricState = (track, isInit) => {
   setLyricExistState(-1)
   setCurrentIndex(0)
   setLyricData(Track.lyricData(track))
@@ -64,14 +65,16 @@ const setLyricState = (track) => {
       }
     }
     setLyricExistState(state)
+  } else if(isInit) {
+    postMessageToMain('c-track-loadLyric', track)
   }
 
   nextTick(() => setupLyricExtra())
 }
 
-const setCurrentTrack = (track) => {
+const setCurrentTrack = (track, isInit) => {
   currenTrack.value = track
-  setLyricState(track)
+  setLyricState(track, isInit)
 }
 
 const getDefaultLyricText = () => {
@@ -266,7 +269,8 @@ const setupLyricExtra = () => {
 let initTimer = null
 const initDesktopLryic = () => {
   //syncSettingFromMain(data)
-  setupLyricSetting(true)
+  setupLyricSetting()
+  sendLyricLayoutStateToMain(true)
   clearInterval(initTimer)
   initTimer = setInterval(() => {
     postMessageToMain('c-track-init')
@@ -289,22 +293,17 @@ const postMessageToMain = (action, data) => {
 }
 
 const handleMessage = ({ action, data }) => {
-  /*if (action == 's-desktopLyric-init') {
-    syncSettingFromMain(data)
-    setupLyricSetting(true)
-    postMessageToMain('c-track-init')
-  } */
   if (action === 's-track-none') {
     setCurrentTrack(null)
   } else if (action === 's-track-init') {
     clearInterval(initTimer)
     const { track, playing } = data
-    setCurrentTrack(track)
+    setCurrentTrack(track, true)
     if (playing) syncTrackPos()
     //再次确认，是否有当前播放Track
     if (!track) postMessageToMain('c-track-init-retry')
   } else if (action === 's-track-init-retry') {
-    setCurrentTrack(data)
+    setCurrentTrack(data, true)
   } else if (action === 's-track-play') {
     syncTrackPos()
   } else if (action === 's-track-pause') {
@@ -320,8 +319,11 @@ const handleMessage = ({ action, data }) => {
   } else if (action === 's-desktopLyric-pinState') {
     togglePin()
   } else if (action === 's-setting-sync') {
+    const { layoutMode, textDirection, autoSize, needResize } = data
+    console.log(layoutMode, textDirection, autoSize, needResize)
     syncSettingFromMain(data)
-    setupLyricSetting(false)
+    setupLyricSetting()
+    sendLyricLayoutStateToMain(needResize || false)
   } else if (action === 's-theme-apply') {
     applyThemeFromMain(data)
   }
@@ -363,22 +365,20 @@ const setupMessagePort = (callback) => {
 }
 
 const desktopLyricRef = ref(null)
-const setupLyricSetting = (needResize) => {
+const setupLyricSetting = () => {
   if (!desktopLyricRef.value) return
-  const { fontSize, color, hlColor, lineSpacing } = desktopLyric.value
+  const { fontSize, color, hlColor, extraTextHlColor, lineSpacing } = desktopLyric.value
+  const _extraTextHlColor = extraTextHlColor || 'var(--content-text-color)'
   const styles = {
     '--content-desktop-lyric-text-size': `${fontSize}px`,
     '--content-desktop-lyric-color': color,
     '--content-desktop-lyric-highlight-color': hlColor,
+    '--content-desktop-lyric-extra-text-highlight-color': _extraTextHlColor,
     '--content-desktop-lyric-line-spacing': `${lineSpacing}px`,
   }
+  
   for (const [key, value] of Object.entries(styles)) {
     desktopLyricRef.value.style.setProperty(key, value)
-  }
-
-  if (typeof needResize == 'boolean') {
-    sendLyricLayoutStateToMain(needResize)
-    setupDesktopLyricAutoSize(needResize)
   }
 }
 
@@ -406,34 +406,54 @@ const toggleLock = () => {
   sendToMain('app-desktopLyric-lock', lockState.value)
 }
 
+const isResizing = ref(false)
+const setResizing = (value) => isResizing.value = value
+
+let resizingTimeout = null
+window.addEventListener('resize', (event) => {
+  sendToMain('app-desktopLyric-setShadow', true)
+  setResizing(true)
+
+  if(resizingTimeout) clearTimeout(resizingTimeout)
+  resizingTimeout = setTimeout(() => {
+    setResizing(false)
+    sendToMain('app-desktopLyric-setShadow', false)
+  }, 1000)
+})
+
 const onMouseover = (event) => {
+  sendToMain('app-desktopLyric-setShadow', !lockState.value)
   if (!lockState.value) return
   lockVisible.value = true
 }
 
 const onMouseout = (event) => {
+   sendToMain('app-desktopLyric-setShadow', false)
   if (!lockState.value) return
   lockVisible.value = false
 }
 
 //事件透传
+/*
 const onLockBtnMouseOver = (event) => {
   if (!lockState.value) return
-  sendToMain('app-desktopLyric-ignoreMouseEvent', false)
+  //sendToMain('app-ignoreMouseEvents', false)
 }
 
 const onLockBtnMouseOut = (event) => {
   if (!lockState.value) return
-  sendToMain('app-desktopLyric-ignoreMouseEvent', true)
+  //sendToMain('app-ignoreMouseEvents', true, { forward: true })
 }
+*/
 
 //文字显示方向，横屏、竖屏
 const switchTextDirectionState = () => {
   const { textDirection } = desktopLyric.value
   const direction = (textDirection + 1) % 2
   setDesktopLyricTextDirection(direction)
-  setupLyricSetting(true)
+  setupLyricSetting()
   syncSettingToMain()
+  sendLyricLayoutStateToMain(true)
   //setupLyricScrollLocator()
 }
 
@@ -503,9 +523,9 @@ const switchLayoutMode = () => {
     setDesktopLyricAlignment(1)
   }
 
-  sendLyricLayoutStateToMain()
+  sendLyricLayoutStateToMain(true)
   syncSettingToMain()
-  setupLyricSetting(true)
+  setupLyricSetting()
 }
 
 const toggleLyricTransActive = () => {
@@ -513,7 +533,8 @@ const toggleLyricTransActive = () => {
 }
 
 const sendLyricLayoutStateToMain = (needResize) => {
-  const { layoutMode, textDirection } = desktopLyric.value
+  const { layoutMode, textDirection, autoSize } = desktopLyric.value
+  if(!autoSize) return 
   sendToMain('app-desktopLyric-layoutMode', { layoutMode, textDirection, needResize })
 }
 
@@ -522,14 +543,17 @@ const visitSetting = () => {
 }
 
 const syncSettingFromMain = (data) => {
-  const { fontSize, textDirection, alignment, layoutMode, color, hlColor, lineSpacing, } = data
+  const { fontSize, textDirection, alignment, layoutMode, 
+      color, hlColor, extraTextHlColor ,lineSpacing, autoSize } = data
   setDesktopLyricFontSize(fontSize)
   setDesktopLyricAlignment(alignment)
   setDesktopLyricTextDirection(textDirection)
   setDesktopLyricLayoutMode(layoutMode)
   setDesktopLyricColor(color)
   setDesktopLyricHighlightColor(hlColor)
+  setDesktopLyricExtraTextHighlightColor(extraTextHlColor)
   setDesktopLyricLineSpacing(lineSpacing)
+  setDesktopLyricAutoSize(autoSize)
 }
 
 const syncSettingToMain = () => {
@@ -580,8 +604,12 @@ onMounted(() => {
 
 <template>
   <div class="desktop-lyric"
-    :class="{ 'desktop-lyric-lock': lockState, 'desktop-lyric-vertical': (desktopLyric.textDirection == 1) }"
-    ref="desktopLyricRef" @mouseover="onMouseover" @mouseout="onMouseout">
+    :class="{ 
+      'desktop-lyric-lock': lockState, 
+      'desktop-lyric-vertical': (desktopLyric.textDirection == 1),
+      'desktop-lyric-hover': isResizing,
+    }"
+    ref="desktopLyricRef" @mouseenter="onMouseover" @mouseleave="onMouseout">
     <div class="header">
       <div class="action">
         <div class="close-btn btn" v-show="!lockState" @click="hideWin">
@@ -610,9 +638,18 @@ onMounted(() => {
             </g>
           </svg>
         </div>
-        <div class="lock-btn btn spacing" :class="{ active: lockState }" v-show="lockVisible" @click="toggleLock"
-          @mouseover="onLockBtnMouseOver" @mouseout="onLockBtnMouseOut">
-          <svg width="17" height="17" viewBox="0 0 768.04 938.72" xmlns="http://www.w3.org/2000/svg">
+        <div class="lock-btn btn spacing" :class="{ active: lockState }" v-show="lockVisible" @click="toggleLock">
+          <svg width="17" height="17" v-show="!lockState" viewBox="0 0 768.04 938.72" xmlns="http://www.w3.org/2000/svg">
+            <g id="Layer_2" data-name="Layer 2">
+              <g id="Layer_1-2" data-name="Layer 1">
+                <path
+                  d="M128,383.71v-6.83c0-40.32-.08-80.65,0-121A255.94,255.94,0,0,1,324.23,7.19C465.55-27,607.47,64.07,635,207a292.07,292.07,0,0,1,4.79,50.11c.67,40.32.22,80.65.22,121v5.46c8.06,1,15.83,1.52,23.48,2.85,54.73,9.5,98.13,56.29,103.62,111.62.51,5.13.86,10.3.86,15.46q.07,148,0,295.95c0,61.93-40.79,113-101.12,126.31a137,137,0,0,1-29.24,2.84q-253.71.25-507.43.1C66.77,938.66,15.43,897.38,2.68,836A136.23,136.23,0,0,1,.12,808.74Q-.13,661.52,0,514.28c0-64.85,43.4-117,107.15-128.43C113.84,384.65,120.68,384.44,128,383.71ZM383.88,853.44h253c28,0,45.86-17.91,45.87-46q0-146,0-292c0-28.11-17.84-46-45.86-46q-253.26,0-506.5,0a51.82,51.82,0,0,0-8.46.49c-22.55,3.78-36.65,20.94-36.66,44.73q0,146.74,0,293.49a54.15,54.15,0,0,0,1.28,12.39c4.8,20.12,21.66,32.86,43.28,32.87Q256.89,853.47,383.88,853.44ZM554.53,383.92c.1-1.79.23-2.94.23-4.09,0-41,.23-82-.16-122.95a181.55,181.55,0,0,0-3.31-33.72C536.81,150.8,480.86,97.59,407.11,87.28,354,79.85,307.05,95,267.75,131.45c-36.62,33.92-54.22,76.66-54.44,126.48-.18,40.32,0,80.64,0,121,0,1.61.17,3.22.27,5Z" />
+                <path
+                  d="M341.27,743.32c0-8.33-.16-16.67.07-25,.09-3.24-1.07-5-3.73-6.78-28-19.11-41.34-45.83-38.35-79.46,2.85-32,19.91-55.45,48.85-69.3,40.27-19.27,88.72-3.22,110.48,35.84a85.21,85.21,0,0,1-27.47,112.49c-3.4,2.24-4.47,4.53-4.43,8.39q.29,23.75,0,47.49c-.2,17-7.38,30.35-22.48,38.52-14.31,7.75-28.95,7.21-42.77-1.34-13.52-8.37-19.89-21.09-20.18-36.87C341.15,759.32,341.27,751.32,341.27,743.32Z" />
+              </g>
+            </g>
+          </svg>
+          <svg width="23" height="23" v-show="lockState" viewBox="0 0 768.04 938.72" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -888,10 +925,13 @@ onMounted(() => {
 
   position: relative;
   -webkit-app-region: drag;
+
+  background: none;
+  color: var(--content-desktop-lyric-color);
 }
 
 .desktop-lyric-lock {
-  color: var(--content-desktop-lyric-color);
+  /*color: var(--content-desktop-lyric-color);*/
   background: none;
   -webkit-app-region: none;
   /*pointer-events: none;*/
@@ -914,9 +954,25 @@ onMounted(() => {
   margin-left: 20px;
 }
 
+
+.desktop-lyric:hover,
+.desktop-lyric-hover {
+  background: var(--app-bg-color);
+}
+
+.desktop-lyric-lock:hover {
+  background: none;
+}
+
+.desktop-lyric:hover .header,
+.desktop-lyric.desktop-lyric-hover .header {
+  visibility: visible;
+}
+
 .desktop-lyric .header {
   padding-top: 8px;
   padding-bottom: 6px;
+  visibility: hidden;
 }
 
 .desktop-lyric .header .action {
@@ -944,6 +1000,11 @@ onMounted(() => {
   overflow: scroll;
 }
 
+.desktop-lyric.desktop-lyric-lock .center {
+  padding-top: 0px;
+  margin-top: 33px;
+}
+
 .desktop-lyric .center .no-lyric,
 .desktop-lyric .center .unready-state-line,
 .desktop-lyric .center .line {
@@ -956,22 +1017,20 @@ onMounted(() => {
   margin-bottom: var(--content-desktop-lyric-line-spacing);
 }
 
-.desktop-lyric .center .desktop-lyric-content-highlight .extra-text {
+/*
+.desktop-lyric .center .line .extra-text {
   color: var(--content-text-color);
-}
-
-.desktop-lyric-lock .center .line .extra-text {
-  /*
   background: var(--content-desktop-lyric-highlight-color);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
-  */
-  color: var(--content-desktop-lyric-color) !important;
+  color: var(--content-desktop-lyric-color);
+}
+*/
+
+.desktop-lyric .center .desktop-lyric-content-highlight .extra-text {
+  color: var(--content-desktop-lyric-extra-text-highlight-color);
 }
 
 .desktop-lyric-lock .center .desktop-lyric-content-highlight .extra-text {
-  background: var(--content-desktop-lyric-highlight-color);
+  background: var(--content-desktop-lyric-extra-text-highlight-color);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;

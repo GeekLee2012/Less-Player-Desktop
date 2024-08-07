@@ -62,6 +62,8 @@ const IMAGE_QUALITIES = [{
     name: '高清'
 }]
 
+const SIMPLE_LAYOUT_INDEX = 3
+
 //TODO 本地缓存导致Store State数据不一致
 export const useSettingStore = defineStore('setting', {
     state: () => ({
@@ -177,6 +179,8 @@ export const useSettingStore = defineStore('setting', {
             //拖拽保存
             dndSave: false, 
             dndSavePath: null, 
+            //图文控件 - 专辑标题单行显示
+            singleLineAlbumTitleStyle: false,
             //播放页 - 封面图片背景效果
             playingViewUseBgCoverEffect: false,
             //播放页 - 封面图片边框
@@ -241,6 +245,8 @@ export const useSettingStore = defineStore('setting', {
             color: null,
             //高亮行颜色
             hlColor: null,
+            //高亮行颜色 - 翻译文字
+            extraTextHlColor: null,
             //已废弃，窗口自动高度，跟随显示模式
             autoHeight: true,
             //窗口自动大小，跟随显示模式
@@ -457,9 +463,13 @@ export const useSettingStore = defineStore('setting', {
         isStoreRecentPlay() {
             return this.cache.storeRecentPlay
         },
-        isDefaultLayout() { //默认布局，目前包含2种
+        isDefaultLayout() { //默认布局
             const index = this.layout.index
-            return index == 0 || index == 1
+            return index == 0 || index == 1 || index == 2
+        },
+        isDefaultLayoutWithBottom() {
+            const index = this.layout.index
+            return index == 1 || index == 2
         },
         isDefaultOldLayout() {  //旧版布局，第一个版本发布时的布局
             return this.layout.index == 0
@@ -467,8 +477,11 @@ export const useSettingStore = defineStore('setting', {
         isDefaultClassicLayout() {
             return this.layout.index == 1
         },
-        isSimpleLayout() {
+        isDefaultNewLayout() {
             return this.layout.index == 2
+        },
+        isSimpleLayout() {
+            return this.layout.index == SIMPLE_LAYOUT_INDEX
         },
         getWindowZoom() {
             return this.common.winZoom
@@ -684,6 +697,9 @@ export const useSettingStore = defineStore('setting', {
         isPlayingViewCoverBorderShow() {
             return this.track.playingViewCoverBorderShow
         },
+        isSingleLineAlbumTitleStyle() {
+            return this.track.singleLineAlbumTitleStyle
+        }
     },
     actions: {
         setThemeIndex(index, type) {
@@ -693,14 +709,21 @@ export const useSettingStore = defineStore('setting', {
             //emitEvents('switchTheme', themeId)
         },
         setLayoutIndex(index) {
+            const { isMaxScreen } = useAppCommonStore()
+            //硬编码
+            if (isMaxScreen && index == SIMPLE_LAYOUT_INDEX) return
+
             this.layout.index = index || 0
             const currentIndex = this.layout.index
-            if (currentIndex < 2) this.layout.fallbackIndex = currentIndex
+            if (!this.isSimpleLayout) this.layout.fallbackIndex = currentIndex
             emitEvents('app-layout')
         },
         switchToFallbackLayout() {
             this.setLayoutIndex(this.layout.fallbackIndex)
             this.setupWindowZoom()
+        },
+        switchToSimpleLayout() {
+            this.setLayoutIndex(SIMPLE_LAYOUT_INDEX)
         },
         presetThemes() {
             const { getPresetThemes } = useThemeStore()
@@ -859,6 +882,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleHightlightCtxMenuItem() {
             this.track.highlightCtxMenuItem = !this.track.highlightCtxMenuItem
+        },
+        toggleSingleLineAlbumTitleStyle() {
+            this.track.singleLineAlbumTitleStyle = !this.track.singleLineAlbumTitleStyle
         },
         setStateRefreshFrequency(value) {
             const freq = parseInt(value || 60)
@@ -1250,48 +1276,48 @@ export const useSettingStore = defineStore('setting', {
             const fontSize = parseInt(value || 23)
             if (fontSize < 10 || fontSize > 365) return
             this.desktopLyric.fontSize = fontSize
-            this.syncSettingToDesktopLyric()
+            this.syncSettingToDesktopLyric(false)
         },
         setDesktopLyricColor(value) {
             this.desktopLyric.color = value
-            this.syncSettingToDesktopLyric()
+            this.syncSettingToDesktopLyric(false)
         },
         setDesktopLyricHighlightColor(value) {
             this.desktopLyric.hlColor = value
-            this.syncSettingToDesktopLyric()
+            this.syncSettingToDesktopLyric(false)
+        },
+        setDesktopLyricExtraTextHighlightColor(value) {
+            this.desktopLyric.extraTextHlColor = value
+            this.syncSettingToDesktopLyric(false)
         },
         setDesktopLyricLineSpacing(value) {
             value = parseInt(value || 23)
             if (value < 0 || value > 1024) return
             this.desktopLyric.lineSpacing = value
-            this.syncSettingToDesktopLyric()
+            this.syncSettingToDesktopLyric(false)
         },
         setDesktopLyricTextDirection(value) {
             this.desktopLyric.textDirection = value
-            this.setupDesktopLyricAutoSize(true)
-            this.syncSettingToDesktopLyric()
+            this.syncSettingToDesktopLyric(true)
         },
         setDesktopLyricAlignment(value) {
             this.desktopLyric.alignment = value
-            this.syncSettingToDesktopLyric()
+            this.syncSettingToDesktopLyric(false)
         },
         setDesktopLyricLayoutMode(value) {
             this.desktopLyric.layoutMode = value
-            if (this.desktopLyric.layoutMode !== 1 && this.desktopLyric.alignment === 3) {
+            if (this.desktopLyric.layoutMode !== 1 
+                && this.desktopLyric.alignment === 3) {
                 this.desktopLyric.alignment = 1
             }
-            this.syncSettingToDesktopLyric()
+            this.syncSettingToDesktopLyric(true)
         },
-        toggleDesktopLyricAutoHeight() {
-            this.desktopLyric.autoHeight = !this.desktopLyric.autoHeight
-            ipcRendererSend('app-desktopLyric-autoHeight', this.desktopLyric.autoHeight)
+        setDesktopLyricAutoSize(value) {
+            this.desktopLyric.autoSize = value
         },
         toggleDesktopLyricAutoSize() {
             this.desktopLyric.autoSize = !this.desktopLyric.autoSize
-            this.setupDesktopLyricAutoSize()
-        },
-        setupDesktopLyricAutoSize(isInit) {
-            ipcRendererSend('app-desktopLyric-autoSize', this.desktopLyric.autoSize, this.desktopLyric.textDirection == 1, isInit)
+            this.syncSettingToDesktopLyric(false)
         },
         syncSettingFromDesktopLyric(data) {
             const { alignment, fontSize, layoutMode, lineSpacing, textDirection } = data
@@ -1301,8 +1327,9 @@ export const useSettingStore = defineStore('setting', {
             this.desktopLyric.lineSpacing = lineSpacing
             this.desktopLyric.textDirection = textDirection
         },
-        syncSettingToDesktopLyric() {
-            emitEvents('setting-syncToDesktopLyric', this.desktopLyric)
+        syncSettingToDesktopLyric(needResize) {
+            const _needResize = this.desktopLyric.autoSize && needResize 
+            emitEvents('setting-syncToDesktopLyric', {  ...this.desktopLyric, needResize: _needResize })
         },
         setAudioOutputDeviceId(value) {
             this.track.audioOutputDeviceId = value

@@ -1,5 +1,5 @@
 <script setup>
-import { inject, nextTick, onActivated, onMounted, shallowRef, watch } from 'vue';
+import { inject, nextTick, onActivated, onDeactivated, onMounted, onUnmounted, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -9,7 +9,7 @@ import DefaultMainBottom from './DefaultMainBottom.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
 import { isDevEnv } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -24,7 +24,7 @@ const { playlistCategoryViewShow, artistCategoryViewShow,
 const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
-    isDefaultClassicLayout } = storeToRefs(useSettingStore())
+    isDefaultClassicLayout, isDefaultNewLayout } = storeToRefs(useSettingStore())
 const { setupWindowZoom } = useSettingStore()
 
 //TODO 硬编码
@@ -300,7 +300,7 @@ const setLyricToolbarPos = () => {
 }
 
 const setupDefaultLayout = () => {
-    if (isDefaultClassicLayout.value) {
+    if (isDefaultClassicLayout.value || isDefaultNewLayout.value) {
         currentMainTop.value = ClassicMainTop
         currentMainBottom.value = ClassicMainBottom
     } else {
@@ -385,29 +385,9 @@ const resizeViewItems = (event) => {
     if (isDevEnv()) console.log('[ WINDOW - Resize ]')
 }
 
-onActivated(() => {
-    setupDefaultLayout()
-    nextTick(resizeViewItems)
-})
 
-onMounted(() => {
-    //窗口大小变化事件监听
-    window.addEventListener('resize', resizeViewItems)
 
-    //点击事件监听
-    document.addEventListener('click', e => {
-        //强制分类列表重置大小
-        setCategoryViewSize()
-    })
-})
-
-onEvents({
-    'batchView-show': setBatchViewListSize,
-    'pluginsView-show': setPluginsViewListSize,
-    'playingView-changed': setPlayingViewSize,
-    'app-layout-default': setupDefaultLayout,
-})
-
+/* 生命周期、监听 */
 //TODO
 watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)
 watch(playingViewShow, (nv, ov) => {
@@ -421,13 +401,40 @@ watch(lyricMetaPos, () => {
     setPlayingLyricCtlSize()
     setVisualPlayingViewLyricCtlSize()
 })
+
+const eventsRegistration = {
+    'batchView-show': setBatchViewListSize,
+    'pluginsView-show': setPluginsViewListSize,
+    'playingView-changed': setPlayingViewSize,
+    'app-layout-default': setupDefaultLayout,
+}
+
+onMounted(() => {
+    onEvents(eventsRegistration)
+    
+    //窗口大小变化事件监听
+    window.addEventListener('resize', resizeViewItems)
+
+    //点击事件监听
+    document.addEventListener('click', e => {
+        //强制分类列表重置大小
+        setCategoryViewSize()
+    })
+})
+
+onUnmounted(() => offEvents(eventsRegistration))
+
+onActivated(() => {
+    setupDefaultLayout()
+    nextTick(resizeViewItems)
+})
 </script>
 
 <template>
     <div id="default-main-center">
         <component id="default-main-top" :is="currentMainTop">
         </component>
-        <DefaultMainContent id="default-main-content" :class="{ autopadding: isDefaultClassicLayout }">
+        <DefaultMainContent id="default-main-content" :class="{ autopadding: (isDefaultClassicLayout || isDefaultNewLayout) }">
         </DefaultMainContent>
         <component id="default-main-bottom" :is="currentMainBottom">
         </component>
@@ -488,7 +495,7 @@ watch(lyricMetaPos, () => {
 #default-main-center .autopadding #album-detail-view,
 #default-main-center .autopadding #custom-playlist-detail-view,
 #default-main-center .autopadding #local-playlist-detail-view {
-    /* padding-top: 13px; */
-    padding-top: 12px;
+    /* padding-top: 12px; */
+    padding-top: 8px;
 }
 </style>

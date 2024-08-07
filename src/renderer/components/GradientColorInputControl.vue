@@ -78,6 +78,8 @@ const openGradientColorToolbar = (event) => {
     })
 }
 
+
+/* 生命周期、监听 */
 const { onChanged } = props
 watch(gradient, (nv, ov) => {
     if (onChanged) onChanged(nv, ov)

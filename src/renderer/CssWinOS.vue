@@ -37,6 +37,17 @@
   margin-left: 36px !important;
 }
 
+.use-winos-win-ctl.default-new-layout #main-left .header {
+  height: 68px !important;
+  margin-bottom: 3px !important;
+}
+
+.use-winos-win-ctl.default-new-layout #main-left .header .top-logo {
+  margin-top: 25px;
+}
+
+
+
 /*
 .use-winos-win-ctl .default-old-layout #main-left .header {
   background-color: var(--content-bg-color);

@@ -45,6 +45,20 @@ window.electronAPI = {
   TrayAction,
   GitRepository,
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  const viewEl = document.querySelector('.desktop-lyric')
+  if(!viewEl) return
+  const lyricEl = viewEl.querySelector('.center')
+  lyricEl.addEventListener('mouseenter', () => {
+    if(viewEl.classList.contains('desktop-lyric-lock')) {
+      ipcRenderer.send('app-ignoreMouseEvents', true, { forward: true })
+    }
+  })
+  lyricEl.addEventListener('mouseleave', () => {
+    ipcRenderer.send('app-ignoreMouseEvents', false)
+  })
+})
 /*
 window.lessAPI = {
   utils: {

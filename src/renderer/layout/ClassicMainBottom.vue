@@ -106,6 +106,7 @@ onMounted(() => {
     padding-left: 28px;
 }
 
+.classic-main-bottom #play-nav #play-meta .title-wrap,
 .classic-main-bottom #play-nav #play-meta .cover-wrap,
 .classic-main-bottom #play-nav #play-meta .audio-cover,
 .classic-main-bottom #play-nav #play-meta .cover-mask {
@@ -114,9 +115,11 @@ onMounted(() => {
     border-radius: 3px;
 }
 
+/*
 .classic-main-bottom #play-nav #play-meta .title-wrap {
     padding-bottom: 7px;
 }
+*/
 
 .classic-main-bottom #play-nav .play-ctl-wrap {
     flex: 1;

@@ -144,12 +144,13 @@ const visitRoute = (route) => {
         if (beforeRoute && (typeof beforeRoute == 'function')) beforeRoute(toPath)
 
         const fromPath = currentRoutePath()
-        const isSame = (fromPath == toPath)
-        if (isSame && !replace && !override) {
-            return (rejectOnSame && typeof rejectOnSame == 'boolean') ? reject('sameRoute') : null
+        const isSamePath = (fromPath == toPath)
+        if (isSamePath && !replace && !override) {
+            return (rejectOnSame && typeof rejectOnSame == 'boolean') 
+                && reject('sameRoute')
         }
         //相同且要求覆盖，才进行替换
-        if (isSame && (override && typeof override == 'boolean')) Object.assign(route, { replace: true })
+        if (isSamePath && (override && typeof override == 'boolean')) Object.assign(route, { replace: true })
 
         //onRouteReady设置后，仅在route有效时执行
         if (onRouteReady && (typeof onRouteReady == 'function')) onRouteReady(toPath)
@@ -425,9 +426,10 @@ provide('appRoute', {
     addCustomRoute: (route) => {
         return addRoute('appmain', route)
     },
-    visitVideoDetail: (platform, id, href, video) => {
-        href = href ? href.replace(/\//g, '@') : ''
-        return visitCommonRoute(`/videos/video/${platform}/${id}/${href}`)
+    visitVideoDetail: (platform, id, detailUrl, video) => {
+        return visitCommonRoute(`/videos/video/${platform}/${id}`, 
+            () => setRouterCtxCacheItem({ platform, id, detailUrl, video})
+        )
     }
 })
 </script>

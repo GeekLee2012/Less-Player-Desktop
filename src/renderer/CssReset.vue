@@ -21,4 +21,8 @@ input {
   outline: 0;
   padding: 0px;
 }
+
+input[readonly] {
+  cursor: default;
+} 
 </style>

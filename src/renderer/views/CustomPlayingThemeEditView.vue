@@ -120,6 +120,8 @@ const onDrop = (event) => {
     if (isEventStopped) event.stopPropagation()
 }
 
+
+/* 生命周期、监听 */
 const contentRef = ref(null)
 watch(workingCustomPlayingTheme, (nv, ov) => {
     resetTheme()

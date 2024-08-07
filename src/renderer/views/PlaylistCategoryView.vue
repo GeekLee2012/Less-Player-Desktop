@@ -1,9 +1,9 @@
 <script setup>
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { reactive } from 'vue';
+import { onMounted, onUnmounted, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -65,13 +65,18 @@ const visitByOrder = (item, index) => {
     }
 }
 
-onEvents({
+
+/* 生命周期、监听 */
+const eventsRegistration = {
     'playlistCategory-update': () => {
         updateCategories()
         updateOrders()
     },
     'playlistCategory-resetScroll': resetScroll,
-})
+}
+
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

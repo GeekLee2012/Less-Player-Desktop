@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, nextTick } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, nextTick, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -12,7 +12,7 @@ import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import { coverDefault, isSupportedImage, toYyyymmddHhMmSs } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -179,15 +179,10 @@ const detectTitleHeight = () => {
     setTwoLinesTitle(clientHeight > 50)
 }
 
-onEvents({
-    'app-resize': detectTitleHeight, 
-})
-
 const filterContent = (keyword) => {
     setSearchKeyword(keyword)
     loadContent()
 }
-
 
 const playlistCoverOnDrop = (event) => {
     event.preventDefault()
@@ -207,12 +202,9 @@ const playlistCoverOnDrop = (event) => {
     if (isEventStopped) event.stopPropagation()
 }
 
-onActivated(() => {
-    restoreScrollState()
-    nextTick(detectTitleHeight)
-    loadContent()
-})
 
+
+/* 生命周期、监听 */
 watch(() => props.id, () => {
     resetView()
     resetScrollState()
@@ -222,17 +214,26 @@ watch(() => props.id, () => {
 
 watch(currentPlatformCode, loadContent)
 
+const eventsRegistration = {
+    'app-resize': detectTitleHeight, 
+}
 
 onMounted(() => {
+    onEvents(eventsRegistration)
     resetView()
     resetBack2TopBtn()
     loadContent()
 })
 
-//TODO
-onUpdated(() => {
-    resetBack2TopBtn()
+onActivated(() => {
+    restoreScrollState()
+    nextTick(detectTitleHeight)
+    loadContent()
 })
+
+onUnmounted(() => offEvents(eventsRegistration))
+//TODO
+onUpdated(() => resetBack2TopBtn())
 </script>
 
 <template>

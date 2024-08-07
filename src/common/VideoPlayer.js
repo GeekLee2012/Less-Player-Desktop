@@ -1,3 +1,4 @@
+
 import { PlayState, PlayAction } from './Constants';
 import { onEvents, emitEvents } from './EventBusWrapper';
 
@@ -16,8 +17,8 @@ class VideoPlayer {
     }
 
     static create() {
-        if (singleton) return singleton
-        singleton = new VideoPlayer().on({
+        if (!singleton) {
+            singleton = new VideoPlayer().on({
                 'video-init': value => singleton.setVideoNode(value),
                 'video-change': value => singleton.setVideo(value),
                 'video-play': value => singleton.playVideo(value),
@@ -25,12 +26,13 @@ class VideoPlayer {
                 'video-setVolume': value => singleton.volume(value),
                 'video-stop': () => singleton.setVideo(null),
             })
+        }
         return singleton
     }
 
     initDelegatePlayer() {
         if(!this.videoNode) return 
-        
+
         this.delegatePlayer = videojs(this.videoNode, { 
             fill: true, 
             playbackRates: [0.5, 1, 1.5, 2], 
@@ -55,18 +57,25 @@ class VideoPlayer {
         if(!this.delegatePlayer) return 
         
         const self = this
-        this.delegatePlayer.getChild('ControlBar')
-            .addChild('button', {
-                clickHandler: (event) => {
-                    self.setPlayAction(PlayAction.NEXT, event)
-                },
-                controlText: 'Next',
-                className: 'c-vjs-play-next-btn'
-            }, 1)
-
+        const ctlBar = this.delegatePlayer.getChild('ControlBar')
+        
+        const playNextBtnId = 'CustomPlayNextBtn'
+        const playNextBtn = ctlBar.getChildById(playNextBtnId)
+        if(!playNextBtn) {
+            ctlBar.addChild('button', {
+                    id: playNextBtnId,
+                    className: 'c-vjs-play-next-btn',
+                    controlText: 'Next',
+                    clickHandler: (event) => {
+                        self.setPlayAction(PlayAction.NEXT, event)
+                    },
+                }, 1)
+        }
     }
 
     setVideoNode(node) {
+        if(this.videoNode == node) return
+
         this.videoNode = node
         this.initDelegatePlayer()
     }

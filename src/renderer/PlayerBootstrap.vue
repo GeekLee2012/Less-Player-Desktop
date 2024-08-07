@@ -1,5 +1,5 @@
 <script setup>
-import { inject, provide, onMounted, watch, ref, computed, toRaw, nextTick } from 'vue';
+import { inject, provide, onMounted, watch, ref, computed, toRaw, nextTick, onDeactivated, onActivated, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -8,8 +8,7 @@ import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
 import { useSettingStore } from './store/settingStore';
 import { Track } from '../common/Track'
-import {
-    coverDefault, isBlank, isDevEnv, escapeHtml,
+import { coverDefault, isBlank, isDevEnv, escapeHtml,
     useStartDrag, useDownloadsPath, 
     tryCall, toTrimString, useTrayAction,
     ipcRendererSend, ipcRendererInvoke, 
@@ -21,7 +20,7 @@ import { Lyric } from '../common/Lyric';
 import { United } from '../vendor/united';
 import { useVideoPlayStore } from './store/videoPlayStore';
 import { useSoundEffectStore } from './store/soundEffectStore';
-import { onEvents, emitEvents } from '../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../common/EventBusWrapper';
 
 
 
@@ -556,7 +555,7 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId, pla
         }
         if (needReset && queueTracksSize.value > 0) {
             let ok = true
-            if (isShowDialogBeforeClearPlaybackQueue.value) ok = await showConfirm({ msg: '电台歌单播放前，需清空当前播放。确定要继续吗？' })
+            if (isShowDialogBeforeClearPlaybackQueue.value) ok = await showConfirm({ msg: '播放电台歌单，需清空当前播放。确定要继续吗？' })
             if (!ok) return
             resetQueue()
         }
@@ -844,40 +843,44 @@ const getVideoDetail = (video) => {
 
 //TODO 貌似Electron Bug：主窗口刷新后，MediaSession无法重新关联
 const setupCurrentMediaSession = async (track) => {
-    if ("mediaSession" in navigator) {
-        const _track = (currentVideo.value || track || currentTrack.value || { title: '听你想听，爱你所爱' })
-        const { title, cover } = _track
-        let coverSrc = cover
-        if (toTrimString(cover).startsWith(ImageProtocal.prefix)) {
-            coverSrc = await ipcRendererInvoke('open-image-base64', cover)
-        }
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title,
-            artist: Track.artistName(_track),
-            album: Track.albumName(_track),
-            artwork: [{
-                src: coverDefault(coverSrc),
-                sizes: "240x240",
-                type: "image/png",
-            }, {
-                src: coverDefault(coverSrc),
-                sizes: "300x300",
-                type: "image/png",
-            }, {
-                src: coverDefault(coverSrc),
-                sizes: "500x500",
-                type: "image/png",
-            }, {
-                src: coverDefault(coverSrc),
-                sizes: "1000x1000",
-                type: "image/png",
-            }]
-        })
+    try {
+        if ("mediaSession" in navigator) {
+            const _track = (currentVideo.value || track || currentTrack.value || { title: '听你想听，爱你所爱' })
+            const { title, cover } = _track
+            let coverSrc = cover
+            if (toTrimString(cover).startsWith(ImageProtocal.prefix)) {
+                coverSrc = await ipcRendererInvoke('open-image-base64', cover)
+            }
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title,
+                artist: Track.artistName(_track),
+                album: Track.albumName(_track),
+                artwork: [{
+                    src: coverDefault(coverSrc),
+                    sizes: "240x240",
+                    type: "image/png",
+                }, {
+                    src: coverDefault(coverSrc),
+                    sizes: "300x300",
+                    type: "image/png",
+                }, {
+                    src: coverDefault(coverSrc),
+                    sizes: "500x500",
+                    type: "image/png",
+                }, {
+                    src: coverDefault(coverSrc),
+                    sizes: "1000x1000",
+                    type: "image/png",
+                }]
+            })
 
-        //上、下一曲按钮功能绑定，不支持视频
-        if (currentVideo.value) return
-        navigator.mediaSession.setActionHandler("previoustrack", playPrevTrack)
-        navigator.mediaSession.setActionHandler("nexttrack", playNextTrack)
+            //上、下一曲按钮功能绑定，不支持视频
+            if (currentVideo.value) return
+            navigator.mediaSession.setActionHandler("previoustrack", playPrevTrack)
+            navigator.mediaSession.setActionHandler("nexttrack", playNextTrack)
+        }
+    } catch(error) {
+        if(isDevEnv()) console.log(error)
     }
 }
 
@@ -1391,6 +1394,8 @@ const handleMessageFromDesktopLyric = (action, data) => {
         playNextTrack()
     } else if (action === 'c-track-init-retry') {
         postMessageToDesktopLryic('s-track-init-retry', currentTrack.value)
+    } else if (action === 'c-track-loadLyric') {
+        loadLyric(data)
     } else if (messagePort.onPlayerMessage) { //必须放在最后
         messagePort.onPlayerMessage(action, data)
     }
@@ -1407,7 +1412,7 @@ const reloadApp = () => {
 
 
 //EventBus监听注册，统一管理
-onEvents({
+const eventsRegistration = {
     //FM广播
     'radio-play': traceRecentTrack,
     'radio-state': ({ state, track, currentTime, radio }) => {
@@ -1574,9 +1579,11 @@ onEvents({
     'userProfile-reset': checkFavoritedState,
     'track-refreshFavoritedState': checkFavoritedState,
     'setting-syncToDesktopLyric': data => postMessageToDesktopLryic('s-setting-sync', data),
-})
+}
 
 onMounted(() => {
+    onEvents(eventsRegistration)
+
     setupStateRefreshFrequency()
     setupSpectrumRefreshFrequency()
     setupSoundEffect()
@@ -1584,6 +1591,10 @@ onMounted(() => {
     restoreTrack(handleStartupPlay)
 
     //setupOutputDevices()
+})
+
+onUnmounted(() => {
+    offEvents(eventsRegistration)
 })
 
 watch(queueTracksSize, (nv, ov) => {

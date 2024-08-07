@@ -8,7 +8,7 @@ export default {
 -->
 
 <script setup>
-import { inject, ref, reactive, shallowRef, watch, toRaw, nextTick, computed } from 'vue';
+import { inject, ref, reactive, shallowRef, watch, toRaw, nextTick, computed, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
@@ -22,7 +22,7 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { Album } from '../../common/Album';
 import { coverDefault } from '../../common/Utils';
 import { useSettingStore } from '../store/settingStore';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -234,18 +234,24 @@ const computedTabName = computed(() => {
     }
 })
 
-//TODO
-onEvents({
-    'ctxMenu-removeFromLocal': reloadAll,
-    'app-resize': detectTitleHeight,
-})
 
+
+/* 生命周期、监听 */
 //TODO 需要梳理优化
 watch(() => [props.platform, props.id], ([nv1, nv2]) => {
     updateAlbumDetailKeys(nv1, nv2)
     reloadAll()
 }, { immediate: true })
 watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
+
+//TODO
+const eventsRegistration = {
+    'ctxMenu-removeFromLocal': reloadAll,
+    'app-resize': detectTitleHeight,
+}
+
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

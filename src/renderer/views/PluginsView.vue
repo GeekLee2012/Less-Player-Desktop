@@ -321,9 +321,9 @@ const refreshCheckData = () => {
 
 const refreshViewSize = () => emitEvents('pluginsView-show')
 
-onActivated(() => {
-    nextTick(refreshViewSize)
-})
+
+/* 生命周期、监听 */
+onActivated(() => nextTick(refreshViewSize))
 </script>
 
 <template>

@@ -287,7 +287,8 @@ onUnmounted(() => {
                     </div>
                 </div>
                 <div class="lyric-wrap" :class="{ 'meta-show': (lyricMetaPos == 0) }">
-                    <LyricControl :track="currentTrack" :currentTime="currentTimeState" @mousewheel="onUserMouseWheel">
+                    <LyricControl :track="currentTrack" :currentTime="currentTimeState" 
+                        @mousewheel="onUserMouseWheel" keyName="visualPlayingView">
                     </LyricControl>
                 </div>
             </div>

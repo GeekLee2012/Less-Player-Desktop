@@ -21,6 +21,8 @@ const setNavIndex = (index) => {
     navIndex.value = index || 0
 }
 
+
+/* 生命周期、监听 */
 watch(randomMusicToolbarShow, () => setNavIndex(0))
 </script>
 

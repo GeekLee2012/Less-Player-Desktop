@@ -54,8 +54,8 @@ const updateProgress = (percent, noUpdate) => {
     height = height > 0 ? height : 0
     height = height < 100 ? height : 100
 
-    progressRef.value.style.height = `${height}%`
-    thumbRef.value.style.bottom = `${height}%`
+    if(progressRef.value) progressRef.value.style.height = `${height}%`
+    if(thumbRef.value) thumbRef.value.style.bottom = `${height}%`
 
     if (!noUpdate) setValue(height / 100)
 }
@@ -126,15 +126,18 @@ const releaseDrag = (event) => {
     }, 1288)
 }
 
+
+/* 生命周期、监听 */
+watch(() => props.value, (nv, ov) => {
+    nextTick(() => updateProgress(nv))
+}, { immediate: true })
+
 //对外提供API
 defineExpose({
     updateProgress,
     toggleProgress
 })
 
-watch(() => props.value, (nv, ov) => {
-    nextTick(() => updateProgress(nv))
-}, { immediate: true })
 </script>
 
 <template>

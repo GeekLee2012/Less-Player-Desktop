@@ -3,16 +3,18 @@ import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { isBlank } from '../../common/Utils';
 
 
 
 const props = defineProps({
     threshold: Number,
     //maxScrollTopThreshold: Number,
-    target: Object
+    target: Object,
+    prefix: String,
 })
 
-const { layout, isPlaylistCategoryBarFlowBtnShow } = storeToRefs(useSettingStore())
+const { isDefaultLayoutWithBottom, isPlaylistCategoryBarFlowBtnShow } = storeToRefs(useSettingStore())
 
 let threshold = (props.threshold || 1024)
 let scrollTarget = props.target
@@ -45,15 +47,21 @@ const bindScrollListener = () => {
     scrollTarget.addEventListener('scroll', showAsNeeded)
 }
 
-const toggleCategory = () => emitEvents('playlistCategory-toggle')
+const toggleCategory = () => {
+    const { prefix } = props
+    if(isBlank(prefix)) return 
+    emitEvents(`${prefix}Category-toggle`)
+}
 
+
+/* 生命周期、监听 */
 defineExpose({
     setScrollTarget
 })
 </script>
 
 <template>
-    <div class="playlist-categroy-flow-btn" :class="{ 'playlist-categroy-flow-btn-autolayout': (layout.index == 1) }"
+    <div class="playlist-categroy-flow-btn" :class="{ 'playlist-categroy-flow-btn-with-bottom': isDefaultLayoutWithBottom }"
         @click.stop="toggleCategory" v-show="isPlaylistCategoryBarFlowBtnShow && isBtnShow">
         <svg width="15" height="15" viewBox="0 0 29.3 29.3">
             <g id="Layer_2" data-name="Layer 2">
@@ -99,7 +107,7 @@ defineExpose({
 }
 
 /*TODO */
-.playlist-categroy-flow-btn-autolayout {
+.playlist-categroy-flow-btn-with-bottom {
     bottom: 139px;
     right: 20px;
 }

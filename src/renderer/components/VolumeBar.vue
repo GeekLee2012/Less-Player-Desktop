@@ -27,6 +27,8 @@ const toggleMute = () => {
     updateVolume(sliderRef.value.toggleProgress())
 }
 
+
+/* 生命周期、监听 */
 watch(volume, (nv, ov) => updateUI(nv))
 
 defineExpose({

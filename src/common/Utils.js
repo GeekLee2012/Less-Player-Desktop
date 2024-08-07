@@ -67,16 +67,16 @@ export const onIpcRendererEvents = (registration) => {
     })
 }
 
-export const ipcRendererSend = (channel, data) => {
+export const ipcRendererSend = (channel, data, options) => {
     const ipcRenderer = useIpcRenderer()
     if(!ipcRenderer) return 
-    ipcRenderer.send(channel, data)
+    ipcRenderer.send(channel, data, options)
 }
 
-export const ipcRendererInvoke = async (channel, data) => {
+export const ipcRendererInvoke = async (channel, data, options) => {
     const ipcRenderer = useIpcRenderer()
     if(!ipcRenderer) return 
-    return ipcRenderer.invoke(channel, data)
+    return ipcRenderer.invoke(channel, data, options)
 }
 
 export const useStartDrag = () => {

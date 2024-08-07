@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref, inject, nextTick, computed, onUnmounted, } from 'vue';
+import { watch, ref, inject, nextTick, computed, onUnmounted, onMounted, } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
@@ -11,7 +11,7 @@ import { useSettingStore } from '../store/settingStore';
 import { PlayState } from '../../common/Constants';
 import { isDevEnv, smoothScroll, toMMssSSS, toMillis } from '../../common/Utils';
 import { Lyric } from '../../common/Lyric';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -147,6 +147,7 @@ const resetLyricState = (track, state) => {
 
 //重新加载歌词
 const reloadLyricData = (track) => {
+    if(!track) return
     /*
     let isExist = false
     if (Track.hasLyric(track)) { //确认是否存在有效歌词
@@ -191,6 +192,7 @@ const reloadLyricData = (track) => {
         safeRenderAndScrollLyric(currentTimeState.value, true)
     })
     //setTimeout(setupLyricLines, 300)
+
 }
 
 const onUserMouseWheel = (event) => {
@@ -335,9 +337,26 @@ const setupLyricExtra = () => {
     }
 }
 
+const loadTrackLyric = (track) => {
+    if(!track) return
+    if(Track.hasLyric(track)) return reloadLyricData(track)
+    
+    resetLyricState(track)
+    loadLyric(track)
+}
 
-//EventBus事件
-onEvents({
+
+
+/* 生命周期、监听 */
+watch(() => props.currentTime, (nv, ov) => {
+    //TODO 暂时简单处理，播放页隐藏时直接返回
+    if (!playingViewShow.value) return
+    safeRenderAndScrollLyric(nv)
+}, { immediate: true })
+
+watch(() => props.track, (nv, ov) => loadTrackLyric(nv), { immediate: true })
+
+const eventsRegistration = {
     'track-lyricLoaded': reloadLyricData,
     'track-noLyric': reloadLyricData,
     'lyric-userMouseWheel': onUserMouseWheel,
@@ -349,19 +368,13 @@ onEvents({
     'lyric-alignment': setupLyricAlignment,
     'playingView-changed': setupLyricAlignment,
     'track-lyricRestore': () => setLyricExistState(-1),
+}
+
+onMounted(() => {
+    onEvents(eventsRegistration)
+    loadTrackLyric(props.track)
 })
-
-watch(() => props.currentTime, (nv, ov) => {
-    //TODO 暂时简单处理，播放页隐藏时直接返回
-    if (!playingViewShow.value) return
-    safeRenderAndScrollLyric(nv)
-}, { immediate: true })
-
-watch(() => props.track, (nv, ov) => {
-    if (!nv) return
-    resetLyricState(nv)
-    loadLyric(nv)
-}, { immediate: true })
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

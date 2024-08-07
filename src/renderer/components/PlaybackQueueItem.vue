@@ -16,7 +16,7 @@ const { playMv, dndSaveTrack } = inject('player')
 const { visitPlaylist, visitRadio, visitAlbum } = inject('appRoute')
 const { showContextMenu, } = inject('appCommon')
 
-const { queueTracksSize } = storeToRefs(usePlayStore())
+const { queueTracksSize, playing } = storeToRefs(usePlayStore())
 const { playTrack, removeTrack, isCurrentTrack, togglePlay } = usePlayStore()
 const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast, setRouterCtxCacheItem } = useAppCommonStore()
@@ -93,6 +93,12 @@ const isDraggable = computed(() => {
         && !isLocalMusic(platform)
         && !Playlist.isFMRadioType(props.data)
 })
+
+const playingState = computed(() => {
+    const track = props.data
+    if (!isCurrentTrack(track)) return false
+    return playing.value
+})
 </script>
 
 <template>
@@ -129,10 +135,21 @@ const isDraggable = computed(() => {
                             </g>
                         </g>
                     </svg>
-                    <svg :class="{ spacing1: isMvBtnShow }" @click="playItem" width="18" height="18" viewBox="0 0 139 139"
+                    <svg :class="{ spacing1: isMvBtnShow }" v-show="!playingState" @click="playItem" width="18" height="18" viewBox="0 0 139 139"
                         xmlns="http://www.w3.org/2000/svg" xml:space="preserve" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <path
                             d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
+                    </svg>
+                    <svg :class="{ spacing1: isMvBtnShow }" v-show="playingState" @click="playItem" width="15" height="15" viewBox="0 0 658.53 1006.16"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M196.43,503.09q0,200.21,0,400.41c0,20.63-4.42,39.93-15.66,57.45-21.43,33.42-62.66,50.43-102.18,42.14-39.72-8.34-70.5-39.72-76.82-78.67A130.29,130.29,0,0,1,.08,903.55Q-.06,501.88,0,100.21C0,48.38,35,8.27,86.47.9,136.62-6.29,186.73,30.61,194.7,80.79a135,135,0,0,1,1.66,20.88Q196.49,302.37,196.43,503.09Z" />
+                                <path
+                                    d="M462.09,503q0-200.72,0-401.42c0-46.91,29.11-85.51,72.86-97,63.42-16.69,123.47,30.29,123.52,96.79q.12,169,0,337.92,0,232.95,0,465.9c0,38.9-15.56,69.86-50.23,88.7-60,32.57-134.91-2.14-145.21-73a117,117,0,0,1-.9-17Q462.05,703.43,462.09,503Z" />
+                            </g>
+                        </g>
                     </svg>
                     <svg @click="linkItem" width="16" height="16" class="spacing" viewBox="0 0 80 80"
                         xmlns="http://www.w3.org/2000/svg">

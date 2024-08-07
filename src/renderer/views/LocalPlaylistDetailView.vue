@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated, nextTick } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated, nextTick, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
@@ -13,7 +13,7 @@ import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import { coverDefault, ipcRendererInvoke, isSupportedImage, toYyyymmddHhMmSs } from "../../common/Utils";
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -273,17 +273,8 @@ const filterContent = (keyword) => {
     loadContent()
 }
 
-onEvents({
-    'app-resize': detectTitleHeight,
-})
 
-onActivated(() => {
-    resetView()
-    restoreScrollState()
-    nextTick(detectTitleHeight)
-    loadContent()
-})
-
+/* 生命周期、监听 */
 watch(() => props.id, () => {
     resetView()
     resetScrollState()
@@ -293,10 +284,19 @@ watch(() => props.id, () => {
 
 watch(currentPlatformCode, loadContent)
 
-
+const eventsRegistration = {
+    'app-resize': detectTitleHeight,
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 //TODO
-onUpdated(() => {
-    resetBack2TopBtn()
+onUpdated(() => resetBack2TopBtn())
+
+onActivated(() => {
+    resetView()
+    restoreScrollState()
+    nextTick(detectTitleHeight)
+    loadContent()
 })
 </script>
 

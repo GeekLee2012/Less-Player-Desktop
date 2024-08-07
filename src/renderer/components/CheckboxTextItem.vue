@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onMounted, onUnmounted, ref } from 'vue';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -31,12 +31,16 @@ const setChecked = (id, checked) => {
     isChecked.value = checked
 }
 
-onEvents({ 
+
+/* 生命周期、监听 */
+const eventsRegistration = { 
     'checkeboxTextItem-refresh': data => {
         const { id, checked } = data
         setChecked(id, checked)
     },
-})
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

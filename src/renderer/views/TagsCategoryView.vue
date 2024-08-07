@@ -1,6 +1,6 @@
 <script setup>
-import { reactive, ref } from 'vue';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onMounted, onUnmounted, reactive, ref } from 'vue';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -45,12 +45,16 @@ const toggleTagActive = (tag, index) => {
     notifyChanged()
 }
 
-onEvents({
+
+/* 生命周期、监听 */
+const eventsRegistration = {
     'tagsCategory-update': ({ data, callback }) => {
         tagsData.value = data
         onChangedCallback = callback
     },
-})
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

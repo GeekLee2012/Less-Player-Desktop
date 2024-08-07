@@ -166,6 +166,8 @@ const shortenCacheData = (data) => {
     return [data[0], data[1], { title: '......' }, data[data.length - 2], data[data.length - 1]]
 }
 
+
+/* 生命周期、监听 */
 onMounted(() => loadCustomPlaylist())
 </script>
 

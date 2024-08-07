@@ -1,6 +1,6 @@
 <script setup>
-import { inject } from 'vue';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { inject, onMounted, onUnmounted } from 'vue';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -20,15 +20,21 @@ const visitArtistDetail = (platform, item, index, callback) => {
     visitArtist({ platform, item, index, callback, updatedArtist })
 }
 
+
+
+/* 生命周期、监听 */
 //TODO 下面代码存在问题，惊群效应
 //前期接口未能提供完整数据，后期某个接口更新补全数据
-onEvents({
+//onEvents()
+const eventsRegistration = {
     'track-artistUpdated': data => {
         if (!data) return
         if (data.trackId != props.trackId) return
         updatedArtist = data
     },
-})
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

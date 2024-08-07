@@ -200,6 +200,9 @@ const saveGradient = () => {
     hideGradientColorToolbar()
 }
 
+
+
+/* 生命周期、监听 */
 defineExpose({
     init: ({ onChanged, value }) => {
         onChangeSaved = onChanged

@@ -1,9 +1,9 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { inject, onMounted, reactive } from 'vue';
+import { inject, onMounted, onUnmounted, reactive } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -18,6 +18,8 @@ const menuData = reactive([])
 
 const initData = () => {
     menuData.length = 0
+    if(!commonCtxMenuCacheItem.value) return 
+    
     const { artist } = commonCtxMenuCacheItem.value
     artist.forEach((item, index) => {
         menuData.push({
@@ -30,11 +32,17 @@ const initData = () => {
     })
 }
 
-onMounted(() => initData())
 
-onEvents({
+
+/* 生命周期、监听 */
+const eventsRegistration = {
     'artistListSubmenu-init': initData,
+}
+onMounted(() => {
+    onEvents(eventsRegistration)
+    initData()
 })
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

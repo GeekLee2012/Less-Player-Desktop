@@ -16,7 +16,8 @@ const props = defineProps({
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function,
     loading: Boolean,
-    isAlbumArtistSutitle: Boolean
+    isAlbumArtistSutitle: Boolean,
+    singleLineTitleStyle: Boolean,
 })
 
 const visitItem = (item) => {
@@ -39,7 +40,7 @@ const computedItemSubtitle = computed(() => {
     <div class="albumlist-ctl">
         <div class="pag-content" v-show="!loading">
             <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title"
-                :singleLineTitleStyle="isAlbumArtistSutitle" :subtitle="computedItemSubtitle(item)"
+                :singleLineTitleStyle="singleLineTitleStyle || isAlbumArtistSutitle" :subtitle="computedItemSubtitle(item)"
                 :extraText="item.publishTime" @click="visitItem(item)" :checkbox="checkbox" :playable="true"
                 :playAction="() => playAlbum(item)" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">

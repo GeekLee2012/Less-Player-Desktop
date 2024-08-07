@@ -1,12 +1,12 @@
 <script setup>
-import { computed, inject, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { smoothScroll, stringEqualsIgnoreCase } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -22,6 +22,10 @@ const { isPlaybackQueueAutoPositionOnShow, isPlaybackQueueCloseBtnShow,
     isPlaybackQueueBatchActionBtnShow
 } = storeToRefs(useSettingStore())
 const { playbackQueueViewShow } = storeToRefs(useAppCommonStore())
+
+
+const pbqRef = ref(null)
+const listRef = ref(null)
 
 const targetPlaying = () => {
     if (queueTracksSize.value < 1) return
@@ -63,11 +67,6 @@ const queueState = () => {
     if (dragOverIndex.value > -1) current = Math.min(Math.max(dragOverIndex.value + 1, 1), total)
     return total > 0 ? (current > 0 ? `${current} / ${total}首` : `共${total}首`) : '共0首'
 }
-
-onEvents({
-    'playbackQueue-empty': onQueueEmpty,
-    'playbackQueue-targetPlaying': targetPlaying, 
-})
 
 let isUserMouseWheel = false, isPendingTargetPlaying = false
 let userMouseWheelTimer = null
@@ -122,13 +121,8 @@ const isIconMode = computed(() => {
         && isPlaybackQueueHistoryBtnShow.value 
 })
 
-const pbqRef = ref(null)
-const listRef = ref(null)
-onMounted(() => {
-    if (pbqRef.value) pbqRef.value.addEventListener('click', hideAllCtxMenus)
-    if (listRef.value) listRef.value.addEventListener('scroll', hideAllCtxMenus)
-})
 
+/* 生命周期、监听 */
 watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
     if (isShow && isPlaybackQueueAutoPositionOnShow.value) {
         if (isUserMouseWheel) {
@@ -138,6 +132,19 @@ watch([playbackQueueViewShow, playingIndex], ([isShow, index]) => {
         }
     }
 }, { immediate: true })
+
+
+const eventsRegistration = {
+    'playbackQueue-empty': onQueueEmpty,
+    'playbackQueue-targetPlaying': targetPlaying, 
+}
+onMounted(() => {
+    onEvents(eventsRegistration)
+    if (pbqRef.value) pbqRef.value.addEventListener('click', hideAllCtxMenus)
+    if (listRef.value) listRef.value.addEventListener('scroll', hideAllCtxMenus)
+})
+
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

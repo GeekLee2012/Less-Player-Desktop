@@ -17,6 +17,7 @@ import analyze from 'rgbaster-plus';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
+
 const { seekTrack, playMv,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
@@ -24,6 +25,8 @@ const { seekTrack, playMv,
     mmssPreseekTime, isTrackSeekable,
     dndSaveCover } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
+
+const { applyDocumentStyle } = inject('appStyle')
 
 
 const { isMaxScreen, playingViewShow, desktopLyricShow } = storeToRefs(useAppCommonStore())
@@ -85,8 +88,8 @@ const setupBackgroudEffect = async () => {
     //本地歌曲
     if (cover.startsWith(ImageProtocal.prefix)) return setHasBackgroudCover(false)
 
-    
     setHasBackgroudCover(true)
+    //TODO 内存占用高
     Object.assign(bgEffectStyle, {
         background: `url('${cover}')`
     })
@@ -120,6 +123,8 @@ const trackFormat = computed(() => {
     return `${_bitrate} kbps , ${sampleRate} Hz ${_codec}`
 })
 
+
+/* 生命周期、监听 */
 watch([() => (currentTrack.value && currentTrack.value.cover), playingViewShow], () => {
     setupBackgroudEffect()
 })
@@ -180,7 +185,8 @@ onMounted(() => {
                     <div class="format" v-show="computedFormatShow" v-html="trackFormat"></div>
                 </div>
                 <div class="lyric-wrap">
-                    <LyricControl :track="currentTrack" :currentTime="currentTimeState" @mousewheel="onUserMouseWheel">
+                    <LyricControl :track="currentTrack" :currentTime="currentTimeState" 
+                        @mousewheel="onUserMouseWheel" keyName="playingView">
                     </LyricControl>
                 </div>
             </div>
@@ -282,7 +288,7 @@ onMounted(() => {
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
-    --others-sliderbar-ctl-height: 3px;
+    --others-sliderbar-ctl-height: 3px; 
 }
 
 .playing-view .spacing {

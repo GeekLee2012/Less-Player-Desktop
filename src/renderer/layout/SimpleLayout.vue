@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, ref, watch, toRaw, inject, nextTick, computed } from 'vue';
+import { onActivated, ref, watch, toRaw, inject, nextTick, computed, onDeactivated, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -18,7 +18,7 @@ import ArtistControl from '../components/ArtistControl.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { useArtistSquareStore } from '../store/artistSquareStore';
 import { Album } from '../../common/Album';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -1019,25 +1019,9 @@ const computedCategoryName = computed(() => {
     return currentTraceId.value ? currentMusicCategoryName.value : ''
 })
 
-/* EventBus事件 */
-onEvents({
-    'track-lyricLoaded': track => checkLyricValid(track),
-    'lyric-fontSize': setupLyricLines,
-    'lyric-hlFontSize': setupLyricLines,
-    'lyric-fontWeight': setupLyricLines,
-    'lyric-lineHeight': setupLyricLines,
-    'lyric-lineSpacing': setupLyricLines,
-    'lyric-alignment': setupLyricAlignment, 
-})
 
-/* 组件生命周期、钩子等 */
-onActivated(() => {
-    setupTextColor()
-    updatePlatformShortName()
 
-    if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
-})
-
+/* 生命周期、监听 */
 watch(currentTimeState, (nv, ov) => {
     if (!isSimpleLayout.value) return
 
@@ -1077,6 +1061,25 @@ watch(randomMusicToolbarShow, () => {
 
 watch([lyricToolbarShow], setLyricToolbarPos)
 watch([textColorIndex], setupTextColor)
+
+const eventsRegistration = {
+    'track-lyricLoaded': track => checkLyricValid(track),
+    'lyric-fontSize': setupLyricLines,
+    'lyric-hlFontSize': setupLyricLines,
+    'lyric-fontWeight': setupLyricLines,
+    'lyric-lineHeight': setupLyricLines,
+    'lyric-lineSpacing': setupLyricLines,
+    'lyric-alignment': setupLyricAlignment, 
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
+
+onActivated(() => {
+    setupTextColor()
+    updatePlatformShortName()
+
+    if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
+})
 </script>
 
 <template>
@@ -1719,7 +1722,7 @@ watch([textColorIndex], setupTextColor)
 }
 
 .simple-layout .video-playing-view .vjs-theme-city .c-vjs-play-next-btn .vjs-icon-placeholder::before {
-    padding-left: 0.1em;
+    padding-left: 0.18em;
     padding-right: 0.5em;
 }
 

@@ -280,6 +280,8 @@ const checkReady = () => {
     setReady(false)
 }
 
+
+/* 生命周期、监听 */
 watch(sources, () => {
     checkReady()
     updateCheckedLength()

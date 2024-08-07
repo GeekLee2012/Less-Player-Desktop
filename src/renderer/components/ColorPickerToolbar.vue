@@ -144,6 +144,8 @@ const computedTitle = computed(() => {
     return title || '颜色设置'
 })
 
+
+/* 生命周期、监听 */
 onMounted(() => VueColorKitHack.hack())
 
 defineExpose({

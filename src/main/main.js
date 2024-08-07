@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain,
   shell, powerSaveBlocker, Tray,
   globalShortcut, session, utilityProcess,
   protocol, nativeTheme, MessageChannelMain,
-  nativeImage, 
+  nativeImage,  screen,
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
@@ -50,7 +50,6 @@ let powerSaveBlockerId = -1
 let appTray = null, appTrayMenu = null, appTrayShow = false
 let playState = false, desktopLyricLockState = false
 //let lyricWinMinWidth = 450, lyricWinMinHeight = 168
-let isDesktopLyricAutoSize = true, isVerticalDesktopLyric = false, desktopLyricLayoutMode = 0
 const proxyAuthRealms = []
 // 下载队列
 const downloadingQueue = []
@@ -810,6 +809,11 @@ const registryGlobalListeners = () => {
     if(index > -1) exRequestHandlers.splice(index, 1)
   })
 
+  ipcMain.handle('app-displayFrequency', (event, data) => {
+    const { displayFrequency } = getPrimaryScreenMetadata()
+    return displayFrequency
+  })
+
   ipcMain.on('app-desktopLyric-toggle', (event, ...args) => {
     toggleLyricWindow()
     sendTrayAction(isLyricWindowShow() ? TrayAction.DESKTOP_LYRIC_OPEN 
@@ -826,29 +830,27 @@ const registryGlobalListeners = () => {
     setupTrayMenu()
   }).on('app-desktopLyric-lock', (event, ...args) => {
     desktopLyricLockState = args[0]
-    if (isMacOS) lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
+    //if (isMacOS) lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
+    //lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
     lyricWin.setHasShadow(!desktopLyricLockState)
     lyricWin.setResizable(!desktopLyricLockState)
     //lyricWin.setMinimumSize(lyricWinMinWidth, lyricWinMinHeight)
     if (desktopLyricLockState) lyricWin.blur()
     setupTrayMenu()
+  }).on('app-ignoreMouseEvents', (event, ignore, options) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win.setIgnoreMouseEvents(ignore, options)
   }).on('app-mainWin-show', (event, ...args) => {
     showMainWindow()
-  }).on('app-desktopLyric-autoSize', (event, ...args) => {
-    isDesktopLyricAutoSize = args[0]
-    isVerticalDesktopLyric = args[1]
   }).on('app-desktopLyric-layoutMode', (event, ...args) => {
     const { layoutMode, textDirection, needResize } = args[0]
-    desktopLyricLayoutMode = layoutMode
-    isVerticalDesktopLyric = (textDirection == 1)
-    if (!isDesktopLyricAutoSize && !needResize) return
-    setupDesktopLyricWindowSize(isDesktopLyricAutoSize || needResize)
+    setupDesktopLyricWindowSize(layoutMode, textDirection == 1, needResize)
   }).on('app-desktopLyric-alwaysOnTop', (event, ...args) => {
-    //lyricWin.setAlwaysOnTop(!lyricWin.isAlwaysOnTop())
-    lyricWin.setAlwaysOnTop(args[0] || false)
+    setWindowAlwaysOnTop(lyricWin, args[0])
     setupTrayMenu()
-  }).on('app-desktopLyric-ignoreMouseEvent', (event, ...args) => {
-    if (isMacOS) lyricWin.setIgnoreMouseEvents(args[0])
+  }).on('app-desktopLyric-setShadow', (event, ...args) => {
+    lyricWin.setHasShadow(args[0])
+    lyricWin.setResizable(args[0])
   }).on('app-messagePort-setup', (event, ...args) => {
     messagePortChannel = args[0]
     sendToMainRenderer('app-messagePort-channel', messagePortChannel)
@@ -880,53 +882,58 @@ const getPluginsRootPath = (dirName) => {
   return _path
 }
 
-const setupDesktopLyricWindowSize = (needResize) => {
-  const minWidth = isVerticalDesktopLyric ? 150 : 450
-  const minHeight = isVerticalDesktopLyric ? 465 : 100
-  if (lyricWin) {
-    lyricWin.setMinimumSize(minWidth, minHeight)
-    lyricWin.setSize(minWidth, minHeight)
-    if (needResize) { //逻辑有些乱
-      const { x, y, width, height } = lyricWin.getBounds()
-      switch (desktopLyricLayoutMode) {
-        case 0:
-          if (isVerticalDesktopLyric) {
-            if (width > 150) {
-              lyricWin.setSize(150, Math.max(height, minHeight))
-            }
-          } else if (height > 200) {
-            lyricWin.setSize(width, 100)
-          }
-          break
-        case 1:
-          if (isVerticalDesktopLyric) {
-            if (width != 200) {
-              lyricWin.setSize(200, Math.max(height, minHeight))
-            }
-          } else if (height != 150) {
-            lyricWin.setSize(width, 150)
-          }
-          break
-        case 2:
-          if (isVerticalDesktopLyric) {
-            if (width < 366) {
-              lyricWin.setSize(366, Math.max(height, minHeight))
-            }
-          } else if (height < 520) {
-            lyricWin.setSize(width, 520)
-          }
-          break
+const setupDesktopLyricWindowSize = (layoutMode, isVertical, needResize) => {
+  if(!needResize) return 
+  if(!isLyricWindowShow()) return
+  
+  const minWidth = isVertical ? 150 : 450
+  const minHeight = isVertical ? 465 : 100
+  lyricWin.setMinimumSize(minWidth, minHeight)
+  lyricWin.setSize(minWidth, minHeight)
+  //逻辑有些乱
+  const { x, y, width, height } = lyricWin.getBounds()
+  switch (layoutMode) {
+    case 0:
+      if (isVertical) {
+        if (width > 150) {
+          lyricWin.setSize(150, Math.max(height, minHeight))
+        }
+      } else if (height > 200) {
+        lyricWin.setSize(width, 100)
       }
-      //lyricWin.center()
-    }
+      break
+    case 1:
+      if (isVertical) {
+        if (width != 200) {
+          lyricWin.setSize(200, Math.max(height, minHeight))
+        }
+      } else if (height != 150) {
+        lyricWin.setSize(width, 150)
+      }
+      break
+    case 2:
+      if (isVertical) {
+        if (width < 366) {
+          lyricWin.setSize(366, Math.max(height, minHeight))
+        }
+      } else if (height < 520) {
+        lyricWin.setSize(width, 520)
+      }
+      break
   }
+}
+
+const setWindowAlwaysOnTop = (win, flag, level) => {
+  //level => normal, floating, torn-off-menu, modal-panel, main-menu, status, pop-up-menu, screen-saver
+  win && win.setAlwaysOnTop(flag || false, level || 'pop-up-menu')
 }
 
 const toggleLyricWindow = () => {
   let showState = false
   if (!lyricWin || lyricWin.isDestroyed()) {
     lyricWin = createLyricWindow()
-    lyricWin.setAlwaysOnTop(true)
+    setWindowAlwaysOnTop(lyricWin ,true)
+    lyricWin.setHasShadow(false)
     showState = true
   } else if (lyricWin.isVisible()) {
     //lyricWin.hide()
@@ -1097,6 +1104,8 @@ const setupAppLayout = (layout, zoom, isInit) => {
   if(mainWin.webContents.zoomFactor) {
     mainWin.webContents.zoomFactor = zoomFactor
   }
+  //TODO 显示效果：能居中，但只能居中一点点？水平方向居中，但垂直方向没居中
+  // 貌似 Electron Bug? 
   mainWin.center()
 }
 
@@ -1625,6 +1634,13 @@ const isMainWindowShow = () => {
 
 const isLyricWindowShow = () => {
   return lyricWin && !lyricWin.isDestroyed() && lyricWin.isVisible()
+}
+
+//获取主屏幕相关信息
+const getPrimaryScreenMetadata = () => {
+  const primaryDisplay = screen.getPrimaryDisplay()
+  const { bounds, displayFrequency, size } = primaryDisplay
+  return { bounds, displayFrequency, size }
 }
 
 //启动应用

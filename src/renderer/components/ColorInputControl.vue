@@ -123,6 +123,8 @@ const updateColor = () => {
     gradient.value = null
 }
 
+
+/* 生命周期、监听 */
 watch([color, gradient], ([nv1, nv2], [ov1, ov2]) => {
     if (onChanged) onChanged(nv1 || nv2)
 })

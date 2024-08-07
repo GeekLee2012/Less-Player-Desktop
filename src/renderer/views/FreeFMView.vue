@@ -238,6 +238,13 @@ const radioTileOnDrop = (event, item, index) => {
     if (isEventStopped) event.stopPropagation()
 }
 
+//为方便搜索、修改电台信息
+const interruptSearchBarExclusiveModeCtl = () => {
+    return currentRoutePath().includes('/radios/freefm')
+}
+
+
+/* 生命周期、监听 */
 onMounted(() => {
     resetScrollState()
 })
@@ -246,11 +253,6 @@ onActivated(() => {
     restoreScrollState()
     resetBack2TopBtn()
 })
-
-//为方便搜索、修改电台信息
-const interruptSearchBarExclusiveModeCtl = () => {
-    return currentRoutePath().includes('/radios/freefm')
-}
 </script>
 
 <template>

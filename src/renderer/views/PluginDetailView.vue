@@ -37,6 +37,8 @@ const updateAlias = () => {
     updatePlugin({ id }, { alias })
 }
 
+
+/* 生命周期、监听 */
 onActivated(loadPlugin)
 </script>
 

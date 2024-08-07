@@ -23,7 +23,7 @@ import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import { toYyyymmddHhMmSs } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -55,7 +55,7 @@ const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { getLocalPlaylist, removeFromLocalPlaylist, removeLocalPlaylist } = useLocalMusicStore()
 const { freeRadios } = storeToRefs(useFreeFMStore())
 const { removeFreeRadio } = useFreeFMStore()
-const { isSearchForBatchActionShow, isShowDialogBeforeBatchDelete } = storeToRefs(useSettingStore())
+const { isSearchForBatchActionShow, isShowDialogBeforeBatchDelete, isSingleLineAlbumTitleStyle } = storeToRefs(useSettingStore())
 const { getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios } = storeToRefs(useRecentsStore())
 const { removeRecentSong, removeRecentPlaylist,
@@ -84,6 +84,8 @@ const currentTabView = shallowRef(null)
 const tabData = reactive([])
 const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
+const singleLineTitleStyle = ref(false)
+
 
 //TODO
 const actionShowCtl = reactive({
@@ -178,6 +180,7 @@ const resetTab = () => {
     currentTabView.value = null
     ignoreCheckAllEvent.value = false
     checkedAll.value = false
+    singleLineTitleStyle.value = false
     Object.assign(actionShowCtl, {
         playBtn: false,
         addToBtn: false,
@@ -276,6 +279,7 @@ const switchTab = () => {
             })
             tabData.push(...filterByTitleWithKeyword(getRecentAlbums.value(platform)))
         }
+        singleLineTitleStyle.value = isSingleLineAlbumTitleStyle.value
         currentTabView.value = AlbumListControl
     } else if (isFmRadioTab()) { //电台
         if (isFavorites()) {
@@ -662,22 +666,6 @@ const registryLocalKeys = (unbind) => {
     }
 }
 
-onEvents({
-    'commonCtxMenuItem-finish': refresh, 
-})
-
-onMounted(() => {
-    updateCurrentPlatform(0)
-    visitTab(getFirstVisibleTabIndex())
-    updateTitle()
-    resetBack2TopBtn()
-    //registryLocalKeys()
-})
-
-onUnmounted(() => {
-    //registryLocalKeys(true)
-})
-
 const refreshContent = () => {
     const path = currentRoutePath()
     if (path.includes("/batch/")) refresh()
@@ -688,9 +676,28 @@ const updateKeywordAndRefreshContent = (keyword) => {
     refreshContent()
 }
 
-watch([currentPlatformCode], () => {
-    refreshContent()
+
+
+/* 生命周期、监听 */
+const eventsRegistration = {
+    'commonCtxMenuItem-finish': refresh, 
+}
+
+onMounted(() => {
+    onEvents(eventsRegistration)
+    updateCurrentPlatform(0)
+    visitTab(getFirstVisibleTabIndex())
+    updateTitle()
+    resetBack2TopBtn()
+    //registryLocalKeys()
 })
+
+onUnmounted(() => {
+    offEvents(eventsRegistration)
+    //registryLocalKeys(true)
+})
+
+watch([currentPlatformCode], () => refreshContent())
 </script>
 
 <template>
@@ -834,7 +841,9 @@ watch([currentPlatformCode], () => {
             </div>
             <div class="content" ref="contentRef" @scroll="onScroll">
                 <component :is="currentTabView" :data="tabData" :checkbox="true" :checkedAll="checkedAll"
-                    :checkChangedFn="onCheckChanged" :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkedData="checkedData">
+                    :checkChangedFn="onCheckChanged" :ignoreCheckAllEvent="ignoreCheckAllEvent" 
+                    :checkedData="checkedData"
+                    :singleLineTitleStyle="singleLineTitleStyle">
                 </component>
             </div>
         </div>

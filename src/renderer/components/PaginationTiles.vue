@@ -90,6 +90,8 @@ const isToolbarEnable = computed(() => {
 
 const computedData = computed(() => (dataInProps.value || dataFromLoad))
 
+
+/* 生命周期、监听 */
 watch(nextPagePendingMark, nextPage, { immediate: true })
 watch(refreshPagePendingMark, refreshPage, { immediate: true })
 watch(refreshAllPendingMark, () => { nextTick(refreshAll) }, { immediate: true })

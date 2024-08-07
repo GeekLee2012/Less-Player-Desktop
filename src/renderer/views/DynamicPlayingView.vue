@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, inject, computed, watch, reactive, nextTick, toRaw } from 'vue';
+import { onMounted, ref, inject, computed, watch, reactive, nextTick, toRaw, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -12,7 +12,7 @@ import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
 import { isDevEnv, smoothScroll, transformUrl, toMillis, toMMssSSS, } from '../../common/Utils';
 import { FILE_SCHEME } from '../../common/Constants';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -238,12 +238,18 @@ const isLyricShowable = computed(() => {
     return state == 1 && !Playlist.isFMRadioType(track)
 })
 
-//EventBus事件
-onEvents({
-    'track-lyricLoaded': reloadLyricData,
-    'track-noLyric': reloadLyricData,
-})
 
+const loadTrackLyric = (track) => {
+    if(!track) return
+    if(Track.hasLyric(track)) return reloadLyricData(track)
+    
+    resetLyricState(track)
+    loadLyric(track)
+}
+
+
+
+/* 生命周期、监听 */
 watch(currentTimeState, (nv, ov) => {
     //TODO 暂时简单处理，播放页隐藏时直接返回
     if (!playingViewShow.value) return
@@ -251,16 +257,20 @@ watch(currentTimeState, (nv, ov) => {
 }, { immediate: true })
 
 
-watch(currentTrack, (nv, ov) => {
-    if (!nv) return
-    resetLyricState(nv)
-    loadLyric(nv)
-}, { immediate: true })
+watch(currentTrack, (nv, ov) => loadTrackLyric(nv), { immediate: true })
 
+const eventsRegistration = {
+    'track-lyricLoaded': reloadLyricData,
+    'track-noLyric': reloadLyricData,
+}
 onMounted(() => {
+    onEvents(eventsRegistration)
     emitEvents('playingView-changed')
     if (volumeBarRef) volumeBarRef.value.setVolume(volume.value)
+    loadTrackLyric(currentTrack.value)
 })
+
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { inject, onMounted, reactive, toRaw } from 'vue';
+import { inject, onMounted, onUnmounted, reactive, toRaw } from 'vue';
 import { Playlist } from '../../common/Playlist';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
@@ -8,7 +8,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -174,14 +174,22 @@ const initData = (actionMode, dataType) => {
     return listData.length
 }
 
-onMounted(() => initData())
 
-onEvents({
+
+/* 生命周期、监听 */
+const eventsRegistration = {
     'addToListSubmenu-init': ({ mode, dataType, callback }) => {
         const total = initData(mode, dataType)
         if (callback && (typeof callback == 'function')) callback({ total })
     },
+}
+
+onMounted(() => {
+    onEvents(eventsRegistration)
+    initData()
 })
+
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

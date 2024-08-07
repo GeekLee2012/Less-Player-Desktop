@@ -123,8 +123,9 @@ const onDrop = (event) => {
     if (isEventStopped) event.stopPropagation()
 }
 
-onMounted(() => loadRadio())
 
+/* 生命周期、监听 */
+onMounted(() => loadRadio())
 </script>
 
 <template>

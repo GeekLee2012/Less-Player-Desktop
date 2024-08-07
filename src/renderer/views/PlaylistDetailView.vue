@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, reactive, ref, watch, inject, nextTick, onDeactivated } from 'vue';
+import { onActivated, reactive, ref, watch, inject, nextTick, onDeactivated, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
@@ -14,7 +14,7 @@ import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import { Playlist } from '../../common/Playlist';
 import { coverDefault, isBlank, trimExtraChars } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -268,13 +268,6 @@ const visitRouterCtxCacheItem = () => {
 
 
 /* 生命周期、监听 */
-onActivated(() => {
-    restoreScrollState()
-    detectTitleHeight()
-    resetBack2TopBtn()
-    //visitRouterCtxCacheItem()
-})
-
 watch(() => props.id, () => {
     resetView()
     resetScrollState()
@@ -284,10 +277,19 @@ watch(() => props.id, () => {
 
 watch(isLoading, () => nextTick(detectTitleHeight))
 
-onEvents({
+const eventsRegistration = {
     'refresh-favorite': checkFavorite,
     'app-resize': detectTitleHeight, 
     //'playlist-linkItem': visitLinkItem
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
+
+onActivated(() => {
+    restoreScrollState()
+    detectTitleHeight()
+    resetBack2TopBtn()
+    //visitRouterCtxCacheItem()
 })
 </script>
 

@@ -1,10 +1,10 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../../renderer/store/platformStore';
 import { useSettingStore } from '../../renderer/store/settingStore';
-import { coverDefault } from '../../common/Utils';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { coverDefault, isBlank, toTrimString } from '../../common/Utils';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -24,6 +24,7 @@ const props = defineProps({
     videoStyle: Boolean,
     coverFit: Number,
     singleLineTitleStyle: Boolean,
+    centerTitleStyle: Boolean,
 })
 
 const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
@@ -46,15 +47,30 @@ const notCardStyleFreeFM = computed(() => {
     return isFreeFM(props.platform) && !isUseCardStyleImageTextTile.value
 })
 
+const computedBigTitle = computed(() => {
+    const { title } = props
+    const _title = toTrimString(title)
+    if(isBlank(_title)) return
+    //此处为中文符号
+    const delimiter = '｜'
+    if(!_title.includes(delimiter)) return _title
+    const parts = _title.split(delimiter)
+    return parts && parts.length >= 1 && toTrimString(parts[1])
+})
+
+
+
+/* 生命周期、监听 */
 watch(() => props.checked, (nv, ov) => {
     if (props.ignoreCheckAllEvent) return
     setChecked(nv)
 })
 
-
-onEvents({
+const eventsRegistration = {
     'checkbox-refresh': () => setChecked(false),
-})
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
@@ -64,12 +80,15 @@ onEvents({
         'image-text-tile-radio': isFMRadioPlatform(platform),
         'image-text-tile-non-freefm': !isFreeFM(platform),
         'image-text-tile-color-mode': color,
-        'image-text-tile-video': videoStyle
+        'image-text-tile-video': videoStyle,
+        'image-text-tile-center-title-mode': centerTitleStyle,
     }" @click="toggleCheck">
         <div class="cover-wrap">
             <img class="cover" v-lazy="coverDefault(cover)" v-show="!color"
                 :class="{ 'obj-fit-contain': (coverFit == 1) }" />
-            <div class="cover" v-show="color" :style="{ background: color }"></div>
+            <div class="cover" v-show="color" :style="{ background: color }">
+                <div class="big-title" v-html="computedBigTitle"></div>
+            </div>
             <div class="cover-mask" :class="{ selectable: checkbox }">
                 <div class="play-btn" v-show="playable && !checkbox" @click.stop="playAction">
                     <svg width="21" height="21" viewBox="0 0 139 139" xml:space="preserve"
@@ -259,6 +278,10 @@ onEvents({
     fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
+.image-text-tile .cover-wrap .big-title {
+    display: none;
+}
+
 /* 实验性CSS */
 .image-text-tile-card {
     background-color: var(--app-bg-color);
@@ -266,7 +289,7 @@ onEvents({
     border-radius: 6px;
     min-height: var(--others-image-text-tile-card-min-height);
     margin-top: 18px;
-    margin-bottom: 18px;
+    /*margin-bottom: 18px;*/
 }
 
 .image-text-tile-card:hover {
@@ -321,7 +344,10 @@ onEvents({
 .image-text-tile-card.image-text-tile-radio .extra-text,
 .image-text-tile-card.image-text-tile-color-mode .title,
 .image-text-tile-card.image-text-tile-color-mode .subtitle,
-.image-text-tile-card.image-text-tile-color-mode .extra-text {
+.image-text-tile-card.image-text-tile-color-mode .extra-text,
+.image-text-tile-card.image-text-tile-center-title-mode .title,
+.image-text-tile-card.image-text-tile-center-title-mode .subtitle,
+.image-text-tile-card.image-text-tile-center-title-mode .extra-text {
     text-align: center;
 }
 
@@ -331,6 +357,23 @@ onEvents({
 
 .image-text-tile-color-mode .title {
     line-break: normal;
+}
+
+.image-text-tile.image-text-tile-color-mode .cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-text-tile.image-text-tile-color-mode .cover-wrap .big-title {
+    display: flex;
+    line-height: calc(var(--content-text-module-subtitle-size) + 4px);
+    font-size: var(--content-text-module-subtitle-size);
+    color: #ffffff;
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
 }
 
 

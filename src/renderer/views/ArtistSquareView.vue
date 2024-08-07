@@ -1,12 +1,12 @@
 <script setup>
-import { onActivated, onMounted, reactive, ref, watch } from 'vue';
+import { onActivated, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useArtistSquareStore } from '../store/artistSquareStore';
 import ArtistCategoryBar from '../components/ArtistCategoryBar.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -149,25 +149,30 @@ const refreshData = () => {
     loadContent()
 }
 
+
+
 /* 生命周期、监听 */
-onActivated(() => {
-    //loadCategories()
-    resetBack2TopBtn()
-    restoreScrollState()
-})
-
-onMounted(() => {
-    loadCategories()
-})
-
 //TODO
 watch(currentPlatformCode, (nv, ov) => {
     if (!isArtistMode.value) return
     loadCategories()
 })
 
-onEvents({
+const eventsRegistration = {
     'artistSquare-refresh': refreshData, 
+}
+
+onMounted(() => {
+    onEvents(eventsRegistration)
+    loadCategories()
+})
+
+onUnmounted(() => offEvents(eventsRegistration))
+
+onActivated(() => {
+    //loadCategories()
+    resetBack2TopBtn()
+    restoreScrollState()
 })
 </script>
 

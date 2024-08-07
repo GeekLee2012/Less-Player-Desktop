@@ -31,6 +31,8 @@ const onDeactivatedAction = () => {
     setSearchKeyword(null)
 }
 
+
+/* 生命周期、监听 */
 watch(searchKeyword, props.onKeywordChanged)
 watch(() => props.checked, (nv) => {
     if (nv) nextTick(() => { setSearchBarExclusiveAction(setSearchKeyword) })

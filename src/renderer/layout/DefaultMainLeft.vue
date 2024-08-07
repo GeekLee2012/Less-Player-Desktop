@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onActivated, onMounted, reactive, ref, watch } from 'vue';
+import { computed, inject, onActivated, onDeactivated, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia'
 import { usePlatformStore } from '../store/platformStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -9,7 +9,8 @@ import { isDevEnv, useUseCustomTrafficLight } from '../../common/Utils';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import Navigator from '../components/Navigator.vue';
 import SearchBar from '../components/SearchBar.vue';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import AppLogo from '../components/AppLogo.vue';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 const { visitRoute, visitArtist, visitHome,
@@ -28,7 +29,7 @@ const { isMaxScreen, isPlaylistMode, isArtistMode,
     isRadioMode, isUserHomeMode, exploreModeCode, } = storeToRefs(useAppCommonStore())
 const { nextExploreMode, setPlaylistExploreMode, setRadioExploreMode } = useAppCommonStore()
 const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists } = storeToRefs(useUserProfileStore())
-const { navigation, isDefaultOldLayout, } = storeToRefs(useSettingStore())
+const { navigation, isDefaultOldLayout, isDefaultNewLayout } = storeToRefs(useSettingStore())
 
 const activeCustomPlaylistIndex = ref(-1)
 const activeFavoritePlaylistIndex = ref(-1)
@@ -206,12 +207,17 @@ const sortedActivePlaylistPlatforms = computed(() => {
 watch(() => activePlatforms.value(), setupSortedActivePlatforms)
 */
 
-onEvents({
+
+/* 生命周期、监听 */
+const eventsRegistration = {
     'navigation-refreshCustomPlaylistIndex': index => {
         activeCustomPlaylistIndex.value = index
     },
     toggleRadioMode,
-})
+}
+
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
@@ -224,6 +230,9 @@ onEvents({
             </WinTrafficLightBtn>
             <div class="top-left-navigator-wrap" v-show="isDefaultOldLayout">
                 <Navigator></Navigator>
+            </div>
+            <div class="top-logo" v-show="isDefaultNewLayout">
+                <AppLogo></AppLogo>
             </div>
         </div>
         <div class="search-wrap" v-show="isDefaultOldLayout">
@@ -430,10 +439,7 @@ onEvents({
             </div>
         </div>
         <div class="bottom">
-            <div id="app-logo">
-                <span>L</span>
-            </div>
-            <div id="app-name">Less Player</div>
+            <AppLogo ></AppLogo>
         </div>
     </div>
 </template>
@@ -480,8 +486,8 @@ onEvents({
 
 #main-left .header {
     -webkit-app-region: drag;
-    height: 58px;
-    margin-bottom: 8px;
+    height: 68px;
+    margin-bottom: 5px;
     display: flex;
     position: relative;
 }
@@ -505,6 +511,7 @@ onEvents({
     flex: 1;
     padding-bottom: 36px;
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 #main-left .search-wrap {
@@ -693,48 +700,9 @@ onEvents({
     height: 60px;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
     margin-right: 23px;
-}
-
-#app-logo {
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10rem 0 10rem 10rem;
-    border: 0px solid;
-    font-weight: bold;
-    background: var(--app-logo-bg-color);
-}
-
-#app-logo span {
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    font-size: 13.5px;
-    justify-content: center;
-    border-radius: 10rem;
-    background: var(--app-logo-inner-bg-color);
-    color: var(--app-logo-inner-text-color);
-}
-
-#app-name {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 10px;
-    font-size: 20px;
-    font-weight: bold;
-    background: var(--app-logo-app-name-text-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.default-old-layout #main-left .bottom {
-    height: 68px;
+    padding-bottom: 18px;
 }
 </style>

@@ -177,7 +177,7 @@ const routes = [
                 component: PluginDetailView
             },
             {  //视频 - 视频详情
-                path: '/videos/video/:platform/:id/:href',
+                path: '/videos/video/:platform/:id',
                 props: true,
                 component: VideoDetailView
             },

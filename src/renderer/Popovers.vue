@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onMounted, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, shallowRef, triggerRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
@@ -25,7 +25,7 @@ import PlatformCategoryView from './views/PlatformCategoryView.vue';
 import DynamicPlayingView from './views/DynamicPlayingView.vue';
 import PlayingThemeListView from './views/PlayingThemeListView.vue';
 import CustomPlayingThemeEditView from './views/CustomPlayingThemeEditView.vue';
-import { onEvents, emitEvents } from '../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../common/EventBusWrapper';
 
 
 
@@ -61,7 +61,7 @@ const { hideCommonCtxMenu, showCommonCtxMenu,
   hidePopoverHint, isSamePopoverHintShow,
   updateCommonCtxMenuCacheItemIndex } = useAppCommonStore()
 //const { customPlaylists } = storeToRefs(useUserProfileStore())
-const { isDefaultClassicLayout } = storeToRefs(useSettingStore())
+const { isDefaultClassicLayout, isDefaultNewLayout } = storeToRefs(useSettingStore())
 const { getCurrentTheme } = useSettingStore()
 
 
@@ -258,6 +258,13 @@ const setupPlayingView = (theme, isPreviewMode) => {
 }
 
 //TODO
+const isAutoLayout = computed(() => {
+  return isDefaultClassicLayout.value || isDefaultNewLayout.value
+})
+
+
+
+//TODO
 watch(commonCtxMenuShow, (nv, ov) => {
   if (!nv) ctxMenuPos = null
 })
@@ -277,7 +284,7 @@ const appBackgroundScope = reactive({
 })
 
 //EventBus监听注册，统一管理
-onEvents({
+const eventsRegistration = {
   'commonCtxMenu-show': ({ event, data, index }) => {
     hideCommonCtxMenu(true) //强制取消上次的显示
     hideAddToListSubmenu()
@@ -335,9 +342,7 @@ onEvents({
     const { theme, isPreviewMode } = param || {}
     setupPlayingView(theme, isPreviewMode)
   },
-})
-
-onMounted(setupPlayingView)
+}
 
 watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
 watch(gradientColorToolbarShow, setupGradientColorToolbarPos)
@@ -349,6 +354,13 @@ watch(() => getCurrentTheme(), (nv) => {
   const { appBackgroundScope: scope } = nv
   Object.assign(appBackgroundScope, { ...scope })
 }, { deep: true, immediate: true })
+
+onMounted(() => {
+  onEvents(eventsRegistration)
+  setupPlayingView()
+})
+
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
@@ -356,35 +368,38 @@ watch(() => getCurrentTheme(), (nv) => {
     <!-- 浮层(Component、View)-->
     <transition name="fade-ex">
       <PlaylistCategoryView id="playlist-category-view"
-        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ 
+          autolayout: isAutoLayout, 
+          'app-custom-theme-bg': appBackgroundScope.categoryView 
+        }"
         v-show="playlistCategoryViewShow">
       </PlaylistCategoryView>
     </transition>
 
     <transition name="fade-ex">
       <ArtistCategoryView id="artist-category-view"
-        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ autolayout: isAutoLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
         v-show="artistCategoryViewShow">
       </ArtistCategoryView>
     </transition>
 
     <transition name="fade-ex">
       <RadioCategoryView id="radio-category-view"
-        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ autolayout: isAutoLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
         v-show="radioCategoryViewShow">
       </RadioCategoryView>
     </transition>
 
     <transition name="fade-ex">
       <TagsCategoryView id="tags-category-view"
-        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ autolayout: isAutoLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
         v-show="tagsCategoryViewShow">
       </TagsCategoryView>
     </transition>
 
     <transition name="fade-ex">
       <PlatformCategoryView id="platform-category-view"
-        :class="{ autolayout: isDefaultClassicLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ autolayout: isAutoLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
         v-show="platformCategoryViewShow">
       </PlatformCategoryView>
     </transition>
@@ -437,9 +452,9 @@ watch(() => getCurrentTheme(), (nv) => {
 
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
-      <component id="playing-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.playingView }"
-        v-show="playingViewShow" :is="currentPlayingView">
-      </component>
+        <component id="playing-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.playingView }"
+            v-show="playingViewShow" :is="currentPlayingView">
+        </component>
     </transition>
 
     <transition name="fade-ex">
@@ -505,7 +520,7 @@ watch(() => getCurrentTheme(), (nv) => {
 #tags-category-view,
 #platform-category-view {
   position: fixed;
-  top: 85px;
+  top: 83px;
   right: 0px;
   width: 404px;
   width: 40.4%;
@@ -685,7 +700,7 @@ watch(() => getCurrentTheme(), (nv) => {
 
 
 #popovers .autolayout {
-  top: 60px;
+  top: 68px;
 }
 
 #popovers .popover-hint {

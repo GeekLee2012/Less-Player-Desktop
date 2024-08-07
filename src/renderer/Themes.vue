@@ -45,7 +45,7 @@ const applyTheme = (theme) => {
   } else if (bgImageGradient) {
     themeBgImage = bgImageGradient
   }
-  if (!themeBgImage && !themeBgColor) themeBgColor = "#FFF"
+  if (!themeBgImage && !themeBgColor) themeBgColor = "#FFFFFF"
 
   const { textHighlightColor, bgColor: contentBgColor } = theme.content
   let contentBorderImage = textHighlightColor || ''
@@ -254,8 +254,8 @@ provide('appStyle', {
 <template>
   <CssReset></CssReset>
   <CssCommon></CssCommon>
-  <CssWinOS></CssWinOS>
   <slot></slot>
+  <CssWinOS></CssWinOS>
 </template>
 
 <style>

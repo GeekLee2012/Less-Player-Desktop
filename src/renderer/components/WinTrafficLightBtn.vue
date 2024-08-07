@@ -28,9 +28,7 @@ const doMinimize = () => {
 }
 
 const isMaximized = toRef(props, 'isMaximized')
-const toggleMaximize = () => {
-    maximize()
-}
+const toggleMaximize = () => maximize()
 </script>
 
 <template>

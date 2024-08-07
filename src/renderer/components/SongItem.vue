@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, inject, computed } from 'vue';
+import { ref, watch, inject, computed, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -10,7 +10,7 @@ import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { toTrimString } from '../../common/Utils';
 import { Playlist } from '../../common/Playlist';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -119,9 +119,13 @@ const isDraggable = computed(() => {
         && !Playlist.isFMRadioType(props.data)
 })
 
-onEvents({
+
+/* 生命周期、监听 */
+const eventsRegistration = {
     'checkbox-refresh': () => setChecked(false), 
-})
+}
+onMounted(() => onEvents(eventsRegistration))
+onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>

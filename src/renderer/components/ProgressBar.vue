@@ -48,6 +48,8 @@ const updateProgress = (percent, prevPercent) => {
 }
 */
 
+
+/* 生命周期、监听 */
 watch(() => props.value, (nv, ov) => {
     updateProgress(nv, ov)
 })

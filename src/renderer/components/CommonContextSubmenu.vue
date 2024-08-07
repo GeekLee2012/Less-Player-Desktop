@@ -28,7 +28,6 @@ const submenuListRef = ref(null)
 const resetScroll = () => {
     if (submenuListRef.value) submenuListRef.value.scrollTop = 0
 }
-
 </script>
 
 <template>
