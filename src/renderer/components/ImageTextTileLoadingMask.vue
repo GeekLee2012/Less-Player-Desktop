@@ -35,7 +35,8 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
     width: var(--others-image-text-tile-cover-size);
     /*height: 206px;*/
     height: 235px;
-    margin: 15px 13px;
+    /*margin: 15px 13px;*/
+    margin: 15px 13px 11px 13px;
 }
 
 .tiles-loading-mask .tile .cover {
@@ -57,7 +58,6 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
     height: 224px;
     min-height: var(--others-image-text-tile-card-min-height);
     margin-top: 18px;
-    /*margin-bottom: 18px;*/
     margin-bottom: 15px;
 }
 

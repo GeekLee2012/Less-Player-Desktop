@@ -75,10 +75,6 @@ const currentVideoTitle = computed(() => {
     return cTitle ? `${cTitle} - ${title}` : title
 })
 
-const currentVideoUrl = computed(() => {
-    return currentVideo.value ? currentVideo.value.url : null
-})
-
 const sidebarShow = ref(false)
 const toggleSidebarShow = () => sidebarShow.value = !sidebarShow.value
 
@@ -336,6 +332,7 @@ onActivated(initVideoPlayer)
     justify-content: flex-end;
     flex: 1;
     padding-right: 22px;
+    z-index: 3;
 }
 
 .video-playing-view > .header .winstyle-action {

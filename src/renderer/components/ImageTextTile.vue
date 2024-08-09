@@ -137,7 +137,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 <style scoped>
 .image-text-tile {
-    margin: 15px 13px;
+    /*margin: 15px 13px;*/
+    margin: 15px 13px 11px 13px;
     --tile-border-radius: 6px;
     position: relative;
 }
@@ -154,7 +155,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile .cover-wrap:hover {
-    transform: scale(1.11) translateY(-4px);
+    /*transform: scale(1.11) translateY(-4px);*/
 }
 
 .image-text-tile .title {
@@ -289,7 +290,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-radius: 6px;
     min-height: var(--others-image-text-tile-card-min-height);
     margin-top: 18px;
-    /*margin-bottom: 18px;*/
+    margin-bottom: 15px;
 }
 
 .image-text-tile-card:hover {

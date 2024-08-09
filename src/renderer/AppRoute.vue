@@ -184,6 +184,12 @@ const refresh = () => {
 
 const highlightPlatform = (to) => {
     const { path } = to
+    if(path.startsWith('/setting')
+        || path.startsWith('/themes')
+        || path.startsWith('/data')) {
+        return
+    } 
+
     let platform = null
     if (path.includes('/local')) {
         platform = 'local'

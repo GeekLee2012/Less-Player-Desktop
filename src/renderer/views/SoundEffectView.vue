@@ -200,7 +200,9 @@ const computedVolumeGainText = computed(() => {
                         <div class="item-center">
                             <span class="text-btn" @click="setVolumeGain(0)">静音</span>
                             <SliderBar :value="currentVolumeGainToPercent" :scopeType="1" :onSeek="updateVolumeGain"
-                                :onScroll="updateVolumeGain" :onDragMove="updateVolumeGain"></SliderBar>
+                                :onScroll="updateVolumeGain" :onDragMove="updateVolumeGain" 
+                                keyName="soundEffect">
+                            </SliderBar>
                             <span class="text-btn" @click="setVolumeGain(3)">最大</span>
                         </div>
                         <div class="item-bottom">

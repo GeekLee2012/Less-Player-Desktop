@@ -269,9 +269,7 @@ watch(commonCtxMenuShow, (nv, ov) => {
   if (!nv) ctxMenuPos = null
 })
 watch(playbackQueueViewShow, hideAllCtxMenus)
-watch(() => `${playingViewThemeType.value}-${playingViewThemeIndex.value}`, () => {
-  setupPlayingView()
-})
+watch(() => `${playingViewThemeType.value}-${playingViewThemeIndex.value}-${playingViewShow.value}`, () => setupPlayingView())
 
 const appBackgroundScope = reactive({
   playingView: true,
@@ -656,6 +654,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   top: 50%;
   width: 520px;
   height: 211px;
+  height: 233px;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);

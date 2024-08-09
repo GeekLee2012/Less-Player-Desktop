@@ -338,7 +338,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="bottom">
                 <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
                     :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack"
-                    :onDragMove="preseekTrack">
+                    :onDragMove="preseekTrack" keyName="dynamicPlayingView">
                 </SliderBar>
                 <div class="action">
                     <div class="btm-left">

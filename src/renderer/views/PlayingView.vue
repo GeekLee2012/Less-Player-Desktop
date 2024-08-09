@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, inject, computed, watch, reactive } from 'vue';
+import { onMounted, ref, inject, computed, watch, reactive, onUnmounted, onActivated, onDeactivated } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -47,7 +47,7 @@ const volumeBarRef = ref(null)
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
 const hasBackgroudCover = ref(false)
-const bgEffectStyle = reactive({})
+//const bgEffectStyle = reactive({})
 const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
 
 const extractRgbColor = (rgb) => {
@@ -80,6 +80,9 @@ const toDarkerRgbColor = (rgb) => {
 
 const setupBackgroudEffect = async () => {
     if (!isPlayingViewUseBgCoverEffect.value) return
+    const bgEffectEl = document.querySelector('.playing-view .bg-effect')
+    if(!bgEffectEl) return 
+
     const track = currentTrack.value
     if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
     const { cover } = track
@@ -89,12 +92,13 @@ const setupBackgroudEffect = async () => {
     if (cover.startsWith(ImageProtocal.prefix)) return setHasBackgroudCover(false)
 
     setHasBackgroudCover(true)
+    bgEffectEl.style.background = `url('${cover}')`
+
+    /*
     //TODO 内存占用高
     Object.assign(bgEffectStyle, {
         background: `url('${cover}')`
     })
-
-    /*
     const ignoreColors = ['rgb(255,255,255)', 'rgb(0,0,0)']
     analyze(cover, { ignore: ignoreColors, scale: 0.6 })
         .then(result => {
@@ -125,9 +129,7 @@ const trackFormat = computed(() => {
 
 
 /* 生命周期、监听 */
-watch([() => (currentTrack.value && currentTrack.value.cover), playingViewShow], () => {
-    setupBackgroudEffect()
-})
+watch(() => (currentTrack.value && currentTrack.value.cover + '&' + playingViewShow.value), setupBackgroudEffect)
 
 onMounted(() => {
     emitEvents('playingView-changed')
@@ -138,7 +140,7 @@ onMounted(() => {
 
 <template>
     <div class="playing-view">
-        <div class="container" :style="bgEffectStyle">
+        <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
                     <WinTrafficLightBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
@@ -174,7 +176,7 @@ onMounted(() => {
                 </div>
             </div>
             <div class="center">
-                <div class="cover-wrap" :class="{ 'with-format': computedFormatShow}">
+                <div class="cover-wrap" :class="{ 'with-format': false}">
                     <img class="cover"
                             :class="{ 
                                 'obj-fit-contain': currentTrack.coverFit == 1, 
@@ -182,7 +184,7 @@ onMounted(() => {
                                 'none-border': !isPlayingViewCoverBorderShow 
                             }"
                             v-lazy="Track.coverDefault(currentTrack)" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
-                    <div class="format" v-show="computedFormatShow" v-html="trackFormat"></div>
+                    <div class="format" v-show="false" v-html="trackFormat"></div>
                 </div>
                 <div class="lyric-wrap">
                     <LyricControl :track="currentTrack" :currentTime="currentTimeState" 
@@ -192,8 +194,9 @@ onMounted(() => {
             </div>
             <div class="bottom">
                 <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
-                    :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack"
-                    :onDragMove="preseekTrack">
+                    :onScroll="preseekTrack" :onScrollFinish="seekTrack" 
+                    :onDragRelease="seekTrack" :onDragMove="preseekTrack" 
+                    keyName="playingView">
                 </SliderBar>
                 <div class="action">
                     <div class="btm-left">
@@ -278,7 +281,7 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div class="bg-effect" :style="bgEffectStyle" v-show="hasBackgroudCover && isPlayingViewUseBgCoverEffect">
+        <div class="bg-effect" v-show="hasBackgroudCover && isPlayingViewUseBgCoverEffect">
         </div>
     </div>
 </template>

@@ -536,7 +536,7 @@ const getDisplayFrequency = async () => {
 
 
 /* 生命周期、监听 */
-watch(isCheckPreReleaseVersion, checkForUpdates)
+//watch(isCheckPreReleaseVersion, checkForUpdates)
 watch(isSettingViewTipsShow, refreshSettingViewTips)
 
 const eventsRegistration = {
@@ -737,6 +737,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                     </div>
                     <div>
+                        <span class="cate-subtitle">专辑控件标题单行显示：</span>
+                        <ToggleControl @click="toggleSingleLineAlbumTitleStyle" :value="track.singleLineAlbumTitleStyle">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：仅支持部分页面的图文控件</div>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">当前播放列表自动定位：</span>
                         <ToggleControl @click="togglePlaybackQueueAutoPositionOnShow"
                             :value="track.playbackQueueAutoPositionOnShow">
@@ -822,12 +828,6 @@ onUnmounted(() => offEvents(eventsRegistration))
                             <input class="text-input-ctl" v-model="track.dndSavePath" placeholder="默认为用户目录下的Downloads" />
                             <div class="select-btn" @click="selectDir">选择</div>
                         </div>
-                    </div>
-                    <div>
-                        <span class="cate-subtitle">专辑控件标题单行显示：</span>
-                        <ToggleControl @click="toggleSingleLineAlbumTitleStyle" :value="track.singleLineAlbumTitleStyle">
-                        </ToggleControl>
-                        <div class="tip-text spacing">提示：仅支持部分页面的图文控件</div>
                     </div>
                     <div class="tip-text">提示：应用启动时，会自动检测屏幕刷新率，不可修改；正常值为正整数，仅供参考
                     </div>
@@ -1099,7 +1099,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleFollowArtistsShow" :value="navigation.followArtistsShow">
                         </ToggleControl>
                     </div>
-                    <div class="tip-text">提示：顶部导航栏，部分快捷入口，仅在“经典主流”布局下生效</div>
+                    <div class="tip-text">提示：顶部导航栏，不同布局下，部分快捷入口可能会失效</div>
                     <div>顶部导航栏显示快捷入口：</div>
                     <div>
                         <span class="cate-subtitle">相约电波：</span>
@@ -1339,7 +1339,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div :class="{ last: isLastRelease }">
                         <div>
                             <span v-html="formatVersion(version)"></span>
-                            <svg :class="{ 'refresh-flag': checkingUpdates }" v-show="checkingUpdates" width="14" height="14" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
+                        </div>
+                        <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing link">更新日志</a>
+                        <!--<div class="tip-text spacing">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
+                        <div class="update-check text-btn spacing1" @click="checkForUpdates">
+                            <svg :class="{ 'refresh-flag': checkingUpdates }" width="14" height="14" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <g id="Layer_2-2" data-name="Layer 2">
@@ -1351,10 +1355,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                                     </g>
                                 </g>
                             </svg>
+                            <span>检查更新</span>
                         </div>
-                        <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing1 link" :class="{ spacing4: checkingUpdates }">更新日志</a>
-                        <!--<div class="tip-text spacing">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
-                        <div class="update-check checkbox text-btn spacing1" @click="toggleCheckPreReleaseVersion">
+                        <div class="checkbox text-btn spacing" @click="toggleCheckPreReleaseVersion">
                             <svg v-show="!others.checkPreReleaseVersion" width="16" height="16" viewBox="0 0 731.64 731.66"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
@@ -1373,7 +1376,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                                     </g>
                                 </g>
                             </svg>
-                            <span>检查更新，不忽略Pre-release开发预览版</span>
+                            <span>不忽略Pre-release开发预览版</span>
                         </div>
                     </div>
                     <div :class="{ last: hasNewRelease }" v-show="hasNewRelease">
@@ -1471,12 +1474,13 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </div>
                     </div>
                     <div class="license">
-                        <span>开源许可证：</span>
-                        <span class="link" @click="visitLink('https://www.apache.org/licenses/LICENSE-2.0.html')">Apache
-                            License 2.0</span>
+                        <span>开源许可：</span>
+                        <span class="link" @click="visitLink('https://www.apache.org/licenses/LICENSE-2.0.html')">
+                            Apache License 2.0
+                        </span>
                     </div>
                     <div class="annoucement last">
-                        <span><b>郑重声明：当前应用完全开源免费，仅供学习交流；若谁做非法用途，后果自负！</b></span>
+                        <span>郑重声明：Less Player完全开源免费，仅供学习交流；若谁做非法用途，后果自负！</span>
                     </div>
                 </div>
             </div>
@@ -1900,6 +1904,14 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding-left: 6px;
 }
 
+#setting-view .license .link {
+    padding-left: 0px;
+}
+
+#setting-view .annoucement {
+    font-weight: bold;
+}
+
 #setting-view .version .new-version-wrap {
     display: flex;
     align-items: center;
@@ -1917,11 +1929,16 @@ onUnmounted(() => offEvents(eventsRegistration))
     cursor: pointer;
 }
 
+#setting-view .version .update-check {
+    display: flex;
+    align-items: center;
+}
+
 #setting-view .version .refresh-flag {
-    margin-left: 8px;
+    /*margin-left: 8px;*/
+    /*transform: translateY(8px);*/
     transform-box: fill-box; 
     transform-origin: center;
-    transform: translateY(8px);
     animation: rotate 1s linear infinite;
 }
 
@@ -1939,7 +1956,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
-    height: 37.5px;
+    height: 37.39px;
     display: flex;
     align-items: center;
     justify-content: center;

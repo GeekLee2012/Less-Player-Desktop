@@ -1186,8 +1186,9 @@ onActivated(() => {
         <div class="bottom" @contextmenu="toggleLyricToolbar()">
             <div class="progress-wrap">
                 <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
-                    :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack"
-                    :onDragMove="preseekTrack">
+                    :onScroll="preseekTrack" :onScrollFinish="seekTrack" 
+                    :onDragRelease="seekTrack" :onDragMove="preseekTrack" 
+                    keyName="simpleLayout">
                 </SliderBar>
             </div>
             <div class="action" v-show="!isLyricShow">

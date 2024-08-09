@@ -63,7 +63,7 @@ defineExpose({
         </div>
         <div class="volume-value">
             <SliderBar ref="sliderRef" :value="volume" :onSeek="updateVolume" :onScroll="updateVolume"
-                :onDragMove="updateVolume" :thumbAutoHideDelay="0">
+                :onDragMove="updateVolume" :thumbAutoHideDelay="0" keyName="volume">
             </SliderBar>
         </div>
     </div>

@@ -444,10 +444,11 @@ class Player {
     }
 
     static getRaw(data) {
-        return data ? toRaw(data) : data
+        return data && toRaw(data)
     }
 
     static getRawTrack(track) {
+        if(!track) return 
         const _track = Player.getRaw(track)
         const { artist, album, lyric, lyricTrans, lyricRoma } = _track
         return Object.assign(_track, {

@@ -83,8 +83,11 @@ const roundedRect = (ctx, x, y, width, height, radius) => {
 }
 */
 
-const setupBackgroudEffect = () => {
+const setupBackgroudEffect = async () => {
     if (!isPlayingViewUseBgCoverEffect.value) return
+    const bgEffectEl = document.querySelector('.visual-playing-view .bg-effect')
+    if(!bgEffectEl) return 
+
     const track = currentTrack.value
     if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
     const { cover } = track
@@ -94,9 +97,7 @@ const setupBackgroudEffect = () => {
     if (cover.startsWith(ImageProtocal.prefix)) return setHasBackgroudCover(false)
 
     setHasBackgroudCover(true)
-    Object.assign(bgEffectStyle, {
-        background: `url('${cover}')`
-    })
+    bgEffectEl.style.background = `url('${cover}')`
 }
 
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
@@ -108,9 +109,9 @@ const switchVisualCanvas = () => {
     setExVisualCanvasIndex((index + 1) % len)
 }
 
-watch([() => (currentTrack.value && currentTrack.value.cover), playingViewShow], () => {
-    setupBackgroudEffect()
-})
+
+/* 生命周期、监听 */
+watch(() => (currentTrack.value && currentTrack.value.cover + '&'+ playingViewShow.value), setupBackgroudEffect)
 
 onMounted(() => {
     setDisactived(false)
@@ -185,7 +186,8 @@ onUnmounted(() => {
                     <div class="progress-wrap">
                         <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack"
                             :disableScroll="true" :onScroll="preseekTrack" :onScrollFinish="seekTrack"
-                            :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+                            :onDragRelease="seekTrack" :onDragMove="preseekTrack" 
+                            keyName="visualPlayingView">
                         </SliderBar>
                     </div>
                     <div class="audio-time-wrap">
@@ -297,7 +299,7 @@ onUnmounted(() => {
             <canvas class="fullpage-spectrum-canvas" v-show="false">
             </canvas>
         </div>
-        <div class="bg-effect" :style="bgEffectStyle" v-show="hasBackgroudCover && isPlayingViewUseBgCoverEffect">
+        <div class="bg-effect" v-show="hasBackgroudCover && isPlayingViewUseBgCoverEffect">
         </div>
     </div>
 </template>

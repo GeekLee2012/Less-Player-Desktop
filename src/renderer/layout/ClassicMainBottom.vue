@@ -27,7 +27,9 @@ onMounted(() => {
 <template>
     <div class="classic-main-bottom">
         <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
-            :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+            :onScroll="preseekTrack" :onScrollFinish="seekTrack" 
+            :onDragRelease="seekTrack" :onDragMove="preseekTrack"
+            keyName="classicMainBottom" >
         </SliderBar>
         <div id="play-nav">
             <PlayMeta id="play-meta"></PlayMeta>

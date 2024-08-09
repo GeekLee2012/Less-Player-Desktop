@@ -1,9 +1,11 @@
 <script setup>
-import { watch, ref, onMounted } from 'vue';
+import { watch, ref, onMounted, onUnmounted, onActivated, onDeactivated } from 'vue';
+import { nextInt, randomTextWithinAlphabet } from '../../common/Utils';
 
 
 //TODO 组件写得复杂化了，且效果一般
 const props = defineProps({
+    keyName: String,
     value: Number,      //0.0 - 1.0
     disable: Boolean,
     disableScroll: Boolean,
@@ -168,12 +170,21 @@ const hideThumb = () => {
 
 
 /* 生命周期、监听 */
-watch(() => props.value, (nv, ov) => {
-    if (onDrag.value || onUserScroll.value) return
-    updateProgress(nv, ov)
-}, { immediate: true })
+const watches = {}
+const onWatches = () => {
+    const watchKey = props.keyName || ('slider-' + Date.now())
+    watches[watchKey] = watch(() => props.value, (nv, ov) => {
+        if (onDrag.value || onUserScroll.value) return
+        updateProgress(nv, ov)
+    }, { immediate: true })
+}
 
-onMounted(() => updateProgress(props.value))
+const unWatches = () => {
+    Object.entries(watches).forEach(([key, unwatch]) => unwatch())
+}
+
+onMounted(() => onWatches())
+onUnmounted(() => unWatches())
 
 //对外提供API
 defineExpose({

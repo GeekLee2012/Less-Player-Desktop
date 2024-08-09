@@ -270,7 +270,7 @@ watch(playlistExportContextItem, (nv, ov) => {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
-    height: 37.5px;
+    height: 37.39px;
     display: flex;
     align-items: center;
     justify-content: center;

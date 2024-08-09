@@ -649,7 +649,7 @@ onMounted(() => {
               </g>
             </g>
           </svg>
-          <svg width="23" height="23" v-show="lockState" viewBox="0 0 768.04 938.72" xmlns="http://www.w3.org/2000/svg">
+          <svg width="23" height="23"v-show="lockState" viewBox="0 0 768.04 938.72" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -990,6 +990,12 @@ onMounted(() => {
   -webkit-app-region: none;
 }
 
+.desktop-lyric-lock .lock-btn.active {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: transparent;
+}
+
 .desktop-lyric .active svg {
   fill: var(--content-highlight-color);
 }
@@ -1001,8 +1007,7 @@ onMounted(() => {
 }
 
 .desktop-lyric.desktop-lyric-lock .center {
-  padding-top: 0px;
-  margin-top: 33px;
+  margin-top: 10px;
 }
 
 .desktop-lyric .center .no-lyric,

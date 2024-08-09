@@ -13,7 +13,11 @@ const { visitThemes, visitUserHome, visitSetting, visitModulesSetting, visitPlug
 const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
 const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('player')
 
-const { isUserHomeShortcutEnable } = storeToRefs(useSettingStore())
+const { isUserHomeShortcutEnable,
+    isModulesSettingShortcutEnable,
+    isPluginsSettingShortcutEnable,
+    isThemesShortcutEnable,
+    isSimpleLayoutShortcutEnable, } = storeToRefs(useSettingStore())
 const { setLayoutIndex, switchToSimpleLayout } = useSettingStore()
 const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
 </script>
@@ -30,7 +34,7 @@ const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
                 <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
                 </SearchBar>
                 -->
-                <div class="module-btn btn" @click="visitModulesSetting">
+                <div class="module-btn btn" @click="visitModulesSetting" v-show="isModulesSettingShortcutEnable">
                     <svg width="19" height="19" viewBox="0 0 853.51 926.34" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -40,7 +44,7 @@ const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
                         </g>
                     </svg>
                 </div>
-                <div class="plugin-btn btn spacing" @click="visitPlugins">
+                <div class="plugin-btn btn spacing" @click="visitPlugins" v-show="isPluginsSettingShortcutEnable">
                     <svg width="19" height="19" viewBox="0 0 918.34 919" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -52,7 +56,7 @@ const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
                         </g>
                     </svg>
                 </div>
-                <div class="theme-btn btn spacing" @click="visitThemes">
+                <div class="theme-btn btn spacing" @click="visitThemes" v-show="isThemesShortcutEnable">
                     <svg width="19" height="19" viewBox="0 -10 940.66 926.15" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -62,7 +66,7 @@ const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
                         </g>
                     </svg>
                 </div>
-                <div class="userhome-btn btn spacing" @click="() => visitUserHome()">
+                <div class="userhome-btn btn spacing" @click="() => visitUserHome()" v-show="isUserHomeShortcutEnable">
                     <svg width="22" height="21" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -101,7 +105,9 @@ const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
             </div>
         </div>
         <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
-            :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack" :onDragMove="preseekTrack">
+            :onScroll="preseekTrack" :onScrollFinish="seekTrack" 
+            :onDragRelease="seekTrack" :onDragMove="preseekTrack"
+            keyName="defaultMainTop" >
         </SliderBar>
     </div>
 </template>

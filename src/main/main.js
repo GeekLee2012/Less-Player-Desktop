@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain,
   shell, powerSaveBlocker, Tray,
   globalShortcut, session, utilityProcess,
   protocol, nativeTheme, MessageChannelMain,
-  nativeImage,  screen,
+  nativeImage,  screen, 
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
@@ -1104,6 +1104,7 @@ const setupAppLayout = (layout, zoom, isInit) => {
   if(mainWin.webContents.zoomFactor) {
     mainWin.webContents.zoomFactor = zoomFactor
   }
+  
   //TODO 显示效果：能居中，但只能居中一点点？水平方向居中，但垂直方向没居中
   // 貌似 Electron Bug? 
   mainWin.center()
