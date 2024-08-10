@@ -42,7 +42,7 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 .tiles-loading-mask .tile .cover {
     width: 100%;
     height: var(--others-image-text-tile-cover-size);
-    border-radius: 6px;
+    border-radius: var(--border-img-text-tile-border-radius);
 }
 
 .tiles-loading-mask .tile .title {
@@ -69,7 +69,7 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 
 .tiles-card-loading-mask .tile .title {
     margin-top: 0px;
-    border-radius: 6px;
+    border-radius: var(--border-img-text-tile-border-radius);
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     height: 66px;

@@ -95,7 +95,8 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 }
 
 .random-music-toolbar .container {
-    border-radius: 10px;
+    /*border-radius: 10px;*/
+    border-radius: var(--border-popover-border-radius);
     display: flex;
     flex-direction: column;
     flex: 1;

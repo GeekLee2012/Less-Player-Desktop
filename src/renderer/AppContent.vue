@@ -256,14 +256,14 @@ const forceHideToast = () => {
 }
 
 const setElementAlignCenter = (selector, width, height, offsetLeft, offsetTop) => {
-  const { clientWidth, clientHeight } = document.documentElement
-  const el = document.querySelector(selector)
-  if (!el) return
-  //offsetXXX 设置偏移量
-  const left = (clientWidth - width) / 2 + (offsetLeft || 0)
-  const top = (clientHeight - height) / 2 + (offsetTop || 0)
-  el.style.left = `${left}px`
-  el.style.top = `${top}px`
+    const { clientWidth, clientHeight } = document.documentElement
+    const el = document.querySelector(selector)
+    if (!el) return
+    //offsetXXX 设置偏移量
+    const left = (clientWidth - width) / 2 + (offsetLeft || 0)
+    const top = (clientHeight - height) / 2 + (offsetTop || 0)
+    el.style.left = `${left}px`
+    el.style.top = `${top}px`
 }
 
 const restoreSetting = (isInit) => {
@@ -473,8 +473,8 @@ onEvents({
   'app-zoom': setupTrafficLightWinCtlBtn,
   'app-layout': setupLayout,
   'app-elementAlignCenter': value => {
-    const { selector, width, height, offsetLeft, offsetTop } = value
-    setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
+      const { selector, width, height, offsetLeft, offsetTop } = value
+      setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
   },
   'app-resetSetting': restoreSetting,
   'setting-restore': restoreSetting,
@@ -517,13 +517,13 @@ provide('appCommon', {
 </script>
 
 <template>
-  <div id="app-content" @dragover="e => e.preventDefault()" @drop="onDrop">
+  <div id="app-content" @dragover="e => e.preventDefault()" @drop="onDrop"
+      :class="{
+        'winos-style': isWinOS(),
+        'use-winos-win-ctl': useWindowsStyleWinCtl
+      }">
     <keep-alive :max="1">
-      <component :is="currentAppLayout" 
-          :class="{
-            'winos-style': isWinOS(),
-            'use-winos-win-ctl': useWindowsStyleWinCtl
-          }" >
+      <component :is="currentAppLayout">
       </component>
     </keep-alive>
     <slot></slot>

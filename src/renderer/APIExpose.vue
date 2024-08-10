@@ -473,3 +473,6 @@ provide('apiExpose', {
 <template>
     <slot></slot>
 </template>
+
+<style>
+</style>

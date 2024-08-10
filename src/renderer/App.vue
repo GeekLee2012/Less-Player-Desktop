@@ -1,12 +1,12 @@
 <script setup>
 import Themes from './Themes.vue';
-
 </script>
 
 <template>
   <Themes>
     <router-view v-slot="{ Component }">
-      <component :is="Component" />
+      <component :is="Component">
+      </component>
     </router-view>
   </Themes>
 </template>
@@ -21,7 +21,7 @@ body,
 
   font-size: var(--content-text-size);
   color: var(--content-text-color);
-  border-radius: var(--border-macstyle-border-radius);
+  border-radius: var(--border-app-win-border-radius);
 }
 
 #app {

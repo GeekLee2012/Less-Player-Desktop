@@ -4,17 +4,18 @@ import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
-import { isMacOS } from '../common/Utils';
+import { isMacOS, isWinOS } from '../common/Utils';
 import CssWinOS from './CssWinOS.vue';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
 
-const { theme: themeSetting } = storeToRefs(useSettingStore())
+const { theme: themeSetting, currentBorderRadiusCtlStyle,
+  isUseAutoBorderRadiusCtl, isUseMacOSBorderRadiusCtl,
+  isUseWindowsBorderRadiusCtl, } = storeToRefs(useSettingStore())
 const { getCurrentTheme, setupFontFamily,
   setupFontWeight, allFontSizeLevels,
-  currentFontSizeLevel, currentFontSize,
-} = useSettingStore()
+  currentFontSizeLevel, currentFontSize, } = useSettingStore()
 
 
 const applyDocumentElementStyle = (prop, value) => {
@@ -200,11 +201,41 @@ const setupFontStyle = () => {
   setupFontSize()
 }
 
-const setupMacStyle = () => {
+const setupBorderRadiusCtlStyle = () => {
+  const winStyle = {
+    '--border-app-win-border-radius': '3px',
+    '--border-popover-border-radius': '3px',
+    '--border-btn-border-radius': '5px',
+    '--border-list-item-border-radius': '5px',
+    '--border-left-nav-list-item-border-radius': '3px',
+    '--border-img-text-tile-border-radius': '3px',
+  }
+
+  const macStyle = {
+    '--border-app-win-border-radius': '12px',
+    '--border-popover-border-radius': '8px',
+    '--border-btn-border-radius': '10rem',
+    '--border-list-item-border-radius': '10rem',
+    '--border-left-nav-list-item-border-radius': '5px',
+    '--border-img-text-tile-border-radius': '6px',
+  }
+  let changes = macStyle
+  console
+  if ((isUseAutoBorderRadiusCtl.value && isWinOS()) 
+    || isUseWindowsBorderRadiusCtl.value) {
+    changes = winStyle 
+  }
+  applyDocumentStyle(changes)
+}
+
+/*
+const setupAppBorder = () => {
+  //TODO 硬编码
   const borderRadius = isMacOS() ? 0 : 12
-  applyDocumentStyle({ '--border-macstyle-border-radius': `${borderRadius}px` })
+  applyDocumentStyle({ '--border-app-win-border-radius': `${borderRadius}px` })
   //TODO 边框阴影效果, 再看看情况
 }
+*/
 
 /*
 const setupAutoTheme = () => {
@@ -236,13 +267,16 @@ onEvents({
   'theme-applyTheme': setupAppTheme,
 })
 
-setupMacStyle()
+//setupAppBorder()
 
 onMounted(() => {
   setupFontStyle()
+  setupBorderRadiusCtlStyle()
   //setupAppTheme()
 })
+
 watch(themeSetting, () => setupAppTheme(), { deep: true })
+watch(currentBorderRadiusCtlStyle, setupBorderRadiusCtlStyle)
 
 provide('appStyle', {
   applyDocumentElementStyle,

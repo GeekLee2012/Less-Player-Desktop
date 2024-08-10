@@ -284,61 +284,61 @@ const appBackgroundScope = reactive({
 //EventBus监听注册，统一管理
 const eventsRegistration = {
   'commonCtxMenu-show': ({ event, data, index }) => {
-    hideCommonCtxMenu(true) //强制取消上次的显示
-    hideAddToListSubmenu()
-    hideArtistListSubmenu()
-    setMenuPosition(event)
-    //updateCommonCtxMenuCacheItemIndex(index)
-    showCommonCtxMenu(data)
+      hideCommonCtxMenu(true) //强制取消上次的显示
+      hideAddToListSubmenu()
+      hideArtistListSubmenu()
+      setMenuPosition(event)
+      //updateCommonCtxMenuCacheItemIndex(index)
+      showCommonCtxMenu(data)
   },
   'addToListSubmenu-show': ({ event, total }) => {
-    //submenuItemNums = customPlaylists.value.length + 2
-    submenuItemNums = total
-    setSubmenuPosition(event)
-    showAddToListSubmenu()
+      //submenuItemNums = customPlaylists.value.length + 2
+      submenuItemNums = total
+      setSubmenuPosition(event)
+      showAddToListSubmenu()
   },
   'artistListSubmenu-show': event => {
-    const { artist } = commonCtxMenuCacheItem.value
-    submenuItemNums = artist.length
-    setSubmenuPosition(event)
-    showArtistListSubmenu()
+      const { artist } = commonCtxMenuCacheItem.value
+      submenuItemNums = artist.length
+      setSubmenuPosition(event)
+      showArtistListSubmenu()
   }, 
   'addToListSubmenu-hide': hideAddToListSubmenu,
   'artistListSubmenu-hide': hideArtistListSubmenu,
   'color-picker-toolbar-show': ({ event: mouseEvent, onChanged, value, title }) => {
-    //根据鼠标点击位置，确定弹出位置
-    const tbWidth = 218, tbHeight = 369
-    const { x, y, offsetX, offsetY } = mouseEvent
-    const pickerEl = document.querySelector('#color-picker-toolbar')
-    const { clientHeight, clientWidth } = document.documentElement
-    if (!pickerEl) return
-    const padding = 25
-    let top = Math.max(y + (18 - offsetY) - tbHeight / 2, padding)
-    top = Math.min(top, clientHeight - tbHeight - padding)
-    let left = Math.max(x + padding, padding)
-    left = Math.min(left, clientWidth - tbWidth - padding)
-    pickerEl.style.top = `${top}px`
-    pickerEl.style.left = `${left}px`
+      //根据鼠标点击位置，确定弹出位置
+      const tbWidth = 218, tbHeight = 369
+      const { x, y, offsetX, offsetY } = mouseEvent
+      const pickerEl = document.querySelector('#color-picker-toolbar')
+      const { clientHeight, clientWidth } = document.documentElement
+      if (!pickerEl) return
+      const padding = 25
+      let top = Math.max(y + (18 - offsetY) - tbHeight / 2, padding)
+      top = Math.min(top, clientHeight - tbHeight - padding)
+      let left = Math.max(x + padding, padding)
+      left = Math.min(left, clientWidth - tbWidth - padding)
+      pickerEl.style.top = `${top}px`
+      pickerEl.style.left = `${left}px`
 
-    if (!colorPickerToolbarRef.value) return
-    if (value) value = value.replace(/\s/g, '')
-    colorPickerToolbarRef.value.init({ onChanged, value })
-    showColorPickerToolbar(title)
+      if (!colorPickerToolbarRef.value) return
+      if (value) value = value.replace(/\s/g, '')
+      colorPickerToolbarRef.value.init({ onChanged, value })
+      showColorPickerToolbar(title)
   },
   'gradient-color-toolbar-show': ({ event: mouseEvent, value, onChanged }) => {
-    if (!gradientColorToolbarRef.value) return
-    gradientColorToolbarRef.value.init({ onChanged, value })
-    showGradientColorToolbar()
+      if (!gradientColorToolbarRef.value) return
+      gradientColorToolbarRef.value.init({ onChanged, value })
+      showGradientColorToolbar()
   },
   'app-resize': () => {
-    setupSoundEffectViewPos()
-    setupCustomThemeEditViewPos()
-    setupGradientColorToolbarPos()
+      setupSoundEffectViewPos()
+      setupCustomThemeEditViewPos()
+      setupGradientColorToolbarPos()
   },
   'popover-hint-register': registerPopoverHints,
   'playingViewCustomTheme-applyTheme': param => {
-    const { theme, isPreviewMode } = param || {}
-    setupPlayingView(theme, isPreviewMode)
+      const { theme, isPreviewMode } = param || {}
+      setupPlayingView(theme, isPreviewMode)
   },
 }
 
@@ -538,8 +538,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   height: 100%;
   z-index: 99;
   box-shadow: var(--box-shadow);
-  border-top-right-radius: var(--border-macstyle-border-radius);
-  border-bottom-right-radius: var(--border-macstyle-border-radius);
+  border-top-right-radius: var(--border-app-border-radius);
+  border-bottom-right-radius: var(--border-app-border-radius);
 }
 
 #playing-view,
@@ -552,7 +552,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 99;
   background-position: center;
   background-size: cover;
-  border-radius: var(--border-macstyle-border-radius);
+  border-radius: var(--border-app-border-radius);
 }
 
 #playing-theme-list-view {
@@ -565,8 +565,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   height: 100%;
   z-index: 100;
   box-shadow: var(--box-shadow);
-  border-top-right-radius: var(--border-macstyle-border-radius);
-  border-bottom-right-radius: var(--border-macstyle-border-radius);
+  border-top-right-radius: var(--border-app-border-radius);
+  border-bottom-right-radius: var(--border-app-border-radius);
 }
 
 #custom-playing-theme-edit-view {
@@ -578,7 +578,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  border-radius: 15px;
+  /*border-radius: 15px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #video-playing-view {
@@ -593,7 +594,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   height: 550px;
   z-index: 99;
   box-shadow: var(--box-shadow);
-  border-radius: 15px;
+  /*border-radius: 15px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #lyric-toolbar {
@@ -602,7 +604,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   z-index: 99;
   box-shadow: var(--box-shadow);
-  border-radius: 5px;
+  /*border-radius: 5px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #random-music-toolbar {
@@ -611,7 +614,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   z-index: 99;
   box-shadow: var(--box-shadow);
-  border-radius: 10px;
+  /*border-radius: 10px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #custom-theme-edit-view {
@@ -623,7 +627,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 99;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  border-radius: 15px;
+  /*border-radius: 15px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #color-picker-toolbar {
@@ -633,7 +638,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 101;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  border-radius: 5px;
+  /*border-radius: 5px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #gradient-color-toolbar {
@@ -645,7 +651,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  border-radius: 15px;
+  /*border-radius: 15px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #playlist-export-toolbar {
@@ -658,7 +665,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  border-radius: 15px;
+  /*border-radius: 15px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 .app-custom-theme-bg .ntf-dialog-mask {
@@ -674,7 +682,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #popovers .common-ntf,
 #popovers .common-ntf .ntf-dialog-mask {
-  border-radius: 12px;
+  /*border-radius: 12px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #popovers .common-ntf .ntf-text {
@@ -694,7 +703,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #popovers .common-ctx-menu .container,
 #popovers .common-ctx-submenu,
 #popovers .common-ctx-submenu .container {
-  border-radius: 8px;
+  border-radius: var(--border-popover-border-radius);
 }
 
 
@@ -707,7 +716,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #popovers .popover-hint .ntf-dialog-mask {
-  border-radius: 6px;
+  /*border-radius: 6px;*/
+  border-radius: var(--border-popover-border-radius);
 }
 
 #popovers .popover-hint .ntf-dialog {

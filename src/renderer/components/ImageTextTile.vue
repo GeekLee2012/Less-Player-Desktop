@@ -139,15 +139,15 @@ onUnmounted(() => offEvents(eventsRegistration))
 .image-text-tile {
     /*margin: 15px 13px;*/
     margin: 15px 13px 11px 13px;
-    --tile-border-radius: 6px;
     position: relative;
+    --card-shadow-height: 6px;
 }
 
 .image-text-tile .cover {
     width: var(--others-image-text-tile-cover-size);
     height: var(--others-image-text-tile-cover-size);
     line-height: var(--others-image-text-tile-cover-size);
-    border-radius: var(--tile-border-radius);
+    border-radius: var(--border-img-text-tile-border-radius);
     cursor: pointer;
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
     box-shadow: 0px 0px 3px #181818;
@@ -287,7 +287,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .image-text-tile-card {
     background-color: var(--app-bg-color);
     box-shadow: 0px 0px 3px #181818;
-    border-radius: 6px;
+    border-radius: var(--border-img-text-tile-border-radius);
     min-height: var(--others-image-text-tile-card-min-height);
     margin-top: 18px;
     margin-bottom: 15px;
@@ -423,15 +423,15 @@ onUnmounted(() => offEvents(eventsRegistration))
     position: absolute;
     top: 0px;
     left: 50%;
-    transform: translate(-50%, var(--tile-border-radius));
-    border-radius: var(--tile-border-radius);
+    transform: translate(-50%, var(--card-shadow-height));
+    border-radius: var(--border-img-text-tile-border-radius);
     background: var(--content-regular-bg-color);
 }
 
 .image-text-tile-card.image-text-tile-card-shadow .layer-tiny {
     z-index: -2;
     width: 80%;
-    transform: translate(-50%, calc(var(--tile-border-radius) * 2));
+    transform: translate(-50%, calc(var(--card-shadow-height) * 2));
     background: var(--content-light-bg-color);
 }
 

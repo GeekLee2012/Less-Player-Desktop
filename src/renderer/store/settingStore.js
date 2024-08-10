@@ -84,6 +84,8 @@ export const useSettingStore = defineStore('setting', {
             winZoom: 85,
             //窗口控件风格，0 => 自动，1 => macOS, 2 => Windows
             winCtlStyle: 0,
+            //TODO 元素圆角风格（预设），0 => 自动，1 => macOS, 2 => Windows
+            borderRadiusCtlStyle: 0,
             //字体名称
             fontFamily: '',
             //字体大小
@@ -181,6 +183,8 @@ export const useSettingStore = defineStore('setting', {
             dndSavePath: null, 
             //图文控件 - 专辑标题单行显示
             singleLineAlbumTitleStyle: false,
+            //图文控件 - 自由FM标题单行显示
+            singleLineRadioTitleStyle: false,
             //播放页 - 封面图片背景效果
             playingViewUseBgCoverEffect: false,
             //播放页 - 封面图片边框
@@ -495,6 +499,18 @@ export const useSettingStore = defineStore('setting', {
         isUseWindowsWinCtl() {
             return this.common.winCtlStyle == 2
         },
+        currentBorderRadiusCtlStyle() {
+            return this.common.borderRadiusCtlStyle
+        },
+        isUseAutoBorderRadiusCtl() {
+            return this.common.borderRadiusCtlStyle == 0
+        },
+        isUseMacOSBorderRadiusCtl() {
+            return this.common.borderRadiusCtlStyle == 1
+        },
+        isUseWindowsBorderRadiusCtl() {
+            return this.common.borderRadiusCtlStyle == 2
+        },
         isPlayCountShow() {
             //listenNumShow为旧版本名称
             return this.track.playCountShow || this.track.listenNumShow
@@ -699,6 +715,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isSingleLineAlbumTitleStyle() {
             return this.track.singleLineAlbumTitleStyle
+        },
+        isSingleLineRadioTitleStyle() {
+            return this.track.singleLineRadioTitleStyle
         }
     },
     actions: {
@@ -764,6 +783,11 @@ export const useSettingStore = defineStore('setting', {
             const index = parseInt(value || 0)
             if (index < 0 || index > 2) return
             this.common.winCtlStyle = index
+        },
+        setBorderRadiusCtlStyle(value) {
+            const index = parseInt(value || 0)
+            if (index < 0 || index > 2) return
+            this.common.borderRadiusCtlStyle = index
         },
         currentFontSize() {
             return this.common.fontSize
@@ -885,6 +909,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleSingleLineAlbumTitleStyle() {
             this.track.singleLineAlbumTitleStyle = !this.track.singleLineAlbumTitleStyle
+        },
+        toggleSingleLineRadioTitleStyle() {
+            this.track.singleLineRadioTitleStyle = !this.track.singleLineRadioTitleStyle
         },
         setStateRefreshFrequency(value) {
             const freq = parseInt(value || 60)

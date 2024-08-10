@@ -655,7 +655,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding-left: 20px;
     padding-right: 20px;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: var(--border-left-nav-list-item-border-radius);
     
     text-align: left;
     overflow: hidden;

@@ -30,7 +30,7 @@ const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,
     setSearchBarExclusiveAction, toggleTagsCategoryView } = useAppCommonStore()
 const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM, 
-    isFreeFMHomepageTipsShow, } = storeToRefs(useSettingStore())
+    isFreeFMHomepageTipsShow, isSingleLineRadioTitleStyle, } = storeToRefs(useSettingStore())
 
 
 const freefmRef = ref(null)
@@ -306,7 +306,7 @@ onActivated(() => {
                 </div>
             </div>
             <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount"
-                :tileOnDropFn="radioTileOnDrop">
+                :tileOnDropFn="radioTileOnDrop" :singleLineTitleStyle="isSingleLineRadioTitleStyle">
             </PlaylistsControl>
             <!--
             <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount"

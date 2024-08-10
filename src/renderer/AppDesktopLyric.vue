@@ -5,7 +5,7 @@ import { useSettingStore } from './store/settingStore';
 import Mousetrap from 'mousetrap';
 import { randomTextWithinAlphabetNums, smoothScroll, smoothScrollHorizional,
   ipcRendererSend as sendToMain, onIpcRendererEvent,
-  toMMssSSS, toMillis } from '../common/Utils';
+  toMMssSSS, toMillis, isWinOS } from '../common/Utils';
 import { Track } from '../common/Track';
 
 
@@ -605,6 +605,7 @@ onMounted(() => {
 <template>
   <div class="desktop-lyric"
     :class="{ 
+      'winos-style': isWinOS(),
       'desktop-lyric-lock': lockState, 
       'desktop-lyric-vertical': (desktopLyric.textDirection == 1),
       'desktop-lyric-hover': isResizing,
@@ -928,6 +929,7 @@ onMounted(() => {
 
   background: none;
   color: var(--content-desktop-lyric-color);
+  border-radius: var(--border-app-win-border-radius);
 }
 
 .desktop-lyric-lock {

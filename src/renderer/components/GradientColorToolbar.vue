@@ -516,7 +516,8 @@ defineExpose({
     min-width: 88px;
     padding: 6px;
     text-align: center;
-    border-radius: 10rem;
+    /*border-radius: 10rem;*/
+    border-radius: var(--border-list-item-border-radius);
     margin-right: 20px;
     border: 0px solid var(--border-color);
     cursor: pointer;

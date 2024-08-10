@@ -25,7 +25,8 @@ const active = toRef(props, 'value')
     */
     width: 40px;
     height: 20px;
-    border-radius: 10rem;
+    /*border-radius: 10rem;*/
+    border-radius: var(--border-btn-border-radius);
     border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -38,7 +39,8 @@ const active = toRef(props, 'value')
     margin: 1px;
     width: 16px;
     height: 16px;
-    border-radius: 10rem;
+    /*border-radius: 10rem;*/
+    border-radius: var(--border-btn-border-radius);
     background: var(--button-toggle-btn-thumb-color);
 }
 

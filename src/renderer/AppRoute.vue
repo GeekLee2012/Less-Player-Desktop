@@ -444,4 +444,5 @@ provide('appRoute', {
     <slot></slot>
 </template>
 
-<style scoped></style>
+<style>
+</style>

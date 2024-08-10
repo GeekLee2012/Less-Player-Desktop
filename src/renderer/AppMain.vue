@@ -18,6 +18,7 @@ import APIExpose from "./APIExpose.vue";
 </template>
 
 <style>
+/*
 html,
 body,
 #app {
@@ -26,7 +27,6 @@ body,
   font-size: var(--content-text-size);
   color: var(--content-text-color);
   overflow: hidden;
-  border-radius: var(--border-macstyle-border-radius);
 }
 
 #app {
@@ -35,4 +35,5 @@ body,
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+*/
 </style>

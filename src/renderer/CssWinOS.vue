@@ -1,9 +1,25 @@
 <template></template>
 
 <style>
+/*
+.winos-style {
+  --border-app-win-border-radius: 3px;
+  --border-popover-border-radius: 3px;
+  --border-btn-border-radius: 3px;
+  --border-list-item-border-radius: 3px;
+  --border-left-nav-list-item-border-radius: 3px;
+  --border-img-text-tile-border-radius: 3px;
+}
+*/
+
 /* 普通文本按钮 */
 .winos-style .text-btn svg {
   padding-top: 2px !important;
+}
+
+.winos-style .image-text-tile.image-text-tile-color-mode .cover-wrap .big-title {
+    line-height: calc(var(--content-text-module-subtitle-size) + 3px);
+    font-size: calc(var(--content-text-module-subtitle-size) - 1px) !important;
 }
 
 /* 桌面歌词（文字）按钮 */
@@ -37,13 +53,14 @@
   margin-left: 36px !important;
 }
 
-.use-winos-win-ctl.default-new-layout #main-left .header {
+.use-winos-win-ctl .default-new-layout #main-left .header {
   height: 68px !important;
   margin-bottom: 3px !important;
 }
 
-.use-winos-win-ctl.default-new-layout #main-left .header .top-logo {
-  margin-top: 25px;
+.use-winos-win-ctl .default-new-layout #main-left .header .top-logo {
+  margin-top: 23px;
+  margin-left: 23px;
 }
 
 
@@ -154,6 +171,25 @@
 .use-winos-win-ctl .custom-playing-theme-edit-view .header .title-wrap,
 .use-winos-win-ctl .gradient-color-toolbar .header .title-wrap {
   margin-left: 10px !important;
+}
+
+/* 桌面歌词 */
+.desktop-lyric.winos-style  {
+  background: var(--app-bg-color) !important;
+}
+
+.desktop-lyric.winos-style .header {
+  visibility: visible;
+}
+
+.desktop-lyric.winos-style:hover .header,
+.desktop-lyric.winos-style.desktop-lyric-hover .header {
+  visibility: visible;
+}
+
+
+.desktop-lyric-lock.winos-style {
+  background: none !important;
 }
 
 

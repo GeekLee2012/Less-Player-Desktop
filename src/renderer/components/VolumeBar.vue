@@ -108,7 +108,8 @@ defineExpose({
     margin-left: 5px;
     width: 80px;
     height: 3px;
-    border-radius: 10rem;
+    /*border-radius: 10rem;*/
+    border-radius: var(--border-btn-border-radius);
 }
 
 .volume-bar .volume-value .progress {

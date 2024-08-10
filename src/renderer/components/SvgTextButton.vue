@@ -44,7 +44,7 @@ const handleRightClick = (event) => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    border-radius: 10rem;
+    border-radius: var(--border-btn-border-radius);
     height: 36px;
     color: var(--button-icon-text-btn-text-color);
 }
@@ -69,8 +69,10 @@ const handleRightClick = (event) => {
 }
 
 .svg-text-btn .left-btn {
-    /*width: 103px;*/
+    /*
     border-radius: 10rem 0 0 10rem;
+    */
+    border-radius: var(--border-btn-border-radius) 0px 0px var(--border-btn-border-radius);
 }
 
 .svg-text-btn .left-btn .img {
@@ -81,7 +83,8 @@ const handleRightClick = (event) => {
 }
 
 .svg-text-btn .right-btn {
-    border-radius: 0 10rem 10rem 0;
+    /*border-radius: 0 10rem 10rem 0;*/
+    border-radius: 0px var(--border-btn-border-radius) var(--border-btn-border-radius) 0px ;
     padding-left: 8px;
     padding-right: 10px;
     border-left: var(--svg-text-btn-rbtn-border);

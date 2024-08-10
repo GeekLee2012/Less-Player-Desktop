@@ -27,6 +27,7 @@ const props = defineProps({
     nextPagePendingMark: Number,
     refreshAllPendingMark: Number,
     videoStyle: Boolean,
+    singleLineTitleStyle: Boolean,
     tileOnDropFn: Function,
     draggable: Boolean,
     tileOnDragStartFn: Function,
@@ -116,6 +117,7 @@ const computedCenterTitleStyle = computed(() => {
                     :cover="transformUrl(item.cover, FILE_SCHEME)" :coverFit="item.coverFit"
                     :title="item.title" :subtitle="getSubtitle(item)" 
                     :videoStyle="videoStyle" :centerTitleStyle="computedCenterTitleStyle(item)"
+                    :singleLineTitleStyle="singleLineTitleStyle"
                     :playable="true" :playAction="() => playPlaylist(item)" 
                     :checkbox="checkbox" :checked="checkedAll"
                     :ignoreCheckAllEvent="ignoreCheckAllEvent"

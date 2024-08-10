@@ -35,6 +35,7 @@ const { setThemeIndex,
     toggleSettingViewTipsShow,
     setWindowZoom,
     setWindowCtlStyle,
+    setBorderRadiusCtlStyle,
     setFontFamily,
     setFontWeight,
     toggleRadioModeShortcut,
@@ -78,6 +79,7 @@ const { setThemeIndex,
     toggleDndSave,
     setDndSavePath,
     toggleSingleLineAlbumTitleStyle,
+    toggleSingleLineRadioTitleStyle,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueAutoPositionOnShow,
@@ -618,7 +620,13 @@ onUnmounted(() => offEvents(eventsRegistration))
                             :class="{ active: index == common.winCtlStyle }" @click="setWindowCtlStyle(index)">
                             {{ item }}
                         </span>
-                        <div class="tip-text spacing">提示：实验性功能</div>
+                    </div>
+                    <div class="border-radius-ctl">
+                        <span class="sec-title">预设圆角风格：</span>
+                        <span v-for="(item, index) in ['自动', 'macOS', 'Windows']" class="quality-item"
+                            :class="{ active: index == common.borderRadiusCtlStyle }" @click="setBorderRadiusCtlStyle(index)">
+                            {{ item }}
+                        </span>
                     </div>
                     <div class="font" @keydown.stop="">
                         <span>字体名称：</span>
@@ -741,6 +749,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleSingleLineAlbumTitleStyle" :value="track.singleLineAlbumTitleStyle">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：仅支持部分页面的图文控件</div>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">电台控件标题单行显示：</span>
+                        <ToggleControl @click="toggleSingleLineRadioTitleStyle" :value="track.singleLineRadioTitleStyle">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：仅支持自由FM的图文控件</div>
                     </div>
                     <div>
                         <span class="cate-subtitle">当前播放列表自动定位：</span>
@@ -1722,7 +1736,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     width: 128px;
 }
 
-#setting-view .window-ctl .sec-title {
+#setting-view .window-ctl .sec-title,
+#setting-view .border-radius-ctl  .sec-title {
     width: 159px !important;
 }
 

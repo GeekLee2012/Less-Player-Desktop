@@ -452,8 +452,8 @@ onActivated(initVideoPlayer)
     width: 404px;
     height: 100%;
     z-index: 99;
-    border-top-right-radius: var(--border-macstyle-border-radius);
-    border-bottom-right-radius: var(--border-macstyle-border-radius);
+    border-top-right-radius: var(--border-app-win-border-radius);
+    border-bottom-right-radius: var(--border-app-win-border-radius);
     box-shadow: 0px 0px 3px #000;
 
     display: flex;

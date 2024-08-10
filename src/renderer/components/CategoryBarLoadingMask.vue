@@ -19,7 +19,8 @@ const props = defineProps({
     padding: 6px 15px;
     margin-right: 8px;
     margin-bottom: 6px; 
-    border-radius: 10rem; 
+    /*border-radius: 10rem; */
+    border-radius: var(--border-list-item-border-radius);
     cursor: default; 
     display: inline-block;
 }

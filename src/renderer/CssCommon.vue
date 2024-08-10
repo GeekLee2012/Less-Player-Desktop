@@ -3,7 +3,7 @@
 <style>
 :root {
   --app-bg: transparent;
-
+  /*内容*/
   --content-text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
   --content-text-font-family: var(--content-text-preset-font-family);
 
@@ -28,10 +28,15 @@
   --content-error-color: #fc605c;
 
   /*边框 */
-  --border-macstyle-border-radius: 0px;
+  --border-app-win-border-radius: 12px;
+  --border-popover-border-radius: 8px;
   --border-list-item-border-radius: 10rem;
+  --border-left-nav-list-item-border-radius: 5px;
   --border-inputs-border-radius: 3px;
+  --border-btn-border-radius: 10rem;
+  --border-img-text-tile-border-radius: 6px;
 
+  /*其他*/
   --others-scrollbar-width: 6px;
   /*--win-ctl-width: 105px;*/
   --others-win-ctl-margin-left: 15px;

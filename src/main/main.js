@@ -830,14 +830,14 @@ const registryGlobalListeners = () => {
     setupTrayMenu()
   }).on('app-desktopLyric-lock', (event, ...args) => {
     desktopLyricLockState = args[0]
-    //if (isMacOS) lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
-    //lyricWin.setIgnoreMouseEvents(desktopLyricLockState)
-    lyricWin.setHasShadow(!desktopLyricLockState)
+    //TODO 平台兼容性问题
+    if(isMacOS) lyricWin.setHasShadow(!desktopLyricLockState)
     lyricWin.setResizable(!desktopLyricLockState)
-    //lyricWin.setMinimumSize(lyricWinMinWidth, lyricWinMinHeight)
     if (desktopLyricLockState) lyricWin.blur()
     setupTrayMenu()
   }).on('app-ignoreMouseEvents', (event, ignore, options) => {
+    //TODO 平台兼容性问题
+    if(isWinOS) return
     const win = BrowserWindow.fromWebContents(event.sender)
     win.setIgnoreMouseEvents(ignore, options)
   }).on('app-mainWin-show', (event, ...args) => {
@@ -849,6 +849,8 @@ const registryGlobalListeners = () => {
     setWindowAlwaysOnTop(lyricWin, args[0])
     setupTrayMenu()
   }).on('app-desktopLyric-setShadow', (event, ...args) => {
+    //TODO 平台兼容性问题
+    if(isWinOS) return
     lyricWin.setHasShadow(args[0])
     lyricWin.setResizable(args[0])
   }).on('app-messagePort-setup', (event, ...args) => {

@@ -7,7 +7,7 @@ import ClassicMainBottom from './ClassicMainBottom.vue';
 </script>
 
 <template>
-    <div class="default-new-layout">
+    <div class="default-layout default-new-layout">
         <div class="center">
             <DefaultMainLeft></DefaultMainLeft>
             <DefaultMainCenter></DefaultMainCenter>

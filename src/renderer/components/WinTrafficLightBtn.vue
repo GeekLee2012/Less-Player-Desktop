@@ -105,7 +105,7 @@ const toggleMaximize = () => maximize()
     width: var(--others-win-ctl-btn-size);
     height: var(--others-win-ctl-btn-size);
     margin-right: var(--others-win-ctl-btn-margin-right);
-    border-radius: 100rem;
+    border-radius: 10rem;
     box-shadow: 0px 0px 1px var(--border-popovers-border-color);
     -webkit-app-region: none;
     cursor: pointer !important;
