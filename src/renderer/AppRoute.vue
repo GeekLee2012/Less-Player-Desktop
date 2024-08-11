@@ -69,7 +69,6 @@ const autoSwitchExploreMode = (to, from) => {
 let searchPlaceHolderTimer = null
 const autoSwitchSearchPlaceHolder = (to) => {
     if (!isSearchBarAutoPlaceholderEnable.value) return
-    clearTimeout(searchPlaceHolderTimer)
 
     const { path } = to
     let index = 0
@@ -92,6 +91,7 @@ const autoSwitchSearchPlaceHolder = (to) => {
     }
     const MINUTE = 60000
     setSearchPlaceHolderIndex(index)
+    clearTimeout(searchPlaceHolderTimer)
     searchPlaceHolderTimer = setTimeout(() => {
         if (index != 0) setSearchPlaceHolderIndex(0)
     }, MINUTE)
@@ -101,8 +101,8 @@ const autoSwitchSearchPlaceHolder = (to) => {
 const hideRelativeComponents = (to) => {
     hidePlayingView()
     hideVideoPlayingView()
-    hideAllCtxMenus()
     updateCommonCtxItem(null)
+    hideAllCtxMenus()
     hidePopoverHint()
 
     hideLyricToolbar()
@@ -123,8 +123,10 @@ const createCommonRoute = (route, onRouteReady) => {
             //hidePlayingView()
             setRouterCtxCacheItem(null)
             hideRelativeComponents()
+
             if (isSimpleLayout.value) switchToFallbackLayout()
             if (!toPath.includes('/artist/')) hidePlaybackQueueView()
+            
             emitEvents('app-beforeRoute', { toPath, fromPath })
         }
     }
@@ -394,9 +396,6 @@ provide('appRoute', {
     visitBatchRecents: () => {
         return visitCommonRoute('/userhome/batch/recents/0')
     },
-    visitFreeVideoCreate: () => {
-        return visitCommonRoute('/videos/video/create')
-    },
     visitTrack: ({ id, platform, title, cover, artist, album }, onRouteReady) => {
         const exploreMode = transformExploreMode()
         return visitCommonRoute({
@@ -431,6 +430,9 @@ provide('appRoute', {
     },
     addCustomRoute: (route) => {
         return addRoute('appmain', route)
+    },
+    visitVideoCreate: () => {
+        return visitCommonRoute('/videos/video/create')
     },
     visitVideoDetail: (platform, id, detailUrl, video) => {
         return visitCommonRoute(`/videos/video/${platform}/${id}`, 

@@ -21,7 +21,7 @@ const { backward, forward,
   visitRadio, visitThemes,
   visitModulesSetting, visitDataBackup,
   visitDataRestore, visitUserHome,
-  visitFreeVideoCreate, visitRecents,
+  visitVideoCreate, visitRecents,
   visitPlugins, } = inject('appRoute')
 const { quickSearch } = inject('player')
 
@@ -367,7 +367,7 @@ const searchDefault = async (keyword) => {
     return
   } else if (keyword === '视频'
     || toLowerCaseTrimString(keyword) === 'video') {
-    visitFreeVideoCreate()
+    visitVideoCreate()
     return
   } else if (keyword === '插件管理'
     || keyword === '插件'

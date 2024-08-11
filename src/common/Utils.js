@@ -545,6 +545,10 @@ export const parsePlsText = (text, mapFn) => {
     return result
 }
 
+const detectVideoPlatform = (url) => {
+    return url && url.startsWith('http') ? 'free-video' : 'local'
+}
+
 /** 解析levc格式文件
  * 目前格式松散，对数据的顺序性、重复性等方面并没有强制要求
  * levc => Less Player Video Collection
@@ -554,9 +558,8 @@ export const parsePlsText = (text, mapFn) => {
 //虽然可以通过main/preload.js预先暴露给renderer重用
 //但过早引入common.js时，也会过早require里面的music-metadata，然后控制台会输出一堆警告
 //避免看到一堆毫无意义的警告，暂时采取冗余代码方式解决
-export const parseVideoCollectionLines = (lines, callback) => {
+export const parseVideoCollectionLines = (lines) => {
     if(!lines || !Array.isArray(lines) || lines.length < 1) return 
-    if(!callback || typeof callback != 'function') return 
     
     const Meta = {
         DELIMITER: '$',
@@ -573,7 +576,10 @@ export const parseVideoCollectionLines = (lines, callback) => {
         keyName: (prop) => (`${Meta.DELIMITER}${prop}${Meta.DELIMITER}`),
     }
     const delimiter = Meta.DELIMITER
-    const collection = {}, excludeFilenames = ['index']
+    const excludeFilenames = ['index']
+    
+    const cid = 'levc' + Date.now()
+    const collection = { id: cid, platform: 'free-video', title: '', data: [] }
     let listBegan = false
     lines.forEach(line => {
         line = toTrimString(line)
@@ -583,8 +589,8 @@ export const parseVideoCollectionLines = (lines, callback) => {
             || line.startsWith('*')) return
         
         if(line.startsWith(Meta.keyName(Meta.TITLE))) {
-            const cTitle = line.split(Meta.keyName(Meta.TITLE))[1].trim()
-            Object.assign(collection, { cTitle })
+            const title = line.split(Meta.keyName(Meta.TITLE))[1].trim()
+            Object.assign(collection, { title })
         } else if(line.startsWith(Meta.keyName(Meta.COVER))
             || line.startsWith(Meta.keyName(Meta.YEAR))
             || line.startsWith(Meta.keyName(Meta.REGION))
@@ -602,8 +608,8 @@ export const parseVideoCollectionLines = (lines, callback) => {
         } else if(line.startsWith(Meta.keyName(Meta.LIST))) {
             listBegan = true
         } else if(line.startsWith(delimiter) && line.endsWith(delimiter)) {
-            const cTitle = line.substring(1, line.length - 1)
-            Object.assign(collection, { cTitle })
+            const title = line.substring(1, line.length - 1)
+            Object.assign(collection, { title })
         } else if(line.includes(delimiter)) {
             //数据行格式：[标题$url]
             const parts = line.split(delimiter)
@@ -611,21 +617,22 @@ export const parseVideoCollectionLines = (lines, callback) => {
 
             const subtitle = toTrimString(parts[0]) 
                 || guessFilename(parts[0], randomTextWithinAlphabetNums(8), excludeFilenames)
-            const url = toTrimString(parts[1])
+            let url = toTrimString(parts[1])
             if(!url.startsWith('http') 
                 && !url.startsWith('blob:http') 
                 && !url.startsWith('/')) {
                 return
             }
+            if(url.startsWith('/')) url = transformUrl(url, FILE_SCHEME)
 
-            callback({ 
+            collection.data.push({ 
                 id: md5(subtitle), 
-                platform: 'free-video', 
+                platform: detectVideoPlatform(url), 
                 title: subtitle, 
-                url, 
-                ...collection
+                url,
             })
         } else {
+            //数据行格式：[url]
             line = transformPath(line)
             if(!line.startsWith('http') 
                 && !line.startsWith('blob:http') 
@@ -633,18 +640,27 @@ export const parseVideoCollectionLines = (lines, callback) => {
                 return
             } 
             if(line.startsWith('/')) line = transformUrl(line, FILE_SCHEME)
-            //数据行格式：[url]
+            
             const id = randomTextWithinAlphabetNums(8)
-
-            callback({ 
+            collection.data.push({ 
                 id, 
-                platform: 'free-video', 
+                platform: detectVideoPlatform(line), 
                 title: guessFilename(line, id, excludeFilenames), 
                 url: line, 
-                ...collection
             })
         }
     })
+
+    //重新确认vcType，并根据vcType更新相关信息
+    const vcType = (collection.data.length > 1 ? 1 : 0)
+    Object.assign(collection, { vcType  })
+    if(!vcType) {
+        const vcItem = collection.data.length > 0 ? collection.data[0] : {}
+        Object.assign(collection, { ...vcItem, data: [] })
+        Object.assign(collection, { platform: detectVideoPlatform(collection.url) })
+    }
+
+    return collection
 }
 
 const guessFilename = (name, defaultName, excludes) => {
@@ -669,7 +685,7 @@ export const trimArray = async (data, limit) => {
     limit = limit || 999
     if (data && data.length > limit) {
         const deleteCount = data.length - limit
-        await data.splice(limit, deleteCount)
+        await data.splice(0, deleteCount)
         return deleteCount
     }
     return 0

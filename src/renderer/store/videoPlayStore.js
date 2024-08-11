@@ -1,12 +1,23 @@
 import { defineStore } from 'pinia';
 import { PlayMode } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { Video } from '../../common/Video';
+import { trimArray } from '../../common/Utils';
 
 
+const isValueEqual = (v1, v2) => {
+    if(!v1 || !v2) return 
+    if(typeof v1 == 'string' || typeof v2 == 'string') {
+        v1 = v1.toString().trim()
+        v2 = v2.toString().trim() 
+    }
+    return v1 == v2
+}
 
 export const isVideoEquals = (v1, v2) => {
     if (!v1 || !v2) return false
-    return v1.id == v2.id && v1.platform == v2.platform
+    return v1.platform == v2.platform && 
+        (isValueEqual(v1.id, v2.id) || isValueEqual(v1.title, v2.title))
 }
 
 //RGB三色主题
@@ -16,22 +27,30 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
     state: () => ({
         playing: false,
         playMode: PlayMode.REPEAT_ALL,
-        playingIndex: -1,
-        queueVideos: [],
+        currentVideo: null, 
+        playingIndex: -1, 
         videoThemeIndex: 1,
+        dataLayoutIndex: 0, // 0 => Grid, 1 => List
+        recentVideos: [],
     }),
     getters: {
-        currentVideo() {
-            return this.playingIndex < 0 ? null : this.queueVideos[this.playingIndex]
+        currentVideoPlayingItem() {
+            if(!this.currentVideo) return 
+            const { data } = this.currentVideo
+            return data ? data[this.playingIndex] : this.currentVideo
         },
-        queueVideosSize(state) {
-            return state.queueVideos.length
+        currentVideoData() {
+            if(!this.currentVideo) return 
+            const { data } = this.currentVideo
+            return data ? data : []
+        },
+        currentVideoDataSize() {
+            if(!this.currentVideo) return -1
+            const { data } = this.currentVideo
+            return data ? data.length : -1
         },
     },
     actions: {
-        findIndex(video) {
-            return this.queueVideos.findIndex(item => (isVideoEquals(video, item)))
-        },
         isCurrentVideo(video) {
             return isVideoEquals(this.currentVideo, video)
         },
@@ -41,45 +60,45 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         setPlaying(value) {
             this.playing = value
         },
-        addVideo(video) {
-            const index = this.findIndex(video)
-            if (index == -1) this.queueVideos.push(video)
+        findItemIndex(video) {
+            const { data } = this.currentVideo
+            if(!data || data.length < 1) return -1
+            return data.findItemIndex(item => (isVideoEquals(video, item)))
         },
-        addVideos(videos) {
+         /*
+        addVideoItem(video) {
+            if(!video || !this.currentVideo) return 
+            const { data } = this.currentVideo
+            if(!data || data.length < 1) return 
+
+            const index = this.findItemIndex(video)
+            if (index == -1) this.currentVideo.data.push(video)
+        },
+        addVideoItems(videos) {
+            if(!this.currentVideo) return 
+            const { data } = this.currentVideo
+            if(!data || data.length < 1) return 
+
             if (!videos || !Array.isArray(videos) || videos.length < 1) return
-            videos.forEach(item => this.addVideo(item))
+            videos.forEach(item => this.addVideoItem(item))
         },
-        playVideoLater(video) {
-            let index = this.findIndex(video)
-            if (index == -1) {
-                index = this.playingIndex + 1
-                this.queueVideos.splice(index, 0, video)
-            } else if (index < this.playingIndex) {
-                this.queueVideos.splice(this.playingIndex + 1, 0, video)
-                this.queueVideos.splice(index, 1)
-                --this.playingIndex
-            } else if (index > this.playingIndex
-                && (index != this.playingIndex + 1)) {
-                this.queueVideos.splice(this.playingIndex + 1, 0, video)
-                this.queueVideos.splice(index + 1, 1)
-            }
-        },
-        removeVideo(video) {
-            const index = this.findIndex(video)
+        removeVideoItem(video) {
+            if(!video || !this.currentVideo) return 
+            const { data } = this.currentVideo
+            if(!data || data.length < 1) return 
+
+            const index = this.findItemIndex(video)
             if (index > -1) {
                 const isCurrent = (index == this.playingIndex)
-                this.queueVideos.splice(index, 1)
+                this.currentVideo.data.splice(index, 1)
                 if (index <= this.playingIndex) {
                     --this.playingIndex
                 }
-                const maxSize = this.queueVideosSize
-                if (maxSize < 1) {
-                    this.resetQueue()
-                    return
-                }
+                const maxSize = this.currentVideoDataSize
+                if (maxSize < 1) return
                 if (isCurrent) {
                     if (this.playing) {
-                        this.playNextVideo()
+                        this.playNextVideoItem()
                     }
                 }
             }
@@ -87,74 +106,113 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         resetQueue() {
             this.queueVideos.length = 0
             this.playingIndex = -1
-            this.__resetPlayState()
         },
-        __resetPlayState() {
+        */
+        _resetPlayState() {
             this.playing = false
-            this.currentTime = 0
-            this.progress = 0.0
+            //this.currentTime = 0
+            //this.progress = 0.0
         },
-        __validPlayingIndex() {
-            const maxSize = this.queueVideosSize
-            this.playingIndex = this.playingIndex > 0 ? this.playingIndex : 0
-            this.playingIndex = this.playingIndex < maxSize ? this.playingIndex : (maxSize - 1)
+        _validPlayingIndex(index) {
+            index = index || 0
+            const size = this.currentVideoDataSize
+            index = Math.max(index, 0)
+            index = Math.min(index, (size - 1))
+            return index
         },
         //直接播放，其他状态一概不管
         playVideoDirectly(video) {
-            this.__resetPlayState()
-            let playEventName = 'video-play'
-            if (!video.url) {
-                playEventName = 'video-changed'
-            }
+            if(!video) return
+            this._resetPlayState()
+
+            const playEventName = video.url ? 'video-play' : 'video-change'
             emitEvents(playEventName, video)
         },
         //播放，并更新当前播放列表相关状态
-        playVideoNow(video) {
-            let index = this.findIndex(video)
-            if (index < 0) {
-                index = this.playingIndex + 1
-                this.queueVideos.splice(index, 0, video)
-            }
-            this.playingIndex = index
-            this.playVideoDirectly(video)
+        playVideoNow(video, index) {
+            if(!video) return 
+
+            this.currentVideo = video
+            const isCollectionType = Video.isCollectionType(video)
+            this.playingIndex = !isCollectionType ? -1 : Math.max(index || 0, 0)
+
+            const _video = isCollectionType ? this.currentVideoPlayingItem : this.currentVideo
+            this.playVideoDirectly(_video)
+            this.traceRecentVideos()
         },
-        playVideoByIndex(index) {
-            this.playingIndex = index
-            this.__validPlayingIndex()
-            emitEvents('video-playCurrent', this.currentVideo)
+        playVideoItemByIndex(index) {
+            this.playingIndex = this._validPlayingIndex(index)
+            this.playVideoNow(this.currentVideo, this.playingIndex)
         },
-        playPrevVideo() {
-            const maxSize = this.queueVideosSize
-            if (maxSize < 1) return
+        playPrevVideoItem() {
+            const size = this.currentVideoDataSize
+            if (size < 1) return
+            let index = this.playingIndex
             switch (this.playMode) {
                 case PlayMode.REPEAT_ALL:
-                    --this.playingIndex
-                    this.playingIndex = this.playingIndex < 0 ? maxSize - 1 : this.playingIndex
+                    --index
+                    index = index < 0 ? size - 1 : index
                     break
                 case PlayMode.REPEAT_ONE:
                     break
                 case PlayMode.RANDOM:
                     break
             }
-            this.playVideoByIndex(this.playingIndex)
+            this.playVideoItemByIndex(index)
         },
-        playNextVideo() {
-            const maxSize = this.queueVideosSize
-            if (maxSize < 1) return
+        playNextVideoItem() {
+            const size = this.currentVideoDataSize
+            if (size < 1) return
+
+            let index = this.playingIndex
             switch (this.playMode) {
                 case PlayMode.REPEAT_ALL:
-                    this.playingIndex = ++this.playingIndex % maxSize
+                    index = ++index % size
                     break
                 case PlayMode.REPEAT_ONE:
                     break
                 case PlayMode.RANDOM:
-                    this.playingIndex = Math.ceil(Math.random() * maxSize)
+                    index = Math.ceil(Math.random() * size)
                     break
             }
-            this.playVideoByIndex(this.playingIndex)
+            this.playVideoItemByIndex(index)
         },
         switchVideoThemeIndex() {
             this.videoThemeIndex = ++this.videoThemeIndex % videoThemeNames.length
+        },
+        seDataLayoutIndex(index) {
+            this.dataLayoutIndex = index
+        },
+        clearCurrentVideo() {
+            this.currentVideo = null
+            this.playingIndex = -1
+            this._resetPlayState()
+        },
+        traceRecentVideos() {
+            const current = this.currentVideo
+            let index = 0
+            do {
+                index = this.recentVideos.findIndex(item => isVideoEquals(item.data, current))
+                if(index > -1) {
+                    this.recentVideos.splice(index, 1)
+                    index = 0
+                }
+            } while(index > -1)
+            
+            this.recentVideos.push({
+                data: current,
+                index: this.playingIndex
+            })
+            //TODO 暂时只保留一条记录
+            trimArray(this.recentVideos, 1)
+        },
+        getRecentLatestVideo() {
+            const size = this.recentVideos.length
+            if(size < 1) return 
+            return this.recentVideos[0]
+        },
+        clearRecentVideos() {
+            this.recentVideos.length = 0
         },
     },
     persist: {
@@ -162,7 +220,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         strategies: [
             {
                 storage: localStorage,
-                paths: ['playingIndex', 'queueVideos', 'videoThemeIndex']
+                paths: [ 'currentVideo', 'playingIndex', 'videoThemeIndex', 'dataLayoutIndex', 'recentVideos', ]
             }
         ]
     }

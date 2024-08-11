@@ -299,11 +299,13 @@ const parseAndPlayTasks = (files) => {
   if (!files || !Array.isArray(files) || files.length < 1) return
 
   try {
+    //只检查第一顺序位文件
     if(isSuppotedVideoType(files[0])) {
-      return parseVideos(files).then(videos => {
-        sendToMainRenderer('app-startup-playVideos', videos)
+      return parseVideos(files).then(video => {
+        sendToMainRenderer('app-startup-playVideos', video)
       })
     }
+    //尝试解析音频文件
     parseTracks(files).then(tracks => {
       sendToMainRenderer('app-startup-playTracks', tracks)
     })

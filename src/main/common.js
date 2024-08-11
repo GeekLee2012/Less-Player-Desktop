@@ -127,6 +127,10 @@ async function parseTracks(audioFiles) {
     return tracks
 }
 
+const detectVideoPlatform = (url) => {
+    return url && url.startsWith('http') ? 'free-video' : 'local'
+}
+
 async function createVideoFrom(file) {
     file = transformPath(file)
     const statResult = statSync(file, { throwIfNoEntry: false })
@@ -137,7 +141,7 @@ async function createVideoFrom(file) {
     const hash = MD5(file)
     return {
         id: hash,
-        platform: 'local',
+        platform: detectVideoPlatform(file),
         title: filename,
         cover: null,
         url: (FILE_PREFIX + file),
@@ -149,9 +153,8 @@ async function createVideoFrom(file) {
  * levc => Less Player Video Collection
  * @param callback 每个视频项解析成功后的回调处理函数
  */
-function parseVideoCollectionLines(lines, callback) {
+function parseVideoCollectionLines(lines) {
     if(!lines || !Array.isArray(lines) || lines.length < 1) return 
-    if(!callback || typeof callback != 'function') return 
     
     const Meta = {
         DELIMITER: '$',
@@ -168,7 +171,10 @@ function parseVideoCollectionLines(lines, callback) {
         keyName: (prop) => (`${Meta.DELIMITER}${prop}${Meta.DELIMITER}`),
     }
     const delimiter = Meta.DELIMITER
-    const collection = {}
+
+    const vcid = 'levc' + Date.now()
+    const collection = { id: vcid, platform: 'free-video', title: '', data: [] }
+
     let listBegan = false
     lines.forEach(line => {
         line = line.trim()
@@ -178,8 +184,8 @@ function parseVideoCollectionLines(lines, callback) {
             || line.startsWith('*')) return
         
         if(line.startsWith(Meta.keyName(Meta.TITLE))) {
-            const cTitle = line.split(Meta.keyName(Meta.TITLE))[1].trim()
-            Object.assign(collection, { cTitle })
+            const title = line.split(Meta.keyName(Meta.TITLE))[1].trim()
+            Object.assign(collection, { title })
         } else if(line.startsWith(Meta.keyName(Meta.COVER))
             || line.startsWith(Meta.keyName(Meta.YEAR))
             || line.startsWith(Meta.keyName(Meta.REGION))
@@ -197,29 +203,30 @@ function parseVideoCollectionLines(lines, callback) {
         } else if(!listBegan && line.startsWith(Meta.keyName(Meta.LIST))) {
             listBegan = true
         } else if(line.startsWith(delimiter) && line.endsWith(delimiter)) {
-            const cTitle = line.substring(1, line.length - 1)
-            Object.assign(collection, { cTitle })
+            const title = line.substring(1, line.length - 1)
+            Object.assign(collection, { title })
         } else if(line.includes(delimiter)) {
             const parts = line.split(delimiter)
             if(!parts || parts.length != 2) return
 
             const subtitle = parts[0].trim() 
                     || getSimpleFileName(parts[0], randomTextWithinAlphabetNums(8))
-            const url = parts[1].trim()
+            let url = parts[1].trim()
             if(!url.startsWith('http') 
                 && !url.startsWith('blob:http') 
                 && !url.startsWith('/')) {
                 return
             }
-
-            callback({ 
+            if(url.startsWith('/')) url = transformUrl(url, FILE_SCHEME)
+            
+            collection.data.push({ 
                 id: MD5(subtitle), 
-                platform: 'free-video', 
+                platform: detectVideoPlatform(url), 
                 title: subtitle, 
                 url, 
-                ...collection
             })
         } else {
+            //数据行格式：[url]
             line = transformPath(line)
             if(!line.startsWith('http') 
                 && !line.startsWith('blob:http') 
@@ -227,51 +234,83 @@ function parseVideoCollectionLines(lines, callback) {
                 return
             }  
             if(line.startsWith('/')) line = transformUrl(line, FILE_SCHEME)
-
-            //数据行格式：[url]
+            
             const id = randomTextWithinAlphabetNums(8)
-
-            callback({ 
+            collection.data.push({ 
                 id, 
-                platform: 'free-video', 
+                platform: detectVideoPlatform(line), 
                 title: getSimpleFileName(line, id), 
-                url: line, 
-                ...collection
+                url: line,
             })
         }
     })
+
+    const vcType = collection.data.length > 1 ? 1 : 0
+    Object.assign(collection, { vcType })
+    //单个视频，非合集
+    if(!vcType) {
+        const vcItem = collection.data.length > 0 ? collection.data[0] : {}
+        Object.assign(collection, { ...vcItem, data: [] })
+        Object.assign(collection, { platform: detectVideoPlatform(collection.url) })
+    }
+    //const { title } = collection
+    //if(title) Object.assign(collection, { id: MD5(title) })
+
+    return collection
 }
 
-function parseVideoCollectionFile(file, callback) {
+function parseVideoCollectionFile(file) {
     const content = readText(file)
     if (!content) return 
     const lines = content.trim().split('\n')
-    parseVideoCollectionLines(lines, callback)
+    return parseVideoCollectionLines(lines)
 }
 
-
-
+/**
+ * 解析并创建视频对象，覆盖以下场景：
+ * 1、单个视频文件 => [vcType = 0]
+ * 2、levc合集文件 => [vcType = 1]
+ * 3、多个本地视频文件 => [vcType = 1]
+ * 其中, vcType值：0 => 单文件，1 => 合集
+ */
 async function parseVideos(videoFiles) {
-    const videos = []
+    if(!videoFiles || videoFiles.length < 1) return 
+
+    //视频合集文件
+    //只检查第一顺序位，其他位置直接忽略
+    const firstFile = videoFiles[0]
+    if (firstFile.endsWith('.levc')) return parseVideoCollectionFile(firstFile)
+    
+    const id = 'levc' + Date.now()
+    const video = { id, platform: 'free-video', title: '', vcType: 0, data: [] }
+    //普通文件
     for (const file of videoFiles) {
         try {
-            if (file.endsWith('.levc')) {
-                parseVideoCollectionFile(file, video => videos.push(video))
-                return videos
-            }
-            
+            //非视频文件
             if (!isSuppotedVideoType(file)) continue
+            //非第一顺序位的合集，直接忽略
+            if (file.endsWith('.levc')) continue
             
-            const video = await createVideoFrom(file)
-            if (video) {
-                const index = videos.findIndex(item => video.url == item.url)
-                if (index == -1) videos.push(video)
-            }
+            const videoItem = await createVideoFrom(file)
+            if (!videoItem) continue
+            //去掉重复项
+            const index = video.data.findIndex(item => video.url == item.url)
+            if (index == -1) video.data.push(videoItem)
         } catch (error) {
             console.log(error)
         }
     }
-    return videos
+
+    //重新确认vcType，并根据vcType更新相关信息
+    const vcType = (video.data.length > 1 ? 1 : 0)
+    Object.assign(video, { vcType  })
+    if(!vcType) {
+        const videoItem = video.data.length > 0 ? video.data[0] : {}
+        Object.assign(video, { ...videoItem, data: [] })
+        Object.assign(video, { platform: detectVideoPlatform(video.url) })
+    }
+    
+    return video
 }
 
 function MD5(text) {

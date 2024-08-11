@@ -8,6 +8,7 @@ import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { PlayAction, PlayState } from '../../common/Constants';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+import { Video } from '../../common/Video';
 
 
 
@@ -17,9 +18,16 @@ const { dndSaveVideo, playVideo } = inject('player')
 const { hideVideoPlayingView, normalize } = useAppCommonStore()
 const { isMaxScreen, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { isSimpleLayout, isQuitVideoAfterEndedEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
-const { setPlaying, removeVideo, playNextVideo, resetQueue, switchVideoThemeIndex } = useVideoPlayStore()
-const { playingIndex, currentVideo, queueVideos, queueVideosSize, videoThemeIndex } = storeToRefs(useVideoPlayStore())
+const { switchVideoThemeIndex, playVideoNow, 
+    playNextVideoItem, seDataLayoutIndex, clearCurrentVideo, } = useVideoPlayStore()
+const { playingIndex, currentVideo, currentVideoData, 
+    currentVideoDataSize, videoThemeIndex, 
+    currentVideoPlayingItem, dataLayoutIndex, } = storeToRefs(useVideoPlayStore())
 
+
+const sidebarShow = ref(false)
+const setSideBarShow = (value) => sidebarShow.value = value
+const toggleSidebarShow = () => setSideBarShow(!sidebarShow.value)
 
 let videoNode = null
 const initVideoPlayer = () => {
@@ -51,8 +59,7 @@ const setupVideoTheme = () => {
 
 const stopVideo = (callback) => {
     if (currentVideo.value) {
-        setPlaying(false)
-        removeVideo(currentVideo.value)
+        clearCurrentVideo()
         emitEvents('video-stop')
     }
     if (callback && (typeof callback == 'function')) callback()
@@ -64,19 +71,19 @@ const quitVideo = (callback) => {
     setTimeout(() => {
         hideVideoPlayingView()
         stopVideo(callback)
-        resetQueue()
-        sidebarShow.value = false
+        setSideBarShow(false)
     }, 666)
 }
 
 const currentVideoTitle = computed(() => {
-    if(!currentVideo.value) return ''
-    const { title, cTitle } = currentVideo.value
-    return cTitle ? `${cTitle} - ${title}` : title
+    const video = currentVideo.value
+    if(!video) return ''
+    const { title } = video
+    const _title = title ? `${title} - ` : ''
+    const isCollectionType = Video.isCollectionType(video)
+    const subtitle = isCollectionType ? currentVideoPlayingItem.value.title : ''
+    return isCollectionType ? `${_title}${subtitle}` : title
 })
-
-const sidebarShow = ref(false)
-const toggleSidebarShow = () => sidebarShow.value = !sidebarShow.value
 
 const handleSpaceKeyEvents = (event) => {
     event.preventDefault()
@@ -85,21 +92,22 @@ const handleSpaceKeyEvents = (event) => {
 }
 
 const playItem = (item, index) => {
-    playVideo(item)
+    playVideo(currentVideo.value, index)
 } 
 
 const computedCollectionTitle = computed(() => {
     const video = currentVideo.value
     if(!video) return ''
-    const { cTitle } = currentVideo.value
-    const size = queueVideosSize.value
-    return cTitle && size > 1 && `${cTitle} ( ${queueVideosSize.value} )` 
+    const { title } = video
+    const _title = title || '当前播放'
+    const size = currentVideoDataSize.value
+    return _title && size > 1 && `${_title} ( ${size} )` 
 })
 
 const playNext = () => {
-    const size = queueVideosSize.value
+    const size = currentVideoDataSize.value
     const index = playingIndex.value
-    if(size > 1 && index < (size - 1)) playNextVideo()
+    if(size > 1 && index < (size - 1)) playNextVideoItem()
 }
 
 const preventFullScreen = (event) => {
@@ -116,9 +124,9 @@ const eventsRegistration = {
     'app-beforeRoute': quitVideo,
     'video-state':  ({ state, video }) => {
         if (state == PlayState.END) {
-            const size = queueVideosSize.value
+            const size = currentVideoDataSize.value
             if(isQuitVideoAfterEndedEnable.value && size <= 1) return quitVideo()
-            
+
             playNext()
         }
     },
@@ -164,12 +172,6 @@ onActivated(initVideoPlayer)
             </div>
         </div>
         <div class="center">
-            <!--
-            <video class="video-node" controls controlslist="nodownload" disablepictureinpicture="true"
-                disableRemotePlayback="true" @click.prevent="" @dblclick.prevent="handleVideoDoubleClick">
-                <source :src="currentVideoUrl" type="video/mp4">
-            </video>
-            -->
             <video class="video-node video-js vjs-theme-city"
                 controls controlslist="nodownload" preload="auto" data-setup="{}">
                 <!--
@@ -177,20 +179,6 @@ onActivated(initVideoPlayer)
                 -->
             </video>
         </div>
-        <!--
-        <div class="play-next-btn btn">
-            <svg width="15" height="15" viewBox="0 0 892.89 974.72" xmlns="http://www.w3.org/2000/svg">
-                <g id="Layer_2" data-name="Layer 2">
-                    <g id="Layer_1-2" data-name="Layer 1">
-                        <path
-                            d="M0,487.1q0-214.48.11-429c0-10.43.55-21.09,2.72-31.24C7.49,5.16,21.25-3.21,43,1.09A75.6,75.6,0,0,1,71.71,13.35Q238,129.06,404.36,244.75,551,346.75,697.57,448.84c14.66,10.26,20.1,26.31,19.71,43.82-.43,19.08-8.14,34.53-24.32,45.64Q386.35,748.89,79.78,959.58a131.15,131.15,0,0,1-19.56,11c-26.27,12-54-3.06-59-32.1A96.76,96.76,0,0,1,.06,922.05Q0,704.58,0,487.1Z" />
-                        <path
-                            d="M794,486.76q0-217.47,0-434.95c0-23.46,12.26-41.43,32.93-48.47,30-10.21,60.81,8,65.73,39.13.64,4-.13,8.26-.13,12.4q0,432.21.09,864.41c0,14-2.45,26.8-11.92,37.6a49.8,49.8,0,0,1-55.1,13.81c-19.25-7.11-31.56-25-31.57-46.47q-.12-133.49,0-267Z" />
-                    </g>
-                </g>
-            </svg>
-        </div>
-        -->
         <div class="sidebar-btn" v-show="!sidebarShow" @click="toggleSidebarShow">
             <svg width="18" height="18" viewBox="0 0 455.71 818.05" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
@@ -201,31 +189,6 @@ onActivated(initVideoPlayer)
                 </g>
             </svg>
         </div>
-        <!--
-        <div class="sidebar-btn" :class="{ 'sidebar-collapse-btn': sidebarShow }" @click="toggleSidebarShow">
-            <svg width="18" height="18" v-show="!sidebarShow" viewBox="0 0 455.71 818.05"
-                xmlns="http://www.w3.org/2000/svg">
-                <g id="Layer_2" data-name="Layer 2">
-                    <g id="Layer_1-2" data-name="Layer 1">
-                        <path
-                            d="M101.17,405.1c2.89,1.94,5,2.89,6.47,4.41Q274.29,576.23,440.9,743c13.06,13.06,18.24,28.17,12.47,46-9.58,29.54-46.92,38.79-69.57,17.37-7.87-7.44-15.35-15.29-23-23L15.22,437.44C-5,417.2-5.07,392.34,15,372.23Q193.44,193.58,371.81,14.88C380.93,5.74,391.29-.19,404.44,0c17.18.25,30.24,8,37.94,23.27,7.79,15.43,6.19,30.66-3.89,44.78a60.83,60.83,0,0,1-6.7,7.4Q269.45,238,107.05,400.5C105.77,401.78,104.18,402.76,101.17,405.1Z" />
-                    </g>
-                </g>
-            </svg>
-            <svg width="18" height="18" v-show="sidebarShow" viewBox="0 0 455.71 818.08" xmlns="http://www.w3.org/2000/svg">
-                <g id="Layer_2" data-name="Layer 2">
-                    <g id="Layer_1-2" data-name="Layer 1">
-                        <g id="Layer_2-2" data-name="Layer 2">
-                            <g id="Layer_1-2-2" data-name="Layer 1-2">
-                                <path
-                                    d="M354.54,413c-2.89-1.94-5-2.89-6.47-4.41Q181.42,241.85,14.81,75.08C1.75,62-3.43,46.91,2.34,29.08,11.92-.46,49.26-9.71,71.91,11.71c7.87,7.44,15.35,15.29,23,23L440.49,380.64c20.22,20.24,20.29,45.1.22,65.21Q262.27,624.5,83.9,803.2c-9.12,9.14-19.48,15.07-32.63,14.88-17.18-.25-30.24-8-37.94-23.27C5.54,779.38,7.14,764.15,17.22,750a61.07,61.07,0,0,1,6.7-7.4q162.34-162.55,324.74-325C349.94,416.3,351.53,415.32,354.54,413Z" />
-                            </g>
-                        </g>
-                    </g>
-                </g>
-            </svg>
-        </div>
-        -->
         <transition name="fade-ex">
             <div class="sidebar" v-show="sidebarShow">
                 <div class="sidebar-btn sidebar-collapse-btn" @click="toggleSidebarShow">
@@ -242,17 +205,23 @@ onActivated(initVideoPlayer)
                         </g>
                     </svg>
                 </div>
-                <div class="header">
-                    <div class="title" v-show="computedCollectionTitle" 
-                        v-html="computedCollectionTitle">
+                <div class="header" v-show="currentVideoDataSize > 1">
+                    <div class="title" v-html="computedCollectionTitle">
+                    </div>
+                    <div class="layout-mode">
+                        <svg width="16" height="16" @click="() => seDataLayoutIndex(0)" :class="{ active: (dataLayoutIndex == 0)}" class="grid-mode" viewBox="0 0 853.14 854.23" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M852.7,619c0,43.49.68,87-.2,130.48-.81,40.11-19.37,70.57-54.31,90.67-14.63,8.42-30.8,12.22-47.4,12.33-59.48.42-119,1-178.45-.1-46.28-.88-84.55-29.89-96.78-71.74A143.53,143.53,0,0,1,470,741.72c-.48-82-.38-164-.15-246,.06-23.15,4.31-45.4,18-64.94,20.54-29.35,48.88-45.26,84.47-45.75,59.31-.81,118.66-1.19,177.95.09,45,1,77,23.85,95,65.29,5.31,12.19,7.27,25.35,7.35,38.55.26,43.33.1,86.66.1,130Zm-84.88.29h.1c0-36.65.06-73.3,0-109.95,0-7.65-.45-15.32-1.11-22.94-.77-8.85-6.93-14.8-15.89-15.7-4.8-.48-9.63-.93-14.45-.94q-64-.21-127.94-.18c-12,0-24,.37-35.93,1.14-10,.65-15.94,7-16.71,17.1-.52,6.8-1,13.63-1,20.45q-.11,110.21,0,220.41c0,7.15.43,14.32,1,21.45.81,9.76,6.83,15.76,16.61,16.72,5.29.52,10.62.93,15.94.95,41.81.12,83.63.24,125.44.14,12.48,0,25-.47,37.43-1.22,8.5-.52,14.63-7,15.49-15.54.51-5.13,1-10.29,1-15.44Q767.9,677.48,767.82,619.26Z"/><path d="M.82,234.47C.82,191,.18,147.47,1,104c.75-39.07,18.53-69.12,52.17-89.43C68.4,5.36,85.28,1.13,102.75,1c59.65-.43,119.32-1.07,179,.14,45.91.94,83.86,29.8,96.09,71.23a142.31,142.31,0,0,1,5.69,38.86c.5,82.32.36,164.65.19,247-.06,30.22-8.39,57.45-30.33,79.51-20.08,20.19-44.56,30.49-72.64,30.75-59.15.55-118.32.94-177.46-.09-45.92-.8-83.9-29.68-97.07-71C.83,380.65.45,363.29.21,346-.06,327.3,0,308.64,0,290q0-27.75,0-55.5Zm297.89-3.38c0-35.32.06-70.64,0-105.95,0-7.32-.41-14.66-1-22-.81-9.52-6.87-15.57-16.26-16.51a149.43,149.43,0,0,0-14.94-1q-63.48-.19-126.94-.16c-12.32,0-24.64.45-36.93,1.2-8.89.54-14.93,6.87-15.84,15.73-.5,5-1,10-1,14.94q-.12,115.44-.06,230.9c0,6.14.45,12.31,1,18.44.86,9.18,6.89,15.13,16.12,16,5,.49,10,.93,14.94.95q63.22.19,126.45.16c12.31,0,24.64-.39,36.92-1.16,9.74-.61,15.72-6.95,16.52-16.76.57-7.13,1-14.3,1-21.45C298.76,306.72,298.71,268.91,298.71,231.09Z"/><path d="M661.44,297.78c-30.15,0-60.32.76-90.44-.16C516.23,295.94,473.6,255,471,200.21c-1.67-34.55-1.51-69.31.13-103.86C473.45,46.47,514,5.41,563.79,1.92,592-.07,620.37.18,648.68.07c33.48-.13,67-.17,100.45.85,43,1.32,74.66,21.56,94,60.29,6.49,13,9.21,27.22,9.42,41.58.47,31,1.18,62-.08,92.94-1.86,45.62-24.51,77.82-66.88,95.43-14.51,6-30.14,7-45.64,7.24-26.15.33-52.31.09-78.47.09Zm-.06-85v.74c16.49,0,33,.2,49.48-.06,13.81-.22,27.63-.61,41.4-1.62,8.09-.59,13.73-7.1,14.52-15.3a162.77,162.77,0,0,0,1-16.94c-.2-25.64-.37-51.28-1.07-76.91-.25-9.17-6.8-15.07-16.07-16-4.8-.48-9.63-.91-14.45-.93q-63.72-.19-127.45-.17c-12.14,0-24.31.4-36.43,1.16-9.49.59-16.2,6.86-16.32,16.31-.38,31-.24,61.93,0,92.89,0,7.17,4.33,12.3,10.73,15,3.41,1.43,7.47,1.77,11.25,1.79C605.74,212.81,633.56,212.74,661.38,212.74Z"/><path d="M192.16,852.66c-29.49,0-59,.8-88.45-.19C60.87,851,29.5,830.6,10.34,792.07a90.38,90.38,0,0,1-9.2-39.62C.86,718,0,683.44,2,649.08,4.86,601,44,561.7,91.92,556.79c15.7-1.61,31.58-1.88,47.38-2q62-.36,124,0c17.84.09,35.89.48,52.64,7.33,39.69,16.25,63.7,45.72,66.39,88.76,2.2,35.16,1.76,70.63.16,105.85-2.29,50.19-42.82,91.32-92.91,94.75-32.37,2.21-64.91,1.88-97.37,2.68C192.17,853.71,192.16,853.18,192.16,852.66Zm0-211.95V640c-16.66,0-33.33-.18-50,.06-13.48.19-27,.5-40.41,1.53-8.82.67-14.91,6.95-15,15.83q-.52,46.68,0,93.37c.11,9.17,6.79,15.1,16,16,5,.49,10,.93,14.94,1q63.74.18,127.45.14c12,0,24-.38,35.93-1.14,9.55-.61,16.22-6.8,16.35-16.28.4-31,.29-61.92.05-92.89-.06-7.54-4.62-12.81-11.57-15.39a30.84,30.84,0,0,0-10.34-1.42C247.83,640.67,220,640.71,192.2,640.71Z"/></g></g></svg>
+                        <svg width="16" height="16" @click="() => seDataLayoutIndex(1)" :class="{ active: (dataLayoutIndex == 1)}" class="list-mode" viewBox="0 0 682.31 511.62" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.27,84.78q-148.21,0-296.43,0c-20,0-35.34-10-41.87-27.24A42.42,42.42,0,0,1,41,.07C42.31,0,43.64,0,45,0H637.34C658,0,674.12,11,680.06,29c9.25,28-11.11,55.68-41.35,55.71q-134.48.15-268.94,0Z"/><path d="M341.19,426.84q148.21,0,296.43,0c20.07,0,35.29,10,41.84,27.26a42.41,42.41,0,0,1-38,57.44c-1.5.07-3,.07-4.5.07H45.56c-20.48,0-36.15-10.18-42.71-27.65-10.27-27.36,9.59-56.91,38.91-57,71-.26,142-.11,213-.12Z"/><path d="M341.15,213.42q147,0,293.92.11a62.77,62.77,0,0,1,19.61,2.76c18.5,6.26,29.77,25.53,27.27,45.07a42.23,42.23,0,0,1-38.51,36.53c-2.49.19-5,.3-7.48.3q-294.68,0-589.35.07c-13.06,0-24.83-3-34.06-12.63C.24,272.76-3.2,257.49,3.05,240.9c6.17-16.38,18.6-25.51,36.19-27.18,3.14-.29,6.32-.29,9.49-.29Z"/></g></g></svg>
                     </div>
                 </div>
-                <div class="content">
-                    <div v-show="queueVideosSize <= 1" class="slogan-item" :draggable="isDndSaveEnable" 
+                <div class="content" :class="{ 
+                        'grid': (dataLayoutIndex == 0), 
+                        'list': (dataLayoutIndex == 1)  
+                    }">
+                    <div v-show="currentVideoDataSize <= 1" class="slogan-item" :draggable="isDndSaveEnable" 
                         @dragstart="(event) => dndSaveVideo(event, currentVideo)">
                         路漫漫其修远兮，<br> 吾将上下而求索！
                     </div>
-                    <div v-show="queueVideosSize > 1" class="video-item" v-for="(item, index) in queueVideos" 
+                    <div v-show="currentVideoDataSize > 1" class="video-item" v-for="(item, index) in currentVideoData" 
                         :class="{ active: (playingIndex == index)}"
                         v-html="item.title" @click="() => playItem(item, index)">
                     </div>
@@ -358,16 +327,16 @@ onActivated(initVideoPlayer)
     stroke: #fff;
 }
 
-.video-playing-view .header .action .text-btn:hover {
+.video-playing-view > .header .action .text-btn:hover {
     color: var(--content-highlight-color);
 }
 
-.video-playing-view .header .action .text-btn:hover svg {
+.video-playing-view > .header .action .text-btn:hover svg {
     fill: var(--content-highlight-color);
     stroke: var(--content-highlight-color);
 }
 
-.video-playing-view .header svg:hover,
+.video-playing-view > .header svg:hover,
 .video-playing-view .collapse-btn:hover,
 .video-playing-view .collapse-btn:hover svg {
     fill: var(--content-highlight-color) !important;
@@ -461,17 +430,45 @@ onActivated(initVideoPlayer)
     align-items: flex-start;
     justify-content: flex-start;
 
-    padding: 15px 0px;
+    padding: 10px 0px ;
 }
 
 .video-playing-view .sidebar > .header {
     display: flex;
     color: #ccc;
-    font-size: var(--content-text-module-title3-size);
+    font-size: var(--content-text-module-subtitle-size);
     font-weight: bold;
     padding: 5px 10px;
     margin-left: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    position: relative;
+    width: calc(100% - 40px);
+}
+
+.video-playing-view .sidebar > .header .layout-mode {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    height: 100%;
+}
+
+.video-playing-view .sidebar > .header .layout-mode svg {
+    padding: 5px 8px;
+    fill: #ccc;
+    border-radius: 3px;
+    background: #666666;
+}
+
+.video-playing-view .sidebar > .header .layout-mode .grid-mode {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.video-playing-view .sidebar > .header .layout-mode .list-mode {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
 }
 
 .video-playing-view .sidebar > .content {
@@ -496,7 +493,7 @@ onActivated(initVideoPlayer)
     line-height: 36px;
 }
 
-.video-playing-view .sidebar>.content .video-item {
+.video-playing-view .sidebar>.content.grid .video-item {
     /*
     display: flex;
     align-items: center;
@@ -517,6 +514,26 @@ onActivated(initVideoPlayer)
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: center;
+    word-wrap: break-word;
+    line-break: anywhere;
+}
+
+.video-playing-view .sidebar>.content.list .video-item {
+    width: 100%;
+    height: 39px;
+    line-height: 39px;
+    padding: 3px 8px;
+    cursor: pointer;
+    margin: 0px 15px 10px 15px;
+    font-size: var(--content-text-size);
+    border-radius: 3px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: left;
     word-wrap: break-word;
     line-break: anywhere;
 }
@@ -632,6 +649,11 @@ onActivated(initVideoPlayer)
     cursor: pointer;
 }
 
+.video-playing-view.theme-city .sidebar > .header .layout-mode .active {
+    background: #bf3b4d;
+    fill: #ccc !important;
+}
+
 /* vjs-theme-sea */
 .video-playing-view .vjs-theme-sea .c-vjs-play-next-btn .vjs-icon-placeholder::before {
     font-size: 2.1em;
@@ -694,11 +716,18 @@ onActivated(initVideoPlayer)
     cursor: pointer;
 }
 
+.video-playing-view.theme-sea .sidebar > .header .layout-mode .active {
+    background: #4176bc;
+    fill: #ccc !important;
+}
+
 
 /* vjs-theme-forest */
+/*
 .video-playing-view .vjs-theme-forest .c-vjs-play-next-btn {
-   /*flex: 1;*/
+  flex: 1;
 }
+*/
 
 .video-playing-view .vjs-theme-forest .c-vjs-play-next-btn .vjs-icon-placeholder::before {
     font-size: 3em;
@@ -710,9 +739,11 @@ onActivated(initVideoPlayer)
     */
 }
 
+/*
 .video-playing-view .vjs-theme-forest .vjs-control-bar {
-    /*line-height: 50px;*/
+   line-height: 50px;
 }
+*/
 
 .video-playing-view .vjs-theme-forest .vjs-play-control {
     outline: none;
@@ -783,5 +814,10 @@ onActivated(initVideoPlayer)
 .video-playing-view.theme-forest .collapse-btn:hover svg {
     fill: #6fb04e !important;
     cursor: pointer;
+}
+
+.video-playing-view.theme-forest .sidebar > .header .layout-mode .active {
+    background: #6fb04e;
+    fill: #ccc !important;
 }
 </style>

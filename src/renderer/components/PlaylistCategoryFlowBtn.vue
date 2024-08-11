@@ -77,7 +77,7 @@ defineExpose({
 <style scoped>
 .playlist-categroy-flow-btn {
     position: fixed;
-    bottom: 75px;
+    bottom: 77px;
     right: 15px;
     z-index: 66;
 
@@ -108,7 +108,7 @@ defineExpose({
 
 /*TODO */
 .playlist-categroy-flow-btn-with-bottom {
-    bottom: 139px;
+    bottom: 141px;
     right: 20px;
 }
 </style>

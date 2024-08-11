@@ -21,6 +21,7 @@ import { United } from '../vendor/united';
 import { useVideoPlayStore } from './store/videoPlayStore';
 import { useSoundEffectStore } from './store/soundEffectStore';
 import { onEvents, emitEvents, offEvents } from '../common/EventBusWrapper';
+import { Video } from '../common/Video';
 
 
 
@@ -69,7 +70,6 @@ const { addRecentSong, addRecentRadio,
 const { playVideoNow } = useVideoPlayStore()
 const { currentVideo } = storeToRefs(useVideoPlayStore())
 const { setupSoundEffect } = useSoundEffectStore()
-const { addVideo, playNextVideo, resetQueue: resetVideoQueue } = useVideoPlayStore()
 
 
 
@@ -459,8 +459,8 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         playNextPlaylistRadioTrack(platform, id, null, traceId, playlist)
         return
     } else if (Playlist.isVideoType(playlist)) { //视频
-        const { href } = playlist
-        href ? playVideoCollection(playlist) 
+        const { detailUrl } = playlist
+        detailUrl ? playVideoCollection(playlist) 
             : playMv({ ...playlist }, '当前视频无法播放', text || '即将为您播放视频')
         return
     } else if (Playlist.isNormalType(playlist)
@@ -485,6 +485,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
 
 const playVideoCollection = async (playlist) => {
     playlist = await loadVideoCollection(playlist)
+    Object.assign(playlist,  { vcType: 1 })
     //检查数据，再次确认
     if (!playlist || !playlist.data || playlist.data.length < 1) {
         const failMsg = Playlist.isCustomType(playlist) ? '视频无法播放'
@@ -493,17 +494,8 @@ const playVideoCollection = async (playlist) => {
         showFailToast(failMsg)
         return
     }
-    const { id, platform, cover, title, data } = playlist
-    showToast('即将为您播放全部视频')
-    resetVideoQueue()
-    data.forEach(item => addVideo({
-        ...item,
-        id: md5(item.title),
-        platform, 
-        cTitle: title, 
-        cover,
-    }))
-    playNextVideo()
+    //const { id, platform, cover, title, data } = playlist
+    showToast('即将为您播放全部视频', () => playVideo(playlist))
 }
 
 //获取视频详情
@@ -946,7 +938,7 @@ const isTrackSeekable = computed(() => {
 //播放MV
 const playMv = (video, failText, text) => {
     if (!video) return
-    const { id, mv } = video
+    const { id, mv, vcType } = video
     if (!id && !mv) return
 
     failText = (failText || '当前MV无法播放')
@@ -954,7 +946,7 @@ const playMv = (video, failText, text) => {
 
     getVideoDetail(video).then(result => {
         showToast(text, () => {
-            playVideo({ ...video, ...result }, failText)
+            playVideo({ ...video, ...result, vcType: (vcType || 0) }, -1, failText)
             traceRecentTrack(video)
         }, 666)
     }, async error => {
@@ -963,7 +955,7 @@ const playMv = (video, failText, text) => {
             if (result && !isBlank(result.url)) {
                 const { url } = result
                 return showToast(text, () => {
-                    playVideo({ ...video, url }, failText)
+                    playVideo({ ...video, url, vcType: (vcType || 0) }, -1, failText)
                     traceRecentTrack(video)
                 }, 666)
             }
@@ -973,9 +965,11 @@ const playMv = (video, failText, text) => {
     })
 }
 
-//video => { title, cover, url }
-const playVideo = async (video, failText) => {
+//video => { title, type, cover, url }
+const playVideo = async (video, index, failText) => {
     try {
+        if(!video) return
+        
         //是否需要暂停音频播放并挂起
         const playing = isPlaying()
         const pending = (playing && isPauseOnPlayingVideoEnable.value)
@@ -984,9 +978,10 @@ const playVideo = async (video, failText) => {
 
         //开始播放视频
         if (!videoPlayingViewShow.value) toggleVideoPlayingView()
-        playVideoNow(video)
+        playVideoNow(video, index)
         setupCurrentMediaSession()
     } catch (error) {
+        if(isDevEnv()) console.log(error)
         showFailToast(failText || '当前视频无法播放')
     }
 }
@@ -1334,22 +1329,20 @@ const handleStartupPlay = () => {
     onIpcRendererEvents({
         'app-startup-playTracks': (event, tracks) => {
             if (!tracks || !Array.isArray(tracks) || tracks.length < 1) return
-            //addAndPlayTracks(tracks, false, '即将为您播放歌曲')
             //紧跟在当前歌曲后面播放，不扰乱当前播放列表进度
             tracks.forEach(track => playTrackLater(track))
-            playTrack(tracks[0])
-            showToast('即将为您播放歌曲')
-            ipcRendererSend('app-startup-playDone', tracks)
+            showToast('即将为您播放歌曲', () => {
+                playTrack(tracks[0])
+                ipcRendererSend('app-startup-playDone', tracks)
+            }, 888)
         },
-        'app-startup-playVideos': (event, videos) => {
-            if (!videos || !Array.isArray(videos) || videos.length < 1) return
-            
-            resetVideoQueue()
-            videos.forEach(addVideo)
-            playNextVideo()
-
-            showToast(videos.length > 1 ? '即将为您播放视频合集' : '即将为您播放视频')
-            ipcRendererSend('app-startup-playDone', videos)
+        'app-startup-playVideos': (event, video) => {
+            if (!video) return
+            const tailText = Video.isCollectionType(video) ? '合集' : ''
+            showToast(`即将为您播放视频${tailText}`, () => {
+                playVideo(video)
+                ipcRendererSend('app-startup-playDone', video)
+            }, 888)
         },
     })
     ipcRendererSend('app-startup-playReady')
@@ -1561,7 +1554,7 @@ const eventsRegistration = {
         playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)
     },
     'video-stop': resumeTrackPendingPlay,
-    'video-playCurrent': playVideo,
+    //'video-playCurrent': playVideo,
     'plugins-accessResult-addPlatform': ({ code }) => {
         const pendingTrack = pendingBootstrapTrack.value
         if (!pendingTrack) return
