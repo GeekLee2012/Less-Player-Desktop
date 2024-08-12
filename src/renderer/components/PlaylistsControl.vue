@@ -114,7 +114,8 @@ const computedCenterTitleStyle = computed(() => {
             <template v-slot="{ item, index }">
                 <ImageTextTile @click="visitItem(item)" 
                     :platform="item.platform" :color="item.color"
-                    :cover="transformUrl(item.cover, FILE_SCHEME)" :coverFit="item.coverFit"
+                    :cover="transformUrl(item.cover, FILE_SCHEME)" 
+                    :coverFit="item.coverFit"
                     :title="item.title" :subtitle="getSubtitle(item)" 
                     :videoStyle="videoStyle" :centerTitleStyle="computedCenterTitleStyle(item)"
                     :singleLineTitleStyle="singleLineTitleStyle"

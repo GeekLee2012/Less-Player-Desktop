@@ -114,7 +114,7 @@ const removeAll = async () => {
     if (freeRadios.value.length < 1) return
 
     if (isShowDialogBeforeClearFreeFM.value) {
-        const ok = await showConfirm({ msg: '确定要清空全部电台吗？' })
+        const ok = await showConfirm('确定要清空全部电台吗？')
         if (!ok) return
     }
 

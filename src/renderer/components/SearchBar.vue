@@ -38,7 +38,7 @@ const clear = () => {
 
 <template>
     <div class="search-bar" :class="{ 'mini-search-bar': miniMode }" @keydown.enter="submitSearch" @keydown.stop="">
-        <div class="search-btn" @click="visitSearchView">
+        <div class="search-btn" @click="submitSearch">
             <svg :width="miniMode ? 20 : 15" :height="miniMode ? 20 : 15" viewBox="0 0 726.24 726.5"
                 xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">

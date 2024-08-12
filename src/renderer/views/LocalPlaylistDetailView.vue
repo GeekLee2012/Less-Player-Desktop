@@ -168,7 +168,7 @@ const removeAll = async () => {
     if (!detail.data || detail.data.length < 1) return
 
     if (isShowDialogBeforeBatchDelete.value) {
-        const ok = await showConfirm({ msg: '确定要清空歌单吗？' })
+        const ok = await showConfirm('确定要清空歌单吗？')
         if (!ok) return
     }
 

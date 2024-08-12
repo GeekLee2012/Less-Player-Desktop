@@ -251,7 +251,7 @@ const disablePlugins = () => {
 const removePlugins = async () => {
     if (checkedData.length < 1) return
     if (isShowDialogBeforeDeletePlugins.value) {
-        const ok = await showConfirm({ msg: '确定要删除插件吗？' })
+        const ok = await showConfirm('确定要删除插件吗？')
         if(!ok) return
     }
     

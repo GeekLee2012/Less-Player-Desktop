@@ -85,6 +85,7 @@
 * 常见问题：[FAQ.md](FAQ.md)  
 * 更新日志：[CHANGELOG.md](CHANGELOG.md) 
 * 待办事项：[TODO.md](TODO.md)  
+* LeVC格式：[LeVC.md](LeVC.md)  
   
 ### 其他  
 * <b>`再次郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>

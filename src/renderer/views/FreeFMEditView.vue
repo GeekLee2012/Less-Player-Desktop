@@ -12,26 +12,29 @@ import { useFreeFMStore } from '../store/freeFMStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { coverDefault, ipcRendererInvoke, isSupportedImage } from '../../common/Utils';
 import { FreeFM } from '../../vendor/freefm';
+import { storeToRefs } from 'pinia';
+import { useSettingStore } from '../store/settingStore';
 
 
-
-const { backward } = inject('appRoute')
 
 const props = defineProps({
     id: String
 })
 
+const { backward } = inject('appRoute')
+const { showConfirm } = inject('apiExpose')
+
 const { showToast, showFailToast } = useAppCommonStore()
+const { isShowDialogBeforeDeleteFreeFM } = storeToRefs(useSettingStore())
+const { addFreeRadio, updateFreeRadio, getFreeRadio, removeFreeRadio } = useFreeFMStore()
+const { removeFavoriteRadio } = useUserProfileStore()
+
 const detail = reactive({ title: null, url: null, streamType: 0, tags: null, about: null, cover: null, coverFit: 0 })
 const setStreamType = (value) => Object.assign(detail, { streamType: value })
 const titleInvalid = ref(false)
 const urlInvalid = ref(false)
 const isActionDisabled = ref(false)
 const setActionDisabled = (value) => isActionDisabled.value = value
-
-
-const { addFreeRadio, updateFreeRadio, getFreeRadio, removeFreeRadio } = useFreeFMStore()
-const { removeFavoriteRadio } = useUserProfileStore()
 
 const loadRadio = () => {
     if (!props.id) return
@@ -81,7 +84,11 @@ const submit = () => {
     }
 }
 
-const remove = () => {
+const remove = async () => {
+    let ok = true
+    if (isShowDialogBeforeDeleteFreeFM.value) ok = await showConfirm('确定要删除电台吗？')
+    if (!ok) return
+
     const success = removeFreeRadio({ id: props.id })
     removeFavoriteRadio(props.id, FreeFM.CODE)
     if (success) {

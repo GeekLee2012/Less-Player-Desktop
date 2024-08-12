@@ -49,7 +49,7 @@ const { currentTrack } = storeToRefs(usePlayStore())
 let isConfirmDialogShowing = ref(false)
 const setConfirmDialogShowing = (value) => isConfirmDialogShowing.value = value
 
-const showConfirm = async ({ title, msg }) => {
+const showConfirm = async (msg, title) => {
   if (isConfirmDialogShowing.value) return false
   setConfirmDialogShowing(true)
   hideAllCtxMenus(false)

@@ -39,7 +39,7 @@ const visitRepository = async (url) => {
     const _url = transformUrl(url)
     const msg = `即将打开浏览器，前往插件官网：${_url}。\n确定要继续吗？`
     if (isShowDialogBeforeVisitPluginRepository.value) {
-        const ok = await showConfirm({ msg })
+        const ok = await showConfirm(msg)
         if(!ok) return 
     }
     visitLink(_url)

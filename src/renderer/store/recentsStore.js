@@ -131,7 +131,7 @@ export const useRecentsStore = defineStore('recents', {
             })
         },
         addRecentRadio(track) {
-            const { id, platform, title, cover, type, } = track
+            const { id, platform, title, cover, type, coverFit } = track
             const { isFreeFM } = usePlatformStore()
             const compareFn = (item, e) => {
                 if (item.data && item.data.length > 0
@@ -141,7 +141,7 @@ export const useRecentsStore = defineStore('recents', {
                 return false
             }
             this.uniqueInsertFirst(this.recents.radios, {
-                id, platform, title, cover, type, data: [track]
+                id, platform, title, cover, type, coverFit, data: [track]
             }, isFreeFM(platform) ? compareFn : null)
             trimArray(this.recents.radios, 366).then(count => {
                 if (count) refreshUserHome()

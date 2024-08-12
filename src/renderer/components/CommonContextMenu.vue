@@ -181,7 +181,7 @@ const visitBatchCustom = () => {
 //删除创建的歌单
 const removeCustom = async () => {
     if (isShowDialogBeforeDeleteCustomPlaylist.value) {
-        const ok = await showConfirm({ msg: '确定要删除歌单吗？' })
+        const ok = await showConfirm('确定要删除歌单吗？')
         if(!ok) return
     }
 

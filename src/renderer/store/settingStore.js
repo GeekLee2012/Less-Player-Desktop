@@ -313,6 +313,8 @@ export const useSettingStore = defineStore('setting', {
             clearLocalMusics: true,
             //清空自由FM
             clearFreeFM: true,
+            //删除自由FM电台（单个）
+            deleteFreeFM: true,
             //访问插件官网链接
             visitPluginRepository: true,
             //删除插件
@@ -643,6 +645,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeClearFreeFM() {
             return this.dialog.clearFreeFM
+        },
+        isShowDialogBeforeDeleteFreeFM() {
+            return this.dialog.deleteFreeFM
         },
         isShowDialogBeforeVisitPluginRepository() {
             return this.dialog.visitPluginRepository
@@ -1258,6 +1263,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeClearFreeFM() {
             this.dialog.clearFreeFM = !this.dialog.clearFreeFM
+        },
+        toggleShowDialogBeforeDeleteFreeFM() {
+            this.dialog.deleteFreeFM = !this.dialog.deleteFreeFM
         },
         toggleShowDialogBeforeVisitPluginRepository() {
             this.dialog.visitPluginRepository = !this.dialog.visitPluginRepository

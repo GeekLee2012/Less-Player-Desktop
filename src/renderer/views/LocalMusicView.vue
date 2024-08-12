@@ -110,7 +110,7 @@ const removeAll = async () => {
     if (localPlaylists.value.length < 1) return
 
     if (isShowDialogBeforeClearLocalMusics.value) {
-        const ok = await showConfirm({ msg: '确定要清空本地歌曲吗？' })
+        const ok = await showConfirm('确定要清空本地歌曲吗？')
         if (!ok) return
     }
     

@@ -112,6 +112,7 @@ const { setThemeIndex,
     toggleShowDialogBeforeResetSetting,
     toggleShowDialogBeforeClearLocalMusics,
     toggleShowDialogBeforeClearFreeFM,
+    toggleShowDialogBeforeDeleteFreeFM,
     toggleShowDialogBeforeVisitPluginRepository,
     toggleShowDialogBeforeDeletePlugins,
     toggleCheckPreReleaseVersion,
@@ -147,9 +148,8 @@ const switchLayout = (index) => {
 
 /* 数据 - 重置 */
 const resetData = async () => {
-    const ok = await showConfirm({
-        msg: '数据重置，将会清空我的主页、当前播放等全部数据，并恢复默认设置。但不会清空本地歌曲、自由FM、插件等数据。  确定要继续吗？'
-    })
+    const ok = await showConfirm('数据重置，将会清空我的主页、当前播放等全部数据，并恢复默认设置。' 
+        + '但不会清空本地歌曲、自由FM、插件等数据。  确定要继续吗？')
     if (!ok) return
 
     const relativeStores = {
@@ -173,7 +173,7 @@ const resetData = async () => {
 /*
 const resetSettingData = async () => {
     if (isShowDialogBeforeResetSetting.value) {
-        const ok = await showConfirm({ msg: '确定要恢复默认设置吗？' })
+        const ok = await showConfirm('确定要恢复默认设置吗？')
         if (!ok) return
     }
     const settingStore = useSettingStore()
@@ -1182,6 +1182,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="cate-subtitle">清空自由FM：</span>
                         <ToggleControl @click="toggleShowDialogBeforeClearFreeFM" :value="dialog.clearFreeFM">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">删除自由FM电台：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeDeleteFreeFM" :value="dialog.deleteFreeFM">
                         </ToggleControl>
                     </div>
                     <div>

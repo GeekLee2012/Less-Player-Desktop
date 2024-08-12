@@ -193,7 +193,7 @@ const batchRemoveAll = async () => {
     //if(index == 0) clearFavorites()
     if (index == 3) {
         if (isShowDialogBeforeClearRecents.value) {
-            const ok = await showConfirm({ msg: '确定要清空最近播放吗？' })
+            const ok = await showConfirm('确定要清空最近播放吗？')
             if(!ok) return 
         }
         clearRecents()

@@ -547,7 +547,7 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId, pla
         }
         if (needReset && queueTracksSize.value > 0) {
             let ok = true
-            if (isShowDialogBeforeClearPlaybackQueue.value) ok = await showConfirm({ msg: '播放电台歌单，需清空当前播放。确定要继续吗？' })
+            if (isShowDialogBeforeClearPlaybackQueue.value) ok = await showConfirm('播放电台歌单，需清空当前播放。确定要继续吗？')
             if (!ok) return
             resetQueue()
         }

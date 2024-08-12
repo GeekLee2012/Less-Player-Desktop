@@ -24,6 +24,8 @@ const { backward, forward,
   visitVideoCreate, visitRecents,
   visitPlugins, } = inject('appRoute')
 const { quickSearch } = inject('player')
+const { showConfirm } = inject('apiExpose')
+
 
 const currentAppLayout = shallowRef(null)
 
@@ -160,7 +162,7 @@ const cleanupSetting = () => {
 // 恢复默认设置
 const resetSetting = async () => {
   let ok = true
-  if (isShowDialogBeforeResetSetting.value) ok = await showConfirm({ msg: '确定要恢复默认设置吗？' })
+  if (isShowDialogBeforeResetSetting.value) ok = await showConfirm('确定要恢复默认设置吗？')
   if (!ok) return
   const settingStore = useSettingStore()
   settingStore.$reset()
@@ -506,7 +508,6 @@ const logFontData = async () => {
 
 //通用API
 provide('appCommon', {
-  //showConfirm,
   showContextMenu,
   searchAction,
   searchDefault,
