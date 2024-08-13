@@ -382,7 +382,7 @@ onUnmounted(() => offEvents(eventsRegistration))
         <div class="header" v-show="isHeaderVisible()">
             <div class="audio-title">
                 <span class="mv" v-show="Track.hasMv(track)">
-                    <svg @click="playMv(track)" width="23" height="18" viewBox="0 0 1024 853.52"
+                    <svg @click="playMv(track)" width="24" height="20" viewBox="0 0 1024 853.52"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
