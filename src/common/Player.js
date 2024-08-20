@@ -493,6 +493,6 @@ class Player {
     }
 }
 
-export function createPlayer() {
+export function createAudioPlayer() {
     return Player.create()
 }

@@ -437,6 +437,7 @@ const checkForUpdates = async () => {
     }
     setLastRelease(currentVersion >= lastVersion.value)
     checkingUpdates.value = false
+    return !isLastRelease.value
 }
 
 const formatVersion = (version) => {
@@ -548,12 +549,12 @@ const eventsRegistration = {
 onMounted(() => {
     onEvents(eventsRegistration)
     checkForUpdates()
+    getDisplayFrequency()
 })
 
 onActivated(() => {
     updateSessionCacheSize()
     updateBlackHole(Math.random() * 100000000)
-    getDisplayFrequency()
 })
 
 onUnmounted(() => offEvents(eventsRegistration))
@@ -843,7 +844,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                             <div class="select-btn" @click="selectDir">选择</div>
                         </div>
                     </div>
-                    <div class="tip-text">提示：应用启动时，会自动检测屏幕刷新率，不可修改；正常值为正整数，仅供参考
+                    <div class="tip-text">提示：每次打开设置页时，自动检测屏幕刷新率，不可修改；正常值为正整数，仅供参考
                     </div>
                     <div>
                         <span class="cate-subtitle">屏幕刷新率（系统检测值）：</span>
@@ -1401,7 +1402,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div :class="{ last: hasNewRelease }" v-show="hasNewRelease">
                         <div class="new-version-wrap">
                             <span class="newflag content-text-highlight">最新版本</span>
-                            <div class="release-url-link spacing">
+                            <div class="release-url-link">
                                 <span v-show="githubHasNewRelease">
                                     <svg width="17" height="17" @click.prevent="visitLink(githubReleasesUrl)"
                                         viewBox="0 0 896.57 896.13" xmlns="http://www.w3.org/2000/svg">
@@ -1416,7 +1417,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                                         v-html="formatVersion(githubLastVersion)">
                                     </a>
                                 </span>
-                                <span :class="{ spacing: githubHasNewRelease }" v-show="giteeHasNewRelease">
+                                <span :class="{ spacing5: githubHasNewRelease }" v-show="giteeHasNewRelease">
                                     <svg width="15" height="15" @click.prevent="visitLink(giteeReleasesUrl)"
                                         viewBox="0 0 49.87 49.82" xmlns="http://www.w3.org/2000/svg">
                                         <g id="Layer_2" data-name="Layer 2">
@@ -1791,6 +1792,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-left: 28px;
 }
 
+#setting-view .center .spacing5 {
+    margin-left: 35px;
+}
+
 #setting-view .link {
     color: var(--content-text-color);
 }
@@ -1897,7 +1902,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding: 3px 6px;
     font-size: var(--content-text-tip-text-size);
     font-weight: bold;
-    margin-right: 5px;
+    margin-right: 18px;
 }
 
 #setting-view .about .content span {

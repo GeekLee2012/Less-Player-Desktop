@@ -3,8 +3,9 @@ import { ref, watch, inject, computed, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
 import { ActivateState } from '../../common/Constants';
-import { transformUrl } from '../../common/Utils';
+import { transformUrl, coverDefault, escapeHtml } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+import ToggleControl from '../components/ToggleControl.vue';
 
 
 
@@ -13,27 +14,13 @@ const props = defineProps({
     data: Object, //Track
     deleteFn: Function,
     dataType: Number,
-    checkbox: Boolean,
-    checked: Boolean,
-    ignoreCheckAllEvent: Boolean,
-    checkChangedFn: Function,
+    toggleAction: Function,
 })
 
 const { showContextMenu,  } = inject('appCommon')
 const { showConfirm, visitLink } = inject('apiExpose')
 
 const { isShowDialogBeforeVisitPluginRepository } = storeToRefs(useSettingStore())
-
-const isChecked = ref(props.checked)
-const toggleCheck = () => {
-    const { checkbox, checkChangedFn, checked } = props
-    if (!checkbox) return
-    setChecked(!isChecked.value)
-    if (checkChangedFn) checkChangedFn(isChecked.value, { index: props.index, ...props.data })
-}
-
-const setChecked = (value) => isChecked.value = value
-
 
 const visitRepository = async (url) => {
     const _url = transformUrl(url)
@@ -46,81 +33,51 @@ const visitRepository = async (url) => {
 }
 
 const onContextMenu = (event) => {
-    if (props.checkbox) return
+   
 }
 
-const computedStateText = computed(() => {
-    const { data } = props
-    if (!data) return
-    const { state } = data
-    if (!state) return
-    if (state == ActivateState.ACTIVATED) return 'ON'
-    else if (state == ActivateState.INVALID) return 'ERROR'
+const hasIcon = computed(() => {
+    return data => (data.icon)
 })
-
-
 
 /* 生命周期、监听 */
-watch(() => props.checked, (nv, ov) => {
-    if (props.ignoreCheckAllEvent) return
-    setChecked(nv)
-})
-
-const eventsRegistration = {
-    'plugin-checkbox-refresh': () => setChecked(false), 
-}
-
-onMounted(() => onEvents(eventsRegistration))
-onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div class="plugin-item" @click="toggleCheck" @contextmenu="onContextMenu">
-        <div v-show="checkbox" class="checkbox">
-            <svg v-show="!isChecked" width="16" height="16" viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
-                <g id="Layer_2" data-name="Layer 2">
-                    <g id="Layer_1-2" data-name="Layer 1">
-                        <path
-                            d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
-                    </g>
-                </g>
-            </svg>
-            <svg v-show="isChecked" class="checked-svg" width="16" height="16" viewBox="0 0 767.89 767.94"
-                xmlns="http://www.w3.org/2000/svg">
-                <g id="Layer_2" data-name="Layer 2">
-                    <g id="Layer_1-2" data-name="Layer 1">
-                        <path
-                            d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
-                    </g>
-                </g>
-            </svg>
+    <div class="plugin-item" @click="" @contextmenu="onContextMenu">
+        <div class="icon-wrap"> 
+            <img :src="coverDefault(data.icon)" v-show="hasIcon(data)"/>
+            <svg width="32" height="32" v-show="!hasIcon(data)" viewBox="0 0 703.66 832.24" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M.05,480.55q0-137.49,0-275c0-37.8,24-67.63,60.93-75.29a82.19,82.19,0,0,1,16.36-1.49q56.25-.18,112.49.08c4.68,0,6.19-1.62,7.15-5.82C211.38,60,263.25,11.93,327.63,1.87c81.68-12.76,161.09,41.05,178.86,121.31.95,4.32,2.64,5.76,7.23,5.73q57-.3,114,0c20.65.13,38.75,7.18,53.55,21.94s21.89,32.56,22,53c.32,48.82.17,97.65.09,146.48,0,19.8-13.86,33.51-33.69,33.77-46.9.6-86.78,36.28-93.35,82.69A96.56,96.56,0,0,0,654.93,575.4c7,1.29,14.27,1,21.31,2.11,16.07,2.59,27.08,15.18,27.14,31.55.19,50,.55,100-.07,150-.52,41.31-34.31,73.09-76.37,73.1q-229.25.06-458.47.05c-31.17,0-62.33.13-93.5,0C40.59,832,11.25,809.38,2.7,776.25A84.07,84.07,0,0,1,.12,755.53Q-.13,618,0,480.55ZM351.27,768.66v.06H626.76c9.5,0,13.3-3.81,13.3-13.34,0-37.33-.13-74.66.17-112,0-5.51-1.72-7.17-6.81-8.35-80.16-18.57-133.49-98.22-120.2-179.2,10.6-64.63,57.71-115.32,121.18-130.07,4.75-1.11,5.86-3.08,5.83-7.68-.18-37.16-.09-74.33-.09-111.5,0-11.32-3.22-14.52-14.56-14.52q-71.74,0-143.49,0c-17.82,0-30.5-10.54-33.36-28-1.13-6.87-.72-14-2-20.82C436.7,89,384.48,54.5,330.49,66.25c-42.26,9.19-74.6,48.36-75,90.87-.22,21.8-13.56,35-35.47,35l-142,0c-11.24,0-14.51,3.3-14.51,14.62q0,273.75,0,547.5c0,11,3.36,14.4,14.24,14.4Z"/></g></g></svg>
         </div>
-        <div v-show="!checkbox" class="sqno">{{ index + 1 }}</div>
-        <div class="stateflag textflag" v-show="data.state" :class="{ warning: (data.state == ActivateState.INVALID) }">
-            <span v-html="computedStateText"></span>
-        </div>
-        <div class="repository" v-show="data.repository" @click.stop="visitRepository(data.repository)"
-            :class="{ spacing1: (data.state) }">
-            <svg width="16" height="16" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                <g id="Layer_2" data-name="Layer 2">
-                    <g id="Capa_1" data-name="Capa 1">
-                        <path
-                            d="M29.3,63.47l-4.05,4a9.05,9.05,0,0,1-12.72,0,8.8,8.8,0,0,1,0-12.51l14.9-14.79c3.08-3.06,8.89-7.57,13.13-3.37a5,5,0,1,0,7-7c-7.19-7.14-17.83-5.82-27.1,3.37L5.54,47.94a18.72,18.72,0,0,0,0,26.59,19,19,0,0,0,26.7,0l4-4a5,5,0,1,0-7-7ZM74.45,6C66.72-1.63,55.92-2,48.76,5.06l-5,5a5,5,0,0,0,7,7l5-5c3.71-3.69,8.57-2.16,11.73,1a8.79,8.79,0,0,1,0,12.52L51.58,41.37c-7.27,7.21-10.68,3.83-12.14,2.38a5,5,0,0,0-7,7,15.61,15.61,0,0,0,11.14,5c4.89,0,10-2.46,15-7.34l15.9-15.77A18.71,18.71,0,0,0,74.45,6Z" />
-                    </g>
-                </g>
-            </svg>
-        </div>
-        <div class="title-wrap" :class="{ spacing1: (data.state || data.repository) }">
-            <span v-html="data.alias || data.name"></span>
-        </div>
-        <div class="author spacing">
-            <span v-html="data.author"></span>
-        </div>
-        <div class="version spacing">
-            <span v-html="data.version"></span>
-        </div>
-        <div class="about spacing">
-            <span v-html="data.about"></span>
+        <div class="center">
+            <div class="title-action-wrap">
+                <div class="title-wrap">
+                    <span v-html="data.alias || data.name"></span>
+                </div>
+                <div class="action" @click.stop="">
+                    <ToggleControl @click="toggleAction" :value="data.state == 1"></ToggleControl>
+                    <div class="delete-btn spacing1" @click="deleteFn">
+                        <svg width="18" height="18" viewBox="0 0 256 256" data-name="Layer 1"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z"
+                                transform="translate(-833 -413)" />
+                            <path
+                                d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z"
+                                transform="translate(-833 -413)" />
+                            <path
+                                d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z"
+                                transform="translate(-833 -413)" />
+                            <path
+                                d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z"
+                                transform="translate(-833 -413)" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="about">
+                <span v-html="escapeHtml(data.about || '暂无简介')"></span>
+            </div>
         </div>
     </div>
 </template>
@@ -131,36 +88,69 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: flex;
     flex-direction: row;
     flex: 1;
-    margin-bottom: 3px;
+    margin-top: 3px;
+    margin-bottom: 15px;
     border-radius: 3px;
+    box-shadow: 0px 0px 3px var(--border-popovers-border-color);
 }
 
 .plugin-item:hover {
     /*border-radius: 3px;*/
     background: var(--content-list-item-hover-bg-color);
+    cursor: pointer;
 }
 
 .plugin-item .hidden {
     display: none !important;
 }
 
-.plugin-item>div {
-    line-height: 59px;
+.plugin-item > div {
+    height: 80px;
     vertical-align: middle;
     /*font-size: var(--content-text-size);*/
 }
 
 .plugin-item .spacing {
-    margin-left: 10px !important;
+    margin-left: 18px !important;
 }
 
 .plugin-item .spacing1 {
-    margin-left: 3px !important;
+    margin-left: 23px !important;
+}
+
+.plugin-item .icon-wrap {
+    width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.plugin-item .icon-wrap img {
+    width: 45px;
+    height: 45px;
+    border-radius: 3px;
+}
+
+.plugin-item .icon-wrap svg {
+    fill: var(--button-icon-btn-color) !important;
+    fill: var(--content-subtitle-text-color) !important;
+    transform: rotateY(180deg);
+    border-radius: 3px;
+}
+
+.plugin-item .center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.plugin-item .center .title-action-wrap {
+    width: 100%;
+    position: relative;
 }
 
 .plugin-item .title-wrap,
-.plugin-item .version,
-.plugin-item .author,
 .plugin-item .about {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -172,26 +162,12 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-break: anywhere;
 }
 
-.plugin-item .sqno,
-.plugin-item .checkbox {
-    width: 35px;
-    padding-left: 8px;
-    text-align: left;
-}
-
-.plugin-item .checkbox {
-    width: 30px;
-}
-
-.plugin-item .checkbox svg {
-    margin-bottom: -3px;
-}
 
 .plugin-item .title-wrap {
-    position: relative;
     text-align: left;
-    margin-top: 1px;
-    flex: 1;
+    margin-top: 13px;
+    margin-bottom: 6px;
+    max-width: calc(100% - 168px);
 }
 
 .plugin-item .title-wrap span {
@@ -199,48 +175,28 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-break: anywhere;
 }
 
-.plugin-item .repository {
-    width: 25px;
-    cursor: pointer;
+.plugin-item .title-action-wrap .action {
+    position: absolute;
+    right: 20px;
+    top: 13px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-right: 2px;
-    margin-left: 1px;
+    cursor: default;
 }
 
-.plugin-item .version {
-    width: 88px;
-    text-align: center;
+.plugin-item .title-action-wrap .action .delete-btn {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
 }
 
-.plugin-item .author {
-    width: 15%;
-    text-align: center;
+.plugin-item .title-action-wrap .action .delete-btn:hover svg {
+    fill: var(--content-highlight-color);
 }
 
-.plugin-item .about {
-    width: 30%;
-}
-
-.plugin-item .textflag span {
-    background: var(--content-text-highlight-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent !important;
-
-    border-radius: 3px;
-    border: 1.3px solid var(--content-highlight-color);
-    padding: 1px 3px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.plugin-item .textflag.warning span {
-    background: #fc605c;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent !important;
-    border-color: #fc605c;
+.plugin-item .center .about {
+    width: calc(100% - 10px);
+    color: var(--content-subtitle-text-color);
+    font-size: var(--content-text-tip-text-size);
 }
 </style>

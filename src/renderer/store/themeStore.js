@@ -103,7 +103,8 @@ const PRESET_THEMES = [{
     dark: true
 }]
 */
-const CUSTOM_DEMO_ID_PREFIX = 'CUSTDEMO'
+const THEME_ID_PREFIX = 'theme-'
+const CUSTOM_DEMO_ID = 'CUSTDEMO'
 
 export const useThemeStore = defineStore('themes', {
     state: () => ({
@@ -113,6 +114,10 @@ export const useThemeStore = defineStore('themes', {
 
     },
     actions: {
+        newThemeId(id) {
+            const _id = id || randomTextWithinAlphabetNums(8)
+            return THEME_ID_PREFIX + _id
+        },
         getTheme(type, index) {
             index = index > 0 ? index : 0
             const allThemes = [presetThemes, this.customThemes]
@@ -123,21 +128,24 @@ export const useThemeStore = defineStore('themes', {
         },
         getCustomThemes() {
             const demoTheme = presetCustomThemes[0]
-            let index = this.customThemes.findIndex(item => (item.id == demoTheme.id))
+            let index = this.customThemes.findIndex(item => (this.isDemoTheme(item)))
             index = Math.max(0, index)
             this.customThemes.splice(index, 1, demoTheme)
             return this.customThemes
         },
+        isDemoTheme(theme) {
+            if (!theme) return false
+            const { id } = theme
+            return id === CUSTOM_DEMO_ID 
+                || id === (THEME_ID_PREFIX + CUSTOM_DEMO_ID)
+        },
         saveCustomTheme(theme) {
             if (!theme) return
-            let index = -1
-            if (theme.id) {
-                if (theme.id === CUSTOM_DEMO_ID_PREFIX) return
-                index = this.customThemes.findIndex(item => item.id == theme.id)
-            }
+            if (this.isDemoTheme(theme)) return
+            const index = this.customThemes.findIndex(item => item.id == theme.id)
             const now = Date.now()
             if (index < 0) {
-                const id = randomTextWithinAlphabetNums(8)
+                const id = this.newThemeId()
                 Object.assign(theme, { id, created: now, updated: now })
                 this.customThemes.push(theme)
             } else {
@@ -145,10 +153,13 @@ export const useThemeStore = defineStore('themes', {
                 Object.assign(_theme, { ...theme, updated: now })
             }
         },
-        removeCustomTheme({ id }) {
-            if (id === CUSTOM_DEMO_ID_PREFIX) return
+        removeCustomTheme(theme) {
+            if(!theme) return false
+            if (this.isDemoTheme(theme)) return false
+            const { id } = theme
             const index = this.customThemes.findIndex(item => item.id === id)
-            if (index > -1) this.customThemes.splice(index, 1)
+            if (index > -1) return this.customThemes.splice(index, 1)
+            return false
         }
     },
     persist: {

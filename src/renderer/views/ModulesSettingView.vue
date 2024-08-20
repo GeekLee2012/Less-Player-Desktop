@@ -1,9 +1,9 @@
 <script setup>
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
 import { usePlatformStore } from '../store/platformStore';
 import ToggleControl from '../components/ToggleControl.vue';
-import { computed } from 'vue';
 
 
 
@@ -26,6 +26,8 @@ const searchPlatforms = computed(() => {
     return platforms.value('search').filter(item => (item.code != 'local'))
 })
 
+const activeTab = ref(0)
+const setActiveTab = (value) => activeTab.value = value
 </script>
 
 <template>
@@ -36,52 +38,46 @@ const searchPlatforms = computed(() => {
             </div>
         </div>
         <div class="center">
-            <div class="row">
-                <span class="cate-name">分类歌单</span>
-                <div class="content" v-show="playlistsPlatforms.length > 0">
-                    <div v-for="(item, index) in playlistsPlatforms"
-                        :class="{ last: index == playlistsPlatforms.length - 1 }">
-                        <span class="cate-subtitle">{{ item.name }}：</span>
-                        <ToggleControl @click="toggleModulesPlaylistsOff(item.code)"
-                            :value="!isModulesPlaylistsOff(item.code)">
-                        </ToggleControl>
-                    </div>
-                </div>
-                <div class="content" v-show="playlistsPlatforms.length < 1">
-                    <div class="tip-text last">还没有歌单平台，空空如也 ~</div>
+            <div class="tab-nav">
+                <span class="tab" v-for="(tab, index) in ['分类歌单', '万千歌手', '相约电波', '搜索']"
+                    :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
+                    @click="setActiveTab(index)" v-html="tab">
+                </span>
+            </div>
+            <div class="content" v-show="activeTab == 0 && playlistsPlatforms.length > 0">
+                <div v-for="(item, index) in playlistsPlatforms" class="toggle-item" 
+                    @click="toggleModulesPlaylistsOff(item.code)">
+                    <span class="cate-subtitle" v-html="item.name"></span>
+                    <ToggleControl @click="toggleModulesPlaylistsOff(item.code)"
+                        :value="!isModulesPlaylistsOff(item.code)">
+                    </ToggleControl>
                 </div>
             </div>
-            <div class="row">
-                <span class="cate-name">万千歌手</span>
-                <div class="content">
-                    <div v-for="(item, index) in artistsPlatforms" :class="{ last: index == artistsPlatforms.length - 1 }">
-                        <span class="cate-subtitle">{{ item.name }}：</span>
-                        <ToggleControl @click="toggleModulesArtistsOff(item.code)" :value="!isModulesArtistsOff(item.code)">
-                        </ToggleControl>
-                    </div>
+
+            <div class="content" v-show="activeTab == 1">
+                <div v-for="(item, index) in artistsPlatforms" class="toggle-item"
+                    @click="toggleModulesArtistsOff(item.code)">
+                    <span class="cate-subtitle" v-html="item.name"></span>
+                    <ToggleControl @click="toggleModulesArtistsOff(item.code)" :value="!isModulesArtistsOff(item.code)">
+                    </ToggleControl>
                 </div>
             </div>
-            <div class="row">
-                <span class="cate-name">相约电波</span>
-                <div class="content">
-                    <div v-for="(item, index) in radiosPlatforms" :class="{ last: index == radiosPlatforms.length - 1 }">
-                        <span class="cate-subtitle">{{ item.name }}：</span>
-                        <ToggleControl @click="toggleModulesRadiosOff(item.code)" :value="!isModulesRadiosOff(item.code)">
-                        </ToggleControl>
-                    </div>
+
+            <div class="content" v-show="activeTab == 2">
+                <div v-for="(item, index) in radiosPlatforms" class="toggle-item"
+                    @click="toggleModulesRadiosOff(item.code)">
+                    <span class="cate-subtitle" v-html="item.name"></span>
+                    <ToggleControl @click="toggleModulesRadiosOff(item.code)" :value="!isModulesRadiosOff(item.code)">
+                    </ToggleControl>
                 </div>
             </div>
-            <div class="row last-row">
-                <span class="cate-name">搜索</span>
-                <div class="content" v-show="searchPlatforms.length > 0">
-                    <div v-for="(item, index) in searchPlatforms" :class="{ last: index == searchPlatforms.length - 1 }">
-                        <span class="cate-subtitle">{{ item.name }}：</span>
-                        <ToggleControl @click="toggleModulesSearchOff(item.code)" :value="!isModulesSearchOff(item.code)">
-                        </ToggleControl>
-                    </div>
-                </div>
-                <div class="content" v-show="searchPlatforms.length < 1">
-                    <div class="tip-text last">还没有搜索平台，空空如也 ~</div>
+
+            <div class="content" v-show="activeTab == 3 && searchPlatforms.length > 0">
+                <div v-for="(item, index) in searchPlatforms" class="toggle-item"
+                    @click="toggleModulesSearchOff(item.code)">
+                    <span class="cate-subtitle" v-html="item.name"></span>
+                    <ToggleControl @click="toggleModulesSearchOff(item.code)" :value="!isModulesSearchOff(item.code)">
+                    </ToggleControl>
                 </div>
             </div>
         </div>
@@ -94,8 +90,7 @@ const searchPlatforms = computed(() => {
     display: flex;
     flex-direction: column;
     text-align: left;
-    overflow: scroll;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 #modules-setting-view .spacing {
@@ -109,7 +104,7 @@ const searchPlatforms = computed(() => {
     /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
     border-bottom: 2px solid transparent;
 }
 
@@ -118,51 +113,60 @@ const searchPlatforms = computed(() => {
 }
 
 #modules-setting-view .center {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overflow-x: hidden;
+}
+
+#modules-setting-view .center .tab-nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 36px;
+    margin-left: 35px;
+    margin-right: 35px;
+    border-bottom: 1px solid transparent;
+}
+
+#modules-setting-view .center .tab {
+    font-size: var(--content-text-tab-title-size);
+    margin-right: 36px;
+    padding-bottom: 5px;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+}
+
+#modules-setting-view .center .tab-nav .active {
+    font-weight: bold;
+    border-color: var(--content-highlight-color);
+}
+
+#modules-setting-view .center .content {
     padding-left: 35px;
     padding-right: 35px;
-    padding-bottom: 30px;
-}
-
-#modules-setting-view .center .row {
-    display: flex;
-    flex-direction: row;
-    padding-top: 35px;
-    padding-bottom: 35px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-#modules-setting-view .center .last-row {
-    border-color: transparent;
-}
-
-#modules-setting-view .center .row>.cate-name {
-    font-size: var(--content-text-tab-title-size);
-    margin-left: 10px;
-    width: 128px;
-}
-
-#modules-setting-view .content,
-#modules-setting-view .content>div {
+    padding-top: 8px;
     flex: 1;
+    overflow: scroll;
+    overflow-x: hidden;
 }
 
-#modules-setting-view .content>div {
-    margin-bottom: 30px;
+
+#modules-setting-view .center .content .toggle-item {
     display: flex;
     flex-direction: row;
     align-items: center;
+    border-radius: 3px;
+    height: 50px;
+    padding: 3px 18px;
+    margin-bottom: 15px;
+    box-shadow: 0px 0px 3px var(--border-popovers-border-color);
+    cursor: pointer;
 }
 
-#modules-setting-view .content>div .cate-subtitle {
-    width: 188px;
+#modules-setting-view .center .content .toggle-item .cate-subtitle {
+    width: calc(100% - 60px);
     margin-right: 25px;
-}
-
-#modules-setting-view .content .last {
-    margin-bottom: 0px;
-}
-
-#modules-setting-view .center .last-row {
-    border-color: transparent;
 }
 </style>

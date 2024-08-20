@@ -168,7 +168,7 @@ const routes = [
                 component: FreeVideoEditView
             },
             {  //设置 - 插件管理（音源等）
-                path: '/setting/plugins',
+                path: '/plugins',
                 component: PluginsView
             },
             {  //插件管理 - 插件详情

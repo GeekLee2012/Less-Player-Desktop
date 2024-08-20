@@ -269,7 +269,7 @@ const setPluginsViewListSize = () => {
     const { clientHeight: headerClientHeight } = headerEl
     const padding = isDefaultClassicLayout.value ? 20 : 36
     //header 136, margin 15, action 36
-    const height = (clientHeight - headerClientHeight - 36 - padding)
+    const height = (clientHeight - headerClientHeight - padding)
     if (el) el.style.height = `${height}px`
 }
 
@@ -369,7 +369,7 @@ const resizeViewItems = (event) => {
     //自适应批量操作页面列表大小
     setBatchViewListSize()
     //插件管理
-    setPluginsViewListSize()
+    //setPluginsViewListSize()
     //主题页
     setThemeViewItemsSize()
     //分页组件

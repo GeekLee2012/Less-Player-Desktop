@@ -1,7 +1,7 @@
 {
     "presetThemes": [
         {
-            "id": "default-dark",
+            "id": "theme-default-dark",
             "name": "默认",
             "previewBg": "#48484a",
             "appBackground": {
@@ -71,7 +71,7 @@
             }
         },
         {
-            "id": "default-white",
+            "id": "theme-default-white",
             "name": "默认2",
             "previewBg": "#ffffff",
             "appBackground": {
@@ -143,7 +143,7 @@
             }
         },
         {
-            "id": "light",
+            "id": "theme-light",
             "name": "浅色",
             "previewBg": "#e7e1e3",
             "appBackground": {
@@ -215,7 +215,7 @@
             }
         },
         {
-            "id": "pink",
+            "id": "theme-pink",
             "name": "粉色",
             "previewBg": "#e667af",
             "appBackground": {
@@ -287,7 +287,7 @@
             }
         },
         {
-            "id": "pink2",
+            "id": "theme-pink2",
             "name": "粉色2",
             "previewBg": "#fc589c",
             "appBackground": {
@@ -357,7 +357,7 @@
             }
         },
         {
-            "id": "pink-red",
+            "id": "theme-pink-red",
             "name": "粉红",
             "previewBg": "#fc7688",
             "appBackground": {
@@ -427,7 +427,7 @@
             }
         },
         {
-            "id": "red",
+            "id": "theme-red",
             "name": "红色",
             "previewBg": "#f9453f",
             "appBackground": {
@@ -499,7 +499,7 @@
             }
         },
         {
-            "id": "red2",
+            "id": "theme-red2",
             "name": "红色2",
             "previewBg": "#d53943",
             "appBackground": {
@@ -569,7 +569,7 @@
             }
         },
         {
-            "id": "green",
+            "id": "theme-green",
             "name": "绿色",
             "previewBg": "#cfdec3",
             "appBackground": {
@@ -639,7 +639,7 @@
             }
         },
         {
-            "id": "green2",
+            "id": "theme-green2",
             "name": "绿色2",
             "previewBg": "#054a34",
             "appBackground": {
@@ -709,7 +709,7 @@
             }
         },
         {
-            "id": "blue",
+            "id": "theme-blue",
             "name": "蓝色",
             "previewBg": "#2783fb",
             "appBackground": {
@@ -781,7 +781,7 @@
             }
         },
         {
-            "id": "blue2",
+            "id": "theme-blue2",
             "name": "蓝色2",
             "previewBg": "#a8c5cb",
             "appBackground": {
@@ -853,7 +853,7 @@
             }
         },
         {
-            "id": "yellow",
+            "id": "theme-yellow",
             "name": "黄色",
             "previewBg": "#ffb300",
             "appBackground": {
@@ -925,7 +925,7 @@
             }
         },
         {
-            "id": "yellow2",
+            "id": "theme-yellow2",
             "name": "黄色2",
             "previewBg": "#fc9b29",
             "appBackground": {
@@ -995,7 +995,7 @@
             }
         },
         {
-            "id": "purple",
+            "id": "theme-purple",
             "name": "紫色",
             "previewBg": "#9c27b0",
             "appBackground": {
@@ -1067,7 +1067,7 @@
             }
         },
         {
-            "id": "purple2",
+            "id": "theme-purple2",
             "name": "紫色2",
             "previewBg": "#4d3e72",
             "appBackground": {
@@ -1139,7 +1139,7 @@
     ],
     "presetCustomThemes": [
         {
-            "id": "CUSTDEMO",
+            "id": "theme-CUSTDEMO",
             "name": "模板主题",
             "desc": null,
             "author": null,

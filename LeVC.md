@@ -46,7 +46,7 @@ $电视剧$
 
 2、重复metadata项的示例
 ```text
-$title$我是电视剧$
+$title$我是电视剧
 $我是动漫，我会覆盖上一行$
 第01集$https://abc.xyz/01
 第02集$https://abc.xyz/02

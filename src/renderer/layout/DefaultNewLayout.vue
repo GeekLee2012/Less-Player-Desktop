@@ -28,8 +28,8 @@ import ClassicMainBottom from './ClassicMainBottom.vue';
 }
 
 .default-new-layout > .center {
-    display: flex;
     flex: 1;
+    display: flex;
     overflow: auto;
 }
 
@@ -49,10 +49,7 @@ import ClassicMainBottom from './ClassicMainBottom.vue';
 }
 */
 
-.default-new-layout > .center #main-left .bottom {
-    display: none;
-}
-
+.default-new-layout > .center #main-left .bottom,
 .default-new-layout > .center #default-main-bottom {
     display: none;
 }
@@ -87,12 +84,4 @@ import ClassicMainBottom from './ClassicMainBottom.vue';
     width: 50px !important;
     height: 50px !important;
 }
-
-
-/*
-.default-new-layout > .bottom .classic-main-bottom .play-ctl .play-btn svg {
-    width: 66;
-    height: 66;
-}
-*/
 </style>

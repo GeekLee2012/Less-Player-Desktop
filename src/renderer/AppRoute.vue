@@ -188,6 +188,7 @@ const highlightPlatform = (to) => {
     const { path } = to
     if(path.startsWith('/setting')
         || path.startsWith('/themes')
+        || path.startsWith('/plugins')
         || path.startsWith('/data')) {
         return
     } 
@@ -420,10 +421,7 @@ provide('appRoute', {
     },
     visitRadio,
     visitPlugins: () => {
-        return visitCommonRoute('/setting/plugins')
-    },
-    visitPlugins: () => {
-        return visitCommonRoute('/setting/plugins')
+        return visitCommonRoute('/plugins')
     },
     visitPluginDetail: (id) => {
         return visitCommonRoute(`/plugins/plugin/${id}`)

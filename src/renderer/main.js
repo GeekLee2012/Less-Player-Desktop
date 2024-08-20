@@ -10,7 +10,7 @@ import { router } from './route/router';
 import VueLazyLoad from 'vue3-lazyload';
 //import lazyPlugin from 'vue3-lazy';
 //播放器
-import { createPlayer } from '../common/Player';
+import { createAudioPlayer } from '../common/Player';
 import { createRadioPlayer } from '../common/RadioPlayer';
 import { createVideoPlayer } from '../common/VideoPlayer';
 
@@ -36,7 +36,7 @@ import { coverDefault } from '../common/Utils';
 const pinia = createPinia().use(piniaPersist)
 
 //播放器：创建
-createPlayer()
+createAudioPlayer()
 createRadioPlayer()
 createVideoPlayer()
 
