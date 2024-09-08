@@ -65,7 +65,7 @@ const ceateTheme = () => editTheme()
             <div class="title">主题</div>
             <div class="tab-nav">
                 <span v-for="(item, index) in ['推荐', '自定义']" class="tab"
-                    :class="{ active: currentTabIndex == index, 'content-text-highlight': currentTabIndex == index, spacing: index > 0 }"
+                    :class="{ active: currentTabIndex == index, 'content-text-highlight': currentTabIndex == index, spacing: index < 0 }"
                     @click="switchTab(index)" v-html="item">
                 </span>
             </div>
@@ -185,7 +185,7 @@ const ceateTheme = () => editTheme()
 
 
 #themes-view .header .title {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
     padding-top: 20px;
     /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
@@ -205,7 +205,8 @@ const ceateTheme = () => editTheme()
     font-size: var(--content-text-tab-title-size);
     /*padding: 8px 15px;*/
     padding-bottom: 5px;
-    margin-right: 36px;
+    /*margin-right: 36px;*/
+    margin-right: 56px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }
@@ -221,7 +222,7 @@ const ceateTheme = () => editTheme()
     flex: 1;
     margin-left: 35px;
     margin-right: 35px;
-    padding-bottom: 56px;
+    padding-bottom: 20px;
 }
 
 #themes-view .center .row {
@@ -242,7 +243,8 @@ const ceateTheme = () => editTheme()
 
 #themes-view .center .row .content .item {
     margin-right: 25px;
-    margin-top: 20px;
+    margin-top: 5px;
+    margin-bottom: 13px;
 }
 
 #themes-view .center .row .content .preview {

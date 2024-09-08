@@ -311,7 +311,7 @@ const switchTab = () => {
     }
     updateTipText()
     //TODO
-    emitEvents("batchView-show")
+    //emitEvents("batchView-show")
 }
 
 const visitTab = (index) => {
@@ -853,7 +853,7 @@ watch([currentPlatformCode], () => refreshContent())
 
 <style>
 #batch-action-view {
-    padding: 20px 0px 15px 0px;
+    padding: 20px 0px 0px 0px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -942,25 +942,26 @@ watch([currentPlatformCode], () => refreshContent())
 #batch-action-view .center {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
-#batch-action-view .center>.action {
+#batch-action-view .center > .action {
     display: flex;
     flex-direction: row;
     position: relative;
     margin-bottom: 10px;
 }
 
-#batch-action-view .center>.action svg {
+#batch-action-view .center > .action svg {
     fill: var(--button-icon-text-btn-text-color);
 }
 
-#batch-action-view .center>.action .to-right {
+#batch-action-view .center > .action .to-right {
     position: absolute;
     right: 33px;
 }
 
-#batch-action-view .center>.action .checkbox {
+#batch-action-view .center > .action .checkbox {
     flex-direction: row;
     margin-left: 8px;
     margin-right: 15px;
@@ -979,18 +980,18 @@ watch([currentPlatformCode], () => refreshContent())
 }
 */
 
-#batch-action-view .center>.action .checkbox>span {
+#batch-action-view .center > .action .checkbox > span {
     text-align: left;
     margin: 0px 20px;
     /*width: 65px;*/
     min-width: 80px;
 }
 
-#batch-action-view .center>.action .checkall span {
+#batch-action-view .center > .action .checkall span {
     margin-left: 13px;
 }
 
-#batch-action-view .center>.content {
+#batch-action-view .center > .content {
     overflow: scroll;
     overflow-x: hidden;
 }

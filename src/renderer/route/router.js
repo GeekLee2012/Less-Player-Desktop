@@ -202,10 +202,7 @@ export const onBeforeResolve = (callback) => {
 
 export const currentRoute = () => (router.currentRoute.value)
 
-export const currentRoutePath = () => {
-    const { path } = currentRoute()
-    return path
-}
+export const currentRoutePath = () => (currentRoute().path || '')
 
 export const backward = () => router.back()
 

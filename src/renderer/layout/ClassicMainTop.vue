@@ -36,7 +36,7 @@ const toggleRadioMode = () => {
         <SearchBar :submitAction="searchAction" :placeholder="searchBarPlaceholder">
         </SearchBar>
         <div class="action">
-            <div id="radio-playlist-btn" @click="toggleRadioMode" v-show="isRadioModeEnable && isRadioModeShortcutEnable">
+            <div class="radio-playlist-btn btn spacing" @click="toggleRadioMode" v-show="isRadioModeEnable && isRadioModeShortcutEnable">
                 <svg class="radio-btn" v-show="!isRadioMode" width="21" height="18.8" viewBox="0 0 939.22 940.41"
                     xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
@@ -66,7 +66,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="module-btn" @click="visitModulesSetting" v-show="isModulesSettingShortcutEnable">
+            <div class="module-btn btn spacing" @click="visitModulesSetting" v-show="isModulesSettingShortcutEnable">
                 <svg width="19" height="19" viewBox="0 0 853.51 926.34" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -76,7 +76,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="plugin-btn" @click="visitPlugins" v-show="isPluginsSettingShortcutEnable">
+            <div class="plugin-btn btn spacing" @click="visitPlugins" v-show="isPluginsSettingShortcutEnable">
                 <svg width="19" height="19" viewBox="0 0 918.34 919" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -88,7 +88,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="theme-btn" @click="visitThemes" v-show="isThemesShortcutEnable">
+            <div class="theme-btn btn spacing" @click="visitThemes" v-show="isThemesShortcutEnable">
                 <svg width="19" height="19" viewBox="0 -10 940.66 926.15" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -98,7 +98,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="userhome-btn" @click="() => visitUserHome()" v-show="isUserHomeShortcutEnable">
+            <div class="userhome-btn btn spacing" @click="() => visitUserHome()" v-show="isUserHomeShortcutEnable">
                 <svg width="21" height="21" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -108,7 +108,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="setting-btn" @click="() => visitSetting()" :class="{ 'last-btn': !isSimpleLayoutShortcutEnable }">
+            <div class="setting-btn btn spacing" @click="() => visitSetting()" :class="{ 'last-btn': !isSimpleLayoutShortcutEnable }">
                 <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -118,7 +118,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div id="switch-layout-btn" @click="switchToSimpleLayout" v-show="isSimpleLayoutShortcutEnable">
+            <div class="switch-layout-btn btn" @click="switchToSimpleLayout" v-show="isSimpleLayoutShortcutEnable">
                 <svg width="20" height="18" viewBox="0 0 1019 1019" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -146,18 +146,22 @@ const toggleRadioMode = () => {
     padding-left: 33px;
 }
 
-.classic-main-top .navigator {
-    margin-top: 3px;
-    margin-right: 15px;
+.classic-main-top .spacing {
+    margin-right: 18px;
 }
 
 .classic-main-top .action {
     position: absolute;
+    right: 33px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    right: 33px;
+}
+
+.classic-main-top .action .btn {
+    display: flex;
+    align-items: center;
 }
 
 .classic-main-top svg {
@@ -171,38 +175,24 @@ const toggleRadioMode = () => {
     fill: var(--content-highlight-color);
 }
 
-.classic-main-top #radio-playlist-btn .radio-btn {
+.classic-main-top .radio-playlist-btn .radio-btn {
     transform: translateY(0.5px) scale(0.973);
 }
 
-.classic-main-top #radio-playlist-btn .playlist-btn {
+.classic-main-top .radio-playlist-btn .playlist-btn {
     transform: translateY(0.5px);
 }
 
-.classic-main-top #radio-playlist-btn svg,
-.classic-main-top #plugin-btn svg,
-.classic-main-top #module-btn svg,
-.classic-main-top #theme-btn svg,
-.classic-main-top #userhome-btn svg,
-.classic-main-top #setting-btn svg,
-.classic-main-top #switch-layout-btn svg {
-    margin-top: 4px;
-}
-
-.classic-main-top #radio-playlist-btn,
-.classic-main-top #plugin-btn svg,
-.classic-main-top #module-btn svg,
-.classic-main-top #theme-btn,
-.classic-main-top #userhome-btn,
-.classic-main-top #setting-btn {
-    margin-right: 18px;
+.classic-main-top .win-ctl-wrap {
+    display: flex;
+    align-items: center;
 }
 
 .classic-main-top .last-btn {
     margin-right: 0px !important;
 }
 
-.classic-main-top #module-btn {
+.classic-main-top .module-btn {
     transform: translateY(1px);
 }
 </style>

@@ -24,7 +24,11 @@ class VideoPlayer {
                 'video-play': value => singleton.playVideo(value),
                 'video-togglePlay': () => singleton.togglePlay(),
                 'video-setVolume': value => singleton.volume(value),
-                'video-stop': () => singleton.setVideo(null),
+                'video-stop': (retPos) => {
+                    if(retPos) singleton.currentPosition()
+                    singleton.setVideo(null)
+                },
+                'video-pos': (value) => singleton.currentPosition(value),
             })
         }
         return singleton
@@ -73,6 +77,13 @@ class VideoPlayer {
         }
     }
 
+    currentPosition(value) {
+        if(!this.delegatePlayer) return
+        const readOnly = (typeof value == 'undefined' || value <  0)
+        readOnly ? this.notify('video-currentTime', this.delegatePlayer.currentTime())
+            : this.delegatePlayer.currentTime(value)
+    }
+
     setVideoNode(node) {
         if(this.videoNode == node) return
 
@@ -85,8 +96,12 @@ class VideoPlayer {
         if (!this.videoNode) return
         if (!this.video || !this.video.url) return this.setPlayState(PlayState.PLAY_ERROR)
         
-        const { url: src } = this.video
-        if(this.videoChanged) this.delegatePlayer.src(src)
+        const { url: src, pos } = this.video
+        if(this.videoChanged) {
+            this.delegatePlayer.src(src)
+            const _pos = Math.max(pos || -1, 0)
+            this.currentPosition(_pos)
+        }
         
         this.delegatePlayer.play()
         this.videoChanged = false

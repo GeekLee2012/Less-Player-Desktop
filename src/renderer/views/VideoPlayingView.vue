@@ -19,7 +19,7 @@ const { hideVideoPlayingView, normalize } = useAppCommonStore()
 const { isMaxScreen, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { isSimpleLayout, isQuitVideoAfterEndedEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { switchVideoThemeIndex, playVideoNow, 
-    playNextVideoItem, seDataLayoutIndex, clearCurrentVideo, } = useVideoPlayStore()
+    playNextVideoItem, seDataLayoutIndex, clearCurrentVideo, updateRecentLatestVideo } = useVideoPlayStore()
 const { playingIndex, currentVideo, currentVideoData, 
     currentVideoDataSize, videoThemeIndex, 
     currentVideoPlayingItem, dataLayoutIndex, } = storeToRefs(useVideoPlayStore())
@@ -60,7 +60,7 @@ const setupVideoTheme = () => {
 const stopVideo = (callback) => {
     if (currentVideo.value) {
         clearCurrentVideo()
-        emitEvents('video-stop')
+        emitEvents('video-stop', true)
     }
     if (callback && (typeof callback == 'function')) callback()
 }
@@ -137,7 +137,8 @@ const eventsRegistration = {
             const el = document.querySelector('.vjs-playback-rate .vjs-playback-rate-value')
             el && data && (el.textContent = `${data}x`)
         }
-    }
+    },
+    'video-currentTime': updateRecentLatestVideo,
 }
 onMounted(() => onEvents(eventsRegistration))
 onUnmounted(() => offEvents(eventsRegistration))

@@ -538,8 +538,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   height: 100%;
   z-index: 99;
   box-shadow: var(--box-shadow);
-  border-top-right-radius: var(--border-app-border-radius);
-  border-bottom-right-radius: var(--border-app-border-radius);
+  border-top-right-radius: var(--border-app-win-border-radius);
+  border-bottom-right-radius: var(--border-app-win-border-radius);
 }
 
 #playing-view,
@@ -552,7 +552,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 99;
   background-position: center;
   background-size: cover;
-  border-radius: var(--border-app-border-radius);
+  border-radius: var(--border-app-win-border-radius);
 }
 
 #playing-theme-list-view {
@@ -565,8 +565,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   height: 100%;
   z-index: 100;
   box-shadow: var(--box-shadow);
-  border-top-right-radius: var(--border-app-border-radius);
-  border-bottom-right-radius: var(--border-app-border-radius);
+  border-top-right-radius: var(--border-app-win-border-radius);
+  border-bottom-right-radius: var(--border-app-win-border-radius);
 }
 
 #custom-playing-theme-edit-view {

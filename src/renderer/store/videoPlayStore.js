@@ -32,6 +32,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         videoThemeIndex: 1,
         dataLayoutIndex: 0, // 0 => Grid, 1 => List
         recentVideos: [],
+        savePlayingPos: false, //是否保存播放进度，即是否从头开始看
     }),
     getters: {
         currentVideoPlayingItem() {
@@ -49,6 +50,9 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             const { data } = this.currentVideo
             return data ? data.length : -1
         },
+        isPlayFromBeginning() {
+            return !this.savePlayingPos
+        }
     },
     actions: {
         isCurrentVideo(video) {
@@ -129,7 +133,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             emitEvents(playEventName, video)
         },
         //播放，并更新当前播放列表相关状态
-        playVideoNow(video, index) {
+        playVideoNow(video, index, pos) {
             if(!video) return 
 
             this.currentVideo = video
@@ -137,6 +141,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             this.playingIndex = !isCollectionType ? -1 : Math.max(index || 0, 0)
 
             const _video = isCollectionType ? this.currentVideoPlayingItem : this.currentVideo
+            Object.assign(_video, { pos })
             this.playVideoDirectly(_video)
             this.traceRecentVideos()
         },
@@ -214,13 +219,22 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         clearRecentVideos() {
             this.recentVideos.length = 0
         },
+        toggleSavePlayingPos() {
+            this.savePlayingPos = !this.savePlayingPos
+        },
+        updateRecentLatestVideo(pos) {
+            if(!this.savePlayingPos) return 
+            const video = this.getRecentLatestVideo()
+            if(!video) return 
+            Object.assign(video, { pos })
+        },
     },
     persist: {
         enabled: true,
         strategies: [
             {
                 storage: localStorage,
-                paths: [ 'currentVideo', 'playingIndex', 'videoThemeIndex', 'dataLayoutIndex', 'recentVideos', ]
+                paths: [ 'currentVideo', 'playingIndex', 'videoThemeIndex', 'dataLayoutIndex', 'recentVideos', 'savePlayingPos' ]
             }
         ]
     }

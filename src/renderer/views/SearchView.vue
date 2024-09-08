@@ -216,7 +216,7 @@ watch(currentPlatformIndex, (nv, ov) => {
     const _index = getTabIndex(code)
     if (_index == -1) return resetTabView()
     if (_index != index) setActiveTab(_index, code)
-
+    
     loadTab()
 })
 watch(activeTab, (nv, ov) => visitTab(nv))
@@ -268,7 +268,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
                     v-for="(tab, index) in tabs" @click="visitTab(index, tab.code)" v-html="tab.name">
                 </span>
-                <span class="tab-tip content-text-highlight" v-html="tabTipText" v-show="tabs.length > 0"></span>
+                <span class="tab-tip content-text-highlight" v-html="tabTipText" v-show="tabs.length > 0">
+                </span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
                 :isAlbumArtistSutitle="true" :loading="isLoading" :videoStyle="videoStyle">

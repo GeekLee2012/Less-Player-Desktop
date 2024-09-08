@@ -537,6 +537,21 @@ const getDisplayFrequency = async () => {
     setDisplayFrequency(displayFrequency)
 }
 
+/*
+const anchorTo = (subSelector) => {
+    const el = document.querySelector(`#setting-view .${subSelector}`)
+    if(el) el.scrollIntoView()
+}
+
+const navbarShow = ref(false)
+const setNavbarShow = (value) => navbarShow.value = value
+
+const settingViewRef = ref(null)
+const onScroll = (event) => {
+    if(!settingViewRef.value) return 
+    setNavbarShow(settingViewRef.value.scrollTop >= 202)
+}
+*/
 
 /* 生命周期、监听 */
 //watch(isCheckPreReleaseVersion, checkForUpdates)
@@ -561,7 +576,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div id="setting-view">
+    <div id="setting-view" ref="settingViewRef" @scroll="onScroll">
         <div class="header">
             <div class="title">设置</div>
         </div>
@@ -874,7 +889,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </div>
                 </div>
             </div>
-            <div class="track row">
+            <div class="track localTrack row">
                 <span class="cate-name">本地歌曲</span>
                 <div class="content">
                     <div>
@@ -1525,14 +1540,24 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 */
 
+#setting-view .navbar {
+    position: fixed;
+    top: 68px;
+    z-index: 1;
+    height: 50px;
+    width: 100%;
+    padding-left: 35px;
+    padding-right: 35px;
+    background: var(--app-bg-color);
+}
+
 #setting-view .title {
     margin-left: 35px;
     margin-right: 35px;
-    padding-top: 20px;
+    margin-bottom: 10px;
     /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
-    padding-bottom: 20px;
     border-bottom: 2px solid transparent;
 }
 

@@ -489,6 +489,8 @@ const registryGlobalListeners = () => {
         if(isDevEnv) console.log('[FetchBuffer - Error]', error)
       }
     })
+  }).on('app-setProgressBar', (event, data) => {
+    if(isWindowAccessible(mainWin)) mainWin.setProgressBar(data)
   })
 
   ipcMain.handle('app-maxScreenState', (event, ...args) => {
@@ -1590,6 +1592,7 @@ const overrideRequestHeaders = (details) => {
 const createLyricWindow = () => {
   // Create the browser window.
   const win = new BrowserWindow({
+    //parent: mainWin,
     width: 450,
     height: 150,
     minWidth: 100,

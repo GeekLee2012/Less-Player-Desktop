@@ -147,7 +147,7 @@ const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
     margin-left: 15px;
 }
 
-.default-main-top .play-nav>.action {
+.default-main-top .play-nav > .action {
     /*width: 39.33%;*/
     display: flex;
     align-items: center;
@@ -157,18 +157,18 @@ const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
     */
 }
 
-.default-main-top .play-nav>.action .spacing {
+.default-main-top .play-nav > .action .spacing {
     margin-left: 15px;
 }
 
 
-.default-main-top .play-nav>.action.not-windows-style-win-ctl {
+.default-main-top .play-nav > .action.not-windows-style-win-ctl {
     /*margin-right: 39px;*/
     padding-right: 33px;
     width: var(--i-width);
 }
 
-.default-main-top .play-nav>.action .btn {
+.default-main-top .play-nav > .action .btn {
     display: flex;
     align-items: center;
 }

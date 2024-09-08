@@ -56,7 +56,7 @@ const hasIcon = computed(() => {
                 </div>
                 <div class="action" @click.stop="">
                     <ToggleControl @click="toggleAction" :value="data.state == 1"></ToggleControl>
-                    <div class="delete-btn spacing1" @click="deleteFn">
+                    <div class="btn delete-btn spacing1" @click="deleteFn">
                         <svg width="18" height="18" viewBox="0 0 256 256" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -188,10 +188,6 @@ const hasIcon = computed(() => {
     display: flex;
     align-items: center;
     cursor: pointer;
-}
-
-.plugin-item .title-action-wrap .action .delete-btn:hover svg {
-    fill: var(--content-highlight-color);
 }
 
 .plugin-item .center .about {

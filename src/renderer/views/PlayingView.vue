@@ -50,34 +50,6 @@ const hasBackgroudCover = ref(false)
 //const bgEffectStyle = reactive({})
 const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
 
-const extractRgbColor = (rgb) => {
-    let _rgb = toLowerCaseTrimString(rgb)
-    if(!_rgb || !_rgb.startsWith('rgb')) return null
-    const index = _rgb.indexOf('(')
-    _rgb = _rgb.substring(index + 1, _rgb.length - 1)
-    const parts = _rgb.split(',')
-    if(!Array.isArray(parts) || parts.length != 3) return null
-    try {
-        const r = parseInt(toTrimString(parts[0]))
-        const g = parseInt(toTrimString(parts[1]))
-        const b = parseInt(toTrimString(parts[2]))
-        return { r, g, b }
-    } catch(error) {
-        if(isDevEnv()) console.log(error)
-    }
-    return rgb
-}
-
-const toDarkerRgbColor = (rgb) => {
-    const _rgb = extractRgbColor(rgb)
-    if(!_rgb) return null
-    const { r, g, b } = _rgb
-    const _r = parseInt(Math.max(52, r - (255 - r) * 0.5))
-    const _g = parseInt(Math.max(52, g - (255 - g) * 0.5))
-    const _b = parseInt(Math.max(52, b - (255 - b) * 0.5))
-    return `rgb(${_r},${_g},${_b})`
-}
-
 const setupBackgroudEffect = async () => {
     if (!isPlayingViewUseBgCoverEffect.value) return
     const bgEffectEl = document.querySelector('.playing-view .bg-effect')
@@ -93,25 +65,6 @@ const setupBackgroudEffect = async () => {
 
     setHasBackgroudCover(true)
     bgEffectEl.style.background = `url('${cover}')`
-
-    /*
-    //TODO 内存占用高
-    Object.assign(bgEffectStyle, {
-        background: `url('${cover}')`
-    })
-    const ignoreColors = ['rgb(255,255,255)', 'rgb(0,0,0)']
-    analyze(cover, { ignore: ignoreColors, scale: 0.6 })
-        .then(result => {
-            const { color } = result[2]
-            if(ignoreColors.includes(color)) return
-            const darkColor = toDarkerRgbColor(color)
-            const _color = darkColor ? `linear-gradient(to right bottom, ${color}, ${darkColor})` : color
-            Object.assign(bgEffectStyle, {
-                background: `${_color} !important`
-            })
-            //setCoverNoneBorder(true)
-        })
-    */
 }
 
 const computedFormatShow = computed(() => {

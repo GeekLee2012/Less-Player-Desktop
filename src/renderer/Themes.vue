@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
-import { isMacOS, isWinOS } from '../common/Utils';
+import { isMacOS, isWinOS, toTrimString } from '../common/Utils';
 import CssWinOS from './CssWinOS.vue';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
@@ -18,19 +18,13 @@ const { getCurrentTheme, setupFontFamily,
   currentFontSizeLevel, currentFontSize, } = useSettingStore()
 
 
-const applyDocumentElementStyle = (prop, value) => {
-  document.documentElement.style.setProperty(prop, value)
-}
-
-const removeDocumentElementStyle = (prop, value) => {
-  document.documentElement.style.removeProperty(prop, value)
-}
+const applyDocumentElementStyle = (prop, value) => document.documentElement.style.setProperty(prop, value)
+const removeDocumentElementStyle = (prop, value) => document.documentElement.style.removeProperty(prop, value)
 
 const applyDocumentStyle = (changes, valueSuffix) => {
-    valueSuffix = valueSuffix || ''
     if(!changes || typeof changes != 'object') return
     for (const [key, value] of Object.entries(changes)) {
-      applyDocumentElementStyle(key, `${value}${valueSuffix}`)
+      applyDocumentElementStyle(key, `${value}${valueSuffix || ''}`)
     }
 }
 
@@ -132,23 +126,8 @@ const setupAppTheme = (theme) => {
 //直接在setup()时执行，不需要等待其他生命周期
 setupAppTheme()
 
-/*
-const updateFontFamily = (value) => {
-  value = value.trim()
-  const fontFamily = value.length > 2 ? value : "var(--content-text-font-family)"
-  document.documentElement.style.fontFamily = fontFamily
-}
-*/
-
-const updateFontFamily = (value) => {
-  //const presetFontFamily = document.documentElement.style.getPropertyValue('--content-text-preset-font-family')
-  const fontFamily = value.trim()
-  applyDocumentStyle({ 'font-family': fontFamily })
-}
-
-const updateFontWeight = (value) => {
-  applyDocumentStyle({'font-weight': value })
-}
+const updateFontFamily = (value) => applyDocumentStyle({ 'font-family': toTrimString(value) })
+const updateFontWeight = (value) => applyDocumentStyle({'font-weight': value })
 
 //设置字体大小
 const setupFontSize = (fontSize) => {
@@ -202,28 +181,16 @@ const setupFontStyle = () => {
 }
 
 const setupBorderRadiusCtlStyle = () => {
-  const winStyle = {
-    '--border-app-win-border-radius': '3px',
-    '--border-popover-border-radius': '3px',
-    '--border-btn-border-radius': '5px',
-    '--border-list-item-border-radius': '5px',
-    '--border-left-nav-list-item-border-radius': '3px',
-    '--border-img-text-tile-border-radius': '3px',
-  }
-
-  const macStyle = {
-    '--border-app-win-border-radius': '12px',
-    '--border-popover-border-radius': '8px',
-    '--border-btn-border-radius': '10rem',
-    '--border-list-item-border-radius': '10rem',
-    '--border-left-nav-list-item-border-radius': '5px',
-    '--border-img-text-tile-border-radius': '6px',
-  }
-  let changes = macStyle
-  console
-  if ((isUseAutoBorderRadiusCtl.value && isWinOS()) 
-    || isUseWindowsBorderRadiusCtl.value) {
-    changes = winStyle 
+  const useWinStyle = ((isUseAutoBorderRadiusCtl.value && isWinOS()) || isUseWindowsBorderRadiusCtl.value)
+  const index = useWinStyle ? 0 : 1
+  const changes = {
+    '--border-app-win-border-radius': ['3px', '12px'][index],
+    '--border-popover-border-radius': ['3px', '8px'][index],
+    '--border-btn-border-radius': ['5px', '10rem'][index],
+    '--border-list-item-border-radius': ['5px', '10rem'][index],
+    '--border-left-nav-list-item-border-radius': ['3px', '5px'][index],
+    '--border-img-text-tile-border-radius': ['3px', '6px'][index],
+    '--border-flow-btn-border-radius': ['3px', '6px'][index],
   }
   applyDocumentStyle(changes)
 }

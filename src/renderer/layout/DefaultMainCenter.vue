@@ -246,33 +246,6 @@ const setVisualPlayingViewCanvasSize = () => {
     }
 }
 
-//TODO
-const setBatchViewListSize = () => {
-    const mainContent = document.getElementById('default-main-content')
-    if (!mainContent) return
-    const el = document.querySelector('#batch-action-view .center > .content')
-    const { clientHeight } = mainContent
-    const padding = isDefaultClassicLayout.value ? 25 : 43
-    //header 87, margin 15, action 31
-    const height = (clientHeight - 87 - 15 - 31 - padding)
-    if (el) el.style.height = `${height}px`
-}
-
-//TODO
-const setPluginsViewListSize = () => {
-    const mainContent = document.getElementById('default-main-content')
-    if (!mainContent) return
-    const el = document.querySelector('#plugins-view .center > .content')
-    const headerEl = document.querySelector('#plugins-view > .header')
-    if (!el || !headerEl) return
-    const { clientHeight } = mainContent
-    const { clientHeight: headerClientHeight } = headerEl
-    const padding = isDefaultClassicLayout.value ? 20 : 36
-    //header 136, margin 15, action 36
-    const height = (clientHeight - headerClientHeight - padding)
-    if (el) el.style.height = `${height}px`
-}
-
 //自适应播放页组件大小
 const setPlayingViewSize = () => {
     setPlayingCoverSize()
@@ -366,10 +339,6 @@ const resizeViewItems = (event) => {
     setCategoryViewSize()
     //自适应播放页组件大小
     setPlayingViewSize()
-    //自适应批量操作页面列表大小
-    setBatchViewListSize()
-    //插件管理
-    //setPluginsViewListSize()
     //主题页
     setThemeViewItemsSize()
     //分页组件
@@ -403,8 +372,8 @@ watch(lyricMetaPos, () => {
 })
 
 const eventsRegistration = {
-    'batchView-show': setBatchViewListSize,
-    'pluginsView-show': setPluginsViewListSize,
+    //'batchView-show': setBatchViewListSize,
+    //'pluginsView-show': setPluginsViewListSize,
     'playingView-changed': setPlayingViewSize,
     'app-layout-default': setupDefaultLayout,
 }
@@ -434,7 +403,10 @@ onActivated(() => {
     <div id="default-main-center">
         <component id="default-main-top" :is="currentMainTop">
         </component>
-        <DefaultMainContent id="default-main-content" :class="{ autopadding: (isDefaultClassicLayout || isDefaultNewLayout) }">
+        <DefaultMainContent id="default-main-content" 
+            :class="{ 
+                autopadding: (isDefaultClassicLayout || isDefaultNewLayout) 
+            }">
         </DefaultMainContent>
         <component id="default-main-bottom" :is="currentMainBottom">
         </component>
@@ -486,16 +458,15 @@ onActivated(() => {
 #default-main-center .autopadding #free-video-edit-view,
 #default-main-center .autopadding #data-backup-view,
 #default-main-center .autopadding #data-restore-view {
-    /* padding-top: 5px; */
     padding-top: 3px;
 }
 
 #default-main-center .autopadding #playlist-detail-view,
 #default-main-center .autopadding #artist-detail-view,
 #default-main-center .autopadding #album-detail-view,
+#default-main-center .autopadding #track-detail-view,
 #default-main-center .autopadding #custom-playlist-detail-view,
 #default-main-center .autopadding #local-playlist-detail-view {
-    /* padding-top: 12px; */
     padding-top: 8px;
 }
 </style>

@@ -946,7 +946,7 @@ const playMv = (video, failText, text) => {
 
     getVideoDetail(video).then(result => {
         showToast(text, () => {
-            playVideo({ ...video, ...result, vcType: (vcType || 0) }, -1, failText)
+            playVideo({ ...video, ...result, vcType: (vcType || 0) }, -1, -1, failText)
             traceRecentTrack(video)
         }, 666)
     }, async error => {
@@ -955,7 +955,7 @@ const playMv = (video, failText, text) => {
             if (result && !isBlank(result.url)) {
                 const { url } = result
                 return showToast(text, () => {
-                    playVideo({ ...video, url, vcType: (vcType || 0) }, -1, failText)
+                    playVideo({ ...video, url, vcType: (vcType || 0) }, -1, -1,failText)
                     traceRecentTrack(video)
                 }, 666)
             }
@@ -966,7 +966,7 @@ const playMv = (video, failText, text) => {
 }
 
 //video => { title, type, cover, url }
-const playVideo = async (video, index, failText) => {
+const playVideo = async (video, index, pos, failText) => {
     try {
         if(!video) return
         
@@ -978,7 +978,7 @@ const playVideo = async (video, index, failText) => {
 
         //开始播放视频
         if (!videoPlayingViewShow.value) toggleVideoPlayingView()
-        playVideoNow(video, index)
+        playVideoNow(video, index, pos)
         setupCurrentMediaSession()
     } catch (error) {
         if(isDevEnv()) console.log(error)
@@ -1516,6 +1516,7 @@ const eventsRegistration = {
         currentTimeState.value = currentSecs
         const _duration = track.duration || 0
         progressState.value = _duration > 0 ? (currentTime / _duration) : 0
+        //ipcRendererSend('app-setProgressBar', progressState.value || -1)
     },
     'track-spectrumData': ({leftFreqData, leftFreqBinCount, rightFreqData,
         rightFreqBinCount, freqData, freqBinCount,

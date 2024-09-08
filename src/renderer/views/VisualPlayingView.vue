@@ -103,6 +103,7 @@ const setupBackgroudEffect = async () => {
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
 const switchVisualCanvas = () => {
+    if(!playing.value) return
     const len = getExVisualCanvasHandlersLength()
     if (len < 1) return
     const index = exVisualCanvasIndex.value
@@ -176,7 +177,7 @@ onUnmounted(() => {
                                 :draggable="isDndSaveEnable" @dragstart="dndSaveCover"
                                 @contextmenu="toggleExVisualCanvasShow" />
                         </div>
-                        <div class="canvas-wrap" @click="switchSpectrumIndex">
+                        <div class="canvas-wrap" @click="() => (playing && switchSpectrumIndex())">
                             <canvas class="spectrum-canvas" width="480" height="66"></canvas>
                         </div>
                     </div>

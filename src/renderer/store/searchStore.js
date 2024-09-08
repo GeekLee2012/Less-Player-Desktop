@@ -47,7 +47,8 @@ export const useSearchStore = defineStore('search', {
         },
         updateTabTipText(length) {
             const index = this.activeTab
-            this.tabTipText = index < 0 ? '' : (this.tabs[index].stext || this.tabs[index].text).replace('0', length)
+            const tipText = this.tabs[index] ? (this.tabs[index].stext || this.tabs[index].text || '') : ''
+            this.tabTipText = index < 0 ? '' : tipText.replace(/\d+/g, length)
         },
         currentPlatform() {
             const index = this.currentPlatformIndex

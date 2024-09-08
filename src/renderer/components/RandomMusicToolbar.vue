@@ -59,18 +59,20 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
                         {{ item }}
                     </div>
                 </div>
-                <div class="content-wrap v-spacing">
+                <div class="content-wrap">
                     <div class="content platform" v-show="navIndex == 0">
-                        <div v-for="(item, index) in platforms('random')" class="row" :class="{ 'v-spacing': index > 0 }">
-                            <span>{{ item.name }}：</span>
+                        <div v-for="(item, index) in platforms('random')" class="row"
+                            @click="() => toggleRandomMusicPlatform(item.code)">
+                            <span v-html="item.name"></span>
                             <ToggleControl :value="isActiveRandomMusicPlatform(item.code)"
                                 @click="() => toggleRandomMusicPlatform(item.code)">
                             </ToggleControl>
                         </div>
                     </div>
                     <div class="content type" v-show="navIndex == 1">
-                        <div v-for="(item, index) in randomMusicTypes" class="row" :class="{ 'v-spacing': index > 0 }">
-                            <span>{{ item.name }}：</span>
+                        <div v-for="(item, index) in randomMusicTypes" class="row"
+                            @click="() => toggleRandomMusicType(item.code)">
+                            <span v-html="item.name"></span>
                             <ToggleControl :value="isActiveRandomMusicType(item.code)"
                                 @click="() => toggleRandomMusicType(item.code)">
                             </ToggleControl>
@@ -158,11 +160,15 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 
 .random-music-toolbar .center .content-wrap {
     flex: 1;
-    padding-bottom: 10px;
     overflow: scroll;
+    overflow-x: hidden;
+}
+
+.random-music-toolbar .center .content-wrap .content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 18px 43px 10px 43px;
 }
 
 .random-music-toolbar .row {
@@ -170,10 +176,35 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
     flex-direction: row;
     align-items: center;
     text-align: left;
+    border-radius: 3px;
+    box-shadow: 0px 0px 2px var(--border-popovers-border-color);
+    padding: 10px 15px;
+    width: 100%;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.random-music-toolbar .row:hover {
+    background: var(--content-list-item-hover-bg-color);
 }
 
 .random-music-toolbar .row span {
-    width: 100px;
-    width: 125px;
+    /*width: 100px;
+    width: 125px;*/
+    flex: 1;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
+}
+
+.random-music-toolbar .row .toggle-ctl {
+    min-width: 40px;
+    margin-left: 15px;
 }
 </style>

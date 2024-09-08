@@ -81,7 +81,7 @@ defineExpose({
     border: 0.1px solid var(--border-color);
     box-shadow: 0px 0px 1px #161616;
     background: var(--button-icon-text-btn-bg-color);
-    border-radius: 6px;
+    border-radius: var(--border-flow-btn-border-radius);
     width: 36px;
     height: 36px;
 
