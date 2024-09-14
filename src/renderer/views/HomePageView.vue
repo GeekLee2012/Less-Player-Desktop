@@ -1,22 +1,24 @@
 <script setup>
-import { storeToRefs } from 'pinia';
 import { inject, onActivated } from 'vue';
+import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../store/platformStore';
 
 
 
-const { visitPlaylistSquare, visitLocalMusic } = inject('appRoute')
+const { visitPlaylistSquare, visitLocalMusic, addHomePath } = inject('appRoute')
 
 const { activePlatforms } = storeToRefs(usePlatformStore())
 const { isLocalMusic } = usePlatformStore()
 
 const visitFirstActivePlatform = () => {
-    const { code } = activePlatforms.value('playlists')[0]
+    const exploreMode = 'playlists'
+    const { code } = activePlatforms.value(exploreMode)[0]
     if (isLocalMusic(code)) {
         visitLocalMusic()
     } else {
         visitPlaylistSquare(code)
     }
+    addHomePath(`/${exploreMode}/${code}`)
 }
 
 

@@ -11,7 +11,7 @@ import { Playlist } from '../common/Playlist';
 import { isDevEnv, toTrimString, isBlank } from '../common/Utils';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
 import { currentRoute, currentRoutePath, onBeforeResolve, 
-    backward, forward, addRoute, pushRoute } from './route/router';
+    backward, forward, addRoute, pushRoute, addHomePath, } from './route/router';
 
 
 
@@ -301,6 +301,7 @@ onBeforeResolve((to, from) => {
 provide('appRoute', {
     currentRoute,
     currentRoutePath,
+    addHomePath,
     backward,
     forward,
     visitRoute,

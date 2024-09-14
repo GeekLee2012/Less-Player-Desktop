@@ -599,7 +599,7 @@ export const useAppCommonStore = defineStore('appCommon', {
             if(index < 0) return false
             return this.playingViewThemeType == 1 
                 && this.playingViewThemeIndex == index
-        }
+        },
     },
     persist: {
         enabled: true,

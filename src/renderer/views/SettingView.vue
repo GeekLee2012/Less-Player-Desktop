@@ -595,7 +595,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="cate-name">布局</span>
                 <div class="content">
                     <div class="last">
-                        <span v-for="(item, index) in ['旧版', '经典', '主流','简约']" class="layout-item"
+                        <span v-for="(item, index) in ['自动', '经典', '主流','简约']" class="layout-item"
                             :class="{ active: index == layout.index }" @click="setLayoutIndex(index)">
                             {{ item }}
                         </span>

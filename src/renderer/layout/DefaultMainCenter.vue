@@ -24,7 +24,8 @@ const { playlistCategoryViewShow, artistCategoryViewShow,
 const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
-    isDefaultClassicLayout, isDefaultNewLayout } = storeToRefs(useSettingStore())
+    isDefaultClassicLayout, isDefaultNewLayout,
+    isAutoLayout } = storeToRefs(useSettingStore())
 const { setupWindowZoom } = useSettingStore()
 
 //TODO 硬编码
@@ -273,7 +274,7 @@ const setLyricToolbarPos = () => {
 }
 
 const setupDefaultLayout = () => {
-    if (isDefaultClassicLayout.value || isDefaultNewLayout.value) {
+    if (isAutoLayout.value || isDefaultClassicLayout.value || isDefaultNewLayout.value) {
         currentMainTop.value = ClassicMainTop
         currentMainBottom.value = ClassicMainBottom
     } else {
@@ -405,7 +406,7 @@ onActivated(() => {
         </component>
         <DefaultMainContent id="default-main-content" 
             :class="{ 
-                autopadding: (isDefaultClassicLayout || isDefaultNewLayout) 
+                autopadding: (isAutoLayout || isDefaultClassicLayout || isDefaultNewLayout) 
             }">
         </DefaultMainContent>
         <component id="default-main-bottom" :is="currentMainBottom">

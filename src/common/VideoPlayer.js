@@ -41,7 +41,7 @@ class VideoPlayer {
             fill: true, 
             playbackRates: [0.5, 1, 1.5, 2], 
             userActions: {
-                click: false
+                //click: false
             }
         })
         this.delegatePlayer.volume(this.volume)

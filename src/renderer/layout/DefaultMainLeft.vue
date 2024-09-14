@@ -5,7 +5,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
-import { isDevEnv, useUseCustomTrafficLight } from '../../common/Utils';
+import { isDevEnv, useUseCustomTrafficLight, isMacOS } from '../../common/Utils';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import Navigator from '../components/Navigator.vue';
 import SearchBar from '../components/SearchBar.vue';
@@ -29,7 +29,7 @@ const { isMaxScreen, isPlaylistMode, isArtistMode,
     isRadioMode, isUserHomeMode, exploreModeCode, } = storeToRefs(useAppCommonStore())
 const { nextExploreMode, setPlaylistExploreMode, setRadioExploreMode } = useAppCommonStore()
 const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists } = storeToRefs(useUserProfileStore())
-const { navigation, isDefaultOldLayout, isDefaultNewLayout } = storeToRefs(useSettingStore())
+const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
 
 const activeCustomPlaylistIndex = ref(-1)
 const activeFavoritePlaylistIndex = ref(-1)
@@ -231,7 +231,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="top-left-navigator-wrap" v-show="isDefaultOldLayout">
                 <Navigator></Navigator>
             </div>
-            <div class="top-logo" v-show="isDefaultNewLayout">
+            <div class="top-logo" v-show="isDefaultNewLayout || (isAutoLayout && !isMacOS())">
                 <AppLogo></AppLogo>
             </div>
         </div>

@@ -42,6 +42,9 @@ const tabs = [{
         code: -1,
         name: '错误',
     }]
+const isActivedStateTab = () => (activeTab.value && activeTab.value.code == 1)
+const isInactivedStateTab = () => (activeTab.value  && activeTab.value.code == 0)
+const isErrorStateTab = () => (activeTab.value  && activeTab.value.code == -1)
 
 const actionShowCtl = reactive({
     enableBtn: true,
@@ -232,8 +235,8 @@ const importPlugins = async () => {
 }
 
 
-const removePluginNew = async (plugin) => {
-    if (isShowDialogBeforeDeletePlugins.value) {
+const removePluginNew = async (plugin, silent) => {
+    if (isShowDialogBeforeDeletePlugins.value && !silent) {
         const ok = await showConfirm('确定要删除插件吗？')
         if(!ok) return
     }
@@ -352,6 +355,36 @@ const computedTabName = computed(() => {
     }
 })
 
+//忽略通过关键字搜索过滤的情况
+const toggleAllPluginsState = () => {
+    const data = plugins.value
+    if(!data || data.length < 1) return
+    const toggleState = (plugin, state) => {
+        updatePlugin(plugin, { state })
+        refreshView()
+    }
+
+    if(isActivedStateTab()) {
+        data.forEach(plugin => deactivatePluginNow(plugin, () => toggleState(plugin, ActivateState.DEACTIVATED)))
+    } else if(isInactivedStateTab()) {
+        data.forEach(plugin => activatePluginNow(plugin, () => toggleState(plugin, ActivateState.ACTIVATED)))
+    }
+}
+
+const removeAllPlugins = async () => {
+    const data = plugins.value
+    if(!data || data.length < 1) return
+
+    const ok = await showConfirm('确定要删除全部插件吗？')
+    if(!ok) return
+    let counter = 0
+    do {
+        data.forEach(item => removePluginNew(item, true))
+        if(++counter > 59) break
+    } while(data.length > 0)
+    //reloadApp()
+}
+
 /* 生命周期、监听 */
 onActivated(() => {
     //nextTick(refreshViewSize)
@@ -419,12 +452,42 @@ onActivated(() => {
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" v-for="(tab, index) in tabs" v-show="hasTabData(tab)"
+                <span class="tab" v-for="(tab, index) in tabs" v-show="hasTabData(tab) || true"
                     :class="{ active: isActiveTab(tab), 'content-text-highlight': isActiveTab(tab) }"
                     @click="switchTab(tab)" v-html="computedTabName(tab)">
                 </span>
+                <span class="tab" v-show="!plugins || plugins.length < 1"
+                    :class="{ active: true, 'content-text-highlight': true }">
+                    已导入(0)
+                </span>
                 <div class="action to-right">
-                    <SvgTextButton text="导入" class="spacing" v-show="actionShowCtl.importBtn" :leftAction="importPlugins" >
+                    <SvgTextButton :text="isActivedStateTab() ? '全部禁用' : '全部启用'" class="spacing" 
+                        v-show="(plugins && plugins.length > 0) && (activeTab && activeTab.code >= 0)" 
+                        :leftAction="toggleAllPluginsState">
+                        <template #left-img>
+                            <svg v-show="isActivedStateTab()" width="15" height="15" viewBox="0 0 853.47 853.5" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M426.79,853.5C192.45,853.62.22,661.48,0,426.92S192.62-.39,426.94,0C661.68.39,853.57,192.4,853.47,426.82S661.33,853.37,426.79,853.5ZM635.25,158C512.54,58,311.4,53.78,180,191.8,49.19,329.13,65.54,523.71,158.14,635.15ZM218.16,695.51c133.64,107.39,344.4,99.78,470.12-50.39,119.65-142.91,90.61-328.33,6.9-426.64Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <svg v-show="isInactivedStateTab()" width="16" height="16" viewBox="0 0 770.66 779.07" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M389.25,779.07c-159.7-.12-300.57-94.26-359.94-238C7.08,487.28-2.83,431.21.7,373.16Q9.58,226.89,112.39,121.9c14.86-15.19,37.84-15.85,52.51-1.76,15.21,14.6,15.7,37.7.44,53.21-35.93,36.52-63,78.61-77,127.91-34.1,120.26-7.39,226.16,80.06,315.33,46.87,47.81,105.26,75.33,171.47,85.2,159.1,23.71,311.08-77.86,347.77-234.45,25.78-110.07-1.77-207.32-78.77-290.26-7.43-8-14-16-14.64-27.5-.94-15.85,7.21-29.93,21.3-36.46a36.48,36.48,0,0,1,41.55,7.42,380.44,380.44,0,0,1,63.25,82.7C746,248.55,762.2,297.09,768,348.84c9.89,88.24-7.81,170.78-54.37,246.44C665.82,673,598.21,726.86,512.25,757.5A374.22,374.22,0,0,1,389.25,779.07Z" />
+                                        <path
+                                            d="M422.07,208.11q0,85.26,0,170.5c0,17.27-8.62,30.59-23.1,36.4-24.65,9.89-50.71-7.94-50.7-34.91q0-129.75.29-259.5c0-27.33,0-54.66.19-82,.13-19.32,11.62-33.89,29.35-37.76C400.45-4,422.25,12.64,422.46,35.62c.36,37.83,0,75.67,0,113.5q0,29.49,0,59Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                        </template>
+                    </SvgTextButton>
+                    <SvgTextButton text="导入" class="spacing" v-show="actionShowCtl.importBtn" 
+                        :leftAction="importPlugins"
+                        :rightAction="removeAllPlugins" >
                         <template #left-img>
                             <svg width="16" height="16" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
@@ -435,6 +498,23 @@ onActivated(() => {
                                             d="M394.63,450.06v-5.88q0-199.47,0-398.94c0-20.15,9.91-35.63,26.85-42.21,28.37-11,58.2,9.24,58.3,40,.19,62,.06,124,.06,186V451.28c2-1.84,3.34-3,4.57-4.19Q535.69,395.84,587,344.6c18.84-18.76,47.07-18,63.7,1.39a42.31,42.31,0,0,1-1.2,56.56c-8.5,9.16-17.56,17.79-26.4,26.63Q546,506.25,468.93,583.3c-15.5,15.47-36.33,18.46-53.8,7.71a51.86,51.86,0,0,1-9.31-7.48q-89.51-89.35-178.88-178.84c-13.46-13.48-17.06-31.76-9.79-48.24a42.62,42.62,0,0,1,41.2-25.38c11.71.55,21.35,5.62,29.57,13.87q40.38,40.57,80.91,81c8.22,8.23,16.38,16.53,24.57,24.8Z" />
                                     </g>
                                 </g>
+                            </svg>
+                        </template>
+                        <template #right-img>
+                            <svg v-show="plugins && plugins.length > 0" width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z"
+                                    transform="translate(-833 -413)" />
+                                <path
+                                    d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z"
+                                    transform="translate(-833 -413)" />
+                                <path
+                                    d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z"
+                                    transform="translate(-833 -413)" />
+                                <path
+                                    d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z"
+                                    transform="translate(-833 -413)" />
                             </svg>
                         </template>
                     </SvgTextButton>

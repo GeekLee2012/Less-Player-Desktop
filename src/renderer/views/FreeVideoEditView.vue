@@ -37,7 +37,8 @@ const titleInvalid = ref(false)
 const urlInvalid = ref(false)
 const isActionDisabled = ref(false)
 const isCoverShow = ref(false)
-const levcUrl = 'https://gitee.com/rive08/less-player-desktop/blob/master/LeVC.md'
+//const levcUrl = 'https://gitee.com/rive08/less-player-desktop/blob/master/LeVC.md'
+const levcUrl = 'https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LeVC.md'
 
 const resetCheckStatus = () => {
     titleInvalid.value = false

@@ -1,3 +1,4 @@
+import { reactive } from 'vue';
 import { createRouter, createWebHashHistory, useRouter } from 'vue-router';
 import AppMain from '../AppMain.vue';
 import HomePageView from '../views/HomePageView.vue';
@@ -204,7 +205,19 @@ export const currentRoute = () => (router.currentRoute.value)
 
 export const currentRoutePath = () => (currentRoute().path || '')
 
-export const backward = () => router.back()
+const homePaths = ['/']
+export const addHomePath = (path) => {
+    const index = homePaths.findIndex(item => (item == path))
+    if(index == -1) homePaths.push(path)
+}
+
+const isBackable = () => {
+    const currentPath = currentRoutePath()
+    for(const path of homePaths) if(path == currentPath) return false
+    return true
+}
+
+export const backward = () => (isBackable() && router.back())
 
 export const forward = () => router.forward()
 

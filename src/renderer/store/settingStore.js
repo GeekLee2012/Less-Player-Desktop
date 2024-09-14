@@ -75,7 +75,7 @@ export const useSettingStore = defineStore('setting', {
         },
         layout: {
             //当前index
-            index: 1,
+            index: 0,
             //回退index，即从简约模式退出时，返回的普通布局index
             fallbackIndex: 1
         },
@@ -477,7 +477,11 @@ export const useSettingStore = defineStore('setting', {
             const index = this.layout.index
             return index == 1 || index == 2
         },
+        //已移除，不再支持
         isDefaultOldLayout() {  //旧版布局，第一个版本发布时的布局
+            return this.layout.index == -1
+        },
+        isAutoLayout() {  //根据OS平台自动布局
             return this.layout.index == 0
         },
         isDefaultClassicLayout() {

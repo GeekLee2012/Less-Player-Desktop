@@ -11,7 +11,8 @@ import { onEvents, emitEvents } from '../common/EventBusWrapper';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
-  ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, } from '../common/Utils';
+  ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, 
+  isMacOS, } from '../common/Utils';
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 
 
@@ -30,9 +31,9 @@ const { showConfirm } = inject('apiExpose')
 const currentAppLayout = shallowRef(null)
 
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
-  getWindowZoom, isSimpleLayout, isDefaultNewLayout,
+  getWindowZoom, isSimpleLayout, isDefaultNewLayout, 
   isUseAutoWinCtl, isUseWindowsWinCtl,
-  isShowDialogBeforeResetSetting } = storeToRefs(useSettingStore())
+  isShowDialogBeforeResetSetting, isAutoLayout, } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
   setupAppGlobalProxy } = useSettingStore()
@@ -186,7 +187,8 @@ const setupLayout = (isInit) => {
   if (isSimpleLayout.value) {
     currentAppLayout.value = SimpleLayout
     eventName = 'app-layout-simple'
-  } else if(isDefaultNewLayout.value) {
+  } else if(isDefaultNewLayout.value 
+    || (isAutoLayout.value && !isMacOS())) {
     currentAppLayout.value = DefaultNewLayout
   } else {
     currentAppLayout.value = DefaultLayout

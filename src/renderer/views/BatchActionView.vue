@@ -609,7 +609,7 @@ const formatRadios = (radios, format) => {
         }
     })
     const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')
-    const filename = `FreeRadios-${timestamp}`
+    const filename = `自由FM-${timestamp}`
     const presetData = {
         json: JSON.stringify({ created: now, data: radioData })
     }

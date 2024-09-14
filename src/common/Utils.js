@@ -711,7 +711,7 @@ export const coverDefault = (cover, defaultCover) => {
 
 export const transformUrl = (url, protocal) => {
     url = toTrimString(url)
-    if(url.length < 1 || url.includes('://')) return url
+    if(url.length < 1 || url.includes('://') || url.startsWith('data:')) return url
     protocal = protocal || 'https'
     return `${protocal}://${url}`.replace(':////', '://')
 }
