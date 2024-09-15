@@ -4,8 +4,9 @@ import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import { coverDefault } from '../../common/Utils';
-import SingleSelectionControl from '../Components/SingleSelectionControl.vue';
+import SingleSelectionControl from '../components/SingleSelectionControl.vue';
 import ToggleControl from '../components/ToggleControl.vue';
+
 
 
 
