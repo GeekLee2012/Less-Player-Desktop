@@ -1,14 +1,15 @@
 # <div align=center>Less Player</div>  
+
   
-[![GitHub release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
-[![GitHub tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/tags)
-[![GitHub license](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)
-![GitHub Releases Download](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
+[![GitHub Release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
+[![GitHub Tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/tags)
+[![GitHub License](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)
+![GitHub Downloads](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
 ![GitHub Stars](https://img.shields.io/github/stars/GeekLee2012/Less-Player-Desktop)
 ![GitHub Forks](https://img.shields.io/github/forks/GeekLee2012/Less-Player-Desktop)    
     
   
-基于[Electron](https://www.electronjs.org/) + [Vue 3](https://cn.vuejs.org/)开发、[插件化](https://github.com/GeekLee2012/Less-Player-Desktop-Plugins/)的播放器。   
+基于[Electron](https://www.electronjs.org/) + [Vue 3](https://vuejs.org/)开发、[插件化](https://github.com/GeekLee2012/Less-Player-Desktop-Plugins/)的播放器。   
   
 <b>`郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>   
   

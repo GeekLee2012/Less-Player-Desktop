@@ -452,7 +452,7 @@ onActivated(() => {
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" v-for="(tab, index) in tabs" v-show="hasTabData(tab) || true"
+                <span class="tab" v-for="(tab, index) in tabs" v-show="hasTabData(tab)"
                     :class="{ active: isActiveTab(tab), 'content-text-highlight': isActiveTab(tab) }"
                     @click="switchTab(tab)" v-html="computedTabName(tab)">
                 </span>
@@ -615,7 +615,7 @@ onActivated(() => {
     position: relative;
     display: flex;
     align-items: center;
-    height: 36px;
+    line-height: 36px;
     margin-left: 35px;
     margin-right: 35px;
     margin-bottom: 10px;
@@ -625,7 +625,7 @@ onActivated(() => {
 #plugins-view .center .tab {
     font-size: var(--content-text-tab-title-size);
     margin-right: 36px;
-    padding-bottom: 5px;
+    /*padding-bottom: 5px;*/
     border-bottom: 3px solid transparent;
     cursor: pointer;
 }

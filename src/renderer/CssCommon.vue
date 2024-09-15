@@ -272,4 +272,18 @@ textarea {
 .fade-x-leave-from {
   transform: translateX(0);
 }
+
+.bg-effect {
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    /*backdrop-filter: blur(20px);*/
+    /*filter: brightness(88%) blur(88px);*/
+    /*filter: hue-rotate(360deg);*/
+    filter: blur(8px);
+    z-index: -10;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
 </style>

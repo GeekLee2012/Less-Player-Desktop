@@ -599,16 +599,4 @@ onUnmounted(() => {
     position: absolute;
     z-index: 3 !important;
 }
-
-.visual-playing-view .bg-effect {
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-size: cover !important;
-    /*backdrop-filter: blur(20px);*/
-    filter: blur(8px);
-    z-index: -10;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-}
 </style>

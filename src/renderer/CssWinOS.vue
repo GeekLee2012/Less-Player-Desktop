@@ -174,6 +174,19 @@
   margin-left: 10px !important;
 }
 
+.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn,
+.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn svg {
+  fill: #fff !important;
+  stroke: #fff !important;
+  cursor: pointer;
+}
+
+.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn:hover,
+.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn:hover svg {
+  fill: var(--content-highlight-color) !important;
+  stroke: var(--content-highlight-color) !important;
+  cursor: pointer;
+}
 /* 桌面歌词 */
 .desktop-lyric.winos-style  {
   background: var(--app-bg-color) !important;

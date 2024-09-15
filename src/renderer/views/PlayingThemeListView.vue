@@ -2,7 +2,10 @@
 import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { useSettingStore } from '../store/settingStore';
 import { coverDefault } from '../../common/Utils';
+import SingleSelectionControl from '../Components/SingleSelectionControl.vue';
+import ToggleControl from '../components/ToggleControl.vue';
 
 
 
@@ -10,6 +13,9 @@ const { setPlayingViewThemeIndex, showCustomPlayingThemeEditView,
     removePlayingViewCustomTheme, } = useAppCommonStore()
 const { playingViewPresetThemes, playingViewCustomThemes,
     playingViewThemeIndex, playingViewThemeType } = storeToRefs(useAppCommonStore())
+const { track } = storeToRefs(useSettingStore())
+const { setPlayingViewBgCoverEffectIndex, togglePlayingViewCoverBorderShow } = useSettingStore()
+
 
 const editTheme = (item) => {
     showCustomPlayingThemeEditView(item)
@@ -60,6 +66,20 @@ const computedCustomThemeSectionTitle = computed(() => {
                 </div>
             </div>
             <div class="center" ref="listRef">
+                <div class="sec-title">选项</div>
+                <div class="options">
+                    <div class="opt-item">
+                        <span class="subtitle">封面背景效果：</span>
+                        <SingleSelectionControl :data="['关闭', '简单', '渐变']" :value="track.playingViewBgCoverEffectIndex" :onChanged="setPlayingViewBgCoverEffectIndex">
+                        </SingleSelectionControl>
+                    </div>
+                    <div class="opt-item">
+                        <span class="subtitle">封面图片边框：</span>
+                        <ToggleControl @click="togglePlayingViewCoverBorderShow"
+                            :value="track.playingViewCoverBorderShow">
+                        </ToggleControl>
+                    </div>
+                </div>
                 <div class="sec-title">预设({{ computedPresetThemeSectionTitle }})</div>
                 <template v-for="(item, index) in playingViewPresetThemes">
                     <div class="item" :class="{ current: (playingViewThemeIndex == index && playingViewThemeType == 0) }" 
@@ -203,7 +223,7 @@ const computedCustomThemeSectionTitle = computed(() => {
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    padding-bottom: 66px;
+    padding-bottom: 33px;
 }
 
 .playing-theme-list-view .center .sec-title {
@@ -214,16 +234,16 @@ const computedCustomThemeSectionTitle = computed(() => {
     color: var(--content-subtitle-text-color);
 }
 
-.playing-theme-list-view .center .item {
+.playing-theme-list-view .center > .item {
     position: relative;
     margin: 0px 33px 36px 33px;
 }
 
-.playing-theme-list-view .center .item .preview-wrap {
+.playing-theme-list-view .center > .item .preview-wrap {
     position: relative;
 }
 
-.playing-theme-list-view .center .item .preview {
+.playing-theme-list-view .center > .item .preview {
     width: 100%;
     height: 188px;
     object-fit: fill;
@@ -233,11 +253,11 @@ const computedCustomThemeSectionTitle = computed(() => {
     cursor: pointer;
 }
 
-.playing-theme-list-view .center .item .preview.no-cover {
+.playing-theme-list-view .center > .item .preview.no-cover {
     object-fit: cover;
 }
 
-.playing-theme-list-view .center .item .preview-wrap .checked-svg {
+.playing-theme-list-view .center > .item .preview-wrap .checked-svg {
     position: absolute;
     right: 0px;
     bottom: 13px;
@@ -245,7 +265,7 @@ const computedCustomThemeSectionTitle = computed(() => {
     fill: var(--content-highlight-color);
 }
 
-.playing-theme-list-view .center .item .preview-wrap .action {
+.playing-theme-list-view .center > .item .preview-wrap .action {
     position: absolute;
     top: 3px;
     right: -5px;
@@ -260,20 +280,46 @@ const computedCustomThemeSectionTitle = computed(() => {
     visibility: hidden;
 }
 
-.playing-theme-list-view .center .item .preview-wrap:hover .action {
+.playing-theme-list-view .center > .item .preview-wrap:hover .action {
     visibility: visible;
 }
 
-.playing-theme-list-view .center .item .text {
+.playing-theme-list-view .center > .item .text {
     cursor: pointer;
 }
 
-.playing-theme-list-view .center .item.current .preview {
+.playing-theme-list-view .center > .item.current .preview {
     border-color: var(--content-highlight-color);
 }
 
-.playing-theme-list-view .center .item.current .text {
+.playing-theme-list-view .center > .item.current .text {
     color: var(--content-highlight-color);
     font-weight: bold;
+}
+
+.playing-theme-list-view .center .options {
+    display: flex;
+    flex-direction: column;
+    margin: 0px 33px 20px 33px;
+}
+
+.playing-theme-list-view .center .options .opt-item {
+    display: flex;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.playing-theme-list-view .center .options .opt-item .subtitle {
+    text-align: left;
+    min-width: 128px;
+    margin-right: 10px;
+}
+
+.playing-theme-list-view .center .options .single-selection-ctl {
+    justify-content: flex-start;
+}
+
+.playing-theme-list-view .center .options .single-selection-ctl .item {
+    font-size: 15px;
 }
 </style>

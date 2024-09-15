@@ -187,6 +187,7 @@ export const useSettingStore = defineStore('setting', {
             singleLineRadioTitleStyle: false,
             //播放页 - 封面图片背景效果
             playingViewUseBgCoverEffect: false,
+            playingViewBgCoverEffectIndex: 0,
             //播放页 - 封面图片边框
             playingViewCoverBorderShow: true,
         },
@@ -705,7 +706,11 @@ export const useSettingStore = defineStore('setting', {
             return this.track.dndSave
         },
         isPlayingViewUseBgCoverEffect() {
-            return this.track.playingViewUseBgCoverEffect
+            return this.track.playingViewBgCoverEffectIndex 
+                && this.track.playingViewBgCoverEffectIndex > 0
+        },
+        playingViewBgCoverEffectIndex() {
+            return this.track.playingViewBgCoverEffectIndex
         },
         isUseShadowForCardStyleTile() {
             return this.common.shadowForCardStyleTile
@@ -1380,6 +1385,9 @@ export const useSettingStore = defineStore('setting', {
         togglePlayingViewUseBgCoverEffect() {
             this.track.playingViewUseBgCoverEffect = !this.track.playingViewUseBgCoverEffect
         },
+        setPlayingViewBgCoverEffectIndex(value) {
+            this.track.playingViewBgCoverEffectIndex = value
+        }
     },
     persist: {
         enabled: true,

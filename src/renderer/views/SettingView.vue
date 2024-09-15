@@ -832,14 +832,14 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                         <div class="tip-text spacing">提示：不会影响系统正常熄屏、锁屏</div>
                     </div>
-                    <div>
+                    <div v-show="false">
                         <span class="cate-subtitle">播放页封面图片背景效果：</span>
                         <ToggleControl @click="togglePlayingViewUseBgCoverEffect"
                             :value="track.playingViewUseBgCoverEffect">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：实验性功能，内存占用高，较耗性能</div>
                     </div>
-                    <div>
+                    <div v-show="false">
                         <span class="cate-subtitle">播放页封面图片边框：</span>
                         <ToggleControl @click="togglePlayingViewCoverBorderShow"
                             :value="track.playingViewCoverBorderShow">
@@ -1531,6 +1531,17 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-align: left;
     overflow: scroll;
     overflow-x: hidden;
+}
+
+/*TODO 为更方便点击，把按钮调大，先挖个坑吧*/
+#setting-view .toggle-ctl {
+    width: 42px;
+    height: 21px;
+}
+
+#setting-view .toggle-ctl .thumb {
+    width: 17px;
+    height: 17px;
 }
 
 /*

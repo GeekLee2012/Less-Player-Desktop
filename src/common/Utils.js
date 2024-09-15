@@ -787,6 +787,17 @@ export const toYyyymmdd = (timestamp, sp) => {
     return yyyy + sp + mm + sp + dd
 }
 
+export const extractHhMmSs = (timestamp) => {
+    const date = new Date(timestamp)
+    let hh = date.getHours()
+    let mm = date.getMinutes()
+    let ss = date.getSeconds()
+    hh = hh < 10 ? ('0' + hh) : hh
+    mm = mm < 10 ? ('0' + mm) : mm
+    ss = ss < 10 ? ('0' + ss) : ss
+    return `${hh}:${mm}:${ss}`
+}
+
 export const toYmd = (timestamp, sp) => {
     sp = sp || '.'
     const date = new Date(timestamp)
