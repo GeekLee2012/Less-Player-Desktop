@@ -4,6 +4,8 @@
 <style>
 :root {
   --app-bg: transparent;
+  --bg-effect: none;
+  --bg-effect-bottom: none;
   /*内容*/
   --content-text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
   --content-text-font-family: var(--content-text-preset-font-family);
@@ -278,12 +280,12 @@ textarea {
     background-repeat: no-repeat !important;
     background-size: cover !important;
     /*backdrop-filter: blur(20px);*/
-    /*filter: brightness(88%) blur(88px);*/
-    /*filter: hue-rotate(360deg);*/
+    /*filter: brightness(88%) hue-rotate(360deg);*/
     filter: blur(8px);
+    background: var(--bg-effect) !important;
     z-index: -10;
     position: absolute;
     width: 100%;
-    height: 100%;
+    height: 100%; 
 }
 </style>

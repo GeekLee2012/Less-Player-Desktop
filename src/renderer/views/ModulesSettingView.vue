@@ -165,6 +165,11 @@ const setActiveTab = (value) => activeTab.value = value
     cursor: pointer;
 }
 
+#modules-setting-view .center .content .toggle-item:hover {
+    background: var(--content-list-item-hover-bg-color);
+    cursor: pointer;
+}
+
 #modules-setting-view .center .content .toggle-item .cate-subtitle {
     width: calc(100% - 60px);
     margin-right: 25px;

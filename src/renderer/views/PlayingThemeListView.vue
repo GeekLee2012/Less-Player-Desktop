@@ -313,11 +313,11 @@ const computedCustomThemeSectionTitle = computed(() => {
 .playing-theme-list-view .center .options .opt-item .subtitle {
     text-align: left;
     min-width: 128px;
-    margin-right: 10px;
+    flex: 1;
 }
 
 .playing-theme-list-view .center .options .single-selection-ctl {
-    justify-content: flex-start;
+    justify-content: flex-end;
 }
 
 .playing-theme-list-view .center .options .single-selection-ctl .item {

@@ -8,7 +8,7 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv, nextInt } from '../../common/Utils';
+import { stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv, nextInt, rgbToHsl,  } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
@@ -47,128 +47,78 @@ const volumeBarRef = ref(null)
 
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
-const hasBackgroudCover = ref(false)
-//const bgEffectStyle = reactive({})
-const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
 
-const setupBackgroudEffect = async () => {
-    const containerEl = document.querySelector('.playing-view .container')
-    if(!containerEl) return 
-    containerEl.classList.remove('auto-effect')
-
-    if (!isPlayingViewUseBgCoverEffect.value) return
-    const bgEffectEl = document.querySelector('.playing-view .bg-effect')
-    if(!bgEffectEl) return 
-
-    const track = currentTrack.value
-    if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
-    const { cover } = track
-    //默认封面
-    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return setHasBackgroudCover(false)
-    //本地歌曲
-    if (cover.startsWith(ImageProtocal.prefix)) return setHasBackgroudCover(false)
-
-    setHasBackgroudCover(true)
-    const effectIndex = playingViewBgCoverEffectIndex.value
-    if(effectIndex == 1) bgEffectEl.style.background = `url('${cover}')`
-    
-    if(effectIndex != 2) return
-
-    const colorThief = new ColorThief()
-    const coverImg = new Image()
-    coverImg.crossOrigin = 'Anonymous'
-    coverImg.src = cover
-
-    coverImg.addEventListener('load', function() {
-        const alpha = (88 / 255).toFixed(2)
-        const rgbs = colorThief.getPalette(coverImg, 2)
-        const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
-        const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
-        const _rgbColors = rgbColors.join(',')
-
-        containerEl.style.setProperty('--pv-auto-effect-bottom-bg-color', rgbaColors[0])
-        containerEl.style.setProperty('--pv-auto-effect-bg-color', `linear-gradient(${_rgbColors})`)
-
-        containerEl.classList.add('auto-effect')
-        
-        //setupDynamicTheme(_rgbColors)
-    })
+const sortPalette = (rgbs) => {
+    //简单起见，仅考虑数组长度为2的情况
+    const [h1, s1, l1] = rgbToHsl(...rgbs[0])
+    const [h2, s2, l2] = rgbToHsl(...rgbs[1])
+    if(l1 > l2) return rgbs
+    return rgbs.reverse()
 }
 
-const setupDynamicTheme = (rgbColors) => {
-    const dynamicTheme = {
-            "id": "theme-dynamic-by-cover",
-            "name": "默认2",
-            "previewBg": "#ffffff",
-            "appBackground": {
-                "bgColor": "#ffffff",
-                "bgImage": null,
-                "bgImageGradient": null
-            },
-            "appBackgroundScope": {
-                "playingView": true,
-                "playbackQueue": false,
-                "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
-                "soundEffectView": false,
-                "lyricToolbar": false,
-                "randomMusicToolbar": false
-            },
-            "content": {
-                "textColor": "#373737",
-                "subtitleTextColor": "#888888",
-                "secondaryTextColor": "#a0a0a0",
-                "bgColor": `linear-gradient(${rgbColors})`,
-                "textHighlightColor": "linear-gradient(to top right, #1ca388, #28c83f)",
-                "highlightColor": "#28c83f",
-                "headerNavBgColor": "#eeeeee88",
-                "loadingMaskColor": "linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%)",
-                "listItemHoverBgColor": "#eeeeee",
-                "leftNavBgColor": `linear-gradient(${rgbColors})`,
-                "inputsBgColor": "#ffffff",
-                "inputsTextColor": "#272727",
-                "regularBgColor": "#d3d5d7",
-                "lightBgColor": "#f1f2f3"
-            },
-            "border": {
-                "borderColor": "#eeeeee",
-                "leftNavBorderColor": null,
-                "popoversBorderColor": "#999999",
-                "inputsBorderColor": "#cccccc"
-            },
-            "button": {
-                "iconBtnColor": "#373737",
-                "iconTextBtnTextColor": "#ffffff",
-                "iconTextBtnIconColor": "#ffffff",
-                "iconTextBtnBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
-                "iconTextBtnHoverBgColor": "linear-gradient(to top right, #2edfa3, #28c83f)",
-                "toggleBtnBgColor": "#989898",
-                "toggleBtnThumbColor": "#ffffff"
-            },
-            "searchBar": {
-                "borderColor": "#777777",
-                "bgColor": "#ffffff",
-                "textColor": null,
-                "searchBtnBgColor": "#ffffff",
-                "searchBtnHoverBgColor": "#ffffff",
-                "searchBtnIconColor": "#373737",
-                "searchBtnHoverIconColor": "#28c83f",
-                "clearBtnIconColor": "#575757"
-            },
-            "appLogo": {
-                "bgColor": "linear-gradient(to top right, #1ca388, #28c83f)",
-                "innerBgColor": "#ffffff",
-                "innerTextColor": "#1ca388",
-                "appNameTextColor": "linear-gradient(to top right, #1ca388, #28c83f)"
-            },
-            "others": {
-                "scrollBarColor": "#bebebe",
-                "progressBarBgColor": "#cccccc",
-                "volumeBarThumbColor": "#28c83f"
-            }
-        }
-    emitEvents('theme-applyTheme', dynamicTheme)
+const getPalette = (img, num) => {
+    return new ColorThief().getPalette(img, num)
+}
+
+const postCoverLoadComplete = () => {
+    const containerEl = document.querySelector('.playing-view .container')
+    const coverEl = containerEl.querySelector('.center .cover')
+
+    const alpha = (68 / 255).toFixed(2)
+    
+    const rgbs = sortPalette(getPalette(coverEl, 2))
+    const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
+    const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
+    const _rgbColors = rgbColors.join(',')
+    applyDocumentStyle({ 
+        '--bg-effect': `linear-gradient(${_rgbColors})`,
+        '--bg-effect-bottom': rgbaColors[0],
+    })
+    containerEl.classList.add('auto-effect')
+    return true
+}
+
+const clearBackgroundEffect = () => {
+    const containerEl = document.querySelector('.playing-view .container')
+    containerEl.classList.remove('auto-effect')
+    applyDocumentStyle({ '--bg-effect': 'none'})
+
+    const coverEl = containerEl.querySelector('.center .cover')
+    coverEl.removeEventListener('load', postCoverLoadComplete)
+}
+
+
+const setupSimpleBackgroundEffect = async () => {
+    clearBackgroundEffect()
+    const cover = Track.coverDefault(currentTrack.value)
+    //默认封面
+    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return 
+    //本地歌曲
+    //if (cover.startsWith(ImageProtocal.prefix)) return
+    applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
+}
+
+const setupGradientBackgroundEffect = async () => {
+    const containerEl = document.querySelector('.playing-view .container')
+    const coverEl = containerEl.querySelector('.center .cover')
+    if(coverEl.complete) postCoverLoadComplete()
+    coverEl.addEventListener('load', postCoverLoadComplete)
+}
+
+const setupBackgroudEffect = async () => {
+    switch(playingViewBgCoverEffectIndex.value) {
+        case 0:
+            clearBackgroundEffect()
+            break
+        case 1:
+            setupSimpleBackgroundEffect()
+            break
+        case 2:
+            setupGradientBackgroundEffect()
+            break
+        default:
+            break
+    }
 }
 
 
@@ -187,7 +137,7 @@ const trackFormat = computed(() => {
 
 
 /* 生命周期、监听 */
-watch(() => (currentTrack.value && currentTrack.value.cover + '&' + playingViewShow.value), setupBackgroudEffect)
+watch(() => (currentTrack.value && currentTrack.value.cover + '&' + playingViewShow.value),  setupBackgroudEffect)
 watch(playingViewBgCoverEffectIndex, setupBackgroudEffect)
 
 onMounted(() => {
@@ -339,8 +289,7 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-            <div class="bg-effect" v-show="hasBackgroudCover && isPlayingViewUseBgCoverEffect">
-            </div>
+            <div class="bg-effect"></div>
         </div>
     </div>
 </template>
@@ -369,7 +318,6 @@ onMounted(() => {
     background: #355c7d;   
     */
     --pv-auto-effect-bottom-bg-color: none;
-    --pv-auto-effect-bg-color: none;
 }
 
 .playing-view .container > .header {
@@ -629,7 +577,7 @@ onMounted(() => {
 }
 
 .playing-view .container.auto-effect .bottom {
-    background: var(--pv-auto-effect-bottom-bg-color);
+    background: var(--bg-effect-bottom);
 }
 
 .playing-view .container.auto-effect .lyric-btn {
@@ -657,7 +605,6 @@ onMounted(() => {
 
 .playing-view .container.auto-effect .bg-effect {
     filter: unset;
-    background: var(--pv-auto-effect-bg-color) !important;
     transition: background 1s;
 }
 </style>

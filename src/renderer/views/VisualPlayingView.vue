@@ -24,6 +24,7 @@ const { seekTrack, playMv,
     dndSaveCover } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 const { getExVisualCanvasHandlersLength } = inject('apiExpose')
+const { applyDocumentStyle } = inject('appStyle')
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -43,7 +44,7 @@ const { currentTrack, playingIndex,
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos, theme, layout,
     isDndSaveEnable, isPlayingViewUseBgCoverEffect,
-    isPlayingViewCoverBorderShow
+    isPlayingViewCoverBorderShow, playingViewBgCoverEffectIndex
 } = storeToRefs(useSettingStore())
 
 
@@ -58,46 +59,44 @@ const setDisactived = (value) => {
     emitEvents('playingView-changed')
 }
 
-
-/*
-const randomRgbColor = () => {
-    var red = Math.random() * 255
-    var green = Math.random() * 666 % 255
-    var blue = Math.random() * 1024 % 255
-    return `rgb(${red}, ${green}, ${blue})`
+const getPalette = (img, num) => {
+    const colorThief = new ColorThief()
+    return colorThief.getPalette(img, num)
 }
 
-const roundedRect = (ctx, x, y, width, height, radius) => {
-    if (height < radius * 2) return
-    ctx.beginPath();
-    ctx.moveTo(x, y + radius);
-    ctx.lineTo(x, y + height - radius);
-    ctx.quadraticCurveTo(x, y + height, x + radius, y + height);
-    ctx.lineTo(x + width - radius, y + height);
-    ctx.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
-    ctx.lineTo(x + width, y + radius);
-    ctx.quadraticCurveTo(x + width, y, x + width - radius, y);
-    ctx.lineTo(x + radius, y);
-    ctx.quadraticCurveTo(x, y, x, y + radius);
-    ctx.stroke();
+const clearBackgroundEffect = () => {
+    const containerEl = document.querySelector('.visual-playing-view .container')
+    containerEl.classList.remove('auto-effect')
+    applyDocumentStyle({ '--bg-effect': 'none'})
 }
-*/
 
-const setupBackgroudEffect = async () => {
-    if (!isPlayingViewUseBgCoverEffect.value) return
-    const bgEffectEl = document.querySelector('.visual-playing-view .bg-effect')
-    if(!bgEffectEl) return 
 
+const setupSimpleBackgroundEffect = async () => {
     const track = currentTrack.value
-    if (!track || !Track.hasCover(track)) return setHasBackgroudCover(false)
+    if (!track || !Track.hasCover(track)) return clearBackgroundEffect()
     const { cover } = track
     //默认封面
-    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return setHasBackgroudCover(false)
+    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return clearBackgroundEffect()
     //本地歌曲
-    if (cover.startsWith(ImageProtocal.prefix)) return setHasBackgroudCover(false)
+    if (cover.startsWith(ImageProtocal.prefix)) return clearBackgroundEffect()
+    applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
+}
 
-    setHasBackgroudCover(true)
-    bgEffectEl.style.background = `url('${cover}')`
+
+const setupBackgroudEffect = async () => {
+    switch(playingViewBgCoverEffectIndex.value) {
+        case 0:
+            clearBackgroundEffect()
+            break
+        case 1:
+            setupSimpleBackgroundEffect()
+            break
+        case 2:
+            //setupGradientBackgroundEffect()
+            break
+        default:
+            break
+    }
 }
 
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
@@ -113,6 +112,7 @@ const switchVisualCanvas = () => {
 
 /* 生命周期、监听 */
 watch(() => (currentTrack.value && currentTrack.value.cover + '&'+ playingViewShow.value), setupBackgroudEffect)
+watch(playingViewBgCoverEffectIndex, setupBackgroudEffect)
 
 onMounted(() => {
     setDisactived(false)
@@ -300,7 +300,7 @@ onUnmounted(() => {
             <canvas class="fullpage-spectrum-canvas" v-show="false">
             </canvas>
         </div>
-        <div class="bg-effect" v-show="hasBackgroudCover && isPlayingViewUseBgCoverEffect">
+        <div class="bg-effect">
         </div>
     </div>
 </template>
