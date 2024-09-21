@@ -91,7 +91,7 @@ onMounted(() => {
 
 .classic-main-bottom {
     flex-direction: column;
-    height: var(--others-playnav-height);
+    height: var(--main-bottom-height);
     -webkit-app-region: none;
     padding-top: 8px;
 }

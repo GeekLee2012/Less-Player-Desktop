@@ -946,7 +946,7 @@ const playMv = (video, failText, text) => {
 
     getVideoDetail(video).then(result => {
         showToast(text, () => {
-            playVideo({ ...video, ...result, vcType: (vcType || 0) }, -1, -1, failText)
+            playVideo({ ...video, ...result, vcType: (vcType || 0) }, -1, -1, failText, true)
             traceRecentTrack(video)
         }, 666)
     }, async error => {
@@ -955,7 +955,7 @@ const playMv = (video, failText, text) => {
             if (result && !isBlank(result.url)) {
                 const { url } = result
                 return showToast(text, () => {
-                    playVideo({ ...video, url, vcType: (vcType || 0) }, -1, -1,failText)
+                    playVideo({ ...video, url, vcType: (vcType || 0) }, -1, -1,failText, true)
                     traceRecentTrack(video)
                 }, 666)
             }
@@ -966,7 +966,7 @@ const playMv = (video, failText, text) => {
 }
 
 //video => { title, type, cover, url }
-const playVideo = async (video, index, pos, failText) => {
+const playVideo = async (video, index, pos, failText, noTrace) => {
     try {
         if(!video) return
         
@@ -978,7 +978,7 @@ const playVideo = async (video, index, pos, failText) => {
 
         //开始播放视频
         if (!videoPlayingViewShow.value) toggleVideoPlayingView()
-        playVideoNow(video, index, pos)
+        playVideoNow(video, index, pos, noTrace)
         setupCurrentMediaSession()
     } catch (error) {
         if(isDevEnv()) console.log(error)

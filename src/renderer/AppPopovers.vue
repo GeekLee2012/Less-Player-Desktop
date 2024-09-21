@@ -519,9 +519,11 @@ onUnmounted(() => offEvents(eventsRegistration))
 #platform-category-view {
   position: fixed;
   top: 83px;
+  top: calc(2px + var(--main-top-height));
   right: 0px;
   width: 404px;
   width: 40.4%;
+  height: calc(100% - var(--main-top-height) - 2px - var(--main-bottom-height) - 2px);
   z-index: 55;
   background-color: var(--app-bg-color);
   background-image: var(--app-bg-image);
@@ -706,10 +708,11 @@ onUnmounted(() => offEvents(eventsRegistration))
   border-radius: var(--border-popover-border-radius);
 }
 
-
+/*
 #popovers .autolayout {
   top: 68px;
 }
+*/
 
 #popovers .popover-hint {
   z-index: 1024;

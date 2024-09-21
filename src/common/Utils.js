@@ -670,6 +670,7 @@ const guessFilename = (name, defaultName, excludes) => {
     let to = name.lastIndexOf('.')
     //if(to <= from) return defaultName
     to = (to >= 0 ? to : name.length)
+    if(from >= to) return name
     const _name = name.substring(from, to)
     if(excludes && Array.isArray(excludes) 
         && excludes.includes(_name)) {

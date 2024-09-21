@@ -520,7 +520,7 @@ provide('appCommon', {
 </script>
 
 <template>
-  <div id="app-content" @dragover="e => e.preventDefault()" @drop="onDrop"
+  <div id="app-main-content" @dragover="e => e.preventDefault()" @drop="onDrop"
       :class="{
         'winos-style': isWinOS(),
         'use-winos-win-ctl': useWindowsStyleWinCtl
@@ -534,7 +534,7 @@ provide('appCommon', {
 </template>
 
 <style>
-#app-content {
+#app-main-content {
   display: flex;
   flex: 1;
   background-image: var(--app-bg-image);

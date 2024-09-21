@@ -193,10 +193,10 @@ const getLyricOffsetText = () => {
 
 .lyric-toolbar .text {
     margin-bottom: 2px;
-    font-size: 14px;
+    font-size: 15px;
     width: 100%;
     align-items: flex-start;
-    padding-left: 52px;
+    padding-left: 39px;
 }
 
 .lyric-toolbar .v-spacing {
@@ -209,13 +209,13 @@ const getLyricOffsetText = () => {
     border: 1px solid var(--border-inputs-border-color);
     font-size: 14px;
     text-align: left;
-    width: 108px;
+    width: 116px;
 }
 
 
 .lyric-toolbar .text-btn {
     text-align: center;
-    font-size: 14px;
+    font-size: 15px;
     display: flex;
     flex-direction: row;
     align-items: center;

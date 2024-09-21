@@ -52,27 +52,6 @@ const setSearchBarSize = () => {
     if (el) el.style.width = `${size}px`
 }
 
-const setCategoryViewSize = () => {
-    const mainContent = document.getElementById('default-main-content')
-    if (!mainContent) return
-
-    const playlistCategory = document.querySelector('#playlist-category-view')
-    const artistCategory = document.querySelector('#artist-category-view')
-    const radioCategory = document.querySelector('#radio-category-view')
-    const tagsCategory = document.querySelector('#tags-category-view')
-    const platformCategory = document.querySelector('#platform-category-view')
-
-    const categories = [playlistCategory, artistCategory,
-        radioCategory, tagsCategory,
-        platformCategory]
-
-    const { clientHeight } = mainContent, padding = 0
-    const height = (clientHeight - padding)
-    categories.forEach(item => {
-        if (item) item.style.height = `${height}px`
-    })
-}
-
 const setImageTextTileSize = () => {
     const tileMinWidth = 173
     const tileHMargin = 13
@@ -332,12 +311,8 @@ const resizeViewItems = (event) => {
     //nextTick(() => setupWindowZoom(true))
     //自适应播放元信息组件大小
     setPlayMetaSize()
-    //自适应搜索框大小
-    //setSearchBarSize()
     //自适应ImageTextTile组件大小
     setImageTextTileSize()
-    //自适应分类列表大小
-    setCategoryViewSize()
     //自适应播放页组件大小
     setPlayingViewSize()
     //主题页
@@ -358,8 +333,6 @@ const resizeViewItems = (event) => {
 
 
 /* 生命周期、监听 */
-//TODO
-watch([playlistCategoryViewShow, artistCategoryViewShow, radioCategoryViewShow], setCategoryViewSize)
 watch(playingViewShow, (nv, ov) => {
     hideLyricToolbar()
     setPlayingViewSize()
@@ -381,15 +354,9 @@ const eventsRegistration = {
 
 onMounted(() => {
     onEvents(eventsRegistration)
-    
+
     //窗口大小变化事件监听
     window.addEventListener('resize', resizeViewItems)
-
-    //点击事件监听
-    document.addEventListener('click', e => {
-        //强制分类列表重置大小
-        setCategoryViewSize()
-    })
 })
 
 onUnmounted(() => offEvents(eventsRegistration))

@@ -10,6 +10,9 @@
   --content-text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
   --content-text-font-family: var(--content-text-preset-font-family);
 
+  --main-top-height: 68px;
+  --main-bottom-height: 82px;
+
   --content-text-size: 15.5px;
   --content-text-subtitle-size: 14px;
   --content-text-tip-text-size: 13.5px;

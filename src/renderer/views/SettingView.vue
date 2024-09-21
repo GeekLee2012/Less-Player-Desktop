@@ -39,6 +39,7 @@ const { setThemeIndex,
     setFontFamily,
     setFontWeight,
     toggleRadioModeShortcut,
+    toggleFreeVideoShortcut,
     setTrackQualityIndex,
     toggleVipTransfer,
     toggleVipFlagShow,
@@ -1134,6 +1135,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="cate-subtitle">相约电波：</span>
                         <ToggleControl @click="toggleRadioModeShortcut" :value="navigation.radioModeShortcut">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">视频创建：</span>
+                        <ToggleControl @click="toggleFreeVideoShortcut" :value="navigation.freeVideoShortcut">
                         </ToggleControl>
                     </div>
                     <div>

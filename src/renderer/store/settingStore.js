@@ -188,6 +188,7 @@ export const useSettingStore = defineStore('setting', {
             //播放页 - 封面图片背景效果
             playingViewUseBgCoverEffect: false,
             playingViewBgCoverEffectIndex: 0,
+            playingViewBgCoverEffectGradientMode: 0,
             //播放页 - 封面图片边框
             playingViewCoverBorderShow: true,
         },
@@ -297,6 +298,8 @@ export const useSettingStore = defineStore('setting', {
             userHomeShortcut: true,
             //简约布局按钮
             simpleLayoutShortcut: true,
+            //视频入口按钮
+            freeVideoShortcut: false,
         },
         /* 对话框 */
         dialog: {
@@ -555,6 +558,9 @@ export const useSettingStore = defineStore('setting', {
         isSimpleLayoutShortcutEnable() {
             return this.navigation.simpleLayoutShortcut
         },
+        isFreeVideoShortcutEnable() {
+            return this.navigation.freeVideoShortcut
+        },
         isPlaybackQueueAutoPositionOnShow() {
             return this.track.playbackQueueAutoPositionOnShow
         },
@@ -711,6 +717,9 @@ export const useSettingStore = defineStore('setting', {
         },
         playingViewBgCoverEffectIndex() {
             return this.track.playingViewBgCoverEffectIndex
+        },
+        playingViewBgCoverEffectGradientMode() {
+            return this.track.playingViewBgCoverEffectGradientMode
         },
         isUseShadowForCardStyleTile() {
             return this.common.shadowForCardStyleTile
@@ -1037,6 +1046,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleSimpleLayoutShortcut() {
             this.navigation.simpleLayoutShortcut = !this.navigation.simpleLayoutShortcut
+        },
+        toggleFreeVideoShortcut() {
+            this.navigation.freeVideoShortcut = !this.navigation.freeVideoShortcut
         },
         toggleKeysGlobal() {
             this.keys.global = !this.keys.global
@@ -1387,6 +1399,9 @@ export const useSettingStore = defineStore('setting', {
         },
         setPlayingViewBgCoverEffectIndex(value) {
             this.track.playingViewBgCoverEffectIndex = value
+        },
+        setPlayingViewBgCoverEffectGradientMode(value) {
+            this.track.playingViewBgCoverEffectGradientMode = value
         }
     },
     persist: {

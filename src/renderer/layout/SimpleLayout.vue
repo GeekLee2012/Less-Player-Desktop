@@ -12,7 +12,7 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
 import { isMacOS, isDevEnv, nextInt, randomTextWithinAlphabet, toTrimString, toMillis } from '../../common/Utils';
-import Popovers from '../Popovers.vue';
+import AppPopovers from '../AppPopovers.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
@@ -1262,7 +1262,7 @@ onActivated(() => {
                     v-html="line2Text"></div>
             </div>
         </div>
-        <Popovers></Popovers>
+        <AppPopovers></AppPopovers>
     </div>
 </template>
 

@@ -39,7 +39,7 @@ const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos,
     isDndSaveEnable, isPlayingViewUseBgCoverEffect,
     isPlayingViewCoverBorderShow, currentTheme, 
-    playingViewBgCoverEffectIndex,
+    playingViewBgCoverEffectIndex, playingViewBgCoverEffectGradientMode,
 } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
@@ -48,25 +48,35 @@ const volumeBarRef = ref(null)
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
 
-const sortPalette = (rgbs) => {
+const sortPalette = (rgbs, mode) => {
     //简单起见，仅考虑数组长度为2的情况
-    const [h1, s1, l1] = rgbToHsl(...rgbs[0])
-    const [h2, s2, l2] = rgbToHsl(...rgbs[1])
-    if(l1 > l2) return rgbs
-    return rgbs.reverse()
+    const _rgbs = rgbs.slice(0, 2)
+    const [h1, s1, l1] = rgbToHsl(..._rgbs[0])
+    const [h2, s2, l2] = rgbToHsl(..._rgbs[1])
+
+    switch(mode) {
+        case 0: //亮 -> 暗
+            return l1 > l2 ? _rgbs : _rgbs.reverse()
+        case 1: //暗 -> 亮
+            return l1 > l2 ? _rgbs.reverse() : _rgbs
+        default:
+            break
+    }
+    return _rgbs
 }
 
 const getPalette = (img, num) => {
     return new ColorThief().getPalette(img, num)
 }
 
+
 const postCoverLoadComplete = () => {
     const containerEl = document.querySelector('.playing-view .container')
     const coverEl = containerEl.querySelector('.center .cover')
-
-    const alpha = (68 / 255).toFixed(2)
-    
-    const rgbs = sortPalette(getPalette(coverEl, 2))
+    const mode = playingViewBgCoverEffectGradientMode.value
+    const rgbs = sortPalette(getPalette(coverEl, 2), mode)
+    const alphaColor = mode ? 88: 68
+    const alpha = (alphaColor / 255).toFixed(2)
     const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
     const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
     const _rgbColors = rgbColors.join(',')
@@ -137,8 +147,11 @@ const trackFormat = computed(() => {
 
 
 /* 生命周期、监听 */
-watch(() => (currentTrack.value && currentTrack.value.cover + '&' + playingViewShow.value),  setupBackgroudEffect)
-watch(playingViewBgCoverEffectIndex, setupBackgroudEffect)
+watch(() => (currentTrack.value && currentTrack.value.cover 
+    + '&' + playingViewShow.value
+    + '-' + playingViewBgCoverEffectIndex.value
+    + '-' + playingViewBgCoverEffectGradientMode.value),  
+    setupBackgroudEffect)
 
 onMounted(() => {
     emitEvents('playingView-changed')
@@ -370,6 +383,7 @@ onMounted(() => {
     align-items: center;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     word-wrap: break-word;
     line-break: anywhere;
 }

@@ -1,7 +1,7 @@
 <script setup>
 import DefaultMainLeft from './DefaultMainLeft.vue';
 import DefaultMainCenter from './DefaultMainCenter.vue';
-import Popovers from '../Popovers.vue';
+import AppPopovers from '../AppPopovers.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
 
 </script>
@@ -15,7 +15,7 @@ import ClassicMainBottom from './ClassicMainBottom.vue';
         <div class="bottom">
             <ClassicMainBottom></ClassicMainBottom>
         </div>
-        <Popovers></Popovers>
+        <AppPopovers></AppPopovers>
     </div>
 </template>
 

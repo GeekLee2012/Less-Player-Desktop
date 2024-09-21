@@ -2,17 +2,6 @@
 </template>
 
 <style>
-/*
-.winos-style {
-  --border-app-win-border-radius: 3px;
-  --border-popover-border-radius: 3px;
-  --border-btn-border-radius: 3px;
-  --border-list-item-border-radius: 3px;
-  --border-left-nav-list-item-border-radius: 3px;
-  --border-img-text-tile-border-radius: 3px;
-}
-*/
-
 /* 普通文本按钮 */
 .winos-style .text-btn svg {
   padding-top: 2px !important;
@@ -181,12 +170,10 @@
   cursor: pointer;
 }
 
-.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn:hover,
-.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn:hover svg {
-  fill: var(--content-highlight-color) !important;
-  stroke: var(--content-highlight-color) !important;
-  cursor: pointer;
+.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn:hover {
+  background: #eeeeee66;
 }
+
 /* 桌面歌词 */
 .desktop-lyric.winos-style  {
   background: var(--app-bg-color) !important;

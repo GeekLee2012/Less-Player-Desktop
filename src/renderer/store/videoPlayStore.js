@@ -32,6 +32,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         videoThemeIndex: 1,
         dataLayoutIndex: 0, // 0 => Grid, 1 => List
         recentVideos: [],
+        recentLimit: 10,
         savePlayingPos: false, //是否保存播放进度，即是否从头开始看
     }),
     getters: {
@@ -133,7 +134,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             emitEvents(playEventName, video)
         },
         //播放，并更新当前播放列表相关状态
-        playVideoNow(video, index, pos) {
+        playVideoNow(video, index, pos, noTrace) {
             if(!video) return 
 
             this.currentVideo = video
@@ -143,7 +144,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             const _video = isCollectionType ? this.currentVideoPlayingItem : this.currentVideo
             Object.assign(_video, { pos })
             this.playVideoDirectly(_video)
-            this.traceRecentVideos()
+            if(!noTrace) this.traceRecentVideos()
         },
         playVideoItemByIndex(index) {
             this.playingIndex = this._validPlayingIndex(index)
@@ -194,27 +195,20 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             this._resetPlayState()
         },
         traceRecentVideos() {
-            const current = this.currentVideo
-            let index = 0
-            do {
-                index = this.recentVideos.findIndex(item => isVideoEquals(item.data, current))
-                if(index > -1) {
-                    this.recentVideos.splice(index, 1)
-                    index = 0
-                }
-            } while(index > -1)
-            
+            const video = this.currentVideo
+            this.removeRecentVideo(video)
             this.recentVideos.push({
-                data: current,
+                data: video,
                 index: this.playingIndex
             })
-            //TODO 暂时只保留一条记录
-            trimArray(this.recentVideos, 1)
+            //TODO 暂时只保留少量记录
+            trimArray(this.recentVideos, this.recentLimit || 3)
         },
-        getRecentLatestVideo() {
+        getRecentLatestVideos() {
             const size = this.recentVideos.length
             if(size < 1) return 
-            return this.recentVideos[0]
+            const _videos = this.recentVideos
+            return _videos.reverse()
         },
         clearRecentVideos() {
             this.recentVideos.length = 0
@@ -224,9 +218,23 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         },
         updateRecentLatestVideo(pos) {
             if(!this.savePlayingPos) return 
-            const video = this.getRecentLatestVideo()
+            const videos = this.getRecentLatestVideos()
+            if(!videos) return 
+            const size = videos.length
+            if(size < 1) return 
+            Object.assign(videos[0], { pos })
+        },
+        removeRecentVideo(video) {
             if(!video) return 
-            Object.assign(video, { pos })
+            let index = 0, counter = 0
+            do {
+                index = this.recentVideos.findIndex(item => isVideoEquals(item.data, video))
+                if(index > -1) {
+                    this.recentVideos.splice(index, 1)
+                    index = 0
+                }
+                if(++counter > 10) break
+            } while(index > -1)
         },
     },
     persist: {

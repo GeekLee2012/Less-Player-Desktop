@@ -15,7 +15,10 @@ const { setPlayingViewThemeIndex, showCustomPlayingThemeEditView,
 const { playingViewPresetThemes, playingViewCustomThemes,
     playingViewThemeIndex, playingViewThemeType } = storeToRefs(useAppCommonStore())
 const { track } = storeToRefs(useSettingStore())
-const { setPlayingViewBgCoverEffectIndex, togglePlayingViewCoverBorderShow } = useSettingStore()
+const { setPlayingViewBgCoverEffectIndex, 
+    togglePlayingViewCoverBorderShow,
+    setPlayingViewBgCoverEffectGradientMode
+ } = useSettingStore()
 
 
 const editTheme = (item) => {
@@ -72,6 +75,11 @@ const computedCustomThemeSectionTitle = computed(() => {
                     <div class="opt-item">
                         <span class="subtitle">封面背景效果：</span>
                         <SingleSelectionControl :data="['关闭', '简单', '渐变']" :value="track.playingViewBgCoverEffectIndex" :onChanged="setPlayingViewBgCoverEffectIndex">
+                        </SingleSelectionControl>
+                    </div>
+                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
+                        <span class="subtitle">渐变顺序：</span>
+                        <SingleSelectionControl class="" :data="['亮-暗', '暗-亮']" :value="track.playingViewBgCoverEffectGradientMode" :onChanged="setPlayingViewBgCoverEffectGradientMode">
                         </SingleSelectionControl>
                     </div>
                     <div class="opt-item">

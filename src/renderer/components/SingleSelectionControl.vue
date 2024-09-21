@@ -46,12 +46,16 @@ const setCurrentIndex = (index) => {
     border-bottom: var(--item-border);
     padding: 4px 6px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     text-align: center;
     /*
     background-color: var(--content-list-item-hover-bg-color);
     background-color: var(--button-toggle-btn-bg-color);
     */
+}
+
+.single-selection-ctl .item:hover {
+    background: var(--content-list-item-hover-bg-color);
 }
 
 .single-selection-ctl .first {

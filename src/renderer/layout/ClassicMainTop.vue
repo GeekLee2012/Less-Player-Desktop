@@ -10,7 +10,9 @@ import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
-const { visitThemes, visitUserHome, visitSetting, visitModulesSetting, visitPlugins } = inject('appRoute')
+const { visitThemes, visitUserHome, visitSetting, 
+    visitModulesSetting, visitPlugins, visitVideoCreate 
+} = inject('appRoute')
 const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
 
 
@@ -20,7 +22,8 @@ const { isRadioModeShortcutEnable,
     isPluginsSettingShortcutEnable,
     isThemesShortcutEnable,
     isUserHomeShortcutEnable,
-    isSimpleLayoutShortcutEnable, } = storeToRefs(useSettingStore())
+    isSimpleLayoutShortcutEnable, 
+    isFreeVideoShortcutEnable, } = storeToRefs(useSettingStore())
 const { isMaxScreen, isRadioMode, isRadioModeEnable } = storeToRefs(useAppCommonStore())
 
 
@@ -62,6 +65,16 @@ const toggleRadioMode = () => {
                                 d="M287.78,352q-119.47,0-238.95,0C20.79,352-.7,330,0,302.29.66,277.7,21.13,257,45.75,256c1.17,0,2.34,0,3.5,0q238.71,0,477.42,0c27.85,0,49.4,21.12,49.31,48.2A47.92,47.92,0,0,1,528.74,352c-22,.2-44,0-66,0Z" />
                             <path
                                 d="M191.69,608c-47.82,0-95.65.07-143.47,0A48,48,0,0,1,0,559.19C.31,533.67,21.27,512.47,46.84,512c11.5-.2,23,0,34.49,0q127,0,253.94,0c27.18,0,48.64,21.16,48.71,47.79A48,48,0,0,1,335.65,608Q263.67,608.1,191.69,608Z" />
+                        </g>
+                    </g>
+                </svg>
+            </div>
+            <div class="video-btn btn spacing" @click="visitVideoCreate" v-show="isFreeVideoShortcutEnable">
+                <svg width="20" height="20" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Layer_2" data-name="Layer 2">
+                        <g id="Layer_1-2" data-name="Layer 1">
+                            <path
+                                d="M1024,158.76v536c-.3,1.61-.58,3.21-.92,4.81-2.52,12-3.91,24.43-7.76,36-23.93,72-88.54,117.91-165.13,117.92q-338.19,0-676.4-.1a205.81,205.81,0,0,1-32.3-2.69C76,840.18,19.81,787.63,5,723.14c-2.15-9.35-3.36-18.91-5-28.38v-537c.3-1.26.66-2.51.89-3.79,1.6-8.83,2.52-17.84,4.85-26.48C26.32,51.12,93.47.05,173.29,0Q512,0,850.72.13a200.6,200.6,0,0,1,31.8,2.68C948.44,13.47,1004,65.66,1019.09,130.88,1021.21,140.06,1022.39,149.46,1024,158.76ZM384,426.39c0,45.66-.09,91.32,0,137,.07,24.51,19.76,43.56,43.38,42.47,8.95-.42,15.83-5.3,23.06-9.86q69.25-43.74,138.74-87.11,40.63-25.42,81.44-50.6c23.18-14.34,23.09-49-.25-63.14-3.27-2-6.69-3.72-9.93-5.74q-30.08-18.81-60.08-37.69Q522.2,302.46,444,253.2a34.65,34.65,0,0,0-26.33-4.87c-19.87,4.13-33.64,21.28-33.68,42.09Q383.9,358.42,384,426.39Z" />
                         </g>
                     </g>
                 </svg>
@@ -140,7 +153,7 @@ const toggleRadioMode = () => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 68px;
+    height: var(--main-top-height);
     -webkit-app-region: drag;
     position: relative;
     padding-left: 33px;
@@ -193,6 +206,10 @@ const toggleRadioMode = () => {
 }
 
 .classic-main-top .module-btn {
+    transform: translateY(1px);
+}
+
+.classic-main-top .video-btn {
     transform: translateY(1px);
 }
 </style>
