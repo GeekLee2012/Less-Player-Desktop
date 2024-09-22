@@ -3,9 +3,10 @@
 ##### 一、阅读须知  
 当前内容格式，不同环境可能会显示不同。
 为避免产生误解，请在下列参考环境下阅读：
-- Github上，在预览模式（Preview Mode）下阅读，而国内Git平台在除Fireox外的其他浏览器中会显示错误  
+- Github上，在预览模式（Preview Mode）下阅读
 - VSCode中，在预览模式下阅读  
 - 第三方Markdown阅读器，在预览模式下阅读  
+- （不建议）国内Git平台上，在预览模式下阅读；但在部分浏览器中，可能会显示错误  
   
 ##### 二、简介   
 LeVC（Less Player Video Collection）即视频合集，文件扩展名为.levc。  

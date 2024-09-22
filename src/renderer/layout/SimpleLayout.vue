@@ -299,7 +299,7 @@ const nextRandomPlatformCode = (platforms) => {
     return sortedPlatforms[guessmeIndex].code
 }
 
-/* 随便听听 */
+/* 随缘听 */
 const randomPlay = async () => {
     //本次操作链路traceId，一次操作涉需要经过许多函数调用才能完成
     //通过设置新的链路traceId，可实现前一操作的中断，或舍弃其结果
@@ -1116,7 +1116,7 @@ onActivated(() => {
                                 <path
                                     d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
                             </svg>
-                            <div class="text">随便听听</div>
+                            <div class="text">随缘听</div>
                         </div>
                         <svg @click="toggleRandomMusicToolbar" class="down-btn" width="15" height="15"
                             viewBox="0 0 763.32 424.57" xmlns="http://www.w3.org/2000/svg">
@@ -1274,12 +1274,13 @@ onActivated(() => {
     justify-content: center;
     flex: 1;
     -webkit-app-region: none;
-    --layout-width: 500px;
+    --layout-width: calc(500px - var(--app-win-custom-shadow-size) * 2);
     --bottom-height: 88px;
     width: var(--layout-width);
     overflow: hidden;
     background: var(--content-bg-color);
     --others-sliderbar-ctl-height: 3px;
+    --others-playctl-spacing: 18px;
 }
 
 .simple-layout .spacing {
@@ -1301,7 +1302,7 @@ onActivated(() => {
     cursor: pointer;
 }
 
-.simple-layout>.center {
+.simple-layout > .center {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1312,7 +1313,7 @@ onActivated(() => {
     height: var(--layout-width);
 }
 
-.simple-layout>.center .top {
+.simple-layout > .center .top {
     -webkit-app-region: drag;
     width: 100%;
     height: 56px;
@@ -1326,30 +1327,30 @@ onActivated(() => {
     justify-content: center;
 }
 
-.simple-layout>.center .top svg {
+.simple-layou > .center .top svg {
     -webkit-app-region: none;
 }
 
-.simple-layout>.center .top:hover {
+.simple-layout > .center .top:hover {
     background-color: var(--app-bg-color);
     opacity: 0.85;
 }
 
-.simple-layout>.center .top .left {
+.simple-layout > .center .top .left {
     display: flex;
     height: 100%;
     width: 188px;
     position: relative;
 }
 
-.simple-layout>.center .top .left .win-ctl-wrap {
+.simple-layout > .center .top .left .win-ctl-wrap {
     display: flex;
     align-items: center;
     padding-left: 15px;
     overflow: hidden;
 }
 
-.simple-layout>.center .top .left .extra {
+.simple-layout > .center .top .left .extra {
     height: 100%;
     position: absolute;
     right: 0px;
@@ -1359,20 +1360,20 @@ onActivated(() => {
     overflow: hidden;
 }
 
-.simple-layout>.center .top .left .extra .platform {
+.simple-layout > .center .top .left .extra .platform {
     display: flex;
     align-items: center;
     margin-right: 3px;
 }
 
-.simple-layout>.center .top .left .extra .platform span {
+.simple-layout > .center .top .left .extra .platform span {
     color: var(--content-text-highlight-color);
     font-size: var(--content-text-tip-text-size);
     font-weight: bold;
     text-align: center;
 }
 
-.simple-layout>.center .top .left .extra .cate-name {
+.simple-layout > .center .top .left .extra .cate-name {
     padding: 1px;
     font-weight: bold;
 
@@ -1380,11 +1381,12 @@ onActivated(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     width: 75px;
 }
 
-.simple-layout>.center .top .flex-space {
+.simple-layout > .center .top .flex-space {
     flex: 1;
     display: flex;
     align-items: center;
@@ -1413,13 +1415,17 @@ onActivated(() => {
     -webkit-app-region: none;
 }
 
+.simple-layout .listen-btn .down-btn {
+    -webkit-app-region: none;
+}
+
 .simple-layout .listen-btn .play-btn:hover svg,
 .simple-layout .listen-btn .play-btn:hover .text {
     color: var(--content-highlight-color);
     fill: var(--content-highlight-color);
 }
 
-.simple-layout>.center .top .action {
+.simple-layout > .center .top .action {
     visibility: hidden;
     display: flex;
     align-items: center;
@@ -1429,16 +1435,16 @@ onActivated(() => {
     margin-left: 43px;
 }
 
-.simple-layout>.center .top .win-action-left {
+.simple-layout > .center .top .win-action-left {
     display: flex;
     align-items: center;
     justify-content: flex-start;
 }
 
-.simple-layout>.center .top .win-action-left .lyric-btn,
-.simple-layout>.center .top .win-action-left .text-color-btn,
-.simple-layout>.center .top .action .lyric-btn,
-.simple-layout>.center .top .action .text-color-btn {
+.simple-layout > .center .top .win-action-left .lyric-btn,
+.simple-layout > .center .top .win-action-left .text-color-btn,
+.simple-layout > .center .top .action .lyric-btn,
+.simple-layout > .center .top .action .text-color-btn {
     width: 15px;
     height: 13px;
     border-radius: 3px;
@@ -1452,53 +1458,53 @@ onActivated(() => {
 }
 
 
-.simple-layout>.center .top .action .lyric-show,
-.simple-layout>.center .top .win-action-left .lyric-show {
+.simple-layout > .center .top .action .lyric-show,
+.simple-layout > .center .top .win-action-left .lyric-show {
     border: 2px solid var(--content-highlight-color);
     cursor: pointer;
 }
 
-.simple-layout>.center .top .action .text-color-btn,
-.simple-layout>.center .top .win-action-left .text-color-btn {
+.simple-layout > .center .top .action .text-color-btn,
+.simple-layout > .center .top .win-action-left .text-color-btn {
     background: var(--button-icon-btn-color);
     color: #fff;
 }
 
-.simple-layout>.center .top .action .text-color-black,
-.simple-layout>.center .top .win-action-left .text-color-black {
+.simple-layout > .center .top .action .text-color-black,
+.simple-layout > .center .top .win-action-left .text-color-black {
     background: #fff;
     color: #000;
 }
 
-.simple-layout>.center .top .left,
-.simple-layout>.center .top .flex-space,
-.simple-layout>.center .top .action {
+.simple-layout > .center .top .left,
+.simple-layout > .center .top .flex-space,
+.simple-layout > .center .top .action {
     visibility: hidden;
 }
 
-.simple-layout>.center .top .action .mv-btn,
-.simple-layout>.center .top .action .quit-layout-btn {
+.simple-layout > .center .top .action .mv-btn,
+.simple-layout > .center .top .action .quit-layout-btn {
     display: flex;
     justify-content: center;
     align-items: center;
     /*padding-top: 3px;*/
 }
 
-.simple-layout>.center .non-macos-top .action,
-.simple-layout>.center .non-macos-top .win-action-left {
+.simple-layout > .center .non-macos-top .action,
+.simple-layout > .center .non-macos-top .win-action-left {
     -webkit-app-region: none;
 }
 
-.simple-layout>.center .non-macos-top .left,
-.simple-layout>.center .non-macos-top .flex-space,
-.simple-layout>.center .non-macos-top .action,
-.simple-layout>.center .top:hover .left,
-.simple-layout>.center .top:hover .flex-space,
-.simple-layout>.center .top:hover .action {
+.simple-layout > .center .non-macos-top .left,
+.simple-layout > .center .non-macos-top .flex-space,
+.simple-layout > .center .non-macos-top .action,
+.simple-layout > .center .top:hover .left,
+.simple-layout > .center .top:hover .flex-space,
+.simple-layout > .center .top:hover .action {
     visibility: visible;
 }
 
-.simple-layout>.center .meta-wrap {
+.simple-layout > .center .meta-wrap {
     width: 100%;
     z-index: 2;
     position: absolute;
@@ -1508,47 +1514,49 @@ onActivated(() => {
     padding: 33px;
 }
 
-.simple-layout>.center .meta-wrap .audio-title {
+.simple-layout > .center .meta-wrap .audio-title {
     font-size: 28px;
     font-weight: bold;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     width: 86.8%;
     line-height: 36px;
 }
 
-.simple-layout>.center .meta-wrap .audio-artist {
+.simple-layout > .center .meta-wrap .audio-artist {
     font-size: 17px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     width: 80%;
     line-height: 32px;
 }
 
 
-.simple-layout>.center .cover {
+.simple-layout > .center .cover {
     width: var(--layout-width);
     height: var(--layout-width);
     overflow: hidden;
     z-index: 1;
 }
 
-.simple-layout>.center .cover img {
+.simple-layout > .center .cover img {
     width: 100%;
     height: 100%;
 }
 
-.simple-layout>.center .cover img.draggable {
+.simple-layout > .center .cover img.draggable {
     -webkit-user-drag: auto;
 }
 
-.simple-layout>.center .audio-time-wrap {
+.simple-layout > .center .audio-time-wrap {
     width: 100%;
     z-index: 2;
     position: absolute;
@@ -1585,7 +1593,7 @@ onActivated(() => {
     overflow: hidden;
 }
 
-.simple-layout>.bottom {
+.simple-layout > .bottom {
     width: var(--layout-width);
     height: var(--bottom-height);
     display: flex;
@@ -1606,7 +1614,7 @@ onActivated(() => {
     border-radius: 0px;
 }
 
-.simple-layout>.bottom .action {
+.simple-layout > .bottom .action {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1614,42 +1622,42 @@ onActivated(() => {
     flex: 1;
 }
 
-.simple-layout>.bottom .action .btm-left,
-.simple-layout>.bottom .action .btm-right {
+.simple-layout > .bottom .action .btm-left,
+.simple-layout > .bottom .action .btm-right {
     width: 135px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.simple-layout>.bottom .action .btm-left {
+.simple-layout > .bottom .action .btm-left {
     justify-content: flex-start;
 }
 
-.simple-layout>.bottom .action .btm-right {
+.simple-layout > .bottom .action .btm-right {
     justify-content: flex-end;
 }
 
-.simple-layout>.bottom .action .btm-center {
+.simple-layout > .bottom .action .btm-center {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.simple-layout>.bottom .volume-bar {
+.simple-layout > .bottom .volume-bar {
     width: 25px;
 }
 
-.simple-layout>.bottom .volume-bar:hover {
-    width: 80px;
+.simple-layout > .bottom .volume-bar:hover {
+    width: 68px;
 }
 
-.simple-layout>.bottom .action .love-btn {
+.simple-layout > .bottom .action .love-btn {
     fill: var(--content-highlight-color) !important;
 }
 
-.simple-layout>.bottom .lyric-ctl {
+.simple-layout > .bottom .lyric-ctl {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1658,7 +1666,7 @@ onActivated(() => {
     width: 90%;
 }
 
-.simple-layout>.bottom .lyric-ctl .line {
+.simple-layout > .bottom .lyric-ctl .line {
     font-size: 22px;
     line-height: 30px;
 
@@ -1671,12 +1679,12 @@ onActivated(() => {
     width: 100%;
 }
 
-.simple-layout>.bottom .lyric-ctl .current-line {
+.simple-layout > .bottom .lyric-ctl .current-line {
     font-size: 21px;
     font-weight: bold;
 }
 
-.simple-layout>.bottom .lyric-ctl .v-spacing {
+.simple-layout > .bottom .lyric-ctl .v-spacing {
     margin-top: 0px;
 }
 

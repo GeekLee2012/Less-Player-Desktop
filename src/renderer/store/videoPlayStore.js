@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { PlayMode } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 import { Video } from '../../common/Video';
-import { trimArray } from '../../common/Utils';
+import { trimArrayTail } from '../../common/Utils';
 
 
 const isValueEqual = (v1, v2) => {
@@ -197,18 +197,24 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         traceRecentVideos() {
             const video = this.currentVideo
             this.removeRecentVideo(video)
+            /*
             this.recentVideos.push({
                 data: video,
                 index: this.playingIndex
             })
+            */
+            this.recentVideos.splice(0, 0, {
+                data: video,
+                index: this.playingIndex
+            })
             //TODO 暂时只保留少量记录
-            trimArray(this.recentVideos, this.recentLimit || 3)
+            trimArrayTail(this.recentVideos, this.recentLimit)
         },
-        getRecentLatestVideos() {
+        getRecentLatestVideos(limit) {
             const size = this.recentVideos.length
-            if(size < 1) return 
-            const _videos = this.recentVideos
-            return _videos.reverse()
+            if(size < 1 || limit <= 0) return 
+            return limit ? this.recentVideos.slice(0, Math.min(limit, size)) 
+                : this.recentVideos
         },
         clearRecentVideos() {
             this.recentVideos.length = 0
@@ -218,10 +224,8 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         },
         updateRecentLatestVideo(pos) {
             if(!this.savePlayingPos) return 
-            const videos = this.getRecentLatestVideos()
-            if(!videos) return 
-            const size = videos.length
-            if(size < 1) return 
+            const videos = this.getRecentLatestVideos(1)
+            if(!videos || videos.length < 1) return 
             Object.assign(videos[0], { pos })
         },
         removeRecentVideo(video) {

@@ -105,6 +105,7 @@
   margin-right: 0px;
   padding-left: 18%;
   margin-left: var(--others-win-ctl-margin-left);
+  transform: translateY(-3px);
 }
 
 .use-winos-win-ctl .video-playing-view .win-ctl-wrap {
@@ -192,7 +193,6 @@
 .desktop-lyric-lock.winos-style {
   background: none !important;
 }
-
 
 /* 简约布局 */
 .simple-layout-use-winos-win-ctl .win-ctl-wrap {

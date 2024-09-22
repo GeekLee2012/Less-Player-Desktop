@@ -439,7 +439,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
-    --others-sliderbar-ctl-height: 3px;
+    --others-sliderbar-ctl-height: 4px; 
+    --others-sliderbar-thumb-size: 15px;
 }
 
 .dynamic-playing-view .spacing {
@@ -583,8 +584,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 */
 
 .dynamic-playing-view .bottom {
-    height: 77px;
-    padding-bottom: 5px;
+    height: 82px;
+    padding-bottom: 3px;
     visibility: hidden;
 }
 
@@ -592,6 +593,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: flex;
     justify-content: center;
     align-items: center;
+    --others-sliderbar-thumb-size: 12px;
 }
 
 .dynamic-playing-view .bottom .action>div {

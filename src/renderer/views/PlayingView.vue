@@ -312,11 +312,12 @@ onMounted(() => {
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
-    --others-sliderbar-ctl-height: 3px; 
+    --others-sliderbar-ctl-height: 4px; 
+    --others-sliderbar-thumb-size: 15px;
 }
 
 .playing-view .spacing3 {
-    margin-left: 20px;
+    margin-left: 23px;
 }
 
 .playing-view .container {
@@ -486,14 +487,15 @@ onMounted(() => {
 }
 
 .playing-view .container > .bottom {
-    height: 77px;
-    padding-bottom: 5px;
+    height: 82px;
+    padding-bottom: 3px;
 }
 
 .playing-view .container > .bottom .action {
     display: flex;
     justify-content: center;
     align-items: center;
+    --others-sliderbar-thumb-size: 12px;
 }
 
 .playing-view .container > .bottom .action > div {

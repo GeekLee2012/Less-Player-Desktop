@@ -20,9 +20,9 @@ const props = defineProps({
     onDragStart: Function,
     onDragMove: Function,
     onDragRelease: Function,
-    thumbStyle: Number,  //0 => 默认， 1 => 加大, 2 - logo形状
+    thumbStyle: Number,  //-1 =>隐藏 , 0 => 默认， 1 => 加大, 2 - logo形状
     thumbAutoHideDelay: Number, //单位ms, 默认1000
-    scopeType: Number //类型，主界面为0，非主界面为1（比如弹窗）
+    scopeType: Number //类型，0 => 主界面，1 => 非主界面（比如弹窗）
 })
 
 const sliderCtlRef = ref(null)
@@ -196,10 +196,20 @@ defineExpose({
 <template>
     <div class="slider-bar" @mousewheel="scrollProgress" @mouseenter="showThumb" @mouseleave="hideThumb">
         <div class="slider-bar-ctl"
-            :class="{ 'slider-bar-ctl-ondrag': onDrag, 'slider-bar-ctl-with-thumb': thumbShow, 'slider-bar-ctl-disable': disable }"
-            ref="sliderCtlRef" @click="seekProgress">
+            :class="{ 
+                'slider-bar-ctl-ondrag': onDrag, 
+                'slider-bar-ctl-with-thumb': thumbShow, 
+                'slider-bar-ctl-disable': disable 
+            }"
+            ref="sliderCtlRef" 
+            @click="seekProgress">
             <div class="progress" ref="progressRef"></div>
-            <div class="thumb" :class="{ 'big-thumb': (thumbStyle == 1), 'logo-thumb': (thumbStyle == 2) }" ref="thumbRef" @mousedown="startDrag">
+            <div class="thumb" :class="{ 
+                'big-thumb': (thumbStyle == 1), 
+                'logo-thumb': (thumbStyle == 2) 
+                }" 
+                ref="thumbRef" 
+                @mousedown="startDrag">
             </div>
         </div>
     </div>
@@ -223,11 +233,24 @@ defineExpose({
     position: relative;
 }
 
+.slider-bar.hover {
+    transform: translateY(-1px);
+}
+
+.slider-bar.hover .slider-bar-ctl,
+.slider-bar.hover .slider-bar-ctl .progress {
+    height: calc(var(--others-sliderbar-ctl-height) + 2px);
+}
+
+.slider-bar.hover .slider-bar-ctl .thumb {
+    transform: scale(1.2);
+}
+
 .slider-bar .slider-bar-ctl-disable {
     cursor: default;
 }
 
-.slider-bar .progress {
+.slider-bar .slider-bar-ctl .progress {
     width: 0%;
     height: 100%;
     border-radius: 10rem;
@@ -236,9 +259,9 @@ defineExpose({
     position: absolute;
 }
 
-.slider-bar .thumb {
-    width: 13px;
-    height: 13px;
+.slider-bar .slider-bar-ctl .thumb {
+    width: var(--others-sliderbar-thumb-size);
+    height: var(--others-sliderbar-thumb-size);
     border-radius: 10rem;
     /*border-top-right-radius: 0rem;*/
     /*background-color: var(--others-volumebar-thumb-color);*/
@@ -250,11 +273,11 @@ defineExpose({
     visibility: hidden;
 }
 
-.slider-bar .big-thumb {
+.slider-bar .slider-bar-ctl .big-thumb {
     border: 1px solid var(--content-highlight-color);
 }
 
-.slider-bar .logo-thumb {
+.slider-bar .slider-bar-ctl .logo-thumb {
     border-top-right-radius: 0rem;
     /*
     background: url('/public/deco_1001.png');

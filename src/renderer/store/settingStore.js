@@ -104,7 +104,8 @@ export const useSettingStore = defineStore('setting', {
             shadowForCardStyleTile: true,
             //设置页面提示
             settingViewTipsShow: true,
-
+            //窗口自定义阴影
+            winCustomShadowSize: 5, // 0 - 10
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -741,6 +742,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isSingleLineRadioTitleStyle() {
             return this.track.singleLineRadioTitleStyle
+        },
+        winCustomShadowSize() {
+            return this.common.winCustomShadowSize
         }
     },
     actions: {
@@ -1402,7 +1406,10 @@ export const useSettingStore = defineStore('setting', {
         },
         setPlayingViewBgCoverEffectGradientMode(value) {
             this.track.playingViewBgCoverEffectGradientMode = value
-        }
+        },
+        setWindowCustomShadowSize(value) {
+            this.common.winCustomShadowSize = parseInt(value)
+        },
     },
     persist: {
         enabled: true,

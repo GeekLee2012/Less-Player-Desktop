@@ -33,7 +33,8 @@ const currentAppLayout = shallowRef(null)
 const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
   getWindowZoom, isSimpleLayout, isDefaultNewLayout, 
   isUseAutoWinCtl, isUseWindowsWinCtl,
-  isShowDialogBeforeResetSetting, isAutoLayout, } = storeToRefs(useSettingStore())
+  isShowDialogBeforeResetSetting, isAutoLayout,
+  isAppCustomShadowShow, } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
   setupAppGlobalProxy } = useSettingStore()
@@ -523,7 +524,8 @@ provide('appCommon', {
   <div id="app-main-content" @dragover="e => e.preventDefault()" @drop="onDrop"
       :class="{
         'winos-style': isWinOS(),
-        'use-winos-win-ctl': useWindowsStyleWinCtl
+        'use-winos-win-ctl': useWindowsStyleWinCtl,
+        'custom-shadow': isAppCustomShadowShow
       }">
     <keep-alive :max="1">
       <component :is="currentAppLayout">

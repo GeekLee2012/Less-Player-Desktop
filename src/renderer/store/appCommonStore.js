@@ -612,7 +612,7 @@ export const useAppCommonStore = defineStore('appCommon', {
                     'currentMusicCategoryName', 'exploreModeActiveStates', 
                     'pendingPlay', 'pendingPlayPercent',
                     'exVisualCanvasShow', 'exVisualCanvasIndex', 
-                    'playingViewCustomThemes', 'playingViewThemeType']
+                    'playingViewCustomThemes', 'playingViewThemeType' ]
             },
         ],
     },

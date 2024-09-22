@@ -518,12 +518,11 @@ onUnmounted(() => offEvents(eventsRegistration))
 #tags-category-view,
 #platform-category-view {
   position: fixed;
-  top: 83px;
-  top: calc(2px + var(--main-top-height));
-  right: 0px;
+  top: calc(2px + var(--main-top-height) + var(--app-win-custom-shadow-size));
+  right: calc(0px + var(--app-win-custom-shadow-size));
   width: 404px;
   width: 40.4%;
-  height: calc(100% - var(--main-top-height) - 2px - var(--main-bottom-height) - 2px);
+  height: calc(100% - var(--main-top-height) - 2px - var(--main-bottom-height) - 2px - var(--app-win-custom-shadow-size) * 2);
   z-index: 55;
   background-color: var(--app-bg-color);
   background-image: var(--app-bg-image);
@@ -532,12 +531,12 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #playback-queue-view {
   position: fixed;
-  top: 0;
-  right: 0px;
+  top: calc(0px + var(--app-win-custom-shadow-size));
+  right: calc(0px + var(--app-win-custom-shadow-size));
   width: 335px;
   max-width: 404px;
   width: 33.5%;
-  height: 100%;
+  height:calc(100% - var(--app-win-custom-shadow-size) * 2);
   z-index: 99;
   box-shadow: var(--box-shadow);
   border-top-right-radius: var(--border-app-win-border-radius);
@@ -547,10 +546,10 @@ onUnmounted(() => offEvents(eventsRegistration))
 #playing-view,
 #video-playing-view {
   position: fixed;
-  top: 0;
-  left: 0px;
-  width: 100%;
-  height: 100%;
+  top: calc(0px + var(--app-win-custom-shadow-size));
+  left: calc(0px + var(--app-win-custom-shadow-size));
+  width: calc(100% - var(--app-win-custom-shadow-size) * 2);
+  height: calc(100% - var(--app-win-custom-shadow-size) * 2);
   z-index: 99;
   background-position: center;
   background-size: cover;
@@ -559,12 +558,12 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #playing-theme-list-view {
   position: fixed;
-  top: 0;
-  right: 0px;
+  top: calc(0px + var(--app-win-custom-shadow-size));
+  right: calc(0px + var(--app-win-custom-shadow-size));
   width: 335px;
   max-width: 404px;
   width: 33.5%;
-  height: 100%;
+  height: calc(100% - var(--app-win-custom-shadow-size) * 2);
   z-index: 100;
   box-shadow: var(--box-shadow);
   border-top-right-radius: var(--border-app-win-border-radius);

@@ -12,7 +12,7 @@ import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 const { theme: themeSetting, currentBorderRadiusCtlStyle,
   isUseAutoBorderRadiusCtl, isUseMacOSBorderRadiusCtl,
-  isUseWindowsBorderRadiusCtl, } = storeToRefs(useSettingStore())
+  isUseWindowsBorderRadiusCtl, winCustomShadowSize, } = storeToRefs(useSettingStore())
 const { getCurrentTheme, setupFontFamily,
   setupFontWeight, allFontSizeLevels,
   currentFontSizeLevel, currentFontSize, } = useSettingStore()
@@ -195,6 +195,20 @@ const setupBorderRadiusCtlStyle = () => {
   applyDocumentStyle(changes)
 }
 
+const setupWinCustomShadow = () => {
+  const shadowClass = 'app-win-custom-shadow'
+  document.body.classList.remove(shadowClass)
+
+  const needCustomShadow = isWinOS()
+  const shadowSize = needCustomShadow ? winCustomShadowSize.value : -1
+  if(needCustomShadow && shadowSize > 0) {
+    applyDocumentStyle({
+      '--app-win-custom-shadow-size': `${shadowSize}px`,
+    })
+    document.body.classList.add(shadowClass)
+  }
+}
+
 /*
 const setupAppBorder = () => {
   //TODO 硬编码
@@ -234,16 +248,16 @@ onEvents({
   'theme-applyTheme': setupAppTheme,
 })
 
-//setupAppBorder()
-
 onMounted(() => {
   setupFontStyle()
   setupBorderRadiusCtlStyle()
+  setupWinCustomShadow()
   //setupAppTheme()
 })
 
 watch(themeSetting, () => setupAppTheme(), { deep: true })
 watch(currentBorderRadiusCtlStyle, setupBorderRadiusCtlStyle)
+watch(winCustomShadowSize, setupWinCustomShadow)
 
 provide('appStyle', {
   applyDocumentElementStyle,
@@ -264,6 +278,15 @@ provide('appStyle', {
 @media (prefers-color-scheme: light) {}
 @media (prefers-color-scheme: dark) {}
 */
+body.app-win-custom-shadow {
+  padding: var(--app-win-custom-shadow-size);
+  box-sizing: border-box;
+}
+
+.app-win-custom-shadow #app {
+  border-radius: var(--border-popover-border-radius);
+  box-shadow: var(--app-win-custom-box-shadow);
+}
 
 .app-custom-theme-bg {
   background-color: var(--app-bg-color);

@@ -25,7 +25,7 @@ const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
     isDefaultClassicLayout, isDefaultNewLayout,
-    isAutoLayout } = storeToRefs(useSettingStore())
+    isAutoLayout, winCustomShadowSize } = storeToRefs(useSettingStore())
 const { setupWindowZoom } = useSettingStore()
 
 //TODO 硬编码
@@ -79,12 +79,7 @@ const setImageTextTileSize = () => {
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 1
     const cardTileHeight = parseInt(tileWidth * 0.883)
-    /*
-    document.documentElement.style.setProperty('--others-image-text-tile-cover-size', `${tileWidth}px`)
-    document.documentElement.style.setProperty('--others-card-image-text-tile-title-width', `${tileWidth - 20}px`)
-    document.documentElement.style.setProperty('--others-image-text-tile-card-cover-height', `${cardTileHeight}px`)
-    document.documentElement.style.setProperty('--others-image-text-tile-card-min-height', `${cardTileHeight + 66}px`)
-    */
+    
     applyDocumentStyle({
         '--others-image-text-tile-cover-size': `${tileWidth}px`,
         //'--others-card-image-text-tile-title-width': `${tileWidth - 20}px`,
@@ -344,6 +339,7 @@ watch(lyricMetaPos, () => {
     setPlayingLyricCtlSize()
     setVisualPlayingViewLyricCtlSize()
 })
+watch(winCustomShadowSize, resizeViewItems)
 
 const eventsRegistration = {
     //'batchView-show': setBatchViewListSize,

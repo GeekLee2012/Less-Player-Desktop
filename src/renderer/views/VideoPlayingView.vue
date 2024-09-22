@@ -254,6 +254,8 @@ onActivated(initVideoPlayer)
     --sidebar-bg: var(--sidebar-btn-bg);
     --sidebar-btn-svg-color: #fff;
     --sidebar-collapse-btn-svg-color: #fff;
+    --header-height: 56px;
+    --title-width: 520px;
     background: var(--view-bg);
 }
 
@@ -266,8 +268,8 @@ onActivated(initVideoPlayer)
     top: 0px;
     left: 0px;
     width: 100%;
-    height: 56px;
-    min-height: 56px;
+    height: var(--header-height);
+    min-height: var(--header-height);
     display: flex;
     align-items: center;
     -webkit-app-region: drag;
@@ -288,9 +290,10 @@ onActivated(initVideoPlayer)
 
 .video-playing-view > .header .title {
     position: fixed;
-    width: 520px;
-    left: calc(50% - 260px);
-    top: 13px;
+    width: var(--title-width);
+    line-height: var(--header-height);
+    left: calc(50% - var(--title-width) / 2 - var(--app-win-custom-shadow-size));
+    top: calc(0px + var(--app-win-custom-shadow-size));
     font-weight: bold;
     color: var(--content-subtitle-text-color);
     text-align: center;

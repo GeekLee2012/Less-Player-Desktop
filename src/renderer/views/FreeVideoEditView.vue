@@ -12,7 +12,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useVideoPlayStore } from '../store/videoPlayStore';
 import { coverDefault, transformUrl, isSupportedVideo, 
     toTrimString, ipcRendererInvoke, 
-    parseVideoCollectionLines, } from '../../common/Utils';
+    parseVideoCollectionLines, useGitRepository, } from '../../common/Utils';
 import { Video } from '../../common/Video';
 
 
@@ -38,8 +38,9 @@ const titleInvalid = ref(false)
 const urlInvalid = ref(false)
 const isActionDisabled = ref(false)
 const isCoverShow = ref(false)
-//const levcUrl = 'https://gitee.com/rive08/less-player-desktop/blob/master/LeVC.md'
-const levcUrl = 'https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LeVC.md'
+const { GITHUB, GITEE } = useGitRepository()
+const levcUrl = `${GITEE}/blob/master/LeVC.md`
+//const levcUrl = `${GITHUB}/blob/main/LeVC.md`
 
 const resetCheckStatus = () => {
     titleInvalid.value = false
@@ -78,7 +79,6 @@ const submit = () => {
 }
 
 const playRecentLatest = (video) => {
-    //const video = getRecentLatestVideos()
     if(!video) return 
     const { data, index, pos } = video
     const isResetPos = isPlayFromBeginning.value
@@ -131,7 +131,7 @@ const dragToDelete = async (item) => {
 const demoShow = ref(true)
 let demoTimer = null
 const dragToDeleteDemo = async () => {
-    const ok = await showConfirm('确定要删除当前播放记录吗？')
+    const ok = await showConfirm('演示：确定要删除当前播放记录吗？')
     if(!ok) return
 
     demoShow.value = false

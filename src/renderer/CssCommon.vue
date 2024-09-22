@@ -6,6 +6,8 @@
   --app-bg: transparent;
   --bg-effect: none;
   --bg-effect-bottom: none;
+  --app-win-custom-shadow-size: 0px;
+  --app-win-custom-box-shadow: 0px 0px var(--app-win-custom-shadow-size) #393939;
   /*内容*/
   --content-text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
   --content-text-font-family: var(--content-text-preset-font-family);
@@ -53,6 +55,7 @@
 
   --others-playmeta-height: 77px;
   --others-playnav-height: 80px;
+  --others-playctl-spacing: 23px;
   /*--others-image-text-tile-cover-size: 173px; */
   --others-image-text-tile-cover-size: 172px;
   --others-image-text-tile-mask-width: var(--others-image-text-tile-cover-size);
@@ -62,7 +65,8 @@
   --others-theme-preview-tile-width: 160px;
   --others-theme-preview-tile-height: 95px;
   --others-progressbar-height: 3px;
-  --others-sliderbar-ctl-height: 2px;
+  --others-sliderbar-ctl-height: 3px;
+  --others-sliderbar-thumb-size: 13px;
 
   /* 主题相关 */
   --border-popovers-border-color: #666;

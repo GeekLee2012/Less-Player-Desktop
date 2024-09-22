@@ -154,11 +154,7 @@ onMounted(() => {
 .classic-main-bottom .volume-bar {
     width: 88px;
     margin-right: 36px;
-    /* margin-left: 3px; */
-}
-
-.classic-main-bottom .volume-bar:hover {
-    /*width: 100px;*/
+    --others-sliderbar-thumb-size: 12px;
 }
 
 .classic-main-bottom .love-btn {

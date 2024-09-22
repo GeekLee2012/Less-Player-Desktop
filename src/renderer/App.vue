@@ -1,13 +1,14 @@
 <script setup>
 import AppThemes from './AppThemes.vue';
+
 </script>
 
 <template>
   <AppThemes>
-    <router-view v-slot="{ Component }">
-      <component :is="Component">
-      </component>
-    </router-view>
+      <router-view v-slot="{ Component }">
+        <component :is="Component">
+        </component>
+      </router-view>
   </AppThemes>
 </template>
 

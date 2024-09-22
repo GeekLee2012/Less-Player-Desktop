@@ -188,6 +188,7 @@ onUnmounted(() => {
                         <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack"
                             :disableScroll="true" :onScroll="preseekTrack" :onScrollFinish="seekTrack"
                             :onDragRelease="seekTrack" :onDragMove="preseekTrack" 
+                            :thumbStyle="0"
                             keyName="visualPlayingView">
                         </SliderBar>
                     </div>
@@ -310,7 +311,7 @@ onUnmounted(() => {
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
-    --others-sliderbar-ctl-height: 3px;
+    --others-sliderbar-ctl-height: 4px;
 }
 
 .visual-playing-view .container {
@@ -566,6 +567,8 @@ onUnmounted(() => {
 
 .visual-playing-view .volume-bar {
     width: 70px;
+    --others-sliderbar-ctl-height: 3px;
+    --others-sliderbar-thumb-size: 12px;
 }
 
 .visual-playing-view .volume-bar:hover {

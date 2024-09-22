@@ -147,7 +147,7 @@ const togglePlaybackQueue = () => {
 }
 
 .play-ctl .spacing {
-    margin-left: 20px;
+    margin-left: var(--others-playctl-spacing);
 }
 
 .play-ctl svg {

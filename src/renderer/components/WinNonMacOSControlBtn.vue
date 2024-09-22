@@ -170,6 +170,10 @@ const toggleMaximize = () => maximize()
 }
 */
 
+.win-non-macos-ctl-btn .collapse-btn svg {
+    transform: translateY(1px);
+}
+
 .win-non-macos-ctl-btn .close-btn:hover {
     /*background-color: #e5182c !important;*/
     background-color: #fc605c !important;

@@ -692,6 +692,16 @@ export const trimArray = async (data, limit) => {
     return 0
 }
 
+export const trimArrayTail = async (data, limit) => {
+    limit = limit || 999
+    if (data && data.length > limit) {
+        const deleteCount = data.length - limit
+        await data.splice(limit, deleteCount)
+        return deleteCount
+    }
+    return 0
+}
+
 export const isChineseChar = (ch) => {
     return /[\u4e00-\u9fa5]/.test(ch)
 }

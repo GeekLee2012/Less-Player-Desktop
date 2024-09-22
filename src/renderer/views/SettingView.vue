@@ -132,6 +132,7 @@ const { setThemeIndex,
     toggleDesktopLyricAutoSize,
     setDesktopLyricTextDirection,
     setAudioOutputDeviceId,
+    setWindowCustomShadowSize,
 } = useSettingStore()
 
 const { showToast, showImportantToast, } = useAppCommonStore()
@@ -194,6 +195,10 @@ const fontWeights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 
 const updateWinZoom = (event) => {
     setWindowZoom(event.target.value)
+}
+
+const updateWinCustomShadowSize = (evnet) => {
+    setWindowCustomShadowSize(event.target.value)
 }
 
 const updateFontFamily = (event) => {
@@ -597,7 +602,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="content">
                     <div class="last">
                         <span v-for="(item, index) in ['自动', '经典', '主流','简约']" class="layout-item"
-                            :class="{ active: index == layout.index }" @click="setLayoutIndex(index)">
+                            :class="{ active: index == layout.index, 'first-item': index == 0 }" @click="setLayoutIndex(index)">
                             {{ item }}
                         </span>
                     </div>
@@ -634,16 +639,23 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div class="window-ctl">
                         <span class="sec-title">窗口按钮风格：</span>
                         <span v-for="(item, index) in ['自动', 'macOS', 'Windows']" class="quality-item"
-                            :class="{ active: index == common.winCtlStyle }" @click="setWindowCtlStyle(index)">
+                            :class="{ active: index == common.winCtlStyle, 'first-item': index == 0 }" @click="setWindowCtlStyle(index)">
                             {{ item }}
                         </span>
                     </div>
                     <div class="border-radius-ctl">
                         <span class="sec-title">预设圆角风格：</span>
                         <span v-for="(item, index) in ['自动', 'macOS', 'Windows']" class="quality-item"
-                            :class="{ active: index == common.borderRadiusCtlStyle }" @click="setBorderRadiusCtlStyle(index)">
+                            :class="{ active: index == common.borderRadiusCtlStyle, 'first-item': index == 0 }" @click="setBorderRadiusCtlStyle(index)">
                             {{ item }}
                         </span>
+                    </div>
+                    <div class="tip-text" v-show="isWinOS()">提示：窗口阴影大小，仅对Windows有效；macOS默认自带阴影效果
+                    </div>
+                    <div class="window-custom-shadow" v-show="isWinOS()">
+                        <span class="sec-title">窗口阴影大小：</span>
+                        <input type="number" :value="common.winCustomShadowSize" placeholder="0-10，默认5" min="0" max="10"
+                            step="1" @keydown.enter="updateWinCustomShadowSize" @focusout="updateWinCustomShadowSize" />
                     </div>
                     <div class="font" @keydown.stop="">
                         <span>字体名称：</span>
@@ -658,7 +670,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span style="margin-right: 8px;">预设大小：</span>
                         <span v-for="(item, index) in allFontSizeLevels()" class="fslevel-item"
-                            :class="{ active: index == common.fontSizeLevel }" @click="setFontSizeLevel(index)">
+                            :class="{ active: index == common.fontSizeLevel, 'first-item': index == 0 }" @click="setFontSizeLevel(index)">
                             {{ item.name }}
                         </span>
                     </div>
@@ -674,7 +686,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="sec-title">图文控件风格：</span>
                         <span v-for="(item, index) in ['普通', '卡片']" class="quality-item"
-                            :class="{ active: index == common.imageTextTileStyleIndex }"
+                            :class="{ active: index == common.imageTextTileStyleIndex, 'first-item': index == 0 }"
                             @click="setImageTextTileStyleIndex(index)">
                             {{ item }}
                         </span>
@@ -689,14 +701,14 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="sec-title">图片清晰度：</span>
                         <span v-for="(item, index) in allImageQualities()" class="quality-item"
-                            :class="{ active: index == common.imgQualityIndex }" @click="setImageQualityIndex(index)">
+                            :class="{ active: index == common.imgQualityIndex, 'first-item': index == 0 }" @click="setImageQualityIndex(index)">
                             {{ item.name }}
                         </span>
                     </div>
                     <div>
                         <span class="sec-title">分页方式：</span>
                         <span v-for="(item, index) in ['普通', '瀑布流']" class="quality-item"
-                            :class="{ active: index == common.paginationStyleIndex }"
+                            :class="{ active: index == common.paginationStyleIndex, 'first-item': index == 0 }"
                             @click="setPaginationStyleIndex(index)">
                             {{ item }}
                         </span>
@@ -730,7 +742,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="cate-subtitle">优先音质（暂未支持）：</span>
                         <span v-for="(item, index) in allQualities()" class="quality-item"
-                            :class="{ active: index == track.quality.index }" @click="setTrackQualityIndex(index)">
+                            :class="{ active: index == track.quality.index, 'first-item': index == 0 }" @click="setTrackQualityIndex(index)">
                             {{ item.name }}
                         </span>
                     </div>
@@ -978,7 +990,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="sec-title">文字方向：</span>
                         <span v-for="(item, index) in ['横屏', '竖屏']" class="quality-item"
-                            :class="{ active: index === desktopLyric.textDirection }"
+                            :class="{ active: index === desktopLyric.textDirection, 'first-item': index == 0 }"
                             @click="setDesktopLyricTextDirection(index)">
                             {{ item }}
                         </span>
@@ -986,7 +998,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div v-show="desktopLyric.textDirection == 0">
                         <span class="sec-title">对齐方式：</span>
                         <span v-for="(item, index) in ['左对齐', '居中', '右对齐', '左、右对齐']" class="quality-item"
-                            v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment }"
+                            v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment, 'first-item': index == 0 }"
                             @click="setDesktopLyricAlignment(index)">
                             {{ item }}
                         </span>
@@ -994,7 +1006,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div v-show="desktopLyric.textDirection == 1">
                         <span class="sec-title">对齐方式：</span>
                         <span v-for="(item, index) in ['上对齐', '居中', '下对齐', '上、下对齐']" class="quality-item"
-                            v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment }"
+                            v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment, 'first-item': index == 0 }"
                             @click="setDesktopLyricAlignment(index)">
                             {{ item }}
                         </span>
@@ -1002,7 +1014,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="sec-title">显示模式：</span>
                         <span v-for="(item, index) in ['单行', '双行', '全部']" class="quality-item"
-                            :class="{ active: index === desktopLyric.layoutMode }"
+                            :class="{ active: index === desktopLyric.layoutMode, 'first-item': index == 0 }"
                             @click="setDesktopLyricLayoutMode(index)">
                             {{ item }}
                         </span>
@@ -1749,10 +1761,14 @@ onUnmounted(() => offEvents(eventsRegistration))
     min-width: 68px;
     padding: 6px;
     text-align: center;
+    margin-left: 20px;
     border-radius: var(--border-list-item-border-radius);
-    margin-right: 20px;
     border: 0px solid var(--border-color);
     cursor: pointer;
+}
+
+#setting-view .content .first-item {
+    margin-left: 0px;
 }
 
 #setting-view .content .layout-item {
@@ -1785,8 +1801,13 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view .window-ctl .sec-title,
-#setting-view .border-radius-ctl  .sec-title {
+#setting-view .border-radius-ctl  .sec-title,
+#setting-view .window-custom-shadow .sec-title {
     width: 159px !important;
+}
+
+#setting-view .window-custom-shadow input {
+    margin-left: 0px !important;
 }
 
 #setting-view .desktopLyric .content .sec-title {

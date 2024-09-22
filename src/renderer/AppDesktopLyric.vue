@@ -404,6 +404,12 @@ const toggleLock = () => {
   lockState.value = !lockState.value
   lockVisible.value = true
   sendToMain('app-desktopLyric-lock', lockState.value)
+
+  //TODO
+  const boxShadow = lockState.value ? 'none' : '0px 0px var(--app-win-custom-shadow-size) #393939'
+  applyDocumentStyle({
+    '--app-win-custom-box-shadow': boxShadow,
+  })
 }
 
 const isResizing = ref(false)

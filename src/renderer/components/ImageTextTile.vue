@@ -82,14 +82,15 @@ onUnmounted(() => offEvents(eventsRegistration))
         'image-text-tile-color-mode': color,
         'image-text-tile-video': videoStyle,
         'image-text-tile-center-title-mode': centerTitleStyle,
-    }" @click="toggleCheck">
+        selectable: checkbox,
+    }" @click.stop="toggleCheck">
         <div class="cover-wrap">
             <img class="cover" v-lazy="coverDefault(cover)" v-show="!color"
                 :class="{ 'obj-fit-contain': (coverFit == 1) }" />
             <div class="cover" v-show="color" :style="{ background: color }">
                 <div class="big-title" v-html="computedBigTitle"></div>
             </div>
-            <div class="cover-mask" :class="{ selectable: checkbox }">
+            <div class="cover-mask">
                 <div class="play-btn" v-show="playable && !checkbox" @click.stop="playAction">
                     <svg width="21" height="21" viewBox="0 0 139 139" xml:space="preserve"
                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -152,10 +153,6 @@ onUnmounted(() => offEvents(eventsRegistration))
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
     box-shadow: 0px 0px 3px #181818;
     background-color: var(--app-bg-color);
-}
-
-.image-text-tile .cover-wrap:hover {
-    /*transform: scale(1.11) translateY(-4px);*/
 }
 
 .image-text-tile .title {
@@ -229,22 +226,25 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .image-text-tile .cover-wrap .cover-mask {
     position: absolute;
-    margin: auto;
-    z-index: 1;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
     visibility: hidden;
+    cursor: pointer;
 }
 
-.image-text-tile .cover-wrap:hover .cover-mask {
+.image-text-tile .cover-wrap:hover .cover-mask,
+.image-text-tile.selectable .cover-wrap .cover-mask {
     visibility: visible;
 }
 
-.image-text-tile .cover-wrap .selectable {
-    visibility: visible;
+.image-text-tile .cover-wrap .cover-mask .checkbox {
+    position: absolute;
     top: 10px;
     left: 10px;
     width: 25px;
     height: 25px;
-    /*background: var(--others-checkbox-bg-color);*/
     background: var(--app-bg-color);
     border-radius: 6px;
     display: flex;
@@ -252,25 +252,32 @@ onUnmounted(() => offEvents(eventsRegistration))
     cursor: pointer;
 }
 
-.image-text-tile .checkbox svg {
+.image-text-tile .cover-wrap .checkbox svg {
     fill: var(--content-highlight-color);
 }
 
 .image-text-tile .cover-wrap .play-btn {
     border-radius: 10rem;
-    width: 43px;
-    height: 43px;
+    --btn-size: 49px;
+    width: var(--btn-size);
+    height: var(--btn-size);
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    right: calc((100% - var(--btn-size))/ 2);
+    bottom: calc((100% - var(--btn-size))/2);
+    z-index: 1;
     background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    position: relative;
 }
 
 .image-text-tile .cover-wrap .play-btn:hover {
     background: var(--button-icon-text-btn-hover-bg-color);
+    transform: scale(1.05);
 }
 
 .image-text-tile .cover-wrap .play-btn svg {
@@ -296,6 +303,12 @@ onUnmounted(() => offEvents(eventsRegistration))
 .image-text-tile-card:hover {
     transform: scale(1.08) translateY(-4px);
 }
+
+/*
+.image-text-tile.selectable:hover {
+    transform: none;
+}
+*/
 
 .image-text-tile-card:hover .title {
     background: var(--content-text-highlight-color);
