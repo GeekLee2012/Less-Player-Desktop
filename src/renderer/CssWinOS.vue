@@ -14,6 +14,7 @@
 
 /* 桌面歌词（文字）按钮 */
 .winos-style .classic-main-bottom .lyric-btn,
+.winos-style .default-new-main-bottom .lyric-btn,
 .winos-style .playing-view .bottom .action .lyric-btn,
 .winos-style .visual-playing-view .action .lyric-btn,
 /* 播放页 - 歌词 */

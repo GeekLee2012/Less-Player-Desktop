@@ -1,34 +1,51 @@
 <script setup>
-import { onMounted, ref, inject } from 'vue';
+import { onMounted, ref, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { usePlatformStore } from '../store/platformStore';
 import VolumeBar from './VolumeBar.vue';
 import AudioTime from './AudioTime.vue';
+import ArtistControl from './ArtistControl.vue';
 import { Track } from '../../common/Track';
+import { Playlist } from '../../common/Playlist';
+import { toTrimString } from '../../common/Utils';
 
 
 
 const { mmssCurrentTime, mmssPreseekTime } = inject('player')
+const { visitTrack } = inject('appRoute')
 
 const props = defineProps({
     enableVolumeBar: Boolean,
+    enableSubtitleArtist: Boolean,
 })
 
 const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useAppCommonStore())
-const { showPlayingView, toggleCoverMask } = useAppCommonStore()
+const { showPlayingView, toggleCoverMask, setRouterCtxCacheItem, } = useAppCommonStore()
 const { isFreeFM } = usePlatformStore()
 
 const volumeBarRef = ref(null)
 
-const trackMeta = (track) => {
-    let artistName = Track.artistName(track)
-    if (artistName.length > 0) artistName = ' - ' + artistName
-    return track.title + artistName
-}
+const computedTitle = computed(() => {
+    const track = currentTrack.value
+    return props.enableSubtitleArtist ? Track.title(track) 
+        : Track.normalName(track)
+})
 
+const checkVisitTrack = () => {
+    if(!props.enableSubtitleArtist) return 
+    const track = currentTrack.value
+    if(!track) return
+    const { id, platform, title, cover, artist, album } = track
+    if (Playlist.isFMRadioType(track)) return
+    visitTrack({
+        id, platform, title, cover, artist,
+        artist: JSON.stringify(artist),
+        album: JSON.stringify(album),
+    }, () => setRouterCtxCacheItem(track))
+}
 
 /* 生命周期、监听 */
 onMounted(() => {
@@ -54,7 +71,7 @@ onMounted(() => {
         </div>
         <div class="title-wrap">
             <div class="audio-title-wrap">
-                <div class="audio-title" v-html="trackMeta(currentTrack)"></div>
+                <div class="audio-title" :class="{ btn: enableSubtitleArtist }" v-html="computedTitle" @click="checkVisitTrack"></div>
                 <div class="favorite-btn">
                     <svg v-show="true" width="18" height="18" viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
@@ -74,12 +91,18 @@ onMounted(() => {
                     </svg>
                 </div>
             </div>
-            <div class="time-volume-wrap">
-                <AudioTime :current="mmssPreseekTime || mmssCurrentTime" :duration="Track.mmssDuration(currentTrack, 0)">
+            <div class="time-volume-wrap" v-show="!enableSubtitleArtist">
+                <AudioTime :current="mmssPreseekTime || mmssCurrentTime" 
+                    :duration="Track.mmssDuration(currentTrack, 0)">
                 </AudioTime>
                 <div class="volume-bar">
                     <VolumeBar ref="volumeBarRef" v-show="enableVolumeBar"></VolumeBar>
                 </div>
+            </div>
+            <div class="subtitle-artist-wrap" v-show="enableSubtitleArtist">
+                <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
+                    :trackId="toTrimString(currentTrack.id)">
+                </ArtistControl>
             </div>
         </div>
     </div>
@@ -170,6 +193,17 @@ onMounted(() => {
     /*width: 211px;*/
 }
 
+.play-meta .audio-title.btn {
+    font-size: calc(var(--content-text-subtitle-size) + 1px);
+}
+
+.play-meta .audio-title.btn:hover {
+    background: var(--content-text-highlight-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
 .play-meta .favorite-btn {
     margin-top: 15px;
     margin-left: 15px;
@@ -227,5 +261,10 @@ onMounted(() => {
 .play-meta .volume-value {
     width: 66px;
     margin-left: 3px;
+}
+
+.play-meta .subtitle-artist-wrap {
+    font-size: var(--content-text-tip-text-size);
+    color: var(--content-subtitle-text-color);
 }
 </style>

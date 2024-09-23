@@ -105,7 +105,8 @@ defineExpose({
 
 /*TODO */
 .back2top-btn-with-bottom {
-    bottom: 100px;
+    /*bottom: 100px;*/
+    bottom: calc(var(--main-bottom-height) + 15px);
     right: 20px;
 }
 </style>

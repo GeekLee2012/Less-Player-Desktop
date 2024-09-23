@@ -369,7 +369,8 @@ onActivated(() => {
         </component>
         <DefaultMainContent id="default-main-content" 
             :class="{ 
-                autopadding: (isAutoLayout || isDefaultClassicLayout || isDefaultNewLayout) 
+                autopadding: (isAutoLayout || isDefaultClassicLayout || isDefaultNewLayout),
+                newpadding: isDefaultNewLayout
             }">
         </DefaultMainContent>
         <component id="default-main-bottom" :is="currentMainBottom">
@@ -432,5 +433,35 @@ onActivated(() => {
 #default-main-center .autopadding #custom-playlist-detail-view,
 #default-main-center .autopadding #local-playlist-detail-view {
     padding-top: 8px;
+}
+
+#default-main-center .newpadding .playlist-square-view,
+#default-main-center .newpadding .artist-square-view,
+#default-main-center .newpadding .radio-square-view,
+#default-main-center .newpadding #local-music-view,
+#default-main-center .newpadding #themes-view .title,
+#default-main-center .newpadding #setting-view .title,
+#default-main-center .newpadding #home-page-view .title,
+#default-main-center .newpadding #modules-setting-view .title,
+#default-main-center .newpadding #plugins-view,
+#default-main-center .newpadding #plugin-detail-view,
+#default-main-center .newpadding #freefm-view,
+#default-main-center .newpadding #search-view,
+#default-main-center .newpadding #user-profile-view,
+#default-main-center .newpadding #batch-action-view,
+#default-main-center .newpadding #user-info-edit-view,
+#default-main-center .newpadding #custom-playlist-edit-view,
+#default-main-center .newpadding #local-playlist-edit-view,
+#default-main-center .newpadding #freefm-edit-view,
+#default-main-center .newpadding #free-video-edit-view,
+#default-main-center .newpadding #data-backup-view,
+#default-main-center .newpadding #data-restore-view,
+#default-main-center .newpadding #playlist-detail-view,
+#default-main-center .newpadding #artist-detail-view,
+#default-main-center .newpadding #album-detail-view,
+#default-main-center .newpadding #track-detail-view,
+#default-main-center .newpadding #custom-playlist-detail-view,
+#default-main-center .newpadding #local-playlist-detail-view  {
+    padding-top: 0px;
 }
 </style>

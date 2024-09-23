@@ -108,7 +108,8 @@ defineExpose({
 
 /*TODO */
 .playlist-categroy-flow-btn-with-bottom {
-    bottom: 141px;
+    /*bottom: 141px;*/
+    bottom: calc(var(--main-bottom-height) + 15px + 41px);
     right: 20px;
 }
 </style>

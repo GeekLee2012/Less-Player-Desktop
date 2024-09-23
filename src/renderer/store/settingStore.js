@@ -192,6 +192,8 @@ export const useSettingStore = defineStore('setting', {
             playingViewBgCoverEffectGradientMode: 0,
             //播放页 - 封面图片边框
             playingViewCoverBorderShow: true,
+            //播放页 - 播放控件风格
+            playingViewPlayCtlStyleIndex: 0,
         },
         search: {
             //场景化提示
@@ -480,7 +482,7 @@ export const useSettingStore = defineStore('setting', {
         },
         isDefaultLayoutWithBottom() {
             const index = this.layout.index
-            return index == 1 || index == 2
+            return index == 0 || index == 1 || index == 2
         },
         //已移除，不再支持
         isDefaultOldLayout() {  //旧版布局，第一个版本发布时的布局
@@ -721,6 +723,9 @@ export const useSettingStore = defineStore('setting', {
         },
         playingViewBgCoverEffectGradientMode() {
             return this.track.playingViewBgCoverEffectGradientMode
+        },
+        playingViewPlayCtlStyleIndex() {
+            return this.track.playingViewPlayCtlStyleIndex
         },
         isUseShadowForCardStyleTile() {
             return this.common.shadowForCardStyleTile
@@ -1409,6 +1414,9 @@ export const useSettingStore = defineStore('setting', {
         },
         setWindowCustomShadowSize(value) {
             this.common.winCustomShadowSize = parseInt(value)
+        },
+        setPlayingViewPlayCtlStyleIndex(value) {
+            this.track.playingViewPlayCtlStyleIndex = value
         },
     },
     persist: {

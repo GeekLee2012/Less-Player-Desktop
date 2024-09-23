@@ -77,6 +77,7 @@ defineExpose({
     align-items: center;
     -webkit-app-region: none;
     --others-sliderbar-ctl-height: 3px;
+    --volume-status-size: 21px;
 }
 
 .volume-bar .volume-status {
@@ -95,8 +96,8 @@ defineExpose({
 .volume-bar .st-slient,
 .volume-bar .st-small,
 .volume-bar .st-large {
-    width: 21px;
-    height: 21px;
+    width: var(--volume-status-size);
+    height: var(--volume-status-size);
 }
 
 .volume-bar .volume-status:hover svg {

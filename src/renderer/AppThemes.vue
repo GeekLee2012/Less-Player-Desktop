@@ -200,7 +200,7 @@ const setupWinCustomShadow = () => {
   document.body.classList.remove(shadowClass)
 
   const needCustomShadow = isWinOS()
-  const shadowSize = needCustomShadow ? winCustomShadowSize.value : -1
+  const shadowSize = needCustomShadow ? winCustomShadowSize.value : 0
   if(needCustomShadow && shadowSize > 0) {
     applyDocumentStyle({
       '--app-win-custom-shadow-size': `${shadowSize}px`,

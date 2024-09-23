@@ -1647,10 +1647,12 @@ onActivated(() => {
 
 .simple-layout > .bottom .volume-bar {
     width: 25px;
+    transition: 0.3s;
 }
 
 .simple-layout > .bottom .volume-bar:hover {
     width: 68px;
+    transition: 0.5s;
 }
 
 .simple-layout > .bottom .action .love-btn {

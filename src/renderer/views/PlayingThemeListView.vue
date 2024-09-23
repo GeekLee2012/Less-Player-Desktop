@@ -17,7 +17,8 @@ const { playingViewPresetThemes, playingViewCustomThemes,
 const { track } = storeToRefs(useSettingStore())
 const { setPlayingViewBgCoverEffectIndex, 
     togglePlayingViewCoverBorderShow,
-    setPlayingViewBgCoverEffectGradientMode
+    setPlayingViewBgCoverEffectGradientMode,
+    setPlayingViewPlayCtlStyleIndex,
  } = useSettingStore()
 
 
@@ -72,6 +73,11 @@ const computedCustomThemeSectionTitle = computed(() => {
             <div class="center" ref="listRef">
                 <div class="sec-title">选项</div>
                 <div class="options">
+                    <div class="opt-item">
+                        <span class="subtitle">播放控件风格：</span>
+                        <SingleSelectionControl class="" :data="['自动', '经典', '主流']" :value="track.playingViewPlayCtlStyleIndex" :onChanged="setPlayingViewPlayCtlStyleIndex">
+                        </SingleSelectionControl>
+                    </div>
                     <div class="opt-item">
                         <span class="subtitle">封面背景效果：</span>
                         <SingleSelectionControl :data="['关闭', '简单', '渐变']" :value="track.playingViewBgCoverEffectIndex" :onChanged="setPlayingViewBgCoverEffectIndex">
@@ -314,7 +320,7 @@ const computedCustomThemeSectionTitle = computed(() => {
 
 .playing-theme-list-view .center .options .opt-item {
     display: flex;
-    margin-bottom: 10px;
+    margin-bottom: 13px;
     align-items: center;
 }
 
