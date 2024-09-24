@@ -80,7 +80,8 @@ export class Track {
     }
 
     static mmssDuration(track, defaultValue) {
-        return toMmss(track.duration || defaultValue)
+        const duration = track.duration || defaultValue
+        return duration >= 0 ? toMmss(duration) : '--:--'
     }
 
     hasPid() {

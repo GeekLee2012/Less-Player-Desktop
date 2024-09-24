@@ -93,7 +93,8 @@ onMounted(() => {
             </div>
             <div class="time-volume-wrap" v-show="!enableSubtitleArtist">
                 <AudioTime :current="mmssPreseekTime || mmssCurrentTime" 
-                    :duration="Track.mmssDuration(currentTrack, 0)">
+                    :duration="Track.mmssDuration(currentTrack, 0)"
+                    :hideDuration="Playlist.isFMRadioType(currentTrack)">
                 </AudioTime>
                 <div class="volume-bar">
                     <VolumeBar ref="volumeBarRef" v-show="enableVolumeBar"></VolumeBar>

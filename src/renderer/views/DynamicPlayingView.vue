@@ -32,7 +32,7 @@ const { isMaxScreen, playingViewShow,
     playingViewCustomThemePreviewCache, } = storeToRefs(useAppCommonStore())
 const { hidePlayingView,  toggleSoundEffectView, 
     toggleDesktopLyricShow, togglePlayingThemeListView } = useAppCommonStore()
-const { currentTrack, volume } = storeToRefs(usePlayStore())
+const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { lyricMetaPos, lyric, lyricTransActived, lyricRomaActived, } = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
@@ -338,7 +338,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="bottom">
                 <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
                     :onScroll="preseekTrack" :onScrollFinish="seekTrack" :onDragRelease="seekTrack"
-                    :onDragMove="preseekTrack" keyName="dynamicPlayingView">
+                    :onDragMove="preseekTrack" keyName="dynamicPlayingView" :autoHeightMode="playing">
                 </SliderBar>
                 <div class="action">
                     <div class="btm-left">
@@ -368,7 +368,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </div>
                     <div>
                         <AudioTime :current="mmssPreseekTime || mmssCurrentTime"
-                            :duration="Track.mmssDuration(currentTrack, 0)">
+                            :duration="Track.mmssDuration(currentTrack, 0)"
+                            :hideDuration="Playlist.isFMRadioType(currentTrack)">
                         </AudioTime>
                     </div>
                     <div class="btm-center">
@@ -439,8 +440,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
-    --others-sliderbar-ctl-height: 4px; 
-    --others-sliderbar-thumb-size: 15px;
+    --others-sliderbar-ctl-height: 2px; 
+    --others-sliderbar-thumb-size: 13px;
 }
 
 .dynamic-playing-view .spacing {

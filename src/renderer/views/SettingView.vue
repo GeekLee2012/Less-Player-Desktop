@@ -24,6 +24,13 @@ const { visitThemes, visitDataBackup,
     visitBatchRecents, visitPlugins } = inject('appRoute')
 const { resetSetting,  } = inject('appCommon')
 const { showConfirm, visitLink } = inject('apiExpose')
+const { version, lastVersion, giteeLastVersion,
+  githubLastVersion, checkingUpdates, checkForUpdates,
+  giteeHasNewRelease,  githubHasNewRelease,
+  isLastRelease, hasNewRelease,
+  giteeReleasesUrl, githubReleasesUrl, changelogUrl,
+} = inject('appVersion')
+
 
 const { theme, layout, common, track, desktopLyric,
     keys, keysDefault, tray, navigation, dialog, cache,
@@ -240,8 +247,9 @@ const showDeskLyricAlignItem = computed(() => {
     }
 })
 
+/*
 const { GITHUB, GITEE } = useGitRepository()
-/* 应用更新升级 */
+// 应用更新升级 
 const changelogUrl = `${GITEE}/blob/master/CHANGELOG.md`
 //const lastReleaseUrlRoot = `${GITEE}/releases/tag/`
 const githubReleasesUrl = `${GITHUB}/releases/`
@@ -254,53 +262,11 @@ const isLastRelease = ref(true)
 const giteeHasNewRelease = ref(false)
 const githubHasNewRelease = ref(false)
 
-/*
-const downloadState = ref(0)
-const progressBarRef = ref(null)
-const downloadProgress = ref('准备开始下载')
-let localSavePath = null
-*/
-
 const setLastRelease = (value) => isLastRelease.value = value
 const setGiteeLastVersion = (value) => giteeLastVersion.value = value
 const setGithubLastVersion = (value) => githubLastVersion.value = value
 const setGiteeHasNewRelease = (value) => giteeHasNewRelease.value = value
 const setGithubHasNewRelease = (value) => githubHasNewRelease.value = value
-
-/*
-const setDownloadState = (value) => downloadState.value = value
-const isDownloadError = () => (downloadState.value == -1)
-const isUnstarted = () => (downloadState.value <= 0)
-const isDownloading = () => (downloadState.value == 1)
-const isDownloaded = () => (downloadState.value == 2)
-
-
-const updateDownloadProgress = (received, total) => {
-    let receivedMB = 0, totalMB = 0
-    if (isMacOS()) {
-        receivedMB = parseFloat(received / (1000 * 1000)).toFixed(2)
-        totalMB = parseFloat(total / (1000 * 1000)).toFixed(2)
-    } else {
-        receivedMB = parseFloat(received / (1024 * 1024)).toFixed(2)
-        totalMB = parseFloat(total / (1024 * 1024)).toFixed(2)
-    }
-    if (receivedMB >= totalMB && total > 0) {
-        downloadProgress.value = '下载完成，请手动安装更新'
-        setDownloadState(2)
-    } else if (total > 0) {
-        downloadProgress.value = `${receivedMB}MB / ${totalMB}MB`
-    } else {
-        downloadProgress.value = '准备开始下载'
-    }
-    const percent = total > 0 ? received / total : 0
-    if (progressBarRef) progressBarRef.value.updateProgress(percent)
-}
-
-const resetDownloadProgress = () => {
-    setDownloadState(0)
-    updateDownloadProgress(0, 0)
-}
-*/
 
 const hasNewRelease = computed(() => {
     return !isLastRelease.value && (giteeHasNewRelease.value || githubHasNewRelease.value)
@@ -344,74 +310,6 @@ const getLastReleaseVersion = () => {
     })
 }
 
-/*
-const getVersionReleaseUrl = (version) => {
-    return new Promise((resolve, reject) => {
-        const url = lastReleaseUrlRoot + version
-        let targetExt = 'NULL'
-        if (isMacOS()) targetExt = '.dmg'
-        else if (isWinOS()) targetExt = '.exe'
-
-        let releaseUrl = null
-        getDoc(url).then(doc => {
-            const els = doc.querySelectorAll('.releases-download-list .item a')
-            els.forEach(el => {
-                const href = el.getAttribute('href').trim()
-                if (!href.endsWith(targetExt)) return
-                releaseUrl = "https://gitee.com" + href
-            })
-            resolve(releaseUrl)
-        }, reason => {
-            resolve(null)
-        })
-    })
-}
-
-const getTagReleasePageUrl = (version) => {
-    //`https://gitee.com/rive08/less-player-desktop/releases/tag/${version}`
-    return isCheckPreReleaseVersion.value ? githubReleasesUrl : giteeReleasesUrl
-}
-
-//是否已经下载，且存在下载文件但未进行安装
-const checkDownloaded = async () => {
-    let targetExt = 'NULL'
-    if (isMacOS()) targetExt = '.dmg'
-    else if (isWinOS()) targetExt = '.exe'
-    const path = await ipcRendererInvoke('download-checkExists', {
-        //必须同时满足
-        nameContains: ['Less Player', lastVersion.value, targetExt]
-    })
-    if (path) {
-        localSavePath = path
-        downloadProgress.value = "更新已下载，请手动安装"
-        setDownloadState(2)
-    }
-}
-
-//TODO 目前仅考虑单任务下载
-const startDownload = async () => {
-    //非macOS平台，使用默认浏览器下载
-    if (!isMacOS()) {
-        const url = lastReleaseUrlRoot + lastVersion.value
-        visitLink(url)
-        return
-    }
-    //macOS平台，使用本应用内置下载功能
-    const lastReleaseUrl = await getVersionReleaseUrl(lastVersion.value)
-    if (!lastReleaseUrl) {
-        setDownloadState(-1)
-        downloadProgress.value = '下载失败！请稍候重试'
-        return
-    }
-    setDownloadState(1)
-    onIpcRendererEvent('download-progressing', (e, item) => {
-        const { url, savePath, received, total } = item
-        localSavePath = savePath
-        updateDownloadProgress(received, total)
-    })
-    ipcRendererSend('download-item', { url: lastReleaseUrl })
-}
-*/
 
 let checkingUpdates = ref(false)
 
@@ -445,6 +343,7 @@ const checkForUpdates = async () => {
     checkingUpdates.value = false
     return !isLastRelease.value
 }
+*/
 
 const formatVersion = (version) => {
     const _version = toLowerCaseTrimString(version)
@@ -458,16 +357,6 @@ const formatVersion = (version) => {
     return _version
 }
 
-/*
-const cancelDownload = () => {
-    ipcRendererSend('download-cancel')
-    resetDownloadProgress()
-}
-
-const showPathInFolder = async () => {
-    ipcRendererSend('path-showInFolder', localSavePath)
-}
-*/
 
 //TODO test功能暂未实现
 const applySetupProxy = () => {
@@ -563,13 +452,16 @@ const onScroll = (event) => {
 //watch(isCheckPreReleaseVersion, checkForUpdates)
 watch(isSettingViewTipsShow, refreshSettingViewTips)
 
+/*
 const eventsRegistration = {
     'setting-checkForUpdates': checkForUpdates,
 }
+*/
+
 /* 生命周期、监听 */
 onMounted(() => {
-    onEvents(eventsRegistration)
-    checkForUpdates()
+    //onEvents(eventsRegistration)
+    //checkForUpdates()
     getDisplayFrequency()
 })
 
@@ -1429,7 +1321,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                                     </g>
                                 </g>
                             </svg>
-                            <span>不忽略Pre-release开发预览版</span>
+                            <span>不忽略Pre-release预览版</span>
                         </div>
                     </div>
                     <div :class="{ last: hasNewRelease }" v-show="hasNewRelease">
@@ -1771,10 +1663,12 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-left: 0px;
 }
 
+/*
 #setting-view .content .layout-item {
     width: auto;
     min-width: 93px;
 }
+*/
 
 #setting-view .common .content .fslevel-item {
     min-width: 56px !important;

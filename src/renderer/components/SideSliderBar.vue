@@ -19,7 +19,7 @@ const props = defineProps({
     onDragMove: Function,
     onDragRelease: Function,
     thumbStyle: Number,  //0 => 默认， 1 => 加大
-    thumbAutoHideDelay: Number, //单位ms, 默认1000
+    thumbAutoHideDelay: Number, //单位ms, 默认1000,
 })
 
 const sliderCtlRef = ref(null)

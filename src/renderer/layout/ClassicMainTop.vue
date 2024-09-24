@@ -14,6 +14,7 @@ const { visitThemes, visitUserHome, visitSetting,
     visitModulesSetting, visitPlugins, visitVideoCreate 
 } = inject('appRoute')
 const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
+const { hasNewRelease } = inject('appVersion')
 
 
 const { setLayoutIndex, switchToSimpleLayout } = useSettingStore()
@@ -121,7 +122,7 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div class="setting-btn btn spacing" @click="() => visitSetting()" :class="{ 'last-btn': !isSimpleLayoutShortcutEnable }">
+            <div class="setting-btn btn spacing" @click="() => visitSetting()" :class="{ 'last-btn': !isSimpleLayoutShortcutEnable, newflag: hasNewRelease }">
                 <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">
@@ -211,5 +212,21 @@ const toggleRadioMode = () => {
 
 .classic-main-top .video-btn {
     transform: translateY(1px);
+}
+
+.classic-main-top .setting-btn {
+    position: relative;
+}
+
+.classic-main-top .setting-btn.newflag::after {
+    content: '';
+    background: var(--content-new-color);
+    border: 1px solid #ffffff18;
+    border-radius: 10em;
+    width: 5px;
+    height: 5px;
+    position: absolute;
+    right: -4px;
+    top: -4px;
 }
 </style>

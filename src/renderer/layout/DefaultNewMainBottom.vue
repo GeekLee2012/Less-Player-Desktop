@@ -6,6 +6,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
 import { Track } from '../../common/Track';
+import { Playlist } from '../../common/Playlist';
 
 
 
@@ -39,7 +40,7 @@ onMounted(() => {
                         :onDragRelease="seekTrack" :onDragMove="preseekTrack"
                         keyName="defaultNewMainBottom" >
                     </SliderBar>
-                    <span class="t-duration" v-html="Track.mmssDuration(currentTrack, 0)"></span>
+                    <span class="t-duration" v-html="Track.mmssDuration(currentTrack, Playlist.isFMRadioType(currentTrack) ? -1 : 0)"></span>
                 </div>
             </div>
             <div class="right">

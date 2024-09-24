@@ -5,14 +5,14 @@ import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import { usePlatformStore } from '../store/platformStore';
-import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
+import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
 import { coverDefault, toTrimString } from '../../common/Utils';
 
 
 
-const { playMv, dndSaveTrack } = inject('player')
+const { playMv, dndSaveTrack, mmssCurrentTime } = inject('player')
 const { visitPlaylist, visitRadio, visitAlbum } = inject('appRoute')
 const { showContextMenu, } = inject('appCommon')
 
@@ -121,8 +121,8 @@ const playingState = computed(() => {
                                 :trackId="data.id">
                             </ArtistControl>
                         </div>
-                        <span class="duration" :class="{ 'content-text-highlight': active }">{{ Track.mmssDuration(data)
-                        }}</span>
+                        <span class="duration" v-show="active && Playlist.isFMRadioType(data)" :class="{ 'content-text-highlight': active }">{{ mmssCurrentTime }}</span>
+                        <span class="duration" v-show="!Playlist.isFMRadioType(data)" :class="{ 'content-text-highlight': active }">{{ Track.mmssDuration(data)}}</span>
                     </div>
                 </div>
                 <div class="action">

@@ -12,8 +12,12 @@ import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
   ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, 
-  isMacOS, } from '../common/Utils';
+  isMacOS, useGitRepository,
+  isDevEnv, } from '../common/Utils';
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
+import packageCfg from '../../package.json';
+import { getDoc } from '../common/HttpClient';
+
 
 
 
@@ -34,7 +38,7 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
   getWindowZoom, isSimpleLayout, isDefaultNewLayout, 
   isUseAutoWinCtl, isUseWindowsWinCtl,
   isShowDialogBeforeResetSetting, isAutoLayout,
-  isAppCustomShadowShow, } = storeToRefs(useSettingStore())
+  isAppCustomShadowShow, isCheckPreReleaseVersion, } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
   setupAppGlobalProxy } = useSettingStore()
@@ -216,18 +220,6 @@ const setupTrafficLightWinCtlBtn = () => {
   document.documentElement.style.setProperty('--others-win-ctl-btn-margin-right', `${ctlBtnMarginRight}px`)
 }
 
-//TODO
-const setVideoViewSize = () => {
-  const { clientWidth, clientHeight } = document.documentElement
-  const els = document.querySelectorAll('.video-node')
-  if (!els) return
-  els.forEach(el => {
-    el.style.width = `${clientWidth}px`
-    el.style.height = `${clientHeight - 56}px`
-    el.style.maxHeight = `${clientHeight - 56}px`
-  })
-}
-
 const hideAllPopoverViews = () => {
   //隐藏当前播放
   hidePlaybackQueueView()
@@ -321,6 +313,7 @@ const initialize = () => {
   restoreSetting(true)
   migrateRecentsData()
   //emitEvents('app-init')
+  checkAppVersion()
 }
 
 //直接在setup()时初始化，不需要等待其他生命周期
@@ -443,11 +436,123 @@ const checkMaxScreenState = async () => {
   setMaxScreen(isMaxScreen)
 }
 
+/* 应用更新升级 */
+const { GITHUB, GITEE } = useGitRepository()
+const changelogUrl = `${GITEE}/blob/master/CHANGELOG.md`
+//const lastReleaseUrlRoot = `${GITEE}/releases/tag/`
+const githubReleasesUrl = `${GITHUB}/releases/`
+const giteeReleasesUrl = `${GITEE}/releases/`
+const { version } = packageCfg
+const lastVersion = ref(version)
+const giteeLastVersion = ref(version)
+const githubLastVersion = ref(version)
+const isLastRelease = ref(true)
+const giteeHasNewRelease = ref(false)
+const githubHasNewRelease = ref(false)
+
+const setLastRelease = (value) => isLastRelease.value = value
+const setGiteeLastVersion = (value) => giteeLastVersion.value = value
+const setGithubLastVersion = (value) => githubLastVersion.value = value
+const setGiteeHasNewRelease = (value) => giteeHasNewRelease.value = value
+const setGithubHasNewRelease = (value) => githubHasNewRelease.value = value
+
+const hasNewRelease = computed(() => {
+    return !isLastRelease.value && (giteeHasNewRelease.value || githubHasNewRelease.value)
+})
+
+const getDocWithTimeout = (url, timeout) => (getDoc(url, null, { timeout }))
+
+const getLastReleaseVersion = () => {
+    return new Promise((resolve, reject) => {
+        const _version = `v${version}`
+        const timeout1 = 6000
+        const timeout2 = 10000
+        
+        setLastRelease(true)
+        setGiteeHasNewRelease(false)
+        setGithubHasNewRelease(false)
+        setGiteeLastVersion(_version)
+        setGithubLastVersion(_version)
+
+        if (isCheckPreReleaseVersion.value) { //开发预览版
+            Promise.all([getDocWithTimeout(giteeReleasesUrl, timeout1), getDocWithTimeout(githubReleasesUrl, timeout2)])
+                .then(docs => {
+                const [giteeDoc, githubDoc] = docs
+                const giteeVersion = giteeDoc && giteeDoc.querySelector('.releases-tag-content .release-tag-item .release-meta .tag-name').textContent.trim()
+                const githubVersion = githubDoc && githubDoc.querySelector('.repository-content .col-md-2 .mr-3 span').textContent.trim()
+                resolve({ giteeVersion, githubVersion })
+            }, error => Promise.reject(error))
+            .catch(error => reject(error))
+        } else { //正式版
+            getDocWithTimeout(changelogUrl, timeout1).then(doc => {
+                const versionTextEls = doc.querySelectorAll('.file_content h2')
+                const hasVersionText = (versionTextEls && versionTextEls.length > 1)
+                const changeLogLastVersion = hasVersionText ? toTrimString(versionTextEls[1].textContent) : _version
+                resolve({
+                    giteeVersion: changeLogLastVersion,
+                    githubVersion: changeLogLastVersion
+                })
+            }, error => Promise.reject(error))
+            .catch(error => reject(error))
+        }
+    })
+}
+
+const checkingUpdates = ref(false)
+const setCheckingUpdates = (value) => checkingUpdates.value = value
+const checkForUpdates = async () => {
+    if(checkingUpdates.value) return 
+    setCheckingUpdates(true)
+    setLastRelease(true)
+    const result = await getLastReleaseVersion().catch(error => {
+            checkingUpdates.value = false
+            return { version, error }
+        })
+    if (!result) return setCheckingUpdates(false)
+    const { giteeVersion, githubVersion, error } = result
+    if(error) return setCheckingUpdates(false)
+    const currentVersion = `v${version}`
+    lastVersion.value = currentVersion
+    if (giteeVersion) {
+        setGiteeLastVersion(giteeVersion)
+        setGiteeHasNewRelease(giteeVersion > currentVersion)
+
+        if (giteeVersion >= lastVersion.value) lastVersion.value = giteeVersion
+    }
+    if (githubVersion) {
+        setGithubLastVersion(githubVersion)
+        setGithubHasNewRelease(githubVersion > currentVersion)
+
+        if (githubVersion >= lastVersion.value) lastVersion.value = githubVersion
+    }
+    setLastRelease(currentVersion >= lastVersion.value)
+    setCheckingUpdates(false)
+    return !isLastRelease.value
+}
+
+let checkAppVersionTimer = null, checkRetry = 0
+const checkAppVersion = async () => {
+  const callback = () => {
+    if(isDevEnv()) console.log('[ VERSION - checkForUpdates ]')
+    checkForUpdates().then(result => {
+      if(typeof result == 'boolean' || ++checkRetry >= 6) {
+        clearInterval(checkAppVersionTimer)
+        checkRetry = 0
+        if(isDevEnv() && result) console.log('[ VERSION - New Release ]')
+      }
+    })
+  }
+  callback()
+  //失败重试
+  const MINUTE = 60 * 1000
+  clearInterval(checkAppVersionTimer)
+  checkAppVersionTimer = setInterval(callback, 10 * MINUTE)
+}
+
+
 onMounted(() => {
   //窗口大小变化事件监听
   window.addEventListener('resize', event => {
-    //自适应视频页面大小
-    //setVideoViewSize()
     //重新检查窗口最大化状态
     checkMaxScreenState()
     emitEvents('app-resize', event)
@@ -486,7 +591,7 @@ onEvents({
   'setting-reset': restoreSetting,
   'route-visitShortcutKeys': visitShortcutKeys,
   'check-for-updates': () => {
-    searchDefault('@检查更新').then(() => emitEvents('setting-checkForUpdates'))
+    searchDefault('@检查更新').then(() => checkForUpdates())
   },
 })
 
@@ -517,6 +622,22 @@ provide('appCommon', {
   searchBarPlaceholder,
   useWindowsStyleWinCtl,
   resetSetting,
+})
+
+provide('appVersion', {
+  version,
+  lastVersion,
+  giteeLastVersion,
+  githubLastVersion,
+  checkingUpdates,
+  checkForUpdates,
+  giteeHasNewRelease,
+  githubHasNewRelease,
+  isLastRelease,
+  hasNewRelease,
+  giteeReleasesUrl,
+  githubReleasesUrl,
+  changelogUrl,
 })
 </script>
 

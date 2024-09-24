@@ -1,15 +1,18 @@
 <script setup>
+import { computed } from 'vue';
+
 const props = defineProps({
     current: String,
-    duration: String
+    duration: String,
+    hideDuration: Boolean,
 })
 </script>
 
 <template>
     <div class="audio-time">
-        <span class="t-current">{{ current }}</span>
-        <span class="t-sp">/</span>
-        <span class="t-duration">{{ duration }}</span>
+        <span class="t-current" v-html="current"></span>
+        <span class="t-sp" v-show="!hideDuration">/</span>
+        <span class="t-duration" v-show="!hideDuration" v-html="duration"></span>
     </div>
 </template>
 

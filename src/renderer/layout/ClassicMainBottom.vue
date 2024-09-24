@@ -151,10 +151,32 @@ onMounted(() => {
     fill: var(--content-highlight-color);
 }
 
+/*
 .classic-main-bottom .volume-bar {
     width: 88px;
     margin-right: 36px;
     --others-sliderbar-thumb-size: 12px;
+}
+*/
+
+.classic-main-bottom .volume-wrap {
+    padding-right: 15px;
+    padding-left: 8px;
+}
+
+.classic-main-bottom .volume-wrap .volume-bar {
+    width: 10px;
+    /*margin-right: 33px;*/
+    --others-sliderbar-ctl-height: 3.5px;
+    --others-sliderbar-thumb-size: 12px;
+    --volume-status-size: 22px;
+    height: calc(var(--main-bottom-height) - 25px);
+    transition: width 0.3s;
+}
+
+.classic-main-bottom .volume-wrap:hover .volume-bar {
+    width: 88px;
+    transition: 0.5s;
 }
 
 .classic-main-bottom .love-btn {

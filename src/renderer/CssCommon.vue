@@ -34,6 +34,7 @@
   --content-left-nav-line-height: 36.5px;
   --content-left-nav-line-spacing: 10.5px;
   --content-error-color: #fc605c;
+  --content-new-color: #fc605c;
 
   /*边框 */
   --border-app-win-border-radius: 12px;
@@ -67,6 +68,7 @@
   --others-progressbar-height: 3px;
   --others-sliderbar-ctl-height: 3px;
   --others-sliderbar-thumb-size: 13px;
+  --others-sliderba-ctl-height-exsize: 2px;
 
   /* 主题相关 */
   --border-popovers-border-color: #666;

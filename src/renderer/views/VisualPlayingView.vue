@@ -13,6 +13,7 @@ import { Track } from '../../common/Track';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { Playlist } from '../../common/Playlist';
 
 
 
@@ -194,7 +195,7 @@ onUnmounted(() => {
                     </div>
                     <div class="audio-time-wrap">
                         <span class="t-current" v-html="mmssPreseekTime || mmssCurrentTime"></span>
-                        <span class="t-duration" v-html="Track.mmssDuration(currentTrack, 0)"></span>
+                        <span class="t-duration" v-html="Track.mmssDuration(currentTrack, Playlist.isFMRadioType(currentTrack) ? -1 : 0)"></span>
                     </div>
                     <div class="action">
                         <div class="btm-left">

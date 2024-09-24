@@ -89,7 +89,7 @@ const computedCustomThemeSectionTitle = computed(() => {
                         </SingleSelectionControl>
                     </div>
                     <div class="opt-item">
-                        <span class="subtitle">封面图片边框：</span>
+                        <span class="subtitle">封面边框：</span>
                         <ToggleControl @click="togglePlayingViewCoverBorderShow"
                             :value="track.playingViewCoverBorderShow">
                         </ToggleControl>

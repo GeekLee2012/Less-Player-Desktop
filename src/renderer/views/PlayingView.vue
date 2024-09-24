@@ -15,6 +15,7 @@ import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
 import { usePlatformStore } from '../store/platformStore';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 import ColorThief from '../../../node_modules/colorthief/dist/color-thief.mjs';
+import { Playlist } from '../../common/Playlist';
 
 
 
@@ -223,7 +224,7 @@ onMounted(() => {
                 <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
                     :onScroll="preseekTrack" :onScrollFinish="seekTrack" 
                     :onDragRelease="seekTrack" :onDragMove="preseekTrack" 
-                    keyName="playingView">
+                    keyName="playingView" :autoHeightMode="playing">
                 </SliderBar>
                 <div class="action">
                     <div class="btm-left">
@@ -253,7 +254,8 @@ onMounted(() => {
                     </div>
                     <div>
                         <AudioTime :current="mmssPreseekTime || mmssCurrentTime"
-                            :duration="Track.mmssDuration(currentTrack, 0)">
+                            :duration="Track.mmssDuration(currentTrack, 0)"
+                            :hideDuration="Playlist.isFMRadioType(currentTrack)">
                         </AudioTime>
                     </div>
                     <div class="btm-center">
@@ -346,7 +348,7 @@ onMounted(() => {
                                 :onDragRelease="seekTrack" :onDragMove="preseekTrack" 
                                 keyName="playingView">
                             </SliderBar>
-                            <span class="t-duration" v-html="Track.mmssDuration(currentTrack, 0)"></span>
+                            <span class="t-duration" v-html="Track.mmssDuration(currentTrack, Playlist.isFMRadioType(currentTrack) ? -1 : 0)"></span>
                         </div>
                     </div>
                     <div class="btm-right">
@@ -578,9 +580,12 @@ onMounted(() => {
     margin-left: 41px;
 }
 
+/* bottom */
 .playing-view .container > .bottom {
     height: 82px;
     padding-bottom: 3px;
+    --others-sliderbar-ctl-height: 3px; 
+    --others-sliderbar-thumb-size: 13px;
 }
 
 .playing-view .container > .bottom .action {

@@ -22,7 +22,8 @@ const props = defineProps({
     onDragRelease: Function,
     thumbStyle: Number,  //-1 =>隐藏 , 0 => 默认， 1 => 加大, 2 - logo形状
     thumbAutoHideDelay: Number, //单位ms, 默认1000
-    scopeType: Number //类型，0 => 主界面，1 => 非主界面（比如弹窗）
+    scopeType: Number, //类型，0 => 主界面，1 => 非主界面（比如弹窗）
+    autoHeightMode: Boolean,
 })
 
 const sliderCtlRef = ref(null)
@@ -194,7 +195,8 @@ defineExpose({
 </script>
 
 <template>
-    <div class="slider-bar" @mousewheel="scrollProgress" @mouseenter="showThumb" @mouseleave="hideThumb">
+    <div class="slider-bar" @mousewheel="scrollProgress" @mouseenter="showThumb" @mouseleave="hideThumb"
+        :class="{ 'auto-height': autoHeightMode }">
         <div class="slider-bar-ctl"
             :class="{ 
                 'slider-bar-ctl-ondrag': onDrag, 
@@ -231,19 +233,6 @@ defineExpose({
     flex-direction: row;
     align-items: center;
     position: relative;
-}
-
-.slider-bar.hover {
-    transform: translateY(-1px);
-}
-
-.slider-bar.hover .slider-bar-ctl,
-.slider-bar.hover .slider-bar-ctl .progress {
-    height: calc(var(--others-sliderbar-ctl-height) + 2px);
-}
-
-.slider-bar.hover .slider-bar-ctl .thumb {
-    transform: scale(1.2);
 }
 
 .slider-bar .slider-bar-ctl-disable {
@@ -291,5 +280,22 @@ defineExpose({
 .slider-bar .slider-bar-ctl-with-thumb .thumb,
 .slider-bar .slider-bar-ctl-ondrag .thumb {
     visibility: visible;
+}
+
+
+.slider-bar.auto-height:hover {
+    transform: translateY(calc(0px - var(--others-sliderba-ctl-height-exsize) / 2));
+    transition: 0.3s;
+}
+
+.slider-bar.auto-height:hover .slider-bar-ctl,
+.slider-bar.auto-height:hover .slider-bar-ctl .progress {
+    height: calc(var(--others-sliderbar-ctl-height) + var(--others-sliderba-ctl-height-exsize));
+    transition: 0.3s;
+}
+
+.slider-bar.auto-height:hover .thumb {
+    transform: scale(1.2);
+    transition: 0.3s;
 }
 </style>
