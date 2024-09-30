@@ -13,6 +13,11 @@ import AppLogo from '../components/AppLogo.vue';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
+
+const props = defineProps({
+    hideBottom: Boolean,
+})
+
 const { visitRoute, visitArtist, visitHome,
     visitFavoritePlaylist, visitCustomPlaylist,
     visitCustomPlaylistCreate, currentRoutePath,
@@ -438,7 +443,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </ul>
             </div>
         </div>
-        <div class="bottom">
+        <div class="bottom" v-if="!hideBottom">
             <AppLogo ></AppLogo>
         </div>
     </div>
@@ -446,7 +451,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 <style>
 #main-left {
-    width: 211px;
+    width: var(--main-left-width);
+    min-width: var(--main-left-width);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -495,6 +501,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left .header .win-traffic-light-btn {
     margin-top: 17px;
     margin-left: 20px;
+    align-items: flex-start;
 }
 
 #main-left .header .top-left-navigator-wrap {

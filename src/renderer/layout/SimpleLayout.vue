@@ -97,15 +97,16 @@ const toggleLyricShow = () => {
 
 const setLyricToolbarPos = () => {
     const { clientWidth, clientHeight } = document.documentElement
-    const el = document.querySelector("#lyric-toolbar")
+    const el = document.querySelector('#lyric-toolbar')
     if (!el) return
     //const width = 150, height = 446, padding = 30
-    const width = 168, height = 549, padding = 33
-    const left = (clientWidth - width - padding)
-    const top = (clientHeight - height) / 2
+    const { clientWidth: eWidth, clientHeight: eHeight } = el
+    //const width = 168, height = 549, padding = 33
+    //const left = (clientWidth - eWidth - padding)
+    const top = (clientHeight - eHeight) / 2
     //el.style.right = padding + 'px'
-    el.style.left = left + 'px'
-    el.style.top = top + 'px'
+    //el.style.left = `${left}px`
+    el.style.top = `${top}px`
 }
 
 const switchTextColor = () => {
@@ -1059,8 +1060,8 @@ watch(randomMusicToolbarShow, () => {
     })
 })
 
-watch([lyricToolbarShow], setLyricToolbarPos)
-watch([textColorIndex], setupTextColor)
+watch(lyricToolbarShow, () => nextTick(setLyricToolbarPos))
+watch(textColorIndex, setupTextColor)
 
 const eventsRegistration = {
     'track-lyricLoaded': track => checkLyricValid(track),

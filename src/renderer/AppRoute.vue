@@ -399,6 +399,7 @@ provide('appRoute', {
         return visitCommonRoute('/userhome/batch/recents/0')
     },
     visitTrack: ({ id, platform, title, cover, artist, album }, onRouteReady) => {
+        if(!id || !platform) return
         const exploreMode = transformExploreMode()
         return visitCommonRoute({
             path: `/${exploreMode}/${platform}/track/${id}`,

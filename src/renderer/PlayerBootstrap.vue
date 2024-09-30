@@ -13,6 +13,7 @@ import { coverDefault, isBlank, isDevEnv, escapeHtml,
     tryCall, toTrimString, useTrayAction,
     ipcRendererSend, ipcRendererInvoke, 
     onIpcRendererEvent, onIpcRendererEvents, toMmss, md5,
+    isSupportedImage,
 } from '../common/Utils';
 import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
@@ -91,6 +92,9 @@ let desktopLyricShowState = false, trackRetry = 0
 const TRACK_MAX_RETRY = 1
 const pendingBootstrapTrack = ref(null)
 const setPendingBootstrapTrack = (value) => pendingBootstrapTrack.value = value
+const customDndPlayingCover = ref(null)
+const setCustomDndPlayingCover = (value) => customDndPlayingCover.value = value
+
 
 /* 记录最近播放 */
 //歌曲、电台、MV、视频
@@ -199,9 +203,9 @@ const notifyLyricLoaded = (track) => {
 //处理不可播放歌曲
 const AUTO_PLAY_NEXT_MSG = '当前歌曲无法播放<br>即将为您播放下一曲'
 const NO_NEXT_MSG = '当前歌曲无法播放<br>列表无可播放歌曲'
-const OVERTRY_MSG = '尝试播放次数太多<br>请手动播放其他歌曲吧'
+const OVERTRY_MSG = '播放失败次数太多<br>请手动播放其他歌曲吧'
 const TRY_TRANSFRER_MSG = '当前歌曲无法播放<br>即将尝试切换其他版本'
-const TRANSFRER_OK_MSG = '版本切换已完成<br>即将为您播放歌曲'
+const TRANSFRER_OK_MSG = '版本切换完成<br>即将为您播放歌曲'
 const TRANSFRER_FAIL_MSG = '没有合适版本切换<br>即将为您播放下一曲'
 
 //连跳计数器
@@ -210,14 +214,17 @@ let autoSkipCnt = 0
 const resetAutoSkip = () => autoSkipCnt = 0
 
 
-//提示并播放下一曲
-const toastAndPlayNext = (track, msg) => {
-    //前提条件：必须是当前歌曲
-    if (isCurrentTrack(track)) {
-        showFailToast(msg || AUTO_PLAY_NEXT_MSG, () => {
-            if (isCurrentTrack(track)) playNextTrack()
-        })
-    }
+//提示失败并播放下一曲
+const toastFailAndPlayNext = (track, msg, cnt) => {
+    //歌曲已手动被切走，非当前歌曲
+    if (!isCurrentTrack(track)) return
+    //延时控制访问速度，避免频繁骚扰音乐平台
+    const isRadio = Playlist.isFMRadioType(track)
+    const _msg = isRadio ? AUTO_PLAY_NEXT_MSG.replace('歌曲', '电台') : AUTO_PLAY_NEXT_MSG
+    showFailToast(msg || _msg, () => {
+        //重新确认当前歌曲
+        if (isCurrentTrack(track)) playNextTrack()
+    }, 2233 + cnt * 100)
 }
 
 //用户手动干预，即主动点击上/下一曲时，产生体验上的Bug
@@ -226,7 +233,7 @@ const handleUnplayableTrack = (track, msg) => {
     ++autoSkipCnt
     const queueSize = queueTracksSize.value
     if (Playlist.isNormalRadioType(track)) { //普通歌单电台
-        return toastAndPlayNext(track, msg)
+        return toastFailAndPlayNext(track, msg, autoSkipCnt)
     } else if (autoSkipCnt >= queueSize) { //非电台歌曲，且没有下一曲
         resetPlayState()
         resetAutoSkip()
@@ -234,7 +241,7 @@ const handleUnplayableTrack = (track, msg) => {
     }
     //普通歌曲
     //频繁切换下一曲，体验不好，对音乐平台也不友好
-    if (autoSkipCnt <= 10) return toastAndPlayNext(track, msg)
+    if (autoSkipCnt <= 10) return toastFailAndPlayNext(track, msg, autoSkipCnt)
     resetPlayState()
     //10连跳啦，暂停一下吧
     resetAutoSkip()
@@ -449,9 +456,22 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
 
     const { id, platform } = playlist
     if (Playlist.isFMRadioType(playlist)) { //FM广播电台
-        showToast(text || '即将为您收听电台')
         const track = playlist.data ? playlist.data[0] : playlist
-        playTrack(track)
+        const hasUrl = Track.hasUrl(track)
+        showToast(text || '即将为您收听电台')
+        if(!hasUrl) {
+            Object.assign(track, { purl: playlist.url })
+            bootstrapTrack(track).then(result => {
+                if(!Track.hasUrl(result)) {
+                    if (traceId && !isCurrentTraceId(traceId)) return
+                    return showFailToast('网络异常！请稍候重试')
+                }
+                const { url } = result
+                playTrack(Object.assign(track, { url }))
+            })
+        } else {
+            playTrack(track)
+        }
         return
     } else if (Playlist.isNormalRadioType(playlist)) { //歌单电台
         //提示前置，避免因网络卡顿导致用户多次请求
@@ -890,6 +910,7 @@ const resetPlayState = (ignore) => {
     if (!ignore) setPlayState(PlayState.NONE)
 
     setProgressSeekingState(false)
+    setCustomDndPlayingCover(null)
 }
 
 
@@ -978,8 +999,11 @@ const playVideo = async (video, index, pos, failText, noTrace) => {
 
         //开始播放视频
         if (!videoPlayingViewShow.value) toggleVideoPlayingView()
-        playVideoNow(video, index, pos, noTrace)
-        setupCurrentMediaSession()
+        //等待视频播放页打开，并完成相关初始化
+        nextTick(() => {
+            playVideoNow(video, index, pos, noTrace)
+            setupCurrentMediaSession()
+        })
     } catch (error) {
         if(isDevEnv()) console.log(error)
         showFailToast(failText || '当前视频无法播放')
@@ -1194,6 +1218,23 @@ const dndSaveVideo = async (event, video) => {
     const suffix = '.mp4'
     const file = `${dndSavePath}/${title}${suffix}`
     startDrag({ file, name: title, type: 'video', url })
+}
+
+
+const setupCustomDndPlayingCover = async (event) => {
+    event.preventDefault()
+
+    const { files } = event.dataTransfer
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        setCustomDndPlayingCover(path)
+    } else {
+        //其他文件，直接放行，继续事件冒泡
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
+
 }
 
 
@@ -1647,6 +1688,9 @@ provide('player', {
     dndSaveVideo,
     quickSearch,
     reloadApp,
+    customDndPlayingCover,
+    //setCustomDndPlayingCover,
+    setupCustomDndPlayingCover,
 })
 </script>
 

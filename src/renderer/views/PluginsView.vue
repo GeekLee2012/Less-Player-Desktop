@@ -640,8 +640,7 @@ onActivated(() => {
 }
 
 #plugins-view .center > .content {
-    padding-left: 35px;
-    padding-right: 35px;
+    padding: 0px 35px 15px 35px;
     overflow: scroll;
     overflow-x: hidden;
 }

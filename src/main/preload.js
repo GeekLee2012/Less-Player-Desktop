@@ -25,7 +25,6 @@ const { isMacOS, isWinOS, useCustomTrafficLight,
 //const zlib = require('zlib')
 
 
-
 window.electronAPI = {
   ipcRenderer: {
     ...ipcRenderer,

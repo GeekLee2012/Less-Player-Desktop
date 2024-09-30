@@ -24,7 +24,8 @@ const { isRadioModeShortcutEnable,
     isThemesShortcutEnable,
     isUserHomeShortcutEnable,
     isSimpleLayoutShortcutEnable, 
-    isFreeVideoShortcutEnable, } = storeToRefs(useSettingStore())
+    isFreeVideoShortcutEnable,
+    isUpdatesHintShowEnable, } = storeToRefs(useSettingStore())
 const { isMaxScreen, isRadioMode, isRadioModeEnable } = storeToRefs(useAppCommonStore())
 
 
@@ -122,7 +123,11 @@ const toggleRadioMode = () => {
                     </g>
                 </svg>
             </div>
-            <div class="setting-btn btn spacing" @click="() => visitSetting()" :class="{ 'last-btn': !isSimpleLayoutShortcutEnable, newflag: hasNewRelease }">
+            <div class="setting-btn btn spacing" @click="() => visitSetting()" 
+                :class="{ 
+                    'last-btn': !isSimpleLayoutShortcutEnable, 
+                    newflag: hasNewRelease && isUpdatesHintShowEnable,
+                }">
                 <svg width="21" height="20" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
                         <g id="Layer_1-2" data-name="Layer 1">

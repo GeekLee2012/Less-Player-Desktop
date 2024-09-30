@@ -52,6 +52,9 @@ const FONTSIZE_LEVELS = [{
 }]
 
 const IMAGE_QUALITIES = [{
+    id: 'small',
+    name: '低清'
+},{
     id: 'normal',
     name: '普通'
 }, {
@@ -60,6 +63,9 @@ const IMAGE_QUALITIES = [{
 }, {
     id: 'big',
     name: '高清'
+}, {
+    id: 'bigger',
+    name: '超清'
 }]
 
 const SIMPLE_LAYOUT_INDEX = 3
@@ -106,6 +112,8 @@ export const useSettingStore = defineStore('setting', {
             settingViewTipsShow: true,
             //窗口自定义阴影
             winCustomShadowSize: 5, // 0 - 10
+            //开关选项标题关联点击
+            toggleCtlTitleActionEnable: true,
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -278,6 +286,8 @@ export const useSettingStore = defineStore('setting', {
             show: false,
             //是否最小化到菜单栏
             showOnMinimized: false,
+            //本地化风格图标，仅macOS平台有效
+            nativeIcon: false,
         },
         /* 导航栏 */
         navigation: {
@@ -306,6 +316,8 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 对话框 */
         dialog: {
+            //退出应用
+            quitApp: true,
             //批量删除
             batchDelete: true,
             //删除创建的歌单
@@ -336,7 +348,7 @@ export const useSettingStore = defineStore('setting', {
         keysDefault: {
             data: [{
                 id: 'visitShortcutKeys',
-                name: '查看快捷键设置',
+                name: '快捷键列表',
                 binding: 'K',
                 gBinding: 'Alt + Shift + K'
             }, {
@@ -381,47 +393,47 @@ export const useSettingStore = defineStore('setting', {
                 gBinding: 'Alt + Shift + P'
             }, {
                 id: 'togglePlaybackQueue',
-                name: '打开 / 关闭当前播放',
+                name: '当前播放',
                 binding: 'Q',
                 gBinding: 'Alt + Shift + Q'
             }, {
                 id: 'toggleLyricToolbar',
-                name: '打开 / 关闭歌词设置',
+                name: '歌词设置',
                 binding: 'L',
                 gBinding: 'Alt + Shift + L'
             }, {
                 id: 'visitThemes',
-                name: '打开主题页',
+                name: '主题页',
                 binding: 'T',
                 gBinding: 'Alt + Shift + T'
             }, {
                 id: 'visitUserHome',
-                name: '打开我的主页',
+                name: '我的主页',
                 binding: 'H',
                 gBinding: 'Alt + Shift + H'
             }, {
                 id: 'visitModulesSetting',
-                name: '打开功能管理',
+                name: '功能管理',
                 binding: 'G',
                 gBinding: 'Alt + Shift + G'
             }, {
                 id: 'visitPlugins',
-                name: '打开插件管理',
+                name: '插件管理',
                 binding: 'U',
                 gBinding: 'Alt + Shift + U'
             }, {
                 id: 'quickSearch',
-                name: '快速打开搜索',
+                name: '搜索页',
                 binding: 'S',
                 gBinding: 'Ctrl + Alt + Shift + S'
             },{
                 id: 'visitRecents',
-                name: '打开最近播放',
+                name: '最近播放',
                 binding: 'R',
                 gBinding: 'Alt + Shift + R'
             },{
                 id: 'togglePlayingThemes',
-                name: '打开 / 关闭播放样式',
+                name: '播放样式',
                 binding: 'V',
                 gBinding: 'Alt + Shift + V'
             },{
@@ -451,7 +463,9 @@ export const useSettingStore = defineStore('setting', {
         /* 其他 */
         others: {
             //版本 - 检查更新时，是否忽略开发预览版
-            checkPreReleaseVersion: true
+            checkPreReleaseVersion: true,
+            //版本 - 新版本更新提醒（设置按钮上的小红点）
+            updatesHintShow: true,
         },
         //“黑洞 ”state，永远不需要持久化
         //仅用于触发某些机制，但现在暂时已经用处不大啦
@@ -582,8 +596,14 @@ export const useSettingStore = defineStore('setting', {
         isPlaybackQueueBatchActionBtnShow() {
             return this.track.playbackQueueBatchActionBtnShow
         },
+        isTrayShow() {
+            return this.tray.show
+        },
         isHideToTrayOnMinimized() {
             return this.tray.showOnMinimized
+        },
+        isNativeIcon() {
+            return this.tray.nativeIcon
         },
         currentTheme() {
             return this.getCurrentTheme()
@@ -639,6 +659,9 @@ export const useSettingStore = defineStore('setting', {
         isSearchForPluginsViewShow() {
             return this.search.pluginsViewShow
         },
+        isShowDialogBeforeQuitApp() {
+            return this.dialog.quitApp
+        },
         isShowDialogBeforeBatchDelete() {
             return this.dialog.batchDelete
         },
@@ -671,6 +694,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isCheckPreReleaseVersion() {
             return this.others.checkPreReleaseVersion
+        },
+        isUpdatesHintShowEnable() {
+            return this.others.updatesHintShow
         },
         isModulesPlaylistsOff() {
             return (platform) => {
@@ -750,6 +776,9 @@ export const useSettingStore = defineStore('setting', {
         },
         winCustomShadowSize() {
             return this.common.winCustomShadowSize
+        },
+        isToggleCtlTitleActionEnable() {
+            return this.common.toggleCtlTitleActionEnable
         }
     },
     actions: {
@@ -826,7 +855,7 @@ export const useSettingStore = defineStore('setting', {
         },
         setFontSize(fontSize, byPresetLevel) {
             fontSize = Number(fontSize || 17.5)
-            if (fontSize < 10 || fontSize > 25) return
+            if (fontSize < 10 || fontSize > 30) return
             this.common.fontSize = fontSize
             if (!byPresetLevel) { //使用预设大小时，自动更新预设大小等级
                 const levels = this.allFontSizeLevels()
@@ -1029,6 +1058,10 @@ export const useSettingStore = defineStore('setting', {
         toggleTrayShowOnMinimized() {
             this.tray.showOnMinimized = !this.tray.showOnMinimized
         },
+        toggleTrayNativeIcon() {
+            this.tray.nativeIcon = !this.tray.nativeIcon
+            this.setupTray()
+        },
         toggleCustomPlaylistsShow() {
             this.navigation.customPlaylistsShow = !this.navigation.customPlaylistsShow
         },
@@ -1081,7 +1114,7 @@ export const useSettingStore = defineStore('setting', {
             ipcRendererSend('app-suspension', this.track.playingWithoutSleeping)
         },
         setupTray() {
-            ipcRendererSend('app-tray', this.tray.show)
+            ipcRendererSend('app-tray', this.tray.show, this.tray.nativeIcon)
         },
         setupGlobalShortcut() {
             ipcRendererSend("app-globalShortcut", this.keys.global)
@@ -1273,6 +1306,9 @@ export const useSettingStore = defineStore('setting', {
         getStateRefreshFrequency() {
             return this.track.stateRefreshFrequency
         },
+        toggleShowDialogBeforeQuitApp() {
+            this.dialog.quitApp = !this.dialog.quitApp
+        },
         toggleShowDialogBeforeBatchDelete() {
             this.dialog.batchDelete = !this.dialog.batchDelete
         },
@@ -1305,6 +1341,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleCheckPreReleaseVersion() {
             this.others.checkPreReleaseVersion = !this.others.checkPreReleaseVersion
+        },
+        togglUpdatesHintShow() {
+            this.others.updatesHintShow = !this.others.updatesHintShow
         },
         toggleModulesPlatformOff(module, platform) {
             if (!module || !platform) return
@@ -1418,6 +1457,9 @@ export const useSettingStore = defineStore('setting', {
         setPlayingViewPlayCtlStyleIndex(value) {
             this.track.playingViewPlayCtlStyleIndex = value
         },
+        toggleToggleCtlTitleActionEnable() {
+            this.common.toggleCtlTitleActionEnable = !this.common.toggleCtlTitleActionEnable
+        }
     },
     persist: {
         enabled: true,

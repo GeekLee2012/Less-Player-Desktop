@@ -9,7 +9,7 @@ import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 const NO_TRACK = new Track('0', '', '听你想听，爱你所爱',
     [{ id: '0', name: '不枉青春' }],
-    { id: '0', name: '山川湖海，日月星辰' },
+    { id: '0', name: '日月星辰，山川湖海' },
     0, '')
 
 export const usePlayStore = defineStore('player', {

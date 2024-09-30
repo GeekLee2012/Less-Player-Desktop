@@ -92,6 +92,7 @@ const hasIcon = computed(() => {
     margin-bottom: 15px;
     border-radius: 3px;
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
+    --item-height: 79px;
 }
 
 .plugin-item:hover {
@@ -105,7 +106,7 @@ const hasIcon = computed(() => {
 }
 
 .plugin-item > div {
-    height: 80px;
+    height: var(--item-height);
     vertical-align: middle;
     /*font-size: var(--content-text-size);*/
 }

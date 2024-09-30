@@ -64,6 +64,13 @@ class RadioPlayer {
         //Hls事件绑定
         if (!this.isBindHlsEvent) {
             const self = this
+            /*
+            this.hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                self.hls.config.xhrSetup = (xhr, url) => {
+                    //xhr.setRequestHeader()
+                }
+            })
+            */
             this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 audioNode.play()
                 self.setState(PlayState.PLAYING)

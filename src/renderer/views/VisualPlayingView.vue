@@ -8,7 +8,7 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { stringEquals, useUseCustomTrafficLight } from '../../common/Utils';
+import { stringEquals, useUseCustomTrafficLight, coverDefault, } from '../../common/Utils';
 import { Track } from '../../common/Track';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
@@ -22,7 +22,8 @@ const { seekTrack, playMv,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
     mmssPreseekTime, isTrackSeekable,
-    dndSaveCover } = inject('player')
+    dndSaveCover, customDndPlayingCover,
+    setupCustomDndPlayingCover, } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 const { getExVisualCanvasHandlersLength } = inject('apiExpose')
 const { applyDocumentStyle } = inject('appStyle')
@@ -110,6 +111,10 @@ const switchVisualCanvas = () => {
     setExVisualCanvasIndex((index + 1) % len)
 }
 
+const onDrop = async (event) => {
+    setupCustomDndPlayingCover(event)
+}
+
 
 /* 生命周期、监听 */
 watch(() => (currentTrack.value && currentTrack.value.cover + '&'+ playingViewShow.value), setupBackgroudEffect)
@@ -128,7 +133,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="visual-playing-view">
+    <div class="visual-playing-view" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
@@ -168,7 +173,7 @@ onUnmounted(() => {
                 <div class="left">
                     <div class="cover-spectrum-wrap" v-show="!exVisualCanvasShow">
                         <div class="cover-wrap">
-                            <img class="cover" v-lazy="Track.coverDefault(currentTrack)"
+                            <img class="cover" v-lazy="coverDefault(customDndPlayingCover, Track.coverDefault(currentTrack))"
                                 :class="{ 
                                     rotation: (playingViewShow && playing), 
                                     'obj-fit-contain': (currentTrack.coverFit == 1), 
@@ -313,6 +318,8 @@ onUnmounted(() => {
     /*flex-direction: column;*/
     overflow: hidden;
     --others-sliderbar-ctl-height: 4px;
+    --others-lyric-ctl-extra-btn-right: 50px;
+    --others-lyric-ctl-extra-btn-bottom: 80px;
 }
 
 .visual-playing-view .container {
@@ -329,6 +336,7 @@ onUnmounted(() => {
 
 .visual-playing-view .header {
     height: 56px;
+    height: 43px;
     display: flex;
     -webkit-app-region: drag;
 }
@@ -434,6 +442,7 @@ onUnmounted(() => {
 
 .visual-playing-view .center .lyric-wrap.meta-show {
     margin-top: 15px;
+    margin-top: 30px;
 }
 
 .visual-playing-view .center .lyric-wrap .lyric-ctl {
@@ -446,10 +455,12 @@ onUnmounted(() => {
     justify-content: center;
     /*padding-top: 33px;*/
     margin-right: 28px;
+    margin-top: 23px;
 }
 
 .visual-playing-view .cover-spectrum-wrap {
     padding-top: 33px;
+    padding-top: 50px;
     padding-bottom: 0px;
 }
 

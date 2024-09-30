@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, nextTick, onActivated, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onActivated, onMounted, onUnmounted, ref, watch, onBeforeMount, onBeforeUnmount } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -29,13 +29,15 @@ const sidebarShow = ref(false)
 const setSideBarShow = (value) => sidebarShow.value = value
 const toggleSidebarShow = () => setSideBarShow(!sidebarShow.value)
 
-let videoNode = null
+//let videoNode = null
 const initVideoPlayer = () => {
-    const videoEls = document.querySelectorAll('.video-node')
-    let index = 0 //正常情况，只有 1个
+    //const videoEls = document.querySelectorAll('.video-node')
+    //let index = 0 //正常情况，只有 1个
     //异常情况
-    if (videoEls.length == 2) index = isSimpleLayout.value ? 0 : 1
-    videoNode = videoEls[index]
+    //if (videoEls.length == 2) index = isSimpleLayout.value ? 0 : 1
+    //videoNode = videoEls[index]
+    //console.log(videoEls.length)
+    const videoNode = document.querySelector('.video-node')
     emitEvents('video-init', videoNode)
     setupVideoTheme()
 }
@@ -146,10 +148,19 @@ const eventsRegistration = {
         }
     },
     'video-currentTime': updateRecentLatestVideo,
+    'video-ready': () => emitEvents('video-togglePlay'),
 }
-onMounted(() => onEvents(eventsRegistration))
-onUnmounted(() => offEvents(eventsRegistration))
-onActivated(initVideoPlayer)
+
+onBeforeMount(() => {
+    onEvents(eventsRegistration)
+})
+
+onMounted(() => {
+    //onEvents(eventsRegistration)
+    initVideoPlayer()
+})
+onBeforeUnmount(() => offEvents(eventsRegistration))
+//onActivated(initVideoPlayer)
 </script>
 
 <template>
@@ -216,13 +227,14 @@ onActivated(initVideoPlayer)
                 <div class="header" v-show="currentVideoDataSize > 1">
                     <div class="title" v-html="computedCollectionTitle">
                     </div>
-                    <div class="subtitle-wrap">
-                        <div class="subtitle" v-html="computedCollectionSubtitle"></div>
+                    <div class="nav">
+                        <div class="tab subtitle active" v-html="computedCollectionSubtitle"></div>
+                        <div class="tab">简介</div>
                         <div class="sort-mode" v-show="false">
                         </div>
                         <div class="layout-mode">
-                            <svg width="16" height="16" @click="() => seDataLayoutIndex(0)" :class="{ active: (dataLayoutIndex == 0)}" class="grid-mode" viewBox="0 0 853.14 854.23" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M852.7,619c0,43.49.68,87-.2,130.48-.81,40.11-19.37,70.57-54.31,90.67-14.63,8.42-30.8,12.22-47.4,12.33-59.48.42-119,1-178.45-.1-46.28-.88-84.55-29.89-96.78-71.74A143.53,143.53,0,0,1,470,741.72c-.48-82-.38-164-.15-246,.06-23.15,4.31-45.4,18-64.94,20.54-29.35,48.88-45.26,84.47-45.75,59.31-.81,118.66-1.19,177.95.09,45,1,77,23.85,95,65.29,5.31,12.19,7.27,25.35,7.35,38.55.26,43.33.1,86.66.1,130Zm-84.88.29h.1c0-36.65.06-73.3,0-109.95,0-7.65-.45-15.32-1.11-22.94-.77-8.85-6.93-14.8-15.89-15.7-4.8-.48-9.63-.93-14.45-.94q-64-.21-127.94-.18c-12,0-24,.37-35.93,1.14-10,.65-15.94,7-16.71,17.1-.52,6.8-1,13.63-1,20.45q-.11,110.21,0,220.41c0,7.15.43,14.32,1,21.45.81,9.76,6.83,15.76,16.61,16.72,5.29.52,10.62.93,15.94.95,41.81.12,83.63.24,125.44.14,12.48,0,25-.47,37.43-1.22,8.5-.52,14.63-7,15.49-15.54.51-5.13,1-10.29,1-15.44Q767.9,677.48,767.82,619.26Z"/><path d="M.82,234.47C.82,191,.18,147.47,1,104c.75-39.07,18.53-69.12,52.17-89.43C68.4,5.36,85.28,1.13,102.75,1c59.65-.43,119.32-1.07,179,.14,45.91.94,83.86,29.8,96.09,71.23a142.31,142.31,0,0,1,5.69,38.86c.5,82.32.36,164.65.19,247-.06,30.22-8.39,57.45-30.33,79.51-20.08,20.19-44.56,30.49-72.64,30.75-59.15.55-118.32.94-177.46-.09-45.92-.8-83.9-29.68-97.07-71C.83,380.65.45,363.29.21,346-.06,327.3,0,308.64,0,290q0-27.75,0-55.5Zm297.89-3.38c0-35.32.06-70.64,0-105.95,0-7.32-.41-14.66-1-22-.81-9.52-6.87-15.57-16.26-16.51a149.43,149.43,0,0,0-14.94-1q-63.48-.19-126.94-.16c-12.32,0-24.64.45-36.93,1.2-8.89.54-14.93,6.87-15.84,15.73-.5,5-1,10-1,14.94q-.12,115.44-.06,230.9c0,6.14.45,12.31,1,18.44.86,9.18,6.89,15.13,16.12,16,5,.49,10,.93,14.94.95q63.22.19,126.45.16c12.31,0,24.64-.39,36.92-1.16,9.74-.61,15.72-6.95,16.52-16.76.57-7.13,1-14.3,1-21.45C298.76,306.72,298.71,268.91,298.71,231.09Z"/><path d="M661.44,297.78c-30.15,0-60.32.76-90.44-.16C516.23,295.94,473.6,255,471,200.21c-1.67-34.55-1.51-69.31.13-103.86C473.45,46.47,514,5.41,563.79,1.92,592-.07,620.37.18,648.68.07c33.48-.13,67-.17,100.45.85,43,1.32,74.66,21.56,94,60.29,6.49,13,9.21,27.22,9.42,41.58.47,31,1.18,62-.08,92.94-1.86,45.62-24.51,77.82-66.88,95.43-14.51,6-30.14,7-45.64,7.24-26.15.33-52.31.09-78.47.09Zm-.06-85v.74c16.49,0,33,.2,49.48-.06,13.81-.22,27.63-.61,41.4-1.62,8.09-.59,13.73-7.1,14.52-15.3a162.77,162.77,0,0,0,1-16.94c-.2-25.64-.37-51.28-1.07-76.91-.25-9.17-6.8-15.07-16.07-16-4.8-.48-9.63-.91-14.45-.93q-63.72-.19-127.45-.17c-12.14,0-24.31.4-36.43,1.16-9.49.59-16.2,6.86-16.32,16.31-.38,31-.24,61.93,0,92.89,0,7.17,4.33,12.3,10.73,15,3.41,1.43,7.47,1.77,11.25,1.79C605.74,212.81,633.56,212.74,661.38,212.74Z"/><path d="M192.16,852.66c-29.49,0-59,.8-88.45-.19C60.87,851,29.5,830.6,10.34,792.07a90.38,90.38,0,0,1-9.2-39.62C.86,718,0,683.44,2,649.08,4.86,601,44,561.7,91.92,556.79c15.7-1.61,31.58-1.88,47.38-2q62-.36,124,0c17.84.09,35.89.48,52.64,7.33,39.69,16.25,63.7,45.72,66.39,88.76,2.2,35.16,1.76,70.63.16,105.85-2.29,50.19-42.82,91.32-92.91,94.75-32.37,2.21-64.91,1.88-97.37,2.68C192.17,853.71,192.16,853.18,192.16,852.66Zm0-211.95V640c-16.66,0-33.33-.18-50,.06-13.48.19-27,.5-40.41,1.53-8.82.67-14.91,6.95-15,15.83q-.52,46.68,0,93.37c.11,9.17,6.79,15.1,16,16,5,.49,10,.93,14.94,1q63.74.18,127.45.14c12,0,24-.38,35.93-1.14,9.55-.61,16.22-6.8,16.35-16.28.4-31,.29-61.92.05-92.89-.06-7.54-4.62-12.81-11.57-15.39a30.84,30.84,0,0,0-10.34-1.42C247.83,640.67,220,640.71,192.2,640.71Z"/></g></g></svg>
-                            <svg width="16" height="16" @click="() => seDataLayoutIndex(1)" :class="{ active: (dataLayoutIndex == 1)}" class="list-mode" viewBox="0 0 682.31 511.62" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.27,84.78q-148.21,0-296.43,0c-20,0-35.34-10-41.87-27.24A42.42,42.42,0,0,1,41,.07C42.31,0,43.64,0,45,0H637.34C658,0,674.12,11,680.06,29c9.25,28-11.11,55.68-41.35,55.71q-134.48.15-268.94,0Z"/><path d="M341.19,426.84q148.21,0,296.43,0c20.07,0,35.29,10,41.84,27.26a42.41,42.41,0,0,1-38,57.44c-1.5.07-3,.07-4.5.07H45.56c-20.48,0-36.15-10.18-42.71-27.65-10.27-27.36,9.59-56.91,38.91-57,71-.26,142-.11,213-.12Z"/><path d="M341.15,213.42q147,0,293.92.11a62.77,62.77,0,0,1,19.61,2.76c18.5,6.26,29.77,25.53,27.27,45.07a42.23,42.23,0,0,1-38.51,36.53c-2.49.19-5,.3-7.48.3q-294.68,0-589.35.07c-13.06,0-24.83-3-34.06-12.63C.24,272.76-3.2,257.49,3.05,240.9c6.17-16.38,18.6-25.51,36.19-27.18,3.14-.29,6.32-.29,9.49-.29Z"/></g></g></svg>
+                            <svg width="16" height="16" @click="() => seDataLayoutIndex(0)" :class="{ active: (dataLayoutIndex == 0)}" class="grid-mode mode-item" viewBox="0 0 853.14 854.23" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M852.7,619c0,43.49.68,87-.2,130.48-.81,40.11-19.37,70.57-54.31,90.67-14.63,8.42-30.8,12.22-47.4,12.33-59.48.42-119,1-178.45-.1-46.28-.88-84.55-29.89-96.78-71.74A143.53,143.53,0,0,1,470,741.72c-.48-82-.38-164-.15-246,.06-23.15,4.31-45.4,18-64.94,20.54-29.35,48.88-45.26,84.47-45.75,59.31-.81,118.66-1.19,177.95.09,45,1,77,23.85,95,65.29,5.31,12.19,7.27,25.35,7.35,38.55.26,43.33.1,86.66.1,130Zm-84.88.29h.1c0-36.65.06-73.3,0-109.95,0-7.65-.45-15.32-1.11-22.94-.77-8.85-6.93-14.8-15.89-15.7-4.8-.48-9.63-.93-14.45-.94q-64-.21-127.94-.18c-12,0-24,.37-35.93,1.14-10,.65-15.94,7-16.71,17.1-.52,6.8-1,13.63-1,20.45q-.11,110.21,0,220.41c0,7.15.43,14.32,1,21.45.81,9.76,6.83,15.76,16.61,16.72,5.29.52,10.62.93,15.94.95,41.81.12,83.63.24,125.44.14,12.48,0,25-.47,37.43-1.22,8.5-.52,14.63-7,15.49-15.54.51-5.13,1-10.29,1-15.44Q767.9,677.48,767.82,619.26Z"/><path d="M.82,234.47C.82,191,.18,147.47,1,104c.75-39.07,18.53-69.12,52.17-89.43C68.4,5.36,85.28,1.13,102.75,1c59.65-.43,119.32-1.07,179,.14,45.91.94,83.86,29.8,96.09,71.23a142.31,142.31,0,0,1,5.69,38.86c.5,82.32.36,164.65.19,247-.06,30.22-8.39,57.45-30.33,79.51-20.08,20.19-44.56,30.49-72.64,30.75-59.15.55-118.32.94-177.46-.09-45.92-.8-83.9-29.68-97.07-71C.83,380.65.45,363.29.21,346-.06,327.3,0,308.64,0,290q0-27.75,0-55.5Zm297.89-3.38c0-35.32.06-70.64,0-105.95,0-7.32-.41-14.66-1-22-.81-9.52-6.87-15.57-16.26-16.51a149.43,149.43,0,0,0-14.94-1q-63.48-.19-126.94-.16c-12.32,0-24.64.45-36.93,1.2-8.89.54-14.93,6.87-15.84,15.73-.5,5-1,10-1,14.94q-.12,115.44-.06,230.9c0,6.14.45,12.31,1,18.44.86,9.18,6.89,15.13,16.12,16,5,.49,10,.93,14.94.95q63.22.19,126.45.16c12.31,0,24.64-.39,36.92-1.16,9.74-.61,15.72-6.95,16.52-16.76.57-7.13,1-14.3,1-21.45C298.76,306.72,298.71,268.91,298.71,231.09Z"/><path d="M661.44,297.78c-30.15,0-60.32.76-90.44-.16C516.23,295.94,473.6,255,471,200.21c-1.67-34.55-1.51-69.31.13-103.86C473.45,46.47,514,5.41,563.79,1.92,592-.07,620.37.18,648.68.07c33.48-.13,67-.17,100.45.85,43,1.32,74.66,21.56,94,60.29,6.49,13,9.21,27.22,9.42,41.58.47,31,1.18,62-.08,92.94-1.86,45.62-24.51,77.82-66.88,95.43-14.51,6-30.14,7-45.64,7.24-26.15.33-52.31.09-78.47.09Zm-.06-85v.74c16.49,0,33,.2,49.48-.06,13.81-.22,27.63-.61,41.4-1.62,8.09-.59,13.73-7.1,14.52-15.3a162.77,162.77,0,0,0,1-16.94c-.2-25.64-.37-51.28-1.07-76.91-.25-9.17-6.8-15.07-16.07-16-4.8-.48-9.63-.91-14.45-.93q-63.72-.19-127.45-.17c-12.14,0-24.31.4-36.43,1.16-9.49.59-16.2,6.86-16.32,16.31-.38,31-.24,61.93,0,92.89,0,7.17,4.33,12.3,10.73,15,3.41,1.43,7.47,1.77,11.25,1.79C605.74,212.81,633.56,212.74,661.38,212.74Z"/><path d="M192.16,852.66c-29.49,0-59,.8-88.45-.19C60.87,851,29.5,830.6,10.34,792.07a90.38,90.38,0,0,1-9.2-39.62C.86,718,0,683.44,2,649.08,4.86,601,44,561.7,91.92,556.79c15.7-1.61,31.58-1.88,47.38-2q62-.36,124,0c17.84.09,35.89.48,52.64,7.33,39.69,16.25,63.7,45.72,66.39,88.76,2.2,35.16,1.76,70.63.16,105.85-2.29,50.19-42.82,91.32-92.91,94.75-32.37,2.21-64.91,1.88-97.37,2.68C192.17,853.71,192.16,853.18,192.16,852.66Zm0-211.95V640c-16.66,0-33.33-.18-50,.06-13.48.19-27,.5-40.41,1.53-8.82.67-14.91,6.95-15,15.83q-.52,46.68,0,93.37c.11,9.17,6.79,15.1,16,16,5,.49,10,.93,14.94,1q63.74.18,127.45.14c12,0,24-.38,35.93-1.14,9.55-.61,16.22-6.8,16.35-16.28.4-31,.29-61.92.05-92.89-.06-7.54-4.62-12.81-11.57-15.39a30.84,30.84,0,0,0-10.34-1.42C247.83,640.67,220,640.71,192.2,640.71Z"/></g></g></svg>
+                            <svg width="16" height="16" @click="() => seDataLayoutIndex(1)" :class="{ active: (dataLayoutIndex == 1)}" class="list-mode mode-item" viewBox="0 0 682.31 511.62" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M341.27,84.78q-148.21,0-296.43,0c-20,0-35.34-10-41.87-27.24A42.42,42.42,0,0,1,41,.07C42.31,0,43.64,0,45,0H637.34C658,0,674.12,11,680.06,29c9.25,28-11.11,55.68-41.35,55.71q-134.48.15-268.94,0Z"/><path d="M341.19,426.84q148.21,0,296.43,0c20.07,0,35.29,10,41.84,27.26a42.41,42.41,0,0,1-38,57.44c-1.5.07-3,.07-4.5.07H45.56c-20.48,0-36.15-10.18-42.71-27.65-10.27-27.36,9.59-56.91,38.91-57,71-.26,142-.11,213-.12Z"/><path d="M341.15,213.42q147,0,293.92.11a62.77,62.77,0,0,1,19.61,2.76c18.5,6.26,29.77,25.53,27.27,45.07a42.23,42.23,0,0,1-38.51,36.53c-2.49.19-5,.3-7.48.3q-294.68,0-589.35.07c-13.06,0-24.83-3-34.06-12.63C.24,272.76-3.2,257.49,3.05,240.9c6.17-16.38,18.6-25.51,36.19-27.18,3.14-.29,6.32-.29,9.49-.29Z"/></g></g></svg>
                         </div>
                     </div>
                 </div>
@@ -254,7 +266,7 @@ onActivated(initVideoPlayer)
     --sidebar-bg: var(--sidebar-btn-bg);
     --sidebar-btn-svg-color: #fff;
     --sidebar-collapse-btn-svg-color: #fff;
-    --header-height: 56px;
+    --header-height: 43px;
     --title-width: 520px;
     background: var(--view-bg);
 }
@@ -304,6 +316,7 @@ onActivated(initVideoPlayer)
     align-items: center;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     word-wrap: break-word;
     line-break: anywhere;
 
@@ -423,6 +436,7 @@ onActivated(initVideoPlayer)
     border-bottom: 0.1px solid #000;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
+    visibility: visible !important;
 }
 
 .video-playing-view .sidebar-collapse-btn svg {
@@ -446,7 +460,7 @@ onActivated(initVideoPlayer)
     align-items: flex-start;
     justify-content: flex-start;
 
-    padding: 10px 0px ;
+    padding: 5px 0px 10px 0px;
 }
 
 .video-playing-view .sidebar > .header {
@@ -469,22 +483,25 @@ onActivated(initVideoPlayer)
     text-align: left;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     word-wrap: break-word;
     line-break: anywhere;
 }
 
-.video-playing-view .sidebar > .header .subtitle-wrap {
+.video-playing-view .sidebar > .header .nav {
     display: flex;
     position: relative;
     margin-top: 10px;
     padding-left: 1px;
 }
 
-.video-playing-view .sidebar > .header .subtitle-wrap .subtitle {
-    font-size: calc(var(--content-text-module-title3-size) - 2px);
+.video-playing-view .sidebar > .header .nav .tab {
+    font-size: calc(var(--content-text-module-title3-size) - 3px);
     padding-bottom: 3px;
     border-bottom: 3px solid transparent;
+    margin-right: 36px;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .video-playing-view .sidebar > .header .layout-mode {
@@ -494,14 +511,20 @@ onActivated(initVideoPlayer)
     align-items: center;
     justify-items: center;
     height: 100%;
+    cursor: pointer;
 }
 
 .video-playing-view .sidebar > .header .layout-mode svg {
     padding: 5px 8px;
     fill: #ccc;
     border-radius: 3px;
-    background: #666666;
+    background: #555;
 }
+
+.video-playing-view .sidebar > .header .layout-mode .mode-item:hover {
+    background: #666;
+}
+
 
 .video-playing-view .sidebar > .header .layout-mode .grid-mode {
     border-top-right-radius: 0px;
@@ -523,7 +546,7 @@ onActivated(initVideoPlayer)
     flex-direction: row;
     flex-wrap: wrap;
     overflow: scroll;
-    padding-bottom: 22px;
+    padding-bottom: 10px;
 }
 
 .video-playing-view .sidebar>.content .slogan-item {
@@ -546,7 +569,7 @@ onActivated(initVideoPlayer)
     line-height: 39px;
     padding: 3px 6px;
     cursor: pointer;
-    margin: 0px 0px 20px 20px;
+    margin: 0px 0px 16px 20px;
     font-size: var(--content-text-size);
     border-radius: 5px;
 
@@ -558,12 +581,15 @@ onActivated(initVideoPlayer)
     text-align: center;
     word-wrap: break-word;
     line-break: anywhere;
+
+    background: #434343;
+    color: #ddd;
 }
 
 .video-playing-view .sidebar>.content.list .video-item {
     width: 100%;
-    height: 39px;
-    line-height: 39px;
+    height: 43px;
+    line-height: 43px;
     padding: 3px 8px;
     cursor: pointer;
     margin: 0px 15px 10px 15px;
@@ -578,11 +604,14 @@ onActivated(initVideoPlayer)
     text-align: left;
     word-wrap: break-word;
     line-break: anywhere;
+
+    background: #434343;
+    color: #ddd;
 }
 
 .video-playing-view .sidebar>.content .video-item:hover {
-    background: #666666;
-    color: #ccc;
+    background: #666;
+    color: #eee;
 }
 
 .video-playing-view .sidebar>.content .video-item.active {
@@ -690,7 +719,7 @@ onActivated(initVideoPlayer)
     background: #bf3b4d;
 }
 
-.video-playing-view.theme-city .header svg:hover,
+.video-playing-view.theme-city > .header svg:hover,
 .video-playing-view.theme-city .collapse-btn:hover,
 .video-playing-view.theme-city .collapse-btn:hover svg {
     fill: #bf3b4d !important;
@@ -702,8 +731,12 @@ onActivated(initVideoPlayer)
     fill: #ccc !important;
 }
 
-.video-playing-view.theme-city .sidebar > .header .subtitle {
+.video-playing-view.theme-city .sidebar > .header .tab.active {
     border-color: #bf3b4d;
+}
+
+.video-playing-view.theme-city .sidebar-btn:hover {
+    background: #bf3b4d;
 }
 
 /* vjs-theme-sea */
@@ -761,7 +794,7 @@ onActivated(initVideoPlayer)
     background: #4176bc;
 }
 
-.video-playing-view.theme-sea .header svg:hover,
+.video-playing-view.theme-sea > .header svg:hover,
 .video-playing-view.theme-sea .collapse-btn:hover,
 .video-playing-view.theme-sea .collapse-btn:hover svg {
     fill: #4176bc !important;
@@ -773,8 +806,12 @@ onActivated(initVideoPlayer)
     fill: #ccc !important;
 }
 
-.video-playing-view.theme-sea .sidebar > .header .subtitle {
+.video-playing-view.theme-sea .sidebar > .header .tab.active {
     border-color: #4176bc;
+}
+
+.video-playing-view.theme-sea .sidebar-btn:hover {
+    background: #4176bc;
 }
 
 
@@ -865,7 +902,7 @@ onActivated(initVideoPlayer)
     background: #6fb04e;
 }
 
-.video-playing-view.theme-forest .header svg:hover,
+.video-playing-view.theme-forest > .header svg:hover,
 .video-playing-view.theme-forest .collapse-btn:hover,
 .video-playing-view.theme-forest .collapse-btn:hover svg {
     fill: #6fb04e !important;
@@ -877,7 +914,11 @@ onActivated(initVideoPlayer)
     fill: #ccc !important;
 }
 
-.video-playing-view.theme-forest .sidebar > .header .subtitle {
+.video-playing-view.theme-forest .sidebar > .header .tab.active {
     border-color: #6fb04e;
+}
+
+.video-playing-view.theme-forest .sidebar-btn:hover {
+    background: #6fb04e;
 }
 </style>

@@ -144,9 +144,7 @@ const setActiveTab = (value) => activeTab.value = value
 }
 
 #modules-setting-view .center .content {
-    padding-left: 35px;
-    padding-right: 35px;
-    padding-top: 8px;
+    padding: 8px 35px 15px 35px;
     flex: 1;
     overflow: scroll;
     overflow-x: hidden;

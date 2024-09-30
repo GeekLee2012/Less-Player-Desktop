@@ -17,7 +17,7 @@ import {
     aesDecryptText, tryCallDefault, tryCall, tryCallOnObject, transformUrl,
     stringEquals, stringEqualsIgnoreCase, readLines,
     ipcRendererSend, ipcRendererInvoke,  toMmss, 
-    toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs
+    toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs,
 } from '../common/Utils';
 import {
     FILE_PREFIX, ActivateState,
@@ -43,7 +43,6 @@ const { spectrumParams } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { getImageUrlByQuality } = useSettingStore()
 const { currentTrack } = storeToRefs(usePlayStore())
-
 
 
 let isConfirmDialogShowing = ref(false)

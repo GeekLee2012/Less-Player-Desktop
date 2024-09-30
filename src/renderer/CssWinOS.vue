@@ -77,7 +77,7 @@
 }
 
 .use-winos-win-ctl .classic-main-top .action {
-  right: 25px;
+  right: 23px;
 }
 
 .use-winos-win-ctl .classic-main-top .win-ctl-wrap {
@@ -91,8 +91,8 @@
 .use-winos-win-ctl .dynamic-playing-view .win-ctl-wrap {
   position: absolute;
   right: 0px;
-  top: 10px;
-  padding-right: 25px;
+  top: 9px;
+  padding-right: 21px;
   justify-content: flex-end !important;
 }
 
@@ -106,12 +106,12 @@
   margin-right: 0px;
   padding-left: 18%;
   margin-left: var(--others-win-ctl-margin-left);
-  transform: translateY(-3px);
+  /*transform: translateY(-3px);*/
 }
 
 .use-winos-win-ctl .video-playing-view .win-ctl-wrap {
   position: absolute;
-  right: 10px;
+  right: 13px;
   top: -2px;
 }
 
@@ -131,6 +131,10 @@
 .use-winos-win-ctl .video-playing-view .win-ctl-wrap .close-btn:hover svg {
   fill: #fff !important;
   stroke: #fff !important;
+}
+
+.use-winos-win-ctl .video-playing-view .theme-btn svg {
+    transform: scale(0.93) translateY(2px);
 }
 
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRef } from 'vue';
+import { inject, ref, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -14,12 +14,24 @@ const props = defineProps({
     isMaximized: Boolean,
 })
 
+
+const { showConfirm } = inject('apiExpose')
+
+const { desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { quit, minimize, maximize } = useAppCommonStore()
-const { isHideToTrayOnMinimized } = storeToRefs(useSettingStore())
+const { isHideToTrayOnMinimized, isTrayShow, isShowDialogBeforeQuitApp } = storeToRefs(useSettingStore())
 const isMinBtnDisabled = ref(false)
 
 const setMinBtnDisabled = (value) => {
     isMinBtnDisabled.value = value
+}
+
+const doQuit = async () => {
+    if(!isTrayShow.value && !desktopLyricShow.value && isShowDialogBeforeQuitApp.value) {
+        const ok = await showConfirm('确定要退出应用吗?')
+        if(!ok) return
+    }
+    quit()
 }
 
 const doMinimize = () => {
@@ -33,7 +45,7 @@ const toggleMaximize = () => maximize()
 
 <template>
     <div class="win-traffic-light-btn" @dblclick.stop="">
-        <div @click="quit" class="ctl-btn close-btn">
+        <div @click="doQuit" class="ctl-btn close-btn">
             <svg viewBox="0 -1 32 32" xmlns="http://www.w3.org/2000/svg">
                 <g id="cross">
                     <line class="cls-1" x1="7" x2="25" y1="7" y2="25" />
@@ -92,6 +104,7 @@ const toggleMaximize = () => maximize()
 .win-traffic-light-btn {
     display: flex;
     -webkit-app-region: none;
+    align-items: center;
     /* width: 56px; */
 }
 
@@ -182,11 +195,11 @@ const toggleMaximize = () => maximize()
     fill: var(--button-icon-btn-color);
     width: var(--others-win-ctl-collapse-btn-size);
     height: var(--others-win-ctl-collapse-btn-size);
+    transform: translateY(4px);
 }
 
 .win-traffic-light-btn .collapse-btn:hover,
 .win-traffic-light-btn .collapse-btn:hover svg {
     fill: var(--content-highlight-color);
-    cursor: pointer;
 }
 </style>

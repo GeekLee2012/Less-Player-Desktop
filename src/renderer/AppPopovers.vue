@@ -306,29 +306,33 @@ const eventsRegistration = {
   'addToListSubmenu-hide': hideAddToListSubmenu,
   'artistListSubmenu-hide': hideArtistListSubmenu,
   'color-picker-toolbar-show': ({ event: mouseEvent, onChanged, value, title }) => {
-      //根据鼠标点击位置，确定弹出位置
-      const tbWidth = 218, tbHeight = 369
-      const { x, y, offsetX, offsetY } = mouseEvent
-      const pickerEl = document.querySelector('#color-picker-toolbar')
-      const { clientHeight, clientWidth } = document.documentElement
-      if (!pickerEl) return
-      const padding = 25
-      let top = Math.max(y + (18 - offsetY) - tbHeight / 2, padding)
-      top = Math.min(top, clientHeight - tbHeight - padding)
-      let left = Math.max(x + padding, padding)
-      left = Math.min(left, clientWidth - tbWidth - padding)
-      pickerEl.style.top = `${top}px`
-      pickerEl.style.left = `${left}px`
-
-      if (!colorPickerToolbarRef.value) return
-      if (value) value = value.replace(/\s/g, '')
-      colorPickerToolbarRef.value.init({ onChanged, value })
       showColorPickerToolbar(title)
+      //根据鼠标点击位置，确定弹出位置
+      nextTick(() => {
+        const tbWidth = 218, tbHeight = 369
+        const { x, y, offsetX, offsetY } = mouseEvent
+        const pickerEl = document.querySelector('#color-picker-toolbar')
+        const { clientHeight, clientWidth } = document.documentElement
+        if (!pickerEl) return
+        const padding = 25
+        let top = Math.max(y + (18 - offsetY) - tbHeight / 2, padding)
+        top = Math.min(top, clientHeight - tbHeight - padding)
+        let left = Math.max(x + padding, padding)
+        left = Math.min(left, clientWidth - tbWidth - padding)
+        pickerEl.style.top = `${top}px`
+        pickerEl.style.left = `${left}px`
+
+        if (!colorPickerToolbarRef.value) return
+        if (value) value = value.replace(/\s/g, '')
+        colorPickerToolbarRef.value.init({ onChanged, value })
+      })
   },
   'gradient-color-toolbar-show': ({ event: mouseEvent, value, onChanged }) => {
-      if (!gradientColorToolbarRef.value) return
-      gradientColorToolbarRef.value.init({ onChanged, value })
       showGradientColorToolbar()
+      nextTick(() => {
+        if (!gradientColorToolbarRef.value) return
+        gradientColorToolbarRef.value.init({ onChanged, value })
+      })
   },
   'app-resize': () => {
       setupSoundEffectViewPos()
@@ -376,48 +380,66 @@ onUnmounted(() => offEvents(eventsRegistration))
 
     <transition name="fade-ex">
       <ArtistCategoryView id="artist-category-view"
-        :class="{ autolayout: isAutoLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ 
+          autolayout: isAutoLayout, 
+          'app-custom-theme-bg': appBackgroundScope.categoryView 
+        }"
         v-show="artistCategoryViewShow">
       </ArtistCategoryView>
     </transition>
 
     <transition name="fade-ex">
       <RadioCategoryView id="radio-category-view"
-        :class="{ autolayout: isAutoLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ 
+          autolayout: isAutoLayout, 
+          'app-custom-theme-bg': appBackgroundScope.categoryView 
+        }"
         v-show="radioCategoryViewShow">
       </RadioCategoryView>
     </transition>
 
     <transition name="fade-ex">
       <TagsCategoryView id="tags-category-view"
-        :class="{ autolayout: isAutoLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ 
+          autolayout: isAutoLayout, 
+          'app-custom-theme-bg': appBackgroundScope.categoryView 
+        }"
         v-show="tagsCategoryViewShow">
       </TagsCategoryView>
     </transition>
 
     <transition name="fade-ex">
       <PlatformCategoryView id="platform-category-view"
-        :class="{ autolayout: isAutoLayout, 'app-custom-theme-bg': appBackgroundScope.categoryView }"
+        :class="{ 
+          autolayout: isAutoLayout, 
+          'app-custom-theme-bg': appBackgroundScope.categoryView 
+        }"
         v-show="platformCategoryViewShow">
       </PlatformCategoryView>
     </transition>
 
-    <CommonContextMenu v-show="commonCtxMenuShow" :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
+    <!-- 右键菜单 -->
+    <CommonContextMenu v-show="commonCtxMenuShow" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
       :posStyle="ctxMenuPosStyle" :data="commonCtxMenuData">
     </CommonContextMenu>
 
-    <AddToListSubmenu v-show="addToListSubmenuShow" :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
+    <AddToListSubmenu v-show="addToListSubmenuShow" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
       :posStyle="ctxSubmenuPosStyle">
     </AddToListSubmenu>
 
-    <ArtistListSubmenu v-show="artistListSubmenuShow" :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
+    <ArtistListSubmenu v-show="artistListSubmenuShow" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
       :posStyle="ctxSubmenuPosStyle">
     </ArtistListSubmenu>
 
     <!-- 通用通知 -->
     <transition>
-      <Notification class="common-ntf" :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
-        v-show="commonNotificationShow" @click.stop="">
+      <Notification class="common-ntf" 
+        :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
+        v-show="commonNotificationShow && (commonNotificationType == 0)" 
+        @click.stop="">
         <template #text>
           <svg v-show="commonNotificationType == 0" width="36" height="36" viewBox="0 0 938.64 938.69"
             xmlns="http://www.w3.org/2000/svg">
@@ -430,6 +452,17 @@ onUnmounted(() => offEvents(eventsRegistration))
               </g>
             </g>
           </svg>
+          <p class="ntf-text" v-html="commonNotificationText"></p>
+        </template>
+      </Notification>
+    </transition>
+
+    <transition>
+      <Notification class="common-ntf warning-ntf" 
+        :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
+        v-show="commonNotificationShow && (commonNotificationType == 1)" 
+        @click.stop="">
+        <template #text>
           <svg v-show="commonNotificationType == 1" class="warning" width="36" height="36" viewBox="0 0 832.69 833.08"
             xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
@@ -450,63 +483,81 @@ onUnmounted(() => offEvents(eventsRegistration))
 
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
-        <component id="playing-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.playingView }"
-            v-show="playingViewShow" :is="currentPlayingView">
+        <component id="playing-view" 
+            :class="{ 'app-custom-theme-bg': appBackgroundScope.playingView }"
+            v-if="playingViewShow" :is="currentPlayingView">
         </component>
     </transition>
 
     <transition name="fade-ex">
-      <PlaybackQueueView id="playback-queue-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.playbackQueue }"
+      <PlaybackQueueView id="playback-queue-view" 
+        :class="{ 'app-custom-theme-bg': appBackgroundScope.playbackQueue }"
         v-show="playbackQueueViewShow">
       </PlaybackQueueView>
     </transition>
 
     <transition name="fade-ex">
-      <PlayingThemeListView id="playing-theme-list-view" v-show="playingThemeListViewShow">
+      <PlayingThemeListView id="playing-theme-list-view" 
+        v-if="playingThemeListViewShow">
       </PlayingThemeListView>
     </transition>
 
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
-      <VideoPlayingView id="video-playing-view" v-show="videoPlayingViewShow">
+      <VideoPlayingView id="video-playing-view" 
+        v-if="videoPlayingViewShow">
       </VideoPlayingView>
     </transition>
 
-    <SoundEffectView id="sound-effect-view" :class="{ 'app-custom-theme-bg': appBackgroundScope.soundEffectView }"
-      v-show="soundEffectViewShow" @click.stop="">
+    <SoundEffectView id="sound-effect-view" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.soundEffectView }"
+      v-if="soundEffectViewShow" 
+      @click.stop="">
     </SoundEffectView>
 
     <LyricToolbar id="lyric-toolbar" :class="{ 'app-custom-theme-bg': appBackgroundScope.lyricToolbar }"
-      v-show="lyricToolbarShow" @click.stop="">
+      v-if="lyricToolbarShow" 
+      @click.stop="">
     </LyricToolbar>
 
     <RandomMusicToolbar id="random-music-toolbar"
-      :class="{ 'app-custom-theme-bg': appBackgroundScope.randomMusicToolbar }" v-show="randomMusicToolbarShow"
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.randomMusicToolbar }" 
+      v-if="randomMusicToolbarShow"
       @click.stop="">
     </RandomMusicToolbar>
 
-    <CustomThemeEditView id="custom-theme-edit-view" v-show="customThemeEditViewShow" @click.stop="">
+    <CustomThemeEditView id="custom-theme-edit-view" 
+      v-if="customThemeEditViewShow" 
+      @click.stop="">
     </CustomThemeEditView>
 
-    <CustomPlayingThemeEditView id="custom-playing-theme-edit-view" v-show="customPlayingThemeEditViewShow" @click.stop="">
+    <CustomPlayingThemeEditView id="custom-playing-theme-edit-view" 
+      v-if="customPlayingThemeEditViewShow" 
+      @click.stop="">
     </CustomPlayingThemeEditView>
 
-    <ColorPickerToolbar id="color-picker-toolbar" ref="colorPickerToolbarRef" v-show="colorPickerToolbarShow"
+    <ColorPickerToolbar id="color-picker-toolbar" ref="colorPickerToolbarRef" 
+      v-if="colorPickerToolbarShow"
       @click.stop="">
     </ColorPickerToolbar>
 
-    <GradientColorToolbar id="gradient-color-toolbar" ref="gradientColorToolbarRef" v-show="gradientColorToolbarShow"
+    <GradientColorToolbar id="gradient-color-toolbar" ref="gradientColorToolbarRef" 
+      v-if="gradientColorToolbarShow"
       @click.stop="">
     </GradientColorToolbar>
 
-    <Notification class="popover-hint" :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
-      v-show="popoverHintShow" @click.stop="">
+    <Notification class="popover-hint" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
+      v-show="popoverHintShow" 
+      @click.stop="">
       <template #text>
         <div v-html="popoverHintText"></div>
       </template>
     </Notification>
 
-    <PlaylistExportToolbar id="playlist-export-toolbar" v-show="playlistExportToolbarShow" @click.stop="">
+    <PlaylistExportToolbar id="playlist-export-toolbar" 
+      v-if="playlistExportToolbarShow" 
+      @click.stop="">
     </PlaylistExportToolbar>
   </div>
 </template>
@@ -601,8 +652,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #lyric-toolbar {
   position: fixed;
-  top: 202px;
-  right: 30px;
+  /*top: 80px;*/
+  right: 56px;
   z-index: 99;
   box-shadow: var(--box-shadow);
   /*border-radius: 5px;*/
@@ -698,6 +749,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 #popovers .common-ctx-menu,

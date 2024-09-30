@@ -2,16 +2,16 @@
 import DefaultMainLeft from './DefaultMainLeft.vue';
 import DefaultMainCenter from './DefaultMainCenter.vue';
 import AppPopovers from '../AppPopovers.vue';
-import ClassicMainBottom from './ClassicMainBottom.vue';
 import DefaultNewMainBottom from './DefaultNewMainBottom.vue';
+
 
 </script>
 
 <template>
     <div class="default-layout default-new-layout">
         <div class="center">
-            <DefaultMainLeft></DefaultMainLeft>
-            <DefaultMainCenter></DefaultMainCenter>
+            <DefaultMainLeft :hideBottom="true"></DefaultMainLeft>
+            <DefaultMainCenter :hideBottom="true"></DefaultMainCenter>
         </div>
         <div class="bottom">
             <DefaultNewMainBottom></DefaultNewMainBottom>
@@ -45,16 +45,7 @@ import DefaultNewMainBottom from './DefaultNewMainBottom.vue';
     margin-left: 20px;
 }
 
-/*
-.default-new-layout > .center #main-left .top-logo .app-name {
-    font-size: 23px;
-}
-*/
 
-.default-new-layout > .center #main-left .bottom,
-.default-new-layout > .center #default-main-bottom {
-    display: none;
-}
 
 .default-new-layout > .bottom {
     height: var(--main-bottom-height);

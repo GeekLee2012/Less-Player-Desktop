@@ -101,7 +101,7 @@ export const getInternalIpv4 = async () => {
         const { ip } = await getJson(url, null, { timeout: 3000 })
         return ip
     } catch (error) {
-        console.log(error)
+        if(isDevEnv()) console.log(error)
     }
     //兜底，随机IP池
     const ipPools = [

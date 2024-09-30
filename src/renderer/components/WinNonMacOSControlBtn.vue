@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRef } from 'vue';
+import { inject, ref, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -14,9 +14,20 @@ const props = defineProps({
     isMaximized: Boolean,
 })
 
+const { showConfirm } = inject('apiExpose')
+
+const { desktopLyricShow } = storeToRefs(useAppCommonStore())
 const { quit, minimize, maximize } = useAppCommonStore()
-const { isHideToTrayOnMinimized } = storeToRefs(useSettingStore())
+const { isHideToTrayOnMinimized, isTrayShow, isShowDialogBeforeQuitApp  } = storeToRefs(useSettingStore())
 const isMinBtnDisabled = ref(false)
+
+const doQuit = async () => {
+    if(!isTrayShow.value && !desktopLyricShow.value && isShowDialogBeforeQuitApp.value) {
+        const ok = await showConfirm('确定要退出应用吗?')
+        if(!ok) return
+    }
+    quit()
+}
 
 const setMinBtnDisabled = (value) => {
     isMinBtnDisabled.value = value
@@ -74,7 +85,7 @@ const toggleMaximize = () => maximize()
                 </g>
             </svg>
         </div>
-        <div @click="quit" class="ctl-btn close-btn">
+        <div @click="doQuit" class="ctl-btn close-btn">
             <svg width="15" height="15" viewBox="0 0 1004.78 1003.64" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M510.76,407c19.71-20,38.9-39.67,58.35-59.1Q725,192.26,881,36.76c20-20,44.11-25.92,70.75-18.24,27.47,7.92,45,26.79,51.17,54.83,5.67,25.64-1.48,48.2-19.73,67-15.34,15.78-31.06,31.17-46.62,46.72L618,505.59c-1.39,1.39-2.72,2.84-4.83,5.05,11.75,11.48,23.43,22.61,34.8,34.05Q807.53,705.07,967,865.52c21,21.12,27.13,51.81,15.58,78.83-12.08,28.22-37.87,45.28-67.89,44.81-20.19-.32-37.11-8.21-51.28-22.37q-67-67-134-134-108-108-216-216c-1.29-1.29-2.34-2.82-3.83-4.64-1.85,1.76-3.17,3-4.42,4.2q-183,183-365.91,365.92c-28.16,28.17-72,28.59-101.18.92C9.43,956,7.84,911.93,34.48,882.42c1.89-2.1,3.91-4.1,5.92-6.1Q221,695.66,401.73,515c1.52-1.52,3.27-2.8,6.76-5.76-2.68-1.55-4.74-2.25-6.12-3.62Q212.44,315.85,22.65,125.93C2.21,105.47-5.08,80.7,3.6,53.05S31.05,7.17,60,1.49c25.6-5,47.76,2.82,66.13,21.15Q205.4,101.75,284.54,181L506.28,402.74C507.44,403.89,508.67,405,510.76,407Z"/></g></g></svg>
             <!--
             <svg width="23" height="23" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -171,7 +182,7 @@ const toggleMaximize = () => maximize()
 */
 
 .win-non-macos-ctl-btn .collapse-btn svg {
-    transform: translateY(1px);
+    transform: translateY(2px);
 }
 
 .win-non-macos-ctl-btn .close-btn:hover {

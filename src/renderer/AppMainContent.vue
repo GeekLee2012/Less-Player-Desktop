@@ -13,10 +13,10 @@ import SimpleLayout from './layout/SimpleLayout.vue';
 import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
   ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, 
   isMacOS, useGitRepository,
-  isDevEnv, } from '../common/Utils';
+  isDevEnv, readLines, nextInt, } from '../common/Utils';
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 import packageCfg from '../../package.json';
-import { getDoc } from '../common/HttpClient';
+import { getDoc, getRaw } from '../common/HttpClient';
 
 
 
@@ -76,7 +76,7 @@ const deepInState = (state, cache) => {
 }
 
 const visitShortcutKeys = () => {
-  searchDefault('@查看快捷键')
+  searchDefault('@快捷键列表')
 }
 
 //注册默认应用级别快捷键
@@ -199,8 +199,8 @@ const setupLayout = (isInit) => {
     currentAppLayout.value = DefaultLayout
   }
   emitEvents(eventName)
-  ipcRendererSend(eventName, { zoom: getWindowZoom.value, isInit })
-  //triggerRef(currentAppLayout)
+  const zoom = isInit ? 85 : getWindowZoom.value
+  ipcRendererSend(eventName, { zoom, isInit })
 }
 
 const setupTrafficLightWinCtlBtn = () => {
@@ -244,7 +244,7 @@ const hideAllPopoverViewsAndToolbars = () => {
 
 const hideEmptyToast = () => {
   const text = commonNotificationText.value
-  if (!text || text.trim().length < 1) forceHideToast()
+  if (isBlank(text)) forceHideToast()
 }
 
 const forceHideToast = () => {
@@ -272,17 +272,18 @@ const restoreSetting = (isInit) => {
   setupGlobalShortcut()
   setupLayout(isInit)
   setupWindowZoom()
-  //非初始化，比如重置设置、还原备份数据 
-  if (!isInit) {
+  if (isInit) {
+    //TODO 延迟2s，解决Electron Bug：缩放后内容未按照缩放比例正确显示
+    setTimeout(() => ipcRendererSend('app-mainWin-show'), 1888)
+  } else { 
+    //非初始化，比如重置设置、还原备份数据 
     resetExploreModeActiveStates()
   }
 }
 
 //注册ipcRenderer消息监听器
 onIpcRendererEvents({
-  'app-active': () => {
-    hideEmptyToast()
-  },
+  'app-active': hideEmptyToast,
   'app-quit': setupCache,
 })
 
@@ -315,9 +316,6 @@ const initialize = () => {
   //emitEvents('app-init')
   checkAppVersion()
 }
-
-//直接在setup()时初始化，不需要等待其他生命周期
-//initialize()
 
 const searchDefault = async (keyword) => {
   keyword = toTrimString(keyword)
@@ -439,6 +437,7 @@ const checkMaxScreenState = async () => {
 /* 应用更新升级 */
 const { GITHUB, GITEE } = useGitRepository()
 const changelogUrl = `${GITEE}/blob/master/CHANGELOG.md`
+const rawChangelogUrl = `${GITEE}/raw/master/CHANGELOG.md`
 //const lastReleaseUrlRoot = `${GITEE}/releases/tag/`
 const githubReleasesUrl = `${GITHUB}/releases/`
 const giteeReleasesUrl = `${GITEE}/releases/`
@@ -461,6 +460,7 @@ const hasNewRelease = computed(() => {
 })
 
 const getDocWithTimeout = (url, timeout) => (getDoc(url, null, { timeout }))
+const getRawWithTimeout = (url, timeout) => (getRaw(url, null, { timeout }))
 
 const getLastReleaseVersion = () => {
     return new Promise((resolve, reject) => {
@@ -474,7 +474,7 @@ const getLastReleaseVersion = () => {
         setGiteeLastVersion(_version)
         setGithubLastVersion(_version)
 
-        if (isCheckPreReleaseVersion.value) { //开发预览版
+        if (isCheckPreReleaseVersion.value) { //包括开发预览版
             Promise.all([getDocWithTimeout(giteeReleasesUrl, timeout1), getDocWithTimeout(githubReleasesUrl, timeout2)])
                 .then(docs => {
                 const [giteeDoc, githubDoc] = docs
@@ -484,7 +484,9 @@ const getLastReleaseVersion = () => {
             }, error => Promise.reject(error))
             .catch(error => reject(error))
         } else { //正式版
+            /*
             getDocWithTimeout(changelogUrl, timeout1).then(doc => {
+                //检测方式已失效，由于平台采用动态方式创建数据相关元素
                 const versionTextEls = doc.querySelectorAll('.file_content h2')
                 const hasVersionText = (versionTextEls && versionTextEls.length > 1)
                 const changeLogLastVersion = hasVersionText ? toTrimString(versionTextEls[1].textContent) : _version
@@ -492,6 +494,29 @@ const getLastReleaseVersion = () => {
                     giteeVersion: changeLogLastVersion,
                     githubVersion: changeLogLastVersion
                 })
+            }, error => Promise.reject(error))
+            .catch(error => reject(error))
+            */
+            getRawWithTimeout(rawChangelogUrl, timeout1).then(rawText => {
+                const lines = readLines(rawText)
+                let versionText = ''
+                const keyword = '## v'
+                for(let i = 0; i< lines.length; i++) {
+                  if(lines[i].startsWith(keyword)) {
+                    versionText = lines[i].substring(2)
+                    break
+                  }
+                }
+                const hasVersionText = !isBlank(versionText)
+                const changeLogLastVersion = hasVersionText ? toTrimString(versionText) : _version
+                //网络正常时，访问速度相对较快
+                //延迟返回，让动画先玩一会；魔力转圈圈，也可以有助于控制对当前网站的访问频率
+                setTimeout(() => {
+                  resolve({
+                      giteeVersion: changeLogLastVersion,
+                      githubVersion: changeLogLastVersion
+                  })
+                }, 666 + nextInt(2333))
             }, error => Promise.reject(error))
             .catch(error => reject(error))
         }
@@ -535,7 +560,7 @@ const checkAppVersion = async () => {
   const callback = () => {
     if(isDevEnv()) console.log('[ VERSION - checkForUpdates ]')
     checkForUpdates().then(result => {
-      if(typeof result == 'boolean' || ++checkRetry >= 6) {
+      if(result === true || ++checkRetry >= 6) {
         clearInterval(checkAppVersionTimer)
         checkRetry = 0
         if(isDevEnv() && result) console.log('[ VERSION - New Release ]')
@@ -583,8 +608,10 @@ onEvents({
   'app-zoom': setupTrafficLightWinCtlBtn,
   'app-layout': setupLayout,
   'app-elementAlignCenter': value => {
-      const { selector, width, height, offsetLeft, offsetTop } = value
-      setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
+      nextTick(() => {
+        const { selector, width, height, offsetLeft, offsetTop } = value
+        setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
+      })
   },
   'app-resetSetting': restoreSetting,
   'setting-restore': restoreSetting,

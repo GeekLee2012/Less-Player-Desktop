@@ -55,6 +55,8 @@ class VideoPlayer {
         this.delegatePlayer.on('ratechange', (event) => self.setPlayAction(PlayAction.CHANGE_RATE, event, self.delegatePlayer.playbackRate()))
 
         this.customControlBar()
+
+        this.notify('video-ready')
     }
 
     customControlBar() {
@@ -85,7 +87,7 @@ class VideoPlayer {
     }
 
     setVideoNode(node) {
-        if(this.videoNode == node) return
+        if(this.videoNode == node) return 
 
         this.videoNode = node
         this.initDelegatePlayer()

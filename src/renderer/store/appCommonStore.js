@@ -341,25 +341,27 @@ export const useAppCommonStore = defineStore('appCommon', {
         setUserHomeExploreMode() {
             this.setExploreMode(3)
         },
-        setCommonNotificationType(type) {
-            this.commonNotificationType = type || 0
-        },
-        showCommonNotification(text) {
+        setupCommonNotification(text, type) {
             //没有内容就不显示
-            if (!text || (typeof text != 'string') || text.trim().length < 1) return
-            this.commonNotificationText = text
-            this.commonNotificationShow = true
+            const hasText = (text && text.toString().trim().length > 1) 
+            if(hasText) {
+                this.commonNotificationText = text
+                this.commonNotificationType = type || 0
+                this.commonNotificationShow = hasText
+            } else {
+                this.commonNotificationShow = hasText
+                this.commonNotificationType = type || 0
+                this.commonNotificationText = text
+            }
+            return hasText
         },
         hideCommonNotification() {
-            this.commonNotificationShow = false
-            this.commonNotificationText = null
             this.commonNotificationImportant = false
-            this.setCommonNotificationType(-1)
+            this.setupCommonNotification(null, -1)
         },
         doToast(text, type, callback, delay) {
-            if (toastTimer) clearTimeout(toastTimer)
-            this.showCommonNotification(text)
-            this.setCommonNotificationType(type)
+            clearTimeout(toastTimer)
+            if(!this.setupCommonNotification(text, type)) return
             toastTimer = setTimeout(() => {
                 this.hideCommonNotification()
                 try {

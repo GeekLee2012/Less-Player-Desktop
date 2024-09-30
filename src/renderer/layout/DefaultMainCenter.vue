@@ -13,6 +13,11 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
+const props = defineProps({
+    hideTop: Boolean,
+    hideBottom: Boolean,
+})
+
 const { applyDocumentStyle } = inject('appStyle')
 
 const currentMainTop = shallowRef(null)
@@ -160,7 +165,8 @@ const setVisualPlayingViewLyricCtlSize = () => {
     //const lyricContentEl = document.querySelector('.visual-playing-view .lyric-ctl .center')
     //const noLyricEl = document.querySelector('.visual-playing-view .no-lyric')
 
-    const marginTop = 15 * Math.min(wScaleRatio, hScaleRatio)
+    //const marginTop = 15 * Math.min(wScaleRatio, hScaleRatio)
+    const marginTop = 30 * Math.min(wScaleRatio, hScaleRatio)
     const isHeaderShow = (lyricMetaPos.value == 0)
     //const headerHeight = isHeaderShow ? (headerEl && (headerEl.clientHeight + marginTop)) : 0
     //let { clientHeight: wrapHeight } = lyricWrapEl
@@ -239,11 +245,12 @@ const setLyricToolbarPos = () => {
     const el = document.querySelector('#lyric-toolbar')
     if (!el) return
     //const width = 150, height = 446, padding = 30
-    const width = 168, height = 549, padding = 33
-    const left = (clientWidth - width - padding)
-    const top = (clientHeight - height) / 2
+    const { clientWidth: eWidth, clientHeight: eHeight } = el
+    //const width = 168, height = 549, padding = 33
+    //const left = (clientWidth - eWidth - padding)
+    const top = (clientHeight - eHeight) / 2
     //el.style.right = padding + 'px'
-    el.style.left = `${left}px`
+    //el.style.left = `${left}px`
     el.style.top = `${top}px`
 }
 
@@ -334,7 +341,7 @@ watch(playingViewShow, (nv, ov) => {
     //TODO
     emitEvents('lyric-alignment')
 })
-watch(lyricToolbarShow, setLyricToolbarPos)
+watch(lyricToolbarShow, () => nextTick(setLyricToolbarPos))
 watch(lyricMetaPos, () => {
     setPlayingLyricCtlSize()
     setVisualPlayingViewLyricCtlSize()
@@ -365,7 +372,7 @@ onActivated(() => {
 
 <template>
     <div id="default-main-center">
-        <component id="default-main-top" :is="currentMainTop">
+        <component id="default-main-top" :is="currentMainTop" v-if="!hideTop">
         </component>
         <DefaultMainContent id="default-main-content" 
             :class="{ 
@@ -373,7 +380,7 @@ onActivated(() => {
                 newpadding: isDefaultNewLayout
             }">
         </DefaultMainContent>
-        <component id="default-main-bottom" :is="currentMainBottom">
+        <component id="default-main-bottom" :is="currentMainBottom" v-if="!hideBottom">
         </component>
     </div>
 </template>

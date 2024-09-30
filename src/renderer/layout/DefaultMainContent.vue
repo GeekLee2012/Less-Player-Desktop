@@ -27,7 +27,7 @@ onActivated(visitFirstActivePlatform)*/
 <template>
     <div id="default-main-content">
         <router-view v-slot="{ Component }">
-            <keep-alive :exclude="excludes" :max="12">
+            <keep-alive :exclude="excludes" :max="6">
                 <component :is="Component" />
             </keep-alive>
         </router-view>

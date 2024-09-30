@@ -9,6 +9,7 @@ import { useSettingStore } from '../store/settingStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { isWinOS, useGitRepository, toTrimString, toLowerCaseTrimString,
     ipcRendererSend, ipcRendererInvoke, onIpcRendererEvent,
+    isMacOS,
 } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
@@ -36,10 +37,12 @@ const { theme, layout, common, track, desktopLyric,
     keys, keysDefault, tray, navigation, dialog, cache,
     network, others, search, isHttpProxyEnable, isSocksProxyEnable,
     isShowDialogBeforeResetSetting, isCheckPreReleaseVersion,
-    isUseCardStyleImageTextTile, isSettingViewTipsShow, } = storeToRefs(useSettingStore())
+    isUseCardStyleImageTextTile, isSettingViewTipsShow, 
+    isToggleCtlTitleActionEnable, } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
     toggleSettingViewTipsShow,
+    toggleToggleCtlTitleActionEnable,
     setWindowZoom,
     setWindowCtlStyle,
     setBorderRadiusCtlStyle,
@@ -65,6 +68,7 @@ const { setThemeIndex,
     toggleStoreRecentPlay,
     toggleTrayShow,
     toggleTrayShowOnMinimized,
+    toggleTrayNativeIcon,
     toggleCustomPlaylistsShow,
     toggleFavoritePlaylistsShow,
     toggleFollowArtistsShow,
@@ -113,6 +117,7 @@ const { setThemeIndex,
     toggleSearchForBatchActionShow,
     toggleSearchForFreeFMShow,
     toggleSearchForPluginsViewShow,
+    toggleShowDialogBeforeQuitApp,
     toggleShowDialogBeforeBatchDelete,
     toggleShowDialogBeforeCustomPlaylistDelete,
     toggleShowDialogBeforeClearRecents,
@@ -124,6 +129,7 @@ const { setThemeIndex,
     toggleShowDialogBeforeVisitPluginRepository,
     toggleShowDialogBeforeDeletePlugins,
     toggleCheckPreReleaseVersion,
+    togglUpdatesHintShow,
     toggleModulesSettingShortcut,
     togglePluginsSettingShortcut,
     toggleThemesShortcut,
@@ -197,7 +203,7 @@ const resetSettingData = async () => {
 */
 
 /* 通用设置 */
-const zoomTickmarks = [50, 70, 85, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
+const zoomTickmarks = [50, 70, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
 const fontWeights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 
 const updateWinZoom = (event) => {
@@ -247,103 +253,6 @@ const showDeskLyricAlignItem = computed(() => {
     }
 })
 
-/*
-const { GITHUB, GITEE } = useGitRepository()
-// 应用更新升级 
-const changelogUrl = `${GITEE}/blob/master/CHANGELOG.md`
-//const lastReleaseUrlRoot = `${GITEE}/releases/tag/`
-const githubReleasesUrl = `${GITHUB}/releases/`
-const giteeReleasesUrl = `${GITEE}/releases/`
-const { version } = packageCfg
-const lastVersion = ref(version)
-const giteeLastVersion = ref(version)
-const githubLastVersion = ref(version)
-const isLastRelease = ref(true)
-const giteeHasNewRelease = ref(false)
-const githubHasNewRelease = ref(false)
-
-const setLastRelease = (value) => isLastRelease.value = value
-const setGiteeLastVersion = (value) => giteeLastVersion.value = value
-const setGithubLastVersion = (value) => githubLastVersion.value = value
-const setGiteeHasNewRelease = (value) => giteeHasNewRelease.value = value
-const setGithubHasNewRelease = (value) => githubHasNewRelease.value = value
-
-const hasNewRelease = computed(() => {
-    return !isLastRelease.value && (giteeHasNewRelease.value || githubHasNewRelease.value)
-})
-
-const getDocWithTimeout = (url, timeout) => (getDoc(url, null, { timeout }))
-
-const getLastReleaseVersion = () => {
-    return new Promise((resolve, reject) => {
-        const _version = `v${version}`
-        const timeout1 = 6000
-        const timeout2 = 10000
-        
-        setLastRelease(true)
-        setGiteeHasNewRelease(false)
-        setGithubHasNewRelease(false)
-        setGiteeLastVersion(_version)
-        setGithubLastVersion(_version)
-
-        if (isCheckPreReleaseVersion.value) { //开发预览版
-            Promise.all([getDocWithTimeout(giteeReleasesUrl, timeout1), getDocWithTimeout(githubReleasesUrl, timeout2)])
-                .then(docs => {
-                const [giteeDoc, githubDoc] = docs
-                const giteeVersion = giteeDoc.querySelector('.releases-tag-content .release-tag-item .release-meta .tag-name').textContent.trim()
-                const githubVersion = githubDoc.querySelector('.repository-content .col-md-2 .mr-3 span').textContent.trim()
-                resolve({ giteeVersion, githubVersion })
-            }, error => Promise.reject(error))
-            .catch(error => reject(error))
-        } else { //正式版
-            getDocWithTimeout(changelogUrl, timeout1).then(doc => {
-                const versionTextEls = doc.querySelectorAll('.file_content h2')
-                const hasVersionText = (versionTextEls && versionTextEls.length > 1)
-                const changeLogLastVersion = hasVersionText ? toTrimString(versionTextEls[1].textContent) : _version
-                resolve({
-                    giteeVersion: changeLogLastVersion,
-                    githubVersion: changeLogLastVersion
-                })
-            }, error => Promise.reject(error))
-            .catch(error => reject(error))
-        }
-    })
-}
-
-
-let checkingUpdates = ref(false)
-
-const checkForUpdates = async () => {
-    if(checkingUpdates.value) return 
-    checkingUpdates.value = true
-    const result = await getLastReleaseVersion().catch(error => {
-            checkingUpdates.value = false
-            return { version }
-        })
-    if (!result) {
-        checkingUpdates.value = false
-        return
-    } 
-    const { giteeVersion, githubVersion } = result
-    const currentVersion = `v${version}`
-    lastVersion.value = currentVersion
-    if (giteeVersion) {
-        setGiteeLastVersion(giteeVersion)
-        setGiteeHasNewRelease(giteeVersion > currentVersion)
-
-        if (giteeVersion >= lastVersion.value) lastVersion.value = giteeVersion
-    }
-    if (githubVersion) {
-        setGithubLastVersion(githubVersion)
-        setGithubHasNewRelease(githubVersion > currentVersion)
-
-        if (githubVersion >= lastVersion.value) lastVersion.value = githubVersion
-    }
-    setLastRelease(currentVersion >= lastVersion.value)
-    checkingUpdates.value = false
-    return !isLastRelease.value
-}
-*/
 
 const formatVersion = (version) => {
     const _version = toLowerCaseTrimString(version)
@@ -423,6 +332,37 @@ const refreshSettingViewTips = (nv) => {
     tipTextEls.forEach(el => el.style.display = visibility)
 }
 
+const setupToggleCtlTitleClass = () => {
+    const actionClass = 'btn'
+    const toggleCtlEls = document.querySelectorAll(`#setting-view .toggle-ctl`) || []
+    toggleCtlEls.forEach(el => {
+        const prevSiblingEl = el.previousElementSibling
+        if(!prevSiblingEl) return 
+        if(prevSiblingEl.classList.contains('cate-subtitle')
+            || prevSiblingEl.classList.contains('sec-title')) {
+            const isEnable = isToggleCtlTitleActionEnable.value
+            prevSiblingEl.classList.remove(actionClass)
+            if(isEnable) prevSiblingEl.classList.add(actionClass)
+        }
+    })
+}
+
+
+const setupToggleCtlTitleAction = () => {
+    const toggleCtlEls = document.querySelectorAll(`#setting-view .toggle-ctl`) || []
+    toggleCtlEls.forEach(el => {
+        const prevSiblingEl = el.previousElementSibling
+        if(!prevSiblingEl) return
+        if(prevSiblingEl.classList.contains('cate-subtitle')
+            || prevSiblingEl.classList.contains('sec-title')) {
+            prevSiblingEl.addEventListener('click', () => {
+                const isEnable = isToggleCtlTitleActionEnable.value
+                if(isEnable) el.click()
+            })
+        }
+    })
+}
+
 
 const displayFrequency = ref(60)
 const setDisplayFrequency = (value) => displayFrequency.value = value
@@ -451,6 +391,7 @@ const onScroll = (event) => {
 /* 生命周期、监听 */
 //watch(isCheckPreReleaseVersion, checkForUpdates)
 watch(isSettingViewTipsShow, refreshSettingViewTips)
+watch(isToggleCtlTitleActionEnable, setupToggleCtlTitleClass)
 
 /*
 const eventsRegistration = {
@@ -463,6 +404,8 @@ onMounted(() => {
     //onEvents(eventsRegistration)
     //checkForUpdates()
     getDisplayFrequency()
+    setupToggleCtlTitleAction()
+    setupToggleCtlTitleClass()
 })
 
 onActivated(() => {
@@ -509,6 +452,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleSettingViewTipsShow" :value="common.settingViewTipsShow">
                         </ToggleControl>
                     </div>
+                    <div>
+                        <span class="cate-subtitle">设置页开关选项标题联动：</span>
+                        <ToggleControl @click="toggleToggleCtlTitleActionEnable" :value="common.toggleCtlTitleActionEnable">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：试一试点击开关右边的标题</div>
+                    </div>
                     <div class="window-zoom">
                         <div class="zoom-title">
                             <span>窗口缩放：</span>
@@ -549,25 +498,25 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <input type="number" :value="common.winCustomShadowSize" placeholder="0-10，默认5" min="0" max="10"
                             step="1" @keydown.enter="updateWinCustomShadowSize" @focusout="updateWinCustomShadowSize" />
                     </div>
-                    <div class="font" @keydown.stop="">
-                        <span>字体名称：</span>
+                    <div class="max-content-mr-36" @keydown.stop="">
+                        <span class="cate-subtitle">字体名称：</span>
                         <input type="text" :value="resolveFont(common.fontFamily, true)" placeholder="请参考CSS - FontFamily"
                             @keydown.enter="updateFontFamily" @focusout="updateFontFamily" />
                     </div>
-                    <div>
-                        <span>字体大小：</span>
-                        <input type="number" :value="common.fontSize" placeholder="10-25，默认15.5" min="10" max="25"
+                    <div class="max-content-mr-36">
+                        <span class="cate-subtitle">字体大小：</span>
+                        <input type="number" :value="common.fontSize" placeholder="10-30，默认15.5" min="10" max="30"
                             step="0.1" @keydown.enter="updateFontSize" @focusout="updateFontSize" />
                     </div>
-                    <div>
-                        <span style="margin-right: 8px;">预设大小：</span>
+                    <div class="max-content-mr-36">
+                        <span class="cate-subtitle">预设大小：</span>
                         <span v-for="(item, index) in allFontSizeLevels()" class="fslevel-item"
                             :class="{ active: index == common.fontSizeLevel, 'first-item': index == 0 }" @click="setFontSizeLevel(index)">
                             {{ item.name }}
                         </span>
                     </div>
-                    <div>
-                        <span>字体粗细：</span>
+                    <div class="max-content-mr-36">
+                        <span class="cate-subtitle">字体粗细：</span>
                         <input type="number" :value="common.fontWeight" placeholder="100-1000，默认400" min="100" max="1000"
                             step="10" @keydown.enter="updateFontWeight" @focusout="updateFontWeight" />
                         <datalist id="fontweight-suggests" v-if="false">
@@ -575,20 +524,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </option>
                         </datalist>
                     </div>
-                    <div>
-                        <span class="sec-title">图文控件风格：</span>
-                        <span v-for="(item, index) in ['普通', '卡片']" class="quality-item"
-                            :class="{ active: index == common.imageTextTileStyleIndex, 'first-item': index == 0 }"
-                            @click="setImageTextTileStyleIndex(index)">
-                            {{ item }}
-                        </span>
-                        <div class="tip-text spacing">提示：歌单、专辑等预览控件</div>
-                    </div>
-                    <div v-show="isUseCardStyleImageTextTile">
-                        <span class="cate-subtitle">卡片风格控件阴影效果：</span>
-                        <ToggleControl @click="toggleUseShadowForCardStyleTile" :value="common.shadowForCardStyleTile">
-                        </ToggleControl>
-                        <div class="tip-text spacing3">提示：仅支持部分主题</div>
+                    <div class="tip-text">提示：图片清晰度越高，视觉体验越好，但内存占用越高<br>
+                    图片清晰度完全依赖官方平台，无法保证设置完全有效<br>
+                    设置变更前，已加载好的图片，在设置变更后，无法对其产生任何效果
                     </div>
                     <div>
                         <span class="sec-title">图片清晰度：</span>
@@ -597,8 +535,23 @@ onUnmounted(() => offEvents(eventsRegistration))
                             {{ item.name }}
                         </span>
                     </div>
+                    <div class="max-content-mr-36">
+                        <span class="cate-subtitle">图文控件风格：</span>
+                        <span v-for="(item, index) in ['普通', '卡片']" class="quality-item"
+                            :class="{ active: index == common.imageTextTileStyleIndex, 'first-item': index == 0 }"
+                            @click="setImageTextTileStyleIndex(index)">
+                            {{ item }}
+                        </span>
+                        <div class="tip-text spacing">提示：歌单、专辑等预览控件</div>
+                    </div>
+                    <div class="max-content-mr-36" v-show="isUseCardStyleImageTextTile">
+                        <span class="cate-subtitle">卡片底部阴影：</span>
+                        <ToggleControl @click="toggleUseShadowForCardStyleTile" :value="common.shadowForCardStyleTile">
+                        </ToggleControl>
+                        <div class="tip-text spacing3">提示：仅支持部分主题</div>
+                    </div>
                     <div>
-                        <span class="sec-title">分页方式：</span>
+                        <span class="sec-title cate-sutitle">分页风格：</span>
                         <span v-for="(item, index) in ['普通', '瀑布流']" class="quality-item"
                             :class="{ active: index == common.paginationStyleIndex, 'first-item': index == 0 }"
                             @click="setPaginationStyleIndex(index)">
@@ -607,14 +560,14 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div>
-                        <span class="sec-title">功能管理：</span>
-                        <SvgTextButton text="前往设置" :leftAction="visitModulesSetting">
+                        <span class="sec-title cate-sutitle">功能管理：</span>
+                        <SvgTextButton text="前往管理" :leftAction="visitModulesSetting">
                         </SvgTextButton>
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div class="last">
-                        <span class="sec-title">插件管理：</span>
-                        <SvgTextButton text="前往设置" :leftAction="visitPlugins">
+                        <span class="sec-title cate-sutitle">插件管理：</span>
+                        <SvgTextButton text="前往管理" :leftAction="visitPlugins">
                         </SvgTextButton>
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
@@ -631,7 +584,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </option>
                         </select>
                     </div>
-                    <div>
+                    <div class="max-content-mr-36">
                         <span class="cate-subtitle">优先音质（暂未支持）：</span>
                         <span v-for="(item, index) in allQualities()" class="quality-item"
                             :class="{ active: index == track.quality.index, 'first-item': index == 0 }" @click="setTrackQualityIndex(index)">
@@ -757,7 +710,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div class="tip-text">提示：由于系统平台的安全机制，访问用户目录可能需要授权。</div>
-                    <div>
+                    <div class="max-content-mr-36">
                         <span class="cate-subtitle">拖拽保存位置：</span>
                         <div class="dir-input-ctl">
                             <input class="text-input-ctl" v-model="track.dndSavePath" placeholder="默认为用户目录下的Downloads" />
@@ -803,7 +756,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">歌曲在线封面（如果可用）：</span>
+                        <span class="cate-subtitle">歌曲启用在线封面：</span>
                         <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
                         </ToggleControl>
                     </div>
@@ -879,43 +832,43 @@ onUnmounted(() => offEvents(eventsRegistration))
                             step="1" @keydown.enter="updateDesktopLyricLineSpacing"
                             @focusout="updateDesktopLyricLineSpacing" />
                     </div>
-                    <div>
-                        <span class="sec-title">文字方向：</span>
+                    <div class="max-content-mr-36">
+                        <span class="cate-subtitle">文字方向：</span>
                         <span v-for="(item, index) in ['横屏', '竖屏']" class="quality-item"
                             :class="{ active: index === desktopLyric.textDirection, 'first-item': index == 0 }"
                             @click="setDesktopLyricTextDirection(index)">
                             {{ item }}
                         </span>
                     </div>
-                    <div v-show="desktopLyric.textDirection == 0">
-                        <span class="sec-title">对齐方式：</span>
+                    <div class="max-content-mr-36" v-show="desktopLyric.textDirection == 0">
+                        <span class="cate-subtitle">对齐方式：</span>
                         <span v-for="(item, index) in ['左对齐', '居中', '右对齐', '左、右对齐']" class="quality-item"
                             v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment, 'first-item': index == 0 }"
                             @click="setDesktopLyricAlignment(index)">
                             {{ item }}
                         </span>
                     </div>
-                    <div v-show="desktopLyric.textDirection == 1">
-                        <span class="sec-title">对齐方式：</span>
+                    <div class="max-content-mr-36" v-show="desktopLyric.textDirection == 1">
+                        <span class="cate-subtitle">对齐方式：</span>
                         <span v-for="(item, index) in ['上对齐', '居中', '下对齐', '上、下对齐']" class="quality-item"
                             v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment, 'first-item': index == 0 }"
                             @click="setDesktopLyricAlignment(index)">
                             {{ item }}
                         </span>
                     </div>
-                    <div>
-                        <span class="sec-title">显示模式：</span>
+                    <div class="max-content-mr-36" >
+                        <span class="cate-subtitle">显示模式：</span>
                         <span v-for="(item, index) in ['单行', '双行', '全部']" class="quality-item"
                             :class="{ active: index === desktopLyric.layoutMode, 'first-item': index == 0 }"
                             @click="setDesktopLyricLayoutMode(index)">
                             {{ item }}
                         </span>
                     </div>
+                    <div class="tip-text">提示：开启时，跟随显示模式，自动调整为对应默认的大小</div>
                     <div class="last">
-                        <span class="sec-title">窗口自动大小：</span>
+                        <span class="cate-subtitle">窗口自动调整大小：</span>
                         <ToggleControl @click="toggleDesktopLyricAutoSize" :value="desktopLyric.autoSize">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：开启时，随显示模式自动调整为对应默认的大小</div>
                     </div>
                 </div>
             </div>
@@ -1008,6 +961,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleTrayShow" :value="tray.show">
                         </ToggleControl>
                     </div>
+                    <div v-show="isMacOS()">
+                        <span class="cate-subtitle">本地化风格图标：</span>
+                        <ToggleControl @click="toggleTrayNativeIcon" :value="tray.nativeIcon">
+                        </ToggleControl>
+                    </div>
                     <div class="last">
                         <span class="cate-subtitle">最小化到菜单栏：</span>
                         <ToggleControl @click="toggleTrayShowOnMinimized" :value="tray.showOnMinimized">
@@ -1035,7 +993,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                     </div>
                     <div class="tip-text">提示：顶部导航栏，不同布局下，部分快捷入口可能会失效</div>
-                    <div>顶部导航栏显示快捷入口：</div>
+                    <div>顶部导航栏显示：</div>
                     <div>
                         <span class="cate-subtitle">相约电波：</span>
                         <ToggleControl @click="toggleRadioModeShortcut" :value="navigation.radioModeShortcut">
@@ -1078,6 +1036,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="content">
                     <div class="tip-text">提示：当前使用系统提供的对话框，可能会和当前应用的风格不一致</div>
                     <div>当进行下列操作时，需要确认：</div>
+                    <div>
+                        <span class="cate-subtitle">退出应用：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeQuitApp" :value="dialog.quitApp">
+                        </ToggleControl>
+                    </div>
                     <div>
                         <span class="cate-subtitle">批量删除：</span>
                         <ToggleControl @click="toggleShowDialogBeforeBatchDelete" :value="dialog.batchDelete">
@@ -1141,7 +1104,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleKeysGlobal" :value="keys.global">
                         </ToggleControl>
                         <SvgTextButton text="恢复默认" style="display: none"></SvgTextButton>
-                        <div class="tip-text" v-show="false">提示：目前暂时不支持自定义</div>
+                        <div class="tip-text spacing">提示：目前暂时不支持自定义</div>
                     </div>
                     <div class="tip-text">提示：一般不建议开启全局快捷键，容易与其他应用的快捷键产生冲突</div>
                     <div class="local-keys" v-for="(item, index) in keysDefault.data"
@@ -1281,12 +1244,13 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="version row">
                 <span class="cate-name">版本</span>
                 <div class="content">
-                    <div :class="{ last: isLastRelease }">
-                        <div>
+                    <div>
+                        <div class="current-version" :class="{ oldflag: hasNewRelease }">
                             <span v-html="formatVersion(version)"></span>
                         </div>
-                        <a href="#" @click.prevent="visitLink(changelogUrl)" class="spacing link">更新日志</a>
+                        <a href="#" @click.prevent="visitLink(changelogUrl)" class="link spacing">更新日志</a>
                         <!--<div class="tip-text spacing">提示：当前应用会访问系统默认下载目录，检查是否已存在更新文件</div>-->
+                        <!--
                         <div class="update-check text-btn spacing1" @click="checkForUpdates">
                             <svg :class="{ 'refresh-flag': checkingUpdates }" width="14" height="14" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
@@ -1302,30 +1266,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </svg>
                             <span>检查更新</span>
                         </div>
-                        <div class="checkbox text-btn spacing" @click="toggleCheckPreReleaseVersion">
-                            <svg v-show="!others.checkPreReleaseVersion" width="16" height="16" viewBox="0 0 731.64 731.66"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <g id="Layer_2" data-name="Layer 2">
-                                    <g id="Layer_1-2" data-name="Layer 1">
-                                        <path
-                                            d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
-                                    </g>
-                                </g>
-                            </svg>
-                            <svg v-show="others.checkPreReleaseVersion" class="checked-svg" width="16" height="16"
-                                viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
-                                <g id="Layer_2" data-name="Layer 2">
-                                    <g id="Layer_1-2" data-name="Layer 1">
-                                        <path
-                                            d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
-                                    </g>
-                                </g>
-                            </svg>
-                            <span>不忽略Pre-release预览版</span>
-                        </div>
-                    </div>
-                    <div :class="{ last: hasNewRelease }" v-show="hasNewRelease">
-                        <div class="new-version-wrap">
+                        -->
+                        <div class="new-version-wrap spacing1" v-show="hasNewRelease">
                             <span class="newflag content-text-highlight">最新版本</span>
                             <div class="release-url-link">
                                 <span v-show="githubHasNewRelease">
@@ -1369,6 +1311,65 @@ onUnmounted(() => offEvents(eventsRegistration))
                                     </a>
                                 </span>
                             </div>
+                        </div>
+                    </div>
+                    <div class="last">
+                        <div class="update-check text-btn" @click="checkForUpdates">
+                            <svg :class="{ 'refresh-flag': checkingUpdates }" width="14" height="14" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <g id="Layer_2-2" data-name="Layer 2">
+                                            <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                                <path d="M722.91,136.61c0-17.65-.35-35.3.09-52.93.58-23,19.65-41,42.64-40.9A42.56,42.56,0,0,1,808,85.56v0c.16,38.17,0,76.33,0,114.49v54.5c-.07,25.68-18.46,44.14-44.12,44.16q-84.75.08-169.49,0c-21.66-.07-38.86-15.64-42.08-37.35-2.94-19.81,9.9-39.91,29.79-45.85a54.59,54.59,0,0,1,15.26-1.9c25.16-.19,50.32-.09,76.53-.09a51.87,51.87,0,0,0-3-4.35c-53.4-65-120.89-107-204.41-119.23-120.29-17.69-221,21.23-301.17,112-43.89,49.66-69.09,108.57-79,174-.8,5.26-1.24,10.59-2.17,15.83-3.89,21.83-24.31,37.22-46,34.82C15.69,424.12-1.76,405.28.14,383A356.16,356.16,0,0,1,9.31,326.4C42,196.44,117.61,100.17,237.93,40.47,302.23,8.56,371-4,442.53,1.11,551,9,642.25,53.63,717.11,132.23l4.7,5Z"/>
+                                                <path d="M125.34,715.25v6.31c0,16.16.27,32.34-.19,48.49-.65,23-19.8,40.89-42.82,40.71-22.63-.18-42-18.42-42.1-41q-.48-87,0-174c.12-22.34,19.12-40.8,41.66-40.89,57.32-.22,114.65-.09,172,0a40.33,40.33,0,0,1,7.43.81A42.52,42.52,0,0,1,296,600.34c-1.35,21.43-18.92,39-40.45,39.47-24.82.49-49.66.18-74.48.21h-6.55a21.06,21.06,0,0,0,1.55,2.93c53.45,65.66,121.36,107.14,205.23,120.83,132.88,21.7,259.15-40.37,328.92-148.61a342.29,342.29,0,0,0,53-149.18c2.45-21.73,19.28-38.14,40-39.15,21.49-1.06,40.64,12.81,44,34.06,1.62,10.24.12,21.26-1.49,31.69-11.52,74.95-40.28,142.66-87.62,202-66,82.72-150.85,135.93-255.6,152.64-144.38,23-267.87-20.37-370.17-124.57C130.27,720.55,128.32,718.41,125.34,715.25Z"/>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                            <span>检查更新</span>
+                        </div>
+                        <div class="checkbox text-btn spacing1" @click="toggleCheckPreReleaseVersion">
+                            <svg v-show="!others.checkPreReleaseVersion" width="16" height="16" viewBox="0 0 731.64 731.66"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <svg v-show="others.checkPreReleaseVersion" class="checked-svg" width="16" height="16"
+                                viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <span>不忽略Pre-release预览版</span>
+                        </div>
+                        <div class="checkbox text-btn spacing5" @click="togglUpdatesHintShow">
+                            <svg v-show="!others.updatesHintShow" width="16" height="16" viewBox="0 0 731.64 731.66"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <svg v-show="others.updatesHintShow" class="checked-svg" width="16" height="16"
+                                viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <span>小红点提醒</span>
                         </div>
                     </div>
                 </div>
@@ -1500,44 +1501,40 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-color: transparent;
 }
 
-#setting-view .center .row>.cate-name {
+#setting-view .center .row > .cate-name {
     font-size: var(--content-text-tab-title-size);
     margin-left: 10px;
     width: 110px;
 }
 
 #setting-view .content,
-#setting-view .content>div,
+#setting-view .content > div,
 #setting-view .keys-input-ctl {
     flex: 1;
 }
 
-#setting-view .content>div {
+#setting-view .content > div {
     margin-bottom: 33px;
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#setting-view .content>div .cate-subtitle {
+#setting-view .content > div .cate-subtitle {
     width: var(--content-setting-cate-subtitle-width);
     margin-right: 25px;
 }
 
-/*
-#setting-view .navigation .cate-subtitle,
-#setting-view .dialog .cate-subtitle,
-#setting-view .network .cate-subtitle ,
-#setting-view .keys .cate-subtitle {
-    width: 225px !important;
-}
-*/
 
-#setting-view .keys .local-keys .cate-subtitle {
-    width: 188px !important;
-    margin-right: 15px;
+#setting-view .max-content-mr-20 .cate-subtitle {
+    width: max-content;
+    margin-right: 20px;
 }
 
+#setting-view .max-content-mr-36 .cate-subtitle {
+    width: max-content !important;
+    margin-right: 36px;
+}
 
 #setting-view .content .last {
     margin-bottom: 0px;
@@ -1660,8 +1657,13 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view .content .first-item {
-    margin-left: 0px;
+    margin-left: 0px !important;
 }
+
+#setting-view .common .content .fslevel-item.first-item {
+    margin-left: 10px !important;
+}
+
 
 /*
 #setting-view .content .layout-item {
@@ -1696,7 +1698,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #setting-view .window-ctl .sec-title,
 #setting-view .border-radius-ctl  .sec-title,
-#setting-view .window-custom-shadow .sec-title {
+#setting-view .window-custom-shadow .sec-title,
+#setting-view .keys .cate-subtitle {
     width: 159px !important;
 }
 
@@ -1789,7 +1792,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #setting-view input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     height: 22px;
-    width: 6px;
+    width: 8px;
     /*background: var(--content-text-highlight-color);*/
     background: var(--content-highlight-color);
     border-radius: 10rem;
@@ -1800,15 +1803,6 @@ onUnmounted(() => offEvents(eventsRegistration))
     background: var(--others-progressbar-bg-color);
     border-radius: 10rem;
     height: 6px;
-}
-
-#setting-view .font {
-    display: flex;
-    margin-top: 3px;
-}
-
-#setting-view .font div {
-    flex: 1;
 }
 
 #setting-view .cache-size-text {
@@ -1859,7 +1853,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding: 3px 6px;
     font-size: var(--content-text-tip-text-size);
     font-weight: bold;
-    margin-right: 18px;
+    margin-right: 25px;
 }
 
 #setting-view .about .content span {
@@ -1892,6 +1886,19 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #setting-view .annoucement {
     font-weight: bold;
+}
+
+
+#setting-view .version .current-version {
+    display: flex;
+    min-height: 36px;
+    align-items: center;
+    text-align: left;
+}
+
+#setting-view .version .current-version.oldflag {
+    text-decoration: line-through;
+    color: var(--content-subtitle-text-color);
 }
 
 #setting-view .version .new-version-wrap {

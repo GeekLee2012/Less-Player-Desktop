@@ -12,6 +12,7 @@
   --content-text-preset-font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", 微软雅黑, Arial, sans-serif;
   --content-text-font-family: var(--content-text-preset-font-family);
 
+  --main-left-width: 211px;
   --main-top-height: 68px;
   --main-bottom-height: 82px;
 
@@ -69,6 +70,8 @@
   --others-sliderbar-ctl-height: 3px;
   --others-sliderbar-thumb-size: 13px;
   --others-sliderba-ctl-height-exsize: 2px;
+  --others-lyric-ctl-extra-btn-right: 56px;
+  --others-lyric-ctl-extra-btn-bottom: 99px;
 
   /* 主题相关 */
   --border-popovers-border-color: #666;
@@ -79,6 +82,7 @@
   --content-desktop-lyric-color: #393939;
   --content-desktop-lyric-highlight-color: var(--content-text-highlight-color);
   --content-desktop-lyric-line-spacing: 22px;
+  
 
   font-family: var(--content-text-font-family);
   letter-spacing: var(--content-text-letter-spacing);

@@ -7,7 +7,8 @@ const { app, BrowserWindow, ipcMain,
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
-  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON,
+  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, 
+  APP_ICON, APP_ICON_TEMPLATE, APP_ICON_OPTIONS,
   AUDIO_PLAYLIST_EXTS, BACKUP_FILE_EXTS, 
   TrayAction, GitRepository
 } = require('./env')
@@ -33,6 +34,7 @@ const fetch = require('electron-fetch').default
 
 let messagePortPair = null, messagePortChannel = null
 let appUserAgent =  null, exRequestHandlers = []
+let useTemplateImage = false
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
@@ -100,7 +102,7 @@ const initialize = () => {
     //全局UserAgent
     appUserAgent = USER_AGENTS[nextInt(USER_AGENTS.length)]
     app.userAgentFallback = appUserAgent
-    mainWin = createMainWindow()
+    mainWin = createMainWindow(false)
 
     //清理缓存
     clearCaches()
@@ -173,7 +175,7 @@ const initialize = () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0 || mainWin.isDestroyed()) {
-      mainWin = createMainWindow()
+      mainWin = createMainWindow(true)
     }
     sendToMainRenderer('app-active')
   })
@@ -338,14 +340,15 @@ const handleStartupPlay = (argv) => {
 }
 
 //在菜单栏显示
-const setupTray = (forceShow) => {
+const setupTray = (forceShow, forceUseTempldate) => {
   if (appTrayShow || forceShow) {
     if (appTray) appTray.destroy()
-    /*
-    const icon = nativeImage.createFromPath(path.join(__dirname, APP_ICON))
+    const useNativeTemplate = isMacOS && (forceUseTempldate || useTemplateImage)
+    const iconPath = useNativeTemplate ? APP_ICON_TEMPLATE : APP_ICON
+    const icon = nativeImage.createFromPath(path.join(__dirname, iconPath)).resize(APP_ICON_OPTIONS)
+    if(isMacOS) icon.setTemplateImage(useNativeTemplate)
     appTray = new Tray(icon)
-    */
-    appTray = new Tray(path.join(__dirname, APP_ICON))
+    //appTray = new Tray(path.join(__dirname, APP_ICON))
     appTrayMenu = Menu.buildFromTemplate(initTrayMenuTemplate())
     appTray.setContextMenu(appTrayMenu)
   } else if (appTray) {
@@ -434,8 +437,9 @@ const registryGlobalListeners = () => {
       powerSaveBlocker.stop(powerSaveBlockerId)
       powerSaveBlockerId = -1
     }
-  }).on('app-tray', (event, isShow) => {
+  }).on('app-tray', (event, isShow, isNative) => {
     appTrayShow = isShow
+    useTemplateImage = isNative
     setupTray()
   }).on('app-zoom', (event, { zoom, noResize }) => {
     setupAppWindowZoom(zoom, noResize)
@@ -1004,7 +1008,7 @@ const closeMessagePortPair = () => {
 }
 
 //创建浏览窗口
-const createMainWindow = () => {
+const createMainWindow = (show) => {
   const { appWidth: width, appHeight: height } = appLayoutConfig[appLayout]
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -1017,9 +1021,10 @@ const createMainWindow = () => {
     //trafficLightPosition: { x: 20, y: 18 },
     trafficLightPosition: { x: -404, y: -404 }, // 404 => 神秘数字 
     transparent: true,
+    show,
     frame: false,
     webPreferences: {
-      //zoomFactor: 1,
+      zoomFactor: 1.0,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
@@ -1039,7 +1044,7 @@ const createMainWindow = () => {
 
   mainWindow.once('ready-to-show', () => {
     setWindowButtonVisibility(mainWindow, !useCustomTrafficLight)
-    mainWindow.show()
+    //mainWindow.show()
 
     onReadyToShowTasks()
   })
@@ -1096,8 +1101,8 @@ const setupAppLayout = (layout, zoom, isInit) => {
   if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 0.85
   //mainWin.webContents.setZoomFactor(zoomFactor)
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
-  const width = parseInt(appWidth * zoomFactor)
-  const height = parseInt(appHeight * zoomFactor)
+  const width = Math.round(appWidth * zoomFactor)
+  const height = Math.round(appHeight * zoomFactor)
   const isSimpleLayout = (appLayout === SIMPLE_LAYOUT)
   const maxWidth = (isSimpleLayout ? width : 102400)
   const maxHeight = (isSimpleLayout ? height : 102400)
@@ -1107,9 +1112,6 @@ const setupAppLayout = (layout, zoom, isInit) => {
     mainWin.setSize(width, height)
   }
   mainWin.webContents.setZoomFactor(zoomFactor)
-  if(mainWin.webContents.zoomFactor) {
-    mainWin.webContents.zoomFactor = zoomFactor
-  }
   
   //TODO 显示效果：能居中，但只能居中一点点？水平方向居中，但垂直方向没居中
   // 貌似 Electron Bug? 
@@ -1603,6 +1605,7 @@ const createLyricWindow = () => {
     transparent: true,
     frame: false,
     webPreferences: {
+      zoomFactor: 1.0,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,

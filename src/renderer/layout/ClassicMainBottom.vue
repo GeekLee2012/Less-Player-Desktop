@@ -40,7 +40,7 @@ onMounted(() => {
                 <div class="volume-wrap">
                     <VolumeBar ref="volumeBarRef"></VolumeBar>
                 </div>
-                <div class="spacing" @click="toggleFavoritedState">
+                <div @click="toggleFavoritedState">
                     <svg v-show="!favoritedState" class="love-btn" width="18" height="19" viewBox="0 0 1024 937.46"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
@@ -160,13 +160,12 @@ onMounted(() => {
 */
 
 .classic-main-bottom .volume-wrap {
-    padding-right: 15px;
+    padding-right: 31px;
     padding-left: 8px;
 }
 
 .classic-main-bottom .volume-wrap .volume-bar {
     width: 10px;
-    /*margin-right: 33px;*/
     --others-sliderbar-ctl-height: 3.5px;
     --others-sliderbar-thumb-size: 12px;
     --volume-status-size: 22px;

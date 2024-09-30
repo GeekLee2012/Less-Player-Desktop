@@ -8,7 +8,8 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv, nextInt, rgbToHsl,  } from '../../common/Utils';
+import { stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv, nextInt, 
+    rgbToHsl, hslToRgb, coverDefault, } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
@@ -24,10 +25,12 @@ const { seekTrack, playMv,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
     mmssPreseekTime, isTrackSeekable,
-    dndSaveCover } = inject('player')
+    dndSaveCover, customDndPlayingCover,
+    setupCustomDndPlayingCover, } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 const { applyDocumentStyle } = inject('appStyle')
+
 
 
 const { isMaxScreen, playingViewShow, desktopLyricShow } = storeToRefs(useAppCommonStore())
@@ -49,9 +52,26 @@ const volumeBarRef = ref(null)
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
 
+const overrideDefaultPalette = (rgbs) => {
+    const [r1, g1, b1] = rgbs[0]
+    const [r2, g2, b2] = rgbs[1]
+    const isHit = (r, g, b) => {
+         //[219, 116, 115], [68, 68, 69]
+        return (r == 219 && g == 116 && b == 115) 
+            || (r == 68 && g == 68 && b == 69)
+    }
+    if(isHit(r1, g1, b1) && isHit(r2, g2, b2)) {
+        //Noon to Dusk: #ff6e7f, #bfe9ff => [255, 110, 127], [191, 233, 255]
+        //Love and Liberty: #200122, #6f0000 => [32, 1, 34], [111, 0, 0]
+        //Poncho: #403a3e, #be5869 => [190, 88, 105], [64, 58, 62]
+        return [[190, 88, 105], [64, 58, 62]]
+    }
+    return rgbs
+}
+
 const sortPalette = (rgbs, mode) => {
     //简单起见，仅考虑数组长度为2的情况
-    const _rgbs = rgbs.slice(0, 2)
+    const _rgbs = overrideDefaultPalette(rgbs.slice(0, 2))
     const [h1, s1, l1] = rgbToHsl(..._rgbs[0])
     const [h2, s2, l2] = rgbToHsl(..._rgbs[1])
 
@@ -66,18 +86,28 @@ const sortPalette = (rgbs, mode) => {
     return _rgbs
 }
 
+let isOptimizeEnable = false
+const optimizePalette = (rgbs) => {
+    if(!isOptimizeEnable) return rgbs
+    //简单起见，仅考虑数组长度为2的情况
+    const _rgbs = rgbs.slice(0, 2)
+    //TODO 待学习色彩理论、算法
+    return _rgbs.map(rgb => {
+        return rgb
+    })
+}
+
 const getPalette = (img, num) => {
     return new ColorThief().getPalette(img, num)
 }
-
 
 const postCoverLoadComplete = () => {
     const containerEl = document.querySelector('.playing-view .container')
     const coverEl = containerEl.querySelector('.center .cover')
     const mode = playingViewBgCoverEffectGradientMode.value
-    const rgbs = sortPalette(getPalette(coverEl, 2), mode)
-    const alphaColor = mode ? 88: 68
-    const alpha = (alphaColor / 255).toFixed(2)
+    const rgbs = optimizePalette(sortPalette(getPalette(coverEl, 2), mode))
+    const alphaFactor = mode ? 88: 68
+    const alpha = (alphaFactor / 255).toFixed(2)
     const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
     const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
     const _rgbColors = rgbColors.join(',')
@@ -152,6 +182,10 @@ const computedBottomNewShow = computed(() => {
     return playCtlIndex == 2 || (playCtlIndex == 0 && effectIndex == 2)
 })
 
+const onDrop = async (event) => {
+    setupCustomDndPlayingCover(event)
+}
+
 /* 生命周期、监听 */
 watch(() => (currentTrack.value && currentTrack.value.cover 
     + '&' + playingViewShow.value
@@ -167,7 +201,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="playing-view">
+    <div class="playing-view" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
@@ -211,7 +245,7 @@ onMounted(() => {
                                 'draggable': isDndSaveEnable, 
                                 'none-border': !isPlayingViewCoverBorderShow 
                             }"
-                            v-lazy="Track.coverDefault(currentTrack)" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
+                            v-lazy="coverDefault(customDndPlayingCover, Track.coverDefault(currentTrack))" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
                     <div class="format" v-show="false" v-html="trackFormat"></div>
                 </div>
                 <div class="lyric-wrap">
@@ -406,6 +440,8 @@ onMounted(() => {
     display: flex;
     /*flex-direction: column;*/
     overflow: hidden;
+    --bottom-size: 82px;
+    --others-lyric-ctl-extra-btn-bottom: 108px;
     --others-sliderbar-ctl-height: 4px; 
     --others-sliderbar-thumb-size: 15px;
 }
@@ -430,6 +466,7 @@ onMounted(() => {
 
 .playing-view .container > .header {
     height: 56px;
+    height: 43px;
     display: flex;
     -webkit-app-region: drag;
 }
@@ -535,6 +572,7 @@ onMounted(() => {
 .playing-view .container > .center .cover-wrap {
     margin-right: 41px;
     margin-bottom: 0px;
+    margin-top: 13px;
     display: flex;
     justify-content: flex-end;
     flex-direction: column;
@@ -556,8 +594,9 @@ onMounted(() => {
 }
 
 .playing-view .container > .center .cover-wrap .cover.none-border {
-    border: 0px solid transparent;
+    border: 6px solid transparent;
     box-shadow: 0px 0px 6px var(--border-popovers-border-color);
+    box-shadow: 0px 0px 6px transparent;
 }
 
 .playing-view .container > .center .cover-wrap .cover.draggable {
@@ -582,10 +621,12 @@ onMounted(() => {
 
 /* bottom */
 .playing-view .container > .bottom {
-    height: 82px;
-    padding-bottom: 3px;
     --others-sliderbar-ctl-height: 3px; 
     --others-sliderbar-thumb-size: 13px;
+
+    height: var(--bottom-size);
+    min-height: var(--bottom-size);
+    padding-bottom: 3px;
 }
 
 .playing-view .container > .bottom .action {
@@ -640,8 +681,9 @@ onMounted(() => {
 /* bottom-new  */
 .playing-view .container > .bottom.bottom-new {
     border-top: 1.3px solid var(--others-progressbar-bg-color);
-    --bottom-new-size: 88px;
-    height: var(--bottom-new-size);
+    --bottom-size: 88px;
+    /*height: var(--bottom-size);
+    min-height: var(--bottom-size);*/
     padding-bottom: 0px;
     --others-playctl-spacing: 28px;
     --bottom-hmargin: 59px;
@@ -664,7 +706,7 @@ onMounted(() => {
 }
 
 .playing-view .container > .bottom.bottom-new .btm-left .volume-wrap {
-    padding-right: 20px;
+    padding-right: 33px;
 }
 
 .playing-view .container > .bottom.bottom-new .btm-left .volume-wrap .volume-bar {
@@ -832,5 +874,9 @@ onMounted(() => {
 
 .playing-view .container.auto-effect > .bottom.bottom-new {
     border-top: 0.1px solid #ffffff25;
+}
+
+.playing-view .container.auto-effect > .bottom.bottom-new .active svg {
+    fill: var(--content-highlight-color) !important;
 }
 </style>

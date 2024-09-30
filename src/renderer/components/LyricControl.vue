@@ -492,9 +492,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 
-    font-size: 28px;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
     margin-bottom: 6px;
@@ -648,8 +648,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .lyric-ctl .extra-btn {
     position: fixed;
-    right: 35px;
-    bottom: 99px;
+    right: var(--others-lyric-ctl-extra-btn-right);
+    bottom: var(--others-lyric-ctl-extra-btn-bottom);
 }
 
 .lyric-ctl .extra-btn span {
