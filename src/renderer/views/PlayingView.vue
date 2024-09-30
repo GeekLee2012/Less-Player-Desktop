@@ -770,13 +770,14 @@ onMounted(() => {
     margin: 0px 10px;
 }
 
-.playing-view .container > .bottom.bottom-new .btm-center .t-current {
+.playing-view .container > .bottom.bottom-new .btm-center .t-current,
+.playing-view .container > .bottom.bottom-new .btm-center .t-duration {
     min-width: 59px;
     text-align: end;
+    padding-bottom: 2px;
 }
 
 .playing-view .container > .bottom.bottom-new .btm-center .t-duration {
-    min-width: 59px;
     text-align: start;
 }
 

@@ -161,13 +161,13 @@ onMounted(() => {
     margin: 0px 10px;
 }
 
-.default-new-main-bottom #play-nav .play-ctl-wrap .t-current {
+.default-new-main-bottom #play-nav .play-ctl-wrap .t-current,
+.default-new-main-bottom #play-nav .play-ctl-wrap .t-duration {
     min-width: 56px;
     text-align: end;
 }
 
 .default-new-main-bottom #play-nav .play-ctl-wrap .t-duration {
-    min-width: 56px;
     text-align: start;
 }
 

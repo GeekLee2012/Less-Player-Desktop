@@ -1,11 +1,11 @@
 {
   "name": "less-player",
   "private": true,
-  "version": "0.1.26",
+  "version": "0.1.27",
   "description": "Less Player, Less is More ! ",
   "author": {
     "name": "RIVE2012",
-    "email": "Rive08@126.com"
+    "email": "rive08@126.com"
   },
   "repository": {
     "type": "git",
