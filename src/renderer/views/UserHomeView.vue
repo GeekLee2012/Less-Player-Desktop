@@ -451,6 +451,7 @@ onActivated(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
 }
 
 #user-profile-view .header .about {
@@ -527,7 +528,7 @@ onActivated(() => {
     position: relative;
     display: flex;
     /*height: 21px;*/
-    margin: 10px 0px 3px 3px;
+    margin: 8px 0px 3px 3px;
 }
 
 #user-profile-view .sub-tab-nav .sub-tab {

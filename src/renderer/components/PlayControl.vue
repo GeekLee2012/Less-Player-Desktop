@@ -186,4 +186,10 @@ const togglePlaybackQueue = () => {
     margin-left: 0px;
     fill: var(--button-icon-text-btn-icon-color) !important;
 }
+
+/*
+.play-ctl .play-btn:hover svg {
+    fill: var(--button-icon-btn-color);
+}
+*/
 </style>

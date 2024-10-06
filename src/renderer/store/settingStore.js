@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ipcRendererSend } from '../../common/Utils';
+import { ipcRendererSend, isMacOS } from '../../common/Utils';
 import { useThemeStore } from './themeStore';
 import { usePlatformStore } from './platformStore';
 import { useAppCommonStore } from './appCommonStore';
@@ -92,6 +92,18 @@ export const useSettingStore = defineStore('setting', {
             winCtlStyle: 0,
             //TODO 元素圆角风格（预设），0 => 自动，1 => macOS, 2 => Windows
             borderRadiusCtlStyle: 0,
+            //单位：px
+            borderRadius: {
+                appWin: 12,
+                popover: 8,
+                btn: 999,
+                flowBtn: 6,
+                inputs: 3,
+                listItem: 999,
+                listItemVertical: 5,
+                imageTextTile: 5,
+                imageSmall: 3,
+            },
             //字体名称
             fontFamily: '',
             //字体大小
@@ -108,12 +120,24 @@ export const useSettingStore = defineStore('setting', {
             imageTextTileStyleIndex: 1,
             //卡片Tile样式阴影效果
             shadowForCardStyleTile: true,
-            //设置页面提示
-            settingViewTipsShow: true,
             //窗口自定义阴影
             winCustomShadowSize: 5, // 0 - 10
             //开关选项标题关联点击
             toggleCtlTitleActionEnable: true,
+            //设置页导航按钮
+            settingViewNavbarShow: false,
+            //设置页面提示
+            settingViewTipsShow: true,
+            //本地歌曲首页提示
+            localMusicViewTipsShow: true,
+            localMusicViewPlaylistTipsShow: true,
+            //自由FM首页提示
+            freeFMViewTipsShow: true,
+            freeFMViewRadiosTipsShow: true,
+            //当前播放提示
+            playbackQueueViewTipsShow: true,
+            //插件管理提示
+            pluginsViewTipsShow: true,
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -139,18 +163,20 @@ export const useSettingStore = defineStore('setting', {
             playlistCategoryBarRandom: false,
             //歌单分类浮动按钮
             playlistCategoryBarFlowBtnShow: false,
-            //当前播放列表自动定位
+            //当前播放 - 列表自动定位
             playbackQueueAutoPositionOnShow: false,
-            //关闭按钮，Electron平台兼容性问题，主要为Windows等平台冗余设计
+            //当前播放 - 关闭按钮，Electron平台兼容性问题，主要为Windows等平台冗余设计
             playbackQueueCloseBtnShow: false,
-            //定位按钮
+            //当前播放 - 定位按钮
             playbackQueuePositionBtnShow: true,
-            //历史播放按钮，即最近播放快捷入口
+            //当前播放 - 历史播放按钮，即最近播放快捷入口
             playbackQueueHistoryBtnShow: true,
-            //MV标识、MV播放按钮
+            //当前播放 - MV标识、MV播放按钮
             playbackQueueMvBtnShow: true,
-            //批量操作按钮
+            //当前播放 - 批量操作按钮
             playbackQueueBatchActionBtnShow: true,
+            //当前播放 - 操作按钮仅显示图标，不显示对应文字(图标模式)
+            playbackQueueBtnIconMode: true,
             //歌单播放量
             //listenNumShow: false,
             playCountShow: false,
@@ -181,10 +207,10 @@ export const useSettingStore = defineStore('setting', {
             useDndForExportLocalPlaylist: true,
             //普通分页，本地歌曲每页记录数
             limitPerPageForLocalPlaylist: 30,
-            //本地歌曲首页提示
-            localMusicHomepageTipsShow: true,
-            //自由FM首页提示
-            freeFMHomepageTipsShow: true,
+            //本地歌曲首页提示 - 已废弃
+            //localMusicHomepageTipsShow: true,
+            //自由FM首页提示 - 已废弃
+            //freeFMHomepageTipsShow: true,
             //高亮当前右键菜单对应的歌曲
             highlightCtxMenuItem: true,
             //拖拽保存
@@ -202,6 +228,8 @@ export const useSettingStore = defineStore('setting', {
             playingViewCoverBorderShow: true,
             //播放页 - 播放控件风格
             playingViewPlayCtlStyleIndex: 0,
+            //播放页 - 歌词高亮样式
+            playingViewLyricHighlightMode: 0,
         },
         search: {
             //场景化提示
@@ -341,7 +369,7 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 快捷键，可修改 */
         keys: {
-            //是否全局（系统平台级别）快捷键
+            //是否全局（系统级别）快捷键
             global: false,
         },
         /* 快捷键 - 默认值，只读 */
@@ -467,7 +495,7 @@ export const useSettingStore = defineStore('setting', {
             //版本 - 新版本更新提醒（设置按钮上的小红点）
             updatesHintShow: true,
         },
-        //“黑洞 ”state，永远不需要持久化
+        //“黑洞”state，永远无需持久化
         //仅用于触发某些机制，但现在暂时已经用处不大啦
         blackHole: null,
     }),
@@ -595,6 +623,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isPlaybackQueueBatchActionBtnShow() {
             return this.track.playbackQueueBatchActionBtnShow
+        },
+        isPlaybackQueueBtnIconMode() {
+            return this.track.playbackQueueBtnIconMode
         },
         isTrayShow() {
             return this.tray.show
@@ -750,20 +781,14 @@ export const useSettingStore = defineStore('setting', {
         playingViewBgCoverEffectGradientMode() {
             return this.track.playingViewBgCoverEffectGradientMode
         },
+        playingViewLyricHighlightMode() {
+            return this.track.playingViewLyricHighlightMode
+        },
         playingViewPlayCtlStyleIndex() {
             return this.track.playingViewPlayCtlStyleIndex
         },
         isUseShadowForCardStyleTile() {
             return this.common.shadowForCardStyleTile
-        },
-        isLocalMusicHomepageTipsShow() {
-            return this.track.localMusicHomepageTipsShow
-        },
-        isFreeFMHomepageTipsShow() {
-            return this.track.freeFMHomepageTipsShow
-        },
-        isSettingViewTipsShow() {
-            return this.common.settingViewTipsShow
         },
         isPlayingViewCoverBorderShow() {
             return this.track.playingViewCoverBorderShow
@@ -779,6 +804,30 @@ export const useSettingStore = defineStore('setting', {
         },
         isToggleCtlTitleActionEnable() {
             return this.common.toggleCtlTitleActionEnable
+        },
+        isSettingViewTipsShow() {
+            return this.common.settingViewTipsShow
+        },
+        isLocalMusicViewTipsShow() {
+            return this.common.localMusicViewTipsShow
+        },
+        isLocalMusicViewPlaylistTipsShow() {
+            return this.common.localMusicViewPlaylistTipsShow
+        },
+        isFreeFMViewTipsShow() {
+            return this.common.freeFMViewTipsShow
+        },
+        isFreeFMViewRadiosTipsShow() {
+            return this.common.freeFMViewRadiosTipsShow
+        },
+        isPlaybackQueueViewTipsShow() {
+            return this.common.playbackQueueViewTipsShow
+        },
+        isPluginsViewTipsShow() {
+            return this.common.pluginsViewTipsShow
+        },
+        commonBorderRadius() {
+            return this.common.borderRadius
         }
     },
     actions: {
@@ -829,8 +878,8 @@ export const useSettingStore = defineStore('setting', {
             const { type, index } = this.theme
             return getTheme(type, index).content.bgColor
         },
-        toggleSettingViewTipsShow() {
-            this.common.settingViewTipsShow = !this.common.settingViewTipsShow
+        toggleSettingViewNavbarShow() {
+            this.common.settingViewNavbarShow = !this.common.settingViewNavbarShow
         },
         setWindowZoom(value) {
             if (!value) return
@@ -849,6 +898,39 @@ export const useSettingStore = defineStore('setting', {
             const index = parseInt(value || 0)
             if (index < 0 || index > 2) return
             this.common.borderRadiusCtlStyle = index
+        },
+        getPresetBorderRadius(isWinOS) {
+            const presets = [
+                {
+                    appWin: 12,
+                    popover: 8,
+                    btn: 999,
+                    flowBtn: 6,
+                    inputs: 3,
+                    listItem: 999,
+                    listItemVertical: 5,
+                    imageTextTile: 5,
+                    imageSmall: 3,
+                }, {
+                    appWin: 3,
+                    popover: 3,
+                    btn: 5,
+                    flowBtn: 3,
+                    inputs: 3,
+                    listItem: 3,
+                    listItemVertical: 3,
+                    imageTextTile: 3,
+                    imageSmall: 3,
+                }
+            ]
+            return presets[isWinOS ? 1 : 0]
+        },
+        setCommonBorderRadius(borderRadius) {
+            if(typeof borderRadius != 'object') return
+            Object.assign(this.common.borderRadius, { ...borderRadius })
+        },
+        setPresetBorderRadius(isWinOS) {
+            this.setCommonBorderRadius(this.getPresetBorderRadius(isWinOS))
         },
         currentFontSize() {
             return this.common.fontSize
@@ -959,6 +1041,9 @@ export const useSettingStore = defineStore('setting', {
         togglePlaybackQueueBatchActionBtnShow() {
             this.track.playbackQueueBatchActionBtnShow = !this.track.playbackQueueBatchActionBtnShow
         },
+        togglePlaybackQueueBtnIconMode() {
+            this.track.playbackQueueBtnIconMode = !this.track.playbackQueueBtnIconMode
+        },
         togglePlayCountShow() {
             this.track.playCountShow = !this.track.playCountShow
         },
@@ -1019,12 +1104,6 @@ export const useSettingStore = defineStore('setting', {
             value = parseInt(value || 30)
             if (value < 10 || value > 200) return
             this.track.limitPerPageForLocalPlaylist = value
-        },
-        toggleLocalMusicHomepageTipsShow() {
-            this.track.localMusicHomepageTipsShow = !this.track.localMusicHomepageTipsShow
-        },
-        toggleFreeFMHomepageTipsShow() {
-            this.track.freeFMHomepageTipsShow = !this.track.freeFMHomepageTipsShow
         },
         toggleSearchBarAutoPlaceholder() {
             this.search.autoPlaceholder = !this.search.autoPlaceholder
@@ -1451,6 +1530,9 @@ export const useSettingStore = defineStore('setting', {
         setPlayingViewBgCoverEffectGradientMode(value) {
             this.track.playingViewBgCoverEffectGradientMode = value
         },
+        setPlayingViewLyricHighlightMode(value) {
+            this.track.playingViewLyricHighlightMode = value
+        },
         setWindowCustomShadowSize(value) {
             this.common.winCustomShadowSize = parseInt(value)
         },
@@ -1459,7 +1541,28 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleToggleCtlTitleActionEnable() {
             this.common.toggleCtlTitleActionEnable = !this.common.toggleCtlTitleActionEnable
-        }
+        },
+        toggleSettingViewTipsShow() {
+            this.common.settingViewTipsShow = !this.common.settingViewTipsShow
+        },
+        toggleLocalMusicViewTipsShow() {
+            this.common.localMusicViewTipsShow = !this.common.localMusicViewTipsShow
+        },
+        toggleLocalMusicViewPlaylistTipsShow() {
+            this.common.localMusicViewPlaylistTipsShow = !this.common.localMusicViewPlaylistTipsShow
+        },
+        toggleFreeFMViewTipsShow() {
+            this.common.freeFMViewTipsShow = !this.common.freeFMViewTipsShow
+        },
+        toggleFreeFMViewRadiosTipsShow() {
+            this.common.freeFMViewRadiosTipsShow = !this.common.freeFMViewRadiosTipsShow
+        },
+        togglePlaybackQueueViewTipsShow() {
+            this.common.playbackQueueViewTipsShow = !this.common.playbackQueueViewTipsShow
+        },
+        togglePluginsViewTipsShow() {
+            this.common.pluginsViewTipsShow = !this.common.pluginsViewTipsShow
+        },
     },
     persist: {
         enabled: true,

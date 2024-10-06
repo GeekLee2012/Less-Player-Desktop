@@ -27,7 +27,8 @@ const { isLocalMusic } = usePlatformStore()
 const props = defineProps({
     data: Object, //Track
     active: Boolean,
-    index: Number
+    index: Number,
+    actionable: Boolean,
 })
 
 const playItem = () => {
@@ -79,7 +80,8 @@ const removeItem = () => {
 }
 
 const onContextMenu = (event) => {
-    const { data, index } = props
+    const { data, index, actionable } = props
+    if(!actionable) return 
     showContextMenu(event, data, 9, index, true)
 }
 
@@ -103,11 +105,21 @@ const playingState = computed(() => {
 
 <template>
     <div class="playback-queue-item"
-        :class="{ 'playback-queue-item-active': active, 'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data) }"
-        @dblclick="" @contextmenu="onContextMenu">
+        :class="{ 
+            'playback-queue-item-active': active, 
+            'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data),
+            actionable,
+        }"
+        @dblclick="" 
+        @contextmenu="onContextMenu">
         <div class="item-wrap">
             <div class="left" :draggable="isDraggable" @dragstart.stop="(event) => dndSaveTrack(event, data)">
-                <img class="cover" :class="{ 'obj-fit-contain': (data.coverFit == 1) }" v-lazy="coverDefault(data.cover)" />
+                <img class="cover" v-show="!data.color"
+                    :class="{ 'obj-fit-contain': (data.coverFit == 1) }" 
+                    v-lazy="coverDefault(data.cover)" />
+                <div class="cover color-mode" v-show="data.color" 
+                    :style="{ background: data.color }">
+                </div>
             </div>
             <div class="right">
                 <div class="data">
@@ -117,7 +129,7 @@ const playingState = computed(() => {
                     </div>
                     <div class="bottom">
                         <div class="artist" :class="{ 'content-text-highlight': active }">
-                            <ArtistControl :visitable="true" :platform="data.platform" :data="data.artist"
+                            <ArtistControl :visitable="actionable" :platform="data.platform" :data="data.artist"
                                 :trackId="data.id">
                             </ArtistControl>
                         </div>
@@ -125,7 +137,7 @@ const playingState = computed(() => {
                         <span class="duration" v-show="!Playlist.isFMRadioType(data)" :class="{ 'content-text-highlight': active }">{{ Track.mmssDuration(data)}}</span>
                     </div>
                 </div>
-                <div class="action">
+                <div class="action" v-show="actionable">
                     <svg v-show="isMvBtnShow" @click="playMv(data)" width="18" height="16" viewBox="0 0 1024 853.52"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
@@ -225,7 +237,7 @@ const playingState = computed(() => {
     height: var(--cover-size);
     -webkit-user-drag: none;
     box-shadow: 0px 0px 1px #161616;
-    border-radius: 2px;
+    border-radius: var(--border-img-small-border-radius);
     margin-right: 10px;
     margin-left: 12.5px;
 }
@@ -261,15 +273,13 @@ const playingState = computed(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
 }
 
 .playback-queue-item .title {
     width: 258px;
     width: 77%;
-    /* 
-    position: relative;
-    top: 2px;
-    */
+    width: 95%;
 }
 
 .playback-queue-item .artist,
@@ -293,7 +303,7 @@ const playingState = computed(() => {
     left: 0px;
     width: 210px;
     width: 62.68%;
-    cursor: pointer;
+    width: 93.5%;
 }
 
 .playback-queue-item .artist span {
@@ -339,14 +349,23 @@ const playingState = computed(() => {
     fill: var(--content-highlight-color);
 }
 
-.playback-queue-item:hover .title,
-.playback-queue-item:hover .artist {
+.playback-queue-item.actionable .title {
+    width: 77%;
+}
+
+.playback-queue-item.actionable .artist {
+    width: 62.68%;
+    cursor: pointer;
+}
+
+.playback-queue-item.actionable:hover .title,
+.playback-queue-item.actionable:hover .artist {
     width: 158px;
     width: 47.16%;
     width: 50%;
 }
 
-.playback-queue-item:hover .action {
+.playback-queue-item.actionable:hover .action {
     visibility: visible;
 }
 
@@ -362,7 +381,7 @@ const playingState = computed(() => {
     background-clip: text;
     color: transparent !important;
 
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     border: 1.3px solid var(--content-subtitle-text-color);
     padding: 1px 3px;
     font-size: 10px;

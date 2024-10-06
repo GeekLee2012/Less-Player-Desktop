@@ -11,7 +11,7 @@ const props = defineProps({
     target: Object
 })
 
-const { isDefaultLayoutWithBottom } = storeToRefs(useSettingStore())
+//const { isDefaultLayoutWithBottom } = storeToRefs(useSettingStore())
 
 let threshold = (props.threshold || 1024)
 let scrollTarget = props.target
@@ -56,7 +56,7 @@ defineExpose({
 </script>
 
 <template>
-    <div class="back2top-btn" :class="{ 'back2top-btn-with-bottom': isDefaultLayoutWithBottom }" @click="scrollToTop"
+    <div class="back2top-btn" @click="scrollToTop"
         v-show="isBtnShow">
         <svg width="14" height="14" viewBox="0 0 597.39 511.99" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
@@ -74,8 +74,8 @@ defineExpose({
 <style scoped>
 .back2top-btn {
     position: fixed;
-    bottom: 36px;
-    right: 15px;
+    bottom: calc(var(--main-bottom-height) + 15px);
+    right: 20px;
     z-index: 66;
 
     border: 0.1px solid var(--border-color);
@@ -101,12 +101,5 @@ defineExpose({
 
 .back2top-btn svg:hover {
     fill: var(--button-icon-text-btn-icon-color) !important;
-}
-
-/*TODO */
-.back2top-btn-with-bottom {
-    /*bottom: 100px;*/
-    bottom: calc(var(--main-bottom-height) + 15px);
-    right: 20px;
 }
 </style>

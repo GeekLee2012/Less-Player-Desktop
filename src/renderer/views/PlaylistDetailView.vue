@@ -356,7 +356,7 @@ onActivated(() => {
 #playlist-detail-view .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 #playlist-detail-view .header .right {
@@ -384,6 +384,7 @@ onActivated(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
 }
 
 #playlist-detail-view .header .about {
@@ -402,6 +403,7 @@ onActivated(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 5;
+    line-clamp: 5;
 }
 
 #playlist-detail-view .header .short-about {
@@ -412,12 +414,13 @@ onActivated(() => {
     height: 80px;
     margin-bottom: 23px;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
 }
 
 #playlist-detail-view .header .cover {
     width: 236px;
     height: 236px;
-    border-radius: 6px;
+    border-radius: var(--border-img-text-tile-border-radius);
     box-shadow: 0px 0px 1px #161616;
 }
 

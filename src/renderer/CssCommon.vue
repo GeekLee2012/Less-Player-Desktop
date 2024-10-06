@@ -41,10 +41,11 @@
   --border-app-win-border-radius: 12px;
   --border-popover-border-radius: 8px;
   --border-list-item-border-radius: 10rem;
-  --border-left-nav-list-item-border-radius: 5px;
+  --border-list-item-vertical-border-radius: 5px;
   --border-inputs-border-radius: 3px;
   --border-btn-border-radius: 10rem;
   --border-img-text-tile-border-radius: 6px;
+  --border-flow-btn-border-radius: 6px;
 
   /*其他*/
   --others-scrollbar-width: 6px;
@@ -90,8 +91,8 @@
 
 .content-text-highlight {
   background: var(--content-text-highlight-color);
-  background-clip: text;
-  -webkit-background-clip: text;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
   color: transparent !important;
   /*-webkit-text-fill-color: transparent !important;*/
 }
@@ -104,7 +105,7 @@ textarea {
 }
 
 .text-input-ctl {
-  border-radius: 3px;
+  border-radius: var(--border-inputs-border-radius);
   padding: 8px;
   border: 1px solid var(--border-inputs-border-color);
   background-color: var(--content-inputs-bg-color);
@@ -292,10 +293,10 @@ textarea {
     background-position: center !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
-    /*backdrop-filter: blur(20px);*/
-    /*filter: brightness(88%) hue-rotate(360deg);*/
+    background: var(--bg-effect);
+    /*backdrop-filter: blur(20px);
+    filter: brightness(88%) hue-rotate(360deg);*/
     filter: blur(8px);
-    background: var(--bg-effect) !important;
     z-index: -10;
     position: absolute;
     width: 100%;

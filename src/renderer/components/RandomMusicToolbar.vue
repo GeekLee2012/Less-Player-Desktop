@@ -176,7 +176,7 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
     flex-direction: row;
     align-items: center;
     text-align: left;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     box-shadow: 0px 0px 2px var(--border-popovers-border-color);
     padding: 10px 15px;
     width: 100%;
@@ -197,6 +197,7 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;

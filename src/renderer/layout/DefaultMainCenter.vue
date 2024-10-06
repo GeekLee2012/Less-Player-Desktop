@@ -100,7 +100,7 @@ const setPlayingCoverSize = () => {
     let size = 366 * Math.min(wScaleRatio, hScaleRatio)
     const coverWrapEl = document.querySelector('.playing-view .cover-wrap')
     if (!coverWrapEl) return
-    coverWrapEl.style.marginRight = 41 * Math.min(wScaleRatio, hScaleRatio) + 'px'
+    //coverWrapEl.style.marginRight = (41  + 10) * Math.min(wScaleRatio, hScaleRatio) + 'px'
     const coverEl = coverWrapEl.querySelector('.cover')
     if (!coverEl) return
     coverEl.style.width = `${size + 3}px`

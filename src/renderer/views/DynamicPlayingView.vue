@@ -563,6 +563,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     height: 43px;
     display: flex;
     -webkit-app-region: drag;
+    visibility: hidden;
 }
 
 .dynamic-playing-view .header svg {
@@ -954,12 +955,9 @@ onUnmounted(() => offEvents(eventsRegistration))
   }
 }
 */
-
+.dynamic-playing-view:hover .header,
+.dynamic-playing-view:hover .bottom,
 .dynamic-playing-view:hover .extra-btn.extra-exist {
-    visibility: visible;
-}
-
-.dynamic-playing-view:hover .bottom {
     visibility: visible;
 }
 

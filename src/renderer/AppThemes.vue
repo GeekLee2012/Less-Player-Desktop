@@ -7,15 +7,18 @@ import CssCommon from './CssCommon.vue';
 import { isMacOS, isWinOS, toTrimString } from '../common/Utils';
 import CssWinOS from './CssWinOS.vue';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
+import ImageTextTile from './components/ImageTextTile.vue';
 
 
 
 const { theme: themeSetting, currentBorderRadiusCtlStyle,
   isUseAutoBorderRadiusCtl, isUseMacOSBorderRadiusCtl,
-  isUseWindowsBorderRadiusCtl, winCustomShadowSize, } = storeToRefs(useSettingStore())
+  isUseWindowsBorderRadiusCtl, winCustomShadowSize, 
+  commonBorderRadius, } = storeToRefs(useSettingStore())
 const { getCurrentTheme, setupFontFamily,
   setupFontWeight, allFontSizeLevels,
-  currentFontSizeLevel, currentFontSize, } = useSettingStore()
+  currentFontSizeLevel, currentFontSize,
+  setPresetBorderRadius, } = useSettingStore()
 
 
 const applyDocumentElementStyle = (prop, value) => document.documentElement.style.setProperty(prop, value)
@@ -180,19 +183,30 @@ const setupFontStyle = () => {
   setupFontSize()
 }
 
-const setupBorderRadiusCtlStyle = () => {
-  const useWinStyle = ((isUseAutoBorderRadiusCtl.value && isWinOS()) || isUseWindowsBorderRadiusCtl.value)
-  const index = useWinStyle ? 0 : 1
+const setupAppBorderRadius = (data) => {
+  const { 
+    appWin, popover, btn, flowBtn, inputs, 
+    listItem, listItemVertical, 
+    imageTextTile, imageSmall 
+  } = data || commonBorderRadius.value
+  
   const changes = {
-    '--border-app-win-border-radius': ['3px', '12px'][index],
-    '--border-popover-border-radius': ['3px', '8px'][index],
-    '--border-btn-border-radius': ['5px', '10rem'][index],
-    '--border-list-item-border-radius': ['5px', '10rem'][index],
-    '--border-left-nav-list-item-border-radius': ['3px', '5px'][index],
-    '--border-img-text-tile-border-radius': ['3px', '6px'][index],
-    '--border-flow-btn-border-radius': ['3px', '6px'][index],
+    '--border-app-win-border-radius': `${appWin}px`,
+    '--border-popover-border-radius': `${popover}px`,
+    '--border-btn-border-radius': `${btn}px`,
+    '--border-flow-btn-border-radius': `${flowBtn}px`,
+    '--border-inputs-border-radius': `${inputs}px`,
+    '--border-list-item-border-radius': `${listItem}px`,
+    '--border-list-item-vertical-border-radius': `${listItemVertical}px`,
+    '--border-img-text-tile-border-radius': `${imageTextTile}px`,
+    '--border-img-small-border-radius': `${imageSmall}px`,
   }
   applyDocumentStyle(changes)
+}
+
+const setupPresetBorderRadius = () => {
+  const useWinStyle = ((isUseAutoBorderRadiusCtl.value && isWinOS()) || isUseWindowsBorderRadiusCtl.value)
+  setPresetBorderRadius(useWinStyle)
 }
 
 const setupWinCustomShadow = () => {
@@ -243,21 +257,29 @@ onEvents({
   'setting-fontFamily': updateFontFamily,
   'setting-fontWeight': updateFontWeight,
   'setting-fontSize': setupFontSize,
-  'setting-reset':  setupFontStyle,
-  'setting-restore':  setupFontStyle,
+  'setting-reset': () => {
+    setupFontStyle()
+    setupPresetBorderRadius()
+  },
+  'setting-restore':  () => {
+    setupFontStyle()
+    setupAppBorderRadius()
+  },
   'theme-applyTheme': setupAppTheme,
+  'setting-appBorderRadiusPreview': setupAppBorderRadius,
 })
 
 onMounted(() => {
   setupFontStyle()
-  setupBorderRadiusCtlStyle()
+  setupAppBorderRadius()
   setupWinCustomShadow()
   //setupAppTheme()
 })
 
 watch(themeSetting, () => setupAppTheme(), { deep: true })
-watch(currentBorderRadiusCtlStyle, setupBorderRadiusCtlStyle)
+watch(currentBorderRadiusCtlStyle, setupPresetBorderRadius)
 watch(winCustomShadowSize, setupWinCustomShadow)
+watch(commonBorderRadius, setupAppBorderRadius, { deep: true })
 
 provide('appStyle', {
   applyDocumentElementStyle,
@@ -284,7 +306,6 @@ body.app-win-custom-shadow {
 }
 
 .app-win-custom-shadow #app {
-  border-radius: var(--border-popover-border-radius);
   box-shadow: var(--app-win-custom-box-shadow);
 }
 

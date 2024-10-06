@@ -455,6 +455,9 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     if (traceId && !isCurrentTraceId(traceId)) return
 
     const { id, platform } = playlist
+    if(typeof id == 'undefined') return
+    if(typeof platform == 'undefined') return
+
     if (Playlist.isFMRadioType(playlist)) { //FM广播电台
         const track = playlist.data ? playlist.data[0] : playlist
         const hasUrl = Track.hasUrl(track)

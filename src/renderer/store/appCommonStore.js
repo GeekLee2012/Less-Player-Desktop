@@ -28,40 +28,40 @@ export const useAppCommonStore = defineStore('appCommon', {
         playingViewShow: false,
         playingThemeListViewShow: false,
         playingViewPresetThemes: [{
-                id: 'default_cover',
-                name: '默认封面',
-                type: 0,
-                dynamic: false,
-                light: false,
-            }, {
-                id: 'spectrum_cover',
-                name: '动感频谱',
-                type: 0,
-                dynamic: false,
-                light: false,
-            }, {
-                id: 'dynamic_pyramid',
-                name: '波光嶙嶙',
-                type: 0,
-                dynamic: true,
-                light: false,
-            }, {
-                id: 'dynamic_zoom',
-                name: '时空穿梭',
-                type: 0,
-                dynamic: true,
-                light: false,
-            }, {
-                id: 'dynamic_purple',
-                name: '紫色心情',
-                type: 0,
-                dynamic: true,
-                light: true,
-            }/*, {
-                id: 'dynamic_sky',
-                name: '浩瀚星空',
-                light: false,
-            }*/],
+            id: 'default_cover',
+            name: '默认封面',
+            type: 0,
+            dynamic: false,
+            light: false,
+        }, {
+            id: 'spectrum_cover',
+            name: '动感频谱',
+            type: 0,
+            dynamic: false,
+            light: false,
+        }, {
+            id: 'dynamic_pyramid',
+            name: '波光嶙嶙',
+            type: 0,
+            dynamic: true,
+            light: false,
+        }, {
+            id: 'dynamic_zoom',
+            name: '时空穿梭',
+            type: 0,
+            dynamic: true,
+            light: false,
+        }, {
+            id: 'dynamic_purple',
+            name: '紫色心情',
+            type: 0,
+            dynamic: true,
+            light: true,
+        }/*, {
+            id: 'dynamic_sky',
+            name: '浩瀚星空',
+            light: false,
+        }*/],
         playingViewCustomThemes: [],
         customPlayingThemeEditViewShow: false,
         playingViewThemeIndex: 0,
@@ -73,6 +73,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         soundEffectViewShow: false,
         customThemeEditViewShow: false,
         workingCustomTheme: null, //当前工作区的自定义主题，即正在编辑的主题
+        customAppBorderRadiusViewShow: false,
         //探索模式，歌单、歌手
         exploreModes: ['playlists', 'artists', 'radios', 'userhome'],
         exploreModeIndex: 0,
@@ -588,6 +589,7 @@ export const useAppCommonStore = defineStore('appCommon', {
                 const _theme = this.playingViewCustomThemes[index]
                 Object.assign(_theme, { ...theme })
             }
+            return true
         },
         removePlayingViewCustomTheme({ id }) {
             if (!id || !id.startsWith(playingViewCustomThemePrefix)) return
@@ -602,6 +604,12 @@ export const useAppCommonStore = defineStore('appCommon', {
             return this.playingViewThemeType == 1 
                 && this.playingViewThemeIndex == index
         },
+        toggleCustomAppBorderRadiusViewShow() {
+            this.customAppBorderRadiusViewShow = !this.customAppBorderRadiusViewShow
+        },
+        hideCustomAppBorderRadiusView() {
+            this.customAppBorderRadiusViewShow = false
+        }
     },
     persist: {
         enabled: true,

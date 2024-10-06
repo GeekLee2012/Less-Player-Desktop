@@ -252,7 +252,7 @@ const ceateTheme = () => editTheme()
     height: 95px;*/
     width: var(--others-theme-preview-tile-width);
     height: var(--others-theme-preview-tile-height);
-    border-radius: 8px;
+    border-radius: var(--border-img-text-tile-border-radius);
     border: 2px solid transparent;
     cursor: pointer;
     box-shadow: 0px 0px 1px #cbcbcbdd;

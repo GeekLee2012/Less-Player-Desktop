@@ -22,7 +22,9 @@ const { showConfirm } = inject('apiExpose')
 const { ignoreErrorPlugins, isReplaceMode, plugins } = storeToRefs(usePluginStore())
 const { toggleIgnoreErrorPlugins, toggleReplaceMode ,addPlugin, updatePlugin, removePlugin } = usePluginStore()
 const { showToast, showFailToast } = useAppCommonStore()
-const { isSearchForPluginsViewShow, isShowDialogBeforeDeletePlugins } = storeToRefs(useSettingStore())
+const { isSearchForPluginsViewShow, 
+    isShowDialogBeforeDeletePlugins, 
+    isPluginsViewTipsShow, } = storeToRefs(useSettingStore())
 
 
 const filteredData = ref(null)
@@ -385,6 +387,20 @@ const removeAllPlugins = async () => {
     //reloadApp()
 }
 
+const tutorialList = [{
+    name: '教程：插件 - 拖拽导入',
+    about: '拖拽多个插件文件到当前页面，导入插件；轻松多选，非插件类型文件，应用会自动忽略'
+}, {
+    name: '教程：插件 - 导入按钮',
+    about: '文件选择对话框，支持选择多个插件文件；根据当前系统，按住Command键或者Ctrl键即可'
+}, {
+    name: '教程：插件 - 覆盖模式',
+    about: '覆盖模式开启后，在导入插件时，若已经存在相同插件，则覆盖更新'
+}, {
+    name: '教程：插件 - 变更未生效',
+    about: '插件变更（导入、删除等操作）后，无法立即生效，请点击"刷新"按钮'
+}]
+
 /* 生命周期、监听 */
 onActivated(() => {
     //nextTick(refreshViewSize)
@@ -445,7 +461,7 @@ onActivated(() => {
                     </SearchBarExclusiveModeControl>
                 </div>
             </div>
-            <div class="tip-text">提示：实验性功能；支持文件多选导入（包括拖拽方式）；插件变更后未生效时，请手动刷新；<br>
+            <div class="tip-text">提示：实验性功能；开发测试阶段，功能性、稳定性等方面皆一般<br>
                 <b>郑重声明：当前应用并未提供安全性检查和保障，概不承担任何插件使用时引发的一切不良后果<br>
                     插件有风险，使用需谨慎！建议尽量不要使用任何来源不明的插件</b>
             </div>
@@ -539,6 +555,10 @@ onActivated(() => {
                     :toggleAction="() => togglePluginState(item)"
                     :deleteFn="() => removePluginNew(item)">
                 </PluginItem>
+                <PluginItem v-for="(item, index) in tutorialList"
+                    :data="item" :index="index"
+                    v-show="isPluginsViewTipsShow && computedPlugins.length < 1">
+                </PluginItem>
             </div>
         </div>
     </div>
@@ -552,6 +572,7 @@ onActivated(() => {
     flex-direction: column;
     text-align: left;
     overflow: hidden;
+    --view-margin: 35px;
     /*
     overflow: scroll;
     overflow-x: hidden;
@@ -565,8 +586,8 @@ onActivated(() => {
 #plugins-view .header .title-wrap {
     display: flex;
     position: relative;
-    margin-left: 35px;
-    margin-right: 35px;
+    margin-left: var(--view-margin);
+    margin-right: var(--view-margin);
     align-items: center;
     font-weight: bold;
     /*padding-bottom: 10px;*/
@@ -586,7 +607,7 @@ onActivated(() => {
 }
 
 #plugins-view .header .tip-text {
-    margin: 6px 0px 16px 37px;
+    margin: 6px 0px 15px 37px;
 }
 
 #plugins-view .center {
@@ -616,8 +637,8 @@ onActivated(() => {
     display: flex;
     align-items: center;
     line-height: 36px;
-    margin-left: 35px;
-    margin-right: 35px;
+    margin-left: var(--view-margin);
+    margin-right: var(--view-margin);
     margin-bottom: 10px;
     border-bottom: 1px solid transparent;
 }
@@ -640,7 +661,7 @@ onActivated(() => {
 }
 
 #plugins-view .center > .content {
-    padding: 0px 35px 15px 35px;
+    padding: 0px var(--view-margin) 15px var(--view-margin);
     overflow: scroll;
     overflow-x: hidden;
 }

@@ -9,7 +9,7 @@ import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv, nextInt, 
-    rgbToHsl, hslToRgb, coverDefault, } from '../../common/Utils';
+    rgbToHsl, hslToRgb, coverDefault, grayscale } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
@@ -43,8 +43,10 @@ const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos,
     isDndSaveEnable, isPlayingViewUseBgCoverEffect,
     isPlayingViewCoverBorderShow, currentTheme, 
-    playingViewBgCoverEffectIndex, playingViewBgCoverEffectGradientMode,
-    playingViewPlayCtlStyleIndex, } = storeToRefs(useSettingStore())
+    playingViewBgCoverEffectIndex, 
+    playingViewBgCoverEffectGradientMode,
+    playingViewPlayCtlStyleIndex,
+    playingViewLyricHighlightMode, } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
 const volumeBarRef = ref(null)
@@ -97,6 +99,16 @@ const optimizePalette = (rgbs) => {
     })
 }
 
+const getPaletteAvgGrayscale = (rgbs) => {
+    //简单起见，仅考虑数组长度为2的情况
+    const _rgbs = rgbs.slice(0, 2)
+    const sumGrayscale = _rgbs.reduce((accumulator, current) => {
+        accumulator += grayscale(...current)
+        return accumulator
+    }, 0)
+    return Math.round(sumGrayscale / _rgbs.length)
+}
+
 const getPalette = (img, num) => {
     return new ColorThief().getPalette(img, num)
 }
@@ -115,13 +127,22 @@ const postCoverLoadComplete = () => {
         '--bg-effect': `linear-gradient(${_rgbColors})`,
         '--bg-effect-bottom': rgbaColors[0],
     })
+    
+    containerEl.classList.remove('light')
+    containerEl.classList.remove('dark')
+
+    const avgGrayscale = getPaletteAvgGrayscale(rgbs)
+    const autoClass = avgGrayscale > 159 ? 'dark' : 'light'
     containerEl.classList.add('auto-effect')
+    containerEl.classList.add(autoClass)
     return true
 }
 
 const clearBackgroundEffect = () => {
     const containerEl = document.querySelector('.playing-view .container')
     containerEl.classList.remove('auto-effect')
+    containerEl.classList.remove('light')
+    containerEl.classList.remove('dark')
     applyDocumentStyle({ '--bg-effect': 'none'})
 
     const coverEl = containerEl.querySelector('.center .cover')
@@ -201,19 +222,24 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="playing-view" @dragover="e => e.preventDefault()" @drop="onDrop">
+    <div class="playing-view" 
+        @dragover="e => e.preventDefault()" 
+        @drop="onDrop">
         <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
-                    <WinTrafficLightBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
+                    <WinTrafficLightBtn :showCollapseBtn="true" 
+                        :collapseAction="hidePlayingView"
                         :isMaximized="isMaxScreen">
                     </WinTrafficLightBtn>
                 </div>
                 <div class="meta-wrap" v-show="(lyricMetaPos == 2)">
                     <div class="meta">
                         <div class="mv" v-show="Track.hasMv(currentTrack)">
-                            <svg @click="playMv(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
-                                xmlns="http://www.w3.org/2000/svg">
+                            <svg @click="playMv(currentTrack)" 
+                                width="20" 
+                                height="16" 
+                                viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -225,46 +251,67 @@ onMounted(() => {
                         <div class="audio-title" v-html="currentTrack.title"></div>
                         <div v-show="Track.hasArtist(currentTrack)">&nbsp;&nbsp;-&nbsp;&nbsp;</div>
                         <div class="audio-artist">
-                            <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
-                                :trackId="currentTrack.id" class="ar-ctl">
+                            <ArtistControl class="ar-ctl"
+                                :visitable="true" 
+                                :platform="currentTrack.platform" 
+                                :data="currentTrack.artist"
+                                :trackId="currentTrack.id" >
                             </ArtistControl>
                         </div>
                     </div>
                 </div>
                 <div class="win-ctl-wrap" v-show="useWindowsStyleWinCtl">
-                    <WinNonMacOSControlBtn :showCollapseBtn="true" :collapseAction="hidePlayingView"
+                    <WinNonMacOSControlBtn :showCollapseBtn="true" 
+                        :collapseAction="hidePlayingView"
                         :isMaximized="isMaxScreen">
                     </WinNonMacOSControlBtn>
                 </div>
             </div>
             <div class="center">
-                <div class="cover-wrap" :class="{ 'with-format': false}">
+                <div class="cover-wrap" 
+                    :class="{ 'with-format': false}">
                     <img class="cover"
-                            :class="{ 
-                                'obj-fit-contain': currentTrack.coverFit == 1, 
-                                'draggable': isDndSaveEnable, 
-                                'none-border': !isPlayingViewCoverBorderShow 
-                            }"
-                            v-lazy="coverDefault(customDndPlayingCover, Track.coverDefault(currentTrack))" :draggable="isDndSaveEnable" @dragstart="dndSaveCover" />
+                        :class="{ 
+                            'obj-fit-contain': currentTrack.coverFit == 1, 
+                            'draggable': isDndSaveEnable, 
+                            'none-border': !isPlayingViewCoverBorderShow 
+                        }"
+                        v-lazy="coverDefault(customDndPlayingCover, Track.coverDefault(currentTrack))" 
+                        :draggable="isDndSaveEnable" 
+                        @dragstart="dndSaveCover" />
                     <div class="format" v-show="false" v-html="trackFormat"></div>
                 </div>
-                <div class="lyric-wrap">
-                    <LyricControl :track="currentTrack" :currentTime="currentTimeState" 
-                        @mousewheel="onUserMouseWheel" keyName="playingView">
+                <div class="lyric-wrap" :class="{
+                    'lyric-hl-default': playingViewLyricHighlightMode == 0,
+                    'lyric-hl-simple-color': playingViewLyricHighlightMode == 1,
+                    'lyric-hl-bg-border': playingViewLyricHighlightMode == 2,
+                }">
+                    <LyricControl :track="currentTrack" 
+                        :currentTime="currentTimeState" 
+                        @mousewheel="onUserMouseWheel" 
+                        keyName="playingView">
                     </LyricControl>
                 </div>
             </div>
             <div class="bottom" v-show="!computedBottomNewShow">
-                <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
-                    :onScroll="preseekTrack" :onScrollFinish="seekTrack" 
-                    :onDragRelease="seekTrack" :onDragMove="preseekTrack" 
-                    keyName="playingView" :autoHeightMode="playing">
+                <SliderBar :value="progressState" 
+                    :disable="!isTrackSeekable" 
+                    :onSeek="seekTrack" 
+                    :disableScroll="true"
+                    :onScroll="preseekTrack" 
+                    :onScrollFinish="seekTrack" 
+                    :onDragRelease="seekTrack" 
+                    :onDragMove="preseekTrack" 
+                    :autoHeightMode="playing"
+                    keyName="playingView" >
                 </SliderBar>
                 <div class="action">
                     <div class="btm-left">
                         <div @click="toggleFavoritedState">
-                            <svg v-show="!favoritedState" width="20" height="20" viewBox="0 0 1024 937.46"
-                                xmlns="http://www.w3.org/2000/svg">
+                            <svg v-show="!favoritedState" 
+                                width="20" 
+                                height="20" 
+                                viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -272,8 +319,11 @@ onMounted(() => {
                                     </g>
                                 </g>
                             </svg>
-                            <svg v-show="favoritedState" class="love-btn" width="20" height="20" viewBox="0 0 1024 937.53"
-                                xmlns="http://www.w3.org/2000/svg">
+                            <svg v-show="favoritedState" 
+                                class="love-btn" 
+                                width="20" 
+                                height="20" 
+                                viewBox="0 0 1024 937.53" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -299,8 +349,10 @@ onMounted(() => {
                         <VolumeBar ref="volumeBarRef"></VolumeBar>
                     </div>
                     <div class="btm-right">
-                        <div class="theme-btn btn" @click.stop="togglePlayingThemeListView">
-                            <svg width="17" height="17" viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
+                        <div class="theme-btn btn" 
+                            @click.stop="togglePlayingThemeListView">
+                            <svg width="17" height="17" 
+                                viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path class="cls-1"
@@ -321,13 +373,16 @@ onMounted(() => {
                         </svg>
                         -->
                         </div>
-                        <div class="lyric-btn spacing3" :class="{ 'content-text-highlight': desktopLyricShow }"
+                        <div class="lyric-btn spacing3" 
+                            :class="{ 'content-text-highlight': desktopLyricShow }"
                             @click="() => toggleDesktopLyricShow()">
                             词
                         </div>
-                        <div class="equalizer-btn btn spacing3" :class="{ active: isUseEffect }"
+                        <div class="equalizer-btn btn spacing3" 
+                            :class="{ active: isUseEffect }"
                             @click="toggleSoundEffectView">
-                            <svg width="17" height="17" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="17" height="17" 
+                                viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -347,8 +402,9 @@ onMounted(() => {
                 <div class="action">
                     <div class="btm-left">
                         <div @click="toggleFavoritedState">
-                            <svg v-show="!favoritedState" width="20" height="20" viewBox="0 0 1024 937.46"
-                                xmlns="http://www.w3.org/2000/svg">
+                            <svg v-show="!favoritedState" 
+                                width="20" height="20" 
+                                viewBox="0 0 1024 937.46" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -356,8 +412,9 @@ onMounted(() => {
                                     </g>
                                 </g>
                             </svg>
-                            <svg v-show="favoritedState" class="love-btn" width="20" height="20" viewBox="0 0 1024 937.53"
-                                xmlns="http://www.w3.org/2000/svg">
+                            <svg v-show="favoritedState" 
+                                class="love-btn" width="20" height="20" 
+                                viewBox="0 0 1024 937.53" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -367,7 +424,7 @@ onMounted(() => {
                             </svg>
                         </div>
                         <div class="spacing3">
-                            <svg width="20" height="20" class="share-btn" viewBox="0 0 853.52 938.68" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M292,589.72c-38.76,37.29-85,54.64-138.74,49.42-43.36-4.22-80.19-22.9-109.23-55.42-60.07-67.26-58.33-167.48,3-232,63.16-66.46,174-73.4,245.1-2.51,12.53-7.29,25.17-14.61,37.78-22Q421.83,273.6,513.73,220c3.34-1.94,4.53-3.49,3.48-7.69C493.68,118.28,552.84,23.71,647.54,3.71S834.26,46.49,850.82,142.26C866.66,233.93,805,322.49,713.47,338.48,656.72,348.39,607,333,564.72,294c-2.51-2.33-4.15-2.65-7.2-.86Q448.26,357,338.82,420.7c-2.94,1.72-3.79,3.23-2.91,6.65a166.71,166.71,0,0,1,.06,84c-.93,3.64,0,5.23,3.11,7Q447.89,581.59,556.54,645.1c3.84,2.25,5.9,2,9.21-1,39.77-36.53,86.66-52.18,140.18-44.74,75.89,10.54,133.26,67.55,145.47,142.95,14.17,87.54-44.28,173.15-131.3,192.3C629.41,954.52,540.41,900,517.31,810.27a167.2,167.2,0,0,1,.09-84.5c.77-3,.51-4.67-2.43-6.37Q404.65,655.29,294.42,591C293.7,590.58,293,590.22,292,589.72ZM85.41,469.18a85.23,85.23,0,1,0,85.25-84.95A85,85,0,0,0,85.41,469.18ZM767.87,170.91a85.23,85.23,0,1,0-170.45-.24c-.06,47.21,38.29,85.64,85.35,85.53A85.35,85.35,0,0,0,767.87,170.91Zm-170.45,597a85.23,85.23,0,1,0,170.45.48c.1-47.29-38.06-85.74-85.24-85.61C633.7,682.89,597.2,723.1,597.42,767.89Z"/></g></g></svg>
+                            <svg class="share-btn" width="20" height="20" viewBox="0 0 853.52 938.68" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M292,589.72c-38.76,37.29-85,54.64-138.74,49.42-43.36-4.22-80.19-22.9-109.23-55.42-60.07-67.26-58.33-167.48,3-232,63.16-66.46,174-73.4,245.1-2.51,12.53-7.29,25.17-14.61,37.78-22Q421.83,273.6,513.73,220c3.34-1.94,4.53-3.49,3.48-7.69C493.68,118.28,552.84,23.71,647.54,3.71S834.26,46.49,850.82,142.26C866.66,233.93,805,322.49,713.47,338.48,656.72,348.39,607,333,564.72,294c-2.51-2.33-4.15-2.65-7.2-.86Q448.26,357,338.82,420.7c-2.94,1.72-3.79,3.23-2.91,6.65a166.71,166.71,0,0,1,.06,84c-.93,3.64,0,5.23,3.11,7Q447.89,581.59,556.54,645.1c3.84,2.25,5.9,2,9.21-1,39.77-36.53,86.66-52.18,140.18-44.74,75.89,10.54,133.26,67.55,145.47,142.95,14.17,87.54-44.28,173.15-131.3,192.3C629.41,954.52,540.41,900,517.31,810.27a167.2,167.2,0,0,1,.09-84.5c.77-3,.51-4.67-2.43-6.37Q404.65,655.29,294.42,591C293.7,590.58,293,590.22,292,589.72ZM85.41,469.18a85.23,85.23,0,1,0,85.25-84.95A85,85,0,0,0,85.41,469.18ZM767.87,170.91a85.23,85.23,0,1,0-170.45-.24c-.06,47.21,38.29,85.64,85.35,85.53A85.35,85.35,0,0,0,767.87,170.91Zm-170.45,597a85.23,85.23,0,1,0,170.45.48c.1-47.29-38.06-85.74-85.24-85.61C633.7,682.89,597.2,723.1,597.42,767.89Z"/></g></g></svg>
                         </div>
                         <div class="volume-wrap spacing3">
                             <VolumeBar ref="volumeBarRef"></VolumeBar>
@@ -376,18 +433,27 @@ onMounted(() => {
                     <div class="btm-center">
                         <PlayControl></PlayControl>
                         <div class="progressbar-wrap">
-                            <span class="t-current" v-html="mmssPreseekTime || mmssCurrentTime"></span>
-                            <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
-                                :onScroll="preseekTrack" :onScrollFinish="seekTrack" 
-                                :onDragRelease="seekTrack" :onDragMove="preseekTrack" 
+                            <span class="t-current" v-html="mmssPreseekTime || mmssCurrentTime">
+                            </span>
+                            <SliderBar :value="progressState" 
+                                :disable="!isTrackSeekable" 
+                                :onSeek="seekTrack" 
+                                :disableScroll="true"
+                                :onScroll="preseekTrack" 
+                                :onScrollFinish="seekTrack" 
+                                :onDragRelease="seekTrack" 
+                                :onDragMove="preseekTrack" 
                                 keyName="playingView">
                             </SliderBar>
-                            <span class="t-duration" v-html="Track.mmssDuration(currentTrack, Playlist.isFMRadioType(currentTrack) ? -1 : 0)"></span>
+                            <span class="t-duration" v-html="Track.mmssDuration(currentTrack, Playlist.isFMRadioType(currentTrack) ? -1 : 0)">
+                            </span>
                         </div>
                     </div>
                     <div class="btm-right">
-                        <div class="theme-btn btn" @click.stop="togglePlayingThemeListView">
-                            <svg width="17" height="17" viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
+                        <div class="theme-btn btn" 
+                            @click.stop="togglePlayingThemeListView">
+                            <svg width="17" height="17" 
+                                viewBox="0 0 1024.5 1024.5" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path class="cls-1"
@@ -408,13 +474,16 @@ onMounted(() => {
                         </svg>
                         -->
                         </div>
-                        <div class="lyric-btn spacing3" :class="{ 'content-text-highlight': desktopLyricShow }"
+                        <div class="lyric-btn spacing3" 
+                            :class="{ 'content-text-highlight': desktopLyricShow }"
                             @click="() => toggleDesktopLyricShow()">
                             词
                         </div>
-                        <div class="equalizer-btn btn spacing3" :class="{ active: isUseEffect }"
+                        <div class="equalizer-btn btn spacing3" 
+                            :class="{ active: isUseEffect }"
                             @click="toggleSoundEffectView">
-                            <svg width="17" height="17" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="17" height="17" 
+                                viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -570,7 +639,7 @@ onMounted(() => {
 }
 
 .playing-view .container > .center .cover-wrap {
-    margin-right: 41px;
+    margin-right: 51px;
     margin-bottom: 0px;
     margin-top: 13px;
     display: flex;
@@ -589,7 +658,7 @@ onMounted(() => {
     width: 366px;
     height: 366px;
     border: 6px solid #292929;
-    border-radius: 3px;
+    border-radius: var(--border-img-text-tile-border-radius);
     background-size: cover;
 }
 
@@ -782,49 +851,166 @@ onMounted(() => {
 }
 
 
-/* background effect */
-.playing-view .container.auto-effect {
+/* background effect light*/
+.playing-view .container.auto-effect.light {
     background: none !important;
     color: #fff;
     transition: 1s;
 }
 
-.playing-view .container.auto-effect .meta-wrap,
-.playing-view .container.auto-effect .meta-wrap .audio-title,
-.playing-view .container.auto-effect .meta-wrap .audio-artist {
-    color: #ddd;
+.playing-view .container.auto-effect.light .meta-wrap,
+.playing-view .container.auto-effect.light .meta-wrap .audio-title,
+.playing-view .container.auto-effect.light .meta-wrap .audio-artist {
+    color: #eee;
 }
 
-.playing-view .container.auto-effect .lyric-ctl .audio-artist,
-.playing-view .container.auto-effect .lyric-ctl .audio-album {
-    color: #ddd !important;
-}
-
-.playing-view .container.auto-effect .lyric-ctl .line {
-    color: #cacaca !important;
-}
-
-.playing-view .container.auto-effect .lyric-ctl .line .extra-text {
-    color: #bababa !important;
-}
-
-.playing-view .container.auto-effect .lyric-ctl .line.current {
-    color: var(--content-highlight-color) !important;
-}
-
-.playing-view .container.auto-effect .lyric-ctl .line.current .extra-text {
-    color: #fff !important;
-}
-
-.playing-view .container.auto-effect .lyric-ctl .line.locatorCurrent,
-.playing-view .container.auto-effect .lyric-ctl .line.locatorCurrent .text,
-.playing-view .container.auto-effect .lyric-ctl .line.locatorCurrent .extra-text {
+.playing-view .container.auto-effect.light .lyric-ctl .audio-artist,
+.playing-view .container.auto-effect.light .lyric-ctl .audio-album {
     color: #eee !important;
 }
 
-.playing-view .container.auto-effect .lyric-ctl .extra-btn span {
+.playing-view .container.auto-effect.light .lyric-ctl .line {
+    color: #ccc !important;
+}
+
+.playing-view .container.auto-effect.light .lyric-ctl .line .extra-text {
+    color: #ddd !important;
+}
+
+.playing-view .container.auto-effect.light .lyric-ctl .line.current .extra-text {
+    color: #fff !important;
+}
+
+.playing-view .container.auto-effect.light .lyric-ctl .line.locator-current,
+.playing-view .container.auto-effect.light .lyric-ctl .line.locator-current .text,
+.playing-view .container.auto-effect.light .lyric-ctl .line.locator-current .extra-text {
+    color: #eee !important;
+}
+
+.playing-view .container.auto-effect.light .lyric-ctl .extra-btn span {
     color: #eee;
     border-color: #eee;
+}
+
+.playing-view .container.auto-effect.light .lyric-btn {
+    color: #fff !important;
+}
+
+.playing-view .container.auto-effect.light svg,
+.playing-view .container.auto-effect.light .play-btn svg,
+.playing-view .container.auto-effect.light .play-btn svg:hover {
+    fill: #fff !important;
+}
+
+.playing-view .container.auto-effect.light > .bottom.bottom-new .t-current,
+.playing-view .container.auto-effect.light > .bottom.bottom-new .t-duration {
+    color: #fff;
+}
+
+.playing-view .container.auto-effect > .bottom.bottom-new {
+    border-top: 0.1px solid #ffffff25;
+}
+
+/* lyric highlight simple-color */
+.playing-view .container.auto-effect.light .lyric-hl-simple-color .lyric-ctl .line.current .text {
+    color: #fff;
+}
+
+/* lyric highlight bg-border */
+.playing-view .container.auto-effect.light .lyric-hl-bg-border .lyric-ctl .line.current {
+    background: #ffffff18 !important;
+    border-radius: 6px;
+    padding: 15px 10px;
+}
+
+.playing-view .container.auto-effect.light .lyric-hl-bg-border .lyric-ctl .line.current .text {
+    color: #fff;
+}
+
+/* background effect dark */
+.playing-view .container.auto-effect.dark {
+    background: none !important;
+    color: #373737;
+    transition: 1s;
+}
+
+.playing-view .container.auto-effect.dark .meta-wrap,
+.playing-view .container.auto-effect.dark .meta-wrap .audio-title,
+.playing-view .container.auto-effect.dark .meta-wrap .audio-artist {
+    color: #666;
+}
+
+.playing-view .container.auto-effect.dark .lyric-ctl .audio-artist,
+.playing-view .container.auto-effect.dark .lyric-ctl .audio-album {
+    color: #666 !important;
+}
+
+.playing-view .container.auto-effect.dark .lyric-ctl .line {
+    color: #666 !important;
+}
+
+.playing-view .container.auto-effect.dark .lyric-ctl .line .extra-text {
+    color: #434343 !important;
+}
+
+.playing-view .container.auto-effect.dark .lyric-ctl .line.current .extra-text {
+    color: #373737 !important;
+}
+
+.playing-view .container.auto-effect.dark .lyric-ctl .line.locator-current,
+.playing-view .container.auto-effect.dark .lyric-ctl .line.locator-current .text,
+.playing-view .container.auto-effect.dark .lyric-ctl .line.locator-current .extra-text {
+    color: #434343 !important;
+}
+
+.playing-view .container.auto-effect.dark .lyric-ctl .extra-btn span {
+    color: #373737;
+    border-color: #373737;
+}
+
+.playing-view .container.auto-effect.dark .lyric-btn {
+    color: #373737 !important;
+}
+
+.playing-view .container.auto-effect.dark svg {
+    fill: #373737 !important;
+}
+
+.playing-view .container.auto-effect.dark .play-btn svg,
+.playing-view .container.auto-effect.dark .play-btn svg:hover {
+    fill: #fff !important;
+}
+
+.playing-view .container.auto-effect.dark > .bottom.bottom-new .t-current,
+.playing-view .container.auto-effect.dark > .bottom.bottom-new .t-duration {
+    color: #393939;
+}
+
+/* lyric highlight simple-color */
+.playing-view .container.auto-effect.dark .lyric-hl-simple-color .lyric-ctl .line.current .text {
+    color: #373737;
+}
+
+/* lyric highlight bg-border */
+.playing-view .container.auto-effect.dark .lyric-hl-bg-border .lyric-ctl .line.current {
+    background: #00000018 !important;
+    border-radius: 6px;
+    padding: 15px 10px;
+}
+
+
+.playing-view .container.auto-effect.dark .lyric-hl-bg-border .lyric-ctl .line.current .text {
+    color: #373737;
+}
+
+
+/* background effect */
+.playing-view .container.auto-effect .lyric-ctl .line.current {
+    /*color: var(--content-highlight-color) !important;*/
+    background: var(--content-text-highlight-color) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
 }
 
 .playing-view .container.auto-effect .lyric-ctl .extra-btn .active,
@@ -840,18 +1026,9 @@ onMounted(() => {
     background: var(--bg-effect-bottom);
 }
 
-.playing-view .container.auto-effect .lyric-btn {
-    color: #fff !important;
-}
-
+.playing-view .container.auto-effect .lyric-btn.content-text-highlight,
 .playing-view .container.auto-effect .lyric-btn:hover {
     color: var(--content-highlight-color) !important;
-}
-
-.playing-view .container.auto-effect svg,
-.playing-view .container.auto-effect .play-btn svg,
-.playing-view .container.auto-effect .play-btn svg:hover {
-    fill: #fff !important;
 }
 
 .playing-view .container.auto-effect svg:hover {
@@ -866,15 +1043,6 @@ onMounted(() => {
 .playing-view .container.auto-effect .bg-effect {
     filter: unset;
     transition: background 1s;
-}
-
-.playing-view .container.auto-effect > .bottom.bottom-new .t-current,
-.playing-view .container.auto-effect > .bottom.bottom-new .t-duration {
-    color: #fff;
-}
-
-.playing-view .container.auto-effect > .bottom.bottom-new {
-    border-top: 0.1px solid #ffffff25;
 }
 
 .playing-view .container.auto-effect > .bottom.bottom-new .active svg {

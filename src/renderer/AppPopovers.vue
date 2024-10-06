@@ -26,6 +26,7 @@ import DynamicPlayingView from './views/DynamicPlayingView.vue';
 import PlayingThemeListView from './views/PlayingThemeListView.vue';
 import CustomPlayingThemeEditView from './views/CustomPlayingThemeEditView.vue';
 import { onEvents, emitEvents, offEvents } from '../common/EventBusWrapper';
+import CustomAppBorderRadiusView from './views/CustomAppBorderRadiusView.vue';
 
 
 
@@ -51,7 +52,7 @@ const { commonNotificationShow, commonNotificationText,
   playlistExportToolbarShow, tagsCategoryViewShow,
   platformCategoryViewShow, playingThemeListViewShow,
   customPlayingThemeEditViewShow, playingViewThemeType,
-  playingViewCustomThemes, } = storeToRefs(useAppCommonStore())
+  playingViewCustomThemes, customAppBorderRadiusViewShow, } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -180,6 +181,15 @@ const setupCustomThemeEditViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '#custom-theme-edit-view',
     width: 768,
+    height: 520
+  })
+}
+
+const setupCustomAppBorderRadiusViewPos = () => {
+  if (!customAppBorderRadiusViewShow.value) return
+  emitEvents('app-elementAlignCenter', {
+    selector: '#custom-app-border-radius-view',
+    width: 618,
     height: 520
   })
 }
@@ -351,6 +361,7 @@ watch(gradientColorToolbarShow, setupGradientColorToolbarPos)
 watch(soundEffectViewShow, setupSoundEffectViewPos)
 watch(playlistExportToolbarShow, setupPlaylistExportToolbarPos)
 watch(customPlayingThemeEditViewShow, setupCustomPlayingThemeEditViewPos)
+watch(customAppBorderRadiusViewShow, setupCustomAppBorderRadiusViewPos)
 
 watch(() => getCurrentTheme(), (nv) => {
   const { appBackgroundScope: scope } = nv
@@ -559,6 +570,11 @@ onUnmounted(() => offEvents(eventsRegistration))
       v-if="playlistExportToolbarShow" 
       @click.stop="">
     </PlaylistExportToolbar>
+
+    <CustomAppBorderRadiusView id="custom-app-border-radius-view" 
+      v-if="customAppBorderRadiusViewShow" 
+      @click.stop="">
+    </CustomAppBorderRadiusView>
   </div>
 </template>
 
@@ -630,7 +646,6 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  /*border-radius: 15px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -646,7 +661,6 @@ onUnmounted(() => offEvents(eventsRegistration))
   height: 550px;
   z-index: 99;
   box-shadow: var(--box-shadow);
-  /*border-radius: 15px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -656,7 +670,6 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 56px;
   z-index: 99;
   box-shadow: var(--box-shadow);
-  /*border-radius: 5px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -666,7 +679,6 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   z-index: 99;
   box-shadow: var(--box-shadow);
-  /*border-radius: 10px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -679,7 +691,6 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 99;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  /*border-radius: 15px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -690,7 +701,6 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 101;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  /*border-radius: 5px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -703,7 +713,6 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  /*border-radius: 15px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -717,7 +726,6 @@ onUnmounted(() => offEvents(eventsRegistration))
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
-  /*border-radius: 15px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -734,7 +742,6 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #popovers .common-ntf,
 #popovers .common-ntf .ntf-dialog-mask {
-  /*border-radius: 12px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -759,18 +766,11 @@ onUnmounted(() => offEvents(eventsRegistration))
   border-radius: var(--border-popover-border-radius);
 }
 
-/*
-#popovers .autolayout {
-  top: 68px;
-}
-*/
-
 #popovers .popover-hint {
   z-index: 1024;
 }
 
 #popovers .popover-hint .ntf-dialog-mask {
-  /*border-radius: 6px;*/
   border-radius: var(--border-popover-border-radius);
 }
 
@@ -792,5 +792,17 @@ onUnmounted(() => offEvents(eventsRegistration))
   height: auto !important;
   text-align: left;
   align-items: center;
+}
+
+#custom-app-border-radius-view {
+  position: fixed;
+  right: 30px;
+  bottom: 80px;
+  width: 618px;
+  height: 520px;
+  z-index: 100;
+  background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-popover-border-radius);
 }
 </style>

@@ -56,7 +56,8 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   hideSoundEffectView, hideCustomThemeEditView,
   hideColorPickerToolbar, resetExploreModeActiveStates,
   setMaxScreen, showImportantToast, 
-  hidePlayingThemeListView, togglePlayingThemeListView } = useAppCommonStore()
+  hidePlayingThemeListView, togglePlayingThemeListView,
+  togglePlayingView, } = useAppCommonStore()
 
 
 const isReservedPath = (path) => {
@@ -64,13 +65,13 @@ const isReservedPath = (path) => {
   return reservedPaths.indexOf(path) >= 0
 }
 
-const deepInState = (state, cache) => {
-  for (let path in state) {
-    const value = state[path]
+const deepIntoStates = (states, oldStates) => {
+  for (let path in states) {
+    const value = states[path]
     if (value && (typeof value === 'object') && !Array.isArray(value)) {
-      deepInState(state[path], cache[path])
-    } else if (cache) {
-      state[path] = (isReservedPath(path) ? state[path] : cache[path])
+      deepIntoStates(states[path], oldStates[path])
+    } else if (oldStates) {
+      states[path] = (isReservedPath(path) ? states[path] : oldStates[path])
     }
   }
 }
@@ -152,17 +153,34 @@ const cleanupSetting = () => {
   const key = "setting"
   const cache = localStorage.getItem(key)
   if (cache) {
-    const cacheStates = JSON.parse(cache)
+    const oldStates = JSON.parse(cache)
     store.$reset() //方法失效，与期望值不符
     localStorage.removeItem(key)
-    deepInState(store.$state, cacheStates)
-    /*
-    const _state = JSON.parse(JSON.stringify(store.$state))
-    deepInState(_state, cacheStates)
-    store.$patch({ ..._state })
-    */
+    deepIntoStates(store.$state, oldStates)
+    migrateSettingStates(store.$state, oldStates)
   }
   store.$patch({ blackHole: Math.random() * 100000000 })
+}
+
+//迁移设置 - 版本升级时尽量向下兼容
+const migrateSettingStates = (states, oldStates) => {
+  try {
+    const { track } = oldStates
+    //迁移首页提示 - 本地音乐、自由FM
+    if(typeof track.localMusicHomepageTipsShow == 'boolean') {
+      Object.assign(states.common,  { 
+        localMusicViewTipsShow: track.localMusicHomepageTipsShow 
+      })
+    }
+    if(typeof track.localMusicHomepageTipsShow == 'boolean') {
+      Object.assign(states.common,  { 
+        freeFMViewTipsShow: track.freeFMHomepageTipsShow 
+      })
+    }
+
+  } catch(error) {
+    if(isDevEnv()) console.log(error)
+  }
 }
 
 // 恢复默认设置
@@ -369,6 +387,16 @@ const searchDefault = async (keyword) => {
     || keyword === '插件'
     || toLowerCaseTrimString(keyword) === 'plugins') {
     visitPlugins()
+    return
+  } else if (keyword === '当前'
+    || keyword === '当前播放'
+    || toLowerCaseTrimString(keyword) === 'playbackQueue') {
+    togglePlaybackQueueView()
+    return
+  } else if (keyword === '播放'
+    || keyword === '播放页'
+    || toLowerCaseTrimString(keyword) === 'playingView') {
+    togglePlayingView()
     return
   } else if (keyword.startsWith(":")) {
     keyword = toLowerCaseTrimString(keyword.slice(1))

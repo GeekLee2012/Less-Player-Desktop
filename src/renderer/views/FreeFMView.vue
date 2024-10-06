@@ -30,7 +30,8 @@ const { searchBarExclusiveAction } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,
     setSearchBarExclusiveAction, toggleTagsCategoryView } = useAppCommonStore()
 const { isSearchForFreeFMShow, isShowDialogBeforeClearFreeFM, 
-    isFreeFMHomepageTipsShow, isSingleLineRadioTitleStyle, } = storeToRefs(useSettingStore())
+    isFreeFMViewTipsShow, isFreeFMViewRadiosTipsShow, 
+    isSingleLineRadioTitleStyle, } = storeToRefs(useSettingStore())
 
 
 const freefmRef = ref(null)
@@ -243,6 +244,20 @@ const interruptSearchBarExclusiveModeCtl = () => {
     return currentRoutePath().includes('/radios/freefm')
 }
 
+const tutorialList = [{
+    title: '前往设置，可关闭上面的废话文学',
+    color: '#fb929e'
+}, {
+    title: '支持json、pls拖拽导入',
+    color: '#46cdcf'
+}, {
+    title: '支持m3u、m3u8拖拽导入',
+    color: '#3d84a8'
+}, {
+    title: '拖拽图片到当前控件，更新封面',
+    color: '#aa96da'
+} ]
+
 
 /* 生命周期、监听 */
 onMounted(() => {
@@ -259,13 +274,13 @@ onActivated(() => {
     <div id="freefm-view" ref="freefmRef" @scroll="onScroll" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <div class="title">自由FM</div>
-            <div class="about" v-show="isFreeFMHomepageTipsShow">
+            <div class="about" v-show="isFreeFMViewTipsShow">
                 <p>初衷：期待汇集全球主流电台，跟随电波一起，更多地了解、感知世界</p>
                 <p>世界那么大，一起来静心聆听吧</p>
                 <p>去探索、去发现，世界的美好</p>
                 <p>去思考、去追寻，自己的人生</p>
             </div>
-            <div class="action" :class="{ 'none-about': !isFreeFMHomepageTipsShow }">
+            <div class="action" :class="{ 'none-about': !isFreeFMViewTipsShow }">
                 <SvgTextButton text="新建电台" :leftAction="visitFreeFMCreate">
                 </SvgTextButton>
                 <SvgTextButton text="导入电台" :leftAction="importRadios" :disabled="importTaskCount > 0" class="spacing">
@@ -305,14 +320,17 @@ onActivated(() => {
                     <span>标签</span>
                 </div>
             </div>
-            <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount"
-                :tileOnDropFn="radioTileOnDrop" :singleLineTitleStyle="isSingleLineRadioTitleStyle">
+            <PlaylistsControl :data="filteredData || freeRadios" 
+                :playable="true"
+                :loading="isLoading" 
+                :customLoadingCount="importTaskCount"
+                :tileOnDropFn="radioTileOnDrop" 
+                :singleLineTitleStyle="isSingleLineRadioTitleStyle">
             </PlaylistsControl>
-            <!--
-            <PlaylistsControl :data="filteredData || freeRadios" :loading="isLoading" :customLoadingCount="importTaskCount"
-                :paginationStyleType="getPaginationStyleIndex" :limit="30" :loadPage="loadPageContent">
+            <PlaylistsControl :data="tutorialList" 
+                :playable="false"  
+                v-show="isFreeFMViewRadiosTipsShow && freeRadios.length < 1">
             </PlaylistsControl>
-            -->
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
@@ -335,7 +353,7 @@ onActivated(() => {
 #freefm-view .header {
     display: flex;
     flex-direction: column;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
 }
 
 #freefm-view .header .title {
@@ -358,7 +376,7 @@ onActivated(() => {
 }
 
 #freefm-view .header .action.none-about {
-    margin-top: 10px;
+    margin-top: 6px;
 }
 
 #freefm-view .list-title {
@@ -372,7 +390,7 @@ onActivated(() => {
 
 #freefm-view .list-title .size-text {
     margin-left: 5px;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
     /*font-size: calc(var(--content-text-tab-title-size) - 2px);*/
     font-size: var(--content-text-tab-title-size);

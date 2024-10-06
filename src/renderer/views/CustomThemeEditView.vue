@@ -680,7 +680,6 @@ watch(workingCustomTheme, (nv, ov) => {
 <style scoped>
 .custom-theme-edit-view {
     display: flex;
-    /*flex-direction: column;*/
     overflow: hidden;
     -webkit-app-region: none;
 }
@@ -845,7 +844,7 @@ watch(workingCustomTheme, (nv, ov) => {
     align-items: center;
     justify-content: center;
     fill: var(--content-subtitle-text-color);
-    border-radius: 6px;
+    border-radius: var(--border-inputs-border-radius);
     margin-bottom: 6px;
     border: 1px solid var(--border-inputs-border-color);
     cursor: pointer;

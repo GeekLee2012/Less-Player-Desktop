@@ -1,5 +1,6 @@
 //环境配置，相关常量、变量等
 
+
 //关闭警告提示
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 //浏览器UserAgent
@@ -55,18 +56,21 @@ const useCustomTrafficLight = isMacOS
 //是否为开发环境
 const isDevEnv = (process.env['NODE_ENV'] === 'dev')
 //应用Icon
-const APP_ICON = '../../public/icon.png'
-//应用Icon - macOS Template Image
-const APP_ICON_TEMPLATE = '../../public/iconTemplate@8x.png'
-const APP_ICON_OPTIONS = isMacOS ? {
-        width: 16,
-        height: 16,
-        quality: 'best'
-    } : {
-        width: 32,
-        height: 32,
-        quality: 'best'
-    }
+const APP_ICON = {
+    path: '../../public/icon.png',
+    templatePath: '../../public/iconTemplate@8x.png',
+    options: [
+        {
+            width: 16,
+            height: 16,
+            quality: 'best'
+        }, {
+            width: 32,
+            height: 32,
+            quality: 'best'
+        }
+    ]
+}
 
 const DOWNLOADS_PATH = (process.env['HOME'] || process.env['USERPROFILE']) + '/Downloads'
 
@@ -108,8 +112,6 @@ module.exports = {
     AUDIO_PLAYLIST_EXTS,
     BACKUP_FILE_EXTS,
     APP_ICON,
-    APP_ICON_OPTIONS,
-    APP_ICON_TEMPLATE,
     DOWNLOADS_PATH,
     TrayAction,
     GitRepository,

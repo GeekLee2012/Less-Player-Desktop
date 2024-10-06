@@ -336,7 +336,7 @@ const computedVolumeGainText = computed(() => {
     width: 96px;
     margin-top: 15px;
     padding: 3px 0px;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     border: 2px solid transparent;
     background-color: #f3f3f3;
     background: var(--content-list-item-hover-bg-color);
@@ -392,7 +392,7 @@ const computedVolumeGainText = computed(() => {
     width: 220px;
     margin-top: 15px;
     padding: 6px 0px;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     border: 2px solid transparent;
     background-color: #f3f3f3;
     background: var(--content-list-item-hover-bg-color);

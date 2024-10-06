@@ -85,8 +85,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: flex;
     overflow: hidden;
     overflow-x: hidden;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-top-left-radius: var(--border-popover-border-radius);
+    border-bottom-left-radius: var(--border-popover-border-radius);
 }
 
 .artist-category-view .container {

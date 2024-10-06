@@ -168,6 +168,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-break: anywhere;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     color: var(--content-text-color);
 }
@@ -179,6 +180,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-break: anywhere;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
 }
 
@@ -197,13 +199,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-height: 25px;
     color: var(--content-secondary-text-color);
     font-size: var(--content-text-tip-text-size);
-    /*font-weight: bold;*/
     color: var(--content-subtitle-text-color);
 
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     word-wrap: break-word;
     line-break: anywhere;
@@ -246,7 +248,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     width: 25px;
     height: 25px;
     background: var(--app-bg-color);
-    border-radius: 6px;
+    border-radius: 5px;
     display: flex;
     justify-content: flex-start;
     cursor: pointer;

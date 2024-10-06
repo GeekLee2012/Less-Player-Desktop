@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
-import { coverDefault } from '../../common/Utils';
+import { coverDefault, isSupportedImage } from '../../common/Utils';
 import SingleSelectionControl from '../components/SingleSelectionControl.vue';
 import ToggleControl from '../components/ToggleControl.vue';
 
@@ -11,13 +11,14 @@ import ToggleControl from '../components/ToggleControl.vue';
 
 
 const { setPlayingViewThemeIndex, showCustomPlayingThemeEditView,
-    removePlayingViewCustomTheme, } = useAppCommonStore()
+    removePlayingViewCustomTheme, savePlayingViewCustomTheme, } = useAppCommonStore()
 const { playingViewPresetThemes, playingViewCustomThemes,
     playingViewThemeIndex, playingViewThemeType } = storeToRefs(useAppCommonStore())
 const { track } = storeToRefs(useSettingStore())
 const { setPlayingViewBgCoverEffectIndex, 
     togglePlayingViewCoverBorderShow,
     setPlayingViewBgCoverEffectGradientMode,
+    setPlayingViewLyricHighlightMode,
     setPlayingViewPlayCtlStyleIndex,
  } = useSettingStore()
 
@@ -44,6 +45,24 @@ const computedCustomThemeSectionTitle = computed(() => {
    const total = playingViewCustomThemes.value.length
    return (type != 0 && total > 0) ? `${index + 1} / ${total}` : total
 })
+
+const onImageDrop = (event, item, index) => {
+    if(!item) return 
+    event.preventDefault()
+    const { files } = event.dataTransfer
+
+    if (files.length < 1) return
+
+    const { path } = files[0]
+    let isEventStopped = true
+    if (isSupportedImage(path)) {
+        const previewCover = path
+        savePlayingViewCustomTheme({ ...item, previewCover }) && Object.assign(item, { previewCover })
+    } else {
+        isEventStopped = false
+    }
+    if (isEventStopped) event.stopPropagation()
+}
 </script>
 
 <template>
@@ -88,6 +107,11 @@ const computedCustomThemeSectionTitle = computed(() => {
                         <SingleSelectionControl class="" :data="['亮-暗', '暗-亮']" :value="track.playingViewBgCoverEffectGradientMode" :onChanged="setPlayingViewBgCoverEffectGradientMode">
                         </SingleSelectionControl>
                     </div>
+                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
+                        <span class="subtitle">歌词高亮：</span>
+                        <SingleSelectionControl class="" :data="['默认', '简色', '方框']" :value="track.playingViewLyricHighlightMode" :onChanged="setPlayingViewLyricHighlightMode">
+                        </SingleSelectionControl>
+                    </div>
                     <div class="opt-item">
                         <span class="subtitle">封面边框：</span>
                         <ToggleControl @click="togglePlayingViewCoverBorderShow"
@@ -124,8 +148,12 @@ const computedCustomThemeSectionTitle = computed(() => {
                     <div class="item" :class="{ current:  (playingViewThemeIndex == index && playingViewThemeType == 1) }" 
                         :index="index">
                         <div class="preview-wrap">
-                            <img class="preview" :src="coverDefault(item.previewCover)" :class="{ 'no-cover': !item.previewCover }"
-                                @click="(event) => setPlayingViewThemeIndex(index, 1)" />
+                            <img class="preview" 
+                                :src="coverDefault(item.previewCover)" 
+                                :class="{ 'no-cover': !item.previewCover }"
+                                @click="event => setPlayingViewThemeIndex(index, 1)"
+                                @dragover="event => event.preventDefault()" 
+                                @drop="event => onImageDrop(event, item, index)"/>
                             <svg v-show="(playingViewThemeIndex == index && playingViewThemeType == 1)" class="checked-svg"
                                 width="21" height="21" viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
@@ -263,7 +291,7 @@ const computedCustomThemeSectionTitle = computed(() => {
     height: 188px;
     object-fit: fill;
     margin-bottom: 3px;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     border: 3.5px solid transparent;
     cursor: pointer;
 }

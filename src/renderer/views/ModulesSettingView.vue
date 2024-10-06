@@ -34,7 +34,7 @@ const setActiveTab = (value) => activeTab.value = value
     <div id="modules-setting-view">
         <div class="header">
             <div class="title">功能管理</div>
-            <div class="tip-text">提示：实验性功能，如果某个功能被全部关闭，那么该功能会被直接隐藏
+            <div class="tip-text">提示：实验性功能；如果某个功能被全部关闭，那么该功能会被直接隐藏
             </div>
         </div>
         <div class="center">
@@ -155,7 +155,7 @@ const setActiveTab = (value) => activeTab.value = value
     display: flex;
     flex-direction: row;
     align-items: center;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     height: 50px;
     padding: 3px 18px;
     margin-bottom: 15px;

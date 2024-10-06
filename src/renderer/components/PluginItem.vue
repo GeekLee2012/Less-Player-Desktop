@@ -90,7 +90,7 @@ const hasIcon = computed(() => {
     flex: 1;
     margin-top: 3px;
     margin-bottom: 15px;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
     --item-height: 79px;
 }
@@ -129,14 +129,14 @@ const hasIcon = computed(() => {
 .plugin-item .icon-wrap img {
     width: 45px;
     height: 45px;
-    border-radius: 3px;
+    border-radius: var(--border-img-small-border-radius);
 }
 
 .plugin-item .icon-wrap svg {
     fill: var(--button-icon-btn-color) !important;
     fill: var(--content-subtitle-text-color) !important;
     transform: rotateY(180deg);
-    border-radius: 3px;
+    border-radius: var(--border-img-small-border-radius);
 }
 
 .plugin-item .center {
@@ -157,6 +157,7 @@ const hasIcon = computed(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;

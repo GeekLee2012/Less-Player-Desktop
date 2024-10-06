@@ -447,6 +447,7 @@ onUnmounted(() => {
 
 .visual-playing-view .center .lyric-wrap .lyric-ctl {
     height: calc(100% - 15px);
+    --lyric-margin-left: 0px;
 }
 
 .visual-playing-view .center .left {

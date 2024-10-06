@@ -533,7 +533,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     align-items: center;
     justify-content: center;
     fill: var(--content-subtitle-text-color);
-    border-radius: 6px;
+    border-radius: var(--border-inputs-border-radius);
     margin-top: 15px;
     border: 1px solid var(--border-inputs-border-color);
     cursor: pointer;

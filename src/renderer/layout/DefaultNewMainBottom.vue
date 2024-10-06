@@ -123,7 +123,7 @@ onMounted(() => {
 .default-new-main-bottom #play-nav #play-meta .cover-mask {
     width: 45px;
     height: 45px;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
 }
 
 /*

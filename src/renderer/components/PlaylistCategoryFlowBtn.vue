@@ -14,7 +14,7 @@ const props = defineProps({
     prefix: String,
 })
 
-const { isDefaultLayoutWithBottom, isPlaylistCategoryBarFlowBtnShow } = storeToRefs(useSettingStore())
+const { isPlaylistCategoryBarFlowBtnShow } = storeToRefs(useSettingStore())
 
 let threshold = (props.threshold || 1024)
 let scrollTarget = props.target
@@ -61,8 +61,9 @@ defineExpose({
 </script>
 
 <template>
-    <div class="playlist-categroy-flow-btn" :class="{ 'playlist-categroy-flow-btn-with-bottom': isDefaultLayoutWithBottom }"
-        @click.stop="toggleCategory" v-show="isPlaylistCategoryBarFlowBtnShow && isBtnShow">
+    <div class="playlist-categroy-flow-btn"
+        @click.stop="toggleCategory" 
+        v-show="isPlaylistCategoryBarFlowBtnShow && isBtnShow">
         <svg width="15" height="15" viewBox="0 0 29.3 29.3">
             <g id="Layer_2" data-name="Layer 2">
                 <g id="Layer_1-2" data-name="Layer 1">
@@ -77,8 +78,9 @@ defineExpose({
 <style scoped>
 .playlist-categroy-flow-btn {
     position: fixed;
-    bottom: 77px;
-    right: 15px;
+    /*bottom: 77px;*/
+    bottom: calc(var(--main-bottom-height) + 58px);
+    right: 20px;
     z-index: 66;
 
     border: 0.1px solid var(--border-color);
@@ -104,12 +106,5 @@ defineExpose({
 
 .playlist-categroy-flow-btn svg:hover {
     fill: var(--button-icon-text-btn-icon-color) !important;
-}
-
-/*TODO */
-.playlist-categroy-flow-btn-with-bottom {
-    /*bottom: 141px;*/
-    bottom: calc(var(--main-bottom-height) + 15px + 41px);
-    right: 20px;
 }
 </style>

@@ -4,10 +4,9 @@
 [![GitHub Release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
 [![GitHub Tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/tags)
 [![GitHub License](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)
-![GitHub Downloads](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/total)
 ![GitHub Stars](https://img.shields.io/github/stars/GeekLee2012/Less-Player-Desktop)
-![GitHub Forks](https://img.shields.io/github/forks/GeekLee2012/Less-Player-Desktop)    
-    
+![GitHub Forks](https://img.shields.io/github/forks/GeekLee2012/Less-Player-Desktop) 
+![GitHub Downloads@Latest](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/latest/total)  
   
 基于[Electron](https://www.electronjs.org/) + [Vue 3](https://vuejs.org/)开发、[插件化](https://github.com/GeekLee2012/Less-Player-Desktop-Plugins/)的播放器。   
   

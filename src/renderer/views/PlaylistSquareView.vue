@@ -64,6 +64,18 @@ const nextPage = () => {
 }
 */
 
+const isCategoriesCachable = (data, min) => {
+    if(!data || !Array.isArray(data)) return false
+    min = min || 6
+    const flatData = []
+    data.forEach((cate, i) => {
+        cate.data.forEach((item, j) => {
+            flatData.push(item)
+        })
+    })
+    return flatData.length >= min
+}
+
 const loadCategories = async () => {
     categories.length = 0
     orders.length = 0
@@ -90,7 +102,7 @@ const loadCategories = async () => {
         cachedOrders = orders
         cachedWhiteWrap = isWhiteWrap
 
-        putCategories(platform, cachedCates)
+        if(isCategoriesCachable(cachedCates)) putCategories(platform, cachedCates)
         if (cachedOrders) putOrders(platform, orders)
         putWhiteWrap(platform, isWhiteWrap)
     }
@@ -221,9 +233,14 @@ onActivated(() => restoreScrollState())
     <div class="playlist-square-view" ref="squareContentRef" @scroll="onScroll">
         <PlaylistCategoryBar :data="categories" :loading="isLoadingCategories" :isWhiteWrap="isWhiteWrap">
         </PlaylistCategoryBar>
-        <PlaylistsControl :loading="isLoadingCategories || isLoadingContent" :paginationStyleType="getPaginationStyleIndex"
-            :limit="pagination.limit" :loadPage="loadPageContent" :nextPagePendingMark="nextPagePendingMark"
-            :refreshAllPendingMark="refreshAllPendingMark" v-show="!isAlbumType">
+        <PlaylistsControl :loading="isLoadingCategories || isLoadingContent" 
+            :playable="true"
+            :paginationStyleType="getPaginationStyleIndex"
+            :limit="pagination.limit" 
+            :loadPage="loadPageContent" 
+            :nextPagePendingMark="nextPagePendingMark"
+            :refreshAllPendingMark="refreshAllPendingMark" 
+            v-show="!isAlbumType">
         </PlaylistsControl>
         <AlbumListControl :data="playlists" :loading="isLoadingContent" v-show="isAlbumType">
         </AlbumListControl>

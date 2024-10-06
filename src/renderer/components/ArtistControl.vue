@@ -40,7 +40,9 @@ onUnmounted(() => offEvents(eventsRegistration))
 <template>
     <div class="artist-ctl" v-show="data && data.length > 0">
         <template v-for="(item, index) in data">
-            <span @click="visitArtistDetail(platform, item, index)" class="artist-item" :class="{ visitable: visitable }"
+            <span @click="visitArtistDetail(platform, item, index)" 
+                class="artist-item" 
+                :class="{ visitable: visitable }"
                 v-html="item.name">
             </span>
             <template v-if="index < (data.length - 1)">、</template>
@@ -54,6 +56,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;

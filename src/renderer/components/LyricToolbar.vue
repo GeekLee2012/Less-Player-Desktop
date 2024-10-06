@@ -153,7 +153,7 @@ const getLyricOffsetText = () => {
     flex: 1;
     flex-direction: column;
     padding-bottom: 18px;
-    border-radius: 5px;
+    border-radius: var(--border-popover-border-radius);
     -webkit-app-region: none;
     background: var(--content-bg-color);
     background: var(--content-bg-color-no-transparent);
@@ -205,7 +205,7 @@ const getLyricOffsetText = () => {
 
 .lyric-toolbar input {
     padding: 5px 6px;
-    border-radius: 5px;
+    border-radius: var(--border-inputs-border-radius);
     border: 1px solid var(--border-inputs-border-color);
     font-size: 14px;
     text-align: left;

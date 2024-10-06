@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import PlaybackQueueItem from '../components/PlaybackQueueItem.vue';
 import { usePlayStore } from '../store/playStore';
@@ -19,7 +19,8 @@ const { showToast, hidePlaybackQueueView,
     setRouterCtxCacheItem, } = useAppCommonStore()
 const { isPlaybackQueueAutoPositionOnShow, isPlaybackQueueCloseBtnShow,
     isPlaybackQueueHistoryBtnShow, isPlaybackQueuePositionBtnShow, 
-    isPlaybackQueueBatchActionBtnShow
+    isPlaybackQueueBatchActionBtnShow, isPlaybackQueueViewTipsShow,
+    isPlaybackQueueBtnIconMode,
 } = storeToRefs(useSettingStore())
 const { playbackQueueViewShow } = storeToRefs(useAppCommonStore())
 
@@ -115,11 +116,71 @@ const moveDragItem = (event) => {
     moveTrack(dragTargetIndex.value, dragOverIndex.value)
 }
 
-const isIconMode = computed(() => {
-    return isPlaybackQueuePositionBtnShow.value 
+const isBtnWithIconMode = computed(() => {
+    return isPlaybackQueueBtnIconMode.value 
+        || (isPlaybackQueuePositionBtnShow.value 
         && isPlaybackQueueBatchActionBtnShow.value 
-        && isPlaybackQueueHistoryBtnShow.value 
+        && isPlaybackQueueHistoryBtnShow.value)
 })
+
+
+const tutorialList = [{
+    title: '设置页 - 播放选项',
+    artist: [ { id:'', name: '教程 - 当前播放' }],
+    color: '#17b978',
+}, {
+    title: '非封面区域，拖拽移动排序',
+    artist: [ { id:'', name: '教程 - 当前播放' }],
+    color: '#086972',
+}, {
+    title: '封面区域，拖拽保存',
+    artist: [ { id:'', name: '教程 - 当前播放' }],
+    color: '#a6e4e7',
+}, {
+    title: '右键菜单：当前应用普遍支持',
+    artist: [ { id:'', name: '教程' }],
+    color: '#dff5f2',
+}, {
+    title: '拖拽图片到封面，更新封面',
+    artist: [ { id:'', name: '教程 - 拖拽' }],
+    color: '#7dace4',
+}, {
+    title: '拖拽图片到新建 / 编辑页',
+    artist: [ { id:'', name: '教程' }],
+    color: '#e84a5f',
+}, {
+    title: '拖拽大封面保存本地',
+    artist: [ { id:'', name: '教程 - 拖拽' }],
+    color: '#163172',
+}, {
+    title: '播放页 - 歌词 - 右键菜单',
+    artist: [ { id:'', name: '教程 - 播放页' }],
+    color: '#930077',
+}, {
+    title: '播放页 - 歌词 - 拖拽保存',
+    artist: [ { id:'', name: '教程 - 播放页' }],
+    color: '#ffbd39',
+}, {
+    title: '播放页 - 播放到指定歌词行',
+    artist: [ { id:'', name: '教程 - 播放页' }],
+    color: '#455d7a',
+}, {
+    title: '播放页 - 频谱 - 左键',
+    artist: [ { id:'', name: '教程 - 播放页 - 动感频谱' }],
+    color: '#d6c8ff',
+}, {
+    title: '播放页 - 封面 - 右键',
+    artist: [ { id:'', name: '教程 - 播放页 - 动感频谱' }],
+    color: '#0dceda',
+}, {
+    title: '内存占用高，请降低图片清晰度',
+    artist: [ { id:'', name: '教程 - 性能' }],
+    color: '#bbded6',
+}, {
+    title: '关闭时不退出：设置页 - 菜单栏',
+    artist: [ { id:'', name: '教程' }],
+    color: '#ff9a3c',
+}]
 
 
 /* 生命周期、监听 */
@@ -168,7 +229,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="detail">
                     <!--<div class="subtext">共{{ queueTracks.length }}首</div>-->
                     <div class="subtitle" v-html="queueState()"></div>
-                    <div class="action" :class="{ 'icon-mode': isIconMode }">
+                    <div class="action" :class="{ 'icon-mode': isBtnWithIconMode }">
                         <div class="batch-action-btn text-btn" @click="visitBatchPlaybackQueue" v-show="isPlaybackQueueBatchActionBtnShow">
                             <svg width="15" height="15" viewBox="0 0 160 125" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
@@ -237,13 +298,29 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
             <div class="center" ref="listRef" :onmousewheel="onUserMouseWheel">
                 <template v-for="(item, index) in queueTracks">
-                    <PlaybackQueueItem class="item" :data="item" :active="playingIndex == index" :index="index"
-                        :class="{ 'drag-target': (dragTargetIndex == index), 'drag-over-mark': (dragOverIndex == index), 'first': (dragOverIndex == 0) }"
-                        :draggable="true" @dragstart="(event) => markDragStart(event, item, index)"
-                        @dragenter="(event) => markDragOver(event, item, index)" @drop="moveDragItem"
+                    <PlaybackQueueItem class="item"
+                        :data="item" 
+                        :index="index"
+                        :actionable="true"
+                        :active="playingIndex == index" 
+                        :class="{ 
+                            'drag-target': (dragTargetIndex == index), 
+                            'drag-over-mark': (dragOverIndex == index), 
+                            'first': (dragOverIndex == 0) 
+                        }"
+                        :draggable="true" 
+                        @dragstart="(event) => markDragStart(event, item, index)"
+                        @dragenter="(event) => markDragOver(event, item, index)" 
+                        @drop="moveDragItem"
                         @dragend="resetDragState">
                     </PlaybackQueueItem>
                 </template>
+                <PlaybackQueueItem v-for="(item, index) in tutorialList"
+                    v-show="isPlaybackQueueViewTipsShow && queueTracks.length < 1"
+                    class="item" 
+                    :data="item"
+                    :index="index">
+                </PlaybackQueueItem>
             </div>
         </div>
     </div>

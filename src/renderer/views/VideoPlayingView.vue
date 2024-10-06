@@ -403,8 +403,8 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
     justify-content: center;
     align-items: center;
     visibility: hidden;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-top-left-radius: var(--border-inputs-border-radius);
+    border-bottom-left-radius: var(--border-inputs-border-radius);
     z-index: 99;
     opacity: 0.68;
     cursor: pointer;
@@ -517,7 +517,7 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
 .video-playing-view .sidebar > .header .layout-mode svg {
     padding: 5px 8px;
     fill: #ccc;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     background: #555;
 }
 
@@ -571,12 +571,13 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
     cursor: pointer;
     margin: 0px 0px 16px 20px;
     font-size: var(--content-text-size);
-    border-radius: 5px;
+    border-radius: var(--border-inputs-border-radius);
 
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: center;
     word-wrap: break-word;
@@ -590,16 +591,17 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
     width: 100%;
     height: 43px;
     line-height: 43px;
-    padding: 3px 8px;
+    padding: 3px 10px;
     cursor: pointer;
     margin: 0px 15px 10px 15px;
     font-size: var(--content-text-size);
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
 
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;

@@ -7,8 +7,7 @@ const { app, BrowserWindow, ipcMain,
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
-  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, 
-  APP_ICON, APP_ICON_TEMPLATE, APP_ICON_OPTIONS,
+  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON,
   AUDIO_PLAYLIST_EXTS, BACKUP_FILE_EXTS, 
   TrayAction, GitRepository
 } = require('./env')
@@ -36,6 +35,7 @@ let messagePortPair = null, messagePortChannel = null
 let appUserAgent =  null, exRequestHandlers = []
 let useTemplateImage = false
 
+const initZoomFactor = 1.0
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
   'default': {
@@ -176,6 +176,8 @@ const initialize = () => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0 || mainWin.isDestroyed()) {
       mainWin = createMainWindow(true)
+    } else if(!isMainWindowShow()) {
+      showMainWindow()
     }
     sendToMainRenderer('app-active')
   })
@@ -344,13 +346,17 @@ const setupTray = (forceShow, forceUseTempldate) => {
   if (appTrayShow || forceShow) {
     if (appTray) appTray.destroy()
     const useNativeTemplate = isMacOS && (forceUseTempldate || useTemplateImage)
-    const iconPath = useNativeTemplate ? APP_ICON_TEMPLATE : APP_ICON
-    const icon = nativeImage.createFromPath(path.join(__dirname, iconPath)).resize(APP_ICON_OPTIONS)
+    const { path: defaultPath, templatePath, options } = APP_ICON
+    const iconPath = useNativeTemplate ? templatePath :defaultPath
+    const iconOption = options[isMacOS ? 0 : 1]
+    const icon = nativeImage.createFromPath(path.join(__dirname, iconPath)).resize(iconOption)
     if(isMacOS) icon.setTemplateImage(useNativeTemplate)
     appTray = new Tray(icon)
-    //appTray = new Tray(path.join(__dirname, APP_ICON))
     appTrayMenu = Menu.buildFromTemplate(initTrayMenuTemplate())
     appTray.setContextMenu(appTrayMenu)
+    appTray.addListener('double-click', (event, bounds) => {
+      if(!isMainWindowShow()) showMainWindow()
+    })
   } else if (appTray) {
     appTray.destroy()
     appTray = null
@@ -1024,7 +1030,7 @@ const createMainWindow = (show) => {
     show,
     frame: false,
     webPreferences: {
-      zoomFactor: 1.0,
+      zoomFactor: initZoomFactor,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
@@ -1099,7 +1105,6 @@ const setupAppLayout = (layout, zoom, isInit) => {
   zoom = Number(zoom) || 85
   const zoomFactor = parseFloat(zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 0.85
-  //mainWin.webContents.setZoomFactor(zoomFactor)
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = Math.round(appWidth * zoomFactor)
   const height = Math.round(appHeight * zoomFactor)
@@ -1111,10 +1116,10 @@ const setupAppLayout = (layout, zoom, isInit) => {
     mainWin.setMinimumSize(width, height)
     mainWin.setSize(width, height)
   }
-  mainWin.webContents.setZoomFactor(zoomFactor)
+  //mainWin.webContents.setZoomFactor(zoomFactor)
+  mainWin.webContents.zoomFactor = zoomFactor
   
-  //TODO 显示效果：能居中，但只能居中一点点？水平方向居中，但垂直方向没居中
-  // 貌似 Electron Bug? 
+  //TODO 貌似 Electron Bug? 显示效果：能居中，但只能居中一点点？水平方向居中，但垂直方向没居中
   mainWin.center()
 }
 
@@ -1331,7 +1336,6 @@ const setupAppWindowZoom = (zoom, noResize) => {
   currentZoom = Number(zoom) || 85
   const zoomFactor = parseFloat(currentZoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return
-  //mainWin.webContents.setZoomFactor(zoomFactor)
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = parseInt(appWidth * zoomFactor)
   const height = parseInt(appHeight * zoomFactor)
@@ -1341,7 +1345,8 @@ const setupAppWindowZoom = (zoom, noResize) => {
     mainWin.setSize(width, height)
     mainWin.center()
   }
-  mainWin.webContents.setZoomFactor(zoomFactor)
+  //mainWin.webContents.setZoomFactor(zoomFactor)
+  mainWin.webContents.zoomFactor = zoomFactor
 }
 
 const addToDownloadingQueue = (url, meta) => {
@@ -1605,7 +1610,7 @@ const createLyricWindow = () => {
     transparent: true,
     frame: false,
     webPreferences: {
-      zoomFactor: 1.0,
+      zoomFactor: initZoomFactor,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,

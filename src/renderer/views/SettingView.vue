@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onActivated, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, inject, onActivated, onMounted, onUnmounted, ref, watch, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
@@ -41,7 +41,7 @@ const { theme, layout, common, track, desktopLyric,
     isToggleCtlTitleActionEnable, } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
-    toggleSettingViewTipsShow,
+    toggleSettingViewNavbarShow,
     toggleToggleCtlTitleActionEnable,
     setWindowZoom,
     setWindowCtlStyle,
@@ -94,6 +94,7 @@ const { setThemeIndex,
     toggleSingleLineRadioTitleStyle,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
+    togglePlaybackQueueBtnIconMode,
     togglePlaybackQueueAutoPositionOnShow,
     togglePlaybackQueueCloseBtnShow,
     togglePlaybackQueuePositionBtnShow,
@@ -106,8 +107,6 @@ const { setThemeIndex,
     toggleUseDndForAddLocalTracks,
     toggleUseDndForExportLocalPlaylist,
     setLimitPerPageForLocalPlaylist,
-    toggleLocalMusicHomepageTipsShow,
-    toggleFreeFMHomepageTipsShow,
     toggleUseDeeplyScanForDirectory,
     toggleAudioTypeFlagShow,
     toggleSearchBarAutoPlaceholder,
@@ -146,9 +145,17 @@ const { setThemeIndex,
     setDesktopLyricTextDirection,
     setAudioOutputDeviceId,
     setWindowCustomShadowSize,
+    toggleSettingViewTipsShow,
+    toggleLocalMusicViewTipsShow,
+    toggleLocalMusicViewPlaylistTipsShow,
+    toggleFreeFMViewTipsShow,
+    toggleFreeFMViewRadiosTipsShow,
+    togglePlaybackQueueViewTipsShow,
+    togglePluginsViewTipsShow,
 } = useSettingStore()
 
-const { showToast, showImportantToast, } = useAppCommonStore()
+const { showToast, showImportantToast, 
+    toggleCustomAppBorderRadiusViewShow, } = useAppCommonStore()
 const { isMaxScreen } = storeToRefs(useAppCommonStore())
 const { audioOutputDevices } = storeToRefs(usePlayStore())
 
@@ -399,6 +406,23 @@ const eventsRegistration = {
 }
 */
 
+
+const settingNavItems = reactive([])
+
+const initSettingNavItems = () => {
+    settingNavItems.length = 0
+    const list = document.querySelectorAll("#setting-view > .center > div > .cate-name") || []
+    list.forEach(item => settingNavItems.push(item))
+}
+
+const navbarCollapsed = ref(true)
+const setNavbarCollapsed = (value) => navbarCollapsed.value = value
+const scrollByNavItem = (event, item) => {
+    item.scrollIntoView()
+    setNavbarCollapsed(true)
+}
+
+
 /* 生命周期、监听 */
 onMounted(() => {
     //onEvents(eventsRegistration)
@@ -406,6 +430,7 @@ onMounted(() => {
     getDisplayFrequency()
     setupToggleCtlTitleAction()
     setupToggleCtlTitleClass()
+    initSettingNavItems()
 })
 
 onActivated(() => {
@@ -417,7 +442,27 @@ onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div id="setting-view" ref="settingViewRef" @scroll="onScroll">
+    <div id="setting-view" ref="settingViewRef" @scroll="onScroll" @click="() => setNavbarCollapsed(true)">
+        <div class="navbar" v-show="common.settingViewNavbarShow"
+            :class="{ collapse: navbarCollapsed }" 
+            @click.stop="() => setNavbarCollapsed(false)">
+            <svg width="16" height="16" viewBox="0 0 682.31 511.62" xmlns="http://www.w3.org/2000/svg">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="Layer_1-2" data-name="Layer 1">
+                        <path d="M341.27,84.78q-148.21,0-296.43,0c-20,0-35.34-10-41.87-27.24A42.42,42.42,0,0,1,41,.07C42.31,0,43.64,0,45,0H637.34C658,0,674.12,11,680.06,29c9.25,28-11.11,55.68-41.35,55.71q-134.48.15-268.94,0Z"/>
+                        <path d="M341.19,426.84q148.21,0,296.43,0c20.07,0,35.29,10,41.84,27.26a42.41,42.41,0,0,1-38,57.44c-1.5.07-3,.07-4.5.07H45.56c-20.48,0-36.15-10.18-42.71-27.65-10.27-27.36,9.59-56.91,38.91-57,71-.26,142-.11,213-.12Z"/>
+                        <path d="M341.15,213.42q147,0,293.92.11a62.77,62.77,0,0,1,19.61,2.76c18.5,6.26,29.77,25.53,27.27,45.07a42.23,42.23,0,0,1-38.51,36.53c-2.49.19-5,.3-7.48.3q-294.68,0-589.35.07c-13.06,0-24.83-3-34.06-12.63C.24,272.76-3.2,257.49,3.05,240.9c6.17-16.38,18.6-25.51,36.19-27.18,3.14-.29,6.32-.29,9.49-.29Z"/>
+                    </g>
+                </g>
+            </svg>
+            <ul>
+                <li class="nav-item" v-for="(item, index) in settingNavItems"
+                    :class="{ first: (index == 0)}"
+                    v-html="item.textContent" 
+                    @click.stop="(event) => scrollByNavItem(event, item)">
+                </li>
+            </ul>
+        </div>
         <div class="header">
             <div class="title">设置</div>
         </div>
@@ -448,8 +493,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="content">
                     <div class="tip-text">提示：当前应用的输入框，按下Enter键生效，或光标焦点离开后自动生效</div>
                     <div>
-                        <span class="cate-subtitle">设置页显示提示：</span>
-                        <ToggleControl @click="toggleSettingViewTipsShow" :value="common.settingViewTipsShow">
+                        <span class="cate-subtitle">设置页导航按钮：</span>
+                        <ToggleControl @click="toggleSettingViewNavbarShow" :value="common.settingViewNavbarShow">
                         </ToggleControl>
                     </div>
                     <div>
@@ -490,6 +535,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                             :class="{ active: index == common.borderRadiusCtlStyle, 'first-item': index == 0 }" @click="setBorderRadiusCtlStyle(index)">
                             {{ item }}
                         </span>
+                    </div>
+                    <div class="border-radius-ctl">
+                        <span class="sec-title">圆角自定义：</span>
+                        <SvgTextButton text="前往设置" :leftAction="toggleCustomAppBorderRadiusViewShow">
+                        </SvgTextButton>
+                        <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div class="tip-text" v-show="isWinOS()">提示：窗口阴影大小，仅对Windows有效；macOS默认自带阴影效果
                     </div>
@@ -573,10 +624,50 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </div>
                 </div>
             </div>
+            <div class="tutorial row">
+                <span class="cate-name">提示</span>
+                <div class="content">
+                    <div>
+                        <span class="cate-subtitle">设置页显示提示：</span>
+                        <ToggleControl @click="toggleSettingViewTipsShow" :value="common.settingViewTipsShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">本地歌曲首页文字提示：</span>
+                        <ToggleControl @click="toggleLocalMusicViewTipsShow" :value="common.localMusicViewTipsShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">本地歌曲首页歌单列表提示：</span>
+                        <ToggleControl @click="toggleLocalMusicViewPlaylistTipsShow" :value="common.localMusicViewPlaylistTipsShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">自由FM首页文字提示：</span>
+                        <ToggleControl @click="toggleFreeFMViewTipsShow" :value="common.freeFMViewTipsShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">自由FM首页电台列表提示：</span>
+                        <ToggleControl @click="toggleFreeFMViewRadiosTipsShow" :value="common.freeFMViewRadiosTipsShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">当前播放提示：</span>
+                        <ToggleControl @click="togglePlaybackQueueViewTipsShow" :value="common.playbackQueueViewTipsShow">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">插件管理提示：</span>
+                        <ToggleControl @click="togglePluginsViewTipsShow" :value="common.pluginsViewTipsShow">
+                        </ToggleControl>
+                    </div>
+                </div>
+            </div>
             <div class="track row">
                 <span class="cate-name">播放选项</span>
                 <div class="content">
-                    <div v-show="false">
+                    <div v-if="false">
                         <span class="cate-subtitle">音频输出设备：</span>
                         <select class="select-list-ctl" @change="changeAudioOutputDevices">
                             <option v-for="(item, index) in audioOutputDevices" :value="item.deviceId"
@@ -634,6 +725,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">当前播放列表自动定位：</span>
                         <ToggleControl @click="togglePlaybackQueueAutoPositionOnShow"
                             :value="track.playbackQueueAutoPositionOnShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">当前播放列按钮图标模式：</span>
+                        <ToggleControl @click="togglePlaybackQueueBtnIconMode" :value="track.playbackQueueBtnIconMode">
                         </ToggleControl>
                     </div>
                     <div>
@@ -734,27 +830,17 @@ onUnmounted(() => offEvents(eventsRegistration))
                             max="1024" step="1" @input="" @keydown.enter="updateStateRefreshFrequency"
                             @focusout="updateStateRefreshFrequency" />
                     </div>
-                    <div>
+                    <div class="last">
                         <span class="cate-subtitle">歌曲频谱更新频度：</span>
                         <input type="number" :value="track.spectrumRefreshFrequency" placeholder="1-256，默认3" min="1"
                             max="256" step="1" @input="" @keydown.enter="updateSpectrumRefreshFrequency"
                             @focusout="updateSpectrumRefreshFrequency" />
-                    </div>
-                    <div class="last">
-                        <span class="cate-subtitle">自由FM首页提示：</span>
-                        <ToggleControl @click="toggleFreeFMHomepageTipsShow" :value="track.freeFMHomepageTipsShow">
-                        </ToggleControl>
                     </div>
                 </div>
             </div>
             <div class="track localTrack row">
                 <span class="cate-name">本地歌曲</span>
                 <div class="content">
-                    <div>
-                        <span class="cate-subtitle">本地歌曲首页提示：</span>
-                        <ToggleControl @click="toggleLocalMusicHomepageTipsShow" :value="track.localMusicHomepageTipsShow">
-                        </ToggleControl>
-                    </div>
                     <div>
                         <span class="cate-subtitle">歌曲启用在线封面：</span>
                         <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
@@ -1099,12 +1185,12 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="keys row">
                 <span class="cate-name">快捷键</span>
                 <div class="content">
-                    <div>
+                    <div class="toggle-global">
                         <span class="cate-subtitle">开启全局快捷键：</span>
                         <ToggleControl @click="toggleKeysGlobal" :value="keys.global">
                         </ToggleControl>
                         <SvgTextButton text="恢复默认" style="display: none"></SvgTextButton>
-                        <div class="tip-text spacing">提示：目前暂时不支持自定义</div>
+                        <div class="tip-text spacing">提示：暂不支持自定义</div>
                     </div>
                     <div class="tip-text">提示：一般不建议开启全局快捷键，容易与其他应用的快捷键产生冲突</div>
                     <div class="local-keys" v-for="(item, index) in keysDefault.data"
@@ -1442,6 +1528,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-align: left;
     overflow: scroll;
     overflow-x: hidden;
+    position: relative;
 }
 
 /*TODO 为更方便点击，把按钮调大，先挖个坑吧*/
@@ -1464,14 +1551,74 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #setting-view .navbar {
     position: fixed;
-    top: 68px;
-    z-index: 1;
-    height: 50px;
-    width: 100%;
-    padding-left: 35px;
-    padding-right: 35px;
+    top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size));
+    right: calc(0px + var(--app-win-custom-shadow-size));
+    height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px - var(--app-win-custom-shadow-size) * 2);
+    padding: 15px 0px;
     background: var(--app-bg-color);
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    overflow: auto;
+    overflow-x: hidden;
+    box-shadow: var(--box-shadow);
+    border-top-left-radius: var(--border-popover-border-radius);
+    border-bottom-left-radius: var(--border-popover-border-radius);
 }
+
+#setting-view .navbar ul {
+    padding: 0px 15px;
+    background: transparent;
+}
+
+#setting-view .navbar li {
+    list-style: none;
+    padding: 6px 35px 6px 15px;
+    margin-top: 8px;
+    text-align: left;
+    font-size: calc(var(--content-text-size) - 1px);
+    border-radius: var(--border-list-item-vertical-border-radius);
+    cursor: pointer;
+}
+
+#setting-view .navbar li.first {
+    margin-top: 0px;
+}
+
+#setting-view .navbar li:hover {
+    background: var(--content-list-item-hover-bg-color);
+}
+
+#setting-view .navbar.collapse {
+    top: auto;
+    bottom: calc(var(--main-bottom-height) + 15px + var(--app-win-custom-shadow-size));
+    right: calc(20px + var(--app-win-custom-shadow-size));
+    padding: 0px;
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    border: 0.1px solid var(--border-color);
+    box-shadow: 0px 0px 1px #161616;
+    background: var(--button-icon-text-btn-bg-color);
+    border-radius: var(--border-flow-btn-border-radius);
+    align-items: center;
+    justify-content: center;
+}
+
+#setting-view .navbar.collapse:hover {
+    background: var(--button-icon-text-btn-hover-bg-color);
+    cursor: pointer;
+}
+
+#setting-view .navbar.collapse ul {
+    display: none;
+}
+
+#setting-view .navbar.collapse svg {
+    fill: var(--button-icon-text-btn-icon-color) !important;
+}
+
 
 #setting-view .title {
     margin-left: 35px;
@@ -1568,7 +1715,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     width: var(--size);
     max-width: var(--size);
     height: var(--size);
-    border-radius: 5px;
+    border-radius: var(--border-inputs-border-radius);
     box-shadow: 0px 0px 1px #212121;
     text-align: center;
     margin-right: 23px;
@@ -1578,14 +1725,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     justify-content: center;
     align-items: center;
     border: 3px solid transparent;
-    /* flex: 1; */
 }
 
 #setting-view .theme .content div span {
     background-color: var(--app-bg-color);
     opacity: 0.68;
     line-height: 51px;
-    border-radius: 2px;
+    border-radius: var(--border-inputs-border-radius);
     overflow: hidden;
     visibility: hidden;
     font-size: 16px;
@@ -1633,7 +1779,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 */
 
 #setting-view .common .window-zoom .zoom-title input {
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     padding: 8px;
     border: 1px solid var(--border-inputs-border-color);
     background-color: var(--content-inputs-bg-color);
@@ -1701,6 +1847,11 @@ onUnmounted(() => offEvents(eventsRegistration))
 #setting-view .window-custom-shadow .sec-title,
 #setting-view .keys .cate-subtitle {
     width: 159px !important;
+}
+
+#setting-view .keys .toggle-global .cate-subtitle {
+    width: var(--content-setting-cate-subtitle-width) !important;
+    margin-right: 25px;
 }
 
 #setting-view .window-custom-shadow input {
@@ -1848,7 +1999,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view .version .newflag {
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     border: 1.3px solid var(--content-highlight-color);
     padding: 3px 6px;
     font-size: var(--content-text-tip-text-size);

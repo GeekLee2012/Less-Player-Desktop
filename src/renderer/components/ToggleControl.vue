@@ -12,7 +12,7 @@ const active = toRef(props, 'value')
 </script>
 
 <template>
-    <div class="toggle-ctl" :class="{ 'toggle-ctl-active': active }" @click.stop="">
+    <div class="toggle-ctl" :class="{ 'active-state': active }" @click.stop="">
         <div class="thumb"></div>
     </div>
 </template>
@@ -25,8 +25,8 @@ const active = toRef(props, 'value')
     */
     width: 40px;
     height: 20px;
-    /*border-radius: 10rem;*/
     border-radius: var(--border-btn-border-radius);
+    border-radius: 10rem;
     border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -36,20 +36,20 @@ const active = toRef(props, 'value')
 }
 
 .toggle-ctl .thumb {
-    margin: 1px;
+    margin: 1px 2px;
     width: 16px;
     height: 16px;
-    /*border-radius: 10rem;*/
     border-radius: var(--border-btn-border-radius);
+    border-radius: 10rem;
     background: var(--button-toggle-btn-thumb-color);
 }
 
-.toggle-ctl-active {
+.toggle-ctl.active-state {
     background: var(--button-icon-text-btn-bg-color);
     align-items: flex-end;
 }
 
-.toggle-ctl-active .thumb {
+.toggle-ctl.active-state .thumb {
     background: var(--button-icon-text-btn-text-color) !important;
 }
 </style>

@@ -29,6 +29,7 @@
     margin: auto;
     overflow: hidden;
     box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
 }
 
 .ntf-dialog {

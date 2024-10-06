@@ -114,8 +114,14 @@ onMounted(() => {
 .classic-main-bottom #play-nav #play-meta .cover-mask {
     width: 45px;
     height: 45px;
-    border-radius: 3px;
 }
+
+.classic-main-bottom #play-nav #play-meta .cover-wrap,
+.classic-main-bottom #play-nav #play-meta .audio-cover,
+.classic-main-bottom #play-nav #play-meta .cover-mask {
+    border-radius: var(--border-img-small-border-radius);
+}
+
 
 /*
 .classic-main-bottom #play-nav #play-meta .title-wrap {

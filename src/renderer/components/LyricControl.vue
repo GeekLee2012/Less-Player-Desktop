@@ -382,8 +382,10 @@ onUnmounted(() => offEvents(eventsRegistration))
         <div class="header" v-show="isHeaderVisible()">
             <div class="audio-title">
                 <span class="mv" v-show="Track.hasMv(track)">
-                    <svg @click="playMv(track)" width="24" height="20" viewBox="0 0 1024 853.52"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg @click="playMv(track)" 
+                        width="24" 
+                        height="20" 
+                        viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path
@@ -398,8 +400,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <b v-show="!Playlist.isFMRadioType(track)">歌手:</b>
                 <b v-show="Playlist.isFMRadioType(track)">平台:</b>
                 <span>
-                    <ArtistControl :visitable="true" :platform="track.platform" :data="track.artist" :trackId="track.id"
-                        class="ar-ctl">
+                    <ArtistControl class="ar-ctl" 
+                        :visitable="true" 
+                        :platform="track.platform" 
+                        :data="track.artist" 
+                        :trackId="track.id">
                     </ArtistControl>
                 </span>
             </div>
@@ -407,12 +412,18 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <b v-show="!Playlist.isFMRadioType(track)">专辑:</b>
                 <b v-show="Playlist.isFMRadioType(track)">标签:</b>
                 <span>
-                    <AlbumControl :visitable="true" :platform="track.platform" :data="track.album" class="al-ctl">
+                    <AlbumControl class="al-ctl" 
+                        :visitable="true" 
+                        :platform="track.platform" 
+                        :data="track.album">
                     </AlbumControl>
                 </span>
             </div>
         </div>
-        <div class="center" ref="lyricWrapRef" :draggable="isDndSaveEnable" @dragstart="dndSaveLyric">
+        <div class="center" 
+            ref="lyricWrapRef" 
+            :draggable="isDndSaveEnable" 
+            @dragstart="dndSaveLyric">
             <div v-show="lyricExistState == -1" class="no-lyric">
                 <span v-show="!Playlist.isFMRadioType(track)">歌词加载中，请先欣赏音乐吧~</span>
                 <span v-show="Playlist.isFMRadioType(track)">简介加载中，请先欣赏音乐吧~</span>
@@ -421,14 +432,18 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span v-show="!Playlist.isFMRadioType(track)">暂无歌词，请继续欣赏音乐吧~</span>
                 <span v-show="Playlist.isFMRadioType(track)">暂无简介，请继续聆听电台吧~</span>
             </div>
-            <div v-show="lyricExistState == 1" v-for="([key, value], index) in lyricData" class="line" :timeKey="key"
-                :index="index" :class="{
-        first: index == 0,
-        last: index == (lyricData.size - 1),
-        'content-text-highlight': index == currentIndex,
-        current: index == currentIndex,
-        locatorCurrent: (index == scrollLocatorCurrentIndex && index != currentIndex && isUserMouseWheel)
-    }">
+            <div v-for="([key, value], index) in lyricData" 
+                v-show="lyricExistState == 1" 
+                class="line" 
+                :class="{
+                    first: index == 0,
+                    last: index == (lyricData.size - 1),
+                    'content-text-highlight': index == currentIndex,
+                    current: index == currentIndex,
+                    'locator-current': (index == scrollLocatorCurrentIndex && index != currentIndex && isUserMouseWheel)
+                }"
+                :timeKey="key"
+                :index="index">
                 <div class="text" :timeKey="key" :index="index" v-html="value"></div>
                 <div class="extra-text" v-show="isExtraTextActived"></div>
             </div>
@@ -437,7 +452,9 @@ onUnmounted(() => offEvents(eventsRegistration))
             v-show="(lyricExistState == 1) && isUserMouseWheel">
             <span class="time-text" v-html="scrollLocatorTimeText"></span>
             <div class="play-btn" @click="seekFromLyric">
-                <svg width="9" height="9" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                <svg width="9" height="9" 
+                    viewBox="0 0 139 139" xml:space="preserve" 
+                    xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink">
                     <path
                         d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
@@ -459,6 +476,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     flex-direction: column;
     text-align: left;
     --lyric-mask: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
+    --lyric-margin-left: 10px
 }
 
 .lyric-ctl .spacing {
@@ -467,6 +485,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .lyric-ctl .header {
     max-height: 202px;
+    margin-left: var(--lyric-margin-left);
 }
 
 .lyric-ctl .header b {
@@ -514,6 +533,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .lyric-ctl .audio-artist .ar-ctl,
 .lyric-ctl .audio-album .al-ctl {
     -webkit-line-clamp: 1;
+    line-clamp: 1;
 }
 
 .lyric-ctl .center {
@@ -541,6 +561,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     font-size: 22px;
     line-height: 28px;
     margin-top: 28px;
+    padding-left: var(--lyric-margin-left);
     color: var(--content-subtitle-text-color);
     word-break: break-word;
     /*word-wrap: break-word;*/
@@ -567,6 +588,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     height: 100%;
     display: flex;
     align-items: center;
+    padding-left: var(--lyric-margin-left);
     justify-content: flex-start;
     font-size: 23px;
     font-weight: bold !important;
@@ -599,9 +621,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-left: 33px;
 }
 
-.lyric-ctl .center .locatorCurrent,
-.lyric-ctl .center .locatorCurrent .text,
-.lyric-ctl .center .locatorCurrent .extra-text {
+.lyric-ctl .center .locator-current,
+.lyric-ctl .center .locator-current .text,
+.lyric-ctl .center .locator-current .extra-text {
     color: var(--content-text-color) !important;
     font-weight: bold !important;
 }

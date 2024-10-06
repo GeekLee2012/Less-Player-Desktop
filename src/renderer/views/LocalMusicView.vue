@@ -30,7 +30,9 @@ const { showToast, showFailToast, hideAllCtxMenus, showPlaylistExportToolbar } =
 const { isUseDndForCreateLocalPlaylistEnable,
     isUseDeeplyScanForDirectoryEnable,
     isShowDialogBeforeClearLocalMusics,
-    isLocalMusicHomepageTipsShow, isUseDndForExportLocalPlaylistEnable, } = storeToRefs(useSettingStore())
+    isLocalMusicViewTipsShow, 
+    isLocalMusicViewPlaylistTipsShow,
+    isUseDndForExportLocalPlaylistEnable, } = storeToRefs(useSettingStore())
 
 const localMusicRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -145,6 +147,20 @@ const playlistOnDrag = (event, item, index) => {
     showPlaylistExportToolbar(exportCfg)
 }
 
+const tutorialList = [{
+    title: '设置页-本地歌曲，开启其他功能',
+    color: '#fc5185'
+}, {
+    title: '拖拽目录到当前页面，导入歌单',
+    color: '#3fc1c9'
+}, {
+    title: '拖拽图片到当前控件，更新封面',
+    color: '#3f72af'
+}, {
+    title: '轻轻拖拽当前控件，导出歌单',
+    color: '#f08a5d'
+}]
+
 
 /* 生命周期、监听 */
 onMounted(() => resetBack2TopBtn())
@@ -154,14 +170,14 @@ onMounted(() => resetBack2TopBtn())
     <div id="local-music-view" ref="localMusicRef" @scroll="onScroll" @dragover="e => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <div class="title">本地歌曲</div>
-            <div class="about" v-show="isLocalMusicHomepageTipsShow">
-                <p>支持播放的音频格式：.mp3、.flac、.ogg、.wav、.aac、.m4a</p>
-                <p>支持导入的歌单格式：.m3u、.m3u8、.pls</p>
-                <p>歌单导入、导出功能，并不支持跨设备，而是为兼容当前设备下的其他播放器</p>
-                <p>最近播放、收藏功能，暂时还不支持本地歌曲</p>
-                <p>歌曲信息乱码时，建议使用第三方音乐标签工具修正后，再重新添加到当前播放器</p>
+            <div class="about" v-show="isLocalMusicViewTipsShow">
+                <p>支持音频格式：mp3、flac、ogg、wav、aac、m4a</p>
+                <p>支持歌单格式：m3u、m3u8、pls</p>
+                <p>歌单导入、导出，主要为兼容当前设备下的其他应用，不支持跨设备共享使用</p>
+                <p>最近播放、收藏，暂时不支持本地歌曲</p>
+                <p>歌曲信息乱码时，建议用第三方音乐标签工具修正后，再重新添加到当前应用</p>
             </div>
-            <div class="action" :class="{ 'none-about': !isLocalMusicHomepageTipsShow }">
+            <div class="action" :class="{ 'none-about': !isLocalMusicViewTipsShow }">
                 <CreatePlaylistBtn :leftAction="visitLocalPlaylistCreate">
                 </CreatePlaylistBtn>
                 <SvgTextButton text="导入歌单" :leftAction="importPlaylist" :disabled="importTaskCount > 0" class="spacing">
@@ -187,8 +203,16 @@ onMounted(() => resetBack2TopBtn())
             <div class="list-title">
                 <div class="size-text content-text-highlight">歌单列表({{ localPlaylists.length }})</div>
             </div>
-            <PlaylistsControl :data="localPlaylists" :customLoadingCount="importTaskCount"
-                :tileOnDropFn="playlistOnDrop" :draggable="isUseDndForExportLocalPlaylistEnable" :tileOnDragEndFn="playlistOnDrag">
+            <PlaylistsControl :data="localPlaylists" 
+                :playable="true" 
+                :customLoadingCount="importTaskCount"
+                :tileOnDropFn="playlistOnDrop" 
+                :draggable="isUseDndForExportLocalPlaylistEnable" 
+                :tileOnDragEndFn="playlistOnDrag">
+            </PlaylistsControl>
+            <PlaylistsControl :data="tutorialList" 
+                :playable="false"  
+                v-show="isLocalMusicViewPlaylistTipsShow && localPlaylists.length < 1">
             </PlaylistsControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -217,7 +241,7 @@ onMounted(() => resetBack2TopBtn())
 
 #local-music-view .header .title {
     text-align: left;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
@@ -228,16 +252,6 @@ onMounted(() => resetBack2TopBtn())
     margin-bottom: 15px;
     line-height: 29px;
     color: var(--content-subtitle-text-color);
-    /*
-    overflow: hidden;
-    word-wrap: break-all;
-    white-space: pre-wrap;
-    line-break: anywhere;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 6;
-    */
 }
 
 #local-music-view .header .action {
@@ -258,7 +272,7 @@ onMounted(() => resetBack2TopBtn())
 
 #local-music-view .list-title .size-text {
     margin-left: 3px;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
     /*font-size: calc(var(--content-text-tab-title-size) - 2px);*/
     font-size: var(--content-text-tab-title-size);

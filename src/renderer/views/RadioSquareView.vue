@@ -204,8 +204,12 @@ onUnmounted(() => offEvents(eventsRegistration))
     <div class="radio-square-view" ref="squareContentRef" @scroll="onScroll">
         <RadioCategoryBar :data="categories" :loading="isLoadingCategories" :isWhiteWrap="isWhiteWrap">
         </RadioCategoryBar>
-        <PlaylistsControl :loading="isLoadingCategories || isLoadingContent" :loadPage="loadPageContent" :limit="35"
-            :paginationStyleType="getPaginationStyleIndex" :nextPagePendingMark="nextPagePendingMark"
+        <PlaylistsControl :loading="isLoadingCategories || isLoadingContent" 
+            :playable="true"
+            :loadPage="loadPageContent" 
+            :limit="35"
+            :paginationStyleType="getPaginationStyleIndex" 
+            :nextPagePendingMark="nextPagePendingMark"
             :refreshAllPendingMark="refreshAllPendingMark">
         </PlaylistsControl>
         <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef" prefix="radio">

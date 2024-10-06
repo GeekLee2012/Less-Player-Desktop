@@ -1,5 +1,5 @@
 <script setup>
-import { inject, computed } from 'vue';
+import { inject, computed, readonly } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
@@ -33,6 +33,7 @@ const props = defineProps({
     tileOnDragStartFn: Function,
     tileOnDragEnterFn: Function,
     tileOnDragEndFn: Function,
+    playable: Boolean,
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
@@ -119,7 +120,7 @@ const computedCenterTitleStyle = computed(() => {
                     :title="item.title" :subtitle="getSubtitle(item)" 
                     :videoStyle="videoStyle" :centerTitleStyle="computedCenterTitleStyle(item)"
                     :singleLineTitleStyle="singleLineTitleStyle"
-                    :playable="true" :playAction="() => playPlaylist(item)" 
+                    :playable="playable" :playAction="() => (playable && playPlaylist(item))" 
                     :checkbox="checkbox" :checked="checkedAll"
                     :ignoreCheckAllEvent="ignoreCheckAllEvent"
                     :checkChangedFn="(checked) => checkChangedFn(checked, item)"

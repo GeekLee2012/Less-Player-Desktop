@@ -106,7 +106,7 @@ defineExpose({
     height: 36px;
     display: flex;
     color: var(--content-subtitle-text-color);
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
 }
 
 .gradient-color-input-ctl .read-only {
@@ -117,8 +117,8 @@ defineExpose({
     min-width: 66px;
     background-color: var(--content-header-nav-bg-color);
     border: 1px solid var(--border-inputs-border-color);
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
+    border-top-left-radius: var(--border-inputs-border-radius);
+    border-bottom-left-radius: var(--border-inputs-border-radius);
     border-right: 1px solid var(--border-inputs-border-color);
 }
 
@@ -137,8 +137,8 @@ defineExpose({
     border: 1px solid var(--border-inputs-border-color);
     border-left: 0px;
     border-right: 1px solid var(--border-inputs-border-color);
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
+    border-top-right-radius: var(--border-inputs-border-radius);
+    border-bottom-right-radius: var(--border-inputs-border-radius);
 }
 
 .gradient-color-input-ctl .value {

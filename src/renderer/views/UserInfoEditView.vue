@@ -169,7 +169,7 @@ onMounted(() => loadUserInfo())
 #user-info-edit-view .center .cover {
     width: 175px;
     height: 175px;
-    border-radius: 6px;
+    border-radius: var(--border-inputs-border-radius);
     /* border: 1px solid var(--border-left-nav-border-color); */
     box-shadow: 0px 0px 1px #161616;
 }
@@ -178,7 +178,7 @@ onMounted(() => loadUserInfo())
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
     padding: 5px;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
     cursor: pointer;
 }
 
@@ -211,7 +211,7 @@ onMounted(() => loadUserInfo())
     border: 1px solid var(--border-inputs-border-color);
     outline: none;
     padding: 5px 8px;
-    border-radius: 2px;
+    border-radius: var(--border-inputs-border-radius);
     background-color: var(--content-inputs-bg-color);
     color: var(--content-inputs-text-color);
     /*font-size: 15px; */
