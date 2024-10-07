@@ -158,6 +158,7 @@
 
 .use-winos-win-ctl .custom-theme-edit-view .right-action .close-btn,
 .use-winos-win-ctl .custom-playing-theme-edit-view .right-action .close-btn,
+.use-winos-win-ctl .custom-app-border-radius-view .right-action .close-btn,
 .use-winos-win-ctl .gradient-color-toolbar .right-action .close-btn {
   margin-left: 33px;
   margin-right: -8px;
@@ -165,6 +166,7 @@
 
 .use-winos-win-ctl .custom-theme-edit-view .header .title-wrap,
 .use-winos-win-ctl .custom-playing-theme-edit-view .header .title-wrap,
+.use-winos-win-ctl .custom-app-border-radius-view .header .title-wrap,
 .use-winos-win-ctl .gradient-color-toolbar .header .title-wrap {
   margin-left: 10px !important;
 }

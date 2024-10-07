@@ -38,7 +38,8 @@ const { theme, layout, common, track, desktopLyric,
     network, others, search, isHttpProxyEnable, isSocksProxyEnable,
     isShowDialogBeforeResetSetting, isCheckPreReleaseVersion,
     isUseCardStyleImageTextTile, isSettingViewTipsShow, 
-    isToggleCtlTitleActionEnable, } = storeToRefs(useSettingStore())
+    isToggleCtlTitleActionEnable, isShowDialogBeforeSuspiciousZoom, 
+} = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
     toggleSettingViewNavbarShow,
@@ -127,6 +128,7 @@ const { setThemeIndex,
     toggleShowDialogBeforeDeleteFreeFM,
     toggleShowDialogBeforeVisitPluginRepository,
     toggleShowDialogBeforeDeletePlugins,
+    toggleShowDialogBeforeSuspiciousZoom,
     toggleCheckPreReleaseVersion,
     togglUpdatesHintShow,
     toggleModulesSettingShortcut,
@@ -215,6 +217,16 @@ const fontWeights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 
 const updateWinZoom = (event) => {
     setWindowZoom(event.target.value)
+}
+
+const checkUpdateWinZoom = async (event, item) => {
+    const _value = (item || event.target.value)
+    const maySuspicius = (_value < 75 || _value > 125)
+    if (maySuspicius && isShowDialogBeforeSuspiciousZoom.value) {
+        const ok = await showConfirm(`窗口缩放设置为${_value}%。确定要继续吗？`)
+        if (!ok) return
+    }
+    setWindowZoom(_value)
 }
 
 const updateWinCustomShadowSize = (evnet) => {
@@ -506,18 +518,25 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div class="window-zoom">
                         <div class="zoom-title">
                             <span>窗口缩放：</span>
-                            <input type="number" min="50" max="300" step="0.01" :value="common.winZoom"
-                                placeholder="50-300，默认85，支持2位小数" @keydown.enter="updateWinZoom" @focusout="updateWinZoom" />
+                            <input type="number" 
+                                min="50" max="300" step="0.01" 
+                                :value="common.winZoom"
+                                placeholder="50-300，默认85，支持2位小数" 
+                                @keydown.enter="checkUpdateWinZoom" 
+                                @focusout="checkUpdateWinZoom" />
                             <span>%</span>
                         </div>
                         <div>
-                            <input type="range" min="50" max="300" :value="common.winZoom" step="2" @input="updateWinZoom"
+                            <input type="range" min="50" max="300" 
+                                :value="common.winZoom" step="2" 
+                                @input="checkUpdateWinZoom"
                                 list="zoom-tickmarks" />
                         </div>
                         <div>
                             <datalist id="zoom-tickmarks">
-                                <option v-for="(item, index) in zoomTickmarks" :value="item" :label="item"
-                                    @click="() => setWindowZoom(item)">
+                                <option v-for="(item, index) in zoomTickmarks" 
+                                    :value="item" :label="item"
+                                    @click="(event) => checkUpdateWinZoom(event, item)">
                                 </option>
                             </datalist>
                         </div>
@@ -1173,6 +1192,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">访问插件官网：</span>
                         <ToggleControl @click="toggleShowDialogBeforeVisitPluginRepository"
                             :value="dialog.visitPluginRepository">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">窗口缩放（偏大 / 小）：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeSuspiciousZoom"
+                            :value="dialog.suspiciousZoom">
                         </ToggleControl>
                     </div>
                     <div class="last">

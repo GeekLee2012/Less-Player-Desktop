@@ -127,7 +127,7 @@ onMounted(() => {
                         </svg>
                         <span>保存</span>
                     </div>
-                    <div class="close-btn btn" @click="hideCustomPlayingThemeEditView"
+                    <div class="close-btn btn" @click="hideCustomAppBorderRadiusView"
                         v-show="useWindowsStyleWinCtl && !isPreviewMode">
                         <svg width="12" height="12" viewBox="0 0 593.14 593.11" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">

@@ -188,7 +188,14 @@ const setupAppBorderRadius = (data) => {
     appWin, popover, btn, flowBtn, inputs, 
     listItem, listItemVertical, 
     imageTextTile, imageSmall 
-  } = data || commonBorderRadius.value
+  } = data || commonBorderRadius.value || {}
+
+  //简单抽查几个主要属性，都不存在时，视为首次启动
+  if(typeof appWin == 'undefined' 
+    && typeof btn == 'undefined'
+    && typeof imageTextTile == 'undefined') {
+    setupPresetBorderRadius()
+  }
   
   const changes = {
     '--border-app-win-border-radius': `${appWin}px`,

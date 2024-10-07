@@ -90,9 +90,12 @@ export const useSettingStore = defineStore('setting', {
             winZoom: 85,
             //窗口控件风格，0 => 自动，1 => macOS, 2 => Windows
             winCtlStyle: 0,
-            //TODO 元素圆角风格（预设），0 => 自动，1 => macOS, 2 => Windows
+            //元素圆角风格（预设），0 => 自动，1 => macOS, 2 => Windows
             borderRadiusCtlStyle: 0,
             //单位：px
+            //此处设置为空对象：为保证首次启动时，自动根据系统平台选择预设值
+            borderRadius: {},
+            /*
             borderRadius: {
                 appWin: 12,
                 popover: 8,
@@ -103,7 +106,8 @@ export const useSettingStore = defineStore('setting', {
                 listItemVertical: 5,
                 imageTextTile: 5,
                 imageSmall: 3,
-            },
+                
+            },*/
             //字体名称
             fontFamily: '',
             //字体大小
@@ -366,6 +370,9 @@ export const useSettingStore = defineStore('setting', {
             visitPluginRepository: true,
             //删除插件
             deletePlugins: true,
+            //缩放 - 超出常规范围时
+            //abnormalZoom: true,
+            suspiciousZoom: true,
         },
         /* 快捷键，可修改 */
         keys: {
@@ -722,6 +729,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeDeletePlugins() {
             return this.dialog.deletePlugins
+        },
+        isShowDialogBeforeSuspiciousZoom() {
+            return this.dialog.suspiciousZoom
         },
         isCheckPreReleaseVersion() {
             return this.others.checkPreReleaseVersion
@@ -1417,6 +1427,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeDeletePlugins() {
             this.dialog.deletePlugins = !this.dialog.deletePlugins
+        },
+        toggleShowDialogBeforeSuspiciousZoom() {
+            this.dialog.suspiciousZoom = !this.dialog.suspiciousZoom
         },
         toggleCheckPreReleaseVersion() {
             this.others.checkPreReleaseVersion = !this.others.checkPreReleaseVersion

@@ -919,7 +919,7 @@ onMounted(() => {
 /* lyric highlight bg-border */
 .playing-view .container.auto-effect.light .lyric-hl-bg-border .lyric-ctl .line.current {
     background: #ffffff18 !important;
-    border-radius: 6px;
+    border-radius: var(--border-img-text-tile-border-radius);
     padding: 15px 10px;
 }
 
@@ -994,7 +994,7 @@ onMounted(() => {
 /* lyric highlight bg-border */
 .playing-view .container.auto-effect.dark .lyric-hl-bg-border .lyric-ctl .line.current {
     background: #00000018 !important;
-    border-radius: 6px;
+    border-radius: var(--border-img-text-tile-border-radius);
     padding: 15px 10px;
 }
 
