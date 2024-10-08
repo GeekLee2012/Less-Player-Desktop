@@ -1015,11 +1015,11 @@ onMounted(() => {
 
 .playing-view .container.auto-effect .lyric-ctl .extra-btn .active,
 .playing-view .container.auto-effect .lyric-ctl .extra-btn span:hover {
-    background: var(--content-text-highlight-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    border-color: var(--content-highlight-color);
+    background: var(--content-text-highlight-color) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    border-color: var(--content-highlight-color) !important;
 }
 
 .playing-view .container.auto-effect .bottom {

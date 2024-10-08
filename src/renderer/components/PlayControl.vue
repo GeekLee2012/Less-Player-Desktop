@@ -4,7 +4,6 @@ import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 
 
-
 const { playing, playMode } = storeToRefs(usePlayStore())
 const { playPrevTrack, togglePlay, playNextTrack, switchPlayMode } = usePlayStore()
 const { togglePlaybackQueueView, hideAllCategoryViews, 
@@ -74,7 +73,13 @@ const togglePlaybackQueue = () => {
                 </g>
             </svg>
         </div>
-        <div class="play-btn spacing" @click="togglePlay">
+        <div class="play-btn spacing" 
+            :class="{
+                playing,
+                paused: !playing,
+                loading: false,
+            }"
+            @click="togglePlay">
             <svg v-show="!playing" width="18" height="18" viewBox="0 0 139 139" xml:space="preserve"
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <path
@@ -83,7 +88,7 @@ const togglePlaybackQueue = () => {
             <!--
             <svg v-show="playing" width="24" height="24" class="paused" viewBox="0 0 100 100" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M44.2,78.3H32.1c-1.1,0-2-0.9-2-2V23.7c0-1.1,0.9-2,2-2h12.1c1.1,0,2,0.9,2,2v52.5C46.2,77.4,45.3,78.3,44.2,78.3z"/><path d="M67.9,78.3H55.8c-1.1,0-2-0.9-2-2V23.7c0-1.1,0.9-2,2-2h12.1c1.1,0,2,0.9,2,2v52.5C69.9,77.4,69,78.3,67.9,78.3z"/></svg>
             -->
-            <svg v-show="playing" width="15" height="15" class="paused" viewBox="0 0 658.53 1006.16"
+            <svg v-show="playing" width="16" height="16"  viewBox="0 0 658.53 1006.16"
                 xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
@@ -91,6 +96,18 @@ const togglePlaybackQueue = () => {
                             d="M196.43,503.09q0,200.21,0,400.41c0,20.63-4.42,39.93-15.66,57.45-21.43,33.42-62.66,50.43-102.18,42.14-39.72-8.34-70.5-39.72-76.82-78.67A130.29,130.29,0,0,1,.08,903.55Q-.06,501.88,0,100.21C0,48.38,35,8.27,86.47.9,136.62-6.29,186.73,30.61,194.7,80.79a135,135,0,0,1,1.66,20.88Q196.49,302.37,196.43,503.09Z" />
                         <path
                             d="M462.09,503q0-200.72,0-401.42c0-46.91,29.11-85.51,72.86-97,63.42-16.69,123.47,30.29,123.52,96.79q.12,169,0,337.92,0,232.95,0,465.9c0,38.9-15.56,69.86-50.23,88.7-60,32.57-134.91-2.14-145.21-73a117,117,0,0,1-.9-17Q462.05,703.43,462.09,503Z" />
+                    </g>
+                </g>
+            </svg>
+            <svg v-show="false" width="17" height="17" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="Layer_1-2" data-name="Layer 1">
+                        <g id="Layer_2-2" data-name="Layer 2">
+                            <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                <path d="M722.91,136.61c0-17.65-.35-35.3.09-52.93.58-23,19.65-41,42.64-40.9A42.56,42.56,0,0,1,808,85.56v0c.16,38.17,0,76.33,0,114.49v54.5c-.07,25.68-18.46,44.14-44.12,44.16q-84.75.08-169.49,0c-21.66-.07-38.86-15.64-42.08-37.35-2.94-19.81,9.9-39.91,29.79-45.85a54.59,54.59,0,0,1,15.26-1.9c25.16-.19,50.32-.09,76.53-.09a51.87,51.87,0,0,0-3-4.35c-53.4-65-120.89-107-204.41-119.23-120.29-17.69-221,21.23-301.17,112-43.89,49.66-69.09,108.57-79,174-.8,5.26-1.24,10.59-2.17,15.83-3.89,21.83-24.31,37.22-46,34.82C15.69,424.12-1.76,405.28.14,383A356.16,356.16,0,0,1,9.31,326.4C42,196.44,117.61,100.17,237.93,40.47,302.23,8.56,371-4,442.53,1.11,551,9,642.25,53.63,717.11,132.23l4.7,5Z"/>
+                                <path d="M125.34,715.25v6.31c0,16.16.27,32.34-.19,48.49-.65,23-19.8,40.89-42.82,40.71-22.63-.18-42-18.42-42.1-41q-.48-87,0-174c.12-22.34,19.12-40.8,41.66-40.89,57.32-.22,114.65-.09,172,0a40.33,40.33,0,0,1,7.43.81A42.52,42.52,0,0,1,296,600.34c-1.35,21.43-18.92,39-40.45,39.47-24.82.49-49.66.18-74.48.21h-6.55a21.06,21.06,0,0,0,1.55,2.93c53.45,65.66,121.36,107.14,205.23,120.83,132.88,21.7,259.15-40.37,328.92-148.61a342.29,342.29,0,0,0,53-149.18c2.45-21.73,19.28-38.14,40-39.15,21.49-1.06,40.64,12.81,44,34.06,1.62,10.24.12,21.26-1.49,31.69-11.52,74.95-40.28,142.66-87.62,202-66,82.72-150.85,135.93-255.6,152.64-144.38,23-267.87-20.37-370.17-124.57C130.27,720.55,128.32,718.41,125.34,715.25Z"/>
+                            </g>
+                        </g>
                     </g>
                 </g>
             </svg>
@@ -161,35 +178,30 @@ const togglePlaybackQueue = () => {
 }
 
 .play-ctl .play-btn {
-    /*margin-top: 16px;*/
     border-radius: 10rem;
     width: 41px;
     height: 41px;
     background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .play-ctl .play-btn:hover {
-    /*background: linear-gradient(to top right, #2edfa3, #28c83f) !important;*/
     background: var(--button-icon-text-btn-hover-bg-color);
 }
 
 .play-ctl .play-btn svg {
-    /* margin-top: 9px;*/
-    margin-top: 1px;
-    margin-left: 2px;
     fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
-.play-ctl .play-btn .paused {
-    /* margin-top: 6px;*/
-    margin-left: 0px;
-    fill: var(--button-icon-text-btn-icon-color) !important;
+.play-ctl .play-btn.paused svg {
+    transform: translateX(1px) translateY(0.5px);
+    /*fill: var(--button-icon-text-btn-icon-color) !important;*/
 }
 
-/*
-.play-ctl .play-btn:hover svg {
-    fill: var(--button-icon-btn-color);
+.play-ctl .play-btn.loading svg {
+    animation: rotate360 1s infinite;
 }
-*/
 </style>

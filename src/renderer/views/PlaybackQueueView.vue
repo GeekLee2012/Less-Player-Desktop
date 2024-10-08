@@ -141,6 +141,14 @@ const tutorialList = [{
     artist: [ { id:'', name: '教程' }],
     color: '#dff5f2',
 }, {
+    title: '支持图片格式：png、jpg、jpeg、bmp',
+    artist: [ { id:'', name: '教程' }],
+    color: '#ff9a3c',
+}, {
+    title: '支持图片格式：gif、webp、avif',
+    artist: [ { id:'', name: '教程' }],
+    color: '#ff9a3c',
+}, {
     title: '拖拽图片到封面，更新封面',
     artist: [ { id:'', name: '教程 - 拖拽' }],
     color: '#7dace4',

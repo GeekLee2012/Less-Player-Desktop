@@ -549,7 +549,7 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
     padding-bottom: 10px;
 }
 
-.video-playing-view .sidebar>.content .slogan-item {
+.video-playing-view .sidebar > .content .slogan-item {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -558,18 +558,18 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
     line-height: 36px;
 }
 
-.video-playing-view .sidebar>.content.grid .video-item {
+.video-playing-view .sidebar > .content.grid .video-item {
     /*
     display: flex;
     align-items: center;
     justify-content: center;
     */
-    width: 89px;
+    width: 92px;
     height: 39px;
     line-height: 39px;
-    padding: 3px 6px;
+    padding: 3px 8px;
     cursor: pointer;
-    margin: 0px 0px 16px 20px;
+    margin: 0px 0px 17px 20px;
     font-size: var(--content-text-size);
     border-radius: var(--border-inputs-border-radius);
 
@@ -587,13 +587,13 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
     color: #ddd;
 }
 
-.video-playing-view .sidebar>.content.list .video-item {
+.video-playing-view .sidebar > .content.list .video-item {
     width: 100%;
     height: 43px;
     line-height: 43px;
     padding: 3px 10px;
     cursor: pointer;
-    margin: 0px 15px 10px 15px;
+    margin: 0px 15px 12px 20px;
     font-size: var(--content-text-size);
     border-radius: var(--border-inputs-border-radius);
 
@@ -611,12 +611,12 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
     color: #ddd;
 }
 
-.video-playing-view .sidebar>.content .video-item:hover {
+.video-playing-view .sidebar > .content .video-item:hover {
     background: #666;
     color: #eee;
 }
 
-.video-playing-view .sidebar>.content .video-item.active {
+.video-playing-view .sidebar > .content .video-item.active {
     background: var(--content-highlight-color);
     color: #fff;
 }

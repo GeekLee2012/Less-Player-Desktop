@@ -141,11 +141,13 @@ const onContextMenu = (event) => {
 }
 
 .custom-playlist-item:hover {
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-list-item-vertical-border-radius);
+    border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
     background-color: var(--content-list-item-hover-bg-color);
 }
 
-.custom-playlist-item>div {
+.custom-playlist-item > div {
     vertical-align: middle;
     font-size: 16px;
 }
@@ -183,7 +185,7 @@ const onContextMenu = (event) => {
 .custom-playlist-item .cover img {
     width: 52px;
     height: 52px;
-    border-radius: 2px;
+    border-radius: var(--border-img-small-border-radius);
     -webkit-user-drag: none;
 }
 

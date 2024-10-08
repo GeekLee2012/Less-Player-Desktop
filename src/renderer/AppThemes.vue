@@ -31,6 +31,14 @@ const applyDocumentStyle = (changes, valueSuffix) => {
     }
 }
 
+const applyElementStyle = (el, changes, valueSuffix) => {
+  if(!el) return
+  if(!changes || typeof changes != 'object') return
+  for (const [key, value] of Object.entries(changes)) {
+    el.style.setProperty(key, `${value}${valueSuffix || ''}`)
+  }
+}
+
 
 const applyTheme = (theme) => {
   //const theme = new Theme()
@@ -292,6 +300,7 @@ provide('appStyle', {
   applyDocumentElementStyle,
   removeDocumentElementStyle,
   applyDocumentStyle,
+  applyElementStyle,
 })
 </script>
 
@@ -372,13 +381,13 @@ body.app-win-custom-shadow {
   }
 }
 
-@keyframes rotate {
-  from {
-    transform: rotateZ(0deg)
+@keyframes rotate360 {
+  0% {
+    transform: rotate(0deg)
   }
 
-  to {
-    transform: rotateZ(360deg)
+  100% {
+    transform: rotate(360deg)
   }
 }
 </style>

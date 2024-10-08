@@ -111,6 +111,14 @@ export const useExtraAudioExts = () => {
     return tryCallDefault(() => (electronAPI.EXTRA_AUDIO_EXTS))
 }
 
+export const useVideoExts = () => {
+    return tryCallDefault(() => (electronAPI.VIDEO_EXTS))
+}
+
+export const useImageExts = () => {
+    return tryCallDefault(() => (electronAPI.IMAGE_EXTS))
+}
+
 export const useMessagePort = () => {
     return tryCallDefault(() => (electronAPI.messagePort))
 }
@@ -214,6 +222,11 @@ export const trimExtraChars = (text) => {
 //去掉HTML标签、转义实体等
 export const escapeHtml = (text) => {
     return toTrimString(text).replace(/<[^>]+>/g, '').trim()
+}
+
+export const encodeURL = (text) => {
+    return toTrimString(text).replace(/#/g, '%23')
+        .replace(/\?/g, '%3F').trim()
 }
 
 
@@ -728,24 +741,28 @@ export const transformUrl = (url, protocal) => {
     return `${protocal}://${url}`.replace(':////', '://')
 }
 
-export const isSupportedVideo = (path) => {
-    path = toLowerCaseTrimString(path)
-    if(!path) return false
-    const suffixes = ['.mp4', '.mov', '.flv', '.avi', '.rmvb', '.mkv']
+export const isSupportedFile = (path, suffixes) => {
+    if(!suffixes || !Array.isArray(suffixes) || suffixes.length < 1) {
+        return false
+    }
+
+    const _path = toLowerCaseTrimString(path)
+    if(!_path) return false
+
     for(let i = 0; i < suffixes.length; i++) {
-        if(path.endsWith(suffixes[i])) return true
+        let suffix = suffixes[i]
+        if(!suffix.startsWith('.')) suffix = `.${suffix}`
+        if(_path.endsWith(suffix)) return true
     }
     return false
 }
 
+export const isSupportedVideo = (path) => {
+    return isSupportedFile(path, useVideoExts())
+}
+
 export const isSupportedImage = (path) => {
-    path = toLowerCaseTrimString(path)
-    if(!path) return false
-    const suffixes = ['.png', '.jpg', '.jpeg', 'gif', 'webp', 'bmp', '.avif']
-    for(let i = 0; i < suffixes.length; i++) {
-        if(path.endsWith(suffixes[i])) return true
-    }
-    return false
+    return isSupportedFile(path, useImageExts())
 }
 
 export const transformPath = (path) => {

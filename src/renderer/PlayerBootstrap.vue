@@ -860,7 +860,7 @@ const getVideoDetail = (video) => {
 const setupCurrentMediaSession = async (track) => {
     try {
         if ("mediaSession" in navigator) {
-            const _track = (currentVideo.value || track || currentTrack.value || { title: '听你想听，爱你所爱' })
+            const _track = track || { title: '听你想听，爱你所爱' }
             const { title, cover } = _track
             let coverSrc = cover
             if (toTrimString(cover).startsWith(ImageProtocal.prefix)) {
@@ -905,12 +905,12 @@ const mmssPreseekTime = ref(null) //格式: 00:00
 const currentTimeState = ref(0) //单位: 秒
 const progressState = ref(0)
 
-const resetPlayState = (ignore) => {
+const resetPlayState = (state) => {
     currentTimeState.value = 0
     mmssCurrentTime.value = '00:00'
     mmssPreseekTime.value = null
     progressState.value = 0
-    if (!ignore) setPlayState(PlayState.NONE)
+    setPlayState(state || PlayState.NONE)
 
     setProgressSeekingState(false)
     setCustomDndPlayingCover(null)
@@ -1005,7 +1005,7 @@ const playVideo = async (video, index, pos, failText, noTrace) => {
         //等待视频播放页打开，并完成相关初始化
         nextTick(() => {
             playVideoNow(video, index, pos, noTrace)
-            setupCurrentMediaSession()
+            setupCurrentMediaSession(currentVideo.value)
         })
     } catch (error) {
         if(isDevEnv()) console.log(error)
@@ -1018,6 +1018,7 @@ const resumeTrackPendingPlay = () => {
         && !isPlaying.value && pendingPlay.value) {
         togglePlay()
         setPendingPlay(false)
+        setupCurrentMediaSession(currentTrack.value)
     }
 }
 
@@ -1457,7 +1458,7 @@ const eventsRegistration = {
         switch (state) {
             case PlayState.PLAYING:
                 setPlaying(true)
-                setupCurrentMediaSession()
+                setupCurrentMediaSession(currentTrack.value)
                 break
             case PlayState.PAUSE:
                 setPlaying(false)
@@ -1513,20 +1514,21 @@ const eventsRegistration = {
     },
     'track-state': ({ state, track, currentTime }) => {
         //播放刚开始时，更新MediaSession
+        console.log(playState.value, state)
         if ((playState.value == PlayState.INIT
             || playState.value == PlayState.LOADED)
             && state == PlayState.PLAYING) {
-            setupCurrentMediaSession()
+            setupCurrentMediaSession(currentTrack.value)
             resetAutoSkip()
         }
 
         setPlayState(state)
         switch (state) {
             case PlayState.NONE:
-                resetPlayState(true)
+                resetPlayState(state)
                 break
             case PlayState.INIT:
-                resetPlayState(true)
+                resetPlayState(state)
                 checkFavoritedState()
                 break
             case PlayState.PLAYING:

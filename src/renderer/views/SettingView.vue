@@ -513,7 +513,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">设置页开关选项标题联动：</span>
                         <ToggleControl @click="toggleToggleCtlTitleActionEnable" :value="common.toggleCtlTitleActionEnable">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：试一试点击开关右边的标题</div>
+                        <div class="tip-text spacing">提示：开启后，试点击一下右边标题</div>
                     </div>
                     <div class="window-zoom">
                         <div class="zoom-title">
@@ -561,7 +561,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </SvgTextButton>
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
-                    <div class="tip-text" v-show="isWinOS()">提示：窗口阴影大小，仅对Windows有效；macOS默认自带阴影效果
+                    <div class="tip-text" v-show="isWinOS()">提示：窗口阴影大小，仅对Windows、Linux等平台有效<br>
+                        若系统平台默认自带阴影，则请将阴影大小设置为0即可
                     </div>
                     <div class="window-custom-shadow" v-show="isWinOS()">
                         <span class="sec-title">窗口阴影大小：</span>
@@ -2104,7 +2105,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     /*transform: translateY(8px);*/
     transform-box: fill-box; 
     transform-origin: center;
-    animation: rotate 1s linear infinite;
+    animation: rotate360 1s linear infinite;
 }
 
 #setting-view .center .dir-input-ctl {

@@ -38,7 +38,7 @@ const USER_AGENTS = [
 const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
 const EXTRA_AUDIO_EXTS = ['caf', 'oga', 'opus', 'weba', 'webm']
 //支持的图片文件扩展名（本地文件）
-const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', '.avif']
+const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'avif']
 //支持的视频文件扩展名（本地文件）
 const VIDEO_EXTS = ['mp4', 'mov', 'mkv', 'avi', 'rmvb', 'flv']
 const EXTRA_VIDEO_EXTS = ['levc']
@@ -49,7 +49,9 @@ const BACKUP_FILE_EXTS = ['json']
 //是否为macOS
 const isMacOS = (process.platform === 'darwin')
 //是否为Windows OS
-const isWinOS = (process.platform === 'win32')
+//TODO 暂时将Windows、Linux等非macOS系统，统一按Windows来处理；
+//实在没有太多经验、精力去完善本地化风格
+const isWinOS = (process.platform === 'win32') || !isMacOS
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = isMacOS
 //TODO NODE_ENV取值：dev、proc

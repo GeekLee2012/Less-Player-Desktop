@@ -87,7 +87,7 @@ export class United {
         return Array.isArray(vendors) && vendors[0]
     }
 
-    //互惠互助、互通有无、移花接木、同舟共济？奏是介些说法啦 ~
+    //互惠互助、互通有无、移花接木、同舟共济 ~
     static transferTrack(track, options) {
         return new Promise(async (resolve, reject) => {
             let result = null

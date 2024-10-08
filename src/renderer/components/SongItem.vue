@@ -231,7 +231,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     flex-direction: row;
     flex: 1;
     margin-bottom: 3px;
-    border-radius: 3px;
+    border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-list-item-vertical-border-radius);
+    border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
 }
 
 .song-item:hover {

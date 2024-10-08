@@ -6,15 +6,14 @@ import { emitEvents, onEvents } from './EventBusWrapper';
 
 
 
-let audioNode = null, lastPlayTime = null, singleton = null
+let audioNode = null, singleton = null
 
 class RadioPlayer {
     constructor(channel) {
         this.channel = channel
-        this.hls = new Hls()
+        this.hls = this.initHls()
         this.playState = PlayState.NONE
         this.channelChanged = false
-        this.isBindHlsEvent = false
         this.webAudioApi = null
         this.pendingSoundEffect = null
         this.pendingStereoPan = null
@@ -22,6 +21,36 @@ class RadioPlayer {
         this.animationFrameCnt = 0 //动画帧数计数器，控制事件触发频率，降低CPU占用
         this.stateRefreshFrequency = 60 //歌曲进度更新频度
         this.spectrumRefreshFrequency = 3 //歌曲频谱更新频度
+        this.lastPlayTime = null
+    }
+
+    initHls() {
+        const hls = new Hls()
+        const self = this
+        /*
+        hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+            self.hls.config.xhrSetup = (xhr, url) => {
+                //xhr.setRequestHeader()
+            }
+        })
+        */
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            audioNode.play()
+            self.setState(PlayState.PLAYING)
+            
+            if(self.channelChanged) self.lastPlayTime = Date.now()
+            self.channelChanged = false
+            
+            self.animationFrameCnt = 0
+            requestAnimationFrame(self._step.bind(self))
+        })
+        hls.on(Hls.Events.MEDIA_DETACHED, () => {
+            self.setState(PlayState.PAUSE)
+        })
+        hls.on(Hls.Events.ERROR, () => {
+            self.setState(PlayState.PLAY_ERROR)
+        })
+        return hls
     }
 
     static create() {
@@ -29,7 +58,6 @@ class RadioPlayer {
             singleton = new RadioPlayer()
                 .initWebAudio()
                 .on({
-                    //'radio-init': value => singleton._createWebAudioApi(value)
                     'radio-channelChange': value => singleton.setChannel(value),
                     'radio-play': value => singleton.playChannel(value),
                     'radio-togglePlay': () => singleton.togglePlay(),
@@ -60,30 +88,6 @@ class RadioPlayer {
 
         this.hls.loadSource(this.channel.url)
         this.hls.attachMedia(audioNode)
-
-        //Hls事件绑定
-        if (!this.isBindHlsEvent) {
-            const self = this
-            /*
-            this.hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                self.hls.config.xhrSetup = (xhr, url) => {
-                    //xhr.setRequestHeader()
-                }
-            })
-            */
-            this.hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                audioNode.play()
-                self.setState(PlayState.PLAYING)
-                self.channelChanged = false
-                lastPlayTime = Date.now()
-                this.animationFrameCnt = 0
-                requestAnimationFrame(self._step.bind(self))
-            })
-            this.hls.on(Hls.Events.ERROR, function () {
-                self.setState(PlayState.PLAY_ERROR)
-            })
-            this.isBindHlsEvent = true
-        }
     }
 
     playing() {
@@ -96,7 +100,6 @@ class RadioPlayer {
         if (!this.playing()) return
 
         this.hls.detachMedia()
-        this.setState(PlayState.PAUSE)
     }
 
     togglePlay() {
@@ -114,6 +117,7 @@ class RadioPlayer {
         this.hls.stopLoad()
         this.channel = channel
         this.channelChanged = true
+        if(!channel) this.lastPlayTime = null
         return this
     }
 
@@ -130,9 +134,11 @@ class RadioPlayer {
         if (!this.playing()) return 
 
         const nowTime = Date.now()
-        const currentTime = (nowTime - lastPlayTime) || 0
+        const currentTime = (nowTime - this.lastPlayTime) || 0
         const currentSeconds = currentTime / 1000
-        if (this.isStateRefreshEnabled()) this.notify('track-pos', { currentTime: currentSeconds, duration: 0 })
+        if (this.isStateRefreshEnabled()) {
+            this.notify('track-pos', { currentTime: currentSeconds, duration: 0 })
+        }
         this._resolveSound()
         this._countAnimationFrame()
         requestAnimationFrame(this._step.bind(this))

@@ -1,6 +1,8 @@
 
 import { PlayState, PlayAction } from './Constants';
 import { onEvents, emitEvents } from './EventBusWrapper';
+import { encodeURL } from './Utils';
+
 
 
 let singleton = null
@@ -100,7 +102,7 @@ class VideoPlayer {
         
         const { url: src, pos } = this.video
         if(this.videoChanged) {
-            this.delegatePlayer.src(src)
+            this.delegatePlayer.src(encodeURL(src))
             const _pos = Math.max(pos || -1, 0)
             this.currentPosition(_pos)
         }

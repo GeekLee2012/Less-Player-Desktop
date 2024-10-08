@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
 const { contextBridge, ipcRenderer } = require('electron')
 const { isMacOS, isWinOS, useCustomTrafficLight, 
   isDevEnv, DOWNLOADS_PATH, AUDIO_EXTS, EXTRA_AUDIO_EXTS,
-  TrayAction, GitRepository
+  VIDEO_EXTS, IMAGE_EXTS, TrayAction, GitRepository,
 } = require('./env')
 //const path = require('path')
 //const { createCipheriv, publicEncrypt, constants, randomBytes, createHash } = require('crypto')
@@ -41,6 +41,8 @@ window.electronAPI = {
   DOWNLOADS_PATH,
   AUDIO_EXTS,
   EXTRA_AUDIO_EXTS,
+  VIDEO_EXTS,
+  IMAGE_EXTS,
   TrayAction,
   GitRepository,
 }

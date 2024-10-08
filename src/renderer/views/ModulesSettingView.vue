@@ -156,6 +156,7 @@ const setActiveTab = (value) => activeTab.value = value
     flex-direction: row;
     align-items: center;
     border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-list-item-vertical-border-radius);
     height: 50px;
     padding: 3px 18px;
     margin-bottom: 15px;

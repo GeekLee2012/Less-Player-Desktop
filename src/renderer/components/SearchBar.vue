@@ -73,6 +73,7 @@ const clear = () => {
     display: flex;
     height: 32px;
     -webkit-app-region: none;
+    --border-radius: var(--border-btn-border-radius);
 }
 
 .search-bar .search-btn,
@@ -84,7 +85,7 @@ const clear = () => {
 
 .search-bar .search-btn {
     /*border-radius: 10rem 0 0 10rem;*/
-    border-radius: var(--border-btn-border-radius) 0px 0px var(--border-btn-border-radius);
+    border-radius: var(--border-radius) 0px 0px var(--border-radius);
     border-right: 0px;
     width: 28px;
     background: var(--searchbar-search-btn-bg-color);
@@ -126,7 +127,7 @@ const clear = () => {
 
 .search-bar .clear-btn {
     /*border-radius: 0 10rem 10rem 0;*/
-    border-radius: 0px var(--border-btn-border-radius) var(--border-btn-border-radius) 0px;
+    border-radius: 0px var(--border-radius) var(--border-radius) 0px;
     width: 22px;
     border-left: 0px;
     background: var(--searchbar-bg-color);

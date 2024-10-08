@@ -337,9 +337,12 @@ const computedVolumeGainText = computed(() => {
     margin-top: 15px;
     padding: 3px 0px;
     border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-list-item-vertical-border-radius);
+    border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
     border: 2px solid transparent;
     background-color: #f3f3f3;
     background: var(--content-list-item-hover-bg-color);
+    cursor: pointer;
 }
 
 .sound-effect-view .center .presets .active {
@@ -393,10 +396,12 @@ const computedVolumeGainText = computed(() => {
     margin-top: 15px;
     padding: 6px 0px;
     border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-list-item-vertical-border-radius);
+    border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
     border: 2px solid transparent;
     background-color: #f3f3f3;
     background: var(--content-list-item-hover-bg-color);
-    /* cursor: pointer; */
+    cursor: pointer;
 }
 
 .sound-effect-view .center .impulse-content .active {

@@ -1,23 +1,24 @@
-# <div align=center>Less Player</div>  
+### <div align=center>[![Less Player](https://gitee.com/rive08/less-player-desktop/raw/master/public/icon.png)](![/public/icon.png](https://gitee.com/rive08/less-player-desktop/raw/master/public/icon.png))<br>Less Player</div>  
+---  
 
-  
+
 [![GitHub Release](https://img.shields.io/github/release/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/releases)
 [![GitHub Tag](https://img.shields.io/github/tag/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/tags)
 [![GitHub License](https://img.shields.io/github/license/GeekLee2012/Less-Player-Desktop)](https://github.com/GeekLee2012/Less-Player-Desktop/blob/main/LICENSE)
 ![GitHub Stars](https://img.shields.io/github/stars/GeekLee2012/Less-Player-Desktop)
 ![GitHub Forks](https://img.shields.io/github/forks/GeekLee2012/Less-Player-Desktop) 
 ![GitHub Downloads@Latest](https://img.shields.io/github/downloads/GeekLee2012/Less-Player-Desktop/latest/total)  
-  
+
 基于[Electron](https://www.electronjs.org/) + [Vue 3](https://vuejs.org/)开发、[插件化](https://github.com/GeekLee2012/Less-Player-Desktop-Plugins/)的播放器。   
-  
+
 <b>`郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>   
-  
+
 ### 前言  
 * 项目名字：源于Less is More（少即是多）
 * 开发模式：循序渐进模式，边学习边开发（学以致用）  
 * 项目初衷：抛砖引玉，一起学习交流，共同进步  
 * 项目缺点：目前最大最明显的缺点，就是整体上缺乏架构思想，导致代码松散随意  
-    
+  
 ### 开发/测试环境
 * OS：macOS Monterey（开发 + 测试）、Windows 10（虚拟机，仅测试）  
 * IDE：[Visual Studio Code](https://code.visualstudio.com/)  
@@ -36,17 +37,12 @@
 * <b>播放页</b>：目前预设5种播放样式，“静动结合”; 歌词设置灵活，支持通过歌词调整歌曲进度、外文翻译（需平台支持） 
 * <b>窗口缩放</b>：屏幕大小，适应自如  
 * <b>桌面歌词</b>：支持横屏、竖屏歌词；支持3种显示模式，即单行、双行、全部；同时可对字体大小、颜色、行间距等进行设置   
-    
-### 预览图  
-<!--
-![Github snap 11.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2011.png)  
-![Github snap 12.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2012.png)  
-![Github snap 13.png](https://github.com/GeekLee2012/Less-Player/blob/main/snapshot/snap%2013.png)  
---> 
-![Gitee snap 01.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2001.png)  
-![Gitee snap 02.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2002.png)  
-![Gitee snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2003.png)  
-   
+  
+### 界面预览  
+![Snap 01.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2001.png)  
+![Snap 02.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2002.png)  
+![Snap 03.png](https://gitee.com/rive08/resources/raw/master/less-player-desktop/temp/snap%2003.png)  
+
 ### For开发者  
 * 请先下载安装最新版（或最新LTS版本） [Nodejs](https://nodejs.org/)  
 
@@ -77,12 +73,12 @@
 * 当前`页面顶部`，分别有<b>`release、tag、license、downloads`</b>等图标按钮，可点击<b>`release按钮`</b>直达`发行版本列表`页面  
 * 任何删除`清空操作`（带垃圾桶图标的按钮）请`谨慎`！其实也没这么夸张，哈哈 ~  
 * 为避免误操作，已部分支持对话框确认，请参考`“设置页 - 对话框”`  
-    
+  
 ### 发行版  
 * 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
 * Linux和x86平台：可下载源码，配置后构建打包，请参考 [常见问题 FAQ.md](FAQ.md)
   
-### 项目相关文档
+### 相关文档
 * 常见问题：[FAQ.md](FAQ.md)  
 * 更新日志：[CHANGELOG.md](CHANGELOG.md) 
 * 待办事项：[TODO.md](TODO.md)  

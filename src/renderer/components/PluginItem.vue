@@ -91,6 +91,7 @@ const hasIcon = computed(() => {
     margin-top: 3px;
     margin-bottom: 15px;
     border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-list-item-vertical-border-radius);
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
     --item-height: 79px;
 }

@@ -177,6 +177,8 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
     align-items: center;
     text-align: left;
     border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-list-item-vertical-border-radius);
+    border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
     box-shadow: 0px 0px 2px var(--border-popovers-border-color);
     padding: 10px 15px;
     width: 100%;

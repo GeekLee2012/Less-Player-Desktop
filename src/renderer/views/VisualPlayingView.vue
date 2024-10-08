@@ -470,7 +470,7 @@ onUnmounted(() => {
     height: 365px;
     border: 6px solid #292929;
     border-radius: 99rem;
-    animation: rotate 10s linear infinite;
+    animation: rotate360 10s linear infinite;
     animation-play-state: paused;
     cursor: pointer;
 }
