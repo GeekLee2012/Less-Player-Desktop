@@ -148,7 +148,7 @@ const showInFolder = () => {
 #track-detail-view .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #track-detail-view .header .right {
@@ -174,6 +174,7 @@ const showInFolder = () => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
 }
 
 #track-detail-view .header .cover {

@@ -11,7 +11,6 @@ import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 
-//const {  } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideCustomAppBorderRadiusView, } = useAppCommonStore()
 const { commonBorderRadius } = storeToRefs(useSettingStore())
 const { setCommonBorderRadius, } = useSettingStore()
@@ -28,13 +27,13 @@ const togglePreview = () => {
 const resetData = (event) => {
     const isUserAction = event ? true : false
     Object.assign(customData, { ...commonBorderRadius.value })
-    if (isUserAction) showToast('重置完成')
+    if (isUserAction) showToast('圆角设置已重置')
 }
 
 //保存
 const saveData = () => {
     setCommonBorderRadius(customData)
-    showToast('保存成功')
+    showToast('圆角设置保存成功')
     hideCustomAppBorderRadiusView()
 }
 

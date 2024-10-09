@@ -169,4 +169,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
 }
+
+.contrast-mode .playlist-category-bar .active {
+    font-weight: bold;
+}
 </style>

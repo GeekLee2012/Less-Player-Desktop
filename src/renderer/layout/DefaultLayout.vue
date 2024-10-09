@@ -1,17 +1,21 @@
 <script setup>
+import { storeToRefs } from 'pinia';
+import { useSettingStore } from '../store/settingStore';
 import DefaultMainLeft from './DefaultMainLeft.vue';
 import DefaultMainCenter from './DefaultMainCenter.vue';
 import AppPopovers from '../AppPopovers.vue';
-import { useSettingStore } from '../store/settingStore';
-import { storeToRefs } from 'pinia';
 
 
 
-const { isDefaultOldLayout, } = storeToRefs(useSettingStore())
+const { isDefaultOldLayout, isFontAutoWeight } = storeToRefs(useSettingStore())
 </script>
 
 <template>
-    <div class="default-layout" :class="{ 'default-old-layout': isDefaultOldLayout }" >
+    <div class="default-layout" 
+        :class="{ 
+            'default-old-layout': isDefaultOldLayout,
+            'contrast-mode': isFontAutoWeight,
+        }" >
         <DefaultMainLeft></DefaultMainLeft>
         <DefaultMainCenter></DefaultMainCenter>
         <AppPopovers></AppPopovers>

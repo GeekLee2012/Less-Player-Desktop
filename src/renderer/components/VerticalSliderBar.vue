@@ -55,7 +55,7 @@ const updateProgress = (percent, noUpdate) => {
     height = height < 100 ? height : 100
 
     if(progressRef.value) progressRef.value.style.height = `${height}%`
-    if(thumbRef.value) thumbRef.value.style.bottom = `${height}%`
+    if(thumbRef.value) thumbRef.value.style.bottom = `calc(${height}% - 3px)`
 
     if (!noUpdate) setValue(height / 100)
 }
@@ -157,7 +157,7 @@ defineExpose({
 }
 
 .vertical-slider-bar .vertical-slider-bar-ctl {
-    width: 3px;
+    width: var(--others-sliderbar-ctl-height);
     height: 100%;
     border-radius: 10rem;
     background: var(--others-progressbar-bg-color);
@@ -170,7 +170,7 @@ defineExpose({
 }
 
 .vertical-slider-bar .progress {
-    width: 3px;
+    width: var(--others-sliderbar-ctl-height);
     height: 50%;
     border-radius: 10rem;
     background: var(--content-text-highlight-color);
@@ -179,8 +179,8 @@ defineExpose({
 }
 
 .vertical-slider-bar .thumb {
-    width: 13px;
-    height: 13px;
+    width: var(--others-sliderbar-thumb-size);
+    height: var(--others-sliderbar-thumb-size);
     border-radius: 10rem;
     background-color: var(--content-highlight-color);
     z-index: 2;

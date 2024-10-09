@@ -118,9 +118,11 @@ onMounted(() => loadUserInfo())
                     </div>
                 </div>
                 <div class="form-row">
-                    <div><span>简介 / 说说</span></div>
+                    <div>
+                        <span>说说</span>
+                    </div>
                     <div @keydown.stop="">
-                        <textarea v-model="detail.about" maxlength="512" placeholder="今天想要对自己说些什么呀~ 最多支持输入512个字符">
+                        <textarea v-model="detail.about" maxlength="512" placeholder="今天想要说些什么呀~ 最多支持输入512个字符">
                         </textarea>
                     </div>
                 </div>
@@ -149,7 +151,7 @@ onMounted(() => loadUserInfo())
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 #user-info-edit-view .header .title {
@@ -177,9 +179,10 @@ onMounted(() => loadUserInfo())
 #user-info-edit-view .center .cover-eidt-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
-    padding: 5px;
+    padding: 6px;
     border-radius: var(--border-inputs-border-radius);
     cursor: pointer;
+    margin-top: 2px;
 }
 
 #user-info-edit-view .center .right {
@@ -219,7 +222,7 @@ onMounted(() => loadUserInfo())
 }
 
 #user-info-edit-view .center .form-row input {
-    height: 25px;
+    height: 28px;
 }
 
 #user-info-edit-view .center .form-row textarea {

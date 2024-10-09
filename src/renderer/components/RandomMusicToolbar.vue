@@ -150,6 +150,7 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 .random-music-toolbar .center .nav-wrap .active {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color);
+    font-weight: bold;
 }
 
 .random-music-toolbar .center .nav-item {

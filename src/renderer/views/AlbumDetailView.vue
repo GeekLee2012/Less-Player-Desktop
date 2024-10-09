@@ -329,7 +329,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #album-detail-view .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #album-detail-view .header .right {

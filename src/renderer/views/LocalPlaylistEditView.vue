@@ -172,7 +172,7 @@ onMounted(() => loadLocalPlaylist())
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 #local-playlist-edit-view .header .title {
@@ -203,6 +203,7 @@ onMounted(() => loadLocalPlaylist())
     padding: 5px;
     border-radius: var(--border-inputs-border-radius);
     cursor: pointer;
+    margin-top: 2px;
 }
 
 
@@ -243,7 +244,7 @@ onMounted(() => loadLocalPlaylist())
 }
 
 #local-playlist-edit-view .center .form-row input {
-    height: 25px;
+    height: 28px;
 }
 
 #local-playlist-edit-view .center .form-row textarea {

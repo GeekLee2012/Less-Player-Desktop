@@ -83,6 +83,10 @@ export const useStartDrag = () => {
     return tryCallDefault(() => (electronAPI.startDrag))
 }
 
+export const useWebZoom = () => {
+    return tryCallDefault(() => (electronAPI.webZoom))
+}
+
 export const isMacOS = () => {
     return tryCallDefault(() => (electronAPI.isMacOS))
 }

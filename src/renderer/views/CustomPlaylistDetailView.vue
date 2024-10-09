@@ -300,7 +300,7 @@ onUpdated(() => resetBack2TopBtn())
 #custom-playlist-detail-view .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #custom-playlist-detail-view .header .right {
@@ -333,6 +333,7 @@ onUpdated(() => resetBack2TopBtn())
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     margin-bottom: 15px;
     /*font-size: 15px;*/
     letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
@@ -341,6 +342,7 @@ onUpdated(() => resetBack2TopBtn())
 #custom-playlist-detail-view .header .short-about {
     height: 60px;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     margin-bottom: 10px;
 }
 

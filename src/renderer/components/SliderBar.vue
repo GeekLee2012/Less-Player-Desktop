@@ -86,7 +86,7 @@ const updateProgress = (percent) => {
     percent = percent < 100 ? percent : 100
 
     if(progressRef.value) progressRef.value.style.width = `${percent}%`
-    if(thumbRef.value) thumbRef.value.style.left = `${percent}%`
+    if(thumbRef.value) thumbRef.value.style.left = `calc(${percent}% - 3px)`
 
     value = (percent / 100).toFixed(2)
 }

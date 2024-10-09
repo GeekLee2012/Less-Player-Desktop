@@ -356,7 +356,7 @@ onActivated(() => {
 #playlist-detail-view .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #playlist-detail-view .header .right {

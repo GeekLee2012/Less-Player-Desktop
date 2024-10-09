@@ -66,7 +66,7 @@ const queueState = () => {
     let current = Math.min(Math.max(playingIndex.value + 1, 0), total)
     //TODO dragOverIndex有些情况下不准确
     if (dragOverIndex.value > -1) current = Math.min(Math.max(dragOverIndex.value + 1, 1), total)
-    return total > 0 ? (current > 0 ? `${current} / ${total}首` : `共${total}首`) : '共0首'
+    return total > 0 ? (current > 0 ? `${current} / ${total}首` : `${total}首`) : '0首'
 }
 
 let isUserMouseWheel = false, isPendingTargetPlaying = false
@@ -235,7 +235,6 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </div>
                 </div>
                 <div class="detail">
-                    <!--<div class="subtext">共{{ queueTracks.length }}首</div>-->
                     <div class="subtitle" v-html="queueState()"></div>
                     <div class="action" :class="{ 'icon-mode': isBtnWithIconMode }">
                         <div class="batch-action-btn text-btn" @click="visitBatchPlaybackQueue" v-show="isPlaybackQueueBatchActionBtnShow">

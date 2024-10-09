@@ -1,4 +1,5 @@
 <script setup>
+import { onDeactivated } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSearchStore } from '../store/searchStore';
 import { useAppCommonStore } from '../store/appCommonStore';
@@ -13,6 +14,13 @@ const visitItem = (item, index) => {
     setCurrentPlatformIndex(index)
     hidePlatformCategoryView()
 }
+
+const resetScroll = () => {
+    const viewEl = document.querySelector(".platform-category-view .container")
+    if (viewEl) viewEl.scrollTop = 0
+}
+
+onDeactivated(resetScroll)
 </script>
 
 <template>
@@ -131,5 +139,9 @@ const visitItem = (item, index) => {
     border-radius: var(--border-list-item-border-radius);
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+}
+
+.contrast-mode .platform-category-view .center .current {
+    font-weight: bold;
 }
 </style>

@@ -1,12 +1,11 @@
 <script setup>
 import { useArtistSquareStore } from '../store/artistSquareStore';
-import { onMounted, onUnmounted, reactive, ref } from 'vue';
+import { onDeactivated, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
-const artistCategoryViewRef = ref(null)
 const { currentCategoryItems } = storeToRefs(useArtistSquareStore())
 const { currentCategory, updateCurrentCategoryItem, resetCurrentCategoryItems } = useArtistSquareStore()
 const categories = reactive([])
@@ -19,8 +18,8 @@ const updateCategory = () => {
 }
 
 const resetScroll = () => {
-    if (!artistCategoryViewRef.value) return
-    artistCategoryViewRef.value.scrollTop = 0
+    const viewEl = document.querySelector('.artist-category-view .container')
+    if(viewEl) viewEl.scrollTop = 0
 }
 
 const visitCateItem = (name, item, index) => {
@@ -36,11 +35,12 @@ const eventsRegistration = {
     'artistCategory-resetScroll': resetScroll,
 }
 onMounted(() => onEvents(eventsRegistration))
+onDeactivated(resetScroll)
 onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div class="artist-category-view" ref="artistCategoryViewRef" @click.stop="">
+    <div class="artist-category-view" @click.stop="">
         <div class="container">
             <div class="header">
                 <span class="cate-title">全部分类</span>
@@ -132,7 +132,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     justify-items: center;
     cursor: pointer;
     margin-left: 20px;
-    font-size: var(--content-text-tip-text-size);
+    /*font-size: var(--content-text-tip-text-size);*/
 }
 
 .artist-category-view .center {
@@ -164,7 +164,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .artist-category-view .fl-item {
     /*font-size: 15px;*/
-    padding: 6px 16px;
+    padding: 6px 20px;
     margin-top: 10px;
     margin-right: 10px;
     float: left;
@@ -184,5 +184,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-radius: 10rem;
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+}
+
+.contrast-mode .artist-category-view .current {
+    font-weight: bold;
 }
 </style>

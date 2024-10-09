@@ -83,4 +83,8 @@ const setCurrentIndex = (index) => {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
 }
+
+.contrast-mode .single-selection-ctl .active {
+    font-weight: bold;
+}
 </style>

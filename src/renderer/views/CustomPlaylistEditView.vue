@@ -240,7 +240,7 @@ onMounted(() => loadCustomPlaylist())
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 #custom-playlist-edit-view .header .title {
@@ -268,9 +268,10 @@ onMounted(() => loadCustomPlaylist())
 #custom-playlist-edit-view .center .cover-eidt-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
-    padding: 5px;
+    padding: 6px;
     border-radius: var(--border-inputs-border-radius);
     cursor: pointer;
+    margin-top: 2px;
 }
 
 
@@ -341,7 +342,7 @@ onMounted(() => loadCustomPlaylist())
 }
 
 #custom-playlist-edit-view .center .form-row input {
-    height: 25px;
+    height: 28px;
 }
 
 #custom-playlist-edit-view .center .form-row textarea {

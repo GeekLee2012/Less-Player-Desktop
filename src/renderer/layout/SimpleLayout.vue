@@ -1045,7 +1045,7 @@ watch(soundEffectViewShow, () => {
     emitEvents('app-elementAlignCenter', {
         selector: '.simple-layout #sound-effect-view',
         width: 404,
-        height: 366,
+        height: 386,
         offsetTop: -20
     })
 })
@@ -1731,6 +1731,14 @@ onActivated(() => {
 
 .simple-layout #sound-effect-view .center .bands {
     display: none;
+}
+
+.simple-layout #sound-effect-view .center .presets .item {
+    width: 108px;
+}
+
+.simple-layout #sound-effect-view .center .impulse-content .item {
+    width: 250px;
 }
 
 .simple-layout .video-playing-view .vjs-theme-city .c-vjs-play-next-btn .vjs-icon-placeholder::before {

@@ -75,7 +75,7 @@ const getLyricOffsetText = () => {
                 </div>
             </div>
             <div class="center v-spacing">
-                <div class="row text">歌曲信息位置：</div>
+                <div class="row text">歌曲元信息：</div>
                 <div class="row">
                     <SingleSelectionControl :data="['默认', '隐藏', '顶部']" :value="lyric.metaPos" :onChanged="setLyricMetaPos">
                     </SingleSelectionControl>

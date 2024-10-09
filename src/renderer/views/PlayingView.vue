@@ -653,8 +653,6 @@ onMounted(() => {
 }
 
 .playing-view .container > .center .cover-wrap .cover {
-    /*width: 356px;
-    height: 356px;*/
     width: 366px;
     height: 366px;
     border: 6px solid #292929;

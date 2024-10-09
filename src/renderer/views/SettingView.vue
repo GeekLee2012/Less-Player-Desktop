@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onActivated, onMounted, onUnmounted, ref, watch, reactive } from 'vue';
+import { computed, inject, onActivated, onMounted, onDeactivated, onUnmounted, ref, watch, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
@@ -49,6 +49,7 @@ const { setThemeIndex,
     setBorderRadiusCtlStyle,
     setFontFamily,
     setFontWeight,
+    toggleFontAutoWeight,
     toggleRadioModeShortcut,
     toggleFreeVideoShortcut,
     setTrackQualityIndex,
@@ -450,6 +451,7 @@ onActivated(() => {
     updateBlackHole(Math.random() * 100000000)
 })
 
+onDeactivated(() => setNavbarCollapsed(true))
 onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
@@ -594,6 +596,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                             <option v-for="(item, index) in fontWeights" :value="item">
                             </option>
                         </datalist>
+                    </div>
+                    <div class="max-content-mr-36">
+                        <span class="cate-subtitle">字体自动加粗：</span>
+                        <ToggleControl @click="toggleFontAutoWeight" :value="common.fontAutoWeight">
+                        </ToggleControl>
+                        <div class="tip-text spacing3">提示：对部分高亮字体加粗显示</div>
                     </div>
                     <div class="tip-text">提示：图片清晰度越高，视觉体验越好，但内存占用越高<br>
                     图片清晰度完全依赖官方平台，无法保证设置完全有效<br>
@@ -1568,18 +1576,12 @@ onUnmounted(() => offEvents(eventsRegistration))
     height: 17px;
 }
 
-/*
-#setting-view .tip-text {
-    font-size: var(--content-text-tip-text-size);
-    color: var(--content-subtitle-text-color);
-}
-*/
-
 #setting-view .navbar {
+    --height-factor: 36px;
     position: fixed;
-    top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size));
+    top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size) + var(--height-factor) / 2);
     right: calc(0px + var(--app-win-custom-shadow-size));
-    height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px - var(--app-win-custom-shadow-size) * 2);
+    height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px - var(--app-win-custom-shadow-size) * 2 - var(--height-factor));
     padding: 15px 0px;
     background: var(--app-bg-color);
     z-index: 1;
@@ -1591,7 +1593,15 @@ onUnmounted(() => offEvents(eventsRegistration))
     box-shadow: var(--box-shadow);
     border-top-left-radius: var(--border-popover-border-radius);
     border-bottom-left-radius: var(--border-popover-border-radius);
+    /*border-radius: var(--border-popover-border-radius);
+    background: var(--content-left-nav-bg-color);*/
 }
+
+/*
+#setting-view .navbar::-webkit-scrollbar {
+    width: 0;
+}
+*/
 
 #setting-view .navbar ul {
     padding: 0px 15px;
@@ -1600,7 +1610,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #setting-view .navbar li {
     list-style: none;
-    padding: 6px 35px 6px 15px;
+    padding: 6px 40px 6px 20px;
     margin-top: 8px;
     text-align: left;
     font-size: calc(var(--content-text-size) - 1px);
@@ -1613,7 +1623,16 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view .navbar li:hover {
-    background: var(--content-list-item-hover-bg-color);
+    /*background: var(--content-list-item-hover-bg-color);
+    font-weight: bold;
+    transform: scale(1.03);*/
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-text-color);
+    transform: scale(1.03);
+}
+
+.contrast-mode #setting-view .navbar li:hover {
+    font-weight: bold;
 }
 
 #setting-view .navbar.collapse {
@@ -1650,16 +1669,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-left: 35px;
     margin-right: 35px;
     margin-bottom: 10px;
-    /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
     border-bottom: 2px solid transparent;
 }
 
 #setting-view .center {
-    padding-left: 35px;
-    padding-right: 35px;
-    padding-bottom: 30px;
+    padding: 0px 33px 33px 33px;
 }
 
 #setting-view .center .row {
@@ -1797,32 +1813,22 @@ onUnmounted(() => offEvents(eventsRegistration))
     align-items: center;
 }
 
-/*
-#setting-view .common .window-zoom .zoom-title span {
-    margin-left: 18px;
-    padding-top: 2px;
-}
-*/
-
 #setting-view .common .window-zoom .zoom-title input {
     border-radius: var(--border-inputs-border-radius);
     padding: 8px;
     border: 1px solid var(--border-inputs-border-color);
     background-color: var(--content-inputs-bg-color);
-    /*margin-left: 15px;*/
     margin-right: 15px;
     color: var(--content-inputs-text-color);
-    /*text-align: center;
-    min-width: 66px; */
 }
 
 #setting-view .content .layout-item,
 #setting-view .common .content .fslevel-item,
 #setting-view .content .quality-item {
     min-width: 68px;
-    padding: 6px;
+    padding: 6px 8px;
     text-align: center;
-    margin-left: 20px;
+    margin-left: 15px;
     border-radius: var(--border-list-item-border-radius);
     border: 0px solid var(--border-color);
     cursor: pointer;
@@ -1836,16 +1842,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-left: 10px !important;
 }
 
-
-/*
-#setting-view .content .layout-item {
-    width: auto;
-    min-width: 93px;
-}
-*/
-
 #setting-view .common .content .fslevel-item {
-    min-width: 56px !important;
+    min-width: 52px !important;
 }
 
 #setting-view .layout .content .layout-item:hover,
@@ -1862,6 +1860,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
     /*border: 1px solid var(--border-color);*/
+}
+
+.contrast-mode #setting-view .layout .content .active,
+.contrast-mode #setting-view .common .content .active,
+.contrast-mode #setting-view .track .content .active,
+.contrast-mode #setting-view .desktopLyric .content .active {
+    font-weight: bold;
 }
 
 #setting-view .common .content .sec-title {
@@ -1957,13 +1962,13 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view input[type=range] {
+    padding: 0px 1px;
     width: 100%;
     cursor: pointer;
     background: transparent;
     appearance: none;
     margin-top: 10px;
     margin-bottom: 5px;
-    padding: 0px;
 }
 
 #setting-view input[type=range]::-webkit-slider-thumb {

@@ -695,6 +695,12 @@ watch(workingCustomTheme, (nv, ov) => {
     height: 50px !important;
 }
 
+/*TODO 为更方便点击，把按钮调大，先挖个坑吧*/
+.custom-theme-edit-view .toggle-ctl {
+    width: 42px;
+    height: 21px;
+}
+
 .custom-theme-preview-mode .header .no-preview-btn {
     margin-right: 25px;
 }

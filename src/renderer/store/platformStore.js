@@ -39,27 +39,27 @@ const PRESET_TYPES = [{
 const PRESET_TABS = [{
     code: 'all-songs',
     name: '歌曲',
-    text: '共0首歌曲',
+    text: '0首歌曲',
     ctext: '已选择0首歌曲',
-    stext: '约找到0首歌曲',
+    stext: '约0首歌曲',
 }, {
     code: 'hot-songs',
     name: '热门歌曲',
-    text: '共0首歌曲',
+    text: '0首歌曲',
     ctext: '已选择0首歌曲',
-    stext: '约找到0首歌曲',
+    stext: '约0首歌曲',
 }, {
     code: 'albums',
     name: '专辑',
-    text: '共0张专辑',
+    text: '0张专辑',
     ctext: '已选0张专辑',
-    stext: '约找到0张专辑',
+    stext: '约0张专辑',
 }, {
     code: 'videos',
     name: '视频',
-    text: '共0个视频',
+    text: '0个视频',
     ctext: '已选0个视频',
-    stext: '约找到0个视频',
+    stext: '约0个视频',
 }, {
     code: 'about',
     name: '详情',
@@ -69,21 +69,21 @@ const PRESET_TABS = [{
 }, {
     code: 'playlists',
     name: '歌单',
-    text: '共0个歌单',
+    text: '0个歌单',
     ctext: '已选0个歌单',
-    stext: '约找到0个歌单',
+    stext: '约0个歌单',
 }, {
     code: 'artists',
     name: '歌手',
-    text: '共0个歌手',
+    text: '0个歌手',
     ctext: '已选0个歌手',
-    stext: '约找到0个歌手',
+    stext: '约0个歌手',
 }, {
     code: 'fm-radios',
     name: 'FM电台',
-    text: '共0个电台',
+    text: '0个电台',
     ctext: '已选0个电台',
-    stext: '约找到0个电台',
+    stext: '约0个电台',
 }]
 
 

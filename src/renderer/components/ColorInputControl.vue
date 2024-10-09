@@ -200,13 +200,6 @@ watch(inputValue, (nv, ov) => {
     border-bottom-right-radius: var(--border-inputs-border-radius);
 }
 
-/*
-.color-input-ctl .preview {
-    justify-content: flex-start;
-    padding-left: 8px;
-}
-*/
-
 .color-input-ctl .value {
     padding: 0px 8px;
     width: 137px;

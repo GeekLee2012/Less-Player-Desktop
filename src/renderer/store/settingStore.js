@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ipcRendererSend, isMacOS } from '../../common/Utils';
+import { ipcRendererSend, isMacOS, useWebZoom } from '../../common/Utils';
 import { useThemeStore } from './themeStore';
 import { usePlatformStore } from './platformStore';
 import { useAppCommonStore } from './appCommonStore';
@@ -116,6 +116,8 @@ export const useSettingStore = defineStore('setting', {
             fontSizeLevel: 3,
             //字体粗细
             fontWeight: 400,
+            //字体自动加粗显示
+            fontAutoWeight: false,
             //图片质量，0 => 普通，1 => 中等，2 => 高清
             imgQualityIndex: 1,
             //分页方式，0 => 普通，1 => 瀑布流
@@ -838,6 +840,9 @@ export const useSettingStore = defineStore('setting', {
         },
         commonBorderRadius() {
             return this.common.borderRadius
+        },
+        isFontAutoWeight() {
+            return this.common.fontAutoWeight
         }
     },
     actions: {
@@ -1214,6 +1219,9 @@ export const useSettingStore = defineStore('setting', {
         setupFontWeight() {
             const weight = this.common.fontWeight || 400
             emitEvents('setting-fontWeight', weight)
+        },
+        toggleFontAutoWeight() {
+            this.common.fontAutoWeight = !this.common.fontAutoWeight
         },
         updateBlackHole(value) {
             this.blackHole = value

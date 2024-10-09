@@ -620,7 +620,7 @@ onMounted(() => {
     <div class="header">
       <div class="action">
         <div class="close-btn btn" v-show="!lockState" @click="hideWin">
-          <svg width="12" height="12" viewBox="0 0 593.14 593.11" data-name="Layer 1"
+          <svg width="14" height="14" viewBox="0 0 593.14 593.11" data-name="Layer 1"
             xmlns="http://www.w3.org/2000/svg">
             <path
               d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z"
@@ -628,7 +628,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="pin-btn btn spacing" :class="{ active: pinState }" v-show="!lockState" @click="togglePin">
-          <svg width="16" height="16" v-show="!pinState" viewBox="0 0 883.92 883.44" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" v-show="!pinState" viewBox="0 0 883.92 883.44" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -636,7 +636,7 @@ onMounted(() => {
               </g>
             </g>
           </svg>
-          <svg width="16" height="16" v-show="pinState" viewBox="0 0 769.97 933.48" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" v-show="pinState" viewBox="0 0 769.97 933.48" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -646,7 +646,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="lock-btn btn spacing" :class="{ active: lockState }" v-show="lockVisible" @click="toggleLock">
-          <svg width="17" height="17" v-show="!lockState" viewBox="0 0 768.04 938.72" xmlns="http://www.w3.org/2000/svg">
+          <svg width="19" height="19" v-show="!lockState" viewBox="0 0 768.04 938.72" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -668,7 +668,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="text-direction-btn btn spacing" v-show="!lockState" @click="switchTextDirectionState">
-          <svg width="16" height="16" v-show="desktopLyric.textDirection == 0" viewBox="0 0 703.66 768.11"
+          <svg width="18" height="18" v-show="desktopLyric.textDirection == 0" viewBox="0 0 703.66 768.11"
             xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
@@ -681,7 +681,7 @@ onMounted(() => {
               </g>
             </g>
           </svg>
-          <svg width="16" height="16" v-show="desktopLyric.textDirection == 1" viewBox="0 0 716.58 716.58"
+          <svg width="18" height="18" v-show="desktopLyric.textDirection == 1" viewBox="0 0 716.58 716.58"
             xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
@@ -696,7 +696,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="align-btn btn spacing" v-show="!lockState" @click="switchAlignState">
-          <svg width="16" height="16" v-show="desktopLyric.alignment == 0" viewBox="0 0 768.09 597.55"
+          <svg width="18" height="18" v-show="desktopLyric.alignment == 0" viewBox="0 0 768.09 597.55"
             xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
@@ -709,7 +709,7 @@ onMounted(() => {
               </g>
             </g>
           </svg>
-          <svg width="16" height="16" v-show="desktopLyric.alignment == 1" viewBox="0 0 768.1 597.55"
+          <svg width="18" height="18" v-show="desktopLyric.alignment == 1" viewBox="0 0 768.1 597.55"
             xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
@@ -722,7 +722,7 @@ onMounted(() => {
               </g>
             </g>
           </svg>
-          <svg width="16" height="16" v-show="desktopLyric.alignment == 2" viewBox="0 0 768.11 597.51"
+          <svg width="18" height="18" v-show="desktopLyric.alignment == 2" viewBox="0 0 768.11 597.51"
             xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
@@ -735,7 +735,7 @@ onMounted(() => {
               </g>
             </g>
           </svg>
-          <svg width="16" height="16" v-show="desktopLyric.layoutMode == 1 && desktopLyric.alignment == 3"
+          <svg width="18" height="18" v-show="desktopLyric.layoutMode == 1 && desktopLyric.alignment == 3"
             viewBox="0 0 853.35 703.85" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
@@ -750,7 +750,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="font-up-btn btn spacing" v-show="!lockState" @click="fontUp">
-          <svg width="15" height="15" viewBox="0 0 725.07 767.83" xmlns="http://www.w3.org/2000/svg">
+          <svg width="17" height="17" viewBox="0 0 725.07 767.83" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -762,7 +762,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="font-down-btn btn spacing" v-show="!lockState" @click="fontDown">
-          <svg width="15" height="15" viewBox="0 0 725.34 767.78" xmlns="http://www.w3.org/2000/svg">
+          <svg width="17" height="17" viewBox="0 0 725.34 767.78" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -774,7 +774,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="line-spacing-up-btn btn spacing" v-show="!lockState" @click="lineSpacingUp">
-          <svg width="16" height="16" viewBox="0 0 853.44 768.03" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 853.44 768.03" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -792,7 +792,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="line-spacing-down-btn btn spacing" v-show="!lockState" @click="lineSpacingDown">
-          <svg width="16" height="16" viewBox="0 0 853.44 768.03" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 853.44 768.03" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -810,7 +810,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="layout-btn btn spacing" v-show="!lockState" @click="switchLayoutMode">
-          <svg width="15" height="15" viewBox="0 0 853.5 768" xmlns="http://www.w3.org/2000/svg">
+          <svg width="17" height="17" viewBox="0 0 853.5 768" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -843,7 +843,7 @@ onMounted(() => {
         </div>
         <div class="tran-btn btn spacing" v-show="!lockState && Track.hasLyricTrans(currenTrack)"
           @click="toggleLyricTransActive" :class="{ active: lyricTransActived }">
-          <svg width="17" height="17" v-show="false" viewBox="0 0 921.53 938.74" xmlns="http://www.w3.org/2000/svg">
+          <svg width="19" height="19" v-if="false" viewBox="0 0 921.53 938.74" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -855,7 +855,7 @@ onMounted(() => {
               </g>
             </g>
           </svg>
-          <svg width="16" height="16" viewBox="0 0 896 896" xmlns="http://www.w3.org/2000/svg">
+          <svg width="18" height="18" viewBox="0 0 896 896" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path
@@ -865,7 +865,7 @@ onMounted(() => {
           </svg>
         </div>
         <div class="setting-btn btn spacing" v-show="!lockState" @click="visitSetting">
-          <svg width="16" height="16" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
+          <svg width="19" height="19" viewBox="0 0 19.53 18" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
               <g id="Layer_1-2" data-name="Layer 1">
                 <path class="cls-1"
@@ -909,7 +909,7 @@ onMounted(() => {
       v-show="!lockState && desktopLyric.layoutMode == 2 && (lyricExistState == 1) && isUserMouseWheel">
       <span class="time-text" v-html="scrollLocatorTimeText"></span>
       <div class="play-btn" @click="seekFromLyric">
-        <svg width="9" height="9" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+        <svg width="11" height="11" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink">
           <path
             d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
@@ -1116,15 +1116,15 @@ onMounted(() => {
 }
 
 .desktop-lyric .scroll-locator .time-text {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
 }
 
 .desktop-lyric .scroll-locator .play-btn {
   /*margin-top: 16px;*/
   border-radius: 10rem;
-  width: 18px;
-  height: 18px;
+  width: 21px;
+  height: 21px;
   background: var(--button-icon-text-btn-bg-color);
   cursor: pointer;
   display: flex;
@@ -1135,11 +1135,12 @@ onMounted(() => {
 
 .desktop-lyric .scroll-locator .play-btn:hover {
   background: var(--button-icon-text-btn-hover-bg-color);
+  transform: scale(1.1);
 }
 
 .desktop-lyric .scroll-locator .play-btn svg {
-  margin-left: 1px;
   fill: var(--button-icon-text-btn-icon-color) !important;
+  transform: translateX(0.5px) translateY(0.5px);
 }
 
 /* 实验性CSS - 竖屏歌词 */

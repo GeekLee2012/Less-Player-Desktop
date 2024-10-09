@@ -123,4 +123,8 @@ const getAlphabetData = () => {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
 }
+
+.contrast-mode .artist-category-bar .active {
+    font-weight: bold;
+}
 </style>

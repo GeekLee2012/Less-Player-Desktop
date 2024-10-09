@@ -1,14 +1,21 @@
 <script setup>
+import { storeToRefs } from 'pinia';
+import { useSettingStore } from '../store/settingStore';
 import DefaultMainLeft from './DefaultMainLeft.vue';
 import DefaultMainCenter from './DefaultMainCenter.vue';
 import AppPopovers from '../AppPopovers.vue';
 import DefaultNewMainBottom from './DefaultNewMainBottom.vue';
 
 
+
+const { isFontAutoWeight } = storeToRefs(useSettingStore())
 </script>
 
 <template>
-    <div class="default-layout default-new-layout">
+    <div class="default-layout default-new-layout"
+        :class="{
+            'contrast-mode': isFontAutoWeight,
+        }">
         <div class="center">
             <DefaultMainLeft :hideBottom="true"></DefaultMainLeft>
             <DefaultMainCenter :hideBottom="true"></DefaultMainCenter>
@@ -49,6 +56,7 @@ import DefaultNewMainBottom from './DefaultNewMainBottom.vue';
 
 .default-new-layout > .bottom {
     height: var(--main-bottom-height);
+    background: var(--content-bg-color);
 }
 
 

@@ -195,8 +195,8 @@ defineExpose({
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 5px;
-    border-radius: 5px;
+    padding: 6px;
+    border-radius: var(--border-popover-border-radius);
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
     background-color: #eeeeee88 !important;

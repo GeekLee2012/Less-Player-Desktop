@@ -1,7 +1,7 @@
 <script setup>
 import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { onMounted, onUnmounted, reactive } from 'vue';
+import { onDeactivated, onMounted, onUnmounted, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
@@ -27,8 +27,8 @@ const updateOrders = () => {
 }
 
 const resetScroll = () => {
-    const view = document.querySelector(".playlist-category-view")
-    if (view) view.scrollTop = 0
+    const viewEl = document.querySelector(".playlist-category-view .container")
+    if (viewEl) viewEl.scrollTop = 0
 }
 
 const isDiffCate = (item, row, col) => {
@@ -76,6 +76,7 @@ const eventsRegistration = {
 }
 
 onMounted(() => onEvents(eventsRegistration))
+onDeactivated(resetScroll)
 onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
@@ -155,6 +156,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     cursor: default;
     font-size: var(--content-text-size);
     margin-right: 0px;
+    font-weight: bold;
     /*
     padding-top: 8px;
     margin-left: 30px;
@@ -199,7 +201,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .playlist-category-view .fl-item {
     /*float: left;*/
     /* font-size: 15px; */
-    padding: 6px 16px;
+    padding: 6px 20px;
     margin-top: 10px;
     margin-right: 10px;
     cursor: pointer;
@@ -222,5 +224,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-radius: var(--border-list-item-border-radius);
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+}
+
+.contrast-mode .playlist-category-view .center .current {
+    font-weight: bold;
 }
 </style>

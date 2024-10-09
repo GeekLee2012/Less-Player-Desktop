@@ -619,6 +619,7 @@ onBeforeUnmount(() => offEvents(eventsRegistration))
 .video-playing-view .sidebar > .content .video-item.active {
     background: var(--content-highlight-color);
     color: #fff;
+    font-weight: bold;
 }
 
 /************************ VideoJS Style ************************/

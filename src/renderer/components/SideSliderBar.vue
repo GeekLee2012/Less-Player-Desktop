@@ -242,8 +242,8 @@ defineExpose({
 }
 
 .side-slider-bar .thumb {
-    width: 13px;
-    height: 13px;
+    width: var(--others-sliderbar-thumb-size);
+    height: var(--others-sliderbar-thumb-size);
     border-radius: 10rem;
     /*background-color: var(--others-volumebar-thumb-color);*/
     background-color: var(--content-highlight-color);

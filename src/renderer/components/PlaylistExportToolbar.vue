@@ -257,6 +257,10 @@ watch(playlistExportContextItem, (nv, ov) => {
     color: var(--button-icon-text-btn-icon-color) !important;
 }
 
+.contrast-mode .playlist-export-toolbar .center .row-content .active {
+    font-weight: bold;
+}
+
 .playlist-export-toolbar .center .dir-input-ctl {
     display: flex;
     align-items: center;

@@ -493,7 +493,7 @@ onActivated(() => {
 #artist-detail-view .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #artist-detail-view .header .right {

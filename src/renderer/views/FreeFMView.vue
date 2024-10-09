@@ -353,12 +353,12 @@ onActivated(() => {
 #freefm-view .header {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 #freefm-view .header .title {
     text-align: left;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
@@ -366,7 +366,7 @@ onActivated(() => {
 #freefm-view .header .about {
     text-align: left;
     margin-left: 5px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     line-height: 29px;
     color: var(--content-subtitle-text-color);
 }

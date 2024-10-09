@@ -24,10 +24,6 @@
 }
 
 
-.use-winos-win-ctl #main-left .header {
-  /*margin-bottom: -8px !important;*/
-}
-
 .use-winos-win-ctl .default-old-layout #main-left .header {
   margin-bottom: 8px !important;
 }
@@ -56,14 +52,8 @@
 
 
 
-/*
-.use-winos-win-ctl .default-old-layout #main-left .header {
-  background-color: var(--content-bg-color);
-}
-*/
 
-.use-winos-win-ctl .default-main-top .play-nav>.action {
-  /*margin-right: 10px !important;*/
+.use-winos-win-ctl .default-main-top .play-nav > .action {
   padding-right: 10px !important;
   width: 39.33%;
 }

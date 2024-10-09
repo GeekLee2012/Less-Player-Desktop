@@ -35,13 +35,13 @@ const tabs = [{
 {
     code: 'custom-playlist',
     name: '创建的歌单',
-    text: '共0个歌单',
+    text: '0个歌单',
     hasSubTabs: false
 },
 {
     code: 'favorite-artists',
     name: '关注的歌手',
-    text: '共0个歌手',
+    text: '0个歌手',
     hasSubTabs: false
 },
 {
@@ -406,7 +406,7 @@ onActivated(() => {
 #user-profile-view .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #user-profile-view .header .right {

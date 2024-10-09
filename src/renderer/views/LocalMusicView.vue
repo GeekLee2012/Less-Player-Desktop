@@ -236,7 +236,7 @@ onMounted(() => resetBack2TopBtn())
 #local-music-view .header {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 #local-music-view .header .title {
@@ -249,7 +249,7 @@ onMounted(() => resetBack2TopBtn())
 #local-music-view .header .about {
     text-align: left;
     margin-left: 5px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     line-height: 29px;
     color: var(--content-subtitle-text-color);
 }
@@ -259,7 +259,7 @@ onMounted(() => resetBack2TopBtn())
 }
 
 #local-music-view .header .action.none-about {
-    margin-top: 10px;
+    margin-top: 6px;
 }
 
 #local-music-view .center .list-title {

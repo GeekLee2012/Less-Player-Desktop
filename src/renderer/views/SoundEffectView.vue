@@ -219,9 +219,10 @@ const computedVolumeGainText = computed(() => {
 <style scoped>
 .sound-effect-view {
     display: flex;
-    /*flex-direction: column;*/
     overflow: hidden;
     -webkit-app-region: none;
+    --others-sliderbar-ctl-height: 5px;
+    --others-sliderbar-thumb-size: 15px;
 }
 
 .sound-effect-view .container {
@@ -271,6 +272,7 @@ const computedVolumeGainText = computed(() => {
 .sound-effect-view .header .title-wrap {
     margin-left: 10px;
     display: flex;
+    align-items: center;
 }
 
 .sound-effect-view .header .title {
@@ -279,8 +281,9 @@ const computedVolumeGainText = computed(() => {
 }
 
 .sound-effect-view .header #toggle-ctl {
-    cursor: default;
+    /* cursor: default; */
     -webkit-app-region: none;
+    margin-left: 30px;
 }
 
 .sound-effect-view .center {
@@ -316,11 +319,12 @@ const computedVolumeGainText = computed(() => {
 .sound-effect-view .center .left .active svg {
     fill: var(--content-highlight-color) !important;
     color: var(--content-highlight-color) !important;
+    font-weight: bold;
 }
 
 .sound-effect-view .center .content {
     flex: 1;
-    padding-top: 15px;
+    padding-top: 10px;
     margin-left: 0px;
 }
 
@@ -333,7 +337,7 @@ const computedVolumeGainText = computed(() => {
 }
 
 .sound-effect-view .center .presets .item {
-    width: 96px;
+    width: 99px;
     margin-top: 15px;
     padding: 3px 0px;
     border-radius: var(--border-inputs-border-radius);
@@ -346,7 +350,13 @@ const computedVolumeGainText = computed(() => {
 }
 
 .sound-effect-view .center .presets .active {
-    border: 2px solid var(--content-highlight-color);
+    /*border: 2px solid var(--content-highlight-color);*/
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color);
+}
+
+.contrast-mode .sound-effect-view .center .presets .active {
+    font-weight: bold;
 }
 
 .sound-effect-view .center .bands {
@@ -358,7 +368,7 @@ const computedVolumeGainText = computed(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 50px;
+    width: 52px;
 }
 
 .sound-effect-view .center .bands .text,
@@ -379,7 +389,7 @@ const computedVolumeGainText = computed(() => {
 
 .sound-effect-view .center .impulse-content {
     flex: 1;
-    padding-top: 15px;
+    padding-top: 10px;
     padding-bottom: 30px;
     margin-left: 0px;
     display: flex;
@@ -392,9 +402,9 @@ const computedVolumeGainText = computed(() => {
 }
 
 .sound-effect-view .center .impulse-content .item {
-    width: 220px;
+    width: 228px;
     margin-top: 15px;
-    padding: 6px 0px;
+    padding: 7px 0px;
     border-radius: var(--border-inputs-border-radius);
     border-radius: var(--border-list-item-vertical-border-radius);
     border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
@@ -405,7 +415,13 @@ const computedVolumeGainText = computed(() => {
 }
 
 .sound-effect-view .center .impulse-content .active {
-    border: 2px solid var(--content-highlight-color);
+    /*border: 2px solid var(--content-highlight-color);*/
+    background: var(--button-icon-text-btn-bg-color) !important;
+    color: var(--button-icon-text-btn-icon-color);
+}
+
+.contrast-mode .sound-effect-view .center .impulse-content .active {
+    font-weight: bold;
 }
 
 .sound-effect-view .center .impulse-content .disabled {
@@ -415,7 +431,7 @@ const computedVolumeGainText = computed(() => {
 
 .sound-effect-view .center .others-content {
     flex: 1;
-    padding: 35px 25px 25px 25px;
+    padding: 50px 25px 25px 25px;
     margin-left: 0px;
     display: flex;
     flex-direction: column;
@@ -445,9 +461,12 @@ const computedVolumeGainText = computed(() => {
     min-width: 60px;
 }
 
+.contrast-mode .sound-effect-view .center .others-content .item .item-bottom .tip-text {
+    font-weight: bold;
+}
+
 .sound-effect-view .center .others-content .item .side-slider-bar,
 .sound-effect-view .center .others-content .item .slider-bar {
-    --others-sliderbar-ctl-height: 3px;
     margin-left: 15px;
     margin-right: 15px;
     flex: 1;

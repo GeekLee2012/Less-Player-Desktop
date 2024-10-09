@@ -237,7 +237,7 @@ onMounted(() => loadRadio())
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 #freefm-edit-view .header .title {
@@ -267,9 +267,10 @@ onMounted(() => loadRadio())
 #freefm-edit-view .center .cover-eidt-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
-    padding: 5px;
+    padding: 6px;
     border-radius: var(--border-inputs-border-radius);
     cursor: pointer;
+    margin-top: 2px;
 }
 
 
@@ -311,7 +312,7 @@ onMounted(() => loadRadio())
 }
 
 #freefm-edit-view .center .form-row input {
-    height: 25px;
+    height: 28px;
 }
 
 #freefm-edit-view .center .form-row textarea {
@@ -337,6 +338,10 @@ onMounted(() => loadRadio())
 #freefm-edit-view .center .form-row .active {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+}
+
+.contrast-mode #freefm-edit-view .center .form-row .active {
+    font-weight: bold;
 }
 
 #freefm-edit-view .center .action {
@@ -366,11 +371,11 @@ onMounted(() => loadRadio())
 */
 
 #freefm-edit-view .cover-fit {
-    margin-top: 15px;
+    margin-top: 12px;
 }
 
 #freefm-edit-view .cover-fit .list-item {
-    padding: 6px 15px;
+    padding: 6px 20px;
     text-align: center;
     border-radius: var(--border-list-item-border-radius);
     border: 0px solid var(--border-color);
@@ -385,5 +390,9 @@ onMounted(() => loadRadio())
 #freefm-edit-view .list-item.active {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+}
+
+.contrast-mode #freefm-edit-view .list-item.active {
+    font-weight: bold;
 }
 </style>

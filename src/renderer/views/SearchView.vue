@@ -369,6 +369,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     color: var(--button-icon-text-btn-icon-color) !important;
 }
 
+.contrast-mode #search-view .platform .active {
+    font-weight: bold;
+}
+
 #search-view .tab-nav {
     display: flex;
     align-items: center;

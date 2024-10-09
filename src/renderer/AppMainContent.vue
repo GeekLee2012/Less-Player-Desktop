@@ -217,8 +217,12 @@ const setupLayout = (isInit) => {
     currentAppLayout.value = DefaultLayout
   }
   emitEvents(eventName)
-  const zoom = isInit ? 85 : getWindowZoom.value
+  const useDefaultZoom = (isInit && !isDevEnv)
+  const zoom = useDefaultZoom ? 85 : getWindowZoom.value
   ipcRendererSend(eventName, { zoom, isInit })
+  //是否已完成缩放
+  const isDone = (!useDefaultZoom || (getWindowZoom.value != 85))
+  return isDone
 }
 
 const setupTrafficLightWinCtlBtn = () => {
@@ -288,11 +292,15 @@ const restoreSetting = (isInit) => {
   setupCache()
   setupTray()
   setupGlobalShortcut()
-  setupLayout(isInit)
-  setupWindowZoom()
+
+  //TODO 解决Electron Bug：缩放后内容未按照缩放比例正确显示
+  //解决方式：默认缩放85% -> 按用户设置缩放 -> 延迟显示窗口
+  if(!setupLayout(isInit)) {
+    setupWindowZoom()
+  }
   if (isInit) {
-    //TODO 延迟2s，解决Electron Bug：缩放后内容未按照缩放比例正确显示
-    setTimeout(() => ipcRendererSend('app-mainWin-show'), 1888)
+    //延迟2s左右
+    setTimeout(() => ipcRendererSend('app-mainWin-show'), isDevEnv() ? 0 : 1888)
   } else { 
     //非初始化，比如重置设置、还原备份数据 
     resetExploreModeActiveStates()
@@ -419,11 +427,12 @@ const searchAction = computed(() => {
 })
 
 const searchPlaceHolders = [
-  '现在想搜索什么', '搜一搜本地歌曲', '试一试关键字以@开头',
+  '现在想搜索什么', '搜一搜本地歌曲', '试一试@关键字',
   '@FM', '@主题', '@备份',
   '@还原', '@主页', '@功能',
   '@插件'
 ]
+
 const searchBarPlaceholder = computed(() => {
   const index = searchPlaceHolderIndex.value
   return searchBarExclusiveAction.value ?
@@ -585,19 +594,32 @@ const checkForUpdates = async () => {
 
 let checkAppVersionTimer = null, checkRetry = 0
 const checkAppVersion = async () => {
+  const MINUTE = 60 * 1000
   const callback = () => {
     if(isDevEnv()) console.log('[ VERSION - checkForUpdates ]')
     checkForUpdates().then(result => {
-      if(result === true || ++checkRetry >= 6) {
+      if(result === true) {
         clearInterval(checkAppVersionTimer)
         checkRetry = 0
         if(isDevEnv() && result) console.log('[ VERSION - New Release ]')
+      } else if(++checkRetry >= 6) { // 1h
+        clearInterval(checkAppVersionTimer)
+        checkAppVersionTimer = setInterval(callback, 15 * MINUTE)
+      } else if(++checkRetry >= 10) { // 2h
+        clearInterval(checkAppVersionTimer)
+        checkAppVersionTimer = setInterval(callback, 20 * MINUTE)
+      } else if(++checkRetry >= 13) { // 3h
+        clearInterval(checkAppVersionTimer)
+        checkAppVersionTimer = setInterval(callback, 10 * MINUTE)
+      } else if(++checkRetry >= 16) { // 3.5h
+        clearInterval(checkAppVersionTimer)
+        checkRetry = 0
       }
     })
   }
   callback()
+
   //失败重试
-  const MINUTE = 60 * 1000
   clearInterval(checkAppVersionTimer)
   checkAppVersionTimer = setInterval(callback, 10 * MINUTE)
 }

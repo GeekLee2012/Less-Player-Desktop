@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain,
   shell, powerSaveBlocker, Tray,
   globalShortcut, session, utilityProcess,
   protocol, nativeTheme, MessageChannelMain,
-  nativeImage,  screen, 
+  nativeImage,  screen,
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
@@ -1096,6 +1096,10 @@ const createMainWindow = (show) => {
     if (result.finalUpdate) mainWindow.webContents.stopFindInPage('clearSelection')
   })
 
+  mainWindow.webContents.on('did-start-navigation', (details) => {
+    //console.log('[navigation]', details.sender.getZoomFactor(), currentZoom)
+  })
+
   return mainWindow
 }
 
@@ -1116,8 +1120,8 @@ const setupAppLayout = (layout, zoom, isInit) => {
     mainWin.setMinimumSize(width, height)
     mainWin.setSize(width, height)
   }
-  //mainWin.webContents.setZoomFactor(zoomFactor)
-  mainWin.webContents.zoomFactor = zoomFactor
+  mainWin.webContents.setZoomFactor(zoomFactor)
+  //mainWin.webContents.zoomFactor = zoomFactor
   
   //TODO 貌似 Electron Bug? 显示效果：能居中，但只能居中一点点？水平方向居中，但垂直方向没居中
   mainWin.center()
@@ -1333,9 +1337,11 @@ const toggleWinOSFullScreen = () => {
 const setupAppWindowZoom = (zoom, noResize) => {
   if (!isWindowAccessible(mainWin) || !zoom) return
   
-  currentZoom = Number(zoom) || 85
-  const zoomFactor = parseFloat(currentZoom / 100)
+  const _zoom = Number(zoom) || 85
+  const zoomFactor = parseFloat(_zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) return
+  currentZoom = _zoom
+
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = parseInt(appWidth * zoomFactor)
   const height = parseInt(appHeight * zoomFactor)
@@ -1345,8 +1351,8 @@ const setupAppWindowZoom = (zoom, noResize) => {
     mainWin.setSize(width, height)
     mainWin.center()
   }
-  //mainWin.webContents.setZoomFactor(zoomFactor)
-  mainWin.webContents.zoomFactor = zoomFactor
+  mainWin.webContents.setZoomFactor(zoomFactor)
+  //mainWin.webContents.zoomFactor = zoomFactor
 }
 
 const addToDownloadingQueue = (url, meta) => {

@@ -1509,12 +1509,12 @@ const eventsRegistration = {
     },
     'track-play': track => {
         //resetAutoSkip()
+        if(isLocalMusic(track.platform)) bootstrapTrack(track)
         traceRecentTrack(track)
         //loadLyric(track)
     },
     'track-state': ({ state, track, currentTime }) => {
         //播放刚开始时，更新MediaSession
-        console.log(playState.value, state)
         if ((playState.value == PlayState.INIT
             || playState.value == PlayState.LOADED)
             && state == PlayState.PLAYING) {

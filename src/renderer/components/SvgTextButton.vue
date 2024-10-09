@@ -69,9 +69,6 @@ const handleRightClick = (event) => {
 }
 
 .svg-text-btn .left-btn {
-    /*
-    border-radius: 10rem 0 0 10rem;
-    */
     border-radius: var(--border-btn-border-radius) 0px 0px var(--border-btn-border-radius);
 }
 

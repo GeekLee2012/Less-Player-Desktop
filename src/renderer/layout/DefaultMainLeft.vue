@@ -365,7 +365,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
         </div>
         <div class="center" @scroll="onUserMouseWheel">
-            <div id="platform-list">
+            <div class="platform-list">
                 <div class="secondary-text" v-show="isSubtitleVisible()">
                     <span>音乐平台</span>
                 </div>
@@ -377,7 +377,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </li>
                 </ul>
             </div>
-            <div id="custom-playlist-list" v-show="isPlaylistMode && navigation.customPlaylistsShow">
+            <div class="custom-playlist-list" v-show="isPlaylistMode && navigation.customPlaylistsShow">
                 <div class="secondary-text">
                     <span>创建的歌单</span>
                     <svg class="add-custom-btn" @click="() => visitCustomPlaylistCreate()" width="11" height="11"
@@ -397,7 +397,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </li>
                 </ul>
             </div>
-            <div id="favorite-playlist-list" v-show="isPlaylistMode && navigation.favoritePlaylistsShow">
+            <div class="favorite-playlist-list" v-show="isPlaylistMode && navigation.favoritePlaylistsShow">
                 <div class="secondary-text">
                     <span>收藏的歌单</span>
                     <svg v-show="isFavoritePlaylistsCollapsed" class="expand-btn"
@@ -432,7 +432,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </li>
                 </ul>
             </div>
-            <div id="follow-artist-list" v-show="isArtistMode && navigation.followArtistsShow">
+            <div class="follow-artist-list" v-show="isArtistMode && navigation.followArtistsShow">
                 <div class="secondary-text">
                     <span>关注的歌手</span>
                 </div>
@@ -544,7 +544,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #explore-mode svg,
-#custom-playlist-list svg {
+#main-left .custom-playlist-list svg {
     fill: var(--content-subtitle-text-color);
     margin-right: 6px;
 }
@@ -618,9 +618,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     fill: var(--content-subtitle-text-color) !important;
 }
 
-#custom-playlist-list,
-#favorite-playlist-list,
-#follow-artist-list {
+#main-left .custom-playlist-list,
+#main-left .favorite-playlist-list,
+#main-left .follow-artist-list {
     margin-top: 36px;
     position: relative;
 }
@@ -649,7 +649,6 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left ul {
     list-style: none;
     text-align: left;
-    padding-left: 13%;
     padding-left: 10%;
     line-height: var(--content-left-nav-line-height);
 }
@@ -673,6 +672,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     word-wrap: break-word;
     line-break: anywhere;
 }
@@ -681,21 +681,25 @@ onUnmounted(() => offEvents(eventsRegistration))
     background: var(--content-list-item-hover-bg-color);
 }
 
-#custom-playlist-list li,
-#favorite-playlist-list li {
+#main-left .custom-playlist-list li,
+#main-left .favorite-playlist-list li {
     font-size: var(--content-text-subtitle-size);
 }
 
-#favorite-playlist-list li {
+#main-left .favorite-playlist-list li {
     padding-left: 15px;
     padding-right: 15px;
-    /* width: 127px; */
     width: 138px;
 }
 
 #main-left .active {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color);
+}
+
+.contrast-mode #main-left .platform-list .active,
+.contrast-mode #main-left .custom-playlist-list .active {
+    font-weight: bold;
 }
 
 #main-left li.drag-target,

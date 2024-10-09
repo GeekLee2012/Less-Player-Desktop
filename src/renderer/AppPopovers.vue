@@ -216,8 +216,8 @@ const setupGradientColorToolbarPos = () => {
 const setupSoundEffectViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #sound-effect-view',
-    width: 725,
-    height: 550
+    width: 688,
+    height: 528
   })
 }
 
@@ -658,8 +658,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   position: fixed;
   right: 30px;
   bottom: 80px;
-  width: 725px;
-  height: 550px;
+  width: 688px;
+  height: 528px;
   z-index: 99;
   box-shadow: var(--box-shadow);
   border-radius: var(--border-popover-border-radius);

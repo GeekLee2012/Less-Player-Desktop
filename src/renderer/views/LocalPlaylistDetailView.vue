@@ -370,7 +370,7 @@ onActivated(() => {
 #local-playlist-detail-view .header {
     display: flex;
     flex-direction: row;
-    margin-bottom: 25px;
+    margin-bottom: 16px;
 }
 
 #local-playlist-detail-view .header .right {
@@ -385,7 +385,6 @@ onActivated(() => {
 }
 
 #local-playlist-detail-view .header .title {
-    /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
@@ -404,14 +403,15 @@ onActivated(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     margin-bottom: 15px;
-    /*font-size: 15px;*/
     letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 }
 
 #local-playlist-detail-view .header .short-about {
     height: 60px;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     margin-bottom: 10px;
 }
 
@@ -439,7 +439,6 @@ onActivated(() => {
 }
 
 #local-playlist-detail-view .time {
-    /*font-size: 13px;*/
     font-size: var(--content-text-tip-text-size);
     font-weight: 520;
     color: var(--content-subtitle-text-color);

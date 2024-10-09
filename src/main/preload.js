@@ -15,7 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 */
 
-const { contextBridge, ipcRenderer } = require('electron')
+const { contextBridge, ipcRenderer, webFrame } = require('electron')
 const { isMacOS, isWinOS, useCustomTrafficLight, 
   isDevEnv, DOWNLOADS_PATH, AUDIO_EXTS, EXTRA_AUDIO_EXTS,
   VIDEO_EXTS, IMAGE_EXTS, TrayAction, GitRepository,
@@ -33,6 +33,14 @@ window.electronAPI = {
   startDrag: (item) => {
     //path.join(process.cwd(), filePath)
     ipcRenderer.send('dnd-saveToLocal', item)
+  },
+  webZoom: {
+    setZoomFactor: (factor) => {
+      webFrame.setZoomFactor(factor)
+    },
+    getZoomFactor: () => {
+      return webFrame.getZoomFactor()
+    }
   },
   isMacOS,
   isWinOS,
