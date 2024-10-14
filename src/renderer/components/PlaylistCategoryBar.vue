@@ -24,7 +24,7 @@ let lastToggleTime = -1
 const toggleCategory = () => {
     const _now = Date.now()
     const distance = _now - lastToggleTime
-    if(distance < 1000) return
+    if(distance < 366) return
 
     hidePlaybackQueueView()
     togglePlaylistCategoryView()

@@ -19,7 +19,11 @@ export const useSearchStore = defineStore('search', {
     getters: {
         platforms() {
             const { activePlatforms } = usePlatformStore()
-            return activePlatforms('search')
+            return activePlatforms('search').sort((p1, p2) => {
+                const w1 = p1.weight || 0
+                const w2 = p2.weight || 0
+                return w2 - w1
+            })
         },
         activeTabCode(state) {
             if(this._activeTabCode) return this._activeTabCode

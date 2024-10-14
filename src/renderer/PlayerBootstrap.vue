@@ -69,7 +69,7 @@ const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
 const { playVideoNow } = useVideoPlayStore()
-const { currentVideo } = storeToRefs(useVideoPlayStore())
+const { currentVideo, playingIndex: videoPlayingIndex, currentVideoPlayingItem } = storeToRefs(useVideoPlayStore())
 const { setupSoundEffect } = useSoundEffectStore()
 
 
@@ -78,11 +78,8 @@ const { visitHome, visitUserHome, visitSetting,
     visitModulesSetting, visitSearch,
     visitThemes, visitPlugins, visitRecents,
 } = inject('appRoute')
-const { hasExTrackPlayUrlHandlers, hasExVideoPlayUrlHandlers, hasExDrawSpectrumHandlers,
-    getExTrackPlayUrl, getExVideoPlayUrl,
-    drawExSpectrum, toggleExVisualCanvas,
-    showConfirm,
-} = inject('apiExpose')
+const { hasExDrawSpectrumHandlers,drawExSpectrum, 
+    toggleExVisualCanvas, showConfirm, } = inject('apiExpose')
 
 const playState = ref(PlayState.NONE)
 const setPlayState = (value) => playState.value = value
@@ -105,7 +102,7 @@ const traceRecentTrack = (track) => {
     if (Playlist.isFMRadioType(track)) {
         addRecentRadio(track)
     } else if (Playlist.isVideoType(track)) {
-        //TODO 纯MV、或纯视频，暂时不记录
+        //TODO 纯MV、单个视频，暂时不记录
     } else { //歌曲、MV关联的歌曲
         addRecentSong(track)
     }
@@ -261,24 +258,6 @@ const bootstrapTrack = (track, options) => {
         //平台服务
         const vendor = getVendor(platform)
         if (!vendor || !vendor.playDetail) {
-            //外部音源，优先级高于内置平台
-            //当前功能也包括FM广播，不过广播高音质资源不容易找；国外广播的高音质资源多些，但网络连接不太稳定
-            //TODO 功能尚待完善，比如考虑支持多个音源插件同时开启，处理流程、优先级等等
-            if (hasExTrackPlayUrlHandlers()) {
-                try {
-                    const exResult = await getExTrackPlayUrl(track, noToast).catch(error => console.log(error))
-                    if (exResult) {
-                        const { url: purl, exurl } = exResult
-                        if (!isBlank(purl)) {
-                            Object.assign(track, { url: purl, exurl })
-                            if (!noToast) showToast('插件音源加载成功')
-                            return resolve(track)
-                        }
-                    }
-                } catch (error) {
-                    console.log(error)
-                }
-            }
             return reject('noService')
         }
         //播放相关数据
@@ -287,24 +266,6 @@ const bootstrapTrack = (track, options) => {
         const { lyric, cover, artist, url } = result
         //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
         if (Track.hasUrl(result)) Object.assign(track, { url })
-
-        //外部音源，优先级高于内置平台
-        //当前功能也包括FM广播，不过广播高音质资源不容易找；国外广播的高音质资源多些，但网络连接不太稳定
-        //TODO 功能尚待完善，比如考虑支持多个音源插件同时开启，处理流程、优先级等等
-        if (hasExTrackPlayUrlHandlers()) {
-            try {
-                const exResult = await getExTrackPlayUrl(track, noToast).catch(error => console.log(error))
-                if (exResult) {
-                    const { url: purl, exurl } = exResult
-                    if (!isBlank(purl)) {
-                        Object.assign(track, { url: purl, exurl })
-                        if (!noToast) showToast('插件音源加载成功')
-                    }
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        }
 
         //更新歌词
         if (Track.hasLyric(result)) {
@@ -482,9 +443,13 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         playNextPlaylistRadioTrack(platform, id, null, traceId, playlist)
         return
     } else if (Playlist.isVideoType(playlist)) { //视频
-        const { detailUrl } = playlist
-        detailUrl ? playVideoCollection(playlist) 
-            : playMv({ ...playlist }, '当前视频无法播放', text || '即将为您播放视频')
+        //const { detailUrl, } = playlist
+        
+        if(Video.maybeCollectionType(playlist)) {
+            playVideoCollection(playlist, text, traceId) 
+        } else {
+            playVideoItem({ ...playlist }, '', text, traceId)
+        }
         return
     } else if (Playlist.isNormalType(playlist)
         || Playlist.isAnchorRadioType(playlist)) {
@@ -495,8 +460,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
             : '网络异常！请稍候重试'
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast(failMsg)
-        return
+        return showFailToast(failMsg)
     }
 
     if (traceId && !isCurrentTraceId(traceId)) return
@@ -506,19 +470,19 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     addAndPlayTracks(playlist.data, true, text || '即将为您播放歌单', traceId)
 }
 
-const playVideoCollection = async (playlist) => {
+const playVideoCollection = async (playlist, text, traceId) => {
     playlist = await loadVideoCollection(playlist)
     Object.assign(playlist,  { vcType: 1 })
     //检查数据，再次确认
     if (!playlist || !playlist.data || playlist.data.length < 1) {
-        const failMsg = Playlist.isCustomType(playlist) ? '视频无法播放'
-            : '网络异常！请稍候重试'
+        //const failMsg = Playlist.isCustomType(playlist) ? '视频无法播放' : '网络异常！请稍候重试'
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast(failMsg)
-        return
+        showFailToast('当前视频无法播放')
+        return 
     }
     //const { id, platform, cover, title, data } = playlist
-    showToast('即将为您播放全部视频', () => playVideo(playlist))
+    showToast(text || '即将为您播放视频', () => playVideo(playlist))
+    return true
 }
 
 //获取视频详情
@@ -531,8 +495,8 @@ const loadVideoCollection = async (playlist, text, traceId) => {
         if (++retry > maxRetry) break
         //重试一次加载数据
         const vendor = getVendor(platform)
-        if (!vendor || !vendor.videoDetail) break
-        playlist = await vendor.videoDetail(id, playlist)
+        if (!vendor || !vendor.videoCollectionDetail) break
+        playlist = await vendor.videoCollectionDetail(id, playlist)
     }
     return playlist
 }
@@ -555,8 +519,7 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId, pla
 
     const vendor = getVendor(platform)
     if (!vendor || !vendor.nextPlaylistRadioTrack) {
-        showFailToast('服务异常！请稍候重试')
-        return
+        return showFailToast('服务异常！请稍候重试')
     }
     const needReset = !Track.hasId(track)
     let maxRetry = 3, retry = 0, success = false
@@ -843,12 +806,12 @@ watch(exVisualCanvasIndex, (nv, ov) => {
 const getVideoDetail = (video) => {
     return new Promise((resolve, reject) => {
         const { platform, mv, id } = video
-        if (!id && !mv) return reject('noId')
+        const _id = (mv || id)
+        if (!_id) return reject('noId')
         if (!platform) return reject('noService')
         const vendor = getVendor(platform)
         if (!vendor || !vendor.videoDetail) return reject('noService')
 
-        const _id = (mv || id)
         vendor.videoDetail(_id, video).then(result => {
             if (!result || isBlank(result.url)) return reject('noUrl')
             resolve(result)
@@ -959,14 +922,14 @@ const isTrackSeekable = computed(() => {
         && (duration > 0)
 })
 
-//播放MV
-const playMv = (video, failText, text) => {
+//播放单个视频
+const playVideoItem = (video, failText, text, traceId) => {
     if (!video) return
     const { id, mv, vcType } = video
-    if (!id && !mv) return
+    if (!id) return
 
-    failText = (failText || '当前MV无法播放')
-    text = text || '即将为您播放MV'
+    failText = (failText || '当前视频无法播放')
+    text = text || (mv ? '即将为您播放MV' : '即将为您播放视频')
 
     getVideoDetail(video).then(result => {
         showToast(text, () => {
@@ -974,17 +937,8 @@ const playMv = (video, failText, text) => {
             traceRecentTrack(video)
         }, 666)
     }, async error => {
-        if (hasExVideoPlayUrlHandlers()) {
-            const result = await getExVideoPlayUrl(video)
-            if (result && !isBlank(result.url)) {
-                const { url } = result
-                return showToast(text, () => {
-                    playVideo({ ...video, url, vcType: (vcType || 0) }, -1, -1,failText, true)
-                    traceRecentTrack(video)
-                }, 666)
-            }
-        }
         console.log(error)
+        if (traceId && !isCurrentTraceId(traceId)) return
         showFailToast(failText)
     })
 }
@@ -993,7 +947,7 @@ const playMv = (video, failText, text) => {
 const playVideo = async (video, index, pos, failText, noTrace) => {
     try {
         if(!video) return
-        
+
         //是否需要暂停音频播放并挂起
         const playing = isPlaying()
         const pending = (playing && isPauseOnPlayingVideoEnable.value)
@@ -1600,6 +1554,17 @@ const eventsRegistration = {
     'track-nextPlaylistRadioTrack': track => {
         playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)
     },
+    'video-changed': (video) => {
+        getVideoDetail(video).then(result => {
+            if(!Video.hasUrl(result)) return 
+            const { url } = result
+            Object.assign(currentVideoPlayingItem.value, { url })
+            playVideo(currentVideo.value, videoPlayingIndex.value)
+        }).catch(error => {
+            if(isDevEnv()) console.log(error)
+            showFailToast('视频播放失败')
+        })
+    },
     'video-stop': resumeTrackPendingPlay,
     //'video-playCurrent': playVideo,
     'plugins-accessResult-addPlatform': ({ code }) => {
@@ -1673,7 +1638,7 @@ provide('player', {
     addFmRadioToQueue,
     playAlbum,
     addAlbumToQueue,
-    playMv,
+    playVideoItem,
     playVideo,
     addAndPlayTracks,
     loadLyric,

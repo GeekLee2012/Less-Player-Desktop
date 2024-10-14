@@ -88,6 +88,9 @@ export const useSettingStore = defineStore('setting', {
         common: {
             //窗口缩放
             winZoom: 85,
+            //保存为初始值
+            //在创建应用窗口时，作为webPreference的配置参数
+            useWinZoomForCreate: false,
             //窗口控件风格，0 => 自动，1 => macOS, 2 => Windows
             winCtlStyle: 0,
             //元素圆角风格（预设），0 => 自动，1 => macOS, 2 => Windows
@@ -108,6 +111,8 @@ export const useSettingStore = defineStore('setting', {
                 imageSmall: 3,
                 
             },*/
+            //
+            useWinCenterStrict: true,
             //字体名称
             fontFamily: '',
             //字体大小
@@ -554,6 +559,12 @@ export const useSettingStore = defineStore('setting', {
         getWindowZoom() {
             return this.common.winZoom
         },
+        isUseWinZoomForCreate() {
+            return this.common.useWinZoomForCreate
+        },
+        isUseWinCenterStrict() {
+            return this.common.useWinCenterStrict
+        },
         isUseAutoWinCtl() {
             return this.common.winCtlStyle == 0
         },
@@ -904,6 +915,13 @@ export const useSettingStore = defineStore('setting', {
             this.common.winZoom = zoom
             this.setupWindowZoom()
         },
+        toggleUseWinZoomForCreate() {
+            this.common.useWinZoomForCreate = !this.common.useWinZoomForCreate
+            this.setupWindowZoom()
+        },
+        toggleUseWinCenterStrict() {
+            this.common.useWinCenterStrict = !this.common.useWinCenterStrict
+        },
         setWindowCtlStyle(value) {
             const index = parseInt(value || 0)
             if (index < 0 || index > 2) return
@@ -1200,8 +1218,11 @@ export const useSettingStore = defineStore('setting', {
             this.cache.storeRecentPlay = !this.cache.storeRecentPlay
         },
         setupWindowZoom(noResize) {
-            const zoom = this.common.winZoom
-            ipcRendererSend('app-zoom', { zoom, noResize })
+            const { winZoom: zoom, 
+                useWinZoomForCreate: useForCreate, 
+                useWinCenterStrict: useCenterStrict
+            } = this.common
+            ipcRendererSend('app-zoom', { zoom, noResize, useForCreate, useCenterStrict })
             emitEvents('app-zoom', zoom)
         },
         setupAppSuspension() {

@@ -97,17 +97,16 @@ const setPlayingCoverSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    let size = 366 * Math.min(wScaleRatio, hScaleRatio)
+    const size = Math.round(366 * Math.min(wScaleRatio, hScaleRatio))
     const coverWrapEl = document.querySelector('.playing-view .cover-wrap')
     if (!coverWrapEl) return
-    //coverWrapEl.style.marginRight = (41  + 10) * Math.min(wScaleRatio, hScaleRatio) + 'px'
     const coverEl = coverWrapEl.querySelector('.cover')
     if (!coverEl) return
-    coverEl.style.width = `${size + 3}px`
-    coverEl.style.height = `${size + 3}px`
+    coverEl.style.width = `${size}px`
+    coverEl.style.height = `${size}px`
     const formatEl = coverWrapEl.querySelector('.format')
     if (!formatEl) return
-    formatEl.style.width = `${size + 3 + 12}px`
+    formatEl.style.width = `${size + 12}px`
 }
 
 const setPlayingLyricCtlSize = () => {
@@ -182,7 +181,7 @@ const setVisualPlayingViewCoverSize = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const wScaleRatio = clientWidth / minAppWidth
     const hScaleRatio = clientHeight / minAppHeight
-    const size = 365 * Math.min(wScaleRatio, hScaleRatio)
+    const size = Math.round(365 * Math.min(wScaleRatio, hScaleRatio))
     const coverEl = document.querySelector('.visual-playing-view .cover-wrap .cover')
     if (!coverEl) return
     coverEl.style.width = `${size}px`

@@ -23,7 +23,7 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 const { seekTrack, playPlaylist,
-    playMv, progressState,
+    playVideoItem, progressState,
     mmssCurrentTime, currentTimeState,
     favoritedState, toggleFavoritedState,
     preseekTrack, mmssPreseekTime,
@@ -1132,7 +1132,7 @@ onActivated(() => {
                 </div>
                 <div class="action">
                     <span class="mv-btn" v-show="Track.hasMv(currentTrack)">
-                        <svg @click="playMv(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
+                        <svg @click="playVideoItem(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">

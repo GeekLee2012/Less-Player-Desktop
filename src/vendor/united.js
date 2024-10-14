@@ -1,3 +1,4 @@
+import { toRaw } from 'vue';
 import { Track } from "../common/Track";
 import { toTrimString, stringIncludesIgnoreCaseEscapeHtml, 
     stringEqualsIgnoreCaseEscapeHtml, trimTextWithinBrackets, isDevEnv
@@ -87,10 +88,21 @@ export class United {
         return Array.isArray(vendors) && vendors[0]
     }
 
+    //简化Track元数据
+    static simplifyMetadata(track) {
+        const _track = { ...toRaw(track) }
+        //移除非必要信息
+        const excludeProps = ['url', 'lyric', 'lyricTrans', 'lyricRoma',
+            'publishTime', 'score', 'isCandidate']
+        excludeProps.forEach(prop => Reflect.deleteProperty(_track, prop))
+        return _track
+    }
+
     //互惠互助、互通有无、移花接木、同舟共济 ~
     static transferTrack(track, options) {
         return new Promise(async (resolve, reject) => {
             let result = null
+
             const { platform: fromPlatform, title } = track
             const firstArtistName = Track.firstArtistName(track)
             const _title = United.pretransformTitle(title)
@@ -101,14 +113,26 @@ export class United {
             const filteredVendors = United.getVendors().filter(v => (v.CODE != fromPlatform))
             const fromVendor = United.getVendor(fromPlatform)
             if (fromVendor) filteredVendors.push(fromVendor)
-
+            
+            //TODO 优先级策略
             for (var i = 0; i < filteredVendors.length; i++) {
                 const vendor = filteredVendors[i]
-                if(!vendor || !vendor.searchSongs) continue
+                if(!vendor) continue
+                
+                //音源扩展点 1 - 可实现准确匹配，知道歌曲信息
+                if(vendor.transferTrack) {
+                    result = await vendor.transferTrack(United.simplifyMetadata(track), options)
+                }
+                if (result) break
+                
+                if(!vendor.searchSongs) continue
+                //音源扩展点 2 - 模糊（范围）匹配，只知道关键字，不知道歌曲信息
                 const searchResult = await vendor.searchSongs(keyword)
                 if (!searchResult) continue
+
                 const { data: candidates } = searchResult
                 if (!candidates || candidates.length < 1) continue
+
                 result = await United.matchTrack(
                     { ...track, tTitle, tArtistName }, 
                     candidates.slice(0, Math.min(candidates.length, 20)), 

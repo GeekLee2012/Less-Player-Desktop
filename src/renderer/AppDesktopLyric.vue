@@ -270,7 +270,7 @@ let initTimer = null
 const initDesktopLryic = () => {
   //syncSettingFromMain(data)
   setupLyricSetting()
-  sendLyricLayoutStateToMain(true)
+  sendLyricLayoutStateToMain({ needResize: true, isInit: true })
   clearInterval(initTimer)
   initTimer = setInterval(() => {
     postMessageToMain('c-track-init')
@@ -320,10 +320,9 @@ const handleMessage = ({ action, data }) => {
     togglePin()
   } else if (action === 's-setting-sync') {
     const { layoutMode, textDirection, autoSize, needResize } = data
-    console.log(layoutMode, textDirection, autoSize, needResize)
     syncSettingFromMain(data)
     setupLyricSetting()
-    sendLyricLayoutStateToMain(needResize || false)
+    sendLyricLayoutStateToMain({ needResize })
   } else if (action === 's-theme-apply') {
     applyThemeFromMain(data)
   }
@@ -459,7 +458,7 @@ const switchTextDirectionState = () => {
   setDesktopLyricTextDirection(direction)
   setupLyricSetting()
   syncSettingToMain()
-  sendLyricLayoutStateToMain(true)
+  sendLyricLayoutStateToMain({ needResize: true })
   //setupLyricScrollLocator()
 }
 
@@ -529,7 +528,7 @@ const switchLayoutMode = () => {
     setDesktopLyricAlignment(1)
   }
 
-  sendLyricLayoutStateToMain(true)
+  sendLyricLayoutStateToMain({ needResize: true })
   syncSettingToMain()
   setupLyricSetting()
 }
@@ -538,10 +537,13 @@ const toggleLyricTransActive = () => {
   setLyricTransActive(!lyricTransActived.value)
 }
 
-const sendLyricLayoutStateToMain = (needResize) => {
+const sendLyricLayoutStateToMain = (options) => {
+  const { isInit, needResize } = options || {}
   const { layoutMode, textDirection, autoSize } = desktopLyric.value
   if(!autoSize) return 
-  sendToMain('app-desktopLyric-layoutMode', { layoutMode, textDirection, needResize })
+  sendToMain('app-desktopLyric-layoutMode', { 
+    layoutMode, textDirection, needResize, isInit 
+  })
 }
 
 const visitSetting = () => {

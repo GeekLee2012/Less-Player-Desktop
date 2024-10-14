@@ -20,7 +20,7 @@ import { Playlist } from '../../common/Playlist';
 
 
 
-const { seekTrack, playMv,
+const { seekTrack, playVideoItem,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
@@ -236,7 +236,7 @@ onMounted(() => {
                 <div class="meta-wrap" v-show="(lyricMetaPos == 2)">
                     <div class="meta">
                         <div class="mv" v-show="Track.hasMv(currentTrack)">
-                            <svg @click="playMv(currentTrack)" 
+                            <svg @click="playVideoItem(currentTrack)" 
                                 width="20" 
                                 height="16" 
                                 viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
@@ -507,9 +507,9 @@ onMounted(() => {
 <style>
 .playing-view {
     display: flex;
-    /*flex-direction: column;*/
     overflow: hidden;
-    --bottom-size: 82px;
+    --header-height: 43px;
+    --bottom-height: 82px;
     --others-lyric-ctl-extra-btn-bottom: 108px;
     --others-sliderbar-ctl-height: 4px; 
     --others-sliderbar-thumb-size: 15px;
@@ -535,7 +535,7 @@ onMounted(() => {
 
 .playing-view .container > .header {
     height: 56px;
-    height: 43px;
+    height: var(--header-height);
     display: flex;
     -webkit-app-region: drag;
 }
@@ -628,6 +628,7 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
     padding: 0px 60px;
 }
 
@@ -642,8 +643,10 @@ onMounted(() => {
     margin-right: 51px;
     margin-bottom: 0px;
     margin-top: 13px;
+    margin-top: 36px;
+    margin-top: calc(var(--bottom-height) - var(--header-height));
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     flex-direction: column;
     align-items: flex-end;
 }
@@ -691,8 +694,8 @@ onMounted(() => {
     --others-sliderbar-ctl-height: 3px; 
     --others-sliderbar-thumb-size: 13px;
 
-    height: var(--bottom-size);
-    min-height: var(--bottom-size);
+    height: var(--bottom-height);
+    min-height: var(--bottom-height);
     padding-bottom: 3px;
 }
 
@@ -748,9 +751,9 @@ onMounted(() => {
 /* bottom-new  */
 .playing-view .container > .bottom.bottom-new {
     border-top: 1.3px solid var(--others-progressbar-bg-color);
-    --bottom-size: 88px;
-    /*height: var(--bottom-size);
-    min-height: var(--bottom-size);*/
+    --bottom-height: 88px;
+    /*height: var(--bottom-height);
+    min-height: var(--bottom-height);*/
     padding-bottom: 0px;
     --others-playctl-spacing: 28px;
     --bottom-hmargin: 59px;

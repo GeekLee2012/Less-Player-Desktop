@@ -40,6 +40,7 @@
     "colorthief": "^2.4.0",
     "crypto-js": "^4.1.1",
     "electron-fetch": "^1.9.1",
+    "fast-xml-parser": "^4.5.0",
     "hls.js": "^1.4.12",
     "howler": "^2.2.4",
     "jsencrypt": "^3.3.2",

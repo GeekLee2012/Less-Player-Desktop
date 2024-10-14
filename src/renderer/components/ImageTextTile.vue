@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlatformStore } from '../../renderer/store/platformStore';
 import { useSettingStore } from '../../renderer/store/settingStore';
-import { coverDefault, isBlank, toTrimString } from '../../common/Utils';
+import { coverDefault, isBlank, toTrimString, toHhMmss } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -25,6 +25,7 @@ const props = defineProps({
     coverFit: Number,
     singleLineTitleStyle: Boolean,
     centerTitleStyle: Boolean,
+    duration: Number,
 })
 
 const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
@@ -118,6 +119,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </g>
                     </svg>
                 </div>
+            </div>
+            <div class="cover-bottom" v-show="!checkbox && videoStyle">
+                <div class="duration" v-show="duration" v-html="toHhMmss(duration)"></div>
             </div>
         </div>
         <!-- 目前体验不好
@@ -275,6 +279,18 @@ onUnmounted(() => offEvents(eventsRegistration))
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.image-text-tile .cover-wrap .cover-bottom .duration {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    z-index: 1;
+    color: #fff;
+    font-weight: bold;
+    padding: 3px 5px;
+    font-size: calc(var(--content-text-tip-text-size) - 1px);
+    background-color: #16161633;
 }
 
 .image-text-tile .cover-wrap .play-btn:hover {

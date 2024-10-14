@@ -392,7 +392,6 @@ onActivated(() => {
     margin-left: 5px;
     padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
-    /*font-size: calc(var(--content-text-tab-title-size) - 2px);*/
     font-size: var(--content-text-tab-title-size);
 }
 

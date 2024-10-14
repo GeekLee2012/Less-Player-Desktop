@@ -188,6 +188,14 @@ const tutorialList = [{
     title: '关闭时不退出：设置页 - 菜单栏',
     artist: [ { id:'', name: '教程' }],
     color: '#ff9a3c',
+}, {
+    title: '带图标的元素，一般均可交互',
+    artist: [ { id:'', name: '教程' }],
+    color: '#f73859',
+}, {
+    title: '左侧导航，带图标的标题 - 点击',
+    artist: [ { id:'', name: '教程 - 导航' }],
+    color: '#6639a6',
 }]
 
 

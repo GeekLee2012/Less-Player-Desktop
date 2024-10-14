@@ -1,8 +1,8 @@
+import { toRaw } from 'vue';
 import { Howl, Howler } from 'howler';
 import { PlayState } from '../common/Constants';
 import { Track } from './Track';
 import { createWebAudioApi } from './WebAudioApi';
-import { toRaw } from 'vue';
 import { isDevEnv } from './Utils';
 import { onEvents, emitEvents } from './EventBusWrapper';
 

@@ -32,7 +32,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         videoThemeIndex: 1,
         dataLayoutIndex: 0, // 0 => Grid, 1 => List
         recentVideos: [],
-        recentLimit: 10,
+        recentLimit: 20,
         savePlayingPos: false, //是否保存播放进度，即是否从头开始看
     }),
     getters: {
@@ -130,7 +130,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             if(!video) return
             this._resetPlayState()
 
-            const playEventName = video.url ? 'video-play' : 'video-change'
+            const playEventName = video.url ? 'video-play' : 'video-changed'
             emitEvents(playEventName, video)
         },
         //播放，并更新当前播放列表相关状态
@@ -186,7 +186,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         switchVideoThemeIndex() {
             this.videoThemeIndex = ++this.videoThemeIndex % videoThemeNames.length
         },
-        seDataLayoutIndex(index) {
+        setDataLayoutIndex(index) {
             this.dataLayoutIndex = index
         },
         clearCurrentVideo() {
@@ -232,7 +232,10 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
             if(!video) return 
             let index = 0, counter = 0
             do {
-                index = this.recentVideos.findIndex(item => isVideoEquals(item.data, video))
+                index = this.recentVideos.findIndex(item => {
+                    return isVideoEquals(item.data, video) 
+                        || (typeof item.data.id == 'undefined')
+                })
                 if(index > -1) {
                     this.recentVideos.splice(index, 1)
                     index = 0

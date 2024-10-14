@@ -4,6 +4,8 @@ import forge from "node-forge";
 import JSEncrypt from 'jsencrypt';
 import { pinyin } from 'pinyin-pro';
 import { FILE_PREFIX, DEFAULT_COVER_BASE64, FILE_SCHEME } from './Constants';
+import { XMLBuilder, XMLParser } from 'fast-xml-parser'; 
+
 
 
 
@@ -229,7 +231,13 @@ export const escapeHtml = (text) => {
 }
 
 export const encodeURL = (text) => {
-    return toTrimString(text).replace(/#/g, '%23')
+    if(typeof text == 'object') return text
+
+    const _text = toTrimString(text)
+    //在线URL一般无需额外处理
+    if(_text.startsWith('http') || _text.startsWith('blob:http')) return _text
+    //本地URL
+    return _text.replace(/#/g, '%23')
         .replace(/\?/g, '%3F').trim()
 }
 
@@ -697,6 +705,16 @@ const guessFilename = (name, defaultName, excludes) => {
     return  _name
 }
 
+export const parseXML = (text, options) => {
+    const parser = new XMLParser(options)
+    return parser.parse(text)
+}
+
+export const buildXML = (json, options) => {
+    const builder = new XMLBuilder(options)
+    return builder.build(json)
+}
+
 
 /************ 其他 ************/
 //限制数组总长度，超出部分会直接删除
@@ -740,7 +758,9 @@ export const coverDefault = (cover, defaultCover) => {
 
 export const transformUrl = (url, protocal) => {
     url = toTrimString(url)
-    if(url.length < 1 || url.includes('://') || url.startsWith('data:')) return url
+    if(url.length < 1 || url.includes('://') 
+        || url.startsWith('data:')
+        || url.startsWith('blob:')) return url
     protocal = protocal || 'https'
     return `${protocal}://${url}`.replace(':////', '://')
 }
@@ -770,9 +790,12 @@ export const isSupportedImage = (path) => {
 }
 
 export const transformPath = (path) => {
+    const _path = toTrimString(path)
     try {
-        if(path) {
-            return path.replace(FILE_PREFIX, '')
+        if(!_path.startsWith('http') 
+            && !_path.startsWith('blob:http')
+            && !_path.startsWith('data:')) {
+            return _path.replace(FILE_PREFIX, '')
                 .replace(/\\/g, '/')
                 .replace(/\/\//g, '')
                 .trim()
@@ -780,33 +803,50 @@ export const transformPath = (path) => {
     } catch (error) {
         console.log(error)
     }
-    return path
+    return _path
 }
 
 
 /************ 日期时间 ************/
+export const toHhMmss = (millis) => {
+    if(!millis && millis !== 0) return 
+    let minutes = Math.floor(millis / 60000)
+    let seconds = Math.round((millis % 60000) / 1000)
+    if (seconds >= 60) { //是否引起进位
+        seconds = seconds - 60
+        ++minutes
+    }
+    let hours = Math.floor(minutes / 60)
+    minutes -= (hours * 60)
+    const _hours = (hours < 1 ? '' : (hours < 10 ? '0' : '') + `${hours}:`)
+    minutes = (minutes < 10 ? '0' : '') + minutes
+    seconds = (seconds < 10 ? '0' : '') + seconds
+
+    return `${_hours}${minutes}:${seconds}`
+}
+
 export const toMmss = (millis) => {
     if(!millis && millis !== 0) return 
-    let minutes = Math.floor(millis / 60000);
-    let seconds = ((millis % 60000) / 1000).toFixed(0);
+    let minutes = Math.floor(millis / 60000)
+    let seconds = ((millis % 60000) / 1000).toFixed(0)
     if (seconds >= 60) { //toFixed()是否引起进位
         seconds = seconds - 60
         ++minutes
     }
     minutes = (minutes < 10 ? '0' : '') + minutes
     seconds = (seconds < 10 ? '0' : '') + seconds
-    return minutes + ":" + seconds;
+    return `${minutes}:${seconds}`
 }
 
 export const toMMssSSS = (millis) => {
-    let minutes = Math.floor(millis / 60000);
-    let fullSecs = ((millis % 60000) / 1000);
-    let seconds = Math.floor(fullSecs);
-    let millsecs = ((fullSecs - seconds) * 1000).toFixed(0);
+    let minutes = Math.floor(millis / 60000)
+    let fullSecs = ((millis % 60000) / 1000)
+    let seconds = Math.floor(fullSecs)
+    let millsecs = ((fullSecs - seconds) * 1000).toFixed(0)
     minutes = (minutes < 10 ? '0' : '') + minutes
     seconds = (seconds < 10 ? '0' : '') + seconds
     millsecs = (millsecs < 100 ? (millsecs < 10 ? '00' : '0') : '') + millsecs
-    return minutes + ":" + seconds + "." + millsecs;
+    return `${minutes}:${seconds}.${millsecs}`
 }
 
 export const toYyyymmdd = (timestamp, sp) => {

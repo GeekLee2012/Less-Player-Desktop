@@ -27,7 +27,7 @@ const props = defineProps({
     checkChangedFn: Function,
 })
 
-const { playMv, dndSaveTrack } = inject('player')
+const { playVideoItem, dndSaveTrack } = inject('player')
 const { showContextMenu } = inject('appCommon')
 
 const { playing } = storeToRefs(usePlayStore())
@@ -156,7 +156,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <span>VIP</span>
         </div>
         <div class="mv" v-show="!checkbox && Track.hasMv(data)" :class="{ spacing: !(checkbox || showVipFlag(data)) }">
-            <svg @click="playMv(data)" width="18" height="15" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
+            <svg @click="playVideoItem(data)" width="18" height="15" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path

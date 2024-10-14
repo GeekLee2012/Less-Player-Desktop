@@ -348,7 +348,7 @@ const onImageDrop = (event, item, index) => {
 
 .playing-theme-list-view .center .options .opt-item {
     display: flex;
-    margin-bottom: 13px;
+    margin-bottom: 15px;
     align-items: center;
 }
 

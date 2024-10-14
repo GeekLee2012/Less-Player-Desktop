@@ -31,7 +31,8 @@ const transformPath = (path) => {
 
 const transformUrl = (url, protocal) => {
     url = (url || '').trim()
-    if(url.length < 1 || url.includes('://')) return url
+    if(url.length < 1 || url.includes('://')|| url.startsWith('data:')
+        || url.startsWith('blob:')) return url
     protocal = protocal || 'https'
     return `${protocal}://${url}`.replace(':////', '://')
 }

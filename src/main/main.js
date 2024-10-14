@@ -35,7 +35,6 @@ let messagePortPair = null, messagePortChannel = null
 let appUserAgent =  null, exRequestHandlers = []
 let useTemplateImage = false
 
-const initZoomFactor = 1.0
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
 const appLayoutConfig = {
   'default': {
@@ -47,7 +46,8 @@ const appLayoutConfig = {
     appHeight: 588
   }
 }
-let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT, currentZoom = 85
+let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT, currentZoom = 85, useWinCenterStrict = false
+let appConfig = null
 let powerSaveBlockerId = -1
 let appTray = null, appTrayMenu = null, appTrayShow = false
 let playState = false, desktopLyricLockState = false
@@ -93,6 +93,8 @@ const fetchBuffer = async (url, data) => {
 }
 
 const initialize = () => {
+  initAppConfig()
+
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
@@ -447,14 +449,17 @@ const registryGlobalListeners = () => {
     appTrayShow = isShow
     useTemplateImage = isNative
     setupTray()
-  }).on('app-zoom', (event, { zoom, noResize }) => {
-    setupAppWindowZoom(zoom, noResize)
+  }).on('app-zoom', (event, { zoom, noResize, useForCreate, useCenterStrict }) => {
+    useWinCenterStrict = useCenterStrict
+    setupAppWindowZoom(zoom, noResize, useForCreate, useCenterStrict)
   }).on('app-winBtn', (event, value) => {
     setWindowButtonVisibility(mainWin, value === true)
-  }).on('app-layout-default', (event, { zoom, isInit }) => {
-    setupAppLayout(DEFAULT_LAYOUT, zoom, isInit)
-  }).on('app-layout-simple', (event, { zoom, isInit }) => {
-    setupAppLayout(SIMPLE_LAYOUT, zoom, isInit)
+  }).on('app-layout-default', (event, { zoom, isInit, useCenterStrict }) => {
+    useWinCenterStrict = useCenterStrict
+    setupAppLayout(DEFAULT_LAYOUT, zoom, isInit, useCenterStrict)
+  }).on('app-layout-simple', (event, { zoom, isInit, useCenterStrict }) => {
+    useWinCenterStrict = useCenterStrict
+    setupAppLayout(SIMPLE_LAYOUT, zoom, isInit, useCenterStrict)
   }).on('app-globalShortcut', (event, data) => {
     if (data === true) {
       globalShortcut.unregisterAll()
@@ -799,9 +804,10 @@ const registryGlobalListeners = () => {
 
   ipcMain.handle('app-getCookie', async (event, ...args) => {
     const url = args[0]
-    const cookie = getCookie(url)
+    const fetchOnMissing = args[1]
+    const cookie = getCookie(url, fetchOnMissing)
     if(cookie) return cookie
-    return await fetchCookie(url)
+    return await fetchCookie(url, fetchOnMissing)
   })
 
   ipcMain.handle('app-addRequestHandler', async (event, ...args) => {
@@ -812,6 +818,38 @@ const registryGlobalListeners = () => {
     const index = exRequestHandlers.findIndex(item => (item.id == _id))
     if(index > -1) exRequestHandlers.splice(index, 1)
     exRequestHandlers.push(args[0])
+  })
+
+  ipcMain.handle('app-updateRequestHandler', async (event, ...args) => {
+    const { id, appendMode } = args[0]
+    if(!id) return 'id未设置'
+    
+    const _id = id.toString().trim()
+    const index = exRequestHandlers.findIndex(item => (item.id == _id))
+    if(index < 0) return exRequestHandlers.push(args[0])
+    
+    const handler = exRequestHandlers[index]
+    if(!appendMode) { //默认模式 - 替换
+      Object.assign(handler, { ...args[0] })
+    } else {  //追加模式
+      const { includes, startsWith, endsWith, equals, regex } = args[0]
+      if(includes) {
+        handler.includes = handler.includes || []
+        handler.includes.push(...includes)
+      } else if(startsWith) {
+        handler.startsWith = handler.startsWith || []
+        handler.startsWith.push(...startsWith)
+      } else if(endsWith) {
+        handler.endsWith = handler.endsWith || []
+        handler.endsWith.push(...endsWith)
+      } else if(equals) {
+        handler.equals = handler.equals || []
+        handler.equals.push(...equals)
+      } else if(regex) {
+        handler.regex = handler.regex || []
+        handler.regex.push(...regex)
+      }
+    }
   })
 
   ipcMain.handle('app-removeRequestHandler', async (event, ...args) => {
@@ -857,8 +895,9 @@ const registryGlobalListeners = () => {
   }).on('app-mainWin-show', (event, ...args) => {
     showMainWindow()
   }).on('app-desktopLyric-layoutMode', (event, ...args) => {
-    const { layoutMode, textDirection, needResize } = args[0]
+    const { layoutMode, textDirection, needResize, isInit } = args[0]
     setupDesktopLyricWindowSize(layoutMode, textDirection == 1, needResize)
+    if(isInit) setupLyricWindowCenterScreen()
   }).on('app-desktopLyric-alwaysOnTop', (event, ...args) => {
     setWindowAlwaysOnTop(lyricWin, args[0])
     setupTrayMenu()
@@ -896,6 +935,27 @@ const getPluginsRootPath = (dirName) => {
     if(isDevEnv) console.log(error)
   }
   return _path
+}
+
+const initAppConfig = () => {
+  appConfig = {}
+  try {
+    const configFile = app.getPath('userData') + '/User/config.json'
+    const result = statPathSync(configFile)
+    if(!result) return 
+    appConfig = JSON.parse(readText(configFile))
+  } catch(error) {
+    if(isDevEnv) console.log(error)
+  }
+}
+
+const storeAppConfig = () => {
+  try {
+    const configFile = app.getPath('userData') + '/User/config.json'
+    writeText(configFile, JSON.stringify(appConfig))
+  } catch(error) {
+    if(isDevEnv) console.log(error)
+  }
 }
 
 const setupDesktopLyricWindowSize = (layoutMode, isVertical, needResize) => {
@@ -1015,6 +1075,7 @@ const closeMessagePortPair = () => {
 
 //创建浏览窗口
 const createMainWindow = (show) => {
+  const { zoomFactor } = appConfig
   const { appWidth: width, appHeight: height } = appLayoutConfig[appLayout]
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -1030,7 +1091,7 @@ const createMainWindow = (show) => {
     show,
     frame: false,
     webPreferences: {
-      zoomFactor: initZoomFactor,
+      zoomFactor: (zoomFactor || 1.0),
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
@@ -1103,7 +1164,7 @@ const createMainWindow = (show) => {
   return mainWindow
 }
 
-const setupAppLayout = (layout, zoom, isInit) => {
+const setupAppLayout = (layout, zoom, isInit, useCenterStrict) => {
   appLayout = layout
 
   zoom = Number(zoom) || 85
@@ -1122,9 +1183,8 @@ const setupAppLayout = (layout, zoom, isInit) => {
   }
   mainWin.webContents.setZoomFactor(zoomFactor)
   //mainWin.webContents.zoomFactor = zoomFactor
-  
-  //TODO 貌似 Electron Bug? 显示效果：能居中，但只能居中一点点？水平方向居中，但垂直方向没居中
-  mainWin.center()
+
+  setupMainWindowCenterScreen(useCenterStrict)
 }
 
 const getAppMenuI18nConfig = () => {
@@ -1334,7 +1394,36 @@ const toggleWinOSFullScreen = () => {
   return !isMax
 }
 
-const setupAppWindowZoom = (zoom, noResize) => {
+
+const setupMainWindowCenterScreen = (useCenterStrict) => {
+  if (!isWindowAccessible(mainWin)) return
+  //默认居中方式 - 多屏场景下兜底
+  //TODO 貌似Electron Bug? 显示效果：能居中，但只能居中一点点？水平方向居中，但垂直方向没居中
+  if (!useCenterStrict) return mainWin.center()
+  
+  //严格居中显示 - 仅主屏，多屏时不兼容
+  const { width, height } = mainWin.getBounds()
+  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size
+  const x = parseInt((screenWidth - width) / 2)
+  const y = parseInt((screenHeight - height) / 2)
+  mainWin.setPosition(x, y)
+}
+
+//歌词首次居中显示，其他情况一般不需要居中
+const setupLyricWindowCenterScreen = () => {
+  if (!isLyricWindowShow(lyricWin)) return
+  //默认居中方式 - 多屏场景下兜底
+  if (!useWinCenterStrict) return lyricWin.center()
+  
+  //严格居中显示 - 仅主屏，多屏时不兼容
+  const { width, height } = lyricWin.getBounds()
+  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size
+  const x = parseInt((screenWidth - width) / 2)
+  const y = parseInt((screenHeight - height) / 2)
+  lyricWin.setPosition(x, y)
+}
+
+const setupAppWindowZoom = (zoom, noResize, useForCreate, useCenterStrict) => {
   if (!isWindowAccessible(mainWin) || !zoom) return
   
   const _zoom = Number(zoom) || 85
@@ -1349,10 +1438,15 @@ const setupAppWindowZoom = (zoom, noResize) => {
   
   if (!noResize && mainWin.isNormal()) {
     mainWin.setSize(width, height)
-    mainWin.center()
+    setupMainWindowCenterScreen(useCenterStrict)
   }
   mainWin.webContents.setZoomFactor(zoomFactor)
   //mainWin.webContents.zoomFactor = zoomFactor
+  
+  Object.assign(appConfig, {
+    zoomFactor: (useForCreate ? zoomFactor : 1.0)
+  })
+  storeAppConfig()
 }
 
 const addToDownloadingQueue = (url, meta) => {
@@ -1412,7 +1506,7 @@ const setupAppGlobalProxy = (data) => {
       proxyBypassRules: 'localhost'
     })
   }
-  if (isDevEnv) console.log('ProxyConfig: ', config)
+  if (isDevEnv) console.log('[Proxy] ', config)
   session.defaultSession.setProxy(config)
 }
 
@@ -1476,10 +1570,17 @@ const fetchCookie = async (url, ignoreCache) => {
     cookiesPendingMap[url] = true
 
     //缓存未命中
-    const resp = await fetch(url)
-    const cookieText = resp.headers.get('Set-Cookie')
-    if (cookieText) {
-      cookie = {}
+    const resp = await fetch(url, {
+      headers: {
+        'User-Agent': appUserAgent
+      }
+    })
+    const { headers } = resp
+    cookie = {}
+    let counter = 0, hasCookie = false
+    do {
+      const cookieText = headers.get('Set-Cookie')
+      if(!cookieText || (counter++ > 30)) break
       const items = cookieText.split(';')
       items.forEach(item => {
         const kvPair = item.split('=')
@@ -1487,8 +1588,9 @@ const fetchCookie = async (url, ignoreCache) => {
         const value = kvPair[1].trim()
         cookie[key] = value
       })
-      cacheCookie(url, cookie)
-    }
+      hasCookie = true
+    } while(true)
+    if(hasCookie) cacheCookie(url, cookie)
   } catch (error) {
     if (isDevEnv) console.log(error)
   }
@@ -1591,12 +1693,6 @@ const overrideRequestHeaders = (details) => {
   if (preferReferer && preferReferer.includes('localhost') && !url.includes('localhost')) {
     Reflect.deleteProperty(details.requestHeaders, 'Referer')
   }
-
-  if(hostOfUrl.includes('bilivideo')) {
-    details.requestHeaders['Origin'] = 'https://www.bilibili.com'
-    details.requestHeaders['Referer'] = 'https://www.bilibili.com/'
-    details.requestHeaders['Range'] = 'bytes=0-230217861'
-  }
   
   return details.requestHeaders
 }
@@ -1616,7 +1712,7 @@ const createLyricWindow = () => {
     transparent: true,
     frame: false,
     webPreferences: {
-      zoomFactor: initZoomFactor,
+      zoomFactor: 1.0,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,

@@ -22,7 +22,7 @@ class VideoPlayer {
         if (!singleton) {
             singleton = new VideoPlayer().on({
                 'video-init': value => singleton.setVideoNode(value),
-                'video-change': value => singleton.setVideo(value),
+                //'video-changed': value => singleton.setVideo(value),
                 'video-play': value => singleton.playVideo(value),
                 'video-togglePlay': () => singleton.togglePlay(),
                 'video-setVolume': value => singleton.volume(value),
@@ -44,7 +44,16 @@ class VideoPlayer {
             playbackRates: [0.5, 1, 1.5, 2], 
             userActions: {
                 //click: false
-            }
+            },
+            //techOrder: ['html5', 'flvjs'],
+            flvjs: {
+                mediaDataSource: {
+                    isLive: true,
+                    cors: true,
+                    withCredentials: false,
+                },
+                // config: {},
+            },
         })
         this.delegatePlayer.volume(this.volume)
         this.setPlayState(PlayState.INIT)
@@ -54,7 +63,7 @@ class VideoPlayer {
         this.delegatePlayer.on('pause', () => self.setPlayState(PlayState.PAUSE))
         this.delegatePlayer.on('ended', () => self.setPlayState(PlayState.END))
         this.delegatePlayer.on('error', () => self.setPlayState(PlayState.PLAY_ERROR))
-        this.delegatePlayer.on('ratechange', (event) => self.setPlayAction(PlayAction.CHANGE_RATE, event, self.delegatePlayer.playbackRate()))
+        this.delegatePlayer.on('ratechange', (event) => self.setPlayAction(PlayAction.SET_RATE, event, self.delegatePlayer.playbackRate()))
 
         this.customControlBar()
 
@@ -144,6 +153,7 @@ class VideoPlayer {
         this.video = video
         this.videoChanged = true
         this.setPlayState(PlayState.NONE, true)
+        this.setPlayAction(PlayAction.SET_VIDEO, video)
     }
 
     playVideo(video) {

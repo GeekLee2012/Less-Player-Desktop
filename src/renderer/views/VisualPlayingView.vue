@@ -17,7 +17,7 @@ import { Playlist } from '../../common/Playlist';
 
 
 
-const { seekTrack, playMv,
+const { seekTrack, playVideoItem,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
@@ -144,7 +144,7 @@ onUnmounted(() => {
                 <div class="meta-wrap" v-show="(lyricMetaPos == 2)">
                     <div class="meta">
                         <div class="mv" v-show="Track.hasMv(currentTrack)">
-                            <svg @click="playMv(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
+                            <svg @click="playVideoItem(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">

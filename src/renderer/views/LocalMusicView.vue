@@ -19,7 +19,6 @@ import { isDevEnv, ipcRendererInvoke, isSupportedImage } from "../../common/Util
 
 
 
-
 const { visitLocalPlaylistCreate, visitBatchLocalMusic } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
 
@@ -162,6 +161,7 @@ const tutorialList = [{
 }]
 
 
+
 /* 生命周期、监听 */
 onMounted(() => resetBack2TopBtn())
 </script>
@@ -274,7 +274,6 @@ onMounted(() => resetBack2TopBtn())
     margin-left: 3px;
     padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
-    /*font-size: calc(var(--content-text-tab-title-size) - 2px);*/
     font-size: var(--content-text-tab-title-size);
 }
 </style>

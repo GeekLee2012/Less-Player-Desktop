@@ -1,3 +1,7 @@
+import { isBlank } from "./Utils";
+
+
+
 export class Video {
 
     constructor(id, platform, title, vcType, cover, url, data, detailUrl) {
@@ -14,6 +18,18 @@ export class Video {
 
     static isCollectionType(video) {
         return video && video.vcType == 1
+    }
+
+    static isUnknownType(video) {
+        return video && (typeof video.vcType == 'undefined')
+    }
+
+    static maybeCollectionType(video) {
+        return Video.isCollectionType(video) || Video.isUnknownType(video)
+    }
+
+    static hasUrl(video) {
+        return video && !isBlank(video.url)
     }
 
     addDataItem(item) {

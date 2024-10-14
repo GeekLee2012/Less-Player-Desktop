@@ -16,7 +16,7 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
-const { seekTrack, playMv,
+const { seekTrack, playVideoItem,
     progressState, mmssCurrentTime,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
@@ -294,7 +294,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="meta-wrap" v-show="false && (lyricMetaPos == 2)">
                     <div class="meta">
                         <div class="mv" v-show="Track.hasMv(currentTrack)">
-                            <svg @click="playMv(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
+                            <svg @click="playVideoItem(currentTrack)" width="20" height="16" viewBox="0 0 1024 853.52"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
@@ -538,7 +538,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     overflow: hidden;
     --others-sliderbar-ctl-height: 2px; 
     --others-sliderbar-thumb-size: 13px;
-    --bottom-size: 82px;
+    --bottom-height: 82px;
 }
 
 .dynamic-playing-view .spacing {
@@ -689,7 +689,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 */
 
 .dynamic-playing-view .bottom {
-    height: var(--bottom-size);
+    height: var(--bottom-height);
     padding-bottom: 3px;
     visibility: hidden;
     background: #00000036;
@@ -743,9 +743,9 @@ onUnmounted(() => offEvents(eventsRegistration))
 .dynamic-playing-view .container > .bottom.bottom-new {
     border-top: 1.3px solid var(--others-progressbar-bg-color);
     border-top: 0.1px solid #00000039;
-    --bottom-size: 88px;
-    /*height: var(--bottom-size);
-    min-height: var(--bottom-size);*/
+    --bottom-height: 88px;
+    /*height: var(--bottom-height);
+    min-height: var(--bottom-height);*/
     padding-bottom: 0px;
     --others-playctl-spacing: 28px;
     --bottom-hmargin: 59px;

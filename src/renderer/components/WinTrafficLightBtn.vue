@@ -46,7 +46,7 @@ const toggleMaximize = () => maximize()
 <template>
     <div class="win-traffic-light-btn" @dblclick.stop="">
         <div @click="doQuit" class="ctl-btn close-btn">
-            <svg viewBox="0 -1 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg width="12" height="12" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                 <g id="cross">
                     <line class="cls-1" x1="7" x2="25" y1="7" y2="25" />
                     <line class="cls-1" x1="7" x2="25" y1="25" y2="7" />
@@ -55,7 +55,7 @@ const toggleMaximize = () => maximize()
         </div>
         <div @click="doMinimize" v-show="!hideMinBtn" class="ctl-btn min-btn"
             :class="{ 'button-disabled': isMinBtnDisabled }">
-            <svg viewBox="0 0 256 256" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+            <svg width="14" height="14" viewBox="0 0 256 256" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
                 <path
                     d="M208,134.4H48c-3.534,0-6.4-2.866-6.4-6.4s2.866-6.4,6.4-6.4h160c3.534,0,6.4,2.866,6.4,6.4S211.534,134.4,208,134.4z" />
@@ -105,16 +105,10 @@ const toggleMaximize = () => maximize()
     display: flex;
     -webkit-app-region: none;
     align-items: center;
-    /* width: 56px; */
 }
 
 
 .win-traffic-light-btn .ctl-btn {
-    /* width: 16px;
-    width: 13px;
-    height: 13px;
-    margin-right: 8px;
-     */
     width: var(--others-win-ctl-btn-size);
     height: var(--others-win-ctl-btn-size);
     margin-right: var(--others-win-ctl-btn-margin-right);
@@ -136,7 +130,7 @@ const toggleMaximize = () => maximize()
 }
 
 .win-traffic-light-btn .close-btn svg {
-    transform: translateX(0.4px) scale(0.9);
+    transform: translateX(0.4px);
 }
 
 .win-traffic-light-btn .ctl-btn svg {
@@ -153,8 +147,7 @@ const toggleMaximize = () => maximize()
 }
 
 .win-traffic-light-btn .min-btn svg {
-    stroke-width: 28px !important;
-    transform: scale(0.9);
+    stroke-width: 20px !important;
 }
 
 .win-traffic-light-btn .max-btn svg {
@@ -183,12 +176,9 @@ const toggleMaximize = () => maximize()
 
 .win-traffic-light-btn .collapse-btn {
     cursor: pointer;
-    /*margin-right: 8px;*/
     -webkit-app-region: none;
     padding-right: 8px;
     margin-left: calc(var(--others-win-ctl-btn-margin-right) + 5px);
-    /*display: flex;
-    align-items: center;*/
 }
 
 .win-traffic-light-btn .collapse-btn svg {

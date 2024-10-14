@@ -23,16 +23,14 @@ const props = defineProps({
 const { platforms, tabs, activeTab, activeTabCode,
     currentPlatformIndex, tabTipText
 } = storeToRefs(useSearchStore())
-const { setActiveTab,
-    setCurrentPlatformIndex,
-    updateTabTipText,
-    currentVender,
-    currentPlatform,
-    updateTabs,
-    getTabIndex,
-} = useSearchStore()
-const { togglePlatformCategoryView, hideAllCtxMenus, hidePlaybackQueueView } = useAppCommonStore()
-const { isLocalMusic, isAllSongsTab, isPlaylistsTab, isAlbumsTab, isArtistsTab, isVideosTab, } = usePlatformStore()
+const { setActiveTab, setCurrentPlatformIndex,
+    updateTabTipText, currentVender,
+    currentPlatform, updateTabs,
+    getTabIndex, } = useSearchStore()
+const { togglePlatformCategoryView, hideAllCtxMenus,
+    hidePlaybackQueueView } = useAppCommonStore()
+const { isLocalMusic, isAllSongsTab, isPlaylistsTab, 
+    isAlbumsTab, isArtistsTab, isVideosTab, isLyricsTab, } = usePlatformStore()
 
 
 const currentTabView = shallowRef(null)
@@ -138,6 +136,21 @@ const loadVideos = async () => {
     setLoading(false)
 }
 
+const loadLyrics = async () => {
+    currentTabView.value = PlaylistsControl
+    setLoading(true)
+    const vendor = currentVender()
+    if (!vendor || !vendor.searchLyrics) return
+    let result = null, retry = 1
+    do {
+        result = await vendor.searchLyrics(props.keyword, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!isLyricsTab(activeTabCode.value) || !result) return
+    if (currentPlatform() != result.platform) return
+    updateTabData(result.data)
+    setLoading(false)
+}
+
 const resetTabView = () => {
     currentTabView.value = null
     tabData.value.length = 0
@@ -162,6 +175,8 @@ const loadTab = () => {
         loadArtists()
     } else if (isVideosTab(code)) {
         loadVideos()
+    }  else if (isLyricsTab(code)) {
+        loadLyrics()
     }
 }
 
@@ -209,13 +224,14 @@ const togglePlatformCategory = () => {
 /* 生命周期、监听 */
 watch(currentPlatformIndex, (nv, ov) => {
     updateTabs()
+    const { length } = tabs.value
 
     //tabs被更新，需要重新检查index、code是否匹配
-    const index = activeTab
-    const code = activeTabCode.value
-    const _index = getTabIndex(code)
-    if (_index == -1) return resetTabView()
-    if (_index != index) setActiveTab(_index, code)
+    const index = activeTab.value
+    const code = length > 1 ? activeTabCode.value : tabs.value[0].code
+    const _index = length > 1 ? getTabIndex(code) : 0
+    if (_index == -1 && length > 1) return resetTabView()
+    if (_index != index || length == 1) setActiveTab(_index, code)
     
     loadTab()
 })
@@ -272,7 +288,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </span>
             </div>
             <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
-                :isAlbumArtistSutitle="true" :loading="isLoading" :videoStyle="videoStyle">
+                :isAlbumArtistSutitle="true" :loading="isLoading" :videoStyle="videoStyle" :playable="true">
             </component>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -313,6 +329,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
 }
 
 #search-view .platform {

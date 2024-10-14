@@ -9,15 +9,16 @@ export default {
 import { ref, reactive, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { usePlatformStore } from '../store/platformStore';
 import { useVideoPlayStore } from '../store/videoPlayStore';
 import { coverDefault, transformUrl, isSupportedVideo, 
-    toTrimString, ipcRendererInvoke, 
+    toTrimString, toLowerCaseTrimString, ipcRendererInvoke, 
     parseVideoCollectionLines, useGitRepository, } from '../../common/Utils';
 import { Video } from '../../common/Video';
 
 
 
-const { playVideo } = inject('player')
+const { playVideo, playPlaylist } = inject('player')
 const { backward } = inject('appRoute')
 const { showConfirm, visitLink } = inject('apiExpose')
 
@@ -30,6 +31,7 @@ const { showToast, showFailToast } = useAppCommonStore()
 const { recentVideos, isPlayFromBeginning } = storeToRefs(useVideoPlayStore())
 const { getRecentLatestVideos, clearRecentVideos, 
     toggleSavePlayingPos, removeRecentVideo, } = useVideoPlayStore()
+const { platforms } = storeToRefs(usePlatformStore())
 
 const coverRef = ref(null)
 const detail = reactive({ title: '', url: '', streamType: 0, tags: '', about: '', cover: '' })
@@ -49,21 +51,35 @@ const resetCheckStatus = () => {
 
 const setupVideoUrl = (url) => Object.assign(detail, { url })
 
-const parsePlay = (lines) => {
+const parsePlay = async (lines) => {
     if(!lines || !Array.isArray(lines) || lines.length < 1) return
 
     const video = parseVideoCollectionLines(lines)
-    if(!video) return showFailToast('视频流URL无法解析')
+    if(!video) return showFailToast('视频URL无法解析')
     const { vcType, url: vcUrl, data: vcData } = video
+
+    let _video = video
     if(Video.isCollectionType(video) && (!vcData || vcData.length < 1)) {
-        return showFailToast('视频流URL无法解析')
+        return showFailToast('视频URL无法解析')
     } else if(!Video.isCollectionType(video) && !vcUrl) {
-        return showFailToast('视频流URL无法解析')
+        return showFailToast('视频URL无法解析')
+    } else if(!Video.isCollectionType(video) && vcUrl) {
+        const _platforms = platforms.value('video-extract')
+        for(let i = 0; i < _platforms.length; i++) {
+            const { code, vendor } = _platforms[i]
+            if(!vendor.extractVideo) continue
+            if(!vcUrl.includes(toLowerCaseTrimString(code))) continue
+
+            _video = await vendor.extractVideo(vcUrl)
+            if(!_video) continue
+            const { id, vid } = _video
+            if(id && vid) break
+        }
     }
     
-    //backward()
-    const tailText = video.data.length > 1 ? '合集' : ''
-    showToast(`即将为您播放视频${tailText}`, () => playVideo(video))
+    //const tailText = (_video.data && _video.data.length > 1) ? '合集' : ''
+    //const text = `即将为您播放视频${tailText}`
+    playPlaylist(_video)
 }
 
 const submit = () => {
@@ -101,6 +117,10 @@ const computedRecentVideoTitle = computed(() => {
         const subtitle = isCollectionType ? data[index].title : ''
         return isCollectionType ? `${_title}${subtitle}` : title
     }
+})
+
+const urlPlaceholder = computed(() => {
+    return `视频URL，支持file / http / https协议；支持LeVC格式`
 })
 
 
@@ -172,8 +192,7 @@ const updateCover = async () => {
     <div id="free-video-edit-view" @dragover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="header">
             <div class="title-wrap">
-                <span class="title" v-show="!id">创建Video播放源</span>
-                <span class="title" v-show="id">编辑Video播放源</span>
+                <span class="title" v-show="!id">视频播放</span>
             </div>
             <div class="action-wrap">
                 <div class="action">
@@ -270,7 +289,7 @@ const updateCover = async () => {
                     </div>
                     <div @keydown.stop="">
                         <textarea class="url-text" v-model="detail.url" :class="{ invalid: urlInvalid }" 
-                            placeholder="视频流URL，支持file / http / https协议；支持LeVC格式">
+                            :placeholder="urlPlaceholder">
                         </textarea>
                     </div>
                 </div>

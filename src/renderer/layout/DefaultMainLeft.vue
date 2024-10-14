@@ -330,7 +330,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     -->
                 <span>相约电波</span>
             </div>
-            <div class="mode-item userhome-mode excluded-mode-item" v-show="isUserHomeMode" @click="">
+            <div class="mode-item userhome-mode" v-show="isUserHomeMode" @click="() => visitHome()">
                 <!--
                     <svg width="20" height="19" viewBox="0 0 938.47 938.5" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">

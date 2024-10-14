@@ -61,6 +61,12 @@ const PRESET_TABS = [{
     ctext: '已选0个视频',
     stext: '约0个视频',
 }, {
+    code: 'lyrics',
+    name: '歌词',
+    text: '0首歌词',
+    ctext: '已选0首歌词',
+    stext: '约0首歌词',
+}, {
     code: 'about',
     name: '详情',
     text: '',
@@ -96,7 +102,8 @@ const PRESET_PLATFORMS = [
         shortName: 'ALL',
         online: null,
         scopes: ['userhome'],
-        types: null
+        types: null,
+        weight: 999,
     },
     {
         code: LocalMusic.CODE,
@@ -108,6 +115,7 @@ const PRESET_PLATFORMS = [
         scopes: ['playlists', 'artists', 'search'],
         artistTabs: [ 'all-songs', 'about' ],
         searchTabs: [ 'all-songs', 'playlists', 'albums', 'artists' ],
+        weight: 666,
     },
     {
         code: FreeFM.CODE,
@@ -117,7 +125,7 @@ const PRESET_PLATFORMS = [
         online: true,
         types: ['fm-radios'],
         scopes: ['radios', 'userhome'],
-        weight: 5
+        weight: 666,
     }
     /*{
         code: QQ.CODE,
@@ -368,6 +376,9 @@ export const usePlatformStore = defineStore('platforms', {
         },
         isVideosTab(code) {
             return toLowerCaseTrimString(code) === 'videos'
+        },
+        isLyricsTab(code) {
+            return toLowerCaseTrimString(code) === 'lyrics'
         },
         isAboutTab(code) {
             return toLowerCaseTrimString(code) === 'about'

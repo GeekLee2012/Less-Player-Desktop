@@ -20,7 +20,7 @@ const props = defineProps({
     currentTime: Number
 })
 
-const { playMv, loadLyric, currentTimeState,
+const { playVideoItem, loadLyric, currentTimeState,
     seekTrack, playState, progressSeekingState,
     dndSaveLyric } = inject('player')
 
@@ -382,7 +382,7 @@ onUnmounted(() => offEvents(eventsRegistration))
         <div class="header" v-show="isHeaderVisible()">
             <div class="audio-title">
                 <span class="mv" v-show="Track.hasMv(track)">
-                    <svg @click="playMv(track)" 
+                    <svg @click="playVideoItem(track)" 
                         width="24" 
                         height="20" 
                         viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">

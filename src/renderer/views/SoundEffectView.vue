@@ -339,10 +339,10 @@ const computedVolumeGainText = computed(() => {
 .sound-effect-view .center .presets .item {
     width: 99px;
     margin-top: 15px;
-    padding: 3px 0px;
+    padding: 5px 0px;
     border-radius: var(--border-inputs-border-radius);
     border-radius: var(--border-list-item-vertical-border-radius);
-    border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
+    border-radius: calc(var(--border-list-item-vertical-border-radius) - 1px);
     border: 2px solid transparent;
     background-color: #f3f3f3;
     background: var(--content-list-item-hover-bg-color);
@@ -407,7 +407,7 @@ const computedVolumeGainText = computed(() => {
     padding: 7px 0px;
     border-radius: var(--border-inputs-border-radius);
     border-radius: var(--border-list-item-vertical-border-radius);
-    border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
+    border-radius: calc(var(--border-list-item-vertical-border-radius) - 1px);
     border: 2px solid transparent;
     background-color: #f3f3f3;
     background: var(--content-list-item-hover-bg-color);
@@ -422,6 +422,12 @@ const computedVolumeGainText = computed(() => {
 
 .contrast-mode .sound-effect-view .center .impulse-content .active {
     font-weight: bold;
+}
+
+
+.sound-effect-view .center .presets .item:hover,
+.sound-effect-view .center .impulse-content .item:hover {
+    border-color: var(--content-highlight-color);
 }
 
 .sound-effect-view .center .impulse-content .disabled {

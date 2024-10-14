@@ -97,7 +97,6 @@ const hasIcon = computed(() => {
 }
 
 .plugin-item:hover {
-    /*border-radius: 3px;*/
     background: var(--content-list-item-hover-bg-color);
     cursor: pointer;
 }
@@ -194,7 +193,7 @@ const hasIcon = computed(() => {
 }
 
 .plugin-item .center .about {
-    width: calc(100% - 10px);
+    width: calc(100% - 18px);
     color: var(--content-subtitle-text-color);
     font-size: var(--content-text-tip-text-size);
 }

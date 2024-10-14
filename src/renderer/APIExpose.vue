@@ -18,6 +18,7 @@ import {
     stringEquals, stringEqualsIgnoreCase, readLines,
     ipcRendererSend, ipcRendererInvoke,  toMmss, 
     toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs,
+    escapeHtml, parseXML, buildXML, 
 } from '../common/Utils';
 import {
     FILE_PREFIX, ActivateState,
@@ -78,10 +79,8 @@ const onWatches = (arr) => {
 
 /* 开放API */
 const APIEvents = {
-    TRACK_GET_PLAY_URL: 'TRACK_GET_PLAY_URL',
-    VIDEO_GET_PLAY_URL: 'VIDEO_GET_PLAY_URL',
     TRACK_DRAW_SPECTRUM: 'TRACK_DRAW_SPECTRUM',
-    TRACK_VISUAL_CANVAS: 'TRACK_VISUAL_CANVAS'
+    TRACK_VISUAL_CANVAS: 'TRACK_VISUAL_CANVAS',
 }
 
 const APIPermissions = {
@@ -97,6 +96,7 @@ const APIPermissions = {
     REMOVE_PLATFORM: 'REMOVE_PLATFORM',
     //自定义请求处理器，主要目的为重新设置请求头信息
     ADD_REQUEST_HANDLER: 'ADD_REQUEST_HANDLER',
+    UPDATE_REQUEST_HANDLER: 'UPDATE_REQUEST_HANDLER',
     REMOVE_REQUEST_HANDLER: 'REMOVE_REQUEST_HANDLER',
     //播放相关
     TRACK_CURRENT_PLAYING: 'TRACK_CURRENT_PLAYING',
@@ -198,7 +198,7 @@ const removePluginNow = (plugin) => {
 //异步加载插件
 const loadPluginsOnStartup = async () => {
     if (plugins.value.length < 1) return
-    if (isDevEnv()) console.log('[ PLUGINS - Startup ] 开始加载插件')
+    if (isDevEnv()) console.log('[ STARTUP - plugins ] 加载插件......')
     //TODO 当前实现方式，不好确定全部加载完成的时机，以进行相关回调
     plugins.value.forEach((plugin, index) => {
         const { state } = plugin
@@ -255,7 +255,10 @@ const lessAPI = {
         tryCallDefault,
         tryCall,
         tryCallOnObject,
+        escapeHtml,
         transformUrl,
+        parseXML, 
+        buildXML,
     },
     crypto: {
         randomText,
@@ -324,6 +327,8 @@ const lessAPI = {
                 //请求头信息
                 else if (permission == APIPermissions.ADD_REQUEST_HANDLER) {
                     result = await ipcRendererInvoke('app-addRequestHandler', options[0]) || ''
+                } else if (permission == APIPermissions.UPDATE_REQUEST_HANDLER) {
+                    result = await ipcRendererInvoke('app-updateRequestHandler', options[0]) || ''
                 } else if (permission == APIPermissions.REMOVE_REQUEST_HANDLER) {
                     result = await ipcRendererInvoke('app-removeRequestHandler', options[0]) || ''
                 }
@@ -378,47 +383,12 @@ provide('apiExpose', {
     activatePluginNow,
     deactivatePluginNow,
     removePluginNow,
-    hasExTrackPlayUrlHandlers: () => {
-        return EventHandlerRegistrations.hasHanlders(APIEvents.TRACK_GET_PLAY_URL)
-    },
-    hasExVideoPlayUrlHandlers: () => {
-        return EventHandlerRegistrations.hasHanlders(APIEvents.VIDEO_GET_PLAY_URL)
-    },
     hasExDrawSpectrumHandlers: () => {
         return EventHandlerRegistrations.hasHanlders(APIEvents.TRACK_DRAW_SPECTRUM)
     },
     getExVisualCanvasHandlersLength: () => {
         const handlers = EventHandlerRegistrations.handlers(APIEvents.TRACK_VISUAL_CANVAS) || []
         return handlers.length
-    },
-    /**
-     * 获取音频播放url
-     * @param {*} track 
-     */
-    getExTrackPlayUrl: async (track, noToast) => {
-        const _track = { ...toRaw(track) }
-        //移除非必要信息
-        const excludeProps = ['url', 'lyric', 'lyricTran', 'lyricRoma',
-            'publishTime', 'score', 'isCandidate']
-        excludeProps.forEach(prop => Reflect.deleteProperty(_track, prop))
-        //TODO 选择策略
-        const handler = EventHandlerRegistrations.lastHandler(APIEvents.TRACK_GET_PLAY_URL)
-        if (handler && (typeof handler == 'function')) {
-            if (!noToast) showToast(`尝试从插件获取音源<br>请耐心等待一下哟`)
-            return handler(_track)
-        }
-    },
-    /**
-     * 获取视频播放url
-     * @param {*} video 
-     */
-    getExVideoPlayUrl: async (video, noToast) => {
-        const _video = { ...toRaw(video) }
-        const handler = EventHandlerRegistrations.lastHandler(APIEvents.VIDEO_GET_PLAY_URL)
-        if (handler && (typeof handler == 'function')) {
-            if (!noToast) showToast(`尝试从插件获取视频源<br>请耐心等待一下哟`)
-            return handler(_video)
-        }
     },
     /**
      * 绘制频谱

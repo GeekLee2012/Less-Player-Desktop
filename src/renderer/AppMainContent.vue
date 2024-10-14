@@ -38,7 +38,8 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
   getWindowZoom, isSimpleLayout, isDefaultNewLayout, 
   isUseAutoWinCtl, isUseWindowsWinCtl,
   isShowDialogBeforeResetSetting, isAutoLayout,
-  isAppCustomShadowShow, isCheckPreReleaseVersion, } = storeToRefs(useSettingStore())
+  isAppCustomShadowShow, isCheckPreReleaseVersion,
+  isUseWinCenterStrict, } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
   setupAppGlobalProxy } = useSettingStore()
@@ -219,7 +220,8 @@ const setupLayout = (isInit) => {
   emitEvents(eventName)
   const useDefaultZoom = (isInit && !isDevEnv)
   const zoom = useDefaultZoom ? 85 : getWindowZoom.value
-  ipcRendererSend(eventName, { zoom, isInit })
+  const useCenterStrict = isUseWinCenterStrict.value
+  ipcRendererSend(eventName, { zoom, isInit, useCenterStrict })
   //是否已完成缩放
   const isDone = (!useDefaultZoom || (getWindowZoom.value != 85))
   return isDone
@@ -596,7 +598,9 @@ let checkAppVersionTimer = null, checkRetry = 0
 const checkAppVersion = async () => {
   const MINUTE = 60 * 1000
   const callback = () => {
-    if(isDevEnv()) console.log('[ VERSION - checkForUpdates ]')
+    if(isDevEnv()) {
+      console.log(`[ ${checkRetry > 0 ? 'VERSION': 'STARTUP'} - checkForUpdates ]`)
+    }
     checkForUpdates().then(result => {
       if(result === true) {
         clearInterval(checkAppVersionTimer)
