@@ -450,7 +450,7 @@ onActivated(() => {
 
 #playlist-detail-view .list-title .size-text {
     margin-left: 2px;
-    padding-bottom: 5px;
+    padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
 }
 

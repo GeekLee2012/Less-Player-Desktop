@@ -155,7 +155,8 @@ export const useSettingStore = defineStore('setting', {
                 playlists: [],
                 artists: [],
                 radios: [],
-                search: []
+                search: [],
+                cloudstorage: []
             }
         },
         /* 播放歌曲 */
@@ -352,6 +353,8 @@ export const useSettingStore = defineStore('setting', {
             simpleLayoutShortcut: true,
             //视频入口按钮
             freeVideoShortcut: false,
+            //网络存储按钮
+            cloudStorageShortcut: false,
         },
         /* 对话框 */
         dialog: {
@@ -626,6 +629,9 @@ export const useSettingStore = defineStore('setting', {
         isFreeVideoShortcutEnable() {
             return this.navigation.freeVideoShortcut
         },
+        isCloudStorageShortcutEnable() {
+            return this.navigation.cloudStorageShortcut
+        },
         isPlaybackQueueAutoPositionOnShow() {
             return this.track.playbackQueueAutoPositionOnShow
         },
@@ -770,6 +776,11 @@ export const useSettingStore = defineStore('setting', {
         isModulesSearchOff() {
             return (platform) => {
                 return this.modules.off.search.includes(platform)
+            }
+        },
+        isModulesCloudStorageOff() {
+            return (platform) => {
+                return this.modules.off.cloudstorage.includes(platform)
             }
         },
         filterActiveModulesPlatforms() {
@@ -1204,6 +1215,9 @@ export const useSettingStore = defineStore('setting', {
         toggleFreeVideoShortcut() {
             this.navigation.freeVideoShortcut = !this.navigation.freeVideoShortcut
         },
+        toggleCloudStorageShortcut() {
+            this.navigation.cloudStorageShortcut = !this.navigation.cloudStorageShortcut
+        },
         toggleKeysGlobal() {
             this.keys.global = !this.keys.global
             this.setupGlobalShortcut()
@@ -1477,25 +1491,22 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleModulesPlaylistsOff(platform) {
             this.toggleModulesPlatformOff(this.modules.off.playlists, platform)
-            const { activePlatforms } = usePlatformStore()
+            /*const { activePlatforms } = usePlatformStore()
             const { setExploreModeActiveState } = useAppCommonStore()
-            setExploreModeActiveState(0, activePlatforms('playlists').length > 0)
+            setExploreModeActiveState(0, activePlatforms('playlists').length > 0)*/
         },
         toggleModulesArtistsOff(platform) {
             this.toggleModulesPlatformOff(this.modules.off.artists, platform)
-            const { activePlatforms } = usePlatformStore()
-            const { setExploreModeActiveState } = useAppCommonStore()
-            setExploreModeActiveState(1, activePlatforms('artists').length > 0)
         },
         toggleModulesRadiosOff(platform) {
             this.toggleModulesPlatformOff(this.modules.off.radios, platform)
-            const { activePlatforms } = usePlatformStore()
-            const { setExploreModeActiveState } = useAppCommonStore()
-            setExploreModeActiveState(2, activePlatforms('radios').length > 0)
         },
         toggleModulesSearchOff(platform) {
             this.toggleModulesPlatformOff(this.modules.off.search, platform)
             emitEvents('modules-toggleSearchPlatform')
+        },
+        toggleModulesCloudStorageOff(platform) {
+            this.toggleModulesPlatformOff(this.modules.off.cloudstorage, platform)
         },
         setDesktopLyricFontSize(value) {
             const fontSize = parseInt(value || 23)

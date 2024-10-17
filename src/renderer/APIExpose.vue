@@ -18,7 +18,8 @@ import {
     stringEquals, stringEqualsIgnoreCase, readLines,
     ipcRendererSend, ipcRendererInvoke,  toMmss, 
     toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs,
-    escapeHtml, parseXML, buildXML, 
+    escapeHtml, parseXML, buildXML, guessFilename,
+    isSupportedAudio,
 } from '../common/Utils';
 import {
     FILE_PREFIX, ActivateState,
@@ -35,6 +36,7 @@ import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
 
+
 const { addCustomRoute, visitCommonRoute } = inject('appRoute')
 
 const { plugins } = storeToRefs(usePluginStore())
@@ -44,6 +46,7 @@ const { spectrumParams } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { getImageUrlByQuality } = useSettingStore()
 const { currentTrack } = storeToRefs(usePlayStore())
+const { playTrack, resetQueue, addTracks, playNextTrack } = usePlayStore()
 
 
 let isConfirmDialogShowing = ref(false)

@@ -41,7 +41,7 @@ onMounted(() => {
                     <VolumeBar ref="volumeBarRef"></VolumeBar>
                 </div>
                 <div @click="toggleFavoritedState">
-                    <svg v-show="!favoritedState" class="love-btn" width="18" height="19" viewBox="0 0 1024 937.46"
+                    <svg v-show="!favoritedState" class="love-btn" width="19" height="19" viewBox="0 0 1024 937.46"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -50,7 +50,7 @@ onMounted(() => {
                             </g>
                         </g>
                     </svg>
-                    <svg v-show="favoritedState" class="love-btn love-btn-active" width="18" height="17"
+                    <svg v-show="favoritedState" class="love-btn love-btn-active" width="19" height="19"
                         viewBox="0 0 1024 937.53" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -65,7 +65,7 @@ onMounted(() => {
                     词
                 </div>
                 <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
-                    <svg width="17" height="17" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="18" height="18" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
                                 <path

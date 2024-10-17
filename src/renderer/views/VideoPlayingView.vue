@@ -3,6 +3,7 @@ import { computed, inject, nextTick, onActivated, onMounted, onUnmounted, ref, w
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
+import { usePlatformStore } from '../store/platformStore';
 import { videoThemeNames, useVideoPlayStore } from '../store/videoPlayStore';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
@@ -15,7 +16,7 @@ import { Video } from '../../common/Video';
 const { useWindowsStyleWinCtl } = inject('appCommon')
 const { dndSaveVideo, playVideo } = inject('player')
 
-const { hideVideoPlayingView, normalize } = useAppCommonStore()
+const { hideVideoPlayingView, normalize, showFailToast } = useAppCommonStore()
 const { isMaxScreen, videoPlayingViewShow } = storeToRefs(useAppCommonStore())
 const { isSimpleLayout, isQuitVideoAfterEndedEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { switchVideoThemeIndex, playVideoNow, 
@@ -29,17 +30,10 @@ const sidebarShow = ref(false)
 const setSideBarShow = (value) => sidebarShow.value = value
 const toggleSidebarShow = () => setSideBarShow(!sidebarShow.value)
 
-//let videoNode = null
 const initVideoPlayer = () => {
-    //const videoEls = document.querySelectorAll('.video-node')
-    //let index = 0 //正常情况，只有 1个
-    //异常情况
-    //if (videoEls.length == 2) index = isSimpleLayout.value ? 0 : 1
-    //videoNode = videoEls[index]
-    //console.log(videoEls.length)
+    setupVideoTheme()
     const videoNode = document.querySelector('.video-node')
     emitEvents('video-init', videoNode)
-    setupVideoTheme()
 }
 
 const setupVideoTheme = () => {
@@ -96,7 +90,8 @@ const handleSpaceKeyEvents = (event) => {
 }
 
 const playItem = (item, index) => {
-    playVideo(currentVideo.value, index)
+    const _index = (typeof index == 'undefined') ? playingIndex.value : index
+    playVideo(currentVideo.value, _index)
 } 
 
 const computedCollectionTitle = computed(() => {
@@ -139,6 +134,19 @@ const eventsRegistration = {
             if(isQuitVideoAfterEndedEnable.value && size <= 1) return quitVideo()
 
             playNext()
+        } else if (state == PlayState.END) {
+            const size = currentVideoDataSize.value
+            if(isQuitVideoAfterEndedEnable.value && size <= 1) return quitVideo()
+
+            playNext()
+        } else if (state == PlayState.PLAY_ERROR) {
+            //失败重试
+            const retry = video.retry || 1
+            if(retry > 2) {
+                Reflect.deleteProperty(video, 'retry')
+                return showFailToast('视频无法播放')
+            }
+            emitEvents('video-changed', Object.assign(video, { retry: (retry + 1), url: '' }))
         }
     },
     'video-action': ({ action, event, video, data }) => {
@@ -147,20 +155,21 @@ const eventsRegistration = {
         } else if(action == PlayAction.SET_RATE) {
             const el = document.querySelector('.vjs-playback-rate .vjs-playback-rate-value')
             el && data && (el.textContent = `${data}x`)
+        } else if(action == PlayAction.SET_VIDEO) {
+            const { platform } = video || {}
+            if(!platform) return
+            const { getVendor } = usePlatformStore()
+            const vendor = getVendor(platform)
+            if(!vendor || !vendor.onSetVideo) return
+            vendor.onSetVideo(video)
         }
     },
     'video-currentTime': updateRecentLatestVideo,
     'video-ready': () => emitEvents('video-togglePlay'),
 }
 
-onBeforeMount(() => {
-    onEvents(eventsRegistration)
-})
-
-onMounted(() => {
-    //onEvents(eventsRegistration)
-    initVideoPlayer()
-})
+onBeforeMount(() => onEvents(eventsRegistration))
+onMounted(initVideoPlayer)
 onBeforeUnmount(() => offEvents(eventsRegistration))
 //onActivated(initVideoPlayer)
 </script>

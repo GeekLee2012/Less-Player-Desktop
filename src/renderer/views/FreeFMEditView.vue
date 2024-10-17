@@ -395,4 +395,8 @@ onMounted(() => loadRadio())
 .contrast-mode #freefm-edit-view .list-item.active {
     font-weight: bold;
 }
+
+.contrast-mode #freefm-edit-view .center .cover-eidt-btn {
+    font-weight: bold;
+}
 </style>

@@ -102,4 +102,8 @@ const handleRightClick = (event) => {
     margin-left: 1px;
     margin-right: 6px;
 }
+
+.contrast-mode .svg-text-btn .text {
+    font-weight: bold;
+}
 </style>

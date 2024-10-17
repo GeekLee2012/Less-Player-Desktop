@@ -2,8 +2,9 @@ import { defineStore } from 'pinia';
 import { LocalMusic } from '../../vendor/localmusic';
 import { FreeFM } from '../../vendor/freefm';
 import { useAppCommonStore } from './appCommonStore';
-import { isBlank, toLowerCaseTrimString, toTrimString } from '../../common/Utils';
+import { isBlank, toLowerCaseTrimString, toTrimString, stringEqualsIgnoreCase } from '../../common/Utils';
 import { useSettingStore } from './settingStore';
+import { WebDav } from '../../vendor/webdav';
 
 
 
@@ -126,6 +127,16 @@ const PRESET_PLATFORMS = [
         types: ['fm-radios'],
         scopes: ['radios', 'userhome'],
         weight: 666,
+    },
+    {
+        code: WebDav.CODE,
+        vendor: WebDav,
+        name: 'WebDAV',
+        shortName: 'DAV',
+        online: true,
+        types: ['playlists', 'videos'],
+        scopes: ['cloudstorage'],
+        weight: 666,
     }
     /*{
         code: QQ.CODE,
@@ -234,13 +245,16 @@ export const usePlatformStore = defineStore('platforms', {
                 if (result) return result
 
                 //缺少范围或不匹配，按模式获取
-                const { isArtistMode, isRadioMode, isUserHomeMode } = useAppCommonStore()
+                const { isArtistMode, isRadioMode, 
+                    isUserHomeMode, isCloudStorageMode } = useAppCommonStore()
                 if (isArtistMode) {
                     return this.getScopePlatforms('artists')
                 } else if (isRadioMode) {
                     return this.getScopePlatforms('radios')
                 } else if (isUserHomeMode) {
                     return this.getScopePlatforms('userhome')
+                } else if (isCloudStorageMode) {
+                    return this.getScopePlatforms('cloudstorage')
                 }
                 return this.getScopePlatforms('playlists')
             }
@@ -293,12 +307,23 @@ export const usePlatformStore = defineStore('platforms', {
         currentVender() {
             return this.getVendor(this.currentPlatformCode)
         },
+        getPresetVendor(scopes) {
+            if(!scopes || scopes.length < 1) return 
+            for(let i = 0; i < scopes.length; i++) {
+                const scope = scopes[i]
+                if(scope == WebDav.CODE) return WebDav
+            }
+        },
         assertsPlatform(code, refCode) {
             if (!this.isPlatformValid(code)) return false
-            return toTrimString(code) == refCode
+            return stringEqualsIgnoreCase(code, refCode)
         },
         isLocalMusic(code) {
             return this.assertsPlatform(code, LocalMusic.CODE)
+        },
+        isWebDav(code) {
+            const vendor = this.getVendor(code)
+            return vendor && this.assertsPlatform(vendor.CODE, WebDav.CODE)
         },
         isFreeFM(code) {
             return this.assertsPlatform(code, FreeFM.CODE)
@@ -348,6 +373,12 @@ export const usePlatformStore = defineStore('platforms', {
             if(!_code) return
             const index = this.findPlatformIndex(_code)
             if(index > -1) return
+            if(!vendor || typeof vendor == 'string') {
+                const _scopes = vendor ? [vendor] : scopes
+                const presetVendor = this.getPresetVendor(_scopes)
+                if(presetVendor) Object.assign(platform, { vendor: presetVendor })
+            }
+            
             this.allPlatforms.push({ ...platform, code: _code })
         },
         removePlatform(code) {

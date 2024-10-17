@@ -30,7 +30,9 @@ import PluginsView from '../views/PluginsView.vue';
 import PluginDetailView from '../views/PluginDetailView.vue';
 import AppDesktopLyric from '../AppDesktopLyric.vue';
 import VideoDetailView from '../views/VideoDetailView.vue';
-
+import WebDavView from '../views/WebDavView.vue';
+import WebDavSessionEditView from '../views/WebDavSessionEditView.vue';
+import WebDavSessionDetailView from '../views/WebDavSessionDetailView.vue';
 
 
 const routes = [
@@ -181,6 +183,25 @@ const routes = [
                 path: '/videos/video/:platform/:id',
                 props: true,
                 component: VideoDetailView
+            },
+            {  //网络存储 - WebDAV
+                path: '/cloudstorage/webdav',
+                component: WebDavView
+            },
+            {  //网络存储 - WebDAV - 创建会话
+                path: '/cloudstorage/webdav/create',
+                props: true,
+                component: WebDavSessionEditView
+            },
+            {  //网络存储 - WebDAV - 编辑会话
+                path: '/cloudstorage/webdav/edit/:id',
+                props: true,
+                component: WebDavSessionEditView
+            },
+            {  //网络存储 - WebDAV - 会话详情
+                path: '/cloudstorage/webdav/:id',
+                props: true,
+                component: WebDavSessionDetailView
             },
         ]
     },

@@ -121,6 +121,10 @@ export const useVideoExts = () => {
     return tryCallDefault(() => (electronAPI.VIDEO_EXTS))
 }
 
+export const useVideoCollectionExts = () => {
+    return tryCallDefault(() => (electronAPI.VIDEO_COLLECTION_EXTS))
+}
+
 export const useImageExts = () => {
     return tryCallDefault(() => (electronAPI.IMAGE_EXTS))
 }
@@ -689,7 +693,7 @@ export const parseVideoCollectionLines = (lines) => {
     return collection
 }
 
-const guessFilename = (name, defaultName, excludes) => {
+export const guessFilename = (name, defaultName, excludes) => {
     name = toTrimString(name)
     if(!name) return defaultName
     const from = name.lastIndexOf('/') + 1
@@ -782,11 +786,25 @@ export const isSupportedFile = (path, suffixes) => {
 }
 
 export const isSupportedVideo = (path) => {
-    return isSupportedFile(path, useVideoExts())
+    const exts = []
+    exts.push(...useVideoExts())
+    exts.push(...useVideoCollectionExts())
+    return isSupportedFile(path, exts)
+}
+
+export const isSupportedVideoCollection = (path) => {
+    return isSupportedFile(path, useVideoCollectionExts())
 }
 
 export const isSupportedImage = (path) => {
     return isSupportedFile(path, useImageExts())
+}
+
+export const isSupportedAudio = (path) => {
+    const exts = []
+    exts.push(...useAudioExts())
+    exts.push(...useExtraAudioExts())
+    return isSupportedFile(path, exts)
 }
 
 export const transformPath = (path) => {
@@ -858,6 +876,17 @@ export const toYyyymmdd = (timestamp, sp) => {
     let dd = date.getDate()
     dd = dd < 10 ? ('0' + dd) : dd
     return yyyy + sp + mm + sp + dd
+}
+
+export const extractHhMm = (timestamp) => {
+    const date = new Date(timestamp)
+    let hh = date.getHours()
+    let mm = date.getMinutes()
+    //let ss = date.getSeconds()
+    hh = hh < 10 ? ('0' + hh) : hh
+    mm = mm < 10 ? ('0' + mm) : mm
+    //ss = ss < 10 ? ('0' + ss) : ss
+    return `${hh}:${mm}`
 }
 
 export const extractHhMmSs = (timestamp) => {

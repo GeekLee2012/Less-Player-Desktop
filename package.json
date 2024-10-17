@@ -55,7 +55,8 @@
     "qs": "^6.11.2",
     "vue": "^3.3.4",
     "vue-router": "^4.2.5",
-    "vue3-lazyload": "^0.3.8"
+    "vue3-lazyload": "^0.3.8",
+    "webdav": "^5.7.1"
   },
   "devDependencies": {
     "@types/node-forge": "^1.3.2",

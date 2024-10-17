@@ -15,6 +15,7 @@ import { coverDefault, transformUrl, isSupportedVideo,
     toTrimString, toLowerCaseTrimString, ipcRendererInvoke, 
     parseVideoCollectionLines, useGitRepository, } from '../../common/Utils';
 import { Video } from '../../common/Video';
+import { Playlist } from '../../common/Playlist';
 
 
 
@@ -53,16 +54,19 @@ const setupVideoUrl = (url) => Object.assign(detail, { url })
 
 const parsePlay = async (lines) => {
     if(!lines || !Array.isArray(lines) || lines.length < 1) return
+    const failText = '视频URL无法解析'
 
     const video = parseVideoCollectionLines(lines)
-    if(!video) return showFailToast('视频URL无法解析')
-    const { vcType, url: vcUrl, data: vcData } = video
+    if(!video) return showFailToast(failText)
+    
+    const { vcType, url: vcUrl, data: vcData, type } = video
+    if(typeof type == 'undefined') Object.assign(video, { type: Playlist.VIDEO_TYPE })
 
     let _video = video
     if(Video.isCollectionType(video) && (!vcData || vcData.length < 1)) {
-        return showFailToast('视频URL无法解析')
+        return showFailToast(failText)
     } else if(!Video.isCollectionType(video) && !vcUrl) {
-        return showFailToast('视频URL无法解析')
+        return showFailToast(failText)
     } else if(!Video.isCollectionType(video) && vcUrl) {
         const _platforms = platforms.value('video-extract')
         for(let i = 0; i < _platforms.length; i++) {
@@ -76,9 +80,16 @@ const parsePlay = async (lines) => {
             if(id && vid) break
         }
     }
-    
-    //const tailText = (_video.data && _video.data.length > 1) ? '合集' : ''
-    //const text = `即将为您播放视频${tailText}`
+
+    if(_video.url.endsWith('.mp3')) {
+        Object.assign(_video, {
+            url: {
+                src: _video.url,
+                type: 'audio/mpeg'
+            }
+        })
+    }
+
     playPlaylist(_video)
 }
 
@@ -560,6 +571,10 @@ const updateCover = async () => {
 #free-video-edit-view .invalid {
     border-color: var(--content-error-color) !important;
     border-width: 3px;
+}
+
+.contrast-mode #free-video-edit-view .center .cover-eidt-btn {
+    font-weight: bold;
 }
 
 /*

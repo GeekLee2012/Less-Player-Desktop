@@ -610,7 +610,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     fill: var(--button-icon-text-btn-icon-color);
 }
 
-.common-ctx-menu .menuItem>div {
+.common-ctx-menu .menuItem > div {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -630,6 +630,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     text-align: left;
     word-wrap: break-word;
     line-break: anywhere;
@@ -639,5 +640,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin: 3px 15px;
     height: 0px;
     border-bottom: 0.36px solid var(--border-color);
+}
+
+.contrast-mode .common-ctx-menu .menuItem:hover {
+    font-weight: bold;
 }
 </style>

@@ -139,6 +139,7 @@ const { setThemeIndex,
     toggleThemesShortcut,
     toggleUserHomeShortcut,
     toggleSimpleLayoutShortcut,
+    toggleCloudStorageShortcut,
     setDesktopLyricFontSize,
     setDesktopLyricColor,
     setDesktopLyricHighlightColor,
@@ -1147,8 +1148,13 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">视频创建：</span>
+                        <span class="cate-subtitle">视频播放：</span>
                         <ToggleControl @click="toggleFreeVideoShortcut" :value="navigation.freeVideoShortcut">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">网络存储：</span>
+                        <ToggleControl @click="toggleCloudStorageShortcut" :value="navigation.cloudStorageShortcut">
                         </ToggleControl>
                     </div>
                     <div>

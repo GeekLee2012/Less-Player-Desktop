@@ -370,6 +370,10 @@ onMounted(() => loadCustomPlaylist())
     border-width: 3px;
 }
 
+.contrast-mode #custom-playlist-edit-view .center .cover-eidt-btn {
+    font-weight: bold;
+}
+
 /*
 #custom-playlist-edit-view ::-webkit-input-placeholder {
     color: var(--input-placeholder-color);

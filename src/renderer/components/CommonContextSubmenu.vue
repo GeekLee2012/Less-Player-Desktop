@@ -125,6 +125,7 @@ const resetScroll = () => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     word-wrap: break-word;
     line-break: anywhere;
 }
@@ -133,5 +134,9 @@ const resetScroll = () => {
     margin: 3px 15px;
     height: 0px;
     border-bottom: 0.36px solid var(--border-color);
+}
+
+.contrast-mode .common-ctx-submenu .menuItem:hover {
+    font-weight: bold;
 }
 </style>

@@ -11,11 +11,13 @@ const { platforms } = storeToRefs(usePlatformStore())
 const { toggleModulesPlaylistsOff,
     toggleModulesArtistsOff,
     toggleModulesRadiosOff,
-    toggleModulesSearchOff } = useSettingStore()
+    toggleModulesSearchOff,
+    toggleModulesCloudStorageOff } = useSettingStore()
 const { isModulesPlaylistsOff,
     isModulesArtistsOff,
     isModulesRadiosOff,
-    isModulesSearchOff } = storeToRefs(useSettingStore())
+    isModulesSearchOff,
+    isModulesCloudStorageOff } = storeToRefs(useSettingStore())
 
 const playlistsPlatforms = computed(() => {
     return platforms.value('playlists').filter(item => (item.code != 'local'))
@@ -25,6 +27,7 @@ const radiosPlatforms = platforms.value('radios')
 const searchPlatforms = computed(() => {
     return platforms.value('search').filter(item => (item.code != 'local'))
 })
+const cloudStoragePlatforms = platforms.value('cloudstorage')
 
 const activeTab = ref(0)
 const setActiveTab = (value) => activeTab.value = value
@@ -39,7 +42,7 @@ const setActiveTab = (value) => activeTab.value = value
         </div>
         <div class="center">
             <div class="tab-nav">
-                <span class="tab" v-for="(tab, index) in ['分类歌单', '万千歌手', '相约电波', '搜索']"
+                <span class="tab" v-for="(tab, index) in ['分类歌单', '万千歌手', '相约电波', '搜索', '网络存储']"
                     :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
                     @click="setActiveTab(index)" v-html="tab">
                 </span>
@@ -58,7 +61,8 @@ const setActiveTab = (value) => activeTab.value = value
                 <div v-for="(item, index) in artistsPlatforms" class="toggle-item"
                     @click="toggleModulesArtistsOff(item.code)">
                     <span class="cate-subtitle" v-html="item.name"></span>
-                    <ToggleControl @click="toggleModulesArtistsOff(item.code)" :value="!isModulesArtistsOff(item.code)">
+                    <ToggleControl @click="toggleModulesArtistsOff(item.code)" 
+                        :value="!isModulesArtistsOff(item.code)">
                     </ToggleControl>
                 </div>
             </div>
@@ -67,7 +71,8 @@ const setActiveTab = (value) => activeTab.value = value
                 <div v-for="(item, index) in radiosPlatforms" class="toggle-item"
                     @click="toggleModulesRadiosOff(item.code)">
                     <span class="cate-subtitle" v-html="item.name"></span>
-                    <ToggleControl @click="toggleModulesRadiosOff(item.code)" :value="!isModulesRadiosOff(item.code)">
+                    <ToggleControl @click="toggleModulesRadiosOff(item.code)" 
+                        :value="!isModulesRadiosOff(item.code)">
                     </ToggleControl>
                 </div>
             </div>
@@ -76,7 +81,18 @@ const setActiveTab = (value) => activeTab.value = value
                 <div v-for="(item, index) in searchPlatforms" class="toggle-item"
                     @click="toggleModulesSearchOff(item.code)">
                     <span class="cate-subtitle" v-html="item.name"></span>
-                    <ToggleControl @click="toggleModulesSearchOff(item.code)" :value="!isModulesSearchOff(item.code)">
+                    <ToggleControl @click="toggleModulesSearchOff(item.code)" 
+                        :value="!isModulesSearchOff(item.code)">
+                    </ToggleControl>
+                </div>
+            </div>
+
+            <div class="content" v-show="activeTab == 4 && cloudStoragePlatforms.length > 0">
+                <div v-for="(item, index) in cloudStoragePlatforms" class="toggle-item"
+                    @click="toggleModulesCloudStorageOff(item.code)">
+                    <span class="cate-subtitle" v-html="item.name"></span>
+                    <ToggleControl @click="toggleModulesCloudStorageOff(item.code)" 
+                        :value="!isModulesCloudStorageOff(item.code)">
                     </ToggleControl>
                 </div>
             </div>

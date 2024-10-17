@@ -4,7 +4,7 @@ const { homedir } = require('os');
 const path = require('path');
 const CryptoJS = require('crypto-js');
 const MusicMetadata = require('music-metadata');
-const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv, VIDEO_EXTS, EXTRA_VIDEO_EXTS } = require('./env');
+const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv, VIDEO_EXTS, VIDEO_COLLECTION_EXTS } = require('./env');
 
 
 const FILE_SCHEME = 'file'
@@ -107,7 +107,7 @@ function isSuppotedAudioType(file) {
 
 function isSuppotedVideoType(file) {
     return isExtentionValid(file, VIDEO_EXTS)
-        || isExtentionValid(file, EXTRA_VIDEO_EXTS)
+        || isExtentionValid(file, VIDEO_COLLECTION_EXTS)
 }
 
 async function parseTracks(audioFiles) {

@@ -268,6 +268,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;
@@ -371,6 +372,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;
@@ -399,7 +401,6 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding-left: 10px;
     padding-right: 10px;
 
-    /* background: var(--content-list-item-hover-bg-color); */
     visibility: hidden;
 }
 
@@ -428,6 +429,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     word-wrap: break-word;
     line-break: anywhere;

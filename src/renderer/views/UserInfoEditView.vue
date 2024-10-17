@@ -256,4 +256,8 @@ onMounted(() => loadUserInfo())
     border-color: var(--content-error-color) !important;
     border-width: 3px;
 }
+
+.contrast-mode #user-info-edit-view .center .cover-eidt-btn {
+    font-weight: bold;
+}
 </style>

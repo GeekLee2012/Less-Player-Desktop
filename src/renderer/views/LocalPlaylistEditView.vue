@@ -273,9 +273,7 @@ onMounted(() => loadLocalPlaylist())
     border-width: 3px;
 }
 
-/*
-#local-playlist-edit-view ::-webkit-input-placeholder {
-    color: var(--input-placeholder-color);
+.contrast-mode #local-playlist-edit-view .center .cover-eidt-btn {
+    font-weight: bold;
 }
-*/
 </style>

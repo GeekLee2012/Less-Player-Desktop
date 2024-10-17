@@ -428,7 +428,10 @@ onActivated(() => {
 #default-main-center .autopadding #freefm-edit-view,
 #default-main-center .autopadding #free-video-edit-view,
 #default-main-center .autopadding #data-backup-view,
-#default-main-center .autopadding #data-restore-view {
+#default-main-center .autopadding #data-restore-view,
+#default-main-center .autopadding #webdav-view,
+#default-main-center .autopadding #webdav-session-edit-view,
+#default-main-center .autopadding #webdav-session-detail-view {
     padding-top: 3px;
 }
 
@@ -467,7 +470,8 @@ onActivated(() => {
 #default-main-center .newpadding #album-detail-view,
 #default-main-center .newpadding #track-detail-view,
 #default-main-center .newpadding #custom-playlist-detail-view,
-#default-main-center .newpadding #local-playlist-detail-view  {
+#default-main-center .newpadding #local-playlist-detail-view,
+#default-main-center .newpadding #webdav-session-detail-view   {
     padding-top: 0px;
 }
 </style>

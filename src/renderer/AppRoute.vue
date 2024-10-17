@@ -27,7 +27,7 @@ const { setExploreMode, setArtistExploreMode,
     hideLyricToolbar, hideRandomMusicToolbar,
     hideSoundEffectView, hidePopoverHint,
     setSearchPlaceHolderIndex, setRouterCtxCacheItem,
-    hidePlayingThemeListView } = useAppCommonStore()
+    hidePlayingThemeListView, setCloudStorageExploreMode } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
@@ -58,6 +58,8 @@ const autoSwitchExploreMode = (to, from) => {
         setRadioExploreMode()
     } else if (toPath.includes('/userhome')) {
         setUserHomeExploreMode()
+    } else if (toPath.includes('/cloudstorage')) {
+        setCloudStorageExploreMode()
     } else if (toPath.includes('/theme') ||
         toPath.includes('/search') ||
         toPath.includes('/setting')) {
@@ -209,7 +211,10 @@ const highlightPlatform = (to) => {
         if (parts.length === 3) platform = parts[2]
         // /userhome/custom/{id}
         if (parts.length === 4 && parts[2] === 'custom') platform = 'all'
-    }
+    } else if (path.startsWith('/cloudstorage')) {
+        const parts = path.split('/')
+        platform = parts[2]
+    } 
     updateCurrentPlatformByCode(platform)
 }
 
@@ -438,6 +443,15 @@ provide('appRoute', {
         return visitCommonRoute(`/videos/video/${platform}/${id}`, 
             () => setRouterCtxCacheItem({ platform, id, detailUrl, video})
         )
+    },
+    visitWebDavSessionCreate: () => {
+        return visitCommonRoute('/cloudstorage/webdav/create')
+    },
+    visitWebDavSessionEdit: (id) => {
+        return visitCommonRoute(`/cloudstorage/webdav/edit/${id}`)
+    },
+    visitWebDavSessionDetail: (id) => {
+        return visitCommonRoute(`/cloudstorage/webdav/${id}`)
     }
 })
 </script>

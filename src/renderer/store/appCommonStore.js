@@ -3,6 +3,7 @@ import { isDevEnv, randomTextWithinAlphabetNums,
     ipcRendererSend, ipcRendererInvoke,
  } from "../../common/Utils";
 import { onEvents, emitEvents } from "../../common/EventBusWrapper";
+import { usePlatformStore } from "./platformStore";
 
 
 const resetCategoryScroll = (prefix) => emitEvents(`${prefix}Category-resetScroll`)
@@ -75,9 +76,10 @@ export const useAppCommonStore = defineStore('appCommon', {
         workingCustomTheme: null, //当前工作区的自定义主题，即正在编辑的主题
         customAppBorderRadiusViewShow: false,
         //探索模式，歌单、歌手
-        exploreModes: ['playlists', 'artists', 'radios', 'userhome'],
+        exploreModes: ['playlists', 'artists', 'radios', 'userhome', 'cloudstorage'],
         exploreModeIndex: 0,
-        exploreModeActiveStates: [true, true, true, false],
+        //defaultExploreModeActiveStates: [true, true, true, false, true],
+        exploreModeActiveStates: [true, true, true, false, true],
         //通用通知
         commonNotificationShow: false,
         commonNotificationText: null,
@@ -141,6 +143,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         isUserHomeMode() {
             return this.exploreModeIndex == 3
         },
+        isCloudStorageMode() {
+            return this.exploreModeIndex == 4
+        },
         exploreModeCode() {
             return this.exploreModes[this.exploreModeIndex]
         },
@@ -159,8 +164,13 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         isExploreModeEnable() {
             return (exploreMode) => {
-                const index = this.exploreModes.findIndex(item => (item == exploreMode))
-                return this.exploreModeActiveStates[index]
+                //const index = this.exploreModes.findIndex(item => (item == exploreMode))
+                //return this.exploreModeActiveStates[index]
+                if(exploreMode == 'userhome') return false
+                //if(exploreMode == 'cloudstorage') return true
+
+                const { activePlatforms } = usePlatformStore()
+                return activePlatforms(exploreMode).length > 0
             }
         },
         isArtistModeEnable() {
@@ -313,7 +323,7 @@ export const useAppCommonStore = defineStore('appCommon', {
             let index = this.exploreModeIndex, count = 1
             do {
                 index = (index + 1) % length
-                if (this.exploreModeActiveStates[index]) {
+                if (this.isExploreModeEnable(this.exploreModes[index])) {
                     this.setExploreMode(index)
                     break
                 }
@@ -328,7 +338,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         resetExploreModeActiveStates() {
             this.exploreModeActiveStates.length = 0
-            this.exploreModeActiveStates = [true, true, true, false]
+            this.exploreModeActiveStates = this.defaultExploreModeActiveStates
         },
         setPlaylistExploreMode() {
             this.setExploreMode(0)
@@ -341,6 +351,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setUserHomeExploreMode() {
             this.setExploreMode(3)
+        },
+        setCloudStorageExploreMode() {
+            this.setExploreMode(4)
         },
         setupCommonNotification(text, type) {
             //没有内容就不显示

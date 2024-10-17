@@ -122,8 +122,8 @@ const onContextMenu = (event) => {
             <span v-show="false">{{ toYyyymmddHhMmSs(data.created) }}</span>
         </div>
         <div class="time spacing1">
-            <span>{{ toYyyymmdd(data.updated) }}</span>
             <span class="hms">{{ extractHhMmSs(data.updated) }}</span>
+            <span>{{ toYyyymmdd(data.updated) }}</span>
         </div>
     </div>
 </template>
@@ -215,6 +215,7 @@ const onContextMenu = (event) => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     margin-bottom: 6px;
     /*cursor: pointer;*/
@@ -269,6 +270,7 @@ const onContextMenu = (event) => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
 }
 
@@ -283,9 +285,8 @@ const onContextMenu = (event) => {
 }
 
 .custom-playlist-item .time .hms {
-    margin-top: 6px;
-    font-size: var(--content-text-tip-text-size);
-    font-weight: 520;
+    margin-bottom: 6px;
+    /*font-size: var(--content-text-tip-text-size);*/
     color: var(--content-subtitle-text-color);
 }
 </style>

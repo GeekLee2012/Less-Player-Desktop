@@ -153,7 +153,7 @@ class VideoPlayer {
         this.video = video
         this.videoChanged = true
         this.setPlayState(PlayState.NONE, true)
-        this.setPlayAction(PlayAction.SET_VIDEO, video)
+        this.setPlayAction(PlayAction.SET_VIDEO)
     }
 
     playVideo(video) {

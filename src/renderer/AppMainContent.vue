@@ -17,6 +17,8 @@ import { isWinOS, toLowerCaseTrimString, ipcRendererSend,
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 import packageCfg from '../../package.json';
 import { getDoc, getRaw } from '../common/HttpClient';
+import { useCloudStorageStore } from './store/cloudstorageStore';
+import { WebDav } from '../vendor/webdav';
 
 
 
@@ -59,6 +61,8 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   setMaxScreen, showImportantToast, 
   hidePlayingThemeListView, togglePlayingThemeListView,
   togglePlayingView, } = useAppCommonStore()
+
+const { webdavSessions } = storeToRefs(useCloudStorageStore())
 
 
 const isReservedPath = (path) => {
@@ -341,8 +345,14 @@ const migrateRecentsData = () => {
 const initialize = () => {
   restoreSetting(true)
   migrateRecentsData()
+  setupWebDav()
   //emitEvents('app-init')
   checkAppVersion()
+}
+
+const setupWebDav = () => {
+  const sessions = webdavSessions.value || []
+  sessions.forEach(session => WebDav.setupAuthorization(session))
 }
 
 const searchDefault = async (keyword) => {

@@ -38,7 +38,7 @@ const { playTrack, playNextTrack,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying,
     setAudioOutputDevices, playTrackLater } = usePlayStore()
-const { getVendor, isLocalMusic, isFreeFM } = usePlatformStore()
+const { getVendor, isLocalMusic, isFreeFM, isWebDav } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
     playingViewThemeIndex, spectrumIndex,
     pendingPlay, pendingPlayPercent,
@@ -98,7 +98,7 @@ const setCustomDndPlayingCover = (value) => customDndPlayingCover.value = value
 const traceRecentTrack = (track) => {
     if (!isStoreRecentPlay.value) return
     const { platform } = track
-    if (isLocalMusic(platform)) return
+    if (isLocalMusic(platform) || isWebDav(platform)) return
     if (Playlist.isFMRadioType(track)) {
         addRecentRadio(track)
     } else if (Playlist.isVideoType(track)) {
@@ -116,6 +116,7 @@ const traceRecentPlaylist = (playlist) => {
     if (Playlist.isFMRadioType(playlist)) return
     const { id, platform, title, cover, type } = playlist
     if (isLocalMusic(platform)) return
+    if (isWebDav(platform)) return
     addRecentPlaylist(id, platform, title, cover, type)
 }
 
@@ -342,7 +343,7 @@ const onPlayerErrorRetry = ({ track, currentTime, radio }) => {
             markTrackSeekPending(percent)
         }
         //再次检查确认，避免被强行重置url，导致数据异常无法播放
-        if (isLocalMusic(platform) || isFreeFM(platform)) return
+        if (isLocalMusic(platform) || isFreeFM(platform) || isWebDav(platform)) return
 
         //强行重置url，并尝试重新获取
         if (!radio || Playlist.isFMRadioType(track)) track.url = ''
@@ -805,7 +806,8 @@ watch(exVisualCanvasIndex, (nv, ov) => {
 //获取视频信息 
 const getVideoDetail = (video) => {
     return new Promise((resolve, reject) => {
-        const { platform, mv, id } = video
+        const { platform, mv, id, url } = video
+        if(url) return resolve(video)
         const _id = (mv || id)
         if (!_id) return reject('noId')
         if (!platform) return reject('noService')
@@ -1084,7 +1086,8 @@ const setupOutputDevices = () => {
 
 //拖拽保存 - 图片、歌词、歌曲
 //应用场景：播放页、歌曲列表
-const getPreferredDndSavePath = ({ platform, url }) => {
+const getPreferredDndSavePath = (options) => {
+    const { platform, url } = options || {}
     let savePath = getDndSavePath() || useDownloadsPath()
     if (isLocalMusic(platform) && !isBlank(url)) { //本地歌曲默认下载到：歌曲所在目录
         const _url = url.replace(FILE_PREFIX, '')
@@ -1176,6 +1179,20 @@ const dndSaveVideo = async (event, video) => {
     const suffix = '.mp4'
     const file = `${dndSavePath}/${title}${suffix}`
     startDrag({ file, name: title, type: 'video', url })
+}
+
+const dndSaveFile = async (event, item) => {
+    if (!isDndSaveEnable.value) return
+    if (event) event.preventDefault()
+    const { title, url } = item
+    if (!url) return
+    if (!startDrag) return showFailToast('当前操作异常')
+
+    const dndSavePath = getPreferredDndSavePath()
+    if (!dndSavePath) return showFailToast('当前操作异常')
+
+    const file = `${dndSavePath}/${title}`
+    startDrag({ file, name: title, type: 'file', url })
 }
 
 
@@ -1463,7 +1480,8 @@ const eventsRegistration = {
     },
     'track-play': track => {
         //resetAutoSkip()
-        if(isLocalMusic(track.platform)) bootstrapTrack(track)
+        const { platform } = track
+        if(isLocalMusic(platform) || isWebDav(platform)) bootstrapTrack(track)
         traceRecentTrack(track)
         //loadLyric(track)
     },
@@ -1656,6 +1674,7 @@ provide('player', {
     dndSaveLyric,
     dndSaveTrack,
     dndSaveVideo,
+    dndSaveFile,
     quickSearch,
     reloadApp,
     customDndPlayingCover,
