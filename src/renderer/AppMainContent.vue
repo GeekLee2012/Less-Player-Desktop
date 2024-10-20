@@ -17,7 +17,7 @@ import { isWinOS, toLowerCaseTrimString, ipcRendererSend,
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 import packageCfg from '../../package.json';
 import { getDoc, getRaw } from '../common/HttpClient';
-import { useCloudStorageStore } from './store/cloudstorageStore';
+import { useCloudStorageStore } from './store/cloudStorageStore';
 import { WebDav } from '../vendor/webdav';
 
 

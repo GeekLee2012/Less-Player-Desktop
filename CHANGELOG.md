@@ -8,7 +8,7 @@
 一、功能特性  
 * 新增“网络存储”探索模式；  
 * 新增“网络存储 - WebDAV”平台：开发测试平台为坚果云、InfiniCLOUD等；
-* 新增“网络存储 - Navidrome”平台：使用Subsonic API版本v1.16.1；
+* 新增“网络存储 - Navidrome”平台：参照使用Subsonic API版本v1.16.1；
 * 新增“设置页 - 通用 - 圆角自定义”设置项：新增应用圆角设置页面，实现更自由的圆角设置；  
 * 本地化风格：Linux、Windows等非macOS平台，暂时统一按Windows平台来处理；  
 * 新增“设置页 - 通用 - 窗口缩放 - 锁定为初始值”开关选项：解决Electron窗口缩放闪动Bug；  
