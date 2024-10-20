@@ -11,7 +11,7 @@ import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
-import { useCloudStorageStore } from '../store/cloudstorageStore';
+import { useCloudStorageStore } from '../store/cloudStorageStore';
 import { isDevEnv, ipcRendererInvoke, isSupportedAudio, isSupportedVideo,
     md5, guessFilename, toYyyymmdd, extractHhMm, 
     toLowerCaseTrimString, isBlank, } from "../../common/Utils";
@@ -27,7 +27,7 @@ const props = defineProps({
 
 const { backward } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
-const { playVideoItem, dndSaveFile } = inject('player')
+const { addAndPlayTracks, playVideoItem, dndSaveFile } = inject('player')
 
 
 const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
@@ -223,10 +223,7 @@ const playDirectory = async (data) => {
     const tracks = parseTracks(_data) || []
     if(!tracks || tracks.length < 1) return showFailToast('没有找到可播放歌曲') 
 
-    showToast('即将为您播放当前目录')
-    resetQueue()
-    addTracks(tracks)
-    playNextTrack()
+    addAndPlayTracks(tracks, true, '即将为您播放当前目录')
 }
 
 const addDirectoryToPlaylist = async (data, text) => {

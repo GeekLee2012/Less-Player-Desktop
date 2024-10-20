@@ -159,10 +159,13 @@ const getArtistDetail = async () => {
     if (!result) return
     updateArtist(result.title, result.cover)
     let { about, hotSongs } = result
-    if (!about && vendor.artistDetailAbout) {
-        about = await vendor.artistDetailAbout(id)
+    if(about) {
+        updateAbout(about)
+    } else if (!about && vendor.artistDetailAbout) {
+        vendor.artistDetailAbout(id).then(about => {
+            if(about) updateAbout(about)
+        })
     }
-    if (about) updateAbout(about)
     if (hotSongs) updateHotSongs(hotSongs)
     Object.assign(detail, result)
     setLoadingDetail(false)
@@ -471,9 +474,15 @@ onActivated(() => {
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
-            <component :id="id" :is="currentTabView" :data="tabData" :dataType="dataType" :platform="platform"
-                :artistVisitable="true" :albumVisitable="true" :loading="isLoading" 
-                :singleLineTitleStyle="isSingleLineAlbumTitleStyle">
+            <component :id="id" :is="currentTabView" 
+                :data="tabData" 
+                :dataType="dataType" 
+                :platform="platform"
+                :artistVisitable="true" 
+                :albumVisitable="true" 
+                :loading="isLoading" 
+                :singleLineTitleStyle="isSingleLineAlbumTitleStyle"
+                :needReset="true">
             </component>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

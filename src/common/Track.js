@@ -11,13 +11,13 @@ export class Track {
         this.platform = platform
         this.title = toTrimString(title)
         //[ {id, name} ]
-        this.artist = artist ? artist : []
+        this.artist = artist || []
         //数据不完整
         this.artistNotCompleted = false
         //{id, name}
         this.album = album ? album : ({ id: '', name: '' })
         //Millis
-        this.duration = duration ? duration : 0
+        this.duration = duration ||  0
         this.cover = cover
         this.url = toTrimString(url)
         this.lyric = new Lyric()
@@ -102,9 +102,16 @@ export class Track {
         let artistName = ''
         if (track && Array.isArray(track.artist) && track.artist.length > 0) {
             const names = []
-            track.artist.forEach(e => names.push(e.name));
-            artistName = names.join('、')
-            artistName = artistName.slice(0, artistName.length)
+            track.artist.forEach(e => {
+                const { name } = e
+                const _name = name.replace('[Unknown Artist]', '')
+                if(isBlank(_name)) return 
+                names.push(name)
+            })
+            if(names.length > 0) {
+                artistName = names.join('、')
+                artistName = artistName.slice(0, artistName.length)
+            }
         }
         return artistName
     }

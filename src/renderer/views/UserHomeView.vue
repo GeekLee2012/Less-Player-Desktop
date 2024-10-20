@@ -248,7 +248,6 @@ const markScrollState = () => {
 }
 
 const restoreScrollState = () => {
-
     if (!userProfileRef.value) return
     if (markScrollTop < 1) return
     userProfileRef.value.scrollTop = markScrollTop
@@ -293,6 +292,15 @@ const userCoverOnDrop = (event) => {
     if (isEventStopped) event.stopPropagation()
 } 
 
+const decoAnimated = ref(false)
+const toggleDecorationAnimated = () => {
+    decoAnimated.value = !decoAnimated.value
+}
+
+const computedDecoAnimated = computed(() => {
+    const { current } = decoration.value
+    return decoAnimated.value && current == 1001
+})
 
 
 /* 生命周期、监听 */
@@ -325,8 +333,11 @@ onActivated(() => {
 
 <template>
     <div id="user-profile-view" ref="userProfileRef" @scroll="onScroll">
-        <div class="decoration">
-            <img :src="`deco_${decoration.current}.png`" @error="resetDecoration" @click="nextDecoration" />
+        <div class="decoration" :class="{ animated: computedDecoAnimated }">
+            <img :src="`deco_${decoration.current}.png`" 
+                @error="resetDecoration" 
+                @click="nextDecoration"
+                @contextmenu="toggleDecorationAnimated" />
         </div>
         <div class="header">
             <div>
@@ -379,9 +390,15 @@ onActivated(() => {
                 </div>
                 <span class="tip-text" v-show="false">暂不支持本地歌曲</span>
             </div>
-            <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
-                :dataType="dataType" :id="dataListId"
-                :singleLineTitleStyle="singleLineTitleStyle" >
+            <component :is="currentTabView" 
+                :data="tabData" 
+                :artistVisitable="true" 
+                :albumVisitable="true"
+                :dataType="dataType" 
+                :id="dataListId"
+                :singleLineTitleStyle="singleLineTitleStyle"
+                :playable="true"
+                :needReset="true" >
             </component>
             <div v-show="loading">
                 <div class="loading-mask" v-for="i in 12"
@@ -469,6 +486,7 @@ onActivated(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 }
 
@@ -579,5 +597,32 @@ onActivated(() => {
     width: 68px;
     height: 68px;
     cursor: pointer;
+}
+
+#user-profile-view .decoration.animated img {
+    animation: sway-anim 5s linear infinite;
+    transform-origin: top center;
+}
+
+@keyframes sway-anim {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-12deg);
+    }
+
+    50% {
+        transform: rotate(0deg);
+    }
+
+    75% {
+        transform: rotate(12deg);
+    }   
+
+    100% {
+        transform: rotate(0deg);
+    }
 }
 </style>

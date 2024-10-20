@@ -1,0 +1,863 @@
+<script>
+//定义名称，方便用于<keep-alive>
+export default {
+    name: 'NavidromeSessionDetailView'
+}
+</script>
+
+<script setup>
+import { computed, inject, onActivated, onDeactivated, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch, nextTick } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useAppCommonStore } from '../store/appCommonStore';
+import { usePlayStore } from '../store/playStore';
+import { useSettingStore } from '../store/settingStore';
+import { usePlatformStore } from '../store/platformStore';
+import { useCloudStorageStore } from '../store/cloudStorageStore';
+import { isDevEnv, toLowerCaseTrimString, isBlank, } from "../../common/Utils";
+import { Navidrome } from '../../vendor/navidrome';
+import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
+import AlbumListPaginationControl from '../components/AlbumListPaginationControl.vue';
+import ArtistListControl from '../components/ArtistListControl.vue';
+import PlaylistsControl from '../components/PlaylistsControl.vue';
+import SongListControl from '../components/SongListControl.vue';
+import Back2TopBtn from '../components/Back2TopBtn.vue';
+
+
+
+const props = defineProps({
+    id: String
+})
+
+const { backward } = inject('appRoute')
+const { showConfirm } = inject('apiExpose')
+const { addAndPlayTracks, playVideoItem, dndSaveFile } = inject('player')
+
+
+const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
+const { isDndSaveEnable, isSingleLineAlbumTitleStyle, getPaginationStyleIndex } = storeToRefs(useSettingStore())
+const { getNavidromeTypeTabs, isAllSongsTab, isPlaylistsTab, 
+    isAlbumsTab, isFMRadiosTab, isArtistsTab, } = usePlatformStore()
+const { playTrack, resetQueue, addTracks, playNextTrack, addTrack, playTrackLater } = usePlayStore()
+//const {  } = storeToRefs(useCloudStorageStore())
+const { getNavidromeSession, } = useCloudStorageStore()
+
+
+const activeTab = ref(0)
+const tabData = reactive([])
+const currentTabView = shallowRef(null)
+const currentSession = ref(null)
+const currentCate = ref(null)
+const categoriesShow = ref(false)
+const categories = reactive([])
+const albumCategories = reactive([])
+const artistCategories = reactive([])
+const loading = ref(false)
+const viewMode = ref(0)
+const keyword = ref(null)
+const filteredData = ref(null)
+const singleLineTitleStyle = ref(false)
+const contentRef = ref(null)
+const back2TopBtnRef = ref(null)
+let markScrollTop = 0
+const limit = 36
+
+const setCategories = (value) => {
+    categories.length = 0
+    if(value) categories.push(...value)
+}
+const setAlbumCategories = (value) => {
+    albumCategories.length = 0
+    if(value) albumCategories.push(...value)
+}
+const setArtistCategories = (value) => {
+    artistCategories.length = 0
+    if(value) artistCategories.push(...value)
+}
+const setCurrentCate = (value) => (currentCate.value = value)
+const setCategoriesShow = (value) => (categoriesShow.value = value)
+const toggleCategories = () => setCategoriesShow(!categoriesShow.value)
+
+const setActiveTab = (value) => (activeTab.value = value)
+const setCurrentTabView = (value) => (currentTabView.value = value)
+
+const setCurrentSession = (value) => (currentSession.value = value)
+const setViewMode = (value) => (viewMode.value = value)
+const setLoading = (value) => (loading.value = value)
+const setKeyword = (value) => (keyword.value = value)
+const setFilteredData = (value) => (filteredData.value = value)
+const setSingleLineTitleStyle = (value) => (singleLineTitleStyle.value = value)
+
+
+const typeTabs = getNavidromeTypeTabs()
+const activeTabCode = () => (typeTabs[activeTab.value].code)
+const isSongTab = () => (isAllSongsTab(activeTabCode()))
+const isPlaylistTab = () => (isPlaylistsTab(activeTabCode()))
+const isAlbumTab = () => (isAlbumsTab(activeTabCode()))
+const isFmRadioTab = () => (isFMRadiosTab(activeTabCode()))
+const isArtistTab = () => (isArtistsTab(activeTabCode()))
+
+const setupSession = async () => {
+    if(!props.id) return
+    const session = getNavidromeSession(props.id, true) || { title: 'Navidrome' }
+    setCurrentSession(session)
+    Navidrome.setSession(session)
+}
+
+const resetTab = () => {
+    tabData.length = 0
+    singleLineTitleStyle.value = false
+    setCurrentTabView(null)
+}
+
+const loadAlbumCategories = async () => {
+    if(albumCategories.length > 0) return false
+    const result = await Navidrome.albumCategories()
+    setAlbumCategories(result.data)
+    return true
+}
+
+const loadAlbums = async () => {
+    setLoading(true)
+    setCurrentTabView(AlbumListPaginationControl)
+
+    await loadAlbumCategories()
+    setCategories(albumCategories)
+    
+    const { value: cate } = currentCate.value || { value: '' }
+    Navidrome.albumSquare(cate, 0, limit, 1).then(result => {
+        if(!result) return
+        const { data, total } = result
+        tabData.length = 0
+        tabData.push(...data)
+        setSingleLineTitleStyle(true)
+        setLoading(false)
+    })
+}
+
+const loadArtists = async () => {
+    setLoading(true)
+    setCurrentTabView(ArtistListControl)
+
+    const { value: cate } = currentCate.value || { value: '' }
+    Navidrome.artistSquare(cate, 0, limit, 1).then(result => {
+        if(!result) return
+        const { data, categories } = result
+        tabData.length = 0
+        tabData.push(...data)
+
+        setArtistCategories(categories.data)
+        setCategories(artistCategories)
+        setLoading(false)
+    })
+}
+
+const loadPlaylists = async () => {
+    setLoading(true)
+    setCurrentTabView(PlaylistsControl)
+    Navidrome.playlistSquare('', 0, limit, 1).then(result => {
+        if(!result) return
+        const { data, } = result
+        tabData.length = 0
+        tabData.push(...data)
+        setLoading(false)
+    })
+}
+
+const loadSongs = async () => {
+    setLoading(true)
+    setCurrentTabView(SongListControl)
+    Navidrome.songSquare('', 0, 500, 1).then(result => {
+        if(!result) return
+        const { data, } = result
+        tabData.length = 0
+        tabData.push(...data)
+        setLoading(false)
+    })
+}
+
+const loadRadios = async () => {
+    setLoading(true)
+    setCurrentTabView(PlaylistsControl)
+    Navidrome.radioSquare('', 0, limit, 1).then(result => {
+        if(!result) return
+        const { data, } = result
+        tabData.length = 0
+        tabData.push(...data)
+        setLoading(false)
+    })
+}
+
+const loadTab = () => {
+    resetTab()
+    if(isAlbumTab()) {
+        setCurrentCate(albumCategories[0])
+        loadAlbums()
+    } else if(isArtistTab()) {
+        setCurrentCate(artistCategories[0])
+        loadArtists()
+    } else if(isPlaylistTab()) {
+        loadPlaylists()
+    } else if(isSongTab()) {
+        loadSongs()
+    } else if(isFmRadioTab()) {
+        loadRadios()
+    }
+}
+
+const visitTab = (index) => {
+    setActiveTab(index)
+    loadTab()
+}
+
+const markScrollState = () => {
+    if (contentRef.value) markScrollTop = contentRef.value.scrollTop
+}
+
+const resetScrollState = () => {
+    markScrollTop = 0
+    if (contentRef.value) contentRef.value.scrollTop = markScrollTop
+    resetFlowBtns()
+}
+
+const restoreScrollState = () => {
+    if (markScrollTop < 1) return
+    if (contentRef.value) contentRef.value.scrollTop = markScrollTop
+}
+
+const resetFlowBtns = () => {
+    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(contentRef.value)
+}
+
+const refreshAllPendingMark = ref(0)
+const nextPagePendingMark = ref(0)
+const scrollToLoad = (event) => {
+    if (loading.value) return
+    const { scrollTop, scrollHeight, clientHeight } = contentRef.value
+    markScrollState()
+    const allowedError = 10 //允许误差
+    if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
+        nextPagePendingMark.value = Date.now()
+    }
+}
+
+const loadPageContent = async ({ offset, page, limit }) => {
+    const isNormalType = (getPaginationStyleIndex.value === 0)
+    if (isNormalType) resetScrollState()
+    return loadContent((!isNormalType && page > 1), offset, limit, page)
+}
+
+const loadContent = async (noLoadingMask, offset, limit, page) => {
+    if(!noLoadingMask) setLoading(true)
+
+    let loadAction = null
+    if(isAlbumTab()) loadAction = Navidrome.albumSquare
+    if(isPlaylistTab()) loadAction = Navidrome.playlistSquare
+    if(isFmRadioTab()) loadAction = Navidrome.radioSquare
+    if(!loadAction) return
+
+    const { value: cate } = currentCate.value || { value: '' }
+    const result = await loadAction(cate, offset, limit, page)
+    if(!result) return
+
+    const { data, total } = result
+    tabData.length = 0
+    tabData.push(...data)
+    setSingleLineTitleStyle(true)
+    setLoading(false)
+    return { data, total, limit }
+}
+
+const onScroll = (event) => {
+    hideAllCtxMenus()
+    setCategoriesShow(false)
+    scrollToLoad(event)
+}
+
+const resetFilter = () => {
+    setKeyword(null)
+    setFilteredData(null)
+}
+
+const filterContent = (keyword) => {
+    setKeyword(keyword)
+    if(isBlank(keyword)) return resetFilter()
+    if(tabData.length < 1) return
+
+    const _keyword = toLowerCaseTrimString(keyword)
+    const list = tabData.filter(item => {
+        const { basename } = item
+        const title = toLowerCaseTrimString(basename)
+        return title.includes(_keyword)
+    }) || []
+    setFilteredData(list)
+}
+
+const computedSessionTitle = computed(() => {
+    const { title, } = currentSession.value || {}
+    return title || 'Navidrome'
+})
+
+const computedTabData = computed(() => {
+    return filteredData.value || tabData
+})
+
+const computedTabDataLength = computed(() => {
+    const total = tabData.length
+    const filtered = computedTabData.value.length
+    return filtered == total ? total : `${filtered}/${total}`
+})
+
+const computedCurrentCateTitle = computed(() => {
+    const item = currentCate.value
+    if(!item) {
+        if(isAlbumTab()) return '默认'
+        if(isArtistTab()) return '全部'
+        return ''
+    }
+    return item.key.replace('[Unknown]', '未知')
+            .replace('#', '全部')
+})
+
+const computedCateTitle = computed(() => {
+    return (item) => {
+        if(!item) return ''
+        return item.key.replace('[Unknown]', '%')
+    }
+})
+
+const visitCate = (item) => {
+    setCategoriesShow(false)
+    setCurrentCate(item)
+
+    if(isAlbumTab()) {
+        setCategories(albumCategories)
+        loadAlbums()
+    } else if(isArtistTab()) {
+        setCategories(artistCategories)
+        loadArtists()
+    }
+}
+
+const playAll = () => {
+    if(tabData.length < 1) return 
+
+    addAndPlayTracks(tabData, true, '即将为您播放全部歌曲')
+}
+
+const addAll = () => {
+    if(tabData.length < 1) return 
+
+    addTracks(tabData)
+    showToast('歌曲已全部添加')
+}
+
+watch(() => props.id, () => {
+    setupSession()
+    visitTab(0)
+}, { immediate: true })
+
+/* 生命周期、监听 */
+onMounted(() => {
+    resetScrollState()
+})
+
+onActivated(() => restoreScrollState())
+onDeactivated(() => setCategoriesShow(false))
+</script>
+
+<template>
+    <div id="navidrome-session-detail-view" @click="() => setCategoriesShow(false)">
+        <div class="header">
+            <div class="title-wrap">
+                <!-- fill: #0084ff -->
+                <svg width="28" height="28" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" style="enable-background:new 0 0 512 512"><path style="fill:var(--content-highlight-color)" d="M256 10.449C120.275 10.449 10.449 120.276 10.449 256c0 135.725 109.826 245.551 245.551 245.551S501.551 391.725 501.551 256C501.551 120.276 391.725 10.449 256 10.449z"></path><path style="fill:#fff" d="M256 168.229c-48.515.0-87.771 39.257-87.771 87.771s39.257 87.771 87.771 87.771 87.771-39.257 87.771-87.771S304.515 168.229 256 168.229z"></path><path d="M437.061 74.94C388.735 26.615 324.434.0 256 0S123.265 26.615 74.939 74.94.0 187.566.0 256s26.614 132.735 74.939 181.061S187.566 512 256 512s132.735-26.614 181.061-74.939S512 324.434 512 256 485.386 123.266 437.061 74.94zM256 491.102C126.365 491.102 20.898 385.635 20.898 256S126.365 20.898 256 20.898 491.102 126.365 491.102 256 385.635 491.102 256 491.102z"></path><path d="M354.22 256c0-54.158-44.061-98.22-98.22-98.22s-98.22 44.062-98.22 98.22 44.062 98.22 98.22 98.22 98.22-44.061 98.22-98.22zm-175.542.0c0-42.636 34.686-77.322 77.322-77.322s77.322 34.686 77.322 77.322S298.636 333.322 256 333.322 178.678 298.636 178.678 256z"></path><path d="M285.257 256c0-16.132-13.124-29.257-29.257-29.257S226.743 239.868 226.743 256s13.125 29.257 29.257 29.257S285.257 272.133 285.257 256zm-37.616.0c0-4.609 3.75-8.359 8.359-8.359 4.609.0 8.359 3.75 8.359 8.359.0 4.609-3.75 8.359-8.359 8.359C251.391 264.359 247.641 260.609 247.641 256z"></path><path d="M256 391.837c-5.771.0-10.449 4.678-10.449 10.449s4.678 10.449 10.449 10.449c41.897.0 81.265-16.294 110.853-45.883 29.587-29.587 45.881-68.955 45.881-110.852.0-5.771-4.678-10.449-10.449-10.449s-10.449 4.678-10.449 10.449C391.837 330.9 330.9 391.837 256 391.837z"></path><path d="M449.306 245.551c-5.771.0-10.449 4.678-10.449 10.449.0 1.481-.018 2.958-.052 4.43-.136 5.769 4.43 10.557 10.199 10.692.085.002.168.003.252.003 5.656.0 10.307-4.517 10.442-10.202.039-1.637.059-3.279.059-4.925C459.755 250.229 455.077 245.551 449.306 245.551z"></path><path d="M447.55 284.239c-5.656-1.145-11.168 2.52-12.308 8.178-17.107 84.854-92.489 146.44-179.242 146.44-5.771.0-10.449 4.678-10.449 10.449s4.678 10.449 10.449 10.449c47.353.0 93.467-16.573 129.847-46.668 35.9-29.697 60.717-71.084 69.881-116.54C456.868 290.891 453.207 285.38 447.55 284.239z"></path><path d="M256 120.163c5.771.0 10.449-4.678 10.449-10.449S261.771 99.265 256 99.265c-41.897.0-81.265 16.294-110.853 45.883C115.559 174.735 99.265 214.103 99.265 256c0 5.771 4.678 10.449 10.449 10.449s10.449-4.678 10.449-10.449c0-74.9 60.937-135.837 135.837-135.837z"></path><path d="M62.996 240.876c-5.759-.14-10.557 4.43-10.692 10.199-.039 1.637-.059 3.279-.059 4.925.0 5.771 4.678 10.449 10.449 10.449S73.143 261.771 73.143 256c0-1.481.018-2.958.052-4.43C73.331 245.8 68.765 241.013 62.996 240.876z"></path><path d="M256 73.143c5.771.0 10.449-4.678 10.449-10.449S261.771 52.245 256 52.245c-47.353.0-93.467 16.573-129.847 46.668-35.9 29.697-60.717 71.084-69.881 116.54-1.14 5.657 2.521 11.168 8.178 12.308.697.141 1.392.208 2.076.208 4.872.0 9.232-3.426 10.232-8.386C93.864 134.729 169.247 73.143 256 73.143z"></path></svg>
+                <div class="title" v-html="computedSessionTitle"></div>
+            </div>
+            <div class="tip-text about">
+                <p>提示：限于官方API，曲库中的专辑数量、歌曲数量无法确定</p>
+                <p>所以，专辑Tab最大分页固定为300；歌曲Tab为随机500首（已达API上限）</p>
+            </div>
+            <div class="tabs">
+                <span class="tab" v-for="(tab, index) in typeTabs"
+                    :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
+                    @click="visitTab(index)" v-html="tab.name">
+                </span>
+                <div class="cate-btn btn text-btn to-right" 
+                    v-show="activeTab <= 1"
+                    @click.stop="toggleCategories">
+                    <svg width="17" height="17" viewBox="0 0 29.3 29.3">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z" />
+                            </g>
+                        </g>
+                    </svg>
+                    <span v-html="computedCurrentCateTitle"></span>
+                </div>
+                <transition name="fade-ex">
+                    <div class="categories" v-show="categoriesShow">
+                        <ul>
+                            <li class="cate-item" v-for="(item, index) in categories"
+                                :class="{ first: (index == 0)}"
+                                v-html="computedCateTitle(item)" 
+                                @click.stop="visitCate(item)">
+                            </li>
+                        </ul>
+                    </div>
+                </transition>
+                <div class="action to-right" v-show="activeTab == 3">
+                    <SvgTextButton text="播放全部" 
+                        :leftAction="playAll" 
+                        :rightAction="addAll" >
+                        <template #left-img>
+                            <svg width="15" height="15" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <path
+                                    d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
+                            </svg>
+                        </template>
+                        <template #right-img>
+                            <svg width="17" height="17" viewBox="0 0 768.02 554.57" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z" />
+                                        <path
+                                            d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z" />
+                                        <path
+                                            d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z" />
+                                        <path
+                                            d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                        </template>
+                    </SvgTextButton>
+                </div>
+            </div>
+        </div>
+        <div class="center">
+            <div class="content" ref="contentRef" @scroll="onScroll">
+                <component :is="currentTabView" 
+                    :data="tabData" 
+                    :loading="loading"
+                    :paginationStyleType="getPaginationStyleIndex"
+                    :limit="limit" 
+                    :loadPage="loadPageContent"
+                    :nextPagePendingMark="nextPagePendingMark"
+                    :refreshAllPendingMark="refreshAllPendingMark" 
+                    :singleLineTitleStyle="singleLineTitleStyle"
+                    :playable="true"
+                    :needReset="true"
+                    :hideExtra="true" >
+                </component>
+            </div>
+        </div>
+        <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
+    </div>
+</template>
+
+<style>
+#navidrome-session-detail-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    /*padding: 20px 33px 10px 33px;*/
+    padding: 20px 0px 0px 0px;
+    overflow: hidden;
+}
+
+#navidrome-session-detail-view .spacing {
+    margin-left: 20px;
+}
+
+#navidrome-session-detail-view .to-right {
+    position: absolute;
+    right: 0px;
+}
+
+#navidrome-session-detail-view .categories {
+    --height-factor: 20px;
+    position: fixed;
+    top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size) + var(--height-factor) / 2);
+    right: calc(0px + var(--app-win-custom-shadow-size));
+    height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px - var(--app-win-custom-shadow-size) * 2 - var(--height-factor));
+    padding: 20px 0px;
+    background: var(--app-bg-color);
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    overflow: auto;
+    overflow-x: hidden;
+    box-shadow: var(--box-shadow);
+    border-top-left-radius: var(--border-popover-border-radius);
+    border-bottom-left-radius: var(--border-popover-border-radius);
+}
+
+#navidrome-session-detail-view .categories ul {
+    padding: 0px 15px;
+    background: transparent;
+}
+
+#navidrome-session-detail-view .categories li {
+    list-style: none;
+    padding: 6px 0px 6px 0px;
+    width: 88px;
+    margin-top: 8px;
+    text-align: center;
+    font-size: calc(var(--content-text-size) - 1px);
+    border-radius: var(--border-list-item-vertical-border-radius);
+    cursor: pointer;
+}
+
+#navidrome-session-detail-view .categories li.first {
+    margin-top: 0px;
+}
+
+#navidrome-session-detail-view .categories li:hover {
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-text-color);
+    transform: scale(1.03);
+}
+
+.contrast-mode #navidrome-session-detail-view .categories li:hover {
+    font-weight: bold;
+}
+
+
+
+#navidrome-session-detail-view .header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+    padding: 0px 33px 0px 33px;
+}
+
+#navidrome-session-detail-view .header .title-wrap {
+    display: flex;
+    align-items: center;
+    position: relative;
+    font-weight: bold;
+}
+
+#navidrome-session-detail-view .header .title-wrap .title {
+    text-align: left;
+    font-size: var(--content-text-module-title-size);
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+#navidrome-session-detail-view .header .title-wrap .options {
+    display: flex;
+    align-items: center;
+    margin-right: 6px;
+    height: 100%;
+}
+
+#navidrome-session-detail-view .about {
+    text-align: left;
+    margin-bottom: 0px;
+    margin-top: 10px;
+    color: var(--content-subtitle-text-color);
+}
+
+#navidrome-session-detail-view .header .action {
+    display: flex;
+}
+
+#navidrome-session-detail-view .header .tabs {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    padding-bottom: 0px;
+    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid transparent;
+    margin-top: 8px;
+    position: relative;
+}
+
+#navidrome-session-detail-view .header .tab {
+    font-size: var(--content-text-tab-title-size);
+    padding: 8px 0px 5px 0px;
+    margin-right: 36px;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+}
+
+#navidrome-session-detail-view .header .active {
+    font-weight: bold;
+    border-bottom: 3px solid var(--content-highlight-color);
+}
+
+
+#navidrome-session-detail-view .header .cate-btn {
+    margin-right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#navidrome-session-detail-view .center {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#navidrome-session-detail-view .center .list-title {
+    margin-bottom: 6px;
+    text-align: left;
+    display: flex;
+    position: relative;
+    padding: 0px 33px 0px 33px;
+}
+
+#navidrome-session-detail-view .center .list-title .size-text {
+    font-weight: bold;
+    margin-left: 3px;
+    padding-bottom: 6px;
+    border-bottom: 3px solid var(--content-highlight-color);
+    font-size: var(--content-text-tab-title-size);
+    cursor: pointer;
+}
+
+#navidrome-session-detail-view .center .list-title .size-text.loading-mask {
+    border-color: transparent;
+}
+
+#navidrome-session-detail-view .center .list-title .size-text svg {
+    fill: var(--content-highlight-color);
+    transform: translateY(2px);
+}
+
+#navidrome-session-detail-view .center .list-title .size-text span {
+    margin-left: 5px;
+}
+
+#navidrome-session-detail-view .center .list-title .action {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 38px;
+}
+
+#navidrome-session-detail-view .center .location {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
+    color: var(--content-subtitle-text-color);
+    font-size: calc(var(--content-text-size) - 1px);
+    padding: 3px 36px 12px 36px;
+    min-height: 20px;
+}
+
+#navidrome-session-detail-view .center .location .current {
+    word-wrap: break-word;
+    line-break: anywhere;
+    margin-left: 10px;
+}
+
+#navidrome-session-detail-view .center .content {
+    overflow: scroll;
+    overflow-x: hidden;
+    padding: 0px 33px 0px 33px;
+}
+
+#navidrome-session-detail-view .center .content.list-view .item {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    margin-bottom: 8px;
+    border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-list-item-vertical-border-radius);
+    /*box-shadow: 0px 0px 3px var(--border-popovers-border-color);*/
+    --item-height: 63px;
+}
+
+#navidrome-session-detail-view .center .item:hover {
+    background: var(--content-list-item-hover-bg-color);
+    cursor: pointer;
+}
+
+#navidrome-session-detail-view .center .content.list-view  .item > div {
+    height: var(--item-height);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+    /*font-size: var(--content-text-size);*/
+}
+
+#navidrome-session-detail-view .center .content.list-view  .item .sqno {
+    min-width: 36px;
+    padding-left: 10px;
+    flex: 1;
+}
+
+#navidrome-session-detail-view .center .content.list-view  .item .icon {
+    width: 50px;
+    max-width: 50px;
+    flex: 1;
+    padding-left: 10px;
+}
+
+#navidrome-session-detail-view .center .content .item .icon svg {
+    fill: var(--button-icon-btn-color) !important;
+    fill: var(--content-subtitle-text-color) !important;
+    border-radius: var(--border-img-small-border-radius);
+}
+
+#navidrome-session-detail-view .center .content.list-view  .item .title {
+    flex: 10;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
+    margin-right: 15px;
+    position: relative;
+}
+
+#navidrome-session-detail-view .center .content .item .title span {
+    word-wrap: break-word;
+    line-break: anywhere;
+    line-height: var(--item-height);
+}
+
+#navidrome-session-detail-view .center .content.list-view .item .title .action {
+    z-index: 2;
+    height: 100%;
+
+    position: absolute;
+    top: 0px;
+    left: 68%;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    padding-left: 10px;
+    padding-right: 10px;
+    
+    visibility: hidden;
+}
+
+#navidrome-session-detail-view .center .content.list-view .item .title:hover span {
+    width: 66%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    word-wrap: break-word;
+    line-break: anywhere;
+}
+
+#navidrome-session-detail-view .center .content .item .title:hover .action {
+    visibility: visible;
+}
+
+#navidrome-session-detail-view .center .content .item .action svg {
+    fill: var(--button-icon-btn-color);
+}
+
+#navidrome-session-detail-view .center .content .item .action svg:hover {
+    fill: var(--content-highlight-color);
+}
+
+#navidrome-session-detail-view .center .content.list-view  .item .size {
+    min-width: 88px;
+    margin-right: 15px;
+    justify-content: flex-end
+}
+
+#navidrome-session-detail-view .center .content.list-view  .item .type {
+    min-width: 39px;
+}
+
+#navidrome-session-detail-view .center .content.list-view  .item .updated {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    min-width: 115px;
+    padding-right: 10px;
+    /*font-size: var(--content-text-tip-text-size);*/
+    font-size: calc(var(--content-text-size) - 1px);
+}
+
+#navidrome-session-detail-view .center .content.list-view  .item .updated .hms {
+    margin-bottom: 3px;
+}
+
+#navidrome-session-detail-view .center .content.grid-view {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+#navidrome-session-detail-view .center .content.grid-view .item {
+    flex: none;
+    width: 100px;
+    padding: 15px 8px 15px 8px;
+    margin-right: 3px;
+    margin-left: 12px;
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-radius: var(--border-list-item-vertical-border-radius);
+    position: relative;
+}
+
+#navidrome-session-detail-view .center .content.grid-view  .item .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-align: center;
+    word-wrap: break-word;
+    line-break: anywhere;
+    margin-top: 3px;
+    /*font-size: calc(var(--content-text-size) - 1px);*/
+}
+
+#navidrome-session-detail-view .center .content.grid-view .item .action {
+    z-index: 3;
+    padding: 12px 15px;
+    position: absolute;
+    width: calc(100% - 30px);
+    bottom: 0px;
+    left: 0px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    
+    visibility: hidden;
+    border-bottom-left-radius: var(--border-list-item-vertical-border-radius);
+    border-bottom-right-radius: var(--border-list-item-vertical-border-radius);
+}
+
+#navidrome-session-detail-view .center .content.grid-view .item:hover .action {
+    visibility: visible;
+    background: var(--content-list-item-hover-bg-color);
+}
+</style>

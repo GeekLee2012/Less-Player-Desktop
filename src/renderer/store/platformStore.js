@@ -5,6 +5,7 @@ import { useAppCommonStore } from './appCommonStore';
 import { isBlank, toLowerCaseTrimString, toTrimString, stringEqualsIgnoreCase } from '../../common/Utils';
 import { useSettingStore } from './settingStore';
 import { WebDav } from '../../vendor/webdav';
+import { Navidrome } from '../../vendor/navidrome';
 
 
 
@@ -136,9 +137,21 @@ const PRESET_PLATFORMS = [
         online: true,
         types: ['playlists', 'videos'],
         scopes: ['cloudstorage'],
-        weight: 666,
-    }
-    /*{
+        weight: 3,
+    },
+    {
+        code: Navidrome.CODE,
+        vendor: Navidrome,
+        name: 'Navidrome',
+        shortName: 'NVD',
+        online: true,
+        types: ['playlists', 'albums', 'artists', 'videos'],
+        scopes: ['cloudstorage'],
+        artistTabs: [ 'albums','about' ],
+        //searchTabs: [ 'all-songs', 'playlists', 'albums', 'artists', 'videos' ],
+        weight: 3,
+    },
+    /* {
         code: QQ.CODE,
         vendor: QQ,
         name: 'QQ音乐',
@@ -322,8 +335,10 @@ export const usePlatformStore = defineStore('platforms', {
             return this.assertsPlatform(code, LocalMusic.CODE)
         },
         isWebDav(code) {
-            const vendor = this.getVendor(code)
-            return vendor && this.assertsPlatform(vendor.CODE, WebDav.CODE)
+            return this.assertsPlatform(code, WebDav.CODE)
+        },
+        isNavidrome(code) {
+            return this.assertsPlatform(code, Navidrome.CODE)
         },
         isFreeFM(code) {
             return this.assertsPlatform(code, FreeFM.CODE)
@@ -461,6 +476,10 @@ export const usePlatformStore = defineStore('platforms', {
         },
         getPreferTypeTabs() {
             return this.getPlatformTabs('all-songs', 'playlists', 'albums', 'fm-radios')
+        }
+        ,
+        getNavidromeTypeTabs() {
+            return this.getPlatformTabs('albums', 'artists', 'playlists', 'all-songs','fm-radios')
         }
     }
 })

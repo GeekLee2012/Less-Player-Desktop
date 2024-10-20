@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'WebDavSessionEditView'
+    name: 'NavidromeSessionEditView'
 }
 </script>
 
@@ -26,7 +26,7 @@ const setActionDisabled = (value) => isActionDisabled.value = value
 const isCreateMode = !props.id
 
 
-const { addWebDavSession, updateWebDavSession, getWebDavSession,  } = useCloudStorageStore()
+const { addNavidromeSession, updateNavidromeSession, getNavidromeSession,  } = useCloudStorageStore()
 
 
 const loadSession = () => {
@@ -34,7 +34,7 @@ const loadSession = () => {
 
     const id = props.id.trim()
     if (id.length < 1) return
-    const session = getWebDavSession(id)
+    const session = getNavidromeSession(id)
     if (!session) return
     const { title, url, username } = session
     Object.assign(detail, { id, title, url, username, password: '************' })
@@ -49,9 +49,9 @@ const submit = () => {
     const { title, url, username, password } = detail
     let success = false
     if (isCreateMode) {
-        success = addWebDavSession(title, url, username, password)
+        success = addNavidromeSession(title, url, username, password)
     } else {
-        success = updateWebDavSession(props.id, title, url, username)
+        success = updateNavidromeSession(props.id, title, url, username)
     }
     if(!success) return showFailToast('会话保存失败')
 
@@ -75,13 +75,13 @@ onMounted(loadSession)
 </script>
 
 <template>
-    <div id="webdav-session-edit-view">
+    <div id="navidrome-session-edit-view">
         <div class="header">
-            <span class="title" v-show="!id">新建WebDAV会话</span>
-            <span class="title" v-show="id">编辑WebDAV会话</span>
+            <span class="title" v-show="!id">新建Navidrome会话</span>
+            <span class="title" v-show="id">编辑Navidrome会话</span>
         </div>
         <div class="center">
-            <div class="tip-text">提示：“会话名称”除外，其他信息一旦创建，不支持更改</div>
+            <div class="tip-text">提示：“用户名”、“密码”等信息，一旦创建，不支持更改</div>
             <div class="form-row">
                 <div class="sec-title">会话名称：</div>
                 <div @keydown.stop="">
@@ -93,8 +93,7 @@ onMounted(loadSession)
                 <div class="sec-title">会话URL：</div>
                 <div @keydown.stop="">
                     <input type="text" v-model="detail.url" maxlength="1024"
-                        placeholder="会话URL，最多支持输入1024个字符" 
-                        :readonly="!isCreateMode" />
+                        placeholder="会话URL，最多支持输入1024个字符"  />
                 </div>
             </div>
             <div class="form-row">
@@ -126,7 +125,7 @@ onMounted(loadSession)
 </template>
 
 <style>
-#webdav-session-edit-view {
+#navidrome-session-edit-view {
     display: flex;
     flex-direction: column;
     padding: 20px 33px 15px 33px;
@@ -134,14 +133,14 @@ onMounted(loadSession)
     overflow: scroll;
 }
 
-#webdav-session-edit-view .header {
+#navidrome-session-edit-view .header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px;
 }
 
-#webdav-session-edit-view .header .title {
+#navidrome-session-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
     /*font-size: 30px;*/
@@ -149,39 +148,39 @@ onMounted(loadSession)
     font-weight: bold;
 }
 
-#webdav-session-edit-view .center {
+#navidrome-session-edit-view .center {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-top: 10px;
 }
 
-#webdav-session-edit-view .center .tip-text {
+#navidrome-session-edit-view .center .tip-text {
     text-align: left;
     margin-bottom: 10px;
 }
 
-#webdav-session-edit-view .center .form-row {
+#navidrome-session-edit-view .center .form-row {
     margin-bottom: 17px;
     display: flex;
     flex-direction: row;
 }
 
-#webdav-session-edit-view .center .form-row > div {
+#navidrome-session-edit-view .center .form-row > div {
     display: flex;
     flex-direction: row;
     align-items: center;
     flex: 9;
 }
 
-#webdav-session-edit-view .center .form-row > div.sec-title {
+#navidrome-session-edit-view .center .form-row > div.sec-title {
     flex: 1;
     min-width: 100px;
 }
 
 
-#webdav-session-edit-view .center .form-row input,
-#webdav-session-edit-view .center .form-row textarea {
+#navidrome-session-edit-view .center .form-row input,
+#navidrome-session-edit-view .center .form-row textarea {
     flex: 1;
     border: 1px solid var(--border-inputs-border-color);
     outline: none;
@@ -192,21 +191,21 @@ onMounted(loadSession)
     font-size: var(--content-text-size);
 }
 
-#webdav-session-edit-view .center .form-row input {
+#navidrome-session-edit-view .center .form-row input {
     height: 28px;
 }
 
-#webdav-session-edit-view .center .form-row textarea {
+#navidrome-session-edit-view .center .form-row textarea {
     height: 193px;
     padding: 8px;
 }
 
-#webdav-session-edit-view .center .action {
+#navidrome-session-edit-view .center .action {
     display: flex;
     flex-direction: row;
 }
 
-#webdav-session-edit-view .spacing {
+#navidrome-session-edit-view .spacing {
     margin-left: 20px;
 }
 </style>

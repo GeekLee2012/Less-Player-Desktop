@@ -88,7 +88,7 @@ export const useSettingStore = defineStore('setting', {
         common: {
             //窗口缩放
             winZoom: 85,
-            //保存为初始值
+            //锁定为初始值
             //在创建应用窗口时，作为webPreference的配置参数
             useWinZoomForCreate: false,
             //窗口控件风格，0 => 自动，1 => macOS, 2 => Windows

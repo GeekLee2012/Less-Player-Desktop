@@ -58,7 +58,7 @@ const updatePlatformIndex = (index, isSwitchMode) => {
     let path = null
     if (isLocalMusic(platform)) {
         path = `/${exploreMode}/${platform}`
-    } else if (isWebDav(platform)) {
+    } else if (isCloudStorageMode.value) {
         path = `/${exploreMode}/${platform}`
     } else if (isFreeFM(platform) && !currentPath.includes('/batch/')) {
         path = `/${exploreMode}/${platform}`

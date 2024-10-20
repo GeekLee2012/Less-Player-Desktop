@@ -840,10 +840,15 @@ watch([currentPlatformCode], () => refreshContent())
                 <SvgTextButton text="完成" :leftAction="backward" class="to-right"></SvgTextButton>
             </div>
             <div class="content" ref="contentRef" @scroll="onScroll">
-                <component :is="currentTabView" :data="tabData" :checkbox="true" :checkedAll="checkedAll"
-                    :checkChangedFn="onCheckChanged" :ignoreCheckAllEvent="ignoreCheckAllEvent" 
+                <component :is="currentTabView" 
+                    :data="tabData" 
+                    :checkbox="true" 
+                    :checkedAll="checkedAll"
+                    :checkChangedFn="onCheckChanged" 
+                    :ignoreCheckAllEvent="ignoreCheckAllEvent" 
                     :checkedData="checkedData"
-                    :singleLineTitleStyle="singleLineTitleStyle">
+                    :singleLineTitleStyle="singleLineTitleStyle"
+                    :needReset="true" >
                 </component>
             </div>
         </div>

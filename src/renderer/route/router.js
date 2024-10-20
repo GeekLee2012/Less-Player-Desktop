@@ -33,6 +33,10 @@ import VideoDetailView from '../views/VideoDetailView.vue';
 import WebDavView from '../views/WebDavView.vue';
 import WebDavSessionEditView from '../views/WebDavSessionEditView.vue';
 import WebDavSessionDetailView from '../views/WebDavSessionDetailView.vue';
+import NavidromeView from '../views/NavidromeView.vue';
+import NavidromeSessionEditView from '../views/NavidromeSessionEditView.vue';
+import NavidromeSessionDetailView from '../views/NavidromeSessionDetailView.vue';
+
 
 
 const routes = [
@@ -202,6 +206,25 @@ const routes = [
                 path: '/cloudstorage/webdav/:id',
                 props: true,
                 component: WebDavSessionDetailView
+            },
+            {  //网络存储 - Navidrome
+                path: '/cloudstorage/navidrome',
+                component: NavidromeView
+            },
+            {  //网络存储 - Navidrome - 创建会话
+                path: '/cloudstorage/navidrome/create',
+                props: true,
+                component: NavidromeSessionEditView
+            },
+            {  //网络存储 - Navidrome - 编辑会话
+                path: '/cloudstorage/navidrome/edit/:id',
+                props: true,
+                component: NavidromeSessionEditView
+            },
+            {  //网络存储 - Navidrome - 会话详情
+                path: '/cloudstorage/navidrome/:id',
+                props: true,
+                component: NavidromeSessionDetailView
             },
         ]
     },

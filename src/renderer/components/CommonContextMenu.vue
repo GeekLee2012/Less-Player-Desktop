@@ -42,7 +42,7 @@ const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { addToLocalPlaylist, moveToLocalPlaylist, removeFromLocalPlaylist } = useLocalMusicStore()
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { removeRecentSong, } = useRecentsStore()
-const { isLocalMusic } = usePlatformStore()
+const { isLocalMusic, isWebDav, isNavidrome } = usePlatformStore()
 const { isShowDialogBeforeDeleteCustomPlaylist } = storeToRefs(useSettingStore())
 
 
@@ -79,6 +79,9 @@ const addFavoriteItem = () => {
     const track = commonCtxMenuCacheItem.value
     if (!track) return
     const { platform } = track
+    if(isWebDav(platform) || isNavidrome(platform)) {
+        return toastAndHideMenu('当前平台暂不支持收藏', true)
+    }
     let text = "歌曲收藏成功", success = true
     if (Playlist.isFMRadioType(track)) {
         addFavoriteRadio(track)
@@ -221,6 +224,7 @@ const showAddToList = (event, mode) => {
     const track = commonCtxMenuCacheItem.value
     if (!track || Playlist.isFMRadioType(track)) return
     const { platform } = track
+    if (isWebDav(platform) || isNavidrome(platform)) return 
     const dataType = isLocalMusic(platform) ? 10 : currentDataType
     doShowAddToListSubmenu(event, mode, dataType)
     return true
@@ -604,6 +608,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     background-color: var(--content-subtitle-text-color);
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
+    cursor: pointer;
 }
 
 .common-ctx-menu .menuItem:hover svg {

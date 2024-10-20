@@ -75,7 +75,7 @@ const visitTab = (index, isClick) => {
 const playAll = () => {
     const data = allSongs.value
     const album = { ...toRaw(detail), data }
-    playAlbum(album, '即将为您播放全部')
+    playAlbum(album, { text: '即将为您播放全部' })
 }
 
 const addAll = (text) => {
@@ -84,7 +84,7 @@ const addAll = (text) => {
 
     const data = allSongs.value
     const album = { ...toRaw(detail), data }
-    addAlbumToQueue(album, text || "歌曲已全部添加")
+    addAlbumToQueue(album, { text: (text || "歌曲已全部添加") })
 }
 
 //TODO

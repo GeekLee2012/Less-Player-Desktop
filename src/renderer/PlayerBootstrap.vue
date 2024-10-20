@@ -38,7 +38,7 @@ const { playTrack, playNextTrack,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying,
     setAudioOutputDevices, playTrackLater } = usePlayStore()
-const { getVendor, isLocalMusic, isFreeFM, isWebDav } = usePlatformStore()
+const { getVendor, isLocalMusic, isFreeFM, isWebDav, isNavidrome } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
     playingViewThemeIndex, spectrumIndex,
     pendingPlay, pendingPlayPercent,
@@ -98,7 +98,8 @@ const setCustomDndPlayingCover = (value) => customDndPlayingCover.value = value
 const traceRecentTrack = (track) => {
     if (!isStoreRecentPlay.value) return
     const { platform } = track
-    if (isLocalMusic(platform) || isWebDav(platform)) return
+    if (isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) return
+
     if (Playlist.isFMRadioType(track)) {
         addRecentRadio(track)
     } else if (Playlist.isVideoType(track)) {
@@ -115,8 +116,8 @@ const traceRecentPlaylist = (playlist) => {
     if (Playlist.isCustomType(playlist)) return
     if (Playlist.isFMRadioType(playlist)) return
     const { id, platform, title, cover, type } = playlist
-    if (isLocalMusic(platform)) return
-    if (isWebDav(platform)) return
+    if (isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) return
+
     addRecentPlaylist(id, platform, title, cover, type)
 }
 
@@ -124,7 +125,8 @@ const traceRecentPlaylist = (playlist) => {
 const traceRecentAlbum = (album) => {
     if (!isStoreRecentPlay.value) return
     const { id, platform, title, cover, publishTime } = album
-    if (isLocalMusic(platform)) return
+    if (isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) return
+    
     addRecentAlbum(id, platform, title, cover, publishTime)
 }
 
@@ -353,7 +355,8 @@ const onPlayerErrorRetry = ({ track, currentTime, radio }) => {
 }
 
 /* 播放歌单 */
-const playPlaylist = async (playlist, text, traceId) => {
+const playPlaylist = async (playlist, options) => {
+    const { text, traceId } = options || {}
     if (!traceId) setCurrentTraceId(null)
 
     try {
@@ -459,7 +462,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     //检查数据，再次确认
     if (!playlist || !playlist.data || playlist.data.length < 1) {
         const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
-            : '网络异常！请稍候重试'
+            : '获取歌单歌曲失败'
         if (traceId && !isCurrentTraceId(traceId)) return
         return showFailToast(failMsg)
     }
@@ -551,11 +554,13 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId, pla
 }
 
 //播放专辑
-const playAlbum = (album, text, traceId) => {
+const playAlbum = (album, options) => {
+    const { text, traceId, needReset } = options || {}
     if (!traceId) setCurrentTraceId(null)
+    const _needReset = (typeof needReset != 'boolean') ? true : needReset
 
     try {
-        doPlayAlbum(album, text, traceId)
+        doPlayAlbum(album, text, traceId, _needReset)
     } catch (error) {
         if (isDevEnv()) console.log(error)
         if (traceId && !isCurrentTraceId(traceId)) return
@@ -588,7 +593,8 @@ const loadAlbum = async (album, text, traceId) => {
 }
 
 //添加专辑到当前播放
-const addAlbumToQueue = async (album, text, traceId) => {
+const addAlbumToQueue = async (album, options) => {
+    const { text, traceId, } = options || {}
     if (traceId && !isCurrentTraceId(traceId)) return
 
     album = await loadAlbum(album, text, traceId)
@@ -606,7 +612,7 @@ const addAlbumToQueue = async (album, text, traceId) => {
 }
 
 //播放专辑
-const doPlayAlbum = async (album, text, traceId) => {
+const doPlayAlbum = async (album, text, traceId, needReset) => {
     if (traceId && !isCurrentTraceId(traceId)) return
 
     album = await loadAlbum(album, text, traceId)
@@ -618,7 +624,7 @@ const doPlayAlbum = async (album, text, traceId) => {
 
     if (traceId && !isCurrentTraceId(traceId)) return
     traceRecentAlbum(album)
-    addAndPlayTracks(album.data, true, text || '即将为您播放专辑')
+    addAndPlayTracks(album.data, needReset, text || '即将为您播放专辑')
 }
 
 
@@ -806,8 +812,9 @@ watch(exVisualCanvasIndex, (nv, ov) => {
 //获取视频信息 
 const getVideoDetail = (video) => {
     return new Promise((resolve, reject) => {
-        const { platform, mv, id, url } = video
-        if(url) return resolve(video)
+        const { platform, mv, id, url, retry } = video
+        const notRetry = (typeof retry == 'undefined')
+        if(Video.hasUrl(url) && notRetry) return resolve(video)
         const _id = (mv || id)
         if (!_id) return reject('noId')
         if (!platform) return reject('noService')
@@ -1481,7 +1488,9 @@ const eventsRegistration = {
     'track-play': track => {
         //resetAutoSkip()
         const { platform } = track
-        if(isLocalMusic(platform) || isWebDav(platform)) bootstrapTrack(track)
+        if(isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) {
+            bootstrapTrack(track)
+        }
         traceRecentTrack(track)
         //loadLyric(track)
     },

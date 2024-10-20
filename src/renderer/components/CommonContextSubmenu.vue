@@ -98,13 +98,14 @@ const resetScroll = () => {
     background-color: var(--content-subtitle-text-color);
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
+    cursor: pointer;
 }
 
 .common-ctx-submenu .menuItem:hover svg {
     fill: var(--button-icon-text-btn-icon-color);
 }
 
-.common-ctx-submenu .menuItem>div {
+.common-ctx-submenu .menuItem > div {
     display: flex;
     flex-direction: column;
     justify-content: center;

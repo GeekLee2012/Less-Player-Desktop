@@ -33,8 +33,8 @@ export class LocalMusic {
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
                     if (cover && track.cover != cover) {
-                        Object.assign(track, { cover })
-                        onTrackUpdated(track)
+                        Object.assign(result, { cover })
+                        onTrackUpdated(result)
                     }
                 }
             }
@@ -74,8 +74,8 @@ export class LocalMusic {
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
                     if (cover && track.cover != cover) {
-                        Object.assign(track, { cover })
-                        onTrackUpdated(track)
+                        Object.assign(result, { cover })
+                        onTrackUpdated(result)
                     }
                 }
             }

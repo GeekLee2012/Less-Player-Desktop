@@ -242,7 +242,10 @@ onActivated(() => restoreScrollState())
             :refreshAllPendingMark="refreshAllPendingMark" 
             v-show="!isAlbumType">
         </PlaylistsControl>
-        <AlbumListControl :data="playlists" :loading="isLoadingContent" v-show="isAlbumType">
+        <AlbumListControl :data="playlists" 
+            :loading="isLoadingContent"
+            :needReset="true"
+            v-show="isAlbumType">
         </AlbumListControl>
         <PlaylistCategoryFlowBtn ref="playlistCategoryFlowBtnRef" prefix="playlist">
         </PlaylistCategoryFlowBtn>

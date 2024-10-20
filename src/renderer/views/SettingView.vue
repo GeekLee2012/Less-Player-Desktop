@@ -432,7 +432,7 @@ const initSettingNavItems = () => {
 }
 
 const navbarCollapsed = ref(true)
-const setNavbarCollapsed = (value) => navbarCollapsed.value = value
+const setNavbarCollapsed = (value) => (navbarCollapsed.value = value)
 const scrollByNavItem = (event, item) => {
     item.scrollIntoView()
     setNavbarCollapsed(true)
@@ -520,9 +520,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                         <div class="tip-text spacing">提示：开启后，试点击一下右边标题</div>
                     </div>
-                    <div class="tip-text">提示：开启“保存为初始值”，可解决窗口缩放闪动Bug<br>
-                        开启“保存为初始值”，每次变更窗口缩放需重启应用；否则窗口缩放时，会发生闪动<br>
-                        若需经常变更窗口缩放，不建议开启“保存为初始值”
+                    <div class="tip-text">提示：建议开启“锁定为初始值”，可解决窗口缩放闪动Bug<br>
+                        但开启“锁定”后，每次改变“窗口缩放”时需重启应用；否则会触发窗口缩放闪动Bug<br>
+                        若需经常改变“窗口缩放”，不建议开启“锁定为初始值”
                     </div>
                     <div class="window-zoom">
                         <div class="zoom-title">
@@ -553,7 +553,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                                         </g>
                                     </g>
                                 </svg>
-                                <span>保存为初始值</span>
+                                <span>锁定为初始值</span>
                             </div>
                         </div>
                         <div>

@@ -452,6 +452,15 @@ provide('appRoute', {
     },
     visitWebDavSessionDetail: (id) => {
         return visitCommonRoute(`/cloudstorage/webdav/${id}`)
+    },
+    visitNavidromeSessionCreate: () => {
+        return visitCommonRoute('/cloudstorage/navidrome/create')
+    },
+    visitNavidromeSessionEdit: (id) => {
+        return visitCommonRoute(`/cloudstorage/navidrome/edit/${id}`)
+    },
+    visitNavidromeSessionDetail: (id) => {
+        return visitCommonRoute(`/cloudstorage/navidrome/${id}`)
     }
 })
 </script>

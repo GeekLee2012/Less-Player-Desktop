@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'WebDavView'
+    name: 'NavidromeView'
 }
 </script>
 
@@ -12,25 +12,26 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useCloudStorageStore } from '../store/cloudStorageStore';
+import { Navidrome } from '../../vendor/navidrome';
 
 
 
-const { visitWebDavSessionCreate, visitWebDavSessionEdit, visitWebDavSessionDetail } = inject('appRoute')
+const { visitNavidromeSessionCreate, visitNavidromeSessionEdit, visitNavidromeSessionDetail } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
 
 const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
 const { } = storeToRefs(useSettingStore())
-const { webdavSessions } = storeToRefs(useCloudStorageStore())
-const { removeWebDavSession, removeAllWebDavSession } = useCloudStorageStore()
+const { navidromeSessions } = storeToRefs(useCloudStorageStore())
+const { removeNavidromeSession, removeAllNavidromeSession } = useCloudStorageStore()
 
 
 
-const webdavRef = ref(null)
+const navidromeRef = ref(null)
 const back2TopBtnRef = ref(null)
 
 
 const resetBack2TopBtn = () => {
-    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(webdavRef.value)
+    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(navidromeRef.value)
 }
 
 const onScroll = () => {
@@ -46,37 +47,17 @@ const removeItem = async (item) => {
     const ok = await showConfirm('确定删除会话记录吗')
     if(!ok) return
 
-    removeWebDavSession(item)
+    removeNavidromeSession(item)
 }
 
 const removeAll = async () => {
-    if(webdavSessions.value.length < 1) return
+    if(navidromeSessions.value.length < 1) return
     const ok = await showConfirm('确定清空全部会话记录吗')
     if(!ok) return
 
     showToast('会话记录已全部清空')
-    removeAllWebDavSession()
+    removeAllNavidromeSession()
 }
-
-const tutorialList = [{
-    title: 'WebDAV支持音、视频播放；但仅提供只读模式，暂不支持上传、修改、删除等操作'
-}, {
-    title: '目录：单（双）击左键，即可进入'
-}, {
-    title: '音视频文件：双击左键，即可播放'
-}, {
-    title: '全部操作：不支持递归遍历子目录，涉及搜索、播放目录等操作'
-}, {
-    title: '播放目录：播放当前目录下的全部音频文件'
-}, {
-    title: '返回上级：返回到当前目录的上一级目录；当前为根目录(/)时，不再继续返回'
-}, {
-    title: '当前会话：点击带图标的Tab标题（即"当前目录"上方的标题），切换视图模式'
-}, {
-    title: '退出当前会话：点击“返回上级”右侧图标；或点击搜索框左边的后退(<)按钮'
-}, {
-    title: '拖拽下载：请确认设置页拖拽保存已开启；支持拖拽下载单个文件，不支持目录'
-}]
 
 /* 生命周期、监听 */
 onMounted(() => {
@@ -85,16 +66,17 @@ onMounted(() => {
 </script>
 
 <template>
-    <div id="webdav-view" ref="webdavRef" @scroll="onScroll" >
+    <div id="navidrome-view" ref="navidromeRef" @scroll="onScroll" >
         <div class="header">
-            <div class="title">WebDAV</div>
+            <div class="title">
+                <span>Navidrome</span>
+            </div>
             <div class="about">
-                <p>提示：实验性功能；最近播放、收藏等，暂不支持WebDAV</p>
-                <p>当前应用定位并非WebDAV客户端，仅提供只读模式，不计划支持复杂功能</p>
-                <p><b>郑重声明: 当前应用无法保证账号信息安全；当涉及隐私信息时，不建议使用此项WebDAV</b></p>
+                <p>提示：实验性功能；当前使用Subsonic API版本为v{{ Navidrome.VERSION }}</p>
+                <p>目前仅提供播放相关功能；若需进行数据管理，请使用Navidrome官方客户端</p>
             </div>
             <div class="action" :class="{ 'none-about': false }">
-                <SvgTextButton text="新建会话" :leftAction="visitWebDavSessionCreate">
+                <SvgTextButton text="新建会话" :leftAction="visitNavidromeSessionCreate">
                     <template #left-img>
                         <svg width="13" height="13"
                             viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg">
@@ -130,12 +112,12 @@ onMounted(() => {
         </div>
         <div class="center">
             <div class="list-title">
-                <div class="size-text content-text-highlight">会话记录({{ webdavSessions.length }})</div>
+                <div class="size-text content-text-highlight">会话记录({{ navidromeSessions.length }})</div>
             </div>
-            <div v-for="(item, index) in webdavSessions" 
-                v-show="webdavSessions.length > 0"
+            <div v-for="(item, index) in navidromeSessions" 
+                v-show="navidromeSessions.length > 0"
                 class="session-item"
-                @click="visitWebDavSessionDetail(item.id)">
+                @click="visitNavidromeSessionDetail(item.id)">
                 <div class="icon-wrap"> 
                     <img src="" v-show="false"/>
                     <svg width="26" height="26" viewBox="0 0 80 80"
@@ -152,7 +134,7 @@ onMounted(() => {
                     <span v-html="item.title"></span>
                 </div>
                 <div class="action" @click.stop="">
-                    <div class="btn edit-btn" @click="visitWebDavSessionEdit(item.id)">
+                    <div class="btn edit-btn" @click="visitNavidromeSessionEdit(item.id)">
                         <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -183,32 +165,13 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-            <div v-for="(item, index) in tutorialList" 
-                v-show="webdavSessions.length < 1"
-                class="session-item">
-                <div class="icon-wrap"> 
-                    <img src="" v-show="false"/>
-                    <svg width="26" height="26" viewBox="0 0 80 80"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Capa_1" data-name="Capa 1">
-                                <path
-                                    d="M29.3,63.47l-4.05,4a9.05,9.05,0,0,1-12.72,0,8.8,8.8,0,0,1,0-12.51l14.9-14.79c3.08-3.06,8.89-7.57,13.13-3.37a5,5,0,1,0,7-7c-7.19-7.14-17.83-5.82-27.1,3.37L5.54,47.94a18.72,18.72,0,0,0,0,26.59,19,19,0,0,0,26.7,0l4-4a5,5,0,1,0-7-7ZM74.45,6C66.72-1.63,55.92-2,48.76,5.06l-5,5a5,5,0,0,0,7,7l5-5c3.71-3.69,8.57-2.16,11.73,1a8.79,8.79,0,0,1,0,12.52L51.58,41.37c-7.27,7.21-10.68,3.83-12.14,2.38a5,5,0,0,0-7,7,15.61,15.61,0,0,0,11.14,5c4.89,0,10-2.46,15-7.34l15.9-15.77A18.71,18.71,0,0,0,74.45,6Z" />
-                            </g>
-                        </g>
-                    </svg>
-                </div>
-                <div class="title-wrap">
-                    <span v-html="item.title"></span>
-                </div>
-            </div>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>
 </template>
 
 <style>
-#webdav-view {
+#navidrome-view {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -217,24 +180,24 @@ onMounted(() => {
     overflow-x: hidden;
 }
 
-#webdav-view .spacing {
+#navidrome-view .spacing {
     margin-left: 20px;
 }
 
-#webdav-view .header {
+#navidrome-view .header {
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
 }
 
-#webdav-view .header .title {
+#navidrome-view .header .title {
     text-align: left;
     margin-bottom: 5px;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
 
-#webdav-view .header .about {
+#navidrome-view .header .about {
     text-align: left;
     margin-left: 5px;
     margin-bottom: 12px;
@@ -242,15 +205,15 @@ onMounted(() => {
     color: var(--content-subtitle-text-color);
 }
 
-#webdav-view .header .action {
+#navidrome-view .header .action {
     display: flex;
 }
 
-#webdav-view .header .action.none-about {
+#navidrome-view .header .action.none-about {
     margin-top: 6px;
 }
 
-#webdav-view .center .list-title {
+#navidrome-view .center .list-title {
     margin-bottom: 10px;
     text-align: left;
     font-weight: bold;
@@ -258,14 +221,14 @@ onMounted(() => {
     position: relative;
 }
 
-#webdav-view .center .list-title .size-text {
+#navidrome-view .center .list-title .size-text {
     margin-left: 3px;
     padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
     font-size: var(--content-text-tab-title-size);
 }
 
-#webdav-view .center .session-item {
+#navidrome-view .center .session-item {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -279,31 +242,31 @@ onMounted(() => {
     --item-height: 68px;
 }
 
-#webdav-view .center .session-item:hover {
+#navidrome-view .center .session-item:hover {
     background: var(--content-list-item-hover-bg-color);
     cursor: pointer;
 }
 
-#webdav-view .center .session-item > div {
+#navidrome-view .center .session-item > div {
     height: var(--item-height);
     vertical-align: middle;
     /*font-size: var(--content-text-size);*/
 }
 
-#webdav-view .center .session-item .icon-wrap {
+#navidrome-view .center .session-item .icon-wrap {
     width: 68px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-#webdav-view .center .session-item .icon-wrap svg {
+#navidrome-view .center .session-item .icon-wrap svg {
     fill: var(--button-icon-btn-color) !important;
     fill: var(--content-subtitle-text-color) !important;
     border-radius: var(--border-img-small-border-radius);
 }
 
-#webdav-view .center .session-item .title-wrap {
+#navidrome-view .center .session-item .title-wrap {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -316,13 +279,13 @@ onMounted(() => {
     line-break: anywhere;
 }
 
-#webdav-view .center .session-item .title-wrap span {
+#navidrome-view .center .session-item .title-wrap span {
     word-wrap: break-word;
     line-break: anywhere;
     line-height: var(--item-height);
 }
 
-#webdav-view .center .session-item .action {
+#navidrome-view .center .session-item .action {
     display: flex;
     align-items: center;
     justify-content: flex-end;

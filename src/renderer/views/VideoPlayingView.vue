@@ -140,13 +140,14 @@ const eventsRegistration = {
 
             playNext()
         } else if (state == PlayState.PLAY_ERROR) {
-            //失败重试
+            //重试机制：失败后最多支持重试2次
             const retry = video.retry || 1
             if(retry > 2) {
                 Reflect.deleteProperty(video, 'retry')
                 return showFailToast('视频无法播放')
             }
-            emitEvents('video-changed', Object.assign(video, { retry: (retry + 1), url: '' }))
+            //重试前，需重置URL
+            emitEvents('video-changed', Object.assign(video, { retry: (retry + 1) }))
         }
     },
     'video-action': ({ action, event, video, data }) => {

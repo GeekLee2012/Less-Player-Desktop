@@ -28,6 +28,18 @@ export const parseJsonp = (jsonp) => {
 
 export const qsStringify = (data) => (qs.stringify(data))
 
+export const qsStringifyUrl = (url, data) => {
+    let _url = toTrimString(url)
+    const hasData = data && (typeof data === 'object')
+    if (hasData) {
+        _url = _url.includes('?') ? _url : `${_url}?`
+        _url = _url.endsWith('?') ? _url : `${_url}&`
+        const _data = qsStringify(data)
+        _url = `${_url}${_data}`
+    }
+    return _url
+}
+
 const parseJson = (data) => {
     //if(!resp || !resp.data) return 
     //const { data } = resp
@@ -48,6 +60,7 @@ const parseJson = (data) => {
 export const get = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
         if(isBlank(url)) return reject('noUrl')
+        /*
         let _url = toTrimString(url)
         const hasData = data && (typeof data === 'object')
         if (hasData) {
@@ -55,7 +68,8 @@ export const get = async (url, data, config, callback) => {
             _url = _url.endsWith('?') ? _url : `${_url}&`
             const _data = qsStringify(data)
             _url = `${_url}${_data}`
-        }
+        }*/
+        const _url = qsStringifyUrl(url, data)
         axios.get(_url, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))

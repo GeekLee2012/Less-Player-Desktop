@@ -137,7 +137,7 @@ const playAll = () => {
     if (filteredData.value) {
         addAndPlayTracks(filteredData.value, true)
     } else {
-        playPlaylist(detail, '即将为您播放全部')
+        playPlaylist(detail, { text: '即将为您播放全部' })
     }
 }
 

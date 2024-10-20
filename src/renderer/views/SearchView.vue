@@ -287,8 +287,15 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="tab-tip content-text-highlight" v-html="tabTipText" v-show="tabs.length > 0">
                 </span>
             </div>
-            <component :is="currentTabView" :data="tabData" :artistVisitable="true" :albumVisitable="true"
-                :isAlbumArtistSutitle="true" :loading="isLoading" :videoStyle="videoStyle" :playable="true">
+            <component :is="currentTabView" 
+                :data="tabData" 
+                :artistVisitable="true" 
+                :albumVisitable="true"
+                :isAlbumArtistSutitle="true" 
+                :loading="isLoading" 
+                :videoStyle="videoStyle" 
+                :playable="true"
+                :needReset="true" >
             </component>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

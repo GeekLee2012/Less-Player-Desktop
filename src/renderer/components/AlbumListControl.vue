@@ -18,6 +18,9 @@ const props = defineProps({
     loading: Boolean,
     isAlbumArtistSutitle: Boolean,
     singleLineTitleStyle: Boolean,
+    loadingMaskNum: Number,
+    needReset: Boolean, //播放前是否清空当前播放
+    hideExtra: Boolean,
 })
 
 const visitItem = (item) => {
@@ -34,28 +37,42 @@ const computedItemSubtitle = computed(() => {
         return item.subtitle
     }
 })
+
+const computedItemExtra = computed(() => {
+    const { hideExtra } = props
+    return hideExtra ? '' : item.publishTime
+})
+
+const playAction = (item) => {
+    const { needReset } = props
+    playAlbum(item, { needReset })
+}
 </script>
 
 <template>
     <div class="albumlist-ctl">
         <div class="pag-content" v-show="!loading">
-            <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title"
-                :singleLineTitleStyle="singleLineTitleStyle || isAlbumArtistSutitle" :subtitle="computedItemSubtitle(item)"
-                :extraText="item.publishTime" @click="visitItem(item)" :checkbox="checkbox" :playable="true"
-                :playAction="() => playAlbum(item)" :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent"
+            <ImageTextTile v-for="item in data" 
+                :cover="item.cover" 
+                :title="item.title"
+                :singleLineTitleStyle="singleLineTitleStyle || isAlbumArtistSutitle" 
+                :subtitle="computedItemSubtitle(item)"
+                :extraText="computedItemExtra" 
+                @click="visitItem(item)" 
+                :checkbox="checkbox" 
+                :playable="true"
+                :playAction="() => playAction(item)" 
+                :checked="checkedAll" 
+                :ignoreCheckAllEvent="ignoreCheckAllEvent"
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">
             </ImageTextTile>
         </div>
-        <ImageTextTileLoadingMask :count="20" v-show="loading">
+        <ImageTextTileLoadingMask :count="loadingMaskNum || 20" v-show="loading">
         </ImageTextTileLoadingMask>
     </div>
 </template>
 
 <style scoped>
-.albumlist-ctl .image-text-tile {
-    /* margin-top: 25px; */
-}
-
 .albumlist-ctl .pag-content {
     display: flex;
     flex-wrap: wrap;

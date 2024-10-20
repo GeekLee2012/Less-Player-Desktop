@@ -45,6 +45,18 @@ export class United {
         return title
     }
 
+    static pretranformArtistName(name) {
+        return toTrimString(name).replace('网络歌手', '')
+            .replace('未知歌手', '')
+            .replace('未知艺人', '')
+            .replace('未知艺术家', '')
+            .replace('群星', '')
+            .replace('[Unknown Artist]', '')
+            .replace('[Unknown]', '')
+            .replace('Unknown Artist', '')
+            .trim()
+    }
+
     //名称：再次处理
     static tranformTitle(title, artistName) {
         let tTitle = toTrimString(title)
@@ -65,6 +77,9 @@ export class United {
             .replace('未知艺人', '')
             .replace('未知艺术家', '')
             .replace('群星', '')
+            .replace('[Unknown Artist]', '')
+            .replace('[Unknown]', '')
+            .replace('Unknown Artist', '')
             .trim()
     }
 
@@ -104,7 +119,7 @@ export class United {
             let result = null
 
             const { platform: fromPlatform, title } = track
-            const firstArtistName = Track.firstArtistName(track)
+            const firstArtistName = United.pretranformArtistName(Track.firstArtistName(track))
             const _title = United.pretransformTitle(title)
             const tTitle = United.tranformTitle(_title, firstArtistName)
             const tArtistName = United.tranformArtistName(_title, firstArtistName)

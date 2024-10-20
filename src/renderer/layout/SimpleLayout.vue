@@ -494,7 +494,7 @@ const pickPlaylist = async (platform, traceId, noPlayAction) => {
         if (!isCurrentTraceId(traceId)) return
         setCurrentMusicCategoryName(toTrimString(cateName))
         const playAction = (dataType && dataType == 1) ? playAlbum : playPlaylist
-        playAction(playlist, null, traceId)
+        playAction(playlist, { traceId })
         success = true
         break
     } while (retry > 0 && retry < (maxRetry + 1))
@@ -617,7 +617,7 @@ const pickAnchorRadio = async (platform, traceId) => {
         const playlist = playlists[nextInt(playlists.length)]
         if (isCurrentTraceId(traceId)) {
             setCurrentMusicCategoryName(toTrimString(cateName))
-            playPlaylist(playlist, '即将为您打开主播电台', traceId)
+            playPlaylist(playlist, { text: '即将为您打开主播电台', traceId })
         }
         success = true
         break
@@ -744,7 +744,7 @@ const pickFMRadio = async (platform, traceId) => {
         const playlist = playlists[nextInt(playlists.length)]
         if (isCurrentTraceId(traceId)) {
             setCurrentMusicCategoryName(toTrimString(cateName))
-            playPlaylist(playlist, '即将为您收听广播电台', traceId)
+            playPlaylist(playlist, { text: '即将为您收听广播电台', traceId })
         }
         success = true
         break
@@ -998,7 +998,7 @@ const pickAlbum = async (platform, traceId) => {
     albumName = albumName.length <= 12 ? albumName : (albumName.substring(0, 10) + '...')
     setCurrentMusicCategoryName(toTrimString(albumName))
 
-    playAlbum(album, `即将为您播放专辑<br>${albumName}`, traceId)
+    playAlbum(album, { text: `即将为您播放专辑<br>${albumName}`, traceId })
 }
 
 
