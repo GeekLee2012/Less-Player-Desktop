@@ -26,10 +26,10 @@ const props = defineProps({
 const { addAndPlayTracks, playPlaylist, addPlaylistToQueue, dndSaveCover } = inject('player')
 const { searchDefault, } = inject('appCommon')
 
-const { getVendor } = usePlatformStore()
+const { getVendor, isLocalMusic, isWebDav, isNavidrome } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { routerCtxCacheItem, } = storeToRefs(useAppCommonStore())
-const { showToast, hideAllCtxMenus,  } = useAppCommonStore()
+const { showToast, showFailToast, hideAllCtxMenus,  } = useAppCommonStore()
 const { isSearchForOnlinePlaylistShow, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
 
@@ -154,13 +154,18 @@ const addAll = (text) => {
 const { addFavoritePlaylist, removeFavoritePlaylist, isFavoritePlaylist } = useUserProfileStore()
 const favorited = ref(false)
 const toggleFavorite = () => {
+    const { id, platform } = props
+    if(isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) {
+        return showFailToast('当前平台暂不支持收藏')
+    }
+
     favorited.value = !favorited.value
     let text = "歌单收藏成功"
     if (favorited.value) {
         const { title, cover } = detail
-        addFavoritePlaylist(props.id, props.platform, title, cover, Playlist.NORMAL_TYPE)
+        addFavoritePlaylist(id, platform, title, cover, Playlist.NORMAL_TYPE)
     } else {
-        removeFavoritePlaylist(props.id, props.platform)
+        removeFavoritePlaylist(id, platform)
         text = "歌单已取消收藏"
     }
     showToast(text)

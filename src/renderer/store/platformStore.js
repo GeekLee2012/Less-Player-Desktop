@@ -480,6 +480,6 @@ export const usePlatformStore = defineStore('platforms', {
         ,
         getNavidromeTypeTabs() {
             return this.getPlatformTabs('albums', 'artists', 'playlists', 'all-songs','fm-radios')
-        }
+        },
     }
 })

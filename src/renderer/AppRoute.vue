@@ -325,7 +325,8 @@ provide('appRoute', {
         if (platform === 'local') {
             return visitCommonRoute(`/${exploreMode}/local/${id}`)
         }
-        if (exploreMode != 'radios' && noArgMode) exploreMode = 'playlists'
+        const keepDefault = 'radios|cloudstorage|'.includes(exploreMode)
+        if (noArgMode && !keepDefault) exploreMode = 'playlists'
         return visitCommonRoute({
             path: `/${exploreMode}/playlist/${platform}/${id}`, onRouteReady, rejectOnSame
         })

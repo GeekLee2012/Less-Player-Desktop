@@ -55,9 +55,10 @@ const { setActiveTab, updateArtist,
 
 const { getVendor, isLocalMusic,
     isHotSongsTab, isAllSongsTab,
-    isAlbumsTab, isAboutTab, } = usePlatformStore()
+    isAlbumsTab, isAboutTab,
+    isWebDav, isNavidrome } = usePlatformStore()
 const { addTracks } = usePlayStore()
-const { showToast, hideAllCtxMenus } = useAppCommonStore()
+const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { isDndSaveEnable, isSingleLineAlbumTitleStyle } = storeToRefs(useSettingStore())
 
 const artistDetailRef = ref(null)
@@ -114,13 +115,17 @@ const addAllSongs = (text) => {
 const { addFollowArtist, removeFollowArtist, isFollowArtist } = useUserProfileStore()
 const follow = ref(false)
 const toggleFollow = () => {
+    const { id, platform } = props
+    if(isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) {
+        return showFailToast('当前平台暂不支持关注')
+    } 
     follow.value = !follow.value
     let text = "歌手关注成功"
     if (follow.value) {
         const { title, cover } = detail
-        addFollowArtist(props.id, props.platform, title, cover)
+        addFollowArtist(id, platform, title, cover)
     } else {
-        removeFollowArtist(props.id, props.platform)
+        removeFollowArtist(id, platform)
         text = "歌手已取消关注"
     }
     showToast(text)
@@ -432,13 +437,23 @@ onActivated(() => {
                 <div class="alias" v-html="artistAlias"></div>
                 <div class="about">{{ trimExtraHtml(about) }}</div>
                 <div class="action">
-                    <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
-                        v-show="hasHotSongsTab && !isAllSongsTab(activeTabCode)" text="播放热歌" class="spacing">
+                    <PlayAddAllBtn :leftAction="playHotSongs" 
+                        :rightAction="() => addHotSongs()"
+                        v-show="hasHotSongsTab && !isAllSongsTab(activeTabCode)" 
+                        text="播放热歌" 
+                        class="spacing">
                     </PlayAddAllBtn>
-                    <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
-                        v-show="computedPlayAllSongsBtnShow" class="spacing"></PlayAddAllBtn>
-                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow"
-                        :disabled="isLocalMusic(platform)" v-show="!isLocalMusic(platform)">
+                    <PlayAddAllBtn text="播放歌曲" 
+                        :leftAction="playAllSongs" 
+                        :rightAction="() => addAllSongs()"
+                        v-show="computedPlayAllSongsBtnShow" 
+                        class="spacing">
+                    </PlayAddAllBtn>
+                    <FavoriteShareBtn :favorited="follow" 
+                        actionText="关注" 
+                        :leftAction="toggleFollow"
+                        :disabled="isLocalMusic(platform)" 
+                        v-show="!isLocalMusic(platform)">
                     </FavoriteShareBtn>
                 </div>
             </div>

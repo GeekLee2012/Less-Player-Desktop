@@ -23,6 +23,14 @@
   font-weight: normal !important;
 }
 
+.winos-style .video-playing-view > .header {
+  visibility: visible;
+}
+
+.winos-style .lyric-ctl {
+  letter-spacing: 0.5px;
+}
+
 
 .use-winos-win-ctl .default-old-layout #main-left .header {
   margin-bottom: 8px !important;

@@ -1031,8 +1031,9 @@ const toggleFavoritedState = () => {
     const track = currentTrack.value
     if (!track) return
     const { id, platform } = track
-    if (isLocalMusic(platform)) {
-        return
+    if (isLocalMusic(platform) || isWebDav(platform) 
+        || isNavidrome(platform)) {
+        return showFailToast('当前平台暂不支持收藏') 
     }
     setFavoritedState(!favoritedState.value)
     const isFMRadioType = Playlist.isFMRadioType(track)

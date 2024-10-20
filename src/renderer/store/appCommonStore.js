@@ -164,13 +164,11 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         isExploreModeEnable() {
             return (exploreMode) => {
-                //const index = this.exploreModes.findIndex(item => (item == exploreMode))
-                //return this.exploreModeActiveStates[index]
                 if(exploreMode == 'userhome') return false
-                //if(exploreMode == 'cloudstorage') return true
 
                 const { activePlatforms } = usePlatformStore()
-                return activePlatforms(exploreMode).length > 0
+                const platforms =  activePlatforms(exploreMode)
+                return platforms && platforms.length > 0
             }
         },
         isArtistModeEnable() {
@@ -178,7 +176,10 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         isRadioModeEnable() {
             return this.isExploreModeEnable('radios')
-        }
+        },
+        isCloudStorageModeEnable() {
+            return this.isExploreModeEnable('cloudstorage')
+        },
     },
     actions: {
         setMaxScreen(value) {

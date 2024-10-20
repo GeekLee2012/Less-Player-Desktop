@@ -47,9 +47,9 @@ const { setActiveTab, updateTabTipText,
     updateAlbumDetailKeys,
 } = useAlbumDetailStore()
 
-const { getVendor, isLocalMusic, isAllSongsTab, isAboutTab, } = usePlatformStore()
+const { getVendor, isLocalMusic, isAllSongsTab, isAboutTab, isWebDav, isNavidrome } = usePlatformStore()
 const { addTracks } = usePlayStore()
-const { showToast, hideAllCtxMenus } = useAppCommonStore()
+const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { isDndSaveEnable } = storeToRefs(useSettingStore())
 
 
@@ -91,6 +91,12 @@ const addAll = (text) => {
 const { addFavoriteAlbum, removeFavoriteAlbum, isFavoriteAlbum } = useUserProfileStore()
 const favorited = ref(false)
 const toggleFavorite = () => {
+    if(isLocalMusic(platform.value) 
+        || isWebDav(platform.value)
+        || isNavidrome(platform.value)) {
+        return showFailToast('当前平台暂不支持收藏')
+    }
+
     favorited.value = !favorited.value
     let text = "专辑收藏成功"
     if (favorited.value) {

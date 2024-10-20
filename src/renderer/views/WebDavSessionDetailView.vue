@@ -44,6 +44,8 @@ const loading = ref(false)
 const viewMode = ref(0)
 const keyword = ref(null)
 const filteredData = ref(null)
+const listContentRef = ref(null)
+const gridContentRef = ref(null)
 const setViewMode = (value) => (viewMode.value = value)
 const setLoading = (value) => (loading.value = value)
 const setKeyword = (value) => (keyword.value = value)
@@ -59,9 +61,16 @@ const loadRootDirectory = async () => {
     changeDirectory('/')
 }
 
+const resetScrollState = () => {
+    if(listContentRef.value) listContentRef.value.scrollTop = 0
+    if(gridContentRef.value) gridContentRef.value.scrollTop = 0
+}
+
 const changeDirectory = async (path, options) => {
     currentPath.value = path
     setLoading(true)
+    resetScrollState()
+    resetFilter()
     WebDav.ls(client, path, options).then(directoryItems => {
         davData.length = 0
 
@@ -204,7 +213,6 @@ const visitItem = async (item, index, isDoubleClick) => {
 }
 
 const visitParent = async () => {
-    resetFilter()
     if(!currentPath.value) return 
     let path = currentPath.value
     if(path.endsWith('/')) path = path.substring(0, path.length - 2)
@@ -422,7 +430,7 @@ onMounted(() => {
                 <span>当前目录:</span>
                 <span class="current" v-html="currentPath"></span>
             </div>
-            <div class="content list-view" v-show="viewMode == 0 && !loading">
+            <div class="content list-view" ref="listContentRef" v-show="viewMode == 0 && !loading">
                 <div v-for="(item, index) in computedDavData" 
                     v-show="computedDavData.length > 0"
                     class="item"
@@ -474,7 +482,7 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-            <div class="content grid-view" v-show="viewMode == 1 && !loading">
+            <div class="content grid-view" ref="gridContentRef" v-show="viewMode == 1 && !loading">
                 <div v-for="(item, index) in computedDavData" 
                     v-show="computedDavData.length > 0"
                     class="item"

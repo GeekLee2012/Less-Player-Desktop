@@ -28,11 +28,12 @@ const { showContextMenu, useWindowsStyleWinCtl,
 
 const { platforms, currentPlatformIndex,
     currentPlatformCode, activePlatforms } = storeToRefs(usePlatformStore())
-const { updateCurrentPlatform, isLocalMusic, isFreeFM, isWebDav } = usePlatformStore()
+const { updateCurrentPlatform, isLocalMusic, isFreeFM, } = usePlatformStore()
 const { isMaxScreen, isPlaylistMode, isArtistMode,
     isRadioMode, isUserHomeMode, exploreModeCode, isCloudStorageMode, } = storeToRefs(useAppCommonStore())
 const { nextExploreMode, setPlaylistExploreMode, 
-    setRadioExploreMode, setCloudStorageExploreMode, } = useAppCommonStore()
+    setRadioExploreMode, setCloudStorageExploreMode, 
+    showFailToast } = useAppCommonStore()
 const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists } = storeToRefs(useUserProfileStore())
 const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
 

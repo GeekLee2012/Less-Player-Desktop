@@ -341,7 +341,7 @@ const computedCateTitle = computed(() => {
 const visitCate = (item) => {
     setCategoriesShow(false)
     setCurrentCate(item)
-
+    resetScrollState()
     if(isAlbumTab()) {
         setCategories(albumCategories)
         loadAlbums()
