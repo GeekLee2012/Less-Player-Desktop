@@ -95,6 +95,8 @@ const isPlaylistTab = () => (isPlaylistsTab(activeTabCode()))
 const isAlbumTab = () => (isAlbumsTab(activeTabCode()))
 const isFmRadioTab = () => (isFMRadiosTab(activeTabCode()))
 const isArtistTab = () => (isArtistsTab(activeTabCode()))
+const isNormalPaginationType = computed(() => (getPaginationStyleIndex.value === 0))
+
 
 const setupSession = async () => {
     if(!props.id) return
@@ -107,6 +109,7 @@ const resetTab = () => {
     tabData.length = 0
     singleLineTitleStyle.value = false
     setCurrentTabView(null)
+    resetScrollState()
 }
 
 const loadAlbumCategories = async () => {
@@ -240,8 +243,12 @@ const scrollToLoad = (event) => {
     }
 }
 
+const onPageLoaded = () => {
+    if (isNormalPaginationType.value) resetScrollState()
+}
+
 const loadPageContent = async ({ offset, page, limit }) => {
-    const isNormalType = (getPaginationStyleIndex.value === 0)
+    const isNormalType = isNormalPaginationType.value
     if (isNormalType) resetScrollState()
     return loadContent((!isNormalType && page > 1), offset, limit, page)
 }
@@ -249,10 +256,16 @@ const loadPageContent = async ({ offset, page, limit }) => {
 const loadContent = async (noLoadingMask, offset, limit, page) => {
     if(!noLoadingMask) setLoading(true)
 
-    let loadAction = null
-    if(isAlbumTab()) loadAction = Navidrome.albumSquare
-    if(isPlaylistTab()) loadAction = Navidrome.playlistSquare
-    if(isFmRadioTab()) loadAction = Navidrome.radioSquare
+    let loadAction = null, needReset = false
+    if(isAlbumTab()) {
+        loadAction = Navidrome.albumSquare
+    } else if(isPlaylistTab()) {
+        loadAction = Navidrome.playlistSquare
+        needReset = true
+    } else if(isFmRadioTab()) {
+        loadAction = Navidrome.radioSquare
+        needReset = true
+    }
     if(!loadAction) return
 
     const { value: cate } = currentCate.value || { value: '' }
@@ -260,8 +273,8 @@ const loadContent = async (noLoadingMask, offset, limit, page) => {
     if(!result) return
 
     const { data, total } = result
-    tabData.length = 0
-    tabData.push(...data)
+    if(isNormalPaginationType.value || needReset) tabData.length = 0
+    if(data && data.length > 0) tabData.push(...data)
     setSingleLineTitleStyle(true)
     setLoading(false)
     return { data, total, limit }
@@ -357,10 +370,7 @@ watch(() => props.id, () => {
 }, { immediate: true })
 
 /* 生命周期、监听 */
-onMounted(() => {
-    resetScrollState()
-})
-
+onMounted(() => resetScrollState())
 onActivated(() => restoreScrollState())
 onDeactivated(() => setCategoriesShow(false))
 </script>
@@ -445,6 +455,7 @@ onDeactivated(() => setCategoriesShow(false))
                     :paginationStyleType="getPaginationStyleIndex"
                     :limit="limit" 
                     :loadPage="loadPageContent"
+                    :onPageLoaded="onPageLoaded"
                     :nextPagePendingMark="nextPagePendingMark"
                     :refreshAllPendingMark="refreshAllPendingMark" 
                     :singleLineTitleStyle="singleLineTitleStyle"

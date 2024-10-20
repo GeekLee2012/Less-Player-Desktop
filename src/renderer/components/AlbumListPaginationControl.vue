@@ -49,8 +49,10 @@ const computedMaxPage = computed(() => {
 })
 
 const computedItemExtra = computed(() => {
-    const { hideExtra } = props
-    return hideExtra ? '' : item.publishTime
+    return (item) => {
+        const { hideExtra } = props
+        return hideExtra ? '' : item.publishTime
+    }
 })
 
 const playAction = (item) => {
@@ -74,7 +76,7 @@ const playAction = (item) => {
                     :title="item.title"
                     :singleLineTitleStyle="singleLineTitleStyle || isAlbumArtistSutitle" 
                     :subtitle="computedItemSubtitle(item)"
-                    :extraText="computedItemExtra"
+                    :extraText="computedItemExtra(item)"
                     @click="visitItem(item)" 
                     :checkbox="checkbox" 
                     :playable="true"

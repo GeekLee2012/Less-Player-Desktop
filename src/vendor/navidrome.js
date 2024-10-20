@@ -348,7 +348,6 @@ export class Navidrome {
         return new Promise((resolve, reject) => {
             //getArtistInfo
             Navidrome.getRestJson('getArtist', { id }).then(json => {
-                console.log(json)
                 const { artist, } = json
                 const { id, name: title, album, coverArt, artistImageUrl } = artist
                 const result = { 
@@ -368,6 +367,7 @@ export class Navidrome {
             Navidrome.getRestJson('getArtist', { id }).then(json => {
                 const result = { id, platform: Navidrome.CODE, offset, limit, page, data: [] }
                 const { album, } = json.artist
+                console.log(json)
                 if(album && album.length > 0) {
                     album.forEach(item => {
                         const { id, title, artist: artistName, artistId, coverArt, year, comment: about } = item
