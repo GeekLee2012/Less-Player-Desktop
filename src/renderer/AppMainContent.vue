@@ -551,8 +551,9 @@ const getLastReleaseVersion = () => {
                 let versionText = ''
                 const keyword = '## v'
                 for(let i = 0; i< lines.length; i++) {
-                  if(lines[i].startsWith(keyword)) {
-                    versionText = lines[i].substring(2)
+                  const line = toTrimString(lines[i])
+                  if(line.startsWith(keyword)) {
+                    versionText = line.substring(2)
                     break
                   }
                 }
