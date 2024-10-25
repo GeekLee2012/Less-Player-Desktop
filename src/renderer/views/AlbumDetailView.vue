@@ -20,7 +20,7 @@ import TextListControl from '../components/TextListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { Album } from '../../common/Album';
-import { coverDefault } from '../../common/Utils';
+import { coverDefault, randomTextWithinAlphabetNums } from '../../common/Utils';
 import { useSettingStore } from '../store/settingStore';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
@@ -47,7 +47,7 @@ const { setActiveTab, updateTabTipText,
     updateAlbumDetailKeys,
 } = useAlbumDetailStore()
 
-const { getVendor, isLocalMusic, isAllSongsTab, isAboutTab, isWebDav, isNavidrome } = usePlatformStore()
+const { getVendor, isLocalMusic, isAllSongsTab, isAboutTab, isWebDav, isNavidrome, isCloudStorage } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { isDndSaveEnable } = storeToRefs(useSettingStore())
@@ -64,7 +64,6 @@ const setLoading = (value) => isLoading.value = value
 const titleRef = ref(null)
 const isTwoLinesTitle = ref(false)
 const setTwoLinesTitle = (value) => isTwoLinesTitle.value = value
-
 
 const visitTab = (index, isClick) => {
     if (isLoading.value && isClick) return
@@ -92,8 +91,7 @@ const { addFavoriteAlbum, removeFavoriteAlbum, isFavoriteAlbum } = useUserProfil
 const favorited = ref(false)
 const toggleFavorite = () => {
     if(isLocalMusic(platform.value) 
-        || isWebDav(platform.value)
-        || isNavidrome(platform.value)) {
+        || isCloudStorage(platform.value)) {
         return showFailToast('当前平台暂不支持收藏')
     }
 
@@ -139,8 +137,9 @@ const getAlbumDetail = async () => {
     } while (!result && retry++ <= 3)
     if (!result) return
     const artistName = Album.artistName(result)
-    updateAlbum(result.title, result.cover, artistName, result.company, result.publishTime)
-    updateAbout(result.about)
+    const { title, cover, company, publishTime, about } = result
+    updateAlbum(title, cover, artistName, company, publishTime)
+    updateAbout(about)
     Object.assign(detail, result)
     setLoadingDetail(false)
     if (Album.hasTracks(result)) {
@@ -167,12 +166,13 @@ const loadAllSongs = async () => {
         result = await vendor.albumDetailAllSongs(id, 0, 100)
     } while (!result && retry++ <= 3)
     if (!isAllSongsTab(activeTabCode.value) || !result) return
-    updateAllSongs(result.data)
+    const { data, cover, artistName, publishTime } = result
+    updateAllSongs(data)
     updateTabData(allSongs.value)
     if (isLocalMusic(platform.value)) {
-        updateCover(result.cover)
-        updateArtistName(result.artistName)
-        updatePublishTime(result.publishTime)
+        updateCover(cover)
+        updateArtistName(artistName)
+        updatePublishTime(publishTime)
     }
     setLoading(false)
 }
@@ -268,7 +268,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     :draggable="isDndSaveEnable" @dragstart="(event) => dndSaveCover(event, detail)" />
             </div>
             <div class="right" v-show="!isLoading">
-                <div class="title" v-html="albumName || 未知专辑" ref="titleRef"></div>
+                <div class="title" v-html="albumName || '未知专辑'" ref="titleRef"></div>
                 <div class="info" :class="{ 'short-info': isTwoLinesTitle }">
                     <div class="info-row">
                         <p><b>歌手:</b> <span class="artist">{{ artistName || '未知歌手' }} </span></p>
@@ -315,8 +315,16 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
-            <component :id="id" :is="currentTabView" :data="tabData" :dataType="dataType" :artistVisitable="true"
-                :albumVisitable="true" :loading="isLoading" :platform="platform">
+            <component 
+                :id="randomTextWithinAlphabetNums(16)"
+                :is="currentTabView" 
+                :data="tabData" 
+                :dataType="dataType" 
+                :artistVisitable="true"
+                :albumVisitable="true"
+                :draggable="true"
+                :loading="isLoading" 
+                :platform="platform">
             </component>
         </div>
     </div>
@@ -401,6 +409,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;
@@ -422,6 +431,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     overflow: hidden;
     text-overflow: ellipsis;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;

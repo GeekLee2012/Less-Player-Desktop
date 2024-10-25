@@ -390,12 +390,13 @@ onActivated(() => {
                 </div>
                 <span class="tip-text" v-show="false">暂不支持本地歌曲</span>
             </div>
-            <component :is="currentTabView" 
+            <component 
+                :id="dataListId"
+                :is="currentTabView" 
                 :data="tabData" 
                 :artistVisitable="true" 
                 :albumVisitable="true"
                 :dataType="dataType" 
-                :id="dataListId"
                 :singleLineTitleStyle="singleLineTitleStyle"
                 :playable="true"
                 :needReset="true" >

@@ -17,12 +17,14 @@ const props = defineProps({
     nextPagePendingMark: Number,    //下一页
     refreshAllPendingMark: Number,  //刷新全部
     refreshPagePendingMark: Number, //刷新当前页
+    useMaxPage: Boolean,
 })
 
 //数据优先级： props.data > dataFromLoad
 const { data: dataInProps, limit, maxPage,
     paginationStyleType, nextPagePendingMark,
-    refreshAllPendingMark, refreshPagePendingMark } = toRefs(props)
+    refreshAllPendingMark, refreshPagePendingMark,
+    useMaxPage } = toRefs(props)
 const dataFromLoad = reactive([])
 
 const currentPage = ref(1)
@@ -32,6 +34,9 @@ const setCurrentPageMatchLimit = (value) => currentPageMatchLimit.value = value
 const totalPageFromLoad = ref(0)
 
 const getMaxPage = computed(() => {
+    if(useMaxPage.value) {
+        return maxPage.value || totalPageFromLoad.value
+    }
     return totalPageFromLoad.value || maxPage.value
 })
 
@@ -88,7 +93,10 @@ const isToolbarEnable = computed(() => {
     return getMaxPage.value > 1
 })
 
-const computedData = computed(() => (dataInProps.value || dataFromLoad))
+const computedData = computed(() => {
+    const data = dataInProps.value
+    return (data && data.length > 0) ? data : dataFromLoad
+})
 
 
 /* 生命周期、监听 */

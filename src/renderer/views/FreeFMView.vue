@@ -15,7 +15,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { parseM3uText, parsePlsText, ipcRendererInvoke, isSupportedImage } from "../../common/Utils";
+import { parseM3uText, parsePlsText, ipcRendererInvoke, isSupportedImage, isLiveStream } from "../../common/Utils";
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
@@ -92,10 +92,10 @@ const doImportRadios = (result) => {
     const { data: radios } = isJson ?
         JSON.parse(rData)
         : isPls ? parsePlsText(rData, item => {
-            item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
+            item.streamType = (isLiveStream(item.url) ? 0 : 1)
             return item
         }) : parseM3uText(rData, item => {
-            item.streamType = (item.url && item.url.includes('.m3u8') ? 0 : 1)
+            item.streamType = (isLiveStream(item.url) ? 0 : 1)
             return item
         })
     let msg = '导入电台失败', success = false

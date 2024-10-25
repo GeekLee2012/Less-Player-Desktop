@@ -80,17 +80,17 @@ onMounted(loadSession)
             <span class="title" v-show="!id">新建WebDAV会话</span>
             <span class="title" v-show="id">编辑WebDAV会话</span>
         </div>
+        <div class="tip-text">提示：带*号为必填项；“会话名称”除外，其他信息一旦创建，不支持更改</div>
         <div class="center">
-            <div class="tip-text">提示：“会话名称”除外，其他信息一旦创建，不支持更改</div>
             <div class="form-row">
-                <div class="sec-title">会话名称：</div>
+                <div class="sec-title">会话名称*：</div>
                 <div @keydown.stop="">
                     <input type="text" v-model="detail.title" maxlength="128"
                         placeholder="会话名称，最多支持输入128个字符" />
                 </div>
             </div>
             <div class="form-row">
-                <div class="sec-title">会话URL：</div>
+                <div class="sec-title">会话URL*：</div>
                 <div @keydown.stop="">
                     <input type="text" v-model="detail.url" maxlength="1024"
                         placeholder="会话URL，最多支持输入1024个字符" 
@@ -98,7 +98,7 @@ onMounted(loadSession)
                 </div>
             </div>
             <div class="form-row">
-                <div class="sec-title">用户名：</div>
+                <div class="sec-title">用户名*：</div>
                 <div @keydown.stop="">
                     <input type="text" v-model="detail.username" maxlength="128"
                         placeholder="用户名，最多支持输入128个字符"
@@ -108,7 +108,7 @@ onMounted(loadSession)
                 </div>
             </div>
             <div class="form-row">
-                <div class="sec-title">密码：</div>
+                <div class="sec-title">密码*：</div>
                 <div @keydown.stop="">
                     <input type="text" v-model="detail.password" maxlength="256"
                         placeholder="密码，最多支持输入256个字符"
@@ -156,9 +156,9 @@ onMounted(loadSession)
     margin-top: 10px;
 }
 
-#webdav-session-edit-view .center .tip-text {
+#webdav-session-edit-view .tip-text {
     text-align: left;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 #webdav-session-edit-view .center .form-row {

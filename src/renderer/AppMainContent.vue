@@ -73,7 +73,8 @@ const isReservedPath = (path) => {
 const deepIntoStates = (states, oldStates) => {
   for (let path in states) {
     const value = states[path]
-    if (value && (typeof value === 'object') && !Array.isArray(value)) {
+    if (value && (typeof value === 'object') && !Array.isArray(value)
+      && Object.keys(value).length > 0) {
       deepIntoStates(states[path], oldStates[path])
     } else if (oldStates) {
       states[path] = (isReservedPath(path) ? states[path] : oldStates[path])
@@ -350,7 +351,7 @@ const initialize = () => {
   checkAppVersion()
 }
 
-const setupWebDav = () => {
+const setupWebDav = async () => {
   const sessions = webdavSessions.value || []
   sessions.forEach(session => WebDav.setupAuthorization(session))
 }

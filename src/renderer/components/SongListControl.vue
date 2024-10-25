@@ -20,25 +20,43 @@ const props = defineProps({
     useExtra2: Boolean,
     paginationStyleType: Number,
     onPageLoaded: Function,
+    loadPage: Function,
     limit: Number,
+    maxPage: Number,
+    draggable: Boolean,
 })
 
-const limit = toRef(props, 'limit')
+const limitFromProps  = toRef(props, 'limit')
 const dataFromProps = toRef(props, 'data')
+const maxPageFromProps = toRef(props, 'maxPage')
 const paginationStyleType = toRef(props, 'paginationStyleType')
 
-const getLimit = computed(() => (limit.value || 2333))
+const getLimit = computed(() => (limitFromProps .value || 2333))
 
 const getMaxPage = computed(() => {
-    if (!dataFromProps.value || dataFromProps.value.length < 0) return 0
-    return Math.ceil(dataFromProps.value.length / limit.value)
+    const maxPage = maxPageFromProps.value
+    const data = dataFromProps.value
+    const limit = limitFromProps.value
+    if(maxPage && maxPage >= 0) return maxPage
+    if (!data || data < 0) return 0
+    return Math.ceil(data.length / limit)
 })
 
 const currentOffset = ref(0)
 const refreshAllPendingMark = ref(0)
 const refreshPagePendingMark = ref(0)
+//let lastLoadTime = 0
 const loadPageContent = ({ offset, limit, page }) => {
+    /*
+    const distance = (Date.now() - lastLoadTime)
+    if (distance < 100) return
+    lastLoadTime = Date.now()
+    */
+
     currentOffset.value = offset
+    const { loadPage } = props
+    if (typeof loadPage == 'function') return loadPage({ offset, limit, page })
+
     if (!dataFromProps.value || dataFromProps.value.length < 0) return
     if (paginationStyleType.value != 0) return { data: dataFromProps.value }
 
@@ -49,6 +67,7 @@ const loadPageContent = ({ offset, limit, page }) => {
 
 /* 生命周期、监听 */
 //TODO 逻辑上有Bug, 暂时先这样
+/*
 watch(() => dataFromProps.value.length, (nv, ov) => {
     if (ov && nv) {
         refreshPagePendingMark.value = Date.now()
@@ -60,6 +79,7 @@ watch(() => dataFromProps.value.length, (nv, ov) => {
 watch(() => dataFromProps.value.length > 0 && dataFromProps.value[0].id, (nv, ov) => {
     refreshAllPendingMark.value = Date.now()
 })
+*/
 
 watch(() => props.id, (nv, ov) => {
     refreshAllPendingMark.value = Date.now()
@@ -84,19 +104,35 @@ watch(() => props.id, (nv, ov) => {
 -->
 <template>
     <div class="songlist-ctl">
-        <PaginationTiles :paginationStyleType="paginationStyleType" :direction="1" :limit="getLimit" :maxPage="getMaxPage"
-            :loadPage="loadPageContent" :onPageLoaded="onPageLoaded" :loading="loading"
-            :refreshAllPendingMark="refreshAllPendingMark" :refreshPagePendingMark="refreshPagePendingMark">
+        <PaginationTiles 
+            :paginationStyleType="paginationStyleType" 
+            :direction="1" 
+            :limit="getLimit" 
+            :maxPage="getMaxPage"
+            :loadPage="loadPageContent" 
+            :onPageLoaded="onPageLoaded" 
+            :loading="loading"
+            :refreshAllPendingMark="refreshAllPendingMark" 
+            :refreshPagePendingMark="refreshPagePendingMark">
             <template v-slot="{ item, index }">
-                <SongItem :index="(currentOffset + index)" :data="item" :artistVisitable="artistVisitable"
-                    :albumVisitable="albumVisitable" :dataType="dataType" :deleteFn="deleteFn" :checkbox="checkbox"
-                    :checked="checkedAll" :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkChangedFn="checkChangedFn">
+                <SongItem :index="(currentOffset + index)" 
+                    :data="item"
+                    :draggable="draggable"
+                    :artistVisitable="artistVisitable"
+                    :albumVisitable="albumVisitable" 
+                    :dataType="dataType" 
+                    :deleteFn="deleteFn" 
+                    :checkbox="checkbox"
+                    :checked="checkedAll" 
+                    :ignoreCheckAllEvent="ignoreCheckAllEvent" 
+                    :checkChangedFn="checkChangedFn">
                 </SongItem>
             </template>
             <template #loading2>
                 <div v-show="loading">
-                    <div class="loading-mask" v-for="i in 12"
-                        style="width: 100%;  height: 56px; margin-bottom: 3px; display: inline-block;"></div>
+                    <div class="loading-mask" v-for="i in 20"
+                        style="width: 100%;  height: 56px; margin-bottom: 3px; display: inline-block;">
+                    </div>
                 </div>
             </template>
         </PaginationTiles>

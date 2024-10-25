@@ -6,6 +6,8 @@ import { isBlank, toLowerCaseTrimString, toTrimString, stringEqualsIgnoreCase } 
 import { useSettingStore } from './settingStore';
 import { WebDav } from '../../vendor/webdav';
 import { Navidrome } from '../../vendor/navidrome';
+import { Jellyfin } from '../../vendor/jellyfin';
+import { Emby } from '../../vendor/emby';
 
 
 
@@ -92,6 +94,18 @@ const PRESET_TABS = [{
     text: '0个电台',
     ctext: '已选0个电台',
     stext: '约0个电台',
+}, {
+    code: 'genres',
+    name: '流派',
+    text: '0个流派',
+    ctext: '已选0个流派',
+    stext: '约0个流派',
+}, {
+    code: 'folders',
+    name: '目录',
+    text: '0个目录',
+    ctext: '已选0个目录',
+    stext: '约0个目录',
 }]
 
 
@@ -144,6 +158,30 @@ const PRESET_PLATFORMS = [
         vendor: Navidrome,
         name: 'Navidrome',
         shortName: 'NVD',
+        online: true,
+        types: ['playlists', 'albums', 'artists', 'videos'],
+        scopes: ['cloudstorage'],
+        artistTabs: [ 'hot-songs', 'albums','about' ],
+        //searchTabs: [ 'all-songs', 'playlists', 'albums', 'artists', 'videos' ],
+        weight: 3,
+    },
+    {
+        code: Jellyfin.CODE,
+        vendor: Jellyfin,
+        name: 'Jellyfin',
+        shortName: 'JEF',
+        online: true,
+        types: ['playlists', 'albums', 'artists', 'videos'],
+        scopes: ['cloudstorage'],
+        artistTabs: [ 'albums','about' ],
+        //searchTabs: [ 'all-songs', 'playlists', 'albums', 'artists', 'videos' ],
+        weight: 3,
+    },
+    {
+        code: Emby.CODE,
+        vendor: Emby,
+        name: 'Emby',
+        shortName: 'EMB',
         online: true,
         types: ['playlists', 'albums', 'artists', 'videos'],
         scopes: ['cloudstorage'],
@@ -340,6 +378,18 @@ export const usePlatformStore = defineStore('platforms', {
         isNavidrome(code) {
             return this.assertsPlatform(code, Navidrome.CODE)
         },
+        isJellyfin(code) {
+            return this.assertsPlatform(code, Jellyfin.CODE)
+        },
+        isEmby(code) {
+            return this.assertsPlatform(code, Emby.CODE)
+        },
+        isCloudStorage(code) {
+            return this.isWebDav(code) 
+                || this.isNavidrome(code) 
+                || this.isJellyfin(code)
+                || this.isEmby(code)
+        },
         isFreeFM(code) {
             return this.assertsPlatform(code, FreeFM.CODE)
         },
@@ -359,19 +409,19 @@ export const usePlatformStore = defineStore('platforms', {
             return !isBlank(code)
         },
         isPlaylistType(type) {
-            return type === 'playlists'
+            return stringEqualsIgnoreCase(type, 'playlists')
         },
         isArtistType(type) {
-            return type === 'artists'
+            return stringEqualsIgnoreCase(type, 'artists')
         },
         isAlbumType(type) {
-            return type === 'albums'
+            return stringEqualsIgnoreCase(type, 'albums')
         },
         isAnchorRadioType(type) {
-            return type === 'anchor-radios'
+            return stringEqualsIgnoreCase(type, 'anchor-radios')
         },
         isFMRadioType(type) {
-            return type === 'fm-radios'
+            return stringEqualsIgnoreCase(type, 'fm-radios')
         },
         getPlatformName(code) {
             const platform = this.getPlatform(code)
@@ -406,31 +456,37 @@ export const usePlatformStore = defineStore('platforms', {
             this.allPlatforms.splice(index, 1)
         },
         isAllSongsTab(code) {
-            return toLowerCaseTrimString(code) === 'all-songs'
+            return stringEqualsIgnoreCase(code, 'all-songs')
         },
         isHotSongsTab(code) {
-            return toLowerCaseTrimString(code) === 'hot-songs'
+            return stringEqualsIgnoreCase(code, 'hot-songs')
         },
         isPlaylistsTab(code) {
-            return toLowerCaseTrimString(code) === 'playlists'
+            return stringEqualsIgnoreCase(code, 'playlists')
         },
         isAlbumsTab(code) {
-            return toLowerCaseTrimString(code) === 'albums'
+            return stringEqualsIgnoreCase(code, 'albums')
         },
         isArtistsTab(code) {
-            return toLowerCaseTrimString(code) === 'artists'
+            return stringEqualsIgnoreCase(code, 'artists')
         },
         isVideosTab(code) {
-            return toLowerCaseTrimString(code) === 'videos'
+            return stringEqualsIgnoreCase(code, 'videos')
         },
         isLyricsTab(code) {
-            return toLowerCaseTrimString(code) === 'lyrics'
+            return stringEqualsIgnoreCase(code, 'lyrics')
         },
         isAboutTab(code) {
-            return toLowerCaseTrimString(code) === 'about'
+            return stringEqualsIgnoreCase(code, 'about')
         },
         isFMRadiosTab(code) {
-            return toLowerCaseTrimString(code) === 'fm-radios'
+            return stringEqualsIgnoreCase(code, 'fm-radios')
+        },
+        isGenresTab(code) {
+            return stringEqualsIgnoreCase(code, 'genres')
+        },
+        isFoldersTab(code) {
+            return stringEqualsIgnoreCase(code, 'folders')
         },
         getPlatformTab(code) {
             code = toLowerCaseTrimString(code)
@@ -476,10 +532,18 @@ export const usePlatformStore = defineStore('platforms', {
         },
         getPreferTypeTabs() {
             return this.getPlatformTabs('all-songs', 'playlists', 'albums', 'fm-radios')
-        }
-        ,
+        },
         getNavidromeTypeTabs() {
             return this.getPlatformTabs('albums', 'artists', 'playlists', 'all-songs','fm-radios')
+        },
+        getJellyfinTypeTabs() {
+            return this.getPlatformTabs('albums', 'artists', 'playlists', 'all-songs', 'genres')
+        },
+        getEmbyTypeTabs() {
+            return this.getPlatformTabs('albums', 'artists', 'all-songs', 'genres', 'folders')
+        },
+        getGenreTypeTabs() {
+            return this.getPlatformTabs('albums', 'artists', 'all-songs')
         },
     }
 })

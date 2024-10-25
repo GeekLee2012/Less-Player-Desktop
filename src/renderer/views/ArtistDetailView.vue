@@ -21,7 +21,7 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
-import { coverDefault } from '../../common/Utils';
+import { coverDefault, randomTextWithinAlphabetNums } from '../../common/Utils';
 import { useSettingStore } from '../store/settingStore';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
@@ -56,7 +56,7 @@ const { setActiveTab, updateArtist,
 const { getVendor, isLocalMusic,
     isHotSongsTab, isAllSongsTab,
     isAlbumsTab, isAboutTab,
-    isWebDav, isNavidrome } = usePlatformStore()
+    isWebDav, isNavidrome, isCloudStorage } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { isDndSaveEnable, isSingleLineAlbumTitleStyle } = storeToRefs(useSettingStore())
@@ -74,14 +74,9 @@ const isLoading = ref(false)
 const back2TopBtnRef = ref(null)
 const isAllSongsTabMoreData = ref(false)
 let markScrollTop = 0
+const setLoadingDetail = (value) => (isLoadingDetail.value = value)
+const setLoading = (value) => (isLoading.value = value)
 
-const setLoadingDetail = (value) => {
-    isLoadingDetail.value = value
-}
-
-const setLoading = (value) => {
-    isLoading.value = value
-}
 
 const setLoadingSongs = (value) => {
     isLoadingSongs.value = value
@@ -103,11 +98,13 @@ const playHotSongs = () => addAndPlayTracks(hotSongs.value, true)
 const playAllSongs = () => addAndPlayTracks(allSongs.value, true)
 
 const addHotSongs = (text) => {
+    if(!hotSongs.value || hotSongs.value.length < 1) return 
     addTracks(hotSongs.value)
     showToast(text || "歌曲已全部添加")
 }
 
 const addAllSongs = (text) => {
+    if(!allSongs.value || allSongs.value.length < 1) return 
     addTracks(allSongs.value)
     showToast(text || "歌曲已全部添加")
 }
@@ -116,7 +113,7 @@ const { addFollowArtist, removeFollowArtist, isFollowArtist } = useUserProfileSt
 const follow = ref(false)
 const toggleFollow = () => {
     const { id, platform } = props
-    if(isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) {
+    if(isLocalMusic(platform) || isCloudStorage(platform)) {
         return showFailToast('当前平台暂不支持关注')
     } 
     follow.value = !follow.value
@@ -489,12 +486,15 @@ onActivated(() => {
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>
-            <component :id="id" :is="currentTabView" 
+            <component 
+                :id="randomTextWithinAlphabetNums(16)"
+                :is="currentTabView" 
                 :data="tabData" 
                 :dataType="dataType" 
                 :platform="platform"
                 :artistVisitable="true" 
                 :albumVisitable="true" 
+                :draggable="true"
                 :loading="isLoading" 
                 :singleLineTitleStyle="isSingleLineAlbumTitleStyle"
                 :needReset="true">

@@ -158,7 +158,9 @@ class VideoPlayer {
 
     playVideo(video) {
         this.setVideo(video)
-        this.play()
+        const self = this
+        //延迟播放，稍稍给SET_VIDEO事件异步执行争取点时间
+        setTimeout(() => self.play(), 365)
     }
 
     volume(value) {

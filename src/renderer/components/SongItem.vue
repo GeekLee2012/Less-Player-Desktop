@@ -25,6 +25,7 @@ const props = defineProps({
     checked: Boolean,
     ignoreCheckAllEvent: Boolean,
     checkChangedFn: Function,
+    draggable: Boolean
 })
 
 const { playVideoItem, dndSaveTrack } = inject('player')
@@ -113,10 +114,12 @@ const getAudioTypeFlagText = (data) => {
 }
 
 const isDraggable = computed(() => {
-    const { platform } = props.data
-    return isDndSaveEnable.value
+    const { data, draggable } = props
+    const { platform } = data
+    return draggable
+        && isDndSaveEnable.value
         && !isLocalMusic(platform)
-        && !Playlist.isFMRadioType(props.data)
+        && !Playlist.isFMRadioType(data)
 })
 
 

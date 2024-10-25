@@ -22,7 +22,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import SongListControl from '../components/SongListControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { toYyyymmddHhMmSs } from '../../common/Utils';
+import { randomTextWithinAlphabetNums, toYyyymmddHhMmSs } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -840,7 +840,9 @@ watch([currentPlatformCode], () => refreshContent())
                 <SvgTextButton text="完成" :leftAction="backward" class="to-right"></SvgTextButton>
             </div>
             <div class="content" ref="contentRef" @scroll="onScroll">
-                <component :is="currentTabView" 
+                <component 
+                    :id="randomTextWithinAlphabetNums(16)"
+                    :is="currentTabView" 
                     :data="tabData" 
                     :checkbox="true" 
                     :checkedAll="checkedAll"

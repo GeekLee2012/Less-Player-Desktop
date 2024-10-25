@@ -204,9 +204,9 @@ export const useSettingStore = defineStore('setting', {
             stateRefreshFrequency: 60,
             //歌曲频谱刷新频度，默认为3，范围：1 - 256
             spectrumRefreshFrequency: 3,
-            /* 本地歌曲 */
             //启用在线封面
             useOnlineCover: true,
+            /* 本地歌曲 */
             //显示音频格式
             audioTypeFlagShow: false,
             //扫描目录时，启用深度遍历

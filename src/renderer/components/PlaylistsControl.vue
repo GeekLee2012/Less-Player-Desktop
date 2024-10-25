@@ -6,11 +6,11 @@ import { useSettingStore } from '../store/settingStore';
 import PaginationTiles from './PaginationTiles.vue';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { Playlist } from '../../common/Playlist';
-import { toUpperCaseTrimString, transformUrl } from '../../common/Utils';
+import { isBlank, toUpperCaseTrimString, transformUrl } from '../../common/Utils';
 import { FILE_SCHEME } from '../../common/Constants';
 
 
-const { visitPlaylist, visitFreeFMEdit, visitVideoDetail } = inject('appRoute')
+const { visitPlaylist, visitFreeFMEdit, visitVideoDetail, visitGenreDetail } = inject('appRoute')
 const { playPlaylist } = inject('player')
 
 const props = defineProps({
@@ -44,7 +44,9 @@ const visitItem = (item) => {
     if (checkbox) return
     const { id, platform } = item
     const platformValid = isPlatformValid(platform)
-    const idValid = (typeof id == 'string') ? (id.trim().length > 0) : (id > 0)
+    let idValid = false
+    if(typeof id == 'string') idValid = !isBlank(id)
+    if(typeof id == 'number') idValid = (id > 0)
     const visitable = platformValid && idValid
 
     if (isFreeFM(platform)) {
@@ -57,6 +59,8 @@ const visitItem = (item) => {
         //视频
         const { detailUrl } = item
         detailUrl ? visitVideoDetail(platform, id, detailUrl, item) : playPlaylist(item)
+    } else if (Playlist.isGenreType(item)) {
+        visitGenreDetail(platform, id)
     } else if (visitable) {
         //其他，如普通歌单、主播电台歌单等
         const exploreMode = Playlist.isAnchorRadioType(item) ? 'radios' : null
@@ -105,12 +109,25 @@ const computedCenterTitleStyle = computed(() => {
             type == Playlist.FM_RADIO_TYPE
     }
 })
+
+const computedPlayable = computed(() => {
+    return (item) => {
+        const { playable } = props
+        const { type } = item
+        return playable
+    }
+})
 </script>
 
 <template>
     <div class="playlists-ctl">
-        <PaginationTiles :data="data" :paginationStyleType="paginationStyleType" :limit="limit" :maxPage="computedMaxPage"
-            :loadPage="loadPage" :nextPagePendingMark="nextPagePendingMark" :refreshAllPendingMark="refreshAllPendingMark"
+        <PaginationTiles :data="data" 
+            :paginationStyleType="paginationStyleType" 
+            :limit="limit" 
+            :maxPage="computedMaxPage"
+            :loadPage="loadPage" 
+            :nextPagePendingMark="nextPagePendingMark" 
+            :refreshAllPendingMark="refreshAllPendingMark"
             :loading="loading">
             <template v-slot="{ item, index }">
                 <ImageTextTile @click="visitItem(item)" 
@@ -123,7 +140,7 @@ const computedCenterTitleStyle = computed(() => {
                     :videoStyle="videoStyle" 
                     :centerTitleStyle="computedCenterTitleStyle(item)"
                     :singleLineTitleStyle="singleLineTitleStyle"
-                    :playable="playable" 
+                    :playable="computedPlayable(item)" 
                     :playAction="() => (playable && playPlaylist(item))" 
                     :checkbox="checkbox" 
                     :checked="checkedAll"

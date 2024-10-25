@@ -193,8 +193,8 @@ class Player {
 
         const duration = sound.duration()
         if (duration) {
-            sound.seek(Math.min(duration * percent, duration))
-            //this.notify('track-seekFinish')
+            const pos = Math.min(duration * percent, duration)
+            sound.seek(pos)
         }
     }
 
@@ -488,8 +488,11 @@ class Player {
     updateMetadata() {
         if(!this.currentTrack) return 
         const { duration } = this.currentTrack
-        const _duration = Number.isFinite(this.sound.duration()) ? this.sound.duration() * 1000 : 0
-        if(duration != _duration) Object.assign(this.currentTrack, { duration: _duration })
+        let sDuration = this.sound.duration()
+        sDuration = Number.isFinite(sDuration) ? sDuration * 1000 : 0
+        if((duration != sDuration) && (sDuration > 0)) {
+            Object.assign(this.currentTrack, { duration: sDuration })
+        }
     }
 }
 

@@ -9,7 +9,7 @@ export class Album {
         this.title = toTrimString(title)
         this.cover = cover
         //[ {id, name} ]
-        this.artist = artist ? artist : ([{ id: '', name: '未知艺人' }])
+        this.artist = artist || ([{ id: '', name: '未知艺人' }])
         //发行公司
         this.company = company
         //发行时间
@@ -20,7 +20,7 @@ export class Album {
         this.language = ''
         //简介
         this.about = toTrimString(about)
-        this.data = data ? data : []
+        this.data = data || []
     }
 
     addTrack(track) {

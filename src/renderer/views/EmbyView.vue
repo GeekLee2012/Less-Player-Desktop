@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'WebDavView'
+    name: 'EmbyView'
 }
 </script>
 
@@ -12,25 +12,26 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useCloudStorageStore } from '../store/cloudStorageStore';
+import { Emby } from '../../vendor/emby';
 
 
 
-const { visitWebDavSessionCreate, visitWebDavSessionEdit, visitWebDavSessionDetail } = inject('appRoute')
+const { visitEmbySessionCreate, visitEmbySessionEdit, visitEmbySessionDetail } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
 
 const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
 const { } = storeToRefs(useSettingStore())
-const { webdavSessions } = storeToRefs(useCloudStorageStore())
-const { removeWebDavSession, removeAllWebDavSession } = useCloudStorageStore()
+const { embySessions } = storeToRefs(useCloudStorageStore())
+const { removeEmbySession, removeAllEmbySession } = useCloudStorageStore()
 
 
 
-const webdavRef = ref(null)
+const embyRef = ref(null)
 const back2TopBtnRef = ref(null)
 
 
 const resetBack2TopBtn = () => {
-    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(webdavRef.value)
+    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(embyRef.value)
 }
 
 const onScroll = () => {
@@ -46,38 +47,32 @@ const removeItem = async (item) => {
     const ok = await showConfirm('确定删除会话记录吗')
     if(!ok) return
 
-    removeWebDavSession(item)
+    removeEmbySession(item)
 }
 
 const removeAll = async () => {
-    if(webdavSessions.value.length < 1) return
+    if(embySessions.value.length < 1) return
     const ok = await showConfirm('确定清空全部会话记录吗')
     if(!ok) return
 
     showToast('会话记录已全部清空')
-    removeAllWebDavSession()
+    removeAllEmbySession()
 }
 
 const tutorialList = [{
-    title: 'WebDAV支持音、视频播放；但仅提供只读模式，暂不支持上传、修改、删除等操作'
+    title: '连接前准备：前往官方客户端“设置 - 用户 - Profile - 允许此用户管理服务器”'
 }, {
-    title: '目录：单（双）击左键，即可进入'
+    title: 'API Key：前往官方客户端“设置 - API密钥”'
 }, {
-    title: '音视频文件：双击左键，即可播放'
+    title: '歌曲Tab - 播放全部：仅播放当前分页的所有歌曲'
 }, {
-    title: '全部操作：不支持递归遍历子目录，涉及搜索、播放目录等操作'
+    title: '歌曲Tab - 随缘听：从曲库中随机选择一首歌曲进行播放'
 }, {
-    title: '播放目录：播放当前目录下的全部音频文件'
+    title: '流派Tab：在Tab首页直接“播放流派”时，最多支持播放1024首'
+},{
+    title: '暂不支持：最近播放、收藏、关注等功能'
 }, {
-    title: '返回上级：返回到当前目录的上一级目录；当前为根目录(/)时，不再继续返回'
-}, {
-    title: '当前会话：点击带图标的Tab标题（即"当前目录"上方的标题），切换视图模式'
-}, {
-    title: '退出当前会话：点击“返回上级”右侧图标；或点击搜索框左边的后退(<)按钮'
-}, {
-    title: '拖拽下载：请确认设置页拖拽保存已开启；支持拖拽下载单个文件，不支持目录'
-}, {
-    title: '暂不支持：最近播放、关注、收藏等功能'
+    title: '播放记录：无法同步至Emby'
 }]
 
 /* 生命周期、监听 */
@@ -87,15 +82,17 @@ onMounted(() => {
 </script>
 
 <template>
-    <div id="webdav-view" ref="webdavRef" @scroll="onScroll" >
+    <div id="emby-view" ref="embyRef" @scroll="onScroll" >
         <div class="header">
-            <div class="title">WebDAV</div>
+            <div class="title">
+                <span>Emby</span>
+            </div>
             <div class="about">
-                <p>提示：实验性功能；仅提供只读模式，不计划支持复杂功能</p>
-                <p><b>郑重声明: 当前应用无法保证账号信息安全；当涉及隐私信息时，不建议使用此项WebDAV</b></p>
+                <p>提示：实验性功能；当前使用Emby API版本为v{{ Emby.VERSION }}</p>
+                <p>目前仅提供播放相关功能；若需进行数据管理，请使用Emby官方客户端</p>
             </div>
             <div class="action" :class="{ 'none-about': false }">
-                <SvgTextButton text="新建会话" :leftAction="visitWebDavSessionCreate">
+                <SvgTextButton text="新建会话" :leftAction="visitEmbySessionCreate">
                     <template #left-img>
                         <svg width="13" height="13"
                             viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg">
@@ -131,31 +128,20 @@ onMounted(() => {
         </div>
         <div class="center">
             <div class="list-title">
-                <div class="size-text content-text-highlight">会话记录({{ webdavSessions.length }})</div>
+                <div class="size-text content-text-highlight">会话记录({{ embySessions.length }})</div>
             </div>
-            <div v-for="(item, index) in webdavSessions" 
-                v-show="webdavSessions.length > 0"
+            <div v-for="(item, index) in embySessions" 
+                v-show="embySessions.length > 0"
                 class="session-item"
-                @click="visitWebDavSessionDetail(item.id)">
+                @click="visitEmbySessionDetail(item.id)">
                 <div class="icon-wrap">
-                    <!--
-                    <svg width="26" height="26" viewBox="0 0 80 80"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Capa_1" data-name="Capa 1">
-                                <path
-                                    d="M29.3,63.47l-4.05,4a9.05,9.05,0,0,1-12.72,0,8.8,8.8,0,0,1,0-12.51l14.9-14.79c3.08-3.06,8.89-7.57,13.13-3.37a5,5,0,1,0,7-7c-7.19-7.14-17.83-5.82-27.1,3.37L5.54,47.94a18.72,18.72,0,0,0,0,26.59,19,19,0,0,0,26.7,0l4-4a5,5,0,1,0-7-7ZM74.45,6C66.72-1.63,55.92-2,48.76,5.06l-5,5a5,5,0,0,0,7,7l5-5c3.71-3.69,8.57-2.16,11.73,1a8.79,8.79,0,0,1,0,12.52L51.58,41.37c-7.27,7.21-10.68,3.83-12.14,2.38a5,5,0,0,0-7,7,15.61,15.61,0,0,0,11.14,5c4.89,0,10-2.46,15-7.34l15.9-15.77A18.71,18.71,0,0,0,74.45,6Z" />
-                            </g>
-                        </g>
-                    </svg>
-                    -->
-                    <svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 816 817.24"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M0,571.06c1.22-8,2.26-16,3.7-23.95,8.14-45,29.46-83.24,61.19-115.64,37.54-38.33,75.89-75.87,113.5-114.14,20.54-20.9,52.45-10.11,59,12.09,4.11,13.95,1.74,26.34-8.71,36.8C201.92,393,175,419.59,148.47,446.53c-15.54,15.77-31.87,31-45.58,48.28-46.32,58.32-43.11,141.92,5.51,198.44,46.49,54,125.87,66.76,181.76,40.93a167.37,167.37,0,0,0,48.1-33.55q55.82-55.53,111.5-111.2c10-10,21.82-14,35.56-10.42,23.89,6.22,33.59,35.41,18.45,54.9a49.59,49.59,0,0,1-4.32,4.84q-50.35,50.4-100.74,100.76c-19,19-38.48,37.36-62.49,50.15-84.75,45.12-190.42,35.65-264.72-34C28.73,715.49,5.55,665.68.87,607.24A16.41,16.41,0,0,0,0,604.07Z"/><path d="M816,247c-1.17,7.85-2.14,15.73-3.55,23.54-8.11,45-29.32,83.32-61,115.74-37.53,38.35-75.65,76.12-113.6,114.05-13.88,13.86-33.4,15.6-47.59,4.57-16.86-13.11-18.2-37.72-2.76-53.17q52.14-52.15,104.4-104.18c20.4-20.34,37.17-43,46.35-70.74,28.57-86.4-22.65-179.25-111-200.84-57.81-14.13-107.74.42-149.88,41.9-37.53,36.94-74.6,74.34-111.92,111.5-10.24,10.19-22.65,13.45-36.3,9.28s-21.31-14.33-23.74-28.26c-2-11.53,1.69-21.56,9.79-29.66,39.72-39.7,79.22-79.64,119.54-118.72,38.19-37,84.6-56.33,137.54-60.23C577.54,1.42,582.76.61,588,0h8a16.58,16.58,0,0,0,3.25.8C634.09,2.39,667,11.25,697.36,28.3c62.94,35.37,101.57,88.56,114.79,159.79,1.59,8.58,2.58,17.28,3.85,25.93Z"/><path d="M578.5,268c.08,15.27-4.24,23.93-11.64,31.33Q507,359.29,447.15,419.29q-73.8,73.93-147.64,147.85c-12.65,12.66-27.6,15.91-41.82,9.26a34.92,34.92,0,0,1-11.29-55.11c1.67-1.86,3.42-3.65,5.18-5.42q132.66-132.8,265.33-265.58c15.22-15.24,35.06-16.55,50.1-3.23C574.62,253.8,578.44,262.44,578.5,268Z"/></g></g></svg>
+                    <svg width="28" height="28" viewBox="0 0 367.8 368.13" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M198.12,368.13a70.39,70.39,0,0,1-6-4.66q-15.42-15.11-30.7-30.35c-4.37-4.32-8.77-8.6-13.07-13-4-4.11-8-8.26-11.92-12.5-4.74-5.17-9.14-10.69-14.14-15.59a47.82,47.82,0,0,0-10.53-7.33c-.92-.51-3.47.74-4.53,1.87-10.09,10.83-11.93,10.64-21.34-1-4.06-5-9-9.3-13.55-13.89-9.11-9.17-18.2-18.37-27.4-27.46-4.72-4.67-9.71-9.05-14.46-13.69-6.7-6.55-13.29-13.22-19.92-19.84-3-3-6-6.1-9.12-9.06-2.34-2.24-1.49-4,.52-5.83,3.47-3.24,6.79-6.65,10.22-9.94,8.71-8.37,17.57-16.58,26.12-25.11,7-7,13.57-14.52,20.58-21.55,3.49-3.49,7.71-6.23,11.3-9.63,4.68-4.44,9.21-9.07,13.47-13.92,1-1.13,1.52-4.13.76-5.11A106.8,106.8,0,0,0,74.06,99.32c-2.43-2.36-2.69-4-.15-6.58q45.53-45.33,90.85-90.86c2.72-2.74,4.43-2.32,6.92.2,17.95,18.11,36.11,36,54,54.21,5.2,5.3,9.54,11.44,14.44,17.05,3.25,3.72,6.87,7.1,10.18,10.76,3.59,4,7.86,3.22,12.08-2a40.56,40.56,0,0,1,7.21-7.25,5.22,5.22,0,0,1,5,.39c10.29,10.15,20.29,20.59,30.48,30.84,6.22,6.25,12.71,12.22,19,18.43,13.71,13.63,27.25,27.42,41.09,40.93,3.34,3.26,3.73,5.25.18,8.75-26,25.68-51.74,51.56-77.57,77.37a24.84,24.84,0,0,1-2.19,2c-4.85,3.82-4.64,5.85.78,9.19a22.81,22.81,0,0,1,4.67,3.66c4,4.27,3.65,5.7-.5,9.9-4.64,4.7-8.79,9.88-13.45,14.55-3.37,3.38-7.49,6-10.82,9.43C259,307.79,252.2,315.62,245,323c-3.68,3.77-8.1,6.81-11.9,10.47-9.51,9.14-18.88,18.43-28.27,27.69C202.68,363.26,200.69,365.45,198.12,368.13Zm-61-117c.78,6.22,2.34,7.5,7.78,4.69,9.73-5,19.28-10.43,28.82-15.83,7.21-4.08,14.22-8.53,21.45-12.59,6.84-3.84,14-7.17,20.76-11.14,5.59-3.27,10.65-7.46,16.25-10.72,10-5.79,20.17-11.11,30.15-16.84,1.68-1,2.76-2.94,4.12-4.45-1.48-.85-2.95-1.71-4.43-2.55-.71-.41-1.47-.74-2.16-1.19-6.08-4-12-8.13-18.27-11.81-4.07-2.41-8.69-3.89-12.84-6.18-3-1.66-5.52-4.21-8.5-5.93-6.26-3.63-12.75-6.85-19-10.44-10.88-6.23-21.62-12.7-32.5-18.92-7.77-4.45-15.71-8.61-23.52-13-5.54-3.12-7.73-2-8.06,4.56-.08,1.66,0,3.33,0,5Z"/></g></g></svg>
                 </div>
                 <div class="title-wrap">
                     <span v-html="item.title"></span>
                 </div>
                 <div class="action" @click.stop="">
-                    <div class="btn edit-btn" @click="visitWebDavSessionEdit(item.id)">
+                    <div class="btn edit-btn" @click="visitEmbySessionEdit(item.id)">
                         <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -187,19 +173,10 @@ onMounted(() => {
                 </div>
             </div>
             <div v-for="(item, index) in tutorialList" 
-                v-show="webdavSessions.length < 1"
+                v-show="embySessions.length < 1"
                 class="session-item">
-                <div class="icon-wrap"> 
-                    <img src="" v-show="false"/>
-                    <svg width="26" height="26" viewBox="0 0 80 80"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Capa_1" data-name="Capa 1">
-                                <path
-                                    d="M29.3,63.47l-4.05,4a9.05,9.05,0,0,1-12.72,0,8.8,8.8,0,0,1,0-12.51l14.9-14.79c3.08-3.06,8.89-7.57,13.13-3.37a5,5,0,1,0,7-7c-7.19-7.14-17.83-5.82-27.1,3.37L5.54,47.94a18.72,18.72,0,0,0,0,26.59,19,19,0,0,0,26.7,0l4-4a5,5,0,1,0-7-7ZM74.45,6C66.72-1.63,55.92-2,48.76,5.06l-5,5a5,5,0,0,0,7,7l5-5c3.71-3.69,8.57-2.16,11.73,1a8.79,8.79,0,0,1,0,12.52L51.58,41.37c-7.27,7.21-10.68,3.83-12.14,2.38a5,5,0,0,0-7,7,15.61,15.61,0,0,0,11.14,5c4.89,0,10-2.46,15-7.34l15.9-15.77A18.71,18.71,0,0,0,74.45,6Z" />
-                            </g>
-                        </g>
-                    </svg>
+                <div class="icon-wrap">
+                    <svg width="28" height="28" viewBox="0 0 367.8 368.13" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M198.12,368.13a70.39,70.39,0,0,1-6-4.66q-15.42-15.11-30.7-30.35c-4.37-4.32-8.77-8.6-13.07-13-4-4.11-8-8.26-11.92-12.5-4.74-5.17-9.14-10.69-14.14-15.59a47.82,47.82,0,0,0-10.53-7.33c-.92-.51-3.47.74-4.53,1.87-10.09,10.83-11.93,10.64-21.34-1-4.06-5-9-9.3-13.55-13.89-9.11-9.17-18.2-18.37-27.4-27.46-4.72-4.67-9.71-9.05-14.46-13.69-6.7-6.55-13.29-13.22-19.92-19.84-3-3-6-6.1-9.12-9.06-2.34-2.24-1.49-4,.52-5.83,3.47-3.24,6.79-6.65,10.22-9.94,8.71-8.37,17.57-16.58,26.12-25.11,7-7,13.57-14.52,20.58-21.55,3.49-3.49,7.71-6.23,11.3-9.63,4.68-4.44,9.21-9.07,13.47-13.92,1-1.13,1.52-4.13.76-5.11A106.8,106.8,0,0,0,74.06,99.32c-2.43-2.36-2.69-4-.15-6.58q45.53-45.33,90.85-90.86c2.72-2.74,4.43-2.32,6.92.2,17.95,18.11,36.11,36,54,54.21,5.2,5.3,9.54,11.44,14.44,17.05,3.25,3.72,6.87,7.1,10.18,10.76,3.59,4,7.86,3.22,12.08-2a40.56,40.56,0,0,1,7.21-7.25,5.22,5.22,0,0,1,5,.39c10.29,10.15,20.29,20.59,30.48,30.84,6.22,6.25,12.71,12.22,19,18.43,13.71,13.63,27.25,27.42,41.09,40.93,3.34,3.26,3.73,5.25.18,8.75-26,25.68-51.74,51.56-77.57,77.37a24.84,24.84,0,0,1-2.19,2c-4.85,3.82-4.64,5.85.78,9.19a22.81,22.81,0,0,1,4.67,3.66c4,4.27,3.65,5.7-.5,9.9-4.64,4.7-8.79,9.88-13.45,14.55-3.37,3.38-7.49,6-10.82,9.43C259,307.79,252.2,315.62,245,323c-3.68,3.77-8.1,6.81-11.9,10.47-9.51,9.14-18.88,18.43-28.27,27.69C202.68,363.26,200.69,365.45,198.12,368.13Zm-61-117c.78,6.22,2.34,7.5,7.78,4.69,9.73-5,19.28-10.43,28.82-15.83,7.21-4.08,14.22-8.53,21.45-12.59,6.84-3.84,14-7.17,20.76-11.14,5.59-3.27,10.65-7.46,16.25-10.72,10-5.79,20.17-11.11,30.15-16.84,1.68-1,2.76-2.94,4.12-4.45-1.48-.85-2.95-1.71-4.43-2.55-.71-.41-1.47-.74-2.16-1.19-6.08-4-12-8.13-18.27-11.81-4.07-2.41-8.69-3.89-12.84-6.18-3-1.66-5.52-4.21-8.5-5.93-6.26-3.63-12.75-6.85-19-10.44-10.88-6.23-21.62-12.7-32.5-18.92-7.77-4.45-15.71-8.61-23.52-13-5.54-3.12-7.73-2-8.06,4.56-.08,1.66,0,3.33,0,5Z"/></g></g></svg>
                 </div>
                 <div class="title-wrap">
                     <span v-html="item.title"></span>
@@ -211,7 +188,7 @@ onMounted(() => {
 </template>
 
 <style>
-#webdav-view {
+#emby-view {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -220,24 +197,24 @@ onMounted(() => {
     overflow-x: hidden;
 }
 
-#webdav-view .spacing {
+#emby-view .spacing {
     margin-left: 20px;
 }
 
-#webdav-view .header {
+#emby-view .header {
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
 }
 
-#webdav-view .header .title {
+#emby-view .header .title {
     text-align: left;
     margin-bottom: 5px;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
 
-#webdav-view .header .about {
+#emby-view .header .about {
     text-align: left;
     margin-left: 5px;
     margin-bottom: 12px;
@@ -245,15 +222,15 @@ onMounted(() => {
     color: var(--content-subtitle-text-color);
 }
 
-#webdav-view .header .action {
+#emby-view .header .action {
     display: flex;
 }
 
-#webdav-view .header .action.none-about {
+#emby-view .header .action.none-about {
     margin-top: 6px;
 }
 
-#webdav-view .center .list-title {
+#emby-view .center .list-title {
     margin-bottom: 10px;
     text-align: left;
     font-weight: bold;
@@ -261,14 +238,14 @@ onMounted(() => {
     position: relative;
 }
 
-#webdav-view .center .list-title .size-text {
+#emby-view .center .list-title .size-text {
     margin-left: 3px;
     padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
     font-size: var(--content-text-tab-title-size);
 }
 
-#webdav-view .center .session-item {
+#emby-view .center .session-item {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -282,31 +259,31 @@ onMounted(() => {
     --item-height: 68px;
 }
 
-#webdav-view .center .session-item:hover {
+#emby-view .center .session-item:hover {
     background: var(--content-list-item-hover-bg-color);
     cursor: pointer;
 }
 
-#webdav-view .center .session-item > div {
+#emby-view .center .session-item > div {
     height: var(--item-height);
     vertical-align: middle;
     /*font-size: var(--content-text-size);*/
 }
 
-#webdav-view .center .session-item .icon-wrap {
+#emby-view .center .session-item .icon-wrap {
     width: 68px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-#webdav-view .center .session-item .icon-wrap svg {
+#emby-view .center .session-item .icon-wrap svg {
     fill: var(--button-icon-btn-color) !important;
     fill: var(--content-subtitle-text-color) !important;
     border-radius: var(--border-img-small-border-radius);
 }
 
-#webdav-view .center .session-item .title-wrap {
+#emby-view .center .session-item .title-wrap {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -319,13 +296,13 @@ onMounted(() => {
     line-break: anywhere;
 }
 
-#webdav-view .center .session-item .title-wrap span {
+#emby-view .center .session-item .title-wrap span {
     word-wrap: break-word;
     line-break: anywhere;
     line-height: var(--item-height);
 }
 
-#webdav-view .center .session-item .action {
+#emby-view .center .session-item .action {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -334,7 +311,7 @@ onMounted(() => {
     visibility: hidden;
 }
 
-#webdav-view .center .session-item:hover .action {
+#emby-view .center .session-item:hover .action {
     visibility: visible;
 }
 </style>

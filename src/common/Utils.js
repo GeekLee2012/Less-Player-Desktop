@@ -3,7 +3,7 @@ import CryptoJS from 'crypto-js';
 import forge from "node-forge";
 import JSEncrypt from 'jsencrypt';
 import { pinyin } from 'pinyin-pro';
-import { FILE_PREFIX, DEFAULT_COVER_BASE64, FILE_SCHEME } from './Constants';
+import { FILE_PREFIX, DEFAULT_COVER_BASE64, FILE_SCHEME, LESS_MAGIC_CODE } from './Constants';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser'; 
 
 
@@ -406,7 +406,7 @@ export const aesEncryptHexText = (src, mode, key, iv, padding) => {
     return hexStringify(buffer.ciphertext)
 }
 
-export const aesDecryptText = (src, mode, secKey, iv, padding) => {
+export const aesDecryptDefault = (src, mode, secKey, iv, padding) => {
     src = base64Stringify(hexParse(src))
     mode = toCryptoMode(mode)
     secKey = utf8Parse(secKey)
@@ -414,6 +414,22 @@ export const aesDecryptText = (src, mode, secKey, iv, padding) => {
     padding = toCryptoPadding(padding) 
     const buffer = CryptoJS.AES.decrypt(src, secKey, { mode, iv, padding })
     return buffer.toString()
+}
+
+const aesEncryptSimple = (src, key) => {
+    return CryptoJS.AES.encrypt(src, key).toString()
+}
+
+const aesDecryptSimple = (src, key) => {
+    return CryptoJS.AES.decrypt(src, key).toString(CryptoJS.enc.Utf8)
+}
+
+export const encodeLess = (text, key) => {
+    return aesEncryptSimple(text, (key || base64Stringify(LESS_MAGIC_CODE)))
+}
+
+export const decodeLess = (text, key) => {
+    return aesDecryptSimple(text, (key || base64Stringify(LESS_MAGIC_CODE)))
 }
 
 
@@ -822,6 +838,14 @@ export const transformPath = (path) => {
         console.log(error)
     }
     return _path
+}
+
+export const isLiveStream = (url) => {
+    const _url = toLowerCaseTrimString(url)
+    return _url.endsWith('.m3u8')
+        || _url.includes('.m3u8?') 
+        || _url.endsWith('.m3u')
+        || _url.includes('.m3u?')
 }
 
 

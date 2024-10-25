@@ -11,7 +11,7 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { coverDefault, isSupportedImage, toYyyymmddHhMmSs } from '../../common/Utils';
+import { coverDefault, isSupportedImage, randomTextWithinAlphabetNums, toYyyymmddHhMmSs } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -280,7 +280,12 @@ onUpdated(() => resetBack2TopBtn())
                     :onKeywordChanged="filterContent">
                 </SearchBarExclusiveModeControl>
             </div>
-            <SongListControl :data="detail.data" :artistVisitable="true" :albumVisitable="true" :dataType="4" :id="id">
+            <SongListControl
+                :id="randomTextWithinAlphabetNums(16)"
+                :data="detail.data" 
+                :artistVisitable="true" 
+                :albumVisitable="true" 
+                :dataType="4">
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

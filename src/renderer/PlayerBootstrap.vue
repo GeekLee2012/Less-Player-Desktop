@@ -38,7 +38,7 @@ const { playTrack, playNextTrack,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying,
     setAudioOutputDevices, playTrackLater } = usePlayStore()
-const { getVendor, isLocalMusic, isFreeFM, isWebDav, isNavidrome } = usePlatformStore()
+const { getVendor, isLocalMusic, isFreeFM, isCloudStorage, isWebDav, isNavidrome, isJellyfin } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
     playingViewThemeIndex, spectrumIndex,
     pendingPlay, pendingPlayPercent,
@@ -98,7 +98,7 @@ const setCustomDndPlayingCover = (value) => customDndPlayingCover.value = value
 const traceRecentTrack = (track) => {
     if (!isStoreRecentPlay.value) return
     const { platform } = track
-    if (isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) return
+    if (isLocalMusic(platform) || isCloudStorage(platform)) return
 
     if (Playlist.isFMRadioType(track)) {
         addRecentRadio(track)
@@ -116,7 +116,7 @@ const traceRecentPlaylist = (playlist) => {
     if (Playlist.isCustomType(playlist)) return
     if (Playlist.isFMRadioType(playlist)) return
     const { id, platform, title, cover, type } = playlist
-    if (isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) return
+    if (isLocalMusic(platform) || isCloudStorage(platform)) return
 
     addRecentPlaylist(id, platform, title, cover, type)
 }
@@ -125,7 +125,7 @@ const traceRecentPlaylist = (playlist) => {
 const traceRecentAlbum = (album) => {
     if (!isStoreRecentPlay.value) return
     const { id, platform, title, cover, publishTime } = album
-    if (isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) return
+    if (isLocalMusic(platform) || isCloudStorage(platform)) return
     
     addRecentAlbum(id, platform, title, cover, publishTime)
 }
@@ -152,6 +152,9 @@ const loadLyric = (track) => {
     vendor.lyric(id, track).then(result => {
         //再次确认，可能歌曲已经被切走
         if (!isCurrentTrack(track)) return
+        //顺便更新封面
+        const { cover } = result
+        if (Track.hasCover(result)) Object.assign(track, { cover })
         //若当前平台获取到歌词，则直接更新
         if (Track.hasLyric(result)) {
             updateLyric(track, result)
@@ -250,7 +253,7 @@ const handleUnplayableTrack = (track, msg) => {
 
 //获取并更新歌曲播放信息
 const bootstrapTrack = (track, options) => {
-    const { noToast } = (options || {})
+    const { noToast, keepCover } = (options || {})
     return new Promise(async (resolve, reject) => {
         if (!track) return reject('none')
         //FM电台
@@ -260,9 +263,7 @@ const bootstrapTrack = (track, options) => {
         const { id, platform, artistNotCompleted } = track
         //平台服务
         const vendor = getVendor(platform)
-        if (!vendor || !vendor.playDetail) {
-            return reject('noService')
-        }
+        if (!vendor || !vendor.playDetail) return reject('noService')
         //播放相关数据
         const result = await vendor.playDetail(id, track)
         if (!result) return reject('noUrl')
@@ -275,7 +276,7 @@ const bootstrapTrack = (track, options) => {
             updateLyric(track, { lyric })
         }
         //更新封面
-        if (Track.hasCover(result)) {
+        if (Track.hasCover(result) && !keepCover) {
             Object.assign(track, { cover })
         }
         //更新歌手
@@ -364,15 +365,35 @@ const playPlaylist = async (playlist, options) => {
     } catch (error) {
         if (isDevEnv) console.log(error)
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候重试')
+        showFailToast('歌单播放失败')
     }
+}
+
+//获取歌单歌曲数据
+const loadGenrePlaylist = async (playlist, text, traceId) => {
+    const { id, platform } = playlist
+    if (Playlist.isGenreType(playlist)) {
+        let maxRetry = 3, retry = 0
+        while (!playlist || !playlist.data || playlist.data.length < 1) {
+            if (traceId && !isCurrentTraceId(traceId)) return
+
+            if (++retry > maxRetry) break
+            //重试一次加载数据
+            const vendor = getVendor(platform)
+            if (!vendor || !vendor.genreDetailAllSongs) break
+            //TODO 暂时限制为1000首歌曲，当前播放列表太长容易卡顿
+            playlist = await vendor.genreDetailAllSongs(id, playlist)
+        }
+    }
+    return playlist
 }
 
 //获取歌单歌曲数据
 const loadPlaylist = async (playlist, text, traceId) => {
     const { id, platform } = playlist
     if (Playlist.isNormalType(playlist)
-        || Playlist.isAnchorRadioType(playlist)) {
+        || Playlist.isAnchorRadioType(playlist)
+        || Playlist.isFolderType(playlist)) {
         let maxRetry = 3, retry = 0
         while (!playlist || !playlist.data || playlist.data.length < 1) {
             if (traceId && !isCurrentTraceId(traceId)) return
@@ -395,7 +416,7 @@ const addPlaylistToQueue = async (playlist, text, traceId, limit) => {
     playlist = await loadPlaylist(playlist, text, traceId)
     if (!playlist || !playlist.data || playlist.data.length < 1) {
         const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
-            : '网络异常！请稍候重试'
+            : '获取歌单歌曲失败'
         if (traceId && !isCurrentTraceId(traceId)) return
         return showFailToast(failMsg)
     }
@@ -432,7 +453,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
             bootstrapTrack(track).then(result => {
                 if(!Track.hasUrl(result)) {
                     if (traceId && !isCurrentTraceId(traceId)) return
-                    return showFailToast('网络异常！请稍候重试')
+                    return showFailToast('电台收听失败')
                 }
                 const { url } = result
                 playTrack(Object.assign(track, { url }))
@@ -455,8 +476,12 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
             playVideoItem({ ...playlist }, '', text, traceId)
         }
         return
+    } else if (Playlist.isGenreType(playlist)) {
+        text = text || '即将为您播放流派'
+        playlist = await loadGenrePlaylist(playlist, text, traceId)
     } else if (Playlist.isNormalType(playlist)
-        || Playlist.isAnchorRadioType(playlist)) {
+        || Playlist.isAnchorRadioType(playlist)
+        || Playlist.isFolderType(playlist)) {
         playlist = await loadPlaylist(playlist, text, traceId)
     }
     //检查数据，再次确认
@@ -549,7 +574,7 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId, pla
 
     if (!success) {
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候重试')
+        showFailToast('电台歌单播放失败')
     }
 }
 
@@ -564,7 +589,7 @@ const playAlbum = (album, options) => {
     } catch (error) {
         if (isDevEnv()) console.log(error)
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候重试')
+        showFailToast('专辑播放失败')
     }
 }
 
@@ -600,8 +625,7 @@ const addAlbumToQueue = async (album, options) => {
     album = await loadAlbum(album, text, traceId)
     if (!album || !album.data || album.data.length < 1) {
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候重试')
-        return
+        return showFailToast('获取专辑歌曲失败')
     }
 
     if (traceId && !isCurrentTraceId(traceId)) return
@@ -618,7 +642,7 @@ const doPlayAlbum = async (album, text, traceId, needReset) => {
     album = await loadAlbum(album, text, traceId)
     if (!album || !album.data || album.data.length < 1) {
         if (traceId && !isCurrentTraceId(traceId)) return
-        showFailToast('网络异常！请稍候重试')
+        showFailToast('获取专辑歌曲失败')
         return
     }
 
@@ -814,7 +838,7 @@ const getVideoDetail = (video) => {
     return new Promise((resolve, reject) => {
         const { platform, mv, id, url, retry } = video
         const notRetry = (typeof retry == 'undefined')
-        if(Video.hasUrl(url) && notRetry) return resolve(video)
+        if(Video.hasUrl(video) && notRetry) return resolve(video)
         const _id = (mv || id)
         if (!_id) return reject('noId')
         if (!platform) return reject('noService')
@@ -961,7 +985,8 @@ const playVideo = async (video, index, pos, failText, noTrace) => {
         const playing = isPlaying()
         const pending = (playing && isPauseOnPlayingVideoEnable.value)
         if (pending) togglePlay()
-        setPendingPlay(pending)
+        //已挂起状态，视频播放中不应该重置（取消挂起）
+        setPendingPlay(pending || pendingPlay.value)
 
         //开始播放视频
         if (!videoPlayingViewShow.value) toggleVideoPlayingView()
@@ -1031,8 +1056,7 @@ const toggleFavoritedState = () => {
     const track = currentTrack.value
     if (!track) return
     const { id, platform } = track
-    if (isLocalMusic(platform) || isWebDav(platform) 
-        || isNavidrome(platform)) {
+    if (isLocalMusic(platform) || isCloudStorage(platform)) {
         return showFailToast('当前平台暂不支持收藏') 
     }
     setFavoritedState(!favoritedState.value)
@@ -1489,9 +1513,7 @@ const eventsRegistration = {
     'track-play': track => {
         //resetAutoSkip()
         const { platform } = track
-        if(isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) {
-            bootstrapTrack(track)
-        }
+        if(isLocalMusic(platform) || isCloudStorage(platform)) bootstrapTrack(track)
         traceRecentTrack(track)
         //loadLyric(track)
     },
@@ -1538,13 +1560,19 @@ const eventsRegistration = {
             return
         }
         const track = currentTrack.value
-        if (duration != track.duration) Object.assign(track, { duration })
+        if (duration != track.duration && duration > 0) Object.assign(track, { duration })
         const currentTime = currentSecs * 1000
         mmssCurrentTime.value = toMmss(currentTime)
         currentTimeState.value = currentSecs
         const _duration = track.duration || 0
         progressState.value = _duration > 0 ? (currentTime / _duration) : 0
         //ipcRendererSend('app-setProgressBar', progressState.value || -1)
+    },
+    'track-seekAction': ({ track, pos }) => {
+        const { platform } = track
+        const vendor = getVendor(platform)
+        if(!vendor || !vendor.seekAction) return
+        vendor.seekAction(track, pos)
     },
     'track-spectrumData': ({leftFreqData, leftFreqBinCount, rightFreqData,
         rightFreqBinCount, freqData, freqBinCount,

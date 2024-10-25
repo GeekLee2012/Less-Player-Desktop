@@ -14,6 +14,7 @@ import { Category } from "../common/Category";
 import { emitEvents } from "../common/EventBusWrapper";
 
 
+
 const onTrackUpdated = (track) => emitEvents('track-coverUpdated', track)
 
 export class LocalMusic {
@@ -23,9 +24,12 @@ export class LocalMusic {
     static playDetail(id, track) {
         return new Promise(async (resolve, reject) => {
             const result = new Track(id, LocalMusic.CODE)
-            //修正url
+            //修正URL
             let url = track.url
-            if (!url.includes(FILE_PREFIX)) Object.assign(result, { url: (FILE_PREFIX + url) })
+            if (!url.includes(FILE_PREFIX)) {
+                Object.assign(result, { url: (FILE_PREFIX + url) })
+            }
+            
             //封面
             const { isUseOnlineCoverEnable } = useSettingStore()
             if (isUseOnlineCoverEnable) {
@@ -67,6 +71,7 @@ export class LocalMusic {
             } else {
                 Object.assign(result, { lyric: Lyric.parseFromText(lyricText) })
             }
+
             //封面，顺便更新一下
             const { isUseOnlineCoverEnable } = useSettingStore()
             if (isUseOnlineCoverEnable) {

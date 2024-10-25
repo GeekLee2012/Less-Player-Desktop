@@ -129,10 +129,11 @@ export class Track {
     }
 
     static hasCover(track) {
-        if (!track || !track.cover) return false
-        track.cover = toTrimString(track.cover)
-        if (track.cover.length < 1) return false
-        if (track.cover == 'default_cover.png') return false
+        if (!track) return false
+        const { cover } = track
+        const _cover = toTrimString(cover)
+        if (_cover.length < 1) return false
+        if (_cover == 'default_cover.png') return false
         return true
     }
 
@@ -179,7 +180,7 @@ export class Track {
 
     static hasMv(track) {
         if (!track || !track.mv) return false
-        const mv = track.mv.toString()
+        const mv = toTrimString(track.mv)
         if (typeof mv == 'number') return mv > 0
         if (typeof mv == 'string') return !isBlank(mv)
     }

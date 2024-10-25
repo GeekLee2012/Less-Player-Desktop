@@ -121,7 +121,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </div>
             </div>
             <div class="cover-bottom" v-show="!checkbox && videoStyle">
-                <div class="duration" v-show="duration" v-html="toHhMmss(duration)"></div>
+                <div class="duration" v-show="duration" v-html="toHhMmss(duration)">
+                </div>
             </div>
         </div>
         <!-- 目前体验不好
@@ -131,9 +132,12 @@ onUnmounted(() => offEvents(eventsRegistration))
             </picture>
             -->
         <div class="title-wrap">
-            <div class="title" :class="{ 'singleline-title': singleLineTitleStyle }" v-html="title"></div>
-            <div class="subtitle" v-show="subtitle" v-html="subtitle"></div>
-            <div class="extra-text" v-show="extraText" v-html="extraText"></div>
+            <div class="title" :class="{ 'singleline-title': singleLineTitleStyle }" v-html="title">
+            </div>
+            <div class="subtitle" v-show="subtitle" v-html="subtitle">
+            </div>
+            <div class="extra-text" v-show="extraText" v-html="extraText">
+            </div>
         </div>
         <div class="layer"></div>
         <div class="layer layer-tiny"></div>
@@ -279,6 +283,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    box-shadow: 0px 3px 10px #00000088;
 }
 
 .image-text-tile .cover-wrap .cover-bottom .duration {

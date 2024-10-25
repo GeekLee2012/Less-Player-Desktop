@@ -10,7 +10,7 @@ import SongListControl from '../components/SongListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { LESS_MAGIC_CODE } from '../../common/Constants';
-import { toTrimString } from '../../common/Utils';
+import { randomTextWithinAlphabetNums, toTrimString } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -287,7 +287,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="tab-tip content-text-highlight" v-html="tabTipText" v-show="tabs.length > 0">
                 </span>
             </div>
-            <component :is="currentTabView" 
+            <component 
+                :id="randomTextWithinAlphabetNums(16)"
+                :is="currentTabView" 
                 :data="tabData" 
                 :artistVisitable="true" 
                 :albumVisitable="true"

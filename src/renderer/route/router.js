@@ -36,6 +36,13 @@ import WebDavSessionDetailView from '../views/WebDavSessionDetailView.vue';
 import NavidromeView from '../views/NavidromeView.vue';
 import NavidromeSessionEditView from '../views/NavidromeSessionEditView.vue';
 import NavidromeSessionDetailView from '../views/NavidromeSessionDetailView.vue';
+import JellyfinView from '../views/JellyfinView.vue';
+import JellyfinSessionEditView from '../views/JellyfinSessionEditView.vue';
+import JellyfinSessionDetailView from '../views/JellyfinSessionDetailView.vue';
+import GenreDetailView from '../views/GenreDetailView.vue';
+import EmbyView from '../views/EmbyView.vue';
+import EmbySessionEditView from '../views/EmbySessionEditView.vue';
+import EmbySessionDetailView from '../views/EmbySessionDetailView.vue';
 
 
 
@@ -225,6 +232,49 @@ const routes = [
                 path: '/cloudstorage/navidrome/:id',
                 props: true,
                 component: NavidromeSessionDetailView
+            },
+            {  //网络存储 - Jellyfin
+                path: '/cloudstorage/jellyfin',
+                component: JellyfinView
+            },
+            {  //网络存储 - Jellyfin - 创建会话
+                path: '/cloudstorage/jellyfin/create',
+                props: true,
+                component: JellyfinSessionEditView
+            },
+            {  //网络存储 - Jellyfin - 编辑会话
+                path: '/cloudstorage/jellyfin/edit/:id',
+                props: true,
+                component: JellyfinSessionEditView
+            },
+            {  //网络存储 - Jellyfin - 会话详情
+                path: '/cloudstorage/jellyfin/:id',
+                props: true,
+                component: JellyfinSessionDetailView
+            },
+            {  //流派详情
+                path: '/:exploreMode/:platform/genre/:id',
+                props: true,
+                component: GenreDetailView
+            },
+            {  //网络存储 - Emby
+                path: '/cloudstorage/emby',
+                component: EmbyView
+            },
+            {  //网络存储 - Emby - 创建会话
+                path: '/cloudstorage/emby/create',
+                props: true,
+                component: EmbySessionEditView
+            },
+            {  //网络存储 - Emby - 编辑会话
+                path: '/cloudstorage/emby/edit/:id',
+                props: true,
+                component: EmbySessionEditView
+            },
+            {  //网络存储 - Emby - 会话详情
+                path: '/cloudstorage/emby/:id',
+                props: true,
+                component: EmbySessionDetailView
             },
         ]
     },

@@ -1,6 +1,6 @@
 import axios from "axios";
 import qs from "qs";
-import { isBlank, isDevEnv, toTrimString, tryCallDefault } from "./Utils";
+import { isBlank, isDevEnv, stringEquals, toTrimString, tryCallDefault } from "./Utils";
 
 
 
@@ -26,15 +26,21 @@ export const parseJsonp = (jsonp) => {
     return json
 }
 
-export const qsStringify = (data) => (qs.stringify(data))
+export const qsStringify = (data, config) => {
+    if(config && config.headers) {
+        const contentType = config.headers['Content-Type'] || config.headers['content-type']
+        if(stringEquals(contentType, 'application/json')) return data
+    }
+    return qs.stringify(data, { arrayFormat: 'repeat' })
+}
 
-export const qsStringifyUrl = (url, data) => {
+export const qsStringifyUrl = (url, data, config) => {
     let _url = toTrimString(url)
     const hasData = data && (typeof data === 'object')
     if (hasData) {
         _url = _url.includes('?') ? _url : `${_url}?`
         _url = _url.endsWith('?') ? _url : `${_url}&`
-        const _data = qsStringify(data)
+        const _data = qsStringify(data, config)
         _url = `${_url}${_data}`
     }
     return _url
@@ -60,16 +66,7 @@ const parseJson = (data) => {
 export const get = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
         if(isBlank(url)) return reject('noUrl')
-        /*
-        let _url = toTrimString(url)
-        const hasData = data && (typeof data === 'object')
-        if (hasData) {
-            _url = _url.includes('?') ? _url : `${_url}?`
-            _url = _url.endsWith('?') ? _url : `${_url}&`
-            const _data = qsStringify(data)
-            _url = `${_url}${_data}`
-        }*/
-        const _url = qsStringifyUrl(url, data)
+        const _url = qsStringifyUrl(url, data, config)
         axios.get(_url, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))
@@ -81,7 +78,7 @@ export const post = async (url, data, config, callback) => {
         if(isBlank(url)) return reject('noUrl')
         const _url = toTrimString(url)
         const hasData = data && (typeof data === 'object')
-        const _data = hasData ? qsStringify(data) : data
+        const _data = hasData ? qsStringify(data, config) : data
         axios.post(_url, _data, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))

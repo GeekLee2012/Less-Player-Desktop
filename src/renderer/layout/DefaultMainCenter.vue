@@ -389,6 +389,7 @@ onActivated(() => {
     display: flex;
     flex-direction: column;
     flex: 1;
+    flex: 4;
     overflow: hidden;
     background: var(--content-bg-color);
 }
@@ -434,7 +435,14 @@ onActivated(() => {
 #default-main-center .autopadding #webdav-session-detail-view,
 #default-main-center .autopadding #navidrome-view,
 #default-main-center .autopadding #navidrome-session-edit-view,
-#default-main-center .autopadding #navidrome-session-detail-view {
+#default-main-center .autopadding #navidrome-session-detail-view,
+#default-main-center .autopadding #jellyfin-view,
+#default-main-center .autopadding #jellyfin-session-edit-view,
+#default-main-center .autopadding #jellyfin-session-detail-view,
+#default-main-center .autopadding #genre-detail-view,
+#default-main-center .autopadding #emby-view,
+#default-main-center .autopadding #emby-session-edit-view,
+#default-main-center .autopadding #emby-session-detail-view {
     padding-top: 3px;
 }
 
@@ -474,8 +482,19 @@ onActivated(() => {
 #default-main-center .newpadding #track-detail-view,
 #default-main-center .newpadding #custom-playlist-detail-view,
 #default-main-center .newpadding #local-playlist-detail-view,
+#default-main-center .newpadding #webdav-view,
+#default-main-center .newpadding #webdav-session-edit-view,
 #default-main-center .newpadding #webdav-session-detail-view,
-#default-main-center .newpadding #navidrome-session-detail-view   {
+#default-main-center .newpadding #navidrome-view,
+#default-main-center .newpadding #navidrome-session-edit-view,
+#default-main-center .newpadding #navidrome-session-detail-view,
+#default-main-center .newpadding #jellyfin-view,
+#default-main-center .newpadding #jellyfin-session-edit-view,
+#default-main-center .newpadding #jellyfin-session-detail-view,
+#default-main-center .autopadding #genre-detail-view,
+#default-main-center .newpadding #emby-view,
+#default-main-center .newpadding #emby-session-edit-view,
+#default-main-center .newpadding #emby-session-detail-view {
     padding-top: 0px;
 }
 </style>

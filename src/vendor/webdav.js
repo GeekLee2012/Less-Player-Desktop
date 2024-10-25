@@ -3,7 +3,8 @@ import { United } from "./united";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { emitEvents } from "../common/EventBusWrapper";
-import { ipcRendererInvoke, base64Stringify, base64Parse } from "../common/Utils";
+import { ipcRendererInvoke, base64Stringify, base64Parse, transformUrl, decodeLess } from "../common/Utils";
+import { useSettingStore } from "../renderer/store/settingStore";
 
 
 
@@ -14,45 +15,56 @@ export class WebDav {
 
     static playDetail(id, track) {
         return new Promise(async (resolve, reject) => {
+            const result = { ...track }
             //封面
-            const onlineCandidate = await United.transferTrack(track, { isGetCover: true })
-            if (onlineCandidate) {
-                const { cover } = onlineCandidate
-                if (cover && track.cover != cover) {
-                    Object.assign(track, { cover })
-                    onTrackUpdated(track)
+            const { isUseOnlineCoverEnable } = useSettingStore()
+            if(!Track.hasCover(result) || isUseOnlineCoverEnable) {
+                const onlineCandidate = await United.transferTrack(result, { isGetCover: true })
+                if (onlineCandidate) {
+                    const { cover } = onlineCandidate
+                    if (cover && result.cover != cover) {
+                        Object.assign(result, { cover })
+                        onTrackUpdated(result)
+                    }
                 }
             }
-            resolve(track)
+            resolve(result)
         })
     }
 
     //歌词
     static lyric(id, track) {
         return new Promise(async (resolve, reject) => {
+            const result = { ...track }
             //内嵌歌词
-            let lyricText = track.embeddedLyricText
+            let lyricText = result.embeddedLyricText
             //在线歌词
             let onlineCandidate = null
             if (!lyricText) {
-                onlineCandidate = await United.transferTrack(track, { isGetLyric: true })
+                onlineCandidate = await United.transferTrack(result, { isGetLyric: true })
                 if (onlineCandidate) {
                     const { lyric, lyricTrans } = onlineCandidate
-                    Object.assign(track, { lyric, trans: lyricTrans })
+                    Object.assign(result, { lyric, trans: lyricTrans })
                 }
             } else {
-                Object.assign(track, { lyric: Lyric.parseFromText(lyricText) })
+                Object.assign(result, { lyric: Lyric.parseFromText(lyricText) })
             }
-            //封面，顺便更新一下
-            if (!onlineCandidate || !Track.hasCover(onlineCandidate)) onlineCandidate = await United.transferTrack(track, { isGetCover: true })
-            if (onlineCandidate) {
-                const { cover } = onlineCandidate
-                if (cover && track.cover != cover) {
-                    Object.assign(track, { cover })
-                    onTrackUpdated(track)
+            
+            //封面
+            const { isUseOnlineCoverEnable } = useSettingStore()
+            if(!Track.hasCover(result) || isUseOnlineCoverEnable) {
+                if (!onlineCandidate || !Track.hasCover(onlineCandidate)) {
+                    onlineCandidate = await United.transferTrack(track, { isGetCover: true })
+                }
+                if (onlineCandidate) {
+                    const { cover } = onlineCandidate
+                    if (cover && result.cover != cover) {
+                        Object.assign(result, { cover })
+                        onTrackUpdated(result)
+                    }
                 }
             }
-            resolve(track)
+            resolve(result)
         })
     }
 
@@ -64,9 +76,12 @@ export class WebDav {
     }
 
     static setupAuthorization(session) {
-        const { url, realm } = session
+        const { url, username, password } = session
         const host = WebDav.guessHost(url)
 
+        const _password = decodeLess(password)
+        const realm = base64Stringify(`${username}:${_password}`)
+        
         ipcRendererInvoke('app-addRequestHandler', {
             id: host,
             hosts: [host],
@@ -79,12 +94,12 @@ export class WebDav {
     }
 
     static createClient(session) {
-        const { url, realm } = session
-        const [ username, password ] = base64Parse(realm).split(':')
-        const client = createClient(url, {
+        const { url, username, password } = session
+        const _password = decodeLess(password)
+        const client = createClient(transformUrl(url), {
             //authType: AuthType.Digest,
             username,
-            password,
+            password: _password,
         })
 
         WebDav.setupAuthorization(session)

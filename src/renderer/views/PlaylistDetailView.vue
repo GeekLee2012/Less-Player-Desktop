@@ -13,7 +13,7 @@ import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import { Playlist } from '../../common/Playlist';
-import { coverDefault, isBlank, trimExtraChars } from '../../common/Utils';
+import { coverDefault, isBlank, randomTextWithinAlphabetNums, toTrimString, trimExtraChars } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -26,7 +26,7 @@ const props = defineProps({
 const { addAndPlayTracks, playPlaylist, addPlaylistToQueue, dndSaveCover } = inject('player')
 const { searchDefault, } = inject('appCommon')
 
-const { getVendor, isLocalMusic, isWebDav, isNavidrome } = usePlatformStore()
+const { getVendor, isLocalMusic, isWebDav, isNavidrome, isCloudStorage } = usePlatformStore()
 const { addTracks } = usePlayStore()
 const { routerCtxCacheItem, } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,  } = useAppCommonStore()
@@ -155,7 +155,7 @@ const { addFavoritePlaylist, removeFavoritePlaylist, isFavoritePlaylist } = useU
 const favorited = ref(false)
 const toggleFavorite = () => {
     const { id, platform } = props
-    if(isLocalMusic(platform) || isWebDav(platform) || isNavidrome(platform)) {
+    if(isLocalMusic(platform) || isCloudStorage(platform)) {
         return showFailToast('当前平台暂不支持收藏')
     }
 
@@ -340,7 +340,12 @@ onActivated(() => {
                 <div class="loading-mask search-wrap" v-show="isLoading && isSearchForOnlinePlaylistShow"
                     style="text-align: left;width: 188px; height: 28px; display: inline-block;margin-right: 10px;"></div>
             </div>
-            <SongListControl :data="filteredData || detail.data" :artistVisitable="true" :albumVisitable="true"
+            <SongListControl 
+                :id="randomTextWithinAlphabetNums(16)"
+                :data="filteredData || detail.data" 
+                :artistVisitable="true" 
+                :albumVisitable="true"
+                :draggable="true"
                 :loading="isLoading">
             </SongListControl>
         </div>
@@ -412,10 +417,6 @@ onActivated(() => {
 }
 
 #playlist-detail-view .header .short-about {
-    /*
-    height: 105px;
-    -webkit-line-clamp: 4;
-    */
     height: 80px;
     margin-bottom: 23px;
     -webkit-line-clamp: 3;
@@ -423,8 +424,8 @@ onActivated(() => {
 }
 
 #playlist-detail-view .header .cover {
-    width: 236px;
-    height: 236px;
+    width: 239px;
+    height: 239px;
     border-radius: var(--border-img-text-tile-border-radius);
     box-shadow: 0px 0px 1px #161616;
 }

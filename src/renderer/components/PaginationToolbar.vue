@@ -196,6 +196,8 @@ defineExpose({
     margin-bottom: 8px;
     border-bottom: 3px solid transparent;
     border-radius: 3px;
+    /*border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-img-small-border-radius);*/
 }
 
 .pagination-toolbar .action .btn:hover,

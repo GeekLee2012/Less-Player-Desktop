@@ -53,12 +53,12 @@ const setFilteredData = (value) => (filteredData.value = value)
 
 
 let client = null
-const loadRootDirectory = async () => {
+const visitRoot = async () => {
     if(!props.id) return
     setLoading(true)
     currentSession.value = getWebDavSession(props.id, true) || { title: 'WebDAV会话' }
     client = WebDav.createClient(currentSession.value)
-    changeDirectory('/')
+    if(client) changeDirectory('/')
 }
 
 const resetScrollState = () => {
@@ -341,9 +341,7 @@ const computedDavDataLength = computed(() => {
 })
 
 /* 生命周期、监听 */
-onMounted(() => {
-    loadRootDirectory()
-})
+onMounted(visitRoot)
 </script>
 
 <template>
@@ -857,5 +855,9 @@ onMounted(() => {
 #webdav-session-detail-view .center .content.grid-view .item:hover .action {
     visibility: visible;
     background: var(--content-list-item-hover-bg-color);
+}
+
+#webdav-session-detail-view .center .content.grid-view .item.loading-mask {
+    height: 119px;
 }
 </style>

@@ -2,12 +2,13 @@ import { United } from "./united";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { emitEvents } from "../common/EventBusWrapper";
-import { stringEquals, toTrimString,  } from "../common/Utils";
+import { decodeLess, isLiveStream, stringEquals, toTrimString, transformUrl } from "../common/Utils";
 import { getJson, qsStringifyUrl } from "../common/HttpClient";
 import { version } from '../../package.json';
 import { Album } from "../common/Album";
 import { Playlist } from "../common/Playlist";
 import { Category } from "../common/Category";
+import { useSettingStore } from "../renderer/store/settingStore";
 
 
 
@@ -22,18 +23,26 @@ export class Navidrome {
 
     static setSession(session) {
         Navidrome.session = session
+        return new Promise((resolve, reject) => {
+            Navidrome.getRestJson('ping').then(result => {
+                const { status } = result || {}
+                resolve(status == 'ok')
+            })
+        })
     }
 
     static getRestUrl(apiName) {
         const { url } = Navidrome.session || Navidrome.DEFAULT_SESSION
-        return `${url}rest/${apiName}`
+        const _url = transformUrl(url, 'http')
+        return `${_url}rest/${apiName}`
     }
 
     static getAuthorization() {
         const { username, token, salt } = Navidrome.session
+        const _token = decodeLess(token)
         return {
             u: username,
-            t: token,
+            t: _token,
             s: salt,
             v: Navidrome.VERSION,
             c: `Less Player@${version}`,
@@ -203,15 +212,16 @@ export class Navidrome {
     //广场列表 - 歌曲
     static songSquare(cate, offset, limit, page, order) {
         return new Promise((resolve, reject) => {
-            const result = { cate, platform: Navidrome.CODE, data:[], offset, limit, page, order }
-    
+            const result = { cate, platform: Navidrome.CODE, data:[], offset, limit, page, order, total: 1 }
+            if(page > 1) return resolve(result)
+
             Navidrome.getRestJson('getRandomSongs', { size: (limit || 36) }).then(json => {
                 const { song } = json.randomSongs
                 if(song && song.length > 0) {
                     song.forEach(item => {
                         const { id, title, artist: artistName, artistId, coverArt, album: albumName, albumId, duration, path, suffix, } = item
                         const artist = [{ id: artistId, name: artistName }]
-                        const album = [{ id: albumId, name: albumName }]
+                        const album = { id: albumId, name: albumName }
                         const cover = Navidrome.getCover(coverArt)
                         const _title = Navidrome.transformTrackTitle(title, path, suffix)
                         const _duration = duration ? duration * 1000 : 0
@@ -238,7 +248,7 @@ export class Navidrome {
                 if(internetRadioStation && internetRadioStation.length > 0) {
                     internetRadioStation.forEach(item => {
                         const { id, name: title, streamUrl, coverArt } = item
-                        const streamType = toTrimString(streamUrl).includes('.m3u8)') ? 0 : 1
+                        const streamType = isLiveStream(streamUrl) ? 0 : 1
                         result.data.push({
                             id, 
                             platform: Navidrome.CODE,
@@ -278,7 +288,7 @@ export class Navidrome {
                     entry.forEach(item => {
                         const { id, title, artist: artistName, artistId, coverArt, album: albumName, albumId, duration, path, suffix, } = item
                         const artist = [{ id: artistId, name: artistName }]
-                        const album = [{ id: albumId, name: albumName }]
+                        const album = { id: albumId, name: albumName }
                         const cover = Navidrome.getCover(coverArt)
                         const _title = Navidrome.transformTrackTitle(title, path, suffix)
                         const _duration = duration ? duration * 1000 : 0
@@ -297,49 +307,61 @@ export class Navidrome {
 
     static playDetail(id, track) {
         return new Promise(async (resolve, reject) => {
+            const result = { ...track }
             //URL
-            if(!Track.hasUrl(track)) {
+            if(!Track.hasUrl(result)) {
                 Object.assign(track, { url: Navidrome.getStreamUrl(id) })
             }
+
             //封面
-            const onlineCandidate = await United.transferTrack(track, { isGetCover: true })
-            if (onlineCandidate) {
-                const { cover } = onlineCandidate
-                if (cover && track.cover != cover) {
-                    Object.assign(track, { cover })
-                    onTrackUpdated(track)
+            const { isUseOnlineCoverEnable } = useSettingStore()
+            if(!Track.hasCover(result) || isUseOnlineCoverEnable) {
+                const onlineCandidate = await United.transferTrack(result, { isGetCover: true })
+                if (onlineCandidate) {
+                    const { cover } = onlineCandidate
+                    if (cover && result.cover != cover) {
+                        Object.assign(result, { cover })
+                        onTrackUpdated(result)
+                    }
                 }
             }
-            resolve(track)
+            resolve(result)
         })
     }
 
     //歌词
     static lyric(id, track) {
         return new Promise(async (resolve, reject) => {
+            const result = { ...track }
             //内嵌歌词
-            let lyricText = track.embeddedLyricText
+            let lyricText = result.embeddedLyricText
             //在线歌词
             let onlineCandidate = null
             if (!lyricText) {
-                onlineCandidate = await United.transferTrack(track, { isGetLyric: true })
+                onlineCandidate = await United.transferTrack(result, { isGetLyric: true })
                 if (onlineCandidate) {
                     const { lyric, lyricTrans } = onlineCandidate
-                    Object.assign(track, { lyric, trans: lyricTrans })
+                    Object.assign(result, { lyric, trans: lyricTrans })
                 }
             } else {
-                Object.assign(track, { lyric: Lyric.parseFromText(lyricText) })
+                Object.assign(result, { lyric: Lyric.parseFromText(lyricText) })
             }
-            //封面，顺便更新一下
-            if (!onlineCandidate || !Track.hasCover(onlineCandidate)) onlineCandidate = await United.transferTrack(track, { isGetCover: true })
-            if (onlineCandidate) {
-                const { cover } = onlineCandidate
-                if (cover && track.cover != cover) {
-                    Object.assign(track, { cover })
-                    onTrackUpdated(track)
+            
+            //封面
+            const { isUseOnlineCoverEnable } = useSettingStore()
+            if(!Track.hasCover(result) || isUseOnlineCoverEnable) {
+                if (!onlineCandidate || !Track.hasCover(onlineCandidate)) {
+                    onlineCandidate = await United.transferTrack(result, { isGetCover: true })
+                }
+                if (onlineCandidate) {
+                    const { cover } = onlineCandidate
+                    if (cover && result.cover != cover) {
+                        Object.assign(result, { cover })
+                        onTrackUpdated(result)
+                    }
                 }
             }
-            resolve(track)
+            resolve(result)
         })
     }
 
@@ -361,13 +383,49 @@ export class Navidrome {
         })
     }
 
+    //歌手详情：热门歌曲
+    static artistDetailHotSongs(id) {
+        return new Promise((resolve, reject) => {
+            Navidrome.getRestJson('getArtist', { id }).then(async json => {
+                const { artist, } = json
+                const { id, name: title, coverArt, } = artist
+                const result = { 
+                    id, 
+                    platform: Navidrome.CODE, 
+                    title, 
+                    cover: Navidrome.getCover(coverArt),
+                    data: []
+                }
+                const topSongsResult = await Navidrome.getRestJson('getTopSongs', { artist: title })
+                const { topSongs } = topSongsResult
+                const { song } = topSongs
+                if(song && song.length > 0) {
+                    song.forEach(item => {
+                        const { id, title, artist: artistName, artistId, coverArt, album: albumName, albumId, duration, path, suffix, } = item
+                        const artist = [{ id: artistId, name: artistName }]
+                        const album = { id: albumId, name: albumName }
+                        const cover = Navidrome.getCover(coverArt)
+                        const _title = Navidrome.transformTrackTitle(title, path, suffix)
+                        const _duration = duration ? duration * 1000 : 0
+                        const track = new Track(id, Navidrome.CODE, _title, artist, album, _duration, cover)
+                        Object.assign(track, {
+                            url: Navidrome.getStreamUrl(id),
+                            type: Playlist.NORMAL_TYPE,
+                        })
+                        result.data.push(track)
+                    })
+                }
+                resolve(result)
+            })
+        })
+    }
+
     //歌手详情: 专辑
     static artistDetailAlbums(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
             Navidrome.getRestJson('getArtist', { id }).then(json => {
                 const result = { id, platform: Navidrome.CODE, offset, limit, page, data: [] }
                 const { album, } = json.artist
-                console.log(json)
                 if(album && album.length > 0) {
                     album.forEach(item => {
                         const { id, title, artist: artistName, artistId, coverArt, year, comment: about } = item
@@ -390,7 +448,7 @@ export class Navidrome {
     //歌手详情: 简介
     static artistDetailAbout(id) {
         return new Promise((resolve, reject) => {
-            resolve('【Navidrome】暂无简介')
+            resolve('')
         })
     }
 
@@ -404,13 +462,13 @@ export class Navidrome {
                 const artist = [{ id: artistId, name: artistName }]
                 const company = ''
                 const publishTime = toTrimString(year)
-                const about = '【Navidrome】暂无简介'
+                const about = ''
                 const result = new Album(id, Navidrome.CODE, title, cover, artist, company, publishTime, about)
                 if(song && song.length > 0) {
                     song.forEach(item => {
                         const { id, title, artist: artistName, artistId, coverArt, album: albumName, albumId, duration, path, suffix } = item
                         const artist = [{ id: artistId, name: artistName }]
-                        const album = [{ id: albumId, name: albumName }]
+                        const album = { id: albumId, name: albumName }
                         const cover = Navidrome.getCover(coverArt)
                         const _title = Navidrome.transformTrackTitle(title, path, suffix)
                         const _duration = duration ? duration * 1000 : 0

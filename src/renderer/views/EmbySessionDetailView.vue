@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'NavidromeSessionDetailView'
+    name: 'EmbySessionDetailView'
 }
 </script>
 
@@ -13,8 +13,8 @@ import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useCloudStorageStore } from '../store/cloudStorageStore';
-import { isDevEnv, toLowerCaseTrimString, isBlank, randomTextWithinAlphabetNums, } from "../../common/Utils";
-import { Navidrome } from '../../vendor/navidrome';
+import { isDevEnv, toLowerCaseTrimString, isBlank, randomTextWithinAlphabetNums, nextInt, } from "../../common/Utils";
+import { Emby } from '../../vendor/emby';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import AlbumListPaginationControl from '../components/AlbumListPaginationControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
@@ -35,11 +35,12 @@ const { addAndPlayTracks, playVideoItem, dndSaveFile } = inject('player')
 
 const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
 const { isDndSaveEnable, isSingleLineAlbumTitleStyle, getPaginationStyleIndex } = storeToRefs(useSettingStore())
-const { getNavidromeTypeTabs, isAllSongsTab, isPlaylistsTab, 
-    isAlbumsTab, isFMRadiosTab, isArtistsTab, } = usePlatformStore()
+const { getEmbyTypeTabs, isAllSongsTab, isPlaylistsTab, 
+    isAlbumsTab, isFMRadiosTab, isArtistsTab, 
+    isGenresTab, isFoldersTab, } = usePlatformStore()
 const { playTrack, resetQueue, addTracks, playNextTrack, addTrack, playTrackLater } = usePlayStore()
 //const {  } = storeToRefs(useCloudStorageStore())
-const { getNavidromeSession, } = useCloudStorageStore()
+const { getEmbySession, } = useCloudStorageStore()
 
 
 const activeTab = ref(0)
@@ -60,13 +61,10 @@ const contentRef = ref(null)
 const back2TopBtnRef = ref(null)
 let markScrollTop = 0
 const limit = 36
-const titleShow = ref(true)
-const aboutShow = ref(true)
+const maxPage = ref(-1)
 const dataListId = ref(null)
 
 const setDataListId = (value) => (dataListId.value = value)
-const setTitleShow = (value) => (titleShow.value = value)
-const setAboutShow = (value) => (aboutShow.value = value)
 const setCategories = (value) => {
     categories.length = 0
     if(value) categories.push(...value)
@@ -92,26 +90,30 @@ const setLoading = (value) => (loading.value = value)
 const setKeyword = (value) => (keyword.value = value)
 const setFilteredData = (value) => (filteredData.value = value)
 const setSingleLineTitleStyle = (value) => (singleLineTitleStyle.value = value)
-const needRefreshSession = ref(false)
-const setNeedRefreshSession = (value) => (needRefreshSession.value = value)
+const setMaxPage = (value) => {
+    if(typeof value == 'number') maxPage.value = value
+}
 
-
-
-const typeTabs = getNavidromeTypeTabs()
+const typeTabs = getEmbyTypeTabs()
 const activeTabCode = () => (typeTabs[activeTab.value].code)
 const isSongTab = () => (isAllSongsTab(activeTabCode()))
 const isPlaylistTab = () => (isPlaylistsTab(activeTabCode()))
 const isAlbumTab = () => (isAlbumsTab(activeTabCode()))
 const isFmRadioTab = () => (isFMRadiosTab(activeTabCode()))
 const isArtistTab = () => (isArtistsTab(activeTabCode()))
+const isGenreTab = () => (isGenresTab(activeTabCode()))
+const isFolderTab = () => (isFoldersTab(activeTabCode()))
 const isNormalPaginationType = computed(() => (getPaginationStyleIndex.value === 0))
+const needRefreshSession = ref(false)
+const setNeedRefreshSession = (value) => (needRefreshSession.value = value)
+
 
 
 const setupSession = async () => {
     if(!props.id) return
-    const session = getNavidromeSession(props.id) || { title: 'Navidrome' }
+    const session = getEmbySession(props.id) || { title: 'Emby' }
     setCurrentSession(session)
-    return Navidrome.setSession(session)
+    return Emby.setSession(session)
 }
 
 const resetTab = () => {
@@ -119,13 +121,12 @@ const resetTab = () => {
     singleLineTitleStyle.value = false
     setCurrentTabView(null)
     resetScrollState()
-    //setTitleShow(true)
-    //setAboutShow(true)
+    setMaxPage(-1)
 }
 
 const loadAlbumCategories = async () => {
     if(albumCategories.length > 0) return false
-    const result = await Navidrome.albumCategories()
+    const result = await Emby.albumCategories()
     setAlbumCategories(result && result.data)
     return true
 }
@@ -146,9 +147,10 @@ const loadAlbums = async () => {
     setCategories(albumCategories)
     
     const { value: cate } = currentCate.value || { value: '' }
-    Navidrome.albumSquare(cate, 0, limit, 1).then(result => {
+    Emby.albumSquare(cate, 0, limit, 1).then(result => {
         if(!result) return
         const { data, total } = result
+        setMaxPage(total)
         setSingleLineTitleStyle(true)
         if(casTabData(data, true, isAlbumTab)) {
             setLoading(false)
@@ -161,7 +163,7 @@ const loadArtists = async () => {
     setCurrentTabView(ArtistListControl)
 
     const { value: cate } = currentCate.value || { value: '' }
-    Navidrome.artistSquare(cate, 0, limit, 1).then(result => {
+    Emby.artistSquare(cate, 0, limit, 1).then(result => {
         if(!result) return
         const { data, categories } = result
     
@@ -176,7 +178,7 @@ const loadArtists = async () => {
 const loadPlaylists = async () => {
     setLoading(true)
     setCurrentTabView(PlaylistsControl)
-    Navidrome.playlistSquare('', 0, limit, 1).then(result => {
+    Emby.playlistSquare('', 0, limit, 1).then(result => {
         if(!result) return
         const { data, } = result
         if(casTabData(data, true, isPlaylistTab)) {
@@ -188,9 +190,10 @@ const loadPlaylists = async () => {
 const loadSongs = async () => {
     setLoading(true)
     setCurrentTabView(SongListControl)
-    return Navidrome.songSquare('', 0, limit, 1).then(result => {
+    return Emby.songSquare('', 0, limit, 1).then(result => {
         if(!result) return
-        const { data, } = result
+        const { data, total } = result
+        setMaxPage(total)
         if(casTabData(data, true, isSongTab)) {
             setLoading(false)
         }
@@ -200,10 +203,35 @@ const loadSongs = async () => {
 const loadRadios = async () => {
     setLoading(true)
     setCurrentTabView(PlaylistsControl)
-    Navidrome.radioSquare('', 0, limit, 1).then(result => {
+    Emby.radioSquare('', 0, limit, 1).then(result => {
         if(!result) return
         const { data, } = result
         if(casTabData(data, true, isFmRadioTab)) {
+            setLoading(false)
+        }
+    })
+}
+
+const loadGenres = async () => {
+    setLoading(true)
+    setCurrentTabView(PlaylistsControl)
+    Emby.genresSquare('', 0, limit, 1).then(result => {
+        if(!result) return
+        const { data, total } = result
+        //if(typeof total == 'number') setMaxPage(total)
+        if(casTabData(data, true, isGenreTab)) {
+            setLoading(false)
+        }
+    })
+}
+
+const loadFolders = async () => {
+    setLoading(true)
+    setCurrentTabView(PlaylistsControl)
+    Emby.folderSquare('', 0, limit, 1).then(result => {
+        if(!result) return
+        const { data, } = result
+        if(casTabData(data, true, isFolderTab)) {
             setLoading(false)
         }
     })
@@ -223,6 +251,10 @@ const loadTab = () => {
         loadSongs().then(() => setDataListId(randomTextWithinAlphabetNums(16)))
     } else if(isFmRadioTab()) {
         loadRadios()
+    } else if(isGenreTab()) {
+        loadGenres()
+    } else if(isFolderTab()) {
+        loadFolders()
     }
 }
 
@@ -257,20 +289,10 @@ const nextPagePendingMark = ref(0)
 const scrollToLoad = (event) => {
     if (loading.value) return
     const { scrollTop, scrollHeight, clientHeight } = contentRef.value
-    const isUpAction = (markScrollTop > scrollTop)
     markScrollState()
     const allowedError = 10 //允许误差
     if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
         nextPagePendingMark.value = Date.now()
-    }
-
-    if(scrollHeight < 666) return 
-    if(isUpAction) {
-        setTitleShow(markScrollTop < 168)
-        setAboutShow(markScrollTop < 36)
-    } else {
-       if(markScrollTop >= 202) setTitleShow(false)
-       if(markScrollTop >= 36) setAboutShow(false)
     }
 }
 
@@ -289,20 +311,24 @@ const loadContent = async (noLoadingMask, offset, limit, page) => {
 
     let loadAction = null, needReset = false, predicate = null
     if(isAlbumTab()) {
-        loadAction = Navidrome.albumSquare
+        loadAction = Emby.albumSquare
         predicate = isAlbumTab
     } else if(isPlaylistTab()) {
-        loadAction = Navidrome.playlistSquare
+        loadAction = Emby.playlistSquare
         needReset = true
         predicate = isPlaylistTab
     } else if(isSongTab()) {
-        loadAction = Navidrome.songSquare
+        loadAction = Emby.songSquare
         needReset = true
         predicate = isSongTab
     } else if(isFmRadioTab()) {
-        loadAction = Navidrome.radioSquare
+        loadAction = Emby.radioSquare
         needReset = true
         predicate = isFmRadioTab
+    } else if(isGenreTab()) {
+        loadAction = Emby.genresSquare
+        needReset = true
+        predicate = isGenreTab
     }
     if(!loadAction) return
 
@@ -346,7 +372,7 @@ const filterContent = (keyword) => {
 
 const computedSessionTitle = computed(() => {
     const { title, } = currentSession.value || {}
-    return title || 'Navidrome'
+    return title || 'Emby'
 })
 
 const computedTabData = computed(() => {
@@ -362,11 +388,11 @@ const computedTabDataLength = computed(() => {
 const computedCurrentCateTitle = computed(() => {
     const item = currentCate.value
     if(!item) {
-        if(isAlbumTab()) return '默认'
+        if(isAlbumTab()) return '全部'
         if(isArtistTab()) return '全部'
         return ''
     }
-    return item.key.replace('[Unknown]', '未知')
+    return item.key.replace('%', '未知')
             .replace('#', '全部')
 })
 
@@ -390,21 +416,32 @@ const visitCate = (item) => {
     }
 }
 
-const nextRandomSongs = () => {
-    loadSongs().then(() => setDataListId(randomTextWithinAlphabetNums(16)))
-}
-
 const playAll = () => {
     if(tabData.length < 1) return 
 
-    addAndPlayTracks(tabData, true, '即将为您播放全部歌曲')
+    addAndPlayTracks(tabData, true, '即将为您播放当前页')
+}
+
+const randomPlay = () => {
+    const pages = maxPage.value
+    if(!pages || pages < 1) return
+    const page = Math.max(1, nextInt(pages))
+    const offset = limit * (page - 1)
+    Emby.songSquare('', offset, limit, page).then(result => {
+        if(!result) return
+        const { data, total } = result
+        if(!data || data.length < 1) return
+        const index = nextInt(data.length)
+        showToast('即将为您随缘一曲')
+        playTrack(data[index])
+    })
 }
 
 const addAll = () => {
     if(tabData.length < 1) return 
 
     addTracks(tabData)
-    showToast('歌曲已全部添加')
+    showToast('当前页歌曲已添加')
 }
 
 const refreshSession = () => {
@@ -427,18 +464,11 @@ onDeactivated(() => setCategoriesShow(false))
 </script>
 
 <template>
-    <div id="navidrome-session-detail-view" @click="() => setCategoriesShow(false)">
-        <div class="header" :class="{ 
-            'none-title': !titleShow, 
-            'none-about': !aboutShow,
-        }">
+    <div id="emby-session-detail-view" @click="() => setCategoriesShow(false)">
+        <div class="header">
             <div class="title-wrap">
-                <!-- fill: #0084ff -->
-                <svg width="28" height="28" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" style="enable-background:new 0 0 512 512"><path style="fill:var(--content-highlight-color);" d="M256 10.449C120.275 10.449 10.449 120.276 10.449 256c0 135.725 109.826 245.551 245.551 245.551S501.551 391.725 501.551 256C501.551 120.276 391.725 10.449 256 10.449z"></path><path style="fill:#fff" d="M256 168.229c-48.515.0-87.771 39.257-87.771 87.771s39.257 87.771 87.771 87.771 87.771-39.257 87.771-87.771S304.515 168.229 256 168.229z"></path><path d="M437.061 74.94C388.735 26.615 324.434.0 256 0S123.265 26.615 74.939 74.94.0 187.566.0 256s26.614 132.735 74.939 181.061S187.566 512 256 512s132.735-26.614 181.061-74.939S512 324.434 512 256 485.386 123.266 437.061 74.94zM256 491.102C126.365 491.102 20.898 385.635 20.898 256S126.365 20.898 256 20.898 491.102 126.365 491.102 256 385.635 491.102 256 491.102z"></path><path d="M354.22 256c0-54.158-44.061-98.22-98.22-98.22s-98.22 44.062-98.22 98.22 44.062 98.22 98.22 98.22 98.22-44.061 98.22-98.22zm-175.542.0c0-42.636 34.686-77.322 77.322-77.322s77.322 34.686 77.322 77.322S298.636 333.322 256 333.322 178.678 298.636 178.678 256z"></path><path d="M285.257 256c0-16.132-13.124-29.257-29.257-29.257S226.743 239.868 226.743 256s13.125 29.257 29.257 29.257S285.257 272.133 285.257 256zm-37.616.0c0-4.609 3.75-8.359 8.359-8.359 4.609.0 8.359 3.75 8.359 8.359.0 4.609-3.75 8.359-8.359 8.359C251.391 264.359 247.641 260.609 247.641 256z"></path><path d="M256 391.837c-5.771.0-10.449 4.678-10.449 10.449s4.678 10.449 10.449 10.449c41.897.0 81.265-16.294 110.853-45.883 29.587-29.587 45.881-68.955 45.881-110.852.0-5.771-4.678-10.449-10.449-10.449s-10.449 4.678-10.449 10.449C391.837 330.9 330.9 391.837 256 391.837z"></path><path d="M449.306 245.551c-5.771.0-10.449 4.678-10.449 10.449.0 1.481-.018 2.958-.052 4.43-.136 5.769 4.43 10.557 10.199 10.692.085.002.168.003.252.003 5.656.0 10.307-4.517 10.442-10.202.039-1.637.059-3.279.059-4.925C459.755 250.229 455.077 245.551 449.306 245.551z"></path><path d="M447.55 284.239c-5.656-1.145-11.168 2.52-12.308 8.178-17.107 84.854-92.489 146.44-179.242 146.44-5.771.0-10.449 4.678-10.449 10.449s4.678 10.449 10.449 10.449c47.353.0 93.467-16.573 129.847-46.668 35.9-29.697 60.717-71.084 69.881-116.54C456.868 290.891 453.207 285.38 447.55 284.239z"></path><path d="M256 120.163c5.771.0 10.449-4.678 10.449-10.449S261.771 99.265 256 99.265c-41.897.0-81.265 16.294-110.853 45.883C115.559 174.735 99.265 214.103 99.265 256c0 5.771 4.678 10.449 10.449 10.449s10.449-4.678 10.449-10.449c0-74.9 60.937-135.837 135.837-135.837z"></path><path d="M62.996 240.876c-5.759-.14-10.557 4.43-10.692 10.199-.039 1.637-.059 3.279-.059 4.925.0 5.771 4.678 10.449 10.449 10.449S73.143 261.771 73.143 256c0-1.481.018-2.958.052-4.43C73.331 245.8 68.765 241.013 62.996 240.876z"></path><path d="M256 73.143c5.771.0 10.449-4.678 10.449-10.449S261.771 52.245 256 52.245c-47.353.0-93.467 16.573-129.847 46.668-35.9 29.697-60.717 71.084-69.881 116.54-1.14 5.657 2.521 11.168 8.178 12.308.697.141 1.392.208 2.076.208 4.872.0 9.232-3.426 10.232-8.386C93.864 134.729 169.247 73.143 256 73.143z"></path></svg>
+                <svg width="32" height="32" viewBox="0 0 367.8 368.13" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path style="fill:#52b54b;" d="M198.12,368.13a70.39,70.39,0,0,1-6-4.66q-15.42-15.11-30.7-30.35c-4.37-4.32-8.77-8.6-13.07-13-4-4.11-8-8.26-11.92-12.5-4.74-5.17-9.14-10.69-14.14-15.59a47.82,47.82,0,0,0-10.53-7.33c-.92-.51-3.47.74-4.53,1.87-10.09,10.83-11.93,10.64-21.34-1-4.06-5-9-9.3-13.55-13.89-9.11-9.17-18.2-18.37-27.4-27.46-4.72-4.67-9.71-9.05-14.46-13.69-6.7-6.55-13.29-13.22-19.92-19.84-3-3-6-6.1-9.12-9.06-2.34-2.24-1.49-4,.52-5.83,3.47-3.24,6.79-6.65,10.22-9.94,8.71-8.37,17.57-16.58,26.12-25.11,7-7,13.57-14.52,20.58-21.55,3.49-3.49,7.71-6.23,11.3-9.63,4.68-4.44,9.21-9.07,13.47-13.92,1-1.13,1.52-4.13.76-5.11A106.8,106.8,0,0,0,74.06,99.32c-2.43-2.36-2.69-4-.15-6.58q45.53-45.33,90.85-90.86c2.72-2.74,4.43-2.32,6.92.2,17.95,18.11,36.11,36,54,54.21,5.2,5.3,9.54,11.44,14.44,17.05,3.25,3.72,6.87,7.1,10.18,10.76,3.59,4,7.86,3.22,12.08-2a40.56,40.56,0,0,1,7.21-7.25,5.22,5.22,0,0,1,5,.39c10.29,10.15,20.29,20.59,30.48,30.84,6.22,6.25,12.71,12.22,19,18.43,13.71,13.63,27.25,27.42,41.09,40.93,3.34,3.26,3.73,5.25.18,8.75-26,25.68-51.74,51.56-77.57,77.37a24.84,24.84,0,0,1-2.19,2c-4.85,3.82-4.64,5.85.78,9.19a22.81,22.81,0,0,1,4.67,3.66c4,4.27,3.65,5.7-.5,9.9-4.64,4.7-8.79,9.88-13.45,14.55-3.37,3.38-7.49,6-10.82,9.43C259,307.79,252.2,315.62,245,323c-3.68,3.77-8.1,6.81-11.9,10.47-9.51,9.14-18.88,18.43-28.27,27.69C202.68,363.26,200.69,365.45,198.12,368.13Zm-61-117c.78,6.22,2.34,7.5,7.78,4.69,9.73-5,19.28-10.43,28.82-15.83,7.21-4.08,14.22-8.53,21.45-12.59,6.84-3.84,14-7.17,20.76-11.14,5.59-3.27,10.65-7.46,16.25-10.72,10-5.79,20.17-11.11,30.15-16.84,1.68-1,2.76-2.94,4.12-4.45-1.48-.85-2.95-1.71-4.43-2.55-.71-.41-1.47-.74-2.16-1.19-6.08-4-12-8.13-18.27-11.81-4.07-2.41-8.69-3.89-12.84-6.18-3-1.66-5.52-4.21-8.5-5.93-6.26-3.63-12.75-6.85-19-10.44-10.88-6.23-21.62-12.7-32.5-18.92-7.77-4.45-15.71-8.61-23.52-13-5.54-3.12-7.73-2-8.06,4.56-.08,1.66,0,3.33,0,5Z"/></g></g></svg>
                 <div class="title" v-html="computedSessionTitle"></div>
-            </div>
-            <div class="tip-text about">
-                <p>提示：限于官方API，专辑Tab最大分页固定为300；歌曲Tab随机36首</p>
             </div>
             <div class="tabs">
                 <span class="tab" v-for="(tab, index) in typeTabs"
@@ -446,7 +476,7 @@ onDeactivated(() => setCategoriesShow(false))
                     @click="visitTab(index, true)" v-html="tab.name">
                 </span>
                 <div class="cate-btn btn text-btn to-right" 
-                    v-show="activeTab <= 1"
+                    v-show="activeTab <= 1 && categories && categories.length > 0"
                     @click.stop="toggleCategories">
                     <svg width="17" height="17" viewBox="0 0 29.3 29.3">
                         <g id="Layer_2" data-name="Layer 2">
@@ -459,7 +489,7 @@ onDeactivated(() => setCategoriesShow(false))
                     <span v-html="computedCurrentCateTitle"></span>
                 </div>
                 <transition name="fade-ex">
-                    <div class="categories" v-show="categoriesShow">
+                    <div class="categories" v-show="categoriesShow && categories && categories.length > 0">
                         <ul>
                             <li class="cate-item" v-for="(item, index) in categories"
                                 :class="{ first: (index == 0)}"
@@ -469,10 +499,10 @@ onDeactivated(() => setCategoriesShow(false))
                         </ul>
                     </div>
                 </transition>
-                <div class="action to-right" v-show="activeTab == 3">
+                <div class="action to-right" v-show="activeTab == 2">
                     <SvgTextButton text="播放全部" 
                         :leftAction="playAll" 
-                        :rightAction="addAll">
+                        :rightAction="addAll" >
                         <template #left-img>
                             <svg width="15" height="15" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                                 xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -497,8 +527,8 @@ onDeactivated(() => setCategoriesShow(false))
                             </svg>
                         </template>
                     </SvgTextButton>
-                    <SvgTextButton text="换一组" 
-                        :leftAction="nextRandomSongs"
+                    <SvgTextButton text="随缘听" 
+                        :leftAction="randomPlay"
                         class="spacing" >
                         <template #left-img>
                             <svg width="16" height="16" viewBox="0 0 768.11 768.93" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M384.2,509.12c-5.62,8.58-10.61,17-16.38,24.87-42.57,58-99.37,92.91-170.52,104A234.9,234.9,0,0,1,163,640.81c-43.5.32-87,.21-130.5.12C14.67,640.89.6,627.39.06,610.2-.53,591.75,13.72,577,32.51,577q63-.13,126,0c38.3,0,73.92-9.69,105.81-31,51.79-34.55,81.47-83,86.79-145.17A190.91,190.91,0,0,0,200.48,197.4c-14.06-3-28.73-4.05-43.14-4.24-41.65-.55-83.33-.1-125-.24-22.79-.08-38.09-22-30.3-43.11,4.44-12,15.83-20.7,28.59-20.74,46.67-.14,93.44-2,140,.48,92.18,4.86,162.42,48.2,210.63,127l2.76,4.54,3.21-5.28c42.17-69.24,103.1-111,183.24-123.77,15.53-2.49,31.5-2.64,47.29-3,21.65-.48,43.32-.12,66.19-.12-1.76-1.89-2.87-3.14-4-4.32-23.09-23.11-46.27-46.12-69.26-69.33C593.09,37.61,599.81,9,623.12,1.69,634.93-2,645.93.29,654.56,9c30.27,30.54,60.79,60.86,90.07,92.32,32.47,34.89,30.87,88.23-2.4,122.16Q699.53,267,656.63,310.4c-13.11,13.24-32.42,14.13-45.44,2.38-13.84-12.49-14.41-33.17-1-46.71C633,243.13,656,220.4,678.92,197.57c1.24-1.24,2.39-2.56,4.3-4.61h-4.29c-24.49,0-49-.21-73.49.08a192.07,192.07,0,0,0-182.25,139.8c-30.93,109.57,40,221.92,152.33,241.16a198.36,198.36,0,0,0,30.29,2.8c25.65.39,51.31.13,78.16.13-1.85-1.89-3-3.13-4.24-4.32q-34.37-33.51-68.71-67c-10.48-10.27-13.19-24.09-7.54-36.64a31.81,31.81,0,0,1,51.45-9.7c20.42,19.87,40.39,40.22,60.54,60.37,8.72,8.71,17.54,17.34,26.12,26.2,35.35,36.5,35.24,90.32-.31,126.63Q699,715.67,656.37,758.63c-18.25,18.36-48,11.12-54.62-13.24-3.35-12.28,0-23,9-32q34-33.84,68-67.76c1.26-1.25,2.45-2.57,4.48-4.71h-6.22c-24.33,0-48.7.78-73-.17-94.75-3.73-167.09-46.24-217-126.91Z"/></g></g></svg>
@@ -516,6 +546,7 @@ onDeactivated(() => setCategoriesShow(false))
                     :loading="loading"
                     :paginationStyleType="getPaginationStyleIndex"
                     :limit="limit" 
+                    :maxPage="maxPage"
                     :loadPage="loadPageContent"
                     :onPageLoaded="onPageLoaded"
                     :nextPagePendingMark="nextPagePendingMark"
@@ -525,7 +556,8 @@ onDeactivated(() => setCategoriesShow(false))
                     :artistVisitable="true"
                     :albumVisitable="true"
                     :needReset="true"
-                    :hideExtra="true" >
+                    :hideExtra="true"
+                    :useMaxPage="true" >
                 </component>
             </div>
         </div>
@@ -534,7 +566,16 @@ onDeactivated(() => setCategoriesShow(false))
 </template>
 
 <style>
-#navidrome-session-detail-view {
+#emby-session-detail-view .cls-1 {
+    fill: url(#linear-gradient);
+}
+
+#emby-session-detail-view .cls-2 {
+    fill-rule: evenodd;
+    fill: url(#linear-gradient-2);
+}
+
+#emby-session-detail-view {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -543,16 +584,16 @@ onDeactivated(() => setCategoriesShow(false))
     overflow: hidden;
 }
 
-#navidrome-session-detail-view .spacing {
+#emby-session-detail-view .spacing {
     margin-left: 20px;
 }
 
-#navidrome-session-detail-view .to-right {
+#emby-session-detail-view .to-right {
     position: absolute;
     right: 0px;
 }
 
-#navidrome-session-detail-view .categories {
+#emby-session-detail-view .categories {
     --height-factor: 20px;
     position: fixed;
     top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size) + var(--height-factor) / 2);
@@ -571,12 +612,12 @@ onDeactivated(() => setCategoriesShow(false))
     border-bottom-left-radius: var(--border-popover-border-radius);
 }
 
-#navidrome-session-detail-view .categories ul {
+#emby-session-detail-view .categories ul {
     padding: 0px 15px;
     background: transparent;
 }
 
-#navidrome-session-detail-view .categories li {
+#emby-session-detail-view .categories li {
     list-style: none;
     padding: 6px 0px 6px 0px;
     width: 88px;
@@ -587,78 +628,73 @@ onDeactivated(() => setCategoriesShow(false))
     cursor: pointer;
 }
 
-#navidrome-session-detail-view .categories li.first {
+#emby-session-detail-view .categories li.first {
     margin-top: 0px;
 }
 
-#navidrome-session-detail-view .categories li:hover {
+#emby-session-detail-view .categories li:hover {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
     transform: scale(1.03);
 }
 
-.contrast-mode #navidrome-session-detail-view .categories li:hover {
+.contrast-mode #emby-session-detail-view .categories li:hover {
     font-weight: bold;
 }
 
 
-#navidrome-session-detail-view .header {
+
+#emby-session-detail-view .header {
     display: flex;
     flex-direction: column;
     margin-bottom: 5px;
     padding: 0px 33px 0px 33px;
-    --title-height: 30px;
-    --about-height: 18px;
 }
 
-#navidrome-session-detail-view .header .title-wrap {
+#emby-session-detail-view .header .title-wrap {
     display: flex;
     align-items: center;
     position: relative;
     font-weight: bold;
-    height: var(--title-height);
-    transition: 0.5s;
 }
 
-#navidrome-session-detail-view .header .title-wrap .title {
+#emby-session-detail-view .header .title-wrap .title {
     text-align: left;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
     margin-left: 6px;
 }
 
-#navidrome-session-detail-view .header .title-wrap .options {
+#emby-session-detail-view .header .title-wrap .options {
     display: flex;
     align-items: center;
     margin-right: 6px;
     height: 100%;
 }
 
-#navidrome-session-detail-view .about {
+#emby-session-detail-view .about {
     text-align: left;
     margin-bottom: 0px;
     margin-top: 10px;
     color: var(--content-subtitle-text-color);
-    height: var(--about-height);
-    transition: 0.5s;
 }
 
-#navidrome-session-detail-view .header .action {
+#emby-session-detail-view .header .action {
     display: flex;
 }
 
-#navidrome-session-detail-view .header .tabs {
+#emby-session-detail-view .header .tabs {
     display: flex;
     align-items: center;
     text-align: left;
     padding-bottom: 0px;
     border-bottom: 1px solid var(--border-color);
     border-bottom: 1px solid transparent;
-    margin-top: 8px;
+    margin-top: 3px;
     position: relative;
 }
 
-#navidrome-session-detail-view .header .tab {
+#emby-session-detail-view .header .tab {
     font-size: var(--content-text-tab-title-size);
     padding: 8px 0px 5px 0px;
     margin-right: 36px;
@@ -666,41 +702,26 @@ onDeactivated(() => setCategoriesShow(false))
     cursor: pointer;
 }
 
-#navidrome-session-detail-view .header .active {
+#emby-session-detail-view .header .active {
     font-weight: bold;
     border-bottom: 3px solid var(--content-highlight-color);
 }
 
 
-#navidrome-session-detail-view .header .cate-btn {
+#emby-session-detail-view .header .cate-btn {
     margin-right: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#navidrome-session-detail-view .header.none-title .title-wrap,
-#navidrome-session-detail-view .header.none-about .about {
-    /*display: none;*/
-    opacity: 0;
-    height: 0px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-
-#navidrome-session-detail-view .header.none-title .tabs {
-    margin-top: 0px;
-}
-
-#navidrome-session-detail-view .center {
+#emby-session-detail-view .center {
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-#navidrome-session-detail-view .center .list-title {
+#emby-session-detail-view .center .list-title {
     margin-bottom: 6px;
     text-align: left;
     display: flex;
@@ -708,7 +729,7 @@ onDeactivated(() => setCategoriesShow(false))
     padding: 0px 33px 0px 33px;
 }
 
-#navidrome-session-detail-view .center .list-title .size-text {
+#emby-session-detail-view .center .list-title .size-text {
     font-weight: bold;
     margin-left: 3px;
     padding-bottom: 6px;
@@ -717,27 +738,27 @@ onDeactivated(() => setCategoriesShow(false))
     cursor: pointer;
 }
 
-#navidrome-session-detail-view .center .list-title .size-text.loading-mask {
+#emby-session-detail-view .center .list-title .size-text.loading-mask {
     border-color: transparent;
 }
 
-#navidrome-session-detail-view .center .list-title .size-text svg {
+#emby-session-detail-view .center .list-title .size-text svg {
     fill: var(--content-highlight-color);
     transform: translateY(2px);
 }
 
-#navidrome-session-detail-view .center .list-title .size-text span {
+#emby-session-detail-view .center .list-title .size-text span {
     margin-left: 5px;
 }
 
-#navidrome-session-detail-view .center .list-title .action {
+#emby-session-detail-view .center .list-title .action {
     display: flex;
     flex-direction: row;
     align-items: center;
     margin-right: 38px;
 }
 
-#navidrome-session-detail-view .center .location {
+#emby-session-detail-view .center .location {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -753,19 +774,19 @@ onDeactivated(() => setCategoriesShow(false))
     min-height: 20px;
 }
 
-#navidrome-session-detail-view .center .location .current {
+#emby-session-detail-view .center .location .current {
     word-wrap: break-word;
     line-break: anywhere;
     margin-left: 10px;
 }
 
-#navidrome-session-detail-view .center .content {
+#emby-session-detail-view .center .content {
     overflow: scroll;
     overflow-x: hidden;
     padding: 0px 33px 0px 33px;
 }
 
-#navidrome-session-detail-view .center .content.list-view .item {
+#emby-session-detail-view .center .content.list-view .item {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -778,12 +799,12 @@ onDeactivated(() => setCategoriesShow(false))
     --item-height: 63px;
 }
 
-#navidrome-session-detail-view .center .item:hover {
+#emby-session-detail-view .center .item:hover {
     background: var(--content-list-item-hover-bg-color);
     cursor: pointer;
 }
 
-#navidrome-session-detail-view .center .content.list-view  .item > div {
+#emby-session-detail-view .center .content.list-view  .item > div {
     height: var(--item-height);
     display: flex;
     align-items: center;
@@ -792,26 +813,26 @@ onDeactivated(() => setCategoriesShow(false))
     /*font-size: var(--content-text-size);*/
 }
 
-#navidrome-session-detail-view .center .content.list-view  .item .sqno {
+#emby-session-detail-view .center .content.list-view  .item .sqno {
     min-width: 36px;
     padding-left: 10px;
     flex: 1;
 }
 
-#navidrome-session-detail-view .center .content.list-view  .item .icon {
+#emby-session-detail-view .center .content.list-view  .item .icon {
     width: 50px;
     max-width: 50px;
     flex: 1;
     padding-left: 10px;
 }
 
-#navidrome-session-detail-view .center .content .item .icon svg {
+#emby-session-detail-view .center .content .item .icon svg {
     fill: var(--button-icon-btn-color) !important;
     fill: var(--content-subtitle-text-color) !important;
     border-radius: var(--border-img-small-border-radius);
 }
 
-#navidrome-session-detail-view .center .content.list-view  .item .title {
+#emby-session-detail-view .center .content.list-view  .item .title {
     flex: 10;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -826,13 +847,13 @@ onDeactivated(() => setCategoriesShow(false))
     position: relative;
 }
 
-#navidrome-session-detail-view .center .content .item .title span {
+#emby-session-detail-view .center .content .item .title span {
     word-wrap: break-word;
     line-break: anywhere;
     line-height: var(--item-height);
 }
 
-#navidrome-session-detail-view .center .content.list-view .item .title .action {
+#emby-session-detail-view .center .content.list-view .item .title .action {
     z-index: 2;
     height: 100%;
 
@@ -850,7 +871,7 @@ onDeactivated(() => setCategoriesShow(false))
     visibility: hidden;
 }
 
-#navidrome-session-detail-view .center .content.list-view .item .title:hover span {
+#emby-session-detail-view .center .content.list-view .item .title:hover span {
     width: 66%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -862,29 +883,29 @@ onDeactivated(() => setCategoriesShow(false))
     line-break: anywhere;
 }
 
-#navidrome-session-detail-view .center .content .item .title:hover .action {
+#emby-session-detail-view .center .content .item .title:hover .action {
     visibility: visible;
 }
 
-#navidrome-session-detail-view .center .content .item .action svg {
+#emby-session-detail-view .center .content .item .action svg {
     fill: var(--button-icon-btn-color);
 }
 
-#navidrome-session-detail-view .center .content .item .action svg:hover {
+#emby-session-detail-view .center .content .item .action svg:hover {
     fill: var(--content-highlight-color);
 }
 
-#navidrome-session-detail-view .center .content.list-view  .item .size {
+#emby-session-detail-view .center .content.list-view  .item .size {
     min-width: 88px;
     margin-right: 15px;
     justify-content: flex-end
 }
 
-#navidrome-session-detail-view .center .content.list-view  .item .type {
+#emby-session-detail-view .center .content.list-view  .item .type {
     min-width: 39px;
 }
 
-#navidrome-session-detail-view .center .content.list-view  .item .updated {
+#emby-session-detail-view .center .content.list-view  .item .updated {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -895,18 +916,18 @@ onDeactivated(() => setCategoriesShow(false))
     font-size: calc(var(--content-text-size) - 1px);
 }
 
-#navidrome-session-detail-view .center .content.list-view  .item .updated .hms {
+#emby-session-detail-view .center .content.list-view  .item .updated .hms {
     margin-bottom: 3px;
 }
 
-#navidrome-session-detail-view .center .content.grid-view {
+#emby-session-detail-view .center .content.grid-view {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     flex: 1;
 }
 
-#navidrome-session-detail-view .center .content.grid-view .item {
+#emby-session-detail-view .center .content.grid-view .item {
     flex: none;
     width: 100px;
     padding: 15px 8px 15px 8px;
@@ -920,7 +941,7 @@ onDeactivated(() => setCategoriesShow(false))
     position: relative;
 }
 
-#navidrome-session-detail-view .center .content.grid-view  .item .title {
+#emby-session-detail-view .center .content.grid-view  .item .title {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -934,7 +955,7 @@ onDeactivated(() => setCategoriesShow(false))
     /*font-size: calc(var(--content-text-size) - 1px);*/
 }
 
-#navidrome-session-detail-view .center .content.grid-view .item .action {
+#emby-session-detail-view .center .content.grid-view .item .action {
     z-index: 3;
     padding: 12px 15px;
     position: absolute;
@@ -951,7 +972,7 @@ onDeactivated(() => setCategoriesShow(false))
     border-bottom-right-radius: var(--border-list-item-vertical-border-radius);
 }
 
-#navidrome-session-detail-view .center .content.grid-view .item:hover .action {
+#emby-session-detail-view .center .content.grid-view .item:hover .action {
     visibility: visible;
     background: var(--content-list-item-hover-bg-color);
 }

@@ -87,13 +87,13 @@ const onDrop = (event) => {
 }
 
 /* 生命周期、监听 */
-onMounted(() => loadUserInfo())
+onMounted(loadUserInfo)
 </script>
 
 <template>
     <div id="user-info-edit-view" @drapover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="header">
-            <span class="title">编辑用户信息</span>
+            <span class="title">编辑个人信息</span>
         </div>
         <div class="center">
             <div>
@@ -103,12 +103,12 @@ onMounted(() => loadUserInfo())
             <div class="right">
                 <div class="form-row">
                     <div>
-                        <span>用户昵称</span>
+                        <span>昵称</span>
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
                         <input type="text" v-model="detail.nickname" ref="titleRef" :class="{ invalid }" maxlength="64"
-                            placeholder="请输入用户昵称，最多支持输入64个字符">
+                            placeholder="请输入昵称，最多支持输入64个字符">
                     </div>
                 </div>
                 <div class="form-row">

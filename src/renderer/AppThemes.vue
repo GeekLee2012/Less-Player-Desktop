@@ -191,6 +191,29 @@ const setupFontStyle = () => {
   setupFontSize()
 }
 
+//简单抽查几个主要属性，都不存在/为空对象/为负值时，视为首次启动
+const isFirstBoot = ({ appWin, btn, imageTextTile}) => {
+  //正常值非空
+  if(typeof appWin == 'undefined' 
+    && typeof btn == 'undefined'
+    && typeof imageTextTile == 'undefined') {
+      return true
+  }
+  //正常值应为数值型
+  if(typeof appWin == 'object' 
+    && typeof btn == 'object'
+    && typeof imageTextTile == 'object') {
+      return !appWin && !btn && !imageTextTile
+  }
+  //正常值应为非负数
+  if(typeof appWin == 'number' 
+    && typeof btn == 'number'
+    && typeof imageTextTile == 'number') {
+      return appWin < 0 && btn < 0 && imageTextTile < 0
+  }
+  return false
+} 
+
 const setupAppBorderRadius = (data) => {
   const { 
     appWin, popover, btn, flowBtn, inputs, 
@@ -198,11 +221,9 @@ const setupAppBorderRadius = (data) => {
     imageTextTile, imageSmall 
   } = data || commonBorderRadius.value || {}
 
-  //简单抽查几个主要属性，都不存在时，视为首次启动
-  if(typeof appWin == 'undefined' 
-    && typeof btn == 'undefined'
-    && typeof imageTextTile == 'undefined') {
-    setupPresetBorderRadius()
+  //首次启动
+  if(isFirstBoot({ appWin, btn, imageTextTile })) {
+    return setupPresetBorderRadius()
   }
   
   const changes = {

@@ -13,6 +13,10 @@ export class Playlist {
     static ANCHOR_RADIO_TYPE = 3
     //视频
     static VIDEO_TYPE = 4
+    //流派
+    static GENRE_TYPE = 5
+    //目录
+    static FOLDER_TYPE = 6
     //TODO
     static ANCHOR_RADIO_ID_PREFIX = "ARP_"
     //自定义列表
@@ -82,6 +86,14 @@ export class Playlist {
 
     static isVideoType(item) {
         return Playlist._assertType(item, Playlist.VIDEO_TYPE)
+    }
+
+    static isGenreType(item) {
+        return Playlist._assertType(item, Playlist.GENRE_TYPE)
+    }
+
+    static isFolderType(item) {
+        return Playlist._assertType(item, Playlist.FOLDER_TYPE)
     }
 
     static isCustomType(item) {

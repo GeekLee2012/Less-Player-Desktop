@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject } from 'vue';
+import { computed, inject, toRef } from 'vue';
 import PaginationTiles from './PaginationTiles.vue';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { Track } from '../../common/Track';
@@ -26,7 +26,13 @@ const props = defineProps({
     refreshAllPendingMark: Number,
     needReset: Boolean, //播放前是否清空当前播放
     hideExtra: Boolean,
+    maxPage: Number,
+    useMaxPage: Boolean,
 })
+
+const limitFromProps  = toRef(props, 'limit')
+const dataFromProps = toRef(props, 'data')
+const maxPageFromProps = toRef(props, 'maxPage')
 
 const visitItem = (item) => {
     const { checkbox } = props
@@ -44,8 +50,12 @@ const computedItemSubtitle = computed(() => {
 })
 
 const computedMaxPage = computed(() => {
-    const { data, limit } = props
-    return (!data || !limit) ? 0 : Math.ceil(data.length / limit)
+    const maxPage = maxPageFromProps.value
+    const data = dataFromProps.value
+    const limit = limitFromProps.value
+    if(maxPage && maxPage >= 0) return maxPage
+    if (!data || data < 0) return 0
+    return Math.ceil(data.length / limit)
 })
 
 const computedItemExtra = computed(() => {
@@ -66,6 +76,7 @@ const playAction = (item) => {
         <PaginationTiles :data="data" 
             :limit="limit" 
             :maxPage="computedMaxPage"
+            :useMaxPage="useMaxPage"
             :loadPage="loadPage"
             :paginationStyleType="paginationStyleType"
             :nextPagePendingMark="nextPagePendingMark" 

@@ -269,7 +269,7 @@ const updateCover = async () => {
                         </svg>
                         <span>从头开始播放</span>
                     </div>
-                    <div class="about-levc-btn spacing" @click.prevent="visitLink(levcUrl)">
+                    <div class="about-levc-btn btn spacing" @click.prevent="visitLink(levcUrl)">
                         <svg width="18" height="18" viewBox="0 0 971.81 971.81" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -516,6 +516,10 @@ const updateCover = async () => {
 #free-video-edit-view .form-row.history-row span.sec-title {
     display: -webkit-box;
     min-width: fit-content;
+}
+
+#free-video-edit-view .history-row .history-btn {
+    fill: var(--button-icon-btn-color);
 }
 
 #free-video-edit-view .form-row.history-row .link-wrap {

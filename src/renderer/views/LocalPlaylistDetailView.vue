@@ -12,7 +12,7 @@ import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { coverDefault, ipcRendererInvoke, isSupportedImage, toYyyymmddHhMmSs } from "../../common/Utils";
+import { coverDefault, ipcRendererInvoke, isSupportedImage, randomTextWithinAlphabetNums, toYyyymmddHhMmSs } from "../../common/Utils";
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -348,8 +348,15 @@ onActivated(() => {
                     :onKeywordChanged="filterContent">
                 </SearchBarExclusiveModeControl>
             </div>
-            <SongListControl :data="detail.data" :dataType="1" :artistVisitable="true" :albumVisitable="true" :id="id"
-                :loading="isLoading" :paginationStyleType="getPaginationStyleIndex" :limit="getLimitPerPageForLocalPlaylist"
+            <SongListControl 
+                :id="randomTextWithinAlphabetNums(16)"
+                :data="detail.data" 
+                :dataType="1" 
+                :artistVisitable="true" 
+                :albumVisitable="true"
+                :loading="isLoading" 
+                :paginationStyleType="getPaginationStyleIndex" 
+                :limit="getLimitPerPageForLocalPlaylist"
                 :onPageLoaded="resetScrollState">
             </SongListControl>
         </div>

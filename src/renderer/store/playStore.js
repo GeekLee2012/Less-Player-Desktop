@@ -7,10 +7,10 @@ import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
-const NO_TRACK = new Track('0', '', '听你想听，爱你所爱',
-    [{ id: '0', name: '不枉青春' }],
-    { id: '0', name: '日月星辰，山川湖海' },
-    0, '')
+const NONE_TRACK = new Track('', '', 
+    '听你想听，爱你所爱',
+    [{ id: '', name: '不枉青春' }],
+    { id: '', name: '山川湖海，日月星辰' })
 
 export const usePlayStore = defineStore('player', {
     state: () => ({
@@ -31,14 +31,11 @@ export const usePlayStore = defineStore('player', {
     }),
     getters: {
         currentTrack(state) {
-            if (this.playingIndex < 0) return NO_TRACK
+            if (this.playingIndex < 0) return NONE_TRACK
             return this.track(this.playingIndex)
         },
         track(state) {
             return (index) => (state.queueTracks[index])
-        },
-        noTrack() {
-            return NO_TRACK
         },
         mmssCurrentTime() {
             return toMmss(this.currentTime)
@@ -80,7 +77,7 @@ export const usePlayStore = defineStore('player', {
             //播放列表为空
             if (this.queueTracksSize < 1) return
             //当前歌曲不存在或存在但缺少url
-            if (!Track.hasUrl(track) || NO_TRACK == track) {
+            if (!Track.hasUrl(track) || NONE_TRACK == track) {
                 this.playNextTrack()
                 return
             }

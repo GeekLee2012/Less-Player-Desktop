@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'NavidromeSessionEditView'
+    name: 'EmbySessionEditView'
 }
 </script>
 
@@ -10,7 +10,7 @@ import { onMounted, ref, reactive, inject, computed } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useCloudStorageStore } from '../store/cloudStorageStore';
 import { isBlank, toTrimString } from '../../common/Utils';
-import { Navidrome } from '../../vendor/navidrome';
+import { Emby } from '../../vendor/emby';
 
 
 
@@ -21,13 +21,13 @@ const props = defineProps({
 const { backward } = inject('appRoute')
 
 const { showToast, showFailToast } = useAppCommonStore()
-const detail = reactive({ title: '', url: '', username: '', password: '' })
+const detail = reactive({ title: '', url: '', username: '', password: '', apiKey: '' })
 const isActionDisabled = ref(false)
 const setActionDisabled = (value) => isActionDisabled.value = value
 const isCreateMode = !props.id
 
 
-const { addNavidromeSession, updateNavidromeSession, getNavidromeSession,  } = useCloudStorageStore()
+const { addEmbySession, updateEmbySession, getEmbySession,  } = useCloudStorageStore()
 
 
 const loadSession = () => {
@@ -35,10 +35,10 @@ const loadSession = () => {
 
     const id = props.id.trim()
     if (id.length < 1) return
-    const session = getNavidromeSession(id)
+    const session = getEmbySession(id)
     if (!session) return
-    const { title, url, username } = session
-    Object.assign(detail, { id, title, url, username, password: '************' })
+    const { title, url, username, apiKey } = session
+    Object.assign(detail, { id, title, url, username, password: '****************' ,apiKey })
 }
 
 
@@ -47,20 +47,19 @@ const submit = () => {
         if(isBlank(value) && !'title|url'.includes(key)) return showFailToast('字段信息不完整')
     }
 
-    const { title, url, username, password } = detail
+    const { title, url, username, password, apiKey } = detail
     let success = false
     if (isCreateMode) {
-        const _title = isBlank(title) ? 'Navidrome' : title
-        const _url = isBlank(url) ? Navidrome.DEFAULT_SESSION.url : url
-        success = addNavidromeSession(_title, _url, username, password)
+        const _title = isBlank(title) ? 'Emby' : title
+        const _url = isBlank(url) ? Emby.DEFAULT_SESSION.url : url
+        success = addEmbySession(_title, _url, username, password, apiKey)
     } else {
-        success = updateNavidromeSession(props.id, title, url, username)
+        success = updateEmbySession(props.id, title, url)
     }
     if(!success) return showFailToast('会话保存失败')
 
     setActionDisabled(true)
     showToast('会话保存成功', backward)
-    //backward()
 }
 
 const maskedUserName = computed(() => {
@@ -73,17 +72,30 @@ const maskedUserName = computed(() => {
     return `${head}********${tail}`
 })
 
+const maskedApiKey = computed(() => {
+    const { apiKey } = detail
+    const _apiKey = toTrimString(apiKey)
+    const { length } = _apiKey
+    if(length < 1) return _apiKey
+    const head = _apiKey.substring(0, 1)
+    const tail = _apiKey.substring(length - 1, length)
+    return `${head}**************************${tail}`
+})
+
 /* 生命周期、监听 */
 onMounted(loadSession)
 </script>
 
 <template>
-    <div id="navidrome-session-edit-view">
+    <div id="emby-session-edit-view">
         <div class="header">
-            <span class="title" v-show="!id">新建Navidrome会话</span>
-            <span class="title" v-show="id">编辑Navidrome会话</span>
+            <span class="title" v-show="!id">新建Emby会话</span>
+            <span class="title" v-show="id">编辑Emby会话</span>
         </div>
-        <div class="tip-text">提示：带*号为必填项；“用户名”、“密码”等信息，一旦创建，不支持更改</div>
+        <div class="tip-text">
+            <p>提示：带*号为必填项；“用户名“、“密码”、“API Key”等信息，一旦创建，不支持更改</p>
+            <p>“API Key”目前可随意填写，暂时保留备用</p>
+        </div>
         <div class="center">
             <div class="form-row">
                 <div class="sec-title">会话名称：</div>
@@ -117,6 +129,16 @@ onMounted(loadSession)
                         :readonly="!isCreateMode" />
                 </div>
             </div>
+            <div class="form-row">
+                <div class="sec-title">API Key*：</div>
+                <div @keydown.stop="">
+                    <input type="text" v-model="detail.apiKey" maxlength="1024"
+                        placeholder="API密钥，最多支持输入1024个字符"
+                        v-show="isCreateMode" />
+                    <input type="text" v-show="!isCreateMode" 
+                        :value="maskedApiKey" readonly="true" />
+                </div>
+            </div>
             <div class="action">
                 <SvgTextButton :leftAction="submit" text="保存" :disabled="isActionDisabled">
                 </SvgTextButton>
@@ -128,7 +150,7 @@ onMounted(loadSession)
 </template>
 
 <style>
-#navidrome-session-edit-view {
+#emby-session-edit-view {
     display: flex;
     flex-direction: column;
     padding: 20px 33px 15px 33px;
@@ -136,14 +158,14 @@ onMounted(loadSession)
     overflow: scroll;
 }
 
-#navidrome-session-edit-view .header {
+#emby-session-edit-view .header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px;
 }
 
-#navidrome-session-edit-view .header .title {
+#emby-session-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
     /*font-size: 30px;*/
@@ -151,39 +173,39 @@ onMounted(loadSession)
     font-weight: bold;
 }
 
-#navidrome-session-edit-view .center {
+#emby-session-edit-view .center {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-top: 10px;
 }
 
-#navidrome-session-edit-view .tip-text {
+#emby-session-edit-view .tip-text {
     text-align: left;
     margin-bottom: 5px;
 }
 
-#navidrome-session-edit-view .center .form-row {
+#emby-session-edit-view .center .form-row {
     margin-bottom: 17px;
     display: flex;
     flex-direction: row;
 }
 
-#navidrome-session-edit-view .center .form-row > div {
+#emby-session-edit-view .center .form-row > div {
     display: flex;
     flex-direction: row;
     align-items: center;
     flex: 9;
 }
 
-#navidrome-session-edit-view .center .form-row > div.sec-title {
+#emby-session-edit-view .center .form-row > div.sec-title {
     flex: 1;
     min-width: 100px;
 }
 
 
-#navidrome-session-edit-view .center .form-row input,
-#navidrome-session-edit-view .center .form-row textarea {
+#emby-session-edit-view .center .form-row input,
+#emby-session-edit-view .center .form-row textarea {
     flex: 1;
     border: 1px solid var(--border-inputs-border-color);
     outline: none;
@@ -194,21 +216,21 @@ onMounted(loadSession)
     font-size: var(--content-text-size);
 }
 
-#navidrome-session-edit-view .center .form-row input {
+#emby-session-edit-view .center .form-row input {
     height: 28px;
 }
 
-#navidrome-session-edit-view .center .form-row textarea {
+#emby-session-edit-view .center .form-row textarea {
     height: 193px;
     padding: 8px;
 }
 
-#navidrome-session-edit-view .center .action {
+#emby-session-edit-view .center .action {
     display: flex;
     flex-direction: row;
 }
 
-#navidrome-session-edit-view .spacing {
+#emby-session-edit-view .spacing {
     margin-left: 20px;
 }
 </style>

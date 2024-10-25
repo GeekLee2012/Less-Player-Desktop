@@ -462,7 +462,29 @@ provide('appRoute', {
     },
     visitNavidromeSessionDetail: (id) => {
         return visitCommonRoute(`/cloudstorage/navidrome/${id}`)
-    }
+    },
+    visitJellyfinSessionCreate: () => {
+        return visitCommonRoute('/cloudstorage/jellyfin/create')
+    },
+    visitJellyfinSessionEdit: (id) => {
+        return visitCommonRoute(`/cloudstorage/jellyfin/edit/${id}`)
+    },
+    visitJellyfinSessionDetail: (id) => {
+        return visitCommonRoute(`/cloudstorage/jellyfin/${id}`)
+    },
+    visitGenreDetail: (platform, id, exploreMode) => {
+        exploreMode = transformExploreMode(exploreMode)
+        return visitCommonRoute(`/${exploreMode}/${platform}/genre/${id}`)
+    },
+    visitEmbySessionCreate: () => {
+        return visitCommonRoute('/cloudstorage/emby/create')
+    },
+    visitEmbySessionEdit: (id) => {
+        return visitCommonRoute(`/cloudstorage/emby/edit/${id}`)
+    },
+    visitEmbySessionDetail: (id) => {
+        return visitCommonRoute(`/cloudstorage/emby/${id}`)
+    },
 })
 </script>
 

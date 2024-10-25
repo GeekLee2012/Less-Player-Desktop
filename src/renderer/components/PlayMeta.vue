@@ -24,7 +24,7 @@ const props = defineProps({
 const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
 const { coverMaskShow } = storeToRefs(useAppCommonStore())
 const { showPlayingView, toggleCoverMask, setRouterCtxCacheItem, } = useAppCommonStore()
-const { isFreeFM } = usePlatformStore()
+const { isFreeFM, isWebDav, isNavidrome } = usePlatformStore()
 
 const volumeBarRef = ref(null)
 
@@ -39,7 +39,8 @@ const checkVisitTrack = () => {
     const track = currentTrack.value
     if(!track) return
     const { id, platform, title, cover, artist, album } = track
-    if (Playlist.isFMRadioType(track)) return
+    if(Playlist.isFMRadioType(track)) return
+    if(isWebDav(platform) || isNavidrome(platform)) return 
     visitTrack({
         id, platform, title, cover, artist,
         artist: JSON.stringify(artist),

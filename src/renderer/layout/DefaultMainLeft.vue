@@ -30,7 +30,9 @@ const { platforms, currentPlatformIndex,
     currentPlatformCode, activePlatforms } = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform, isLocalMusic, isFreeFM, } = usePlatformStore()
 const { isMaxScreen, isPlaylistMode, isArtistMode,
-    isRadioMode, isUserHomeMode, exploreModeCode, isCloudStorageMode, } = storeToRefs(useAppCommonStore())
+    isRadioMode, isUserHomeMode, exploreModeCode, 
+    isCloudStorageMode, isArtistModeEnable,
+    isRadioModeEnable, isCloudStorageModeEnable } = storeToRefs(useAppCommonStore())
 const { nextExploreMode, setPlaylistExploreMode, 
     setRadioExploreMode, setCloudStorageExploreMode, 
     showFailToast } = useAppCommonStore()
@@ -68,15 +70,16 @@ const updatePlatformIndex = (index, isSwitchMode) => {
     } else if (isPlaylistMode.value || isArtistMode.value || isRadioMode.value) {
         path = `/${exploreMode}/square/${platform}`
     }
-    if (path) {
-        visitRoute(path).catch(error => {
-            if (isDevEnv() && error) console.log(error)
-        })
-    }
+    if (!path) return
+    
+    visitRoute(path).catch(error => {
+        if (isDevEnv() && error) console.log(error)
+    })
 }
 
-const switchExploreMode = () => {
+const switchExploreMode = (noVisit) => {
     nextExploreMode()
+    if(typeof noVisit == 'boolean' && noVisit) return
     updatePlatformIndex(0, true)
 }
 
@@ -224,6 +227,18 @@ watch(() => activePlatforms.value(), setupSortedActivePlatforms)
 
 
 /* 生命周期、监听 */
+watch(isArtistModeEnable, (nv) => {
+    if(!nv && isArtistMode.value) switchExploreMode(true)
+})
+
+watch(isRadioModeEnable, (nv) => {
+    if(!nv && isRadioMode.value) switchExploreMode(true)
+})
+
+watch(isCloudStorageModeEnable, (nv) => {
+    if(!nv && isCloudStorageMode.value) switchExploreMode(true)
+})
+
 const eventsRegistration = {
     'navigation-refreshCustomPlaylistIndex': index => {
         activeCustomPlaylistIndex.value = index
@@ -454,6 +469,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left {
     width: var(--main-left-width);
     min-width: var(--main-left-width);
+    max-width: calc(var(--main-left-width) * 1.25);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -462,6 +478,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     /*box-shadow: 0px 0px 3px var(--border-left-nav-border-color);*/
     border-right: 1px solid var(--border-left-nav-border-color);
     background: var(--content-left-nav-bg-color);
+    --spacing-left: 25px;
+
+    flex: 1;
 }
 
 #main-left ::-webkit-scrollbar-thumb {
@@ -479,8 +498,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     font-size: var(--content-text-tip-text-size);
     text-align: left;
     color: var(--content-secondary-text-color);
-    padding-left: 22%;
-    padding-left: 19.5%;
+    /*padding-left: 22%;
+    padding-left: 19.5%;*/
+    padding-left: calc(var(--spacing-left) + 15px);
     margin-bottom: 10px;
     font-weight: 520;
 }
@@ -559,14 +579,16 @@ onUnmounted(() => offEvents(eventsRegistration))
     flex-direction: row;
     align-items: center;
     cursor: pointer;
-    padding: 0px 6px;
     font-size: var(--content-text-module-title2-size);
     font-weight: bold;
     color: var(--content-subtitle-text-color);
-    margin-right: 23%;
+    /*margin-right: 23%;*/
+    padding-left: var(--spacing-left);
+    width: calc(100% - var(--spacing-left));
     height: 100%;
     margin-top: 3px;
     margin-bottom: 3px;
+    overflow: hidden;
 }
 
 #explore-mode .mode-item:hover span {
@@ -654,17 +676,22 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left ul {
     list-style: none;
     text-align: left;
-    padding-left: 10%;
+    width: 100%;
     line-height: var(--content-left-nav-line-height);
 }
 
 #main-left li {
     text-decoration: none;
-    width: 60%;
-    width: 128px;
-    margin-bottom: var(--content-left-nav-line-spacing);
     padding-left: 20px;
     padding-right: 20px;
+    margin-left: calc(var(--spacing-left) - 3px);
+    margin-right: calc(var(--spacing-left) - 3px);
+    margin-bottom: var(--content-left-nav-line-spacing);
+
+    width: 60%;
+    width: 128px;
+    width: calc(100% - var(--spacing-left) * 2 - 36px + var(--others-scrollbar-width));
+
     cursor: pointer;
     border-radius: var(--border-list-item-vertical-border-radius);
     
@@ -691,11 +718,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     font-size: var(--content-text-subtitle-size);
 }
 
+/*
 #main-left .favorite-playlist-list li {
     padding-left: 15px;
     padding-right: 15px;
     width: 138px;
 }
+*/
 
 #main-left .active {
     background: var(--button-icon-text-btn-bg-color) !important;
@@ -717,8 +746,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    justify-content: center;
-    margin-right: 23px;
+    justify-content: flex-start;
+    /*margin-right: 23px;*/
     padding-bottom: 18px;
+    padding-left: calc(var(--spacing-left) + 18px);
+    overflow: hidden;
 }
 </style>

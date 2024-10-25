@@ -440,6 +440,11 @@ const scrollByNavItem = (event, item) => {
 
 
 /* 生命周期、监听 */
+watch(() => common.value.useWinZoomForCreate, (nv) => {
+    const action = nv ? '开启' : '关闭'
+    showToast(`${action}“锁定为初始值”<br>下次重启后生效`)
+})
+
 onMounted(() => {
     //onEvents(eventsRegistration)
     //checkForUpdates()
@@ -855,10 +860,15 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                         <div class="tip-text spacing">提示：实验性功能，内存占用高，较耗性能</div>
                     </div>
-                    <div v-show="false">
+                    <div>
                         <span class="cate-subtitle">播放页封面图片边框：</span>
                         <ToggleControl @click="togglePlayingViewCoverBorderShow"
                             :value="track.playingViewCoverBorderShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">歌曲启用在线封面：</span>
+                        <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
                         </ToggleControl>
                     </div>
                     <div>
@@ -903,11 +913,13 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="track localTrack row">
                 <span class="cate-name">本地歌曲</span>
                 <div class="content">
+                    <!-- 迁移至“播放页 - 播放样式”，且不仅限于本地歌曲
                     <div>
                         <span class="cate-subtitle">歌曲启用在线封面：</span>
                         <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
                         </ToggleControl>
                     </div>
+                    -->
                     <div>
                         <span class="cate-subtitle">显示音频格式标识：</span>
                         <ToggleControl @click="toggleAudioTypeFlagShow" :value="track.audioTypeFlagShow">

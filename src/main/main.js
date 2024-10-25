@@ -46,7 +46,9 @@ const appLayoutConfig = {
     appHeight: 588
   }
 }
-let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT, currentZoom = 85, useWinCenterStrict = false
+let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT
+let currentZoom = 85, useWinCenterStrict = false
+let markWidth = 0, markHeight = 0
 let appConfig = null
 let powerSaveBlockerId = -1
 let appTray = null, appTrayMenu = null, appTrayShow = false
@@ -422,6 +424,9 @@ const registryGlobalListeners = () => {
     if (mainWin.isFullScreen()) mainWin.setFullScreen(false)
     if (mainWin.isMaximized() || mainWin.isNormal()) mainWin.minimize()
   }).on('app-max', () => {
+    if(!isWindowAccessible(mainWin)) return
+    
+    markMainWindowSize()
     let isFullScreen = false
     if (isWinOS) {
       isFullScreen = toggleWinOSFullScreen()
@@ -430,6 +435,7 @@ const registryGlobalListeners = () => {
       mainWin.setFullScreen(isFullScreen)
     }
     sendToMainRenderer('app-max', isFullScreen)
+    setTimeout(fixElectronExitFullScreen, 365)
   }).on('app-normalize', () => {
     if (!isWindowAccessible(mainWin)) return
     if (isWinOS && mainWin.isMaximized()) {
@@ -1161,6 +1167,23 @@ const createMainWindow = (show) => {
     //console.log('[navigation]', details.sender.getZoomFactor(), currentZoom)
   })
 
+  //全屏事件
+  mainWindow.on('enter-full-screen', () => {
+    markMainWindowSize()
+  })
+  //全屏事件
+  mainWindow.on('enter-html-full-screen', () => {
+    markMainWindowSize()
+  })
+  //退出全屏
+  mainWindow.on('leave-full-screen', () => {
+    setTimeout(fixElectronExitFullScreen, 365)
+  })
+  //退出全屏
+  mainWindow.on('leave-html-full-screen', () => {
+    setTimeout(fixElectronExitFullScreen, 365)
+  })
+
   return mainWindow
 }
 
@@ -1384,7 +1407,7 @@ const setWindowButtonVisibility = (win, visible) => {
 }
 
 const toggleWinOSFullScreen = () => {
-  if (!isWindowAccessible(mainWin) || !isWinOS) return null
+  if (!isWindowAccessible(mainWin) || !isWinOS) return 
   const isMax = mainWin.isMaximized()
   if (isMax) {
     mainWin.unmaximize()
@@ -1407,6 +1430,34 @@ const setupMainWindowCenterScreen = (useCenterStrict) => {
   const x = parseInt((screenWidth - width) / 2)
   const y = parseInt((screenHeight - height) / 2)
   mainWin.setPosition(x, y)
+}
+
+const markMainWindowSize = () => {
+  if(!isWindowAccessible(mainWin)) return
+    //全屏前记录屏幕大小
+  const isWinOSMark = (isWinOS && !mainWin.isMaximized())
+  const isMacOSMark = (isMacOS && !mainWin.isFullScreen())
+  if(isWinOSMark || isMacOSMark) {
+    const size = mainWin.getSize()
+    markWidth = size[0]
+    markHeight = size[1]
+  }
+}
+
+const fixElectronExitFullScreen = () => {
+  if(!isWindowAccessible(mainWin)) return
+  const isWinOSMark = (isWinOS && !mainWin.isMaximized())
+  const isMacOSMark = (isMacOS && !mainWin.isFullScreen())
+  if(!isWinOSMark && !isMacOSMark) return 
+  
+  const { appWidth, appHeight } = appLayoutConfig[appLayout]
+  const zoomFactor = parseFloat(currentZoom / 100)
+  const width = parseInt(appWidth * zoomFactor)
+  const height = parseInt(appHeight * zoomFactor)
+  mainWin.setMinimumSize(width, height)
+  
+  mainWin.setSize(markWidth || width, markHeight || height)
+  //setupMainWindowCenterScreen()
 }
 
 //歌词首次居中显示，其他情况一般不需要居中

@@ -1,7 +1,7 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'WebDavView'
+    name: 'JellyfinView'
 }
 </script>
 
@@ -12,25 +12,26 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useCloudStorageStore } from '../store/cloudStorageStore';
+import { Jellyfin } from '../../vendor/jellyfin';
 
 
 
-const { visitWebDavSessionCreate, visitWebDavSessionEdit, visitWebDavSessionDetail } = inject('appRoute')
+const { visitJellyfinSessionCreate, visitJellyfinSessionEdit, visitJellyfinSessionDetail } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
 
 const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
 const { } = storeToRefs(useSettingStore())
-const { webdavSessions } = storeToRefs(useCloudStorageStore())
-const { removeWebDavSession, removeAllWebDavSession } = useCloudStorageStore()
+const { jellyfinSessions } = storeToRefs(useCloudStorageStore())
+const { removeJellyfinSession, removeAllJellyfinSession } = useCloudStorageStore()
 
 
 
-const webdavRef = ref(null)
+const jellyfinRef = ref(null)
 const back2TopBtnRef = ref(null)
 
 
 const resetBack2TopBtn = () => {
-    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(webdavRef.value)
+    if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(jellyfinRef.value)
 }
 
 const onScroll = () => {
@@ -46,38 +47,32 @@ const removeItem = async (item) => {
     const ok = await showConfirm('确定删除会话记录吗')
     if(!ok) return
 
-    removeWebDavSession(item)
+    removeJellyfinSession(item)
 }
 
 const removeAll = async () => {
-    if(webdavSessions.value.length < 1) return
+    if(jellyfinSessions.value.length < 1) return
     const ok = await showConfirm('确定清空全部会话记录吗')
     if(!ok) return
 
     showToast('会话记录已全部清空')
-    removeAllWebDavSession()
+    removeAllJellyfinSession()
 }
 
 const tutorialList = [{
-    title: 'WebDAV支持音、视频播放；但仅提供只读模式，暂不支持上传、修改、删除等操作'
+    title: '连接前准备：前往官方客户端“Dashboard - 用户 - 简介”，设置“允许此用户管理服务器”'
 }, {
-    title: '目录：单（双）击左键，即可进入'
+    title: 'API Key：前往官方客户端“Dashboard - API密钥”'
 }, {
-    title: '音视频文件：双击左键，即可播放'
+    title: '歌曲Tab - 播放全部：仅播放当前分页的所有歌曲'
 }, {
-    title: '全部操作：不支持递归遍历子目录，涉及搜索、播放目录等操作'
+    title: '歌曲Tab - 随缘听：从曲库中随机选择一首歌曲进行播放'
 }, {
-    title: '播放目录：播放当前目录下的全部音频文件'
+    title: '流派Tab：在Tab首页直接“播放流派”时，最多支持播放1024首'
+},{
+    title: '暂不支持：最近播放、收藏、关注等功能'
 }, {
-    title: '返回上级：返回到当前目录的上一级目录；当前为根目录(/)时，不再继续返回'
-}, {
-    title: '当前会话：点击带图标的Tab标题（即"当前目录"上方的标题），切换视图模式'
-}, {
-    title: '退出当前会话：点击“返回上级”右侧图标；或点击搜索框左边的后退(<)按钮'
-}, {
-    title: '拖拽下载：请确认设置页拖拽保存已开启；支持拖拽下载单个文件，不支持目录'
-}, {
-    title: '暂不支持：最近播放、关注、收藏等功能'
+    title: '播放记录：无法同步至Jellyfin'
 }]
 
 /* 生命周期、监听 */
@@ -87,15 +82,17 @@ onMounted(() => {
 </script>
 
 <template>
-    <div id="webdav-view" ref="webdavRef" @scroll="onScroll" >
+    <div id="jellyfin-view" ref="jellyfinRef" @scroll="onScroll" >
         <div class="header">
-            <div class="title">WebDAV</div>
+            <div class="title">
+                <span>Jellyfin</span>
+            </div>
             <div class="about">
-                <p>提示：实验性功能；仅提供只读模式，不计划支持复杂功能</p>
-                <p><b>郑重声明: 当前应用无法保证账号信息安全；当涉及隐私信息时，不建议使用此项WebDAV</b></p>
+                <p>提示：实验性功能；当前使用Jellyfin API版本为v{{ Jellyfin.VERSION }}</p>
+                <p>目前仅提供播放相关功能；若需进行数据管理，请使用Jellyfin官方客户端</p>
             </div>
             <div class="action" :class="{ 'none-about': false }">
-                <SvgTextButton text="新建会话" :leftAction="visitWebDavSessionCreate">
+                <SvgTextButton text="新建会话" :leftAction="visitJellyfinSessionCreate">
                     <template #left-img>
                         <svg width="13" height="13"
                             viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg">
@@ -131,31 +128,20 @@ onMounted(() => {
         </div>
         <div class="center">
             <div class="list-title">
-                <div class="size-text content-text-highlight">会话记录({{ webdavSessions.length }})</div>
+                <div class="size-text content-text-highlight">会话记录({{ jellyfinSessions.length }})</div>
             </div>
-            <div v-for="(item, index) in webdavSessions" 
-                v-show="webdavSessions.length > 0"
+            <div v-for="(item, index) in jellyfinSessions" 
+                v-show="jellyfinSessions.length > 0"
                 class="session-item"
-                @click="visitWebDavSessionDetail(item.id)">
+                @click="visitJellyfinSessionDetail(item.id)">
                 <div class="icon-wrap">
-                    <!--
-                    <svg width="26" height="26" viewBox="0 0 80 80"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Capa_1" data-name="Capa 1">
-                                <path
-                                    d="M29.3,63.47l-4.05,4a9.05,9.05,0,0,1-12.72,0,8.8,8.8,0,0,1,0-12.51l14.9-14.79c3.08-3.06,8.89-7.57,13.13-3.37a5,5,0,1,0,7-7c-7.19-7.14-17.83-5.82-27.1,3.37L5.54,47.94a18.72,18.72,0,0,0,0,26.59,19,19,0,0,0,26.7,0l4-4a5,5,0,1,0-7-7ZM74.45,6C66.72-1.63,55.92-2,48.76,5.06l-5,5a5,5,0,0,0,7,7l5-5c3.71-3.69,8.57-2.16,11.73,1a8.79,8.79,0,0,1,0,12.52L51.58,41.37c-7.27,7.21-10.68,3.83-12.14,2.38a5,5,0,0,0-7,7,15.61,15.61,0,0,0,11.14,5c4.89,0,10-2.46,15-7.34l15.9-15.77A18.71,18.71,0,0,0,74.45,6Z" />
-                            </g>
-                        </g>
-                    </svg>
-                    -->
-                    <svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 816 817.24"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M0,571.06c1.22-8,2.26-16,3.7-23.95,8.14-45,29.46-83.24,61.19-115.64,37.54-38.33,75.89-75.87,113.5-114.14,20.54-20.9,52.45-10.11,59,12.09,4.11,13.95,1.74,26.34-8.71,36.8C201.92,393,175,419.59,148.47,446.53c-15.54,15.77-31.87,31-45.58,48.28-46.32,58.32-43.11,141.92,5.51,198.44,46.49,54,125.87,66.76,181.76,40.93a167.37,167.37,0,0,0,48.1-33.55q55.82-55.53,111.5-111.2c10-10,21.82-14,35.56-10.42,23.89,6.22,33.59,35.41,18.45,54.9a49.59,49.59,0,0,1-4.32,4.84q-50.35,50.4-100.74,100.76c-19,19-38.48,37.36-62.49,50.15-84.75,45.12-190.42,35.65-264.72-34C28.73,715.49,5.55,665.68.87,607.24A16.41,16.41,0,0,0,0,604.07Z"/><path d="M816,247c-1.17,7.85-2.14,15.73-3.55,23.54-8.11,45-29.32,83.32-61,115.74-37.53,38.35-75.65,76.12-113.6,114.05-13.88,13.86-33.4,15.6-47.59,4.57-16.86-13.11-18.2-37.72-2.76-53.17q52.14-52.15,104.4-104.18c20.4-20.34,37.17-43,46.35-70.74,28.57-86.4-22.65-179.25-111-200.84-57.81-14.13-107.74.42-149.88,41.9-37.53,36.94-74.6,74.34-111.92,111.5-10.24,10.19-22.65,13.45-36.3,9.28s-21.31-14.33-23.74-28.26c-2-11.53,1.69-21.56,9.79-29.66,39.72-39.7,79.22-79.64,119.54-118.72,38.19-37,84.6-56.33,137.54-60.23C577.54,1.42,582.76.61,588,0h8a16.58,16.58,0,0,0,3.25.8C634.09,2.39,667,11.25,697.36,28.3c62.94,35.37,101.57,88.56,114.79,159.79,1.59,8.58,2.58,17.28,3.85,25.93Z"/><path d="M578.5,268c.08,15.27-4.24,23.93-11.64,31.33Q507,359.29,447.15,419.29q-73.8,73.93-147.64,147.85c-12.65,12.66-27.6,15.91-41.82,9.26a34.92,34.92,0,0,1-11.29-55.11c1.67-1.86,3.42-3.65,5.18-5.42q132.66-132.8,265.33-265.58c15.22-15.24,35.06-16.55,50.1-3.23C574.62,253.8,578.44,262.44,578.5,268Z"/></g></g></svg>
+                    <svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 72 72"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path class="cls-1" d="M24.21,49.16C22.66,46,32.84,27.59,36,27.59S49.32,46.08,47.79,49.16s-22,3.11-23.58,0Z"/><path class="cls-2" d="M.48,65C-4.19,55.6,26.48,0,36,0S76.15,55.71,71.53,65,5.16,74.39.48,65m12.26-8.15c3.06,6.15,43.52,6.08,46.55,0S42.25,14.26,36,14.26,9.67,50.69,12.74,56.85Z"/></g></g></svg>
                 </div>
                 <div class="title-wrap">
                     <span v-html="item.title"></span>
                 </div>
                 <div class="action" @click.stop="">
-                    <div class="btn edit-btn" @click="visitWebDavSessionEdit(item.id)">
+                    <div class="btn edit-btn" @click="visitJellyfinSessionEdit(item.id)">
                         <svg width="18" height="18" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -187,19 +173,10 @@ onMounted(() => {
                 </div>
             </div>
             <div v-for="(item, index) in tutorialList" 
-                v-show="webdavSessions.length < 1"
+                v-show="jellyfinSessions.length < 1"
                 class="session-item">
-                <div class="icon-wrap"> 
-                    <img src="" v-show="false"/>
-                    <svg width="26" height="26" viewBox="0 0 80 80"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Capa_1" data-name="Capa 1">
-                                <path
-                                    d="M29.3,63.47l-4.05,4a9.05,9.05,0,0,1-12.72,0,8.8,8.8,0,0,1,0-12.51l14.9-14.79c3.08-3.06,8.89-7.57,13.13-3.37a5,5,0,1,0,7-7c-7.19-7.14-17.83-5.82-27.1,3.37L5.54,47.94a18.72,18.72,0,0,0,0,26.59,19,19,0,0,0,26.7,0l4-4a5,5,0,1,0-7-7ZM74.45,6C66.72-1.63,55.92-2,48.76,5.06l-5,5a5,5,0,0,0,7,7l5-5c3.71-3.69,8.57-2.16,11.73,1a8.79,8.79,0,0,1,0,12.52L51.58,41.37c-7.27,7.21-10.68,3.83-12.14,2.38a5,5,0,0,0-7,7,15.61,15.61,0,0,0,11.14,5c4.89,0,10-2.46,15-7.34l15.9-15.77A18.71,18.71,0,0,0,74.45,6Z" />
-                            </g>
-                        </g>
-                    </svg>
+                <div class="icon-wrap">
+                    <svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 72 72"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path class="cls-1" d="M24.21,49.16C22.66,46,32.84,27.59,36,27.59S49.32,46.08,47.79,49.16s-22,3.11-23.58,0Z"/><path class="cls-2" d="M.48,65C-4.19,55.6,26.48,0,36,0S76.15,55.71,71.53,65,5.16,74.39.48,65m12.26-8.15c3.06,6.15,43.52,6.08,46.55,0S42.25,14.26,36,14.26,9.67,50.69,12.74,56.85Z"/></g></g></svg>
                 </div>
                 <div class="title-wrap">
                     <span v-html="item.title"></span>
@@ -211,7 +188,7 @@ onMounted(() => {
 </template>
 
 <style>
-#webdav-view {
+#jellyfin-view {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -220,24 +197,24 @@ onMounted(() => {
     overflow-x: hidden;
 }
 
-#webdav-view .spacing {
+#jellyfin-view .spacing {
     margin-left: 20px;
 }
 
-#webdav-view .header {
+#jellyfin-view .header {
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
 }
 
-#webdav-view .header .title {
+#jellyfin-view .header .title {
     text-align: left;
     margin-bottom: 5px;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 }
 
-#webdav-view .header .about {
+#jellyfin-view .header .about {
     text-align: left;
     margin-left: 5px;
     margin-bottom: 12px;
@@ -245,15 +222,15 @@ onMounted(() => {
     color: var(--content-subtitle-text-color);
 }
 
-#webdav-view .header .action {
+#jellyfin-view .header .action {
     display: flex;
 }
 
-#webdav-view .header .action.none-about {
+#jellyfin-view .header .action.none-about {
     margin-top: 6px;
 }
 
-#webdav-view .center .list-title {
+#jellyfin-view .center .list-title {
     margin-bottom: 10px;
     text-align: left;
     font-weight: bold;
@@ -261,14 +238,14 @@ onMounted(() => {
     position: relative;
 }
 
-#webdav-view .center .list-title .size-text {
+#jellyfin-view .center .list-title .size-text {
     margin-left: 3px;
     padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
     font-size: var(--content-text-tab-title-size);
 }
 
-#webdav-view .center .session-item {
+#jellyfin-view .center .session-item {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -282,31 +259,31 @@ onMounted(() => {
     --item-height: 68px;
 }
 
-#webdav-view .center .session-item:hover {
+#jellyfin-view .center .session-item:hover {
     background: var(--content-list-item-hover-bg-color);
     cursor: pointer;
 }
 
-#webdav-view .center .session-item > div {
+#jellyfin-view .center .session-item > div {
     height: var(--item-height);
     vertical-align: middle;
     /*font-size: var(--content-text-size);*/
 }
 
-#webdav-view .center .session-item .icon-wrap {
+#jellyfin-view .center .session-item .icon-wrap {
     width: 68px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-#webdav-view .center .session-item .icon-wrap svg {
+#jellyfin-view .center .session-item .icon-wrap svg {
     fill: var(--button-icon-btn-color) !important;
     fill: var(--content-subtitle-text-color) !important;
     border-radius: var(--border-img-small-border-radius);
 }
 
-#webdav-view .center .session-item .title-wrap {
+#jellyfin-view .center .session-item .title-wrap {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -319,13 +296,13 @@ onMounted(() => {
     line-break: anywhere;
 }
 
-#webdav-view .center .session-item .title-wrap span {
+#jellyfin-view .center .session-item .title-wrap span {
     word-wrap: break-word;
     line-break: anywhere;
     line-height: var(--item-height);
 }
 
-#webdav-view .center .session-item .action {
+#jellyfin-view .center .session-item .action {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -334,7 +311,7 @@ onMounted(() => {
     visibility: hidden;
 }
 
-#webdav-view .center .session-item:hover .action {
+#jellyfin-view .center .session-item:hover .action {
     visibility: visible;
 }
 </style>
