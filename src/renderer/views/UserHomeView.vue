@@ -16,7 +16,7 @@ import PlaylistsControl from '../components/PlaylistsControl.vue';
 import CustomPlaylistListControl from '../components/CustomPlaylistListControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
-import { coverDefault, isSupportedImage } from '../../common/Utils';
+import { coverDefault, isSupportedImage, randomTextWithinAlphabetNums } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -95,6 +95,9 @@ const dataType = ref(2)
 const userProfileRef = ref(null)
 const back2TopBtnRef = ref(null)
 const singleLineTitleStyle = ref(false)
+const refreshId = ref(0)
+const setRefreshId = (value) => (refreshId.value = value)
+
 
 const visitTab = (index) => {
     if (loading.value) return
@@ -264,7 +267,8 @@ const onScroll = () => {
 }
 
 const dataListId = computed(() => {
-    return activeTab.value + '-' + (activeSubTab.value || 0)
+    return activeTab.value + '-' + (activeSubTab.value || 0) 
+        + '-' + refreshId.value
 })
 
 
@@ -315,7 +319,10 @@ watch(currentPlatformCode, (nv, ov) => {
 })
 
 const eventsRegistration = {
-    'userHome-refresh': refresh,
+    'userHome-refresh': () => {
+        setRefreshId(randomTextWithinAlphabetNums(8))
+        refresh()
+    },
     'userHome-visitRecentsTab': visitRecentsTab,
 }
 /* 生命周期、监听 */

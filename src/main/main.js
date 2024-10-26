@@ -1171,19 +1171,20 @@ const createMainWindow = (show) => {
   mainWindow.on('enter-full-screen', () => {
     markMainWindowSize()
   })
-  //全屏事件
-  mainWindow.on('enter-html-full-screen', () => {
-    markMainWindowSize()
-  })
+  
   //退出全屏
   mainWindow.on('leave-full-screen', () => {
     setTimeout(fixElectronExitFullScreen, 365)
   })
-  //退出全屏
+  
+  /*
+  mainWindow.on('enter-html-full-screen', () => {
+    markMainWindowSize()
+  })
   mainWindow.on('leave-html-full-screen', () => {
     setTimeout(fixElectronExitFullScreen, 365)
   })
-
+  */
   return mainWindow
 }
 
@@ -1435,7 +1436,7 @@ const setupMainWindowCenterScreen = (useCenterStrict) => {
 const markMainWindowSize = () => {
   if(!isWindowAccessible(mainWin)) return
     //全屏前记录屏幕大小
-  const isWinOSMark = (isWinOS && !mainWin.isMaximized())
+  const isWinOSMark = (isWinOS && !mainWin.isMaximized() && !mainWin.isFullScreen())
   const isMacOSMark = (isMacOS && !mainWin.isFullScreen())
   if(isWinOSMark || isMacOSMark) {
     const size = mainWin.getSize()
@@ -1446,7 +1447,7 @@ const markMainWindowSize = () => {
 
 const fixElectronExitFullScreen = () => {
   if(!isWindowAccessible(mainWin)) return
-  const isWinOSMark = (isWinOS && !mainWin.isMaximized())
+  const isWinOSMark = (isWinOS && !mainWin.isMaximized() && !mainWin.isFullScreen())
   const isMacOSMark = (isMacOS && !mainWin.isFullScreen())
   if(!isWinOSMark && !isMacOSMark) return 
   

@@ -107,6 +107,17 @@
   /*transform: translateY(-3px);*/
 }
 
+.use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .ctl-btn svg,
+.use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .min-btn svg,
+.use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .max-btn svg {
+  fill: #373737 !important;
+  stroke: #373737 !important;
+}
+
+.use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .ctl-btn:hover {
+  background: #00000018;
+}
+
 .use-winos-win-ctl .video-playing-view .win-ctl-wrap {
   position: absolute;
   right: 13px;

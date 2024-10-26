@@ -486,7 +486,7 @@ const checkMaxScreenState = async () => {
 
 /* 应用更新升级 */
 const { GITHUB, GITEE } = useGitRepository()
-const changelogUrl = `${GITEE}/blob/master/CHANGELOG.md`
+const changelogUrl = `${GITHUB}/blob/master/CHANGELOG.md`
 const rawChangelogUrl = `${GITEE}/raw/master/CHANGELOG.md`
 //const lastReleaseUrlRoot = `${GITEE}/releases/tag/`
 const githubReleasesUrl = `${GITHUB}/releases/`
@@ -547,6 +547,7 @@ const getLastReleaseVersion = () => {
             }, error => Promise.reject(error))
             .catch(error => reject(error))
             */
+            //国内平台一堆幺蛾子，开始不登录不给浏览仓库文件
             getRawWithTimeout(rawChangelogUrl, timeout1).then(rawText => {
                 const lines = readLines(rawText)
                 let versionText = ''
@@ -561,7 +562,7 @@ const getLastReleaseVersion = () => {
                 const hasVersionText = !isBlank(versionText)
                 const changeLogLastVersion = hasVersionText ? toTrimString(versionText) : _version
                 //网络正常时，访问速度相对较快
-                //延迟返回，让动画先玩一会；魔力转圈圈，也可以有助于控制对当前网站的访问频率
+                //延迟返回，让动画先玩一会；魔力转圈圈，也有助于控制对当前网站的访问频率
                 setTimeout(() => {
                   resolve({
                       giteeVersion: changeLogLastVersion,

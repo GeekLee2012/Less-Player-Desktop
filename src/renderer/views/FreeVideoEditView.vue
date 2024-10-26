@@ -42,8 +42,8 @@ const urlInvalid = ref(false)
 const isActionDisabled = ref(false)
 const isCoverShow = ref(false)
 const { GITHUB, GITEE } = useGitRepository()
-const levcUrl = `${GITEE}/blob/master/LeVC.md`
-//const levcUrl = `${GITHUB}/blob/main/LeVC.md`
+//const levcUrl = `${GITEE}/blob/master/LeVC.md`
+const levcUrl = `${GITHUB}/blob/main/LeVC.md`
 
 const resetCheckStatus = () => {
     titleInvalid.value = false
@@ -80,16 +80,6 @@ const parsePlay = async (lines) => {
             if(id && vid) break
         }
     }
-
-    if(_video.url.endsWith('.mp3')) {
-        Object.assign(_video, {
-            url: {
-                src: _video.url,
-                type: 'audio/mpeg'
-            }
-        })
-    }
-
     playPlaylist(_video)
 }
 

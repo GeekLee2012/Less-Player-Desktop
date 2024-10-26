@@ -32,6 +32,7 @@ const { version, lastVersion, giteeLastVersion,
   giteeReleasesUrl, githubReleasesUrl, changelogUrl,
 } = inject('appVersion')
 
+const { GITHUB, GITEE } = useGitRepository()
 
 const { theme, layout, common, track, desktopLyric,
     keys, keysDefault, tray, navigation, dialog, cache,
