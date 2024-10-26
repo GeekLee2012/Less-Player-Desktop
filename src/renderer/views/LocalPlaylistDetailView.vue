@@ -46,6 +46,8 @@ const isLoading = ref(false)
 const setLoading = (value) => isLoading.value = value
 const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
+const dataListId = ref(null)
+const setDataListId = (value) => (dataListId.value = value)
 
 const resetView = () => {
     Object.assign(detail, { cover: '', title: '', tags: '', about: '', data: [] })
@@ -279,7 +281,9 @@ watch(() => props.id, () => {
     resetView()
     resetScrollState()
     resetBack2TopBtn()
+
     loadContent()
+    setDataListId(randomTextWithinAlphabetNums(16))
 })
 
 watch(currentPlatformCode, loadContent)
@@ -349,7 +353,7 @@ onActivated(() => {
                 </SearchBarExclusiveModeControl>
             </div>
             <SongListControl 
-                :id="randomTextWithinAlphabetNums(16)"
+                :id="dataListId"
                 :data="detail.data" 
                 :dataType="1" 
                 :artistVisitable="true" 

@@ -97,15 +97,25 @@ export class Emby {
         })
     }
 
-    static getCover(Id, ServerId, Tag) {
-        if(!Id || !Tag) return ''
+    static getCover(item) {
+        const { Id, ServerId, ImageTags, PrimaryImageItemId, PrimaryImageTag } = item || { }
+        let _id = '', _tag = ''
+        if(Id && ImageTags && ImageTags.Primary) {
+            _id = Id
+            _tag = ImageTags.Primary
+        } else if(PrimaryImageItemId && PrimaryImageTag) {
+            _id = PrimaryImageItemId
+            _tag = PrimaryImageTag
+        }
+        if(!_id || !_tag) return ''
+
         return qsStringifyUrl(
-            Emby.getRestUrl(`Items/${Id}/Images/Primary`, true), 
+            Emby.getRestUrl(`Items/${_id}/Images/Primary`, true), 
             { 
                 maxHeight: 400, //412 
                 maxWidth: 400,
                 quality: 90,  //90
-                tag: Tag
+                tag: _tag
             }
         )
     }
@@ -154,6 +164,16 @@ export class Emby {
         return title.split('/').slice(1).join('')
     }
 
+    static toPlaylistType(item) {
+        const { Type } = item || {}
+        if(stringEqualsIgnoreCase(Type, 'MusicAlbum')) {
+            return Playlist.ALBUM_TYPE
+        } else if(stringEqualsIgnoreCase(Type, 'AUDIO')) {
+            return Playlist.SONG_TYPE
+        }
+        return Playlist.NORMAL_TYPE
+    }
+
     static albumCategories() {
         return new Promise((resolve, reject) => {
             const result = new Category('专辑分类')
@@ -200,6 +220,200 @@ export class Emby {
         return result
     }
 
+    //广场列表 - 推荐
+    static suggestionSquare(cate, offset, limit, page, order) {
+        const _cate = toTrimString(cate) || 'latest'
+        //最近播放
+        if(stringEqualsIgnoreCase(_cate, 'recent')) {
+            return Emby.suggestionsRecentlyPlayed(cate, offset, limit, page, order)
+        }
+        //最多播放
+        if(stringEqualsIgnoreCase(_cate, 'frequent')) {
+            return Emby.suggestionsFrequentlyPlayed(cate, offset, limit, page, order)
+        }
+        return new Promise((resolve, reject) => {
+            const result = { cate, platform: Emby.CODE, data:[], offset, limit, page, order }
+            
+            Emby.musicUserView().then(userView => {
+                const { Id } = userView
+                const reqBody = { 
+                    parentId: Id,
+                    limit,
+                    SortBy: 'SortName',
+                    SortOrder: 'Ascending'
+                }
+                const categories = new Category('推荐分类')
+                const suggestionsIndex = [{
+                    key: '最新音乐',
+                    value: 'latest'
+                }, {
+                    key: '最近播放',
+                    value: 'recent'
+                }, {
+                    key: '最多播放',
+                    value: 'frequent'
+                }]
+                suggestionsIndex.forEach((item, index) => {
+                    const { key, value } = item
+                    categories.add(key, value)
+                })
+                Object.assign(result, { categories })
+
+                Emby.getRestJson('Items/Latest', reqBody).then(json => {
+                    const Items = json
+                    if(Items && Items.length > 0) {
+                        Items.forEach(item => {
+                            const { Id, Name, ServerId, AlbumArtist, ArtistItems, RunTimeTicks } = item
+                            const type = Emby.toPlaylistType(item)
+                            //限定类型为：专辑、歌曲
+                            if(type != Playlist.ALBUM_TYPE && type != Playlist.SONG_TYPE) return 
+
+                            const duration = Math.floor(RunTimeTicks / 10000)
+                            result.data.push({
+                                id: Id, 
+                                platform: Emby.CODE,
+                                title: Name, 
+                                subtitle: AlbumArtist,
+                                cover: Emby.getCover(item),
+                                artist: ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name })),
+                                duration,
+                                ServerId,
+                                type,
+                            })
+                        })
+                    }
+                    setTimeout(() => resolve(result), 202)
+                })
+            })
+        })
+    }
+
+    //广场列表 - 推荐 - 最近播放
+    static suggestionsRecentlyPlayed(cate, offset, limit, page, order) {
+        const _cate = toTrimString(cate) || 'recent'
+        return new Promise((resolve, reject) => {
+            const result = { cate, platform: Emby.CODE, data:[], offset, limit, page, order }
+        
+            Emby.musicUserView().then(userView => {
+                const { Id } = userView
+                const reqBody = { 
+                    parentId: Id,
+                    limit,
+                    IncludeItemTypes: ['Audio'],
+                    Recursive: true,
+                    Fields: ['MediaSources', 'MediaStreams'],
+                    Filters: ['IsPlayed'],
+                    SortBy: 'DatePlayed',
+                    SortOrder: 'Descending',
+                }
+                const categories = new Category('推荐分类')
+                const suggestionsIndex = [{
+                    key: '最新音乐',
+                    value: 'latest'
+                }, {
+                    key: '最近播放',
+                    value: 'recent'
+                }, {
+                    key: '最多播放',
+                    value: 'frequent'
+                }]
+                suggestionsIndex.forEach((item, index) => {
+                    const { key, value } = item
+                    categories.add(key, value)
+                })
+                Object.assign(result, { categories })
+
+                Emby.getRestJson('Items', reqBody).then(json => {
+                    const { Items } = json
+                    if(Items && Items.length > 0) {
+                        Items.forEach(item => {
+                            const { Id, Name, ServerId, ArtistItems, AlbumId, Album, RunTimeTicks, Container, MediaSources } = item
+                            const { Id: mediaSourceId, Size, Bitrate, ETag  } = MediaSources[0] || { }
+                            const cover = Emby.getCover(item)
+                            const artist = ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name }))
+                            const album = { id: AlbumId, name: Album }
+                            //const album = { id: '', name: '' }
+                            const duration = Math.floor(RunTimeTicks / 10000)
+                            const track = new Track(Id, Emby.CODE, Name, artist, album, duration, cover)
+                            Object.assign(track, {
+                                url: Emby.getStreamUrl(Id, Container, mediaSourceId, ETag),
+                                type: Playlist.NORMAL_TYPE,
+                                Container,
+                                mediaSourceId,
+                                Tag: ETag,
+                            })
+                            result.data.push(track)
+                        })
+                    }
+                    setTimeout(() => resolve(result), 202)
+                })
+            })
+        })
+    }
+
+    //广场列表 - 推荐 - 最多播放
+    static suggestionsFrequentlyPlayed(cate, offset, limit, page, order) {
+        const _cate = toTrimString(cate) || 'frequent'
+        return new Promise((resolve, reject) => {
+            const result = { cate, platform: Emby.CODE, data:[], offset, limit, page, order }
+        
+            Emby.musicUserView().then(userView => {
+                const { Id } = userView
+                const reqBody = { 
+                    parentId: Id,
+                    limit,
+                    IncludeItemTypes: ['Audio'],
+                    Recursive: true,
+                    Fields: ['MediaSources', 'MediaStreams'],
+                    Filters: ['IsPlayed'],
+                    SortBy: 'PlayCount',
+                    SortOrder: 'Descending',
+                }
+                const categories = new Category('推荐分类')
+                const suggestionsIndex = [{
+                    key: '最新音乐',
+                    value: 'latest'
+                }, {
+                    key: '最近播放',
+                    value: 'recent'
+                }, {
+                    key: '最多播放',
+                    value: 'frequent'
+                }]
+                suggestionsIndex.forEach((item, index) => {
+                    const { key, value } = item
+                    categories.add(key, value)
+                })
+                Object.assign(result, { categories })
+
+                Emby.getRestJson('Items', reqBody).then(json => {
+                    const { Items } = json
+                    if(Items && Items.length > 0) {
+                        Items.forEach(item => {
+                            const { Id, Name, ServerId, ArtistItems, AlbumId, Album, RunTimeTicks, Container, MediaSources } = item
+                            const { Id: mediaSourceId, Size, Bitrate, ETag  } = MediaSources[0] || { }
+                            const cover = Emby.getCover(item)
+                            const artist = ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name }))
+                            const album = { id: AlbumId, name: Album }
+                            //const album = { id: '', name: '' }
+                            const duration = Math.floor(RunTimeTicks / 10000)
+                            const track = new Track(Id, Emby.CODE, Name, artist, album, duration, cover)
+                            Object.assign(track, {
+                                url: Emby.getStreamUrl(Id, Container, mediaSourceId, ETag),
+                                type: Playlist.NORMAL_TYPE,
+                                Container,
+                                mediaSourceId,
+                                Tag: ETag,
+                            })
+                            result.data.push(track)
+                        })
+                    }
+                    setTimeout(() => resolve(result), 202)
+                })
+            })
+        })
+    }
+
     //广场列表 - 专辑
     static albumSquare(cate, offset, limit, page, order) {
         return new Promise((resolve, reject) => {
@@ -224,23 +438,21 @@ export class Emby {
                 Object.assign(result,  { total: Math.ceil(TotalRecordCount / limit) })
                 if(Items && Items.length > 0) {
                     Items.forEach(item => {
-                        const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, 
-                            PrimaryImageItemId, PrimaryImageTag } = item
-                        
+                        const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, } = item
+
                         result.data.push({
                             id: Id, 
                             platform: Emby.CODE,
                             title: Name, 
                             subtitle: AlbumArtist,
-                            cover: Emby.getCover(PrimaryImageItemId, ServerId, PrimaryImageTag),
+                            cover: Emby.getCover(item),
                             artist: ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name })),
                             publishTime: toTrimString(ProductionYear),
                             ServerId,
                         })
                     })
                 }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -262,20 +474,19 @@ export class Emby {
                     Object.assign(result,  { total: Math.ceil(TotalRecordCount / limit) })
                     if(Items && Items.length > 0) {
                         Items.forEach(item => {
-                            const { Id, Name, ServerId, ImageTags } = item
-                            const { Primary } = ImageTags
+                            const { Id, Name, ServerId, } = item
+                            
                             result.data.push({
                                 id: Id, 
                                 platform: Emby.CODE,
                                 title: Name, 
-                                cover: Emby.getCover(Id, ServerId, Primary),
+                                cover: Emby.getCover(item),
                                 type: Playlist.NORMAL_TYPE,
                                 ServerId,
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay)
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -309,19 +520,17 @@ export class Emby {
                     const { Items } = json
                     if(Items && Items.length > 0) {
                         Items.forEach(item => {
-                            const { Id, Name, ServerId, ImageTags } = item
-                            const { Primary } = ImageTags
+                            const { Id, Name, ServerId, } = item
                             result.data.push({
                                 id: Id, 
                                 platform: Emby.CODE,
                                 title: Name, 
-                                cover: Emby.getCover(Id, ServerId, Primary),
+                                cover: Emby.getCover(item),
                                 ServerId,
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay) 
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -344,10 +553,9 @@ export class Emby {
                 Object.assign(result,  { total: Math.ceil(TotalRecordCount / limit) })
                 if(Items && Items.length > 0) {
                     Items.forEach(item => {
-                        const { Id, Name, ServerId, ArtistItems, AlbumId, Album, RunTimeTicks, ImageTags, Container, MediaSources } = item
-                        const { Primary } = ImageTags
+                        const { Id, Name, ServerId, ArtistItems, AlbumId, Album, RunTimeTicks, Container, MediaSources } = item
                         const { Id: mediaSourceId, Size, Bitrate, ETag  } = MediaSources[0] || { }
-                        const cover = Emby.getCover(Id, ServerId, Primary)
+                        const cover = Emby.getCover(item)
                         const artist = ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name }))
                         const album = { id: AlbumId, name: Album }
                         //const album = { id: '', name: '' }
@@ -363,8 +571,7 @@ export class Emby {
                         result.data.push(track)
                     })
                 }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -373,35 +580,7 @@ export class Emby {
     static radioSquare(cate, offset, limit, page, order) {
         return new Promise((resolve, reject) => {
             const result = { cate, platform: Emby.CODE, data:[], offset, limit, page, order }
-    
-            Emby.getRestJson('getInternetRadioStations').then(json => {
-                const { internetRadioStation } = json.internetRadioStations
-                if(internetRadioStation && internetRadioStation.length > 0) {
-                    internetRadioStation.forEach(item => {
-                        const { id, name: title, streamUrl, coverArt } = item
-                        const streamType = isLiveStream(streamUrl) ? 0 : 1
-                        result.data.push({
-                            id, 
-                            platform: Emby.CODE,
-                            title, 
-                            cover: Emby.getCover(coverArt || 'al-1e6519da32a1eed2d492c5fac4dbf2c1_654f63a6'),
-                            type: Playlist.FM_RADIO_TYPE,
-                            data: [{
-                                id,
-                                title,
-                                cover: Emby.getCover(coverArt || 'al-1e6519da32a1eed2d492c5fac4dbf2c1_654f63a6'),
-                                artist: [{ id: '', name: 'Emby' }],
-                                album: { id: '', name: '' },
-                                url: streamUrl,
-                                type: Playlist.FM_RADIO_TYPE,
-                                streamType,
-                            }]
-                        })
-                    })
-                }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
-            })
+            setTimeout(() => resolve(result), 202)
         })
     }
 
@@ -425,20 +604,17 @@ export class Emby {
                     Object.assign(result,  { total: Math.ceil(TotalRecordCount / limit) })
                     if(Items && Items.length > 0) {
                         Items.forEach(item => {
-                            const { Id, Name, ServerId, ImageTags, } = item
-                            const { Primary } = ImageTags
-                            const cover = Emby.getCover(Id, ServerId, Primary)
+                            const { Id, Name, ServerId, } = item
                             result.data.push({
                                 id: Id,
                                 platform: Emby.CODE,
                                 title: Name,
-                                cover,
+                                cover: Emby.getCover(item),
                                 type: Playlist.GENRE_TYPE,
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay)
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -462,20 +638,18 @@ export class Emby {
                     Object.assign(result,  { total: Math.ceil(TotalRecordCount / limit) })
                     if(Items && Items.length > 0) {
                         Items.forEach(item => {
-                            const { Id, Name, ServerId, ImageTags } = item
-                            const { Primary } = ImageTags
+                            const { Id, Name, ServerId, } = item
                             result.data.push({
                                 id: Id, 
                                 platform: Emby.CODE,
                                 title: Name, 
-                                cover: Emby.getCover(Id, ServerId, Primary),
+                                cover: Emby.getCover(item),
                                 type: Playlist.FOLDER_TYPE,
                                 ServerId,
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay)
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -484,9 +658,9 @@ export class Emby {
     static playlistDetail(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
             Emby.getRestJson(`Items/${id}`).then(async json => {
-                const { Id, Name, ServerId, ImageTags } = json
-                const { Primary } = ImageTags
-                const cover = Emby.getCover(Id, ServerId, Primary)
+                const { Id, Name, ServerId, } = json
+                
+                const cover = Emby.getCover(json)
                 const result = { id, platform: Emby.CODE, title: Name, cover, offset, limit, page, data:[] }
                 
                 const reqBody = {
@@ -499,10 +673,9 @@ export class Emby {
                 Object.assign(result, { total: TotalRecordCount, totalPage: Math.ceil(TotalRecordCount / limit) })
                 if(trackItems && trackItems.length > 0) {
                     trackItems.forEach(item => {
-                        const { Id, Name, ServerId, ArtistItems, AlbumId, Album, RunTimeTicks, ImageTags, Container, MediaSources } = item
-                        const { Primary } = ImageTags
+                        const { Id, Name, ServerId, ArtistItems, AlbumId, Album, RunTimeTicks, Container, MediaSources } = item
                         const { Id: mediaSourceId, Size, Bitrate, ETag  } = (MediaSources && MediaSources[0]) || { }
-                        const cover = Emby.getCover(Id, ServerId, Primary)
+                        const cover = Emby.getCover(item)
                         const artist = (ArtistItems && ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name }))) || []
                         const album = { id: AlbumId, name: Album }
                         const duration = Math.floor(RunTimeTicks / 10000)
@@ -590,13 +763,13 @@ export class Emby {
             Emby.getRestJson('Items', { ids: [id] }).then(json => {
                 const { Items } = json
                 if(Items && Items.length > 0) {
-                    const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, ImageTags } = Items[0]
-                    const { Primary } = ImageTags
+                    const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, } = Items[0]
+                    
                     const result = {
                         id: Id, 
                         platform: Emby.CODE,
                         title: Name, 
-                        cover: Emby.getCover(Id, ServerId, Primary),
+                        cover: Emby.getCover(Items[0]),
                         ServerId,
                     }
                     resolve(result)
@@ -618,22 +791,21 @@ export class Emby {
                 const { Items } = json
                 if(Items && Items.length > 0) {
                     Items.forEach(item => {
-                        const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, 
-                            ImageTags, PrimaryImageItemId, PrimaryImageTag } = item
-                        const { Primary } = ImageTags
+                        const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, } = item
+                        
                         result.data.push({
                             id: Id, 
                             platform: Emby.CODE,
                             title: Name, 
                             //subtitle: AlbumArtist,
-                            cover: Emby.getCover(PrimaryImageItemId, ServerId, PrimaryImageTag),
+                            cover: Emby.getCover(item),
                             artist: ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name })),
                             publishTime: toTrimString(ProductionYear),
                             ServerId,
                         })
                     })
                 }
-                resolve(result)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -649,9 +821,8 @@ export class Emby {
     static albumDetail(Id) {
         return new Promise((resolve, reject) => {
             Emby.getRestJson(`Items/${Id}`).then(async json => {
-                const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, 
-                    PrimaryImageItemId, PrimaryImageTag  } = json
-                const cover = Emby.getCover(PrimaryImageItemId, ServerId, PrimaryImageTag)
+                const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, } = json
+                const cover = Emby.getCover(json)
                 const artist = ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name }))
                 const publishTime = toTrimString(ProductionYear)
                 const result = new Album(Id, Emby.CODE, Name, cover, artist, '', publishTime)
@@ -666,10 +837,9 @@ export class Emby {
                 const { Items: trackItems } = await Emby.getRestJson('Items', reqBody) || { Items: [] }
                 if(trackItems && trackItems.length > 0) {
                     trackItems.forEach(item => {
-                        const { Id, Name, ServerId, ArtistItems, AlbumId, RunTimeTicks, ImageTags, Container, MediaSources } = item
-                        const { Primary } = ImageTags
+                        const { Id, Name, ServerId, ArtistItems, AlbumId, RunTimeTicks, Container, MediaSources } = item
                         const { Id: mediaSourceId, Size, Bitrate, ETag  } = MediaSources[0] || { }
-                        const cover = Emby.getCover(Id, ServerId, Primary)
+                        const cover = Emby.getCover(item)
                         const artist = ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name }))
                         const album = { id: AlbumId, name: albumName }
                         const duration = Math.floor(RunTimeTicks / 10000)
@@ -710,23 +880,21 @@ export class Emby {
 
                     if(Items && Items.length > 0) {
                         Items.forEach(item => {
-                            const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, ImageTags } = item
-                            const { Primary } = ImageTags
+                            const { Id, Name, ServerId, AlbumArtist, ArtistItems, ProductionYear, } = item
+                        
                             result.data.push({
                                 id: Id, 
                                 platform: Emby.CODE,
                                 title: Name, 
                                 subtitle: AlbumArtist,
-                                cover: Emby.getCover(Id, ServerId, Primary),
+                                cover: Emby.getCover(item),
                                 artist: ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name })),
                                 publishTime: toTrimString(ProductionYear),
                                 ServerId,
                             })
                         })
                     }
-
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay)
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -748,19 +916,17 @@ export class Emby {
                     const { Items } = json
                     if(Items && Items.length > 0) {
                         Items.forEach(item => {
-                            const { Id, Name, ServerId, ImageTags } = item
-                            const { Primary } = ImageTags
+                            const { Id, Name, ServerId, } = item
                             result.data.push({
                                 id: Id, 
                                 platform: Emby.CODE,
                                 title: Name, 
-                                cover: Emby.getCover(Id, ServerId, Primary),
+                                cover: Emby.getCover(item),
                                 ServerId,
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay) 
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -782,10 +948,9 @@ export class Emby {
                 const { Items } = json
                 if(Items && Items.length > 0) {
                     Items.forEach(item => {
-                        const { Id, Name, ServerId, ArtistItems, AlbumId,Album, RunTimeTicks, ImageTags, Container, MediaSources } = item
-                        const { Primary } = ImageTags
+                        const { Id, Name, ServerId, ArtistItems, AlbumId,Album, RunTimeTicks, Container, MediaSources } = item
                         const { Id: mediaSourceId, Size, Bitrate, ETag  } = MediaSources[0] || { }
-                        const cover = Emby.getCover(Id, ServerId, Primary)
+                        const cover = Emby.getCover(item)
                         const artist = ArtistItems.map(ar => ({ id: ar.Id, name: ar.Name }))
                         const album = { id: AlbumId, name: Album }
                         const duration = Math.floor(RunTimeTicks / 10000)
@@ -799,8 +964,7 @@ export class Emby {
                         })
                         result.data.push(track)
                     })
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(Emby.limitResult(result, 1024)), delay)
+                    setTimeout(() => resolve(Emby.limitResult(result, 1024)), 202)
                 }
             })
         })  

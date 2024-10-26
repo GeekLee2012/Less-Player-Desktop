@@ -203,14 +203,16 @@ onMounted(() => resetBack2TopBtn())
             <div class="list-title">
                 <div class="size-text content-text-highlight">歌单列表({{ localPlaylists.length }})</div>
             </div>
-            <PlaylistsControl :data="localPlaylists" 
+            <PlaylistsControl 
+                :data="localPlaylists" 
                 :playable="true" 
                 :customLoadingCount="importTaskCount"
                 :tileOnDropFn="playlistOnDrop" 
                 :draggable="isUseDndForExportLocalPlaylistEnable" 
                 :tileOnDragEndFn="playlistOnDrag">
             </PlaylistsControl>
-            <PlaylistsControl :data="tutorialList" 
+            <PlaylistsControl 
+                :data="tutorialList" 
                 :playable="false"  
                 v-show="isLocalMusicViewPlaylistTipsShow 
                     && localPlaylists.length < 1

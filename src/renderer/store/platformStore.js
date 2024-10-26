@@ -106,6 +106,12 @@ const PRESET_TABS = [{
     text: '0个目录',
     ctext: '已选0个目录',
     stext: '约0个目录',
+}, {
+    code: 'suggestions',
+    name: '推荐',
+    text: '',
+    ctext: '',
+    stext: '',
 }]
 
 
@@ -154,14 +160,14 @@ const PRESET_PLATFORMS = [
         weight: 3,
     },
     {
-        code: Navidrome.CODE,
-        vendor: Navidrome,
-        name: 'Navidrome',
-        shortName: 'NVD',
+        code: Emby.CODE,
+        vendor: Emby,
+        name: 'Emby',
+        shortName: 'EMB',
         online: true,
         types: ['playlists', 'albums', 'artists', 'videos'],
         scopes: ['cloudstorage'],
-        artistTabs: [ 'hot-songs', 'albums','about' ],
+        artistTabs: [ 'albums','about' ],
         //searchTabs: [ 'all-songs', 'playlists', 'albums', 'artists', 'videos' ],
         weight: 3,
     },
@@ -178,14 +184,14 @@ const PRESET_PLATFORMS = [
         weight: 3,
     },
     {
-        code: Emby.CODE,
-        vendor: Emby,
-        name: 'Emby',
-        shortName: 'EMB',
+        code: Navidrome.CODE,
+        vendor: Navidrome,
+        name: 'Navidrome',
+        shortName: 'NVD',
         online: true,
         types: ['playlists', 'albums', 'artists', 'videos'],
         scopes: ['cloudstorage'],
-        artistTabs: [ 'albums','about' ],
+        artistTabs: [ 'hot-songs', 'albums','about' ],
         //searchTabs: [ 'all-songs', 'playlists', 'albums', 'artists', 'videos' ],
         weight: 3,
     },
@@ -488,6 +494,9 @@ export const usePlatformStore = defineStore('platforms', {
         isFoldersTab(code) {
             return stringEqualsIgnoreCase(code, 'folders')
         },
+        isSuggestionsTab(code) {
+            return stringEqualsIgnoreCase(code, 'suggestions')
+        },
         getPlatformTab(code) {
             code = toLowerCaseTrimString(code)
             for(var i = 0; i < PRESET_TABS.length; i++) {
@@ -540,7 +549,7 @@ export const usePlatformStore = defineStore('platforms', {
             return this.getPlatformTabs('albums', 'artists', 'playlists', 'all-songs', 'genres')
         },
         getEmbyTypeTabs() {
-            return this.getPlatformTabs('albums', 'artists', 'all-songs', 'genres', 'folders')
+            return this.getPlatformTabs('suggestions', 'albums', 'artists', 'all-songs', 'genres', 'folders')
         },
         getGenreTypeTabs() {
             return this.getPlatformTabs('albums', 'artists', 'all-songs')

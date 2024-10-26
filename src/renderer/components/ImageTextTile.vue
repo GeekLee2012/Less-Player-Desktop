@@ -22,6 +22,7 @@ const props = defineProps({
     checkChangedFn: Function,
     platform: String,
     videoStyle: Boolean,
+    songStyle: Boolean,
     coverFit: Number,
     singleLineTitleStyle: Boolean,
     centerTitleStyle: Boolean,
@@ -120,7 +121,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </svg>
                 </div>
             </div>
-            <div class="cover-bottom" v-show="!checkbox && videoStyle">
+            <div class="cover-bottom" v-show="!checkbox && (videoStyle || songStyle)">
                 <div class="duration" v-show="duration" v-html="toHhMmss(duration)">
                 </div>
             </div>

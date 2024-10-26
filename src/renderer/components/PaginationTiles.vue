@@ -72,7 +72,8 @@ const nextPage = (event) => {
 
 const refreshAll = () => {
     dataFromLoad.length = 0
-    if (dataInProps.value || !paginationToolbarRef.value) return
+    if (dataInProps.value) return
+    if (!paginationToolbarRef.value) return onPageChanged({ offset: 0, limit: limit.value, page: 1})
     paginationToolbarRef.value.goToPage(1)
 }
 

@@ -663,7 +663,7 @@ onMounted(visitRoot)
 #webdav-session-detail-view .center .content {
     overflow: scroll;
     overflow-x: hidden;
-    padding: 0px 33px 0px 33px;
+    padding: 0px 33px 20px 33px;
 }
 
 #webdav-session-detail-view .center .content.list-view .item {

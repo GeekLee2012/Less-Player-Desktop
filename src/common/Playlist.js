@@ -17,6 +17,10 @@ export class Playlist {
     static GENRE_TYPE = 5
     //目录
     static FOLDER_TYPE = 6
+    //专辑
+    static ALBUM_TYPE = 7
+    //歌曲
+    static SONG_TYPE = 8
     //TODO
     static ANCHOR_RADIO_ID_PREFIX = "ARP_"
     //自定义列表
@@ -94,6 +98,14 @@ export class Playlist {
 
     static isFolderType(item) {
         return Playlist._assertType(item, Playlist.FOLDER_TYPE)
+    }
+
+    static isAlbumType(item) {
+        return Playlist._assertType(item, Playlist.ALBUM_TYPE)
+    }
+
+    static isSongType(item) {
+        return Playlist._assertType(item, Playlist.SONG_TYPE)
     }
 
     static isCustomType(item) {

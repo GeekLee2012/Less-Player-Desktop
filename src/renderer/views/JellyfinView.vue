@@ -64,9 +64,9 @@ const tutorialList = [{
 }, {
     title: 'API Key：前往官方客户端“Dashboard - API密钥”'
 }, {
-    title: '歌曲Tab - 播放全部：仅播放当前分页的所有歌曲'
+    title: '随缘听：从曲库中随机选择一首歌曲进行播放'
 }, {
-    title: '歌曲Tab - 随缘听：从曲库中随机选择一首歌曲进行播放'
+    title: '歌曲Tab - 播放全部：仅播放当前分页的所有歌曲'
 }, {
     title: '流派Tab：在Tab首页直接“播放流派”时，最多支持播放1024首'
 },{

@@ -74,7 +74,7 @@ const clearCaches = async (force) => {
   try {
     const { session } = mainWin.webContents
     const cacheSize = await session.getCacheSize()
-    const limit = 500 * 1024 * 1024
+    const limit = 512 * 1024 * 1024
     if (cacheSize >= limit || force) {
       session.clearCache()
     }

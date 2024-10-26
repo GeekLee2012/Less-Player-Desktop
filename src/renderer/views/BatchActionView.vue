@@ -100,6 +100,9 @@ const checkedData = reactive([])
 const checkedAll = ref(false)
 const ignoreCheckAllEvent = ref(false)
 const sourceItem = reactive({})
+const dataListId = ref(null)
+const setDataListId = (value) => (dataListId.value = value)
+
 
 const updateTitle = () => {
     let text = "", subtext = ""
@@ -163,11 +166,11 @@ const fastSelectByShiftKey = (item) => {
 }
 
 const onCheckChanged = (checked, item) => {
-    if (checked) {
-        checkedData.push(item)
+    const index = checkedData.findIndex(e => (item.id == e.id && item.platform == e.platform))
+    if (index > -1) {
+        checkedData.splice(index, 1)
     } else {
-        const index = checkedData.findIndex(e => (item.id == e.id && item.platform == e.platform))
-        if (index > -1) checkedData.splice(index, 1)
+        checkedData.push(item)
     }
     ignoreCheckAllEvent.value = true
     checkedAll.value = (checkedData.length == tabData.length)
@@ -235,6 +238,7 @@ const switchTab = () => {
            tabData.push(...filterPlaybackQueueSongs())
         }
         currentTabView.value = SongListControl
+        setDataListId(randomTextWithinAlphabetNums(16))
     } else if (isPlaylistTab()) { //歌单
         if (isFavorites()) {
             Object.assign(actionShowCtl, {
@@ -841,7 +845,7 @@ watch([currentPlatformCode], () => refreshContent())
             </div>
             <div class="content" ref="contentRef" @scroll="onScroll">
                 <component 
-                    :id="randomTextWithinAlphabetNums(16)"
+                    :id="dataListId"
                     :is="currentTabView" 
                     :data="tabData" 
                     :checkbox="true" 

@@ -222,8 +222,7 @@ export class Jellyfin {
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay)
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -258,8 +257,7 @@ export class Jellyfin {
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay)
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -302,8 +300,7 @@ export class Jellyfin {
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay) 
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -345,8 +342,7 @@ export class Jellyfin {
                         result.data.push(track)
                     })
                 }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -381,8 +377,7 @@ export class Jellyfin {
                         })
                     })
                 }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -414,8 +409,7 @@ export class Jellyfin {
                             })
                         })
                     }
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay)
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })
@@ -570,7 +564,7 @@ export class Jellyfin {
                         })
                     })
                 }
-                resolve(result)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -660,9 +654,7 @@ export class Jellyfin {
                             })
                         })
                     }
-
-                    const delay = (result.data > 10) ? 0 : 366
-                    setTimeout(() => resolve(result), delay)
+                    setTimeout(() => resolve(result), 202)
                 })
             })
         })

@@ -143,8 +143,7 @@ export class Navidrome {
                         })
                     })
                 }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -169,8 +168,7 @@ export class Navidrome {
                         })
                     })
                 }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -203,8 +201,7 @@ export class Navidrome {
                         })
                     })
                 }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -233,7 +230,7 @@ export class Navidrome {
                         result.data.push(track)
                     })
                 }
-                resolve(result)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -268,8 +265,7 @@ export class Navidrome {
                         })
                     })
                 }
-                const delay = (result.data > 10) ? 0 : 366
-                setTimeout(() => resolve(result), delay)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -415,7 +411,7 @@ export class Navidrome {
                         result.data.push(track)
                     })
                 }
-                resolve(result)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }
@@ -440,7 +436,7 @@ export class Navidrome {
                         })
                     })
                 }
-                resolve(result)
+                setTimeout(() => resolve(result), 202)
             })
         })
     }

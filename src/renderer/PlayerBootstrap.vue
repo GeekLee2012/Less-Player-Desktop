@@ -444,6 +444,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     if(typeof id == 'undefined') return
     if(typeof platform == 'undefined') return
 
+    let isTracePlaylist = true, needReset = true
     if (Playlist.isFMRadioType(playlist)) { //FM广播电台
         const track = playlist.data ? playlist.data[0] : playlist
         const hasUrl = Track.hasUrl(track)
@@ -483,6 +484,14 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         || Playlist.isAnchorRadioType(playlist)
         || Playlist.isFolderType(playlist)) {
         playlist = await loadPlaylist(playlist, text, traceId)
+    } else if(Playlist.isAlbumType(playlist)) {
+        text = '即将为您播放专辑'
+        playlist = await loadAlbum(playlist, text, traceId)
+    } else if(Playlist.isSongType(playlist)) {
+        isTracePlaylist = false
+        needReset = false
+        text = '即将为您播放歌曲'
+        playlist.data = [{ ...playlist }]
     }
     //检查数据，再次确认
     if (!playlist || !playlist.data || playlist.data.length < 1) {
@@ -495,8 +504,8 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
     if (traceId && !isCurrentTraceId(traceId)) return
 
     //可播放状态, 记录到最近播放，并开始播放
-    traceRecentPlaylist(playlist)
-    addAndPlayTracks(playlist.data, true, text || '即将为您播放歌单', traceId)
+    if(isTracePlaylist) traceRecentPlaylist(playlist)
+    addAndPlayTracks(playlist.data, needReset, text || '即将为您播放歌单', traceId)
 }
 
 const playVideoCollection = async (playlist, text, traceId) => {

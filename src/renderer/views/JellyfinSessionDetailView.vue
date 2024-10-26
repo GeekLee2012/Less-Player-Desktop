@@ -102,7 +102,10 @@ const isGenreTab = () => (isGenresTab(activeTabCode()))
 const isNormalPaginationType = computed(() => (getPaginationStyleIndex.value === 0))
 const needRefreshSession = ref(false)
 const setNeedRefreshSession = (value) => (needRefreshSession.value = value)
-
+const titleShow = ref(true)
+const setTitleShow = (value) => (titleShow.value = value)
+const refreshAllPendingMark = ref(0)
+const nextPagePendingMark = ref(0)
 
 
 const setupSession = async () => {
@@ -265,15 +268,21 @@ const resetFlowBtns = () => {
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(contentRef.value)
 }
 
-const refreshAllPendingMark = ref(0)
-const nextPagePendingMark = ref(0)
 const scrollToLoad = (event) => {
     if (loading.value) return
     const { scrollTop, scrollHeight, clientHeight } = contentRef.value
+    const isUpAction = (markScrollTop > scrollTop)
     markScrollState()
     const allowedError = 10 //允许误差
     if ((scrollTop + clientHeight + allowedError) >= scrollHeight) {
         nextPagePendingMark.value = Date.now()
+    }
+
+    if(scrollHeight < 666) return 
+    if(isUpAction) {
+        setTitleShow(markScrollTop < 168)
+    } else {
+       if(markScrollTop >= 202) setTitleShow(false)
     }
 }
 
@@ -403,14 +412,16 @@ const playAll = () => {
     addAndPlayTracks(tabData, true, '即将为您播放当前页')
 }
 
+let songTotalPages = 1
 const randomPlay = () => {
-    const pages = maxPage.value
-    if(!pages || pages < 1) return
-    const page = Math.max(1, nextInt(pages))
+    //const pages = maxPage.value
+    //if(!pages || pages < 1) return
+    const page = Math.max(1, nextInt(songTotalPages))
     const offset = limit * (page - 1)
     Jellyfin.songSquare('', offset, limit, page).then(result => {
         if(!result) return
         const { data, total } = result
+        songTotalPages = Math.max(1, total)
         if(!data || data.length < 1) return
         const index = nextInt(data.length)
         showToast('即将为您随缘一曲')
@@ -446,7 +457,7 @@ onDeactivated(() => setCategoriesShow(false))
 
 <template>
     <div id="jellyfin-session-detail-view" @click="() => setCategoriesShow(false)">
-        <div class="header">
+        <div class="header" :class="{  'none-title': !titleShow, }">
             <div class="title-wrap">
                 <svg width="28" height="28" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <defs>
@@ -470,19 +481,6 @@ onDeactivated(() => setCategoriesShow(false))
                     :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
                     @click="visitTab(index, true)" v-html="tab.name">
                 </span>
-                <div class="cate-btn btn text-btn to-right" 
-                    v-show="activeTab <= 1 && categories && categories.length > 0"
-                    @click.stop="toggleCategories">
-                    <svg width="17" height="17" viewBox="0 0 29.3 29.3">
-                        <g id="Layer_2" data-name="Layer 2">
-                            <g id="Layer_1-2" data-name="Layer 1">
-                                <path
-                                    d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z" />
-                            </g>
-                        </g>
-                    </svg>
-                    <span v-html="computedCurrentCateTitle"></span>
-                </div>
                 <transition name="fade-ex">
                     <div class="categories" v-show="categoriesShow && categories && categories.length > 0">
                         <ul>
@@ -494,10 +492,11 @@ onDeactivated(() => setCategoriesShow(false))
                         </ul>
                     </div>
                 </transition>
-                <div class="action to-right" v-show="activeTab == 3">
+                <div class="action to-right">
                     <SvgTextButton text="播放全部" 
                         :leftAction="playAll" 
-                        :rightAction="addAll" >
+                        :rightAction="addAll"
+                        v-show="activeTab == 3" >
                         <template #left-img>
                             <svg width="15" height="15" viewBox="0 0 139 139" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                                 xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -529,6 +528,19 @@ onDeactivated(() => setCategoriesShow(false))
                             <svg width="16" height="16" viewBox="0 0 768.11 768.93" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M384.2,509.12c-5.62,8.58-10.61,17-16.38,24.87-42.57,58-99.37,92.91-170.52,104A234.9,234.9,0,0,1,163,640.81c-43.5.32-87,.21-130.5.12C14.67,640.89.6,627.39.06,610.2-.53,591.75,13.72,577,32.51,577q63-.13,126,0c38.3,0,73.92-9.69,105.81-31,51.79-34.55,81.47-83,86.79-145.17A190.91,190.91,0,0,0,200.48,197.4c-14.06-3-28.73-4.05-43.14-4.24-41.65-.55-83.33-.1-125-.24-22.79-.08-38.09-22-30.3-43.11,4.44-12,15.83-20.7,28.59-20.74,46.67-.14,93.44-2,140,.48,92.18,4.86,162.42,48.2,210.63,127l2.76,4.54,3.21-5.28c42.17-69.24,103.1-111,183.24-123.77,15.53-2.49,31.5-2.64,47.29-3,21.65-.48,43.32-.12,66.19-.12-1.76-1.89-2.87-3.14-4-4.32-23.09-23.11-46.27-46.12-69.26-69.33C593.09,37.61,599.81,9,623.12,1.69,634.93-2,645.93.29,654.56,9c30.27,30.54,60.79,60.86,90.07,92.32,32.47,34.89,30.87,88.23-2.4,122.16Q699.53,267,656.63,310.4c-13.11,13.24-32.42,14.13-45.44,2.38-13.84-12.49-14.41-33.17-1-46.71C633,243.13,656,220.4,678.92,197.57c1.24-1.24,2.39-2.56,4.3-4.61h-4.29c-24.49,0-49-.21-73.49.08a192.07,192.07,0,0,0-182.25,139.8c-30.93,109.57,40,221.92,152.33,241.16a198.36,198.36,0,0,0,30.29,2.8c25.65.39,51.31.13,78.16.13-1.85-1.89-3-3.13-4.24-4.32q-34.37-33.51-68.71-67c-10.48-10.27-13.19-24.09-7.54-36.64a31.81,31.81,0,0,1,51.45-9.7c20.42,19.87,40.39,40.22,60.54,60.37,8.72,8.71,17.54,17.34,26.12,26.2,35.35,36.5,35.24,90.32-.31,126.63Q699,715.67,656.37,758.63c-18.25,18.36-48,11.12-54.62-13.24-3.35-12.28,0-23,9-32q34-33.84,68-67.76c1.26-1.25,2.45-2.57,4.48-4.71h-6.22c-24.33,0-48.7.78-73-.17-94.75-3.73-167.09-46.24-217-126.91Z"/></g></g></svg>
                         </template>
                     </SvgTextButton>
+                    <div class="cate-btn btn text-btn spacing" 
+                        v-show="activeTab <= 1 && categories && categories.length > 0"
+                        @click.stop="toggleCategories">
+                        <svg width="17" height="17" viewBox="0 0 29.3 29.3">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M23.51,15.66H17.3a1.55,1.55,0,0,0-.56.11,1.45,1.45,0,0,0-1.11,1.41v6.38a5.77,5.77,0,0,0,5.76,5.76h2.16a5.76,5.76,0,0,0,5.75-5.76V21.41a5.76,5.76,0,0,0-5.77-5.75Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86H21.35a2.86,2.86,0,0,1-2.85-2.86v-5h5a2.86,2.86,0,0,1,2.85,2.86ZM12.52,15.76a1.55,1.55,0,0,0-.56-.11H5.75A5.76,5.76,0,0,0,0,21.41v2.15a5.76,5.76,0,0,0,5.75,5.76H7.91a5.78,5.78,0,0,0,5.72-5.76V17.18A1.47,1.47,0,0,0,12.52,15.76Zm-1.76,7.8a2.86,2.86,0,0,1-2.85,2.86H5.75A2.86,2.86,0,0,1,2.9,23.56V21.41a2.86,2.86,0,0,1,2.85-2.86h5Zm-5-9.89H12a1.55,1.55,0,0,0,.56-.11,1.45,1.45,0,0,0,1.1-1.42V5.76A5.77,5.77,0,0,0,7.87,0H5.75A5.76,5.76,0,0,0,0,5.76V7.91a5.77,5.77,0,0,0,5.75,5.75ZM2.9,5.76A2.86,2.86,0,0,1,5.75,2.9H7.91a2.86,2.86,0,0,1,2.85,2.86v5h-5A2.86,2.86,0,0,1,2.91,7.9ZM23.51,0H21.35a5.78,5.78,0,0,0-5.72,5.76v6.38a1.45,1.45,0,0,0,1.15,1.42,1.55,1.55,0,0,0,.56.11h6.21A5.76,5.76,0,0,0,29.3,7.91V5.76A5.76,5.76,0,0,0,23.54,0Zm2.85,7.91a2.86,2.86,0,0,1-2.85,2.86h-5v-5a2.86,2.86,0,0,1,2.85-2.86h2.16a2.86,2.86,0,0,1,2.85,2.86Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        <span v-html="computedCurrentCateTitle"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -573,7 +585,6 @@ onDeactivated(() => setCategoriesShow(false))
     display: flex;
     flex-direction: column;
     flex: 1;
-    /*padding: 20px 33px 10px 33px;*/
     padding: 20px 0px 0px 0px;
     overflow: hidden;
 }
@@ -637,12 +648,12 @@ onDeactivated(() => setCategoriesShow(false))
 }
 
 
-
 #jellyfin-session-detail-view .header {
     display: flex;
     flex-direction: column;
     margin-bottom: 5px;
     padding: 0px 33px 0px 33px;
+    --title-height: 30px;
 }
 
 #jellyfin-session-detail-view .header .title-wrap {
@@ -650,6 +661,17 @@ onDeactivated(() => setCategoriesShow(false))
     align-items: center;
     position: relative;
     font-weight: bold;
+    height: var(--title-height);
+    transition: 0.5s;
+}
+
+#jellyfin-session-detail-view .header.none-title .title-wrap {
+    opacity: 0;
+    height: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 #jellyfin-session-detail-view .header .title-wrap .title {
@@ -673,10 +695,6 @@ onDeactivated(() => setCategoriesShow(false))
     color: var(--content-subtitle-text-color);
 }
 
-#jellyfin-session-detail-view .header .action {
-    display: flex;
-}
-
 #jellyfin-session-detail-view .header .tabs {
     display: flex;
     align-items: center;
@@ -684,11 +702,19 @@ onDeactivated(() => setCategoriesShow(false))
     padding-bottom: 0px;
     border-bottom: 1px solid var(--border-color);
     border-bottom: 1px solid transparent;
-    margin-top: 3px;
+    margin-top: 6px;
     position: relative;
 }
 
-#jellyfin-session-detail-view .header .tab {
+#jellyfin-session-detail-view .header.none-title .tabs {
+    margin-top: 0px;
+}
+
+#jellyfin-session-detail-view .header.none-title .tabs .tab {
+    padding-top: 5px;
+}
+
+#jellyfin-session-detail-view .header .tabs .tab {
     font-size: var(--content-text-tab-title-size);
     padding: 8px 0px 5px 0px;
     margin-right: 36px;
@@ -696,13 +722,16 @@ onDeactivated(() => setCategoriesShow(false))
     cursor: pointer;
 }
 
-#jellyfin-session-detail-view .header .active {
+#jellyfin-session-detail-view .header .tabs .active {
     font-weight: bold;
     border-bottom: 3px solid var(--content-highlight-color);
 }
 
+#jellyfin-session-detail-view .header .action {
+    display: flex;
+}
 
-#jellyfin-session-detail-view .header .cate-btn {
+#jellyfin-session-detail-view .header .action .cate-btn {
     margin-right: 15px;
     display: flex;
     justify-content: center;
@@ -752,32 +781,10 @@ onDeactivated(() => setCategoriesShow(false))
     margin-right: 38px;
 }
 
-#jellyfin-session-detail-view .center .location {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    -webkit-box-orient: vertical;
-    text-align: left;
-    word-wrap: break-word;
-    line-break: anywhere;
-    color: var(--content-subtitle-text-color);
-    font-size: calc(var(--content-text-size) - 1px);
-    padding: 3px 36px 12px 36px;
-    min-height: 20px;
-}
-
-#jellyfin-session-detail-view .center .location .current {
-    word-wrap: break-word;
-    line-break: anywhere;
-    margin-left: 10px;
-}
-
 #jellyfin-session-detail-view .center .content {
     overflow: scroll;
     overflow-x: hidden;
-    padding: 0px 33px 0px 33px;
+    padding: 0px 33px 20px 33px;
 }
 
 #jellyfin-session-detail-view .center .content.list-view .item {

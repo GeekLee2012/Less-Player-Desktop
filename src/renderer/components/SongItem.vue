@@ -132,9 +132,15 @@ onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div class="song-item" @click="toggleCheck" @contextmenu="onContextMenu"
-        :class="{ 'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data) }"
-        :draggable="isDraggable" @dragstart="(event) => dndSaveTrack(event, data)">
+    <div class="song-item" 
+        :class="{ 
+            'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data),
+            'selection-mode': checkbox,
+        }"
+        @click="toggleCheck" 
+        @contextmenu="onContextMenu"
+        :draggable="isDraggable" 
+        @dragstart="(event) => dndSaveTrack(event, data)">
         <div v-show="checkbox" class="checkbox">
             <svg v-show="!isChecked" width="16" height="16" viewBox="0 0 731.64 731.66" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
@@ -213,12 +219,16 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
         </div>
         <div class="artist spacing1" v-show="!isExtra1Available()">
-            <ArtistControl :visitable="artistVisitable && !checkbox" :platform="data.platform" :data="data.artist"
+            <ArtistControl :visitable="artistVisitable && !checkbox" 
+                :platform="data.platform" 
+                :data="data.artist"
                 :trackId="toTrimString(data.id)">
             </ArtistControl>
         </div>
         <div class="album spacing1" v-show="!isExtra2Available()">
-            <AlbumControl :visitable="albumVisitable && !checkbox" :platform="data.platform" :data="data.album">
+            <AlbumControl :visitable="albumVisitable && !checkbox" 
+                :platform="data.platform" 
+                :data="data.album">
             </AlbumControl>
         </div>
         <div class="extra1 spacing1" v-show="isExtra1Available()" v-html="data.extra1"></div>
@@ -237,6 +247,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-radius: var(--border-inputs-border-radius);
     border-radius: var(--border-list-item-vertical-border-radius);
     border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
+}
+
+.song-item.selection-mode {
+    cursor: pointer;
 }
 
 .song-item:hover {
