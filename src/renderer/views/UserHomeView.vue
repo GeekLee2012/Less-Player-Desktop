@@ -569,6 +569,7 @@ onActivated(() => {
 #user-profile-view .sub-tab-nav .sub-tab .tab-icon {
     margin-right: 5px;
     transform: translateY(2px);
+    fill: var(--button-icon-btn-color);
 }
 
 #user-profile-view .sub-tab-nav .active {

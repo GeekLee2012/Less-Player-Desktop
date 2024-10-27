@@ -524,7 +524,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">设置页开关选项标题联动：</span>
                         <ToggleControl @click="toggleToggleCtlTitleActionEnable" :value="common.toggleCtlTitleActionEnable">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：开启后，试点击一下右边标题</div>
+                        <div class="tip-text spacing">提示：开启后，试点击一下左边标题</div>
                     </div>
                     <div class="tip-text">提示：建议开启“锁定为初始值”，可解决窗口缩放闪动Bug<br>
                         但开启“锁定”后，每次改变“窗口缩放”时需重启应用；否则会触发窗口缩放闪动Bug<br>
@@ -1598,7 +1598,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </span>
                     </div>
                     <div class="annoucement last">
-                        <span>郑重声明：Less Player完全开源免费，仅供学习交流；若谁做非法用途，后果自负！</span>
+                        <span>郑重声明：Less Player开源免费，仅供学习交流；若谁做非法用途，后果自负！</span>
                     </div>
                 </div>
             </div>

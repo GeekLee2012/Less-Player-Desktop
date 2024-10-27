@@ -30,14 +30,14 @@
                 "loadingMaskColor": "linear-gradient(to right, #666666 8%, #515151 18%, #666666 33%)",
                 "listItemHoverBgColor": "#666666",
                 "leftNavBgColor": "#48484a",
-                "inputsBgColor": "#eeeeee",
-                "inputsTextColor": "#373737"
+                "inputsBgColor": "#595959",
+                "inputsTextColor": "#d5d5d5"
             },
             "border": {
                 "borderColor": "#414141",
                 "leftNavBorderColor": "#333333",
                 "popoversBorderColor": "#222222",
-                "inputsBorderColor": "#999999"
+                "inputsBorderColor": "#636363"
             },
             "button": {
                 "iconBtnColor": "#ffffff",
@@ -49,14 +49,14 @@
                 "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": null,
-                "bgColor": "#eeeeee",
+                "borderColor": "transparent",
+                "bgColor": "#dddddd",
                 "textColor": "#373737",
                 "searchBtnBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
                 "searchBtnHoverBgColor": "linear-gradient(to top right, #2edfa3, #28c83f)",
                 "searchBtnIconColor": "#ffffff",
                 "searchBtnHoverIconColor": "#ffffff",
-                "clearBtnIconColor": "#666666"
+                "clearBtnIconColor": "#555555"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to top right, #1ca388, #28c83f)",
@@ -107,7 +107,7 @@
             },
             "border": {
                 "borderColor": "#eeeeee",
-                "leftNavBorderColor": null,
+                "leftNavBorderColor": "transparent",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -320,7 +320,7 @@
                 "inputsTextColor": "#393939"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#000000",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#454045"
@@ -335,7 +335,7 @@
                 "toggleBtnThumbColor": "#cccccc"
             },
             "searchBar": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "bgColor": "#dddddd",
                 "textColor": "#393939",
                 "searchBtnBgColor": "#dddddd",
@@ -390,7 +390,7 @@
                 "inputsTextColor": "#666666"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#31313125",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#31313159"
@@ -405,7 +405,7 @@
                 "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "bgColor": "#ffffff",
                 "textColor": "#666666",
                 "searchBtnBgColor": "linear-gradient(to right, #eee, #fff)",
@@ -462,7 +462,7 @@
                 "lightBgColor": "#f1f2f3"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#e8e8e8",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#cccccc"
@@ -532,7 +532,7 @@
                 "inputsTextColor": "#363636"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#0b0b0b",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#454045"
@@ -547,7 +547,7 @@
                 "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "bgColor": "#dddddd",
                 "textColor": "#363636",
                 "searchBtnBgColor": "linear-gradient(to right, #f84860, #d53943)",
@@ -602,7 +602,7 @@
                 "inputsTextColor": "#282828"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#bcbcbc",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#bcbcbc"
@@ -617,7 +617,7 @@
                 "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "bgColor": "#cfdec3cb",
                 "textColor": "#282828",
                 "searchBtnBgColor": "#cfdec3cb",
@@ -672,7 +672,7 @@
                 "inputsTextColor": "#919343"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#91934336",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#91934356"
@@ -687,7 +687,7 @@
                 "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "bgColor": "#91934336",
                 "textColor": null,
                 "searchBtnBgColor": "#91934336",
@@ -958,7 +958,7 @@
                 "inputsTextColor": "#333333"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#cccccc",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
@@ -1030,7 +1030,7 @@
                 "lightBgColor": "#f1f2f3"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#dddddd",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#dddddd"
@@ -1100,7 +1100,7 @@
                 "inputsTextColor": "#272727"
             },
             "border": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "leftNavBorderColor": "#333333",
                 "popoversBorderColor": "#222222",
                 "inputsBorderColor": "#edede2"
@@ -1115,7 +1115,7 @@
                 "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": null,
+                "borderColor": "transparent",
                 "bgColor": "#edede2",
                 "textColor": "#212121",
                 "searchBtnBgColor": "#edede2",
@@ -1177,7 +1177,7 @@
             },
             "border": {
                 "borderColor": "#cccccc",
-                "leftNavBorderColor": null,
+                "leftNavBorderColor": "transparent",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#999999"
             },

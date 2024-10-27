@@ -280,10 +280,7 @@ export const useRgbaster = async (src, opts) => {
 
 //TODO 随机数不随机！
 export const nextInt = (max) => {
-    max = tryCallDefault(parseInt, max, 1024)
-    const randomLimit = parseInt(Math.random() * 1024 + 66)
-    const limit = Math.max(max, randomLimit)
-    return Math.floor(Math.random() * limit) % max
+    return Math.floor(Math.random() * max) % max
 }
 
 export const utf8Parse = (text) => {
