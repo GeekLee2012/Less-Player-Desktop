@@ -148,11 +148,12 @@ export class Emby {
     static postRestJson(path, data, config, token) {
         return new Promise((resolve, reject) => {
             const url = Emby.getRestUrl(path)
-            const headers = Emby.getAuthorization()
+            const authHeaders = Emby.getAuthorization()
             config = config || {}
-            const _headers = headers
-            if(config.headers) Object.assign(_headers, { ...config.headers, ...headers })
-            Object.assign(config, { headers: _headers })
+            const { headers: cHeaders } = config
+            const headers = authHeaders
+            if(cHeaders) Object.assign(headers, { ...cHeaders, ...authHeaders })
+            Object.assign(config, { headers })
 
             postJson(url, data, config).then(json => resolve(json))
         })

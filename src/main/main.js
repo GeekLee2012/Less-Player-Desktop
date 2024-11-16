@@ -35,7 +35,8 @@ let messagePortPair = null, messagePortChannel = null
 let appUserAgent =  null, exRequestHandlers = []
 let useTemplateImage = false
 
-const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple'
+const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple', MINI_LAYOUT = 'mini'
+const miniExpandSize = 500 - 55
 const appLayoutConfig = {
   'default': {
     appWidth: 1080,
@@ -44,7 +45,11 @@ const appLayoutConfig = {
   'simple': {
     appWidth: 500,
     appHeight: 588
-  }
+  },
+  'mini': {
+    appWidth: 466,
+    appHeight: 139
+  },
 }
 let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT
 let currentZoom = 85, useWinCenterStrict = false
@@ -119,7 +124,7 @@ const initialize = () => {
         for(var i = 0; i < urlChain.length; i++) {
           const url = urlChain[i]
           const index = downloadingQueue.findIndex(qItem => {
-            return qItem.url == decodeURIComponent(url)
+            return (qItem.url == url) || (qItem.url == decodeURIComponent(url))
           })
           queuedItemMeta = downloadingQueue[index]
           if(queuedItemMeta) break
@@ -145,6 +150,12 @@ const initialize = () => {
         }
       })
       */
+      item.on('updated', (event, state) => {
+        if(state == 'interrupted') {
+          if(isDevEnv) console.log('[DownloadItem - Interrupted]', item)
+        }
+      })
+
 
       item.on('done', (event, state) => {
         if(!queuedItemMeta) return
@@ -466,6 +477,12 @@ const registryGlobalListeners = () => {
   }).on('app-layout-simple', (event, { zoom, isInit, useCenterStrict }) => {
     useWinCenterStrict = useCenterStrict
     setupAppLayout(SIMPLE_LAYOUT, zoom, isInit, useCenterStrict)
+  }).on('app-layout-mini', (event, { zoom, isInit, useCenterStrict }) => {
+    useWinCenterStrict = useCenterStrict
+    setupAppLayout(MINI_LAYOUT, zoom, isInit, useCenterStrict)
+  }).on('app-layout-mini-toggleExpand', (event, { zoom, isInit, useCenterStrict, expand }) => {
+    useWinCenterStrict = useCenterStrict
+    setupAppLayout(MINI_LAYOUT, zoom, isInit, useCenterStrict, expand)
   }).on('app-globalShortcut', (event, data) => {
     if (data === true) {
       globalShortcut.unregisterAll()
@@ -499,6 +516,8 @@ const registryGlobalListeners = () => {
     
     const fileMeta = { file, name, type, data, url, useDefaultIcon }
     file = transformPath(file)
+    //TODO 特殊符号处理：<>/|:*?
+    if(!isMacOS) file = file.replace(/\|/g, '--')
     fetchBuffer(url, data).then(_data => {
       writeFile(file, _data, error => {
         sendToMainRenderer('dnd-saveToLocal-result', { ...fileMeta, error })
@@ -900,6 +919,8 @@ const registryGlobalListeners = () => {
     win.setIgnoreMouseEvents(ignore, options)
   }).on('app-mainWin-show', (event, ...args) => {
     showMainWindow()
+  }).on('app-mainWin-alwaysOnTop', (event, ...args) => {
+    setWindowAlwaysOnTop(mainWin, args[0])
   }).on('app-desktopLyric-layoutMode', (event, ...args) => {
     const { layoutMode, textDirection, needResize, isInit } = args[0]
     setupDesktopLyricWindowSize(layoutMode, textDirection == 1, needResize)
@@ -1188,7 +1209,7 @@ const createMainWindow = (show) => {
   return mainWindow
 }
 
-const setupAppLayout = (layout, zoom, isInit, useCenterStrict) => {
+const setupAppLayout = (layout, zoom, isInit, useCenterStrict, miniExpand) => {
   appLayout = layout
 
   zoom = Number(zoom) || 85
@@ -1196,19 +1217,22 @@ const setupAppLayout = (layout, zoom, isInit, useCenterStrict) => {
   if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 0.85
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = Math.round(appWidth * zoomFactor)
-  const height = Math.round(appHeight * zoomFactor)
-  const isSimpleLayout = (appLayout === SIMPLE_LAYOUT)
-  const maxWidth = (isSimpleLayout ? width : 102400)
-  const maxHeight = (isSimpleLayout ? height : 102400)
+  const height = Math.round(appHeight * zoomFactor) + (miniExpand ? miniExpandSize : 0)
+  const noResizable = (appLayout === SIMPLE_LAYOUT) || (appLayout === MINI_LAYOUT)
+  const maxWidth = (noResizable ? width : 102400)
+  const maxHeight = (noResizable ? height : 102400)
   mainWin.setMaximumSize(maxWidth, maxHeight)
-  if (isInit || isSimpleLayout) {
+  if (isInit || noResizable) {
     mainWin.setMinimumSize(width, height)
     mainWin.setSize(width, height)
   }
+  mainWin.setHasShadow(appLayout != MINI_LAYOUT)
   mainWin.webContents.setZoomFactor(zoomFactor)
   //mainWin.webContents.zoomFactor = zoomFactor
 
-  setupMainWindowCenterScreen(useCenterStrict)
+  if(typeof miniExpand == 'undefined') {
+    setupMainWindowCenterScreen(useCenterStrict)
+  }
 }
 
 const getAppMenuI18nConfig = () => {

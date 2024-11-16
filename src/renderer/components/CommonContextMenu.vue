@@ -43,7 +43,7 @@ const { addToLocalPlaylist, moveToLocalPlaylist, removeFromLocalPlaylist } = use
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { removeRecentSong, } = useRecentsStore()
 const { isLocalMusic, isWebDav, isNavidrome } = usePlatformStore()
-const { isShowDialogBeforeDeleteCustomPlaylist } = storeToRefs(useSettingStore())
+const { isShowDialogBeforeDeleteCustomPlaylist, isMiniLayout } = storeToRefs(useSettingStore())
 
 
 const toastAndHideMenu = (text, failed) => {
@@ -512,10 +512,16 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
             data = [MenuItems.playPlaylist, MenuItems.removePlaylistFromFavorite]
             break;
         case 9: //当前播放列表
-            data = [MenuItems.play, MenuItems.playLater,
-            MenuItems.sp, MenuItems.addToListNoQueue(), MenuItems.addAllToListNoQueue(), MenuItems.addFavorite, /*MenuItems.share,*/
-            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
-            MenuItems.sp, MenuItems.visitTrack, MenuItems.removeFromQueue,]
+            if(isMiniLayout.value) {
+                data = [MenuItems.play, MenuItems.playLater,
+                    MenuItems.sp, MenuItems.visitAlbum, MenuItems.visitTrack, 
+                    MenuItems.sp, MenuItems.removeFromQueue,]
+            } else {
+                data = [MenuItems.play, MenuItems.playLater,
+                    MenuItems.sp, MenuItems.addToListNoQueue(), MenuItems.addAllToListNoQueue(), MenuItems.addFavorite, /*MenuItems.share,*/
+                    MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
+                    MenuItems.sp, MenuItems.visitTrack, MenuItems.removeFromQueue,]
+            }
             break;
         case 10: //本地歌曲 - 批量操作 - 添加到菜单、移动到菜单 
             data = initBatchActionPopupMenuData(dataType, actionType == 1)

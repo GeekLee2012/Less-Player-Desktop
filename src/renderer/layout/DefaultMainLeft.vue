@@ -614,9 +614,11 @@ onUnmounted(() => offEvents(eventsRegistration))
     transform: translateY(-0.01px) scale(0.96);
 }
 
+/*
 #explore-mode .cloud-storage-mode  svg {
     transform: rotateY(180deg);
 }
+*/
 
 #explore-mode .exit-btn {
     position: absolute;

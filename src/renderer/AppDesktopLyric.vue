@@ -890,8 +890,9 @@ onMounted(() => {
       }" v-show="lyricExistState !== 1">
         {{ getDefaultLyricText() }}
       </div>
-      <div v-show="lyricExistState == 1 && showByLayoutMode(key, value, index)"
-        v-for="([key, value], index) in lyricData" class="line" :class="{
+      <div v-for="([key, value], index) in lyricData" class="line"
+        v-show="lyricExistState == 1 && showByLayoutMode(key, value, index)"
+        :class="{
           'desktop-lyric-content-highlight': (currentIndex == index),
           first: index == 0,
           last: index == (lyricData.size - 1),

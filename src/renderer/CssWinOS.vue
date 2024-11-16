@@ -31,6 +31,11 @@
   letter-spacing: 0.5px;
 }
 
+.winos-style .svg-text-btn .left-btn svg,
+.winos-style .svg-text-btn .right-btn svg {
+    transform: translateY(1px);
+}
+
 
 .use-winos-win-ctl .default-old-layout #main-left .header {
   margin-bottom: 8px !important;
@@ -116,6 +121,10 @@
 
 .use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .ctl-btn:hover {
   background: #00000018;
+}
+
+.use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .close-btn:hover svg {
+  fill: #ffffff !important;
 }
 
 .use-winos-win-ctl .video-playing-view .win-ctl-wrap {
@@ -213,5 +222,20 @@
 /* 简约布局 */
 .simple-layout-use-winos-win-ctl .win-ctl-wrap {
   margin-left: 8px !important;
+}
+
+/* 迷你布局 */
+.winos-style .mini-layout > .center > .content {
+  -webkit-app-region: no-drag;
+}
+
+.winos-style .mini-layout > .center > .content .win-ctl-wrap,
+.winos-style .mini-layout > .center > .content .duration-wrap {
+  -webkit-app-region: drag;
+}
+
+.winos-style .mini-layout > .center > .content .play-ctl-wrap .lyric-btn {
+  font-weight: normal;
+  transform: translateY(-1px);
 }
 </style>

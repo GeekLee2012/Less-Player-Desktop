@@ -1,6 +1,7 @@
 import { Lyric } from './Lyric';
 import { isBlank, toTrimString, coverDefault, toLowerCaseTrimString, 
     useAudioExts, useExtraAudioExts, toMmss, } from './Utils';
+import { ImageProtocal } from './Constants';
 
 
 export class Track {
@@ -128,12 +129,13 @@ export class Track {
         return track && track.url && !isBlank(track.url)
     }
 
-    static hasCover(track) {
+    static hasCover(track, ignoreLocal) {
         if (!track) return false
         const { cover } = track
         const _cover = toTrimString(cover)
         if (_cover.length < 1) return false
         if (_cover == 'default_cover.png') return false
+        if (ignoreLocal && _cover.startsWith(ImageProtocal.prefix)) return false
         return true
     }
 

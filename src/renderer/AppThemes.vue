@@ -342,6 +342,10 @@ body.app-win-custom-shadow {
   box-sizing: border-box;
 }
 
+body.app-win-custom-shadow.mini {
+  padding: 0px;
+}
+
 .app-win-custom-shadow #app {
   box-shadow: var(--app-win-custom-box-shadow);
 }

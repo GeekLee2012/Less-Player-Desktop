@@ -191,7 +191,7 @@ const setupCustomAppBorderRadiusViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '#custom-app-border-radius-view',
     width: 618,
-    height: 520
+    height: 470
   })
 }
 
@@ -590,6 +590,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: calc(0px + var(--app-win-custom-shadow-size));
   width: 404px;
   width: 40.4%;
+  max-width: 500px;
   height: calc(100% - var(--main-top-height) - 2px - var(--main-bottom-height) - 2px - var(--app-win-custom-shadow-size) * 2);
   z-index: 55;
   background-color: var(--app-bg-color);
@@ -602,8 +603,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   top: calc(0px + var(--app-win-custom-shadow-size));
   right: calc(0px + var(--app-win-custom-shadow-size));
   width: 335px;
-  max-width: 404px;
   width: 33.5%;
+  max-width: 500px;
   height:calc(100% - var(--app-win-custom-shadow-size) * 2);
   z-index: 99;
   box-shadow: var(--box-shadow);
@@ -629,7 +630,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   top: calc(0px + var(--app-win-custom-shadow-size));
   right: calc(0px + var(--app-win-custom-shadow-size));
   width: 335px;
-  max-width: 404px;
+  max-width: 500px;
   width: 33.5%;
   height: calc(100% - var(--app-win-custom-shadow-size) * 2);
   z-index: 100;
@@ -800,7 +801,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   bottom: 80px;
   width: 618px;
-  height: 520px;
+  height: 470px;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);

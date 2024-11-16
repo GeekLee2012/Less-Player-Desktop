@@ -140,6 +140,7 @@ const { setThemeIndex,
     toggleThemesShortcut,
     toggleUserHomeShortcut,
     toggleSimpleLayoutShortcut,
+    toggleSimpleLayoutShortcutForMiniLayout,
     toggleCloudStorageShortcut,
     setDesktopLyricFontSize,
     setDesktopLyricColor,
@@ -504,7 +505,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="cate-name">布局</span>
                 <div class="content">
                     <div class="last">
-                        <span v-for="(item, index) in ['自动', '经典', '主流','简约']" class="layout-item"
+                        <span v-for="(item, index) in ['自动', '经典', '主流', '简约', '迷你']" class="layout-item"
                             :class="{ active: index == layout.index, 'first-item': index == 0 }" @click="setLayoutIndex(index)">
                             {{ item }}
                         </span>
@@ -1190,9 +1191,15 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleUserHomeShortcut" :value="navigation.userHomeShortcut">
                         </ToggleControl>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">简约布局：</span>
                         <ToggleControl @click="toggleSimpleLayoutShortcut" :value="navigation.simpleLayoutShortcut">
+                        </ToggleControl>
+                    </div>
+                    <div>"简约布局"按钮，点击时切换为：</div>
+                    <div class="last">
+                        <span class="cate-subtitle">迷你布局：</span>
+                        <ToggleControl @click="toggleSimpleLayoutShortcutForMiniLayout" :value="navigation.simpleLayoutShortcutForMiniLayout">
                         </ToggleControl>
                     </div>
                 </div>
@@ -1331,22 +1338,22 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                     </div>
                     <div class="http-proxy" v-show="network.httpProxy.enable">
-                        <div>
+                        <div class="network-item">
                             <span>主机: </span>
                             <input type="text" placeholder="IP、域名" v-model="network.httpProxy.host" />
                         </div>
-                        <div class="spacing">
+                        <div class="network-item spacing">
                             <span>端口:</span>
                             <input type="number" placeholder="范围0 - 65535，默认80" min="0" max="65535" step="1"
                                 v-model="network.httpProxy.port" />
                         </div>
                     </div>
                     <div class="http-proxy" v-show="network.httpProxy.enable">
-                        <div>
+                        <div class="network-item">
                             <span>用户: </span>
                             <input type="text" placeholder="用户名" v-model="network.httpProxy.username" />
                         </div>
-                        <div class="spacing">
+                        <div class="network-item spacing">
                             <span>密码:</span>
                             <input type="password" placeholder="密码" v-model="network.httpProxy.password" />
                         </div>
@@ -1358,22 +1365,22 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                     </div>
                     <div class="socks-proxy" v-show="network.socksProxy.enable">
-                        <div>
+                        <div class="network-item">
                             <span>主机: </span>
                             <input type="text" placeholder="IP、域名" v-model="network.socksProxy.host" />
                         </div>
-                        <div class="spacing">
+                        <div class="network-item spacing">
                             <span>端口:</span>
                             <input type="number" placeholder="范围0 - 65535，默认80" min="0" max="65535" step="1"
                                 v-model="network.socksProxy.port" />
                         </div>
                     </div>
                     <div class="socks-proxy last" v-show="network.socksProxy.enable">
-                        <div>
+                        <div class="network-item">
                             <span>用户: </span>
                             <input type="text" placeholder="用户名" v-model="network.socksProxy.username" />
                         </div>
-                        <div class="spacing">
+                        <div class="network-item spacing">
                             <span>密码:</span>
                             <input type="password" placeholder="密码" v-model="network.socksProxy.password" />
                         </div>
@@ -1768,12 +1775,12 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 
 #setting-view .max-content-mr-20 .cate-subtitle {
-    width: max-content;
+    max-width: max-content;
     margin-right: 20px;
 }
 
 #setting-view .max-content-mr-36 .cate-subtitle {
-    width: max-content !important;
+    max-width: max-content !important;
     margin-right: 36px;
 }
 
@@ -1930,7 +1937,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view .window-ctl .sec-title,
-#setting-view .border-radius-ctl  .sec-title,
+#setting-view .border-radius-ctl .sec-title,
 #setting-view .window-custom-shadow .sec-title,
 #setting-view .keys .cate-subtitle {
     width: 159px !important;
@@ -2058,6 +2065,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     background-color: var(--content-inputs-bg-color);
     margin-left: 10px;
     min-width: 258px;
+    width: 50%;
     color: var(--content-inputs-text-color);
 }
 
@@ -2067,12 +2075,24 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view .desktopLyric .color-input-ctl {
-    width: 276px;
+    min-width: 276px;
+    width: calc(50% + 18px);
+}
+
+#setting-view .network .network-item {
+    width: 47%;
+    display: flex;
+    align-items: center;
+}
+
+#setting-view .network .network-item span {
+    min-width: max-content !important;
+    margin-right: 5px;
 }
 
 #setting-view .network input {
     min-width: 235px !important;
-    width: 235px
+    flex: 1;
 }
 
 #setting-view .version .download-wrap {
@@ -2172,11 +2192,13 @@ onUnmounted(() => offEvents(eventsRegistration))
 #setting-view .center .dir-input-ctl {
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 #setting-view .center .dir-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
+    width: 50% !important;
 }
 
 #setting-view .center .dir-input-ctl .select-btn {

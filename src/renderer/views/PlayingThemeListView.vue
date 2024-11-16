@@ -295,7 +295,9 @@ const onImageDrop = (event, item, index) => {
 
 .playing-theme-list-view .center > .item .preview {
     width: 100%;
-    height: 188px;
+    min-height: 190px;
+    height: var(--content-playing-theme-list-item-height);
+    max-height: 295px;
     object-fit: fill;
     margin-bottom: 3px;
     border-radius: var(--border-inputs-border-radius);

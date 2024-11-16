@@ -23,16 +23,16 @@ export class LocalMusic {
     //歌曲详情
     static playDetail(id, track) {
         return new Promise(async (resolve, reject) => {
-            const result = new Track(id, LocalMusic.CODE)
+            const result = { ...track }
             //修正URL
-            let url = track.url
-            if (!url.includes(FILE_PREFIX)) {
+            let { url } = result
+            if (url && !url.includes(FILE_PREFIX)) {
                 Object.assign(result, { url: (FILE_PREFIX + url) })
             }
             
             //封面
             const { isUseOnlineCoverEnable } = useSettingStore()
-            if (isUseOnlineCoverEnable) {
+            if (!Track.hasCover(track) || isUseOnlineCoverEnable) {
                 const onlineCandidate = await United.transferTrack(track, { isGetCover: true })
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
@@ -49,13 +49,13 @@ export class LocalMusic {
     //歌词
     static lyric(id, track) {
         return new Promise(async (resolve, reject) => {
-            const result = { id, platform: LocalMusic.CODE, lyric: null, trans: null }
+            const result = { ...track }
             //内嵌歌词
-            let lyricText = track.embeddedLyricText
+            let lyricText = result.embeddedLyricText
             //本地歌词（同名文件）
             try {
                 if (!lyricText) {
-                    lyricText = await ipcRendererInvoke('load-lyric-file', track.url)
+                    lyricText = await ipcRendererInvoke('load-lyric-file', result.url)
                 }
             } catch (error) {
                 console.log(error)
@@ -63,7 +63,7 @@ export class LocalMusic {
             //在线歌词
             let onlineCandidate = null
             if (!lyricText) {
-                onlineCandidate = await United.transferTrack(track, { isGetLyric: true })
+                onlineCandidate = await United.transferTrack(result, { isGetLyric: true })
                 if (onlineCandidate) {
                     const { lyric, lyricTrans } = onlineCandidate
                     Object.assign(result, { lyric, trans: lyricTrans })
@@ -74,11 +74,11 @@ export class LocalMusic {
 
             //封面，顺便更新一下
             const { isUseOnlineCoverEnable } = useSettingStore()
-            if (isUseOnlineCoverEnable) {
+            if (!Track.hasCover(track) || isUseOnlineCoverEnable) {
                 if (!onlineCandidate || !Track.hasCover(onlineCandidate)) onlineCandidate = await United.transferTrack(track, { isGetCover: true })
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
-                    if (cover && track.cover != cover) {
+                    if (cover && result.cover != cover) {
                         Object.assign(result, { cover })
                         onTrackUpdated(result)
                     }

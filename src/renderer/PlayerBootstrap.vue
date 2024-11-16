@@ -59,13 +59,14 @@ const { theme, layout, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
     isResumePlayAfterVideoEnable, isPauseOnPlayingVideoEnable,
     selectedAudioOutputDeviceId, isDndSaveEnable,
-    isShowDialogBeforeClearPlaybackQueue, } = storeToRefs(useSettingStore())
+    isShowDialogBeforeClearPlaybackQueue, 
+    isUseOnlineCoverEnable, isMiniLayout, } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray,
     syncSettingFromDesktopLyric, getCurrentTheme,
     setAudioOutputDeviceId, setupAudioOutputDevice,
     getDndSavePath, setDndSavePath,
-    getCurrentThemeContentBgColor } = useSettingStore()
+    getCurrentThemeContentBgColor, switchToFallbackLayout, } = useSettingStore()
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
 const { playVideoNow } = useVideoPlayStore()
@@ -154,7 +155,9 @@ const loadLyric = (track) => {
         if (!isCurrentTrack(track)) return
         //顺便更新封面
         const { cover } = result
-        if (Track.hasCover(result)) Object.assign(track, { cover })
+        if (Track.hasCover(result, isUseOnlineCoverEnable.value)) {
+            Object.assign(track, { cover })
+        }
         //若当前平台获取到歌词，则直接更新
         if (Track.hasLyric(result)) {
             updateLyric(track, result)
@@ -172,8 +175,12 @@ const loadLyricFromUnited = (track) => {
             //仍然无法获取，直接返回
             if (!uResult) return notifyLyricLoaded(track)
             //更新歌词
-            const { lyric, lyricRoma: roma, lyricTrans: trans } = uResult
+            const { lyric, lyricRoma: roma, lyricTrans: trans, cover } = uResult
             updateLyric(track, { lyric, roma, trans })
+            //顺便更新封面
+            if (Track.hasCover(uResult, isUseOnlineCoverEnable.value)) {
+                Object.assign(track, { cover })
+            }
         }, error => notifyLyricLoaded(track))
 }
 
@@ -276,7 +283,7 @@ const bootstrapTrack = (track, options) => {
             updateLyric(track, { lyric })
         }
         //更新封面
-        if (Track.hasCover(result) && !keepCover) {
+        if (Track.hasCover(result, isUseOnlineCoverEnable.value) && !keepCover) {
             Object.assign(track, { cover })
         }
         //更新歌手
@@ -909,10 +916,12 @@ const mmssCurrentTime = ref('00:00')
 const mmssPreseekTime = ref(null) //格式: 00:00
 const currentTimeState = ref(0) //单位: 秒
 const progressState = ref(0)
+const mmssDurationLeft = ref('00:00')
 
 const resetPlayState = (state) => {
     currentTimeState.value = 0
     mmssCurrentTime.value = '00:00'
+    mmssDurationLeft.value = '00:00'
     mmssPreseekTime.value = null
     progressState.value = 0
     setPlayState(state || PlayState.NONE)
@@ -972,6 +981,8 @@ const playVideoItem = (video, failText, text, traceId) => {
 
     failText = (failText || '当前视频无法播放')
     text = text || (mv ? '即将为您播放MV' : '即将为您播放视频')
+
+    if(isMiniLayout.value) switchToFallbackLayout()
 
     getVideoDetail(video).then(result => {
         showToast(text, () => {
@@ -1241,6 +1252,7 @@ const setupCustomDndPlayingCover = async (event) => {
     event.preventDefault()
 
     const { files } = event.dataTransfer
+    if(!files || files.length < 1) return
     const { path } = files[0]
     let isEventStopped = true
     if (isSupportedImage(path)) {
@@ -1330,7 +1342,7 @@ onIpcRendererEvents({
     'globalShortcut-visitSetting': () => visitSetting(),
     'globalShortcut-togglePlaybackQueue': togglePlaybackQueueView,
     'globalShortcut-toggleLyricToolbar': () => {
-        if (playingViewShow.value) toggleLyricToolbar()
+        if (playingViewShow.value || isSimpleLayout.value) toggleLyricToolbar()
     },
     'globalShortcut-resetSetting': () => {
         emitEvents('app-resetSetting')
@@ -1396,6 +1408,7 @@ const handleStartupPlay = () => {
         'app-startup-playVideos': (event, video) => {
             if (!video) return
             const tailText = Video.isCollectionType(video) ? '合集' : ''
+            if(isMiniLayout.value) switchToFallbackLayout()
             showToast(`即将为您播放视频${tailText}`, () => {
                 playVideo(video)
                 ipcRendererSend('app-startup-playDone', video)
@@ -1505,8 +1518,9 @@ const eventsRegistration = {
                 }
                 if (!isCurrentTrack(track)) return
                 if (isDevEnv()) console.log(candidate)
-                const { url, lyric, lyricTrans, lyricRoma, duration, isCandidate } = candidate
+                const { url, cover, lyric, lyricTrans, lyricRoma, duration, isCandidate } = candidate
                 Object.assign(track, { url, lyric, lyricTrans, lyricRoma, duration, isCandidate })
+                if (Track.hasCover(candidate)) Object.assign(track, { cover })
                 showToast(TRANSFRER_OK_MSG, () => {
                     if (isCurrentTrack(track)) {
                         loadLyric(track)
@@ -1575,6 +1589,8 @@ const eventsRegistration = {
         currentTimeState.value = currentSecs
         const _duration = track.duration || 0
         progressState.value = _duration > 0 ? (currentTime / _duration) : 0
+        const durationLeft = (_duration - currentTime)
+        mmssDurationLeft.value = toMmss(Math.max(durationLeft, 0))
         //ipcRendererSend('app-setProgressBar', progressState.value || -1)
     },
     'track-seekAction': ({ track, pos }) => {
@@ -1708,6 +1724,7 @@ provide('player', {
     addAndPlayTracks,
     loadLyric,
     mmssCurrentTime,
+    mmssDurationLeft,
     currentTimeState,
     progressState,
     playState,

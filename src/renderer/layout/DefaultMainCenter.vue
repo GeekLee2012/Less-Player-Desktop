@@ -25,7 +25,8 @@ const currentMainBottom = shallowRef(null)
 
 const { playlistCategoryViewShow, artistCategoryViewShow,
     radioCategoryViewShow, playingViewShow,
-    soundEffectViewShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
+    soundEffectViewShow, lyricToolbarShow,
+    playingThemeListViewShow, } = storeToRefs(useAppCommonStore())
 const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
@@ -237,6 +238,18 @@ const setPlayingViewSize = () => {
     setVisualPlayingViewCanvasSize()
 
     setLyricToolbarPos()
+    setPlayingThemeListViewSize()
+}
+
+//播放页 - 播放样式
+const setPlayingThemeListViewSize = () => {
+    const { clientWidth, clientHeight } = document.documentElement
+    const wScaleRatio = clientWidth / minAppWidth
+    const hScaleRatio = clientHeight / minAppHeight
+    const height = Math.round(190 * Math.min(wScaleRatio, hScaleRatio))
+    applyDocumentStyle({
+        '--content-playing-theme-list-item-height': `${height}px`
+    })
 }
 
 const setLyricToolbarPos = () => {
@@ -346,6 +359,7 @@ watch(lyricMetaPos, () => {
     setVisualPlayingViewLyricCtlSize()
 })
 watch(winCustomShadowSize, resizeViewItems)
+watch(playingThemeListViewShow, setPlayingThemeListViewSize, { immediate: true })
 
 const eventsRegistration = {
     //'batchView-show': setBatchViewListSize,

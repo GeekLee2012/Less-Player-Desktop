@@ -29,7 +29,7 @@ const { setExploreMode, setArtistExploreMode,
     setSearchPlaceHolderIndex, setRouterCtxCacheItem,
     hidePlayingThemeListView, setCloudStorageExploreMode } = useAppCommonStore()
 const { findCustomPlaylistIndex } = useUserProfileStore()
-const { isSimpleLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
+const { isSimpleLayout, isMiniLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
 
@@ -126,7 +126,7 @@ const createCommonRoute = (route, onRouteReady) => {
             setRouterCtxCacheItem(null)
             hideRelativeComponents()
 
-            if (isSimpleLayout.value) switchToFallbackLayout()
+            if (isSimpleLayout.value || isMiniLayout.value) switchToFallbackLayout()
             if (!toPath.includes('/artist/')) hidePlaybackQueueView()
             
             emitEvents('app-beforeRoute', { toPath, fromPath })

@@ -109,6 +109,7 @@ const playingState = computed(() => {
             'playback-queue-item-active': active, 
             'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data),
             actionable,
+            'ex-action': isMvBtnShow,
         }"
         @dblclick="" 
         @contextmenu="onContextMenu">
@@ -138,7 +139,7 @@ const playingState = computed(() => {
                     </div>
                 </div>
                 <div class="action" v-show="actionable">
-                    <svg v-show="isMvBtnShow" @click="playVideoItem(data)" width="18" height="16" viewBox="0 0 1024 853.52"
+                    <svg v-show="isMvBtnShow" @click="playVideoItem(data)" width="18" height="18" viewBox="0 0 1024 853.52"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -147,12 +148,12 @@ const playingState = computed(() => {
                             </g>
                         </g>
                     </svg>
-                    <svg :class="{ spacing1: isMvBtnShow }" v-show="!playingState" @click="playItem" width="18" height="18" viewBox="0 0 139 139"
+                    <svg :class="{ spacing2: isMvBtnShow }" v-show="!playingState" @click="playItem" width="18" height="18" viewBox="0 0 139 139"
                         xmlns="http://www.w3.org/2000/svg" xml:space="preserve" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <path
                             d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
                     </svg>
-                    <svg :class="{ spacing1: isMvBtnShow }" v-show="playingState" @click="playItem" width="15" height="15" viewBox="0 0 658.53 1006.16"
+                    <svg :class="{ spacing2: isMvBtnShow }" v-show="playingState" @click="playItem" width="18" height="15" viewBox="0 0 658.53 1006.16"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -163,7 +164,7 @@ const playingState = computed(() => {
                             </g>
                         </g>
                     </svg>
-                    <svg @click="linkItem" width="16" height="16" class="spacing" viewBox="0 0 80 80"
+                    <svg @click="linkItem" width="16" height="16" class="spacing1" viewBox="0 0 80 80"
                         xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Capa_1" data-name="Capa 1">
@@ -172,7 +173,7 @@ const playingState = computed(() => {
                             </g>
                         </g>
                     </svg>
-                    <svg @click="removeItem" width="16" height="16" class="spacing" viewBox="0 0 256 256"
+                    <svg @click="removeItem" width="16" height="16" class="spacing1" viewBox="0 0 256 256"
                         data-name="Layer 1" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z"
@@ -220,6 +221,10 @@ const playingState = computed(() => {
 
 .playback-queue-item .spacing1 {
     margin-left: 15px;
+}
+
+.playback-queue-item .spacing2 {
+    margin-left: 18px;
 }
 
 .playback-queue-item-active .item-wrap {
@@ -328,13 +333,13 @@ const playingState = computed(() => {
 
     position: absolute;
     top: 0px;
-    right: 10px;
+    right: 0px;
 
     display: flex;
     align-items: center;
 
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
 
     /*background: var(--content-list-item-hover-bg-color);*/
     visibility: hidden;
@@ -360,9 +365,12 @@ const playingState = computed(() => {
 
 .playback-queue-item.actionable:hover .title,
 .playback-queue-item.actionable:hover .artist {
-    width: 158px;
-    width: 47.16%;
-    width: 50%;
+    width: 59%;
+}
+
+.playback-queue-item.actionable.ex-action:hover .title,
+.playback-queue-item.actionable.ex-action:hover .artist {
+    width: 49%;
 }
 
 .playback-queue-item.actionable:hover .action {

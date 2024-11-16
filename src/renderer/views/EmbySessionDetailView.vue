@@ -477,6 +477,13 @@ const playAll = () => {
     addAndPlayTracks(tabData, true, '即将为您播放当前页')
 }
 
+const addAll = () => {
+    if(tabData.length < 1) return 
+
+    addTracks(tabData)
+    showToast('当前页歌曲已添加')
+}
+
 let songTotalPages = 1
 const randomPlay = () => {
     //随缘听第一次点击，固定从第一页歌曲列表里随机
@@ -492,13 +499,6 @@ const randomPlay = () => {
         showToast('即将为您随缘一曲')
         playTrack(data[index])
     })
-}
-
-const addAll = () => {
-    if(tabData.length < 1) return 
-
-    addTracks(tabData)
-    showToast('当前页歌曲已添加')
 }
 
 const refreshSession = () => {
@@ -662,9 +662,9 @@ onUnmounted(() =>offEvents(eventsRegistration))
 #emby-session-detail-view .categories {
     --height-factor: 20px;
     position: fixed;
-    top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size) + var(--height-factor) / 2);
+    top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size) + var(--height-factor) / 2 - 10px);
     right: calc(0px + var(--app-win-custom-shadow-size));
-    height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px - var(--app-win-custom-shadow-size) * 2 - var(--height-factor));
+    height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px + 10px - var(--app-win-custom-shadow-size) * 2 - var(--height-factor));
     padding: 20px 0px;
     background: var(--app-bg-color);
     z-index: 99;
@@ -686,7 +686,7 @@ onUnmounted(() =>offEvents(eventsRegistration))
 #emby-session-detail-view .categories li {
     list-style: none;
     padding: 6px 0px 6px 0px;
-    width: 88px;
+    width: 108px;
     margin-top: 8px;
     text-align: center;
     font-size: calc(var(--content-text-size) - 1px);
@@ -808,6 +808,7 @@ onUnmounted(() =>offEvents(eventsRegistration))
     display: flex;
     justify-content: center;
     align-items: center;
+    min-width: 66px;
 }
 
 #emby-session-detail-view .center {

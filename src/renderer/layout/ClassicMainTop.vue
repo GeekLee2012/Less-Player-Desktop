@@ -17,7 +17,7 @@ const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('ap
 const { hasNewRelease } = inject('appVersion')
 
 
-const { setLayoutIndex, switchToSimpleLayout } = useSettingStore()
+const { setLayoutIndex, switchToSimpleLayout, switchToMiniLayout } = useSettingStore()
 const { isRadioModeShortcutEnable,
     isModulesSettingShortcutEnable,
     isPluginsSettingShortcutEnable,
@@ -26,7 +26,8 @@ const { isRadioModeShortcutEnable,
     isSimpleLayoutShortcutEnable, 
     isFreeVideoShortcutEnable,
     isCloudStorageShortcutEnable,
-    isUpdatesHintShowEnable, } = storeToRefs(useSettingStore())
+    isUpdatesHintShowEnable,
+    isSimpleLayoutShortcutForMiniLayoutEnable, } = storeToRefs(useSettingStore())
 const { isMaxScreen, isRadioMode, isRadioModeEnable, 
     isCloudStorageModeEnable } = storeToRefs(useAppCommonStore())
 
@@ -38,6 +39,14 @@ const toggleRadioMode = () => {
 
 const visitCloudStorage = () => {
     emitEvents('visitCloudStorageMode')
+}
+
+const switchToSmallLayout = () => {
+    if(isSimpleLayoutShortcutForMiniLayoutEnable.value) {
+        switchToMiniLayout()
+    } else {
+        switchToSimpleLayout()
+    }
 }
 </script>
 
@@ -148,7 +157,7 @@ const visitCloudStorage = () => {
                         </g>
                     </svg>
                 </div>
-                <div class="switch-layout-btn btn" @click="switchToSimpleLayout" v-show="isSimpleLayoutShortcutEnable">
+                <div class="switch-layout-btn btn" @click="switchToSmallLayout" v-show="isSimpleLayoutShortcutEnable">
                     <svg width="20" height="18.3" viewBox="0 0 1019 1019" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">

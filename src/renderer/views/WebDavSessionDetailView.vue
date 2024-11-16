@@ -356,7 +356,7 @@ onMounted(visitRoot)
                 </div>
             </div>
         </div>
-        <div class="tip-text about">
+        <div class="tip-text about" v-show="false">
             <p>郑重声明: 当前应用无法保证账号信息安全；当涉及隐私信息时，不建议使用此项WebDAV</p>
         </div>
         <div class="center">
@@ -558,7 +558,7 @@ onMounted(visitRoot)
 #webdav-session-detail-view .header {
     display: flex;
     flex-direction: column;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     padding: 0px 33px 0px 33px;
 }
 

@@ -481,7 +481,7 @@ onActivated(() => {
                         v-show="(plugins && plugins.length > 0) && (activeTab && activeTab.code >= 0)" 
                         :leftAction="toggleAllPluginsState">
                         <template #left-img>
-                            <svg v-show="isActivedStateTab()" width="15" height="15" viewBox="0 0 853.47 853.5" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-show="isActivedStateTab()" class="deactive-icon" width="16" height="16" viewBox="0 0 853.47 853.5" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -658,6 +658,10 @@ onActivated(() => {
 
 #plugins-view .center .tab-tip {
     font-weight: bold;
+}
+
+#plugins-view .center .tab-nav .deactive-icon {
+    transform: translateY(1px) scale(0.98);
 }
 
 #plugins-view .center > .content {

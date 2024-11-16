@@ -13,7 +13,7 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 const { visitRecents, visitBatchPlaybackQueue } = inject('appRoute')
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
-const { resetQueue, moveTrack } = usePlayStore()
+const { resetQueue, moveTrack, } = usePlayStore()
 const { showToast, hidePlaybackQueueView,
     hidePlayingView, hideAllCtxMenus,
     setRouterCtxCacheItem, } = useAppCommonStore()
@@ -184,6 +184,10 @@ const tutorialList = [{
     title: '内存占用高，请降低图片清晰度',
     artist: [ { id:'', name: '教程 - 性能' }],
     color: '#bbded6',
+}, {
+    title: '窗口闪动：请开启“锁定为初始值”',
+    artist: [ { id:'', name: '教程 - 设置页 - 通用 - 窗口缩放' }],
+    color: '#3B4371',
 }, {
     title: '关闭时不退出：设置页 - 菜单栏',
     artist: [ { id:'', name: '教程' }],

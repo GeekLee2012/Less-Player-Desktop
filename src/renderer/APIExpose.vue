@@ -33,7 +33,7 @@ import { Album } from '../common/Album';
 import { Lyric } from '../common/Lyric';
 import { usePlayStore } from './store/playStore';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
-
+import { tify, sify } from 'chinese-conv'; 
 
 
 
@@ -262,6 +262,8 @@ const lessAPI = {
         transformUrl,
         parseXML, 
         buildXML,
+        tify,
+        sify,
     },
     crypto: {
         randomText,

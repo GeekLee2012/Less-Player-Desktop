@@ -566,9 +566,9 @@ onDeactivated(() => setCategoriesShow(false))
 #navidrome-session-detail-view .categories {
     --height-factor: 20px;
     position: fixed;
-    top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size) + var(--height-factor) / 2);
+    top: calc(var(--main-top-height) + 3px + var(--app-win-custom-shadow-size) + var(--height-factor) / 2 - 10px);
     right: calc(0px + var(--app-win-custom-shadow-size));
-    height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px - var(--app-win-custom-shadow-size) * 2 - var(--height-factor));
+    height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px + 10px - var(--app-win-custom-shadow-size) * 2 - var(--height-factor));
     padding: 20px 0px;
     background: var(--app-bg-color);
     z-index: 99;
@@ -590,7 +590,7 @@ onDeactivated(() => setCategoriesShow(false))
 #navidrome-session-detail-view .categories li {
     list-style: none;
     padding: 6px 0px 6px 0px;
-    width: 88px;
+    width: 108px;
     margin-top: 8px;
     text-align: center;
     font-size: calc(var(--content-text-size) - 1px);
@@ -688,6 +688,7 @@ onDeactivated(() => setCategoriesShow(false))
     display: flex;
     justify-content: center;
     align-items: center;
+    min-width: 66px;
 }
 
 #navidrome-session-detail-view .header.none-title .title-wrap,

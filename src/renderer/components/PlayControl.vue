@@ -3,6 +3,10 @@ import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 
+const props = defineProps({
+    toggleQueueAction: Function,
+})
+
 
 const { playing, playMode } = storeToRefs(usePlayStore())
 const { playPrevTrack, togglePlay, playNextTrack, switchPlayMode } = usePlayStore()
@@ -13,7 +17,13 @@ const togglePlaybackQueue = () => {
     hideAllCategoryViews()
     hideAllCtxMenus()
     hidePlayingThemeListView()
-    togglePlaybackQueueView()
+    
+    const { toggleQueueAction } = props
+    if(typeof toggleQueueAction == 'function') {
+        toggleQueueAction()
+    } else {
+        togglePlaybackQueueView()
+    }
 }
 </script>
 

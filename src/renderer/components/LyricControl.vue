@@ -17,7 +17,9 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 const props = defineProps({
     track: Object, //Track
-    currentTime: Number
+    currentTime: Number,
+    hiddenMeta: Boolean,
+    layoutMode: Number,
 })
 
 const { playVideoItem, loadLyric, currentTimeState,
@@ -26,7 +28,8 @@ const { playVideoItem, loadLyric, currentTimeState,
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
-const { lyric, lyricTransActived, lyricRomaActived, isDndSaveEnable, } = storeToRefs(useSettingStore())
+const { lyric, lyricTransActived, lyricRomaActived, 
+    isDndSaveEnable, isMiniLayout, } = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 //const { currentTrack } = storeToRefs(usePlayStore())
 
@@ -245,7 +248,7 @@ const setupLyricAlignment = () => {
 
 }
 
-const isHeaderVisible = () => (lyric.value.metaPos == 0)
+const isHeaderVisible = () => (lyric.value.metaPos == 0 && !props.hiddenMeta)
 
 //播放到指定歌词行，即通过歌词调整歌曲进度
 const scrollLocatorTime = ref(0)
@@ -345,12 +348,37 @@ const loadTrackLyric = (track) => {
     loadLyric(track)
 }
 
+//显示模式（布局）
+const showByLayoutMode = computed(() => {
+  return (key, value, index) => {
+    const { layoutMode } = props
+    if(typeof layoutMode == 'undefined') return true
+
+    switch (layoutMode) {
+      case 1: //双行
+        if (currentIndex.value == index) return true
+        const offset = (currentIndex.value % 2 === 1) ? -1 : 1
+        return (currentIndex.value + offset) == index
+      case 2: //全部显示
+        return true
+      default: //单行
+        return currentIndex.value == index
+    }
+  }
+})
+
+const isFullLayoutMode = computed(() => {
+    const { layoutMode } = props
+    if(typeof layoutMode == 'undefined') return true
+    return layoutMode == 2
+})
+
 
 
 /* 生命周期、监听 */
 watch(() => props.currentTime, (nv, ov) => {
     //TODO 暂时简单处理，播放页隐藏时直接返回
-    if (!playingViewShow.value) return
+    if (!playingViewShow.value && !isMiniLayout.value) return
     safeRenderAndScrollLyric(nv)
 }, { immediate: true })
 
@@ -433,7 +461,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span v-show="Playlist.isFMRadioType(track)">暂无简介，请继续聆听电台吧~</span>
             </div>
             <div v-for="([key, value], index) in lyricData" 
-                v-show="lyricExistState == 1" 
+                v-show="lyricExistState == 1 && showByLayoutMode(key, value, index)" 
                 class="line" 
                 :class="{
                     first: index == 0,
@@ -461,10 +489,10 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </svg>
             </div>
         </div>
-        <div class="trans-btn extra-btn" v-show="Track.hasLyricTrans(track)">
+        <div class="trans-btn extra-btn" v-show="Track.hasLyricTrans(track) && isFullLayoutMode">
             <span :class="{ active: lyricTransActived }" @click="toggleLyricTrans">译</span>
         </div>
-        <div class="roma-btn extra-btn" v-show="Track.hasLyricRoma(track)">
+        <div class="roma-btn extra-btn" v-show="Track.hasLyricRoma(track) && isFullLayoutMode">
             <span :class="{ active: lyricRomaActived }" @click="toggleLyricRoma">音</span>
         </div>
     </div>

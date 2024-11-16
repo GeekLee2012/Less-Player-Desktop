@@ -355,6 +355,8 @@ export const useSettingStore = defineStore('setting', {
             freeVideoShortcut: false,
             //网络存储按钮
             cloudStorageShortcut: false,
+            //点击简约布局按钮时，切换为迷你布局 / 简约布局
+            simpleLayoutShortcutForMiniLayout: false,
         },
         /* 对话框 */
         dialog: {
@@ -559,6 +561,9 @@ export const useSettingStore = defineStore('setting', {
         isSimpleLayout() {
             return this.layout.index == SIMPLE_LAYOUT_INDEX
         },
+        isMiniLayout() {
+            return this.layout.index == 4
+        },
         getWindowZoom() {
             return this.common.winZoom
         },
@@ -625,6 +630,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isSimpleLayoutShortcutEnable() {
             return this.navigation.simpleLayoutShortcut
+        },
+        isSimpleLayoutShortcutForMiniLayoutEnable() {
+            return this.navigation.simpleLayoutShortcutForMiniLayout
         },
         isFreeVideoShortcutEnable() {
             return this.navigation.freeVideoShortcut
@@ -881,15 +889,19 @@ export const useSettingStore = defineStore('setting', {
 
             this.layout.index = index || 0
             const currentIndex = this.layout.index
-            if (!this.isSimpleLayout) this.layout.fallbackIndex = currentIndex
+            if (!this.isSimpleLayout && !this.isMiniLayout) this.layout.fallbackIndex = currentIndex
             emitEvents('app-layout')
         },
         switchToFallbackLayout() {
+            if(this.layout.fallbackIndex > 2) this.layout.fallbackIndex = 0
             this.setLayoutIndex(this.layout.fallbackIndex)
             this.setupWindowZoom()
         },
         switchToSimpleLayout() {
             this.setLayoutIndex(SIMPLE_LAYOUT_INDEX)
+        },
+        switchToMiniLayout() {
+            this.setLayoutIndex(4)
         },
         presetThemes() {
             const { getPresetThemes } = useThemeStore()
@@ -1211,6 +1223,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleSimpleLayoutShortcut() {
             this.navigation.simpleLayoutShortcut = !this.navigation.simpleLayoutShortcut
+        },
+        toggleSimpleLayoutShortcutForMiniLayout() {
+            this.navigation.simpleLayoutShortcutForMiniLayout = !this.navigation.simpleLayoutShortcutForMiniLayout
         },
         toggleFreeVideoShortcut() {
             this.navigation.freeVideoShortcut = !this.navigation.freeVideoShortcut

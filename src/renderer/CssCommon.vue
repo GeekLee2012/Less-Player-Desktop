@@ -36,6 +36,8 @@
   --content-left-nav-line-spacing: 10.5px;
   --content-error-color: #fc605c;
   --content-new-color: #fc605c;
+  
+  --content-playing-theme-list-item-height: 190px;
 
   /*边框 */
   --border-app-win-border-radius: 12px;
@@ -83,7 +85,7 @@
   --content-desktop-lyric-color: #393939;
   --content-desktop-lyric-highlight-color: var(--content-text-highlight-color);
   --content-desktop-lyric-line-spacing: 22px;
-  
+  --others-mini-layout-cover-progress-bg: none;
 
   font-family: var(--content-text-font-family);
   letter-spacing: var(--content-text-letter-spacing);

@@ -4,7 +4,7 @@ import forge from "node-forge";
 import JSEncrypt from 'jsencrypt';
 import { pinyin } from 'pinyin-pro';
 import { FILE_PREFIX, DEFAULT_COVER_BASE64, FILE_SCHEME, LESS_MAGIC_CODE } from './Constants';
-import { XMLBuilder, XMLParser } from 'fast-xml-parser'; 
+import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 
 
 
@@ -677,11 +677,13 @@ export const parseVideoCollectionLines = (lines) => {
         } else {
             //数据行格式：[url]
             line = transformPath(line)
+            /*
             if(!line.startsWith('http') 
                 && !line.startsWith('blob:http') 
                 && !line.startsWith('/')) {
                 return
-            } 
+            }
+            */
             if(line.startsWith('/')) line = transformUrl(line, FILE_SCHEME)
             
             const id = randomTextWithinAlphabetNums(8)
@@ -704,6 +706,25 @@ export const parseVideoCollectionLines = (lines) => {
     }
 
     return collection
+}
+
+export const recheckVideoCollectionData = (video) => {
+    if(!video) return 
+    const { vcType, data } = video
+    if(vcType < 1) return
+    if(!data || data.length < 1) return
+
+    const _data = []
+    data.forEach(item => {
+        const { title, url } = item
+        if(title == url) return
+        if(url.startsWith('http') 
+            || url.startsWith('blob:http') 
+            || url.startsWith('/')) {
+            _data.push(item)
+        }
+    })
+    return Object.assign(video, { data: _data })
 }
 
 export const guessFilename = (name, defaultName, excludes) => {
@@ -843,6 +864,14 @@ export const isLiveStream = (url) => {
         || _url.includes('.m3u8?') 
         || _url.endsWith('.m3u')
         || _url.includes('.m3u?')
+}
+
+export const isLocalFile = (url) => {
+    return toTrimString(url).startsWith(FILE_PREFIX)
+}
+
+export const isHttpUrl = (url) => {
+    return toTrimString(url).startsWith('http')
 }
 
 

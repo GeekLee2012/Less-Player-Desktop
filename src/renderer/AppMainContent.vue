@@ -19,6 +19,7 @@ import packageCfg from '../../package.json';
 import { getDoc, getRaw } from '../common/HttpClient';
 import { useCloudStorageStore } from './store/cloudStorageStore';
 import { WebDav } from '../vendor/webdav';
+import MiniLayout from './layout/MiniLayout.vue';
 
 
 
@@ -41,7 +42,7 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
   isUseAutoWinCtl, isUseWindowsWinCtl,
   isShowDialogBeforeResetSetting, isAutoLayout,
   isAppCustomShadowShow, isCheckPreReleaseVersion,
-  isUseWinCenterStrict, } = storeToRefs(useSettingStore())
+  isUseWinCenterStrict, isMiniLayout, } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
   setupAppGlobalProxy } = useSettingStore()
@@ -219,6 +220,10 @@ const setupLayout = (isInit) => {
   } else if(isDefaultNewLayout.value 
     || (isAutoLayout.value && !isMacOS())) {
     currentAppLayout.value = DefaultNewLayout
+  } else if(isMiniLayout.value) {
+    eventName = 'app-layout-mini'
+    isInit = true
+    currentAppLayout.value = MiniLayout
   } else {
     currentAppLayout.value = DefaultLayout
   }

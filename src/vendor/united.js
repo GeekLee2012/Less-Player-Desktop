@@ -93,9 +93,11 @@ export class United {
         return album
     }
 
-    static getVendors() {
+    static getVendors(sortFn) {
         const { platforms } = usePlatformStore()
-        return (platforms('united') || []).map(item => (item.vendor))
+        const uPlatforms = (platforms('united') || [])
+        if(sortFn && typeof sortFn == 'function') uPlatforms.sort(sortFn)
+        return uPlatforms.map(item => (item.vendor))
     }
 
     static getVendor(code) {
@@ -113,10 +115,26 @@ export class United {
         return _track
     }
 
+    static mergeTrackResult(result, track) {
+        if(!track) return result
+
+        const { url, cover, lyric, lyricTrans, lyricRoma } = track
+        if(!Track.hasUrl(result) && Track.hasUrl(track)) {
+            Object.assign(result, { url })
+        }
+        if(!Track.hasCover(result, true) && Track.hasCover(track, true)) {
+            Object.assign(result, { cover })
+        }
+        if(!Track.hasLyric(result) && Track.hasLyric(track)) {
+            Object.assign(result, { lyric, lyricTrans, lyricRoma })
+        }
+        return result
+    }
+
     //互惠互助、互通有无、移花接木、同舟共济 ~
     static transferTrack(track, options) {
         return new Promise(async (resolve, reject) => {
-            let result = null
+            const result = { ...track }
 
             const { platform: fromPlatform, title } = track
             const firstArtistName = United.pretranformArtistName(Track.firstArtistName(track))
@@ -125,38 +143,55 @@ export class United {
             const tArtistName = United.tranformArtistName(_title, firstArtistName)
             const keyword = `${tTitle} ${tArtistName}`
 
-            const filteredVendors = United.getVendors().filter(v => (v.CODE != fromPlatform))
+            //TODO 优先级策略
+            const filteredVendors = United.getVendors((p1, p2) => (p2.weight - p1.weight))
+                .filter(v => (v.CODE != fromPlatform))
             const fromVendor = United.getVendor(fromPlatform)
             if (fromVendor) filteredVendors.push(fromVendor)
             
-            //TODO 优先级策略
+            const _options = { }
             for (var i = 0; i < filteredVendors.length; i++) {
                 const vendor = filteredVendors[i]
                 if(!vendor) continue
                 
                 //音源扩展点 1 - 可实现准确匹配，知道歌曲信息
                 if(vendor.transferTrack) {
-                    result = await vendor.transferTrack(United.simplifyMetadata(track), options)
+                    const ttResult = await vendor.transferTrack(United.simplifyMetadata(track), options || _options)
+                    Object.assign(result, { ...United.mergeTrackResult(result, ttResult) })
                 }
-                if (result) break
+
+                if (United.isMetedataCompleted(result)) break
+
+                if(!options && Track.hasUrl(result) && !Track.hasCover(result)) {
+                    Object.assign(_options, { isGetCover: true }) 
+                } else if(!options && Track.hasUrl(result) && !Track.hasLyric(result)) {
+                    Object.assign(_options, { isGetLyric: true }) 
+                }
                 
                 if(!vendor.searchSongs) continue
                 //音源扩展点 2 - 模糊（范围）匹配，只知道关键字，不知道歌曲信息
-                const searchResult = await vendor.searchSongs(keyword)
+                const searchResult = await vendor.searchSongs(keyword, options || _options)
                 if (!searchResult) continue
 
                 const { data: candidates } = searchResult
                 if (!candidates || candidates.length < 1) continue
 
-                result = await United.matchTrack(
+                const ssResult = await United.matchTrack(
                     { ...track, tTitle, tArtistName }, 
                     candidates.slice(0, Math.min(candidates.length, 20)), 
-                    options)
-                if (result) break
+                    options || _options)
+                Object.assign(result, { ...United.mergeTrackResult(result, ssResult) })
+                if (United.isMetedataCompleted(result)) break
             }
             resolve(result)
         })
     }
+
+    static isMetedataCompleted(track) {
+        return Track.hasUrl(track) 
+            && Track.hasCover(track, true) 
+            && Track.hasLyric(track)
+    } 
 
     //TODO 匹配算法，后续再完善
     static matchTrack(track, candidates, options) {
@@ -372,6 +407,9 @@ export class United {
                     Object.assign(candidate, { lyric, lyricTrans, lyricRoma })    
                 }
                 
+                //封面
+                if(!ignore.cover && !Track.hasCover(candidate)) continue
+
                 result = candidate
                 break
             }

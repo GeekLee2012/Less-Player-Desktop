@@ -226,8 +226,9 @@ const clearRecents = () => {
     showToast("最近播放已清空")
 }
 
-const refresh = () => {
+const refresh = (newMode) => {
     visitTab(activeTab.value)
+    if(newMode) setRefreshId(randomTextWithinAlphabetNums(8))
     //TODO
     //cleanUpAllSongs()
 }
@@ -309,20 +310,17 @@ const computedDecoAnimated = computed(() => {
 
 /* 生命周期、监听 */
 watch(playingViewShow, (nv, ov) => {
-    if (!nv) refresh()
+    if (!nv) refresh(true)
 })
 
 watch(currentPlatformCode, (nv, ov) => {
     const path = currentRoutePath()
     if (!isUserHomeMode.value && path.includes("/batch/")) return
-    refresh()
+    refresh(true)
 })
 
 const eventsRegistration = {
-    'userHome-refresh': () => {
-        setRefreshId(randomTextWithinAlphabetNums(8))
-        refresh()
-    },
+    'userHome-refresh': () => refresh(true),
     'userHome-visitRecentsTab': visitRecentsTab,
 }
 /* 生命周期、监听 */

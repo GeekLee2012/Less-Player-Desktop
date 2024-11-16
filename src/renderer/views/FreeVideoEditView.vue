@@ -13,7 +13,8 @@ import { usePlatformStore } from '../store/platformStore';
 import { useVideoPlayStore } from '../store/videoPlayStore';
 import { coverDefault, transformUrl, isSupportedVideo, 
     toTrimString, toLowerCaseTrimString, ipcRendererInvoke, 
-    parseVideoCollectionLines, useGitRepository, } from '../../common/Utils';
+    parseVideoCollectionLines, useGitRepository,
+    recheckVideoCollectionData, isLocalFile, isHttpUrl } from '../../common/Utils';
 import { Video } from '../../common/Video';
 import { Playlist } from '../../common/Playlist';
 
@@ -62,24 +63,31 @@ const parsePlay = async (lines) => {
     const { vcType, url: vcUrl, data: vcData, type } = video
     if(typeof type == 'undefined') Object.assign(video, { type: Playlist.VIDEO_TYPE })
 
-    let _video = video
-    if(Video.isCollectionType(video) && (!vcData || vcData.length < 1)) {
-        return showFailToast(failText)
-    } else if(!Video.isCollectionType(video) && !vcUrl) {
-        return showFailToast(failText)
-    } else if(!Video.isCollectionType(video) && vcUrl) {
-        const _platforms = platforms.value('video-extract')
-        for(let i = 0; i < _platforms.length; i++) {
-            const { code, vendor } = _platforms[i]
-            if(!vendor.extractVideo) continue
-            if(!vcUrl.includes(toLowerCaseTrimString(code))) continue
+    let _video = video, maySupported = true
+    if(!Video.isCollectionType(video)) {
+        if(!vcUrl) return showFailToast(failText)
+        if(!isLocalFile(vcUrl)) {
+            const _platforms = platforms.value('video-extract')
+            for(let i = 0; i < _platforms.length; i++) {
+                const { code, vendor } = _platforms[i]
+                if(!vendor.canExtractVideo || !vendor.extractVideo) continue
+                maySupported = await vendor.canExtractVideo(vcUrl)
+                if(!maySupported) continue
 
-            _video = await vendor.extractVideo(vcUrl)
-            if(!_video) continue
-            const { id, vid } = _video
-            if(id && vid) break
-        }
+                _video = await vendor.extractVideo(vcUrl)
+                if(!_video) continue
+                const { id, vid } = _video
+                if(id && vid) break
+            }
+            //再次确认
+            if(!maySupported) maySupported = isHttpUrl(vcUrl)
+        } 
+    } else {
+        _video = recheckVideoCollectionData(_video)
+        //再次确认
+        maySupported = (_video.url || (_video.data && _video.data.length > 0))
     }
+    if(!maySupported) return showFailToast(failText)
     playPlaylist(_video)
 }
 
@@ -308,18 +316,16 @@ const updateCover = async () => {
                         </svg>
                         <span class="sec-title">最近播放：</span>
                     </div>
-                    <div class="link-wrap">
-                        <div class="link-item" v-for="(item, index) in computedRecentVideos" 
+                    <div class="link-item" v-for="(item, index) in computedRecentVideos" 
                             @click="playRecentLatest(item)" 
                             :draggable="true"
                             @dragend="dragToDelete(item)"
                             v-html="computedRecentVideoTitle(item)">
-                        </div>
-                        <div class="link-item" v-show="recentVideos.length < 1 && demoShow"
-                            :draggable="true"
-                            @dragend="dragToDeleteDemo()">
-                            播放记录，保留最近10条；单击即可播放；轻轻拖拽即可删除
-                        </div>
+                    </div>
+                    <div class="link-item" v-show="recentVideos.length < 1 && demoShow"
+                        :draggable="true"
+                        @dragend="dragToDeleteDemo()">
+                        播放记录，保留最近66条；单击即可播放；轻轻拖拽即可删除
                     </div>
                 </div>
             </div>
@@ -341,7 +347,7 @@ const updateCover = async () => {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 #free-video-edit-view .header .title {
@@ -354,7 +360,7 @@ const updateCover = async () => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 10px;
     position: relative;
     width: 100%;
 }
@@ -429,7 +435,7 @@ const updateCover = async () => {
 }
 
 #free-video-edit-view .center .form-row {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 #free-video-edit-view .center .form-row div {
@@ -491,9 +497,11 @@ const updateCover = async () => {
     display: flex;
     align-items: flex-start;
     margin-bottom: 0px !important;
+    flex-wrap: wrap;
 }
 
 #free-video-edit-view .history-row .history-btn {
+    margin-left: 10px;
     margin-right: 5px;
     transform: translateY(-4.5px);
 }
@@ -512,6 +520,7 @@ const updateCover = async () => {
     fill: var(--button-icon-btn-color);
 }
 
+/*
 #free-video-edit-view .form-row.history-row .link-wrap {
     display: flex;
     flex-direction: row;
@@ -519,6 +528,7 @@ const updateCover = async () => {
     flex-wrap: wrap;
     flex: 1;
 }
+*/
 
 #free-video-edit-view .form-row.history-row .link-item {
     overflow: hidden;
@@ -536,7 +546,8 @@ const updateCover = async () => {
     border-radius: calc(var(--border-list-item-vertical-border-radius) - 3px);
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
 
-    margin-right: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
     margin-bottom: 10px;
     padding: 2px 10px;
 }

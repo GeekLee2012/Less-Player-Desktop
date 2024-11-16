@@ -2,14 +2,13 @@ import { defineStore } from 'pinia';
 import { PlayMode } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 import { Video } from '../../common/Video';
-import { trimArrayTail } from '../../common/Utils';
+import { toTrimString, trimArrayTail } from '../../common/Utils';
 
 
 const isValueEqual = (v1, v2) => {
     if(!v1 || !v2) return 
     if(typeof v1 == 'string' || typeof v2 == 'string') {
-        v1 = v1.toString().trim()
-        v2 = v2.toString().trim() 
+        return toTrimString(v1) == toTrimString( v2)
     }
     return v1 == v2
 }
@@ -32,7 +31,7 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         videoThemeIndex: 1,
         dataLayoutIndex: 0, // 0 => Grid, 1 => List
         recentVideos: [],
-        recentLimit: 20,
+        recentLimit: 66,
         savePlayingPos: false, //是否保存播放进度，即是否从头开始看
     }),
     getters: {
