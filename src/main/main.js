@@ -64,6 +64,8 @@ const proxyAuthRealms = []
 const downloadingQueue = []
 // 待播放任务列表
 let pendigPlayTasks = []
+// 贴边隐藏
+let isHiddenOnEdges = false, prevX = null, prevY = null
 
 
 /* 自定义函数 */
@@ -112,7 +114,7 @@ const initialize = () => {
     appUserAgent = USER_AGENTS[nextInt(USER_AGENTS.length)]
     app.userAgentFallback = appUserAgent
     mainWin = createMainWindow(false)
-
+    
     //清理缓存
     clearCaches()
 

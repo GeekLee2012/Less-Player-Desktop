@@ -491,7 +491,8 @@ const checkMaxScreenState = async () => {
 
 /* 应用更新升级 */
 const { GITHUB, GITEE } = useGitRepository()
-const changelogUrl = `${GITHUB}/blob/master/CHANGELOG.md`
+const changelogUrl = `${GITHUB}/blob/main/CHANGELOG.md`
+const changelogUrl2 = `${GITEE}/blob/master/CHANGELOG.md`
 const rawChangelogUrl = `${GITEE}/raw/master/CHANGELOG.md`
 //const lastReleaseUrlRoot = `${GITEE}/releases/tag/`
 const githubReleasesUrl = `${GITHUB}/releases/`

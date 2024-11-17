@@ -156,15 +156,10 @@ const setLyricToolbarPos = () => {
     const { clientWidth, clientHeight } = document.documentElement
     const el = document.querySelector('#lyric-toolbar')
     if (!el) return
-    //const width = 150, height = 446, padding = 30
     const { clientWidth: eWidth, clientHeight: eHeight } = el
-    //const width = 168, height = 549, padding = 33
-    //const left = (clientWidth - eWidth - padding)
     const top = (clientHeight - eHeight) / 2
-    //el.style.right = padding + 'px'
-    //el.style.left = `${left}px`
-    el.style.top = `${top + 52}px`
-    el.style.right = '20px'
+    el.style.top = `${top + 20}px`
+    el.style.right = '23px'
 }
 
 const togglePin = () => {
@@ -224,7 +219,7 @@ onUnmounted(toggleMiniStyle)
 </script>
 
 <template>
-    <div class="mini-layout" @mouseover="onMouseOver" @mouseout="onMouseOut">
+    <div class="mini-layout" @mouseenter="onMouseOver" @mouseleave="onMouseOut">
         <div class="header">
             <div class="cover-wrap">
                 <img class="cover" 

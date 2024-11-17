@@ -82,7 +82,7 @@ export const useSettingStore = defineStore('setting', {
         layout: {
             //当前index
             index: 0,
-            //回退index，即从简约模式退出时，返回的普通布局index
+            //回退index，即从简约/迷你模式退出时，返回的普通布局index
             fallbackIndex: 1
         },
         common: {
@@ -884,8 +884,9 @@ export const useSettingStore = defineStore('setting', {
         },
         setLayoutIndex(index) {
             const { isMaxScreen } = useAppCommonStore()
-            //硬编码
-            if (isMaxScreen && index == SIMPLE_LAYOUT_INDEX) return
+            //硬编码，简约 / 迷你布局
+            const isSmallLayout = (index == SIMPLE_LAYOUT_INDEX) || (index == 4)
+            if (isMaxScreen && isSmallLayout) return
 
             this.layout.index = index || 0
             const currentIndex = this.layout.index
