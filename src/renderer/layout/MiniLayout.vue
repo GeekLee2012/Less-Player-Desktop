@@ -24,7 +24,7 @@ const { visitRecents, visitBatchPlaybackQueue } = inject('appRoute')
 
 
 const { desktopLyricShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
-const { quit, hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
+const { quit, hideAllCtxMenus, hideLyricToolbar, toggleDesktopLyricShow } = useAppCommonStore()
 const { currentTrack, playing, queueTracks, playingIndex, queueTracksSize, } = storeToRefs(usePlayStore())
 const { resetQueue, moveTrack } = usePlayStore()
 const { isHideToTrayOnMinimized, isTrayShow, isShowDialogBeforeQuitApp,
@@ -34,7 +34,7 @@ const { isHideToTrayOnMinimized, isTrayShow, isShowDialogBeforeQuitApp,
 const { switchToFallbackLayout } = useSettingStore()
 
 
-const isPlayCtlShow = ref(true)
+const isPlayCtlShow = ref(false)
 const isQueueShow = ref(false)
 const isFullLyricShow = ref(false)
 const listRef = ref(null)
@@ -48,7 +48,7 @@ const setLyricLayoutMode = (value) => (lyricLayoutMode.value = value)
 const setPendingFullLyric = (value) => (pendingFullLyric.value = value)
 const switchLyricLayoutMode = () => {
     const mode = lyricLayoutMode.value
-    setLyricLayoutMode((mode + 1) % 3)
+    setLyricLayoutMode((mode + 1) % 4)
 }
 
 
@@ -98,17 +98,25 @@ const toggleQueue = () => {
 }
 
 const toggleLyric = (noSwitch) => {
-    setQueueShow(false)
+    const oldMode = lyricLayoutMode.value
     if(!noSwitch) switchLyricLayoutMode()
-    setFullLyricShow(lyricLayoutMode.value == 2)
-    toggleExpand(isFullLyricShow.value)
+    const currentMode = lyricLayoutMode.value
+
+    setQueueShow(isQueueShow.value && currentMode != 2)
+    setFullLyricShow(currentMode == 2)
+    toggleExpand(isQueueShow.value || isFullLyricShow.value)
     setPendingFullLyric(false)
+
+    if(oldMode ==  3 || currentMode == 3) {
+        toggleDesktopLyricShow()
+    }
 }
 
 const hideLyric = () => {
     setLyricLayoutMode(0)
     setFullLyricShow(lyricLayoutMode.value == 2)
     toggleExpand(isQueueShow.value || isFullLyricShow.value)
+    if(desktopLyricShow.value) toggleDesktopLyricShow()
 }
 
 const targetPlaying = () => {
@@ -206,20 +214,24 @@ const moveDragItem = (event) => {
 
 watch(progressState, (nv, ov) => {
     const percent = nv * 100
-    const progressEffect = `conic-gradient(var(--content-highlight-color) ${percent}%, var(--button-icon-btn-color) ${percent - 50}%)`
+    //const progressEffect = `conic-gradient(var(--content-highlight-color) ${percent}%, var(--button-icon-btn-color) ${percent - 50}%)`
+    const progressEffect = `conic-gradient(var(--content-highlight-color) ${percent}%, #292929 ${percent - 50}%)`
     applyDocumentStyle({
         '--others-mini-layout-cover-progress-bg': progressEffect,
     })
 })
 
 watch(lyricToolbarShow, () => nextTick(setLyricToolbarPos))
+watch(desktopLyricShow, (nv, ov) => {
+    if(!nv && lyricLayoutMode.value == 3) switchLyricLayoutMode()
+})
 
 onMounted(toggleMiniStyle)
 onUnmounted(toggleMiniStyle)
 </script>
 
 <template>
-    <div class="mini-layout" @mouseenter="onMouseOver" @mouseleave="onMouseOut">
+    <div class="mini-layout">
         <div class="header">
             <div class="cover-wrap">
                 <img class="cover" 
@@ -263,7 +275,8 @@ onUnmounted(toggleMiniStyle)
                 <div class="duration-wrap">
                     <div class="duration" v-html="mmssDurationLeft"></div>
                 </div>
-                <div class="play-ctl-wrap" v-show="isPlayCtlShow">
+                <div class="play-ctl-wrap" v-show="isPlayCtlShow"
+                    @mouseenter="onMouseOver" @mouseleave="onMouseOut">
                     <div class="favorite-btn" @click="toggleFavoritedState">
                         <svg v-show="!favoritedState" width="21" height="21" viewBox="0 -50 1024 937.46"
                             xmlns="http://www.w3.org/2000/svg">
@@ -293,7 +306,8 @@ onUnmounted(toggleMiniStyle)
                         词
                     </div>
                 </div>
-                <div class="meta-wrap" v-show="lyricLayoutMode != 1 && !isPlayCtlShow">
+                <div class="meta-wrap" v-show="lyricLayoutMode != 1 && !isPlayCtlShow"
+                    @mouseenter="onMouseOver" @mouseleave="onMouseOut">
                     <div class="audio-title" v-html="currentTrack.title">
                     </div>
                     <ArtistControl class="audio-artist"
@@ -303,12 +317,12 @@ onUnmounted(toggleMiniStyle)
                         :trackId="toTrimString(currentTrack.id)">
                     </ArtistControl>
                 </div>
-                <div class="mini-lyric-wrap" v-if="lyricLayoutMode == 1 && !isPlayCtlShow">
+                <div class="mini-lyric-wrap" v-if="lyricLayoutMode == 1 && !isPlayCtlShow"
+                    @mouseenter="onMouseOver" @mouseleave="onMouseOut">
                     <LyricControl :track="currentTrack" 
                         :currentTime="currentTimeState" 
                         :hiddenMeta="true"
                         :layoutMode="0"
-                        @mousewheel="onLyricUserMouseWheel" 
                         keyName="miniLayout">
                     </LyricControl>
                 </div>
@@ -482,7 +496,11 @@ onUnmounted(toggleMiniStyle)
     width: calc(100% - 8px);
     height: calc(100% - 47px + 4px);
     border-radius: var(--border-app-win-border-radius);
-    background: var(--app-bg-color);
+    /*background: var(--app-bg-color);*/
+    background-color: var(--app-bg-color);
+    background-image: var(--app-bg-image);
+    background-repeat: no-repeat;
+    background-size: cover;
     display: flex;
     flex-direction: column;
     box-shadow: 0px 0px 4px #393939;
@@ -495,6 +513,7 @@ onUnmounted(toggleMiniStyle)
     height: 92px;
     display: flex;
     flex-direction: row;
+    background: var(--content-bg-color);
 }
 
 
@@ -636,6 +655,7 @@ onUnmounted(toggleMiniStyle)
     align-items: center;
     position: relative;
     overflow: hidden;
+    background: var(--content-bg-color);
 }
 
 .mini-layout > .center .playback-queue .list-header {
@@ -732,9 +752,30 @@ onUnmounted(toggleMiniStyle)
     padding-right: 18px;
     overflow: scroll;
     overflow-x: hidden;
+    background: var(--content-bg-color);
+}
+
+.mini-layout > .center .lyric-wrap .lyric-ctl,
+.mini-layout > .center .lyric-wrap .center {
+    width: 100%;
+}
+
+.mini-layout > .center .lyric-wrap .center {
+    padding-right: 0px;
+} 
+
+.mini-layout > .center .lyric-wrap .line {
+    width: calc(100% - 5px);
+    padding-left: 5px;
 }
 
 .mini-layout > .center .lyric-wrap .scroll-locator {
     right: 20px;
+}
+
+.mini-layout > .center .lyric-wrap .scroll-locator-left {
+    right: auto;
+    left: 20px;
+    margin-left: 0px;
 }
 </style>

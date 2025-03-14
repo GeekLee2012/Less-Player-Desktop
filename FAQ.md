@@ -25,7 +25,7 @@ ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-
 | :-  | :- |
 | 设置registry下载源 |  npm config set registy http://registry.npmmirror.com  |
 | 恢复默认下载源   | npm config delete registry |
-| 配置查看        | npm config ls 或 npm config list |
+| 查看配置        | npm config ls 或 npm config list |
 | 检查诊断        | npm doctor |
 | 安装时显示详情   | npm install --verbose |
 | 更新依赖        | npm update |
@@ -46,7 +46,7 @@ ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-
     
 ### 二、其他  
 > 为何还要自己造轮子，Listen1、洛雪音乐助手不香吗？  
-* 首先，二者使用体验都很香，但内容方面不太满意，目前都没有我喜欢的电台（广播）  
+* 首先，二者使用体验都不错，但内容方面不太满意，目前都没有我喜欢的电台（广播）  
 * 其次，单纯想入门学习前端技术，可二者源码不太容易入门（就我当时的基础来说）  
 * 再者，天时地利人和（作为后端开发者，却一直关注前端技术，刚好有时间、有机子、会点网络爬虫等）  
 * 总之，想造轮子不是一天两天三天啦，那就从播放器入手吧，我爱音乐、电台（广播）啊  

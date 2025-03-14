@@ -36,7 +36,7 @@ let appUserAgent =  null, exRequestHandlers = []
 let useTemplateImage = false
 
 const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple', MINI_LAYOUT = 'mini'
-const miniExpandSize = 500 - 55
+const miniExpandSize = 520
 const appLayoutConfig = {
   'default': {
     appWidth: 1080,
@@ -54,7 +54,7 @@ const appLayoutConfig = {
 let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT
 let currentZoom = 85, useWinCenterStrict = false
 let markWidth = 0, markHeight = 0
-let appConfig = null
+let appConfig = {}
 let powerSaveBlockerId = -1
 let appTray = null, appTrayMenu = null, appTrayShow = false
 let playState = false, desktopLyricLockState = false
@@ -174,6 +174,18 @@ const initialize = () => {
         removeFromDownloadingQueue(queuedItemMeta)
       })
     })
+
+    /*
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        cancel: false,
+        responseHeaders: {
+          'Access-Control-Allow-Origin': '*',
+          ...details.responseHeaders,
+        }
+      })
+    })
+    */
 
     //自定义协议
     protocol.registerBufferProtocol(ImageProtocal.scheme, (request, callback) => {
@@ -685,14 +697,14 @@ const registryGlobalListeners = () => {
     const { title, name, data } = args[0]
     const result = await dialog.showSaveDialog(mainWin, {
       title: (title || '文件保存'),
-      defaultPath: (name ? name : null),
+      defaultPath: (name || null),
     })
-    if (result.canceled) return false
+    if (result.canceled) return null
     return writeText(result.filePath, data)
   })
 
   ipcMain.handle('open-file', async (event, ...args) => {
-    const { title, filterExts } = args[0] || { title: '请选择文件',filterExts: ['*'] }
+    const { title, filterExts } = args[0] || { title: '请选择文件', filterExts: ['*'] }
     const result = await dialog.showOpenDialog(mainWin, {
       title: title || '请选择文件',
       filters: [{ name: '数据文件', extensions: filterExts || ['*'] }],
@@ -966,22 +978,31 @@ const getPluginsRootPath = (dirName) => {
   return _path
 }
 
+const getAppConfigFilePath = () => {
+  return app.getPath('userData') + '/User/config.json'
+}
+
 const initAppConfig = () => {
-  appConfig = {}
   try {
-    const configFile = app.getPath('userData') + '/User/config.json'
-    const result = statPathSync(configFile)
-    if(!result) return 
-    appConfig = JSON.parse(readText(configFile))
+    const configFile = getAppConfigFilePath()
+    if(statPathSync(configFile)) {
+      appConfig = JSON.parse(readText(configFile))
+    }
   } catch(error) {
     if(isDevEnv) console.log(error)
   }
+  appConfig = (appConfig || {})
+}
+
+const getAppConfigInitialZoomFactor = () => {
+  const { zoomFactor } = (appConfig || {})
+  if(zoomFactor < 0 || zoomFactor > 3) return 1.0 
+  return zoomFactor || 1.0
 }
 
 const storeAppConfig = () => {
   try {
-    const configFile = app.getPath('userData') + '/User/config.json'
-    writeText(configFile, JSON.stringify(appConfig))
+    writeText(getAppConfigFilePath(), JSON.stringify(appConfig))
   } catch(error) {
     if(isDevEnv) console.log(error)
   }
@@ -1104,7 +1125,6 @@ const closeMessagePortPair = () => {
 
 //创建浏览窗口
 const createMainWindow = (show) => {
-  const { zoomFactor } = appConfig
   const { appWidth: width, appHeight: height } = appLayoutConfig[appLayout]
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -1120,7 +1140,7 @@ const createMainWindow = (show) => {
     show,
     frame: false,
     webPreferences: {
-      zoomFactor: (zoomFactor || 1.0),
+      zoomFactor: getAppConfigInitialZoomFactor(),
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       //nodeIntegrationInWorker: true,
@@ -1219,19 +1239,17 @@ const setupAppLayout = (layout, zoom, isInit, useCenterStrict, miniExpand) => {
   if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 0.85
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = Math.round(appWidth * zoomFactor)
-  const height = Math.round(appHeight * zoomFactor) + (miniExpand ? miniExpandSize : 0)
+  const height = Math.round((appHeight + (miniExpand ? miniExpandSize : 0)) * zoomFactor)
   const noResizable = (appLayout === SIMPLE_LAYOUT) || (appLayout === MINI_LAYOUT)
   const maxWidth = (noResizable ? width : 102400)
   const maxHeight = (noResizable ? height : 102400)
+  mainWin.setHasShadow(appLayout != MINI_LAYOUT)
   mainWin.setMaximumSize(maxWidth, maxHeight)
   if (isInit || noResizable) {
     mainWin.setMinimumSize(width, height)
     mainWin.setSize(width, height)
   }
-  mainWin.setHasShadow(appLayout != MINI_LAYOUT)
   mainWin.webContents.setZoomFactor(zoomFactor)
-  //mainWin.webContents.zoomFactor = zoomFactor
-
   if(typeof miniExpand == 'undefined') {
     setupMainWindowCenterScreen(useCenterStrict)
   }
@@ -1685,7 +1703,7 @@ const overrideRequestHeaders = (details) => {
   const { url, requestHeaders } = details
   //不处理本地请求、非http请求
   if (url.includes('localhost') || !url.startsWith('http')) return details.requestHeaders
-  // 从url中解析host，虽然requestHeaders也可能有Host信息，但有可能已经被被修改过，不一定准确
+  // 从url中解析host，虽然requestHeaders也可能有Host信息，但有可能已经被修改过，不一定准确
   const fromIndex = url.indexOf('://') + 3
   const toIndex = url.indexOf('/', fromIndex)
   const hostOfUrl = url.substring(fromIndex, toIndex)

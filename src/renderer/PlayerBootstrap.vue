@@ -1591,6 +1591,8 @@ const eventsRegistration = {
         progressState.value = _duration > 0 ? (currentTime / _duration) : 0
         const durationLeft = (_duration - currentTime)
         mmssDurationLeft.value = toMmss(Math.max(durationLeft, 0))
+        //FM电台，特殊处理
+        if(Playlist.isFMRadioType(track)) mmssDurationLeft.value = mmssCurrentTime.value
         //ipcRendererSend('app-setProgressBar', progressState.value || -1)
     },
     'track-seekAction': ({ track, pos }) => {

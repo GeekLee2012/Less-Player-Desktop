@@ -25,7 +25,10 @@ export class Theme {
             toast: false,
             soundEffectView: false,
             lyricToolbar: false,
-            randomMusicToolbar: false
+            randomMusicToolbar: false,
+            customThemeEditView: false,
+            playingThemeListView: false,
+            customPlayingThemeEditView: false
         }
 
         /*内容*/

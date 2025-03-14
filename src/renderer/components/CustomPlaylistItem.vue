@@ -73,7 +73,7 @@ const onContextMenu = (event) => {
         <div class="title-wrap spacing1">
             <div class="content" @click="visitItem">
                 <div class="title"><span v-html="data.title"></span></div>
-                <div class="size">{{ data.data.length }} 首歌曲</div>
+                <div class="size">{{ data.data.length }} 首</div>
             </div>
             <div class="action">
                 <svg @click.stop="playItem" width="17" height="17" viewBox="0 0 139 139" xml:space="preserve"
@@ -149,7 +149,7 @@ const onContextMenu = (event) => {
 
 .custom-playlist-item > div {
     vertical-align: middle;
-    font-size: 16px;
+    font-size: 17px;
 }
 
 .custom-playlist-item .spacing1 {
@@ -204,7 +204,7 @@ const onContextMenu = (event) => {
     margin-right: 8px;
 }
 
-.custom-playlist-item .content>div {
+.custom-playlist-item .content > div {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -224,7 +224,7 @@ const onContextMenu = (event) => {
 .custom-playlist-item .title-wrap .size {
     /*font-size: var(--content-text-subtitle-size);
     font-size: 13px;*/
-    font-size: var(--content-text-tip-text-size);
+    font-size: calc(var(--content-text-tip-text-size) - 1px);
     font-weight: 520;
     color: var(--content-subtitle-text-color);
 }

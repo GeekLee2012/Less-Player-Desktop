@@ -131,6 +131,8 @@ export const useSettingStore = defineStore('setting', {
             imageTextTileStyleIndex: 1,
             //卡片Tile样式阴影效果
             shadowForCardStyleTile: true,
+            //歌曲控件样式，0 => 经典，1 => 主流
+            songItemStyleIndex: 0,
             //窗口自定义阴影
             winCustomShadowSize: 5, // 0 - 10
             //开关选项标题关联点击
@@ -807,6 +809,9 @@ export const useSettingStore = defineStore('setting', {
         isUseCardStyleImageTextTile() {
             return this.common.imageTextTileStyleIndex == 1
         },
+        getSongItemStyleIndex() {
+            return this.common.songItemStyleIndex
+        },
         selectedAudioOutputDeviceId() {
             return this.track.audioOutputDeviceId
         },
@@ -1135,6 +1140,11 @@ export const useSettingStore = defineStore('setting', {
             const index = parseInt(value || 0)
             if (index < 0 || index > 1) return
             this.common.imageTextTileStyleIndex = index
+        },
+        setSongItemStyleIndex(value) {
+            const index = parseInt(value || 0)
+            if (index < 0 || index > 1) return
+            this.common.songItemStyleIndex = index
         },
         toggleUseShadowForCardStyleTile() {
             this.common.shadowForCardStyleTile = !this.common.shadowForCardStyleTile

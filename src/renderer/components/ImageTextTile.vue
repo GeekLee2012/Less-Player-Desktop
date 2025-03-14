@@ -76,16 +76,18 @@ onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div class="image-text-tile" :class="{
-        'image-text-tile-card': isUseCardStyleImageTextTile,
-        'image-text-tile-card-shadow': isUseShadowForCardStyleTile,
-        'image-text-tile-radio': isFMRadioPlatform(platform),
-        'image-text-tile-non-freefm': !isFreeFM(platform),
-        'image-text-tile-color-mode': color,
-        'image-text-tile-video': videoStyle,
-        'image-text-tile-center-title-mode': centerTitleStyle,
-        selectable: checkbox,
-    }" @click.stop="toggleCheck">
+    <div class="image-text-tile" 
+            :class="{
+            'image-text-tile-card': isUseCardStyleImageTextTile,
+            'image-text-tile-card-shadow': isUseShadowForCardStyleTile,
+            'image-text-tile-radio': isFMRadioPlatform(platform),
+            'image-text-tile-non-freefm': !isFreeFM(platform),
+            'image-text-tile-color-mode': color,
+            'image-text-tile-video': videoStyle,
+            'image-text-tile-center-title-mode': centerTitleStyle,
+            selectable: checkbox,
+        }" 
+        @click.stop="toggleCheck">
         <div class="cover-wrap">
             <img class="cover" v-lazy="coverDefault(cover)" v-show="!color"
                 :class="{ 'obj-fit-contain': (coverFit == 1) }" />

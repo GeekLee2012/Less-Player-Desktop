@@ -908,7 +908,10 @@ onMounted(() => {
       </div>
     </div>
     <div class="scroll-locator"
-      :class="{ 'scroll-locator-vertical': (desktopLyric.textDirection == 1), 'scroll-locator-left': (desktopLyric.alignment == 2) }"
+      :class="{ 
+        'scroll-locator-vertical': (desktopLyric.textDirection == 1), 
+        'scroll-locator-left': (desktopLyric.alignment == 2) 
+      }"
       v-show="!lockState && desktopLyric.layoutMode == 2 && (lyricExistState == 1) && isUserMouseWheel">
       <span class="time-text" v-html="scrollLocatorTimeText"></span>
       <div class="play-btn" @click="seekFromLyric">

@@ -94,6 +94,10 @@ const toggleAppBgScopeToast = () => Object.assign(customTheme.appBackgroundScope
 const toggleAppBgScopeSoundEffectView = () => Object.assign(customTheme.appBackgroundScope, { soundEffectView: !customTheme.appBackgroundScope.soundEffectView })
 const toggleAppBgScopeLyricToolbar = () => Object.assign(customTheme.appBackgroundScope, { lyricToolbar: !customTheme.appBackgroundScope.lyricToolbar })
 const toggleAppBgScopeRandomMusicToolbar = () => Object.assign(customTheme.appBackgroundScope, { randomMusicToolbar: !customTheme.appBackgroundScope.randomMusicToolbar })
+const toggleAppBgScopeCustomThemeEditView = () => Object.assign(customTheme.appBackgroundScope, { customThemeEditView: !customTheme.appBackgroundScope.customThemeEditView })
+const toggleAppBgScopePlayingThemeListView = () => Object.assign(customTheme.appBackgroundScope, { playingThemeListView: !customTheme.appBackgroundScope.playingThemeListView })
+const toggleAppBgScopeCustomPlayingThemeEditView = () => Object.assign(customTheme.appBackgroundScope, { customPlayingThemeEditView: !customTheme.appBackgroundScope.customPlayingThemeEditView })
+
 
 const setupContentTextColor = (value) => Object.assign(customTheme.content, { textColor: value })
 const setupContentSubtitleTextColor = (value) => Object.assign(customTheme.content, { subtitleTextColor: value })
@@ -374,6 +378,12 @@ watch(workingCustomTheme, (nv, ov) => {
                             </ToggleControl>
                         </div>
                         <div class="item">
+                            <div class="name">播放样式（列表）：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.playingThemeListView"
+                                @click="toggleAppBgScopePlayingThemeListView">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
                             <div class="name">右键菜单：</div>
                             <ToggleControl :value="customTheme.appBackgroundScope.contextMenu"
                                 @click="toggleAppBgScopeContextMenu">
@@ -382,6 +392,12 @@ watch(workingCustomTheme, (nv, ov) => {
                         <div class="item">
                             <div class="name">Toast消息：</div>
                             <ToggleControl :value="customTheme.appBackgroundScope.toast" @click="toggleAppBgScopeToast">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">自定义主题（工具栏）：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.customThemeEditView"
+                                @click="toggleAppBgScopeCustomThemeEditView">
                             </ToggleControl>
                         </div>
                         <div class="item">
@@ -400,6 +416,12 @@ watch(workingCustomTheme, (nv, ov) => {
                             <div class="name">随机设置（工具栏）：</div>
                             <ToggleControl :value="customTheme.appBackgroundScope.randomMusicToolbar"
                                 @click="toggleAppBgScopeRandomMusicToolbar">
+                            </ToggleControl>
+                        </div>
+                        <div class="item">
+                            <div class="name">播放样式 - 自定义（工具栏）：</div>
+                            <ToggleControl :value="customTheme.appBackgroundScope.customPlayingThemeEditView"
+                                @click="toggleAppBgScopeCustomPlayingThemeEditView">
                             </ToggleControl>
                         </div>
                     </div>
@@ -781,7 +803,7 @@ watch(workingCustomTheme, (nv, ov) => {
 .custom-theme-edit-view .center {
     padding: 0px 50px;
     flex: 1;
-    background: var(--content-bg-color);
+    /*background: var(--content-bg-color);*/
     overflow: hidden;
     align-items: flex-start;
     display: flex;

@@ -19,6 +19,7 @@ import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { useArtistSquareStore } from '../store/artistSquareStore';
 import { Album } from '../../common/Album';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+import LyricControl from '../components/LyricControl.vue';
 
 
 
@@ -1021,8 +1022,8 @@ const computedCategoryName = computed(() => {
 })
 
 
-
 /* 生命周期、监听 */
+/*
 watch(currentTimeState, (nv, ov) => {
     if (!isSimpleLayout.value) return
 
@@ -1033,12 +1034,13 @@ watch(currentTimeState, (nv, ov) => {
         console.log(error)
     }
 })
+*/
 
 watch(currentTrack, (nv, ov) => {
     if (!nv) return
     updatePlatformShortName()
-    resetLyric()
-    checkLyricValid()
+    //resetLyric()
+    //checkLyricValid()
 })
 
 watch(soundEffectViewShow, () => {
@@ -1062,7 +1064,7 @@ watch(randomMusicToolbarShow, () => {
 
 watch(lyricToolbarShow, () => nextTick(setLyricToolbarPos))
 watch(textColorIndex, setupTextColor)
-
+/*
 const eventsRegistration = {
     'track-lyricLoaded': track => checkLyricValid(track),
     'lyric-fontSize': setupLyricLines,
@@ -1074,7 +1076,7 @@ const eventsRegistration = {
 }
 onMounted(() => onEvents(eventsRegistration))
 onUnmounted(() => offEvents(eventsRegistration))
-
+*/
 onActivated(() => {
     setupTextColor()
     updatePlatformShortName()
@@ -1184,7 +1186,7 @@ onActivated(() => {
                 <canvas class="spectrum-canvas" width="500" height="100"></canvas>
             </div>
         </div>
-        <div class="bottom" @contextmenu="toggleLyricToolbar()">
+        <div class="bottom">
             <div class="progress-wrap">
                 <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack" :disableScroll="true"
                     :onScroll="preseekTrack" :onScrollFinish="seekTrack" 
@@ -1255,12 +1257,22 @@ onActivated(() => {
                     </div>
                 </div>
             </div>
+            <!--
             <div class="lyric-ctl" v-show="isLyricShow" :draggable="isDndSaveEnable" @dragstart="dndSaveLyric">
                 <div class="line" :class="{ 'current-line': hlLineIndex == 0, 'content-text-highlight': hlLineIndex == 0 }"
                     v-html="line1Text"></div>
                 <div class="line v-spacing"
                     :class="{ 'current-line': hlLineIndex == 1, 'content-text-highlight': hlLineIndex == 1 }"
                     v-html="line2Text"></div>
+            </div>
+            -->
+            <div class="lyric-wrap" v-if="isLyricShow">
+                <LyricControl :track="currentTrack" 
+                    :currentTime="currentTimeState" 
+                    :hiddenMeta="true"
+                    :layoutMode="1"
+                    keyName="simpleLayout">
+                </LyricControl>
             </div>
         </div>
         <AppPopovers></AppPopovers>
@@ -1660,6 +1672,7 @@ onActivated(() => {
     fill: var(--content-highlight-color) !important;
 }
 
+/*
 .simple-layout > .bottom .lyric-ctl {
     display: flex;
     flex-direction: column;
@@ -1677,6 +1690,7 @@ onActivated(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: center;
     width: 100%;
@@ -1690,7 +1704,50 @@ onActivated(() => {
 .simple-layout > .bottom .lyric-ctl .v-spacing {
     margin-top: 0px;
 }
+*/
 
+.simple-layout > .bottom .lyric-wrap {
+    display: flex;
+    flex: 1;
+    width: calc(100% - 36px);
+    padding-left: 18px;
+    padding-right: 18px;
+    overflow: hidden;
+    overflow-x: hidden;
+}
+
+.simple-layout > .bottom .lyric-wrap .lyric-ctl,
+.simple-layout > .bottom .lyric-wrap .lyric-ctl .center {
+    width: 100%;
+}
+
+.simple-layout > .bottom .lyric-wrap .lyric-ctl .center {
+    margin-top: 5px;
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+.simple-layout > .bottom .lyric-wrap .line {
+    margin: 0px !important;
+    font-size: calc(var(--content-text-size) + 4px) !important;
+    line-height: 28px !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+
+.simple-layout > .bottom .lyric-wrap .lyric-ctl .extra-text
+.simple-layout > .bottom .lyric-wrap .lyric-ctl .extra-btn,
+.simple-layout > .bottom .lyric-wrap .lyric-ctl .scroll-locator {
+    display: none !important;
+}
 
 /* 
 .simple-layout .win-traffic-light-btn {

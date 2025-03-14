@@ -67,8 +67,10 @@
   --others-card-image-text-tile-title-width: 152px;
   --others-image-text-tile-card-cover-height: 152px;
   --others-image-text-tile-card-min-height: 224px;
-  --others-theme-preview-tile-width: 160px;
-  --others-theme-preview-tile-height: 95px;
+  /*--others-theme-preview-tile-width: 160px;
+  --others-theme-preview-tile-height: 95px;*/
+  --others-theme-preview-tile-width: 166px;
+  --others-theme-preview-tile-height: 103px;
   --others-progressbar-height: 3px;
   --others-sliderbar-ctl-height: 3px;
   --others-sliderbar-thumb-size: 13px;

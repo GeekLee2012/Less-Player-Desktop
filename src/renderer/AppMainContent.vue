@@ -307,9 +307,8 @@ const restoreSetting = (isInit) => {
 
   //TODO 解决Electron Bug：缩放后内容未按照缩放比例正确显示
   //解决方式：默认缩放85% -> 按用户设置缩放 -> 延迟显示窗口
-  if(!setupLayout(isInit)) {
-    setupWindowZoom()
-  }
+  const isDone = setupLayout(isInit)
+  if(!isDone) setupWindowZoom()
   if (isInit) {
     //延迟2s左右
     setTimeout(() => ipcRendererSend('app-mainWin-show'), isDevEnv() ? 0 : 1888)

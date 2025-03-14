@@ -93,6 +93,9 @@ const resetTheme = (event) => {
     Object.keys(customTheme).forEach(key => Reflect.deleteProperty(customTheme, key))
     Object.assign(customTheme, { ...theme }) //注意，此处Object.assign()有坑
     if (isUserAction) showToast('自定义播放样式<br>重置成功')
+
+    setNameInvalid(false)
+    setBgViewUrlInvalid(false)
 }
 
 const setupBgVideoUrl = (value) => Object.assign(customTheme, { bgVideoUrl: value })
@@ -456,7 +459,8 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 .custom-playing-theme-edit-view .center {
     padding: 0px 50px;
     flex: 1;
-    background: var(--content-bg-color);
+    /*background: var(--content-bg-color);*/
+    background: transparent;
     overflow: hidden;
     align-items: flex-start;
     display: flex;
@@ -596,5 +600,14 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 /* 别扭挖坑的方式 */
 .custom-playing-theme-edit-view .center .url-input-ctl .select-btn {
     height: 38px;
+}
+
+
+.custom-playing-theme-edit-view .center .color-input-ctl {
+    width: 410px;
+}
+
+.contrast-mode .custom-playing-theme-edit-view .center .url-input-ctl .select-btn {
+    font-weight: bold;
 }
 </style>

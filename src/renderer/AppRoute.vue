@@ -28,22 +28,25 @@ const { setExploreMode, setArtistExploreMode,
     hideSoundEffectView, hidePopoverHint,
     setSearchPlaceHolderIndex, setRouterCtxCacheItem,
     hidePlayingThemeListView, setCloudStorageExploreMode } = useAppCommonStore()
-const { findCustomPlaylistIndex } = useUserProfileStore()
+const { findCustomPlaylistIndex, findFavouritePlaylistIndex } = useUserProfileStore()
 const { isSimpleLayout, isMiniLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
 
-//TODO 数据量大时，可能有卡顿风险
-const highlightNavigationCustomPlaylist = (to, from) => {
+//数据量大时，可能有卡顿风险
+const highlightNavigationPlaylist = (to, from) => {
     const { path } = to
-    let index = -1
+    let customIndex = -1, favouriteIndex = -1
     if (path.includes('/custom/')
         && !path.includes('/create')
         && !path.includes('/edit')) {
         const id = path.split('/')[3]
-        index = findCustomPlaylistIndex(id)
+        customIndex = findCustomPlaylistIndex(id)
+    } else if (path.includes('/favourite/playlist/')) {
+        const id = path.split('/')[5]
+        favouriteIndex = findFavouritePlaylistIndex(id)
     }
-    emitEvents("navigation-refreshCustomPlaylistIndex", index)
+    emitEvents("navigation-refreshPlaylistIndex", { customIndex, favouriteIndex })
 }
 
 const autoSwitchExploreMode = (to, from) => {
@@ -202,8 +205,12 @@ const highlightPlatform = (to) => {
         platform = 'freefm'
     } else if (path.includes('/track')) {
         platform = path.split('/')[2]
-    } else if (path.includes('/square') || path.includes('/playlist')
-        || path.includes('/artist') || path.includes('/album')) {
+    } else if (path.includes('/favourite/playlist')) {
+        platform = path.split('/')[4]
+    } else if (path.includes('/square') 
+        || path.includes('/playlist')
+        || path.includes('/artist') 
+        || path.includes('/album')) {
         platform = path.split('/')[3]
     } else if (path.includes('/userhome')) {
         const parts = path.split('/')
@@ -297,7 +304,7 @@ onBeforeResolve((to, from) => {
 
     autoSwitchExploreMode(to, from)
     highlightPlatform(to)
-    highlightNavigationCustomPlaylist(to, from)
+    highlightNavigationPlaylist(to, from)
     hideRelativeComponents(to)
     autoSwitchSearchPlaceHolder(to)
 })
@@ -343,7 +350,7 @@ provide('appRoute', {
         if (toTrimString(id).startsWith(Playlist.ANCHOR_RADIO_ID_PREFIX)) {
             exploreMode = (exploreMode == 'userhome') ? 'userhome' : 'radios'
         }
-        return visitCommonRoute(`/${exploreMode}/playlist/${platform}/${id}`)
+        return visitCommonRoute(`/${exploreMode}/favourite/playlist/${platform}/${id}`)
     },
     visitCustomPlaylistCreate: (exploreMode, onRouteReady) => {
         exploreMode = transformExploreMode(exploreMode)

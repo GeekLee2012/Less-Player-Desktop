@@ -510,6 +510,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
     <transition name="fade-ex">
       <PlayingThemeListView id="playing-theme-list-view" 
+        :class="{ 'app-custom-theme-bg': appBackgroundScope.playingThemeListView }"
         v-if="playingThemeListViewShow">
       </PlayingThemeListView>
     </transition>
@@ -539,11 +540,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     </RandomMusicToolbar>
 
     <CustomThemeEditView id="custom-theme-edit-view" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.customThemeEditView }" 
       v-if="customThemeEditViewShow" 
       @click.stop="">
     </CustomThemeEditView>
 
-    <CustomPlayingThemeEditView id="custom-playing-theme-edit-view" 
+    <CustomPlayingThemeEditView id="custom-playing-theme-edit-view"
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.customPlayingThemeEditView }"  
       v-if="customPlayingThemeEditViewShow" 
       @click.stop="">
     </CustomPlayingThemeEditView>

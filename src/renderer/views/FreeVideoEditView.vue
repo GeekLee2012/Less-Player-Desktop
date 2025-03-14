@@ -134,10 +134,10 @@ const urlPlaceholder = computed(() => {
 
 
 const clearRecents = async () => {
-    const ok = await showConfirm('确定要清空最近播放记录吗？')
+    const ok = await showConfirm('确定要清空最近播放吗？')
     if(!ok) return
     clearRecentVideos()
-    showToast('最近播放记录已清空')
+    showToast('最近播放已清空')
 }
 
 const clearText = async () => {

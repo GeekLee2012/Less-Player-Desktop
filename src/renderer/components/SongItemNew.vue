@@ -8,7 +8,7 @@ import { useSettingStore } from '../store/settingStore';
 import { Track } from '../../common/Track';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
-import { toTrimString } from '../../common/Utils';
+import { toTrimString, coverDefault } from '../../common/Utils';
 import { Playlist } from '../../common/Playlist';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
@@ -31,8 +31,9 @@ const props = defineProps({
 const { playVideoItem, dndSaveTrack } = inject('player')
 const { showContextMenu } = inject('appCommon')
 
+//技术债：早期很多操作，都直接访问Store，没有统一封装管理
 const { playing } = storeToRefs(usePlayStore())
-const { addTrack, playTrack, togglePlay } = usePlayStore()
+const { addTrack, playTrack, togglePlay, playTrackLater } = usePlayStore()
 const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
 const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
@@ -56,6 +57,11 @@ const playItem = () => {
 const addItem = () => {
     addTrack(props.data)
     showToast("歌曲添加成功")
+}
+
+const playItemLater = () => {
+    playTrackLater(props.data)
+    showToast("下一曲将为您播放")
 }
 
 const deleteItem = () => {
@@ -132,7 +138,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div class="song-item" 
+    <div class="song-item-new" 
         :class="{ 
             'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data),
             'selection-mode': checkbox,
@@ -161,32 +167,58 @@ onUnmounted(() => offEvents(eventsRegistration))
             </svg>
         </div>
         <div v-show="!checkbox" class="sqno">{{ index + 1 }}</div>
-        <div class="vipflag textflag" v-show="showVipFlag(data)" :class="{ spacing: !checkbox }">
-            <span>VIP</span>
+        <div class="cover">
+            <img v-lazy="coverDefault(data.cover)" >
         </div>
-        <div class="mv" v-show="!checkbox && Track.hasMv(data)" :class="{ spacing: !(checkbox || showVipFlag(data)) }">
-            <svg @click="playVideoItem(data)" width="18" height="15" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
-                <g id="Layer_2" data-name="Layer 2">
-                    <g id="Layer_1-2" data-name="Layer 1">
-                        <path
-                            d="M1024,158.76v536c-.3,1.61-.58,3.21-.92,4.81-2.52,12-3.91,24.43-7.76,36-23.93,72-88.54,117.91-165.13,117.92q-338.19,0-676.4-.1a205.81,205.81,0,0,1-32.3-2.69C76,840.18,19.81,787.63,5,723.14c-2.15-9.35-3.36-18.91-5-28.38v-537c.3-1.26.66-2.51.89-3.79,1.6-8.83,2.52-17.84,4.85-26.48C26.32,51.12,93.47.05,173.29,0Q512,0,850.72.13a200.6,200.6,0,0,1,31.8,2.68C948.44,13.47,1004,65.66,1019.09,130.88,1021.21,140.06,1022.39,149.46,1024,158.76ZM384,426.39c0,45.66-.09,91.32,0,137,.07,24.51,19.76,43.56,43.38,42.47,8.95-.42,15.83-5.3,23.06-9.86q69.25-43.74,138.74-87.11,40.63-25.42,81.44-50.6c23.18-14.34,23.09-49-.25-63.14-3.27-2-6.69-3.72-9.93-5.74q-30.08-18.81-60.08-37.69Q522.2,302.46,444,253.2a34.65,34.65,0,0,0-26.33-4.87c-19.87,4.13-33.64,21.28-33.68,42.09Q383.9,358.42,384,426.39Z" />
-                    </g>
-                </g>
-            </svg>
-        </div>
-        <div class="audio-type-flag textflag" v-show="!checkbox && showAudioTypeFlag(data)"
-            :class="{ spacing: !(checkbox || showVipFlag(data) || Track.hasMv(data)) }">
-            <span v-html="getAudioTypeFlagText(data)"></span>
-        </div>
-        <div class="title-wrap"
-            :class="{ spacing: !(checkbox || Track.hasMv(data) || showVipFlag(data) || showAudioTypeFlag(data)) }">
-            <span v-html="data.filename || data.title" :class="{ limitedSpan: !checkbox }"></span>
+        <div class="title-wrap spacing">
+            <div class="top">
+                <div class="vipflag textflag" v-show="showVipFlag(data)">
+                    <span>VIP</span>
+                </div>
+                <div class="mvflag textflag" v-show="!checkbox && Track.hasMv(data)" :class="{ spacing: showVipFlag(data) }">
+                    <span>MV</span>
+                </div>
+                <div class="audio-type-flag textflag" v-show="!checkbox && showAudioTypeFlag(data)"
+                    :class="{ spacing: (showVipFlag(data) || Track.hasMv(data)) }">
+                    <span v-html="getAudioTypeFlagText(data)"></span>
+                </div>
+                <!--
+                <div class="mv" v-show="!checkbox && Track.hasMv(data)" :class="{ spacing: showVipFlag(data) }">
+                    <svg @click="playVideoItem(data)" width="18" height="15" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M1024,158.76v536c-.3,1.61-.58,3.21-.92,4.81-2.52,12-3.91,24.43-7.76,36-23.93,72-88.54,117.91-165.13,117.92q-338.19,0-676.4-.1a205.81,205.81,0,0,1-32.3-2.69C76,840.18,19.81,787.63,5,723.14c-2.15-9.35-3.36-18.91-5-28.38v-537c.3-1.26.66-2.51.89-3.79,1.6-8.83,2.52-17.84,4.85-26.48C26.32,51.12,93.47.05,173.29,0Q512,0,850.72.13a200.6,200.6,0,0,1,31.8,2.68C948.44,13.47,1004,65.66,1019.09,130.88,1021.21,140.06,1022.39,149.46,1024,158.76ZM384,426.39c0,45.66-.09,91.32,0,137,.07,24.51,19.76,43.56,43.38,42.47,8.95-.42,15.83-5.3,23.06-9.86q69.25-43.74,138.74-87.11,40.63-25.42,81.44-50.6c23.18-14.34,23.09-49-.25-63.14-3.27-2-6.69-3.72-9.93-5.74q-30.08-18.81-60.08-37.69Q522.2,302.46,444,253.2a34.65,34.65,0,0,0-26.33-4.87c-19.87,4.13-33.64,21.28-33.68,42.09Q383.9,358.42,384,426.39Z" />
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                -->
+                <div class="title" v-html="data.filename || data.title" :class="{ limitedWidth: !checkbox }"></div>
+            </div>
+            <div class="artist" :class="{ limitedWidth: !checkbox }" v-show="!isExtra1Available()">
+                <ArtistControl :visitable="artistVisitable && !checkbox" 
+                    :platform="data.platform" 
+                    :data="data.artist"
+                    :trackId="toTrimString(data.id)">
+                </ArtistControl>
+                <div v-show="!data.artist || data.artist.length < 1">&nbsp;</div>
+            </div>
             <div class="action" :class="{ hidden: checkbox }">
-                <svg @click="playItem" width="18" height="18" class="play-btn" viewBox="0 0 139 139" xml:space="preserve"
+                <svg @click="playVideoItem(data)" v-show="Track.hasMv(data)" width="18" height="15" viewBox="0 0 1024 853.52" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Layer_2" data-name="Layer 2">
+                        <g id="Layer_1-2" data-name="Layer 1">
+                            <path
+                                d="M1024,158.76v536c-.3,1.61-.58,3.21-.92,4.81-2.52,12-3.91,24.43-7.76,36-23.93,72-88.54,117.91-165.13,117.92q-338.19,0-676.4-.1a205.81,205.81,0,0,1-32.3-2.69C76,840.18,19.81,787.63,5,723.14c-2.15-9.35-3.36-18.91-5-28.38v-537c.3-1.26.66-2.51.89-3.79,1.6-8.83,2.52-17.84,4.85-26.48C26.32,51.12,93.47.05,173.29,0Q512,0,850.72.13a200.6,200.6,0,0,1,31.8,2.68C948.44,13.47,1004,65.66,1019.09,130.88,1021.21,140.06,1022.39,149.46,1024,158.76ZM384,426.39c0,45.66-.09,91.32,0,137,.07,24.51,19.76,43.56,43.38,42.47,8.95-.42,15.83-5.3,23.06-9.86q69.25-43.74,138.74-87.11,40.63-25.42,81.44-50.6c23.18-14.34,23.09-49-.25-63.14-3.27-2-6.69-3.72-9.93-5.74q-30.08-18.81-60.08-37.69Q522.2,302.46,444,253.2a34.65,34.65,0,0,0-26.33-4.87c-19.87,4.13-33.64,21.28-33.68,42.09Q383.9,358.42,384,426.39Z" />
+                        </g>
+                    </g>
+                </svg>
+                <svg @click="playItem" width="18" height="18" class="play-btn" :class="{ spacing2: Track.hasMv(data) }" viewBox="0 0 139 139" xml:space="preserve"
                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <path
                         d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
                 </svg>
+                <svg @click="playItemLater" width="17" height="17" class="play-later-btn spacing2" viewBox="0 0 1016.14 1016.1" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M855.35,134.55q23.42-24,46.82-47.91c6.59-6.74,14.31-8.93,23.23-5.48,8.24,3.18,12.69,10.31,12.7,20.15q.06,57,0,114,0,33.49,0,67c0,14-8.28,22.46-22.36,22.47q-90.5.09-181,0c-10.7,0-17.88-4.41-21.12-12.85-3.55-9.25-.61-16.75,6.14-23.5,20.64-20.6,41.13-41.35,61.93-62.31a20,20,0,0,0-2-2.21c-57.49-50.33-123.7-83-199-95.71C467.07,89,362.61,112.61,269.37,180.43c-83.05,60.41-137,141.45-157.78,242.16-26.92,130.72,2.28,248.84,89,350.94,56.55,66.57,128.32,109.92,213.54,130C605,948.46,798.31,854.19,880.52,676.35A390.93,390.93,0,0,0,914.21,556.2c3.36-29.3,24.65-48.78,52.66-48,28.86.77,52.2,27.58,49,56.25-23.63,209.77-175.59,383.91-380.38,435.94a507.7,507.7,0,0,1-178.46,13C250.67,992.07,76.68,846.67,19.72,647.81A498.26,498.26,0,0,1,2.91,455.41C17.55,320.13,77.17,208.27,180.28,120,246.77,63,324.09,27.56,409.73,10.1A490.72,490.72,0,0,1,556.41,2.33q157.29,15.45,279.36,116c6.05,5,11.88,10.21,17.82,15.31.11.09.31.08.46.11Z"/><path d="M407.78,508q0-91.2,0-182.41c0-3.14,0-6.45.94-9.38,3.77-11.85,19-15.17,28-6.11,5.28,5.31,10.19,11,15.25,16.53Q528.83,410.82,605.63,495c7.79,8.54,8,16.88.35,25.32q-83.93,92.22-168,184.33c-8.22,9-20.92,9-27-.47-2.24-3.5-3.13-8.43-3.14-12.71-.2-56.64-.14-113.28-.14-169.92Z"/></g></g></svg>
                 <svg @click="addItem" width="15" height="15" class="add-btn spacing2" viewBox="0 0 682.65 682.74"
                     xmlns="http://www.w3.org/2000/svg">
                     <g id="Layer_2" data-name="Layer 2">
@@ -218,7 +250,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 -->
             </div>
         </div>
-        <div class="artist spacing1" v-show="!isExtra1Available()">
+        <div class="artist spacing1" v-show="false && !isExtra1Available()">
             <ArtistControl :visitable="artistVisitable && !checkbox" 
                 :platform="data.platform" 
                 :data="data.artist"
@@ -238,7 +270,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 </template>
 
 <style scoped>
-.song-item {
+.song-item-new {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -249,42 +281,57 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-radius: calc(var(--border-list-item-vertical-border-radius) - 2px);
 }
 
-.song-item.selection-mode {
+.song-item-new.selection-mode {
     cursor: pointer;
 }
 
-.song-item:hover {
+.song-item-new:hover {
     /*border-radius: 3px;*/
     background: var(--content-list-item-hover-bg-color);
 }
 
-.song-item .hidden {
+.song-item-new .hidden {
     display: none !important;
 }
 
-.song-item>div {
-    line-height: 50px;
+.song-item-new > div {
     line-height: 59px;
+    line-height: 66px;
     vertical-align: middle;
     /*font-size: var(--content-text-size);*/
 }
 
-.song-item .spacing {
+.song-item-new .spacing {
     margin-left: 12px;
 }
 
-.song-item .spacing1 {
+.song-item-new .spacing1 {
     /*margin-left: 8px;*/
     margin-left: 20px;
 }
 
-.song-item .spacing2 {
+.song-item-new .spacing2 {
     margin-left: 15px;
 }
 
-.song-item .title-wrap,
-.song-item .artist,
-.song-item .album {
+
+.song-item-new .cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 3px;
+}
+
+.song-item-new .cover img {
+    width: 43px;
+    height: 43px;
+    object-fit: cover;
+    border-radius: var(--border-img-small-border-radius);
+}
+
+.song-item-new .title-wrap .title,
+.song-item-new .artist,
+.song-item-new .album {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -296,54 +343,59 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-break: anywhere;
 }
 
-/*
-.song-item .artist span,
-.song-item .album span {
-    cursor: pointer;
-}
-
-.song-item .artist span:hover,
-.song-item .album span:hover {
-    background: var(--content-text-highlight-color);
-    -webkit-background-clip: text;
-    color: transparent;
-}
-*/
-
-.song-item .sqno,
-.song-item .checkbox {
+.song-item-new .sqno,
+.song-item-new .checkbox {
     width: 35px;
     padding-left: 8px;
     text-align: left;
 }
 
-.song-item .sqno {
+.song-item-new .sqno {
     color: var(--content-subtitle-text-color);
 }
 
-.song-item .checkbox {
+.song-item-new .checkbox {
     width: 30px;
 }
 
-.song-item .checkbox svg {
+.song-item-new .checkbox svg {
     margin-bottom: -3px;
 }
 
-.song-item .title-wrap {
-    flex: 1;
+.song-item-new .title-wrap {
+    flex: 2;
+    display: flex;
     position: relative;
     text-align: left;
     margin-top: 1px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
 }
 
-.song-item .title-wrap span {
+.song-item-new .title-wrap .top {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    transform: translateY(-2px);
+    width: 95% !important;
+}
+
+.song-item-new .title-wrap .title {
     z-index: 1;
     word-wrap: break-word;
     line-break: anywhere;
+    line-height: normal;
 }
 
-/* .song-item .mv span, */
-.song-item .textflag span {
+.song-item-new .textflag {
+    line-height: normal;
+    transform: translateY(-2px);
+}
+
+/* .song-item-new .mv span, */
+.song-item-new .textflag span {
     background: var(--content-text-highlight-color);
     -webkit-background-clip: text;
     background-clip: text;
@@ -352,18 +404,18 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-radius: 3px;
     border: 1.3px solid var(--content-highlight-color);
     padding: 1px 3px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
     margin-right: 5px;
 }
 
 /*
-.song-item .mv span {
+.song-item-new .mv span {
     cursor: pointer;
 }
 */
 
-.song-item .mv {
+.song-item-new .mv {
     display: flex;
     flex-direction: column;
     margin-right: 5px;
@@ -372,23 +424,32 @@ onUnmounted(() => offEvents(eventsRegistration))
     justify-content: center;
 }
 
-.song-item .mv svg {
+.song-item-new .mv svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
-.song-item .artist,
-.song-item .extra1 {
+.song-item-new .artist {
+    line-height: normal;
+    color: var(--content-subtitle-text-color);
+    font-size: 14px;
+    font-weight: 520;
+    width: 95% !important;
+    margin-top: 3px;
+}
+
+.song-item-new .artist,
+.song-item-new .extra1 {
     width: 25%;
 }
 
-.song-item .album,
-.song-item .extra2 {
+.song-item-new .album,
+.song-item-new .extra2 {
     width: 25%;
 }
 
-.song-item .extra1,
-.song-item .extra2 {
+.song-item-new .extra1,
+.song-item-new .extra2 {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -400,20 +461,21 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-break: anywhere;
 }
 
-.song-item .duration {
+.song-item-new .duration {
     width: 53px;
     padding-right: 8px;
     text-align: right;
 }
 
-.song-item .action {
+.song-item-new .action {
     z-index: 2;
     height: 100%;
 
     position: absolute;
     top: 0px;
-    left: 158px;
+    left: 168px;
     left: 51%;
+    left: 60%;
 
     display: flex;
     flex-direction: row;
@@ -425,27 +487,28 @@ onUnmounted(() => offEvents(eventsRegistration))
     visibility: hidden;
 }
 
-.song-item .action .delete-btn {
+.song-item-new .action .delete-btn {
     visibility: hidden;
+    display: none;
 }
 
-.song-item .action svg {
+.song-item-new .action svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
 }
 
-.song-item .mv svg:hover,
-.song-item .action svg:hover {
+.song-item-new .mv svg:hover,
+.song-item-new .action svg:hover {
     fill: var(--content-highlight-color);
 }
 
-.song-item .title-wrap:hover .action {
+.song-item-new .title-wrap:hover .action {
     visibility: visible;
 }
 
-.song-item .title-wrap:hover .limitedSpan {
-    width: 158px;
-    width: 50%;
+.song-item-new .title-wrap:hover .limitedWidth {
+    width: 168px;
+    width: 59% !important;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -454,5 +517,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     -webkit-box-orient: vertical;
     word-wrap: break-word;
     line-break: anywhere;
+}
+
+.song-item-new .title-wrap:hover .title.limitedWidth {
+    width: 50% !important;
 }
 </style>

@@ -123,7 +123,7 @@ export class LocalMusic {
                     }
                 }
             })
-            resolve(result)
+            setTimeout(() => resolve(result), 365)
         })
     }
 
@@ -166,7 +166,7 @@ export class LocalMusic {
                     }
                 }
             })
-            resolve(result)
+            setTimeout(() => resolve(result), 365)
         })
     }
 
@@ -297,7 +297,7 @@ export class LocalMusic {
             //category.add('韩文名', 3)
 
             result.data.push(category)
-            setTimeout(() => resolve(result), Math.random() * 520)
+            setTimeout(() => resolve(result), 365)
         })
     }
 
@@ -395,7 +395,7 @@ export class LocalMusic {
                     }
                 })
             })
-            setTimeout(() => resolve(result), Math.random() * 666)
+            setTimeout(() => resolve(result), 365)
         })
     }
 }

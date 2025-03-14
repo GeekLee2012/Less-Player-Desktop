@@ -97,6 +97,11 @@ const routes = [
                 props: true,
                 component: PlaylistDetailView
             },
+            {  //歌单详情 - 收藏
+                path: '/:exploreMode/favourite/playlist/:platform/:id',
+                props: true,
+                component: PlaylistDetailView
+            },
             {  //歌手详情
                 path: '/:exploreMode/artist/:platform/:id',
                 props: true,

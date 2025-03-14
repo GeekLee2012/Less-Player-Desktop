@@ -133,18 +133,21 @@ export const useThemeStore = defineStore('themes', {
             this.customThemes.splice(index, 1, demoTheme)
             return this.customThemes
         },
+        getExportableThemes() {
+            return this.getCustomThemes().filter(item => !item.id.includes(CUSTOM_DEMO_ID)) || []
+        },
         isDemoTheme(theme) {
             if (!theme) return false
             const { id } = theme
             return id === CUSTOM_DEMO_ID 
                 || id === (THEME_ID_PREFIX + CUSTOM_DEMO_ID)
         },
-        saveCustomTheme(theme) {
+        saveCustomTheme(theme, forceNew) {
             if (!theme) return
             if (this.isDemoTheme(theme)) return
             const index = this.customThemes.findIndex(item => item.id == theme.id)
             const now = Date.now()
-            if (index < 0) {
+            if (forceNew || index < 0) {
                 const id = this.newThemeId()
                 Object.assign(theme, { id, created: now, updated: now })
                 this.customThemes.push(theme)

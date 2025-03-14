@@ -112,7 +112,9 @@ class WebAudioApi {
         const eqFilters = this.biquadFilters
         if (!eqFilters || eqFilters.length < 1) return
         eqFilters.forEach((filter, index) => {
-            filter.gain.value = values[index]
+            let _value = values[index]
+            if(_value && typeof _value == 'string') _value = parseFloat(_value)
+            filter.gain.value = _value
         })
     }
 

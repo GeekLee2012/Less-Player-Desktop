@@ -4,12 +4,14 @@ import { storeToRefs } from 'pinia';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingStore } from '../store/settingStore';
 import { useAppCommonStore } from '../store/appCommonStore';
+import { ipcRendererInvoke, toYyyymmddHhMmSs } from '../../common/Utils';
 
 
 
-const { getPresetThemes, getCustomThemes, removeCustomTheme, isDemoTheme } = useThemeStore()
+const { getPresetThemes, getCustomThemes, removeCustomTheme, isDemoTheme, 
+    saveCustomTheme, getExportableThemes } = useThemeStore()
 const { showCustomThemeEditView, hideCustomThemeEditView,
-    showToast, hidePlaybackQueueView } = useAppCommonStore()
+    showToast, hidePlaybackQueueView, showFailToast } = useAppCommonStore()
 const { theme: themeSetting } = storeToRefs(useSettingStore())
 const { setThemeIndex } = useSettingStore()
 
@@ -56,7 +58,37 @@ const editTheme = (item) => {
     showCustomThemeEditView(item)
 }
 
-const ceateTheme = () => editTheme()
+const createTheme = () => editTheme()
+
+//导入：暂时简单实现，只新增不查重
+const importThemes = async () => {
+    const result = await ipcRendererInvoke('open-file', { title: '选择主题文件', filterExts: ['.json'] })
+    if(!result) return
+    const { filePath, data } = result
+    const themes = JSON.parse(data) || []
+    themes.forEach(theme => {
+        saveCustomTheme(theme, true)
+    })
+    showToast('主题导入完成')
+}
+
+const exportThemes = async () => {
+    const themes = getExportableThemes()
+    if(!themes || themes.length < 1) return showFailToast('没有可导出的主题')
+
+    const title = '导出主题'
+    const data = JSON.stringify(themes)
+
+    const now = Date.now()
+    const timestamp = toYyyymmddHhMmSs(now).replace(/-/g, '').replace(/ /g, '-').replace(/:/g, '')
+    const name = `Less.Player.Themes-${timestamp}.json`
+    const result = await ipcRendererInvoke('save-file', { title, name, data })
+    if(result) {
+        showToast('主题导出成功')
+    } else if(typeof result == 'boolean'){
+        showFailToast('主题导出失败')
+    }
+}
 </script>
 
 <template>
@@ -68,6 +100,47 @@ const ceateTheme = () => editTheme()
                     :class="{ active: currentTabIndex == index, 'content-text-highlight': currentTabIndex == index, spacing: index < 0 }"
                     @click="switchTab(index)" v-html="item">
                 </span>
+                <div class="action to-right" v-show="currentTabIndex == 1">
+                    <SvgTextButton text="新建" :leftAction="createTheme" :rightAction="importThemes">
+                        <template #left-img>
+                            <svg width="14" height="14"
+                                viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M298.59,384.15h-7.06q-123.24,0-246.49,0c-21.63,0-38.69-12.57-43.64-31.94-7-27.56,13.21-53.29,42.33-53.51,25.33-.18,50.66,0,76,0H298.59v-6.44q0-123.49,0-247c0-20.39,10.77-36.44,28.49-42.71C355-7.34,383.55,13,384,43.16c.26,16.33,0,32.67,0,49V298.65h6.82q123.49,0,247,0c21.52,0,38.61,12.77,43.43,32.19,6.75,27.26-13.06,52.7-41.62,53.25-11.16.22-22.33,0-33.49,0H384.09v6.69q0,123.5,0,247c0,21.59-12.66,38.65-32.06,43.53-27.59,6.95-53.24-13.31-53.39-42.46-.17-32.66,0-65.33,0-98V384.15Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                        </template>
+                        <template #right-img>
+                            <svg width="16" height="16" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M426.89,768q-148.75,0-297.49,0C69.87,767.93,19.57,729.67,4.61,672.5a140.41,140.41,0,0,1-4.31-34c-.44-55.67-.29-111.33-.21-167,0-31.15,27.63-51.88,56.33-42.52,17.88,5.83,29.09,22.14,29.12,42.72q.1,65.51.06,131c0,11.66,0,23.33,0,35,.13,27.13,18,45.07,45.21,45.08q143,.07,286,0,152.49,0,305,0c10.8,0,20.87-2.11,29.52-8.91,11.68-9.19,16.88-21.33,16.83-36.16-.15-43,0-86,0-129,0-12.83-.15-25.66,0-38.49.26-17.27,7.72-30.64,23.12-38.64,14.61-7.57,29.38-6.72,43.18,2.34,12.62,8.29,19,20.52,19,35.47.17,57.83.86,115.67-.21,173.49-1.18,63.32-47.07,114.32-109.5,123.77a141.79,141.79,0,0,1-20.92,1.3Q574.88,768.07,426.89,768Z" />
+                                        <path
+                                            d="M394.63,450.06v-5.88q0-199.47,0-398.94c0-20.15,9.91-35.63,26.85-42.21,28.37-11,58.2,9.24,58.3,40,.19,62,.06,124,.06,186V451.28c2-1.84,3.34-3,4.57-4.19Q535.69,395.84,587,344.6c18.84-18.76,47.07-18,63.7,1.39a42.31,42.31,0,0,1-1.2,56.56c-8.5,9.16-17.56,17.79-26.4,26.63Q546,506.25,468.93,583.3c-15.5,15.47-36.33,18.46-53.8,7.71a51.86,51.86,0,0,1-9.31-7.48q-89.51-89.35-178.88-178.84c-13.46-13.48-17.06-31.76-9.79-48.24a42.62,42.62,0,0,1,41.2-25.38c11.71.55,21.35,5.62,29.57,13.87q40.38,40.57,80.91,81c8.22,8.23,16.38,16.53,24.57,24.8Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                        </template>
+                    </SvgTextButton>
+                    <SvgTextButton text="导出" class="spacing1" :leftAction="exportThemes">
+                        <template #left-img>
+                            <svg width="15" height="15" viewBox="0 0 853.89 768.12" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M426.89,768.1q-148.75,0-297.49,0C69.87,768,19.57,729.77,4.61,672.61a140,140,0,0,1-4.3-34.06c-.45-55.66-.3-111.33-.22-167,0-31.16,27.63-51.89,56.33-42.53,17.88,5.84,29.09,22.14,29.12,42.72q.1,65.5.06,131c0,11.67,0,23.33,0,35,.13,27.13,18,45.07,45.21,45.09q143,.06,286,0,152.49,0,305,0c10.8,0,20.87-2.1,29.52-8.91,11.68-9.19,16.88-21.33,16.83-36.16-.15-43,0-86,0-129,0-12.84-.15-25.67,0-38.5.26-17.26,7.72-30.64,23.12-38.63,14.61-7.58,29.38-6.73,43.18,2.34,12.62,8.28,19,20.51,19,35.46.17,57.83.86,115.68-.21,173.49-1.18,63.32-47.07,114.32-109.5,123.77a140.44,140.44,0,0,1-20.92,1.3Q574.88,768.17,426.89,768.1Z" />
+                                        <path
+                                            d="M479.85,146.1v6.79q0,200,0,400c0,22.17-13.11,39-33.73,43.58-25.55,5.68-51-13.5-51.27-39.67-.5-42.15-.2-84.32-.2-126.48q0-139.23,0-278.46v-5.69c-2,1.8-3.26,2.89-4.46,4.09Q338.89,201.45,287.62,252.7c-14.1,14.06-32.63,17.57-49.5,9.65a42.57,42.57,0,0,1-14.66-65.86c1.39-1.67,2.9-3.23,4.43-4.76Q316.62,103,405.36,14.27C420.27-.62,439.53-4.17,456.94,5.1a51.57,51.57,0,0,1,11.87,9Q558,103.05,647,192.21c12.33,12.34,17,27,11.88,43.87-4.83,16-15.89,26-32.26,29.38-15.32,3.13-28.58-1.47-39.64-12.55q-39-39.1-78.12-78.14Q496.52,162.41,484.14,150C483,148.91,481.8,147.88,479.85,146.1Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                        </template>
+                    </SvgTextButton>
+                </div>
             </div>
         </div>
         <div class="center">
@@ -94,8 +167,8 @@ const ceateTheme = () => editTheme()
             <div class="row custom-themes" v-show="currentTabIndex == 1">
                 <!--<div class="cate-name">自定义</div>-->
                 <div class="content">
-                    <div class="item">
-                        <div class="preview create-action" @click="ceateTheme()">
+                    <div class="item" v-show="false">
+                        <div class="preview create-action" @click="createTheme()">
                             <svg class="add-custom-btn" width="32" height="32" viewBox="0 0 682.65 682.74"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
@@ -106,7 +179,7 @@ const ceateTheme = () => editTheme()
                                 </g>
                             </svg>
                         </div>
-                        <div class="name" @click="ceateTheme()">新建主题</div>
+                        <div class="name" @click="createTheme()">新建主题</div>
                     </div>
                     <div class="item" v-for="(item, index) in getCustomThemes()"
                         :class="{ active: index == themeSetting.index && themeSetting.type === 1 }">
@@ -168,13 +241,17 @@ const ceateTheme = () => editTheme()
     display: flex;
     flex-direction: column;
     text-align: left;
-    overflow: scroll;
-    overflow-x: hidden;
+    /*overflow: scroll;
+    overflow-x: hidden;*/
     --active-color: #ffd700;
 }
 
 #themes-view .spacing {
     margin-left: 33px;
+}
+
+#themes-view .spacing1 {
+    margin-left: 20px;
 }
 
 #themes-view .header {
@@ -198,6 +275,7 @@ const ceateTheme = () => editTheme()
     position: relative;
     display: flex;
     align-items: center;
+    position: relative;
 }
 
 #themes-view .tab {
@@ -216,13 +294,26 @@ const ceateTheme = () => editTheme()
     border-bottom: 3px solid var(--content-highlight-color);
 }
 
+#themes-view .header .tab-nav .action {
+    margin-right: 25px;
+    z-index: 1;
+    display: flex;
+}
+
+#themes-view .header .tab-nav .to-right {
+    position: absolute;
+    right: 0px;
+}
+
 #themes-view .center {
     display: flex;
     flex-direction: column;
     flex: 1;
-    margin-left: 35px;
-    margin-right: 35px;
+    padding-left: 35px;
+    padding-right: 35px;
     padding-bottom: 20px;
+    overflow: scroll;
+    overflow-x: hidden;
 }
 
 #themes-view .center .row {
@@ -285,6 +376,7 @@ const ceateTheme = () => editTheme()
     word-wrap: break-word;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 

@@ -329,11 +329,17 @@ export const useUserProfileStore = defineStore("userProfile", {
             Object.assign(playlist, { updated })
             return true
         },
-        findCustomPlaylistIndex(id) {
+        _findListItemIndex(id, list) {
             if (!id || id.trim().length < 1) return -1
-            if (this.customPlaylists.length < 1) return -1
-            return this.findItemIndex(this.customPlaylists, { id },
+            if (!list || list.length < 1) return -1
+            return this.findItemIndex(list, { id },
                 (e1, e2) => e1.id === e2.id)
+        },
+        findCustomPlaylistIndex(id) {
+            return this._findListItemIndex(id, this.customPlaylists)
+        },
+        findFavouritePlaylistIndex(id) {
+            return this._findListItemIndex(id, this.favorites.playlists)
         },
         //关注的歌手
         addFollowArtist(id, platform, title, cover) {

@@ -1,6 +1,10 @@
 <script setup>
-import { computed, ref, toRef, watch } from 'vue';
+import { computed, ref, shallowRef, toRef, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import PaginationTiles from './PaginationTiles.vue';
+import SongItem from './SongItem.vue';
+import SongItemNew from './SongItemNew.vue';
+import { useSettingStore } from '../store/settingStore'; 
 
 
 
@@ -24,12 +28,15 @@ const props = defineProps({
     limit: Number,
     maxPage: Number,
     draggable: Boolean,
+    //itemDisplayMode: Number,
 })
 
+const songItemRef = shallowRef(SongItemNew)
 const limitFromProps  = toRef(props, 'limit')
 const dataFromProps = toRef(props, 'data')
 const maxPageFromProps = toRef(props, 'maxPage')
 const paginationStyleType = toRef(props, 'paginationStyleType')
+const { getSongItemStyleIndex } = storeToRefs(useSettingStore())
 
 const getLimit = computed(() => (limitFromProps .value || 2333))
 
@@ -41,6 +48,7 @@ const getMaxPage = computed(() => {
     if (!data || data < 0) return 0
     return Math.ceil(data.length / limit)
 })
+
 
 const currentOffset = ref(0)
 const refreshAllPendingMark = ref(0)
@@ -84,6 +92,11 @@ watch(() => dataFromProps.value.length > 0 && dataFromProps.value[0].id, (nv, ov
 watch(() => props.id, (nv, ov) => {
     refreshAllPendingMark.value = Date.now()
 }, { immediate: true })
+
+//偷懒写法，作为组件一般不应与设置settingStore直接关联
+watch(getSongItemStyleIndex, (nv, ov) => {
+    songItemRef.value = nv ? SongItemNew : SongItem
+})
 </script>
 
 <!--
@@ -115,7 +128,8 @@ watch(() => props.id, (nv, ov) => {
             :refreshAllPendingMark="refreshAllPendingMark" 
             :refreshPagePendingMark="refreshPagePendingMark">
             <template v-slot="{ item, index }">
-                <SongItem :index="(currentOffset + index)" 
+                <component :is="songItemRef"
+                    :index="(currentOffset + index)" 
                     :data="item"
                     :draggable="draggable"
                     :artistVisitable="artistVisitable"
@@ -126,7 +140,7 @@ watch(() => props.id, (nv, ov) => {
                     :checked="checkedAll" 
                     :ignoreCheckAllEvent="ignoreCheckAllEvent" 
                     :checkChangedFn="checkChangedFn">
-                </SongItem>
+                </component>
             </template>
             <template #loading2>
                 <div v-show="loading">

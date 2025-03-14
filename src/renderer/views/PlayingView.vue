@@ -9,13 +9,12 @@ import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import { stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv, nextInt, 
-    rgbToHsl, hslToRgb, coverDefault, grayscale } from '../../common/Utils';
+    rgbToHsl, hslToRgb, coverDefault, grayscale, getPalette } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
 import { usePlatformStore } from '../store/platformStore';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
-import ColorThief from '../../../node_modules/colorthief/dist/color-thief.mjs';
 import { Playlist } from '../../common/Playlist';
 
 
@@ -110,9 +109,11 @@ const getPaletteAvgGrayscale = (rgbs) => {
     return Math.round(sumGrayscale / _rgbs.length)
 }
 
+/*
 const getPalette = (img, num) => {
     return new ColorThief().getPalette(img, num)
 }
+*/
 
 const postCoverLoadComplete = () => {
     const containerEl = document.querySelector('.playing-view .container')
@@ -821,10 +822,12 @@ onMounted(() => {
     margin-top: 13px;
 }
 
+/*
 .playing-view .container > .bottom.bottom-new .btm-center .play-ctl .play-btn {
     height: 39px;
     width: 39px;
 }
+*/
 
 .playing-view .container > .bottom.bottom-new .btm-center .play-ctl .play-btn:hover {
     transform: scale(1.05);

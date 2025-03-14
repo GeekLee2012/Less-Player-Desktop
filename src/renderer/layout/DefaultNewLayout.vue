@@ -87,10 +87,12 @@ const { isFontAutoWeight } = storeToRefs(useSettingStore())
 }
 
 /* default new bottom */
+/*
 .default-new-layout > .bottom .default-new-main-bottom .play-ctl .play-btn {
     height: 39px;
     width: 39px;
 }
+*/
 
 .default-new-layout > .bottom .default-new-main-bottom .play-ctl .play-btn:hover {
     transform: scale(1.05);

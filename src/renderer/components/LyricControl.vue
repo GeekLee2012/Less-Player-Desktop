@@ -20,6 +20,7 @@ const props = defineProps({
     currentTime: Number,
     hiddenMeta: Boolean,
     layoutMode: Number,
+    keyName: String,
 })
 
 const { playVideoItem, loadLyric, currentTimeState,
@@ -29,7 +30,7 @@ const { playVideoItem, loadLyric, currentTimeState,
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
 const { lyric, lyricTransActived, lyricRomaActived, 
-    isDndSaveEnable, isMiniLayout, } = storeToRefs(useSettingStore())
+    isDndSaveEnable, isMiniLayout, isSimpleLayout, } = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 //const { currentTrack } = storeToRefs(usePlayStore())
 
@@ -377,8 +378,8 @@ const isFullLayoutMode = computed(() => {
 
 /* 生命周期、监听 */
 watch(() => props.currentTime, (nv, ov) => {
-    //TODO 暂时简单处理，播放页隐藏时直接返回
-    if (!playingViewShow.value && !isMiniLayout.value) return
+    //TODO 暂时简单处理，非可视状态直接返回
+    if (!playingViewShow.value && !isMiniLayout.value && !isSimpleLayout.value) return
     safeRenderAndScrollLyric(nv)
 }, { immediate: true })
 

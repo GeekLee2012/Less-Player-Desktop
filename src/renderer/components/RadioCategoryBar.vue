@@ -76,7 +76,8 @@ const getFlatData = () => {
 
 const loadFirstCateData = () => {
     const firstItem = getFlatData()[0]
-    visitCateItem(firstItem, firstItem.row, firstItem.col, true)
+    const { row, col } = firstItem || {}
+    visitCateItem(firstItem, row, col, true)
 }
 
 const isItemActive = (item) => {

@@ -5,6 +5,7 @@ import JSEncrypt from 'jsencrypt';
 import { pinyin } from 'pinyin-pro';
 import { FILE_PREFIX, DEFAULT_COVER_BASE64, FILE_SCHEME, LESS_MAGIC_CODE } from './Constants';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
+import ColorThief from '../../node_modules/colorthief/dist/color-thief.mjs';
 
 
 
@@ -1057,4 +1058,9 @@ const hueToRgb = (p, q, t) => {
 
 export const grayscale = (r, g, b) => {
     return 0.299 * r  + 0.587 * g + 0.114 * b
+}
+
+export const getPalette = (img, num) => {
+    num = num || 1
+    return new ColorThief().getPalette(img, num)
 }

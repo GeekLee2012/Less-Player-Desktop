@@ -5,7 +5,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
-import { isDevEnv, useUseCustomTrafficLight, isMacOS } from '../../common/Utils';
+import { isDevEnv, useUseCustomTrafficLight, isMacOS, coverDefault } from '../../common/Utils';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import Navigator from '../components/Navigator.vue';
 import SearchBar from '../components/SearchBar.vue';
@@ -117,9 +117,9 @@ const visitArtistItem = (item, index) => {
     })
 }
 
-const visitFavourteItem = (item, index) => {
+const visitFavouriteItem = (item, index) => {
     activeCustomPlaylistIndex.value = -1
-    //activeFavoritePlaylistIndex.value = index
+    activeFavoritePlaylistIndex.value = index
     const { id, platform } = item
     visitFavoritePlaylist(platform, id)
 }
@@ -240,8 +240,9 @@ watch(isCloudStorageModeEnable, (nv) => {
 })
 
 const eventsRegistration = {
-    'navigation-refreshCustomPlaylistIndex': index => {
-        activeCustomPlaylistIndex.value = index
+    'navigation-refreshPlaylistIndex': ({ customIndex, favouriteIndex }) => {
+        activeCustomPlaylistIndex.value = customIndex
+        activeFavoritePlaylistIndex.value = favouriteIndex
     },
     toggleRadioMode,
     visitCloudStorageMode,
@@ -409,7 +410,13 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <ul>
                     <li v-for="(item, index) in getCustomPlaylists"
                         :class="{ active: (activeCustomPlaylistIndex == index) }" @click="visitCustomItem(item, index)"
-                        @contextmenu="(e) => onContextMenu(e, item, 3, index)" v-html="item.title">
+                        @contextmenu="(e) => onContextMenu(e, item, 3, index)">
+                        <div class="playlist-item">
+                            <div class="cover">
+                                <img v-lazy="coverDefault(item.cover)" />
+                            </div>
+                            <div class="title" v-html="item.title"></div>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -443,8 +450,14 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </div>
                 <ul v-show="!isFavoritePlaylistsCollapsed">
                     <li v-for="(item, index) in getFavoritePlaylilsts()"
-                        :class="{ active: (activeFavoritePlaylistIndex == index) }" @click="visitFavourteItem(item, index)"
-                        @contextmenu="(e) => onContextMenu(e, item, 8, index)" v-html="item.title">
+                        :class="{ active: (activeFavoritePlaylistIndex == index) }" @click="visitFavouriteItem(item, index)"
+                        @contextmenu="(e) => onContextMenu(e, item, 8, index)">
+                        <div class="playlist-item">
+                            <div class="cover">
+                                <img v-lazy="coverDefault(item.cover)" />
+                            </div>
+                            <div class="title" v-html="item.title"></div>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -454,7 +467,13 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </div>
                 <ul>
                     <li v-for="(item, index) in getFollowArtists()" :class="{ active0: (activeArtistIndex == index) }"
-                        @click="visitArtistItem(item, index)" v-html="item.title">
+                        @click="visitArtistItem(item, index)">
+                        <div class="playlist-item">
+                            <div class="cover">
+                                <img v-lazy="coverDefault(item.cover)" />
+                            </div>
+                            <div class="title" v-html="item.title"></div>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -662,7 +681,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     position: absolute;
     /* right: 15px; */
     right: 19px;
-    top: 4px;
+    top: 6px;
 }
 
 #main-left .center .collapse-btn,
@@ -718,6 +737,18 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left .custom-playlist-list li,
 #main-left .favorite-playlist-list li {
     font-size: var(--content-text-subtitle-size);
+    padding-left: 5px;
+    padding-right: 5px;
+    width: calc(100% - var(--spacing-left) * 2 - 36px + var(--others-scrollbar-width) + 30px);
+    margin-bottom: 6px;
+}
+
+#main-left .follow-artist-list li {
+    font-size: var(--content-text-subtitle-size);
+    padding-left: 10px;
+    padding-right: 10px;
+    width: calc(100% - var(--spacing-left) * 2 - 36px + var(--others-scrollbar-width) + 20px);
+    margin-bottom: 6px;
 }
 
 /*
@@ -741,6 +772,51 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left li.drag-target,
 #main-left li.drag-over-mark {
     background: var(--content-list-item-hover-bg-color);
+}
+
+#main-left .playlist-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#main-left .playlist-item .cover {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#main-left .playlist-item .cover img {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--border-img-small-border-radius);
+}
+
+#main-left .follow-artist-list .cover img {
+    width: 36px;
+    height: 36px;
+    border-radius: 10em;
+}
+
+#main-left .playlist-item .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
+    line-height: normal;
+    margin-left: 8px;
+    font-size: 14px;
+}
+
+#main-left .follow-artist-list .playlist-item .title {
+    font-size: calc(var(--content-text-subtitle-size) - 1px);
 }
 
 #main-left .bottom {
