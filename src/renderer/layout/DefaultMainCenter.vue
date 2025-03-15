@@ -277,7 +277,7 @@ const setupDefaultLayout = () => {
 }
 
 const setThemeViewItemsSize = () => {
-    const tileMinWidth = 166 //160
+    const tileMinWidth = 165 //160
     const tileHMargin = 25
     const scrollBarWidth = 6
     const limits = [8, 7, 6, 5, 4] //TODO 宽屏、超宽屏，需更好兼容性
@@ -299,8 +299,7 @@ const setThemeViewItemsSize = () => {
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 3
 
-    //const tileHeight = tileWidth * 95 / tileMinWidth
-    const tileHeight = tileWidth * 103 / tileMinWidth
+    const tileHeight = tileWidth * 100 / tileMinWidth //95
     applyDocumentStyle({
         '--others-theme-preview-tile-width': `${tileWidth}px`,
         '--others-theme-preview-tile-height': `${tileHeight}px`

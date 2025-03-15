@@ -62,7 +62,7 @@ const createTheme = () => editTheme()
 
 //导入：暂时简单实现，只新增不查重
 const importThemes = async () => {
-    const result = await ipcRendererInvoke('open-file', { title: '选择主题文件', filterExts: ['.json'] })
+    const result = await ipcRendererInvoke('open-file', { title: '选择主题文件', filterExts: ['json'] })
     if(!result) return
     const { filePath, data } = result
     const themes = JSON.parse(data) || []

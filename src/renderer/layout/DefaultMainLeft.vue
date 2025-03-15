@@ -43,6 +43,7 @@ const activeCustomPlaylistIndex = ref(-1)
 const activeFavoritePlaylistIndex = ref(-1)
 const activeArtistIndex = ref(-1)
 const isFavoritePlaylistsCollapsed = ref(false)
+const centerContentRef = ref(null)
 
 let isUserMouseWheel = ref(false), userMouseWheelCancelTimer = null
 
@@ -235,6 +236,12 @@ watch(isRadioModeEnable, (nv) => {
     if(!nv && isRadioMode.value) switchExploreMode(true)
 })
 
+watch(isUserHomeMode, (nv) => {
+    if(centerContentRef.value) {
+        centerContentRef.value.scrollTop = 0
+    }
+})
+
 watch(isCloudStorageModeEnable, (nv) => {
     if(!nv && isCloudStorageMode.value) switchExploreMode(true)
 })
@@ -381,7 +388,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </svg>
             </div>
         </div>
-        <div class="center" @scroll="onUserMouseWheel">
+        <div class="center" @scroll="onUserMouseWheel" ref="centerContentRef">
             <div class="platform-list">
                 <div class="secondary-text" v-show="isSubtitleVisible()">
                     <span>音乐平台</span>

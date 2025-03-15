@@ -200,6 +200,13 @@ const saveGradient = () => {
     hideGradientColorToolbar()
 }
 
+const removeGradient = () => {
+    if(!gradientInputRef.value) return 
+    const value = ''
+    gradientInputRef.value.updateValue(value)
+    updateFromGradientInput(value)
+}
+
 
 
 /* 生命周期、监听 */
@@ -230,7 +237,7 @@ defineExpose({
                     <div class="title">渐变设置</div>
                 </div>
                 <div class="action right-action">
-                    <div class="clear-btn text-btn" v-show="false" @click="">
+                    <div class="clear-btn text-btn" @click="removeGradient">
                         <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -246,7 +253,7 @@ defineExpose({
                                 d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z"
                                 transform="translate(-833 -413)" />
                         </svg>
-                        <span>重置</span>
+                        <span>移除渐变</span>
                     </div>
                     <div class="append-btn text-btn" @click="appendColorStop">
                         <svg width="13" height="13" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">

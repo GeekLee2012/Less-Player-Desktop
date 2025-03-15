@@ -671,7 +671,10 @@ const registryGlobalListeners = () => {
       ],
       properties: ['openFile']
     })
-    return result.filePaths.map(item => (noFilePrefix ? item : (FILE_PREFIX + item)))
+    return result.filePaths.map(item => {
+      item = transformPath(item)
+      return noFilePrefix ? item : (FILE_PREFIX + item)
+    })
   })
 
   ipcMain.handle('open-image-base64', async (event, ...args) => {

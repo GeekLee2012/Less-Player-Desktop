@@ -801,6 +801,7 @@ export const transformUrl = (url, protocal) => {
         || url.startsWith('data:')
         || url.startsWith('blob:')) return url
     protocal = protocal || 'https'
+    url = url.replace(/\\/g, '/').replace(/\\/g, '/')
     return `${protocal}://${url}`.replace(':////', '://')
 }
 

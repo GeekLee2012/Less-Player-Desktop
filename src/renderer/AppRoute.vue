@@ -42,10 +42,11 @@ const highlightNavigationPlaylist = (to, from) => {
         && !path.includes('/edit')) {
         const id = path.split('/')[3]
         customIndex = findCustomPlaylistIndex(id)
-    } else if (path.includes('/favourite/playlist/')) {
-        const id = path.split('/')[5]
+    } else if (path.includes('/playlist/')) {
+        const offset = path.includes('/favourite/') ? 1 : 0
+        const id = path.split('/')[4 + offset]
         favouriteIndex = findFavouritePlaylistIndex(id)
-    }
+    } 
     emitEvents("navigation-refreshPlaylistIndex", { customIndex, favouriteIndex })
 }
 

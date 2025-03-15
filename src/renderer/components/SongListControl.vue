@@ -96,7 +96,7 @@ watch(() => props.id, (nv, ov) => {
 //偷懒写法，作为组件一般不应与设置settingStore直接关联
 watch(getSongItemStyleIndex, (nv, ov) => {
     songItemRef.value = nv ? SongItemNew : SongItem
-})
+}, { immediate: true })
 </script>
 
 <!--

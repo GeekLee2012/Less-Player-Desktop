@@ -17,7 +17,7 @@ const { useWindowsStyleWinCtl } = inject('appCommon')
 
 const { workingCustomTheme } = storeToRefs(useAppCommonStore())
 const { hideCustomThemeEditView, showToast, showFailToast } = useAppCommonStore()
-const { saveCustomTheme } = useThemeStore()
+const { saveCustomTheme, isDemoTheme } = useThemeStore()
 const { isCurrentTheme } = useSettingStore()
 
 const blankTheme = new Theme()
@@ -47,6 +47,7 @@ const saveTheme = () => {
     if (isFormInvalid.value) return
 
     const theme = JSON.parse(JSON.stringify(customTheme))
+    if(isDemoTheme(theme)) return showFailToast('模板主题无法修改<br>请使用另存为操作')
     saveCustomTheme(theme)
     showToast('主题保存成功')
     hideCustomThemeEditView()
@@ -804,6 +805,7 @@ watch(workingCustomTheme, (nv, ov) => {
     padding: 0px 50px;
     flex: 1;
     /*background: var(--content-bg-color);*/
+    background: transparent;
     overflow: hidden;
     align-items: flex-start;
     display: flex;
