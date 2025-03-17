@@ -99,7 +99,7 @@ onMounted(() => {
 .default-new-main-bottom {
     flex-direction: column;
     padding-top: 3px;
-    border-top: 1.3px solid var(--others-progressbar-bg-color);
+    border-top: 0.6px solid var(--others-progressbar-bg-color);
     height: calc(var(--main-bottom-height) - 3px - 1.3px);
     -webkit-app-region: none;
     --others-sliderbar-ctl-height: 4px;

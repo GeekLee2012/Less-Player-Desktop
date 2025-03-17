@@ -76,7 +76,7 @@ const onImageDrop = (event, item, index) => {
                 </div>
                 <div class="action">
                     <div class="add-btn text-btn" @click="() => showCustomPlayingThemeEditView()" >
-                        <svg width="14" height="14"
+                        <svg width="13" height="13"
                             viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -262,9 +262,14 @@ const onImageDrop = (event, item, index) => {
     right: 25px;
 }
 
+.playing-theme-list-view .header .action .add-btn {
+    font-size: var(--content-text-tip-text-size);
+}
+
 .playing-theme-list-view .header .action .add-btn svg {
     transform: translateY(1px);
 }
+
 
 .playing-theme-list-view .center {
     position: relative;

@@ -757,7 +757,7 @@ onMounted(() => {
 
 /* bottom-new  */
 .playing-view .container > .bottom.bottom-new {
-    border-top: 1.3px solid var(--others-progressbar-bg-color);
+    border-top: 1.1px solid var(--others-progressbar-bg-color);
     --bottom-height: 88px;
     /*height: var(--bottom-height);
     min-height: var(--bottom-height);*/

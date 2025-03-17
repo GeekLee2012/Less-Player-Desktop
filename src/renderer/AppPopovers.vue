@@ -289,7 +289,10 @@ const appBackgroundScope = reactive({
   toast: false,
   soundEffectView: false,
   lyricToolbar: false,
-  randomMusicToolbar: false
+  randomMusicToolbar: false,
+  customThemeEditView: false,
+  playingThemeListView: false,
+  customPlayingThemeEditView: false,
 })
 
 //EventBus监听注册，统一管理

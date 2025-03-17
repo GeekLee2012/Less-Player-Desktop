@@ -53,11 +53,15 @@ const visitItem = (item) => {
     margin-top: 5px !important;
 }
 
-
 .artistlist-ctl .image-text-tile-card {
     box-shadow: none !important;
     background-color: transparent !important;
 }
+
+.artistlist-ctl .image-text-tile-card .cover-wrap {
+    border-bottom: 1px solid transparent !important;
+}
+
 
 .artistlist-ctl .image-text-tile-card .cover {
     height: var(--others-image-text-tile-cover-size) !important;

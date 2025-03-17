@@ -51,11 +51,13 @@ const setVDirection = (item, index) => {
 const colorStops = ref([])
 const gradientInputRef = ref(null)
 
+const updateGradientInput = (value) => {
+    if(gradientInputRef.value) gradientInputRef.value.updateValue(value)
+}
+
 const doUpdateValue = (value, fromGradientInput) => {
     setGradient(value)
-    if (!fromGradientInput && gradientInputRef.value) {
-        gradientInputRef.value.updateValue(value)
-    }
+    if (!fromGradientInput) updateGradientInput(value)
 }
 
 const resolveGradientText = (value) => {
@@ -201,9 +203,10 @@ const saveGradient = () => {
 }
 
 const removeGradient = () => {
-    if(!gradientInputRef.value) return 
     const value = ''
-    gradientInputRef.value.updateValue(value)
+    updateGradientInput(value)
+    setHDirectionIndex(0)
+    setVDirectionIndex(0)
     updateFromGradientInput(value)
 }
 
