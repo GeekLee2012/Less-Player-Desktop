@@ -29,4 +29,12 @@ const props = defineProps({
     </SvgTextButton>
 </template>
 
-<style></style>
+<style>
+.add-folder-file-btn .left-btn svg {
+    transform: scaleY(1.1) scale(0.96);
+}
+
+.add-folder-file-btn .right-btn svg {
+    transform: scaleY(0.96) scale(1.05);
+}
+</style>

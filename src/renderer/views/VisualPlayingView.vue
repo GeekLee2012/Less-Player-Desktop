@@ -8,7 +8,9 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { stringEquals, useUseCustomTrafficLight, coverDefault, } from '../../common/Utils';
+import { stringEquals, useUseCustomTrafficLight, coverDefault, 
+    rgbToHsl, hslToRgb, grayscale, getPalette, nextInt,
+} from '../../common/Utils';
 import { Track } from '../../common/Track';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
@@ -46,7 +48,11 @@ const { currentTrack, playingIndex,
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos, theme, layout,
     isDndSaveEnable, isPlayingViewUseBgCoverEffect,
-    isPlayingViewCoverBorderShow, playingViewBgCoverEffectIndex
+    isPlayingViewCoverBorderShow, playingViewBgCoverEffectIndex,
+    playingViewBgCoverEffectGradientMode,
+    playingViewBgCoverEffectGradientType,
+    playingViewBgCoverEffectGradientBrightness,
+    playingViewThemeColorIndex,
 } = storeToRefs(useSettingStore())
 
 
@@ -61,30 +67,161 @@ const setDisactived = (value) => {
     emitEvents('playingView-changed')
 }
 
+
+const overrideDefaultPalette = (rgbs) => {
+    const [r1, g1, b1] = rgbs[0]
+    const [r2, g2, b2] = rgbs[1]
+    const isHit = (r, g, b) => {
+         //[219, 116, 115], [68, 68, 69]
+        return (r == 219 && g == 116 && b == 115) 
+            || (r == 68 && g == 68 && b == 69)
+    }
+    if(isHit(r1, g1, b1) && isHit(r2, g2, b2)) {
+        //Noon to Dusk: #ff6e7f, #bfe9ff => [255, 110, 127], [191, 233, 255]
+        //Love and Liberty: #200122, #6f0000 => [32, 1, 34], [111, 0, 0]
+        //Poncho: #403a3e, #be5869 => [190, 88, 105], [64, 58, 62]
+        return [[190, 88, 105], [64, 58, 62]]
+    }
+    return rgbs
+}
+
+const sortPalette = (rgbs, mode) => {
+    //简单起见，仅考虑数组长度为2的情况
+    const _rgbs = overrideDefaultPalette(rgbs.slice(0, 2))
+    const [h1, s1, l1] = rgbToHsl(..._rgbs[0])
+    const [h2, s2, l2] = rgbToHsl(..._rgbs[1])
+
+    switch(mode) {
+        case 0: //亮 -> 暗
+            return l1 > l2 ? _rgbs : _rgbs.reverse()
+        case 1: //暗 -> 亮
+            return l1 > l2 ? _rgbs.reverse() : _rgbs
+        default:
+            break
+    }
+    return _rgbs
+}
+
+let isOptimizeEnable = false
+const optimizePalette = (rgbs) => {
+    if(!isOptimizeEnable) return rgbs
+    //简单起见，仅考虑数组长度为2的情况
+    const _rgbs = rgbs.slice(0, 2)
+    //TODO 待学习色彩理论、算法
+    return _rgbs.map(rgb => {
+        return rgb
+    })
+}
+
+const getPaletteAvgGrayscale = (rgbs) => {
+    //简单起见，仅考虑数组长度为2的情况
+    const _rgbs = rgbs.slice(0, 2)
+    const sumGrayscale = _rgbs.reduce((accumulator, current) => {
+        accumulator += grayscale(...current)
+        return accumulator
+    }, 0)
+    return Math.round(sumGrayscale / _rgbs.length)
+}
+
+/*
 const getPalette = (img, num) => {
-    const colorThief = new ColorThief()
-    return colorThief.getPalette(img, num)
+    return new ColorThief().getPalette(img, num)
+}
+*/
+
+const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
+    const avgGrayscale = getPaletteAvgGrayscale(rgbs)
+    let autoClass = defaultClass || (avgGrayscale > 159 ? 'dark' : 'light')
+    switch(playingViewThemeColorIndex.value) {
+        case 1:
+            autoClass = 'light'
+            break
+        case 2:
+            autoClass = 'dark'
+            break
+    }
+    return autoClass
+}
+
+const postCoverLoadComplete = () => {
+    const containerEl = document.querySelector('.visual-playing-view .container')
+    const coverEl = containerEl.querySelector('.center .cover')
+    const mode = playingViewBgCoverEffectGradientMode.value
+    const rgbs = optimizePalette(sortPalette(getPalette(coverEl, 2), mode))
+    const alphaFactor = mode ? 88: 68
+    const alpha = (alphaFactor / 255).toFixed(2)
+    const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
+    const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
+    const _rgbColors = rgbColors.join(',')
+
+    applyDocumentStyle({ 
+        '--bg-effect': `linear-gradient(${_rgbColors})`,
+        '--bg-effect-bottom': rgbaColors[0],
+    })
+    
+    const backdropClass = 'with-backdrop'
+    const brightnessLightClass = 'brightness-light'
+    containerEl.classList.remove('light')
+    containerEl.classList.remove('dark')
+    containerEl.classList.remove(backdropClass)
+    containerEl.classList.remove(brightnessLightClass)
+
+    let autoClass = getPlayingViewThemeAutoClass(rgbs)
+
+    containerEl.classList.add('auto-effect')
+    containerEl.classList.add(autoClass)
+    
+    const gradientType = playingViewBgCoverEffectGradientType.value
+    if(gradientType == 2 || (gradientType == 0 && (nextInt(100) % 2 == 0))) {
+        containerEl.classList.add(backdropClass)
+        //文字、按钮控件等元素，大部分在light样式下效果较好
+        containerEl.classList.remove('dark')
+        autoClass = 'light'
+
+        if(playingViewBgCoverEffectGradientBrightness.value == 0) {
+            containerEl.classList.add(brightnessLightClass)
+            containerEl.classList.remove('light')
+            autoClass = 'dark'
+        }
+
+        containerEl.classList.add(getPlayingViewThemeAutoClass(rgbs, autoClass))
+    }
+    return true
 }
 
 const clearBackgroundEffect = () => {
     const containerEl = document.querySelector('.visual-playing-view .container')
     containerEl.classList.remove('auto-effect')
+    containerEl.classList.remove('with-backdrop')
+    containerEl.classList.remove('brightness-light')
+    containerEl.classList.remove('light')
+    containerEl.classList.remove('dark')
     applyDocumentStyle({ '--bg-effect': 'none'})
+
+    const coverEl = containerEl.querySelector('.center .cover')
+    coverEl.removeEventListener('load', postCoverLoadComplete)
 }
 
 
 const setupSimpleBackgroundEffect = async () => {
-    const track = currentTrack.value
-    if (!track || !Track.hasCover(track)) return clearBackgroundEffect()
-    const { cover } = track
+    clearBackgroundEffect()
+    const cover = Track.coverDefault(currentTrack.value)
     //默认封面
-    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return clearBackgroundEffect()
+    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return 
     //本地歌曲
-    if (cover.startsWith(ImageProtocal.prefix)) return clearBackgroundEffect()
+    //if (cover.startsWith(ImageProtocal.prefix)) return
     applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
 }
 
+const setupGradientBackgroundEffect = async () => {
+    clearBackgroundEffect()
+    const containerEl = document.querySelector('.visual-playing-view .container')
+    const coverEl = containerEl.querySelector('.center .cover')
+    if(coverEl.complete) postCoverLoadComplete()
+    coverEl.addEventListener('load', postCoverLoadComplete)
+}
 
+//TODO 性能问题
 const setupBackgroudEffect = async () => {
     switch(playingViewBgCoverEffectIndex.value) {
         case 0:
@@ -94,12 +231,14 @@ const setupBackgroudEffect = async () => {
             setupSimpleBackgroundEffect()
             break
         case 2:
-            //setupGradientBackgroundEffect()
+            setupGradientBackgroundEffect()
             break
         default:
             break
     }
 }
+
+
 
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
@@ -117,8 +256,17 @@ const onDrop = async (event) => {
 
 
 /* 生命周期、监听 */
-watch(() => (currentTrack.value && currentTrack.value.cover + '&'+ playingViewShow.value), setupBackgroudEffect)
-watch(playingViewBgCoverEffectIndex, setupBackgroudEffect)
+//watch(() => (currentTrack.value && currentTrack.value.cover + '&'+ playingViewShow.value), setupBackgroudEffect)
+//watch(playingViewBgCoverEffectIndex, setupBackgroudEffect)
+watch(() => (currentTrack.value && currentTrack.value.cover 
+    + '&' + playingViewShow.value
+    + '-' + playingViewBgCoverEffectIndex.value
+    + '-' + playingViewBgCoverEffectGradientMode.value
+    + '-' + playingViewBgCoverEffectGradientType.value
+    + '-' + playingViewBgCoverEffectGradientBrightness.value
+    + '-' + playingViewThemeColorIndex.value),  
+    setupBackgroudEffect)
+
 
 onMounted(() => {
     setDisactived(false)
@@ -224,7 +372,7 @@ onUnmounted(() => {
                                     </g>
                                 </svg>
                             </div>
-                            <div class="spectrum-btn spacing" @click="switchSpectrumIndex"
+                            <div class="spectrum-btn spacing1" @click="switchSpectrumIndex"
                                 :class="{ active: spectrumIndex < 0 }" v-show="false">
                                 <svg width="18" height="17" viewBox="0 0 1003.7 910.4" xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
@@ -243,10 +391,10 @@ onUnmounted(() => {
                                     </g>
                                 </svg>
                             </div>
-                            <div class="volume-ctl-btn spacing">
+                            <div class="volume-ctl-btn spacing1">
                                 <VolumeBar ref="volumeBarRef"></VolumeBar>
                             </div>
-                            <!--<div class="spacing"><svg width="21" height="21" viewBox="0 0 767.96 895.83" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M458.7,677.8,274.75,559.58c-35.29,34.33-77.25,51.15-126.42,47.61C104,604,67.35,584.86,38.16,551.38c-53.89-61.79-50.31-156.85,8.26-216.25,60.08-60.95,162.47-65.53,228.41.79L458.59,217.83c-17.32-49.24-14-96.72,13.09-141.57,19.67-32.52,47.82-55.37,83.9-67.49,75.65-25.39,155.7,5.8,193.1,74.7C785.34,151,768.21,236,708.87,284.05c-60.76,49.2-153.42,49.49-215.57-12.43l-184,118.25a161.11,161.11,0,0,1,0,115.78l184,118.23c64.15-64.7,163-61.37,223-6C774.44,671.56,785,760.17,740.5,825.46c-44.86,65.91-131.3,89-202.23,54.35C466.68,844.85,428.1,760.37,458.7,677.8ZM512,159.4a96,96,0,1,0,96.37-95.62A96.09,96.09,0,0,0,512,159.4Zm0,576a96,96,0,1,0,96.36-95.62A96.08,96.08,0,0,0,512,735.4ZM160.36,351.78A96,96,0,1,0,256,448.11,96,96,0,0,0,160.36,351.78Z"/></g></g></svg></div>-->
+                            <!--<div class="spacing1"><svg width="21" height="21" viewBox="0 0 767.96 895.83" xmlns="http://www.w3.org/2000/svg" ><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M458.7,677.8,274.75,559.58c-35.29,34.33-77.25,51.15-126.42,47.61C104,604,67.35,584.86,38.16,551.38c-53.89-61.79-50.31-156.85,8.26-216.25,60.08-60.95,162.47-65.53,228.41.79L458.59,217.83c-17.32-49.24-14-96.72,13.09-141.57,19.67-32.52,47.82-55.37,83.9-67.49,75.65-25.39,155.7,5.8,193.1,74.7C785.34,151,768.21,236,708.87,284.05c-60.76,49.2-153.42,49.49-215.57-12.43l-184,118.25a161.11,161.11,0,0,1,0,115.78l184,118.23c64.15-64.7,163-61.37,223-6C774.44,671.56,785,760.17,740.5,825.46c-44.86,65.91-131.3,89-202.23,54.35C466.68,844.85,428.1,760.37,458.7,677.8ZM512,159.4a96,96,0,1,0,96.37-95.62A96.09,96.09,0,0,0,512,159.4Zm0,576a96,96,0,1,0,96.36-95.62A96.08,96.08,0,0,0,512,735.4ZM160.36,351.78A96,96,0,1,0,256,448.11,96,96,0,0,0,160.36,351.78Z"/></g></g></svg></div>-->
                         </div>
                         <div class="btm-center">
                             <PlayControl></PlayControl>
@@ -274,11 +422,11 @@ onUnmounted(() => {
                                 </svg>
                                 -->
                             </div>
-                            <div class="lyric-btn btn spacing" :class="{ 'content-text-highlight': desktopLyricShow }"
+                            <div class="lyric-btn btn spacing1" :class="{ 'content-text-highlight': desktopLyricShow }"
                                 @click="() => toggleDesktopLyricShow()">
                                 词
                             </div>
-                            <div class="equalizer-btn btn spacing" :class="{ active: isUseEffect }">
+                            <div class="equalizer-btn btn spacing1" :class="{ active: isUseEffect }">
                                 <svg @click="toggleSoundEffectView" width="17" height="17" viewBox="0 0 1024 1024"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
@@ -306,13 +454,16 @@ onUnmounted(() => {
             </div>
             <canvas class="fullpage-spectrum-canvas" v-show="false">
             </canvas>
-        </div>
-        <div class="bg-effect">
+            <div class="bg-effect"></div>
+            <div class="backdrop-container">
+                <img class="backdrop-img" :src="Track.coverDefault(currentTrack)">
+            </div>
+            <div class="bg-container"></div>
         </div>
     </div>
 </template>
 
-<style scoped>
+<style>
 .visual-playing-view {
     display: flex;
     /*flex-direction: column;*/
@@ -330,22 +481,22 @@ onUnmounted(() => {
     background: var(--content-bg-color-no-transparent);
 }
 
-.visual-playing-view .spacing {
+.visual-playing-view .spacing1 {
     margin-left: 18px;
 }
 
-.visual-playing-view .header {
+.visual-playing-view .container > .header {
     height: 56px;
     height: 43px;
     display: flex;
     -webkit-app-region: drag;
 }
 
-.visual-playing-view .header svg {
+.visual-playing-view .container > .header svg {
     -webkit-app-region: none;
 }
 
-.visual-playing-view .header .win-ctl-wrap {
+.visual-playing-view .container > .header .win-ctl-wrap {
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -384,6 +535,7 @@ onUnmounted(() => {
     align-items: center;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     word-wrap: break-word;
     line-break: anywhere;
 }
@@ -392,7 +544,7 @@ onUnmounted(() => {
     -webkit-app-region: none;
 }
 
-.visual-playing-view .mv {
+.visual-playing-view .container > .header .mv {
     margin-right: 5px;
     display: flex;
     justify-content: center;
@@ -405,7 +557,7 @@ onUnmounted(() => {
     cursor: pointer;
 }
 
-.visual-playing-view .header svg:hover,
+.visual-playing-view .container > .header svg:hover,
 .visual-playing-view .theme-btn svg:hover,
 .visual-playing-view .equalizer-btn svg:hover,
 .visual-playing-view .active svg,
@@ -418,7 +570,7 @@ onUnmounted(() => {
     transform: rotate(-90deg);
 }
 
-.visual-playing-view .center {
+.visual-playing-view .container > .center {
     flex: 1;
     display: flex;
     flex-direction: row;
@@ -427,30 +579,31 @@ onUnmounted(() => {
     padding-right: 60px;
     overflow: hidden;
     height: 625px;
+    padding-bottom: 56px;
 }
 
-.visual-playing-view .center .left,
-.visual-playing-view .center .lyric-wrap {
+.visual-playing-view .container > .center .left,
+.visual-playing-view .container > .center .lyric-wrap {
     /*flex: 1;*/
     width: 50%;
     max-width: 50%;
 }
 
-.visual-playing-view .center .lyric-wrap {
+.visual-playing-view .container > .center .lyric-wrap {
     margin-left: 28px;
 }
 
-.visual-playing-view .center .lyric-wrap.meta-show {
+.visual-playing-view .container > .center .lyric-wrap.meta-show {
     margin-top: 15px;
     margin-top: 30px;
 }
 
-.visual-playing-view .center .lyric-wrap .lyric-ctl {
+.visual-playing-view .container > .center .lyric-wrap .lyric-ctl {
     height: calc(100% - 15px);
     --lyric-margin-left: 0px;
 }
 
-.visual-playing-view .center .left {
+.visual-playing-view .container > .center .left {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -489,11 +642,11 @@ onUnmounted(() => {
 }
 
 
-.visual-playing-view .center .left .audio-time {
+.visual-playing-view .container > .center .left .audio-time {
     margin: 0px 8px;
 }
 
-.visual-playing-view .center .ex-visual-canvas-wrap {
+.visual-playing-view .container > .center .ex-visual-canvas-wrap {
     cursor: pointer;
     width: 100%;
     height: 494px;
@@ -526,7 +679,7 @@ onUnmounted(() => {
     right: 0px;
 }
 
-.visual-playing-view .center .action {
+.visual-playing-view .container > .center .action {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -584,10 +737,6 @@ onUnmounted(() => {
     --others-sliderbar-thumb-size: 12px;
 }
 
-.visual-playing-view .volume-bar:hover {
-    /*width: 80px;*/
-}
-
 .visual-playing-view .action .love-btn {
     fill: var(--content-highlight-color) !important;
 }
@@ -607,12 +756,282 @@ onUnmounted(() => {
     color: var(--content-highlight-color);
 }
 
-.visual-playing-view .bottom {
+.visual-playing-view .container > .bottom {
     height: 56px;
+    display: none;
 }
 
 .visual-playing-view .fullpage-spectrum-canvas {
     position: absolute;
     z-index: 3 !important;
+}
+
+/* background effect light*/
+.visual-playing-view .container.auto-effect.light {
+    background: none !important;
+    color: #fff;
+    transition: 1s;
+}
+
+.visual-playing-view .container.auto-effect.light .meta-wrap,
+.visual-playing-view .container.auto-effect.light .meta-wrap .audio-title,
+.visual-playing-view .container.auto-effect.light .meta-wrap .audio-artist {
+    color: #eee;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .audio-artist,
+.visual-playing-view .container.auto-effect.light .lyric-ctl .audio-album {
+    color: #eee !important;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .line {
+    color: #ccc !important;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .line .extra-text {
+    color: #ddd !important;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .line.current .extra-text {
+    color: #fff !important;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .line.locator-current,
+.visual-playing-view .container.auto-effect.light .lyric-ctl .line.locator-current .text,
+.visual-playing-view .container.auto-effect.light .lyric-ctl .line.locator-current .extra-text {
+    color: #eee !important;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .extra-btn span {
+    color: #eee;
+    border-color: #eee;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-btn {
+    color: #fff !important;
+}
+
+.visual-playing-view .container.auto-effect.light svg,
+.visual-playing-view .container.auto-effect.light .play-btn svg,
+.visual-playing-view .container.auto-effect.light .play-btn svg:hover {
+    fill: #fff !important;
+}
+
+/* lyric highlight simple-color */
+.visual-playing-view .container.auto-effect.light .lyric-hl-simple-color .lyric-ctl .line.current .text {
+    color: #fff;
+}
+
+/* lyric highlight bg-border */
+.visual-playing-view .container.auto-effect.light .lyric-hl-bg-border .lyric-ctl .line.current {
+    background: #ffffff18 !important;
+    border-radius: var(--border-img-text-tile-border-radius);
+    padding: 15px 10px;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-hl-bg-border .lyric-ctl .line.current .text {
+    color: #fff;
+}
+
+/* background effect dark */
+.visual-playing-view .container.auto-effect.dark {
+    background: none !important;
+    color: #373737;
+    transition: 1s;
+}
+
+.visual-playing-view .container.auto-effect.dark .meta-wrap,
+.visual-playing-view .container.auto-effect.dark .meta-wrap .audio-title,
+.visual-playing-view .container.auto-effect.dark .meta-wrap .audio-artist {
+    color: #666;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .audio-artist,
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .audio-album {
+    color: #666 !important;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .line {
+    color: #666 !important;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .line .extra-text {
+    color: #434343 !important;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .line.current .extra-text {
+    color: #373737 !important;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .line.locator-current,
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .line.locator-current .text,
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .line.locator-current .extra-text {
+    color: #434343 !important;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .extra-btn span {
+    color: #373737;
+    border-color: #373737;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-btn {
+    color: #373737 !important;
+}
+
+.visual-playing-view .container.auto-effect.dark svg {
+    fill: #373737 !important;
+}
+
+.visual-playing-view .container.auto-effect.dark .play-btn svg,
+.visual-playing-view .container.auto-effect.dark .play-btn svg:hover {
+    fill: #fff !important;
+}
+
+.visual-playing-view .container.auto-effect.dark > .bottom.bottom-new .t-current,
+.visual-playing-view .container.auto-effect.dark > .bottom.bottom-new .t-duration {
+    color: #393939;
+}
+
+/* lyric highlight simple-color */
+.visual-playing-view .container.auto-effect.dark .lyric-hl-simple-color .lyric-ctl .line.current .text {
+    color: #373737;
+}
+
+/* lyric highlight bg-border */
+.visual-playing-view .container.auto-effect.dark .lyric-hl-bg-border .lyric-ctl .line.current {
+    background: #00000018 !important;
+    border-radius: var(--border-img-text-tile-border-radius);
+    padding: 15px 10px;
+}
+
+
+.visual-playing-view .container.auto-effect.dark .lyric-hl-bg-border .lyric-ctl .line.current .text {
+    color: #373737;
+}
+
+
+/* background effect */
+.visual-playing-view .container.auto-effect .lyric-ctl .line.current {
+    /*color: var(--content-highlight-color) !important;*/
+    background: var(--content-text-highlight-color) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+}
+
+.visual-playing-view .container.auto-effect .lyric-ctl .extra-btn .active,
+.visual-playing-view .container.auto-effect .lyric-ctl .extra-btn span:hover {
+    background: var(--content-text-highlight-color) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    border-color: var(--content-highlight-color) !important;
+}
+
+.visual-playing-view .container.auto-effect .bottom {
+    background: var(--bg-effect-bottom);
+}
+
+.visual-playing-view .container.auto-effect .lyric-btn.content-text-highlight,
+.visual-playing-view .container.auto-effect .lyric-btn:hover {
+    color: var(--content-highlight-color) !important;
+}
+
+.visual-playing-view .container.auto-effect svg:hover {
+    fill: var(--content-highlight-color) !important;
+}
+
+.visual-playing-view .container.auto-effect .max-btn svg {
+    fill: #555 !important;
+    stroke: #555 !important;
+}
+
+.visual-playing-view .container.auto-effect .bg-effect {
+    filter: unset;
+    transition: background 1s;
+}
+
+.visual-playing-view .container.auto-effect > .bottom.bottom-new .active svg {
+    fill: var(--content-highlight-color) !important;
+}
+
+
+/* 渐变风格 - 现代 */
+.visual-playing-view .container .backdrop-container {
+    contain: style size;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    z-index: -1;
+    touch-action: none;
+    z-index: -1;
+    display: none;
+}
+
+.visual-playing-view .container .backdrop-container .backdrop-img {
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  contain: layout style paint;
+  object-fit: cover;
+  object-position: center center;
+  width: 100%;
+  height: 100%;
+  content-visibility: auto;
+  background-color: #000;
+  z-index: -1;
+
+  -webkit-animation: backdrop-fadein .6s ease-out normal;
+  animation: backdrop-fadein .6s ease-out normal;
+}
+
+.visual-playing-view .container .bg-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    contain: strict;
+    z-index: -1;
+    display: none;
+}
+
+.visual-playing-view .container.auto-effect.with-backdrop .backdrop-container {
+    -webkit-filter: none !important;
+    filter: none !important;
+    display: block;
+}
+
+.visual-playing-view .container.auto-effect.with-backdrop .bg-container {
+    background-image: none !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    -webkit-backdrop-filter: blur(10vmax) saturate(2.1);
+    backdrop-filter: blur(10vmax) saturate(2.1);
+    display: block;
+}
+
+.visual-playing-view .container.auto-effect.with-backdrop.brightness-light .bg-container {
+    background-color: rgba(202, 202, 202, 0.4) !important;
+}
+
+.visual-playing-view .container.auto-effect.with-backdrop {
+    background: none !important;
+}
+
+.visual-playing-view .container.auto-effect.with-backdrop .bg-effect {
+    display: none;
 }
 </style>

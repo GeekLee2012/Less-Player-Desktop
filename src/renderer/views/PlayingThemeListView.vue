@@ -19,8 +19,11 @@ const { setPlayingViewBgCoverEffectIndex,
     togglePlayingViewCoverBorderShow,
     toggleUseOnlineCover,
     setPlayingViewBgCoverEffectGradientMode,
+    setPlayingViewBgCoverEffectGradientType,
+    setPlayingViewBgCoverEffectGradientBrightness,
     setPlayingViewLyricHighlightMode,
     setPlayingViewPlayCtlStyleIndex,
+    setPlayingViewThemeColorIndex,
  } = useSettingStore()
 
 
@@ -106,6 +109,21 @@ const onImageDrop = (event, item, index) => {
                     <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
                         <span class="subtitle">渐变顺序：</span>
                         <SingleSelectionControl class="" :data="['亮-暗', '暗-亮']" :value="track.playingViewBgCoverEffectGradientMode" :onChanged="setPlayingViewBgCoverEffectGradientMode">
+                        </SingleSelectionControl>
+                    </div>
+                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
+                        <span class="subtitle">渐变风格：</span>
+                        <SingleSelectionControl :data="['随机', '简单', '现代']" :value="track.playingViewBgCoverEffectGradientType" :onChanged="setPlayingViewBgCoverEffectGradientType">
+                        </SingleSelectionControl>
+                    </div>
+                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2 && track.playingViewBgCoverEffectGradientType == 2">
+                        <span class="subtitle">渐变亮度：</span>
+                        <SingleSelectionControl :data="['亮色', '暗色']" :value="track.playingViewBgCoverEffectGradientBrightness" :onChanged="setPlayingViewBgCoverEffectGradientBrightness">
+                        </SingleSelectionControl>
+                    </div>
+                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
+                        <span class="subtitle">控件颜色：</span>
+                        <SingleSelectionControl class="" :data="['自动', '白色', '黑色']" :value="track.playingViewThemeColorIndex" :onChanged="setPlayingViewThemeColorIndex">
                         </SingleSelectionControl>
                     </div>
                     <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">

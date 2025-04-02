@@ -24,6 +24,7 @@ const { visitRoute, visitArtist, visitHome,
     visitUserHome, visitSetting, } = inject('appRoute')
 const { showContextMenu, useWindowsStyleWinCtl, 
     searchAction, searchBarPlaceholder, } = inject('appCommon')
+const { playPlaylist } = inject('player')
 
 
 const { platforms, currentPlatformIndex,
@@ -35,9 +36,10 @@ const { isMaxScreen, isPlaylistMode, isArtistMode,
     isRadioModeEnable, isCloudStorageModeEnable } = storeToRefs(useAppCommonStore())
 const { nextExploreMode, setPlaylistExploreMode, 
     setRadioExploreMode, setCloudStorageExploreMode, 
-    showFailToast } = useAppCommonStore()
-const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists } = storeToRefs(useUserProfileStore())
+    showFailToast, hideAllCtxMenus, } = useAppCommonStore()
+const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists, } = storeToRefs(useUserProfileStore())
 const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
+const { getCustomPlaylist } = useUserProfileStore()
 
 const activeCustomPlaylistIndex = ref(-1)
 const activeFavoritePlaylistIndex = ref(-1)
@@ -130,6 +132,7 @@ const setFavoritePlaylistsCollapsed = (value) => {
 }
 
 const onUserMouseWheel = () => {
+    hideAllCtxMenus()
     isUserMouseWheel.value = true
     if (userMouseWheelCancelTimer) clearTimeout(userMouseWheelCancelTimer)
     userMouseWheelCancelTimer = setTimeout(() => {
@@ -145,6 +148,11 @@ const isSubtitleVisible = () => {
         return followArtistsShow
     }
     return false
+}
+
+const playCustomPlaylistItem = (item, index) => {
+    const playlist = getCustomPlaylist(item.id)
+    playPlaylist(playlist)
 }
 
 /* 拖拽移动重排序 */
@@ -421,6 +429,13 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <div class="playlist-item">
                             <div class="cover">
                                 <img v-lazy="coverDefault(item.cover)" />
+                                <div class="play-btn" @click.stop="playCustomPlaylistItem(item, index)">
+                                    <svg width="18" height="18" viewBox="0 0 139 139" xml:space="preserve"
+                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                        <path
+                                            d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
+                                    </svg>
+                                </div>
                             </div>
                             <div class="title" v-html="item.title"></div>
                         </div>
@@ -462,6 +477,13 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <div class="playlist-item">
                             <div class="cover">
                                 <img v-lazy="coverDefault(item.cover)" />
+                                <div class="play-btn" @click.stop="playPlaylist(item)">
+                                    <svg width="18" height="18" viewBox="0 0 139 139" xml:space="preserve"
+                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                        <path
+                                            d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
+                                    </svg>
+                                </div>
                             </div>
                             <div class="title" v-html="item.title"></div>
                         </div>
@@ -495,7 +517,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left {
     width: var(--main-left-width);
     min-width: var(--main-left-width);
-    max-width: calc(var(--main-left-width) * 1.25);
+    max-width: calc(var(--main-left-width) * 1.36);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -591,7 +613,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #explore-mode svg,
-#main-left .custom-playlist-list svg {
+#main-left .custom-playlist-list .add-custom-btn {
     fill: var(--content-subtitle-text-color);
     margin-right: 6px;
 }
@@ -689,6 +711,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     /* right: 15px; */
     right: 19px;
     top: 6px;
+    transform: scale(1.05);
 }
 
 #main-left .center .collapse-btn,
@@ -697,7 +720,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     right: 26px;
 }
 
-#main-left .center .add-custom-btn:hover {
+#main-left .center .add-custom-btn:hover,
+#main-left .center .collapse-btn:hover,
+#main-left .center .expand-btn:hover {
     fill: var(--content-highlight-color);
 }
 
@@ -787,24 +812,56 @@ onUnmounted(() => offEvents(eventsRegistration))
     align-items: center;
     padding-top: 5px;
     padding-bottom: 5px;
+    --cover-img-width: 32px;
+    --cover-img-height: 32px;
+    --cover-img-border-radius: var(--border-img-small-border-radius);
 }
 
 #main-left .playlist-item .cover {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 #main-left .playlist-item .cover img {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--border-img-small-border-radius);
+    width: var(--cover-img-width);
+    height: var(--cover-img-height);
+    border-radius: var(--cover-img-border-radius);
 }
 
 #main-left .follow-artist-list .cover img {
-    width: 36px;
-    height: 36px;
+    width: calc(var(--cover-img-width) + 4px);
+    height: calc(var(--cover-img-width) + 4px);
     border-radius: 10em;
+}
+
+#main-left .playlist-item .play-btn {
+    width: var(--cover-img-width);
+    height: var(--cover-img-height);
+    border-radius: var(--cover-img-border-radius);
+    position: absolute;
+    z-index: 2;
+    top: 0px;
+    left: 0px;
+    background-color: var(--app-bg-color);
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+}
+
+#main-left .playlist-item .play-btn:hover {
+    opacity: 1;
+}
+
+#main-left .playlist-item .play-btn svg {
+    fill: var(--button-icon-btn-color);
+}
+
+#main-left .playlist-item:hover .play-btn {
+    visibility: visible;
 }
 
 #main-left .playlist-item .title {

@@ -449,7 +449,7 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
 
     const { id, platform } = playlist
     if(typeof id == 'undefined') return
-    if(typeof platform == 'undefined') return
+    if(typeof platform == 'undefined' && !Playlist.isCustomType(playlist)) return
 
     let isTracePlaylist = true, needReset = true
     if (Playlist.isFMRadioType(playlist)) { //FM广播电台

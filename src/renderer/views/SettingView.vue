@@ -455,7 +455,7 @@ const scrollByNavItem = (event, item) => {
 /* 生命周期、监听 */
 watch(() => common.value.useWinZoomForCreate, (nv) => {
     const action = nv ? '开启' : '关闭'
-    showToast(`${action}“锁定为初始值”<br>下次重启后生效`)
+    showToast(`已${action}“锁定为初始值”<br>下次重启后生效`)
 })
 
 onMounted(() => {
@@ -1682,6 +1682,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     right: calc(0px + var(--app-win-custom-shadow-size));
     height: calc(100% - var(--main-top-height) - var(--main-bottom-height) - 6px - 30px - var(--app-win-custom-shadow-size) * 2 - var(--height-factor));
     padding: 15px 0px;
+    /*background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);*/
     background: var(--app-bg-color);
     z-index: 1;
     display: flex;

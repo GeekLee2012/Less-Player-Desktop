@@ -132,7 +132,7 @@ export const useSettingStore = defineStore('setting', {
             //卡片Tile样式阴影效果
             shadowForCardStyleTile: true,
             //歌曲控件样式，0 => 经典，1 => 主流
-            songItemStyleIndex: 0,
+            songItemStyleIndex: 1,
             //窗口自定义阴影
             winCustomShadowSize: 5, // 0 - 10
             //开关选项标题关联点击
@@ -238,10 +238,16 @@ export const useSettingStore = defineStore('setting', {
             playingViewUseBgCoverEffect: false,
             playingViewBgCoverEffectIndex: 0,
             playingViewBgCoverEffectGradientMode: 0,
+            //渐变模式 - 渐变风格
+            playingViewBgCoverEffectGradientType: 2, 
+            //渐变模式 - 渐变风格 - 渐变亮度
+            playingViewBgCoverEffectGradientBrightness: 1, 
             //播放页 - 封面图片边框
             playingViewCoverBorderShow: true,
             //播放页 - 播放控件风格
             playingViewPlayCtlStyleIndex: 0,
+            //播放页 - 播放控件颜色
+            playingViewThemeColorIndex: 0,
             //播放页 - 歌词高亮样式
             playingViewLyricHighlightMode: 0,
         },
@@ -828,11 +834,20 @@ export const useSettingStore = defineStore('setting', {
         playingViewBgCoverEffectGradientMode() {
             return this.track.playingViewBgCoverEffectGradientMode
         },
+        playingViewBgCoverEffectGradientType() {
+            return this.track.playingViewBgCoverEffectGradientType
+        },
+        playingViewBgCoverEffectGradientBrightness() {
+            return this.track.playingViewBgCoverEffectGradientBrightness
+        },
         playingViewLyricHighlightMode() {
             return this.track.playingViewLyricHighlightMode
         },
         playingViewPlayCtlStyleIndex() {
             return this.track.playingViewPlayCtlStyleIndex
+        },
+        playingViewThemeColorIndex() {
+            return this.track.playingViewThemeColorIndex
         },
         isUseShadowForCardStyleTile() {
             return this.common.shadowForCardStyleTile
@@ -1609,6 +1624,12 @@ export const useSettingStore = defineStore('setting', {
         setPlayingViewBgCoverEffectGradientMode(value) {
             this.track.playingViewBgCoverEffectGradientMode = value
         },
+        setPlayingViewBgCoverEffectGradientType(value) {
+            this.track.playingViewBgCoverEffectGradientType = value
+        },
+        setPlayingViewBgCoverEffectGradientBrightness(value) {
+            this.track.playingViewBgCoverEffectGradientBrightness = value
+        },
         setPlayingViewLyricHighlightMode(value) {
             this.track.playingViewLyricHighlightMode = value
         },
@@ -1617,6 +1638,9 @@ export const useSettingStore = defineStore('setting', {
         },
         setPlayingViewPlayCtlStyleIndex(value) {
             this.track.playingViewPlayCtlStyleIndex = value
+        },
+        setPlayingViewThemeColorIndex(value) {
+            this.track.playingViewThemeColorIndex = value
         },
         toggleToggleCtlTitleActionEnable() {
             this.common.toggleCtlTitleActionEnable = !this.common.toggleCtlTitleActionEnable

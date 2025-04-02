@@ -112,7 +112,7 @@ const resetScroll = () => {
 }
 
 .common-ctx-submenu .menuItem svg {
-    margin-right: 15px;
+    margin-right: 10px;
     fill: var(--content-text-color);
 }
 

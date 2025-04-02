@@ -154,9 +154,10 @@ export class United {
                 const vendor = filteredVendors[i]
                 if(!vendor) continue
                 
-                //音源扩展点 1 - 可实现准确匹配，知道歌曲信息
+                //音源扩展点 - 可实现准确匹配，知道歌曲信息
                 if(vendor.transferTrack) {
                     const ttResult = await vendor.transferTrack(United.simplifyMetadata(track), options || _options)
+                        .catch(e => { if(isDevEnv()) console.log(e) })
                     Object.assign(result, { ...United.mergeTrackResult(result, ttResult) })
                 }
 
@@ -169,8 +170,9 @@ export class United {
                 }
                 
                 if(!vendor.searchSongs) continue
-                //音源扩展点 2 - 模糊（范围）匹配，只知道关键字，不知道歌曲信息
+                //音源扩展点 - 模糊（范围）匹配，只知道关键字，不知道歌曲信息
                 const searchResult = await vendor.searchSongs(keyword, options || _options)
+                    .catch(e => { if(isDevEnv()) console.log(e) })
                 if (!searchResult) continue
 
                 const { data: candidates } = searchResult

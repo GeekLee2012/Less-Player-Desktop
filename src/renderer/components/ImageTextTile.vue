@@ -168,7 +168,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .image-text-tile .title {
     width: var(--others-image-text-tile-cover-size);
-    margin-top: 10px;
+    margin-top: 6px;
     text-align: left;
     cursor: pointer;
     line-height: var(--content-text-line-height);
@@ -351,7 +351,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     box-shadow: none;
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
-    height: var(--others-image-text-tile-card-cover-height);
+    /*height: var(--others-image-text-tile-card-cover-height);*/
+    height: calc(var(--others-image-text-tile-card-cover-height) + 5px);
 }
 
 .image-text-tile-card .cover-wrap {
@@ -359,7 +360,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card .title-wrap {
-    padding: 8px 15px 10px 15px;
+    /*padding: 8px 15px 10px 15px;*/
+    padding: 4px 15px 9px 15px;
     /*width: var(--others-card-image-text-tile-title-width);*/
     width: calc(var(--others-image-text-tile-cover-size) - 30px);
 }
@@ -435,8 +437,10 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 
 .image-text-tile-card.image-text-tile-video .title-wrap {
-    padding: 10px 21px 16px 21px;
-    width: calc(var(--others-image-text-tile-cover-size) * 1.36 - 42px);
+    /* padding: 10px 21px 16px 21px; */
+    /* width: calc(var(--others-image-text-tile-cover-size) * 1.36 - 42px); */
+    padding: 5px 15px 13px 15px;
+    width: calc(var(--others-image-text-tile-cover-size) * 1.36 - 30px);
 }
 
 .image-text-tile-card.image-text-tile-video .title,

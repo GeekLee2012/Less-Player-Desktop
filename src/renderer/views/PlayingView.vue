@@ -44,7 +44,10 @@ const { getWindowZoom, lyricMetaPos,
     isPlayingViewCoverBorderShow, currentTheme, 
     playingViewBgCoverEffectIndex, 
     playingViewBgCoverEffectGradientMode,
+    playingViewBgCoverEffectGradientType,
+    playingViewBgCoverEffectGradientBrightness,
     playingViewPlayCtlStyleIndex,
+    playingViewThemeColorIndex,
     playingViewLyricHighlightMode, } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
@@ -115,6 +118,20 @@ const getPalette = (img, num) => {
 }
 */
 
+const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
+    const avgGrayscale = getPaletteAvgGrayscale(rgbs)
+    let autoClass = defaultClass || (avgGrayscale > 159 ? 'dark' : 'light')
+    switch(playingViewThemeColorIndex.value) {
+        case 1:
+            autoClass = 'light'
+            break
+        case 2:
+            autoClass = 'dark'
+            break
+    }
+    return autoClass
+}
+
 const postCoverLoadComplete = () => {
     const containerEl = document.querySelector('.playing-view .container')
     const coverEl = containerEl.querySelector('.center .cover')
@@ -125,24 +142,46 @@ const postCoverLoadComplete = () => {
     const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
     const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
     const _rgbColors = rgbColors.join(',')
+
     applyDocumentStyle({ 
         '--bg-effect': `linear-gradient(${_rgbColors})`,
         '--bg-effect-bottom': rgbaColors[0],
     })
     
+    const backdropClass = 'with-backdrop'
+    const brightnessLightClass = 'brightness-light'
     containerEl.classList.remove('light')
     containerEl.classList.remove('dark')
+    containerEl.classList.remove(backdropClass)
+    containerEl.classList.remove(brightnessLightClass)
 
-    const avgGrayscale = getPaletteAvgGrayscale(rgbs)
-    const autoClass = avgGrayscale > 159 ? 'dark' : 'light'
+    let autoClass = getPlayingViewThemeAutoClass(rgbs)
     containerEl.classList.add('auto-effect')
     containerEl.classList.add(autoClass)
+    
+    const gradientType = playingViewBgCoverEffectGradientType.value
+    if(gradientType == 2 || (gradientType == 0 && (nextInt(100) % 2 == 0))) {
+        containerEl.classList.add(backdropClass)
+        //文字、按钮控件等元素，大部分在light样式下效果较好
+        containerEl.classList.remove('dark')
+        autoClass = 'light'
+
+        if(playingViewBgCoverEffectGradientBrightness.value == 0) {
+            containerEl.classList.add(brightnessLightClass)
+            containerEl.classList.remove('light')
+            autoClass = 'dark'
+        }
+
+        containerEl.classList.add(getPlayingViewThemeAutoClass(rgbs, autoClass))
+    }
     return true
 }
 
 const clearBackgroundEffect = () => {
     const containerEl = document.querySelector('.playing-view .container')
     containerEl.classList.remove('auto-effect')
+    containerEl.classList.remove('with-backdrop')
+    containerEl.classList.remove('brightness-light')
     containerEl.classList.remove('light')
     containerEl.classList.remove('dark')
     applyDocumentStyle({ '--bg-effect': 'none'})
@@ -163,6 +202,7 @@ const setupSimpleBackgroundEffect = async () => {
 }
 
 const setupGradientBackgroundEffect = async () => {
+    clearBackgroundEffect()
     const containerEl = document.querySelector('.playing-view .container')
     const coverEl = containerEl.querySelector('.center .cover')
     if(coverEl.complete) postCoverLoadComplete()
@@ -216,9 +256,12 @@ const setupVolumeBar = () => {
 
 /* 生命周期、监听 */
 watch(() => (currentTrack.value && currentTrack.value.cover 
-    + '&' + playingViewShow.value
+    + '-' + playingViewShow.value
     + '-' + playingViewBgCoverEffectIndex.value
-    + '-' + playingViewBgCoverEffectGradientMode.value),  
+    + '-' + playingViewBgCoverEffectGradientMode.value
+    + '-' + playingViewBgCoverEffectGradientType.value
+    + '-' + playingViewBgCoverEffectGradientBrightness.value
+    + '-' + playingViewThemeColorIndex.value),  
     setupBackgroudEffect)
 
 onMounted(() => {
@@ -507,6 +550,10 @@ onMounted(() => {
                 </div>
             </div>
             <div class="bg-effect"></div>
+            <div class="backdrop-container">
+                <img class="backdrop-img" :src="Track.coverDefault(currentTrack)">
+            </div>
+            <div class="bg-container"></div>
         </div>
     </div>
 </template>
@@ -1057,5 +1104,84 @@ onMounted(() => {
 
 .playing-view .container.auto-effect > .bottom.bottom-new .active svg {
     fill: var(--content-highlight-color) !important;
+}
+
+/* 渐变风格 - 现代 */
+.playing-view .container .backdrop-container {
+    contain: style size;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    z-index: -1;
+    touch-action: none;
+    z-index: -1;
+    display: none;
+}
+
+.playing-view .container .backdrop-container .backdrop-img {
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  contain: layout style paint;
+  object-fit: cover;
+  object-position: center center;
+  width: 100%;
+  height: 100%;
+  content-visibility: auto;
+  background-color: #000;
+  z-index: -1;
+
+  -webkit-animation: backdrop-fadein .6s ease-out normal;
+  animation: backdrop-fadein .6s ease-out normal;
+}
+
+.playing-view .container .bg-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    contain: strict;
+    z-index: -1;
+    display: none;
+}
+
+.playing-view .container.auto-effect.with-backdrop .backdrop-container {
+    -webkit-filter: none !important;
+    filter: none !important;
+    display: block;
+}
+
+.playing-view .container.auto-effect.with-backdrop .bg-container {
+    background-image: none !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    -webkit-backdrop-filter: blur(10vmax) saturate(2.1);
+    backdrop-filter: blur(10vmax) saturate(2.1);
+    display: block;
+}
+
+.playing-view .container.auto-effect.with-backdrop.brightness-light .bg-container {
+    background-color: rgba(202, 202, 202, 0.4) !important;
+}
+
+.playing-view .container.auto-effect.with-backdrop {
+    background: none !important;
+}
+
+.playing-view .container.auto-effect.with-backdrop .bg-effect {
+    display: none;
 }
 </style>
