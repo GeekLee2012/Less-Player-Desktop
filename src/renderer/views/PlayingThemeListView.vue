@@ -118,7 +118,7 @@ const onImageDrop = (event, item, index) => {
                     </div>
                     <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2 && track.playingViewBgCoverEffectGradientType == 2">
                         <span class="subtitle">渐变亮度：</span>
-                        <SingleSelectionControl :data="['亮色', '暗色']" :value="track.playingViewBgCoverEffectGradientBrightness" :onChanged="setPlayingViewBgCoverEffectGradientBrightness">
+                        <SingleSelectionControl :data="['偏亮', '平衡', '偏暗']" :value="track.playingViewBgCoverEffectGradientBrightness" :onChanged="setPlayingViewBgCoverEffectGradientBrightness">
                         </SingleSelectionControl>
                     </div>
                     <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">

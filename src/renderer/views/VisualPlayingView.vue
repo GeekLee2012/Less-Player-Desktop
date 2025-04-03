@@ -161,10 +161,12 @@ const postCoverLoadComplete = () => {
     
     const backdropClass = 'with-backdrop'
     const brightnessLightClass = 'brightness-light'
+    const brightnessMidClass = 'brightness-mid'
     containerEl.classList.remove('light')
     containerEl.classList.remove('dark')
     containerEl.classList.remove(backdropClass)
     containerEl.classList.remove(brightnessLightClass)
+    containerEl.classList.remove(brightnessMidClass)
 
     let autoClass = getPlayingViewThemeAutoClass(rgbs)
 
@@ -182,6 +184,8 @@ const postCoverLoadComplete = () => {
             containerEl.classList.add(brightnessLightClass)
             containerEl.classList.remove('light')
             autoClass = 'dark'
+        } else if(playingViewBgCoverEffectGradientBrightness.value == 1) {
+            containerEl.classList.add(brightnessMidClass)
         }
 
         containerEl.classList.add(getPlayingViewThemeAutoClass(rgbs, autoClass))
@@ -194,6 +198,7 @@ const clearBackgroundEffect = () => {
     containerEl.classList.remove('auto-effect')
     containerEl.classList.remove('with-backdrop')
     containerEl.classList.remove('brightness-light')
+    containerEl.classList.remove('brightness-mid')
     containerEl.classList.remove('light')
     containerEl.classList.remove('dark')
     applyDocumentStyle({ '--bg-effect': 'none'})
@@ -1024,7 +1029,12 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .container.auto-effect.with-backdrop.brightness-light .bg-container {
-    background-color: rgba(202, 202, 202, 0.4) !important;
+    background-color: rgba(233, 233, 233, 0.4) !important;
+}
+
+.visual-playing-view .container.auto-effect.with-backdrop.brightness-mid .bg-container {
+    /*background-color: rgba(158, 158, 158, 0.4) !important;*/
+    background-color: rgba(98, 98, 98, 0.4) !important;
 }
 
 .visual-playing-view .container.auto-effect.with-backdrop {
