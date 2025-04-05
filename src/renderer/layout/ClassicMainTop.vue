@@ -200,7 +200,8 @@ const switchToSmallLayout = () => {
 
 .classic-main-top .action {
     position: absolute;
-    right: 33px;
+    /*right: 33px;*/
+    right: 28px;
     display: flex;
     flex-direction: row;
     align-items: center;

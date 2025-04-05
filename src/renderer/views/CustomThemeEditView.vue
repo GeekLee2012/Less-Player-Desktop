@@ -34,7 +34,7 @@ const toggleCustomThemePreview = () => {
 
 //TODO 使用本地文件图片，存在迁移共享问题
 const uploadImage = async () => {
-    const result = await ipcRendererInvoke('open-image')
+    const result = await ipcRendererInvoke('open-image', { path: customTheme.appBackground.bgImage })
     if (result && result.length > 0) setupAppBgImage(result[0])
 }
 

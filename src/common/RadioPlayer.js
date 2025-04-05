@@ -34,6 +34,9 @@ class RadioPlayer {
             }
         })
         */
+        hls.on(Hls.Events.MANIFEST_LOADING, () => {
+            self.setState(PlayState.LOADING)
+        })
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
             audioNode.play()
             self.setState(PlayState.PLAYING)

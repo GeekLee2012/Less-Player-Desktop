@@ -231,7 +231,7 @@ const switchTab = () => {
         }
         if(isPlaybackQueue()) {
             Object.assign(actionShowCtl, {
-                playBtn: false,
+                playBtn: true,
                 addToQueueBtn: true,
                 deleteBtn: true
             })
@@ -429,6 +429,9 @@ const sortCheckData = () => {
 const playChecked = () => {
     const sortedData = sortCheckData()
     if (isSongTab()) { //歌曲
+        /*if (isPlaybackQueue() && sortedData.length > 1) {
+            return showFailToast('当前操作不支持！<br>无法同时播放多首歌曲')
+        }*/
         addTracks(sortedData)
         playTrack(sortedData[0])
         showToast("即将为您播放歌曲")
@@ -757,7 +760,7 @@ watch([currentPlatformCode], () => refreshContent())
                         </svg>
                     </template>
                     <template #right-img>
-                        <svg v-show="actionShowCtl.addToQueueBtn" width="16" height="16" viewBox="0 0 768.02 554.57"
+                        <svg v-show="actionShowCtl.addToQueueBtn && !isPlaybackQueue()" width="16" height="16" viewBox="0 0 768.02 554.57"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">

@@ -80,7 +80,8 @@
 }
 
 .use-winos-win-ctl .classic-main-top .action {
-  right: 23px;
+  /*right: 23px;*/
+  right: 15px;
 }
 
 .use-winos-win-ctl .classic-main-top .win-ctl-wrap {
@@ -95,7 +96,8 @@
   position: absolute;
   right: 0px;
   top: 9px;
-  padding-right: 21px;
+  /*padding-right: 21px;*/
+  padding-right: 13px;
   justify-content: flex-end !important;
 }
 
@@ -114,7 +116,10 @@
 
 .use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .ctl-btn svg,
 .use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .min-btn svg,
-.use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .max-btn svg {
+.use-winos-win-ctl .playing-view .container.auto-effect.dark .win-ctl-wrap .max-btn svg,
+.use-winos-win-ctl .visual-playing-view .container.auto-effect.dark .win-ctl-wrap .ctl-btn svg,
+.use-winos-win-ctl .visual-playing-view .container.auto-effect.dark .win-ctl-wrap .min-btn svg,
+.use-winos-win-ctl .visual-playing-view .container.auto-effect.dark .win-ctl-wrap .max-btn svg {
   fill: #373737 !important;
   stroke: #373737 !important;
 }
@@ -190,13 +195,16 @@
 }
 
 .use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn,
-.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn svg {
+.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn svg,
+.use-winos-win-ctl .visual-playing-view .container.auto-effect .win-ctl-wrap .ctl-btn,
+.use-winos-win-ctl .visual-playing-view .container.auto-effect .win-ctl-wrap .ctl-btn svg {
   fill: #fff !important;
   stroke: #fff !important;
   cursor: pointer;
 }
 
-.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn:hover {
+.use-winos-win-ctl .playing-view .container.auto-effect .win-ctl-wrap .ctl-btn:hover,
+.use-winos-win-ctl .visual-playing-view .container.auto-effect .win-ctl-wrap .ctl-btn:hover {
   background: #eeeeee66;
 }
 

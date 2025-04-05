@@ -11,10 +11,11 @@ export const ImageProtocal = {
 export const PlayState = {
     NONE: -1,
     INIT: 0,
-    LOADED: 1,
-    PLAYING: 2,
-    PAUSE: 3,
-    END: 4,
+    LOADING: 1,
+    LOADED: 2,
+    PLAYING: 3,
+    PAUSE: 4,
+    END: 5,
     LOAD_ERROR: -2,
     PLAY_ERROR: -3,
 }

@@ -15,6 +15,7 @@ const NONE_TRACK = new Track('', '',
 export const usePlayStore = defineStore('player', {
     state: () => ({
         playing: false,
+        loading: false,
         playMode: PlayMode.REPEAT_ALL,
         playingIndex: -1,
         queueTracks: [],
@@ -63,6 +64,13 @@ export const usePlayStore = defineStore('player', {
         },
         setPlaying(value) {
             this.playing = value
+            if(value) this.setLoading(false)
+        },
+        isLoading() {
+            return this.loading
+        },
+        setLoading(value) {
+            this.loading = value
         },
         isDefaultFMRadioType(track) { 
             return track && Playlist.isFMRadioType(track) && !track.streamType

@@ -320,7 +320,13 @@ watch(currentPlatformCode, (nv, ov) => {
 })
 
 const eventsRegistration = {
-    'userHome-refresh': () => refresh(true),
+    'userHome-refresh': (args) => {
+        const { scope, action } = args || {}
+        const isRecentsTab = (activeTab.value == 3)
+        if(scope == 'recents' && !isRecentsTab) return
+        
+        refresh(true)
+    },
     'userHome-visitRecentsTab': visitRecentsTab,
 }
 /* 生命周期、监听 */

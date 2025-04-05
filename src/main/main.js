@@ -663,13 +663,14 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('open-image', async (event, ...args) => {
-    const { noFilePrefix } = args[0] || {}
+    const { noFilePrefix, path } = args[0] || {}
     const result = await dialog.showOpenDialog(mainWin, {
       title: '请选择文件',
       filters: [
         { name: 'Image', extensions: IMAGE_EXTS }
       ],
-      properties: ['openFile']
+      properties: ['openFile'],
+      defaultPath: transformPath(path) || ''
     })
     return result.filePaths.map(item => {
       item = transformPath(item)

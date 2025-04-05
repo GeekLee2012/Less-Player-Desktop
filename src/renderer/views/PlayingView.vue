@@ -880,10 +880,11 @@ onMounted(() => {
     width: 39px;
 }
 */
-
+/*
 .playing-view .container > .bottom.bottom-new .btm-center .play-ctl .play-btn:hover {
     transform: scale(1.05);
 }
+*/
 
 .playing-view .container > .bottom.bottom-new .btm-center .progressbar-wrap {
     flex: 1;

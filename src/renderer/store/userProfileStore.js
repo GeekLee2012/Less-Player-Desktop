@@ -7,7 +7,7 @@ import { onEvents, emitEvents } from "../../common/EventBusWrapper";
 
 
 //TODO
-export const refreshUserHome = () => emitEvents('userHome-refresh')
+export const refreshUserHome = (scope, action) => emitEvents('userHome-refresh', { scope, action })
 export const refreshFavoritedState = () => emitEvents('track-refreshFavoritedState')
 
 const filterByPlatform = (state, platform) => {

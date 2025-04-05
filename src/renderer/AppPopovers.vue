@@ -71,12 +71,12 @@ const { getCurrentTheme } = useSettingStore()
 const getCtxMenuAutoHeight = () => {
   const total = commonCtxMenuData.value.length || 1
   const spNums = commonCtxMenuSeparatorNums.value
-  const itemHeight = 38, padding = 15
+  const itemHeight = 38, padding = 10
   return itemHeight * (total - spNums) + 7.5 * spNums + 2 * padding + 10
 }
 
 const menuWidth = 208 + 10
-const submenuWidth = 208 + 10 + 33
+const submenuWidth = 208 + 10
 
 const adjustMenuPosition = (event) => {
   const { x, y, clientX, clientY } = event
@@ -108,7 +108,7 @@ const setMenuPosition = (event) => {
 }
 
 const getCtxSubmenuAutoHeight = () => {
-  const itemHeight = 41, padding = 15
+  const itemHeight = 41, padding = 10
   return itemHeight * submenuItemNums + 2 * padding
 }
 
@@ -143,8 +143,8 @@ const adjustSubmenuPosition = (event) => {
 
 const setSubmenuPosition = (event) => {
   const pos = adjustSubmenuPosition(event)
-  const padding = submenuItemNums > 6 ? 12 : 6
-  //const padding = 10
+  //const padding = submenuItemNums > 6 ? 12 : 6
+  const padding = submenuItemNums > 6 ? 22 : 16
   let left = pos.x, top = pos.y
   if (ctxMenuPos) { //存在一级菜单
     left = ctxMenuPos.x - submenuWidth - padding

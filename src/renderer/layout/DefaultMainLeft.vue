@@ -709,7 +709,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     cursor: pointer;
     position: absolute;
     /* right: 15px; */
-    right: 19px;
+    right: calc(var(--spacing-left) + 8px);
     top: 6px;
     transform: scale(1.05);
 }
@@ -717,7 +717,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left .center .collapse-btn,
 #main-left .center .expand-btn {
     /* right: 22px; */
-    right: 26px;
+    right: calc(var(--spacing-left) + 15px);
 }
 
 #main-left .center .add-custom-btn:hover,

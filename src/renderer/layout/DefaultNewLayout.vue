@@ -71,8 +71,8 @@ const { isFontAutoWeight } = storeToRefs(useSettingStore())
 }
 
 .default-new-layout > .bottom .classic-main-bottom .play-ctl .play-btn {
-    height: 45px;
-    width: 45px;
+    height: 47px;
+    width: 47px;
 }
 
 .default-new-layout > .bottom .classic-main-bottom #play-nav {
@@ -93,23 +93,25 @@ const { isFontAutoWeight } = storeToRefs(useSettingStore())
     width: 39px;
 }
 */
-
+/*
 .default-new-layout > .bottom .default-new-main-bottom .play-ctl .play-btn:hover {
     transform: scale(1.05);
 }
+*/
 
 .default-new-layout > .bottom .default-new-main-bottom .play-ctl .spacing {
     margin-left: 25px !important;
 }
 
 .default-new-layout > .bottom .default-new-main-bottom #play-nav {
-    padding-left: 18px;
+    /*padding-left: 18px;*/
+    padding-left: 21px;
 }
 
 .default-new-layout > .bottom .default-new-main-bottom #play-nav .cover-wrap,
 .default-new-layout > .bottom .default-new-main-bottom #play-nav .audio-cover,
 .default-new-layout > .bottom .default-new-main-bottom #play-nav .cover-mask {
-    width: 60px !important;
-    height: 60px !important;
+    width: 56px !important;
+    height: 56px !important;
 }
 </style>

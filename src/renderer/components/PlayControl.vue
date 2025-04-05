@@ -8,7 +8,7 @@ const props = defineProps({
 })
 
 
-const { playing, playMode } = storeToRefs(usePlayStore())
+const { playing, loading, playMode } = storeToRefs(usePlayStore())
 const { playPrevTrack, togglePlay, playNextTrack, switchPlayMode } = usePlayStore()
 const { togglePlaybackQueueView, hideAllCategoryViews, 
     hideAllCtxMenus, hidePlayingThemeListView } = useAppCommonStore()
@@ -87,10 +87,10 @@ const togglePlaybackQueue = () => {
             :class="{
                 playing,
                 paused: !playing,
-                loading: false,
+                loading
             }"
             @click="togglePlay">
-            <svg v-show="!playing" width="18" height="18" viewBox="0 0 139 139" xml:space="preserve"
+            <svg v-show="!playing && !loading" width="19" height="19" viewBox="0 0 139 139" xml:space="preserve"
                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <path
                     d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
@@ -98,7 +98,7 @@ const togglePlaybackQueue = () => {
             <!--
             <svg v-show="playing" width="24" height="24" class="paused" viewBox="0 0 100 100" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M44.2,78.3H32.1c-1.1,0-2-0.9-2-2V23.7c0-1.1,0.9-2,2-2h12.1c1.1,0,2,0.9,2,2v52.5C46.2,77.4,45.3,78.3,44.2,78.3z"/><path d="M67.9,78.3H55.8c-1.1,0-2-0.9-2-2V23.7c0-1.1,0.9-2,2-2h12.1c1.1,0,2,0.9,2,2v52.5C69.9,77.4,69,78.3,67.9,78.3z"/></svg>
             -->
-            <svg v-show="playing" width="16" height="16"  viewBox="0 0 658.53 1006.16"
+            <svg v-show="playing || loading" width="17" height="17"  viewBox="0 0 658.53 1006.16"
                 xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
@@ -109,7 +109,7 @@ const togglePlaybackQueue = () => {
                     </g>
                 </g>
             </svg>
-            <svg v-show="false" width="17" height="17" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
+            <svg v-show="false" width="18" height="18" viewBox="0 0 847.92 853.23" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <g id="Layer_2-2" data-name="Layer 2">
@@ -189,8 +189,8 @@ const togglePlaybackQueue = () => {
 
 .play-ctl .play-btn {
     border-radius: 10rem;
-    width: 41px;
-    height: 41px;
+    width: 43px;
+    height: 43px;
     background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
     display: flex;
@@ -200,6 +200,7 @@ const togglePlaybackQueue = () => {
 
 .play-ctl .play-btn:hover {
     background: var(--button-icon-text-btn-hover-bg-color);
+    transform: scale(1.06);
 }
 
 .play-ctl .play-btn svg {
@@ -212,6 +213,8 @@ const togglePlaybackQueue = () => {
 }
 
 .play-ctl .play-btn.loading svg {
-    animation: rotate360 1s infinite;
+    animation: rotate360 1.8s infinite;
+    animation-fill-mode: forwards;
+    /*animation-direction: alternate;*/
 }
 </style>

@@ -37,7 +37,8 @@ const { playTrack, playNextTrack,
     setPlaying, resetQueue, addTracks,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying,
-    setAudioOutputDevices, playTrackLater } = usePlayStore()
+    setAudioOutputDevices, playTrackLater,
+    setLoading, } = usePlayStore()
 const { getVendor, isLocalMusic, isFreeFM, isCloudStorage, isWebDav, isNavidrome, isJellyfin } = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
     playingViewThemeIndex, spectrumIndex,
@@ -108,7 +109,7 @@ const traceRecentTrack = (track) => {
     } else { //歌曲、MV关联的歌曲
         addRecentSong(track)
     }
-    emitEvents("userHome-refresh")
+    emitEvents('userHome-refresh', { scope: 'recents', action: 'traceRecentTrack' })
 }
 
 //歌单
@@ -1481,6 +1482,11 @@ const eventsRegistration = {
     'radio-state': ({ state, track, currentTime, radio }) => {
         checkFavoritedState()
         switch (state) {
+            case PlayState.INIT:
+                break
+            case PlayState.LOADING:
+                setLoading(true)
+                break
             case PlayState.PLAYING:
                 setPlaying(true)
                 setupCurrentMediaSession(currentTrack.value)
@@ -1490,6 +1496,7 @@ const eventsRegistration = {
                 break
             case PlayState.PLAY_ERROR:
                 setPlaying(false)
+                setLoading(false)
                 onPlayerErrorRetry({ track, currentTime, radio })
                 break
             default:
@@ -1498,6 +1505,7 @@ const eventsRegistration = {
     },
     //普通歌曲
     'track-changed': track => {
+        setLoading(true)
         bootstrapTrack(track).then(track => {
             if (isCurrentTrack(track)) {
                 playTrackDirectly(track)
@@ -1570,6 +1578,7 @@ const eventsRegistration = {
             case PlayState.LOAD_ERROR:
             case PlayState.PLAY_ERROR:
                 setPlaying(false)
+                setLoading(false)
                 onPlayerErrorRetry({ track, currentTime })
                 break
             default:

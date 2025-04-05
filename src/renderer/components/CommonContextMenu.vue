@@ -190,6 +190,7 @@ const removeCustom = async () => {
 
     const { id } = commonCtxMenuCacheItem.value
     removeCustomPlaylist(id)
+    emitEvents({ 'customPlaylist-removed': id })
     toastAndHideMenu("歌单已删除")
     return true
 }
@@ -591,7 +592,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .common-ctx-menu .padding {
-    height: 15px;
+    height: 10px;
 }
 
 .common-ctx-menu .center {
@@ -606,7 +607,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     align-items: center;
     /* font-size: 14px; */
     font-size: var(--content-text-subtitle-size);
-    padding: 9px 20px;
+    padding: 9px 25px;
     height: 23px;
 }
 

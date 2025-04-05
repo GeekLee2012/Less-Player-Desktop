@@ -16,7 +16,7 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
-const { visitCustomPlaylistEdit, visitBatchCustomPlaylist } = inject('appRoute')
+const { visitCustomPlaylistEdit, visitBatchCustomPlaylist, backward } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
 
 const props = defineProps({
@@ -216,6 +216,9 @@ watch(currentPlatformCode, loadContent)
 
 const eventsRegistration = {
     'app-resize': detectTitleHeight, 
+    'customPlaylist-removed': (id) => {
+        if(props.id == id) backward()
+    }
 }
 
 onMounted(() => {
@@ -232,7 +235,6 @@ onActivated(() => {
 })
 
 onUnmounted(() => offEvents(eventsRegistration))
-//TODO
 onUpdated(() => resetBack2TopBtn())
 </script>
 

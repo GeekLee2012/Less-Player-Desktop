@@ -9,6 +9,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import CommonContextSubmenu from './CommonContextSubmenu.vue';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+import { coverDefault } from '../../common/Utils';
 
 
 
@@ -166,8 +167,11 @@ const initData = (actionMode, dataType) => {
             if (isCustomPlaylist) return
             if (isBatchAction && !isPlaybackQueue) return
         }
+        const cover = coverDefault(item.cover)
         listData.push({
+            icon: `<img class='cover' src='${cover}' />`,
             name: item.title,
+            classNames: 'list-item',
             action: (event) => handleClick(item, actionMode, dataType),
         })
     })
@@ -193,8 +197,24 @@ onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <CommonContextSubmenu :data="listData" :posStyle="posStyle">
+    <CommonContextSubmenu class="add-to-list-submenu" :data="listData" :posStyle="posStyle">
     </CommonContextSubmenu>
 </template>
 
-<style></style>
+<style>
+.common-ctx-submenu.add-to-list-submenu .menuItem img {
+    width: 28px;
+    height: 28px;
+    margin-right: 0px;
+    border-radius: var(--border-img-small-border-radius);
+    transform: translateX(-6px);
+}
+
+.common-ctx-submenu.add-to-list-submenu .menuItem svg {
+    transform: scale(1.05);
+}
+
+.common-ctx-submenu.add-to-list-submenu .menuItem.list-item span {
+    font-size: calc(var(--content-text-subtitle-size) - 2px);
+}
+</style>

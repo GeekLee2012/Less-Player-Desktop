@@ -56,7 +56,7 @@ export const useRecentsStore = defineStore('recents', {
             const updated = created
             Object.assign(item, { created, updated })
             state.push(item)
-            refreshUserHome()
+            refreshUserHome('recents')
             return true
         },
         insertFirst(state, item, compareFn) {
@@ -67,7 +67,7 @@ export const useRecentsStore = defineStore('recents', {
             const updated = created
             Object.assign(item, { created, updated })
             state.splice(0, 0, item)
-            refreshUserHome()
+            refreshUserHome('recents')
             return true
         },
         removeItem(state, item, compareFn) {
@@ -76,7 +76,7 @@ export const useRecentsStore = defineStore('recents', {
             const index = this.findItemIndex(state, item, compareFn)
             if (index != -1) {
                 state.splice(index, 1)
-                refreshUserHome()
+                refreshUserHome('recents')
             }
 
         },
@@ -90,7 +90,7 @@ export const useRecentsStore = defineStore('recents', {
                 state.splice(index, 1)
                 ++count
             }
-            if (count) refreshUserHome()
+            if (count) refreshUserHome('recents')
         },
         uniqueInsertFirst(state, item, compareFn) {
             this.removeItems(state, item, compareFn)
@@ -111,7 +111,7 @@ export const useRecentsStore = defineStore('recents', {
                 payPlay, payDownload, songID, strMediaMid, hash, extraHash, 
             })
             trimArray(this.recents.songs, 999).then(deleteCount => {
-                if (deleteCount) refreshUserHome()
+                if (deleteCount) refreshUserHome('recents')
             })
         },
         addRecentPlaylist(id, platform, title, cover, type) {
@@ -119,7 +119,7 @@ export const useRecentsStore = defineStore('recents', {
                 id, platform, title, cover, type
             })
             trimArray(this.recents.playlists, 666).then(deleteCount => {
-                if (deleteCount) refreshUserHome()
+                if (deleteCount) refreshUserHome('recents')
             })
         },
         addRecentAlbum(id, platform, title, cover, publishTime) {
@@ -127,7 +127,7 @@ export const useRecentsStore = defineStore('recents', {
                 id, platform, title, cover, publishTime
             })
             trimArray(this.recents.albums, 666).then(deleteCount => {
-                if (deleteCount) refreshUserHome()
+                if (deleteCount) refreshUserHome('recents')
             })
         },
         addRecentRadio(track) {
@@ -144,7 +144,7 @@ export const useRecentsStore = defineStore('recents', {
                 id, platform, title, cover, type, coverFit, data: [track]
             }, isFreeFM(platform) ? compareFn : null)
             trimArray(this.recents.radios, 366).then(count => {
-                if (count) refreshUserHome()
+                if (count) refreshUserHome('recents')
             })
         },
         removeRecentSong(track) {
@@ -168,7 +168,7 @@ export const useRecentsStore = defineStore('recents', {
             this.recents.playlists.length = 0
             this.recents.albums.length = 0
             this.recents.radios.length = 0
-            refreshUserHome()
+            refreshUserHome('recents')
         },
     },
     persist: {

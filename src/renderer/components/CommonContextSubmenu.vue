@@ -36,9 +36,11 @@ const resetScroll = () => {
             <div class="padding"></div>
             <div class="center" ref="submenuListRef">
                 <template v-for="(item, index) in data">
-                    <div class="menuItem" @click="(event) => handleMenuItem(item, index, event)" v-show="!item.separator">
+                    <div class="menuItem" :class="item.classNames" @click="(event) => handleMenuItem(item, index, event)" v-show="!item.separator">
                         <div v-html="item.icon" v-show="item.icon"></div>
-                        <div><span>{{ item.name }}</span></div>
+                        <div>
+                            <span v-html="item.name"></span>
+                        </div>
                     </div>
                     <div class="separator" v-show="item.separator && false"></div>
                 </template>
@@ -73,24 +75,23 @@ const resetScroll = () => {
 }
 
 .common-ctx-submenu .padding {
-    height: 15px;
+    height: 10px;
 }
 
 .common-ctx-submenu .center {
     overflow: auto;
     max-height: 267px;
+    max-height: 328px;
 }
 
 .common-ctx-submenu .menuItem {
-    /*width: 168px;
-    width: 178px;*/
-    width: 211px;
+    width: 178px;
     display: flex;
     flex-direction: row;
     align-items: center;
     /*font-size: 14px;*/
     font-size: var(--content-text-subtitle-size);
-    padding: 9px 20px;
+    padding: 9px 25px;
     height: 23px;
 }
 

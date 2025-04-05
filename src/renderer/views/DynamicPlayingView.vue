@@ -812,14 +812,18 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-top: 13px;
 }
 
+/*
 .dynamic-playing-view .container > .bottom.bottom-new .btm-center .play-ctl .play-btn {
     height: 39px;
     width: 39px;
 }
+*/
 
+/*
 .dynamic-playing-view .container > .bottom.bottom-new .btm-center .play-ctl .play-btn:hover {
     transform: scale(1.05);
 }
+*/
 
 .dynamic-playing-view .container > .bottom.bottom-new .btm-center .progressbar-wrap {
     flex: 1;

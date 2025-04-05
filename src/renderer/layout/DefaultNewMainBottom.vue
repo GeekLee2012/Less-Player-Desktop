@@ -177,7 +177,8 @@ onMounted(() => {
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
-    padding-right: 30px;
+    /*padding-right: 30px;*/
+    padding-right: 28px;
     padding-top: 6px;
 }
 
