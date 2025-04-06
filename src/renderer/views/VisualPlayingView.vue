@@ -964,7 +964,7 @@ onUnmounted(() => {
 /* 渐变风格 - 现代 */
 .visual-playing-view .container .backdrop-container {
     contain: style size;
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -1002,7 +1002,7 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .container .bg-container {
-    position: fixed;
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 0;

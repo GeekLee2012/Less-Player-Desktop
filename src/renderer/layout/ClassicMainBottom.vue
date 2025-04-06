@@ -101,7 +101,8 @@ onMounted(() => {
 }
 
 .classic-main-bottom #play-nav #play-meta {
-    width: 34.33%;
+    /*width: 34.33%;*/
+    width: 33.33%;
 }
 
 .classic-main-bottom #play-nav {
@@ -144,7 +145,8 @@ onMounted(() => {
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
-    padding-right: 36px;
+    /*padding-right: 36px;*/
+    padding-right: 31px;
 }
 
 .classic-main-bottom svg {

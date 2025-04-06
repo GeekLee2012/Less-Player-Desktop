@@ -1085,6 +1085,15 @@ onMounted(() => {
     border-color: var(--content-highlight-color) !important;
 }
 
+/*
+.playing-view .container.auto-effect .lyric-ctl .extra-btn .active,
+.playing-view .container.auto-effect .lyric-ctl .extra-btn span:hover {
+    background: var(--content-text-highlight-color) !important;
+    color: #fff;
+    border-color: var(--content-highlight-color) !important;
+}
+*/
+
 .playing-view .container.auto-effect .bottom {
     background: var(--bg-effect-bottom);
 }
@@ -1115,7 +1124,7 @@ onMounted(() => {
 /* 渐变风格 - 现代 */
 .playing-view .container .backdrop-container {
     contain: style size;
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -1153,7 +1162,7 @@ onMounted(() => {
 }
 
 .playing-view .container .bg-container {
-    position: fixed;
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 0;

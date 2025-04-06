@@ -481,7 +481,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             v-show="(lyricExistState == 1) && isUserMouseWheel">
             <span class="time-text" v-html="scrollLocatorTimeText"></span>
             <div class="play-btn" @click="seekFromLyric">
-                <svg width="11" height="11" 
+                <svg width="12" height="12" 
                     viewBox="0 0 139 139" xml:space="preserve" 
                     xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -677,8 +677,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 .lyric-ctl .scroll-locator .play-btn {
     /*margin-top: 16px;*/
     border-radius: 10rem;
-    width: 21px;
-    height: 21px;
+    width: 23px;
+    height: 23px;
     background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
     display: flex;

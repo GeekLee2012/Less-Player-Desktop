@@ -246,4 +246,13 @@
   font-weight: normal;
   transform: translateY(-1px);
 }
+
+.use-winos-win-ctl #main-left  .center {
+    margin-bottom: 10px;
+}
+
+.use-winos-win-ctl #main-left .header .top-logo {
+    margin-top: 23px;
+    margin-left: 23px;
+}
 </style>

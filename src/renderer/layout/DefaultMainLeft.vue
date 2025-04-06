@@ -278,7 +278,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="top-left-navigator-wrap" v-show="isDefaultOldLayout">
                 <Navigator></Navigator>
             </div>
-            <div class="top-logo" v-show="isDefaultNewLayout || (isAutoLayout && !isMacOS())">
+            <div class="top-logo" v-show="isDefaultNewLayout || useWindowsStyleWinCtl || (isAutoLayout && !isMacOS())">
                 <AppLogo></AppLogo>
             </div>
         </div>
@@ -507,7 +507,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </ul>
             </div>
         </div>
-        <div class="bottom" v-if="!hideBottom">
+        <div class="bottom" v-if="!hideBottom && !useWindowsStyleWinCtl">
             <AppLogo ></AppLogo>
         </div>
     </div>
