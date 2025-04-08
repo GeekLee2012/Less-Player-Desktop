@@ -250,6 +250,8 @@ export const useSettingStore = defineStore('setting', {
             playingViewThemeColorIndex: 0,
             //播放页 - 歌词高亮样式
             playingViewLyricHighlightMode: 0,
+            //播放页 - 纯净模式
+            playingViewFocusMode: false,
         },
         search: {
             //场景化提示
@@ -854,6 +856,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isPlayingViewCoverBorderShow() {
             return this.track.playingViewCoverBorderShow
+        },
+        playingViewFocusMode() {
+            return this.track.playingViewFocusMode
         },
         isSingleLineAlbumTitleStyle() {
             return this.track.singleLineAlbumTitleStyle
@@ -1617,6 +1622,9 @@ export const useSettingStore = defineStore('setting', {
         },
         togglePlayingViewUseBgCoverEffect() {
             this.track.playingViewUseBgCoverEffect = !this.track.playingViewUseBgCoverEffect
+        },
+        togglePlayingViewFocusMode() {
+            this.track.playingViewFocusMode = !this.track.playingViewFocusMode
         },
         setPlayingViewBgCoverEffectIndex(value) {
             this.track.playingViewBgCoverEffectIndex = value

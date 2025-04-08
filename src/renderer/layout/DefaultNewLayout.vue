@@ -100,7 +100,7 @@ const { isFontAutoWeight } = storeToRefs(useSettingStore())
 */
 
 .default-new-layout > .bottom .default-new-main-bottom .play-ctl .spacing {
-    margin-left: 25px !important;
+    margin-left: 28px !important;
 }
 
 .default-new-layout > .bottom .default-new-main-bottom #play-nav {

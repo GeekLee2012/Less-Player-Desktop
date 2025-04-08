@@ -71,7 +71,7 @@ const clear = () => {
 <style scoped>
 .search-bar {
     display: flex;
-    height: 32px;
+    height: 34px;
     -webkit-app-region: none;
     --border-radius: var(--border-btn-border-radius);
 }
@@ -101,7 +101,7 @@ const clear = () => {
 }
 
 .search-bar .search-btn svg {
-    transform: translateX(2px) translateY(0.5px);
+    transform: translateX(2px) translateY(0.5px) scale(1.02);
     fill: var(--searchbar-search-btn-icon-color);
 }
 
@@ -133,7 +133,7 @@ const clear = () => {
 }
 
 .search-bar .clear-btn svg {
-    transform: translateX(-2px);
+    transform: translateX(-2px) scale(1.1);
     fill: var(--searchbar-clear-btn-icon-color);
     visibility: visible;
     cursor: pointer;

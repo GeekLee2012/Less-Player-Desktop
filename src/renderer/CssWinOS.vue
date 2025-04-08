@@ -16,11 +16,15 @@
 .winos-style .classic-main-bottom .lyric-btn,
 .winos-style .default-new-main-bottom .lyric-btn,
 .winos-style .playing-view .bottom .action .lyric-btn,
-.winos-style .visual-playing-view .action .lyric-btn,
+.winos-style .visual-playing-view .action .lyric-btn {
+  font-weight: normal !important;
+  transform: translateY(-1px) scale(1.05);
+}
+
 /* 播放页 - 歌词 */
 .winos-style .lyric-ctl .audio-artist,
 .winos-style .lyric-ctl .audio-album {
-  font-weight: normal !important;
+  font-weight: normal !important; 
 }
 
 .winos-style .video-playing-view > .header {
@@ -248,11 +252,18 @@
 }
 
 .use-winos-win-ctl #main-left  .center {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .use-winos-win-ctl #main-left .header .top-logo {
-    margin-top: 23px;
-    margin-left: 23px;
+  margin-top: 23px;
+  margin-left: 23px;
+}
+
+.winos-style .playing-view .container .bg-container,
+.winos-style .playing-view .container .backdrop-container,
+.winos-style .visual-playing-view .container .bg-container,
+.winos-style .visual-playing-view .container .backdrop-container  {
+  position: absolute;
 }
 </style>

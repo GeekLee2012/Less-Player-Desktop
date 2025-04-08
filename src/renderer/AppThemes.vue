@@ -361,10 +361,6 @@ body.app-win-custom-shadow.mini {
   background: var(--content-bg-color) !important;
 }
 
-.content-backdrop-filter {
-  /*backdrop-filter: url('none') blur(6px) opacity(100%);*/
-}
-
 /* 滚动条 */
 ::-webkit-scrollbar-thumb {
   background: var(--others-scrollbar-color);

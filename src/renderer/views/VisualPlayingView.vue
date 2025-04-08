@@ -52,7 +52,7 @@ const { getWindowZoom, lyricMetaPos, theme, layout,
     playingViewBgCoverEffectGradientMode,
     playingViewBgCoverEffectGradientType,
     playingViewBgCoverEffectGradientBrightness,
-    playingViewThemeColorIndex,
+    playingViewThemeColorIndex, playingViewFocusMode,
 } = storeToRefs(useSettingStore())
 
 
@@ -286,7 +286,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="visual-playing-view" @dragover="e => e.preventDefault()" @drop="onDrop">
+    <div class="visual-playing-view" 
+        :class="{ 'focus-mode': playingViewFocusMode }"
+        @dragover="e => e.preventDefault()" 
+        @drop="onDrop">
         <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
@@ -964,7 +967,7 @@ onUnmounted(() => {
 /* 渐变风格 - 现代 */
 .visual-playing-view .container .backdrop-container {
     contain: style size;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -983,9 +986,9 @@ onUnmounted(() => {
   background-size: cover;
   position: absolute;
   top: 0;
-  bottom: 0;
   left: 0;
   right: 0;
+  bottom: 0;
   inset-inline-start: 0;
   inset-inline-end: 0;
   contain: layout style paint;
@@ -1002,11 +1005,11 @@ onUnmounted(() => {
 }
 
 .visual-playing-view .container .bg-container {
-    position: absolute;
+    position: fixed;
     top: 0;
-    bottom: 0;
     left: 0;
     right: 0;
+    bottom: 0;
     inset-inline-start: 0;
     inset-inline-end: 0;
     contain: strict;
@@ -1043,5 +1046,22 @@ onUnmounted(() => {
 
 .visual-playing-view .container.auto-effect.with-backdrop .bg-effect {
     display: none;
+}
+
+/* Focus Mode */
+.visual-playing-view.focus-mode .container > .header,
+.visual-playing-view.focus-mode .container > .center .action, 
+.visual-playing-view.focus-mode .container > .center .lyric-ctl .extra-btn, 
+.visual-playing-view.focus-mode .container > .center .progress-wrap,
+.visual-playing-view.focus-mode .container > .center .audio-time-wrap {
+    visibility: hidden;
+}
+
+.visual-playing-view.focus-mode:hover .container > .header,
+.visual-playing-view.focus-mode:hover .container > .center .action,
+.visual-playing-view.focus-mode:hover .container > .center .lyric-ctl .extra-btn, 
+.visual-playing-view.focus-mode:hover .container > .center .progress-wrap,
+.visual-playing-view.focus-mode:hover .container > .center .audio-time-wrap {
+    visibility: visible;
 }
 </style>

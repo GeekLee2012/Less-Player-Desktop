@@ -611,7 +611,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   width: 335px;
   width: 33.5%;
   max-width: 500px;
-  height:calc(100% - var(--app-win-custom-shadow-size) * 2);
+  height: calc(100% - var(--app-win-custom-shadow-size) * 2);
   z-index: 99;
   box-shadow: var(--box-shadow);
   border-top-right-radius: var(--border-app-win-border-radius);

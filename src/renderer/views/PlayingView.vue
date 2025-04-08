@@ -36,7 +36,7 @@ const { isMaxScreen, playingViewShow, desktopLyricShow } = storeToRefs(useAppCom
 const { hidePlayingView, minimize,
     showToast, switchPlayingViewTheme,
     toggleSoundEffectView, toggleDesktopLyricShow,
-    togglePlayingThemeListView, } = useAppCommonStore()
+    togglePlayingThemeListView, switchSpectrumIndex } = useAppCommonStore()
 const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos,
@@ -48,7 +48,8 @@ const { getWindowZoom, lyricMetaPos,
     playingViewBgCoverEffectGradientBrightness,
     playingViewPlayCtlStyleIndex,
     playingViewThemeColorIndex,
-    playingViewLyricHighlightMode, } = storeToRefs(useSettingStore())
+    playingViewLyricHighlightMode,
+    playingViewFocusMode, } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
 const volumeBarRef = ref(null)
@@ -278,6 +279,7 @@ onMounted(() => {
 
 <template>
     <div class="playing-view" 
+        :class="{ 'focus-mode': playingViewFocusMode }"
         @dragover="e => e.preventDefault()" 
         @drop="onDrop">
         <div class="container">
@@ -805,8 +807,6 @@ onMounted(() => {
     color: var(--content-highlight-color);
 }
 
-
-
 /* bottom-new  */
 .playing-view .container > .bottom.bottom-new {
     border-top: 1.1px solid var(--others-progressbar-bg-color);
@@ -858,7 +858,7 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex: 3;
+    flex: 4;
     height: 100%;
 }
 
@@ -1124,7 +1124,7 @@ onMounted(() => {
 /* 渐变风格 - 现代 */
 .playing-view .container .backdrop-container {
     contain: style size;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -1143,9 +1143,9 @@ onMounted(() => {
   background-size: cover;
   position: absolute;
   top: 0;
-  bottom: 0;
   left: 0;
   right: 0;
+  bottom: 0;
   inset-inline-start: 0;
   inset-inline-end: 0;
   contain: layout style paint;
@@ -1162,11 +1162,11 @@ onMounted(() => {
 }
 
 .playing-view .container .bg-container {
-    position: absolute;
+    position: fixed;
     top: 0;
-    bottom: 0;
     left: 0;
     right: 0;
+    bottom: 0;
     inset-inline-start: 0;
     inset-inline-end: 0;
     contain: strict;
@@ -1204,5 +1204,18 @@ onMounted(() => {
 
 .playing-view .container.auto-effect.with-backdrop .bg-effect {
     display: none;
+}
+
+/* Focus Mode */
+.playing-view.focus-mode .container > .header,
+.playing-view.focus-mode .container > .bottom, 
+.playing-view.focus-mode .container .lyric-ctl .extra-btn {
+    visibility: hidden;
+}
+
+.playing-view.focus-mode:hover .container > .header,
+.playing-view.focus-mode:hover .container > .bottom, 
+.playing-view.focus-mode:hover .container .lyric-ctl .extra-btn {
+    visibility: visible;
 }
 </style>

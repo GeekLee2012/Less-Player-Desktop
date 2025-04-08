@@ -36,6 +36,7 @@ const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { lyricMetaPos, lyric, lyricTransActived, lyricRomaActived,
     playingViewBgCoverEffectIndex, playingViewPlayCtlStyleIndex, 
+    playingViewFocusMode,
 } = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 
@@ -288,7 +289,13 @@ onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div class="dynamic-playing-view" :class="{ light: isLightTheme, custom: (playingViewThemeType == 1), 'preview-mode': isPlayingViewCustomThemePreview }">
+    <div class="dynamic-playing-view" 
+        :class="{ 
+            light: isLightTheme, 
+            custom: (playingViewThemeType == 1), 
+            'preview-mode': isPlayingViewCustomThemePreview,
+            'focus-mode': playingViewFocusMode
+        }">
         <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
@@ -568,7 +575,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     height: 43px;
     display: flex;
     -webkit-app-region: drag;
-    visibility: hidden;
+    /*visibility: hidden;*/
 }
 
 .dynamic-playing-view .header svg {
@@ -696,7 +703,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .dynamic-playing-view .bottom {
     height: var(--bottom-height);
     padding-bottom: 3px;
-    visibility: hidden;
+    /*visibility: hidden;*/
     background: #00000036;
 }
 
@@ -796,7 +803,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex: 3;
+    flex: 4;
     height: 100%;
 }
 
@@ -964,9 +971,16 @@ onUnmounted(() => offEvents(eventsRegistration))
   }
 }
 */
-.dynamic-playing-view:hover .header,
-.dynamic-playing-view:hover .bottom,
-.dynamic-playing-view:hover .extra-btn.extra-exist {
+
+.dynamic-playing-view.focus-mode .header,
+.dynamic-playing-view.focus-mode .bottom,
+.dynamic-playing-view.focus-mode .extra-btn.extra-exist {
+    visibility: hidden;
+}
+
+.dynamic-playing-view.focus-mode:hover .header,
+.dynamic-playing-view.focus-mode:hover .bottom,
+.dynamic-playing-view.focus-mode:hover .extra-btn.extra-exist {
     visibility: visible;
 }
 

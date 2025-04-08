@@ -18,6 +18,7 @@ const { track } = storeToRefs(useSettingStore())
 const { setPlayingViewBgCoverEffectIndex, 
     togglePlayingViewCoverBorderShow,
     toggleUseOnlineCover,
+    togglePlayingViewFocusMode,
     setPlayingViewBgCoverEffectGradientMode,
     setPlayingViewBgCoverEffectGradientType,
     setPlayingViewBgCoverEffectGradientBrightness,
@@ -141,6 +142,12 @@ const onImageDrop = (event, item, index) => {
                         <span class="subtitle">在线封面：</span>
                         <ToggleControl @click="toggleUseOnlineCover"
                             :value="track.useOnlineCover">
+                        </ToggleControl>
+                    </div>
+                    <div class="opt-item">
+                        <span class="subtitle">专注模式：</span>
+                        <ToggleControl @click="togglePlayingViewFocusMode"
+                            :value="track.playingViewFocusMode">
                         </ToggleControl>
                     </div>
                 </div>

@@ -133,7 +133,7 @@ onMounted(() => {
 */
 
 .default-new-main-bottom #play-nav > .play-ctl-wrap {
-    flex: 3;
+    flex: 4;
     display: flex;
     flex-direction: column;
     align-items: center;

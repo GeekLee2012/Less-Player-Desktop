@@ -7,7 +7,7 @@ const props = defineProps({
 
 const getTextByStatus = () => {
     const text = props.actionText || "收藏"
-    return props.favorited ? ("取消" + text) : text
+    return props.favorited ? ("已" + text) : text
 }
 </script>
 

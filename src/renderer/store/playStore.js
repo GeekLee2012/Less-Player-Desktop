@@ -144,6 +144,7 @@ export const usePlayStore = defineStore('player', {
             this.queueTracks.length = 0
             this.playingIndex = -1
             this._resetPlayState()
+            this.loading = false
         },
         _resetPlayState() {
             this.playing = false

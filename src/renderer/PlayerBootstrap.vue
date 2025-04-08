@@ -246,6 +246,7 @@ const handleUnplayableTrack = (track, msg) => {
     if (Playlist.isNormalRadioType(track)) { //普通歌单电台
         return toastFailAndPlayNext(track, msg, autoSkipCnt)
     } else if (autoSkipCnt >= queueSize) { //非电台歌曲，且没有下一曲
+        setLoading(false)
         resetPlayState()
         resetAutoSkip()
         return showFailToast(NO_NEXT_MSG)
@@ -254,6 +255,7 @@ const handleUnplayableTrack = (track, msg) => {
     //频繁切换下一曲，体验不好，对音乐平台也不友好
     if (autoSkipCnt <= 10) return toastFailAndPlayNext(track, msg, autoSkipCnt)
     resetPlayState()
+    setLoading(false)
     //10连跳啦，暂停一下吧
     resetAutoSkip()
     showFailToast(OVERTRY_MSG)
@@ -1630,9 +1632,12 @@ const eventsRegistration = {
         })
 
         //简约布局、可视化播放页
+        /*
         if (!isSimpleLayoutMode && (!playingViewShow.value || playingViewThemeIndex.value != 1)) {
             return setSpectrumParams(null)
         }
+        */
+        
         if (exVisualCanvasShow.value && !isSimpleLayoutMode) return
         drawCanvasSpectrum()
     },

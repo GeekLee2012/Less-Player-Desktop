@@ -12,6 +12,7 @@ const props = defineProps({
     cover: String,
     title: String,
     subtitle: String,
+    playCount: String,
     extraText: String,
     color: String,
     playable: Boolean,
@@ -123,8 +124,10 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </svg>
                 </div>
             </div>
-            <div class="cover-bottom" v-show="!checkbox && (videoStyle || songStyle)">
+            <div class="cover-bottom" v-show="!checkbox && (videoStyle || songStyle || playCount)">
                 <div class="duration" v-show="duration" v-html="toHhMmss(duration)">
+                </div>
+                <div class="play-count" v-show="playCount && !duration" v-html="playCount">
                 </div>
             </div>
         </div>
@@ -289,16 +292,22 @@ onUnmounted(() => offEvents(eventsRegistration))
     box-shadow: 0px 3px 10px #00000088;
 }
 
-.image-text-tile .cover-wrap .cover-bottom .duration {
+.image-text-tile .cover-wrap .cover-bottom .duration,
+.image-text-tile .cover-wrap .cover-bottom .play-count {
     position: absolute;
     bottom: 0px;
     right: 0px;
     z-index: 1;
     color: #fff;
     font-weight: bold;
-    padding: 3px 5px;
+    padding: 5px 9px;
     font-size: calc(var(--content-text-tip-text-size) - 1px);
     background-color: #16161633;
+}
+
+.image-text-tile .cover-wrap .cover-bottom .play-count {
+    color: #f9f9f9;
+    background: transparent;
 }
 
 .image-text-tile .cover-wrap .play-btn:hover {
