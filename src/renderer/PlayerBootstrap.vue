@@ -804,29 +804,29 @@ const drawFlippingSpectrum = (canvas, { freqData, spectrumColor, stroke }) => {
 //普通频谱
 const drawCanvasSpectrum = () => {
     const canvas = document.querySelector(".spectrum-canvas")
-    if (canvas) {
-        const index = spectrumIndex.value
-        const params = spectrumParams.value || {}
-        let alignment = 'bottom'
-        switch (index) {
-            case 0:
-                drawEmptySpectrum(canvas, { ...params, alignment })
-                break
-            case 1:
-                drawSpectrum(canvas, { ...params, alignment })
-                break
-            case 2:
-                drawFlippingSpectrum(canvas, params)
-                break
-            default:
-                if (!hasExDrawSpectrumHandlers() || index < 0) return setSpectrumIndex(0)
-                const exSpectrumIndex = Math.max((index - 3), 0)
-                drawExSpectrum(canvas, { ...params, alignment }, exSpectrumIndex)
-                    .catch(error => {
-                        if (error == 'noHandler') return setSpectrumIndex(0)
-                        console.log(error)
-                    })
-        }
+    if (!canvas) return
+    
+    const index = spectrumIndex.value
+    const params = spectrumParams.value || {}
+    let alignment = 'bottom'
+    switch (index) {
+        case 0:
+            drawEmptySpectrum(canvas, { ...params, alignment })
+            break
+        case 1:
+            drawSpectrum(canvas, { ...params, alignment })
+            break
+        case 2:
+            drawFlippingSpectrum(canvas, params)
+            break
+        default:
+            if (!hasExDrawSpectrumHandlers() || index < 0) return setSpectrumIndex(0)
+            const exSpectrumIndex = Math.max((index - 3), 0)
+            drawExSpectrum(canvas, { ...params, alignment }, exSpectrumIndex)
+                .catch(error => {
+                    if (error == 'noHandler') return setSpectrumIndex(0)
+                    console.log(error)
+                })
     }
 }
 
@@ -1632,11 +1632,9 @@ const eventsRegistration = {
         })
 
         //简约布局、可视化播放页
-        /*
         if (!isSimpleLayoutMode && (!playingViewShow.value || playingViewThemeIndex.value != 1)) {
             return setSpectrumParams(null)
         }
-        */
         
         if (exVisualCanvasShow.value && !isSimpleLayoutMode) return
         drawCanvasSpectrum()

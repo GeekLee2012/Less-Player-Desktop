@@ -1,6 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import DefaultMainLeft from './DefaultMainLeft.vue';
 import DefaultMainCenter from './DefaultMainCenter.vue';
 import AppPopovers from '../AppPopovers.vue';
@@ -9,12 +10,14 @@ import DefaultNewMainBottom from './DefaultNewMainBottom.vue';
 
 
 const { isFontAutoWeight } = storeToRefs(useSettingStore())
+const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 </script>
 
 <template>
     <div class="default-layout default-new-layout"
         :class="{
             'contrast-mode': isFontAutoWeight,
+            'mini-navbar-mode': isMiniNavBarMode
         }">
         <div class="center">
             <DefaultMainLeft :hideBottom="true"></DefaultMainLeft>
@@ -51,7 +54,6 @@ const { isFontAutoWeight } = storeToRefs(useSettingStore())
     margin-top: 41px;
     margin-left: 20px;
 }
-
 
 
 .default-new-layout > .bottom {
@@ -113,5 +115,10 @@ const { isFontAutoWeight } = storeToRefs(useSettingStore())
 .default-new-layout > .bottom .default-new-main-bottom #play-nav .cover-mask {
     width: 56px !important;
     height: 56px !important;
+}
+
+.default-new-layout.mini-navbar-mode > .center #main-left .top-logo {
+    margin-top: 41px;
+    margin-left: 0px;
 }
 </style>

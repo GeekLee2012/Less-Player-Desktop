@@ -33,11 +33,11 @@ const visitItem = (item) => {
 
 <style>
 .artistlist-ctl .image-text-tile {
-    margin-top: 25px !important;
+    margin-top: 20px !important;
     margin-bottom: 10px !important;
 }
 
-.artistlist-ctl>.pag-content {
+.artistlist-ctl > .pag-content {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
@@ -63,8 +63,10 @@ const visitItem = (item) => {
 }
 
 
+.artistlist-ctl .image-text-tile .cover,
 .artistlist-ctl .image-text-tile-card .cover {
-    height: var(--others-image-text-tile-cover-size) !important;
+    width: calc(var(--others-image-text-tile-cover-size) * 0.95) !important;
+    height: calc(var(--others-image-text-tile-cover-size) * 0.95) !important;
 }
 
 .artistlist-ctl .tiles-loading-mask .tile {
@@ -80,7 +82,7 @@ const visitItem = (item) => {
 
 .artistlist-ctl .tiles-loading-mask .tile .title {
     text-align: center !important;
-    margin-top: 10px !important;
+    margin-top: 5px !important;
     width: 80%;
     height: 36px !important;
     border-radius: 3px;
@@ -92,12 +94,19 @@ const visitItem = (item) => {
     margin-bottom: 10px !important;
 }
 
+.artistlist-ctl .tiles-loading-mask .tile .cover,
 .artistlist-ctl .tiles-card-loading-mask .tile .cover {
-    height: var(--others-image-text-tile-cover-size) !important;
+    width: calc(var(--others-image-text-tile-cover-size) * 0.95) !important;
+    height: calc(var(--others-image-text-tile-cover-size) * 0.95) !important;
 }
 
 .artistlist-ctl .image-text-tile-card .layer {
     display: none !important;
     background: transparent !important;
+}
+
+.artistlist-ctl .tiles-loading-mask .tile {
+    margin-top: 10px !important;
+    margin-bottom: 0px !important;
 }
 </style>

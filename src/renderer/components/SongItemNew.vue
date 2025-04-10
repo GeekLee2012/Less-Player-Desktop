@@ -142,6 +142,10 @@ onUnmounted(() => offEvents(eventsRegistration))
         :class="{ 
             'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data),
             'selection-mode': checkbox,
+            'with-litte-large-index': index > 500,
+            'with-large-index': index > 999,
+            'with-larger-index': index > 5000,
+            'with-huge-index': index > 9999,
         }"
         @click="toggleCheck" 
         @contextmenu="onContextMenu"
@@ -352,6 +356,22 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .song-item-new .sqno {
     color: var(--content-subtitle-text-color);
+}
+
+.song-item-new.with-litte-large-index .sqno {
+    width: 40px;
+}
+
+.song-item-new.with-large-index .sqno {
+    width: 45px;
+}
+
+.song-item-new.with-larger-index .sqno {
+    width: 50px;
+}
+
+.song-item-new.with-huge-index .sqno {
+    width: 55px;
 }
 
 .song-item-new .checkbox {

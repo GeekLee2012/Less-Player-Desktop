@@ -93,4 +93,20 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 .default-old-layout .tiles-card-loading-mask .tile {
     margin-bottom: 25px;
 }
+
+/* Mini NavBar Mode */
+.mini-navbar-mode .tiles-loading-mask .tile {
+    margin-top: 18px;
+    margin-bottom: 15px;
+}
+
+.mini-navbar-mode .tiles-card-loading-mask .tile {
+    margin-top: 25px;
+    margin-bottom: 20px;
+}
+
+.mini-navbar-mode .tiles-video-loading-mask .tile {
+    margin: 20px 15px;
+    width: calc(var(--others-image-text-tile-cover-size) * 1.24);
+}
 </style>

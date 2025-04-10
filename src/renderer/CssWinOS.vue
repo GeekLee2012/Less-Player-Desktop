@@ -67,7 +67,10 @@
   margin-left: 23px;
 }
 
-
+.use-winos-win-ctl .default-new-layout.mini-navbar-mode #main-left .header .top-logo {
+  margin-top: 23px;
+  margin-left: 0px;
+}
 
 
 .use-winos-win-ctl .default-main-top .play-nav > .action {

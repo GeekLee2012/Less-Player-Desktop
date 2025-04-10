@@ -1,6 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
+import { useAppCommonStore } from '../store/appCommonStore';
 import DefaultMainLeft from './DefaultMainLeft.vue';
 import DefaultMainCenter from './DefaultMainCenter.vue';
 import AppPopovers from '../AppPopovers.vue';
@@ -8,6 +9,7 @@ import AppPopovers from '../AppPopovers.vue';
 
 
 const { isDefaultOldLayout, isFontAutoWeight } = storeToRefs(useSettingStore())
+const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 </script>
 
 <template>
@@ -15,6 +17,7 @@ const { isDefaultOldLayout, isFontAutoWeight } = storeToRefs(useSettingStore())
         :class="{ 
             'default-old-layout': isDefaultOldLayout,
             'contrast-mode': isFontAutoWeight,
+            'mini-navbar-mode': isMiniNavBarMode
         }" >
         <DefaultMainLeft></DefaultMainLeft>
         <DefaultMainCenter></DefaultMainCenter>

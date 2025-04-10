@@ -36,7 +36,8 @@ const { isMaxScreen, isPlaylistMode, isArtistMode,
     isRadioModeEnable, isCloudStorageModeEnable } = storeToRefs(useAppCommonStore())
 const { nextExploreMode, setPlaylistExploreMode, 
     setRadioExploreMode, setCloudStorageExploreMode, 
-    showFailToast, hideAllCtxMenus, } = useAppCommonStore()
+    showFailToast, hideAllCtxMenus,
+    isMiniNavBarMode, toggleMiniNavBarMode, } = useAppCommonStore()
 const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists, } = storeToRefs(useUserProfileStore())
 const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
 const { getCustomPlaylist } = useUserProfileStore()
@@ -270,7 +271,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 <template>
     <div id="main-left"
         :class="{
-            'user-mousewheel': isUserMouseWheel, 
+            'user-mousewheel': isUserMouseWheel
         }">
         <div class="header">
             <WinTrafficLightBtn v-show="!useWindowsStyleWinCtl" :isMaximized="isMaxScreen">
@@ -279,7 +280,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <Navigator></Navigator>
             </div>
             <div class="top-logo" v-show="isDefaultNewLayout || useWindowsStyleWinCtl || (isAutoLayout && !isMacOS())">
-                <AppLogo></AppLogo>
+                <AppLogo @click="toggleMiniNavBarMode"></AppLogo>
             </div>
         </div>
         <div class="search-wrap" v-show="isDefaultOldLayout">
@@ -508,7 +509,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
         </div>
         <div class="bottom" v-if="!hideBottom && !useWindowsStyleWinCtl">
-            <AppLogo ></AppLogo>
+            <AppLogo @click="toggleMiniNavBarMode"></AppLogo>
         </div>
     </div>
 </template>
@@ -893,5 +894,127 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding-bottom: 18px;
     padding-left: calc(var(--spacing-left) + 18px);
     overflow: hidden;
+}
+
+#main-left .header .app-logo-wrap .app-logo,
+#main-left .bottom .app-logo-wrap .app-logo {
+    cursor: pointer;
+}
+
+
+/* Mini NavBar Mode */
+.mini-navbar-mode #main-left {
+    --main-left-width: 66px;
+    width: var(--main-left-width);
+    min-width: auto;
+    max-width: auto;
+}
+
+.mini-navbar-mode #main-left .win-traffic-light-btn {
+    margin-left: 12px;
+}
+
+.mini-navbar-mode #main-left #explore-mode .mode-item {
+    --spacing-left: 0px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    transform: scale(1.2);
+    padding: 10px 5px 10px 10px;
+    margin-bottom: 6px;
+    background: var(--content-list-item-hover-bg-color);
+    cursor: pointer;
+    border-radius: var(--border-list-item-vertical-border-radius);
+}
+
+.mini-navbar-mode #main-left .platform-list ul li {
+    --spacing-left: 23px;
+    padding: 6px 25px 6px 15px;
+    margin-left: calc(var(--spacing-left) - 3px);
+    margin-right: calc(var(--spacing-left) - 3px);
+    margin-bottom: var(--content-left-nav-line-spacing);
+
+    text-align: center;
+    overflow: hidden;
+    word-wrap: break-all;
+    white-space: pre-wrap;
+    line-break: anywhere;
+    text-overflow: clip;
+    letter-spacing: var(--main-left-width);
+    word-wrap: break-word;
+    line-break: anywhere;
+
+    background: var(--content-list-item-hover-bg-color);
+    cursor: pointer;
+    border-radius: var(--border-list-item-vertical-border-radius);
+}
+
+.mini-navbar-mode #main-left .playlist-item {
+    justify-content: center;
+    padding: 8px 3px;
+}
+
+.mini-navbar-mode #main-left .custom-playlist-list,
+.mini-navbar-mode #main-left .favorite-playlist-list,
+.mini-navbar-mode #main-left .follow-artist-list {
+    margin-top: 10px;
+    width: fit-content;
+}
+
+.mini-navbar-mode #main-left .custom-playlist-list li,
+.mini-navbar-mode #main-left .favorite-playlist-list li {
+    padding-left: 4px;
+    padding-right: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateX(-1px);
+}
+
+.mini-navbar-mode #main-left .follow-artist-list li {
+    padding: 0px 5.5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateX(-2px);
+}
+
+.mini-navbar-mode #main-left .follow-artist-list .playlist-item {
+    padding: 6px 3px;
+}
+
+.mini-navbar-mode #main-left .playlist-item:hover .play-btn {
+    display: none;
+}
+
+.mini-navbar-mode #main-left .header .top-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0px;
+    margin-left: 32px;
+}
+
+.mini-navbar-mode #main-left .bottom {
+    align-items: center;
+    justify-content: center;
+    padding-left: 0px;
+    padding-bottom: 2px;
+}
+
+.mini-navbar-mode #main-left .header .app-logo-wrap .app-logo,
+.mini-navbar-mode #main-left .bottom .app-logo-wrap .app-logo {
+    transform: scale(1.1) translateX(-2px);
+}
+
+.mini-navbar-mode #main-left #explore-mode .mode-item span,
+.mini-navbar-mode #main-left #explore-mode .exit-btn,
+.mini-navbar-mode #main-left .secondary-text,
+.mini-navbar-mode #main-left .playlist-item .title,
+.mini-navbar-mode #main-left .header .app-logo-wrap .app-name,
+.mini-navbar-mode #main-left .bottom .app-logo-wrap .app-name {
+    display: none;
 }
 </style>

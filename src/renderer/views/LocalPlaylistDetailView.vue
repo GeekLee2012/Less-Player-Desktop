@@ -275,6 +275,10 @@ const filterContent = (keyword) => {
     loadContent()
 }
 
+const onPageLoaded = ({ page, prevPage }) => {
+    if(page == prevPage) return 
+    resetScrollState()
+}
 
 /* 生命周期、监听 */
 watch(() => props.id, () => {
@@ -290,6 +294,9 @@ watch(currentPlatformCode, loadContent)
 
 const eventsRegistration = {
     'app-resize': detectTitleHeight,
+    'ctxMenu-removeFromLocal': () => {
+        setDataListId('_' + randomTextWithinAlphabetNums(15))
+    },
 }
 onMounted(() => onEvents(eventsRegistration))
 onUnmounted(() => offEvents(eventsRegistration))
@@ -361,7 +368,7 @@ onActivated(() => {
                 :loading="isLoading" 
                 :paginationStyleType="getPaginationStyleIndex" 
                 :limit="getLimitPerPageForLocalPlaylist"
-                :onPageLoaded="resetScrollState">
+                :onPageLoaded="onPageLoaded">
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

@@ -191,12 +191,6 @@ const computedPlayable = computed(() => {
     align-items: center;
 }
 
-/*
-.playlists-ctl .image-text-tile-card .play-cnt {
-    justify-content: center;
-}
-*/
-
 .playlists-ctl .play-cnt svg {
     fill: var(--content-subtitle-text-color);
     margin-right: 4px;

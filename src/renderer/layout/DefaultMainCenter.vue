@@ -26,7 +26,7 @@ const currentMainBottom = shallowRef(null)
 const { playlistCategoryViewShow, artistCategoryViewShow,
     radioCategoryViewShow, playingViewShow,
     soundEffectViewShow, lyricToolbarShow,
-    playingThemeListViewShow, } = storeToRefs(useAppCommonStore())
+    playingThemeListViewShow, isMiniNavBarMode, } = storeToRefs(useAppCommonStore())
 const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
@@ -63,7 +63,8 @@ const setImageTextTileSize = () => {
     const tileHMargin = 13
     const mainMargin = 33
     const scrollBarWidth = 6
-    const limits = [8, 7, 6, 5, 4] //TODO 宽屏、超宽屏，需更好兼容性
+    //TODO 宽屏、超宽屏，需更好兼容性
+    const limits = isMiniNavBarMode.value ? [8, 7, 6, 5] : [8, 7, 6, 5, 4] 
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const { clientWidth } = mainContent
@@ -73,7 +74,8 @@ const setImageTextTileSize = () => {
     const tileTitles = document.querySelectorAll('.image-text-tile .title')
     const tileSubtitles = document.querySelectorAll('.image-text-tile .subtitle')
     */
-    let tileWidth = tileMinWidth, limit = 4
+    let tileWidth = tileMinWidth
+    let limit = isMiniNavBarMode.value ? 5 : 4
     for (var i = 0; i < limits.length; i++) {
         if (clientWidth >= minWidths[i]) {
             limit = limits[i]
@@ -276,18 +278,20 @@ const setupDefaultLayout = () => {
     }
 }
 
-const setThemeViewItemsSize = () => {
-    const tileMinWidth = 165 //160
+const setThemesViewItemsSize = () => {
+    const tileMinWidth = isMiniNavBarMode.value ? 160 : 165 //160
     const tileHMargin = 25
     const scrollBarWidth = 6
-    const limits = [8, 7, 6, 5, 4] //TODO 宽屏、超宽屏，需更好兼容性
+    //TODO 宽屏、超宽屏，需更好兼容性
+    const limits = isMiniNavBarMode.value ? [8, 7, 6, 5] : [8, 7, 6, 5, 4] 
     const mainContent = document.querySelector('#themes-view .center')
     if (!mainContent) return
     const { clientWidth } = mainContent
     if (!clientWidth) return
     const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin) + scrollBarWidth)
-
-    let tileWidth = tileMinWidth, limit = 4
+    
+    let tileWidth = tileMinWidth
+    let limit = isMiniNavBarMode.value ? 5 : 4
     for (var i = 0; i < limits.length; i++) {
         if (clientWidth >= minWidths[i]) {
             limit = limits[i]
@@ -304,8 +308,6 @@ const setThemeViewItemsSize = () => {
         '--others-theme-preview-tile-width': `${tileWidth}px`,
         '--others-theme-preview-tile-height': `${tileHeight}px`
     })
-    //document.documentElement.style.setProperty('--others-theme-preview-tile-width', `${tileWidth}px`)
-    //document.documentElement.style.setProperty('--others-theme-preview-tile-height', `${tileHeight}px`)
 }
 
 const setPaginationSize = () => {
@@ -330,7 +332,7 @@ const resizeViewItems = (event) => {
     //自适应播放页组件大小
     setPlayingViewSize()
     //主题页
-    setThemeViewItemsSize()
+    setThemesViewItemsSize()
     //分页组件
     setPaginationSize()
 
@@ -359,6 +361,7 @@ watch(lyricMetaPos, () => {
     setVisualPlayingViewLyricCtlSize()
 })
 watch(winCustomShadowSize, resizeViewItems)
+watch(isMiniNavBarMode, resizeViewItems)
 watch(playingThemeListViewShow, setPlayingThemeListViewSize, { immediate: true })
 
 const eventsRegistration = {
@@ -366,6 +369,7 @@ const eventsRegistration = {
     //'pluginsView-show': setPluginsViewListSize,
     'playingView-changed': setPlayingViewSize,
     'app-layout-default': setupDefaultLayout,
+    'themesView-actived': setThemesViewItemsSize,
 }
 
 onMounted(() => {

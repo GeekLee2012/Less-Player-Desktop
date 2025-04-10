@@ -1,10 +1,11 @@
 <script setup>
-import { ref } from 'vue';
+import { onActivated, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingStore } from '../store/settingStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { ipcRendererInvoke, toYyyymmddHhMmSs } from '../../common/Utils';
+import { emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -89,6 +90,10 @@ const exportThemes = async () => {
         showFailToast('主题导出失败')
     }
 }
+
+onActivated(() => {
+    emitEvents('themesView-actived')
+})
 </script>
 
 <template>

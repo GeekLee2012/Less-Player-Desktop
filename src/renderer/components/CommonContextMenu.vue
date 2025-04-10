@@ -154,7 +154,8 @@ const removeLocalItem = (item, index) => {
     const { id } = commonCtxItem.value || { id: track.pid }
     removeFromLocalPlaylist(id, track)
     toastAndHideMenu("歌曲已删除")
-    if (currentDataType == 11) emitEvents('ctxMenu-removeFromLocal')
+    //if (currentDataType == 11) emitEvents('ctxMenu-removeFromLocal')
+    emitEvents('ctxMenu-removeFromLocal')
     return true
 }
 

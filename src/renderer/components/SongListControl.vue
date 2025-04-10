@@ -90,7 +90,11 @@ watch(() => dataFromProps.value.length > 0 && dataFromProps.value[0].id, (nv, ov
 */
 
 watch(() => props.id, (nv, ov) => {
-    refreshAllPendingMark.value = Date.now()
+    if(nv.startsWith('_')) {
+        refreshPagePendingMark.value = Date.now()
+    } else {
+        refreshAllPendingMark.value = Date.now()
+    }
 }, { immediate: true })
 
 //偷懒写法，作为组件一般不应与设置settingStore直接关联

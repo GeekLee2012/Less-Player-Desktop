@@ -129,6 +129,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         //播放挂起状态
         pendingPlay: false,
         pendingPlayPercent: 0,
+        miniNavBarMode: false,
     }),
     getters: {
         isPlaylistMode() {
@@ -179,6 +180,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         isCloudStorageModeEnable() {
             return this.isExploreModeEnable('cloudstorage')
+        },
+        isMiniNavBarMode() {
+            return this.miniNavBarMode
         },
     },
     actions: {
@@ -623,6 +627,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         hideCustomAppBorderRadiusView() {
             this.customAppBorderRadiusViewShow = false
+        },
+        toggleMiniNavBarMode() {
+            this.miniNavBarMode = !this.miniNavBarMode
         }
     },
     persist: {
@@ -636,7 +643,8 @@ export const useAppCommonStore = defineStore('appCommon', {
                     'currentMusicCategoryName', 'exploreModeActiveStates', 
                     'pendingPlay', 'pendingPlayPercent',
                     'exVisualCanvasShow', 'exVisualCanvasIndex', 
-                    'playingViewCustomThemes', 'playingViewThemeType' ]
+                    'playingViewCustomThemes', 'playingViewThemeType',
+                    'miniNavBarMode' ]
             },
         ],
     },

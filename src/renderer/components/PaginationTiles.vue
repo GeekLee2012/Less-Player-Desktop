@@ -43,7 +43,9 @@ const getMaxPage = computed(() => {
 const isNormalStyleType = computed(() => (paginationStyleType.value == 0))
 
 const onPageChanged = async ({ offset, limit, page }) => {
+    const prevPage = currentPage.value
     setCurrentPage(page)
+    
     const { loadPage, onPageLoaded, } = props
     if (!loadPage) return
 
@@ -60,7 +62,7 @@ const onPageChanged = async ({ offset, limit, page }) => {
     }
 
     if (total >= 0) totalPageFromLoad.value = total
-    if (onPageLoaded) onPageLoaded({ offset, limit, page, data, total })
+    if (onPageLoaded) onPageLoaded({ offset, limit, page, data, total, prevPage })
 }
 
 const paginationToolbarRef = ref(null)

@@ -185,6 +185,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-clamp: 2;
     -webkit-box-orient: vertical;
     color: var(--content-text-color);
+    /*font-size: calc(var(--content-text-size) - 0.5px);*/
 }
 
 .image-text-tile .singleline-title {
@@ -454,7 +455,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .image-text-tile-card.image-text-tile-video .title,
 .image-text-tile-card.image-text-tile-video .subtitle {
-    width: auto;
+    width: auto !important;
 }
 
 .image-text-tile img[lazy=loading].obj-fit-contain,
@@ -495,5 +496,37 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .default-old-layout .image-text-tile-card {
     margin-bottom: 25px;
+}
+
+/* Mini NavBar Mode */
+.mini-navbar-mode .image-text-tile {
+    margin-top: 23px;
+    margin-bottom: 20px;
+}
+
+.mini-navbar-mode .image-text-tile-card {
+    margin-top: 25px;
+    margin-bottom: 20px;
+}
+
+.mini-navbar-mode .image-text-tile-video {
+    margin: 18px 15px;
+}
+
+.mini-navbar-mode .image-text-tile-video .cover,
+.mini-navbar-mode .image-text-tile-video .title-wrap,
+.mini-navbar-mode .image-text-tile-video .title,
+.mini-navbar-mode .image-text-tile-video .subtitle,
+.mini-navbar-mode .image-text-tile-video .extra-text {
+    width: calc(var(--others-image-text-tile-cover-size) * 1.25);
+}
+
+.mini-navbar-mode .image-text-tile-video .cover {
+    height: calc(var(--others-image-text-tile-cover-size * 0.85));
+}
+
+
+.mini-navbar-mode .image-text-tile-card.image-text-tile-video .title-wrap {
+    width: calc(var(--others-image-text-tile-cover-size) * 1.25 - 30px);
 }
 </style>
