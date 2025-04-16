@@ -37,7 +37,7 @@ const { isMaxScreen, isPlaylistMode, isArtistMode,
 const { nextExploreMode, setPlaylistExploreMode, 
     setRadioExploreMode, setCloudStorageExploreMode, 
     showFailToast, hideAllCtxMenus,
-    isMiniNavBarMode, toggleMiniNavBarMode, } = useAppCommonStore()
+    toggleMiniNavBarMode, } = useAppCommonStore()
 const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists, } = storeToRefs(useUserProfileStore())
 const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
 const { getCustomPlaylist } = useUserProfileStore()

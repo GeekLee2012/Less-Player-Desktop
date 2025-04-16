@@ -64,7 +64,9 @@ const setImageTextTileSize = () => {
     const mainMargin = 33
     const scrollBarWidth = 6
     //TODO 宽屏、超宽屏，需更好兼容性
-    const limits = isMiniNavBarMode.value ? [8, 7, 6, 5] : [8, 7, 6, 5, 4] 
+    const limits = [8, 7, 6, 5]
+    if(!isMiniNavBarMode.value) limits.push(4)
+
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
     const { clientWidth } = mainContent
@@ -74,8 +76,7 @@ const setImageTextTileSize = () => {
     const tileTitles = document.querySelectorAll('.image-text-tile .title')
     const tileSubtitles = document.querySelectorAll('.image-text-tile .subtitle')
     */
-    let tileWidth = tileMinWidth
-    let limit = isMiniNavBarMode.value ? 5 : 4
+    let tileWidth = tileMinWidth, limit = limits[limits.length - 1]
     for (var i = 0; i < limits.length; i++) {
         if (clientWidth >= minWidths[i]) {
             limit = limits[i]
@@ -283,15 +284,16 @@ const setThemesViewItemsSize = () => {
     const tileHMargin = 25
     const scrollBarWidth = 6
     //TODO 宽屏、超宽屏，需更好兼容性
-    const limits = isMiniNavBarMode.value ? [8, 7, 6, 5] : [8, 7, 6, 5, 4] 
+    const limits = [8, 7, 6, 5]
+    if(!isMiniNavBarMode.value) limits.push(4)
+
     const mainContent = document.querySelector('#themes-view .center')
     if (!mainContent) return
     const { clientWidth } = mainContent
     if (!clientWidth) return
     const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin) + scrollBarWidth)
     
-    let tileWidth = tileMinWidth
-    let limit = isMiniNavBarMode.value ? 5 : 4
+    let tileWidth = tileMinWidth, limit = limits[limits.length - 1]
     for (var i = 0; i < limits.length; i++) {
         if (clientWidth >= minWidths[i]) {
             limit = limits[i]

@@ -72,6 +72,10 @@
   margin-left: 0px;
 }
 
+.winos-style #main-left .header .top-logo {
+  -webkit-app-region: none;
+}
+
 
 .use-winos-win-ctl .default-main-top .play-nav > .action {
   padding-right: 10px !important;

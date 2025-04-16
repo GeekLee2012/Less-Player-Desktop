@@ -39,10 +39,9 @@ export const useRecentsStore = defineStore('recents', {
     actions: {
         //TODO state合法性待校验
         findItemIndex(state, item, compareFn) {
-            if (!state) return -1
-            if (!item) return -1
+            if (!state || !item) return -1
             return state.findIndex(e => {
-                return compareFn ? compareFn(item, e) :
+                return (typeof compareFn == 'function') ? compareFn(item, e) :
                     (item.id && e.id
                         && (item.id + '') === (e.id + '')
                         && item.platform == e.platform)
@@ -70,11 +69,12 @@ export const useRecentsStore = defineStore('recents', {
             refreshUserHome('recents')
             return true
         },
-        removeItem(state, item, compareFn) {
+        removeItem(state, item, compareFn, recheckFn) {
             if (!state) return
             if (!item) return
             const index = this.findItemIndex(state, item, compareFn)
             if (index != -1) {
+                if(typeof recheckFn == 'function' && !recheckFn(item)) return 
                 state.splice(index, 1)
                 refreshUserHome('recents')
             }
@@ -147,21 +147,21 @@ export const useRecentsStore = defineStore('recents', {
                 if (count) refreshUserHome('recents')
             })
         },
-        removeRecentSong(track) {
-            const { id, platform } = track
-            this.removeItem(this.recents.songs, { id, platform })
+        removeRecentSong(track, recheckFn) {
+            const { id, platform, updated } = track
+            this.removeItem(this.recents.songs, { id, platform, updated }, null, recheckFn)
         },
-        removeRecentPlaylist(playlist) {
-            const { id, platform } = playlist
-            this.removeItem(this.recents.playlists, { id, platform })
+        removeRecentPlaylist(playlist, recheckFn) {
+            const { id, platform, updated } = playlist
+            this.removeItem(this.recents.playlists, { id, platform, updated }, null, recheckFn)
         },
-        removeRecentAlbum(album) {
-            const { id, platform } = album
-            this.removeItem(this.recents.albums, { id, platform })
+        removeRecentAlbum(album, recheckFn) {
+            const { id, platform, updated } = album
+            this.removeItem(this.recents.albums, { id, platform, updated }, null, recheckFn)
         },
-        removeRecentRadio(track) {
-            const { id, platform } = track
-            this.removeItem(this.recents.radios, { id, platform })
+        removeRecentRadio(track, recheckFn) {
+            const { id, platform, updated } = track
+            this.removeItem(this.recents.radios, { id, platform, updated }, null, recheckFn)
         },
         removeAllRecents() {
             this.recents.songs.length = 0

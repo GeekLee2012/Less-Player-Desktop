@@ -34,6 +34,7 @@ const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
+const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 const { showToast, updateCommonCtxItem } = useAppCommonStore()
 const { getCustomPlaylist, removeAllFromCustomPlaylist, updateCustomPlaylist } = useUserProfileStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
@@ -213,6 +214,7 @@ watch(() => props.id, () => {
 })
 
 watch(currentPlatformCode, loadContent)
+watch(isMiniNavBarMode, () => nextTick(detectTitleHeight))
 
 const eventsRegistration = {
     'app-resize': detectTitleHeight, 

@@ -112,11 +112,13 @@ class Player {
                 self.setState(PlayState.LOADED)
                 self.updateMetadata()
             },
-            onloaderror: function () {
+            onloaderror: function (id, error) {
                 self.setState(PlayState.LOAD_ERROR)
+                if(isDevEnv()) console.log(error)
             },
-            onplayerror: function () {
+            onplayerror: function (id, error) {
                 self.setState(PlayState.PLAY_ERROR)
+                if(isDevEnv()) console.log(error)
             }
         })
         this.currentTime = 0

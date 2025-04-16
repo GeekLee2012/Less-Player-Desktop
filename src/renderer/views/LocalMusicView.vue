@@ -171,7 +171,7 @@ onMounted(() => resetBack2TopBtn())
         <div class="header">
             <div class="title">本地歌曲</div>
             <div class="about" v-show="isLocalMusicViewTipsShow">
-                <p>支持音频格式：mp3、flac、ogg、wav、aac、m4a</p>
+                <p>支持音频格式：mp3、flac、ogg、wav、aac、m4a、wma、ape等</p>
                 <p>支持歌单格式：m3u、m3u8、pls</p>
                 <p>歌单导入、导出，主要为兼容当前设备下的其他应用，不支持跨设备共享使用</p>
                 <p>最近播放、收藏，暂时不支持本地歌曲</p>

@@ -35,7 +35,7 @@ const { playing } = storeToRefs(usePlayStore())
 const { addTrack, playTrack, togglePlay } = usePlayStore()
 const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
-const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
+const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable, isSongItemIndexShow } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
 
@@ -160,7 +160,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </g>
             </svg>
         </div>
-        <div v-show="!checkbox" class="sqno">{{ index + 1 }}</div>
+        <div v-show="!checkbox && isSongItemIndexShow" class="sqno">{{ index + 1 }}</div>
         <div class="vipflag textflag" v-show="showVipFlag(data)" :class="{ spacing: !checkbox }">
             <span>VIP</span>
         </div>

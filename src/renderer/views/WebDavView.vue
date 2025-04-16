@@ -19,7 +19,7 @@ const { visitWebDavSessionCreate, visitWebDavSessionEdit, visitWebDavSessionDeta
 const { showConfirm } = inject('apiExpose')
 
 const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
-const { } = storeToRefs(useSettingStore())
+const { isCloudStorageViewTipsShow } = storeToRefs(useSettingStore())
 const { webdavSessions } = storeToRefs(useCloudStorageStore())
 const { removeWebDavSession, removeAllWebDavSession } = useCloudStorageStore()
 
@@ -90,11 +90,11 @@ onMounted(() => {
     <div id="webdav-view" ref="webdavRef" @scroll="onScroll" >
         <div class="header">
             <div class="title">WebDAV</div>
-            <div class="about">
+            <div class="about" v-show="isCloudStorageViewTipsShow">
                 <p>提示：实验性功能；仅提供只读模式，不计划支持复杂功能</p>
                 <p><b>郑重声明: 当前应用无法保证账号信息安全；当涉及隐私信息时，不建议使用此项WebDAV</b></p>
             </div>
-            <div class="action" :class="{ 'none-about': false }">
+            <div class="action" :class="{ 'none-about': !isCloudStorageViewTipsShow }">
                 <SvgTextButton text="新建会话" :leftAction="visitWebDavSessionCreate">
                     <template #left-img>
                         <svg width="14" height="14"
@@ -187,7 +187,7 @@ onMounted(() => {
                 </div>
             </div>
             <div v-for="(item, index) in tutorialList" 
-                v-show="webdavSessions.length < 1"
+                v-show="isCloudStorageViewTipsShow && webdavSessions.length < 1"
                 class="session-item">
                 <div class="icon-wrap"> 
                     <img src="" v-show="false"/>
@@ -250,7 +250,7 @@ onMounted(() => {
 }
 
 #webdav-view .header .action.none-about {
-    margin-top: 6px;
+    margin-top: 15px;
 }
 
 #webdav-view .center .list-title {

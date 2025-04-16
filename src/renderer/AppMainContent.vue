@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, shallowRef, inject, provide, computed, ref, nextTick } from 'vue';
+import { onMounted, shallowRef, inject, provide, computed, ref, nextTick, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import Mousetrap from 'mousetrap';
 import { useSettingStore } from './store/settingStore';
@@ -42,10 +42,15 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
   isUseAutoWinCtl, isUseWindowsWinCtl,
   isShowDialogBeforeResetSetting, isAutoLayout,
   isAppCustomShadowShow, isCheckPreReleaseVersion,
-  isUseWinCenterStrict, isMiniLayout, } = storeToRefs(useSettingStore())
+  isUseWinCenterStrict, isMiniLayout, 
+  isStoreRecentPlay, isAutoClearRecentPlayEnable,
+  liveTimeForRecentPlay, needClearRecentSongs, 
+  needClearRecentPlaylists, needClearRecentAlbums, 
+  needClearRecentRadios, mpvBinaryPath,
+} = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
-  setupAppGlobalProxy } = useSettingStore()
+  setupAppGlobalProxy, setupMpvBinaryPath } = useSettingStore()
 
 const { togglePlay, switchPlayMode,
   playPrevTrack, playNextTrack,
@@ -64,6 +69,12 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   togglePlayingView, } = useAppCommonStore()
 
 const { webdavSessions } = storeToRefs(useCloudStorageStore())
+const { getRecentSongs, getRecentPlaylilsts, 
+  getRecentAlbums, getRecentRadios 
+} = storeToRefs(useRecentsStore())
+const { removeRecentSong, removeRecentPlaylist, 
+  removeRecentAlbum, removeRecentRadio 
+} = useRecentsStore()
 
 
 const isReservedPath = (path) => {
@@ -321,7 +332,11 @@ const restoreSetting = (isInit) => {
 //注册ipcRenderer消息监听器
 onIpcRendererEvents({
   'app-active': hideEmptyToast,
-  'app-quit': setupCache,
+  'app-quit': () => {
+    setupCache()
+    //避免与ipc事件名称一样，而导致混淆，重新命名事件为app-beforeQuit
+    emitEvents('app-beforeQuit')
+  },
 })
 
 //数据迁移 - 最近播放记录
@@ -351,8 +366,10 @@ const initialize = () => {
   restoreSetting(true)
   migrateRecentsData()
   setupWebDav()
+  //setupMpvBinaryPath()
   //emitEvents('app-init')
   checkAppVersion()
+  checkAndClearRecentPlay()
 }
 
 const setupWebDav = async () => {
@@ -646,6 +663,68 @@ const checkAppVersion = async () => {
   checkAppVersionTimer = setInterval(callback, 10 * MINUTE)
 }
 
+const tryRemoveExpiredRecentItems = async (recentItems, removeFn, memo) => {
+  if(!recentItems || recentItems.length < 1) return
+  if(!removeFn || (typeof removeFn != 'function')) return 
+
+  const liveTime = liveTimeForRecentPlay.value
+  const liveTimeMillis = liveTime * (24 * 60 * 60 * 1000)
+  const currentMillis = Date.now()
+  let effected = 0
+  try {
+    for(let i = 0; i < recentItems.length; i++) {
+      const item = recentItems[i]
+      const { id, updated } = item
+
+      //清理无效记录
+      if(isBlank(id)) {
+        recentItems.splice(i, 1)
+        ++effected
+        continue
+      }
+
+      if(!updated || updated < 1) continue 
+      //清理过期记录
+      if((currentMillis - updated) >= liveTimeMillis) {
+        removeFn(item, (e) => (e.id == id && e.updated == updated))
+        ++effected
+      }
+    }
+  } catch(e) {
+    if(isDevEnv()) console.log(e)
+  }
+
+  if(isDevEnv() && effected && memo) {
+    console.log(`[ Cache - AutoClearRecents - ${memo}] Effected: ${effected}`)
+  }
+}
+
+const checkAndClearRecentPlay = async () => {
+  const isStoreEnable = isStoreRecentPlay.value
+  const isAutoClearEnable = isAutoClearRecentPlayEnable.value
+  if(!isStoreEnable || !isAutoClearEnable) return
+
+  if(needClearRecentSongs.value) {
+    tryRemoveExpiredRecentItems(getRecentSongs.value(), removeRecentSong, 'Songs')
+  }
+  
+  if(needClearRecentPlaylists.value) {
+    tryRemoveExpiredRecentItems(getRecentPlaylilsts.value(), removeRecentPlaylist, 'Playlilsts')
+  }
+
+  if(needClearRecentAlbums.value) {
+    tryRemoveExpiredRecentItems(getRecentAlbums.value(), removeRecentAlbum, 'Albums')
+  }
+  
+  if(needClearRecentRadios.value) {
+    tryRemoveExpiredRecentItems(getRecentRadios.value(), removeRecentRadio, 'Radios')
+  }
+}
+
+
+
+
+watch(mpvBinaryPath, setupMpvBinaryPath, { immediate: true })
 
 onMounted(() => {
   //窗口大小变化事件监听

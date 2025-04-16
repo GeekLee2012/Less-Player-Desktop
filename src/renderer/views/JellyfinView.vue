@@ -20,7 +20,7 @@ const { visitJellyfinSessionCreate, visitJellyfinSessionEdit, visitJellyfinSessi
 const { showConfirm } = inject('apiExpose')
 
 const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
-const { } = storeToRefs(useSettingStore())
+const { isCloudStorageViewTipsShow } = storeToRefs(useSettingStore())
 const { jellyfinSessions } = storeToRefs(useCloudStorageStore())
 const { removeJellyfinSession, removeAllJellyfinSession } = useCloudStorageStore()
 
@@ -87,11 +87,11 @@ onMounted(() => {
             <div class="title">
                 <span>Jellyfin</span>
             </div>
-            <div class="about">
+            <div class="about" v-show="isCloudStorageViewTipsShow">
                 <p>提示：实验性功能；当前使用Jellyfin API版本为v{{ Jellyfin.VERSION }}</p>
                 <p>目前仅提供播放相关功能；若需进行数据管理，请使用Jellyfin官方客户端</p>
             </div>
-            <div class="action" :class="{ 'none-about': false }">
+            <div class="action" :class="{ 'none-about': !isCloudStorageViewTipsShow }">
                 <SvgTextButton text="新建会话" :leftAction="visitJellyfinSessionCreate">
                     <template #left-img>
                         <svg width="14" height="14"
@@ -173,7 +173,7 @@ onMounted(() => {
                 </div>
             </div>
             <div v-for="(item, index) in tutorialList" 
-                v-show="jellyfinSessions.length < 1"
+                v-show="isCloudStorageViewTipsShow && jellyfinSessions.length < 1"
                 class="session-item">
                 <div class="icon-wrap">
                     <svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 72 72"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path class="cls-1" d="M24.21,49.16C22.66,46,32.84,27.59,36,27.59S49.32,46.08,47.79,49.16s-22,3.11-23.58,0Z"/><path class="cls-2" d="M.48,65C-4.19,55.6,26.48,0,36,0S76.15,55.71,71.53,65,5.16,74.39.48,65m12.26-8.15c3.06,6.15,43.52,6.08,46.55,0S42.25,14.26,36,14.26,9.67,50.69,12.74,56.85Z"/></g></g></svg>
@@ -227,7 +227,7 @@ onMounted(() => {
 }
 
 #jellyfin-view .header .action.none-about {
-    margin-top: 6px;
+    margin-top: 15px;
 }
 
 #jellyfin-view .center .list-title {

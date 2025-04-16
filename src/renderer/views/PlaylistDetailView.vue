@@ -28,7 +28,7 @@ const { searchDefault, } = inject('appCommon')
 
 const { getVendor, isLocalMusic, isWebDav, isNavidrome, isCloudStorage } = usePlatformStore()
 const { addTracks } = usePlayStore()
-const { routerCtxCacheItem, } = storeToRefs(useAppCommonStore())
+const { routerCtxCacheItem, isMiniNavBarMode, } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,  } = useAppCommonStore()
 const { isSearchForOnlinePlaylistShow, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
@@ -281,6 +281,7 @@ watch(() => props.id, () => {
 }, { immediate: true })
 
 watch(isLoading, () => nextTick(detectTitleHeight))
+watch(isMiniNavBarMode, () => nextTick(detectTitleHeight))
 
 const eventsRegistration = {
     'refresh-favorite': checkFavorite,

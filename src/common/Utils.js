@@ -142,6 +142,9 @@ export const useTrayAction = () => {
     return tryCallDefault(() => (electronAPI.TrayAction))
 }
 
+export const createMpv = (options, mpvArgs) => {
+    return tryCallDefault(() => (electronAPI.createMpv(options, mpvArgs)))
+}
 
 
 /************ 字符串 ************/

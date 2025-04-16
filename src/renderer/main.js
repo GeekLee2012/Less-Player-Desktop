@@ -10,7 +10,7 @@ import { router } from './route/router';
 import VueLazyLoad from 'vue3-lazyload';
 //import lazyPlugin from 'vue3-lazy';
 //播放器
-import { createAudioPlayer } from '../common/Player';
+import { createAudioPlayer } from '../common/PlayerNew';
 import { createRadioPlayer } from '../common/RadioPlayer';
 import { createVideoPlayer } from '../common/VideoPlayer';
 

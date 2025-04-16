@@ -21,7 +21,7 @@ const { visitEmbySessionCreate, visitEmbySessionEdit, visitEmbySessionDetail } =
 const { showConfirm } = inject('apiExpose')
 
 const { showToast, showFailToast, hideAllCtxMenus, } = useAppCommonStore()
-const { } = storeToRefs(useSettingStore())
+const { isCloudStorageViewTipsShow } = storeToRefs(useSettingStore())
 const { embySessions } = storeToRefs(useCloudStorageStore())
 const { removeEmbySession, removeAllEmbySession } = useCloudStorageStore()
 
@@ -102,11 +102,11 @@ onMounted(() => {
             <div class="title">
                 <span>Emby</span>
             </div>
-            <div class="about">
+            <div class="about" v-show="isCloudStorageViewTipsShow">
                 <p>提示：实验性功能；当前使用Emby API版本为v{{ Emby.VERSION }}</p>
                 <p>目前仅提供播放相关功能；若需进行数据管理，请使用Emby官方客户端</p>
             </div>
-            <div class="action" :class="{ 'none-about': false }">
+            <div class="action" :class="{ 'none-about': !isCloudStorageViewTipsShow }">
                 <SvgTextButton text="新建会话" :leftAction="visitEmbySessionCreate">
                     <template #left-img>
                         <svg width="14" height="14"
@@ -193,7 +193,7 @@ onMounted(() => {
                 </div>
             </div>
             <div v-for="(item, index) in tutorialList" 
-                v-show="embySessions.length < 1"
+                v-show="isCloudStorageViewTipsShow && embySessions.length < 1"
                 class="session-item">
                 <div class="icon-wrap">
                     <svg width="28" height="28" viewBox="0 0 367.8 368.13" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M198.12,368.13a70.39,70.39,0,0,1-6-4.66q-15.42-15.11-30.7-30.35c-4.37-4.32-8.77-8.6-13.07-13-4-4.11-8-8.26-11.92-12.5-4.74-5.17-9.14-10.69-14.14-15.59a47.82,47.82,0,0,0-10.53-7.33c-.92-.51-3.47.74-4.53,1.87-10.09,10.83-11.93,10.64-21.34-1-4.06-5-9-9.3-13.55-13.89-9.11-9.17-18.2-18.37-27.4-27.46-4.72-4.67-9.71-9.05-14.46-13.69-6.7-6.55-13.29-13.22-19.92-19.84-3-3-6-6.1-9.12-9.06-2.34-2.24-1.49-4,.52-5.83,3.47-3.24,6.79-6.65,10.22-9.94,8.71-8.37,17.57-16.58,26.12-25.11,7-7,13.57-14.52,20.58-21.55,3.49-3.49,7.71-6.23,11.3-9.63,4.68-4.44,9.21-9.07,13.47-13.92,1-1.13,1.52-4.13.76-5.11A106.8,106.8,0,0,0,74.06,99.32c-2.43-2.36-2.69-4-.15-6.58q45.53-45.33,90.85-90.86c2.72-2.74,4.43-2.32,6.92.2,17.95,18.11,36.11,36,54,54.21,5.2,5.3,9.54,11.44,14.44,17.05,3.25,3.72,6.87,7.1,10.18,10.76,3.59,4,7.86,3.22,12.08-2a40.56,40.56,0,0,1,7.21-7.25,5.22,5.22,0,0,1,5,.39c10.29,10.15,20.29,20.59,30.48,30.84,6.22,6.25,12.71,12.22,19,18.43,13.71,13.63,27.25,27.42,41.09,40.93,3.34,3.26,3.73,5.25.18,8.75-26,25.68-51.74,51.56-77.57,77.37a24.84,24.84,0,0,1-2.19,2c-4.85,3.82-4.64,5.85.78,9.19a22.81,22.81,0,0,1,4.67,3.66c4,4.27,3.65,5.7-.5,9.9-4.64,4.7-8.79,9.88-13.45,14.55-3.37,3.38-7.49,6-10.82,9.43C259,307.79,252.2,315.62,245,323c-3.68,3.77-8.1,6.81-11.9,10.47-9.51,9.14-18.88,18.43-28.27,27.69C202.68,363.26,200.69,365.45,198.12,368.13Zm-61-117c.78,6.22,2.34,7.5,7.78,4.69,9.73-5,19.28-10.43,28.82-15.83,7.21-4.08,14.22-8.53,21.45-12.59,6.84-3.84,14-7.17,20.76-11.14,5.59-3.27,10.65-7.46,16.25-10.72,10-5.79,20.17-11.11,30.15-16.84,1.68-1,2.76-2.94,4.12-4.45-1.48-.85-2.95-1.71-4.43-2.55-.71-.41-1.47-.74-2.16-1.19-6.08-4-12-8.13-18.27-11.81-4.07-2.41-8.69-3.89-12.84-6.18-3-1.66-5.52-4.21-8.5-5.93-6.26-3.63-12.75-6.85-19-10.44-10.88-6.23-21.62-12.7-32.5-18.92-7.77-4.45-15.71-8.61-23.52-13-5.54-3.12-7.73-2-8.06,4.56-.08,1.66,0,3.33,0,5Z"/></g></g></svg>
@@ -247,7 +247,7 @@ onMounted(() => {
 }
 
 #emby-view .header .action.none-about {
-    margin-top: 6px;
+    margin-top: 15px;
 }
 
 #emby-view .center .list-title {

@@ -700,8 +700,8 @@ onMounted(visitRoot)
 }
 
 #webdav-session-detail-view .center .content.list-view  .item .icon {
-    width: 50px;
-    max-width: 50px;
+    width: 40px;
+    max-width: 40px;
     flex: 1;
     padding-left: 10px;
 }

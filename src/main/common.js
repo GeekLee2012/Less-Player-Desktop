@@ -93,11 +93,28 @@ function getSimpleFileName(fullname, defaultName) {
     return from >= to ? fullname : fullname.substring(from, to)
 }
 
+
+function getParentPath(filename) {
+    if (!filename) return filename
+    filename = transformPath(filename)
+    const index = filename.lastIndexOf('/')
+    return index > 1 ? filename.substring(0, index) : filename
+}
+
 function getFileExtName(fullname) {
     if (!fullname) return ''
     fullname = transformPath(fullname)
     const from = fullname.lastIndexOf('.')
     return fullname.substring(from + 1)
+}
+
+function resolveParentPath(referentFile, targetFile) {
+    const parent = getParentPath(referentFile)
+    targetFile = transformPath(targetFile)
+    if(targetFile && targetFile.indexOf('/') < 0) {
+        return `${parent}/${targetFile}`
+    }
+    return targetFile
 }
 
 function isSuppotedAudioType(file) {
@@ -615,6 +632,7 @@ const parsePlsFile = async (filename, audioExts) => {
             }
             //TODO 暂时先简单处理，不校验序号是否匹配
             if (file != null && isExtentionValid(file, audioExts)) {
+                file = resolveParentPath(filename, file)
                 //从文件本身去解析 Metadata，pls自带信息不完整
                 const track = await createTrackFromMetadata(file)
                 if (track) {
@@ -671,6 +689,7 @@ const parseM3uPlaylist = async (filename, audioExts) => {
             if (line.startsWith('#')) continue
             file = line
             if (file != null && isExtentionValid(file, audioExts)) {
+                file = resolveParentPath(filename, file)
                 //从文件本身去解析 Metadata，pls自带信息不完整
                 const track = await createTrackFromMetadata(file)
                 if (track) {

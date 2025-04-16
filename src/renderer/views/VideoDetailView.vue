@@ -16,6 +16,7 @@ const props = defineProps({
 })
 
 const { getVendor } = usePlatformStore()
+const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 const { routerCtxCacheItem  } = storeToRefs( useAppCommonStore())
 const { showToast, hideAllCtxMenus,  } = useAppCommonStore()
 const { resetQueue, addVideo, playNextVideo, playVideoByIndex } = useVideoPlayStore()
@@ -186,6 +187,7 @@ watch(() => props.id, () => {
 }, { immediate: true })
 
 watch(isLoading, () => nextTick(detectTitleHeight))
+watch(isMiniNavBarMode, () => nextTick(detectTitleHeight))
 
 
 const eventsRegistration = {

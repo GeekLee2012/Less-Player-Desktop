@@ -6,16 +6,13 @@ import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
-import { useLocalMusicStore } from '../store/localMusicStore';
-import { isWinOS, useGitRepository, toTrimString, toLowerCaseTrimString,
-    ipcRendererSend, ipcRendererInvoke, onIpcRendererEvent,
-    isMacOS,
+import { isWinOS, useGitRepository, toTrimString,
+    toLowerCaseTrimString, ipcRendererSend, ipcRendererInvoke, 
+    onIpcRendererEvent, isMacOS, transformPath,
 } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
 import ColorInputControl from '../components/ColorInputControl.vue';
-import packageCfg from '../../../package.json';
-import { getDoc } from '../../common/HttpClient';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -40,7 +37,8 @@ const { theme, layout, common, track, desktopLyric,
     isShowDialogBeforeResetSetting, isCheckPreReleaseVersion,
     isUseCardStyleImageTextTile, isSettingViewTipsShow, 
     isToggleCtlTitleActionEnable, isShowDialogBeforeSuspiciousZoom, 
-    isShowDialogBeforeClearRecents,
+    isShowDialogBeforeClearRecents, isStoreRecentPlay,
+    isAutoClearRecentPlayEnable, autoClearRecentTypes,
 } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setLayoutIndex,
@@ -59,6 +57,7 @@ const { setThemeIndex,
     setTrackQualityIndex,
     toggleVipTransfer,
     toggleVipFlagShow,
+    toggleSongItemIndexShow,
     toggleCategoryBarRandom,
     togglePlaylistCategoryBarFlowBtnShow,
     togglePlayCountShow,
@@ -72,6 +71,9 @@ const { setThemeIndex,
     toggleStorePlayState,
     toggleStoreLocalMusic,
     toggleStoreRecentPlay,
+    toggleAutoClearRecentPlay,
+    setLiveTimeForRecentPlay,
+    setAutoClearRecentTypes,
     toggleTrayShow,
     toggleTrayShowOnMinimized,
     toggleTrayNativeIcon,
@@ -162,6 +164,8 @@ const { setThemeIndex,
     toggleFreeFMViewRadiosTipsShow,
     togglePlaybackQueueViewTipsShow,
     togglePluginsViewTipsShow,
+    toggleCloudStorageViewTipsShow,
+    setMpvBinaryPath,
 } = useSettingStore()
 
 const { showToast, showImportantToast, 
@@ -265,6 +269,10 @@ const updateLimitPerPageForLocalPlaylist = (event) => {
     setLimitPerPageForLocalPlaylist(event.target.value)
 }
 
+const updateLiveTimeForRecentPlay = (event) => {
+    setLiveTimeForRecentPlay(event.target.value)
+}
+
 const updateDesktopLyricFontSize = (event) => {
     setDesktopLyricFontSize(event.target.value)
 }
@@ -329,6 +337,11 @@ const clearRecents = async () => {
     showToast("最近播放已清空")
 }
 
+const updateAutoClearRecentTypes = (index) => {
+    const types = autoClearRecentTypes.value  
+    setAutoClearRecentTypes(index, !types[index])
+}
+
 const sessionCacheSize = ref(0)
 const sessionCacheSizeText = computed(() => {
     const cacheSize = sessionCacheSize.value
@@ -352,9 +365,16 @@ const clearSessionCache = async () => {
     showToast('资源缓存已清理')
 }
 
-const selectDir = async () => {
+const selectDndDir = async () => {
     const result = await ipcRendererInvoke('choose-dirs')
     result && setDndSavePath(result[0])
+}
+
+const selectMpvFile = async () => {
+    const result = await ipcRendererInvoke('choose-files', { title: '请选择mpv binary文件', single: true })
+    if (!result) return
+    const { filePaths } = result
+    setMpvBinaryPath(transformPath(filePaths[0]))
 }
 
 const changeAudioOutputDevices = (event) => {
@@ -745,9 +765,14 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="togglePlaybackQueueViewTipsShow" :value="common.playbackQueueViewTipsShow">
                         </ToggleControl>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">插件管理提示：</span>
                         <ToggleControl @click="togglePluginsViewTipsShow" :value="common.pluginsViewTipsShow">
+                        </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">网络存储提示：</span>
+                        <ToggleControl @click="toggleCloudStorageViewTipsShow" :value="common.cloudStorageViewTipsShow">
                         </ToggleControl>
                     </div>
                 </div>
@@ -779,6 +804,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="cate-subtitle">歌曲显示VIP标识：</span>
                         <ToggleControl @click="toggleVipFlagShow" :value="track.vipFlagShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">歌曲显示序号：</span>
+                        <ToggleControl @click="toggleSongItemIndexShow" :value="track.songItemIndexShow">
                         </ToggleControl>
                     </div>
                     <div>
@@ -903,7 +933,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">拖拽保存位置：</span>
                         <div class="dir-input-ctl">
                             <input class="text-input-ctl" v-model="track.dndSavePath" placeholder="默认为用户目录下的Downloads" />
-                            <div class="select-btn" @click="selectDir">选择</div>
+                            <div class="select-btn" @click="selectDndDir">选择</div>
                         </div>
                     </div>
                     <div class="tip-text">提示：每次打开设置页时，自动检测屏幕刷新率，不可修改；正常值为正整数，仅供参考
@@ -923,11 +953,22 @@ onUnmounted(() => offEvents(eventsRegistration))
                             max="1024" step="1" @input="" @keydown.enter="updateStateRefreshFrequency"
                             @focusout="updateStateRefreshFrequency" />
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">歌曲频谱更新频度：</span>
                         <input type="number" :value="track.spectrumRefreshFrequency" placeholder="1-256，默认3" min="1"
                             max="256" step="1" @input="" @keydown.enter="updateSpectrumRefreshFrequency"
                             @focusout="updateSpectrumRefreshFrequency" />
+                    </div>
+                    <div class="tip-text">提示：当前应用支持启用mpv播放音频，需配置mpv binary文件所在位置<br>
+                        macOS和Linux上文件全称（含扩展名）一般为mpv，Windows则为mpv.exe<br>
+                        目前mpv仅用于兜底播放，即音频播放失败时才启用mpv，暂不支持音效、频谱等
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">mpv binary文件位置：</span>
+                        <div class="dir-input-ctl">
+                            <input class="text-input-ctl" v-model="track.mpvBinaryPath" placeholder="mpv binary文件位置" />
+                            <div class="select-btn" @click="selectMpvFile">选择</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1142,6 +1183,26 @@ onUnmounted(() => offEvents(eventsRegistration))
                                 </template>
                             </SvgTextButton>
                         </div>
+                    </div>
+                    <div v-show="isStoreRecentPlay">
+                        <span class="cate-subtitle">自动清理最近播放：</span>
+                        <ToggleControl @click="toggleAutoClearRecentPlay" :value="cache.autoClearRecentPlay">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：开启后，每次应用启动时自动检查和清理</div>
+                    </div>
+                    <div v-show="isStoreRecentPlay && isAutoClearRecentPlayEnable">
+                        <span class="cate-subtitle">自动清理N天前记录：</span>
+                        <input type="number" :value="cache.liveTimeForRecentPlay" placeholder="单位为天，1-366，默认为10" min="1"
+                            max="366" step="1" @keydown.enter="updateLiveTimeForRecentPlay"
+                            @focusout="updateLiveTimeForRecentPlay" />
+                    </div>
+                    <div v-show="isStoreRecentPlay && isAutoClearRecentPlayEnable">
+                        <span class="cate-subtitle">自动清理记录类型：</span>
+                        <span v-for="(item, index) in ['歌曲', '歌单', '专辑', 'FM电台']" class="quality-item"
+                            :class="{ active: autoClearRecentTypes[index], 'first-item': index == 0 }"
+                            @click="updateAutoClearRecentTypes(index)">
+                            {{ item }}
+                        </span>
                     </div>
                     <div class="last">
                         <span class="cate-subtitle">资源缓存占用约为：</span>
@@ -1824,6 +1885,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-right: 25px;
 }
 
+#setting-view .track .content > div.last .cate-subtitle {
+    min-width: var(--content-setting-cate-subtitle-width);
+}
+
 
 #setting-view .max-content-mr-20 .cate-subtitle {
     max-width: max-content;
@@ -1966,7 +2031,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 #setting-view .layout .content .active,
 #setting-view .common .content .active,
 #setting-view .track .content .active,
-#setting-view .desktopLyric .content .active {
+#setting-view .desktopLyric .content .active,
+#setting-view .cache .content .active {
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
     /*border: 1px solid var(--border-color);*/
@@ -1975,6 +2041,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .contrast-mode #setting-view .layout .content .active,
 .contrast-mode #setting-view .common .content .active,
 .contrast-mode #setting-view .track .content .active,
+.contrast-mode #setting-view .cache .content .active,
 .contrast-mode #setting-view .desktopLyric .content .active,
 .contrast-mode #setting-view .dir-input-ctl .select-btn {
     font-weight: bold;
@@ -2110,6 +2177,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #setting-view .common input[type='number'],
 #setting-view .track input[type='number'],
 #setting-view .desktopLyric input[type='number'],
+#setting-view .cache input[type='number'],
 #setting-view .network input {
     border-radius: var(--border-inputs-border-radius);
     padding: 8px;
@@ -2122,7 +2190,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view .track input[type='number'],
-#setting-view .desktopLyric input[type='number'] {
+#setting-view .desktopLyric input[type='number'],
+#setting-view .cache input[type='number'] {
     margin-left: 0px;
 }
 
@@ -2247,20 +2316,22 @@ onUnmounted(() => offEvents(eventsRegistration))
 #setting-view .center .dir-input-ctl {
     display: flex;
     align-items: center;
-    width: 100%;
+    width: calc(50% + 18px);
+    justify-content: flex-end;
 }
 
 #setting-view .center .dir-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
-    width: 50% !important;
+    flex: 1;
+    height: 20px;
 }
 
 #setting-view .center .dir-input-ctl .select-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
-    height: 37.39px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;

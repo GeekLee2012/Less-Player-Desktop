@@ -20,10 +20,10 @@ const { showConfirm } = inject('apiExpose')
 
 
 const { ignoreErrorPlugins, isReplaceMode, plugins } = storeToRefs(usePluginStore())
-const { toggleIgnoreErrorPlugins, toggleReplaceMode ,addPlugin, updatePlugin, removePlugin } = usePluginStore()
+const { toggleIgnoreErrorPlugins, toggleReplaceMode, addPlugin, 
+    updatePlugin, removePlugin } = usePluginStore()
 const { showToast, showFailToast } = useAppCommonStore()
-const { isSearchForPluginsViewShow, 
-    isShowDialogBeforeDeletePlugins, 
+const { isSearchForPluginsViewShow, isShowDialogBeforeDeletePlugins, 
     isPluginsViewTipsShow, } = storeToRefs(useSettingStore())
 
 
@@ -461,7 +461,7 @@ onActivated(() => {
                     </SearchBarExclusiveModeControl>
                 </div>
             </div>
-            <div class="tip-text">提示：实验性功能；开发测试阶段，功能性、稳定性等方面皆一般<br>
+            <div class="tip-text" v-show="isPluginsViewTipsShow">提示：实验性功能；开发测试阶段，功能性、稳定性等方面皆一般<br>
                 <b>郑重声明：当前应用并未提供安全性检查和保障，概不承担任何插件使用时引发的一切不良后果<br>
                     插件有风险，使用需谨慎！建议尽量不要使用任何来源不明的插件</b>
             </div>

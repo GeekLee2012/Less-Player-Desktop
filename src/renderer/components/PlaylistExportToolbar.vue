@@ -269,13 +269,15 @@ watch(playlistExportContextItem, (nv, ov) => {
 .playlist-export-toolbar .center .dir-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
+    flex: 1;
+    height: 20px;
 }
 
 .playlist-export-toolbar .center .dir-input-ctl .select-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
-    height: 37.39px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -291,9 +293,7 @@ watch(playlistExportContextItem, (nv, ov) => {
     height: 40px;
 }
 
-/*
-.playlist-export-toolbar .name-input-ctl .text-input-ctl {
-    width: 325px;
+.contrast-mode .playlist-export-toolbar .dir-input-ctl .select-btn {
+    font-weight: bold;
 }
-*/
 </style>

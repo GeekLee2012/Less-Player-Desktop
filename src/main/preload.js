@@ -23,6 +23,7 @@ const { isMacOS, isWinOS, useCustomTrafficLight,
 //const path = require('path')
 //const { createCipheriv, publicEncrypt, constants, randomBytes, createHash } = require('crypto')
 //const zlib = require('zlib')
+const { createMpv } = require('./mpv')
 
 
 window.electronAPI = {
@@ -54,6 +55,7 @@ window.electronAPI = {
   IMAGE_EXTS,
   TrayAction,
   GitRepository,
+  createMpv,
 }
 
 window.addEventListener('DOMContentLoaded', () => {

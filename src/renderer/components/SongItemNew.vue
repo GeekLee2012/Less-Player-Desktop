@@ -36,7 +36,7 @@ const { playing } = storeToRefs(usePlayStore())
 const { addTrack, playTrack, togglePlay, playTrackLater } = usePlayStore()
 const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast } = useAppCommonStore()
-const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable } = storeToRefs(useSettingStore())
+const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable, isSongItemIndexShow } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
 
@@ -170,8 +170,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </g>
             </svg>
         </div>
-        <div v-show="!checkbox" class="sqno">{{ index + 1 }}</div>
-        <div class="cover">
+        <div v-show="!checkbox && isSongItemIndexShow" class="sqno">{{ index + 1 }}</div>
+        <div class="cover" :class="{ 'no-sqno': !isSongItemIndexShow }">
             <img v-lazy="coverDefault(data.cover)" >
         </div>
         <div class="title-wrap spacing">
@@ -324,6 +324,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     align-items: center;
     justify-content: center;
     margin-left: 3px;
+}
+
+.song-item-new .cover.no-sqno {
+    margin-left: 10px;
 }
 
 .song-item-new .cover img {

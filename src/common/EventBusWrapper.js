@@ -83,4 +83,16 @@ function offEvents(registration) {
     return EventBusWrapper.offEvents(registration)
 }
 
-export { onEvents, emitEvents, offEvents }
+class EventWrapper {
+    on(registration) {
+        onEvents(registration)
+        return this
+    }
+
+    notify(events, data) {
+        emitEvents(events, data)
+        return this
+    }
+}
+
+export { onEvents, emitEvents, offEvents, EventWrapper }

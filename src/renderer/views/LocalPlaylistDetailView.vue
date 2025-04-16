@@ -27,6 +27,7 @@ const { showConfirm } = inject('apiExpose')
 
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
+const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 const { showToast, updateCommonCtxItem,
     hideAllCtxMenus, showFailToast, } = useAppCommonStore()
 const { getLocalPlaylist, addToLocalPlaylist, updateLocalPlaylist, 
@@ -291,6 +292,7 @@ watch(() => props.id, () => {
 })
 
 watch(currentPlatformCode, loadContent)
+watch(isMiniNavBarMode, () => nextTick(detectTitleHeight))
 
 const eventsRegistration = {
     'app-resize': detectTitleHeight,

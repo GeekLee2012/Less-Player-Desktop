@@ -47,8 +47,12 @@ const { setActiveTab, updateTabTipText,
     updateAlbumDetailKeys,
 } = useAlbumDetailStore()
 
-const { getVendor, isLocalMusic, isAllSongsTab, isAboutTab, isWebDav, isNavidrome, isCloudStorage } = usePlatformStore()
+const { getVendor, isLocalMusic, isAllSongsTab, 
+    isAboutTab, isWebDav, isNavidrome, 
+    isCloudStorage 
+} = usePlatformStore()
 const { addTracks } = usePlayStore()
+const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { isDndSaveEnable } = storeToRefs(useSettingStore())
 
@@ -249,6 +253,7 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
     reloadAll()
 }, { immediate: true })
 watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
+watch(isMiniNavBarMode, () => nextTick(detectTitleHeight))
 
 //TODO
 const eventsRegistration = {

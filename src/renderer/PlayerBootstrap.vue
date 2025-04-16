@@ -336,17 +336,26 @@ const resetTrackRetry = () => trackRetry = 0
 const increaseTrackRetry = () => ++trackRetry
 
 //播放错误时重试
-const onPlayerErrorRetry = ({ track, currentTime, radio }) => {
-    if (isDevEnv()) console.log({ track, currentTime, radio })
+const onPlayerErrorRetry = ({ track, currentTime, radio, fallback }) => {
+    if (isDevEnv()) console.log({ track, currentTime, radio, fallback, trackRetry })
     if (!track) return
 
     const { platform, duration } = track
-    //本地歌曲，偶尔也会播放失败
-    if (isLocalMusic(platform) || isFreeFM(platform)) {
+    //本地歌曲，偶尔也会播放失败（比如文件被删、格式不支持等）
+    if (isLocalMusic(platform) || isCloudStorage(platform)) {
+        //最后一次尝试：切换为fallbackPlayer来播放
+        if(!fallback) return emitEvents('track-switchToFallback', track)
+        //全部尝试失败
+        return handleUnplayableTrack(track)
+    }
+    if (isFreeFM(platform)) {
         return handleUnplayableTrack(track)
     }
     //尝试继续播放
     if (isTrackOverretry()) { //超出最大重试次数
+        //最后一次尝试：切换为fallbackPlayer来播放
+        if(!fallback) return emitEvents('track-switchToFallback', track)
+        //全部尝试失败
         return handleUnplayableTrack(track)
     } else { //普通歌曲、广播电台
         increaseTrackRetry()
@@ -1481,7 +1490,7 @@ const reloadApp = () => {
 const eventsRegistration = {
     //FM广播
     'radio-play': traceRecentTrack,
-    'radio-state': ({ state, track, currentTime, radio }) => {
+    'radio-state': ({ state, track, currentTime, radio, fallback }) => {
         checkFavoritedState()
         switch (state) {
             case PlayState.INIT:
@@ -1499,7 +1508,7 @@ const eventsRegistration = {
             case PlayState.PLAY_ERROR:
                 setPlaying(false)
                 setLoading(false)
-                onPlayerErrorRetry({ track, currentTime, radio })
+                onPlayerErrorRetry({ track, currentTime, radio, fallback })
                 break
             default:
                 break
@@ -1550,11 +1559,10 @@ const eventsRegistration = {
         traceRecentTrack(track)
         //loadLyric(track)
     },
-    'track-state': ({ state, track, currentTime }) => {
+    'track-state': ({ state, track, currentTime, fallback }) => {
         //播放刚开始时，更新MediaSession
-        if ((playState.value == PlayState.INIT
-            || playState.value == PlayState.LOADED)
-            && state == PlayState.PLAYING) {
+        const prevState = playState.value
+        if ((prevState == PlayState.INIT || prevState == PlayState.LOADED) && state == PlayState.PLAYING) {
             setupCurrentMediaSession(currentTrack.value)
             resetAutoSkip()
         }
@@ -1563,16 +1571,21 @@ const eventsRegistration = {
         switch (state) {
             case PlayState.NONE:
                 resetPlayState(state)
+                setPlaying(false)
                 break
             case PlayState.INIT:
                 resetPlayState(state)
                 checkFavoritedState()
+                setPlaying(false)
                 break
             case PlayState.PLAYING:
                 setPlaying(true)
                 break
             case PlayState.PAUSE:
                 setPlaying(false)
+                break
+            case PlayState.STARTED:
+                //setupCurrentMediaSession(currentTrack.value)
                 break
             case PlayState.END:
                 playNextTrack()
@@ -1581,7 +1594,7 @@ const eventsRegistration = {
             case PlayState.PLAY_ERROR:
                 setPlaying(false)
                 setLoading(false)
-                onPlayerErrorRetry({ track, currentTime })
+                onPlayerErrorRetry({ track, currentTime, fallback })
                 break
             default:
                 break

@@ -151,6 +151,8 @@ export const useSettingStore = defineStore('setting', {
             playbackQueueViewTipsShow: true,
             //插件管理提示
             pluginsViewTipsShow: true,
+            //网络存储提示
+            cloudStorageViewTipsShow: true,
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -252,6 +254,10 @@ export const useSettingStore = defineStore('setting', {
             playingViewLyricHighlightMode: 0,
             //播放页 - 纯净模式
             playingViewFocusMode: false,
+            //歌曲控件序号
+            songItemIndexShow: true,
+            //mpv binary文件路径
+            mpvBinaryPath: null,
         },
         search: {
             //场景化提示
@@ -329,6 +335,13 @@ export const useSettingStore = defineStore('setting', {
             storeLocalMusic: true,
             //记录最近播放
             storeRecentPlay: true,
+            //最近播放 - 自动清理
+            autoClearRecentPlay: false,
+            //最近播放 - 保留时长（单位：天）
+            liveTimeForRecentPlay: 10, 
+            //最近播放 - 清理类型
+            // 歌曲、歌单、专辑、FM电台
+            autoClearRecentTypes: [true, true, true, true],
         },
         /* 菜单栏、Windows平台为系统托盘 */
         tray: {
@@ -893,11 +906,41 @@ export const useSettingStore = defineStore('setting', {
         isPluginsViewTipsShow() {
             return this.common.pluginsViewTipsShow
         },
+        isCloudStorageViewTipsShow() {
+            return this.common.cloudStorageViewTipsShow
+        },
         commonBorderRadius() {
             return this.common.borderRadius
         },
         isFontAutoWeight() {
             return this.common.fontAutoWeight
+        },
+        isSongItemIndexShow() {
+            return this.track.songItemIndexShow
+        },
+        isAutoClearRecentPlayEnable() {
+            return this.cache.autoClearRecentPlay
+        },
+        liveTimeForRecentPlay() {
+            return this.cache.liveTimeForRecentPlay
+        },
+        autoClearRecentTypes() {
+            return this.cache.autoClearRecentTypes
+        },
+        needClearRecentSongs() {
+            return this.autoClearRecentTypes[0]
+        },
+        needClearRecentPlaylists() {
+            return this.autoClearRecentTypes[1]
+        },
+        needClearRecentAlbums() {
+            return this.autoClearRecentTypes[2]
+        },
+        needClearRecentRadios() {
+            return this.autoClearRecentTypes[3]
+        },
+        mpvBinaryPath() {
+            return this.track.mpvBinaryPath
         }
     },
     actions: {
@@ -1674,6 +1717,31 @@ export const useSettingStore = defineStore('setting', {
         togglePluginsViewTipsShow() {
             this.common.pluginsViewTipsShow = !this.common.pluginsViewTipsShow
         },
+        toggleCloudStorageViewTipsShow() {
+            this.common.cloudStorageViewTipsShow = !this.common.cloudStorageViewTipsShow
+        },
+        toggleSongItemIndexShow() {
+            this.track.songItemIndexShow = !this.track.songItemIndexShow
+        },
+        toggleAutoClearRecentPlay() {
+            this.cache.autoClearRecentPlay = !this.cache.autoClearRecentPlay
+        },
+        setLiveTimeForRecentPlay(value) {
+            this.cache.liveTimeForRecentPlay = Math.max(value || 10, 1)
+        },
+        setAutoClearRecentTypes(index, value) {
+            const types = this.cache.autoClearRecentTypes
+            if(!Array.isArray(types)) {
+                this.cache.autoClearRecentTypes = [true, true, true, true]
+            }
+            this.cache.autoClearRecentTypes[index] = value || false
+        },
+        setMpvBinaryPath(value) {
+            this.track.mpvBinaryPath = value
+        },
+        setupMpvBinaryPath() {
+            emitEvents('mpvBinary-setPath', this.track.mpvBinaryPath)
+        }
     },
     persist: {
         enabled: true,
