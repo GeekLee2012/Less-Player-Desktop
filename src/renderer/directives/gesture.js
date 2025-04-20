@@ -5,16 +5,26 @@ import { isSupportedVideo, isSupportedImage } from '../../common/Utils';
 //TODO 似是而非，暂且也归类于此吧
 export const bindDragAndMove = (el, binding) => {
     if(!el || !binding) return
-    const { trigger: triggerSelector } = binding
+    const { trigger: triggerSelector, excludes } = binding
     if(!triggerSelector) return 
 
     const triggerEl = el.querySelector(triggerSelector)
     if (!triggerEl) return
 
     triggerEl.onmousedown = (e1) => {
-        let  { x, y } = e1
-
+        let  { x, y, target } = e1
+        
         document.onmousemove = (e2) => {
+            //事件忽略
+            if(excludes && excludes.length > 0) {
+                for(let i = 0; i < excludes.length; i++) {
+                    const excludeEls = el.querySelectorAll(excludes[i]) || []
+                    for(let j = 0; j < excludeEls.length; j++) {
+                        if(excludeEls[j].contains(target)) return
+                    }
+                }
+            }
+
             const gx = e2.x - x
             const gy = e2.y - y
             x = e2.x

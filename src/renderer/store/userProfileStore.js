@@ -176,8 +176,8 @@ export const useUserProfileStore = defineStore("userProfile", {
             } = track
             */
             const _track = { ...track }
-            const excludeProps = ['lyric', 'lyricTran', 'lyricRoma', 
-                'score', 'isCandidate']
+            const excludeProps = ['lyric', 'lyricTran', 'lyricTrans', 
+                'lyricRoma', 'score', 'isCandidate']
             //TODO
             if(!Playlist.isAnchorRadioType(track)) excludeProps.push('url')
             excludeProps.forEach(prop => Reflect.deleteProperty(_track, prop))
@@ -188,14 +188,24 @@ export const useUserProfileStore = defineStore("userProfile", {
             this.addItem(this.favorites.songs, _track)
             return true
         },
+        //清洗收藏的歌曲
+        cleanFavoriteTracks() {
+            if(this.favorites.songs.length < 1) return 
+            const excludeProps = ['lyric', 'lyricTran', 'lyricTrans', 
+                'lyricRoma', 'score', 'isCandidate']
+            this.favorites.songs.forEach(song => {
+                excludeProps.forEach(prop => Reflect.deleteProperty(song, prop))
+                if(!Playlist.isAnchorRadioType(song)) Reflect.deleteProperty(song, 'url')
+            })            
+        },
         addFavoriteRadio(track) {
             /*
             const { id, platform, title, cover, artist, url,
                 type, pid, songlistId, extra1, extra2, position } = track
             */
             const _track = { ...toRaw(track) }
-            const excludeProps = ['lyric', 'lyricTran', 'lyricRoma', 
-                'payPlay', 'payDownload', 
+            const excludeProps = ['lyric', 'lyricTran', 'lyricTrans', 
+                'lyricRoma', 'payPlay', 'payDownload', 
                 'publishTime', 'score', 'isCandidate']
             excludeProps.forEach(prop => Reflect.deleteProperty(_track, prop))
             this.addItem(this.favorites.radios, _track)

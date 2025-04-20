@@ -28,8 +28,9 @@ import { Video } from '../common/Video';
 
 const startDrag = useStartDrag()
 
-const { currentTrack, queueTracksSize,
-    playingIndex, playing } = storeToRefs(usePlayStore())
+const { currentTrack, queueTracksSize, playingIndex, playing, 
+    currentTime: markedCurrentTime, progress: markedProgress,
+} = storeToRefs(usePlayStore())
 const { playTrack, playNextTrack,
     setAutoPlaying, playPrevTrack,
     togglePlay, switchPlayMode,
@@ -38,13 +39,16 @@ const { playTrack, playNextTrack,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying,
     setAudioOutputDevices, playTrackLater,
-    setLoading, } = usePlayStore()
-const { getVendor, isLocalMusic, isFreeFM, isCloudStorage, isWebDav, isNavidrome, isJellyfin } = usePlatformStore()
+    setLoading, markPlayState } = usePlayStore()
+const { getVendor, isLocalMusic, isFreeFM, 
+    isCloudStorage, isWebDav, isNavidrome, isJellyfin 
+} = usePlatformStore()
 const { playingViewShow, videoPlayingViewShow,
     playingViewThemeIndex, spectrumIndex,
     pendingPlay, pendingPlayPercent,
     exVisualCanvasShow, exVisualCanvasIndex,
-    spectrumParams } = storeToRefs(useAppCommonStore())
+    spectrumParams, trackResourceToolViewShow 
+} = storeToRefs(useAppCommonStore())
 const { togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId,
@@ -52,26 +56,32 @@ const { togglePlaybackQueueView, toggleVideoPlayingView,
     setPendingPlay, setPendingPlayPercent,
     setSpectrumIndex, setSpectrumParams,
     setExVisualCanvasIndex, togglePlayingThemeListView,
-    hideAllCtxMenus } = useAppCommonStore()
+    hideAllCtxMenus, toggleTrackResourceToolView, 
+} = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
-    removeFavoriteRadio, isFavoriteRadio } = useUserProfileStore()
+    removeFavoriteRadio, isFavoriteRadio 
+} = useUserProfileStore()
 const { theme, layout, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
     isResumePlayAfterVideoEnable, isPauseOnPlayingVideoEnable,
     selectedAudioOutputDeviceId, isDndSaveEnable,
     isShowDialogBeforeClearPlaybackQueue, 
-    isUseOnlineCoverEnable, isMiniLayout, } = storeToRefs(useSettingStore())
+    isUseOnlineCoverEnable, isMiniLayout, 
+    isStorePlayProgressStateBeforeQuit,
+} = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray,
     syncSettingFromDesktopLyric, getCurrentTheme,
     setAudioOutputDeviceId, setupAudioOutputDevice,
     getDndSavePath, setDndSavePath,
-    getCurrentThemeContentBgColor, switchToFallbackLayout, } = useSettingStore()
+    getCurrentThemeContentBgColor, switchToFallbackLayout, 
+} = useSettingStore()
 const { addRecentSong, addRecentRadio,
     addRecentPlaylist, addRecentAlbum } = useRecentsStore()
 const { playVideoNow } = useVideoPlayStore()
-const { currentVideo, playingIndex: videoPlayingIndex, currentVideoPlayingItem } = storeToRefs(useVideoPlayStore())
+const { currentVideo, playingIndex: videoPlayingIndex, currentVideoPlayingItem 
+} = storeToRefs(useVideoPlayStore())
 const { setupSoundEffect } = useSoundEffectStore()
 
 
@@ -210,6 +220,27 @@ const notifyLyricLoaded = (track) => {
     if (isCurrentTrack(track)) emitEvents('track-lyricLoaded', track)
 }
 
+//获取当前平台指定歌曲的歌词
+const loadTrackLyric = async (track) => {
+    if (!track) return
+    //已有歌词、主播电台
+    if (Track.hasLyric(track) || Playlist.isAnchorRadioType(track)) return
+
+    //检查有效性
+    const { id, platform } = track
+    const vendor = getVendor(platform)
+    
+    //当前平台不存在
+    if (!vendor || !vendor.lyric) return 
+    
+    try {
+        //当前平台存在时，获取歌词
+        return vendor.lyric(id, track)
+    } catch(error) {
+        if(isDevEnv()) console.log(error)
+    }
+}
+
 
 //处理不可播放歌曲
 const AUTO_PLAY_NEXT_MSG = '当前歌曲无法播放<br>即将为您播放下一曲'
@@ -313,6 +344,27 @@ const bootstrapTrackWithTransfer = async (track) => {
             Object.assign(track, { url, isCandidate })
         }
     })
+}
+
+//获取当前平台的音源url
+const loadTrackUrl = async (track) => {
+    if (!track) return
+    //已有url
+    if (Track.hasUrl(track) || Playlist.isFMRadioType(track)) return
+
+    //检查有效性
+    const { id, platform } = track
+    const vendor = getVendor(platform)
+    
+    //当前平台不存在
+    if (!vendor || !vendor.playDetail) return 
+    
+    try {
+        //当前平台存在时，获取播放详情（如音源url等）
+        return vendor.playDetail(id, track)
+    } catch(error) {
+        if(isDevEnv()) console.log(error)
+    }
 }
 
 //添加到播放列表，并开始播放
@@ -1058,6 +1110,16 @@ const restoreTrack = (callback) => {
                 togglePlay()
                 setPendingPlay(false)
             }
+        } else if(isStorePlayProgressStateBeforeQuit.value 
+            && Track.hasUrl(track)) {
+            const currentTime = markedCurrentTime.value
+            const progress = markedProgress.value
+            if(progress <= 0) return 
+            markTrackSeekPending(progress)
+            
+            mmssCurrentTime.value = toMmss(currentTime)
+            currentTimeState.value = parseInt(currentTime / 1000)
+            progressState.value = progress
         }
         tryCall(callback, track)
     }
@@ -1367,6 +1429,7 @@ onIpcRendererEvents({
     'globalShortcut-togglePlayingThemes': () => {
         if (playingViewShow.value) togglePlayingThemeListView()
     },
+    'globalShortcut-toggleTrackResourceToolView': () => toggleTrackResourceToolView(),
 
     //其他事件
     'app-desktopLyric-showSate': (event, isShow) => {
@@ -1692,6 +1755,14 @@ const eventsRegistration = {
     'userProfile-reset': checkFavoritedState,
     'track-refreshFavoritedState': checkFavoritedState,
     'setting-syncToDesktopLyric': data => postMessageToDesktopLryic('s-setting-sync', data),
+    'app-beforeQuit': () => {
+        let currentTime = 0, progress = 0
+        if(isStorePlayProgressStateBeforeQuit.value) {
+            currentTime = (currentTimeState.value || 0) * 1000
+            progress = progressState.value || 0
+        }
+        markPlayState(currentTime, progress)
+    },
 }
 
 onMounted(() => {
@@ -1734,9 +1805,8 @@ watch(theme, () => {
     postMessageToDesktopLryic('s-theme-apply', getCurrentTheme())
 }, { deep: true })
 
-//TODO
 watch(playingIndex, (nv, ov) => resetTrackRetry())
-
+watch(trackResourceToolViewShow, (nv, ov) => nv && hideAllCtxMenus())
 
 //播放器API
 provide('player', {
@@ -1750,6 +1820,9 @@ provide('player', {
     playVideo,
     addAndPlayTracks,
     loadLyric,
+    notifyLyricLoaded,
+    loadTrackLyric,
+    loadTrackUrl,
     mmssCurrentTime,
     mmssDurationLeft,
     currentTimeState,

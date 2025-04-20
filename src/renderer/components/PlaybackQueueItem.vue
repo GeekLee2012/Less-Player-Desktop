@@ -8,7 +8,7 @@ import { usePlatformStore } from '../store/platformStore';
 import ArtistControl from './ArtistControl.vue';
 import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
-import { coverDefault, toTrimString } from '../../common/Utils';
+import { coverDefault, toTrimString, escapeHtml } from '../../common/Utils';
 
 
 
@@ -18,7 +18,7 @@ const { showContextMenu, } = inject('appCommon')
 
 const { queueTracksSize, playing } = storeToRefs(usePlayStore())
 const { playTrack, removeTrack, isCurrentTrack, togglePlay } = usePlayStore()
-const { commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
+const { commonCtxMenuCacheItem, workingTrackForResourceToolView } = storeToRefs(useAppCommonStore())
 const { showToast, setRouterCtxCacheItem } = useAppCommonStore()
 const { isHighlightCtxMenuItemEnable, isPlaybackQueueMvBtnShow, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
@@ -107,12 +107,14 @@ const playingState = computed(() => {
     <div class="playback-queue-item"
         :class="{ 
             'playback-queue-item-active': active, 
-            'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable && (commonCtxMenuCacheItem == data),
-            actionable,
+            'list-item-ctx-menu-trigger': isHighlightCtxMenuItemEnable 
+                && (commonCtxMenuCacheItem == data 
+                    || workingTrackForResourceToolView == data),
             'ex-action': isMvBtnShow,
+            actionable,
         }"
         @dblclick="" 
-        @contextmenu="onContextMenu">
+        @contextmenu.stop="onContextMenu">
         <div class="item-wrap">
             <div class="left" :draggable="isDraggable" @dragstart.stop="(event) => dndSaveTrack(event, data)">
                 <img class="cover" v-show="!data.color"
@@ -124,7 +126,7 @@ const playingState = computed(() => {
             </div>
             <div class="right">
                 <div class="data">
-                    <div class="title" :class="{ 'content-text-highlight': active }" v-html="data.title"></div>
+                    <div class="title" :class="{ 'content-text-highlight': active }" v-html="escapeHtml(data.title)"></div>
                     <div class="textflag mvflag" v-show="isMvBtnShow">
                         <span>MV</span>
                     </div>

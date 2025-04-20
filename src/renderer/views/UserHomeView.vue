@@ -348,7 +348,7 @@ onActivated(() => {
             <img :src="`deco_${decoration.current}.png`" 
                 @error="resetDecoration" 
                 @click="nextDecoration"
-                @contextmenu="toggleDecorationAnimated" />
+                @contextmenu.stop="toggleDecorationAnimated" />
         </div>
         <div class="header">
             <div>

@@ -30,7 +30,8 @@ const { playVideoItem, loadLyric, currentTimeState,
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
 const { lyric, lyricTransActived, lyricRomaActived, 
-    isDndSaveEnable, isMiniLayout, isSimpleLayout, } = storeToRefs(useSettingStore())
+    isDndSaveEnable, isMiniLayout, isSimpleLayout, 
+} = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 //const { currentTrack } = storeToRefs(usePlayStore())
 
@@ -174,6 +175,7 @@ const reloadLyricData = (track) => {
     }
     */
     let isExist = Track.hasLyric(track)
+    
     //歌词存在，但需进一步确认是否有效
     if(isExist) {
         const lyricData = Track.lyricData(track)
@@ -407,7 +409,11 @@ onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
 <template>
-    <div class="lyric-ctl" @contextmenu="toggleLyricToolbar">
+    <div class="lyric-ctl" 
+        :class="{
+            'none-aral-meta': lyric.aralMetaLayout == 1
+        }"
+        @contextmenu.stop="toggleLyricToolbar">
         <div class="header" v-show="isHeaderVisible()">
             <div class="audio-title">
                 <span class="mv" v-show="Track.hasMv(track)">
@@ -425,7 +431,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </span>
                 <span v-html="track.title"></span>
             </div>
-            <div class="audio-artist spacing">
+            <div class="audio-artist spacing" v-show="lyric.aralMetaLayout == 0">
                 <b v-show="!Playlist.isFMRadioType(track)">歌手:</b>
                 <b v-show="Playlist.isFMRadioType(track)">平台:</b>
                 <span>
@@ -437,7 +443,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </ArtistControl>
                 </span>
             </div>
-            <div class="audio-album spacing">
+            <div class="audio-album spacing" v-show="lyric.aralMetaLayout == 0">
                 <b v-show="!Playlist.isFMRadioType(track)">专辑:</b>
                 <b v-show="Playlist.isFMRadioType(track)">标签:</b>
                 <span>
@@ -447,6 +453,31 @@ onUnmounted(() => offEvents(eventsRegistration))
                         :data="track.album">
                     </AlbumControl>
                 </span>
+            </div>
+            <div class="audio-artist-album-wrap spacing" v-show="lyric.aralMetaLayout == 2">
+                <div class="audio-artist">
+                    <b v-show="!Playlist.isFMRadioType(track)">歌手:</b>
+                    <b v-show="Playlist.isFMRadioType(track)">平台:</b>
+                    <span>
+                        <ArtistControl class="ar-ctl" 
+                            :visitable="true" 
+                            :platform="track.platform" 
+                            :data="track.artist" 
+                            :trackId="track.id">
+                        </ArtistControl>
+                    </span>
+                </div>
+                <div class="audio-album">
+                    <b v-show="!Playlist.isFMRadioType(track)">专辑:</b>
+                    <b v-show="Playlist.isFMRadioType(track)">标签:</b>
+                    <span>
+                        <AlbumControl class="al-ctl" 
+                            :visitable="true" 
+                            :platform="track.platform" 
+                            :data="track.album">
+                        </AlbumControl>
+                    </span>
+                </div>
             </div>
         </div>
         <div class="center" 
@@ -551,6 +582,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-break: anywhere;
 }
 
+.lyric-ctl.none-aral-meta .audio-title {
+    margin-bottom: 25px;
+}
+
 .lyric-ctl .audio-artist,
 .lyric-ctl .audio-album {
     /*font-size: 18px;*/
@@ -563,6 +598,16 @@ onUnmounted(() => offEvents(eventsRegistration))
 .lyric-ctl .audio-album .al-ctl {
     -webkit-line-clamp: 1;
     line-clamp: 1;
+}
+
+.lyric-ctl .audio-artist-album-wrap {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.lyric-ctl .audio-artist-album-wrap .audio-album {
+    margin-left: 30px;
 }
 
 .lyric-ctl .center {

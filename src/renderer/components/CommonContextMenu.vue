@@ -32,7 +32,10 @@ let currentDataType = -1
 
 const { commonCtxItem, commonCtxMenuCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast, setCommonCtxMenuData, showFailToast,
-    hideAllCtxMenus, setRouterCtxCacheItem, } = useAppCommonStore()
+    hideAllCtxMenus, setRouterCtxCacheItem, hideTrackResourceToolView, 
+    toggleTrackResourceToolView, setWorkingTrackForResourceToolView,
+    setTrackResourceToolViewPreviewMode,
+} = useAppCommonStore()
 const { playTrackLater, addTrack, removeTrack, addTracks, playTrack } = usePlayStore()
 const { addFavoriteTrack, removeFavoriteSong, addFavoriteRadio,
     removeCustomPlaylist, removeFromCustomPlaylist,
@@ -43,7 +46,9 @@ const { addToLocalPlaylist, moveToLocalPlaylist, removeFromLocalPlaylist } = use
 const { localPlaylists } = storeToRefs(useLocalMusicStore())
 const { removeRecentSong, } = useRecentsStore()
 const { isLocalMusic, isWebDav, isNavidrome } = usePlatformStore()
-const { isShowDialogBeforeDeleteCustomPlaylist, isMiniLayout } = storeToRefs(useSettingStore())
+const { isShowDialogBeforeDeleteCustomPlaylist, isSimpleLayout, isMiniLayout, } = storeToRefs(useSettingStore())
+const { switchToFallbackLayout } = useSettingStore()
+
 
 
 const toastAndHideMenu = (text, failed) => {
@@ -249,6 +254,17 @@ const visitPlaylistCreate = () => {
     isLocalMusicType(currentDataType) ? visitLocalPlaylistCreate() : visitCustomPlaylistCreate()
 }
 
+const searchTrackResource = () => {
+    if (isSimpleLayout.value || isMiniLayout.value) switchToFallbackLayout()
+
+    hideAllCtxMenus(false)
+    hideTrackResourceToolView()
+    setWorkingTrackForResourceToolView(commonCtxMenuCacheItem.value)
+    setTrackResourceToolViewPreviewMode(false)
+    toggleTrackResourceToolView()
+}
+
+
 const MenuItems = {
     sp: {
         separator: true
@@ -383,6 +399,11 @@ const MenuItems = {
         icon: '<svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><path d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z" transform="translate(-833 -413)"/><path d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z" transform="translate(-833 -413)"/><path d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z" transform="translate(-833 -413)"/><path d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z" transform="translate(-833 -413)"/></svg>',
         action: removePlaylistFromFavorite,
     },
+    searchTrackResource: {
+        name: '搜索歌曲资源',
+        icon: '<svg width="16" height="16" viewBox="0 0 726.24 726.5" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M456.25,529.61C384.86,577,307.37,592.47,224,573.24,153.93,557.08,97.62,519,55.17,460.86-28.43,346.44-15.75,186.09,84.6,85.69c101.34-101.4,261-114.38,376.23-30.54,41.42,30.13,73,68.4,94.17,115.09,21.07,46.46,29.25,95.18,24.9,146-4.37,51-21.59,97.46-51.33,141.2,1.68,1.06,3.67,1.85,5,3.23Q622,549.41,710.24,638.25c14.25,14.32,19.28,31.43,13.88,50.84-10.61,38.09-57.48,50-86,22-23.29-22.9-46.23-46.15-69.33-69.24L459.56,532.66C458.52,531.62,457.4,530.67,456.25,529.61Zm56.64-238.83C513,168.29,413.34,68.68,290.67,68.67a221.82,221.82,0,0,0-222,222.1c0,122.25,99.47,221.82,221.82,222.16C412.61,513.26,512.77,413.22,512.89,290.78Z" /></g></g></svg>',
+        action: searchTrackResource,
+    }
 }
 
 const doInit = (data) => {
@@ -482,7 +503,7 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
         case 1: //本地歌曲 - 歌单页 - 歌曲列表
             const addToQueueMenuItem = Object.assign({}, { ...MenuItems.addToQueue })
             addToQueueMenuItem.name = "添加到当前播放"
-            data = [MenuItems.play, addToQueueMenuItem, MenuItems.playLater,
+            data = [MenuItems.play, addToQueueMenuItem, MenuItems.playLater, MenuItems.searchTrackResource,
             MenuItems.sp, MenuItems.addToList, MenuItems.moveToList,
             MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack, MenuItems.showInFolder,
             MenuItems.sp, MenuItems.removeFromLocal]
@@ -497,7 +518,7 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
             MenuItems.batchCustom, MenuItems.removeCustom]
             break;
         case 4: //创建的歌单 - 歌曲列表
-            data = [MenuItems.play, MenuItems.playLater,
+            data = [MenuItems.play, MenuItems.playLater, MenuItems.searchTrackResource,
             MenuItems.sp, MenuItems.addToList, MenuItems.moveToList, MenuItems.addFavorite,
             MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
             MenuItems.sp, MenuItems.removeFromCustom]
@@ -515,11 +536,11 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
             break;
         case 9: //当前播放列表
             if(isMiniLayout.value) {
-                data = [MenuItems.play, MenuItems.playLater,
+                data = [MenuItems.play, MenuItems.playLater, MenuItems.searchTrackResource,
                     MenuItems.sp, MenuItems.visitAlbum, MenuItems.visitTrack, 
                     MenuItems.sp, MenuItems.removeFromQueue,]
             } else {
-                data = [MenuItems.play, MenuItems.playLater,
+                data = [MenuItems.play, MenuItems.playLater, MenuItems.searchTrackResource,
                     MenuItems.sp, MenuItems.addToListNoQueue(), MenuItems.addAllToListNoQueue(), MenuItems.addFavorite, /*MenuItems.share,*/
                     MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum,
                     MenuItems.sp, MenuItems.visitTrack, MenuItems.removeFromQueue,]
@@ -529,7 +550,7 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
             data = initBatchActionPopupMenuData(dataType, actionType == 1)
             break;
         case 11: //本地歌曲 - 歌手页、专辑页 - 歌曲列表
-            data = [MenuItems.play, MenuItems.playLater,
+            data = [MenuItems.play, MenuItems.playLater, MenuItems.searchTrackResource,
             /*MenuItems.sp, MenuItems.addToList, MenuItems.addFavorite,*/
             MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack, MenuItems.showInFolder,
             MenuItems.sp, MenuItems.removeFromLocal,]
@@ -577,8 +598,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-radius: 8px;
     border: 1px solid var(--border-color);*/
     box-shadow: 0px 0px 6px var(--border-popovers-border-color);
-    max-height: 404px;
-    max-height: 460px;
+    max-height: 505px;
 }
 
 .common-ctx-menu .container {

@@ -28,6 +28,7 @@ const props = defineProps({
     limit: Number,
     maxPage: Number,
     draggable: Boolean,
+    resourceMode: Boolean,
     //itemDisplayMode: Number,
 })
 
@@ -136,6 +137,7 @@ watch(getSongItemStyleIndex, (nv, ov) => {
                     :index="(currentOffset + index)" 
                     :data="item"
                     :draggable="draggable"
+                    :resourceMode="resourceMode"
                     :artistVisitable="artistVisitable"
                     :albumVisitable="albumVisitable" 
                     :dataType="dataType" 

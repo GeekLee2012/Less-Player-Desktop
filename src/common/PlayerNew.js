@@ -57,7 +57,11 @@ class HowlerPlayer extends EventWrapper {
         this.pendingOutputDeviceId = null
     }
 
-    createInstance() {
+    setSeekPendingMark(value) {
+        this.seekPendingMark = value
+    }
+
+    createSound() {
         if (!isTrackAvailable(this.currentTrack)) return this.stop()
         
         const self = this
@@ -73,7 +77,7 @@ class HowlerPlayer extends EventWrapper {
                 if (self.seekPendingMark) { 
                     self.animationFrameCnt = 0
                     self.seek(self.seekPendingMark)
-                    self.seekPendingMark = 0
+                    self.setSeekPendingMark(0)
                     return 
                 }
                 //正常情况
@@ -114,26 +118,26 @@ class HowlerPlayer extends EventWrapper {
         return this.sound
     }
 
-    getInstance() {
+    getSound() {
         return isTrackAvailable(this.currentTrack) && this.sound
     }
 
     //播放
     play() {
-        const sound = this.getInstance()
+        const sound = this.getSound()
         if (!sound) return
         sound.play()
     }
 
     //暂停
     pause() {
-        const sound = this.getInstance()
+        const sound = this.getSound()
         if (!sound) return
         sound.pause()
     }
 
     togglePlay() {
-        const sound = this.getInstance()
+        const sound = this.getSound()
         if (!sound) return
         sound.playing() ? sound.pause() : sound.play()
     }
@@ -141,7 +145,7 @@ class HowlerPlayer extends EventWrapper {
     //停止
     stop() {
         try {
-            const sound = this.getInstance()
+            const sound = this.getSound()
             //释放资源
             if (sound) { 
                 sound.stop()
@@ -164,7 +168,7 @@ class HowlerPlayer extends EventWrapper {
     }
 
     seek(percent) {
-        const sound = this.getInstance()
+        const sound = this.getSound()
         if (!sound || !sound.playing()) return 
 
         const duration = sound.duration()
@@ -186,7 +190,7 @@ class HowlerPlayer extends EventWrapper {
         this.currentTrack = getRawTrack(track)
         this.currentTime = 0
         this.setState(PlayState.NONE)
-        this.createInstance()
+        this.createSound()
         return this
     }
 
@@ -202,7 +206,7 @@ class HowlerPlayer extends EventWrapper {
     }
 
     _step() {
-        const sound = this.getInstance()
+        const sound = this.getSound()
         if (!sound) return 
         if (!sound.playing() && this.playState != PlayState.PLAYING) {
             this._stopAnimationFrame()
@@ -395,7 +399,7 @@ class HowlerPlayer extends EventWrapper {
                     playing: (self.playState == PlayState.PLAYING)
                 })
             } else if (action == 'c-track-pos') {
-                const sound = self.getInstance()
+                const sound = self.getSound()
                 if (!sound) return
                 self.currentTime = sound.seek() || 0
                 self.postToDesktopLryic('s-track-pos', self.currentTime)
@@ -446,6 +450,7 @@ class MpvPlayer extends EventWrapper {
         this.mpv = null
         this.playState = PlayState.NONE
         this.currentTime = 0
+        this.seekPendingMark = 0 //percent
         this.started = false
         this.retryCreate = 0
 
@@ -464,14 +469,18 @@ class MpvPlayer extends EventWrapper {
 
     setMpvBinaryPath(value) {
         this.mpvBinaryPath = value
-        if(this.getInstance()) {
+        if(this.getMpvInstance()) {
             this.mpv = null
-            this.createInstance()
+            this.createMpvInstance()
         }
         return this
     }
 
-    createInstance() {  
+    setSeekPendingMark(value) {
+        this.seekPendingMark = value
+    }
+
+    createMpvInstance() {  
         if (!isTrackAvailable(this.currentTrack)) return this.stop()
 
         const self = this
@@ -525,7 +534,7 @@ class MpvPlayer extends EventWrapper {
         return this.mpv
     }
 
-    getInstance() {
+    getMpvInstance() {
         if(this.mpv) this.retryCreate = 0
         return this.mpv
     }
@@ -536,29 +545,43 @@ class MpvPlayer extends EventWrapper {
 
     //播放
     play() {
-        const mpv = this.getInstance()
+        const mpv = this.getMpvInstance()
         if(!mpv) return 
-        if(this.isTrackLoadable()) return mpv.load(this.currentTrack.url)
+        if(this.isTrackLoadable()) {
+            mpv.load(this.currentTrack.url)
+            if(this.seekPendingMark > 0) {
+                this.seek(this.seekPendingMark)
+                this.setSeekPendingMark(0)
+            }
+            return 
+        }
         mpv.play()
     }
 
     //暂停
     pause() {
-        const mpv = this.getInstance()
+        const mpv = this.getMpvInstance()
         if(!mpv) return
         mpv.pause()
     }
 
     togglePlay() {
-        const mpv = this.getInstance()
+        const mpv = this.getMpvInstance()
         if(!mpv) return
-        if(this.isTrackLoadable()) return mpv.load(this.currentTrack.url)
+        if(this.isTrackLoadable()) {
+            mpv.load(this.currentTrack.url)
+            if(this.seekPendingMark > 0) {
+                this.seek(this.seekPendingMark)
+                this.setSeekPendingMark(0)
+            }
+            return 
+        }
         mpv.togglePause()
     }
 
     //停止
     stop() {
-        const mpv = this.getInstance()
+        const mpv = this.getMpvInstance()
         if(!mpv) return
         this.setState(PlayState.STOP)
         mpv.stop()
@@ -575,13 +598,13 @@ class MpvPlayer extends EventWrapper {
         this.currentTrack = getRawTrack(track)
         this.currentTime = 0
         this.setState(PlayState.NONE)
-        this.createInstance()
+        this.createMpvInstance()
         return this
     }
 
     playTrack(track, fallback) {
         this.setCurrent(track, fallback)
-        if(fallback && !this.getInstance()) return this.setState(PlayState.PLAY_ERROR, fallback)
+        if(fallback && !this.getMpvInstance()) return this.setState(PlayState.PLAY_ERROR, fallback)
         this.play()
     }
 
@@ -590,13 +613,13 @@ class MpvPlayer extends EventWrapper {
     }
 
     volume(value) {
-        const mpv = this.getInstance()
+        const mpv = this.getMpvInstance()
         if (!mpv) return
         mpv.volume(parseInt(value * 100))
     }
 
     async duration() {
-        const mpv = this.getInstance()
+        const mpv = this.getMpvInstance()
         if (!mpv) return -1
 
         const duration = await mpv.getProperty('duration')
@@ -604,7 +627,7 @@ class MpvPlayer extends EventWrapper {
     }
 
    async seek(percent) {
-        const mpv = this.getInstance()
+        const mpv = this.getMpvInstance()
         if (!mpv) return
 
         const duration = await this.duration()
@@ -684,7 +707,7 @@ class MpvPlayer extends EventWrapper {
     }
 
     quit() {
-        const mpv = this.getInstance()
+        const mpv = this.getMpvInstance()
         if(!mpv) return
         mpv.quit()
         this.mpv = null

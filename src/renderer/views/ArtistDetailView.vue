@@ -173,6 +173,21 @@ const getArtistDetail = async () => {
     setLoadingDetail(false)
 }
 
+const updateLocalMusicArtistCover = (songs) => {
+    if(!songs || songs.length < 1) return
+    const { id, platform } = props
+    if(!isLocalMusic(platform)) return
+    const { title, cover } = detail
+    if(cover) return 
+    for(let i = 0; i < songs.length; i++) {
+        const { cover: sCover } = songs[i]
+        if(sCover) {
+            updateArtist(title, sCover)
+            break
+        }
+    }
+}
+
 const loadHotSongs = async () => {
     setLoadingSongs(true)
     if (isHotSongsTabLoaded()) {
@@ -217,6 +232,7 @@ const loadAllSongs = async () => {
     setLoadingSongs(true)
     if (isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
+        updateLocalMusicArtistCover(allSongs.value)
         setLoadingSongs(false)
         return
     }
@@ -231,6 +247,7 @@ const loadAllSongs = async () => {
     updateAllSongs(result.data)
     isAllSongsTabMoreData.value = (allSongs.value.length < result.total) || (page < result.totalPage)
     updateTabData(allSongs.value)
+    updateLocalMusicArtistCover(allSongs.value)
     setLoadingSongs(false)
 }
 
@@ -543,6 +560,7 @@ onActivated(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     line-break: anywhere;
 }
 

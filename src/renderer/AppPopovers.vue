@@ -27,6 +27,7 @@ import PlayingThemeListView from './views/PlayingThemeListView.vue';
 import CustomPlayingThemeEditView from './views/CustomPlayingThemeEditView.vue';
 import { onEvents, emitEvents, offEvents } from '../common/EventBusWrapper';
 import CustomAppBorderRadiusView from './views/CustomAppBorderRadiusView.vue';
+import TrackResourceToolView from './views/TrackResourceToolView.vue';
 
 
 
@@ -53,7 +54,8 @@ const { commonNotificationShow, commonNotificationText,
   playlistExportToolbarShow, tagsCategoryViewShow,
   platformCategoryViewShow, playingThemeListViewShow,
   customPlayingThemeEditViewShow, playingViewThemeType,
-  playingViewCustomThemes, customAppBorderRadiusViewShow, } = storeToRefs(useAppCommonStore())
+  playingViewCustomThemes, customAppBorderRadiusViewShow,
+  trackResourceToolViewShow, } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -221,6 +223,14 @@ const setupSoundEffectViewPos = () => {
   })
 }
 
+const setupTrackResourceToolViewPos = () => {
+  emitEvents('app-elementAlignCenter', {
+    selector: '.default-layout #track-resource-tool-view',
+    width: 688,
+    height: 528
+  })
+}
+
 const setupPlaylistExportToolbarPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #playlist-export-toolbar',
@@ -293,6 +303,7 @@ const appBackgroundScope = reactive({
   customThemeEditView: false,
   playingThemeListView: false,
   customPlayingThemeEditView: false,
+  TrackResourceToolView: false,
 })
 
 //EventBus监听注册，统一管理
@@ -352,6 +363,7 @@ const eventsRegistration = {
       setupSoundEffectViewPos()
       setupCustomThemeEditViewPos()
       setupGradientColorToolbarPos()
+      setupTrackResourceToolViewPos()
   },
   'popover-hint-register': registerPopoverHints,
   'playingViewCustomTheme-applyTheme': param => {
@@ -366,6 +378,7 @@ watch(soundEffectViewShow, setupSoundEffectViewPos)
 watch(playlistExportToolbarShow, setupPlaylistExportToolbarPos)
 watch(customPlayingThemeEditViewShow, setupCustomPlayingThemeEditViewPos)
 watch(customAppBorderRadiusViewShow, setupCustomAppBorderRadiusViewPos)
+watch(trackResourceToolViewShow, setupTrackResourceToolViewPos)
 
 watch(() => getCurrentTheme(), (nv) => {
   const { appBackgroundScope: scope } = nv
@@ -582,6 +595,12 @@ onUnmounted(() => offEvents(eventsRegistration))
       v-if="customAppBorderRadiusViewShow" 
       @click.stop="">
     </CustomAppBorderRadiusView>
+
+    <TrackResourceToolView id="track-resource-tool-view" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.TrackResourceToolView }"
+      v-if="trackResourceToolViewShow" 
+      @click.stop="">
+    </TrackResourceToolView>
   </div>
 </template>
 
@@ -810,6 +829,17 @@ onUnmounted(() => offEvents(eventsRegistration))
   height: 470px;
   z-index: 100;
   background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-popover-border-radius);
+}
+
+#track-resource-tool-view {
+  position: fixed;
+  right: 30px;
+  bottom: 80px;
+  width: 688px;
+  height: 528px;
+  z-index: 99;
   box-shadow: var(--box-shadow);
   border-radius: var(--border-popover-border-radius);
 }

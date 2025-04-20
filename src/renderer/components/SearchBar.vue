@@ -7,7 +7,7 @@ import { toTrimString } from '../../common/Utils';
 const props = defineProps({
     miniMode: Boolean,
     placeholder: String,
-    submitAction: Function
+    submitAction: Function,
 })
 
 
@@ -34,6 +34,19 @@ const clear = () => {
     keywordRef.value.value = ""
     hasText.value = false
 }
+
+defineExpose({
+    setKeyword: (keyword, submit) => {
+        if(!keywordRef.value) return 
+        keywordRef.value.value = keyword
+        toggleClearBtn()
+        
+        if(submit) {
+            const { submitAction } = props
+            if (submitAction) submitAction(keyword)
+        }
+    }
+})
 </script>
 
 <template>

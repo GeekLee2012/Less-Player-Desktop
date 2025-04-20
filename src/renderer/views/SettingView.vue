@@ -13,7 +13,9 @@ import { isWinOS, useGitRepository, toTrimString,
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
 import ColorInputControl from '../components/ColorInputControl.vue';
+import MultiSelectionControl from '../components/MultiSelectionControl.vue';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+
 
 
 
@@ -69,6 +71,7 @@ const { setThemeIndex,
     togglePlayingViewCoverBorderShow,
     toggleUseShadowForCardStyleTile,
     toggleStorePlayState,
+    toggleStorePlayProgressState,
     toggleStoreLocalMusic,
     toggleStoreRecentPlay,
     toggleAutoClearRecentPlay,
@@ -122,6 +125,7 @@ const { setThemeIndex,
     toggleSearchForOnlinePlaylistShow,
     toggleSearchForLocalPlaylistShow,
     toggleSearchForCustomPlaylistShow,
+    setCoverAbsentStrategyForLocalPlaylist,
     toggleSearchForBatchActionShow,
     toggleSearchForFreeFMShow,
     toggleSearchForPluginsViewShow,
@@ -337,8 +341,9 @@ const clearRecents = async () => {
     showToast("最近播放已清空")
 }
 
-const updateAutoClearRecentTypes = (index) => {
-    const types = autoClearRecentTypes.value  
+const updateAutoClearRecentTypes = (values, index) => {
+    const types = autoClearRecentTypes.value
+    console.log(index, types, types[index], !types[index])
     setAutoClearRecentTypes(index, !types[index])
 }
 
@@ -975,17 +980,18 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="track localTrack row">
                 <span class="cate-name">本地歌曲</span>
                 <div class="content">
-                    <!-- 迁移至“播放页 - 播放样式”，且不仅限于本地歌曲
-                    <div>
-                        <span class="cate-subtitle">歌曲启用在线封面：</span>
-                        <ToggleControl @click="toggleUseOnlineCover" :value="track.useOnlineCover">
-                        </ToggleControl>
-                    </div>
-                    -->
                     <div>
                         <span class="cate-subtitle">显示音频格式标识：</span>
                         <ToggleControl @click="toggleAudioTypeFlagShow" :value="track.audioTypeFlagShow">
                         </ToggleControl>
+                    </div>
+                    <div v-show="false">
+                        <span class="cate-subtitle">歌单封面策略（未设置时）：</span>
+                        <span v-for="(item, index) in ['默认', '第一顺位', '随机']" class="quality-item"
+                            :class="{ active: index == track.coverAbsentStrategyForLocalPlaylist, 'first-item': index == 0 }"
+                            @click="setCoverAbsentStrategyForLocalPlaylist(index)">
+                            {{ item }}
+                        </span>
                     </div>
                     <div>
                         <span class="cate-subtitle">扫描目录时，启用深度遍历：</span>
@@ -1140,13 +1146,18 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="cache row">
                 <span class="cate-name">缓存</span>
                 <div class="content">
-                    <div class="tip-text">提示：播放状态，包括当前播放（列表）等状态，但不包括当前歌曲的播放进度
-                        <br>最近播放记录，请定期手动清理；当记录过多时，部分列表容易卡顿
+                    <div class="tip-text">提示：最近播放记录，当记录过多时，部分列表容易卡顿
+                        <br>建议开启自动清理最近播放，或定期手动清理
                         <br>资源缓存，默认上限为500M左右；应用会在每次启动时，自动检查并清理
                     </div>
                     <div>
-                        <span class="cate-subtitle">保存播放状态：</span>
+                        <span class="cate-subtitle">保存当前播放（列表）状态：</span>
                         <ToggleControl @click="toggleStorePlayState" :value="cache.storePlayState">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">保存当前歌曲播放进度：</span>
+                        <ToggleControl @click="toggleStorePlayProgressState" :value="cache.storePlayProgressState">
                         </ToggleControl>
                     </div>
                     <div v-show="false">
@@ -1196,6 +1207,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                             max="366" step="1" @keydown.enter="updateLiveTimeForRecentPlay"
                             @focusout="updateLiveTimeForRecentPlay" />
                     </div>
+                    <!--
                     <div v-show="isStoreRecentPlay && isAutoClearRecentPlayEnable">
                         <span class="cate-subtitle">自动清理记录类型：</span>
                         <span v-for="(item, index) in ['歌曲', '歌单', '专辑', 'FM电台']" class="quality-item"
@@ -1203,6 +1215,15 @@ onUnmounted(() => offEvents(eventsRegistration))
                             @click="updateAutoClearRecentTypes(index)">
                             {{ item }}
                         </span>
+                    </div>
+                    -->
+                    <div v-show="isStoreRecentPlay && isAutoClearRecentPlayEnable">
+                        <span class="cate-subtitle">自动清理记录类型：</span>
+                        <MultiSelectionControl 
+                            :data="['歌曲', '歌单', '专辑', 'FM电台']"
+                            :values="autoClearRecentTypes"
+                            :onChanged="updateAutoClearRecentTypes" >
+                        </MultiSelectionControl>
                     </div>
                     <div class="last">
                         <span class="cate-subtitle">资源缓存占用约为：</span>
@@ -2194,6 +2215,16 @@ onUnmounted(() => offEvents(eventsRegistration))
 #setting-view .cache input[type='number'] {
     margin-left: 0px;
 }
+
+#setting-view .cache .content .multi-selection-ctl {
+    justify-content: flex-start;
+}
+
+#setting-view .cache .content .multi-selection-ctl .item {
+    font-size: calc(var(--content-text-size) - 1px);
+    padding: 4px 20px;
+}
+
 
 #setting-view .desktopLyric .color-input-ctl {
     min-width: 276px;

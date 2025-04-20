@@ -66,7 +66,8 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   hideColorPickerToolbar, resetExploreModeActiveStates,
   setMaxScreen, showImportantToast, 
   hidePlayingThemeListView, togglePlayingThemeListView,
-  togglePlayingView, } = useAppCommonStore()
+  togglePlayingView, toggleTrackResourceToolView,
+  hideTrackResourceToolView, } = useAppCommonStore()
 
 const { webdavSessions } = storeToRefs(useCloudStorageStore())
 const { getRecentSongs, getRecentPlaylilsts, 
@@ -152,8 +153,10 @@ const registryDefaultLocalKeys = () => {
   Mousetrap.bind(['g'], visitModulesSetting, 'keyup')
   // 打开插件管理
   Mousetrap.bind(['u'], visitPlugins, 'keyup')
-  // 快速打开搜索
+  // 打开搜索
   Mousetrap.bind(['s'], quickSearch, 'keyup')
+  // 打开歌曲资源搜索
+  Mousetrap.bind(['z'], toggleTrackResourceToolView, 'keyup')
   // 快速查看快捷键
   Mousetrap.bind(['k'], visitShortcutKeys, 'keyup')
   // 打开插件管理
@@ -285,6 +288,7 @@ const hideAllPopoverViewsAndToolbars = () => {
   hideSoundEffectView()
   hideCustomThemeEditView()
   hideColorPickerToolbar()
+  hideTrackResourceToolView()
 }
 
 const hideEmptyToast = () => {
@@ -370,6 +374,7 @@ const initialize = () => {
   //emitEvents('app-init')
   checkAppVersion()
   checkAndClearRecentPlay()
+  checkAndcleanFavorites()
 }
 
 const setupWebDav = async () => {
@@ -699,6 +704,7 @@ const tryRemoveExpiredRecentItems = async (recentItems, removeFn, memo) => {
   }
 }
 
+//检查清理最近播放
 const checkAndClearRecentPlay = async () => {
   const isStoreEnable = isStoreRecentPlay.value
   const isAutoClearEnable = isAutoClearRecentPlayEnable.value
@@ -719,6 +725,22 @@ const checkAndClearRecentPlay = async () => {
   if(needClearRecentRadios.value) {
     tryRemoveExpiredRecentItems(getRecentRadios.value(), removeRecentRadio, 'Radios')
   }
+}
+
+//检查清洗我的收藏
+const checkAndcleanFavorites = async () => {
+  const { cleanFavoriteTracks } = useUserProfileStore()
+  try {
+    cleanFavoriteTracks()
+  } catch(error) {
+    if(isDevEnv()) console.log(error)
+  }
+}
+
+const toggleTrackResourceTool = () => {
+  if(isSimpleLayout.value || isMiniLayout.value) return
+  
+  toggleTrackResourceToolView()
 }
 
 
@@ -825,7 +847,8 @@ provide('appVersion', {
         'winos-style': isWinOS(),
         'use-winos-win-ctl': useWindowsStyleWinCtl,
         'custom-shadow': isAppCustomShadowShow
-      }">
+      }"
+      @contextmenu="toggleTrackResourceTool" >
     <keep-alive :max="1">
       <component :is="currentAppLayout">
       </component>

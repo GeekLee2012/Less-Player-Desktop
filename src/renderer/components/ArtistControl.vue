@@ -1,6 +1,7 @@
 <script setup>
 import { inject, onMounted, onUnmounted } from 'vue';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+import { escapeHtml } from '../../common/Utils';
 
 
 
@@ -43,7 +44,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <span @click="visitArtistDetail(platform, item, index)" 
                 class="artist-item" 
                 :class="{ visitable: visitable }"
-                v-html="item.name">
+                v-html="escapeHtml(item.name)">
             </span>
             <template v-if="index < (data.length - 1)">、</template>
         </template>

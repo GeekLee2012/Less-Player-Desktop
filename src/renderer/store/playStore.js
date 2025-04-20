@@ -56,6 +56,9 @@ export const usePlayStore = defineStore('player', {
         findTrackIndex(track) {
             return this.queueTracks.findIndex((item, index) => Track.isEquals(track, item))
         },
+        isNoneTrack(track) {
+            return NONE_TRACK == track
+        },
         isCurrentTrack(track) {
             return Track.isEquals(this.currentTrack, track)
         },
@@ -145,6 +148,10 @@ export const usePlayStore = defineStore('player', {
             this.playingIndex = -1
             this._resetPlayState()
             this.loading = false
+        },
+        markPlayState(currentTime, progress) {
+            this.currentTime = currentTime
+            this.progress = progress
         },
         _resetPlayState() {
             this.playing = false
@@ -271,7 +278,7 @@ export const usePlayStore = defineStore('player', {
             {
                 //key: "player",
                 storage: localStorage,
-                paths: ['playingIndex', 'playMode', 'queueTracks', 'volume']
+                paths: ['playingIndex', 'playMode', 'queueTracks', 'volume', 'currentTime', 'progress']
             }
         ]
     }

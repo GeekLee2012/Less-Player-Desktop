@@ -426,7 +426,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <ul>
                     <li v-for="(item, index) in getCustomPlaylists"
                         :class="{ active: (activeCustomPlaylistIndex == index) }" @click="visitCustomItem(item, index)"
-                        @contextmenu="(e) => onContextMenu(e, item, 3, index)">
+                        @contextmenu.stop="(e) => onContextMenu(e, item, 3, index)">
                         <div class="playlist-item">
                             <div class="cover">
                                 <img v-lazy="coverDefault(item.cover)" />
@@ -474,7 +474,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <ul v-show="!isFavoritePlaylistsCollapsed">
                     <li v-for="(item, index) in getFavoritePlaylilsts()"
                         :class="{ active: (activeFavoritePlaylistIndex == index) }" @click="visitFavouriteItem(item, index)"
-                        @contextmenu="(e) => onContextMenu(e, item, 8, index)">
+                        @contextmenu.stop="(e) => onContextMenu(e, item, 8, index)">
                         <div class="playlist-item">
                             <div class="cover">
                                 <img v-lazy="coverDefault(item.cover)" />

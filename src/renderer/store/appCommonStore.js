@@ -130,6 +130,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         pendingPlay: false,
         pendingPlayPercent: 0,
         miniNavBarMode: false,
+        trackResourceToolViewShow: false,
+        workingTrackForResourceToolView: null,
+        trackResourceToolViewPreviewMode: false,
     }),
     getters: {
         isPlaylistMode() {
@@ -183,7 +186,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         isMiniNavBarMode() {
             return this.miniNavBarMode
-        },
+        }
     },
     actions: {
         setMaxScreen(value) {
@@ -630,6 +633,21 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleMiniNavBarMode() {
             this.miniNavBarMode = !this.miniNavBarMode
+        },
+        hideTrackResourceToolView() {
+            this.trackResourceToolViewShow = false
+        },
+        toggleTrackResourceToolView() {
+            this.trackResourceToolViewShow = !this.trackResourceToolViewShow
+        },
+        setWorkingTrackForResourceToolView(value) {
+            this.workingTrackForResourceToolView = value
+        },
+        setTrackResourceToolViewPreviewMode(value) {
+            this.trackResourceToolViewPreviewMode = value || false
+        },
+        toggleTrackResourceToolViewPreviewMode() {
+            this.setTrackResourceToolViewPreviewMode(!this.trackResourceToolViewPreviewMode)
         }
     },
     persist: {

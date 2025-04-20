@@ -302,7 +302,7 @@ onUnmounted(toggleMiniStyle)
                     <div class="lyric-btn spacing" 
                         :class="{ 'content-text-highlight': lyricLayoutMode > 0 }"
                         @click="() => toggleLyric()"
-                        @contextmenu="hideLyric">
+                        @contextmenu.stop="hideLyric">
                         词
                     </div>
                 </div>

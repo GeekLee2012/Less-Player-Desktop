@@ -31,7 +31,9 @@ const { isMaxScreen, playingViewShow,
     playingViewThemeType, isPlayingViewCustomThemePreview,
     playingViewCustomThemePreviewCache, } = storeToRefs(useAppCommonStore())
 const { hidePlayingView,  toggleSoundEffectView, 
-    toggleDesktopLyricShow, togglePlayingThemeListView } = useAppCommonStore()
+    toggleDesktopLyricShow, togglePlayingThemeListView,
+    toggleTrackResourceToolView,
+ } = useAppCommonStore()
 const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { lyricMetaPos, lyric, lyricTransActived, lyricRomaActived,
@@ -295,7 +297,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             custom: (playingViewThemeType == 1), 
             'preview-mode': isPlayingViewCustomThemePreview,
             'focus-mode': playingViewFocusMode
-        }">
+        }" >
         <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
@@ -550,7 +552,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     overflow: hidden;
     --others-sliderbar-ctl-height: 2px; 
     --others-sliderbar-thumb-size: 13px;
-    --bottom-height: 82px;
+    /*--bottom-height: 82px;*/
+    --bottom-height: 88px;
 }
 
 .dynamic-playing-view .spacing {
@@ -702,7 +705,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .dynamic-playing-view .bottom {
     height: var(--bottom-height);
-    padding-bottom: 3px;
+    /*padding-bottom: 3px;*/
     /*visibility: hidden;*/
     background: #00000036;
 }

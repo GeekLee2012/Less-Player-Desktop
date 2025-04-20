@@ -15,7 +15,8 @@ const { setLyricFontSize, setLyricHighlightFontSize,
     setLyricLineHeight, setLyricLineSpacing,
     setLyricFontWeight, setLyricOffset,
     setLyricMetaPos, setLyricAlignment,
-    resetLyricSetting, } = useSettingStore()
+    resetLyricSetting, setLyricAralMetaLayout, 
+} = useSettingStore()
 
 const getInputValue = (e) => (e.target.value)
 
@@ -78,6 +79,11 @@ const getLyricOffsetText = () => {
                 <div class="row text">歌曲元信息：</div>
                 <div class="row">
                     <SingleSelectionControl :data="['默认', '隐藏', '顶部']" :value="lyric.metaPos" :onChanged="setLyricMetaPos">
+                    </SingleSelectionControl>
+                </div>
+                <div class="row text v-spacing" v-show="lyric.metaPos == 0">歌手、专辑布局：</div>
+                <div class="row" v-show="lyric.metaPos == 0">
+                    <SingleSelectionControl :data="['分行', '隐藏', '同行']" :value="lyric.aralMetaLayout" :onChanged="setLyricAralMetaLayout">
                     </SingleSelectionControl>
                 </div>
                 <div class="row text v-spacing">对齐方式：</div>

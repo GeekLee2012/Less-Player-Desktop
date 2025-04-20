@@ -174,6 +174,7 @@
 
 /* Toolbar */
 .use-winos-win-ctl .sound-effect-view .action,
+.use-winos-win-ctl .track-resource-tool-view .container > .header .action,
 .use-winos-win-ctl .random-music-toolbar .action,
 .use-winos-win-ctl .lyric-toolbar .action {
   position: absolute;
@@ -183,6 +184,14 @@
 .use-winos-win-ctl .lyric-toolbar .action {
   position: absolute;
   right: 5px;
+}
+
+.use-winos-win-ctl .track-resource-tool-view .container > .header .right-action {
+  margin-right: 0px;
+}
+
+.use-winos-win-ctl .track-resource-tool-view .right-action .close-btn {
+  margin-left: 20px;
 }
 
 .use-winos-win-ctl .random-music-toolbar .header .title,

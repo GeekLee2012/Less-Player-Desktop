@@ -283,6 +283,8 @@ const registryGlobalShortcuts = () => {
     'Alt+Shift+R': 'visitRecents',
     // 打开 / 关闭播放样式
     'Alt+Shift+V': 'togglePlayingThemes',
+    // 打开 / 关闭歌曲资源搜索
+    'Alt+Shift+Z': 'toggleTrackResourceToolView',
     // 打开 开发者工具
     'Control+Alt+Shift+I': () => openDevTools(mainWin),
     'Command+Alt+Shift+I': () => openDevTools(mainWin),

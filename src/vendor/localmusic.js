@@ -36,7 +36,7 @@ export class LocalMusic {
                 const onlineCandidate = await United.transferTrack(track, { isGetCover: true })
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
-                    if (cover && track.cover != cover) {
+                    if (cover && track.cover != cover && !cover.startsWith('http')) {
                         Object.assign(result, { cover })
                         onTrackUpdated(result)
                     }
@@ -75,10 +75,12 @@ export class LocalMusic {
             //封面，顺便更新一下
             const { isUseOnlineCoverEnable } = useSettingStore()
             if (!Track.hasCover(track) || isUseOnlineCoverEnable) {
-                if (!onlineCandidate || !Track.hasCover(onlineCandidate)) onlineCandidate = await United.transferTrack(track, { isGetCover: true })
+                if (!onlineCandidate || !Track.hasCover(onlineCandidate)) {
+                    onlineCandidate = await United.transferTrack(track, { isGetCover: true })
+                }
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
-                    if (cover && result.cover != cover) {
+                    if (cover && result.cover != cover && !cover.startsWith('http')) {
                         Object.assign(result, { cover })
                         onTrackUpdated(result)
                     }

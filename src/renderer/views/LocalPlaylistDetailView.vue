@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated, nextTick, onUnmounted } from 'vue';
+import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, onDeactivated, nextTick, onUnmounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
@@ -12,8 +12,9 @@ import AddFolderFileBtn from '../components/AddFolderFileBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { coverDefault, ipcRendererInvoke, isSupportedImage, randomTextWithinAlphabetNums, toYyyymmddHhMmSs } from "../../common/Utils";
+import { coverDefault, ipcRendererInvoke, isSupportedImage, nextInt, randomTextWithinAlphabetNums, toYyyymmddHhMmSs } from "../../common/Utils";
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+import { ImageProtocal } from '../../common/Constants';
 
 
 
@@ -35,7 +36,9 @@ const { getLocalPlaylist, addToLocalPlaylist, updateLocalPlaylist,
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { isUseDndForAddLocalTracksEnable, isUseDeeplyScanForDirectoryEnable,
     isSearchForLocalPlaylistShow, isShowDialogBeforeBatchDelete,
-    getPaginationStyleIndex, getLimitPerPageForLocalPlaylist } = storeToRefs(useSettingStore())
+    getPaginationStyleIndex, getLimitPerPageForLocalPlaylist,
+    coverAbsentStrategyForLocalPlaylist, 
+} = storeToRefs(useSettingStore())
 
 
 const playlistDetailRef = ref(null)
@@ -280,6 +283,21 @@ const onPageLoaded = ({ page, prevPage }) => {
     if(page == prevPage) return 
     resetScrollState()
 }
+
+const computedCover = computed(() => {
+    const { cover, data } = detail 
+    if(cover) return cover
+    if(!data || data.length < 1) return cover
+
+    const filteredData = data.filter(item => {
+        return item.cover 
+            && !item.cover.startsWith(ImageProtocal.prefix)
+    })
+    const absentStrategy = coverAbsentStrategyForLocalPlaylist.value
+    const index = (absentStrategy == 2) ? nextInt(filteredData.length - 1) : 0
+    const { cover: abCover } = filteredData[index]
+    return abCover
+})
 
 /* 生命周期、监听 */
 watch(() => props.id, () => {

@@ -126,6 +126,21 @@ const updateTabData = (data) => {
     }
 }
 
+const updateLocalMusicAlbumCover = (songs) => {
+    if(!songs || songs.length < 1) return
+    const { id, platform } = props
+    if(!isLocalMusic(platform)) return
+    const { title, cover, publishTime, artist, company } = detail
+    if(cover) return 
+    for(let i = 0; i < songs.length; i++) {
+        const { cover: sCover } = songs[i]
+        if(sCover) {
+            updateCover(sCover)
+            break
+        }
+    }
+}
+
 const getAlbumDetail = async () => {
     setLoadingDetail(true)
     if (isAlbumDetailLoaded()) {
@@ -159,6 +174,7 @@ const loadAllSongs = async () => {
     currentTabView.value = SongListControl
     if (isAllSongsTabLoaded()) {
         updateTabData(allSongs.value)
+        updateLocalMusicAlbumCover(allSongs.value)
         setLoading(false)
         return
     }
@@ -178,6 +194,7 @@ const loadAllSongs = async () => {
         updateArtistName(artistName)
         updatePublishTime(publishTime)
     }
+    updateLocalMusicAlbumCover(allSongs.value)
     setLoading(false)
 }
 

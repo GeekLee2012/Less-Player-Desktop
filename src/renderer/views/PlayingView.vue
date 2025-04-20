@@ -36,7 +36,9 @@ const { isMaxScreen, playingViewShow, desktopLyricShow } = storeToRefs(useAppCom
 const { hidePlayingView, minimize,
     showToast, switchPlayingViewTheme,
     toggleSoundEffectView, toggleDesktopLyricShow,
-    togglePlayingThemeListView, switchSpectrumIndex } = useAppCommonStore()
+    togglePlayingThemeListView, switchSpectrumIndex,
+    toggleTrackResourceToolView 
+} = useAppCommonStore()
 const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos,
@@ -281,7 +283,7 @@ onMounted(() => {
     <div class="playing-view" 
         :class="{ 'focus-mode': playingViewFocusMode }"
         @dragover="e => e.preventDefault()" 
-        @drop="onDrop">
+        @drop="onDrop" >
         <div class="container">
             <div class="header">
                 <div class="win-ctl-wrap" v-show="!useWindowsStyleWinCtl">
@@ -570,7 +572,8 @@ onMounted(() => {
     display: flex;
     overflow: hidden;
     --header-height: 43px;
-    --bottom-height: 82px;
+    /*--bottom-height: 82px;*/
+    --bottom-height: 88px;
     --others-lyric-ctl-extra-btn-bottom: 108px;
     --others-sliderbar-ctl-height: 4px; 
     --others-sliderbar-thumb-size: 15px;
@@ -757,7 +760,7 @@ onMounted(() => {
 
     height: var(--bottom-height);
     min-height: var(--bottom-height);
-    padding-bottom: 3px;
+    /*padding-bottom: 3px; */
 }
 
 .playing-view .container > .bottom .action {
@@ -1157,8 +1160,8 @@ onMounted(() => {
   background-color: #000;
   z-index: -1;
 
-  -webkit-animation: backdrop-fadein .6s ease-out normal;
-  animation: backdrop-fadein .6s ease-out normal;
+  -webkit-animation: backdrop-fadein 0.6s ease-out normal;
+  animation: backdrop-fadein 0.6s ease-out normal;
 }
 
 .playing-view .container .bg-container {

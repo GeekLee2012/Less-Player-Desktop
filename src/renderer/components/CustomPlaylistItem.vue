@@ -65,7 +65,7 @@ const onContextMenu = (event) => {
 </script>
 
 <template>
-    <div class="custom-playlist-item" @contextmenu="onContextMenu">
+    <div class="custom-playlist-item" @contextmenu.stop="onContextMenu">
         <div class="sqno">{{ index + 1 }}</div>
         <div class="cover" @click="visitItem">
             <img v-lazy="coverDefault(data.cover)" />

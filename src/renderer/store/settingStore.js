@@ -211,22 +211,23 @@ export const useSettingStore = defineStore('setting', {
             //启用在线封面
             useOnlineCover: true,
             /* 本地歌曲 */
-            //显示音频格式
+            //本地歌曲 - 显示音频格式
             audioTypeFlagShow: false,
-            //扫描目录时，启用深度遍历
+            //本地歌曲 - 扫描目录时，启用深度遍历
             useDeeplyScanForDirectory: true,
-            //启用Dnd操作，创建本地歌单
+            //本地歌曲 - 启用Dnd操作，创建本地歌单
             useDndForCreateLocalPlaylist: true,
-            //启用Dnd操作，为本地歌单添加歌曲
+            //本地歌曲 - 启用Dnd操作，为本地歌单添加歌曲
             useDndForAddLocalTracks: true,
-            //启用Dnd操作，导出本地歌单
+            //本地歌曲 - 启用Dnd操作，导出本地歌单
             useDndForExportLocalPlaylist: true,
-            //普通分页，本地歌曲每页记录数
+            //本地歌曲 - 普通分页，本地歌曲每页记录数
             limitPerPageForLocalPlaylist: 30,
-            //本地歌曲首页提示 - 已废弃
-            //localMusicHomepageTipsShow: true,
-            //自由FM首页提示 - 已废弃
-            //freeFMHomepageTipsShow: true,
+            //本地歌曲 - 歌单未设置封面时策略: 0 -> 默认、1 - 第一顺位、2 - 随机、3 - 随机颜色
+            //默认策略：使用默认封面
+            //第一顺位策略：从歌单中的第一首有封面的歌曲中获取封面；随机策略类似
+            //随机颜色策略：顾名思义，随机一个颜色作为封面
+            coverAbsentStrategyForLocalPlaylist: 0,
             //高亮当前右键菜单对应的歌曲
             highlightCtxMenuItem: true,
             //拖拽保存
@@ -291,6 +292,8 @@ export const useSettingStore = defineStore('setting', {
             offset: 0,
             //歌曲信息, 0 => 默认, 1 => 隐藏, 2 => 顶部
             metaPos: 0,
+            //歌手、专辑布局, 0 => 分行, 1 => 同行, 2 => 隐藏
+            aralMetaLayout: 0,
             //对齐方式, 0 => 左, 1 => 中, 2 => 右
             alignment: 0,
             //翻译
@@ -329,9 +332,11 @@ export const useSettingStore = defineStore('setting', {
         },
         /* 缓存 */
         cache: {
-            //退出后保存播放状态：包括当前歌曲、播放列表等
+            //退出前保存播放状态：包括当前歌曲、播放列表等
             storePlayState: true,
-            //退出后记录已经添加的本地歌曲
+            //退出前保存当前播放进度
+            storePlayProgressState: false,
+            //退出前记录已经添加的本地歌曲
             storeLocalMusic: true,
             //记录最近播放
             storeRecentPlay: true,
@@ -496,21 +501,26 @@ export const useSettingStore = defineStore('setting', {
                 name: '搜索页',
                 binding: 'S',
                 gBinding: 'Ctrl + Alt + Shift + S'
-            },{
+            }, {
                 id: 'visitRecents',
                 name: '最近播放',
                 binding: 'R',
                 gBinding: 'Alt + Shift + R'
-            },{
+            }, {
                 id: 'togglePlayingThemes',
                 name: '播放样式',
                 binding: 'V',
                 gBinding: 'Alt + Shift + V'
-            },{
+            }, {
                 id: 'resetSetting',
                 name: '恢复默认设置',
                 binding: 'Ctrl + P',
                 gBinding: 'Ctrl + Alt + Shift + P'
+            }, {
+                id: 'toggleTrackResourceToolView',
+                name: '搜索歌曲资源',
+                binding: 'Z',
+                gBinding: 'Alt + Shift + Z'
             }]
         },
         /* 网络 */
@@ -553,6 +563,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isStorePlayStateBeforeQuit(state) {
             return this.cache.storePlayState
+        },
+        isStorePlayProgressStateBeforeQuit() {
+            return this.cache.storePlayProgressState
         },
         isStoreLocalMusicBeforeQuit(state) {
             return this.cache.storeLocalMusic
@@ -623,6 +636,9 @@ export const useSettingStore = defineStore('setting', {
         },
         lyricMetaPos() {
             return this.lyric.metaPos
+        },
+        lyricAralMetaLayout() {
+            return this.lyric.aralMetaLayout
         },
         lyricTransActived() {
             return this.lyric.trans
@@ -722,6 +738,9 @@ export const useSettingStore = defineStore('setting', {
         },
         getLimitPerPageForLocalPlaylist() {
             return this.track.limitPerPageForLocalPlaylist
+        },
+        coverAbsentStrategyForLocalPlaylist() {
+            return this.track.coverAbsentStrategyForLocalPlaylist
         },
         isAudioTypeFlagShowEnable() {
             return this.track.audioTypeFlagShow
@@ -1235,6 +1254,9 @@ export const useSettingStore = defineStore('setting', {
             if (value < 10 || value > 200) return
             this.track.limitPerPageForLocalPlaylist = value
         },
+        setCoverAbsentStrategyForLocalPlaylist(value) {
+            this.track.coverAbsentStrategyForLocalPlaylist = value
+        },
         toggleSearchBarAutoPlaceholder() {
             this.search.autoPlaceholder = !this.search.autoPlaceholder
             if (!this.search.autoPlaceholder) {
@@ -1313,6 +1335,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleStorePlayState() {
             this.cache.storePlayState = !this.cache.storePlayState
+        },
+        toggleStorePlayProgressState() {
+            this.cache.storePlayProgressState = !this.cache.storePlayProgressState
         },
         toggleStoreLocalMusic() {
             this.cache.storeLocalMusic = !this.cache.storeLocalMusic
@@ -1424,6 +1449,10 @@ export const useSettingStore = defineStore('setting', {
             this.lyric.metaPos = value || 0
             this.setupLyricMetaPos()
         },
+        setLyricAralMetaLayout(value) {
+            this.lyric.aralMetaLayout = value || 0
+            this.setupLyricAralMetaLayout()
+        },
         setLyricAlignment(value) {
             this.lyric.alignment = value || 0
             this.setupLyricAlignment()
@@ -1436,6 +1465,7 @@ export const useSettingStore = defineStore('setting', {
             this.setLyricFontWeight()
             this.setLyricOffset()
             this.setLyricMetaPos()
+            this.setLyricAralMetaLayout()
             this.setLyricAlignment()
         },
         setupLyricFontSize() {
@@ -1465,6 +1495,10 @@ export const useSettingStore = defineStore('setting', {
         setupLyricMetaPos() {
             const metaPos = this.lyric.metaPos || 0
             emitEvents('lyric-metaPos', metaPos)
+        },
+        setupLyricAralMetaLayout() {
+            const aralMetaLayout = this.lyric.aralMetaLayout || 0
+            emitEvents('lyric-aralMetaLayout', aralMetaLayout)
         },
         setupLyricAlignment() {
             const alignment = this.lyric.alignment || 0
@@ -1730,10 +1764,12 @@ export const useSettingStore = defineStore('setting', {
             this.cache.liveTimeForRecentPlay = Math.max(value || 10, 1)
         },
         setAutoClearRecentTypes(index, value) {
+            /*
             const types = this.cache.autoClearRecentTypes
             if(!Array.isArray(types)) {
                 this.cache.autoClearRecentTypes = [true, true, true, true]
             }
+            */
             this.cache.autoClearRecentTypes[index] = value || false
         },
         setMpvBinaryPath(value) {

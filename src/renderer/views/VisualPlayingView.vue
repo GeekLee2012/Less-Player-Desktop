@@ -41,7 +41,7 @@ const { hidePlayingView, minimize, showToast,
     switchPlayingViewTheme, switchSpectrumIndex,
     toggleSoundEffectView, toggleDesktopLyricShow,
     toggleExVisualCanvasShow, setExVisualCanvasIndex,
-    togglePlayingThemeListView } = useAppCommonStore()
+    togglePlayingThemeListView, toggleTrackResourceToolView } = useAppCommonStore()
 const { getCurrentThemeHighlightColor } = useSettingStore()
 const { currentTrack, playingIndex,
     playing, volume, queueTracksSize } = storeToRefs(usePlayStore())
@@ -337,14 +337,14 @@ onUnmounted(() => {
                                     'none-border': !isPlayingViewCoverBorderShow 
                                 }"
                                 :draggable="isDndSaveEnable" @dragstart="dndSaveCover"
-                                @contextmenu="toggleExVisualCanvasShow" />
+                                @contextmenu.stop="toggleExVisualCanvasShow" />
                         </div>
                         <div class="canvas-wrap" @click="() => (playing && switchSpectrumIndex())">
                             <canvas class="spectrum-canvas" width="480" height="66"></canvas>
                         </div>
                     </div>
                     <div class="ex-visual-canvas-wrap" v-show="exVisualCanvasShow" @click.stop="switchVisualCanvas"
-                        @contextmenu="toggleExVisualCanvasShow">
+                        @contextmenu.stop="toggleExVisualCanvasShow">
                     </div>
                     <div class="progress-wrap">
                         <SliderBar :value="progressState" :disable="!isTrackSeekable" :onSeek="seekTrack"
