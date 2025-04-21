@@ -400,9 +400,7 @@ const onPlayerErrorRetry = ({ track, currentTime, radio, fallback }) => {
         //全部尝试失败
         return handleUnplayableTrack(track)
     }
-    if (isFreeFM(platform)) {
-        return handleUnplayableTrack(track)
-    }
+    if (isFreeFM(platform)) return handleUnplayableTrack(track)
     //尝试继续播放
     if (isTrackOverretry()) { //超出最大重试次数
         //最后一次尝试：切换为fallbackPlayer来播放
@@ -1580,6 +1578,7 @@ const eventsRegistration = {
     //普通歌曲
     'track-changed': track => {
         setLoading(true)
+        markTrackSeekPending(0)
         bootstrapTrack(track).then(track => {
             if (isCurrentTrack(track)) {
                 playTrackDirectly(track)
@@ -1784,6 +1783,7 @@ onUnmounted(() => {
 watch(queueTracksSize, (nv, ov) => {
     if (nv < 1) {
         resetPlayState()
+        markTrackSeekPending(0)
         setFavoritedState(false)
         emitEvents('playbackQueue-empty')
     }

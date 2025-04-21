@@ -131,22 +131,30 @@ const tutorialList = [{
 }, {
     title: '非封面区域，拖拽移动排序',
     artist: [ { id:'', name: '教程 - 当前播放' }],
-    color: '#086972',
+    color: '#17b978',
 }, {
     title: '封面区域，拖拽保存',
     artist: [ { id:'', name: '教程 - 当前播放' }],
-    color: '#a6e4e7',
+    color: '#17b978',
 }, {
     title: '右键菜单：当前应用普遍支持',
     artist: [ { id:'', name: '教程' }],
     color: '#dff5f2',
 }, {
-    title: '支持图片格式：png、jpg、jpeg、bmp',
-    artist: [ { id:'', name: '教程' }],
+    title: '右键菜单：任意位置',
+    artist: [ { id:'', name: '教程  - 歌曲资源搜索' }],
+    color: '#dff5f2',
+}, {
+    title: '支持图片格式：png、jpg、jpeg',
+    artist: [ { id:'', name: '教程 - 图片' }],
     color: '#ff9a3c',
 }, {
-    title: '支持图片格式：gif、webp、avif',
-    artist: [ { id:'', name: '教程' }],
+    title: '支持图片格式：bmp、gif',
+    artist: [ { id:'', name: '教程 - 图片' }],
+    color: '#ff9a3c',
+}, {
+    title: '支持图片格式：webp、avif',
+    artist: [ { id:'', name: '教程 - 图片' }],
     color: '#ff9a3c',
 }, {
     title: '拖拽图片到封面，更新封面',
@@ -154,52 +162,52 @@ const tutorialList = [{
     color: '#7dace4',
 }, {
     title: '拖拽图片到新建 / 编辑页',
-    artist: [ { id:'', name: '教程' }],
-    color: '#e84a5f',
+    artist: [ { id:'', name: '教程 - 拖拽' }],
+    color: '#7dace4',
 }, {
     title: '拖拽大封面保存本地',
     artist: [ { id:'', name: '教程 - 拖拽' }],
-    color: '#163172',
+    color: '#7dace4',
 }, {
     title: '播放页 - 歌词 - 右键菜单',
     artist: [ { id:'', name: '教程 - 播放页' }],
-    color: '#930077',
+    color: '#cbb4d4',
 }, {
     title: '播放页 - 歌词 - 拖拽保存',
     artist: [ { id:'', name: '教程 - 播放页' }],
-    color: '#ffbd39',
+    color: '#cbb4d4',
 }, {
     title: '播放页 - 播放到指定歌词行',
     artist: [ { id:'', name: '教程 - 播放页' }],
-    color: '#455d7a',
+    color: '#cbb4d4',
 }, {
     title: '播放页 - 频谱 - 左键',
     artist: [ { id:'', name: '教程 - 播放页 - 动感频谱' }],
-    color: '#d6c8ff',
+    color: '#cbb4d4',
 }, {
     title: '播放页 - 封面 - 右键',
     artist: [ { id:'', name: '教程 - 播放页 - 动感频谱' }],
-    color: '#0dceda',
+    color: '#cbb4d4',
 }, {
     title: '内存占用高，请降低图片清晰度',
-    artist: [ { id:'', name: '教程 - 性能' }],
-    color: '#bbded6',
+    artist: [ { id:'', name: '教程 - 设置页 - 通用 - 图片清晰度' }],
+    color: '#30e8bf',
 }, {
     title: '窗口闪动：请开启“锁定为初始值”',
     artist: [ { id:'', name: '教程 - 设置页 - 通用 - 窗口缩放' }],
-    color: '#3B4371',
+    color: '#30e8bf',
 }, {
-    title: '关闭时不退出：设置页 - 菜单栏',
-    artist: [ { id:'', name: '教程' }],
-    color: '#ff9a3c',
+    title: '关闭时不退出：请开启菜单栏图标',
+    artist: [ { id:'', name: '教程 - 设置页 - 菜单栏' }],
+    color: '#30e8bf',
 }, {
     title: '带图标的元素，一般均可交互',
-    artist: [ { id:'', name: '教程' }],
-    color: '#f73859',
+    artist: [ { id:'', name: '教程 - 交互 - 图标' }],
+    color: '#d66d75',
 }, {
     title: '左侧导航，带图标的标题 - 点击',
-    artist: [ { id:'', name: '教程 - 导航' }],
-    color: '#6639a6',
+    artist: [ { id:'', name: '教程 - 交互 - 图标' }],
+    color: '#d66d75',
 }]
 
 

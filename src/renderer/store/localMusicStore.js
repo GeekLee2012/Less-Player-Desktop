@@ -117,6 +117,17 @@ export const useLocalMusicStore = defineStore('localMusic', {
         decreaseImportTaskCount() {
             this.importTaskCount = Math.max(this.importTaskCount - 1, 0)
         },
+        getLocalPlaylistTrack(pid, id) {
+            const playlist = this.getLocalPlaylist(pid)
+            if(!playlist) return 
+            const { data } = playlist
+            if(!data || data.length < 1) return 
+
+            for(let i = 0; i < data.length; i ++) {
+                if(id == data[i].id) return data[i]
+            }
+            return null
+        }
     },
     persist: {
         enabled: true,

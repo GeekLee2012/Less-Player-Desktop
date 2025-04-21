@@ -189,6 +189,7 @@ class HowlerPlayer extends EventWrapper {
         this.stop()
         this.currentTrack = getRawTrack(track)
         this.currentTime = 0
+        this.setSeekPendingMark(0)
         this.setState(PlayState.NONE)
         this.createSound()
         return this
@@ -597,15 +598,22 @@ class MpvPlayer extends EventWrapper {
     setCurrent(track) {
         this.currentTrack = getRawTrack(track)
         this.currentTime = 0
+        this.setSeekPendingMark(0)
         this.setState(PlayState.NONE)
         this.createMpvInstance()
         return this
     }
 
     playTrack(track, fallback) {
-        this.setCurrent(track, fallback)
-        if(fallback && !this.getMpvInstance()) return this.setState(PlayState.PLAY_ERROR, fallback)
-        this.play()
+        this.setSeekPendingMark(0)
+        try {
+            this.setCurrent(track, fallback)
+            if(fallback && !this.getMpvInstance()) return this.setState(PlayState.PLAY_ERROR, fallback)
+            this.play()
+        } catch(error) {
+            if(isDevEnv()) console.log(error)
+            this.setState(PlayState.PLAY_ERROR, fallback)
+        }
     }
 
     restore(track) {

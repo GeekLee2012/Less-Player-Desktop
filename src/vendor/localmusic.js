@@ -36,7 +36,7 @@ export class LocalMusic {
                 const onlineCandidate = await United.transferTrack(track, { isGetCover: true })
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
-                    if (cover && track.cover != cover && !cover.startsWith('http')) {
+                    if (cover && track.cover != cover && !toTrimString(track.cover).startsWith('http')) {
                         Object.assign(result, { cover })
                         onTrackUpdated(result)
                     }
@@ -80,7 +80,7 @@ export class LocalMusic {
                 }
                 if (onlineCandidate) {
                     const { cover } = onlineCandidate
-                    if (cover && result.cover != cover && !cover.startsWith('http')) {
+                    if (cover && result.cover != cover && !toTrimString(track.cover).startsWith('http')) {
                         Object.assign(result, { cover })
                         onTrackUpdated(result)
                     }

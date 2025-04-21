@@ -431,7 +431,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </span>
                 <span v-html="track.title"></span>
             </div>
-            <div class="audio-artist spacing" v-show="lyric.aralMetaLayout == 0">
+            <div class="audio-artist spacing" 
+                v-show="lyric.aralMetaLayout == 0 && Track.hasArtist(track)">
                 <b v-show="!Playlist.isFMRadioType(track)">歌手:</b>
                 <b v-show="Playlist.isFMRadioType(track)">平台:</b>
                 <span>
@@ -443,7 +444,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </ArtistControl>
                 </span>
             </div>
-            <div class="audio-album spacing" v-show="lyric.aralMetaLayout == 0">
+            <div class="audio-album spacing" 
+                v-show="lyric.aralMetaLayout == 0 && Track.hasAlbum(track)">
                 <b v-show="!Playlist.isFMRadioType(track)">专辑:</b>
                 <b v-show="Playlist.isFMRadioType(track)">标签:</b>
                 <span>
@@ -454,8 +456,10 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </AlbumControl>
                 </span>
             </div>
-            <div class="audio-artist-album-wrap spacing" v-show="lyric.aralMetaLayout == 2">
-                <div class="audio-artist">
+            <div class="audio-artist-album-wrap spacing" 
+                v-show="lyric.aralMetaLayout == 2 && 
+                    (Track.hasArtist(track) || Track.hasAlbum(track))">
+                <div class="audio-artist" v-show="Track.hasArtist(track)">
                     <b v-show="!Playlist.isFMRadioType(track)">歌手:</b>
                     <b v-show="Playlist.isFMRadioType(track)">平台:</b>
                     <span>
@@ -467,7 +471,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ArtistControl>
                     </span>
                 </div>
-                <div class="audio-album">
+                <div class="audio-album" :class="{ 'spacing1': Track.hasArtist(track)}"
+                    v-show="Track.hasAlbum(track)">
                     <b v-show="!Playlist.isFMRadioType(track)">专辑:</b>
                     <b v-show="Playlist.isFMRadioType(track)">标签:</b>
                     <span>
@@ -606,7 +611,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-top: 15px;
 }
 
-.lyric-ctl .audio-artist-album-wrap .audio-album {
+.lyric-ctl .audio-artist-album-wrap .audio-album.spacing1 {
     margin-left: 30px;
 }
 

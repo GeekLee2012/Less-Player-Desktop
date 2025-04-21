@@ -9,6 +9,7 @@ import SongListControl from '../components/SongListControl.vue';
 import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { Track } from '../../common/Track';
+import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -107,6 +108,7 @@ const resetTrackCover = () => {
     const { cover  } = working
     Object.assign(current, { cover })
     showToast('封面已重置')
+    emitEvents('track-coverUpdated', current)
 }
 
 const resetTrackLyric = () => {

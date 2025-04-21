@@ -5,10 +5,11 @@ import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
-import { Track } from '../../common/Track';
+import { useLocalMusicStore } from '../store/localMusicStore';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { toTrimString, escapeHtml } from '../../common/Utils';
+import { Track } from '../../common/Track';
 import { Playlist } from '../../common/Playlist';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
@@ -33,11 +34,12 @@ const { playVideoItem, dndSaveTrack, loadTrackUrl, loadTrackLyric, notifyLyricLo
 const { showContextMenu } = inject('appCommon')
 
 const { playing, currentTrack } = storeToRefs(usePlayStore())
-const { addTrack, playTrack, togglePlay } = usePlayStore()
+const { addTrack, playTrack, togglePlay, isNoneTrack } = usePlayStore()
 const { commonCtxMenuCacheItem, workingTrackForResourceToolView } = storeToRefs(useAppCommonStore())
-const { showToast, showFailToast } = useAppCommonStore()
+const { showToast, showFailToast, setTrackResourceToolViewPreviewMode } = useAppCommonStore()
 const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable, isSongItemIndexShow } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
+const { getLocalPlaylistTrack } = useLocalMusicStore()
 
 
 const isChecked = ref(props.checked)
@@ -76,7 +78,11 @@ const onContextMenu = (event) => {
 const getItemTrackUrl = async () => {
     const { data } = props
     const workingTrack = workingTrackForResourceToolView.value || currentTrack.value
-    if(!workingTrack) return 
+    if(!workingTrack || isNoneTrack(workingTrack)) return  
+    if(Playlist.isFMRadioType(workingTrack)) return showFailToast('FM电台不支持换音源')
+    const { platform } = workingTrack
+    if(isLocalMusic(platform)) return showFailToast('本地歌曲不支持换音源')
+
     let result = data 
     if(!Track.hasUrl(result)) result = await loadTrackUrl(data)
     if(!Track.hasUrl(result)) return showFailToast('当前歌曲无音源')
@@ -91,22 +97,40 @@ const getItemCover = () => {
     const { data } = props
     const { cover } = data
     const workingTrack = workingTrackForResourceToolView.value || currentTrack.value
-    if(!workingTrack) return 
+    if(!workingTrack || isNoneTrack(workingTrack)) return
+    if(Playlist.isFMRadioType(workingTrack)) return showFailToast('FM电台不支持换封面')
+    if(!Track.hasCover(data)) return
+
     Object.assign(workingTrack, { cover })
+    setTrackResourceToolViewPreviewMode(true)
+    showToast('封面已更新<br>即将为您开启预览')
+    emitEvents('track-coverUpdated', workingTrack)
+
+     //上面的更新封面操作，影响范围：当前播放（列表）
+    //还需关联更新本地歌单歌曲
+    const { id, platform, pid } = workingTrack
+    if(isLocalMusic(platform)) {
+       const track = getLocalPlaylistTrack(pid, id)
+       if(!track) return 
+       Object.assign(track,  { cover })
+    }
 }
 
 const getItemLyric = async () => {
     const { data } = props
     const workingTrack = workingTrackForResourceToolView.value || currentTrack.value
-    if(!workingTrack) return 
+    if(!workingTrack || isNoneTrack(workingTrack)) return
+    if(Playlist.isFMRadioType(workingTrack)) return showFailToast('FM电台不支持歌词')
+
     let result = data 
     if(!Track.hasLyric(result)) result = await loadTrackLyric(data)
-    const { lyric, lyricTrans, lyricRoma } = result
+    const { lyric, trans, roma } = result
     if(!Track.hasLyric(result)) return showFailToast('当前歌曲无歌词资源')
     //更新歌词
-    Object.assign(workingTrack, { lyric, lyricTrans, lyricRoma  })
+    Object.assign(workingTrack, { lyric, lyricTrans: trans, lyricRoma: roma  })
     notifyLyricLoaded(workingTrack)
-    showToast('歌词资源已加载')
+    setTrackResourceToolViewPreviewMode(true)
+    showToast('歌词已加载<br>即将为您开启预览')
 }
 
 

@@ -204,6 +204,11 @@ export class Track {
             && track.artist.length > 0
     }
 
+    static hasAlbum(track) {
+        return track && track.album
+            && !isBlank(track.album.name)
+    }
+
     static isCandidate(track) {
         return track && track.isCandidate
     }

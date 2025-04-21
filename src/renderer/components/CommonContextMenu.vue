@@ -254,7 +254,7 @@ const visitPlaylistCreate = () => {
     isLocalMusicType(currentDataType) ? visitLocalPlaylistCreate() : visitCustomPlaylistCreate()
 }
 
-const searchTrackResource = () => {
+const showTrackResourceToolView = () => {
     if (isSimpleLayout.value || isMiniLayout.value) switchToFallbackLayout()
 
     hideAllCtxMenus(false)
@@ -402,7 +402,7 @@ const MenuItems = {
     searchTrackResource: {
         name: '搜索歌曲资源',
         icon: '<svg width="16" height="16" viewBox="0 0 726.24 726.5" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path d="M456.25,529.61C384.86,577,307.37,592.47,224,573.24,153.93,557.08,97.62,519,55.17,460.86-28.43,346.44-15.75,186.09,84.6,85.69c101.34-101.4,261-114.38,376.23-30.54,41.42,30.13,73,68.4,94.17,115.09,21.07,46.46,29.25,95.18,24.9,146-4.37,51-21.59,97.46-51.33,141.2,1.68,1.06,3.67,1.85,5,3.23Q622,549.41,710.24,638.25c14.25,14.32,19.28,31.43,13.88,50.84-10.61,38.09-57.48,50-86,22-23.29-22.9-46.23-46.15-69.33-69.24L459.56,532.66C458.52,531.62,457.4,530.67,456.25,529.61Zm56.64-238.83C513,168.29,413.34,68.68,290.67,68.67a221.82,221.82,0,0,0-222,222.1c0,122.25,99.47,221.82,221.82,222.16C412.61,513.26,512.77,413.22,512.89,290.78Z" /></g></g></svg>',
-        action: searchTrackResource,
+        action: showTrackResourceToolView,
     }
 }
 
