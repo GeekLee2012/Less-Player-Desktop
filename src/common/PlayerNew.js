@@ -751,29 +751,30 @@ class Player extends EventWrapper {
     }
 
     static create() {
-        return new Player().on({
-            'track-play': value => singleton.playTrack(value),
-            'track-restore': value => singleton.restore(value),
-            'track-changed': value => singleton.setCurrent(value),
-            'track-togglePlay': () => singleton.togglePlay(),
-            'track-seek': value => singleton.seek(value),
-            'volume-set': value => singleton.volume(value),
-            'radio-play': () => singleton.setCurrent(null),
-            'playbackQueue-empty': () => singleton.setCurrent(null),
-            'track-setupSoundEffect': value => singleton.setupSoundEffect(value),
-            'track-updateStereoPan': value => singleton.updateStereoPan(value),
-            'track-updateVolumeGain': value => singleton.updateVolumeGain(value),
-            'track-stateRefreshFrequency': value => singleton.updateStateRefreshFrequency(value),
-            'track-spectrumRefreshFrequency': value => singleton.updateSpectrumRefreshFrequency(value),
-            'track-markSeekPending': value => singleton.setSeekPendingMark(value),
-            'desktopLyric-messagePort': value => singleton.setupDesktopLyricMessagePort(value),
-            'track-lyricLoaded': value => singleton.updateLyric(value, true),
-            'track-noLyric': value => singleton.updateLyric(value, false),
-            'track-switchToFallback': value => singleton.switchToFallback(value),
-            'desktopLyric-showState': value => singleton.setMessagePortActiveState(value),
-            'outputDevice-setup': value => singleton._setAudioOutputDevice(value),
-            'mpvBinary-setPath': value => singleton.setMpvBinaryPath(value),
-            'app-beforeQuit': () => singleton.quit()
+        const player = new Player()
+        return player.on({
+            'track-play': value => player.playTrack(value),
+            'track-restore': value => player.restore(value),
+            'track-changed': value => player.setCurrent(value),
+            'track-togglePlay': () => player.togglePlay(),
+            'track-seek': value => player.seek(value),
+            'volume-set': value => player.volume(value),
+            'radio-play': () => player.setCurrent(null),
+            'playbackQueue-empty': () => player.setCurrent(null),
+            'track-setupSoundEffect': value => player.setupSoundEffect(value),
+            'track-updateStereoPan': value => player.updateStereoPan(value),
+            'track-updateVolumeGain': value => player.updateVolumeGain(value),
+            'track-stateRefreshFrequency': value => player.updateStateRefreshFrequency(value),
+            'track-spectrumRefreshFrequency': value => player.updateSpectrumRefreshFrequency(value),
+            'track-markSeekPending': value => player.setSeekPendingMark(value),
+            'desktopLyric-messagePort': value => player.setupDesktopLyricMessagePort(value),
+            'track-lyricLoaded': value => player.updateLyric(value, true),
+            'track-noLyric': value => player.updateLyric(value, false),
+            'track-switchToFallback': value => player.switchToFallback(value),
+            'desktopLyric-showState': value => player.setMessagePortActiveState(value),
+            'outputDevice-setup': value => player._setAudioOutputDevice(value),
+            'mpvBinary-setPath': value => player.setMpvBinaryPath(value),
+            'app-beforeQuit': () => player.quit()
         })
     }
 

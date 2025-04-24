@@ -34,7 +34,7 @@ const { playVideoItem, dndSaveTrack, loadTrackUrl, loadTrackLyric, notifyLyricLo
 const { showContextMenu } = inject('appCommon')
 
 const { playing, currentTrack } = storeToRefs(usePlayStore())
-const { addTrack, playTrack, togglePlay, isNoneTrack } = usePlayStore()
+const { addTrack, playTrack, togglePlay, isNoneTrack, isCurrentTrack } = usePlayStore()
 const { commonCtxMenuCacheItem, workingTrackForResourceToolView } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, setTrackResourceToolViewPreviewMode } = useAppCommonStore()
 const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable, isSongItemIndexShow } = storeToRefs(useSettingStore())
@@ -99,12 +99,12 @@ const getItemCover = () => {
     const workingTrack = workingTrackForResourceToolView.value || currentTrack.value
     if(!workingTrack || isNoneTrack(workingTrack)) return
     if(Playlist.isFMRadioType(workingTrack)) return showFailToast('FM电台不支持换封面')
-    if(!Track.hasCover(data)) return
+    if(!Track.hasCover(data)) return 
 
     Object.assign(workingTrack, { cover })
     setTrackResourceToolViewPreviewMode(true)
     showToast('封面已更新<br>即将为您开启预览')
-    emitEvents('track-coverUpdated', workingTrack)
+    if(isCurrentTrack(workingTrack)) emitEvents('track-coverUpdated', workingTrack)
 
      //上面的更新封面操作，影响范围：当前播放（列表）
     //还需关联更新本地歌单歌曲
@@ -122,7 +122,7 @@ const getItemLyric = async () => {
     if(!workingTrack || isNoneTrack(workingTrack)) return
     if(Playlist.isFMRadioType(workingTrack)) return showFailToast('FM电台不支持歌词')
 
-    let result = data 
+    let result = data
     if(!Track.hasLyric(result)) result = await loadTrackLyric(data)
     const { lyric, trans, roma } = result
     if(!Track.hasLyric(result)) return showFailToast('当前歌曲无歌词资源')
@@ -131,6 +131,17 @@ const getItemLyric = async () => {
     notifyLyricLoaded(workingTrack)
     setTrackResourceToolViewPreviewMode(true)
     showToast('歌词已加载<br>即将为您开启预览')
+
+    //歌词暂时不更新啦，节省点存储空间
+    //或许可以采用写入歌词文件的方式
+    /*
+    const { id, platform, pid } = workingTrack
+    if(isLocalMusic(platform)) {
+       const track = getLocalPlaylistTrack(pid, id)
+       if(!track) return 
+       Object.assign(track,  { lyric, lyricTrans: trans, lyricRoma: roma  })
+    }
+    */
 }
 
 

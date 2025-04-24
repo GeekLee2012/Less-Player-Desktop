@@ -79,7 +79,7 @@ const setCurrentTrack = (track, isInit) => {
 
 const getDefaultLyricText = () => {
   const track = currenTrack.value
-  if (!track) return '听你想听，爱你所爱'
+  if (!track) return '爱你所爱'
   let artistName = Track.artistName(track)
   if (artistName.length > 0) artistName = ` - ${artistName}`
   return track.title + artistName

@@ -934,34 +934,43 @@ const getVideoDetail = (video) => {
 const setupCurrentMediaSession = async (track) => {
     try {
         if ("mediaSession" in navigator) {
-            const _track = track || { title: '听你想听，爱你所爱' }
+            const _track = track || { title: '爱你所爱' }
             const { title, cover } = _track
             let coverSrc = cover
             if (toTrimString(cover).startsWith(ImageProtocal.prefix)) {
                 coverSrc = await ipcRendererInvoke('open-image-base64', cover)
             }
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title,
-                artist: Track.artistName(_track),
-                album: Track.albumName(_track),
-                artwork: [{
-                    src: coverDefault(coverSrc),
-                    sizes: "240x240",
-                    type: "image/png",
-                }, {
-                    src: coverDefault(coverSrc),
-                    sizes: "300x300",
-                    type: "image/png",
-                }, {
-                    src: coverDefault(coverSrc),
-                    sizes: "500x500",
-                    type: "image/png",
-                }, {
-                    src: coverDefault(coverSrc),
-                    sizes: "1000x1000",
-                    type: "image/png",
-                }]
-            })
+            const _metadata = {
+                    title,
+                    artist: Track.artistName(_track),
+                    album: Track.albumName(_track),
+                    artwork: [{
+                        src: coverDefault(coverSrc),
+                        sizes: "240x240",
+                        type: "image/png",
+                    }, {
+                        src: coverDefault(coverSrc),
+                        sizes: "300x300",
+                        type: "image/png",
+                    }, {
+                        src: coverDefault(coverSrc),
+                        sizes: "500x500",
+                        type: "image/png",
+                    }, {
+                        src: coverDefault(coverSrc),
+                        sizes: "1000x1000",
+                        type: "image/png",
+                    }]
+                }
+            const { metadata } = navigator.mediaSession
+            if(metadata) {
+                metadata.title = _metadata.title
+                metadata.artist = _metadata.artist
+                metadata.album = _metadata.album
+                metadata.artwork = _metadata.artwork
+            } else {
+                navigator.mediaSession.metadata = new MediaMetadata(_metadata)
+            }
 
             //上、下一曲按钮功能绑定，不支持视频
             if (currentVideo.value) return
@@ -1624,7 +1633,7 @@ const eventsRegistration = {
     'track-state': ({ state, track, currentTime, fallback }) => {
         //播放刚开始时，更新MediaSession
         const prevState = playState.value
-        if ((prevState == PlayState.INIT || prevState == PlayState.LOADED) && state == PlayState.PLAYING) {
+        if (prevState <= PlayState.STARTED && state == PlayState.PLAYING) {
             setupCurrentMediaSession(currentTrack.value)
             resetAutoSkip()
         }
@@ -1647,7 +1656,6 @@ const eventsRegistration = {
                 setPlaying(false)
                 break
             case PlayState.STARTED:
-                //setupCurrentMediaSession(currentTrack.value)
                 break
             case PlayState.END:
                 playNextTrack()

@@ -36,7 +36,9 @@ const { showContextMenu } = inject('appCommon')
 
 //技术债：早期很多操作，都直接访问Store，没有统一封装管理
 const { playing, currentTrack } = storeToRefs(usePlayStore())
-const { addTrack, playTrack, togglePlay, playTrackLater, isNoneTrack } = usePlayStore()
+const { addTrack, playTrack, togglePlay, 
+    playTrackLater, isNoneTrack, isCurrentTrack 
+} = usePlayStore()
 const { commonCtxMenuCacheItem, workingTrackForResourceToolView } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, setTrackResourceToolViewPreviewMode } = useAppCommonStore()
 const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable, isSongItemIndexShow } = storeToRefs(useSettingStore())
@@ -105,7 +107,7 @@ const getItemCover = () => {
     Object.assign(workingTrack, { cover })
     setTrackResourceToolViewPreviewMode(true)
     showToast('封面已更新<br>即将为您开启预览')
-    emitEvents('track-coverUpdated', workingTrack)
+    if(isCurrentTrack(workingTrack)) emitEvents('track-coverUpdated', workingTrack)
 
     //上面的更新封面操作，影响范围：当前播放（列表）
     //还需关联更新本地歌单歌曲

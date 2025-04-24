@@ -208,6 +208,10 @@ const tutorialList = [{
     title: '左侧导航，带图标的标题 - 点击',
     artist: [ { id:'', name: '教程 - 交互 - 图标' }],
     color: '#d66d75',
+}, {
+    title: '左侧导航，当前应用Logo - 点击',
+    artist: [ { id:'', name: '教程 - 交互 - 图标' }],
+    color: '#d66d75',
 }]
 
 

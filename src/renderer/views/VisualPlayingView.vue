@@ -178,11 +178,11 @@ const postCoverLoadComplete = () => {
         containerEl.classList.add(backdropClass)
         //文字、按钮控件等元素，大部分在light样式下效果较好
         containerEl.classList.remove('dark')
+        containerEl.classList.remove('light')
         autoClass = 'light'
 
         if(playingViewBgCoverEffectGradientBrightness.value == 0) {
             containerEl.classList.add(brightnessLightClass)
-            containerEl.classList.remove('light')
             autoClass = 'dark'
         } else if(playingViewBgCoverEffectGradientBrightness.value == 1) {
             containerEl.classList.add(brightnessMidClass)
@@ -282,6 +282,7 @@ onMounted(() => {
 onUnmounted(() => {
     setDisactived(true)
     emitEvents('visualPlayingView-disactived')
+    clearBackgroundEffect()
 })
 </script>
 

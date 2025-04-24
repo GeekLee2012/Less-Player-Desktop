@@ -181,6 +181,7 @@ const removeAll = async () => {
     removeAllFromLocalPlaylist(props.id)
     detail.data.length = 0
     showToast("全部歌曲已删除")
+    setDataListId(randomTextWithinAlphabetNums(16))
 }
 
 const addFolders = async () => {

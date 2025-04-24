@@ -120,9 +120,7 @@ const adjustSubmenuPosition = (event) => {
   const { clientWidth, clientHeight } = document.documentElement
   const submenuHeight = getCtxSubmenuAutoHeight(), padding = 10
   //直接显示二级菜单，而一级菜单并没有在显示
-  if (!ctxMenuPos) {
-    return pos
-  }
+  if (!ctxMenuPos) return pos
   //一级菜单正在显示
   const gapX = clientX + submenuWidth - clientWidth
   const tGapY = clientY - submenuHeight
@@ -146,7 +144,8 @@ const adjustSubmenuPosition = (event) => {
 const setSubmenuPosition = (event) => {
   const pos = adjustSubmenuPosition(event)
   //const padding = submenuItemNums > 6 ? 12 : 6
-  const padding = submenuItemNums > 6 ? 22 : 16
+  //const padding = submenuItemNums > 6 ? 22 : 16
+  const padding = 16
   let left = pos.x, top = pos.y
   if (ctxMenuPos) { //存在一级菜单
     left = ctxMenuPos.x - submenuWidth - padding
@@ -227,7 +226,7 @@ const setupTrackResourceToolViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #track-resource-tool-view',
     width: 688,
-    height: 528
+    height: 505
   })
 }
 
@@ -838,7 +837,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   bottom: 80px;
   width: 688px;
-  height: 528px;
+  height: 505px;
   z-index: 99;
   box-shadow: var(--box-shadow);
   border-radius: var(--border-popover-border-radius);

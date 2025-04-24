@@ -1139,7 +1139,7 @@ const createMainWindow = (show) => {
     minWidth: width,
     minHeight: height,
     titleBarStyle: 'hidden',
-    title: '听你想听，爱你所爱',
+    title: '爱你所爱',
     //trafficLightPosition: { x: 20, y: 18 },
     trafficLightPosition: { x: -404, y: -404 }, // 404 => 神秘数字 
     transparent: true,
@@ -1377,7 +1377,7 @@ const sendTrayAction = (action, isForceShowMainWin) => {
 
 const initTrayMenuTemplate = () => {
   const template = [{
-    label: '听你想听，爱你所爱',
+    label: '爱你所爱，不枉青春',
     click: () => sendTrayAction(TrayAction.RESTORE, true)
   }, {
     type: 'separator'

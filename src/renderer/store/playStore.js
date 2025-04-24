@@ -8,7 +8,7 @@ import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 const NONE_TRACK = new Track('', '', 
-    '听你想听，爱你所爱',
+    '爱你所爱',
     [{ id: '', name: '不枉青春' }],
     { id: '', name: '山川湖海，日月星辰' })
 
