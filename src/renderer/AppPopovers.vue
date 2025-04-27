@@ -462,7 +462,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     </ArtistListSubmenu>
 
     <!-- 通用通知 -->
-    <transition>
+    <transition :class="{
+      'animate__bounceIn': commonNotificationShow,
+      'animate__bounceOut': !commonNotificationShow,
+    }">
       <Notification class="common-ntf" 
         :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
         v-show="commonNotificationShow && (commonNotificationType == 0)" 
@@ -484,7 +487,10 @@ onUnmounted(() => offEvents(eventsRegistration))
       </Notification>
     </transition>
 
-    <transition>
+    <transition :class="{
+      'animate__bounceIn': commonNotificationShow,
+      'animate__bounceOut': !commonNotificationShow,
+    }">
       <Notification class="common-ntf warning-ntf" 
         :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
         v-show="commonNotificationShow && (commonNotificationType == 1)" 

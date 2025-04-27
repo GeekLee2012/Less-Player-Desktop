@@ -948,8 +948,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <input type="number" :value="displayFrequency" readonly/>
                     </div>
                     <div class="tip-text">提示：当前应用，更新频度，是指每多少个动画帧进行一次更新操作<br>
-                        频度值越小，动画可能越流畅，而CPU占用则会越高<br>
-                        歌曲（歌词）进度更新频度，建议与当前设备的屏幕刷新率保持一致
+                        频度值越小，歌词更新延迟越低，动画可能越流畅，而CPU占用则会越高<br>
+                        歌曲（歌词）进度更新频度，建议与当前设备的屏幕刷新率保持一致<br>
                     </div>
                      <!-- 屏幕刷新率检测值，无法完全保证准确性。因此，将下面“xxx更新频度”设置项的主动权交还给用户，自由度也会更高 -->
                     <div>
@@ -964,12 +964,13 @@ onUnmounted(() => offEvents(eventsRegistration))
                             max="256" step="1" @input="" @keydown.enter="updateSpectrumRefreshFrequency"
                             @focusout="updateSpectrumRefreshFrequency" />
                     </div>
-                    <div class="tip-text">提示：当前应用支持启用mpv播放音频，需配置mpv binary文件所在位置<br>
+                    <div class="tip-text">提示：当前应用支持启用mpv播放音频，需配置mpv binary可执行文件所在位置<br>
                         macOS和Linux上文件全称（含扩展名）一般为mpv，Windows则为mpv.exe<br>
-                        目前mpv仅用于兜底播放，即音频播放失败时才启用mpv，暂不支持音效、频谱等
+                        目前mpv仅用于兜底播放，即音频播放失败时才启用mpv，暂不支持音效、频谱等<br>
+                        不同的系统版本，对应支持的mpv版本不同；需配置正确的mpv版本，才能正常使用
                     </div>
                     <div class="last">
-                        <span class="cate-subtitle">mpv binary文件位置：</span>
+                        <span class="cate-subtitle">mpv binary可执行文件位置：</span>
                         <div class="dir-input-ctl">
                             <input class="text-input-ctl" v-model="track.mpvBinaryPath" placeholder="mpv binary文件位置" />
                             <div class="select-btn" @click="selectMpvFile">选择</div>

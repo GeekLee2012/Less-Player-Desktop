@@ -80,8 +80,10 @@ const renderAndScrollLyric = (secs) => {
         index = i
     }
 
-    nextTick(setupLyricLines)
+    if(currentIndex.value == index && index >= 0) return
 
+    nextTick(setupLyricLines)
+    
     if (index >= 0) setLyricCurrentIndex(index)
     index = Math.max(index, 0)
 
@@ -126,7 +128,8 @@ const renderAndScrollLyric = (secs) => {
     //懒得再计算相邻两句歌词之间的时间间隔了，暂时感觉不是很必要
     const frequency = getStateRefreshFrequency()
     const duration = 300 * frequency / 60
-    smoothScroll(lyricWrap, destScrollTop, duration, 5, () => {
+    const step = 5 * frequency / 60
+    smoothScroll(lyricWrap, destScrollTop, duration, step, () => {
         return (isUserMouseWheel.value || isSeeking.value || progressSeekingState.value)
     })
 }
@@ -240,6 +243,7 @@ const setupLyricAlignment = () => {
     const lyricCtlEls = document.querySelectorAll('.lyric-ctl')
     const artistEls = document.querySelectorAll('.lyric-ctl .audio-artist')
     const albumEls = document.querySelectorAll('.lyric-ctl .audio-album')
+    const aralWrapEls = document.querySelectorAll('.lyric-ctl .audio-artist-album-wrap')
     const noLyricEls = document.querySelectorAll('.lyric-ctl .no-lyric')
     const textAligns = ['left', 'center', 'right']
     const flexAligns = ['flex-start', 'center', 'flex-end']
@@ -247,6 +251,7 @@ const setupLyricAlignment = () => {
     if (lyricCtlEls) lyricCtlEls.forEach(el => el.style.textAlign = textAligns[alignment])
     if (artistEls) artistEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
     if (albumEls) albumEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
+    if (aralWrapEls) aralWrapEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
     if (noLyricEls) noLyricEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
 
 }
@@ -376,6 +381,17 @@ const isFullLayoutMode = computed(() => {
     return layoutMode == 2
 })
 
+const computedNoneArtistAlbumMeta = computed(() => {
+    const layout = lyric.value.aralMetaLayout
+    if(layout == 1) return true
+    
+    const { track } = props
+    if(!Track.hasArtist(track) && !Track.hasAlbum(track)) {
+        return true
+    }
+    return false
+})
+
 
 
 /* 生命周期、监听 */
@@ -411,7 +427,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 <template>
     <div class="lyric-ctl" 
         :class="{
-            'none-aral-meta': lyric.aralMetaLayout == 1
+            'none-aral-meta': computedNoneArtistAlbumMeta
         }"
         @contextmenu.stop="toggleLyricToolbar">
         <div class="header" v-show="isHeaderVisible()">
@@ -588,7 +604,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .lyric-ctl.none-aral-meta .audio-title {
-    margin-bottom: 25px;
+    margin-bottom: 25px !important;
 }
 
 .lyric-ctl .audio-artist,
@@ -597,6 +613,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     font-weight: bold;
     color: var(--content-subtitle-text-color);
     display: flex;
+    align-items: center;
 }
 
 .lyric-ctl .audio-artist .ar-ctl,

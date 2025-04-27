@@ -130,6 +130,8 @@ const renderAndScrollLyric = (secs) => {
         }
     }
 
+    if(currentIndex.value == index && index >= 0) return
+
     if (index >= 0) {
         setLyricCurrentIndex(index)
     } else {
@@ -149,7 +151,8 @@ const renderAndScrollLyric = (secs) => {
     //懒得再计算相邻两句歌词之间的时间间隔了，暂时感觉不是很必要
     const frequency = getStateRefreshFrequency()
     const duration = 300 * frequency / 60
-    smoothScroll(lyricWrap, destScrollTop, duration, 5, () => {
+    const step = 5 * frequency / 60
+    smoothScroll(lyricWrap, destScrollTop, duration, step, () => {
         return (isUserMouseWheel.value || isSeeking.value || progressSeekingState.value)
     })
 }

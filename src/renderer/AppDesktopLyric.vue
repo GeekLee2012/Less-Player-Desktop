@@ -17,7 +17,7 @@ const { setDesktopLyricFontSize, setDesktopLyricTextDirection,
   setDesktopLyricAlignment, setDesktopLyricLayoutMode,
   setDesktopLyricColor, setDesktopLyricHighlightColor,
   setDesktopLyricLineSpacing, setDesktopLyricAutoSize,
-  setDesktopLyricExtraTextHighlightColor, } = useSettingStore()
+  setDesktopLyricExtraTextHighlightColor, getStateRefreshFrequency, } = useSettingStore()
 
 //TODO 歌词处理逻辑, 几乎与LyricControl组件重复
 const currenTrack = ref(null)
@@ -79,7 +79,7 @@ const setCurrentTrack = (track, isInit) => {
 
 const getDefaultLyricText = () => {
   const track = currenTrack.value
-  if (!track) return '爱你所爱'
+  if (!track) return '爱你所爱，不枉青春'
   let artistName = Track.artistName(track)
   if (artistName.length > 0) artistName = ` - ${artistName}`
   return track.title + artistName
@@ -104,6 +104,8 @@ const renderLyric = (currentTime) => {
       break
     }
   }
+
+  if(currentIndex.value == index && index >= 0) return
 
   if (index >= 0) {
     setCurrentIndex(index)
@@ -130,9 +132,11 @@ const renderLyric = (currentTime) => {
   const destScrollValue = lines[index][offsetProp] - clientSize / 2 + lineSize / 2
 
   const scrollAction = isVeritical ? smoothScrollHorizional : smoothScroll
-  //const frequency = getStateRefreshFrequency()
-  //const duration = 300 * frequency / 60
-  scrollAction(lyricWrap, destScrollValue, 300, 5, () => (isUserMouseWheel.value || isSeeking.value))
+  const frequency = getStateRefreshFrequency()
+  const duration = 300 * frequency / 60
+  const step = 5 * frequency / 60
+  scrollAction(lyricWrap, destScrollValue, duration, step, 
+    () => (isUserMouseWheel.value || isSeeking.value))
 
 }
 

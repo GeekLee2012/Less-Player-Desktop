@@ -61,6 +61,15 @@ class HowlerPlayer extends EventWrapper {
         this.seekPendingMark = value
     }
 
+    updateStateRefreshFrequency(value) {
+        this.stateRefreshFrequency = value || 60
+    }
+
+    updateSpectrumRefreshFrequency(value) {
+        this.spectrumRefreshFrequency = value || 3
+    }
+
+
     createSound() {
         if (!isTrackAvailable(this.currentTrack)) return this.stop()
         

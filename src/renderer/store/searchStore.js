@@ -25,6 +25,14 @@ export const useSearchStore = defineStore('search', {
                 return w2 - w1
             })
         },
+        resourcePlatforms() {
+            const { activePlatforms } = usePlatformStore()
+            return activePlatforms('resource-search').sort((p1, p2) => {
+                const w1 = p1.weight || 0
+                const w2 = p2.weight || 0
+                return w2 - w1
+            })
+        },
         activeTabCode(state) {
             if(this._activeTabCode) return this._activeTabCode
             return this.activeTab < 0 ? '' : this.tabs[this.activeTab].code

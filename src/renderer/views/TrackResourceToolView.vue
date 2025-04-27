@@ -21,8 +21,10 @@ const { hideTrackResourceToolView, setWorkingTrackForResourceToolView,
     setTrackResourceToolViewPreviewMode: setPreviewMode, showToast,
     hideAllCtxMenus,
  } = useAppCommonStore()
-const { workingTrackForResourceToolView, trackResourceToolViewPreviewMode: isPreviewMode } = storeToRefs(useAppCommonStore())
-const { platforms } = storeToRefs(useSearchStore())
+const { workingTrackForResourceToolView, 
+    trackResourceToolViewPreviewMode: isPreviewMode 
+} = storeToRefs(useAppCommonStore())
+const { platforms, resourcePlatforms } = storeToRefs(useSearchStore())
 const { getVendor } = usePlatformStore()
 const { currentTrack } = storeToRefs(usePlayStore())
 const { isNoneTrack, playTrack } = usePlayStore()
@@ -53,10 +55,21 @@ const setResourceMode = (value) => resourceMode.value = value
 
 
 const computedPlatforms = computed(() => {
-    return platforms.value.filter(platform => {
+    const result = []
+    //新版本
+    const resPlatforms = resourcePlatforms.value
+    if(resPlatforms && resPlatforms.length > 0) {
+        result.push(...resPlatforms)
+    }
+    //兼容旧版本 
+    platforms.value.forEach(platform => {
+        if(result.includes(platform)) return 
         const { searchTabs } = platform
-        return searchTabs.includes('all-songs')
+        if(searchTabs.includes('all-songs')) {
+            result.push(platform)
+        }
     })
+    return result
 })
 
 const visitTab = (item, index) => {

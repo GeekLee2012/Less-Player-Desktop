@@ -134,7 +134,7 @@ const PRESET_PLATFORMS = [
         shortName: 'LO',
         online: false,
         types: ['playlists', 'artists'],
-        scopes: ['playlists', 'artists', 'search'],
+        scopes: ['playlists', 'artists', 'search', 'resource-search'],
         artistTabs: [ 'all-songs', 'about' ],
         searchTabs: [ 'all-songs', 'playlists', 'albums', 'artists' ],
         weight: 666,

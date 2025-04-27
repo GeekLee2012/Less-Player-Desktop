@@ -372,8 +372,8 @@ export const useAppCommonStore = defineStore('appCommon', {
                 this.commonNotificationShow = hasText
             } else {
                 this.commonNotificationShow = hasText
-                this.commonNotificationType = type || 0
-                this.commonNotificationText = text
+                //this.commonNotificationType = type || 0
+                //this.commonNotificationText = text
             }
             return hasText
         },
