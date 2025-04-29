@@ -282,6 +282,14 @@ export const useSettingStore = defineStore('setting', {
             fontSize: 24,
             //高亮行字号
             hlFontSize: 25,
+            //标题字号
+            titleFontSize: 32,
+            //歌手、专辑字号
+            aralFontSize: 18,
+            //普通行字号
+            fontSize: 24,
+            //高亮行字号
+            hlFontSize: 25,
             //字重，即字体粗细
             fontWeight: 400,
             //行高
@@ -292,8 +300,14 @@ export const useSettingStore = defineStore('setting', {
             offset: 0,
             //歌曲信息, 0 => 默认, 1 => 隐藏, 2 => 顶部
             metaPos: 0,
+            //标题信息，0 => 默认, 1 => 单行, 2 => 双行
+            titleMetaLines: 0,
             //歌手、专辑布局, 0 => 分行, 1 => 同行, 2 => 隐藏
             aralMetaLayout: 0,
+            //歌手、专辑标签, 0 => 文字, 1 => 隐藏, 2 => 图标
+            aralMetaLabelStyle: 0,
+            //专辑信息，0 => 默认, 1 => 隐藏, 2 => 显示
+            albumMetaShow: 0,
             //对齐方式, 0 => 左, 1 => 中, 2 => 右
             alignment: 0,
             //翻译
@@ -639,6 +653,15 @@ export const useSettingStore = defineStore('setting', {
         },
         lyricAralMetaLayout() {
             return this.lyric.aralMetaLayout
+        },
+        lyricAralMetaLabelStyle() {
+            return this.lyric.aralMetaLabelStyle
+        },
+        lyricTitleMetaLines() {
+            return this.lyric.titleMetaLines
+        },
+        lyricAlbumMetaShow() {
+            return this.lyric.albumMetaShow
         },
         lyricTransActived() {
             return this.lyric.trans
@@ -1422,6 +1445,18 @@ export const useSettingStore = defineStore('setting', {
             this.lyric.hlFontSize = fontSize
             this.setupLyricHighlightFontSize()
         },
+        setLyricTitleFontSize(value) {
+            const fontSize = parseInt(value || 32)
+            if (fontSize < 10 || fontSize > 100) return
+            this.lyric.titleFontSize = fontSize
+            this.setupLyricTitleFontSize()
+        },
+        setLyricAralFontSize(value) {
+            const fontSize = parseInt(value || 18)
+            if (fontSize < 10 || fontSize > 100) return
+            this.lyric.aralFontSize = fontSize
+            this.setupLyricAralFontSize()
+        },
         setLyricFontWeight(value) {
             const weight = parseInt(value || 400)
             if (weight < 100 || weight > 1000) return
@@ -1453,12 +1488,26 @@ export const useSettingStore = defineStore('setting', {
             this.lyric.aralMetaLayout = value || 0
             this.setupLyricAralMetaLayout()
         },
+        setLyricAralMetaLabelStyle(value) {
+            this.lyric.aralMetaLabelStyle = value || 0
+            this.setupLyricAralMetaLabelStyle()
+        },
+        setLyricTitleMetaLines(value) {
+            this.lyric.titleMetaLines = value || 0
+            this.setupLyricTitleMetaLines()
+        },
+        setLyricAlbumMetaShow(value) {
+            this.lyric.albumMetaShow = value || 0
+            this.setupLyricAlbumMetaShow()
+        },
         setLyricAlignment(value) {
             this.lyric.alignment = value || 0
             this.setupLyricAlignment()
         },
         resetLyricSetting() {
             this.setLyricFontSize()
+            this.setLyricTitleFontSize()
+            this.setLyricAralFontSize()
             this.setLyricHighlightFontSize()
             this.setLyricLineHeight()
             this.setLyricLineSpacing()
@@ -1466,11 +1515,22 @@ export const useSettingStore = defineStore('setting', {
             this.setLyricOffset()
             this.setLyricMetaPos()
             this.setLyricAralMetaLayout()
+            this.setLyricAralMetaLabelStyle()
+            this.setLyricTitleMetaLines()
+            this.setLyricAlbumMetaShow()
             this.setLyricAlignment()
         },
         setupLyricFontSize() {
             const fontSize = this.lyric.fontSize || 24
             emitEvents('lyric-fontSize', fontSize)
+        },
+        setupLyricTitleFontSize() {
+            const fontSize = this.lyric.titleFontSize || 32
+            emitEvents('lyric-titleFontSize', fontSize)
+        },
+        setupLyricAralFontSize() {
+            const fontSize = this.lyric.aralFontSize || 18
+            emitEvents('lyric-aralFontSize', fontSize)
         },
         setupLyricHighlightFontSize() {
             const fontSize = this.lyric.hlFontSize || 25
@@ -1499,6 +1559,18 @@ export const useSettingStore = defineStore('setting', {
         setupLyricAralMetaLayout() {
             const aralMetaLayout = this.lyric.aralMetaLayout || 0
             emitEvents('lyric-aralMetaLayout', aralMetaLayout)
+        },
+        setupLyricAralMetaLabelStyle() {
+            const aralMetaLabelStyle = this.lyric.aralMetaLabelStyle || 0
+            emitEvents('lyric-aralMetaLabelStyle', aralMetaLabelStyle)
+        },
+        setupLyricTitleMetaLines() {
+            const titleMetaLines = this.lyric.titleMetaLines || 0
+            emitEvents('lyric-titleMetaLines', titleMetaLines)
+        },
+        setupLyricAlbumMetaShow() {
+            const albumMetaShow = this.lyric.albumMetaShow || 0
+            emitEvents('lyric-albumMetaShow', albumMetaShow)
         },
         setupLyricAlignment() {
             const alignment = this.lyric.alignment || 0

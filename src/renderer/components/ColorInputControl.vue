@@ -97,8 +97,9 @@ const openColorPicker = (event) => {
     if (gradientMode) return
     const rgba = getColorByMode(2)
     emitEvents('color-picker-toolbar-show', {
-        event, value: rgba, onChanged: ({ rgba, hexa }) => {
-            color.value = hexa
+        event, value: rgba, onChanged: (value) => {
+            const { rgba, hexa, hex } = value || {}
+            color.value = hexa || rgba || hex 
             gradient.value = null
         },
         title: props.label
@@ -120,6 +121,12 @@ const updateColor = () => {
     const { value } = inputRef.value
     const hexa = reformatInput(value, mode.value)
     color.value = hexa
+    gradient.value = null
+}
+
+const clear = () => {
+    inputRef.value.value = ''
+    color.value = null
     gradient.value = null
 }
 
@@ -148,12 +155,21 @@ watch(inputValue, (nv, ov) => {
 </script>
 
 <template>
-    <div class="color-input-ctl" :class="{ 'gradient-only-input-mode': gradientMode }" @keydown.stop="">
+    <div class="color-input-ctl" 
+        :class="{ 'gradient-only-input-mode': gradientMode }" 
+        @keydown.stop="">
         <span class="name" v-html="modeName" @click="toggleMode"></span>
         <input class="value" ref="inputRef" v-show="mode == 1 || mode == 2" :value="modeColor"
             @keydown.enter="updateColor()" @blur="updateColor()" />
         <span class="preview" v-show="mode === 0" @click="openColorPicker" :style="modeStyle" v-html="modeColor"></span>
         <span class="preview" v-show="mode === 3" @click="openGradientColorToolbar" :style="gradientStyle"></span>
+        <div class="btn" @click="clear">
+            <svg width="10"  height="10" viewBox="0 0 593.14 593.11"  data-name="Layer 1" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z"
+                    transform="translate(-663.4 -243.46)" />
+            </svg>
+        </div>
     </div>
 </template>
 
@@ -177,6 +193,15 @@ watch(inputValue, (nv, ov) => {
     color: var(--content-inputs-text-color);
 }
 
+.color-input-ctl .name:hover {
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-text-color)
+}
+
+.contrast-mode .color-input-ctl .name:hover {
+    font-weight: bold;
+}
+
 .color-input-ctl .name,
 .color-input-ctl .preview {
     cursor: pointer;
@@ -188,6 +213,9 @@ watch(inputValue, (nv, ov) => {
 
 .gradient-only-input-mode .name {
     cursor: default;
+    font-weight: normal !important;
+    background: var(--content-inputs-bg-color) !important;
+    color: var(--content-inputs-text-color) !important;
 }
 
 .color-input-ctl .value,
@@ -195,9 +223,12 @@ watch(inputValue, (nv, ov) => {
     flex: 1;
     border: 1px solid var(--border-inputs-border-color);
     border-left: 0px;
+    border-right: 0px;
+    /*
     border-right: 1px solid var(--border-inputs-border-color);
     border-top-right-radius: var(--border-inputs-border-radius);
     border-bottom-right-radius: var(--border-inputs-border-radius);
+    */
 }
 
 .color-input-ctl .value {
@@ -207,5 +238,30 @@ watch(inputValue, (nv, ov) => {
     font-size: var(--content-text-subtitle-size);
     background-color: var(--content-inputs-bg-color);
     color: var(--content-inputs-text-color);
+}
+
+.color-input-ctl .btn {
+    min-width: 36px;
+    border: 1px solid var(--border-inputs-border-color);
+    border-top-right-radius: var(--border-inputs-border-radius);
+    border-bottom-right-radius: var(--border-inputs-border-radius);
+    border-left: 1px solid var(--border-inputs-border-color);
+    background-color: var(--content-inputs-bg-color);
+    color: var(--content-inputs-text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.color-input-ctl .btn svg {
+    fill: var(--button-icon-btn-color);
+}
+
+.color-input-ctl .btn:hover {
+    background: var(--button-icon-text-btn-bg-color);
+}
+
+.color-input-ctl .btn:hover svg {
+    fill: var(--button-icon-text-btn-text-color) !important;
 }
 </style>

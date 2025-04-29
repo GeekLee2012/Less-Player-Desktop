@@ -1059,6 +1059,14 @@ onMounted(() => {
   color: transparent !important;
 }
 
+/*
+.desktop-lyric .center .line.desktop-lyric-content-highlight {
+  background: transparent !important;
+  color: var(--content-highlight-color) !important;
+  text-shadow: 1px 1px 1px white;
+}
+*/
+
 .desktop-lyric .lyric-layout-ends .even,
 .desktop-lyric .center .align-left {
   text-align: left;

@@ -16,12 +16,23 @@ const { setLyricFontSize, setLyricHighlightFontSize,
     setLyricFontWeight, setLyricOffset,
     setLyricMetaPos, setLyricAlignment,
     resetLyricSetting, setLyricAralMetaLayout, 
+    setLyricAralMetaLabelStyle, setLyricTitleMetaLines, 
+    setLyricAlbumMetaShow, setLyricTitleFontSize,
+    setLyricAralFontSize,
 } = useSettingStore()
 
 const getInputValue = (e) => (e.target.value)
 
 const updateLyricFontSize = (e) => {
     setLyricFontSize(getInputValue(e))
+}
+
+const updateLyricTitleFontSize = (e) => {
+    setLyricTitleFontSize(getInputValue(e))
+}
+
+const updateLyricAralFontSize = (e) => {
+    setLyricAralFontSize(getInputValue(e))
 }
 
 const updateLyricHighlightFontSize = (e) => {
@@ -83,7 +94,26 @@ const getLyricOffsetText = () => {
                 </div>
                 <div class="row text v-spacing" v-show="lyric.metaPos == 0">歌手、专辑布局：</div>
                 <div class="row" v-show="lyric.metaPos == 0">
-                    <SingleSelectionControl :data="['分行', '隐藏', '同行']" :value="lyric.aralMetaLayout" :onChanged="setLyricAralMetaLayout">
+                    <SingleSelectionControl :data="['分行', '隐藏', '同行']" :value="lyric.aralMetaLayout" 
+                        :onChanged="setLyricAralMetaLayout">
+                    </SingleSelectionControl>
+                </div>
+                <div class="row text v-spacing" v-show="lyric.metaPos == 0">歌手、专辑标签：</div>
+                <div class="row" v-show="lyric.metaPos == 0">
+                    <SingleSelectionControl :data="['文字', '隐藏', '图标']" :value="lyric.aralMetaLabelStyle" 
+                        :onChanged="setLyricAralMetaLabelStyle">
+                    </SingleSelectionControl>
+                </div>
+                <div class="row text v-spacing" v-show="lyric.metaPos == 0">标题信息：</div>
+                <div class="row" v-show="lyric.metaPos == 0">
+                    <SingleSelectionControl :data="['默认', '单行', '双行']" :value="lyric.titleMetaLines"
+                        :onChanged="setLyricTitleMetaLines">
+                    </SingleSelectionControl>
+                </div>
+                <div class="row text v-spacing" v-show="lyric.metaPos == 0">专辑信息：</div>
+                <div class="row" v-show="lyric.metaPos == 0">
+                    <SingleSelectionControl :data="['默认', '隐藏', '显示']" :value="lyric.albumMetaShow"
+                        :onChanged="setLyricAlbumMetaShow">
                     </SingleSelectionControl>
                 </div>
                 <div class="row text v-spacing">对齐方式：</div>
@@ -91,6 +121,16 @@ const getLyricOffsetText = () => {
                     <SingleSelectionControl :data="['左边', '中间', '右边']" :value="lyric.alignment"
                         :onChanged="setLyricAlignment">
                     </SingleSelectionControl>
+                </div>
+                <div class="row text v-spacing">字号 (标题)：</div>
+                <div class="row">
+                    <input type="number" placeholder="默认值32" :value="lyric.titleFontSize" min="10" max="100" step="1"
+                        @input="updateLyricTitleFontSize" />
+                </div>
+                <div class="row text v-spacing">字号 (歌手、专辑)：</div>
+                <div class="row">
+                    <input type="number" placeholder="默认值18" :value="lyric.aralFontSize" min="10" max="100" step="1"
+                        @input="updateLyricAralFontSize" />
                 </div>
                 <div class="row text v-spacing">字号 (普通)：</div>
                 <div class="row">
@@ -122,6 +162,8 @@ const getLyricOffsetText = () => {
                     <input type="number" placeholder="正快负慢" :value="getLyricOffsetText()" min="-99999" max="99999"
                         step="100" @input="updateLyricOffset" />
                 </div>
+            </div>
+            <div class="bottom">
                 <div class="row text-btn v-spacing" @click="resetLyricSetting">
                     <svg width="15" height="15" viewBox="0 0 256 256" data-name="Layer 1"
                         xmlns="http://www.w3.org/2000/svg">
@@ -158,7 +200,7 @@ const getLyricOffsetText = () => {
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding-bottom: 18px;
+    padding-bottom: 15px;
     border-radius: var(--border-popover-border-radius);
     -webkit-app-region: none;
     background: var(--content-bg-color);
@@ -185,10 +227,17 @@ const getLyricOffsetText = () => {
     padding-right: 20px;
 }
 
-.lyric-toolbar .center {
+.lyric-toolbar .center,
+.lyric-toolbar .bottom {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.lyric-toolbar .center {
+    overflow: scroll;
+    overflow-x: hidden;
+    padding-bottom: 5px;
 }
 
 .lyric-toolbar .row {
@@ -198,7 +247,7 @@ const getLyricOffsetText = () => {
 }
 
 .lyric-toolbar .text {
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     font-size: 15px;
     width: 100%;
     align-items: flex-start;
@@ -217,7 +266,6 @@ const getLyricOffsetText = () => {
     text-align: left;
     width: 116px;
 }
-
 
 .lyric-toolbar .text-btn {
     text-align: center;

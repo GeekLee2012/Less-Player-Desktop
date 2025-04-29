@@ -131,9 +131,8 @@ const getItemLyric = async () => {
     if(!Track.hasLyric(result)) return showFailToast('当前歌曲无歌词资源')
     //更新歌词
     Object.assign(workingTrack, { lyric, lyricTrans: trans, lyricRoma: roma  })
-    notifyLyricLoaded(workingTrack)
+    notifyLyricLoaded(workingTrack, '歌词已加载<br>即将为您开启预览')
     setTrackResourceToolViewPreviewMode(true)
-    showToast('歌词已加载<br>即将为您开启预览')
 
     //歌词暂时不更新啦，节省点存储空间
     //或许可以采用写入歌词文件的方式

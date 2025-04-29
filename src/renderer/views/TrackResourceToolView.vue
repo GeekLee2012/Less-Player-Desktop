@@ -137,8 +137,7 @@ const resetTrackLyric = () => {
 
     const { lyric, lyricTrans, lyricRoma } = working
     Object.assign(track, { lyric, lyricTrans, lyricRoma })
-    notifyLyricLoaded(track)
-    showToast('歌词已重置')
+    notifyLyricLoaded(track, '歌词已重置')
 }
 
 const resetTrackAll = () => {

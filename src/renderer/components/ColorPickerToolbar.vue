@@ -27,7 +27,7 @@ const VueColorKitHack = {
     hexaInput: null,
     rgbaInput: null,
     isFromHexaInput: false,
-    value: {},
+    value: { hex: '#000000' },
     onChanged: null,
     setOnChanged(onChanged) {
         this.onChanged = onChanged
@@ -131,7 +131,7 @@ const VueColorKitHack = {
     },
     applyChange() {
         const { onChanged, value } = this
-        if (onChanged) onChanged(value)
+        if (typeof onChanged == 'function') onChanged(value)
         hideColorPickerToolbar()
     }
 }

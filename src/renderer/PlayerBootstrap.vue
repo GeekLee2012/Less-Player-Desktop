@@ -14,6 +14,7 @@ import { coverDefault, isBlank, isDevEnv, escapeHtml,
     ipcRendererSend, ipcRendererInvoke, 
     onIpcRendererEvent, onIpcRendererEvents, toMmss, md5,
     isSupportedImage,
+    toLowerCaseTrimString,
 } from '../common/Utils';
 import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
@@ -39,7 +40,8 @@ const { playTrack, playNextTrack,
     addTrack, playTrackDirectly,
     isCurrentTrack, isPlaying,
     setAudioOutputDevices, playTrackLater,
-    setLoading, markPlayState } = usePlayStore()
+    setLoading, markPlayState,
+    isNoneTrack, } = usePlayStore()
 const { getVendor, isLocalMusic, isFreeFM, 
     isCloudStorage, isWebDav, isNavidrome, isJellyfin 
 } = usePlatformStore()
@@ -101,8 +103,6 @@ let desktopLyricShowState = false, trackRetry = 0
 const TRACK_MAX_RETRY = 1
 const pendingBootstrapTrack = ref(null)
 const setPendingBootstrapTrack = (value) => pendingBootstrapTrack.value = value
-const customDndPlayingCover = ref(null)
-const setCustomDndPlayingCover = (value) => customDndPlayingCover.value = value
 
 
 /* 记录最近播放 */
@@ -143,7 +143,7 @@ const traceRecentAlbum = (album) => {
 }
 
 
-/* 歌词获取 */
+/* 歌词获取 - 当前歌曲 */
 const loadLyric = (track) => {
     if (!track || !isCurrentTrack(track)) return
     //已有歌词、主播电台
@@ -216,8 +216,9 @@ const updateLyric = (track, { lyric, roma, trans }) => {
 }
 
 //通知歌词已更新
-const notifyLyricLoaded = (track) => {
+const notifyLyricLoaded = (track, text) => {
     if (isCurrentTrack(track)) emitEvents('track-lyricLoaded', track)
+    if (text) showToast(text || '歌词已加载')
 }
 
 //获取当前平台指定歌曲的歌词
@@ -245,6 +246,7 @@ const loadTrackLyric = async (track) => {
 //处理不可播放歌曲
 const AUTO_PLAY_NEXT_MSG = '当前歌曲无法播放<br>即将为您播放下一曲'
 const NO_NEXT_MSG = '当前歌曲无法播放<br>列表无可播放歌曲'
+const EMPTY_QUEUE_MSG = '当前播放还没有歌曲'
 const OVERTRY_MSG = '播放失败次数太多<br>请手动播放其他歌曲吧'
 const TRY_TRANSFRER_MSG = '当前歌曲无法播放<br>即将尝试切换其他版本'
 const TRANSFRER_OK_MSG = '版本切换完成<br>即将为您播放歌曲'
@@ -280,7 +282,7 @@ const handleUnplayableTrack = (track, msg) => {
         setLoading(false)
         resetPlayState()
         resetAutoSkip()
-        return showFailToast(NO_NEXT_MSG)
+        return showFailToast(queueSize < 1 ? EMPTY_QUEUE_MSG : NO_NEXT_MSG)
     }
     //普通歌曲
     //频繁切换下一曲，体验不好，对音乐平台也不友好
@@ -996,9 +998,7 @@ const resetPlayState = (state) => {
     mmssPreseekTime.value = null
     progressState.value = 0
     setPlayState(state || PlayState.NONE)
-
     setProgressSeekingState(false)
-    setCustomDndPlayingCover(null)
 }
 
 
@@ -1329,7 +1329,19 @@ const dndSaveFile = async (event, item) => {
 }
 
 
-const setupCustomDndPlayingCover = async (event) => {
+const setupPlayingViewDndLyric = async (path) => {
+    const track = currentTrack.value
+    if(isNoneTrack(track)) return 
+    const result = await ipcRendererInvoke('read-text', path)
+    const { data, filePath } = result
+    const lyric = Lyric.parseFromText(data)
+    if(!Lyric.hasData(lyric)) return
+    Object.assign(track, { lyric })
+    notifyLyricLoaded(track, '歌词已加载')
+    
+}
+
+const setupPlayingViewDnd = async (event) => {
     event.preventDefault()
 
     const { files } = event.dataTransfer
@@ -1337,7 +1349,9 @@ const setupCustomDndPlayingCover = async (event) => {
     const { path } = files[0]
     let isEventStopped = true
     if (isSupportedImage(path)) {
-        setCustomDndPlayingCover(path)
+        //暂不支持
+    } else if (toLowerCaseTrimString(path).endsWith('.lrc')) {
+        setupPlayingViewDndLyric(path)
     } else {
         //其他文件，直接放行，继续事件冒泡
         isEventStopped = false
@@ -1602,7 +1616,7 @@ const eventsRegistration = {
                 }
                 showFailToast(TRY_TRANSFRER_MSG)
                 const candidate = await United.transferTrack(track)
-                if (!Track.hasUrl(candidate)) {
+                if (!Track.hasUrl(candidate) && !Track.hasUrl(track)) {
                     handleUnplayableTrack(track, TRANSFRER_FAIL_MSG)
                     return
                 }
@@ -1849,9 +1863,7 @@ provide('player', {
     dndSaveFile,
     quickSearch,
     reloadApp,
-    customDndPlayingCover,
-    //setCustomDndPlayingCover,
-    setupCustomDndPlayingCover,
+    setupPlayingViewDnd,
 })
 </script>
 

@@ -1811,14 +1811,9 @@ onActivated(() => {
     flex: 5;
 }
 
-.simple-layout .lyric-toolbar .container {
-    padding-bottom: 8px;
-}
-
 .simple-layout .lyric-toolbar .container .center {
-    max-height: 460px;
+    max-height: 404px;
     overflow: scroll;
     overflow-x: hidden;
-    padding-bottom: 10px;
 }
 </style>

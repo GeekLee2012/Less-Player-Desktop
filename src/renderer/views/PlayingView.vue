@@ -24,8 +24,7 @@ const { seekTrack, playVideoItem,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
     mmssPreseekTime, isTrackSeekable,
-    dndSaveCover, customDndPlayingCover,
-    setupCustomDndPlayingCover, } = inject('player')
+    dndSaveCover, setupPlayingViewDnd, } = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 const { applyDocumentStyle } = inject('appStyle')
@@ -254,7 +253,7 @@ const computedBottomNewShow = computed(() => {
 })
 
 const onDrop = async (event) => {
-    setupCustomDndPlayingCover(event)
+    setupPlayingViewDnd(event)
 }
 
 const setupVolumeBar = () => {
@@ -339,7 +338,7 @@ onUnmounted(() => {
                             'draggable': isDndSaveEnable, 
                             'none-border': !isPlayingViewCoverBorderShow 
                         }"
-                        v-lazy="coverDefault(customDndPlayingCover, Track.coverDefault(currentTrack))" 
+                        v-lazy="Track.coverDefault(currentTrack)" 
                         :draggable="isDndSaveEnable" 
                         @dragstart="dndSaveCover" />
                     <div class="format" v-show="false" v-html="trackFormat"></div>

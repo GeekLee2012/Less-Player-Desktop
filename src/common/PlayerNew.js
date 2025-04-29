@@ -28,6 +28,18 @@ const getRawTrack = (track) => {
     })
 }
 
+//TODO 别扭的方式
+let desktopLyricMessagePort = null
+let desktopLyricMessagePortActiveState = false
+const postToDesktopLryic = (action, data) => {
+    if (!desktopLyricMessagePortActiveState || !desktopLyricMessagePort) return 
+    try {
+        desktopLyricMessagePort.postMessage({ action, data })
+    } catch(error) {
+        if(isDevEnv()) console.log(error)
+    }
+}
+
 class HowlerPlayer extends EventWrapper {
     constructor(track) {
         super()
@@ -50,9 +62,6 @@ class HowlerPlayer extends EventWrapper {
         this.lastAnimationFrameUpdateTime = 0   //上一动画帧执行时间
         this.animationFrameTimeCnt = 0  //动画帧累加计时器
         */
-        //桌面歌词
-        this.desktopLyricMessagePort = null
-        this.desktopLyricMessagePortActiveState = null
 
         this.pendingOutputDeviceId = null
     }
@@ -68,7 +77,6 @@ class HowlerPlayer extends EventWrapper {
     updateSpectrumRefreshFrequency(value) {
         this.spectrumRefreshFrequency = value || 3
     }
-
 
     createSound() {
         if (!isTrackAvailable(this.currentTrack)) return this.stop()
@@ -355,65 +363,37 @@ class HowlerPlayer extends EventWrapper {
         this.animationFrameId = requestAnimationFrame(callback)
     }
 
-    setupDesktopLyricMessagePort(messagePort) {
-        this.desktopLyricMessagePort = messagePort
-        this.onDesktopLyricMessage()
-    }
-
-    setMessagePortActiveState(state) {
-        this.desktopLyricMessagePortActiveState = state
-    }
-
-    postToDesktopLryic(action, data) {
-        if (!this.desktopLyricMessagePortActiveState) return 
-        const messagePort = this.desktopLyricMessagePort
-        try {
-            if (messagePort) messagePort.postMessage({ action, data })
-        } catch(error) {
-            if(isDevEnv()) {
-                console.log(error)
-            }
-        }
-    }
-
     postPlayStateToDesktopLryic() {
-        if (!this.desktopLyricMessagePortActiveState) return
-        if(!this.mpv) return 
-
-        switch (this.mpv.playState) {
+        switch (this.playState) {
             case PlayState.NONE:
-                this.postToDesktopLryic('s-track-none')
+                postToDesktopLryic('s-track-none')
                 break
             case PlayState.INIT:
-                this.postToDesktopLryic('s-track-init', {
+                postToDesktopLryic('s-track-init', {
                     track: this.currentTrack
                 })
                 break
             case PlayState.PLAYING:
-                this.postToDesktopLryic('s-track-play')
+                postToDesktopLryic('s-track-play')
                 break
             case PlayState.PAUSE:
-                this.postToDesktopLryic('s-track-pause')
+                postToDesktopLryic('s-track-pause')
                 break
         }
     }
 
-    onDesktopLyricMessage() {
-        if(!this.desktopLyricMessagePort) return 
+    onPlayerMessage(action, data) {
         const self = this
-        this.desktopLyricMessagePort.onPlayerMessage = (action, data) => {
-            if (action == 'c-track-init') {
-                //self.setMessagePortActiveState(true)
-                self.postToDesktopLryic('s-track-init', {
-                    track: self.currentTrack,
-                    playing: (self.playState == PlayState.PLAYING)
-                })
-            } else if (action == 'c-track-pos') {
-                const sound = self.getSound()
-                if (!sound) return
-                self.currentTime = sound.seek() || 0
-                self.postToDesktopLryic('s-track-pos', self.currentTime)
-            }
+        if (action == 'c-track-init') {
+            postToDesktopLryic('s-track-init', {
+                track: self.currentTrack,
+                playing: (self.playState == PlayState.PLAYING)
+            })
+        } else if (action == 'c-track-pos') {
+            const sound = self.getSound()
+            if (!sound) return
+            self.currentTime = sound.seek() || 0
+            postToDesktopLryic('s-track-pos', self.currentTime)
         }
     }
 
@@ -423,9 +403,8 @@ class HowlerPlayer extends EventWrapper {
     }
 
     postLyricStateToDesktopLyric(track, hasLyric) {
-        if (!this.desktopLyricMessagePortActiveState) return
         const action = hasLyric ? 's-track-lyricLoaded' : 's-track-noLyric'
-        this.postToDesktopLryic(action, track)
+        postToDesktopLryic(action, track)
     }
 
     updateMetadata() {
@@ -463,10 +442,6 @@ class MpvPlayer extends EventWrapper {
         this.seekPendingMark = 0 //percent
         this.started = false
         this.retryCreate = 0
-
-        //桌面歌词
-        this.desktopLyricMessagePort = null
-        this.desktopLyricMessagePortActiveState = null
 
         this.pendingOutputDeviceId = null
         this.mpvBinaryPath = null
@@ -654,61 +629,35 @@ class MpvPlayer extends EventWrapper {
         }
     }
 
-    setupDesktopLyricMessagePort(messagePort) {
-        this.desktopLyricMessagePort = messagePort
-        this.onDesktopLyricMessage()
-    }
-
-    setMessagePortActiveState(state) {
-        this.desktopLyricMessagePortActiveState = state
-    }
-
-    postToDesktopLryic(action, data) {
-        if (!this.desktopLyricMessagePortActiveState) return 
-        const messagePort = this.desktopLyricMessagePort
-        try {
-            if (messagePort) messagePort.postMessage({ action, data })
-        } catch(error) {
-            if(isDevEnv()) {
-                console.log(error)
-            }
-        }
-    }
-
     postPlayStateToDesktopLryic() {
-        if (!this.desktopLyricMessagePortActiveState) return
         switch (this.playState) {
             case PlayState.NONE:
-                this.postToDesktopLryic('s-track-none')
+                postToDesktopLryic('s-track-none')
                 break
             case PlayState.INIT:
-                this.postToDesktopLryic('s-track-init', {
+                postToDesktopLryic('s-track-init', {
                     track: this.currentTrack
                 })
                 break
             case PlayState.PLAYING:
-                this.postToDesktopLryic('s-track-play')
+                postToDesktopLryic('s-track-play')
                 break
             case PlayState.PAUSE:
-                this.postToDesktopLryic('s-track-pause')
+                postToDesktopLryic('s-track-pause')
                 break
         }
     }
 
-    onDesktopLyricMessage() {
-        if(!this.desktopLyricMessagePort) return 
+    onPlayerMessage(action, data) {
         const self = this
-        this.desktopLyricMessagePort.onPlayerMessage = (action, data) => {
-            if (action == 'c-track-init') {
-                //self.setMessagePortActiveState(true)
-                self.postToDesktopLryic('s-track-init', {
-                    track: self.currentTrack,
-                    playing: (self.playState == PlayState.STARTED 
-                        || self.playState == PlayState.PLAYING)
-                })
-            } else if (action == 'c-track-pos') {
-                self.postToDesktopLryic('s-track-pos', self.currentTime)
-            }
+        if (action == 'c-track-init') {
+            postToDesktopLryic('s-track-init', {
+                track: self.currentTrack,
+                playing: (self.playState == PlayState.STARTED 
+                    || self.playState == PlayState.PLAYING)
+            })
+        } else if (action == 'c-track-pos') {
+            postToDesktopLryic('s-track-pos', self.currentTime)
         }
     }
 
@@ -718,9 +667,8 @@ class MpvPlayer extends EventWrapper {
     }
 
     postLyricStateToDesktopLyric(track, hasLyric) {
-        if (!this.desktopLyricMessagePortActiveState) return
         const action = hasLyric ? 's-track-lyricLoaded' : 's-track-noLyric'
-        this.postToDesktopLryic(action, track)
+        postToDesktopLryic(action, track)
     }
 
     quit() {
@@ -735,6 +683,9 @@ class MpvPlayer extends EventWrapper {
 class Player extends EventWrapper {
     constructor() {
         super()
+        //桌面歌词
+        this.desktopLyricMessagePort = null
+        this.desktopLyricMessagePortActiveState = null
     }
 
     setDelegate(delegate) {
@@ -878,22 +829,31 @@ class Player extends EventWrapper {
         this.getActiveDelegate().setupSoundEffect(options)
     }
 
-    setupDesktopLyricMessagePort(value) {
-        if(!this.getActiveDelegate()) return
-        if(!this.getActiveDelegate().setupDesktopLyricMessagePort) return
-        this.getActiveDelegate().setupDesktopLyricMessagePort(value)
-    }
-
     updateLyric(track, hasLyric) {
         if(!this.getActiveDelegate()) return
         if(!this.getActiveDelegate().updateLyric) return
         this.getActiveDelegate().updateLyric(track, hasLyric)
     }
 
+    setupDesktopLyricMessagePort(value) {
+        desktopLyricMessagePort = value
+        //消息监听
+        if(!desktopLyricMessagePort) return
+        desktopLyricMessagePort.onPlayerMessage = (action, data) => {
+            if(!this.getActiveDelegate()) return
+            if(!this.getActiveDelegate().onPlayerMessage) return
+            this.getActiveDelegate().onPlayerMessage(action, data)
+        }
+    }
+
     setMessagePortActiveState(value) {
-        if(!this.getActiveDelegate()) return
-        if(!this.getActiveDelegate().setMessagePortActiveState) return
-        this.getActiveDelegate().setMessagePortActiveState(value)
+        desktopLyricMessagePortActiveState = value
+        //清理
+        if(!desktopLyricMessagePortActiveState 
+            && desktopLyricMessagePort) {
+            Reflect.deleteProperty(desktopLyricMessagePort, 'onPlayerMessage')
+            desktopLyricMessagePort = null
+        }
     }
 
     async _setAudioOutputDevice(deviceId) {
@@ -904,9 +864,9 @@ class Player extends EventWrapper {
 
     switchToFallback(value) {
         this.setActiveDelegate(this.fallbackDelegate)
-        if(!this.fallbackDelegate) return
-        if(!this.fallbackDelegate.playTrack) return
-        this.fallbackDelegate.playTrack(value, true)
+        if(!this.getActiveDelegate()) return
+        if(!this.getActiveDelegate().playTrack) return
+        this.getActiveDelegate().playTrack(value, true)
     }
 
     setMpvBinaryPath(value) {

@@ -365,21 +365,17 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setupCommonNotification(text, type) {
             //没有内容就不显示
-            const hasText = (text && text.toString().trim().length > 1) 
+            const hasText = (text && text.toString().trim().length > 1)
             if(hasText) {
                 this.commonNotificationText = text
                 this.commonNotificationType = type || 0
-                this.commonNotificationShow = hasText
-            } else {
-                this.commonNotificationShow = hasText
-                //this.commonNotificationType = type || 0
-                //this.commonNotificationText = text
             }
+            this.commonNotificationShow = hasText
             return hasText
         },
         hideCommonNotification() {
             this.commonNotificationImportant = false
-            this.setupCommonNotification(null, -1)
+            this.setupCommonNotification()
         },
         doToast(text, type, callback, delay) {
             clearTimeout(toastTimer)

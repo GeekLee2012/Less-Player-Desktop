@@ -24,8 +24,8 @@ const { seekTrack, playVideoItem,
     currentTimeState, favoritedState,
     toggleFavoritedState, preseekTrack,
     mmssPreseekTime, isTrackSeekable,
-    dndSaveCover, customDndPlayingCover,
-    setupCustomDndPlayingCover, } = inject('player')
+    dndSaveCover, setupPlayingViewDnd, 
+} = inject('player')
 const { useWindowsStyleWinCtl } = inject('appCommon')
 const { getExVisualCanvasHandlersLength } = inject('apiExpose')
 const { applyDocumentStyle } = inject('appStyle')
@@ -256,7 +256,7 @@ const switchVisualCanvas = () => {
 }
 
 const onDrop = async (event) => {
-    setupCustomDndPlayingCover(event)
+    setupPlayingViewDnd(event)
 }
 
 
@@ -330,7 +330,7 @@ onUnmounted(() => {
                 <div class="left">
                     <div class="cover-spectrum-wrap" v-show="!exVisualCanvasShow">
                         <div class="cover-wrap">
-                            <img class="cover" v-lazy="coverDefault(customDndPlayingCover, Track.coverDefault(currentTrack))"
+                            <img class="cover" v-lazy="Track.coverDefault(currentTrack)"
                                 :class="{ 
                                     rotation: (playingViewShow && playing), 
                                     'obj-fit-contain': (currentTrack.coverFit == 1), 
