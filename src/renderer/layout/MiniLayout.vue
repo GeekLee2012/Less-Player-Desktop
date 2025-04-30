@@ -25,7 +25,9 @@ const { visitRecents, visitBatchPlaybackQueue } = inject('appRoute')
 
 const { desktopLyricShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
 const { quit, hideAllCtxMenus, hideLyricToolbar, toggleDesktopLyricShow } = useAppCommonStore()
-const { currentTrack, playing, queueTracks, playingIndex, queueTracksSize, } = storeToRefs(usePlayStore())
+const { currentTrack, playing, loading, 
+    queueTracks, playingIndex, queueTracksSize, 
+} = storeToRefs(usePlayStore())
 const { resetQueue, moveTrack } = usePlayStore()
 const { isHideToTrayOnMinimized, isTrayShow, isShowDialogBeforeQuitApp,
     getWindowZoom, isUseWinCenterStrict, isPlaybackQueueHistoryBtnShow, 
@@ -323,8 +325,10 @@ onUnmounted(toggleMiniStyle)
                         :currentTime="currentTimeState" 
                         :hiddenMeta="true"
                         :layoutMode="0"
-                        keyName="miniLayout">
+                        keyName="miniLayout"
+                        v-show="!loading" >
                     </LyricControl>
+                    <div class="loading-tip" v-if="loading">歌曲努力加载中 ......</div>
                 </div>
             </div>
             <div class="playback-queue" v-show="isQueueShow">
@@ -644,6 +648,11 @@ onUnmounted(toggleMiniStyle)
 .mini-layout > .center > .content .mini-lyric-wrap .lyric-ctl .extra-btn,
 .mini-layout > .center > .content .mini-lyric-wrap .lyric-ctl .scroll-locator {
     display: none !important;
+}
+
+.mini-layout > .center > .content .mini-lyric-wrap .loading-tip {
+    margin-left: 30px;
+    font-size: calc(var(--content-text-size) + 2px);
 }
 
 

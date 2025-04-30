@@ -73,6 +73,7 @@
 * 当前`页面顶部`，分别有<b>`release、tag、license、downloads`</b>等图标按钮，可点击<b>`release按钮`</b>直达`发行版本列表`页面  
 * 任何删除`清空操作`（带垃圾桶图标的按钮）请`谨慎`！其实也没这么夸张，哈哈 ~  
 * 为避免误操作，已部分支持对话框确认，请参考`“设置页 - 对话框”`  
+* 设置使用mpv，请参考 [mpv.md](mpv.md)  
   
 ### 发行版  
 * 发行版：x64版本（二进制文件，如dmg、exe、zip等）；支持系统平台包括macOS、Windows 7+  
@@ -83,6 +84,7 @@
 * 更新日志：[CHANGELOG.md](CHANGELOG.md) 
 * 待办事项：[TODO.md](TODO.md)  
 * LeVC格式：[LeVC.md](LeVC.md)  
+* mpv：[mpv.md](mpv.md)
   
 ### 其他  
 * <b>`再次郑重声明：`本项目仅供学习交流，请支持正版！若谁做非法用途，后果自负！</b>

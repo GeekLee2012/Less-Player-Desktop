@@ -27,7 +27,7 @@ const { workingTrackForResourceToolView,
 const { platforms, resourcePlatforms } = storeToRefs(useSearchStore())
 const { getVendor } = usePlatformStore()
 const { currentTrack } = storeToRefs(usePlayStore())
-const { isNoneTrack, playTrack } = usePlayStore()
+const { isNoneTrack, isCurrentTrack, playTrack } = usePlayStore()
 
 
 const copiedWorkingTrack = ref(null)
@@ -125,9 +125,7 @@ const resetTrackCover = () => {
     const { cover  } = working
     Object.assign(track, { cover })
     showToast('封面已重置')
-    if(isCurrentTrack(track)) {
-        emitEvents('track-coverUpdated', track)
-    }
+    if(isCurrentTrack(track)) emitEvents('track-coverUpdated', track)
 }
 
 const resetTrackLyric = () => {

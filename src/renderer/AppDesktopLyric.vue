@@ -29,6 +29,8 @@ const isSeeking = ref(false)
 const lyricTransData = ref(null)
 const lyricTransActived = ref(true)
 const lyricExistState = ref(-1)
+let hitCount = 0
+const millisAhead = 1000
 
 const setCurrentIndex = (value) => currentIndex.value = value
 const setLyricData = (value) => lyricData.value = value
@@ -98,20 +100,19 @@ const renderLyric = (currentTime) => {
   for (var i = 0; i < lines.length; i++) {
     timeKey = lines[i].getAttribute('timeKey')
     const lineTime = toMillis(timeKey)
-    if (trackTime >= lineTime) {
-      index = i
-    } else if (trackTime < lineTime) {
-      break
-    }
+    if (trackTime < (lineTime - millisAhead)) break
+    index = i
   }
 
-  if(currentIndex.value == index && index >= 0) return
-
-  if (index >= 0) {
-    setCurrentIndex(index)
-  } else {
-    index = 0
+  if(currentIndex.value == index && index >= 0 
+      && (++hitCount >= 3)) {
+      return
+  } else if(currentIndex.value != index && index >= 0) {
+      hitCount = 0
   }
+
+  if (index >= 0) setCurrentIndex(index)
+  index = Math.max(index, 0)
 
   //是否为用户手动滚动歌词
   if (isUserMouseWheel.value || isSeeking.value) return

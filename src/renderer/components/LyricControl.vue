@@ -41,6 +41,8 @@ const lyricData = ref(Track.lyricData(props.track))
 let presetOffset = Track.lyricOffset(props.track)
 const lyricTransData = ref(Track.lyricTransData(props.track))
 const lyricRomaData = ref(Track.lyricRomaData(props.track))
+let hitCount = 0
+const millisAhead = 1000
 
 
 const isUserMouseWheel = ref(false)
@@ -76,11 +78,16 @@ const renderAndScrollLyric = (secs) => {
     for (var i = 0; i < lines.length; i++) {
         timeKey = lines[i].getAttribute('timeKey')
         const lineTime = toMillis(timeKey)
-        if (trackTime < lineTime) break
+        if (trackTime < (lineTime - millisAhead)) break
         index = i
     }
 
-    if(currentIndex.value == index && index >= 0) return
+    if(currentIndex.value == index && index >= 0 
+        && (++hitCount >= 3)) {
+        return
+    } else if(currentIndex.value != index && index >= 0) {
+        hitCount = 0
+    }
 
     nextTick(() => {
         setupLyricTitle()
