@@ -21,8 +21,9 @@ https://github.com/eko5624/mpv-mac
 #### macOS
 1. 下载当前系统对应版本的mpv.app  
 2. 运行mpv.app，并给予相关的权限
-3. 确保mpv.app能正常运行后，将mpv.app/Contents/MacOS/下的mpv文件、libs目录，复制到外部指定的目录（如：/Users/xxx/mpv binary/，其中xxx为用户名）
-4. mpv binary可执行文件，则为该指定目录下的mpv文件（如：/Users/xxx/mpv binary/mpv，其中xxx为用户名）
+3. 确保mpv.app能正常运行后，将mpv.app/Contents/MacOS/下的mpv文件、libs目录，复制到mpv.app外部、任意指定的目录  
+（如：/Users/xxx/mpv binary/，其中xxx为用户名，mpv binary为自行创建的目录，名字可随意）
+4. mpv binary可执行文件，则为该指定目录下的mpv文件（如：/Users/xxx/mpv binary/mpv）
   
 #### Windows
 1. 下载当前系统对应版本的mpv压缩包，并完成解压缩

@@ -236,6 +236,10 @@ export const useUserProfileStore = defineStore("userProfile", {
         isFavoriteRadio(id, platform) {
             return this.findItemIndex(this.favorites.radios, { id, platform }) > -1
         },
+        getFavoriteSong(id, platform) {
+            const index = this.findItemIndex(this.favorites.songs, { id, platform })
+            return this.favorites.songs[index]
+        },
         removeAllFavorites() {
             this.favorites.songs.length = 0
             this.favorites.playlists.length = 0

@@ -509,7 +509,7 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
             MenuItems.sp, MenuItems.removeFromLocal]
             break;
         case 2: //我的主页 - 我的收藏 - 歌曲列表
-            data = [MenuItems.play, MenuItems.playLater, MenuItems.addToList,
+            data = [MenuItems.play, MenuItems.playLater, MenuItems.searchTrackResource, MenuItems.addToList,
             MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack,
             MenuItems.sp, MenuItems.removeFromFavorite,]
             break;

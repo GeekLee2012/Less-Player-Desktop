@@ -6,6 +6,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
+import { useUserProfileStore } from '../store/userProfileStore';
 import ArtistControl from './ArtistControl.vue';
 import AlbumControl from './AlbumControl.vue';
 import { toTrimString, escapeHtml } from '../../common/Utils';
@@ -40,6 +41,7 @@ const { showToast, showFailToast, setTrackResourceToolViewPreviewMode } = useApp
 const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable, isSongItemIndexShow } = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 const { getLocalPlaylistTrack } = useLocalMusicStore()
+const { isFavoriteSong, getFavoriteSong } = useUserProfileStore()
 
 
 const isChecked = ref(props.checked)
@@ -75,6 +77,20 @@ const onContextMenu = (event) => {
     showContextMenu(event, data, dataType || 0, index)
 }
 
+const updateReferenceOriginTrack = (workingTrack, changes) => {
+    if(!workingTrack || !changes) return
+
+    const { id, platform, pid } = workingTrack
+    let track = null
+    if(isLocalMusic(platform)) {
+        track = getLocalPlaylistTrack(pid, id)
+    } else if(isFavoriteSong(id, platform)) {
+        track = getFavoriteSong(id, platform)
+    }
+    //更新
+    if(track) Object.assign(track,  changes)
+}
+
 const getItemTrackUrl = async () => {
     const { data } = props
     const workingTrack = workingTrackForResourceToolView.value || currentTrack.value
@@ -106,14 +122,9 @@ const getItemCover = () => {
     showToast('封面已更新<br>即将为您开启预览')
     if(isCurrentTrack(workingTrack)) emitEvents('track-coverUpdated', workingTrack)
 
-     //上面的更新封面操作，影响范围：当前播放（列表）
-    //还需关联更新本地歌单歌曲
-    const { id, platform, pid } = workingTrack
-    if(isLocalMusic(platform)) {
-       const track = getLocalPlaylistTrack(pid, id)
-       if(!track) return 
-       Object.assign(track,  { cover })
-    }
+    //上面的更新封面操作，影响范围：当前播放（列表）
+    //还需关联更新：本地歌单歌曲、收藏的歌曲等
+    updateReferenceOriginTrack(workingTrack, { cover })
 }
 
 const getItemLyric = async () => {
@@ -133,14 +144,7 @@ const getItemLyric = async () => {
 
     //歌词暂时不更新啦，节省点存储空间
     //或许可以采用写入歌词文件的方式
-    /*
-    const { id, platform, pid } = workingTrack
-    if(isLocalMusic(platform)) {
-       const track = getLocalPlaylistTrack(pid, id)
-       if(!track) return 
-       Object.assign(track,  { lyric, lyricTrans: trans, lyricRoma: roma  })
-    }
-    */
+    //updateReferenceOriginTrack(workingTrack, { lyric, lyricTrans: trans, lyricRoma: roma  })
 }
 
 
