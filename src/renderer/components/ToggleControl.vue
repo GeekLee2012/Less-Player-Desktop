@@ -12,7 +12,8 @@ const active = toRef(props, 'value')
 </script>
 
 <template>
-    <div class="toggle-ctl" :class="{ 'active-state': active }" @click.stop="">
+    <div class="toggle-ctl" :class="{ 'active-state': active }" 
+        @click.stop="">
         <div class="thumb"></div>
     </div>
 </template>

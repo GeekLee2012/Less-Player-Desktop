@@ -14,7 +14,7 @@
 
   --main-left-width: 211px;
   --main-top-height: 68px;
-  --main-bottom-height: 82px;
+  --main-bottom-height: 88px;
 
   --content-text-size: 15.5px;
   --content-text-subtitle-size: 14px;
@@ -33,7 +33,7 @@
   --content-text-module-title3-size: 19px;
   /* 行高 - 左导航 */
   --content-left-nav-line-height: 36.5px;
-  --content-left-nav-line-spacing: 10.5px;
+  --content-left-nav-line-spacing: 10px;
   --content-error-color: #fc605c;
   --content-new-color: #fc605c;
   
@@ -67,6 +67,7 @@
   --others-card-image-text-tile-title-width: 152px;
   --others-image-text-tile-card-cover-height: 152px;
   --others-image-text-tile-card-min-height: 224px;
+  --others-image-text-tile-hcard-width-ratio: 2.2;
   /*--others-theme-preview-tile-width: 160px;
   --others-theme-preview-tile-height: 95px;*/
   --others-theme-preview-tile-width: 165px;
@@ -142,7 +143,6 @@ textarea {
 }
 
 .tip-text {
-  /*font-size: 13.5px;*/
   font-size: var(--content-text-tip-text-size);
   color: var(--content-subtitle-text-color);
 }

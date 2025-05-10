@@ -57,7 +57,8 @@ defineExpose({
 
 <template>
     <div class="back2top-btn" @click="scrollToTop"
-        v-show="isBtnShow">
+        v-show="isBtnShow"
+        @contextmenu.stop="" >
         <svg width="14" height="14" viewBox="0 0 597.39 511.99" xmlns="http://www.w3.org/2000/svg">
             <g id="Layer_2" data-name="Layer 2">
                 <g id="Layer_1-2" data-name="Layer 1">

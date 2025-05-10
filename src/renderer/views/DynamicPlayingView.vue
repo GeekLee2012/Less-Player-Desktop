@@ -556,7 +556,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     --others-sliderbar-ctl-height: 2px; 
     --others-sliderbar-thumb-size: 13px;
     /*--bottom-height: 82px;*/
-    --bottom-height: 88px;
+    --bottom-height: 92px;
 }
 
 .dynamic-playing-view .spacing {
@@ -708,9 +708,13 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .dynamic-playing-view .bottom {
     height: var(--bottom-height);
-    /*padding-bottom: 3px;*/
+    /*min-height: var(--bottom-height);
+    padding-bottom: 3px;*/
     /*visibility: hidden;*/
     background: #00000036;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .dynamic-playing-view .bottom .action {
@@ -718,9 +722,10 @@ onUnmounted(() => offEvents(eventsRegistration))
     justify-content: center;
     align-items: center;
     --others-sliderbar-thumb-size: 12px;
+    flex: 1;
 }
 
-.dynamic-playing-view .bottom .action>div {
+.dynamic-playing-view .bottom .action > div {
     flex: 1;
     display: flex;
     flex-direction: row;
@@ -761,7 +766,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .dynamic-playing-view .container > .bottom.bottom-new {
     border-top: 1.3px solid var(--others-progressbar-bg-color);
     border-top: 0.1px solid #00000039;
-    --bottom-height: 88px;
+    --bottom-height: 90px;
     /*height: var(--bottom-height);
     min-height: var(--bottom-height);*/
     padding-bottom: 0px;

@@ -28,7 +28,6 @@ const { showConfirm } = inject('apiExpose')
 
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 const { showToast, updateCommonCtxItem,
     hideAllCtxMenus, showFailToast, } = useAppCommonStore()
 const { getLocalPlaylist, addToLocalPlaylist, updateLocalPlaylist, 
@@ -37,7 +36,7 @@ const { currentPlatformCode } = storeToRefs(usePlatformStore())
 const { isUseDndForAddLocalTracksEnable, isUseDeeplyScanForDirectoryEnable,
     isSearchForLocalPlaylistShow, isShowDialogBeforeBatchDelete,
     getPaginationStyleIndex, getLimitPerPageForLocalPlaylist,
-    coverAbsentStrategyForLocalPlaylist, 
+    coverAbsentStrategyForLocalPlaylist, isMiniNavBarMode,
 } = storeToRefs(useSettingStore())
 
 
@@ -47,11 +46,14 @@ const detail = reactive({ cover: '', title: '', tags: '', about: '', data: [] })
 let offset = 0, page = 1, limit = 1000, total = 0
 let markScrollTop = 0
 const isLoading = ref(false)
-const setLoading = (value) => isLoading.value = value
 const searchKeyword = ref(null)
-const setSearchKeyword = (value) => searchKeyword.value = value
 const dataListId = ref(null)
+const timeIndex = ref(1)
+const setLoading = (value) => isLoading.value = value
+const setSearchKeyword = (value) => searchKeyword.value = value
 const setDataListId = (value) => (dataListId.value = value)
+const setTimeIndex = (value) => (timeIndex.value = value)
+
 
 const resetView = () => {
     Object.assign(detail, { cover: '', title: '', tags: '', about: '', data: [] })
@@ -329,6 +331,7 @@ onActivated(() => {
     restoreScrollState()
     nextTick(detectTitleHeight)
     loadContent()
+    setTimeIndex(1)
 })
 </script>
 
@@ -357,7 +360,8 @@ onActivated(() => {
                         </svg>
                     </div>
                     <div class="time">
-                        <span>最后更新：{{ toYyyymmddHhMmSs(detail.updated) }}</span>
+                        <div v-show="timeIndex == 0"><span @click="setTimeIndex(1)">创建时间</span>：{{ toYyyymmddHhMmSs(detail.created) }}</div>
+                        <div v-show="timeIndex == 1"><span @click="setTimeIndex(0)">最后更新</span>：{{ toYyyymmddHhMmSs(detail.updated) }}</div>
                     </div>
                 </div>
                 <div class="action">
@@ -482,6 +486,12 @@ onActivated(() => {
     font-weight: 520;
     color: var(--content-subtitle-text-color);
     text-align: left;
+}
+
+#local-playlist-detail-view .time:hover span {
+    cursor: pointer;
+    color: var(--content-highlight-color);
+    font-weight: bold;
 }
 
 #local-playlist-detail-view .header .cover {

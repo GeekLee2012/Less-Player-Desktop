@@ -1,7 +1,11 @@
 <script setup>
 import AppThemes from './AppThemes.vue';
 
+const catchUnhandledRejections = () => {
+    window.addEventListener('unhandledrejection', e => console.log(e))
+}
 
+catchUnhandledRejections()
 </script>
 
 <template>

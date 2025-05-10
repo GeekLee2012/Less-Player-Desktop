@@ -142,7 +142,7 @@ const getItemLyric = async () => {
     notifyLyricLoaded(workingTrack, '歌词已加载<br>即将为您开启预览')
     setTrackResourceToolViewPreviewMode(true)
 
-    //歌词暂时不更新啦，节省点存储空间
+    //歌词暂时不更新啦，节省点localStorage的存储空间
     //或许可以采用写入歌词文件的方式
     //updateReferenceOriginTrack(workingTrack, { lyric, lyricTrans: trans, lyricRoma: roma  })
 }

@@ -328,7 +328,7 @@ onUnmounted(toggleMiniStyle)
                         keyName="miniLayout"
                         v-show="!loading" >
                     </LyricControl>
-                    <div class="loading-tip" v-if="loading">歌曲努力加载中 ......</div>
+                    <div class="loading-tip" v-if="loading">歌曲努力加载中 <span>......</span></div>
                 </div>
             </div>
             <div class="playback-queue" v-show="isQueueShow">
@@ -655,6 +655,16 @@ onUnmounted(toggleMiniStyle)
     font-size: calc(var(--content-text-size) + 2px);
 }
 
+.mini-layout > .center > .content .mini-lyric-wrap .loading-tip span {
+    animation-duration: 1.6s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: waitingsPoints;
+    animation-timing-function: ease-in-out;
+    display: inline-block;
+    overflow: hidden;
+}
+
 
 .mini-layout > .center .playback-queue {
     width: 100%;
@@ -751,8 +761,6 @@ onUnmounted(toggleMiniStyle)
     top: 0px;
 }
 
-
-
 .mini-layout > .center .lyric-wrap {
     width: calc(100% - 36px);
     flex: 1;
@@ -786,5 +794,15 @@ onUnmounted(toggleMiniStyle)
     right: auto;
     left: 20px;
     margin-left: 0px;
+}
+
+@keyframes waitingsPoints {
+    from {
+        width: 0px;
+    }
+
+    to {
+        width: 32px;
+    }
 }
 </style>

@@ -13,7 +13,8 @@ import SimpleLayout from './layout/SimpleLayout.vue';
 import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
   ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, 
   isMacOS, useGitRepository,
-  isDevEnv, readLines, nextInt, } from '../common/Utils';
+  isDevEnv, readLines, nextInt,
+  tryCallDefault, } from '../common/Utils';
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 import packageCfg from '../../package.json';
 import { getDoc, getRaw } from '../common/HttpClient';
@@ -50,7 +51,8 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
 } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
-  setupAppGlobalProxy, setupMpvBinaryPath } = useSettingStore()
+  setupAppGlobalProxy, setupMpvBinaryPath,
+  toggleMiniNavBarMode } = useSettingStore()
 
 const { togglePlay, switchPlayMode,
   playPrevTrack, playNextTrack,
@@ -83,14 +85,15 @@ const isReservedPath = (path) => {
   return reservedPaths.indexOf(path) >= 0
 }
 
-const deepIntoStates = (states, oldStates) => {
+const deepIntoStates = (states, oldStates, reservedFn) => {
   for (let path in states) {
     const value = states[path]
     if (value && (typeof value === 'object') && !Array.isArray(value)
       && Object.keys(value).length > 0) {
-      deepIntoStates(states[path], oldStates[path])
+      deepIntoStates(states[path], oldStates[path], reservedFn)
     } else if (oldStates) {
-      states[path] = (isReservedPath(path) ? states[path] : oldStates[path])
+      states[path] = ((typeof reservedFn == 'function') && reservedFn(path)) 
+        ? states[path] : oldStates[path]
     }
   }
 }
@@ -168,24 +171,37 @@ const registryDefaultLocalKeys = () => {
   }, 'keyup')
 }
 
-//TODO 清理设置，解决不同版本导致的数据不一致问题
+//清理设置，解决不同版本导致的数据不一致问题
 const cleanupSetting = () => {
-  const store = useSettingStore()
-  const key = "setting"
+  tryCallDefault(() => {
+    const store = useSettingStore()
+    const key = "setting"
+    const cache = localStorage.getItem(key)
+    if (cache) {
+      const oldStates = JSON.parse(cache)
+      store.$reset() //方法失效，与期望值不符
+      localStorage.removeItem(key)
+      deepIntoStates(store.$state, oldStates, isReservedPath)
+      migrateSettingStates(store.$state, oldStates)
+    }
+    store.$patch({ blackHole: Math.random() * 100000000 })
+  })
+}
+
+//清理Store，解决不同版本导致的数据不一致问题
+const cleanupStore = (store, key) => {
   const cache = localStorage.getItem(key)
   if (cache) {
     const oldStates = JSON.parse(cache)
     store.$reset() //方法失效，与期望值不符
     localStorage.removeItem(key)
     deepIntoStates(store.$state, oldStates)
-    migrateSettingStates(store.$state, oldStates)
   }
-  store.$patch({ blackHole: Math.random() * 100000000 })
 }
 
 //迁移设置 - 版本升级时尽量向下兼容
 const migrateSettingStates = (states, oldStates) => {
-  try {
+  tryCallDefault(() => {
     const { track } = oldStates
     //迁移首页提示 - 本地音乐、自由FM
     if(typeof track.localMusicHomepageTipsShow == 'boolean') {
@@ -198,10 +214,7 @@ const migrateSettingStates = (states, oldStates) => {
         freeFMViewTipsShow: track.freeFMHomepageTipsShow 
       })
     }
-
-  } catch(error) {
-    if(isDevEnv()) console.log(error)
-  }
+  })
 }
 
 // 恢复默认设置
@@ -242,13 +255,9 @@ const setupLayout = (isInit) => {
     currentAppLayout.value = DefaultLayout
   }
   emitEvents(eventName)
-  const useDefaultZoom = (isInit && !isDevEnv)
-  const zoom = useDefaultZoom ? 85 : getWindowZoom.value
+  const zoom = getWindowZoom.value
   const useCenterStrict = isUseWinCenterStrict.value
   ipcRendererSend(eventName, { zoom, isInit, useCenterStrict })
-  //是否已完成缩放
-  const isDone = (!useDefaultZoom || (getWindowZoom.value != 85))
-  return isDone
 }
 
 const setupTrafficLightWinCtlBtn = () => {
@@ -321,15 +330,13 @@ const restoreSetting = (isInit) => {
   setupGlobalShortcut()
 
   //TODO 解决Electron Bug：缩放后内容未按照缩放比例正确显示
-  //解决方式：默认缩放85% -> 按用户设置缩放 -> 延迟显示窗口
-  const isDone = setupLayout(isInit)
-  if(!isDone) setupWindowZoom()
+  setupLayout(isInit)
   if (isInit) {
-    //延迟2s左右
-    setTimeout(() => ipcRendererSend('app-mainWin-show'), isDevEnv() ? 0 : 1888)
+    ipcRendererSend('app-mainWin-show', isInit, isUseWinCenterStrict.value)
   } else { 
     //非初始化，比如重置设置、还原备份数据 
     resetExploreModeActiveStates()
+
   }
 }
 
@@ -366,9 +373,27 @@ const migrateRecentsData = () => {
   removeAllRecents()
 }
 
+//数据迁移
+const migrateData = () => {
+  //迁移 - 最近播放记录
+  tryCallDefault(migrateRecentsData)
+  //迁移 - 左侧导航栏 - 迷你模式
+  tryCallDefault(() => {
+    //旧版本数据
+    const { miniNavBarMode: oMiniNavBarMode } = storeToRefs(useAppCommonStore())
+    //新版本数据
+    const { miniNavBarMode: nMiniNavBarMode } = storeToRefs(useSettingStore())
+    if(oMiniNavBarMode && (typeof oMiniNavBarMode.value == 'boolean') 
+      && oMiniNavBarMode.value != nMiniNavBarMode.value) {
+      toggleMiniNavBarMode()
+      cleanupStore(useAppCommonStore(), 'appCommon')
+    }
+  })
+}
+
 const initialize = () => {
   restoreSetting(true)
-  migrateRecentsData()
+  migrateData()
   setupWebDav()
   //setupMpvBinaryPath()
   //emitEvents('app-init')
@@ -515,6 +540,7 @@ const { GITHUB, GITEE } = useGitRepository()
 const changelogUrl = `${GITHUB}/blob/main/CHANGELOG.md`
 const changelogUrl2 = `${GITEE}/blob/master/CHANGELOG.md`
 const rawChangelogUrl = `${GITEE}/raw/master/CHANGELOG.md`
+const mpvDocUrl = `${GITHUB}/blob/main/mpv.md`
 //const lastReleaseUrlRoot = `${GITEE}/releases/tag/`
 const githubReleasesUrl = `${GITHUB}/releases/`
 const giteeReleasesUrl = `${GITEE}/releases/`
@@ -536,9 +562,6 @@ const hasNewRelease = computed(() => {
     return !isLastRelease.value && (giteeHasNewRelease.value || githubHasNewRelease.value)
 })
 
-const getDocWithTimeout = (url, timeout) => (getDoc(url, null, { timeout }))
-const getRawWithTimeout = (url, timeout) => (getRaw(url, null, { timeout }))
-
 const getLastReleaseVersion = () => {
     return new Promise((resolve, reject) => {
         const _version = `v${version}`
@@ -552,7 +575,7 @@ const getLastReleaseVersion = () => {
         setGithubLastVersion(_version)
 
         if (isCheckPreReleaseVersion.value) { //包括开发预览版
-            Promise.all([getDocWithTimeout(giteeReleasesUrl, timeout1), getDocWithTimeout(githubReleasesUrl, timeout2)])
+            Promise.all([getDoc(giteeReleasesUrl), getDoc(githubReleasesUrl)])
                 .then(docs => {
                 const [giteeDoc, githubDoc] = docs
                 const giteeVersion = giteeDoc && giteeDoc.querySelector('.releases-tag-content .release-tag-item .release-meta .tag-name').textContent.trim()
@@ -561,21 +584,8 @@ const getLastReleaseVersion = () => {
             }, error => Promise.reject(error))
             .catch(error => reject(error))
         } else { //正式版
-            /*
-            getDocWithTimeout(changelogUrl, timeout1).then(doc => {
-                //检测方式已失效，由于平台采用动态方式创建数据相关元素
-                const versionTextEls = doc.querySelectorAll('.file_content h2')
-                const hasVersionText = (versionTextEls && versionTextEls.length > 1)
-                const changeLogLastVersion = hasVersionText ? toTrimString(versionTextEls[1].textContent) : _version
-                resolve({
-                    giteeVersion: changeLogLastVersion,
-                    githubVersion: changeLogLastVersion
-                })
-            }, error => Promise.reject(error))
-            .catch(error => reject(error))
-            */
             //国内平台一堆幺蛾子，开始不登录不给浏览仓库文件
-            getRawWithTimeout(rawChangelogUrl, timeout1).then(rawText => {
+            getRaw(rawChangelogUrl).then(rawText => {
                 const lines = readLines(rawText)
                 let versionText = ''
                 const keyword = '## v'
@@ -786,7 +796,7 @@ onEvents({
         setElementAlignCenter(selector, width, height, offsetLeft, offsetTop)
       })
   },
-  'app-resetSetting': restoreSetting,
+  'app-resetSetting': resetSetting,
   'setting-restore': restoreSetting,
   'setting-reset': restoreSetting,
   'route-visitShortcutKeys': visitShortcutKeys,
@@ -838,6 +848,7 @@ provide('appVersion', {
   giteeReleasesUrl,
   githubReleasesUrl,
   changelogUrl,
+  mpvDocUrl,
 })
 </script>
 

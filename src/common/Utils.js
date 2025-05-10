@@ -82,6 +82,10 @@ export const ipcRendererInvoke = async (channel, data, options) => {
     return ipcRenderer.invoke(channel, data, options)
 }
 
+export const isNetOnline = async () => {
+    return await ipcRendererInvoke('app-netOnline')
+}
+
 export const useStartDrag = () => {
     return tryCallDefault(() => (electronAPI.startDrag))
 }
@@ -1067,4 +1071,14 @@ export const grayscale = (r, g, b) => {
 export const getPalette = (img, num) => {
     num = num || 1
     return new ColorThief().getPalette(img, num)
+}
+
+export const generateOrderNums = (from, to, step) => {
+    const nums = []
+    if(step > 0) {
+        for(let i = from; i <= to; i += step) nums.push(i)
+    } else {
+        for(let i = from; i >= to; i += step) nums.push(i)
+    }
+    return nums
 }

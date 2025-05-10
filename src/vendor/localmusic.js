@@ -4,7 +4,9 @@ import { Album } from "../common/Album";
 import {
     firstCharOfPinyin, isChineseChar,
     isEnglishChar, toLowerCaseTrimString,
-    toTrimString, ipcRendererInvoke
+    toTrimString, ipcRendererInvoke, 
+    isDevEnv, isNetOnline,
+    isBlank,
 } from "../common/Utils";
 import { FILE_PREFIX } from "../common/Constants";
 import { United } from "./united";
@@ -51,38 +53,51 @@ export class LocalMusic {
         return new Promise(async (resolve, reject) => {
             const result = { ...track }
             //内嵌歌词
-            let lyricText = result.embeddedLyricText
+            let lyricText = await ipcRendererInvoke('load-lyric-embeded', result.url)
+            Object.assign(result, { lyricEmbedded: !isBlank(lyricText) })
+            
+            let lyricTransText = null
             //本地歌词（同名文件）
             try {
                 if (!lyricText) {
-                    lyricText = await ipcRendererInvoke('load-lyric-file', result.url)
+                    const loadedTexts = await ipcRendererInvoke('load-lyric-file', result.url)
+                    lyricText = loadedTexts.text
+                    lyricTransText = loadedTexts.transText
                 }
             } catch (error) {
                 console.log(error)
             }
+            //检查网络状态
+            const isOnline = await isNetOnline()
+            
             //在线歌词
             let onlineCandidate = null
-            if (!lyricText) {
+            if (!lyricText && isOnline) {
                 onlineCandidate = await United.transferTrack(result, { isGetLyric: true })
                 if (onlineCandidate) {
                     const { lyric, lyricTrans } = onlineCandidate
                     Object.assign(result, { lyric, trans: lyricTrans })
                 }
             } else {
-                Object.assign(result, { lyric: Lyric.parseFromText(lyricText) })
+                Object.assign(result, { 
+                    lyric: Lyric.parseFromText(lyricText), 
+                    trans: Lyric.parseFromText(lyricTransText)
+                })
             }
 
-            //封面，顺便更新一下
-            const { isUseOnlineCoverEnable } = useSettingStore()
-            if (!Track.hasCover(track) || isUseOnlineCoverEnable) {
-                if (!onlineCandidate || !Track.hasCover(onlineCandidate)) {
-                    onlineCandidate = await United.transferTrack(track, { isGetCover: true })
-                }
-                if (onlineCandidate) {
-                    const { cover } = onlineCandidate
-                    if (cover && result.cover != cover && !toTrimString(track.cover).startsWith('http')) {
-                        Object.assign(result, { cover })
-                        onTrackUpdated(result)
+            if(isOnline) {
+                //封面，顺便更新一下
+                const { isUseOnlineCoverEnable } = useSettingStore()
+                if (!Track.hasCover(track) || isUseOnlineCoverEnable) {
+                    if (!onlineCandidate || !Track.hasCover(onlineCandidate)) {
+                        onlineCandidate = await United.transferTrack(track, { isGetCover: true })
+                    }
+                    if (onlineCandidate) {
+                        const { cover } = onlineCandidate
+                        if (cover && result.cover != cover && !toTrimString(track.cover).startsWith('http')) {
+                            Object.assign(result, { cover })
+                            onTrackUpdated(result)
+                        }
                     }
                 }
             }

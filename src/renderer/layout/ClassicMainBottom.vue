@@ -94,20 +94,25 @@ onMounted(() => {
     height: var(--main-bottom-height);
     -webkit-app-region: none;
     padding-top: 8px;
+    justify-content: center;
 }
 
 .classic-main-bottom .spacing {
     margin-left: 18px;
 }
 
+.classic-main-bottom #play-nav {
+    flex: 1;
+    align-items: center;
+    padding: 1px 0px 3px 28px;
+}
+
 .classic-main-bottom #play-nav #play-meta {
     /*width: 34.33%;*/
     width: 33.33%;
+    transform: translateY(-2px);
 }
 
-.classic-main-bottom #play-nav {
-    padding-left: 28px;
-}
 
 .classic-main-bottom #play-nav #play-meta .title-wrap,
 .classic-main-bottom #play-nav #play-meta .cover-wrap,
@@ -149,6 +154,12 @@ onMounted(() => {
     padding-right: 31px;
 }
 
+.classic-main-bottom #play-nav .right > div {
+    display: flex;
+    align-items: center;
+    justify-items: center;
+}
+
 .classic-main-bottom svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
@@ -187,7 +198,7 @@ onMounted(() => {
 }
 
 .classic-main-bottom .love-btn {
-    margin-top: 2px;
+    transform: scale(1.03);
 }
 
 .classic-main-bottom .love-btn-active {
@@ -200,12 +211,23 @@ onMounted(() => {
     align-items: center;
     cursor: pointer;
     font-weight: bold;
-    margin-bottom: 3px;
     font-size: 18px;
     color: var(--button-icon-btn-color);
 }
 
 .classic-main-bottom .lyric-btn:hover {
     color: var(--content-highlight-color);
+}
+
+.mini-navbar-mode .classic-main-bottom #play-nav #play-meta .title-wrap,
+.mini-navbar-mode .classic-main-bottom #play-nav #play-meta .cover-wrap,
+.mini-navbar-mode .classic-main-bottom #play-nav #play-meta .audio-cover,
+.mini-navbar-mode .classic-main-bottom #play-nav #play-meta .cover-mask {
+    width: 50px;
+    height: 50px;
+}
+
+.mini-navbar-mode .classic-main-bottom #play-nav #play-meta .title-wrap {
+    height: 46px;
 }
 </style>

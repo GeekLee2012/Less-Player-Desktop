@@ -201,7 +201,7 @@ const removePluginNow = (plugin) => {
 //异步加载插件
 const loadPluginsOnStartup = async () => {
     if (plugins.value.length < 1) return
-    if (isDevEnv()) console.log('[ STARTUP - plugins ] 加载插件......')
+    if (isDevEnv()) console.log('[ STARTUP - plugins ] 加载插件中......')
     //TODO 当前实现方式，不好确定全部加载完成的时机，以进行相关回调
     plugins.value.forEach((plugin, index) => {
         const { state } = plugin

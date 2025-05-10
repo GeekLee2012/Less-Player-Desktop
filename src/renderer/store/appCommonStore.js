@@ -129,10 +129,13 @@ export const useAppCommonStore = defineStore('appCommon', {
         //播放挂起状态
         pendingPlay: false,
         pendingPlayPercent: 0,
-        miniNavBarMode: false,
         trackResourceToolViewShow: false,
         workingTrackForResourceToolView: null,
         trackResourceToolViewPreviewMode: false,
+        //主题选择
+        themeSelectionViewShow: false,
+        themeSelectionViewContext: null,
+        isAutoHideThemeSelectionView: true,
     }),
     getters: {
         isPlaylistMode() {
@@ -184,9 +187,6 @@ export const useAppCommonStore = defineStore('appCommon', {
         isCloudStorageModeEnable() {
             return this.isExploreModeEnable('cloudstorage')
         },
-        isMiniNavBarMode() {
-            return this.miniNavBarMode
-        }
     },
     actions: {
         setMaxScreen(value) {
@@ -627,9 +627,6 @@ export const useAppCommonStore = defineStore('appCommon', {
         hideCustomAppBorderRadiusView() {
             this.customAppBorderRadiusViewShow = false
         },
-        toggleMiniNavBarMode() {
-            this.miniNavBarMode = !this.miniNavBarMode
-        },
         hideTrackResourceToolView() {
             this.trackResourceToolViewShow = false
         },
@@ -644,6 +641,19 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleTrackResourceToolViewPreviewMode() {
             this.setTrackResourceToolViewPreviewMode(!this.trackResourceToolViewPreviewMode)
+        },
+        setThemeSelectionViewContext(context) {
+            this.themeSelectionViewContext = context
+        },
+        hideThemeSelectionView() {
+            this.themeSelectionViewShow = false
+        },
+        toggleThemeSelectionView(context) {
+            this.themeSelectionViewShow = !this.themeSelectionViewShow
+            this.setThemeSelectionViewContext(context)
+        },
+        toggleAutoHideThemeSelectionView() {
+            this.isAutoHideThemeSelectionView = !this.isAutoHideThemeSelectionView
         }
     },
     persist: {
@@ -658,7 +668,7 @@ export const useAppCommonStore = defineStore('appCommon', {
                     'pendingPlay', 'pendingPlayPercent',
                     'exVisualCanvasShow', 'exVisualCanvasIndex', 
                     'playingViewCustomThemes', 'playingViewThemeType',
-                    'miniNavBarMode' ]
+                    'isAutoHideThemeSelectionView' ]
             },
         ],
     },

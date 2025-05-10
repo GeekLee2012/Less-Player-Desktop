@@ -7,6 +7,7 @@ import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { coverDefault, md5, trimExtraChars } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 import { useVideoPlayStore } from '../store/videoPlayStore';
+import { useSettingStore } from '../store/settingStore';
 
 
 
@@ -16,8 +17,8 @@ const props = defineProps({
 })
 
 const { getVendor } = usePlatformStore()
-const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
-const { routerCtxCacheItem  } = storeToRefs( useAppCommonStore())
+const { isMiniNavBarMode } = storeToRefs(useSettingStore())
+const { routerCtxCacheItem  } = storeToRefs(useAppCommonStore())
 const { showToast, hideAllCtxMenus,  } = useAppCommonStore()
 const { resetQueue, addVideo, playNextVideo, playVideoByIndex } = useVideoPlayStore()
 

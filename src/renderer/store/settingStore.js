@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ipcRendererSend, isMacOS, useWebZoom } from '../../common/Utils';
+import { ipcRendererInvoke, ipcRendererSend, isMacOS, useWebZoom } from '../../common/Utils';
 import { useThemeStore } from './themeStore';
 import { usePlatformStore } from './platformStore';
 import { useAppCommonStore } from './appCommonStore';
@@ -78,9 +78,16 @@ export const useSettingStore = defineStore('setting', {
             index: 1,
             //主题分类，0 => 推荐，1 => 自定义
             type: 0,
+            //nativeTheme模式，0 => system（跟随系统），1 => light（浅色）, 2 => dark（深色）
+            nativeMode: 0,
+            /* Light Mode */
+            lightIndex: 1,
+            lightType: 0,
+            /* Dark Mode */
+            darkIndex: 0,
+            darkType: 0,
         },
         layout: {
-            //当前index
             index: 0,
             //回退index，即从简约/迷你模式退出时，返回的普通布局index
             fallbackIndex: 1
@@ -131,6 +138,10 @@ export const useSettingStore = defineStore('setting', {
             imageTextTileStyleIndex: 1,
             //卡片Tile样式阴影效果
             shadowForCardStyleTile: true,
+            //H卡片Tile - 反转布局
+            reversedForHCardStyleTile: true,
+            //H卡片Tile - 小图标
+            smallIconForHCardStyleTile: false,
             //歌曲控件样式，0 => 经典，1 => 主流
             songItemStyleIndex: 1,
             //窗口自定义阴影
@@ -228,6 +239,8 @@ export const useSettingStore = defineStore('setting', {
             //第一顺位策略：从歌单中的第一首有封面的歌曲中获取封面；随机策略类似
             //随机颜色策略：顾名思义，随机一个颜色作为封面
             coverAbsentStrategyForLocalPlaylist: 0,
+            //本地歌曲 - 自动下载歌词文件
+            downloadLyricForLocalTrack: false,
             //高亮当前右键菜单对应的歌曲
             highlightCtxMenuItem: true,
             //拖拽保存
@@ -240,6 +253,7 @@ export const useSettingStore = defineStore('setting', {
             //播放页 - 封面图片背景效果
             playingViewUseBgCoverEffect: false,
             playingViewBgCoverEffectIndex: 0,
+            //渐变模式 - 渐变顺序
             playingViewBgCoverEffectGradientMode: 0,
             //渐变模式 - 渐变风格
             playingViewBgCoverEffectGradientType: 2, 
@@ -374,6 +388,7 @@ export const useSettingStore = defineStore('setting', {
         /* 导航栏 */
         navigation: {
             /* 左侧导航 */
+            miniNavBarMode: false,
             //自建歌单
             customPlaylistsShow: false,
             //我的收藏
@@ -382,7 +397,7 @@ export const useSettingStore = defineStore('setting', {
             followArtistsShow: false,
             /* 顶部导航*/
             //相约电波模式按钮
-            radioModeShortcut: true,
+            radioModeShortcut: false,
             //功能管理按钮
             modulesSettingShortcut: false,
             //插件管理按钮
@@ -399,6 +414,8 @@ export const useSettingStore = defineStore('setting', {
             cloudStorageShortcut: false,
             //点击简约布局按钮时，切换为迷你布局 / 简约布局
             simpleLayoutShortcutForMiniLayout: false,
+            //主题显示模式
+            themeNativeModeShortcut: false,
         },
         /* 对话框 */
         dialog: {
@@ -702,6 +719,9 @@ export const useSettingStore = defineStore('setting', {
         isCloudStorageShortcutEnable() {
             return this.navigation.cloudStorageShortcut
         },
+        isThemeNativeModeShortcutEnable() {
+            return this.navigation.themeNativeModeShortcut
+        },
         isPlaybackQueueAutoPositionOnShow() {
             return this.track.playbackQueueAutoPositionOnShow
         },
@@ -767,6 +787,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isAudioTypeFlagShowEnable() {
             return this.track.audioTypeFlagShow
+        },
+        isDownloadLyricForLocalTrack() {
+            return this.track.downloadLyricForLocalTrack
         },
         isSearchBarAutoPlaceholderEnable() {
             return this.search.autoPlaceholder
@@ -869,8 +892,14 @@ export const useSettingStore = defineStore('setting', {
         getPaginationStyleIndex() {
             return this.common.paginationStyleIndex
         },
+        imageTextTileStyleIndex() {
+            return this.common.imageTextTileStyleIndex
+        },
         isUseCardStyleImageTextTile() {
             return this.common.imageTextTileStyleIndex == 1
+        },
+        isUseHCardStyleImageTextTile() {
+            return this.common.imageTextTileStyleIndex == 2
         },
         getSongItemStyleIndex() {
             return this.common.songItemStyleIndex
@@ -908,6 +937,12 @@ export const useSettingStore = defineStore('setting', {
         },
         isUseShadowForCardStyleTile() {
             return this.common.shadowForCardStyleTile
+        },
+        isUseReversedForHCardStyleTile() {
+            return this.common.reversedForHCardStyleTile
+        },
+        isUseSmallIconForHCardStyleTile() {
+            return this.common.smallIconForHCardStyleTile
         },
         isPlayingViewCoverBorderShow() {
             return this.track.playingViewCoverBorderShow
@@ -983,14 +1018,69 @@ export const useSettingStore = defineStore('setting', {
         },
         mpvBinaryPath() {
             return this.track.mpvBinaryPath
+        },
+        themeNativeMode() {
+            return this.theme.nativeMode
+        },
+        isMiniNavBarMode() {
+            return this.navigation.miniNavBarMode
         }
     },
     actions: {
-        setThemeIndex(index, type) {
+        setThemeIndex(index, type, noCansade) {
             this.theme.index = index || 0
             this.theme.type = type || 0
-            //const themeId = THEMES[index].id
-            //emitEvents('switchTheme', themeId)
+
+            //不级联更新
+            if(noCansade) return
+            switch(this.theme.nativeMode) {
+                case 0:
+                    this.setThemeIndexByNativeMode()
+                    break
+                case 1:
+                    this.setThemeLightIndex(this.theme.index, this.theme.type)
+                    break
+                case 2:
+                    this.setThemeDarkIndex(this.theme.index, this.theme.type)
+                    break
+            }
+        },
+        setThemeLightIndex(index, type) {
+            this.theme.lightIndex = (typeof index == 'undefined') ? 1 : index
+            this.theme.lightType = type || 0
+        },
+        setThemeDarkIndex(index, type) {
+            this.theme.darkIndex = index || 0
+            this.theme.darkType = type || 0
+        },
+        setThemeNativeMode(mode) {
+            this.theme.nativeMode = mode || 0
+        },
+        switchThemeNativeMode() {
+            this.theme.nativeMode = (this.theme.nativeMode + 1) % 3
+        },
+        async setThemeIndexByNativeMode() {
+            const shouldUseDarkColors = await ipcRendererInvoke('app-nativeTheme-shouldUseDarkColors')
+            const { index, type } = this.theme
+            shouldUseDarkColors ? this.setThemeDarkIndex(index, type) 
+                : this.setThemeLightIndex(index, type)
+        },
+        switchToTheme(index, type, defaultIndex, defaultType) {
+            defaultIndex = defaultIndex || 0
+            defaultType = defaultType || 0
+            const { getTheme } = useThemeStore()
+            const item = getTheme(type, index)
+            if(!item) return this.setThemeIndex(defaultIndex, defaultType)
+            this.setThemeIndex(index, type, true)
+            emitEvents('theme-applyTheme')
+        },
+        switchToLightTheme(){
+            const { lightIndex, lightType } = this.theme
+            this.switchToTheme(lightIndex, lightType, 1)
+        },
+        switchToDarkTheme(){
+            const { darkIndex, darkType } = this.theme
+            this.switchToTheme(darkIndex, darkType)
         },
         setLayoutIndex(index) {
             const { isMaxScreen } = useAppCommonStore()
@@ -1000,13 +1090,19 @@ export const useSettingStore = defineStore('setting', {
 
             this.layout.index = index || 0
             const currentIndex = this.layout.index
-            if (!this.isSimpleLayout && !this.isMiniLayout) this.layout.fallbackIndex = currentIndex
+            const shouldMarkFallback = (!this.isSimpleLayout && !this.isMiniLayout)
+            if (shouldMarkFallback) {
+                this.layout.fallbackIndex = currentIndex
+            } else {
+                ipcRendererSend('app-markBoundsState')
+            }
             emitEvents('app-layout')
         },
         switchToFallbackLayout() {
             if(this.layout.fallbackIndex > 2) this.layout.fallbackIndex = 0
             this.setLayoutIndex(this.layout.fallbackIndex)
             this.setupWindowZoom()
+            ipcRendererSend('app-restoreBoundsState', this.common.useWinCenterStrict)
         },
         switchToSimpleLayout() {
             this.setLayoutIndex(SIMPLE_LAYOUT_INDEX)
@@ -1243,7 +1339,7 @@ export const useSettingStore = defineStore('setting', {
         },
         setImageTextTileStyleIndex(value) {
             const index = parseInt(value || 0)
-            if (index < 0 || index > 1) return
+            if (index < 0 || index > 2) return
             this.common.imageTextTileStyleIndex = index
         },
         setSongItemStyleIndex(value) {
@@ -1254,11 +1350,20 @@ export const useSettingStore = defineStore('setting', {
         toggleUseShadowForCardStyleTile() {
             this.common.shadowForCardStyleTile = !this.common.shadowForCardStyleTile
         },
+        toggleUseReversedForHCardStyleTile() {
+            this.common.reversedForHCardStyleTile = !this.common.reversedForHCardStyleTile
+        },
+        toggleUseSmallIconForHCardStyleTile() {
+            this.common.smallIconForHCardStyleTile = !this.common.smallIconForHCardStyleTile
+        },
         toggleUseOnlineCover() {
             this.track.useOnlineCover = !this.track.useOnlineCover
         },
         toggleAudioTypeFlagShow() {
             this.track.audioTypeFlagShow = !this.track.audioTypeFlagShow
+        },
+        toggleDownloadLyricForLocalTrack() {
+            this.track.downloadLyricForLocalTrack = !this.track.downloadLyricForLocalTrack
         },
         toggleUseDeeplyScanForDirectory() {
             this.track.useDeeplyScanForDirectory = !this.track.useDeeplyScanForDirectory
@@ -1351,6 +1456,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleCloudStorageShortcut() {
             this.navigation.cloudStorageShortcut = !this.navigation.cloudStorageShortcut
+        },
+        toggleThemeNativeModeShortcut() {
+            this.navigation.themeNativeModeShortcut = !this.navigation.themeNativeModeShortcut
         },
         toggleKeysGlobal() {
             this.keys.global = !this.keys.global
@@ -1849,7 +1957,10 @@ export const useSettingStore = defineStore('setting', {
         },
         setupMpvBinaryPath() {
             emitEvents('mpvBinary-setPath', this.track.mpvBinaryPath)
-        }
+        },
+        toggleMiniNavBarMode() {
+            this.navigation.miniNavBarMode = !this.navigation.miniNavBarMode
+        },
     },
     persist: {
         enabled: true,

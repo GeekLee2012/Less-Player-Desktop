@@ -291,9 +291,7 @@ watch(workingCustomTheme, (nv, ov) => {
                 <div class="row">
                     <div class="cate-name">应用背景</div>
                     <div class="row-content">
-                        <div class="tip-text">提示：颜色控件，左右均可点击；左边为输入模式，右边为输入值<br>
-                            不想设置颜色，请切换为HEXA / RGBA模式，直接删除颜色值即可<br>
-                            当前应用，所有输入框，按Enter键生效，或光标焦点离开后自动生效
+                        <div class="tip-text" v-show="false">提示：当前应用，所有输入框，按Enter键生效，或光标焦点离开后自动生效
                         </div>
                         <div class="item" @click="">
                             <div class="name">背景颜色：</div>

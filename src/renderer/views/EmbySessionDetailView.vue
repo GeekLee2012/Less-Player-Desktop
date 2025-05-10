@@ -541,7 +541,8 @@ onUnmounted(() =>offEvents(eventsRegistration))
                 </span>
                 <transition name="fade-ex">
                     <div class="categories" :class="{ medium: (activeTab == 0) }"
-                        v-show="categoriesShow && categories && categories.length > 0">
+                        v-show="categoriesShow && categories && categories.length > 0"
+                        @contextmenu.stop="" >
                         <ul>
                             <li class="cate-item" v-for="(item, index) in categories"
                                 :class="{ first: (index == 0)}"

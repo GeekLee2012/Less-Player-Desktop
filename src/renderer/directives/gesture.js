@@ -7,6 +7,8 @@ export const bindDragAndMove = (el, binding) => {
     if(!el || !binding) return
     const { trigger: triggerSelector, excludes } = binding
     if(!triggerSelector) return 
+    const _excludes = ['.btn', 'svg', '.toggle-ctl']
+    if(excludes && excludes.length > 0) _excludes.push(...excludes)
 
     const triggerEl = el.querySelector(triggerSelector)
     if (!triggerEl) return
@@ -16,9 +18,9 @@ export const bindDragAndMove = (el, binding) => {
         
         document.onmousemove = (e2) => {
             //事件忽略
-            if(excludes && excludes.length > 0) {
-                for(let i = 0; i < excludes.length; i++) {
-                    const excludeEls = el.querySelectorAll(excludes[i]) || []
+            if(_excludes) {
+                for(let i = 0; i < _excludes.length; i++) {
+                    const excludeEls = el.querySelectorAll(_excludes[i]) || []
                     for(let j = 0; j < excludeEls.length; j++) {
                         if(excludeEls[j].contains(target)) return
                     }

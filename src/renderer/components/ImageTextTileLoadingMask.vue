@@ -6,20 +6,21 @@ import { useSettingStore } from '../../renderer/store/settingStore';
 
 const props = defineProps({
     count: Number,
-    videoStyle: Boolean
+    videoStyle: Boolean,
 })
 
-const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
+const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRefs(useSettingStore())
 </script>
 
 <template>
     <div class="tiles-loading-mask" :class="{
         'tiles-card-loading-mask': isUseCardStyleImageTextTile,
         'tiles-video-loading-mask': videoStyle,
+        'tiles-card-horizion-loading-mask': isUseHCardStyleImageTextTile,
     }">
         <div class="tile" v-for="i in count">
             <div class="cover loading-mask"></div>
-            <div class="title loading-mask"></div>
+            <div class="title loading-mask" v-show="!isUseHCardStyleImageTextTile"></div>
         </div>
     </div>
 </template>
@@ -75,6 +76,18 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
     height: 66px;
 }
 
+.tiles-card-horizion-loading-mask .tile {
+    --others-image-text-tile-cover-size: 168px;
+    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio));
+    margin-top: 18px !important;
+    margin-bottom: 10px !important;
+    height: auto !important;
+}
+
+.tiles-card-horizion-loading-mask .tile .cover {
+    height: 151px !important;
+}
+
 .tiles-video-loading-mask .tile {
     margin: 20px 15px;
     width: calc(var(--others-image-text-tile-cover-size) * 1.35);
@@ -101,8 +114,9 @@ const { isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
 }
 
 .mini-navbar-mode .tiles-card-loading-mask .tile {
-    margin-top: 25px;
+    margin-top: 21px;
     margin-bottom: 20px;
+    transform: scaleY(1.03);
 }
 
 .mini-navbar-mode .tiles-video-loading-mask .tile {

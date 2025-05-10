@@ -206,6 +206,7 @@ onUnmounted(() => offEvents(eventsRegistration))
         </RadioCategoryBar>
         <PlaylistsControl :loading="isLoadingCategories || isLoadingContent" 
             :playable="true"
+            :favorable="true"
             :loadPage="loadPageContent" 
             :limit="35"
             :paginationStyleType="getPaginationStyleIndex" 

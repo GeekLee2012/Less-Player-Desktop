@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain,
   shell, powerSaveBlocker, Tray,
   globalShortcut, session, utilityProcess,
   protocol, nativeTheme, MessageChannelMain,
-  nativeImage,  screen,
+  nativeImage,  screen, net,
 } = require('electron')
 
 const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
@@ -22,7 +22,7 @@ const { scanDirTracks, parseTracks,
   statPathSync, MD5, SHA1, transformPath,
   DEFAULT_COVER_BASE64, getSimpleFileName,
   getFileExtName, walkSync, isSuppotedVideoType,
-  parseVideos,
+  parseVideos, parseEmbeddedLyricFromFile,
 } = require('./common')
 
 const path = require('path')
@@ -113,7 +113,7 @@ const initialize = () => {
     //全局UserAgent
     appUserAgent = USER_AGENTS[nextInt(USER_AGENTS.length)]
     app.userAgentFallback = appUserAgent
-    mainWin = createMainWindow(false)
+    mainWin = createMainWindow({ show: false, isInit: true })
     
     //清理缓存
     clearCaches()
@@ -204,7 +204,7 @@ const initialize = () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0 || mainWin.isDestroyed()) {
-      mainWin = createMainWindow(true)
+      mainWin = createMainWindow({ show: true })
     } else if(!isMainWindowShow()) {
       showMainWindow()
     }
@@ -224,6 +224,7 @@ const initialize = () => {
 
   app.on('before-quit', (event) => {
     cleanupBeforeQuit()
+    saveAppStates()
     sendToMainRenderer('app-quit')
   })
 
@@ -237,7 +238,8 @@ const initialize = () => {
   })
 
   nativeTheme.on('updated', () => {
-    //console.log(nativeTheme.themeSource)
+    const { themeSource, shouldUseDarkColors } = nativeTheme
+    sendToMainRenderer('app-nativeTheme-updated', { themeSource, shouldUseDarkColors })
   })
 
 }
@@ -516,7 +518,7 @@ const registryGlobalListeners = () => {
     cancelDownload()
   })*/.on('path-showInFolder', (event, path) => {
     if (path) shell.showItemInFolder(path)
-  }).on('dnd-saveToLocal', async (event, { file, name, type, data, url, useDefaultIcon }) => {
+  }).on('dnd-saveToLocal', async (event, { file, name, type, data, url, useDefaultIcon, silent }) => {
     const hasData = (file && data)
     const hasUrl = (url && url.startsWith('http'))
     if(!hasData && !hasUrl) return 
@@ -530,7 +532,7 @@ const registryGlobalListeners = () => {
       })
     }
     
-    const fileMeta = { file, name, type, data, url, useDefaultIcon }
+    const fileMeta = { file, name, type, data, url, useDefaultIcon, silent }
     file = transformPath(file)
     //TODO 特殊符号处理：<>/|:*?
     if(!isMacOS) file = file.replace(/\|/g, '--')
@@ -547,6 +549,19 @@ const registryGlobalListeners = () => {
     })
   }).on('app-setProgressBar', (event, data) => {
     if(isWindowAccessible(mainWin)) mainWin.setProgressBar(data)
+  }).on('app-markBoundsState', (event, data) => {
+    markAppBoundsState()
+  }).on('app-restoreBoundsState', (event, ...args) => {
+    const useCenterStrict = args[0]
+    restoreAppBounds(useCenterStrict)
+  })
+
+  ipcMain.handle('app-netOnline', (event, ...args) => {
+    return net.isOnline()
+  })
+
+  ipcMain.handle('app-nativeTheme-shouldUseDarkColors', (event, ...args) => {
+    return nativeTheme.shouldUseDarkColors
   })
 
   ipcMain.handle('app-maxScreenState', (event, ...args) => {
@@ -686,13 +701,25 @@ const registryGlobalListeners = () => {
     return imageResult ? imageResult.text : null
   })
 
+  ipcMain.handle('load-lyric-embeded', async (event, ...args) => {
+    const file = args[0].trim()
+    return await parseEmbeddedLyricFromFile(file)
+  })
+
   ipcMain.handle('load-lyric-file', async (event, ...args) => {
-    const arg = args[0].trim()
-    const index = arg.lastIndexOf('.')
-    const lyricFile = arg.substring(0, index)
-    return readText(`${lyricFile}.lrc`)
-      || readText(`${lyricFile}.LRC`)
-      || readText(`${lyricFile}.Lrc`)
+    const url = args[0].trim()
+    const index = url.lastIndexOf('.')
+    const file = url.substring(0, index)
+    let transText = null
+    const text = readText(`${file}.lrc`)
+      || readText(`${file}.LRC`)
+      || readText(`${file}.Lrc`)
+    if(text) {
+      transText = readText(`${file} [Trans].lrc`)
+        || readText(`${file} [Trans].LRC`)
+        || readText(`${file} [Trans].Lrc`)
+    }
+    return { text, transText }
   })
 
   ipcMain.handle('invoke-vendor', async (event, ...args) => {
@@ -938,7 +965,11 @@ const registryGlobalListeners = () => {
     const win = BrowserWindow.fromWebContents(event.sender)
     win.setIgnoreMouseEvents(ignore, options)
   }).on('app-mainWin-show', (event, ...args) => {
-    showMainWindow()
+    const isInit = args[0]
+    const useCenterStrict = args[1]
+    if(isInit) restoreAppBounds(useCenterStrict)
+    const timeout = (!isInit || isDevEnv) ? 0 : 1888
+    setTimeout(showMainWindow, timeout)
   }).on('app-mainWin-alwaysOnTop', (event, ...args) => {
     setWindowAlwaysOnTop(mainWin, args[0])
   }).on('app-desktopLyric-layoutMode', (event, ...args) => {
@@ -1129,9 +1160,32 @@ const closeMessagePortPair = () => {
   tryCloseMessagePort(port2)
 }
 
+const getInitialMainWindowBounds = (isInit) => {
+  let { appWidth: width, appHeight: height } = appLayoutConfig[appLayout]
+  if(isInit) {
+    const { appBounds } = appConfig
+    if(appBounds) {
+      const { x, y, width, height } = appBounds
+      return { width, height }
+    }
+  }
+  return { width, height }
+}
+
+const restoreAppBounds = (useCenterStrict) => {
+  if(!isWindowAccessible(mainWin)) return 
+  if(appLayout != DEFAULT_LAYOUT) return 
+
+  const { width, height } = getInitialMainWindowBounds(true)
+  const zoomFactor = currentZoom / 100
+  mainWin.webContents.setZoomFactor(zoomFactor)
+  mainWin.setSize(parseInt(width * zoomFactor), parseInt(height * zoomFactor))
+  setupMainWindowCenterScreen(useCenterStrict)
+}
+
 //创建浏览窗口
-const createMainWindow = (show) => {
-  const { appWidth: width, appHeight: height } = appLayoutConfig[appLayout]
+const createMainWindow = ({ show, isInit }) => {
+  const { width, height } = getInitialMainWindowBounds(isInit)
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width,
@@ -1270,6 +1324,7 @@ const getAppMenuI18nConfig = () => {
         About: '关于',
         Update: '检查更新',
         Settings: '设置',
+        ResetSettings: '恢复默认设置',
         DevTools: '开发者工具',
         Quit: '退出',
         Edit: '编辑',
@@ -1282,6 +1337,7 @@ const getAppMenuI18nConfig = () => {
         About: 'About',
         Update: 'Check for Updates...',
         Settings: 'Settings',
+        ResetSettings: 'Reset Settings',
         DevTools: 'Developer Tools',
         Quit: 'Quit',
         Edit: 'Edit',
@@ -1317,7 +1373,10 @@ const initAppMenuTemplate = () => {
     { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.CHECK_FOR_UPDATES, true), label: i18nText.Update },
     { type: 'separator' },
     //accelerator: 'Alt+Shift+P'
-    { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.SETTING, true), label: i18nText.Settings },
+    { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.SETTING, true), 
+      label: i18nText.Settings, accelerator: 'P' },
+    { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.RESET_SETTING, true), 
+      label: i18nText.ResetSettings, accelerator: 'CmdOrCtrl+P' },
     { role: 'toggleDevTools', label: i18nText.DevTools },
     { type: 'separator' },
     { role: 'quit', label: i18nText.Quit },
@@ -1436,8 +1495,13 @@ const initTrayMenuTemplate = () => {
     label: '设置',
     click: () => sendTrayAction(TrayAction.SETTING, true)
   }, {
+    type: 'separator'
+  }, {
     label: '检查更新',
     click: () => sendTrayAction(TrayAction.CHECK_FOR_UPDATES, true)
+  }, {
+    label: '恢复默认设置',
+    click: () => sendTrayAction(TrayAction.RESET_SETTING, true)
   }, {
     type: 'separator'
   }, {
@@ -1635,6 +1699,27 @@ const closeDevTools = (win) => {
 const cleanupBeforeQuit = () => {
   
 }
+
+const markAppBoundsState = () => {
+  if(!isWindowAccessible(mainWin)) return
+
+  const { x, y, width, height } = mainWin.getBounds()
+  const appWidth = parseInt(width * 100 / currentZoom)
+  const appHeight = parseInt(height * 100 / currentZoom)
+  Object.assign(appConfig, {
+    appBounds: { x, y, width: appWidth, height: appHeight }
+  })
+}
+
+const saveAppStates = () => {
+  if(appLayout != DEFAULT_LAYOUT) {
+    Reflect.deleteProperty(appConfig, 'appBounds')
+  } else {
+    markAppBoundsState()
+  }
+  storeAppConfig()
+}
+
 
 const cookiesMap = {} //格式: { url: cookie }
 const cookiesPendingMap = {} //格式: { url: true }

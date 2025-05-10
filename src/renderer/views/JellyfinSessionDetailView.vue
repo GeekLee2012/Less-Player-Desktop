@@ -482,7 +482,9 @@ onDeactivated(() => setCategoriesShow(false))
                     @click="visitTab(index, true)" v-html="tab.name">
                 </span>
                 <transition name="fade-ex">
-                    <div class="categories" v-show="categoriesShow && categories && categories.length > 0">
+                    <div class="categories" 
+                        v-show="categoriesShow && categories && categories.length > 0"
+                        @contextmenu.stop="" >
                         <ul>
                             <li class="cate-item" v-for="(item, index) in categories"
                                 :class="{ first: (index == 0)}"

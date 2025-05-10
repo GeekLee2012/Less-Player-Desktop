@@ -62,8 +62,9 @@ defineExpose({
 
 <template>
     <div class="playlist-categroy-flow-btn"
+        v-show="isPlaylistCategoryBarFlowBtnShow && isBtnShow"
         @click.stop="toggleCategory" 
-        v-show="isPlaylistCategoryBarFlowBtnShow && isBtnShow">
+        @contextmenu.stop="" >
         <svg width="15" height="15" viewBox="0 0 29.3 29.3">
             <g id="Layer_2" data-name="Layer 2">
                 <g id="Layer_1-2" data-name="Layer 1">

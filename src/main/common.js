@@ -4,7 +4,7 @@ const { homedir } = require('os');
 const path = require('path');
 const CryptoJS = require('crypto-js');
 const MusicMetadata = require('music-metadata');
-const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv, VIDEO_EXTS, VIDEO_COLLECTION_EXTS } = require('./env');
+const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv, VIDEO_EXTS, VIDEO_COLLECTION_EXTS, IMAGE_EXTS } = require('./env');
 
 
 const FILE_SCHEME = 'file'
@@ -56,8 +56,19 @@ const statPathSync = (path) => {
     return null
 }
 
+const scanDirCover = async (dir) => {
+    const exts = [...IMAGE_EXTS]
+    const names = ['Cover', 'cover']
+    for(let i = 0; i < exts.length; i++) {
+        for(let j = 0; j < names.length; j++) {
+            const file = `${dir}/${names[j]}.${exts[i]}`
+            if(statPathSync(file)) return file
+        }
+    }
+}
+
 const scanDirTracks = async (dir, exts, deep) => {
-    const result = { path: dir, data: [], name: getSimpleFileName(dir) }
+    const result = { path: dir, data: [], name: getSimpleFileName(dir), cover: '' }
     try {
         const statResult = statSync(dir, { throwIfNoEntry: false })
         if (!statResult || !statResult.isDirectory()) return null
@@ -76,6 +87,7 @@ const scanDirTracks = async (dir, exts, deep) => {
         if (files.length > 0) {
             const tracks = await parseTracks(files.sort())
             result.data.push(...tracks)
+            result.cover = await scanDirCover(dir) || ''
         }
     } catch (error) {
         console.log(error)
@@ -389,7 +401,7 @@ async function createTrackFromMetadata(file) {
             //if (cover) coverData = `data:${cover.format};base64,${cover.data.toString('base64')}`
 
             //内嵌歌词
-            if (lyrics && lyrics.length > 0) lyricText = lyrics[0]
+            //if (lyrics && lyrics.length > 0) lyricText = lyrics[0]
 
             //发布时间
             if (originaldate) publishTime = originaldate
@@ -427,6 +439,7 @@ async function createTrackFromMetadata(file) {
         }
 
         //内嵌歌词
+        /*
         if (metadata.native && !lyricText) {
             const ID3v23 = metadata.native['ID3v2.3']
             for (var i in ID3v23) {
@@ -438,7 +451,8 @@ async function createTrackFromMetadata(file) {
                 //Synchronised Lyrics暂不支持
             }
         }
-
+        */
+       
         //TODO
         const hash = MD5(file)
         return {
@@ -450,7 +464,7 @@ async function createTrackFromMetadata(file) {
             album,
             duration,
             cover: (ImageProtocal.prefix + file),
-            embeddedLyricText: lyricText,
+            //embeddedLyricText: lyricText,
             url: (FILE_PREFIX + file),
             publishTime,
             bitrate,
@@ -485,13 +499,45 @@ async function parseImageMetaFromFile(file) {
     return coverData
 }
 
+async function parseEmbeddedLyricFromFile(file) {
+    file = transformPath(file)
+    const statResult = statSync(file, { throwIfNoEntry: false })
+    if (!statResult) return null
+
+    const metadata = await MusicMetadata.parseFile(file, { duration: true })
+    let lyricText = null
+    try {
+        if (metadata.common) {
+            const { lyrics } = metadata.common
+            //内嵌歌词
+            if (lyrics && lyrics.length > 0) lyricText = lyrics[0]
+        }
+
+        //内嵌歌词
+        if (metadata.native && !lyricText) {
+            const ID3v23 = metadata.native['ID3v2.3']
+            for (var i in ID3v23) {
+                const { id, value } = ID3v23[i]
+                if (id === 'USLT') { //Unsynchronised Lyrics
+                    lyricText = value.text
+                    break
+                }
+                //Synchronised Lyrics暂不支持
+            }
+        }
+    } catch (error) {
+        console.log(error)
+    }
+    return lyricText
+}
+
 function readBufferSync(file, encoding) {
     try {
         file = transformPath(file)
         const statResult = statSync(file, { throwIfNoEntry: false })
         if (statResult) return readFileSync(file, { encoding })
     } catch (error) {
-        console.log(error)
+        console.log(error, file, encoding)
     }
     return null
 }
@@ -597,7 +643,7 @@ const parsePlsFile = async (filename, audioExts) => {
         }
         filename = transformPath(filename)
         const sname = getSimpleFileName(filename)
-        const result = { file: filename, name: sname, version: null, data: [] }
+        const result = { file: filename, name: sname, version: null, data: [], cover: '' }
         //读取文本内容
         const content = readText(filename)
         if (!content) return null
@@ -645,6 +691,7 @@ const parsePlsFile = async (filename, audioExts) => {
                 length = null
             }
         }
+        result.cover = await scanDirCover(getParentPath(filename)) || ''
         return result
     } catch (error) {
         console.log(error)
@@ -662,7 +709,7 @@ const parseM3uPlaylist = async (filename, audioExts) => {
         }
         filename = transformPath(filename)
         const sname = getSimpleFileName(filename)
-        const result = { file: filename, name: sname, version: null, data: [] }
+        const result = { file: filename, name: sname, version: null, data: [], cover: '' }
         //读取文本内容
         const content = readText(filename)
         if (!content) return null
@@ -702,6 +749,7 @@ const parseM3uPlaylist = async (filename, audioExts) => {
                 //length = null
             }
         }
+        result.cover = await scanDirCover(getParentPath(filename)) || ''
         return result
     } catch (error) {
         console.log(error)
@@ -766,6 +814,7 @@ module.exports = {
     writePlsFile,
     writeM3uFile,
     parseImageMetaFromFile,
+    parseEmbeddedLyricFromFile,
     statPathSync,
     walkSync,
     MD5,

@@ -91,6 +91,7 @@ const TrayAction = {
     DESKTOP_LYRIC_PIN: 11,
     DESKTOP_LYRIC_UNPIN: 12,
     PLUGINS: 20,
+    RESET_SETTING: 66,
     CHECK_FOR_UPDATES: 99,
 }
 

@@ -323,7 +323,16 @@ provide('appRoute', {
     visitHome: () => (visitCommonRoute('/')),
     visitThemes: () => (visitCommonRoute('/themes')),
     visitUserHome,
-    visitSetting: () => (visitCommonRoute('/setting')),
+    visitSetting: (text) => {
+        const onRouteReady = isBlank(text) ? null 
+            : () => setRouterCtxCacheItem({ navItemText: text })
+        visitCommonRoute({ path: '/setting', rejectOnSame: true, onRouteReady })
+            .catch(error => {
+                if (error == 'sameRoute' && onRouteReady) {
+                    emitEvents('setting-scrollToNavItem', text)
+                }
+            })
+    },
     visitSearch: (keyword) => (visitCommonRoute(`/search/${keyword}`)),
     visitLocalMusic: () => (visitCommonRoute('/playlists/local')),
     visitPlaylistSquare: (platform) => (visitCommonRoute(`/playlists/square/${platform}`)),

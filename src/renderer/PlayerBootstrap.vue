@@ -7,7 +7,7 @@ import { usePlatformStore } from './store/platformStore';;
 import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
 import { useSettingStore } from './store/settingStore';
-import { Track } from '../common/Track'
+import { Track } from '../common/Track';
 import { coverDefault, isBlank, isDevEnv, escapeHtml,
     useStartDrag, useDownloadsPath, 
     tryCall, toTrimString, useTrayAction,
@@ -15,6 +15,7 @@ import { coverDefault, isBlank, isDevEnv, escapeHtml,
     onIpcRendererEvent, onIpcRendererEvents, toMmss, md5,
     isSupportedImage,
     toLowerCaseTrimString,
+    tryCallDefault,
 } from '../common/Utils';
 import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
 import { Playlist } from '../common/Playlist';
@@ -62,7 +63,9 @@ const { togglePlaybackQueueView, toggleVideoPlayingView,
 } = useAppCommonStore()
 const { addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
-    removeFavoriteRadio, isFavoriteRadio 
+    removeFavoriteRadio, isFavoriteRadio,
+    addFavoritePlaylist, addFavoriteAlbum,
+    addFollowArtist,
 } = useUserProfileStore()
 const { theme, layout, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
@@ -70,7 +73,7 @@ const { theme, layout, isStoreRecentPlay,
     selectedAudioOutputDeviceId, isDndSaveEnable,
     isShowDialogBeforeClearPlaybackQueue, 
     isUseOnlineCoverEnable, isMiniLayout, 
-    isStorePlayProgressStateBeforeQuit,
+    isStorePlayProgressStateBeforeQuit, isDownloadLyricForLocalTrack,
 } = storeToRefs(useSettingStore())
 const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray,
@@ -195,7 +198,8 @@ const loadLyricFromUnited = (track) => {
         }, error => notifyLyricLoaded(track))
 }
 
-const updateLyric = (track, { lyric, roma, trans }) => {
+const updateLyric = (track, { lyric, roma, trans, lyricEmbedded }) => {
+    Object.assign(track, { lyricEmbedded })
     //歌曲 - 普通歌词
     if (track && Lyric.hasData(lyric)) {
         //歌词元数据补全
@@ -217,7 +221,10 @@ const updateLyric = (track, { lyric, roma, trans }) => {
 
 //通知歌词已更新
 const notifyLyricLoaded = (track, text) => {
-    if (isCurrentTrack(track)) emitEvents('track-lyricLoaded', track)
+    if (isCurrentTrack(track)) {
+        emitEvents('track-lyricLoaded', track)
+        saveLyricForLocal(track)
+    }
     if (text) showToast(text || '歌词已加载')
 }
 
@@ -240,6 +247,16 @@ const loadTrackLyric = async (track) => {
     } catch(error) {
         if(isDevEnv()) console.log(error)
     }
+}
+
+const saveLyricForLocal = async (track) => {
+    if(!track) return 
+    //本地歌曲 - 自动下载歌词
+    //目前会重复下载、且覆盖更新
+    const { platform, lyricEmbedded, } = track
+    if(!isLocalMusic(platform) || !isDownloadLyricForLocalTrack.value || lyricEmbedded) return
+    dndSaveLyric(null, track, { useDefaultIcon: true, silent: true })
+    //if(isDevEnv()) console.log('[ Local Music ] 歌词已下载', track)
 }
 
 
@@ -310,13 +327,17 @@ const bootstrapTrack = (track, options) => {
         //播放相关数据
         const result = await vendor.playDetail(id, track)
         if (!result) return reject('noUrl')
-        const { lyric, cover, artist, url } = result
+        const { lyric, lyricTrans ,cover, artist, url } = result
         //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
         if (Track.hasUrl(result)) Object.assign(track, { url })
 
         //更新歌词
         if (Track.hasLyric(result)) {
             updateLyric(track, { lyric })
+        }
+        //更新歌词 - 翻译
+        if (Track.hasLyricTrans(result)) {
+            updateLyric(track, { trans: lyricTrans })
         }
         //更新封面
         if (Track.hasCover(result, isUseOnlineCoverEnable.value) && !keepCover) {
@@ -729,6 +750,85 @@ const doPlayAlbum = async (album, text, traceId, needReset) => {
     if (traceId && !isCurrentTraceId(traceId)) return
     traceRecentAlbum(album)
     addAndPlayTracks(album.data, needReset, text || '即将为您播放专辑')
+}
+
+/* 收藏歌单、电台等 */
+const favorPlaylist = async (playlist) => {
+    const { platform } = playlist
+    if(isLocalMusic(platform) || isCloudStorage(platform)) {
+        return showFailToast('当前平台暂不支持收藏')
+    }
+
+    let text = ''
+    if (Playlist.isNormalType(playlist)) {
+        const { id, title, cover } = playlist
+        addFavoritePlaylist(id, platform, title, cover, Playlist.NORMAL_TYPE)
+        text = '歌单收藏成功'
+    } else if (Playlist.isAlbumType(playlist)) {
+        const { id, title, cover } = playlist
+        addFavoriteAlbum(id, platform, title, cover)
+        text = '专辑收藏成功'
+    } else if (Playlist.isFMRadioType(playlist)) {
+        const { data } = playlist
+        const track = data && data.length > 0 ? data[0] : playlist
+        if(Track.hasUrl(track)) {
+            addFavoriteRadio(track)
+            text = 'FM电台收藏成功'
+            checkFavoritedState()
+        }
+    }
+    if(text) showToast(text)
+}
+
+/* 收藏专辑 */
+const favorAlbum = async (album) => {
+    const { platform } = album
+    if(isLocalMusic(platform) || isCloudStorage(platform)) {
+        return showFailToast('当前平台暂不支持收藏')
+    }
+    
+    const { id, title, cover } = album
+    addFavoriteAlbum(id, platform, title, cover)
+    showToast('专辑收藏成功')
+}
+
+/* 关注歌手 */
+const followArtist = async (artist) => {
+    const { platform } = artist
+    if(isLocalMusic(platform) || isCloudStorage(platform)) {
+        return showFailToast('当前平台暂不支持收藏')
+    }
+    
+    const { id, title, cover } = artist
+    addFollowArtist(id, platform, title, cover)
+    showToast('歌手成功')
+}
+
+//播放歌手：播放热门歌曲或全部歌曲（仅第1页）
+const playArtist = async (artist) => {
+    const { id, platform } = artist
+    if(isBlank(id) || id < 1) return 
+    const vendor = getVendor(platform)
+    if (!vendor) return
+
+    let result = null
+    let maxRetry = 3, retry = 0
+    let success = false, page = 1
+    do {
+        if (vendor.artistDetailHotSongs) {
+            result = await vendor.artistDetailHotSongs(id)
+        } else if (vendor.artistDetailAllSongs) {
+            result = await vendor.artistDetailAllSongs(id, 0, 30, 1)
+        }
+
+        if (result && result.data.length > 0) {
+            addAndPlayTracks(result.data, true, `即将为您播放歌手`)
+            success = true
+            break
+        }
+        ++retry
+    } while (retry > 0 && retry < maxRetry)
+    if (!success) return showFailToast('播放歌手歌曲失败')
 }
 
 
@@ -1250,7 +1350,7 @@ const dndSaveCover = async (event, item) => {
     startDrag({ file, type: 'image', url: cover })
 }
 
-const dndSaveLyric = async (event, track) => {
+const dndSaveLyric = async (event, track, options) => {
     track = track || currentTrack.value
     if (!track) return
     if (!isDndSaveEnable.value) return
@@ -1262,11 +1362,19 @@ const dndSaveLyric = async (event, track) => {
     if (!dndSavePath) return showFailToast('当前操作异常')
     if (!Track.hasLyric(track)) return
 
-    const normalName = Track.normalName(track)
+    const { useDefaultIcon, silent } = options || {}
+
+    const { platform, filename } = track
+    const normalName = isLocalMusic(platform) ? filename : Track.normalName(track)
     const file = `${dndSavePath}/${normalName}.lrc`
-    const { lyric } = track
+    const { lyric, lyricTrans } = track
     const data = Lyric.stringify(lyric)
-    startDrag({ file, type: 'lyric', data })
+    startDrag({ file, type: 'lyric', data, useDefaultIcon, silent })
+
+    if(!Lyric.hasData(lyricTrans)) return 
+    const transFile = `${dndSavePath}/${normalName} [Trans].lrc`
+    const transData = Lyric.stringify(lyricTrans)
+    startDrag({ file: transFile, type: 'lyric', data: transData, useDefaultIcon, silent })
 }
 
 const dndSaveTrack = async (event, track) => {
@@ -1364,7 +1472,7 @@ const setupPlayingViewDnd = async (event) => {
 
 //注册ipcRenderer消息监听器
 const { RESTORE, PLAY, PAUSE,  PLAY_PREV, PLAY_NEXT, 
-        HOME, USERHOME, SETTING, 
+        HOME, USERHOME, SETTING, RESET_SETTING,
         DESKTOP_LYRIC_OPEN, DESKTOP_LYRIC_CLOSE, 
         DESKTOP_LYRIC_LOCK, DESKTOP_LYRIC_UNLOCK,
         DESKTOP_LYRIC_PIN, DESKTOP_LYRIC_UNPIN,
@@ -1401,6 +1509,9 @@ onIpcRendererEvents({
             case SETTING:
                 visitSetting()
                 setupTray()
+                break
+            case RESET_SETTING:
+                emitEvents('app-resetSetting')
                 break
             case DESKTOP_LYRIC_OPEN:
                 setDesktopLyricShow(true, true)
@@ -1463,7 +1574,9 @@ onIpcRendererEvents({
         })
         ipcRendererSend('app-messagePort-pair')
     },
-    'dnd-saveToLocal-result': (event, { file, name, type, data, url, useDefaultIcon, error }) => {
+    'dnd-saveToLocal-result': (event, { file, name, type, data, url, useDefaultIcon, error, silent }) => {
+        if(silent) return 
+
         const typeMappings = {
             image: {
                 name: '图片',
@@ -1519,13 +1632,11 @@ let messagePort = null
 const setupMessagePort = (channel, callback) => {
     onIpcRendererEvent(channel, event => {
         messagePort = event.ports[0]
-
         messagePort.onmessage = (event) => {
             const { action, data } = event.data
             handleMessageFromDesktopLyric(action, data)
         }
-
-        if (callback) callback()
+        tryCallDefault(callback)
     })
 }
 
@@ -1539,8 +1650,8 @@ const postMessageToDesktopLryic = (action, data) => {
 const handleMessageFromDesktopLyric = (action, data) => {
     if (action === 'c-setting-visit') {
         ipcRendererSend('app-mainWin-show')
-        visitSetting()
-        ipcRendererInvoke('find-in-page', '桌面歌词')
+        visitSetting('桌面歌词')
+        //ipcRendererInvoke('find-in-page', '桌面歌词')
     } else if (action === 'c-setting-sync') {
         syncSettingFromDesktopLyric(data)
     } else if (action === 'c-track-seek') {
@@ -1568,7 +1679,6 @@ const reloadApp = () => {
     setPendingPlayPercent(progressState.value)
     setTimeout(() => ipcRendererSend('app-reload'), 1888)
 }
-
 
 //EventBus监听注册，统一管理
 const eventsRegistration = {
@@ -1607,7 +1717,7 @@ const eventsRegistration = {
                 playTrackDirectly(track)
             }
         }, async (reason) => {
-            if (reason == 'noUrl' || reason == 'noService') { //TODO
+            if (reason == 'noUrl' || reason == 'noService') {
                 const { platform } = track
                 if (!isVipTransferEnable.value || isLocalMusic(platform)
                     || Playlist.isFMRadioType(track)) {
@@ -1834,10 +1944,14 @@ watch(trackResourceToolViewShow, (nv, ov) => nv && hideAllCtxMenus())
 provide('player', {
     seekTrack,
     playPlaylist,
+    favorPlaylist,
     addPlaylistToQueue,
     addFmRadioToQueue,
     playAlbum,
     addAlbumToQueue,
+    favorAlbum,
+    playArtist,
+    followArtist,
     playVideoItem,
     playVideo,
     addAndPlayTracks,

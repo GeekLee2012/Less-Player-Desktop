@@ -4,21 +4,25 @@ import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
-import { isMacOS, isWinOS, toTrimString } from '../common/Utils';
+import { isMacOS, isWinOS, toTrimString, onIpcRendererEvents, ipcRendererInvoke } from '../common/Utils';
+import { AppThemeSource } from '../common/Constants';
 import CssWinOS from './CssWinOS.vue';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
-import ImageTextTile from './components/ImageTextTile.vue';
+import { useThemeStore } from './store/themeStore';
 
 
 
 const { theme: themeSetting, currentBorderRadiusCtlStyle,
   isUseAutoBorderRadiusCtl, isUseMacOSBorderRadiusCtl,
   isUseWindowsBorderRadiusCtl, winCustomShadowSize, 
-  commonBorderRadius, } = storeToRefs(useSettingStore())
+  commonBorderRadius, themeNativeMode, } = storeToRefs(useSettingStore())
 const { getCurrentTheme, setupFontFamily,
   setupFontWeight, allFontSizeLevels,
   currentFontSizeLevel, currentFontSize,
-  setPresetBorderRadius, } = useSettingStore()
+  setPresetBorderRadius, switchToLightTheme, 
+  switchToDarkTheme, setThemeLightIndex,
+  setThemeDarkIndex } = useSettingStore()
+const { getTheme } = useThemeStore()
 
 
 const applyDocumentElementStyle = (prop, value) => document.documentElement.style.setProperty(prop, value)
@@ -126,10 +130,8 @@ const applyTheme = (theme) => {
 
 //设置主题
 const setupAppTheme = (theme) => {
-  theme = theme || getCurrentTheme()
-
+  theme = theme || getCurrentTheme() || getTheme(0, 1)
   const { id } = theme
-  const { type } = themeSetting.value
   applyTheme(theme)
   applyDocumentStyle({ 'theme': (id || 'custom-preview') })
 }
@@ -169,7 +171,7 @@ const setupFontSize = (fontSize) => {
     '--content-text-module-title3-size': Math.min((fontSize + 3.5), 28),
     '--content-setting-cate-subtitle-width': Math.min((fontSize / 15.5 * 225), 245),
     //'--content-left-nav-line-height': (fontSize / 15.5 * 33),
-    '--content-left-nav-line-spacing': (fontSize / 15.5 * 10.5),
+    '--content-left-nav-line-spacing': (fontSize / 15.5 * 10),
     //'--content-text-module-title-size': (fontSize / 17.5 * 30),
     //'--content-text-module-subtitle-size': Math.max((fontSize / 17.5 * 25), 25)
   }
@@ -259,6 +261,42 @@ const setupWinCustomShadow = () => {
   }
 }
 
+const setupAppNativeTheme = () => {
+  onIpcRendererEvents({
+    'app-nativeTheme-updated': (event, { themeSource, shouldUseDarkColors }) => {
+      if(themeNativeMode.value != AppThemeSource.SYSTEM) return 
+      shouldUseDarkColors ? switchToDarkTheme() : switchToLightTheme()
+    }
+  })
+}
+
+const setThemeByNativeMode = async () => {
+    const shouldUseDarkColors = await ipcRendererInvoke('app-nativeTheme-shouldUseDarkColors')
+    let mode = themeNativeMode.value
+    if(mode == 0) mode = shouldUseDarkColors ? 2 : 1
+    switch(mode) {
+      case 1:
+        switchToLightTheme()
+        break
+      case 2: 
+        switchToDarkTheme()
+        break
+    }
+}
+
+const postCustomThemeRemoved = (index) => {
+  const item = getTheme(1, index)
+  const { index: currentIndex, lightIndex, 
+    lightType, darkIndex, darkType } = themeSetting.value
+  if(index == currentIndex) {
+    setThemeByNativeMode()
+  } else if(!item && lightType == 1 && lightIndex == index) {
+    setThemeLightIndex(1, 0)
+  } else if(!item && darkType == 1 && darkIndex == index) {
+    setThemeDarkIndex(0, 0)
+  }
+}
+
 /*
 const setupAppBorder = () => {
   //TODO 硬编码
@@ -303,19 +341,22 @@ onEvents({
   },
   'theme-applyTheme': setupAppTheme,
   'setting-appBorderRadiusPreview': setupAppBorderRadius,
+  'theme-nativeMode-updated': setThemeByNativeMode,
+  'theme-customTheme-removed': postCustomThemeRemoved
 })
 
 onMounted(() => {
   setupFontStyle()
   setupAppBorderRadius()
   setupWinCustomShadow()
-  //setupAppTheme()
+  setupAppNativeTheme()
 })
 
 watch(themeSetting, () => setupAppTheme(), { deep: true })
 watch(currentBorderRadiusCtlStyle, setupPresetBorderRadius)
 watch(winCustomShadowSize, setupWinCustomShadow)
 watch(commonBorderRadius, setupAppBorderRadius, { deep: true })
+watch(themeNativeMode, setThemeByNativeMode, { immediate: true })
 
 provide('appStyle', {
   applyDocumentElementStyle,
@@ -387,8 +428,8 @@ body.app-win-custom-shadow.mini {
   animation-timing-function: linear;
   background: var(--content-loading-mask-color);
   background-size: 100% auto;
-  height: 66px;
   position: relative;
+  height: 66px;
   border-radius: 5px;
 }
 

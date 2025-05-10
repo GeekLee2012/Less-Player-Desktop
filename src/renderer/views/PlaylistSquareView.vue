@@ -235,6 +235,7 @@ onActivated(() => restoreScrollState())
         </PlaylistCategoryBar>
         <PlaylistsControl :loading="isLoadingCategories || isLoadingContent" 
             :playable="true"
+            :favorable="true"
             :paginationStyleType="getPaginationStyleIndex"
             :limit="pagination.limit" 
             :loadPage="loadPageContent" 

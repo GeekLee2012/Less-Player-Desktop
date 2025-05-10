@@ -7,6 +7,7 @@ import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 
 
 const { visitArtist } = inject('appRoute')
+const { playArtist, followArtist } = inject('player')
 
 const props = defineProps({
     data: Array,
@@ -24,10 +25,18 @@ const visitItem = (item) => {
 <template>
     <div class="artistlist-ctl">
         <div class="pag-content" v-show="!loading">
-            <ImageTextTile v-for="item in data" :cover="item.cover" :title="item.title" @click="visitItem(item)">
+            <ImageTextTile v-for="item in data" 
+                :cover="item.cover"
+                :playable="true"
+                :playAction="() => playArtist(item)"
+                :favorable="true"
+                :favorAction="() => followArtist(item)"
+                :title="item.title"
+                @click="visitItem(item)">
             </ImageTextTile>
         </div>
-        <ImageTextTileLoadingMask :count="20" v-show="loading"></ImageTextTileLoadingMask>
+        <ImageTextTileLoadingMask :count="20" v-show="loading">
+        </ImageTextTileLoadingMask>
     </div>
 </template>
 
@@ -69,6 +78,23 @@ const visitItem = (item) => {
     height: calc(var(--others-image-text-tile-cover-size) * 0.95) !important;
 }
 
+/* Horizion Card */
+.artistlist-ctl .image-text-tile-card-horizion {
+    --others-image-text-tile-cover-size: 168px !important;
+}
+
+.artistlist-ctl .image-text-tile-card-horizion .cover {
+    width: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
+    height: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
+}
+
+.artistlist-ctl .image-text-tile-card-horizion .title {
+    text-align: left !important;
+}
+
+
+
+/* Loading Mask */
 .artistlist-ctl .tiles-loading-mask .tile {
     display: flex;
     flex-direction: column;
@@ -108,5 +134,23 @@ const visitItem = (item) => {
 .artistlist-ctl .tiles-loading-mask .tile {
     margin-top: 10px !important;
     margin-bottom: 0px !important;
+}
+
+.artistlist-ctl .tiles-card-horizion-loading-mask .tile {
+    --others-image-text-tile-cover-size: 168px !important;
+    /*background: var(--content-list-item-hover-bg-color) !important;*/
+    margin-top: 18px !important;
+    margin-bottom: 10px !important;
+}
+
+
+.artistlist-ctl .tiles-card-horizion-loading-mask .tile .cover {
+    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio)) !important;
+    border-radius: var(--border-img-text-tile-border-radius) !important;
+    height: 151px !important;
+}
+
+.artistlist-ctl .tiles-card-horizion-loading-mask .tile .title {
+    display: none !important;
 }
 </style>

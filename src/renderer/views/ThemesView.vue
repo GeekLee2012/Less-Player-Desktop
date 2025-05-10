@@ -23,15 +23,10 @@ const switchTab = (index) => {
     setCurrnetTabIndex(index)
 }
 
-//TODO 目前自定义主题需要配置项太多，后期可以引入模板
-
 const removeTheme = (item, index) => {
     const success = removeCustomTheme(item)
     if(!success) return 
-    const { index: currentIndex } = themeSetting.value
-    if (index === currentIndex) {
-        setThemeIndex(1, 0)
-    }
+    emitEvents('theme-customTheme-removed', index)
     showToast('主题已删除')
 }
 

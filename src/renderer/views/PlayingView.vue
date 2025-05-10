@@ -284,7 +284,11 @@ onUnmounted(() => {
 
 <template>
     <div class="playing-view" 
-        :class="{ 'focus-mode': playingViewFocusMode }"
+        :class="{ 
+            'focus-mode': playingViewFocusMode,
+            'modern-gradient-effect': (playingViewBgCoverEffectIndex == 2 
+                && playingViewBgCoverEffectGradientType == 2),
+         }"
         @dragover="e => e.preventDefault()" 
         @drop="onDrop" >
         <div class="container">
@@ -575,8 +579,7 @@ onUnmounted(() => {
     display: flex;
     overflow: hidden;
     --header-height: 43px;
-    /*--bottom-height: 82px;*/
-    --bottom-height: 88px;
+    --bottom-height: 92px;
     --others-lyric-ctl-extra-btn-bottom: 108px;
     --others-sliderbar-ctl-height: 4px; 
     --others-sliderbar-thumb-size: 15px;
@@ -764,6 +767,13 @@ onUnmounted(() => {
     height: var(--bottom-height);
     min-height: var(--bottom-height);
     /*padding-bottom: 3px; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.playing-view.modern-gradient-effect .container > .bottom {
+    --others-sliderbar-ctl-height: 2px; 
 }
 
 .playing-view .container > .bottom .action {
@@ -771,6 +781,7 @@ onUnmounted(() => {
     justify-content: center;
     align-items: center;
     --others-sliderbar-thumb-size: 12px;
+    flex: 1;
 }
 
 .playing-view .container > .bottom .action > div {
@@ -815,11 +826,13 @@ onUnmounted(() => {
 
 /* bottom-new  */
 .playing-view .container > .bottom.bottom-new {
+    --others-sliderbar-ctl-height: 3px; 
     border-top: 1.1px solid var(--others-progressbar-bg-color);
-    --bottom-height: 88px;
-    /*height: var(--bottom-height);
+    --bottom-height: 90px;
+    /*
+    height: var(--bottom-height);
     min-height: var(--bottom-height);*/
-    padding-bottom: 0px;
+    padding-bottom: 1px;
     --others-playctl-spacing: 28px;
     --bottom-hmargin: 59px;
     --bottom-vmargin: 5px;

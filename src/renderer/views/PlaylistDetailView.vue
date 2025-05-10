@@ -28,9 +28,9 @@ const { searchDefault, } = inject('appCommon')
 
 const { getVendor, isLocalMusic, isWebDav, isNavidrome, isCloudStorage } = usePlatformStore()
 const { addTracks } = usePlayStore()
-const { routerCtxCacheItem, isMiniNavBarMode, } = storeToRefs(useAppCommonStore())
+const { routerCtxCacheItem,  } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus,  } = useAppCommonStore()
-const { isSearchForOnlinePlaylistShow, isDndSaveEnable } = storeToRefs(useSettingStore())
+const { isSearchForOnlinePlaylistShow, isDndSaveEnable, isMiniNavBarMode, } = storeToRefs(useSettingStore())
 const { currentCategoryCode, currentOrder } = storeToRefs(usePlaylistSquareStore())
 
 

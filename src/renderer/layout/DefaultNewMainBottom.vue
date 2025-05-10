@@ -98,9 +98,9 @@ onMounted(() => {
 
 .default-new-main-bottom {
     flex-direction: column;
-    padding-top: 3px;
+    padding-top: 4px;
     border-top: 0.6px solid var(--others-progressbar-bg-color);
-    height: calc(var(--main-bottom-height) - 3px - 1.3px);
+    height: calc(var(--main-bottom-height) - 4px - 1.3px);
     -webkit-app-region: none;
     --others-sliderbar-ctl-height: 4px;
 }
@@ -111,6 +111,7 @@ onMounted(() => {
 
 .default-new-main-bottom #play-nav #play-meta {
     flex: 2;
+    transform: translateY(1px);
 }
 
 .default-new-main-bottom #play-nav {
@@ -182,6 +183,12 @@ onMounted(() => {
     padding-top: 6px;
 }
 
+.default-new-main-bottom #play-nav .right > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .default-new-main-bottom svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
@@ -213,7 +220,7 @@ onMounted(() => {
 }
 
 .default-new-main-bottom .love-btn {
-    margin-top: 2px;
+    transform: scale(1.03);
 }
 
 .default-new-main-bottom .love-btn-active {
@@ -226,7 +233,6 @@ onMounted(() => {
     align-items: center;
     cursor: pointer;
     font-weight: bold;
-    margin-bottom: 3px;
     font-size: 19px;
     color: var(--button-icon-btn-color);
 }

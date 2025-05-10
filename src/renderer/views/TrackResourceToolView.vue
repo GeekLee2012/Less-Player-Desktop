@@ -205,7 +205,7 @@ onUnmounted(() => {
         :class="{ 'preview-mode': isPreviewMode }"
         v-gesture-dnm="{ 
             trigger: '.header', 
-            excludes: ['.search-bar .keyword', '.search-bar svg', '.btn'] 
+            excludes: ['.search-bar .keyword'] 
         }"
         @click.stop="hideAllCtxMenus">
         <div class="container">

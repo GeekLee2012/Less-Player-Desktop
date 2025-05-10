@@ -18,8 +18,8 @@
 }
 
 .app-logo-wrap .app-logo {
-    width: 26px;
-    height: 26px;
+    width: 27px;
+    height: 27px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -33,8 +33,9 @@
     width: 16px;
     height: 16px;
     line-height: 16px;
-    font-size: 13.5px;
-    justify-content: center;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: middle;
     border-radius: 10rem;
     background: var(--app-logo-inner-bg-color);
     color: var(--app-logo-inner-text-color);

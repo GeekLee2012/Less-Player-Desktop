@@ -12,7 +12,7 @@ import { FILE_SCHEME } from '../../common/Constants';
 
 const { visitPlaylist, visitFreeFMEdit, visitVideoDetail, 
     visitGenreDetail, visitAlbum } = inject('appRoute')
-const { playPlaylist, } = inject('player')
+const { playPlaylist, favorPlaylist } = inject('player')
 
 const props = defineProps({
     data: Array,
@@ -35,10 +35,11 @@ const props = defineProps({
     tileOnDragEnterFn: Function,
     tileOnDragEndFn: Function,
     playable: Boolean,
+    favorable: Boolean,
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
-const { isPlayCountShow, isUseCardStyleImageTextTile } = storeToRefs(useSettingStore())
+const { isPlayCountShow,  } = storeToRefs(useSettingStore())
 
 const visitItem = (item) => {
     const { checkbox } = props
@@ -124,6 +125,14 @@ const computedPlayable = computed(() => {
         return playable
     }
 })
+
+const computedFavorable = computed(() => {
+    return (item) => {
+        const { favorable } = props
+        const { type } = item
+        return favorable && (type != Playlist.NORMAL_RADIO_TYPE)
+    }
+})
 </script>
 
 <template>
@@ -151,6 +160,8 @@ const computedPlayable = computed(() => {
                     :singleLineTitleStyle="singleLineTitleStyle"
                     :playable="computedPlayable(item)" 
                     :playAction="() => (playable && playPlaylist(item))" 
+                    :favorable="computedFavorable(item)" 
+                    :favorAction="() => (favorable && favorPlaylist(item))" 
                     :checkbox="checkbox" 
                     :checked="checkedAll"
                     :ignoreCheckAllEvent="ignoreCheckAllEvent"

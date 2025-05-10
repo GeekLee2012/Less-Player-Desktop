@@ -6,9 +6,10 @@ import { usePlayStore } from '../store/playStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
 import { useSettingStore } from '../store/settingStore';
+import { useThemeStore } from '../store/themeStore';
 import { isWinOS, useGitRepository, toTrimString,
     toLowerCaseTrimString, ipcRendererSend, ipcRendererInvoke, 
-    onIpcRendererEvent, isMacOS, transformPath,
+    onIpcRendererEvent, isMacOS, transformPath, stringEquals,
 } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
@@ -28,7 +29,8 @@ const { version, lastVersion, giteeLastVersion,
   githubLastVersion, checkingUpdates, checkForUpdates,
   giteeHasNewRelease,  githubHasNewRelease,
   isLastRelease, hasNewRelease,
-  giteeReleasesUrl, githubReleasesUrl, changelogUrl,
+  giteeReleasesUrl, githubReleasesUrl, 
+  changelogUrl, mpvDocUrl,
 } = inject('appVersion')
 
 const { GITHUB, GITEE } = useGitRepository()
@@ -41,8 +43,10 @@ const { theme, layout, common, track, desktopLyric,
     isToggleCtlTitleActionEnable, isShowDialogBeforeSuspiciousZoom, 
     isShowDialogBeforeClearRecents, isStoreRecentPlay,
     isAutoClearRecentPlayEnable, autoClearRecentTypes,
+    isUseHCardStyleImageTextTile,
 } = storeToRefs(useSettingStore())
 const { setThemeIndex,
+    setThemeNativeMode,
     setLayoutIndex,
     toggleSettingViewNavbarShow,
     toggleToggleCtlTitleActionEnable,
@@ -54,6 +58,7 @@ const { setThemeIndex,
     setFontFamily,
     setFontWeight,
     toggleFontAutoWeight,
+    toggleThemeNativeModeShortcut,
     toggleRadioModeShortcut,
     toggleFreeVideoShortcut,
     setTrackQualityIndex,
@@ -70,6 +75,8 @@ const { setThemeIndex,
     togglePlayingViewUseBgCoverEffect,
     togglePlayingViewCoverBorderShow,
     toggleUseShadowForCardStyleTile,
+    toggleUseReversedForHCardStyleTile,
+    toggleUseSmallIconForHCardStyleTile,
     toggleStorePlayState,
     toggleStorePlayProgressState,
     toggleStoreLocalMusic,
@@ -80,6 +87,7 @@ const { setThemeIndex,
     toggleTrayShow,
     toggleTrayShowOnMinimized,
     toggleTrayNativeIcon,
+    toggleMiniNavBarMode,
     toggleCustomPlaylistsShow,
     toggleFavoritePlaylistsShow,
     toggleFollowArtistsShow,
@@ -121,6 +129,7 @@ const { setThemeIndex,
     setLimitPerPageForLocalPlaylist,
     toggleUseDeeplyScanForDirectory,
     toggleAudioTypeFlagShow,
+    toggleDownloadLyricForLocalTrack,
     toggleSearchBarAutoPlaceholder,
     toggleSearchForOnlinePlaylistShow,
     toggleSearchForLocalPlaylistShow,
@@ -170,13 +179,17 @@ const { setThemeIndex,
     togglePluginsViewTipsShow,
     toggleCloudStorageViewTipsShow,
     setMpvBinaryPath,
+    setThemeLightIndex,
+    setThemeDarkIndex,
 } = useSettingStore()
 
 const { showToast, showImportantToast, 
-    toggleCustomAppBorderRadiusViewShow, } = useAppCommonStore()
-const { isMaxScreen } = storeToRefs(useAppCommonStore())
+    toggleCustomAppBorderRadiusViewShow,
+    toggleThemeSelectionView, } = useAppCommonStore()
+const { isMaxScreen, routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const { audioOutputDevices } = storeToRefs(usePlayStore())
 const { removeAllRecents } = useRecentsStore()
+const { getTheme } = useThemeStore()
 
 /*
 const switchLayout = (index) => {
@@ -376,7 +389,7 @@ const selectDndDir = async () => {
 }
 
 const selectMpvFile = async () => {
-    const result = await ipcRendererInvoke('choose-files', { title: '请选择mpv binary文件', single: true })
+    const result = await ipcRendererInvoke('choose-files', { title: '请选择mpv binary可执行文件', single: true })
     if (!result) return
     const { filePaths } = result
     setMpvBinaryPath(transformPath(filePaths[0]))
@@ -449,18 +462,6 @@ const onScroll = (event) => {
 }
 */
 
-/* 生命周期、监听 */
-//watch(isCheckPreReleaseVersion, checkForUpdates)
-watch(isSettingViewTipsShow, refreshSettingViewTips)
-watch(isToggleCtlTitleActionEnable, setupToggleCtlTitleClass)
-
-/*
-const eventsRegistration = {
-    'setting-checkForUpdates': checkForUpdates,
-}
-*/
-
-
 const settingNavItems = reactive([])
 
 const initSettingNavItems = () => {
@@ -476,16 +477,101 @@ const scrollByNavItem = (event, item) => {
     setNavbarCollapsed(true)
 }
 
+const scrollToSettingNavItemByText = (text) => {
+    let targetItem = null
+    for(let i = 0; i < settingNavItems.length; i++) {
+        const item = settingNavItems[i]
+        if(stringEquals(item.textContent, text)) {
+            targetItem = item 
+            break
+        }
+    }
+    if(targetItem) scrollByNavItem(null, targetItem)
+}
+
+const getThemeItemPreviewBackground = (index, type) => {
+    const item = getTheme(type, index)
+    if (!item) return {}
+    const { previewBg, appBackground } = item
+    //预设
+    if(type == 0) return { 'background': previewBg }
+    //自定义
+    const { bgColor, bgImage, bgImageGradient } = appBackground
+    let themeBgImage = null
+    if (bgImage && bgImageGradient) {
+        themeBgImage = `${bgImageGradient}, url('${bgImage}')`
+    } else if (bgImage) {
+        themeBgImage = `url('${bgImage}')`
+    } else if (bgImageGradient) {
+        themeBgImage = bgImageGradient
+    }
+    return {
+        'background-color': bgColor,
+        'background-image': themeBgImage,
+        'background-size': 'cover',
+        'background-position': 'center'
+    }
+}
+
+const computedLightItemBackground = computed(() => {
+    const { lightIndex, lightType } = theme.value
+    return getThemeItemPreviewBackground(lightIndex, lightType)
+})
+
+const computedDarkItemBackground = computed(() => {
+    const { darkIndex, darkType } = theme.value
+    return getThemeItemPreviewBackground(darkIndex, darkType)
+})
+
+const toggleLightThemeSelection = () => {
+    toggleThemeSelectionView({
+        mounted: () => {
+            const { lightIndex: index, lightType: type } = theme.value
+            return { subtitle: '浅色', index, type }
+        },
+        unmounted: ({ index, type }) => {
+            setThemeLightIndex(index, type)
+            emitEvents('theme-nativeMode-updated')
+        }
+    })
+}
+
+const toggleDarkThemeSelection = () => {
+    toggleThemeSelectionView({
+        mounted: () => {
+            const { darkIndex: index, darkType: type } = theme.value
+            return { subtitle: '深色', index, type }
+        },
+        unmounted: ({ index, type }) => {
+            setThemeDarkIndex(index, type)
+            emitEvents('theme-nativeMode-updated')
+        }
+    })
+}
+
+const visitRouterCtxCacheItem = () => {
+    if (!routerCtxCacheItem.value) return
+    const { navItemText } = routerCtxCacheItem.value
+    if (navItemText) scrollToSettingNavItemByText(navItemText)
+} 
+
 
 /* 生命周期、监听 */
+watch(isSettingViewTipsShow, refreshSettingViewTips)
+watch(isToggleCtlTitleActionEnable, setupToggleCtlTitleClass)
+
 watch(() => common.value.useWinZoomForCreate, (nv) => {
     const action = nv ? '开启' : '关闭'
     showToast(`已${action}“锁定为初始值”<br>下次重启后生效`)
 })
 
+
+const eventsRegistration = {
+    'setting-scrollToNavItem': scrollToSettingNavItemByText,
+}
+
 onMounted(() => {
-    //onEvents(eventsRegistration)
-    //checkForUpdates()
+    onEvents(eventsRegistration)
     getDisplayFrequency()
     setupToggleCtlTitleAction()
     setupToggleCtlTitleClass()
@@ -493,6 +579,7 @@ onMounted(() => {
 })
 
 onActivated(() => {
+    visitRouterCtxCacheItem()
     updateSessionCacheSize()
     updateBlackHole(Math.random() * 100000000)
 })
@@ -505,7 +592,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     <div id="setting-view" ref="settingViewRef" @scroll="onScroll" @click="() => setNavbarCollapsed(true)">
         <div class="navbar" v-show="common.settingViewNavbarShow"
             :class="{ collapse: navbarCollapsed }" 
-            @click.stop="() => setNavbarCollapsed(false)">
+            @click.stop="() => setNavbarCollapsed(false)"
+            @contextmenu.stop="" >
             <svg width="16" height="16" viewBox="0 0 682.31 511.62" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
@@ -530,10 +618,32 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="theme row">
                 <span class="cate-name"><b @click="visitThemes">主题</b></span>
                 <div class="content">
-                    <div class="last" v-for="(item, index) in presetThemes()"
-                        :class="{ active: index == theme.index && theme.type === 0 }"
-                        :style="{ background: item.previewBg }" @click="setThemeIndex(index)">
-                        <span class="cate-subtitle">{{ item.name }}</span>
+                    <div class="theme-mode-wrap">
+                        <div class="theme-mode max-content-mr-36">
+                            <span class="cate-subtitle">显示模式：</span>
+                            <span v-for="(item, index) in ['自动', '浅色', '深色']" class="quality-item"
+                                :class="{ active: index == theme.nativeMode, 'first-item': index == 0 }" 
+                                @click="setThemeNativeMode(index)" >
+                                {{ item }}
+                            </span>
+                        </div>
+                        <div class="light-item mode-preview-item" 
+                            :style="computedLightItemBackground"
+                            @click="toggleLightThemeSelection" >
+                            <span class="cate-subtitle">浅色</span>
+                        </div>
+                        <div class="dark-item mode-preview-item" 
+                            :style="computedDarkItemBackground"
+                            @click="toggleDarkThemeSelection" >
+                            <span class="cate-subtitle">深色</span>
+                        </div>
+                    </div>
+                    <div class="preset-themes last" >
+                        <div class="item" v-for="(item, index) in presetThemes()"
+                            :class="{ active: index == theme.index && theme.type === 0 }"
+                            :style="{ background: item.previewBg }" @click="setThemeIndex(index)">
+                            <span class="cate-subtitle">{{ item.name }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -542,7 +652,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="content">
                     <div class="last">
                         <span v-for="(item, index) in ['自动', '经典', '主流', '简约', '迷你']" class="layout-item"
-                            :class="{ active: index == layout.index, 'first-item': index == 0 }" @click="setLayoutIndex(index)">
+                            :class="{ active: index == layout.index, 'first-item': index == 0 }" 
+                            @click="setLayoutIndex(index)" >
                             {{ item }}
                         </span>
                     </div>
@@ -552,28 +663,28 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="cate-name">通用</span>
                 <div class="content">
                     <div class="tip-text">提示：当前应用的输入框，按下Enter键生效，或光标焦点离开后自动生效</div>
-                    <div>
-                        <span class="cate-subtitle">设置页导航按钮：</span>
+                    <div class="titled-toggle-ctl-w258">
+                        <span class="cate-subtitle">设置页启用导航按钮：</span>
                         <ToggleControl @click="toggleSettingViewNavbarShow" :value="common.settingViewNavbarShow">
                         </ToggleControl>
                     </div>
-                    <div>
+                    <div class="titled-toggle-ctl-w258">
                         <span class="cate-subtitle">设置页开关选项标题联动：</span>
                         <ToggleControl @click="toggleToggleCtlTitleActionEnable" :value="common.toggleCtlTitleActionEnable">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：开启后，试点击一下左边标题</div>
                     </div>
-                    <div class="tip-text">提示：建议开启“锁定为初始值”，可解决窗口缩放闪动Bug<br>
+                    <div class="tip-text">提示：建议开启“锁定为初始值”，以解决窗口缩放闪动Bug<br>
                         但开启“锁定”后，每次改变“窗口缩放”时需重启应用；否则会触发窗口缩放闪动Bug<br>
-                        若需经常改变“窗口缩放”，不建议开启“锁定为初始值”
+                        若需经常改变“窗口缩放”，则不建议开启“锁定为初始值”
                     </div>
                     <div class="window-zoom">
                         <div class="zoom-title">
                             <span>窗口缩放：</span>
                             <input type="number" 
-                                min="50" max="300" step="0.01" 
+                                min="50" max="300" step="10" 
                                 :value="common.winZoom"
-                                placeholder="50-300，默认85，支持2位小数" 
+                                placeholder="50-300，默认85" 
                                 @keydown.enter="checkUpdateWinZoom" 
                                 @focusout="checkUpdateWinZoom" />
                             <span>%</span>
@@ -632,7 +743,6 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="sec-title">圆角自定义：</span>
                         <SvgTextButton text="前往设置" :leftAction="toggleCustomAppBorderRadiusViewShow">
                         </SvgTextButton>
-                        <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div class="tip-text" v-show="isWinOS()">提示：窗口阴影大小，仅对Windows、Linux等平台有效<br>
                         若系统平台默认自带阴影，则请将阴影大小设置为0即可
@@ -642,11 +752,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <input type="number" :value="common.winCustomShadowSize" placeholder="0-10，默认5" min="0" max="10"
                             step="1" @keydown.enter="updateWinCustomShadowSize" @focusout="updateWinCustomShadowSize" />
                     </div>
-                    <div class="titled-toggle-ctl">
-                        <span class="cate-subtitle">窗口严格居中：</span>
+                    <div class="tip-text">提示：当在非主屏幕显示当前应用时，请关闭当前选项</div>
+                    <div class="titled-toggle-ctl-w258">
+                        <span class="cate-subtitle">窗口在主屏幕严格居中显示：</span>
                         <ToggleControl @click="toggleUseWinCenterStrict" :value="common.useWinCenterStrict">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：非主屏幕中显示当前应用时，请关闭选项</div>
                     </div>
                     <div class="max-content-mr-36" @keydown.stop="">
                         <span class="cate-subtitle">字体名称：</span>
@@ -674,11 +784,10 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </option>
                         </datalist>
                     </div>
-                    <div class="titled-toggle-ctl">
-                        <span class="cate-subtitle">字体自动加粗：</span>
+                    <div class="titled-toggle-ctl-w258">
+                        <span class="cate-subtitle">高亮字体自动加粗（非全部）：</span>
                         <ToggleControl @click="toggleFontAutoWeight" :value="common.fontAutoWeight">
                         </ToggleControl>
-                        <div class="tip-text spacing3">提示：对部分高亮字体加粗显示</div>
                     </div>
                     <div class="tip-text">提示：图片清晰度越高，视觉体验越好，但内存占用越高<br>
                     图片清晰度完全依赖官方平台，无法保证设置完全有效<br>
@@ -691,20 +800,30 @@ onUnmounted(() => offEvents(eventsRegistration))
                             {{ item.name }}
                         </span>
                     </div>
+                    <div class="tip-text">提示：图文控件风格，适用于歌单、专辑、歌手、电台等预览控件</div>
                     <div class="max-content-mr-36">
                         <span class="cate-subtitle">图文控件风格：</span>
-                        <span v-for="(item, index) in ['普通', '卡片']" class="quality-item"
+                        <span v-for="(item, index) in ['普通', '卡片', 'H卡片']" class="quality-item"
                             :class="{ active: index == common.imageTextTileStyleIndex, 'first-item': index == 0 }"
                             @click="setImageTextTileStyleIndex(index)">
                             {{ item }}
                         </span>
-                        <div class="tip-text spacing">提示：歌单、专辑等预览控件</div>
                     </div>
-                    <div class="titled-toggle-ctl" v-show="isUseCardStyleImageTextTile">
-                        <span class="cate-subtitle">卡片底部阴影：</span>
+                    <div class="titled-toggle-ctl-w258" v-show="isUseCardStyleImageTextTile || isUseHCardStyleImageTextTile">
+                        <span class="cate-subtitle">卡片显示底部阴影：</span>
                         <ToggleControl @click="toggleUseShadowForCardStyleTile" :value="common.shadowForCardStyleTile">
                         </ToggleControl>
                         <div class="tip-text spacing3">提示：仅支持部分主题</div>
+                    </div>
+                    <div class="titled-toggle-ctl-w258" v-show="isUseHCardStyleImageTextTile">
+                        <span class="cate-subtitle">H卡片启用反转布局：</span>
+                        <ToggleControl @click="toggleUseReversedForHCardStyleTile" :value="common.reversedForHCardStyleTile">
+                        </ToggleControl>
+                    </div>
+                    <div class="titled-toggle-ctl-w258" v-show="isUseHCardStyleImageTextTile">
+                        <span class="cate-subtitle">H卡片启用小图标按钮：</span>
+                        <ToggleControl @click="toggleUseSmallIconForHCardStyleTile" :value="common.smallIconForHCardStyleTile">
+                        </ToggleControl>
                     </div>
                     <div class="max-content-mr-36">
                         <span class="cate-subtitle">歌曲控件风格：</span>
@@ -721,19 +840,16 @@ onUnmounted(() => offEvents(eventsRegistration))
                             @click="setPaginationStyleIndex(index)">
                             {{ item }}
                         </span>
-                        <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div>
                         <span class="sec-title cate-sutitle">功能管理：</span>
                         <SvgTextButton text="前往管理" :leftAction="visitModulesSetting">
                         </SvgTextButton>
-                        <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div class="last">
                         <span class="sec-title cate-sutitle">插件管理：</span>
                         <SvgTextButton text="前往管理" :leftAction="visitPlugins">
                         </SvgTextButton>
-                        <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                 </div>
             </div>
@@ -741,7 +857,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="cate-name">提示</span>
                 <div class="content">
                     <div>
-                        <span class="cate-subtitle">设置页显示提示：</span>
+                        <span class="cate-subtitle">设置页提示：</span>
                         <ToggleControl @click="toggleSettingViewTipsShow" :value="common.settingViewTipsShow">
                         </ToggleControl>
                     </div>
@@ -909,13 +1025,6 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                         <div class="tip-text spacing">提示：不会影响系统正常熄屏、锁屏</div>
                     </div>
-                    <div v-show="false">
-                        <span class="cate-subtitle">播放页封面图片背景效果：</span>
-                        <ToggleControl @click="togglePlayingViewUseBgCoverEffect"
-                            :value="track.playingViewUseBgCoverEffect">
-                        </ToggleControl>
-                        <div class="tip-text spacing">提示：实验性功能，内存占用高，较耗性能</div>
-                    </div>
                     <div>
                         <span class="cate-subtitle">播放页封面图片边框：</span>
                         <ToggleControl @click="togglePlayingViewCoverBorderShow"
@@ -934,8 +1043,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <div class="tip-text spacing">提示：实验性功能</div>
                     </div>
                     <div class="tip-text">提示：由于系统平台的安全机制，访问用户目录可能需要授权。</div>
-                    <div class="max-content-mr-36">
-                        <span class="cate-subtitle">拖拽保存位置：</span>
+                    <div>
+                        <span class="cate-subtitle">拖拽保存位置（目录）：</span>
                         <div class="dir-input-ctl">
                             <input class="text-input-ctl" v-model="track.dndSavePath" placeholder="默认为用户目录下的Downloads" />
                             <div class="select-btn" @click="selectDndDir">选择</div>
@@ -964,15 +1073,21 @@ onUnmounted(() => offEvents(eventsRegistration))
                             max="256" step="1" @input="" @keydown.enter="updateSpectrumRefreshFrequency"
                             @focusout="updateSpectrumRefreshFrequency" />
                     </div>
-                    <div class="tip-text">提示：当前应用支持启用mpv播放音频，需配置mpv binary可执行文件所在位置<br>
-                        macOS和Linux上文件全称（含扩展名）一般为mpv，Windows则为mpv.exe<br>
-                        目前mpv仅用于兜底播放，即音频播放失败时才启用mpv，暂不支持音效、频谱等<br>
-                        不同的系统版本，对应支持的mpv版本不同；需配置正确的mpv版本，才能正常使用
+                    <div class="tip-text rich-tip-text">
+                        <p>
+                            提示：当前应用支持启用mpv播放音频，需配置mpv binary可执行文件所在位置<br>
+                            macOS和Linux上文件全称（含扩展名）一般为mpv，Windows则为mpv.exe<br>
+                            目前mpv仅用于兜底播放，即音频播放失败时才启用mpv，暂不支持音效、频谱等<br>
+                        </p>
+                        <p>
+                            在当前应用配置mpv时，若有问题，请先参考项目文档：
+                            <a href="#" @click.prevent="visitLink(mpvDocUrl)" class="link">mpv.md</a>
+                        </p>
                     </div>
                     <div class="last">
                         <span class="cate-subtitle">mpv binary可执行文件位置：</span>
                         <div class="dir-input-ctl">
-                            <input class="text-input-ctl" v-model="track.mpvBinaryPath" placeholder="mpv binary文件位置" />
+                            <input class="text-input-ctl" v-model="track.mpvBinaryPath" placeholder="mpv binary可执行文件" />
                             <div class="select-btn" @click="selectMpvFile">选择</div>
                         </div>
                     </div>
@@ -984,6 +1099,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div>
                         <span class="cate-subtitle">显示音频格式标识：</span>
                         <ToggleControl @click="toggleAudioTypeFlagShow" :value="track.audioTypeFlagShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">自动下载歌词文件：</span>
+                        <ToggleControl @click="toggleDownloadLyricForLocalTrack" :value="track.downloadLyricForLocalTrack">
                         </ToggleControl>
                     </div>
                     <div v-show="false">
@@ -1032,8 +1152,8 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="desktopLyric row">
                 <span class="cate-name">桌面歌词</span>
                 <div class="content">
-                    <div class="tip-text">提示：实验性功能。在未锁定状态下，背景颜色默认为当前主题的背景颜色
-                        <br>当文字（高亮）颜色、桌面歌词背景颜色相同时，只有在锁定状态下，才能看到文字效果
+                    <div class="tip-text">提示：在未锁定状态下，背景颜色默认为：当前主题的背景颜色
+                        <br>当文字（高亮）颜色、桌面歌词背景颜色相同时，仅在锁定状态下，才能看到文字效果
                     </div>
                     <div>
                         <span class="sec-title">字体大小：</span>
@@ -1104,7 +1224,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="search row">
                 <span class="cate-name">搜索</span>
                 <div class="content">
-                    <div class="tip-text">提示：场景化提示，即不同页面场景下，搜索框Placeholder显示相应的提示</div>
+                    <div class="tip-text">提示：场景化提示，即不同页面场景下，搜索框placeholder显示相应的提示</div>
                     <div>
                         <span class="cate-subtitle">搜索框场景化提示：</span>
                         <ToggleControl @click="toggleSearchBarAutoPlaceholder" :value="search.autoPlaceholder">
@@ -1148,8 +1268,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="cate-name">缓存</span>
                 <div class="content">
                     <div class="tip-text">提示：最近播放记录，当记录过多时，部分列表容易卡顿
-                        <br>建议开启自动清理最近播放，或定期手动清理
-                        <br>资源缓存，默认上限为500M左右；应用会在每次启动时，自动检查并清理
+                        <br>建议开启自动清理最近播放，或定期进行手动清理
                     </div>
                     <div>
                         <span class="cate-subtitle">保存当前播放（列表）状态：</span>
@@ -1196,11 +1315,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </SvgTextButton>
                         </div>
                     </div>
+                    <div class="tip-text">提示：自动清理最近播放，在每次应用启动时，进行自动检查和清理</div>
                     <div v-show="isStoreRecentPlay">
                         <span class="cate-subtitle">自动清理最近播放：</span>
                         <ToggleControl @click="toggleAutoClearRecentPlay" :value="cache.autoClearRecentPlay">
                         </ToggleControl>
-                        <div class="tip-text spacing">提示：开启后，每次应用启动时自动检查和清理</div>
                     </div>
                     <div v-show="isStoreRecentPlay && isAutoClearRecentPlayEnable">
                         <span class="cate-subtitle">自动清理N天前记录：</span>
@@ -1226,6 +1345,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                             :onChanged="updateAutoClearRecentTypes" >
                         </MultiSelectionControl>
                     </div>
+                    <div class="tip-text">提示：资源缓存，默认上限为500M左右；在每次应用启动时，自动检查和清理</div>
                     <div class="last">
                         <span class="cate-subtitle">资源缓存占用约为：</span>
                         <div class="cache-size-text">{{ sessionCacheSizeText }}</div>
@@ -1263,6 +1383,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="content">
                     <div class="cate-subtitle">左侧导航栏显示：</div>
                     <div>
+                        <span class="cate-subtitle">迷你模式：</span>
+                        <ToggleControl @click="toggleMiniNavBarMode" :value="navigation.miniNavBarMode">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">创建的歌单：</span>
                         <ToggleControl @click="toggleCustomPlaylistsShow" :value="navigation.customPlaylistsShow">
                         </ToggleControl>
@@ -1279,6 +1404,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </div>
                     <div class="tip-text">提示：顶部导航栏，不同布局下，部分快捷入口可能会失效</div>
                     <div>顶部导航栏显示：</div>
+                    <div>
+                        <span class="cate-subtitle">主题显示模式：</span>
+                        <ToggleControl @click="toggleThemeNativeModeShortcut" :value="navigation.themeNativeModeShortcut">
+                        </ToggleControl>
+                    </div>
                     <div>
                         <span class="cate-subtitle">相约电波：</span>
                         <ToggleControl @click="toggleRadioModeShortcut" :value="navigation.radioModeShortcut">
@@ -1945,11 +2075,30 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #setting-view .theme .content {
     display: flex;
+    flex-direction: column;
+}
+
+#setting-view .theme .content .theme-mode-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#setting-view .theme .content .theme-mode {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 36px;
+}
+
+#setting-view .theme .content .preset-themes {
+    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
 }
 
-#setting-view .theme .content div {
+#setting-view .theme .content .theme-mode-wrap .mode-preview-item,
+#setting-view .theme .content .preset-themes .item {
     --size: 50px;
     width: var(--size);
     max-width: var(--size);
@@ -1966,7 +2115,14 @@ onUnmounted(() => offEvents(eventsRegistration))
     border: 3px solid transparent;
 }
 
-#setting-view .theme .content div span {
+#setting-view .theme .content .theme-mode-wrap .mode-preview-item {
+    margin-bottom: 15px;
+    border-color: #ffd700;
+    position: relative;
+}
+
+#setting-view .theme .content .theme-mode-wrap .mode-preview-item span,
+#setting-view .theme .content .preset-themes .item span {
     background-color: var(--app-bg-color);
     opacity: 0.68;
     line-height: 51px;
@@ -1977,15 +2133,45 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin: 0px !important;
 }
 
-#setting-view .theme .content div:hover span {
+#setting-view .theme .content .theme-mode-wrap .mode-preview-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+
+    position: absolute;
+    bottom: -43px;
+    background: transparent;
+    opacity: 1;
+    line-height: auto;
+    /*font-weight: bold;*/
+    font-size: calc(var(--content-text-tip-text-size) - 1px);
+    color: var(--content-subtitle-text-color);
+    visibility: visible;
+    width: fit-content;
+}
+
+#setting-view .theme .content .theme-mode-wrap .mode-preview-item:hover span,
+#setting-view .theme .content .theme-mode-wrap .mode-preview-item span:hover {
+    font-weight: bold;
+    background: var(--content-text-highlight-color);
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    color: transparent !important;
+}
+
+#setting-view .theme .content .preset-themes .item:hover span {
     visibility: visible;
 }
 
-#setting-view .theme .content .active {
+#setting-view .theme .content .preset-themes .active {
     border-color: #ffd700;
 }
 
-#setting-view .theme .content .lightText {
+#setting-view .theme .content .preset-themes .lightText {
     color: #fff !important;
 }
 
@@ -2043,13 +2229,14 @@ onUnmounted(() => offEvents(eventsRegistration))
     min-width: 52px !important;
 }
 
-#setting-view .layout .content .layout-item:hover,
+#setting-view .content .layout-item:hover,
 #setting-view .common .content .fslevel-item:hover,
 #setting-view .content .quality-item:hover {
     background-color: var(--border-color);
     background-color: var(--content-list-item-hover-bg-color);
 }
 
+#setting-view .theme-mode .active,
 #setting-view .layout .content .active,
 #setting-view .common .content .active,
 #setting-view .track .content .active,
@@ -2060,6 +2247,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     /*border: 1px solid var(--border-color);*/
 }
 
+.contrast-mode #setting-view .theme-mode .active,
 .contrast-mode #setting-view .layout .content .active,
 .contrast-mode #setting-view .common .content .active,
 .contrast-mode #setting-view .track .content .active,
@@ -2073,8 +2261,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     width: 128px;
 }
 
-#setting-view .titled-toggle-ctl .cate-subtitle {
-    width: 136px !important;
+#setting-view .titled-toggle-ctl-w258 .cate-subtitle {
+    width: 258px !important;
 }
 
 #setting-view .window-ctl .sec-title,
@@ -2372,6 +2560,15 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-bottom-right-radius: 3px;
     font-size: var(--content-text-tip-text-size);
     cursor: pointer;
+}
+
+#setting-view .rich-tip-text {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+#setting-view .rich-tip-text .link {
+    color: var(--content-subtitle-text-color) !important;
 }
 
 /* 别扭挖坑的方式 */

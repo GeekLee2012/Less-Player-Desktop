@@ -63,14 +63,22 @@ const parseJson = (data) => {
     return data
 }
 
+const mergeConfig = (config) => {
+    const timeout = 30000
+    if(!config) return { timeout }
+    if(!config['timeout']) Object.assign(config, { timeout })
+    return config
+}
+
 export const get = async (url, data, config, callback) => {
     return new Promise((resolve, reject) => {
         if(isBlank(url)) return reject('noUrl')
+        config = mergeConfig(config)
         const _url = qsStringifyUrl(url, data, config)
         axios.get(_url, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))
-    }, error => Promise.reject(error)).catch(error => Promise.reject(error))
+    })
 }
 
 export const post = async (url, data, config, callback) => {
@@ -78,11 +86,12 @@ export const post = async (url, data, config, callback) => {
         if(isBlank(url)) return reject('noUrl')
         const _url = toTrimString(url)
         const hasData = data && (typeof data === 'object')
+        config = mergeConfig(config)
         const _data = hasData ? qsStringify(data, config) : data
         axios.post(_url, _data, config)
             .then(resp => resolve(tryCallDefault(callback, resp, resp)), error => reject(error))
             .catch(error => reject(error))
-    }, error => Promise.reject(error)).catch(error => Promise.reject(error))
+    })
 }
 
 export const getRaw = (url, data, config) => {

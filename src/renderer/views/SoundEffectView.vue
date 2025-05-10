@@ -92,7 +92,7 @@ const computedVolumeGainText = computed(() => {
                     <div class="title">音效SOUND</div>
                     <ToggleControl id="toggle-ctl" :value="isUseEffect" @click="toggleSoundEffect">
                     </ToggleControl>
-                    <div class="text spacing">{{ currentEffectName }}</div>
+                    <div>{{ currentEffectName }}</div>
                 </div>
                 <div class="action" v-show="useWindowsStyleWinCtl">
                     <div class="close-btn btn" @click="hideSoundEffectView">
@@ -281,9 +281,8 @@ const computedVolumeGainText = computed(() => {
 }
 
 .sound-effect-view .header #toggle-ctl {
-    /* cursor: default; */
-    -webkit-app-region: none;
-    margin-left: 30px;
+    margin-left: 66px;
+    margin-right: 8px;
 }
 
 .sound-effect-view .center {

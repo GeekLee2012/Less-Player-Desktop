@@ -65,10 +65,10 @@ const onDrop = async (event) => {
     const result = await ipcRendererInvoke('dnd-open-audio-playlist', path, isUseDeeplyScanForDirectoryEnable.value)
     if (!result) return decreaseImportTaskCount()
     let msg = '导入歌单失败', success = false
-    const { name, data, total } = result
+    const { name, data, total, cover } = result
     if (name && data && data.length > 0) {
         try {
-            addLocalPlaylist(name, null, null, null, data)
+            addLocalPlaylist(name, null, null, cover, data)
         } catch (error) {
             if (isDevEnv()) console.log(error)
         }
@@ -228,7 +228,7 @@ onMounted(() => resetBack2TopBtn())
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 20px 33px 10px 33px;
+    padding: 20px 33px;
     overflow: scroll;
     overflow-x: hidden;
 }

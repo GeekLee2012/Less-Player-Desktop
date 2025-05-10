@@ -470,7 +470,7 @@ onDeactivated(() => setCategoriesShow(false))
                     <span v-html="computedCurrentCateTitle"></span>
                 </div>
                 <transition name="fade-ex">
-                    <div class="categories" v-show="categoriesShow">
+                    <div class="categories" v-show="categoriesShow" @contextmenu.stop="">
                         <ul>
                             <li class="cate-item" v-for="(item, index) in categories"
                                 :class="{ first: (index == 0)}"

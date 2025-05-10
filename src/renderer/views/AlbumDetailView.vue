@@ -52,9 +52,8 @@ const { getVendor, isLocalMusic, isAllSongsTab,
     isCloudStorage 
 } = usePlatformStore()
 const { addTracks } = usePlayStore()
-const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
-const { isDndSaveEnable } = storeToRefs(useSettingStore())
+const { isDndSaveEnable, isMiniNavBarMode } = storeToRefs(useSettingStore())
 
 
 let currentTabView = shallowRef(null)
@@ -143,6 +142,7 @@ const updateLocalMusicAlbumCover = (songs) => {
 
 const getAlbumDetail = async () => {
     setLoadingDetail(true)
+    checkFavorite()
     if (isAlbumDetailLoaded()) {
         setLoadingDetail(false)
         return

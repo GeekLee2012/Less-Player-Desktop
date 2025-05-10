@@ -8,7 +8,7 @@ import DefaultMainContent from './DefaultMainContent.vue';
 import DefaultMainBottom from './DefaultMainBottom.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
-import { isDevEnv } from '../../common/Utils';
+import { isDevEnv, generateOrderNums } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -26,12 +26,15 @@ const currentMainBottom = shallowRef(null)
 const { playlistCategoryViewShow, artistCategoryViewShow,
     radioCategoryViewShow, playingViewShow,
     soundEffectViewShow, lyricToolbarShow,
-    playingThemeListViewShow, isMiniNavBarMode, } = storeToRefs(useAppCommonStore())
+    playingThemeListViewShow, } = storeToRefs(useAppCommonStore())
 const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
 const { lyricMetaPos, isDefaultLayout,
     isDefaultClassicLayout, isDefaultNewLayout,
-    isAutoLayout, winCustomShadowSize } = storeToRefs(useSettingStore())
+    isAutoLayout, winCustomShadowSize, 
+    isMiniNavBarMode, isUseHCardStyleImageTextTile,
+    imageTextTileStyleIndex,
+} = storeToRefs(useSettingStore())
 const { setupWindowZoom } = useSettingStore()
 
 //TODO 硬编码
@@ -58,9 +61,10 @@ const setSearchBarSize = () => {
     if (el) el.style.width = `${size}px`
 }
 
+/*
 const setImageTextTileSize = () => {
     const tileMinWidth = 173
-    const tileHMargin = 13
+    const tileHMargin = 14
     const mainMargin = 33
     const scrollBarWidth = 6
     //TODO 宽屏、超宽屏，需更好兼容性
@@ -71,11 +75,7 @@ const setImageTextTileSize = () => {
     if (!mainContent) return
     const { clientWidth } = mainContent
     const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth)
-    /*
-    const tileCovers = document.querySelectorAll('.image-text-tile .cover')
-    const tileTitles = document.querySelectorAll('.image-text-tile .title')
-    const tileSubtitles = document.querySelectorAll('.image-text-tile .subtitle')
-    */
+    
     let tileWidth = tileMinWidth, limit = limits[limits.length - 1]
     for (var i = 0; i < limits.length; i++) {
         if (clientWidth >= minWidths[i]) {
@@ -94,6 +94,84 @@ const setImageTextTileSize = () => {
         //'--others-card-image-text-tile-title-width': `${tileWidth - 20}px`,
         '--others-image-text-tile-card-cover-height': `${cardTileHeight}px`,
         '--others-image-text-tile-card-min-height': `${cardTileHeight + 73}px`
+    })
+}
+*/
+const setImageTextTileSize = () => {
+    if(isUseHCardStyleImageTextTile.value) {
+        return setHCardImageTextTileSize()
+    }
+
+    const tileMinWidth = 173
+    const tileHMargin = 14
+    const mainMargin = 33
+    const scrollBarWidth = 6
+    //TODO 宽屏、超宽屏，需更好兼容性
+    const limits = generateOrderNums(20, (isMiniNavBarMode.value ? 5 : 4), -1)
+    
+    const mainContent = document.getElementById('default-main-content')
+    if (!mainContent) return
+    const { clientWidth } = mainContent
+
+    const tileWidths = limits.map(num => (clientWidth - 2 * mainMargin - scrollBarWidth) / num - tileHMargin * 2)
+    let tileWidth = tileMinWidth, tileNum = limits[limits.length - 1]
+    for (var i = 0; i < tileWidths.length; i++) {
+        if (Math.abs(tileWidths[i] - tileMinWidth) <= 20) {
+            tileWidth = tileWidths[i]
+            tileNum = limits[i]
+            break
+        }
+    }
+
+    //浮点数运算有误差，保险起见，设置一个误差值
+    tileWidth = parseInt(tileWidth) - 1
+    //再次确认，计算补偿值
+    const totalWidth = tileNum * (tileWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth
+    const offsetWidth = (clientWidth - totalWidth)
+    if(offsetWidth >= 10) tileWidth += parseInt(offsetWidth / tileNum)
+
+    const cardTileHeight = parseInt(tileWidth * 0.883)
+    
+    applyDocumentStyle({
+        '--others-image-text-tile-cover-size': `${tileWidth}px`,
+        //'--others-card-image-text-tile-title-width': `${tileWidth - 20}px`,
+        '--others-image-text-tile-card-cover-height': `${cardTileHeight}px`,
+        '--others-image-text-tile-card-min-height': `${cardTileHeight + 73}px`
+    })
+}
+
+const setHCardImageTextTileSize = () => {
+    const tileMinWidth = 168 * 1.8
+    const tileHMargin = 14
+    const mainMargin = 33
+    const scrollBarWidth = 6
+    //TODO 宽屏、超宽屏，需更好兼容性
+    const limits = generateOrderNums(16, (isMiniNavBarMode.value ? 3 : 2), -1)
+    
+    const mainContent = document.getElementById('default-main-content')
+    if (!mainContent) return
+    const { clientWidth } = mainContent
+
+    const tileWidths = limits.map(num => (clientWidth - 2 * mainMargin - scrollBarWidth) / num - tileHMargin * 2)
+    let tileWidth = tileMinWidth, tileNum = limits[limits.length - 1]
+    for (var i = 0; i < tileWidths.length; i++) {
+        if (Math.abs(tileWidths[i] - tileMinWidth) <= 30) {
+            tileWidth = tileWidths[i]
+            tileNum = limits[i]
+            break
+        }
+    }
+
+    //浮点数运算有误差，保险起见，设置一个误差值
+    tileWidth = parseInt(tileWidth) - 1
+    //再次确认，计算补偿值
+    const totalWidth = tileNum * (tileWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth
+    const offsetWidth = (clientWidth - totalWidth)
+    if(offsetWidth >= 10) tileWidth += parseInt(offsetWidth / tileNum)
+    const widthRatio = (tileWidth / 168)
+    
+    applyDocumentStyle({
+        '--others-image-text-tile-hcard-width-ratio': `${widthRatio}`
     })
 }
 
@@ -280,27 +358,26 @@ const setupDefaultLayout = () => {
 }
 
 const setThemesViewItemsSize = () => {
-    const tileMinWidth = isMiniNavBarMode.value ? 160 : 165 //160
+    //const tileMinWidth = isMiniNavBarMode.value ? 160 : 165 //160
+    const tileMinWidth = 165
     const tileHMargin = 25
     const scrollBarWidth = 6
     //TODO 宽屏、超宽屏，需更好兼容性
-    const limits = [8, 7, 6, 5]
-    if(!isMiniNavBarMode.value) limits.push(4)
+    const limits = generateOrderNums(20, (isMiniNavBarMode.value ? 5 : 4), -1)
 
     const mainContent = document.querySelector('#themes-view .center')
     if (!mainContent) return
     const { clientWidth } = mainContent
     if (!clientWidth) return
-    const minWidths = limits.map(num => num * (tileMinWidth + tileHMargin) + scrollBarWidth)
     
-    let tileWidth = tileMinWidth, limit = limits[limits.length - 1]
-    for (var i = 0; i < limits.length; i++) {
-        if (clientWidth >= minWidths[i]) {
-            limit = limits[i]
+    const tileWidths = limits.map(num => ((clientWidth - scrollBarWidth - 35 * 2) / num - tileHMargin))
+    let tileWidth = tileMinWidth
+    for (var i = 0; i < tileWidths.length; i++) {
+        if (Math.abs(tileWidths[i] - tileMinWidth) <= 20) {
+            tileWidth = tileWidths[i]
             break
         }
     }
-    tileWidth = (clientWidth - scrollBarWidth - 35 * 2) / limit - tileHMargin
 
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 3
@@ -365,6 +442,7 @@ watch(lyricMetaPos, () => {
 watch(winCustomShadowSize, resizeViewItems)
 watch(isMiniNavBarMode, resizeViewItems)
 watch(playingThemeListViewShow, setPlayingThemeListViewSize, { immediate: true })
+watch(imageTextTileStyleIndex, setImageTextTileSize, { immediate: true })
 
 const eventsRegistration = {
     //'batchView-show': setBatchViewListSize,

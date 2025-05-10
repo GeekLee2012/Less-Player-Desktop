@@ -34,11 +34,10 @@ const searchKeyword = ref(null)
 const setSearchKeyword = (value) => searchKeyword.value = value
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
-const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 const { showToast, updateCommonCtxItem } = useAppCommonStore()
 const { getCustomPlaylist, removeAllFromCustomPlaylist, updateCustomPlaylist } = useUserProfileStore()
 const { currentPlatformCode } = storeToRefs(usePlatformStore())
-const { isShowDialogBeforeBatchDelete, isSearchForCustomPlaylistShow } = storeToRefs(useSettingStore())
+const { isShowDialogBeforeBatchDelete, isSearchForCustomPlaylistShow, isMiniNavBarMode } = storeToRefs(useSettingStore())
 
 const resetView = () => {
     Object.assign(detail, { cover: '', title: '', about: '', data: [] })

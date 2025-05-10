@@ -134,7 +134,7 @@ export class Lyric {
     }
 
     static hasData(lyric) {
-        return lyric && lyric.data.size && lyric.data.size > 0
+        return lyric && lyric.data.size && lyric.data.size > 6
     }
 
     static sort(lyric) {
@@ -155,7 +155,7 @@ export class Lyric {
         let text = `[ti: ${title || ''}]\n`
             + `[ar: ${artist || ''}]\n`
             + `[al: ${album || ''}]\n`
-            + `[by: ${by || ''}]\n`
+            + `[by: ${'Less Player' || by}]\n`
             + `[offset: ${offset}]\n\n`
         Array.from(lyric.data).forEach(line => {
             if(!line) return

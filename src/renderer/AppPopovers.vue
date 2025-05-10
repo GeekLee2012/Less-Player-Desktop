@@ -28,6 +28,7 @@ import CustomPlayingThemeEditView from './views/CustomPlayingThemeEditView.vue';
 import { onEvents, emitEvents, offEvents } from '../common/EventBusWrapper';
 import CustomAppBorderRadiusView from './views/CustomAppBorderRadiusView.vue';
 import TrackResourceToolView from './views/TrackResourceToolView.vue';
+import ThemeSelectionView from './views/ThemeSelectionView.vue';
 
 
 
@@ -55,7 +56,7 @@ const { commonNotificationShow, commonNotificationText,
   platformCategoryViewShow, playingThemeListViewShow,
   customPlayingThemeEditViewShow, playingViewThemeType,
   playingViewCustomThemes, customAppBorderRadiusViewShow,
-  trackResourceToolViewShow, } = storeToRefs(useAppCommonStore())
+  trackResourceToolViewShow, themeSelectionViewShow } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -222,6 +223,14 @@ const setupSoundEffectViewPos = () => {
   })
 }
 
+const setupThemeSelectionViewPos = () => {
+  emitEvents('app-elementAlignCenter', {
+    selector: '.default-layout #theme-selection-view',
+    width: 725,
+    height: 528
+  })
+}
+
 const setupTrackResourceToolViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #track-resource-tool-view',
@@ -363,6 +372,7 @@ const eventsRegistration = {
       setupCustomThemeEditViewPos()
       setupGradientColorToolbarPos()
       setupTrackResourceToolViewPos()
+      setupThemeSelectionViewPos()
   },
   'popover-hint-register': registerPopoverHints,
   'playingViewCustomTheme-applyTheme': param => {
@@ -378,6 +388,8 @@ watch(playlistExportToolbarShow, setupPlaylistExportToolbarPos)
 watch(customPlayingThemeEditViewShow, setupCustomPlayingThemeEditViewPos)
 watch(customAppBorderRadiusViewShow, setupCustomAppBorderRadiusViewPos)
 watch(trackResourceToolViewShow, setupTrackResourceToolViewPos)
+watch(themeSelectionViewShow, setupThemeSelectionViewPos)
+
 
 watch(() => getCurrentTheme(), (nv) => {
   const { appBackgroundScope: scope } = nv
@@ -401,7 +413,8 @@ onUnmounted(() => offEvents(eventsRegistration))
           autolayout: isAutoLayout, 
           'app-custom-theme-bg': appBackgroundScope.categoryView 
         }"
-        v-show="playlistCategoryViewShow">
+        v-show="playlistCategoryViewShow"
+        @contextmenu.stop="" >
       </PlaylistCategoryView>
     </transition>
 
@@ -411,7 +424,8 @@ onUnmounted(() => offEvents(eventsRegistration))
           autolayout: isAutoLayout, 
           'app-custom-theme-bg': appBackgroundScope.categoryView 
         }"
-        v-show="artistCategoryViewShow">
+        v-show="artistCategoryViewShow"
+        @contextmenu.stop="" >
       </ArtistCategoryView>
     </transition>
 
@@ -421,7 +435,8 @@ onUnmounted(() => offEvents(eventsRegistration))
           autolayout: isAutoLayout, 
           'app-custom-theme-bg': appBackgroundScope.categoryView 
         }"
-        v-show="radioCategoryViewShow">
+        v-show="radioCategoryViewShow"
+        @contextmenu.stop="" >
       </RadioCategoryView>
     </transition>
 
@@ -431,7 +446,8 @@ onUnmounted(() => offEvents(eventsRegistration))
           autolayout: isAutoLayout, 
           'app-custom-theme-bg': appBackgroundScope.categoryView 
         }"
-        v-show="tagsCategoryViewShow">
+        v-show="tagsCategoryViewShow"
+        @contextmenu.stop="" >
       </TagsCategoryView>
     </transition>
 
@@ -441,24 +457,28 @@ onUnmounted(() => offEvents(eventsRegistration))
           autolayout: isAutoLayout, 
           'app-custom-theme-bg': appBackgroundScope.categoryView 
         }"
-        v-show="platformCategoryViewShow">
+        v-show="platformCategoryViewShow"
+        @contextmenu.stop="" >
       </PlatformCategoryView>
     </transition>
 
     <!-- 右键菜单 -->
     <CommonContextMenu v-show="commonCtxMenuShow" 
       :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
-      :posStyle="ctxMenuPosStyle" :data="commonCtxMenuData">
+      :posStyle="ctxMenuPosStyle" :data="commonCtxMenuData"
+      @contextmenu.stop="" >
     </CommonContextMenu>
 
     <AddToListSubmenu v-show="addToListSubmenuShow" 
       :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
-      :posStyle="ctxSubmenuPosStyle">
+      :posStyle="ctxSubmenuPosStyle"
+      @contextmenu.stop="" >
     </AddToListSubmenu>
 
     <ArtistListSubmenu v-show="artistListSubmenuShow" 
       :class="{ 'app-custom-theme-bg': appBackgroundScope.contextMenu }"
-      :posStyle="ctxSubmenuPosStyle">
+      :posStyle="ctxSubmenuPosStyle"
+      @contextmenu.stop="" >
     </ArtistListSubmenu>
 
     <!-- 通用通知 -->
@@ -469,7 +489,8 @@ onUnmounted(() => offEvents(eventsRegistration))
       <Notification class="common-ntf" 
         :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
         v-show="commonNotificationShow && (commonNotificationType == 0)" 
-        @click.stop="">
+        @click.stop=""
+        @contextmenu.stop="" >
         <template #text>
           <svg v-show="commonNotificationType == 0" width="36" height="36" viewBox="0 0 938.64 938.69"
             xmlns="http://www.w3.org/2000/svg">
@@ -507,7 +528,8 @@ onUnmounted(() => offEvents(eventsRegistration))
       <Notification class="common-ntf warning-ntf" 
         :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
         v-show="commonNotificationShow && (commonNotificationType == 1)" 
-        @click.stop="">
+        @click.stop=""
+        @contextmenu.stop="" >
         <template #text>
           <svg v-show="commonNotificationType == 0" width="36" height="36" viewBox="0 0 938.64 938.69"
             xmlns="http://www.w3.org/2000/svg">
@@ -549,67 +571,85 @@ onUnmounted(() => offEvents(eventsRegistration))
     <transition name="fade-ex">
       <PlaybackQueueView id="playback-queue-view" 
         :class="{ 'app-custom-theme-bg': appBackgroundScope.playbackQueue }"
-        v-show="playbackQueueViewShow">
+        v-show="playbackQueueViewShow"
+        @contextmenu.stop="" >
       </PlaybackQueueView>
     </transition>
 
     <transition name="fade-ex">
       <PlayingThemeListView id="playing-theme-list-view" 
         :class="{ 'app-custom-theme-bg': appBackgroundScope.playingThemeListView }"
-        v-if="playingThemeListViewShow">
+        v-if="playingThemeListViewShow"
+        @contextmenu.stop="" >
       </PlayingThemeListView>
     </transition>
 
     <!-- 顶层浮动窗口 -->
     <transition name="fade-y">
       <VideoPlayingView id="video-playing-view" 
-        v-if="videoPlayingViewShow">
+        v-if="videoPlayingViewShow"
+        @contextmenu.stop="" >
       </VideoPlayingView>
     </transition>
 
     <SoundEffectView id="sound-effect-view" 
       :class="{ 'app-custom-theme-bg': appBackgroundScope.soundEffectView }"
       v-if="soundEffectViewShow" 
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </SoundEffectView>
+
+    <ThemeSelectionView id="theme-selection-view" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.soundEffectView }"
+      v-if="themeSelectionViewShow" 
+      @click.stop=""
+      @contextmenu.stop="" >
+    </ThemeSelectionView>
 
     <LyricToolbar id="lyric-toolbar" :class="{ 'app-custom-theme-bg': appBackgroundScope.lyricToolbar }"
       v-if="lyricToolbarShow" 
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </LyricToolbar>
 
     <RandomMusicToolbar id="random-music-toolbar"
       :class="{ 'app-custom-theme-bg': appBackgroundScope.randomMusicToolbar }" 
       v-if="randomMusicToolbarShow"
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </RandomMusicToolbar>
 
     <CustomThemeEditView id="custom-theme-edit-view" 
       :class="{ 'app-custom-theme-bg': appBackgroundScope.customThemeEditView }" 
       v-if="customThemeEditViewShow" 
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </CustomThemeEditView>
 
     <CustomPlayingThemeEditView id="custom-playing-theme-edit-view"
       :class="{ 'app-custom-theme-bg': appBackgroundScope.customPlayingThemeEditView }"  
       v-if="customPlayingThemeEditViewShow" 
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </CustomPlayingThemeEditView>
 
     <ColorPickerToolbar id="color-picker-toolbar" ref="colorPickerToolbarRef" 
       v-if="colorPickerToolbarShow"
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </ColorPickerToolbar>
 
     <GradientColorToolbar id="gradient-color-toolbar" ref="gradientColorToolbarRef" 
       v-if="gradientColorToolbarShow"
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </GradientColorToolbar>
 
     <Notification class="popover-hint" 
       :class="{ 'app-custom-theme-bg': appBackgroundScope.toast }"
       v-show="popoverHintShow" 
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
       <template #text>
         <div v-html="popoverHintText"></div>
       </template>
@@ -617,18 +657,21 @@ onUnmounted(() => offEvents(eventsRegistration))
 
     <PlaylistExportToolbar id="playlist-export-toolbar" 
       v-if="playlistExportToolbarShow" 
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </PlaylistExportToolbar>
 
     <CustomAppBorderRadiusView id="custom-app-border-radius-view" 
       v-if="customAppBorderRadiusViewShow" 
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </CustomAppBorderRadiusView>
 
     <TrackResourceToolView id="track-resource-tool-view" 
       :class="{ 'app-custom-theme-bg': appBackgroundScope.TrackResourceToolView }"
       v-if="trackResourceToolViewShow" 
-      @click.stop="">
+      @click.stop=""
+      @contextmenu.stop="" >
     </TrackResourceToolView>
   </div>
 </template>
@@ -714,6 +757,17 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   bottom: 80px;
   width: 688px;
+  height: 528px;
+  z-index: 99;
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-popover-border-radius);
+}
+
+#theme-selection-view {
+  position: fixed;
+  right: 30px;
+  bottom: 80px;
+  width: 725px;
   height: 528px;
   z-index: 99;
   box-shadow: var(--box-shadow);

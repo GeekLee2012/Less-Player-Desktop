@@ -3,11 +3,12 @@ import { computed, inject } from 'vue';
 import PaginationTiles from './PaginationTiles.vue';
 import ImageTextTileLoadingMask from './ImageTextTileLoadingMask.vue';
 import { Track } from '../../common/Track';
+import { Playlist } from '../../common/Playlist';
 
 
 
 const { visitAlbum } = inject('appRoute')
-const { playAlbum } = inject('player')
+const { playAlbum, favorAlbum } = inject('player')
 
 const props = defineProps({
     data: Array,
@@ -64,6 +65,8 @@ const playAction = (item) => {
                 :checkbox="checkbox" 
                 :playable="true"
                 :playAction="() => playAction(item)" 
+                :favorable="true"
+                :favorAction="() => favorAlbum(item)"
                 :checked="checkedAll" 
                 :ignoreCheckAllEvent="ignoreCheckAllEvent"
                 :checkChangedFn="(checked) => checkChangedFn(checked, item)">

@@ -36,19 +36,25 @@ const { isMaxScreen, isPlaylistMode, isArtistMode,
     isRadioModeEnable, isCloudStorageModeEnable } = storeToRefs(useAppCommonStore())
 const { nextExploreMode, setPlaylistExploreMode, 
     setRadioExploreMode, setCloudStorageExploreMode, 
-    showFailToast, hideAllCtxMenus,
-    toggleMiniNavBarMode, } = useAppCommonStore()
+    showFailToast, hideAllCtxMenus, } = useAppCommonStore()
 const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists, } = storeToRefs(useUserProfileStore())
 const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
+const { toggleMiniNavBarMode } = useSettingStore()
 const { getCustomPlaylist } = useUserProfileStore()
 
 const activeCustomPlaylistIndex = ref(-1)
 const activeFavoritePlaylistIndex = ref(-1)
 const activeArtistIndex = ref(-1)
+const isPlatformsCollapsed = ref(false)
 const isFavoritePlaylistsCollapsed = ref(false)
+const isFavoriteArtistsCollapsed = ref(false)
 const centerContentRef = ref(null)
+const setPlatformsCollapsed = (value) => isPlatformsCollapsed.value = value
+const setFavoritePlaylistsCollapsed = (value) => isFavoritePlaylistsCollapsed.value = value
+const setFavoriteArtistsCollapsed = (value) => isFavoriteArtistsCollapsed.value = value
 
-let isUserMouseWheel = ref(false), userMouseWheelCancelTimer = null
+let isUserMouseWheel = ref(false)
+let userMouseWheelCancelTimer = null
 
 //TODO
 const updatePlatformIndex = (index, isSwitchMode) => {
@@ -126,10 +132,6 @@ const visitFavouriteItem = (item, index) => {
     activeFavoritePlaylistIndex.value = index
     const { id, platform } = item
     visitFavoritePlaylist(platform, id)
-}
-
-const setFavoritePlaylistsCollapsed = (value) => {
-    isFavoritePlaylistsCollapsed.value = value
 }
 
 const onUserMouseWheel = () => {
@@ -398,11 +400,35 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
         </div>
         <div class="center" @scroll="onUserMouseWheel" ref="centerContentRef">
-            <div class="platform-list">
+            <div class="platform-list" :class="{ collapsed: isPlatformsCollapsed }">
                 <div class="secondary-text" v-show="isSubtitleVisible()">
                     <span>音乐平台</span>
+                    <svg v-show="isPlatformsCollapsed" class="expand-btn"
+                        @click="setPlatformsCollapsed(false)" width="11" height="11" viewBox="0 0 455.71 818.08"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <g id="Layer_2-2" data-name="Layer 2">
+                                    <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                        <path
+                                            d="M354.54,413c-2.89-1.94-5-2.89-6.47-4.41Q181.42,241.85,14.81,75.08C1.75,62-3.43,46.91,2.34,29.08,11.92-.46,49.26-9.71,71.91,11.71c7.87,7.44,15.35,15.29,23,23L440.49,380.64c20.22,20.24,20.29,45.1.22,65.21Q262.27,624.5,83.9,803.2c-9.12,9.14-19.48,15.07-32.63,14.88-17.18-.25-30.24-8-37.94-23.27C5.54,779.38,7.14,764.15,17.22,750a61.07,61.07,0,0,1,6.7-7.4q162.34-162.55,324.74-325C349.94,416.3,351.53,415.32,354.54,413Z" />
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                    <svg v-show="!isPlatformsCollapsed" class="collapse-btn"
+                        @click="setPlatformsCollapsed(true)" width="11" height="11" viewBox="0 0 763.32 424.57"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M380.47,322.11c27.6-27.5,54-53.68,80.23-80Q575,127.75,689.38,13.4C708.7-5.81,735-2.92,750.83,12.91c17,17,16.57,43.39-.9,60.87L414.1,409.61c-19.89,19.89-45,20-64.9.08Q180.9,241.45,12.66,73.15A42.53,42.53,0,1,1,72.85,13Q224.7,164.87,376.48,316.73A46.1,46.1,0,0,1,380.47,322.11Z" />
+                            </g>
+                        </g>
+                    </svg>
                 </div>
-                <ul>
+                <ul v-show="!isPlatformsCollapsed">
                     <li v-for="(item, index) in activePlatforms()" 
                         @click="updatePlatformIndex(index)"
                         :class="{ active: (currentPlatformIndex == index)}" >
@@ -410,7 +436,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </li>
                 </ul>
             </div>
-            <div class="custom-playlist-list" v-show="isPlaylistMode && navigation.customPlaylistsShow">
+            <div class="custom-playlist-list" 
+                :class="{ 'none-data': (getCustomPlaylists.length < 1) }"
+                v-show="isPlaylistMode && navigation.customPlaylistsShow">
                 <div class="secondary-text">
                     <span>创建的歌单</span>
                     <svg class="add-custom-btn" @click="() => visitCustomPlaylistCreate()" width="11" height="11"
@@ -494,8 +522,32 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="follow-artist-list" v-show="isArtistMode && navigation.followArtistsShow">
                 <div class="secondary-text">
                     <span>关注的歌手</span>
+                    <svg v-show="isFavoriteArtistsCollapsed" class="expand-btn"
+                        @click="setFavoriteArtistsCollapsed(false)" width="11" height="11" viewBox="0 0 763.32 424.57"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M380.47,322.11c27.6-27.5,54-53.68,80.23-80Q575,127.75,689.38,13.4C708.7-5.81,735-2.92,750.83,12.91c17,17,16.57,43.39-.9,60.87L414.1,409.61c-19.89,19.89-45,20-64.9.08Q180.9,241.45,12.66,73.15A42.53,42.53,0,1,1,72.85,13Q224.7,164.87,376.48,316.73A46.1,46.1,0,0,1,380.47,322.11Z" />
+                            </g>
+                        </g>
+                    </svg>
+                    <svg v-show="!isFavoriteArtistsCollapsed" class="collapse-btn"
+                        @click="setFavoriteArtistsCollapsed(true)" width="11" height="11" viewBox="0 0 455.71 818.08"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <g id="Layer_2-2" data-name="Layer 2">
+                                    <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                        <path
+                                            d="M354.54,413c-2.89-1.94-5-2.89-6.47-4.41Q181.42,241.85,14.81,75.08C1.75,62-3.43,46.91,2.34,29.08,11.92-.46,49.26-9.71,71.91,11.71c7.87,7.44,15.35,15.29,23,23L440.49,380.64c20.22,20.24,20.29,45.1.22,65.21Q262.27,624.5,83.9,803.2c-9.12,9.14-19.48,15.07-32.63,14.88-17.18-.25-30.24-8-37.94-23.27C5.54,779.38,7.14,764.15,17.22,750a61.07,61.07,0,0,1,6.7-7.4q162.34-162.55,324.74-325C349.94,416.3,351.53,415.32,354.54,413Z" />
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
                 </div>
-                <ul>
+                <ul v-show="isFavoriteArtistsCollapsed" >
                     <li v-for="(item, index) in getFollowArtists()" :class="{ active0: (activeArtistIndex == index) }"
                         @click="visitArtistItem(item, index)">
                         <div class="playlist-item">
@@ -586,7 +638,6 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #main-left .center {
     flex: 1;
-    padding-bottom: 36px;
     overflow: scroll;
     overflow-x: hidden;
 }
@@ -696,11 +747,17 @@ onUnmounted(() => offEvents(eventsRegistration))
     fill: var(--content-subtitle-text-color) !important;
 }
 
+#main-left .platform-list,
 #main-left .custom-playlist-list,
 #main-left .favorite-playlist-list,
 #main-left .follow-artist-list {
-    margin-top: 36px;
+    margin-bottom: 36px;
     position: relative;
+}
+
+#main-left .platform-list.collapsed,
+#main-left .custom-playlist-list.none-data {
+    margin-bottom: 18px;
 }
 
 #main-left .center .add-custom-btn,
@@ -712,7 +769,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     /* right: 15px; */
     right: calc(var(--spacing-left) + 8px);
     top: 6px;
-    transform: scale(1.05);
+    transform: scale(1.08);
 }
 
 #main-left .center .collapse-btn,
@@ -738,6 +795,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     text-decoration: none;
     padding-left: 20px;
     padding-right: 20px;
+    padding-top: 0.5px;
+    padding-bottom: 0.5px;
     margin-left: calc(var(--spacing-left) - 3px);
     margin-right: calc(var(--spacing-left) - 3px);
     margin-bottom: var(--content-left-nav-line-spacing);
@@ -796,6 +855,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color);
 }
+
 
 .contrast-mode #main-left .platform-list .active,
 .contrast-mode #main-left .custom-playlist-list .active {
@@ -956,11 +1016,21 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding: 8px 3px;
 }
 
+.mini-navbar-mode #main-left .platform-list {
+    margin-bottom: 10px;
+}
+
 .mini-navbar-mode #main-left .custom-playlist-list,
 .mini-navbar-mode #main-left .favorite-playlist-list,
 .mini-navbar-mode #main-left .follow-artist-list {
-    margin-top: 10px;
+    margin-bottom: 10px;
     width: fit-content;
+}
+
+.mini-navbar-mode #main-left .custom-playlist-list li {
+    background: var(--content-list-item-hover-bg-color);
+    cursor: pointer;
+    border-radius: var(--border-list-item-vertical-border-radius);
 }
 
 .mini-navbar-mode #main-left .custom-playlist-list li,
@@ -1006,7 +1076,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .mini-navbar-mode #main-left .header .app-logo-wrap .app-logo,
 .mini-navbar-mode #main-left .bottom .app-logo-wrap .app-logo {
-    transform: scale(1.1) translateX(-2px);
+    transform: scale(1.1) translateX(-1px);
 }
 
 .mini-navbar-mode #main-left #explore-mode .mode-item span,

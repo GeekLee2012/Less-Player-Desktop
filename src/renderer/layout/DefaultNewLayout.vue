@@ -1,7 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from '../store/settingStore';
-import { useAppCommonStore } from '../store/appCommonStore';
 import DefaultMainLeft from './DefaultMainLeft.vue';
 import DefaultMainCenter from './DefaultMainCenter.vue';
 import AppPopovers from '../AppPopovers.vue';
@@ -9,8 +8,7 @@ import DefaultNewMainBottom from './DefaultNewMainBottom.vue';
 
 
 
-const { isFontAutoWeight } = storeToRefs(useSettingStore())
-const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
+const { isFontAutoWeight, isMiniNavBarMode } = storeToRefs(useSettingStore())
 </script>
 
 <template>
@@ -36,7 +34,7 @@ const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    --main-bottom-height: 88px;
+    --main-bottom-height: 90px;
 }
 
 .default-new-layout > .center {
@@ -59,6 +57,9 @@ const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 .default-new-layout > .bottom {
     height: var(--main-bottom-height);
     background: var(--content-bg-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 
@@ -88,19 +89,8 @@ const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
     height: 50px !important;
 }
 
-/* default new bottom */
-/*
-.default-new-layout > .bottom .default-new-main-bottom .play-ctl .play-btn {
-    height: 39px;
-    width: 39px;
-}
-*/
-/*
-.default-new-layout > .bottom .default-new-main-bottom .play-ctl .play-btn:hover {
-    transform: scale(1.05);
-}
-*/
 
+/* default new bottom */
 .default-new-layout > .bottom .default-new-main-bottom .play-ctl .spacing {
     margin-left: 28px !important;
 }
@@ -115,6 +105,10 @@ const { isMiniNavBarMode } = storeToRefs(useAppCommonStore())
 .default-new-layout > .bottom .default-new-main-bottom #play-nav .cover-mask {
     width: 56px !important;
     height: 56px !important;
+}
+
+.default-new-layout > .bottom .default-new-main-bottom #play-nav .title-wrap {
+    height: 50px !important;
 }
 
 .default-new-layout.mini-navbar-mode > .center #main-left .top-logo {

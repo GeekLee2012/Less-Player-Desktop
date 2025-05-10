@@ -174,6 +174,7 @@
 
 /* Toolbar */
 .use-winos-win-ctl .sound-effect-view .action,
+.use-winos-win-ctl .theme-selection-view .action,
 .use-winos-win-ctl .track-resource-tool-view .container > .header .action,
 .use-winos-win-ctl .random-music-toolbar .action,
 .use-winos-win-ctl .lyric-toolbar .action {
