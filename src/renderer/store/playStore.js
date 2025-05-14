@@ -82,8 +82,7 @@ export const usePlayStore = defineStore('player', {
             const { currentTrack: track } = this
             //FM广播
             if (this.isDefaultFMRadioType(track)) {
-                emitEvents('radio-togglePlay')
-                return
+                return emitEvents('radio-togglePlay')
             }
             //播放列表为空
             if (this.queueTracksSize < 1) return
@@ -127,6 +126,7 @@ export const usePlayStore = defineStore('player', {
             if (index > -1) {
                 const isCurrent = (index == this.playingIndex)
                 this.queueTracks.splice(index, 1)
+                emitEvents('track-resetTrackRetry')
                 if (index <= this.playingIndex) {
                     --this.playingIndex
                 }
@@ -185,13 +185,13 @@ export const usePlayStore = defineStore('player', {
             this.playTrackDirectly(track)
         },
         playPrevTrack() {
-            //TODO
             const maxSize = this.queueTracksSize
             if (maxSize < 1) return
+            if (maxSize == 1) emitEvents('track-resetTrackRetry')
             switch (this.playMode) {
                 case PlayMode.REPEAT_ALL:
-                    --this.playingIndex
-                    this.playingIndex = this.playingIndex < 0 ? maxSize - 1 : this.playingIndex
+                    const index = this.playingIndex - 1
+                    this.playingIndex = (index < 0 ? maxSize - 1 : index)
                     break
                 case PlayMode.REPEAT_ONE:
                     break
@@ -202,16 +202,15 @@ export const usePlayStore = defineStore('player', {
             this.playTrackDirectly(this.currentTrack)
         },
         playNextTrack() {
-            //TODO
             if (Playlist.isNormalRadioType(this.currentTrack)) {
-                emitEvents('track-nextPlaylistRadioTrack', this.currentTrack)
-                return
+                return emitEvents('track-nextPlaylistRadioTrack', this.currentTrack)
             }
             const maxSize = this.queueTracksSize
             if (maxSize < 1) return
+            if (maxSize == 1) emitEvents('track-resetTrackRetry')
             switch (this.playMode) {
                 case PlayMode.REPEAT_ALL:
-                    this.playingIndex = ++this.playingIndex % maxSize
+                    this.playingIndex = (this.playingIndex + 1) % maxSize
                     break
                 case PlayMode.REPEAT_ONE:
                     break

@@ -502,6 +502,18 @@ provide('appRoute', {
     visitEmbySessionDetail: (id) => {
         return visitCommonRoute(`/cloudstorage/emby/${id}`)
     },
+    visitPlaybackQueue: (id, exploreMode) => {
+        exploreMode = transformExploreMode(exploreMode)
+        return visitCommonRoute(`/${exploreMode}/playbackQueue/${id}`)
+    },
+    visitPlaybackQueueSave: (id, exploreMode) => {
+        exploreMode = transformExploreMode(exploreMode)
+        return visitCommonRoute(`/${exploreMode}/playbackQueue/save`)
+    },
+    visitPlaylistQueueEdit: (id, exploreMode) => {
+        exploreMode = transformExploreMode(exploreMode)
+        return visitCommonRoute({ path: `/${exploreMode}/playbackQueue/edit/${id}`, override: true })
+    },
 })
 </script>
 

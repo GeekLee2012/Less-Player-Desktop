@@ -141,7 +141,7 @@ export const useSettingStore = defineStore('setting', {
             //H卡片Tile - 反转布局
             reversedForHCardStyleTile: true,
             //H卡片Tile - 小图标
-            smallIconForHCardStyleTile: false,
+            smallIconForHCardStyleTile: true,
             //歌曲控件样式，0 => 经典，1 => 主流
             songItemStyleIndex: 1,
             //窗口自定义阴影
@@ -202,6 +202,8 @@ export const useSettingStore = defineStore('setting', {
             playbackQueueMvBtnShow: true,
             //当前播放 - 批量操作按钮
             playbackQueueBatchActionBtnShow: true,
+            //当前播放 - 保存按钮
+            playbackQueueSaveBtnShow: true,
             //当前播放 - 操作按钮仅显示图标，不显示对应文字(图标模式)
             playbackQueueBtnIconMode: true,
             //歌单播放量
@@ -250,6 +252,8 @@ export const useSettingStore = defineStore('setting', {
             singleLineAlbumTitleStyle: false,
             //图文控件 - 自由FM标题单行显示
             singleLineRadioTitleStyle: false,
+            //图文控件 - 电台标题单击播放 / 添加到当前播放
+            radioTileTitleClickPlay: true,
             //播放页 - 封面图片背景效果
             playingViewUseBgCoverEffect: false,
             playingViewBgCoverEffectIndex: 0,
@@ -391,6 +395,8 @@ export const useSettingStore = defineStore('setting', {
             miniNavBarMode: false,
             //自建歌单
             customPlaylistsShow: false,
+            //播放队列
+            savedPlaybackQueuesShow: false,
             //我的收藏
             favoritePlaylistsShow: false,
             //我关注的歌手
@@ -444,6 +450,10 @@ export const useSettingStore = defineStore('setting', {
             //缩放 - 超出常规范围时
             //abnormalZoom: true,
             suspiciousZoom: true,
+            //清空全部（已保存的）播放队列
+            clearPlaybackQueues: true,
+            //删除（已保存的）播放队列
+            deletePlaybackQueue: true,
         },
         /* 快捷键，可修改 */
         keys: {
@@ -740,6 +750,9 @@ export const useSettingStore = defineStore('setting', {
         isPlaybackQueueBatchActionBtnShow() {
             return this.track.playbackQueueBatchActionBtnShow
         },
+        isPlaybackQueueSaveBtnShow() {
+            return this.track.playbackQueueSaveBtnShow
+        },
         isPlaybackQueueBtnIconMode() {
             return this.track.playbackQueueBtnIconMode
         },
@@ -848,6 +861,12 @@ export const useSettingStore = defineStore('setting', {
         isShowDialogBeforeSuspiciousZoom() {
             return this.dialog.suspiciousZoom
         },
+        isShowDialogBeforeClearPlaybackQueues() {
+            return this.dialog.clearPlaybackQueues
+        },
+        isShowDialogBeforeDeletePlaybackQueue() {
+            return this.dialog.deletePlaybackQueue
+        },
         isCheckPreReleaseVersion() {
             return this.others.checkPreReleaseVersion
         },
@@ -955,6 +974,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isSingleLineRadioTitleStyle() {
             return this.track.singleLineRadioTitleStyle
+        },
+        isRadioTileTitleClickPlay() {
+            return this.track.radioTileTitleClickPlay
         },
         winCustomShadowSize() {
             return this.common.winCustomShadowSize
@@ -1304,6 +1326,9 @@ export const useSettingStore = defineStore('setting', {
         togglePlaybackQueueBatchActionBtnShow() {
             this.track.playbackQueueBatchActionBtnShow = !this.track.playbackQueueBatchActionBtnShow
         },
+        togglePlaybackQueueSaveBtnShow() {
+            this.track.playbackQueueSaveBtnShow = !this.track.playbackQueueSaveBtnShow
+        },
         togglePlaybackQueueBtnIconMode() {
             this.track.playbackQueueBtnIconMode = !this.track.playbackQueueBtnIconMode
         },
@@ -1321,6 +1346,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleSingleLineRadioTitleStyle() {
             this.track.singleLineRadioTitleStyle = !this.track.singleLineRadioTitleStyle
+        },
+        toggleRadioTileTitleClickPlay() {
+            this.track.radioTileTitleClickPlay = !this.track.radioTileTitleClickPlay
         },
         setStateRefreshFrequency(value) {
             const freq = parseInt(value || 60)
@@ -1426,6 +1454,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleFavoritePlaylistsShow() {
             this.navigation.favoritePlaylistsShow = !this.navigation.favoritePlaylistsShow
+        },
+        toggleSavedPlaybackQueuesShow() {
+            this.navigation.savedPlaybackQueuesShow = !this.navigation.savedPlaybackQueuesShow
         },
         toggleFollowArtistsShow() {
             this.navigation.followArtistsShow = !this.navigation.followArtistsShow
@@ -1776,6 +1807,12 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeSuspiciousZoom() {
             this.dialog.suspiciousZoom = !this.dialog.suspiciousZoom
+        },
+        toggleShowDialogBeforeClearPlaybackQueues() {
+            this.dialog.clearPlaybackQueues = !this.dialog.clearPlaybackQueues
+        },
+        toggleShowDialogBeforeDeletePlaybackQueue() {
+            this.dialog.deletePlaybackQueue = !this.dialog.deletePlaybackQueue
         },
         toggleCheckPreReleaseVersion() {
             this.others.checkPreReleaseVersion = !this.others.checkPreReleaseVersion

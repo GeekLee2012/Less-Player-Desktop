@@ -3,11 +3,11 @@
 <b>`注意：`不同操作系统，支持的mpv版本不同</b> 
   
 ### 为什么需要配置mpv
-* 在当前应用中，目前依赖Howler.js播放音频（Web Audio API）
-* Howler.js也支持播放大多数主流的音频格式
-* 但对于高品质的音频格式，Howler.js的支持不完善，经常出现无法播放的情况
+* 在当前应用中，目前主要依赖Howler.js播放音频（Web Audio API）
+* Howler.js支持大多数主流的音频格式，一般场景中表现都不错
+* 而对于高品质的音频格式，Howler.js的不完善就显露出来，常常出现无法播放的情况
 * mpv功能强大且完善，可解决上述高品质音频无法播放的问题，提供更好的音乐体验
-* 所以，喜欢本地播放、WebDAV、Emby、Jellyfin、Navidrome等的朋友们，建议配置mpv
+* 喜欢本地播放、WebDAV、Emby、Jellyfin、Navidrome等的朋友们，建议配置mpv
   
 ### 简单了解mpv  
 * mpv官网：https://mpv.io/  

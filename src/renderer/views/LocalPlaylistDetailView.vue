@@ -102,7 +102,14 @@ const loadContent = () => {
     setLoading(true)
     const playlist = getLocalPlaylist(props.id)
     if (!playlist) {
-        Object.assign(detail, { title: '当前歌单找不到啦', about: '神秘代码：404', data: [], updated: Date.now() })
+        const _now = Date.now()
+        Object.assign(detail, { 
+            title: '当前歌单找不到啦', 
+            about: '神秘空间：404', 
+            data: [], 
+            created: _now,
+            updated: _now,
+        })
         return
     }
     Object.assign(detail, { ...playlist })
@@ -112,6 +119,7 @@ const loadContent = () => {
     const filtredData = filterSongsWithKeyword(data)
     Object.assign(detail, { data: filtredData })
     setLoading(false)
+    setDataListId(randomTextWithinAlphabetNums(16))
 }
 
 const loadMoreContent = () => {
@@ -201,21 +209,18 @@ const addFolders = async () => {
         msg = `文件夹添加成功！<br>共新增${count}首歌曲`
         success = true
     }
-    if (success) showToast(msg)
-    if (!success) showFailToast(msg)
+    success ? showToast(msg) : showFailToast(msg)
     setLoading(false)
+    if(success) setDataListId('_' + randomTextWithinAlphabetNums(15))
 }
 
 const addFiles = async () => {
     const result = await ipcRendererInvoke('open-audios')
     if (!result || result.length < 1) return
-    //let msg = '文件添加失败！', success = false
     result.forEach(item => addToLocalPlaylist(props.id, item))
     const msg = `文件添加成功！<br>共新增${result.length}首歌曲`
     showToast(msg)
-    //success = true
-    //if (success) showToast(msg)
-    //if (!success) showFailToast(msg)
+    setDataListId('_' + randomTextWithinAlphabetNums(15))
 }
 
 const onDrop = async (event) => {
@@ -244,8 +249,8 @@ const onDrop = async (event) => {
         success = true
     }
     setLoading(false)
-    if (success) showToast(msg)
-    if (!success) showFailToast(msg)
+    success ? showToast(msg) : showFailToast(msg)
+    if(success) setDataListId('_' + randomTextWithinAlphabetNums(15))
 }
 
 const playlistCoverOnDrop = (event) => {
@@ -309,7 +314,7 @@ watch(() => props.id, () => {
     resetBack2TopBtn()
 
     loadContent()
-    setDataListId(randomTextWithinAlphabetNums(16))
+    //setDataListId(randomTextWithinAlphabetNums(16))
 })
 
 watch(currentPlatformCode, loadContent)
@@ -414,6 +419,8 @@ onActivated(() => {
     display: flex;
     flex-direction: row;
     margin-bottom: 16px;
+    --cover-size: 239px;
+    height: var(--cover-size);
 }
 
 #local-playlist-detail-view .header .right {
@@ -430,12 +437,20 @@ onActivated(() => {
 #local-playlist-detail-view .header .title {
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
+
+    overflow: hidden;
+    word-wrap: break-all;
+    white-space: pre-wrap;
+    line-break: anywhere;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
 }
 
 #local-playlist-detail-view .header .about {
-    height: 86px;
-    /*min-height: 99px;
-    line-height: 21px;*/
+    height: 106px;
     line-height: var(--content-text-line-height);
     color: var(--content-subtitle-text-color);
     overflow: hidden;
@@ -445,9 +460,9 @@ onActivated(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    margin-bottom: 15px;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    margin-bottom: 10px;
     letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 }
 
@@ -462,7 +477,7 @@ onActivated(() => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 #local-playlist-detail-view .right .edit-wrap .edit-btn {
@@ -495,8 +510,8 @@ onActivated(() => {
 }
 
 #local-playlist-detail-view .header .cover {
-    width: 233px;
-    height: 233px;
+    width: var(--cover-size);
+    height: var(--cover-size);
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }

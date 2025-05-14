@@ -5,6 +5,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useSettingStore } from '../store/settingStore';
+import { usePlaybackQueueStore } from '../store/playbackQueueStore';
 import { isDevEnv, useUseCustomTrafficLight, isMacOS, coverDefault } from '../../common/Utils';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
 import Navigator from '../components/Navigator.vue';
@@ -21,7 +22,8 @@ const props = defineProps({
 const { visitRoute, visitArtist, visitHome,
     visitFavoritePlaylist, visitCustomPlaylist,
     visitCustomPlaylistCreate, currentRoutePath,
-    visitUserHome, visitSetting, } = inject('appRoute')
+    visitUserHome, visitSetting, 
+    visitPlaybackQueue, } = inject('appRoute')
 const { showContextMenu, useWindowsStyleWinCtl, 
     searchAction, searchBarPlaceholder, } = inject('appCommon')
 const { playPlaylist } = inject('player')
@@ -41,17 +43,23 @@ const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists, } = storeTo
 const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
 const { toggleMiniNavBarMode } = useSettingStore()
 const { getCustomPlaylist } = useUserProfileStore()
+const { queueMetas } = storeToRefs(usePlaybackQueueStore())
+
 
 const activeCustomPlaylistIndex = ref(-1)
 const activeFavoritePlaylistIndex = ref(-1)
+const activeSavedPlaybackQueueIndex = ref(-1)
 const activeArtistIndex = ref(-1)
 const isPlatformsCollapsed = ref(false)
 const isFavoritePlaylistsCollapsed = ref(false)
 const isFavoriteArtistsCollapsed = ref(false)
+const isSavedPlaybackQueuesCollapsed = ref(false)
 const centerContentRef = ref(null)
 const setPlatformsCollapsed = (value) => isPlatformsCollapsed.value = value
 const setFavoritePlaylistsCollapsed = (value) => isFavoritePlaylistsCollapsed.value = value
 const setFavoriteArtistsCollapsed = (value) => isFavoriteArtistsCollapsed.value = value
+const setSavedPlaybackQueuesCollapsed = (value) => isSavedPlaybackQueuesCollapsed.value = value
+
 
 let isUserMouseWheel = ref(false)
 let userMouseWheelCancelTimer = null
@@ -61,6 +69,7 @@ const updatePlatformIndex = (index, isSwitchMode) => {
     updateCurrentPlatform(index)
     activeCustomPlaylistIndex.value = -1
     activeFavoritePlaylistIndex.value = -1
+    activeSavedPlaybackQueueIndex.value = -1
     activeArtistIndex.value = -1
 
     const platform = currentPlatformCode.value
@@ -107,15 +116,16 @@ const visitCloudStorageMode = () => {
     updatePlatformIndex(0, true)
 }
 
+const onContextMenu = (event, data, dataType, index) => {
+    showContextMenu(event, data, dataType, index)
+}
+
 const visitCustomItem = (item, index) => {
     activeCustomPlaylistIndex.value = index
     activeFavoritePlaylistIndex.value = -1
+    activeSavedPlaybackQueueIndex.value = -1
     updateCurrentPlatform(-1)
     visitCustomPlaylist(item.id)
-}
-
-const onContextMenu = (event, data, dataType, index) => {
-    showContextMenu(event, data, dataType, index)
 }
 
 const visitArtistItem = (item, index) => {
@@ -130,8 +140,17 @@ const visitArtistItem = (item, index) => {
 const visitFavouriteItem = (item, index) => {
     activeCustomPlaylistIndex.value = -1
     activeFavoritePlaylistIndex.value = index
+    activeSavedPlaybackQueueIndex.value = -1
     const { id, platform } = item
     visitFavoritePlaylist(platform, id)
+}
+
+const visitSavedPlaybackQueueItem = (item, index) => {
+    activeCustomPlaylistIndex.value = -1
+    activeFavoritePlaylistIndex.value = -1
+    activeSavedPlaybackQueueIndex.value = index
+    const { id } = item
+    visitPlaybackQueue(id)
 }
 
 const onUserMouseWheel = () => {
@@ -400,7 +419,8 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
         </div>
         <div class="center" @scroll="onUserMouseWheel" ref="centerContentRef">
-            <div class="platform-list" :class="{ collapsed: isPlatformsCollapsed }">
+            <div class="platform-list" 
+                :class="{ 'collapsed': isPlatformsCollapsed }">
                 <div class="secondary-text" v-show="isSubtitleVisible()">
                     <span>音乐平台</span>
                     <svg v-show="isPlatformsCollapsed" class="expand-btn"
@@ -459,6 +479,59 @@ onUnmounted(() => offEvents(eventsRegistration))
                             <div class="cover">
                                 <img v-lazy="coverDefault(item.cover)" />
                                 <div class="play-btn" @click.stop="playCustomPlaylistItem(item, index)">
+                                    <svg width="18" height="18" viewBox="0 0 139 139" xml:space="preserve"
+                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                        <path
+                                            d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="title" v-html="item.title"></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="saved-playbackQueue-list" 
+                :class="{ 
+                    'collapsed': isSavedPlaybackQueuesCollapsed,
+                    'none-data': (queueMetas.length < 1) 
+                }"
+                v-show="isPlaylistMode && navigation.savedPlaybackQueuesShow">
+                <div class="secondary-text">
+                    <span>播放队列</span>
+                    <svg v-show="isSavedPlaybackQueuesCollapsed" class="expand-btn"
+                        @click="setSavedPlaybackQueuesCollapsed(false)" width="11" height="11" viewBox="0 0 455.71 818.08"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <g id="Layer_2-2" data-name="Layer 2">
+                                    <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                        <path
+                                            d="M354.54,413c-2.89-1.94-5-2.89-6.47-4.41Q181.42,241.85,14.81,75.08C1.75,62-3.43,46.91,2.34,29.08,11.92-.46,49.26-9.71,71.91,11.71c7.87,7.44,15.35,15.29,23,23L440.49,380.64c20.22,20.24,20.29,45.1.22,65.21Q262.27,624.5,83.9,803.2c-9.12,9.14-19.48,15.07-32.63,14.88-17.18-.25-30.24-8-37.94-23.27C5.54,779.38,7.14,764.15,17.22,750a61.07,61.07,0,0,1,6.7-7.4q162.34-162.55,324.74-325C349.94,416.3,351.53,415.32,354.54,413Z" />
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                    <svg v-show="!isSavedPlaybackQueuesCollapsed" class="collapse-btn"
+                        @click="setSavedPlaybackQueuesCollapsed(true)" width="11" height="11" viewBox="0 0 763.32 424.57"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M380.47,322.11c27.6-27.5,54-53.68,80.23-80Q575,127.75,689.38,13.4C708.7-5.81,735-2.92,750.83,12.91c17,17,16.57,43.39-.9,60.87L414.1,409.61c-19.89,19.89-45,20-64.9.08Q180.9,241.45,12.66,73.15A42.53,42.53,0,1,1,72.85,13Q224.7,164.87,376.48,316.73A46.1,46.1,0,0,1,380.47,322.11Z" />
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                <ul v-show="!isSavedPlaybackQueuesCollapsed">
+                    <li v-for="(item, index) in queueMetas"
+                        :class="{ active: (activeSavedPlaybackQueueIndex == index) }" @click="visitSavedPlaybackQueueItem(item, index)"
+                        @contextmenu.stop="(e) => {}">
+                        <div class="playlist-item">
+                            <div class="cover">
+                                <img v-lazy="coverDefault(item.cover)" />
+                                <div class="play-btn" @click.stop="playPlaylist(item)">
                                     <svg width="18" height="18" viewBox="0 0 139 139" xml:space="preserve"
                                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                         <path
@@ -749,6 +822,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #main-left .platform-list,
 #main-left .custom-playlist-list,
+#main-left .saved-playbackQueue-list,
 #main-left .favorite-playlist-list,
 #main-left .follow-artist-list {
     margin-bottom: 36px;
@@ -756,7 +830,9 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #main-left .platform-list.collapsed,
-#main-left .custom-playlist-list.none-data {
+#main-left .custom-playlist-list.none-data,
+#main-left .saved-playbackQueue-list.collapsed,
+#main-left .saved-playbackQueue-list.none-data {
     margin-bottom: 18px;
 }
 
@@ -827,6 +903,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #main-left .custom-playlist-list li,
+#main-left .saved-playbackQueue-list li,
 #main-left .favorite-playlist-list li {
     font-size: var(--content-text-subtitle-size);
     padding-left: 5px;
@@ -1021,6 +1098,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .mini-navbar-mode #main-left .custom-playlist-list,
+.mini-navbar-mode #main-left .saved-playbackQueue-list,
 .mini-navbar-mode #main-left .favorite-playlist-list,
 .mini-navbar-mode #main-left .follow-artist-list {
     margin-bottom: 10px;
@@ -1034,6 +1112,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .mini-navbar-mode #main-left .custom-playlist-list li,
+.mini-navbar-mode #main-left .saved-playbackQueue-list li,
 .mini-navbar-mode #main-left .favorite-playlist-list li {
     padding-left: 4px;
     padding-right: 4px;

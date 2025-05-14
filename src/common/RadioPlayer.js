@@ -112,7 +112,7 @@ class RadioPlayer {
     setState(state) {
         this.playState = state
         const { channel: track } = this
-        return this.notify('radio-state', { state, track, currentTime: 0, radio: true, fallback: true })
+        return this.notify('radio-state', { state, track, currentTime: 0, radio: true })
     }
 
     setChannel(channel) {

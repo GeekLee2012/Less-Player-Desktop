@@ -226,8 +226,8 @@ onMounted(loadUserInfo)
 }
 
 #user-info-edit-view .center .form-row textarea {
-    /*height: 280px;*/
-    height: 202px;
+    /*height: 202px;*/
+    height: 168px;
     padding: 8px;
 }
 

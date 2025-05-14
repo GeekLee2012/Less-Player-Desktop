@@ -18,7 +18,11 @@ const props = defineProps({
     playable: Boolean,
     playAction: Function,
     favorable: Boolean,
-    favorAction: Function,
+    //TODO 目前设计关注点，仅在提供便捷的收藏、关注功能；
+    // 而其反向功能和状态显示（变更后），均不支持；因为需要耗费更多的时间、性能！
+    favorAction: Function, 
+    //标题点击事件处理
+    titleAction: Function,
     checkbox: Boolean,
     checked: Boolean,
     ignoreCheckAllEvent: Boolean,
@@ -66,6 +70,10 @@ const computedBigTitle = computed(() => {
     return parts && parts.length >= 1 && toTrimString(parts[1])
 })
 
+const onTitleClick = (event) => {
+    const { titleAction } = props
+    if(typeof titleAction == 'function') titleAction(event)
+}
 
 
 /* 生命周期、监听 */
@@ -146,11 +154,14 @@ onUnmounted(() => offEvents(eventsRegistration))
             </picture>
             -->
         <div class="title-wrap">
-            <div class="title" :class="{ 'singleline-title': singleLineTitleStyle }" v-html="title">
+            <div class="title" 
+                :class="{ 'singleline-title': singleLineTitleStyle }" 
+                @click="onTitleClick"
+                v-html="title">
             </div>
-            <div class="subtitle" v-show="subtitle" v-html="subtitle">
+            <div class="subtitle" @click="onTitleClick" v-show="subtitle" v-html="subtitle">
             </div>
-            <div class="extra-text" v-show="extraText" v-html="extraText">
+            <div class="extra-text" @click="onTitleClick" v-show="extraText" v-html="extraText">
             </div>
             <div class="action">
                 <div class="checkbox" v-show="checkbox">
@@ -521,7 +532,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .image-text-tile-card.image-text-tile-card-shadow .layer,
 .image-text-tile-card-horizion.image-text-tile-card-shadow .layer {
     display: block;
-    z-index: -1;
+    z-index: -2;
     width: 90%;
     height: 100%;
     position: absolute;
@@ -534,7 +545,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .image-text-tile-card.image-text-tile-card-shadow .layer-tiny,
 .image-text-tile-card-horizion.image-text-tile-card-shadow .layer-tiny  {
-    z-index: -2;
+    z-index: -3;
     width: 80%;
     transform: translate(-50%, calc(var(--card-shadow-height) * 2));
     background: var(--content-light-bg-color);
@@ -560,13 +571,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio) - 30px);
     border-radius: var(--border-img-text-tile-border-radius);
     padding: 20px 10px 20px 20px;
-    background: var(--app-bg-color);
+    /*background: var(--app-bg-color);
     background: var(--content-left-nav-bg-color);
-    background: var(--content-loading-mask-color);
+    background: var(--content-loading-mask-color);*/
     background: var(--content-list-item-hover-bg-color);
 
     margin-top: 18px !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 12px !important;
     cursor: pointer;
     /*box-shadow: 0px 0px 3px #181818;*/
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
@@ -625,7 +636,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .image-text-tile-card-horizion .title-wrap .action {
     position: absolute;
-    right: 10px;
+    right: 13px;
     bottom: 0px;
     display: flex;
     align-items: center;
@@ -718,6 +729,26 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-right: 25px;
 }
 
+/* Horizion Card - Video  */
+.image-text-tile-card-horizion.image-text-tile-video {
+    --others-image-text-tile-cover-size: 168px !important;
+    margin-top: 18px !important;
+    margin-bottom: 12px !important;
+    margin-left: 13px !important;
+    margin-right: 13px !important;
+}
+
+.image-text-tile-card-horizion.image-text-tile-video .title-wrap,
+.image-text-tile-card-horizion.image-text-tile-video .title,
+.image-text-tile-card-horizion.image-text-tile-video .subtitle,
+.image-text-tile-card-horizion.image-text-tile-video .extra-text {
+    width: 100% !important;
+}
+
+.image-text-tile-card-horizion.image-text-tile-video .cover {
+    width: calc(var(--others-image-text-tile-cover-size) * 0.88) !important;
+    height: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
+}
 
 
 /* Mini NavBar Mode */
@@ -750,5 +781,26 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .mini-navbar-mode .image-text-tile-card.image-text-tile-video .title-wrap {
     width: calc(var(--others-image-text-tile-cover-size) * 1.25 - 30px);
+}
+
+/* Horizion Card - Video  */
+.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video {
+    --others-image-text-tile-cover-size: 168px !important;
+    margin-top: 18px !important;
+    margin-bottom: 12px !important;
+    margin-left: 13px !important;
+    margin-right: 13px !important;
+}
+
+.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .title-wrap,
+.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .title,
+.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .subtitle,
+.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .extra-text {
+    width: 100% !important;
+}
+
+.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .cover {
+    width: calc(var(--others-image-text-tile-cover-size) * 0.88) !important;
+    height: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
 }
 </style>

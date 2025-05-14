@@ -466,7 +466,8 @@ onActivated(() => {
                     <FavoriteShareBtn :favorited="follow" 
                         actionText="关注" 
                         :leftAction="toggleFollow"
-                        :disabled="isLocalMusic(platform)" 
+                        :disabled="isLocalMusic(platform)"
+                        :hiddenShare="true" 
                         v-show="!isLocalMusic(platform)">
                     </FavoriteShareBtn>
                 </div>
@@ -491,7 +492,11 @@ onActivated(() => {
                     </PlayAddAllBtn>
                     <PlayAddAllBtn text="播放歌曲" :leftAction="playAllSongs" :rightAction="() => addAllSongs()"
                         v-show="computedPlayAllSongsBtnShow" class="spacing"></PlayAddAllBtn>
-                    <FavoriteShareBtn :favorited="follow" actionText="关注" :leftAction="toggleFollow">
+                    <FavoriteShareBtn 
+                        :favorited="follow" 
+                        actionText="关注" 
+                        :leftAction="toggleFollow"
+                        :hiddenShare="true" >
                     </FavoriteShareBtn>
                 </div>
             </div>

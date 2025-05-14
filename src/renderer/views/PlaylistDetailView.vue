@@ -312,7 +312,9 @@ onActivated(() => {
                 <div class="action">
                     <PlayAddAllBtn :leftAction="() => playAll()" :rightAction="() => addAll()" class="btn-spacing">
                     </PlayAddAllBtn>
-                    <FavoriteShareBtn :favorited="favorited" :leftAction="toggleFavorite">
+                    <FavoriteShareBtn :favorited="favorited" 
+                        :leftAction="toggleFavorite"
+                        :hiddenShare="true" >
                     </FavoriteShareBtn>
                 </div>
             </div>
@@ -367,7 +369,10 @@ onActivated(() => {
 #playlist-detail-view .header {
     display: flex;
     flex-direction: row;
+    --cover-size: 239px;
+    height: var(--cover-size);
     margin-bottom: 16px;
+    border-radius: var(--border-img-text-tile-border-radius);
 }
 
 #playlist-detail-view .header .right {
@@ -382,7 +387,6 @@ onActivated(() => {
 }
 
 #playlist-detail-view .header .title {
-    /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
     margin-bottom: 3px;
@@ -425,8 +429,8 @@ onActivated(() => {
 }
 
 #playlist-detail-view .header .cover {
-    width: 239px;
-    height: 239px;
+    width: var(--cover-size);
+    height: var(--cover-size);
     border-radius: var(--border-img-text-tile-border-radius);
     box-shadow: 0px 0px 1px #161616;
 }

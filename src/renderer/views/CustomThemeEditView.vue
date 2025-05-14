@@ -480,6 +480,7 @@ watch(workingCustomTheme, (nv, ov) => {
                                 :onChanged="setupContentLoadingMaskColor">
                             </ColorInputControl>
                         </div>
+                        <div class="tip-text">提示：图文控件风格 - H卡片背景颜色，暂时共用此项设置</div>
                         <div class="item">
                             <div class="name">列表项类光标悬停时背景颜色：</div>
                             <ColorInputControl label="列表项类光标悬停时背景颜色" :value="customTheme.content.listItemHoverBgColor"

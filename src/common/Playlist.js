@@ -22,11 +22,13 @@ export class Playlist {
     //歌曲
     static SONG_TYPE = 8
     //TODO
-    static ANCHOR_RADIO_ID_PREFIX = "ARP_"
+    static ANCHOR_RADIO_ID_PREFIX = 'ARP_'
     //自定义列表
-    static CUSTOM_ID_PREFIX = "CMP_"
+    static CUSTOM_ID_PREFIX = 'CMP_'
     //本地自建歌单
-    static LOCAL_PLAYLIST_ID_PREFIX = "LLP_"
+    static LOCAL_PLAYLIST_ID_PREFIX = 'LLP_'
+    //保存的播放队列
+    static SAVED_PLAYBACK_QUEUE_ID_PREFIX = 'PBQ_'
 
     constructor(id, platform, cover, title, url, about, data, total, type, playCount) {
         this.id = id
@@ -114,6 +116,12 @@ export class Playlist {
         return id.startsWith(Playlist.CUSTOM_ID_PREFIX)
             //下面写法为兼容旧版本数据
             || (id.length == 16 && !item.platform)
+    }
+
+    static isPlaybackQueueType(item){
+        if(!item) return false
+        return toTrimString(item.id)
+            .startsWith(Playlist.SAVED_PLAYBACK_QUEUE_ID_PREFIX)
     }
 
     static hasCover(playlist) {

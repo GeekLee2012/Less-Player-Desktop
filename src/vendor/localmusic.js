@@ -32,15 +32,19 @@ export class LocalMusic {
                 Object.assign(result, { url: (FILE_PREFIX + url) })
             }
             
-            //封面
-            const { isUseOnlineCoverEnable } = useSettingStore()
-            if (!Track.hasCover(track) || isUseOnlineCoverEnable) {
-                const onlineCandidate = await United.transferTrack(track, { isGetCover: true })
-                if (onlineCandidate) {
-                    const { cover } = onlineCandidate
-                    if (cover && track.cover != cover && !toTrimString(track.cover).startsWith('http')) {
-                        Object.assign(result, { cover })
-                        onTrackUpdated(result)
+            //检查网络状态
+            const isOnline = await isNetOnline()
+            if(isOnline) {
+                //在线封面
+                const { isUseOnlineCoverEnable } = useSettingStore()
+                if (!Track.hasCover(track) || isUseOnlineCoverEnable) {
+                    const onlineCandidate = await United.transferTrack(track, { isGetCover: true })
+                    if (onlineCandidate) {
+                        const { cover } = onlineCandidate
+                        if (cover && track.cover != cover && !toTrimString(track.cover).startsWith('http')) {
+                            Object.assign(result, { cover })
+                            onTrackUpdated(result)
+                        }
                     }
                 }
             }
@@ -86,7 +90,7 @@ export class LocalMusic {
             }
 
             if(isOnline) {
-                //封面，顺便更新一下
+                //在线封面，顺便检查更新一下
                 const { isUseOnlineCoverEnable } = useSettingStore()
                 if (!Track.hasCover(track) || isUseOnlineCoverEnable) {
                     if (!onlineCandidate || !Track.hasCover(onlineCandidate)) {

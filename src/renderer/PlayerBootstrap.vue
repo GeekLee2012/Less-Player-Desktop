@@ -23,6 +23,7 @@ import { Lyric } from '../common/Lyric';
 import { United } from '../vendor/united';
 import { useVideoPlayStore } from './store/videoPlayStore';
 import { useSoundEffectStore } from './store/soundEffectStore';
+import { usePlaybackQueueStore } from './store/playbackQueueStore';
 import { onEvents, emitEvents, offEvents } from '../common/EventBusWrapper';
 import { Video } from '../common/Video';
 
@@ -88,6 +89,7 @@ const { playVideoNow } = useVideoPlayStore()
 const { currentVideo, playingIndex: videoPlayingIndex, currentVideoPlayingItem 
 } = storeToRefs(useVideoPlayStore())
 const { setupSoundEffect } = useSoundEffectStore()
+const { getQueue, } = usePlaybackQueueStore()
 
 
 
@@ -103,7 +105,7 @@ const setPlayState = (value) => playState.value = value
 //const pendingPlay = ref(false)
 //const setPendingPlay = (value) => pendingPlay.value = value
 let desktopLyricShowState = false, trackRetry = 0
-const TRACK_MAX_RETRY = 1
+const TRACK_MAX_RETRY = 2
 const pendingBootstrapTrack = ref(null)
 const setPendingBootstrapTrack = (value) => pendingBootstrapTrack.value = value
 
@@ -183,19 +185,20 @@ const loadLyric = (track) => {
 
 const loadLyricFromUnited = (track) => {
     if (!track || !isCurrentTrack(track)) return
-    return United.transferTrack(track, { isGetLyric: true }).then(uResult => {
-            //再次确认，可能歌曲已经被切走
-            if (!isCurrentTrack(track)) return
-            //仍然无法获取，直接返回
-            if (!uResult) return notifyLyricLoaded(track)
-            //更新歌词
-            const { lyric, lyricRoma: roma, lyricTrans: trans, cover } = uResult
-            updateLyric(track, { lyric, roma, trans })
-            //顺便更新封面
-            if (Track.hasCover(uResult, isUseOnlineCoverEnable.value)) {
-                Object.assign(track, { cover })
-            }
-        }, error => notifyLyricLoaded(track))
+    return United.transferTrack(track, { isGetLyric: true }, () => !isCurrentTrack(track))
+            .then(uResult => {
+                //再次确认，可能歌曲已经被切走
+                if (!isCurrentTrack(track)) return
+                //仍然无法获取，直接返回
+                if (!uResult) return notifyLyricLoaded(track)
+                //更新歌词
+                const { lyric, lyricRoma: roma, lyricTrans: trans, cover } = uResult
+                updateLyric(track, { lyric, roma, trans })
+                //顺便更新封面
+                if (Track.hasCover(uResult, isUseOnlineCoverEnable.value)) {
+                    Object.assign(track, { cover })
+                }
+            }, error => notifyLyricLoaded(track))
 }
 
 const updateLyric = (track, { lyric, roma, trans, lyricEmbedded }) => {
@@ -272,7 +275,7 @@ const TRANSFRER_FAIL_MSG = '没有合适版本切换<br>即将为您播放下一
 //连跳计数器
 let autoSkipCnt = 0
 //重置连跳计数
-const resetAutoSkip = () => autoSkipCnt = 0
+const resetAutoSkip = () => (autoSkipCnt = 0)
 
 
 //提示失败并播放下一曲
@@ -285,7 +288,7 @@ const toastFailAndPlayNext = (track, msg, cnt) => {
     showFailToast(msg || _msg, () => {
         //重新确认当前歌曲
         if (isCurrentTrack(track)) playNextTrack()
-    }, 2233 + cnt * 100)
+    }, 2233 + cnt * 300)
 }
 
 //用户手动干预，即主动点击上/下一曲时，产生体验上的Bug
@@ -315,6 +318,7 @@ const handleUnplayableTrack = (track, msg) => {
 const bootstrapTrack = (track, options) => {
     const { noToast, keepCover } = (options || {})
     return new Promise(async (resolve, reject) => {
+        if(!isCurrentTrack(track)) return 
         if (!track) return reject('none')
         //FM电台
         if (Playlist.isFMRadioType(track) && Track.hasUrl(track)) {
@@ -326,7 +330,9 @@ const bootstrapTrack = (track, options) => {
         if (!vendor || !vendor.playDetail) return reject('noService')
         //播放相关数据
         const result = await vendor.playDetail(id, track)
+        if(!isCurrentTrack(track)) return 
         if (!result) return reject('noUrl')
+
         const { lyric, lyricTrans ,cover, artist, url } = result
         //覆盖设置url，音乐平台可能有失效机制，即url只在允许的时间内有效，而非永久性url
         if (Track.hasUrl(result)) Object.assign(track, { url })
@@ -339,6 +345,7 @@ const bootstrapTrack = (track, options) => {
         if (Track.hasLyricTrans(result)) {
             updateLyric(track, { trans: lyricTrans })
         }
+
         //更新封面
         if (Track.hasCover(result, isUseOnlineCoverEnable.value) && !keepCover) {
             Object.assign(track, { cover })
@@ -407,44 +414,39 @@ const addAndPlayTracks = (tracks, needReset, text, traceId) => {
 
 //重试次数
 const isTrackOverretry = () => (trackRetry >= TRACK_MAX_RETRY)
-const resetTrackRetry = () => trackRetry = 0
-const increaseTrackRetry = () => ++trackRetry
+const resetTrackRetry = () => (trackRetry = 0)
+const increaseTrackRetry = () => (++trackRetry)
 
 //播放错误时重试
-const onPlayerErrorRetry = ({ track, currentTime, radio, fallback }) => {
-    if (isDevEnv()) console.log({ track, currentTime, radio, fallback, trackRetry })
+const onPlayerErrorRetry = ({ track, currentTime, radio }) => {
+    if (isDevEnv()) console.log({ track, currentTime, radio, trackRetry })
     if (!track) return
+    //超过最大重试次数
+    if(isTrackOverretry()) return handleUnplayableTrack(track)
+    increaseTrackRetry()
 
     const { platform, duration } = track
+    if (isFreeFM(platform)) return handleUnplayableTrack(track)
     //本地歌曲，偶尔也会播放失败（比如文件被删、格式不支持等）
     if (isLocalMusic(platform) || isCloudStorage(platform)) {
         //最后一次尝试：切换为fallbackPlayer来播放
-        if(!fallback) return emitEvents('track-switchToFallback', track)
-        //全部尝试失败
-        return handleUnplayableTrack(track)
+        const eventName = (trackRetry > (TRACK_MAX_RETRY - 1) 
+            ? 'track-switchToFallback' : 'track-play')
+        return emitEvents(eventName, track)
     }
-    if (isFreeFM(platform)) return handleUnplayableTrack(track)
-    //尝试继续播放
-    if (isTrackOverretry()) { //超出最大重试次数
-        //最后一次尝试：切换为fallbackPlayer来播放
-        if(!fallback) return emitEvents('track-switchToFallback', track)
-        //全部尝试失败
-        return handleUnplayableTrack(track)
-    } else { //普通歌曲、广播电台
-        increaseTrackRetry()
-        //TODO 尝试恢复播放进度
-        if (duration > 0 && !radio) {
-            const percent = currentTime / duration
-            markTrackSeekPending(percent)
-        }
-        //再次检查确认，避免被强行重置url，导致数据异常无法播放
-        if (isLocalMusic(platform) || isFreeFM(platform) || isWebDav(platform)) return
+    //尝试继续播放 - 普通歌曲、广播电台 
+    //尝试恢复播放进度
+    if (duration > 0 && !radio) {
+        const percent = currentTime / duration
+        markTrackSeekPending(percent)
+    }
+    //再次检查确认，避免被强行重置url，导致数据异常无法播放
+    if (isLocalMusic(platform) || isFreeFM(platform) || isWebDav(platform)) return
 
-        //强行重置url，并尝试重新获取
-        if (!radio || Playlist.isFMRadioType(track)) track.url = ''
-        if (!radio) track.isCandidate = false
-        emitEvents('track-changed', track)
-    }
+    //强行重置url，并尝试重新获取
+    if (!radio || Playlist.isFMRadioType(track)) track.url = ''
+    if (!radio) track.isCandidate = false
+    emitEvents('track-changed', track)
 }
 
 /* 播放歌单 */
@@ -556,9 +558,10 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         }
         return
     } else if (Playlist.isNormalRadioType(playlist)) { //歌单电台
-        //提示前置，避免因网络卡顿导致用户多次请求
-        showToast(text || '即将为您播放电台')
-        playNextPlaylistRadioTrack(platform, id, null, traceId, playlist)
+        //提示前置，避免因网络卡顿导致用户多次请求（简约模式 - 随缘听）
+        showToast(text || '即将为您播放电台', () => {
+            playNextPlaylistRadioTrack(platform, id, null, traceId, playlist)
+        })
         return
     } else if (Playlist.isVideoType(playlist)) { //视频
         //const { detailUrl, } = playlist
@@ -584,11 +587,16 @@ const doPlayPlaylist = async (playlist, text, traceId) => {
         needReset = false
         text = '即将为您播放歌曲'
         playlist.data = [{ ...playlist }]
+    } else if(Playlist.isPlaybackQueueType(playlist)) {
+        isTracePlaylist = false
+        needReset = true
+        text = '即将为您播放队列'
+        playlist = getQueue(playlist.id)
     }
     //检查数据，再次确认
     if (!playlist || !playlist.data || playlist.data.length < 1) {
-        const failMsg = Playlist.isCustomType(playlist) ? '歌单里还没有歌曲'
-            : '获取歌单歌曲失败'
+        let failMsg = '获取歌单歌曲失败'
+        if(Playlist.isCustomType(playlist)) failMsg = '歌单里还没有歌曲'
         if (traceId && !isCurrentTraceId(traceId)) return
         return showFailToast(failMsg)
     }
@@ -663,7 +671,9 @@ const playNextPlaylistRadioTrack = async (platform, channel, track, traceId, pla
         }
         if (needReset && queueTracksSize.value > 0) {
             let ok = true
-            if (isShowDialogBeforeClearPlaybackQueue.value) ok = await showConfirm('播放电台歌单，需清空当前播放。确定要继续吗？')
+            if (isShowDialogBeforeClearPlaybackQueue.value) {
+                ok = await showConfirm('播放电台歌单，需清空当前播放。确定要继续吗？')
+            }
             if (!ok) return
             resetQueue()
         }
@@ -1702,7 +1712,7 @@ const eventsRegistration = {
             case PlayState.PLAY_ERROR:
                 setPlaying(false)
                 setLoading(false)
-                onPlayerErrorRetry({ track, currentTime, radio, fallback })
+                onPlayerErrorRetry({ track, currentTime, radio })
                 break
             default:
                 break
@@ -1718,6 +1728,8 @@ const eventsRegistration = {
             }
         }, async (reason) => {
             if (reason == 'noUrl' || reason == 'noService') {
+                if (!isCurrentTrack(track)) return
+                
                 const { platform } = track
                 if (!isVipTransferEnable.value || isLocalMusic(platform)
                     || Playlist.isFMRadioType(track)) {
@@ -1725,7 +1737,7 @@ const eventsRegistration = {
                     return
                 }
                 showFailToast(TRY_TRANSFRER_MSG)
-                const candidate = await United.transferTrack(track)
+                const candidate = await United.transferTrack(track, null, () => !isCurrentTrack(track))
                 if (!Track.hasUrl(candidate) && !Track.hasUrl(track)) {
                     handleUnplayableTrack(track, TRANSFRER_FAIL_MSG)
                     return
@@ -1748,13 +1760,11 @@ const eventsRegistration = {
         })
     },
     'track-play': track => {
-        //resetAutoSkip()
         const { platform } = track
         if(isLocalMusic(platform) || isCloudStorage(platform)) bootstrapTrack(track)
         traceRecentTrack(track)
-        //loadLyric(track)
     },
-    'track-state': ({ state, track, currentTime, fallback }) => {
+    'track-state': ({ state, track, currentTime }) => {
         //播放刚开始时，更新MediaSession
         const prevState = playState.value
         if (prevState <= PlayState.STARTED && state == PlayState.PLAYING) {
@@ -1788,7 +1798,7 @@ const eventsRegistration = {
             case PlayState.PLAY_ERROR:
                 setPlaying(false)
                 setLoading(false)
-                onPlayerErrorRetry({ track, currentTime, fallback })
+                onPlayerErrorRetry({ track, currentTime })
                 break
             default:
                 break
@@ -1813,6 +1823,7 @@ const eventsRegistration = {
         if(Playlist.isFMRadioType(track)) mmssDurationLeft.value = mmssCurrentTime.value
         //ipcRendererSend('app-setProgressBar', progressState.value || -1)
     },
+    'track-resetTrackRetry': () => resetTrackRetry(),
     'track-seekAction': ({ track, pos }) => {
         const { platform } = track
         const vendor = getVendor(platform)
@@ -1822,11 +1833,15 @@ const eventsRegistration = {
     'track-spectrumData': ({leftFreqData, leftFreqBinCount, rightFreqData,
         rightFreqBinCount, freqData, freqBinCount,
         sampleRate, analyser, leftChannelAnalyser, rightChannelAnalyser, }) => {
+        const isSimpleLayoutMode = isSimpleLayout.value
+        //简约布局、可视化播放页
+        if (!isSimpleLayoutMode && (!playingViewShow.value || playingViewThemeIndex.value != 1)) {
+            return setSpectrumParams(null)
+        }
         if (!currentTrack.value) return setSpectrumParams(null)
 
         const spectrumColor = getCurrentThemeHighlightColor()
         const canvasBgColor = getCurrentThemeContentBgColor()
-        const isSimpleLayoutMode = isSimpleLayout.value
         const isPlaying = playing.value
 
         setSpectrumParams({
@@ -1837,11 +1852,6 @@ const eventsRegistration = {
             spectrumColor, stroke: spectrumColor, canvasBgColor,
             isSimpleLayoutMode, isPlaying
         })
-
-        //简约布局、可视化播放页
-        if (!isSimpleLayoutMode && (!playingViewShow.value || playingViewThemeIndex.value != 1)) {
-            return setSpectrumParams(null)
-        }
         
         if (exVisualCanvasShow.value && !isSimpleLayoutMode) return
         drawCanvasSpectrum()
@@ -1937,7 +1947,7 @@ watch(theme, () => {
     postMessageToDesktopLryic('s-theme-apply', getCurrentTheme())
 }, { deep: true })
 
-watch(playingIndex, (nv, ov) => resetTrackRetry())
+watch(playingIndex, (nv, ov) => resetTrackRetry(), { immediate: true })
 watch(trackResourceToolViewShow, (nv, ov) => nv && hideAllCtxMenus())
 
 //播放器API

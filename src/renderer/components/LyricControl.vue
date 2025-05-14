@@ -9,7 +9,7 @@ import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import { PlayState } from '../../common/Constants';
-import { isDevEnv, smoothScroll, toMMssSSS, toMillis } from '../../common/Utils';
+import { isDevEnv, smoothScroll, toMMssSSS, toMillis, tryCallDefault } from '../../common/Utils';
 import { Lyric } from '../../common/Lyric';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
@@ -33,7 +33,8 @@ const { lyric, lyricTransActived, lyricRomaActived,
     isDndSaveEnable, isMiniLayout, isSimpleLayout, 
 } = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
-//const { currentTrack } = storeToRefs(usePlayStore())
+const { isCurrentTrack } = usePlayStore()
+
 
 const currentIndex = ref(-1)
 //const hasLyric = ref(false)
@@ -62,9 +63,10 @@ const setLyricExistState = (value) => lyricExistState.value = value
 const isLyricReady = () => lyricExistState.value == 1
 
 
-const renderAndScrollLyric = (secs) => {
+const renderAndScrollLyric = (secs, track) => {
     if (!isLyricReady()) return
     if (isSeeking.value) return
+    if(!isCurrentTrack(track)) return 
 
     const { offset: userOffset } = lyric.value
     const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
@@ -76,6 +78,8 @@ const renderAndScrollLyric = (secs) => {
 
     let index = -1, timeKey = null
     for (var i = 0; i < lines.length; i++) {
+        if(!isCurrentTrack(track)) return 
+
         timeKey = lines[i].getAttribute('timeKey')
         const lineTime = toMillis(timeKey)
         if (trackTime < (lineTime - millisAhead)) break
@@ -88,11 +92,13 @@ const renderAndScrollLyric = (secs) => {
     } else if(currentIndex.value != index && index >= 0) {
         hitCount = 0
     }
-
+    
     nextTick(() => {
-        setupLyricTitle()
-        setupLyricAral()
-        setupLyricLines()
+        if(!isCurrentTrack(track)) return 
+
+        setupLyricTitle(track)
+        setupLyricAral(track)
+        setupLyricLines(track)
     })
     
     if (index >= 0) setLyricCurrentIndex(index)
@@ -136,6 +142,8 @@ const renderAndScrollLyric = (secs) => {
     const adjustHeight = (lineHeight && lineHeight > 0) ? (lineHeight / 2) : 0
     const destScrollTop = lineOffsetTop - (clientHeight / 2 - offsetTop) + adjustHeight
 
+    if(!isCurrentTrack(track)) return 
+
     //懒得再计算相邻两句歌词之间的时间间隔了，暂时感觉不是很必要
     const frequency = getStateRefreshFrequency()
     const duration = 300 * frequency / 60
@@ -145,15 +153,15 @@ const renderAndScrollLyric = (secs) => {
     })
 }
 
-const safeRenderAndScrollLyric = (secs) => {
-    try {
-        renderAndScrollLyric(secs)
-    } catch (error) {
-        if (isDevEnv()) console.log(error)
-    }
+const safeRenderAndScrollLyric = (secs, track) => {
+    tryCallDefault(() => {
+        renderAndScrollLyric(secs, track)
+    })
 }
 
 const resetLyricState = (track, state) => {
+    if(!isCurrentTrack(track)) return 
+    
     //重置状态
     setLyricExistState(state >= -1 ? state : -1)
     setLyricData(Track.lyricData(track))
@@ -167,27 +175,6 @@ const resetLyricState = (track, state) => {
 //重新加载歌词
 const reloadLyricData = (track) => {
     if(!track) return
-    /*
-    let isExist = false
-    if (Track.hasLyric(track)) { //确认是否存在有效歌词
-        const lyricData = Track.lyricData(track)
-        let isValidLyric = true
-        if (lyricData.size <= 8) {
-            const linesIter = lyricData.values()
-            let line = linesIter.next()
-            while (!line.done) {
-                const lineText = line.value
-                isValidLyric = !(lineText.includes('纯音乐')
-                    || lineText.includes('暂无歌词')
-                    || lineText.includes('没有填词')
-                    || lineText.includes('没有歌词'))
-                if (!isValidLyric) break
-                line = linesIter.next()
-            }
-        }
-        isExist = isValidLyric
-    }
-    */
     let isExist = Track.hasLyric(track)
     
     //歌词存在，但需进一步确认是否有效
@@ -207,12 +194,14 @@ const reloadLyricData = (track) => {
     resetLyricState(track, isExist ? 1 : 0)
     //重新设置样式
     nextTick(() => {
-        //setupLyricLines()
-        setupLyricExtra()
-        safeRenderAndScrollLyric(currentTimeState.value, true)
-    })
-    //setTimeout(setupLyricLines, 300)
+        if(!isCurrentTrack(track)) return 
 
+        setupLyricExtra(track)
+        safeRenderAndScrollLyric(currentTimeState.value, track)
+       /*setupLyricTitle(track)
+        setupLyricAral(track)
+        setupLyricLines(track)*/
+    })
 }
 
 const onUserMouseWheel = (event) => {
@@ -245,7 +234,9 @@ const setLyricLineStyle = (line) => {
     line.style.fontWeight = isCurrent ? 'bold' : fontWeight
 }
 
-const setupLyricTitle = () => {
+const setupLyricTitle = (track) => {
+    if(!isCurrentTrack(track)) return 
+
     const { titleFontSize } = lyric.value
     const titleEls = document.querySelectorAll('.lyric-ctl .header .audio-title') || []
     titleEls.forEach(item => {
@@ -253,13 +244,16 @@ const setupLyricTitle = () => {
     })
 }
 
-const setupLyricAral = () => {
+const setupLyricAral = (track) => {
+    if(!isCurrentTrack(track)) return 
+
     const { aralFontSize } = lyric.value
     const arEls = document.querySelectorAll('.lyric-ctl .header .audio-artist .ar-ctl') || []
     arEls.forEach(el => {
         el.style.fontSize = `${aralFontSize}px`
     })
 
+    if(!isCurrentTrack(track)) return 
     const alEls = document.querySelectorAll('.lyric-ctl .header .audio-album .al-ctl') || []
     alEls.forEach(el => {
         el.style.fontSize = `${aralFontSize}px`
@@ -270,29 +264,36 @@ const setupLyricAral = () => {
     const scale = ratio.toFixed(2)
     const marginRight = Math.ceil(ratio) * 6
 
+    if(!isCurrentTrack(track)) return 
     const bEls = document.querySelectorAll('.lyric-ctl .header b') || []
     bEls.forEach(el => {
         el.style.fontSize = `${aralFontSize}px`
         el.style.marginRight = `${marginRight}px`
     })
 
+    if(!isCurrentTrack(track)) return 
     const arSvgEls = document.querySelectorAll('.lyric-ctl .audio-artist svg') || []
     arSvgEls.forEach(el => {
         el.style.setProperty('--aral-svg-transform', `scale(${scale})`)
         el.style.marginRight = `${marginRight}px`
     })
 
+    if(!isCurrentTrack(track)) return 
     const alSvgEls = document.querySelectorAll('.lyric-ctl .audio-album svg') || []
     alSvgEls.forEach(el => {
         el.style.setProperty('--aral-svg-transform', `scale(${scale})`)
         el.style.marginRight = `${marginRight}px`
     })
-
 }
 
-const setupLyricLines = () => {
+const setupLyricLines = (track) => {
+    if(!isCurrentTrack(track)) return 
+
     const lines = document.querySelectorAll('.lyric-ctl .center .line') || []
-    lines.forEach(line => setLyricLineStyle(line))
+    lines.forEach(line => {
+        if(!isCurrentTrack(track)) return 
+        setLyricLineStyle(line)
+    })
 }
 
 const setupLyricAlignment = () => {
@@ -309,7 +310,6 @@ const setupLyricAlignment = () => {
     if (albumEls) albumEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
     if (aralWrapEls) aralWrapEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
     if (noLyricEls) noLyricEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
-
 }
 
 const isHeaderVisible = () => (lyric.value.metaPos == 0 && !props.hiddenMeta)
@@ -372,10 +372,12 @@ const getExtraTimeKey = (mmssSSS, offset) => {
 }
 
 //歌词翻译、罗马发音
-const setupLyricExtra = () => {
+const setupLyricExtra = (track) => {
     const lines = document.querySelectorAll('.lyric-ctl .center .line') || []
     try {
         lines.forEach((line, index) => {
+            if(!isCurrentTrack(track)) return 
+
             const extraTextEl = line.querySelector('.extra-text')
             if (!extraTextEl) return
             //1、重置
@@ -393,6 +395,8 @@ const setupLyricExtra = () => {
             //目前来说，即使不优化，对性能方面影响也不算大
             const timeErrors = [0, 10, -10, 20, -20, 30, -30, 40, -40, 50, -50]
             for (var i = 0; i < timeErrors.length; i++) {
+                if(!isCurrentTrack(track)) return 
+
                 const timeError = timeErrors[i]
                 extraText = extraTextMap.get(getExtraTimeKey(timeKey, timeError))
                 if (extraText) break
@@ -454,7 +458,7 @@ const computedNoneArtistAlbumMeta = computed(() => {
 watch(() => props.currentTime, (nv, ov) => {
     //TODO 暂时简单处理，非可视状态直接返回
     if (!playingViewShow.value && !isMiniLayout.value && !isSimpleLayout.value) return
-    safeRenderAndScrollLyric(nv)
+    safeRenderAndScrollLyric(nv, props.track)
 }, { immediate: true })
 
 watch(() => props.track, (nv, ov) => loadTrackLyric(nv), { immediate: true })

@@ -1,12 +1,12 @@
 import { toRaw } from 'vue';
 import { Track } from "../common/Track";
 import { toTrimString, stringIncludesIgnoreCaseEscapeHtml, 
-    stringEqualsIgnoreCaseEscapeHtml, trimTextWithinBrackets, isDevEnv
+    stringEqualsIgnoreCaseEscapeHtml, trimTextWithinBrackets, 
+    isDevEnv, tryCallDefault,
  } from "../common/Utils";
 import { LESS_MAGIC_CODE } from "../common/Constants";
 import { usePlatformStore } from "../renderer/store/platformStore";
 import { Lyric } from "../common/Lyric";
-
 
 
 /** 统一平台，协调处理公共业务 */
@@ -132,7 +132,7 @@ export class United {
     }
 
     //互惠互助、互通有无、移花接木、同舟共济 ~
-    static transferTrack(track, options) {
+    static transferTrack(track, options, interruptFn) {
         return new Promise(async (resolve, reject) => {
             const result = { ...track }
 
@@ -151,6 +151,8 @@ export class United {
             
             const _options = { }
             for (var i = 0; i < filteredVendors.length; i++) {
+                if(tryCallDefault(interruptFn, track)) return resolve(result)
+                
                 const vendor = filteredVendors[i]
                 if(!vendor) continue
                 
@@ -160,6 +162,8 @@ export class United {
                         .catch(e => { if(isDevEnv()) console.log(e) })
                     Object.assign(result, { ...United.mergeTrackResult(result, ttResult) })
                 }
+
+                if(tryCallDefault(interruptFn, track)) return resolve(result)
 
                 if (United.isMetedataCompleted(result)) break
 
@@ -174,6 +178,8 @@ export class United {
                 const searchResult = await vendor.searchSongs(keyword, options || _options)
                     .catch(e => { if(isDevEnv()) console.log(e) })
                 if (!searchResult) continue
+                
+                if(tryCallDefault(interruptFn, track)) return resolve(result)
 
                 const { data: candidates } = searchResult
                 if (!candidates || candidates.length < 1) continue
@@ -182,6 +188,9 @@ export class United {
                     { ...track, tTitle, tArtistName }, 
                     candidates.slice(0, Math.min(candidates.length, 20)), 
                     options || _options)
+                
+                if(tryCallDefault(interruptFn, track)) return resolve(result)
+
                 Object.assign(result, { ...United.mergeTrackResult(result, ssResult) })
                 if (United.isMetedataCompleted(result)) break
             }
@@ -196,7 +205,7 @@ export class United {
     } 
 
     //TODO 匹配算法，后续再完善
-    static matchTrack(track, candidates, options) {
+    static matchTrack(track, candidates, options, interruptFn) {
         const ignore = {
             album: false,
             url: false,
@@ -217,6 +226,8 @@ export class United {
             const albumName = United.tranformAlbum(Track.albumName(track)) || LESS_MAGIC_CODE
             
             for (var i = 0; i < candidates.length; i++) {
+                if(tryCallDefault(interruptFn, track)) return resolve(result)
+
                 const candidate = candidates[i]
                 const { id: cId, title: cTitle,
                     platform: cPlatform, duration: cDuration } = candidate

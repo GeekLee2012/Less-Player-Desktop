@@ -7,6 +7,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
+import { usePlaybackQueueStore } from '../store/playbackQueueStore';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
@@ -23,7 +24,7 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 const { currentRoutePath, visitCommonRoute,
-    visitUserInfoEdit, visitCustomPlaylistCreate } = inject('appRoute')
+    visitUserInfoEdit, visitCustomPlaylistCreate, } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
 
 const tabs = [{
@@ -33,13 +34,19 @@ const tabs = [{
     hasSubTabs: true
 },
 {
-    code: 'custom-playlist',
+    code: 'custom-playlists',
     name: '创建的歌单',
     text: '0个歌单',
     hasSubTabs: false
 },
 {
-    code: 'favorite-artists',
+    code: 'saved-playbackQueues',
+    name: '播放队列',
+    text: '0个队列',
+    hasSubTabs: false
+},
+{
+    code: 'follow-artists',
     name: '关注的歌手',
     text: '0个歌手',
     hasSubTabs: false
@@ -66,7 +73,12 @@ const { removeAllFavorites, nextDecoration, resetDecoration, updateUser } = useU
 const { getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios } = storeToRefs(useRecentsStore())
 const { removeAllRecents } = useRecentsStore()
-const { isShowDialogBeforeClearRecents, isSingleLineAlbumTitleStyle } = storeToRefs(useSettingStore())
+const { isShowDialogBeforeClearRecents, isSingleLineAlbumTitleStyle,
+    isShowDialogBeforeClearPlaybackQueues
+ } = storeToRefs(useSettingStore())
+const { queueMetas } = storeToRefs(usePlaybackQueueStore())
+const { clearQueues } = usePlaybackQueueStore()
+
 
 const typeTabs = getPreferTypeTabs()
 const typeIcons = [
@@ -97,6 +109,12 @@ const back2TopBtnRef = ref(null)
 const singleLineTitleStyle = ref(false)
 const refreshId = ref(0)
 const setRefreshId = (value) => (refreshId.value = value)
+const isTabCodeEquals = (code) => (tabs[activeTab.value].code == code)
+const isFavoritesTab = () => (isTabCodeEquals('favorites'))
+const isCustomPlaylistsTab = () => (isTabCodeEquals('custom-playlists'))
+const isPlaybackQueuesTab = () => (isTabCodeEquals('saved-playbackQueues'))
+const isFollowArtistsTab = () => (isTabCodeEquals('follow-artists'))
+const isRecentsTab = () => (isTabCodeEquals('recents'))
 
 
 const visitTab = (index) => {
@@ -124,10 +142,13 @@ const switchTab = () => {
     currentTabView.value = null
     singleLineTitleStyle.value = false
     const platform = currentPlatformCode.value
-    if (activeTab.value == 1) {
+    if (isCustomPlaylistsTab()) {
         tabData.push(...getCustomPlaylists.value)
         currentTabView.value = CustomPlaylistListControl
-    } else if (activeTab.value == 2) {
+    } else if (isPlaybackQueuesTab()) {
+        tabData.push(...queueMetas.value)
+        currentTabView.value = PlaylistsControl
+    } else if (isFollowArtistsTab()) {
         tabData.push(...getFollowArtists.value(platform))
         currentTabView.value = ArtistListControl
     }
@@ -143,7 +164,7 @@ const setActiveTab = (index) => {
     activeTab.value = index
     subTabShow.value = tabs[activeTab.value].hasSubTabs
     if (isDiffTab) activeSubTab.value = 0
-    dataType.value = (index == 3) ? 5 : 2
+    dataType.value = isRecentsTab() ? 5 : 2
 }
 
 const visitSubTab = (index) => {
@@ -164,21 +185,21 @@ const switchSubTab = () => {
     const platform = currentPlatformCode.value
     const { code: typeCode } = typeTabs[activeSubTab.value]
     if (isAllSongsTab(typeCode)) {
-        if (activeTab.value == 0) tabData.push(...getFavoriteSongs.value(platform))
-        if (activeTab.value == 3) tabData.push(...getRecentSongs.value(platform))
+        if (isFavoritesTab()) tabData.push(...getFavoriteSongs.value(platform))
+        if (isRecentsTab()) tabData.push(...getRecentSongs.value(platform))
         currentTabView.value = SongListControl
     } else if (isPlaylistsTab(typeCode)) {
-        if (activeTab.value == 0) tabData.push(...getFavoritePlaylilsts.value(platform))
-        if (activeTab.value == 3) tabData.push(...getRecentPlaylilsts.value(platform))
+        if (isFavoritesTab()) tabData.push(...getFavoritePlaylilsts.value(platform))
+        if (isRecentsTab()) tabData.push(...getRecentPlaylilsts.value(platform))
         currentTabView.value = PlaylistsControl
     } else if (isAlbumsTab(typeCode)) {
-        if (activeTab.value == 0) tabData.push(...getFavoriteAlbums.value(platform))
-        if (activeTab.value == 3) tabData.push(...getRecentAlbums.value(platform))
+        if (isFavoritesTab()) tabData.push(...getFavoriteAlbums.value(platform))
+        if (isRecentsTab()) tabData.push(...getRecentAlbums.value(platform))
         singleLineTitleStyle.value = isSingleLineAlbumTitleStyle.value
         currentTabView.value = AlbumListControl
     } else if (isFMRadiosTab(typeCode)) {
-        if (activeTab.value == 0) tabData.push(...getFavoriteRadios.value(platform))
-        if (activeTab.value == 3) tabData.push(...getRecentRadios.value(platform))
+        if (isFavoritesTab()) tabData.push(...getFavoriteRadios.value(platform))
+        if (isRecentsTab()) tabData.push(...getRecentRadios.value(platform))
         currentTabView.value = PlaylistsControl
     }
     subTabTipText.value = typeTabs[activeSubTab.value].text.replace('0', tabData.length)
@@ -192,9 +213,13 @@ const visitBatchActionView = () => {
 }
 
 const batchRemoveAll = async () => {
-    const index = activeTab.value
-    //if(index == 0) clearFavorites()
-    if (index == 3) {
+    if (isPlaybackQueuesTab()) {
+        if (isShowDialogBeforeClearPlaybackQueues.value) {
+            const ok = await showConfirm('确定要清空播放队列吗？')
+            if(!ok) return 
+        }
+        clearPlaybackQueues()
+    } else if (isRecentsTab()) {
         if (isShowDialogBeforeClearRecents.value) {
             const ok = await showConfirm('确定要清空最近播放吗？')
             if(!ok) return 
@@ -226,11 +251,15 @@ const clearRecents = () => {
     showToast("最近播放已清空")
 }
 
+const clearPlaybackQueues = () => {
+    clearQueues()
+    showToast("播放队列已清空")
+    refresh(true)
+}
+
 const refresh = (newMode) => {
     visitTab(activeTab.value)
     if(newMode) setRefreshId(randomTextWithinAlphabetNums(8))
-    //TODO
-    //cleanUpAllSongs()
 }
 
 const isAvailableSongTab = () => {
@@ -262,7 +291,6 @@ const scrollToLoad = () => {
     hideAllCtxMenus()
 }
 
-//TODO
 const onScroll = () => {
     scrollToLoad()
 }
@@ -322,8 +350,7 @@ watch(currentPlatformCode, (nv, ov) => {
 const eventsRegistration = {
     'userHome-refresh': (args) => {
         const { scope, action } = args || {}
-        const isRecentsTab = (activeTab.value == 3)
-        if(scope == 'recents' && !isRecentsTab) return
+        if(scope == 'recents' && !isRecentsTab()) return
         
         refresh(true)
     },
@@ -373,13 +400,19 @@ onActivated(() => {
                 </div>
                 <div class="about" v-html="getUserAbout"></div>
                 <div class="action">
-                    <PlayAddAllBtn v-show="isAvailableSongTab()" class="spacing" :leftAction="playAllSongs"
+                    <PlayAddAllBtn class="spacing" 
+                        v-show="isAvailableSongTab()" 
+                        :leftAction="playAllSongs"
                         :rightAction="addAllSongs">
                     </PlayAddAllBtn>
-                    <CreatePlaylistBtn :leftAction="visitCustomPlaylistCreate" class="spacing">
+                    <CreatePlaylistBtn class="spacing" 
+                        :leftAction="visitCustomPlaylistCreate" >
                     </CreatePlaylistBtn>
-                    <BatchActionBtn v-show="activeTab == 0 || activeTab == 3" class="spacing"
-                        :deleteBtn="activeTab == 3" :leftAction="visitBatchActionView" :rightAction="batchRemoveAll">
+                    <BatchActionBtn class="spacing" 
+                        v-show="isFavoritesTab() || isPlaybackQueuesTab() || isRecentsTab()" 
+                        :deleteBtn="isRecentsTab()" 
+                        :leftAction="visitBatchActionView" 
+                        :rightAction="batchRemoveAll">
                     </BatchActionBtn>
                 </div>
             </div>

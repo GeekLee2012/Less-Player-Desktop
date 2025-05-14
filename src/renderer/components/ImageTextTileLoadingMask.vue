@@ -76,17 +76,6 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
     height: 66px;
 }
 
-.tiles-card-horizion-loading-mask .tile {
-    --others-image-text-tile-cover-size: 168px;
-    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio));
-    margin-top: 18px !important;
-    margin-bottom: 10px !important;
-    height: auto !important;
-}
-
-.tiles-card-horizion-loading-mask .tile .cover {
-    height: 151px !important;
-}
 
 .tiles-video-loading-mask .tile {
     margin: 20px 15px;
@@ -107,6 +96,23 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
     margin-bottom: 25px;
 }
 
+.tiles-card-horizion-loading-mask {
+    --others-image-text-tile-cover-size: 168px;
+}
+
+.tiles-card-horizion-loading-mask .tile {
+    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio));
+    margin-top: 18px !important;
+    margin-bottom: 12px !important;
+    margin-left: 13px !important;
+    margin-right: 13px !important;
+    height: auto !important;
+}
+
+.tiles-card-horizion-loading-mask .tile .cover {
+    height: 151px !important;
+}
+
 /* Mini NavBar Mode */
 .mini-navbar-mode .tiles-loading-mask .tile {
     margin-top: 18px;
@@ -122,5 +128,23 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
 .mini-navbar-mode .tiles-video-loading-mask .tile {
     margin: 20px 15px;
     width: calc(var(--others-image-text-tile-cover-size) * 1.24);
+}
+
+
+.mini-navbar-mode .tiles-card-horizion-loading-mask {
+    --others-image-text-tile-cover-size: 168px;
+}
+
+.mini-navbar-mode .tiles-card-horizion-loading-mask .tile {
+    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio));
+    margin-top: 18px !important;
+    margin-bottom: 12px !important;
+    margin-left: 13px !important;
+    margin-right: 13px !important;
+    height: auto !important;
+}
+
+.mini-navbar-mode .tiles-card-horizion-loading-mask .tile .cover {
+    height: 151px !important;
 }
 </style>

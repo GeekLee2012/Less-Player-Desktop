@@ -7,7 +7,7 @@ export default {
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { inject, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue';
+import { computed, inject, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue';
 import Mousetrap from 'mousetrap';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlatformStore } from '../store/platformStore';
@@ -17,6 +17,7 @@ import { useRecentsStore } from '../store/recentsStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { useFreeFMStore } from '../store/freeFMStore';
 import { useSettingStore } from '../store/settingStore';
+import { usePlaybackQueueStore } from '../store/playbackQueueStore';
 import AlbumListControl from '../components/AlbumListControl.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import SongListControl from '../components/SongListControl.vue';
@@ -60,6 +61,8 @@ const { getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios } = storeToRefs(useRecentsStore())
 const { removeRecentSong, removeRecentPlaylist,
     removeRecentAlbum, removeRecentRadio, } = useRecentsStore()
+const { queueMetas } = storeToRefs(usePlaybackQueueStore())
+const { removeQueue } = usePlaybackQueueStore()
 
 
 const isFavorites = () => props.source == "favorites"
@@ -68,6 +71,7 @@ const isCustomPlaylist = () => props.source == "custom"
 const isLocalMusic = () => props.source == "local"
 const isFreeFM = () => props.source == "freefm"
 const isPlaybackQueue = () => props.source == "playbackQueue"
+const isSavedPlaybackQueues = () => props.source == "saved-playbackQueues"
 
 const typeTabs = getPreferTypeTabs()
 const activeTabCode = () => (typeTabs[activeTab.value].code)
@@ -122,6 +126,9 @@ const updateTitle = () => {
     if (isPlaybackQueue()) {
         text = "当前播放"
     }
+    if (isSavedPlaybackQueues()) {
+        text = "播放队列"
+    }
     title.value = text
     subtitle.value = subtext
 }
@@ -134,12 +141,14 @@ const isTabsVisible = (tab, index) => {
     if (isLocalMusic() && props.id === '0' && index == 1) return true
     if (isFreeFM() && props.id === '0' && index == 3) return true
     if (isPlaybackQueue() && index == 0) return true
+    if (isSavedPlaybackQueues() && index == 1) return true
     return false
 }
 
 const getFirstVisibleTabIndex = () => {
     if (isLocalMusic() && props.id === '0') return 1
     if (isFreeFM()) return 3
+    if (isSavedPlaybackQueues()) return 1
     return 0
 }
 
@@ -196,7 +205,9 @@ const resetTab = () => {
 }
 
 const updateTipText = () => {
-    tabTipText.value = typeTabs[activeTab.value].ctext.replace('0', checkedData.length)
+    let tipText = typeTabs[activeTab.value].ctext.replace('0', checkedData.length)
+    if(isSavedPlaybackQueues()) tipText = tipText.replace('歌单', '队列')
+    tabTipText.value = tipText
 }
 
 const switchTab = () => {
@@ -264,6 +275,15 @@ const switchTab = () => {
                 exportBtn: true
             })
             tabData.push(...filterByTitleWithKeyword(localPlaylists.value))
+        }
+        if (isSavedPlaybackQueues()) {
+            Object.assign(actionShowCtl, {
+                playBtn: false,
+                addToQueueBtn: false,
+                deleteBtn: true,
+                exportBtn: false
+            })
+            tabData.push(...filterByTitleWithKeyword(queueMetas.value))
         }
         currentTabView.value = PlaylistsControl
     } else if (isAlbumTab()) { //专辑
@@ -557,6 +577,7 @@ const removeChecked = async () => {
         if (isFavorites()) deleteFn = removeFavoritePlaylist
         if (isRecents()) deleteFn = removeRecentPlaylist
         if (isLocalMusic()) deleteFn = removeLocalPlaylist
+        if (isSavedPlaybackQueues()) deleteFn = removeQueue
     } else if (isAlbumTab()) {
         if (isFavorites()) deleteFn = removeFavoriteAlbum
         if (isRecents()) deleteFn = removeRecentAlbum
@@ -683,6 +704,13 @@ const updateKeywordAndRefreshContent = (keyword) => {
     refreshContent()
 }
 
+const computedTabName = computed(() => {
+    return (tab) => {
+        if(isSavedPlaybackQueues()) return '队列'
+        return tab.name
+    }
+})
+
 
 
 /* 生命周期、监听 */
@@ -718,7 +746,7 @@ watch([currentPlatformCode], () => refreshContent())
             <div class="tabs">
                 <span class="tab" v-for="(tab, index) in typeTabs"
                     :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
-                    @click="visitTab(index)" v-show="isTabsVisible(tab, index)" v-html="tab.name">
+                    @click="visitTab(index)" v-show="isTabsVisible(tab, index)" v-html="computedTabName(tab)">
                 </span>
                 <SearchBarExclusiveModeControl class="search-wrap" v-show="isSearchForBatchActionShow"
                     :onKeywordChanged="updateKeywordAndRefreshContent" :checked="true">

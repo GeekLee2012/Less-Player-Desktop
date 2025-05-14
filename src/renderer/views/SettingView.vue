@@ -90,6 +90,7 @@ const { setThemeIndex,
     toggleMiniNavBarMode,
     toggleCustomPlaylistsShow,
     toggleFavoritePlaylistsShow,
+    toggleSavedPlaybackQueuesShow,
     toggleFollowArtistsShow,
     toggleKeysGlobal,
     updateBlackHole,
@@ -112,6 +113,7 @@ const { setThemeIndex,
     setDndSavePath,
     toggleSingleLineAlbumTitleStyle,
     toggleSingleLineRadioTitleStyle,
+    toggleRadioTileTitleClickPlay,
     setStateRefreshFrequency,
     setSpectrumRefreshFrequency,
     togglePlaybackQueueBtnIconMode,
@@ -121,6 +123,7 @@ const { setThemeIndex,
     togglePlaybackQueueHistoryBtnShow,
     togglePlaybackQueueMvBtnShow,
     togglePlaybackQueueBatchActionBtnShow,
+    togglePlaybackQueueSaveBtnShow,
     toggleHightlightCtxMenuItem,
     toggleUseOnlineCover,
     toggleUseDndForCreateLocalPlaylist,
@@ -150,6 +153,8 @@ const { setThemeIndex,
     toggleShowDialogBeforeVisitPluginRepository,
     toggleShowDialogBeforeDeletePlugins,
     toggleShowDialogBeforeSuspiciousZoom,
+    toggleShowDialogBeforeDeletePlaybackQueue,
+    toggleShowDialogBeforeClearPlaybackQueues,
     toggleCheckPreReleaseVersion,
     togglUpdatesHintShow,
     toggleModulesSettingShortcut,
@@ -663,12 +668,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="cate-name">通用</span>
                 <div class="content">
                     <div class="tip-text">提示：当前应用的输入框，按下Enter键生效，或光标焦点离开后自动生效</div>
-                    <div class="titled-toggle-ctl-w258">
+                    <div class="titled-w258">
                         <span class="cate-subtitle">设置页启用导航按钮：</span>
                         <ToggleControl @click="toggleSettingViewNavbarShow" :value="common.settingViewNavbarShow">
                         </ToggleControl>
                     </div>
-                    <div class="titled-toggle-ctl-w258">
+                    <div class="titled-w258">
                         <span class="cate-subtitle">设置页开关选项标题联动：</span>
                         <ToggleControl @click="toggleToggleCtlTitleActionEnable" :value="common.toggleCtlTitleActionEnable">
                         </ToggleControl>
@@ -726,21 +731,21 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </div>
                     </div>
                     <div class="window-ctl">
-                        <span class="sec-title">窗口按钮风格：</span>
+                        <span class="sec-title cate-subtitle">窗口按钮风格：</span>
                         <span v-for="(item, index) in ['自动', 'macOS', 'Windows']" class="quality-item"
                             :class="{ active: index == common.winCtlStyle, 'first-item': index == 0 }" @click="setWindowCtlStyle(index)">
                             {{ item }}
                         </span>
                     </div>
                     <div class="border-radius-ctl">
-                        <span class="sec-title">预设圆角风格：</span>
+                        <span class="sec-title cate-subtitle">预设圆角风格：</span>
                         <span v-for="(item, index) in ['自动', 'macOS', 'Windows']" class="quality-item"
                             :class="{ active: index == common.borderRadiusCtlStyle, 'first-item': index == 0 }" @click="setBorderRadiusCtlStyle(index)">
                             {{ item }}
                         </span>
                     </div>
                     <div class="border-radius-ctl">
-                        <span class="sec-title">圆角自定义：</span>
+                        <span class="sec-title cate-subtitle">圆角自定义：</span>
                         <SvgTextButton text="前往设置" :leftAction="toggleCustomAppBorderRadiusViewShow">
                         </SvgTextButton>
                     </div>
@@ -753,7 +758,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                             step="1" @keydown.enter="updateWinCustomShadowSize" @focusout="updateWinCustomShadowSize" />
                     </div>
                     <div class="tip-text">提示：当在非主屏幕显示当前应用时，请关闭当前选项</div>
-                    <div class="titled-toggle-ctl-w258">
+                    <div class="titled-w258">
                         <span class="cate-subtitle">窗口在主屏幕严格居中显示：</span>
                         <ToggleControl @click="toggleUseWinCenterStrict" :value="common.useWinCenterStrict">
                         </ToggleControl>
@@ -784,8 +789,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </option>
                         </datalist>
                     </div>
-                    <div class="titled-toggle-ctl-w258">
-                        <span class="cate-subtitle">高亮字体自动加粗（非全部）：</span>
+                    <div class="titled-w258">
+                        <span class="cate-subtitle">高亮字体自动加粗：</span>
                         <ToggleControl @click="toggleFontAutoWeight" :value="common.fontAutoWeight">
                         </ToggleControl>
                     </div>
@@ -794,39 +799,39 @@ onUnmounted(() => offEvents(eventsRegistration))
                     设置变更前，已加载好的图片，在设置变更后，无法对其产生任何效果
                     </div>
                     <div>
-                        <span class="sec-title">图片清晰度：</span>
+                        <span class="sec-title cate-subtitle">图片清晰度：</span>
                         <span v-for="(item, index) in allImageQualities()" class="quality-item"
                             :class="{ active: index == common.imgQualityIndex, 'first-item': index == 0 }" @click="setImageQualityIndex(index)">
                             {{ item.name }}
                         </span>
                     </div>
-                    <div class="tip-text">提示：图文控件风格，适用于歌单、专辑、歌手、电台等预览控件</div>
-                    <div class="max-content-mr-36">
-                        <span class="cate-subtitle">图文控件风格：</span>
+                    <div class="tip-text">提示：图文控件风格，适用于歌单、专辑、歌手、电台、视频等预览控件</div>
+                    <div>
+                        <span class="sec-title cate-subtitle">图文控件风格：</span>
                         <span v-for="(item, index) in ['普通', '卡片', 'H卡片']" class="quality-item"
                             :class="{ active: index == common.imageTextTileStyleIndex, 'first-item': index == 0 }"
                             @click="setImageTextTileStyleIndex(index)">
                             {{ item }}
                         </span>
                     </div>
-                    <div class="titled-toggle-ctl-w258" v-show="isUseCardStyleImageTextTile || isUseHCardStyleImageTextTile">
+                    <div class="titled-w258" v-show="isUseCardStyleImageTextTile || isUseHCardStyleImageTextTile">
                         <span class="cate-subtitle">卡片显示底部阴影：</span>
                         <ToggleControl @click="toggleUseShadowForCardStyleTile" :value="common.shadowForCardStyleTile">
                         </ToggleControl>
                         <div class="tip-text spacing3">提示：仅支持部分主题</div>
                     </div>
-                    <div class="titled-toggle-ctl-w258" v-show="isUseHCardStyleImageTextTile">
+                    <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
                         <span class="cate-subtitle">H卡片启用反转布局：</span>
                         <ToggleControl @click="toggleUseReversedForHCardStyleTile" :value="common.reversedForHCardStyleTile">
                         </ToggleControl>
                     </div>
-                    <div class="titled-toggle-ctl-w258" v-show="isUseHCardStyleImageTextTile">
+                    <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
                         <span class="cate-subtitle">H卡片启用小图标按钮：</span>
                         <ToggleControl @click="toggleUseSmallIconForHCardStyleTile" :value="common.smallIconForHCardStyleTile">
                         </ToggleControl>
                     </div>
-                    <div class="max-content-mr-36">
-                        <span class="cate-subtitle">歌曲控件风格：</span>
+                    <div>
+                        <span class="sec-title cate-subtitle">歌曲控件风格：</span>
                         <span v-for="(item, index) in ['经典', '主流']" class="quality-item"
                             :class="{ active: index == common.songItemStyleIndex, 'first-item': index == 0 }"
                             @click="setSongItemStyleIndex(index)">
@@ -834,7 +839,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </span>
                     </div>
                     <div>
-                        <span class="sec-title cate-sutitle">分页风格：</span>
+                        <span class="sec-title cate-subtitle">列表分页风格：</span>
                         <span v-for="(item, index) in ['普通', '瀑布流']" class="quality-item"
                             :class="{ active: index == common.paginationStyleIndex, 'first-item': index == 0 }"
                             @click="setPaginationStyleIndex(index)">
@@ -842,12 +847,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </span>
                     </div>
                     <div>
-                        <span class="sec-title cate-sutitle">功能管理：</span>
+                        <span class="sec-title cate-subtitle">功能管理：</span>
                         <SvgTextButton text="前往管理" :leftAction="visitModulesSetting">
                         </SvgTextButton>
                     </div>
                     <div class="last">
-                        <span class="sec-title cate-sutitle">插件管理：</span>
+                        <span class="sec-title cate-subtitle">插件管理：</span>
                         <SvgTextButton text="前往管理" :leftAction="visitPlugins">
                         </SvgTextButton>
                     </div>
@@ -961,6 +966,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <div class="tip-text spacing">提示：仅支持自由FM的图文控件</div>
                     </div>
                     <div>
+                        <span class="cate-subtitle">电台控件标题单击播放：</span>
+                        <ToggleControl @click="toggleRadioTileTitleClickPlay" :value="track.radioTileTitleClickPlay">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">当前播放列表自动定位：</span>
                         <ToggleControl @click="togglePlaybackQueueAutoPositionOnShow"
                             :value="track.playbackQueueAutoPositionOnShow">
@@ -992,6 +1002,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">当前播放列表批量按钮：</span>
                         <ToggleControl @click="togglePlaybackQueueBatchActionBtnShow"
                             :value="track.playbackQueueBatchActionBtnShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">当前播放列表保存按钮：</span>
+                        <ToggleControl @click="togglePlaybackQueueSaveBtnShow"
+                            :value="track.playbackQueueSaveBtnShow">
                         </ToggleControl>
                     </div>
                     <div>
@@ -1156,57 +1172,57 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <br>当文字（高亮）颜色、桌面歌词背景颜色相同时，仅在锁定状态下，才能看到文字效果
                     </div>
                     <div>
-                        <span class="sec-title">字体大小：</span>
+                        <span class="sec-title cate-subtitle">歌词字体大小：</span>
                         <input type="number" :value="desktopLyric.fontSize" placeholder="10-365，默认23" min="10" max="365"
                             step="0.1" @keydown.enter="updateDesktopLyricFontSize" @focusout="updateDesktopLyricFontSize" />
                     </div>
                     <div>
-                        <span class="sec-title">文字颜色：</span>
+                        <span class="sec-title cate-subtitle">歌词文字颜色：</span>
                         <ColorInputControl label="文字颜色" :value="desktopLyric.color" :colorMode="true" :onChanged="setDesktopLyricColor">
                         </ColorInputControl>
                     </div>
                     <div>
-                        <span class="sec-title">文字高亮颜色：</span>
+                        <span class="sec-title cate-subtitle">歌词高亮颜色：</span>
                         <ColorInputControl label="文字高亮颜色" :value="desktopLyric.hlColor" :onChanged="setDesktopLyricHighlightColor">
                         </ColorInputControl>
                     </div>
                     <div>
-                        <span class="sec-title">翻译高亮颜色：</span>
+                        <span class="sec-title cate-subtitle">翻译高亮颜色：</span>
                         <ColorInputControl label="翻译高亮颜色" :value="desktopLyric.extraTextHlColor" :onChanged="setDesktopLyricExtraTextHighlightColor">
                         </ColorInputControl>
                     </div>
                     <div>
-                        <span class="sec-title">行间距：</span>
+                        <span class="sec-title cate-subtitle">歌词行间距：</span>
                         <input type="number" :value="desktopLyric.lineSpacing" placeholder="0-1024，默认23" min="0" max="1024"
                             step="1" @keydown.enter="updateDesktopLyricLineSpacing"
                             @focusout="updateDesktopLyricLineSpacing" />
                     </div>
-                    <div class="max-content-mr-36">
-                        <span class="cate-subtitle">文字方向：</span>
+                    <div>
+                        <span class="sec-title cate-subtitle">歌词文字方向：</span>
                         <span v-for="(item, index) in ['横屏', '竖屏']" class="quality-item"
                             :class="{ active: index === desktopLyric.textDirection, 'first-item': index == 0 }"
                             @click="setDesktopLyricTextDirection(index)">
                             {{ item }}
                         </span>
                     </div>
-                    <div class="max-content-mr-36" v-show="desktopLyric.textDirection == 0">
-                        <span class="cate-subtitle">对齐方式：</span>
+                    <div v-show="desktopLyric.textDirection == 0">
+                        <span class="sec-title cate-subtitle">歌词对齐方式：</span>
                         <span v-for="(item, index) in ['左对齐', '居中', '右对齐', '左、右对齐']" class="quality-item"
                             v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment, 'first-item': index == 0 }"
                             @click="setDesktopLyricAlignment(index)">
                             {{ item }}
                         </span>
                     </div>
-                    <div class="max-content-mr-36" v-show="desktopLyric.textDirection == 1">
-                        <span class="cate-subtitle">对齐方式：</span>
+                    <div v-show="desktopLyric.textDirection == 1">
+                        <span class="sec-title cate-subtitle">歌词对齐方式：</span>
                         <span v-for="(item, index) in ['上对齐', '居中', '下对齐', '上、下对齐']" class="quality-item"
                             v-show="showDeskLyricAlignItem(index)" :class="{ active: index === desktopLyric.alignment, 'first-item': index == 0 }"
                             @click="setDesktopLyricAlignment(index)">
                             {{ item }}
                         </span>
                     </div>
-                    <div class="max-content-mr-36" >
-                        <span class="cate-subtitle">显示模式：</span>
+                    <div>
+                        <span class="sec-title cate-subtitle">歌词显示模式：</span>
                         <span v-for="(item, index) in ['单行', '双行', '全部']" class="quality-item"
                             :class="{ active: index === desktopLyric.layoutMode, 'first-item': index == 0 }"
                             @click="setDesktopLyricLayoutMode(index)">
@@ -1215,7 +1231,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </div>
                     <div class="tip-text">提示：开启时，跟随显示模式，自动调整为对应默认的大小</div>
                     <div class="last">
-                        <span class="cate-subtitle">窗口自动调整大小：</span>
+                        <span class="sec-title cate-subtitle">窗口自适应大小：</span>
                         <ToggleControl @click="toggleDesktopLyricAutoSize" :value="desktopLyric.autoSize">
                         </ToggleControl>
                     </div>
@@ -1386,10 +1402,16 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">迷你模式：</span>
                         <ToggleControl @click="toggleMiniNavBarMode" :value="navigation.miniNavBarMode">
                         </ToggleControl>
+                        <div class="tip-text spacing">提示：试点击左侧导航的应用Logo</div>
                     </div>
                     <div>
                         <span class="cate-subtitle">创建的歌单：</span>
                         <ToggleControl @click="toggleCustomPlaylistsShow" :value="navigation.customPlaylistsShow">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">播放队列：</span>
+                        <ToggleControl @click="toggleSavedPlaybackQueuesShow" :value="navigation.savedPlaybackQueuesShow">
                         </ToggleControl>
                     </div>
                     <div>
@@ -1519,6 +1541,18 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">窗口缩放（偏大 / 小）：</span>
                         <ToggleControl @click="toggleShowDialogBeforeSuspiciousZoom"
                             :value="dialog.suspiciousZoom">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">删除播放队列：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeDeletePlaybackQueue"
+                            :value="dialog.deletePlaybackQueue">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">清空全部播放队列：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeClearPlaybackQueues"
+                            :value="dialog.clearPlaybackQueues">
                         </ToggleControl>
                     </div>
                     <div class="last">
@@ -2258,10 +2292,10 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #setting-view .common .content .sec-title {
-    width: 128px;
+    width: 136px;
 }
 
-#setting-view .titled-toggle-ctl-w258 .cate-subtitle {
+#setting-view .titled-w258 .cate-subtitle {
     width: 258px !important;
 }
 

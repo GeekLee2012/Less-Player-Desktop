@@ -191,7 +191,7 @@ onMounted(() => loadCustomPlaylist())
             <div class="right">
                 <div class="form-row">
                     <div>
-                        <span>歌单名</span>
+                        <span>歌单名称</span>
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">

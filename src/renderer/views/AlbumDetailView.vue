@@ -310,8 +310,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </div>
                 <div class="action">
                     <PlayAddAllBtn :leftAction="playAll" :rightAction="() => addAll()" class="spacing"></PlayAddAllBtn>
-                    <FavoriteShareBtn :favorited="favorited" :leftAction="toggleFavorite" class="spacing"
-                        :disabled="isLocalMusic(platform)" v-show="!isLocalMusic(platform)">
+                    <FavoriteShareBtn class="spacing"
+                        :favorited="favorited" 
+                        :leftAction="toggleFavorite" 
+                        :disabled="isLocalMusic(platform)" 
+                        :hiddenShare="true"
+                        v-show="!isLocalMusic(platform)">
                     </FavoriteShareBtn>
                 </div>
             </div>

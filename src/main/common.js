@@ -505,30 +505,27 @@ async function parseEmbeddedLyricFromFile(file) {
     if (!statResult) return null
 
     const metadata = await MusicMetadata.parseFile(file, { duration: true })
-    let lyricText = null
     try {
         if (metadata.common) {
             const { lyrics } = metadata.common
             //内嵌歌词
-            if (lyrics && lyrics.length > 0) lyricText = lyrics[0]
+            if (lyrics && lyrics.length > 0) return lyrics[0]
         }
-
+        
         //内嵌歌词
-        if (metadata.native && !lyricText) {
+        if (metadata.native) {
             const ID3v23 = metadata.native['ID3v2.3']
             for (var i in ID3v23) {
                 const { id, value } = ID3v23[i]
-                if (id === 'USLT') { //Unsynchronised Lyrics
-                    lyricText = value.text
-                    break
-                }
-                //Synchronised Lyrics暂不支持
+                //Unsynchronised Lyrics
+                if (id === 'USLT') return value.text
+                //暂不支持：Synchronised Lyrics
             }
         }
     } catch (error) {
         console.log(error)
     }
-    return lyricText
+    return null
 }
 
 function readBufferSync(file, encoding) {

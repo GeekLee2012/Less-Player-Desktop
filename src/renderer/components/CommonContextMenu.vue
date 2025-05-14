@@ -555,6 +555,10 @@ const initCommonCtxMenu = ({ dataType, actionType }) => {
             MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack, MenuItems.showInFolder,
             MenuItems.sp, MenuItems.removeFromLocal,]
             break;
+        case 12: //我的主页 - 播放队列 - 详情
+            data = [MenuItems.play, MenuItems.playLater, MenuItems.searchTrackResource,
+            MenuItems.sp, MenuItems.visitArtist, MenuItems.visitAlbum, MenuItems.visitTrack, ]
+            break;
     }
     doInit(data)
 }

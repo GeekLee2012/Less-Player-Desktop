@@ -7,7 +7,7 @@ const excludes = ['LocalMusicView', 'CustomPlaylistEditView',
     'FreeVideoEditView', 'WebDavSessionEditView',
     'WebDavSessionDetailView', 'NavidromeSessionEditView',
     'JellyfinSessionEditView', 'GenreDetailView', 
-    'EmbySessionEditView',]
+    'EmbySessionEditView', 'SavedPlaybackQueueEditView']
 
 /*
 const { visitPlaylistSquare, visitLocalMusic } = inject('appRoute')

@@ -11,8 +11,8 @@ import { FILE_SCHEME } from '../../common/Constants';
 
 
 const { visitPlaylist, visitFreeFMEdit, visitVideoDetail, 
-    visitGenreDetail, visitAlbum } = inject('appRoute')
-const { playPlaylist, favorPlaylist } = inject('player')
+    visitGenreDetail, visitAlbum, visitPlaybackQueue } = inject('appRoute')
+const { playPlaylist, favorPlaylist, addFmRadioToQueue } = inject('player')
 
 const props = defineProps({
     data: Array,
@@ -39,7 +39,7 @@ const props = defineProps({
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
-const { isPlayCountShow,  } = storeToRefs(useSettingStore())
+const { isPlayCountShow, isRadioTileTitleClickPlay, } = storeToRefs(useSettingStore())
 
 const visitItem = (item) => {
     const { checkbox } = props
@@ -66,6 +66,8 @@ const visitItem = (item) => {
         visitGenreDetail(platform, id)
     } else if (Playlist.isAlbumType(item)) {
         visitAlbum({ platform, id, data: item })
+    } else if (Playlist.isPlaybackQueueType(item)) {
+        visitPlaybackQueue(id)
     } else if (visitable) {
         //其他，如普通歌单、主播电台歌单等
         const exploreMode = Playlist.isAnchorRadioType(item) ? 'radios' : null
@@ -133,6 +135,21 @@ const computedFavorable = computed(() => {
         return favorable && (type != Playlist.NORMAL_RADIO_TYPE)
     }
 })
+
+const onTileTitleClick = (event, item) => {
+    if(!item) return 
+
+    const { platform } = item
+    if(isFreeFM(platform) || Playlist.isFMRadioType(item)) {
+        const isClickPlay = isRadioTileTitleClickPlay.value
+        isClickPlay ? playPlaylist(item) : addFmRadioToQueue(item, 'FM电台添加成功')
+        //阻止click事件冒泡，避免父级元素再次处理（处理逻辑可能相同、也可能不同）
+        //但有副作用：阻止了window对click事件的全局监听处理
+        event.stopPropagation()
+        //重新触发click事件的全局监听处理
+        document.body.click()
+    }
+}
 </script>
 
 <template>
@@ -162,6 +179,7 @@ const computedFavorable = computed(() => {
                     :playAction="() => (playable && playPlaylist(item))" 
                     :favorable="computedFavorable(item)" 
                     :favorAction="() => (favorable && favorPlaylist(item))" 
+                    :titleAction="(event) => onTileTitleClick(event, item)"
                     :checkbox="checkbox" 
                     :checked="checkedAll"
                     :ignoreCheckAllEvent="ignoreCheckAllEvent"

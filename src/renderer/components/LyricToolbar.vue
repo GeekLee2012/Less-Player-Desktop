@@ -265,6 +265,8 @@ const getLyricOffsetText = () => {
     font-size: 14px;
     text-align: left;
     width: 116px;
+    background-color: var(--content-inputs-bg-color);
+    color: var(--content-inputs-text-color);
 }
 
 .lyric-toolbar .text-btn {

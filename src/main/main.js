@@ -711,14 +711,9 @@ const registryGlobalListeners = () => {
     const index = url.lastIndexOf('.')
     const file = url.substring(0, index)
     let transText = null
+    //不再对lrc文件扩展名，做大小写方面的兼容
     const text = readText(`${file}.lrc`)
-      || readText(`${file}.LRC`)
-      || readText(`${file}.Lrc`)
-    if(text) {
-      transText = readText(`${file} [Trans].lrc`)
-        || readText(`${file} [Trans].LRC`)
-        || readText(`${file} [Trans].Lrc`)
-    }
+    if(text) transText = readText(`${file} [Trans].lrc`)
     return { text, transText }
   })
 

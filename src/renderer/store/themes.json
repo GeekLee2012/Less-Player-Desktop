@@ -5,7 +5,7 @@
             "name": "默认",
             "previewBg": "#48484a",
             "appBackground": {
-                "bgColor": "#48484a",
+                "bgColor": "#515151",
                 "bgImage": null,
                 "bgImageGradient": null
             },
@@ -20,10 +20,10 @@
                 "randomMusicToolbar": false
             },
             "content": {
-                "textColor": "#d5d5d5",
+                "textColor": "#cdcdcd",
                 "subtitleTextColor": "#a5a5a5",
                 "secondaryTextColor": "#787878",
-                "bgColor": "#48484acb",
+                "bgColor": "#48484a",
                 "textHighlightColor": "linear-gradient(to top right, #1ca388, #28c83f)",
                 "highlightColor": "#28c83f",
                 "headerNavBgColor": "#48484a",
@@ -35,33 +35,33 @@
             },
             "border": {
                 "borderColor": "#414141",
-                "leftNavBorderColor": "#333333",
+                "leftNavBorderColor": "#3c3c3c",
                 "popoversBorderColor": "#222222",
                 "inputsBorderColor": "#636363"
             },
             "button": {
-                "iconBtnColor": "#ffffff",
-                "iconTextBtnTextColor": "#eaeaea",
-                "iconTextBtnIconColor": "#ffffff",
+                "iconBtnColor": "#cccccc",
+                "iconTextBtnTextColor": "#dddddd",
+                "iconTextBtnIconColor": "#dddddd",
                 "iconTextBtnBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #2edfa3, #28c83f)",
                 "toggleBtnBgColor": "#999999",
-                "toggleBtnThumbColor": "#ffffff"
+                "toggleBtnThumbColor": "#cccccc"
             },
             "searchBar": {
                 "borderColor": null,
-                "bgColor": "#dddddd",
-                "textColor": "#373737",
+                "bgColor": "#cccccc",
+                "textColor": "#48484a",
                 "searchBtnBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
                 "searchBtnHoverBgColor": "linear-gradient(to top right, #2edfa3, #28c83f)",
-                "searchBtnIconColor": "#ffffff",
-                "searchBtnHoverIconColor": "#ffffff",
+                "searchBtnIconColor": "#cccccc",
+                "searchBtnHoverIconColor": "#cccccc",
                 "clearBtnIconColor": "#555555"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to top right, #1ca388, #28c83f)",
-                "innerBgColor": "#ffffff",
-                "innerTextColor": "##1ca388",
+                "innerBgColor": "#dddddd",
+                "innerTextColor": "#1ca388",
                 "appNameTextColor": "linear-gradient(to top right, #1ca388, #28c83f)"
             },
             "others": {
@@ -251,7 +251,7 @@
             },
             "border": {
                 "borderColor": "#f4f4f4",
-                "leftNavBorderColor": "#dddddd",
+                "leftNavBorderColor": "#eeeeee",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -291,7 +291,7 @@
             "name": "粉色2",
             "previewBg": "#fc589c",
             "appBackground": {
-                "bgColor": "#252025",
+                "bgColor": "#393939",
                 "bgImage": null,
                 "bgImageGradient": null
             },
@@ -306,17 +306,17 @@
                 "randomMusicToolbar": false
             },
             "content": {
-                "textColor": "#cdcdcd",
+                "textColor": "#999999",
                 "subtitleTextColor": "#888888",
                 "secondaryTextColor": "#666666",
-                "bgColor": "#252025ec",
+                "bgColor": "#21221f",
                 "textHighlightColor": "linear-gradient(to top right, #fc589c, #e6399b)",
                 "highlightColor": "#fc589c",
                 "headerNavBgColor": "#333333",
                 "loadingMaskColor": "linear-gradient(to right, #494949 8%, #595959 18%, #494949 33%)",
                 "listItemHoverBgColor": "#353035",
-                "leftNavBgColor": "#252025",
-                "inputsBgColor": "#dddddd",
+                "leftNavBgColor": "#21221f",
+                "inputsBgColor": "#cccccc",
                 "inputsTextColor": "#393939"
             },
             "border": {
@@ -326,9 +326,9 @@
                 "inputsBorderColor": "#454045"
             },
             "button": {
-                "iconBtnColor": "#eaeaea",
-                "iconTextBtnTextColor": "#eaeaea",
-                "iconTextBtnIconColor": "#ffffff",
+                "iconBtnColor": "#cccccc",
+                "iconTextBtnTextColor": "#cccccc",
+                "iconTextBtnIconColor": "#cccccc",
                 "iconTextBtnBgColor": "linear-gradient(to top right, #e6399b, #fc589c)",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #fc589c, #992667) ",
                 "toggleBtnBgColor": "#454045",
@@ -336,17 +336,17 @@
             },
             "searchBar": {
                 "borderColor": null,
-                "bgColor": "#dddddd",
+                "bgColor": "#cccccc",
                 "textColor": "#393939",
-                "searchBtnBgColor": "#dddddd",
-                "searchBtnHoverBgColor": "#dddddd",
-                "searchBtnIconColor": "#252025",
-                "searchBtnHoverIconColor": "#252025",
+                "searchBtnBgColor": "#cccccc",
+                "searchBtnHoverBgColor": "#cccccc",
+                "searchBtnIconColor": "#21221f",
+                "searchBtnHoverIconColor": "#21221f",
                 "clearBtnIconColor": "#666666"
             },
             "appLogo": {
                 "bgColor": "linear-gradient(to top right, #e6399b, #fc589c)",
-                "innerBgColor": "#ffffff",
+                "innerBgColor": "#cbcbcb",
                 "innerTextColor": "#fc589c",
                 "appNameTextColor": "linear-gradient(to top right, #e6399b, #fc589c)"
             },
@@ -454,7 +454,7 @@
                 "highlightColor": "#f7314d",
                 "headerNavBgColor": "#eeeeee",
                 "loadingMaskColor": "linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%)",
-                "listItemHoverBgColor": "#f7314d0f",
+                "listItemHoverBgColor": "#fef3f5",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#313131",
@@ -736,7 +736,7 @@
                 "highlightColor": "#2783fb",
                 "headerNavBgColor": "#ffffff66",
                 "loadingMaskColor": "linear-gradient(to right, #ababab36 8%, #ababab66 18%, #ababab36 33%)",
-                "listItemHoverBgColor": "#ababab36",
+                "listItemHoverBgColor": "#e1e7e9",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffffcb",
                 "inputsTextColor": "#161616",
@@ -808,7 +808,7 @@
                 "highlightColor": "#273b42",
                 "headerNavBgColor": "#eeeeee",
                 "loadingMaskColor": "linear-gradient(to right, #91b6c036 8%, #91b6c025 18%, #91b6c036 33%)",
-                "listItemHoverBgColor": "#91b6c036",
+                "listItemHoverBgColor": "#e2ecef",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffffcb",
                 "inputsTextColor": "#273b42",
@@ -880,7 +880,7 @@
                 "highlightColor": "#ffb300",
                 "headerNavBgColor": "#eeeeee",
                 "loadingMaskColor": "linear-gradient(to right, #ddddddab 8%, #cccccc88 18%, #ddddddab 33%)",
-                "listItemHoverBgColor": "#ffb30025",
+                "listItemHoverBgColor": "#eeeeee",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#000000",
@@ -1022,7 +1022,7 @@
                 "highlightColor": "#9c27b0",
                 "headerNavBgColor": "#eeeeee",
                 "loadingMaskColor": "linear-gradient(to right, #ddddddab 8%, #cccccc88 18%, #ddddddab 33%)",
-                "listItemHoverBgColor": "#9c27b025",
+                "listItemHoverBgColor": "#f0e1f3",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#000000",

@@ -98,7 +98,10 @@ const showInFolder = () => {
                         </template>
                     </SvgTextButton>
                     <!--
-                    <FavoriteShareBtn :favorited="false" :leftAction="() => { }" class="spacing">
+                    <FavoriteShareBtn class="spacing"
+                        :favorited="false" 
+                        :leftAction="() => { }" 
+                        :hiddenShare="true" >
                     </FavoriteShareBtn>
                     -->
                 </div>

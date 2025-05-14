@@ -43,6 +43,8 @@ import GenreDetailView from '../views/GenreDetailView.vue';
 import EmbyView from '../views/EmbyView.vue';
 import EmbySessionEditView from '../views/EmbySessionEditView.vue';
 import EmbySessionDetailView from '../views/EmbySessionDetailView.vue';
+import SavedPlaybackQueueDetailView from '../views/SavedPlaybackQueueDetailView.vue';
+import SavedPlaybackQueueEditView from '../views/SavedPlaybackQueueEditView.vue';
 
 
 
@@ -135,6 +137,21 @@ const routes = [
                 path: '/:exploreMode/custom/:id',
                 props: true,
                 component: CustomPlaylistDetailView
+            },
+            {  //我的主页 - 播放队列 - 保存
+                path: '/:exploreMode/playbackQueue/save',
+                props: true,
+                component: SavedPlaybackQueueEditView
+            },
+            {  //我的主页 - 播放队列 - 编辑
+                path: '/:exploreMode/playbackQueue/edit/:id',
+                props: true,
+                component: SavedPlaybackQueueEditView
+            },
+            {  //我的主页 - 播放队列 - 详情
+                path: '/:exploreMode/playbackQueue/:id',
+                props: true,
+                component: SavedPlaybackQueueDetailView
             },
             {  //批量操作
                 path: '/:exploreMode/batch/:source/:id',

@@ -3,11 +3,11 @@ import { onMounted, onActivated, ref, reactive, watch, onUpdated, inject, nextTi
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from '../store/playStore';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useUserProfileStore } from '../store/userProfileStore';
-import { usePlatformStore } from '../store/platformStore';
+import { usePlaybackQueueStore } from '../store/playbackQueueStore';
 import { useSettingStore } from '../store/settingStore';
 import SongListControl from '../components/SongListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
+import DeleteAllBtn from '../components/DeleteAllBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
@@ -15,8 +15,7 @@ import { coverDefault, isSupportedImage, randomTextWithinAlphabetNums, toYyyymmd
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
-
-const { visitCustomPlaylistEdit, visitBatchCustomPlaylist, backward } = inject('appRoute')
+const { visitPlaylistQueueEdit, backward } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
 
 const props = defineProps({
@@ -24,22 +23,24 @@ const props = defineProps({
     id: String
 })
 
-const playlistDetailRef = ref(null)
+const contentRef = ref(null)
 const back2TopBtnRef = ref(null)
 const detail = reactive({})
 let offset = 0, page = 1, limit = 1000, total = 0
 let markScrollTop = 0
 const loading = ref(true)
+const dataListId = ref(null)
 const searchKeyword = ref(null)
 const timeIndex = ref(1)
 const setSearchKeyword = (value) => searchKeyword.value = value
+const setDataListId = (value) => (dataListId.value = value)
 const setTimeIndex = (value) => (timeIndex.value = value)
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem } = useAppCommonStore()
-const { getCustomPlaylist, removeAllFromCustomPlaylist, updateCustomPlaylist } = useUserProfileStore()
-const { currentPlatformCode } = storeToRefs(usePlatformStore())
-const { isShowDialogBeforeBatchDelete, isSearchForCustomPlaylistShow, isMiniNavBarMode } = storeToRefs(useSettingStore())
+const { getQueue, updateQueue, removeQueue } = usePlaybackQueueStore()
+const { isShowDialogBeforeBatchDelete, isSearchForCustomPlaylistShow, 
+    isMiniNavBarMode, isShowDialogBeforeDeletePlaybackQueue, } = storeToRefs(useSettingStore())
 
 const resetView = () => {
     Object.assign(detail, { cover: '', title: '', about: '', data: [] })
@@ -85,20 +86,23 @@ const filterSongsWithKeyword = (list) => {
 }
 
 const loadContent = () => {
-    const playlist = getCustomPlaylist(props.id)
-    if (!playlist) {
-        Object.assign(detail, { title: '当前歌单找不到啦', about: '神秘代码：404', data: [], updated: Date.now() })
+    const queue = getQueue(props.id)
+    if (!queue) {
+        const _now = Date.now()
+        Object.assign(detail, { 
+            title: '播放队列找不到啦', 
+            about: '神秘空间：404', 
+            data: [], 
+            created: _now,
+            updated: _now
+        })
         return
     }
-    //if(playlist.data) cleanUpAllSongs([ playlist.data ])
-    Object.assign(detail, { ...playlist })
-    updateCommonCtxItem(playlist)
-    const platform = currentPlatformCode.value
-    let { data } = playlist
-    if (platform && platform.trim() != 'all') {
-        data = playlist.data.filter(item => (item.platform == platform.trim())) || []
-    }
+    Object.assign(detail, { ...queue })
+    updateCommonCtxItem(queue)
+    let { data } = queue
     Object.assign(detail, { data: filterSongsWithKeyword(data) })
+    setDataListId(randomTextWithinAlphabetNums(16))
 }
 
 const loadMoreContent = () => {
@@ -125,24 +129,35 @@ const addAll = (text) => {
     showToast(text || "歌曲已全部添加")
 }
 
+const removePlaybackQueue = async () => {
+    if (isShowDialogBeforeDeletePlaybackQueue.value) {
+        const ok = await showConfirm('确定要删除播放队列吗？')
+        if (!ok) return
+    }
+    removeQueue(detail)
+    backward()
+    showToast("播放队列已删除")
+}
+
+
 const markScrollState = () => {
-    markScrollTop = playlistDetailRef.value.scrollTop
+    markScrollTop = contentRef.value.scrollTop
 }
 
 const resetScrollState = () => {
     markScrollTop = 0
-    playlistDetailRef.value.scrollTop = markScrollTop
+    contentRef.value.scrollTop = markScrollTop
 }
 
 const restoreScrollState = () => {
     if (markScrollTop < 1) return
-    playlistDetailRef.value.scrollTop = markScrollTop
+    contentRef.value.scrollTop = markScrollTop
 }
 
 const scrollToLoad = () => {
-    const scrollTop = playlistDetailRef.value.scrollTop
-    const scrollHeight = playlistDetailRef.value.scrollHeight
-    const clientHeight = playlistDetailRef.value.clientHeight
+    const scrollTop = contentRef.value.scrollTop
+    const scrollHeight = contentRef.value.scrollHeight
+    const clientHeight = contentRef.value.clientHeight
     markScrollState()
     if ((scrollTop + clientHeight) >= scrollHeight) {
         loadMoreContent()
@@ -154,20 +169,8 @@ const onScroll = () => {
 }
 
 const resetBack2TopBtn = () => {
-    if (!back2TopBtnRef.value || !playlistDetailRef.value) return
-    back2TopBtnRef.value.setScrollTarget(playlistDetailRef.value)
-}
-
-const removeAll = async () => {
-    if (!detail.data || detail.data.length < 1) return
-
-    if (isShowDialogBeforeBatchDelete.value) {
-        const ok = await showConfirm('确定要清空歌单吗？')
-        if (!ok) return
-    }
-
-    removeAllFromCustomPlaylist(props.id)
-    showToast("全部歌曲已删除")
+    if (!back2TopBtnRef.value || !contentRef.value) return
+    back2TopBtnRef.value.setScrollTarget(contentRef.value)
 }
 
 const titleRef = ref(null)
@@ -186,7 +189,7 @@ const filterContent = (keyword) => {
     loadContent()
 }
 
-const playlistCoverOnDrop = (event) => {
+const queueCoverOnDrop = (event) => {
     event.preventDefault()
     const { files } = event.dataTransfer
 
@@ -195,9 +198,10 @@ const playlistCoverOnDrop = (event) => {
     const { path } = files[0]
     let isEventStopped = true
     if (isSupportedImage(path)) {
-        const { id, platform, title, about } = detail
+        const { id, title, about } = detail
         const cover = path
-        updateCustomPlaylist(id, title, about, cover) && Object.assign(detail, { cover })
+        updateQueue({ id, title, about, cover }) 
+            && Object.assign(detail, { cover })
     } else {
         isEventStopped = false
     }
@@ -214,12 +218,11 @@ watch(() => props.id, () => {
     loadContent()
 })
 
-watch(currentPlatformCode, loadContent)
 watch(isMiniNavBarMode, () => nextTick(detectTitleHeight))
 
 const eventsRegistration = {
     'app-resize': detectTitleHeight, 
-    'customPlaylist-removed': (id) => {
+    'playbackQueue-removed': (id) => {
         if(props.id == id) backward()
     }
 }
@@ -242,17 +245,17 @@ onUpdated(() => resetBack2TopBtn())
 </script>
 
 <template>
-    <div id="custom-playlist-detail-view" ref="playlistDetailRef" @scroll="onScroll">
+    <div id="saved-playbackQueue-detail-view" ref="contentRef" @scroll="onScroll">
         <div class="header">
             <div>
                 <img class="cover" v-lazy="coverDefault(detail.cover)" 
-                @dragover="e => e.preventDefault()" @drop="playlistCoverOnDrop" />
+                @dragover="e => e.preventDefault()" @drop="queueCoverOnDrop" />
             </div>
             <div class="right">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>
                 <div class="about" v-html="getAbout()" :class="{ 'short-about': isTwoLinesTitle }"></div>
                 <div class="edit-wrap">
-                    <div class="edit-btn" @click="() => visitCustomPlaylistEdit(id)">
+                    <div class="edit-btn" @click="() => visitPlaylistQueueEdit(id)">
                         <svg width="19" height="19" viewBox="0 0 992.3 992.23" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -270,27 +273,30 @@ onUpdated(() => resetBack2TopBtn())
                     </div>
                 </div>
                 <div class="action">
-                    <PlayAddAllBtn class="btn-spacing" :leftAction="playAll" :rightAction="() => addAll()">
+                    <PlayAddAllBtn class="btn-spacing" 
+                        :leftAction="playAll" 
+                        :rightAction="() => addAll()">
                     </PlayAddAllBtn>
-                    <BatchActionBtn :deleteBtn="true" :leftAction="() => visitBatchCustomPlaylist(id, 'userhome')"
-                        :rightAction="removeAll">
-                    </BatchActionBtn>
+                    <DeleteAllBtn class="btn-spacing" 
+                        text="删除队列"
+                        :leftAction="removePlaybackQueue" >
+                    </DeleteAllBtn>
                 </div>
             </div>
         </div>
         <div class="center">
             <div class="list-title">
-                <span class="size-text content-text-highlight">歌曲({{ detail.data.length }})</span>
+                <span class="size-text content-text-highlight">列表({{ detail.data.length }})</span>
                 <SearchBarExclusiveModeControl class="search-wrap" v-show="isSearchForCustomPlaylistShow"
                     :onKeywordChanged="filterContent">
                 </SearchBarExclusiveModeControl>
             </div>
             <SongListControl
-                :id="randomTextWithinAlphabetNums(16)"
+                :id="dataListId"
                 :data="detail.data" 
                 :artistVisitable="true" 
                 :albumVisitable="true" 
-                :dataType="4">
+                :dataType="12">
             </SongListControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
@@ -298,7 +304,7 @@ onUpdated(() => resetBack2TopBtn())
 </template>
 
 <style scoped>
-#custom-playlist-detail-view {
+#saved-playbackQueue-detail-view {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -307,7 +313,7 @@ onUpdated(() => resetBack2TopBtn())
     overflow-x: hidden;
 }
 
-#custom-playlist-detail-view .header {
+#saved-playbackQueue-detail-view .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 16px;
@@ -315,18 +321,18 @@ onUpdated(() => resetBack2TopBtn())
     height: var(--cover-size);
 }
 
-#custom-playlist-detail-view .header .right {
+#saved-playbackQueue-detail-view .header .right {
     flex: 1;
     margin-left: 30px;
 }
 
-#custom-playlist-detail-view .header .title,
-#custom-playlist-detail-view .header .about {
+#saved-playbackQueue-detail-view .header .title,
+#saved-playbackQueue-detail-view .header .about {
     text-align: left;
     margin-bottom: 10px;
 }
 
-#custom-playlist-detail-view .header .title {
+#saved-playbackQueue-detail-view .header .title {
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
 
@@ -341,8 +347,9 @@ onUpdated(() => resetBack2TopBtn())
     line-clamp: 2;
 }
 
-#custom-playlist-detail-view .header .about {
+#saved-playbackQueue-detail-view .header .about {
     height: 106px;
+    /*line-height: 21px;*/
     line-height: var(--content-text-line-height);
     color: var(--content-subtitle-text-color);
     overflow: hidden;
@@ -359,37 +366,37 @@ onUpdated(() => resetBack2TopBtn())
     letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 }
 
-#custom-playlist-detail-view .header .short-about {
+#saved-playbackQueue-detail-view .header .short-about {
     height: 60px;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     margin-bottom: 10px;
 }
 
-#custom-playlist-detail-view .right .edit-wrap {
+#saved-playbackQueue-detail-view .right .edit-wrap {
     display: flex;
     flex-direction: row;
     align-items: center;
     margin-bottom: 10px;
 }
 
-#custom-playlist-detail-view .right .edit-wrap .edit-btn {
+#saved-playbackQueue-detail-view .right .edit-wrap .edit-btn {
     display: flex;
     align-items: center;
     margin-right: 8px;
 }
 
-#custom-playlist-detail-view .edit-btn svg {
+#saved-playbackQueue-detail-view .edit-btn svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
     transform: translateY(-1px);
 }
 
-#custom-playlist-detail-view .edit-btn svg:hover {
+#saved-playbackQueue-detail-view .edit-btn svg:hover {
     fill: var(--content-highlight-color);
 }
 
-#custom-playlist-detail-view .time {
+#saved-playbackQueue-detail-view .time {
     /*font-size: 13px;*/
     font-size: var(--content-text-tip-text-size);
     font-weight: 520;
@@ -397,29 +404,29 @@ onUpdated(() => resetBack2TopBtn())
     text-align: left;
 }
 
-#custom-playlist-detail-view .time:hover span {
+#saved-playbackQueue-detail-view .time:hover span {
     cursor: pointer;
     color: var(--content-highlight-color);
     font-weight: bold;
 }
 
-#custom-playlist-detail-view .header .cover {
+#saved-playbackQueue-detail-view .header .cover {
     width: var(--cover-size);
     height: var(--cover-size);
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }
 
-#custom-playlist-detail-view .action {
+#saved-playbackQueue-detail-view .action {
     display: flex;
     flex-direction: row;
 }
 
-#custom-playlist-detail-view .btn-spacing {
+#saved-playbackQueue-detail-view .btn-spacing {
     margin-right: 20px;
 }
 
-#custom-playlist-detail-view .list-title {
+#saved-playbackQueue-detail-view .list-title {
     margin-bottom: 6px;
     text-align: left;
     font-weight: bold;
@@ -428,14 +435,14 @@ onUpdated(() => resetBack2TopBtn())
     align-items: center;
 }
 
-#custom-playlist-detail-view .list-title .size-text {
+#saved-playbackQueue-detail-view .list-title .size-text {
     margin-left: 3px;
     padding-bottom: 6px;
     border-bottom: 3px solid var(--content-highlight-color);
     font-size: var(--content-text-tab-title-size);
 }
 
-#custom-playlist-detail-view .list-title .search-wrap {
+#saved-playbackQueue-detail-view .list-title .search-wrap {
     font-size: calc(var(--content-text-tab-title-size) - 1.5px);
     position: absolute;
     right: -10px;

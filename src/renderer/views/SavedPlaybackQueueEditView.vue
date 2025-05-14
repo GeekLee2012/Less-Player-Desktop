@@ -1,15 +1,20 @@
 <script>
 //定义名称，方便用于<keep-alive>
 export default {
-    name: 'LocalPlaylistEditView'
+    name: 'SavedPlaybackQueueEditView'
 }
 </script>
 
 <script setup>
-import { onMounted, ref, reactive, inject } from 'vue';
+import { onMounted, ref, reactive, inject, computed, toRaw } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { useLocalMusicStore } from '../store/localMusicStore';
-import { coverDefault, ipcRendererInvoke, isSupportedImage } from '../../common/Utils';
+import { usePlayStore } from '../store/playStore';
+import { usePlaybackQueueStore } from '../store/playbackQueueStore';
+import { toTrimString, coverDefault, isSupportedImage, ipcRendererInvoke } from '../../common/Utils';
+import ArtistControl from '../components/ArtistControl.vue';
+import AlbumControl from '../components/AlbumControl.vue';
+
 
 
 const { backward } = inject('appRoute')
@@ -18,27 +23,26 @@ const props = defineProps({
     id: String
 })
 
-const { showToast, showFailToast } = useAppCommonStore()
+const { showToast, showFailToast, setRouterCtxCacheItem } = useAppCommonStore()
+const { routerCtxCacheItem } = storeToRefs(useAppCommonStore())
+const { getQueue, addQueue, updateQueue } = usePlaybackQueueStore()
+const { queueTracks } = storeToRefs(usePlayStore())
+
 const titleRef = ref(null)
-const tagsRef = ref(null)
-//const aboutRef = ref(null)
-//const coverRef = ref(null)
 const invalid = ref(false)
-const detail = reactive({ title: '', tags: '', about: '', cover: '' })
+const detail = reactive({ title: '', about: '', cover: '' })
 const isActionDisabled = ref(false)
 const setActionDisabled = (value) => isActionDisabled.value = value
 
-//TODO
-const { addLocalPlaylist, updateLocalPlaylist, getLocalPlaylist } = useLocalMusicStore()
 
-const loadLocalPlaylist = () => {
-    if (!props.id) return
-    const id = props.id.trim()
-    if (id.length < 1) return
-    const playlist = getLocalPlaylist(id)
-    if (!playlist) return
-    const { title, tags, about, cover } = playlist
-    Object.assign(detail, { id, title, tags, about, cover })
+
+const loadContent = () => {
+    const { id } = props
+    if (!id) return
+    const item = getQueue(id)
+    if (!item) return
+    const { title, about, cover } = item
+    Object.assign(detail, { id, title, about, cover })
 }
 
 const checkValid = () => {
@@ -47,26 +51,35 @@ const checkValid = () => {
 }
 
 const submit = () => {
-    /*
-    let title = titleRef.value.value.trim()
-    let tags = tagsRef.value.value.trim()
-    let about = aboutRef.value.value.trim()
-    let cover = coverRef.value.src
-    */
-    let { title, tags, about, cover } = detail
+    let { title, about, cover } = detail
     if (title.length < 1) {
         invalid.value = true
         return
     }
-    let text = "歌单创建成功"
-    if (!props.id) {
-        addLocalPlaylist(title, tags, about, cover)
+
+    const { id } = props
+    const text = (!id ? '播放队列已保存' : '播放队列已更新')
+    if (!id) {
+        const tracks = queueTracks.value
+        if(!tracks || tracks.length < 1) return showFailToast('当前播放队列为空')
+
+        const data = [...toRaw(tracks)]
+        const excludeProps = ['lyric', 'lyricTran', 'lyricTrans', 
+                    'lyricRoma', 'score', 'isCandidate']
+        data.forEach(item => {
+            excludeProps.forEach(prop => Reflect.deleteProperty(item, prop))
+        })
+        addQueue({ title, about, cover, data })
     } else {
-        updateLocalPlaylist(props.id, title, tags, about, cover)
-        text = "歌单已保存"
+        updateQueue({ id, title, cover, about })
     }
     setActionDisabled(true)
     showToast(text)
+    backward()
+}
+
+const cancel = () => {
+    if (routerCtxCacheItem.value) setRouterCtxCacheItem(null)
     backward()
 }
 
@@ -74,7 +87,6 @@ const setupCover = (cover) => {
     return Object.assign(detail, { cover })
 }
 
-//TODO
 const updateCover = async () => {
     const result = await ipcRendererInvoke('open-image')
     if (result.length > 0) setupCover(result[0])
@@ -99,39 +111,29 @@ const onDrop = (event) => {
 
 
 /* 生命周期、监听 */
-onMounted(() => loadLocalPlaylist())
+onMounted(() => loadContent())
 </script>
 
 <template>
-    <div id="local-playlist-edit-view" @drapover="(e) => e.preventDefault()" @drop="onDrop">
+    <div id="saved-playbackQueue-edit-view" @drapover="(e) => e.preventDefault()" @drop="onDrop">
         <div class="header">
-            <span class="title" v-show="!id">创建本地歌单</span>
-            <span class="title" v-show="id">编辑本地歌单</span>
+            <span class="title" v-show="!id">保存播放队列</span>
+            <span class="title" v-show="id">编辑播放队列</span>
         </div>
         <div class="center">
-            <div>
+            <div class="left">
                 <img class="cover" v-lazy="coverDefault(detail.cover)" />
                 <div class="cover-eidt-btn" @click="updateCover">编辑封面</div>
             </div>
             <div class="right">
                 <div class="form-row">
                     <div>
-                        <span>歌单名称</span>
+                        <span>队列名称</span>
                         <span class="required"> *</span>
                     </div>
                     <div @keydown.stop="">
                         <input type="text" v-model="detail.title" ref="titleRef" :class="{ invalid }" maxlength="99"
-                            placeholder="歌单名称，最多支持输入99个字符" />
-                    </div>
-                </div>
-                <div class="form-row" v-show="false">
-                    <div>
-                        <span>标签</span>
-                        <span class="required"> （暂时还不支持）</span>
-                    </div>
-                    <div @keydown.stop="">
-                        <input type="text" v-model="detail.tags" ref="tagsRef" :class="{ invalid }" maxlength="128"
-                            placeholder="标签，歌单分类；多个标签时，以英文状态下的逗号(,)分隔" />
+                            placeholder="队列名称，最多支持输入99个字符" />
                     </div>
                 </div>
                 <div class="form-row">
@@ -144,14 +146,19 @@ onMounted(() => loadLocalPlaylist())
                     <div><span>简介</span></div>
                     <div @keydown.stop="">
                         <textarea v-model="detail.about" maxlength="1024"
-                            placeholder="歌单描述，你想用歌单诉说什么，一起分享一下吧 ~ 最多支持输入1024个字符">
+                            placeholder="播放队列描述，最多支持输入1024个字符">
                         </textarea>
                     </div>
                 </div>
                 <div class="action">
-                    <SvgTextButton :leftAction="submit" text="保存" :disabled="isActionDisabled">
+                    <SvgTextButton  text="保存" 
+                        :leftAction="submit"
+                        :disabled="isActionDisabled">
                     </SvgTextButton>
-                    <SvgTextButton :leftAction="backward" text="取消" class="spacing" :disabled="isActionDisabled">
+                    <SvgTextButton text="取消" 
+                        class="spacing" 
+                        :leftAction="cancel" 
+                        :disabled="isActionDisabled">
                     </SvgTextButton>
                 </div>
             </div>
@@ -160,7 +167,7 @@ onMounted(() => loadLocalPlaylist())
 </template>
 
 <style>
-#local-playlist-edit-view {
+#saved-playbackQueue-edit-view {
     display: flex;
     flex-direction: column;
     padding: 20px 33px 15px 33px;
@@ -168,14 +175,14 @@ onMounted(() => loadLocalPlaylist())
     overflow: scroll;
 }
 
-#local-playlist-edit-view .header {
+#saved-playbackQueue-edit-view .header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 10px;
 }
 
-#local-playlist-edit-view .header .title {
+#saved-playbackQueue-edit-view .header .title {
     text-align: left;
     margin-top: 5px;
     /*font-size: 30px;*/
@@ -183,13 +190,13 @@ onMounted(() => loadLocalPlaylist())
     font-weight: bold;
 }
 
-#local-playlist-edit-view .center {
+#saved-playbackQueue-edit-view .center {
     display: flex;
     flex-direction: row;
     flex: 1;
 }
 
-#local-playlist-edit-view .center .cover {
+#saved-playbackQueue-edit-view .center .cover {
     width: 175px;
     height: 175px;
     border-radius: var(--border-inputs-border-radius);
@@ -197,41 +204,40 @@ onMounted(() => loadLocalPlaylist())
     box-shadow: 0px 0px 1px #161616;
 }
 
-#local-playlist-edit-view .center .cover-eidt-btn {
+#saved-playbackQueue-edit-view .center .cover-eidt-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
-    padding: 5px;
+    padding: 6px;
     border-radius: var(--border-inputs-border-radius);
     cursor: pointer;
     margin-top: 2px;
 }
 
-
-#local-playlist-edit-view .center .right {
+#saved-playbackQueue-edit-view .center .right {
     display: flex;
     flex-direction: column;
     flex: 1;
     margin-left: 20px;
 }
 
-#local-playlist-edit-view .center .form-row {
-    margin-bottom: 17px;
+#saved-playbackQueue-edit-view .center .form-row {
+    margin-bottom: 15px;
 }
 
-#local-playlist-edit-view .center .form-row div {
+#saved-playbackQueue-edit-view .center .form-row div {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#local-playlist-edit-view .center .form-row span {
+#saved-playbackQueue-edit-view .center .form-row span {
     font-size: var(--content-text-subtitle-size);
     color: var(--content-text-color);
     margin-bottom: 8px;
 }
 
-#local-playlist-edit-view .center .form-row input,
-#local-playlist-edit-view .center .form-row textarea {
+#saved-playbackQueue-edit-view .center .form-row input,
+#saved-playbackQueue-edit-view .center .form-row textarea {
     flex: 1;
     border: 1px solid var(--border-inputs-border-color);
     outline: none;
@@ -239,41 +245,45 @@ onMounted(() => loadLocalPlaylist())
     border-radius: var(--border-inputs-border-radius);
     background-color: var(--content-inputs-bg-color);
     color: var(--content-inputs-text-color);
-    /*font-size: 15px; */
     font-size: var(--content-text-size);
 }
 
-#local-playlist-edit-view .center .form-row input {
+#saved-playbackQueue-edit-view .center .form-row input {
     height: 28px;
 }
 
-#local-playlist-edit-view .center .form-row textarea {
-    /*height: 188px;*/
-    height: 193px;
+#saved-playbackQueue-edit-view .center .form-row textarea {
+    height: 200px;
     padding: 8px;
 }
 
-#local-playlist-edit-view .center .action {
+#saved-playbackQueue-edit-view .center .action {
     display: flex;
     flex-direction: row;
 }
 
-#local-playlist-edit-view .spacing {
+#saved-playbackQueue-edit-view .spacing {
     margin-left: 20px;
 }
 
-#local-playlist-edit-view .required {
+#saved-playbackQueue-edit-view .required {
     color: var(--content-text-highlight-color) !important;
     font-weight: bold;
     font-size: 20px;
 }
 
-#local-playlist-edit-view .invalid {
+#saved-playbackQueue-edit-view .invalid {
     border-color: var(--content-error-color) !important;
     border-width: 3px;
 }
 
-.contrast-mode #local-playlist-edit-view .center .cover-eidt-btn {
+.contrast-mode #saved-playbackQueue-edit-view .center .cover-eidt-btn {
     font-weight: bold;
 }
+
+/*
+#saved-playbackQueue-edit-view ::-webkit-input-placeholder {
+    color: var(--input-placeholder-color);
+}
+*/
 </style>

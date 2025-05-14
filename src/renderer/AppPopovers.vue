@@ -56,7 +56,7 @@ const { commonNotificationShow, commonNotificationText,
   platformCategoryViewShow, playingThemeListViewShow,
   customPlayingThemeEditViewShow, playingViewThemeType,
   playingViewCustomThemes, customAppBorderRadiusViewShow,
-  trackResourceToolViewShow, themeSelectionViewShow } = storeToRefs(useAppCommonStore())
+  trackResourceToolViewShow, themeSelectionViewShow, } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -286,14 +286,12 @@ const setupPlayingView = (theme, isPreviewMode) => {
   }
 }
 
-//TODO
 const isAutoLayout = computed(() => {
   return isDefaultClassicLayout.value || isDefaultNewLayout.value
 })
 
 
 
-//TODO
 watch(commonCtxMenuShow, (nv, ov) => {
   if (!nv) ctxMenuPos = null
 })
@@ -924,8 +922,9 @@ onUnmounted(() => offEvents(eventsRegistration))
   bottom: 80px;
   width: 688px;
   height: 505px;
-  z-index: 99;
+  z-index: 100;
   box-shadow: var(--box-shadow);
   border-radius: var(--border-popover-border-radius);
 }
+
 </style>

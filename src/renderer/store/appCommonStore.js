@@ -654,7 +654,7 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleAutoHideThemeSelectionView() {
             this.isAutoHideThemeSelectionView = !this.isAutoHideThemeSelectionView
-        }
+        },
     },
     persist: {
         enabled: true,

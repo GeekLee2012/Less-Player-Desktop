@@ -10,7 +10,7 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
 
-const { visitRecents, visitBatchPlaybackQueue } = inject('appRoute')
+const { visitRecents, visitBatchPlaybackQueue, visitPlaybackQueueSave } = inject('appRoute')
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue, moveTrack, } = usePlayStore()
@@ -20,7 +20,7 @@ const { showToast, hidePlaybackQueueView,
 const { isPlaybackQueueAutoPositionOnShow, isPlaybackQueueCloseBtnShow,
     isPlaybackQueueHistoryBtnShow, isPlaybackQueuePositionBtnShow, 
     isPlaybackQueueBatchActionBtnShow, isPlaybackQueueViewTipsShow,
-    isPlaybackQueueBtnIconMode,
+    isPlaybackQueueBtnIconMode, isPlaybackQueueSaveBtnShow,
 } = storeToRefs(useSettingStore())
 const { playbackQueueViewShow } = storeToRefs(useAppCommonStore())
 
@@ -117,11 +117,18 @@ const moveDragItem = (event) => {
 }
 
 const isBtnWithIconMode = computed(() => {
-    return isPlaybackQueueBtnIconMode.value 
-        || (isPlaybackQueuePositionBtnShow.value 
-        && isPlaybackQueueBatchActionBtnShow.value 
-        && isPlaybackQueueHistoryBtnShow.value)
+    let iconNums = 1  //固定显示清空按钮
+    if (isPlaybackQueuePositionBtnShow.value) ++iconNums
+    if (isPlaybackQueueBatchActionBtnShow.value) ++iconNums
+    if (isPlaybackQueueHistoryBtnShow.value) ++iconNums
+    if (isPlaybackQueueSaveBtnShow.value) ++iconNums
+    return isPlaybackQueueBtnIconMode.value || iconNums > 3
 })
+
+const saveQueue = () => {
+    if (queueTracksSize.value < 1) return
+    visitPlaybackQueueSave()
+}
 
 
 const tutorialList = [{
@@ -261,7 +268,22 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="detail">
                     <div class="subtitle" v-html="queueState()"></div>
                     <div class="action" :class="{ 'icon-mode': isBtnWithIconMode }">
-                        <div class="batch-action-btn text-btn" @click="visitBatchPlaybackQueue" v-show="isPlaybackQueueBatchActionBtnShow">
+                        <div class="save-btn btn text-btn" 
+                            v-show="isPlaybackQueueSaveBtnShow"
+                            @click="saveQueue">
+                            <svg width="15" height="15" viewBox="0 0 853.61 853.59" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path
+                                            d="M426.39,853.55h-199c-32.66,0-65.33.12-98,0C69.66,853.23,19.5,815.14,4.57,758.06A138.7,138.7,0,0,1,.21,723.51Q-.18,426.78.06,130.05c0-64,42.59-115.66,105-127.71A135.26,135.26,0,0,1,130.43.14q232-.19,464-.14c13.93,0,25.46,4.72,35.34,14.64Q733.72,118.89,838,222.83c10.58,10.53,15.62,22.58,15.61,37.48-.13,154,.12,308-.2,462-.1,53.18-24.09,92.8-71.21,117.81-18.61,9.87-38.86,13.47-59.83,13.47Q574.38,853.52,426.39,853.55Zm-170-640h6.94q143.49,0,287,0c3,0,6,0,9,.23,22.36,1.7,40.48,23.55,38,45.78-2.61,23.46-20.15,39.22-43.88,39.22q-168.49,0-337,0c-27.74,0-45.64-17.9-45.64-45.63q0-80.73,0-161.48V85.85c-16.65,0-32.66-.59-48.59.31-6,.33-12.33,3.23-17.49,6.55-13.7,8.82-19.26,22-19.25,38.28q.18,295.72.08,591.45c0,1.67,0,3.33.06,5,.74,18.92,14,35.43,32.57,39.27,7.24,1.5,14.89,1.14,22.36,1.29,9.94.19,19.88,0,30.26,0v-6.49q0-144.49,0-289c0-28,17.85-45.78,46-45.78h420c28.4,0,46,17.71,46,46.22V768c13.88,0,27,0,40.19,0,27.25,0,45-17.78,45-45q0-222.22.08-444.46a10.66,10.66,0,0,0-3.39-8.3q-90.8-90.57-181.37-181.34A10.63,10.63,0,0,0,575,85.48q-156.49.12-313,.07h-5.71Zm340.86,554.3V512.5H256.41V767.85Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <span>保存</span>
+                        </div>
+                        <div class="batch-action-btn text-btn" 
+                            @click="visitBatchPlaybackQueue" 
+                            v-show="isPlaybackQueueBatchActionBtnShow">
                             <svg width="15" height="15" viewBox="0 0 160 125" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
@@ -272,7 +294,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </svg>
                             <span>批量</span>
                         </div>
-                        <div class="history-btn text-btn" @click="visitRecents" v-show="isPlaybackQueueHistoryBtnShow">
+                        <div class="history-btn text-btn" 
+                            @click="visitRecents" 
+                            v-show="isPlaybackQueueHistoryBtnShow">
                             <svg width="15" height="15" viewBox="0 0 767.87 750.82" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
@@ -285,7 +309,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </svg>
                             <span>历史</span>
                         </div>
-                        <div class="target-btn text-btn" @click="targetPlaying" v-show="isPlaybackQueuePositionBtnShow">
+                        <div class="target-btn text-btn" 
+                            @click="targetPlaying" 
+                            v-show="isPlaybackQueuePositionBtnShow">
                             <svg width="16" height="16" viewBox="0 -1 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <g id="aim">
                                     <path d="M12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
@@ -432,8 +458,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .playback-queue-view .detail .action.icon-mode .target-btn svg {
-    width: 19px;
-    height: 19px;
+    width: 18.5px;
+    height: 18.5px;
 }
 
 .playback-queue-view .text-btn {

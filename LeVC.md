@@ -1,5 +1,5 @@
 ### LeVC - Less Player Video Collection  
-  
+
 ##### 一、阅读须知  
 当前内容格式，不同环境可能会显示不同。
 为避免产生误解，请在下列参考环境下阅读：
@@ -11,7 +11,7 @@
 ##### 二、简介   
 LeVC（Less Player Video Collection）即视频合集，文件扩展名为.levc。  
 LeVC格式，并非为追求高效、简洁等方面目的，而是为适配某些资源的使用场景。  
-  
+
 ##### 三、格式规范（严格区分大小写）  
 ```text
 $title$标题
@@ -30,7 +30,7 @@ $list$
 ...
 视频名称n$对应的URL
 ```
-  
+
 ##### 四、格式说明  
 * 内容按行读取，即分隔符为（回车）换行符
 * 内容严格`区分大小写`，如：`$Title$标题`将无法被识别为标题，正确格式应为`$title$标题`
@@ -59,13 +59,13 @@ $我是动漫，我会覆盖上一行$
 第01集$https://abc.xyz/01
 第02集$https://abc.xyz/02
 ```
-  
+
 3、无metadata项的示例
 ```text
 视频$https://xyz.abc/01
 动漫$https://abc.xyz/01
 ```
-  
+
 4、纯url的示例
 ```text
 https://xyz.abc/01

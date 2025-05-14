@@ -29,8 +29,7 @@ ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-
 | 检查诊断        | npm doctor |
 | 安装时显示详情   | npm install --verbose |
 | 更新依赖        | npm update |
-|   |   | 
-    
+  
 > 如何为Linux平台或x86平台编译打包  
   
 * 修改配置[package.json](package.json)中内容  

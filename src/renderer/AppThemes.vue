@@ -2,13 +2,15 @@
 import { inject, onMounted, provide, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
+import { useThemeStore } from './store/themeStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
 import { isMacOS, isWinOS, toTrimString, onIpcRendererEvents, ipcRendererInvoke } from '../common/Utils';
 import { AppThemeSource } from '../common/Constants';
 import CssWinOS from './CssWinOS.vue';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
-import { useThemeStore } from './store/themeStore';
+
+
 
 
 
@@ -401,6 +403,7 @@ body.app-win-custom-shadow.mini {
 .app-custom-theme-bg .container {
   background: var(--content-bg-color) !important;
 }
+
 
 /* 滚动条 */
 ::-webkit-scrollbar-thumb {

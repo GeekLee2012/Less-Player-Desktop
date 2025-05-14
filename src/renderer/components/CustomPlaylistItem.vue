@@ -73,7 +73,7 @@ const onContextMenu = (event) => {
         <div class="title-wrap spacing1">
             <div class="content" @click="visitItem">
                 <div class="title"><span v-html="data.title"></span></div>
-                <div class="size">{{ data.data.length }} 首</div>
+                <div class="size">{{ data.data ? data.data.length : 0 }} 首</div>
             </div>
             <div class="action">
                 <svg @click.stop="playItem" width="17" height="17" viewBox="0 0 139 139" xml:space="preserve"

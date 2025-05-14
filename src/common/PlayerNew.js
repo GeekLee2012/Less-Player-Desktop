@@ -167,6 +167,7 @@ class HowlerPlayer extends EventWrapper {
             if (sound) { 
                 sound.stop()
                 sound.unload()
+                this.sound = null
             }
         } catch(error) {
             if(isDevEnv()) console.log(error)
@@ -441,15 +442,9 @@ class MpvPlayer extends EventWrapper {
         this.currentTime = 0
         this.seekPendingMark = 0 //percent
         this.started = false
-        this.retryCreate = 0
 
         this.pendingOutputDeviceId = null
         this.mpvBinaryPath = null
-    }
-
-    setFallback(value) {
-        this.fallback = value
-        return this
     }
 
     setMpvBinaryPath(value) {
@@ -476,7 +471,7 @@ class MpvPlayer extends EventWrapper {
                 "audio_only": true
             })
             if(!this.mpv) {
-                this.setState(PlayState.PLAY_ERROR, (++this.retryCreate > 1))
+                this.setState(PlayState.PLAY_ERROR)
                 return this.mpv
             }
 
@@ -487,15 +482,17 @@ class MpvPlayer extends EventWrapper {
                 self.setState(PlayState.STARTED)
                 self.seeking = false
                 self.started = true
+                self.setState(PlayState.PLAYING)
             })
 
             this.mpv.on('statuschange', (status) => {
-                const pos = status['playlist-pos']
-                if(pos < 0) return self.setState(PlayState.INIT)
+                const pos = status['playlist-pos'] || -1
+                if(pos < 0 && self.playState <= PlayState.INIT) return
                 if(self.playState == PlayState.STOP) return
 
                 const { pause } = status
                 self.setState(pause ? PlayState.PAUSE : PlayState.PLAYING)
+                
             })
 
             this.mpv.on('timeposition', async (position) => {                
@@ -512,7 +509,6 @@ class MpvPlayer extends EventWrapper {
         }
 
         this.mpv.clearPlaylist()
-        //this.mpv.load(this.currentTrack.url)
         this.started = false
         this.setState(PlayState.INIT)
         this.currentTime = 0
@@ -520,7 +516,6 @@ class MpvPlayer extends EventWrapper {
     }
 
     getMpvInstance() {
-        if(this.mpv) this.retryCreate = 0
         return this.mpv
     }
 
@@ -533,12 +528,11 @@ class MpvPlayer extends EventWrapper {
         const mpv = this.getMpvInstance()
         if(!mpv) return 
         if(this.isTrackLoadable()) {
-            mpv.load(this.currentTrack.url)
             if(this.seekPendingMark > 0) {
                 this.seek(this.seekPendingMark)
                 this.setSeekPendingMark(0)
             }
-            return 
+            return mpv.load(this.currentTrack.url)
         }
         mpv.play()
     }
@@ -554,12 +548,11 @@ class MpvPlayer extends EventWrapper {
         const mpv = this.getMpvInstance()
         if(!mpv) return
         if(this.isTrackLoadable()) {
-            mpv.load(this.currentTrack.url)
             if(this.seekPendingMark > 0) {
                 this.seek(this.seekPendingMark)
                 this.setSeekPendingMark(0)
             }
-            return 
+            return mpv.load(this.currentTrack.url)
         }
         mpv.togglePause()
     }
@@ -569,13 +562,14 @@ class MpvPlayer extends EventWrapper {
         const mpv = this.getMpvInstance()
         if(!mpv) return
         this.setState(PlayState.STOP)
+        mpv.clearPlaylist()
         mpv.stop()
     }
 
-    setState(state, fallback) {
+    setState(state) {
         this.playState = state
         const { currentTrack: track, currentTime } = this
-        this.notify('track-state', { state, track, currentTime, fallback })
+        this.notify('track-state', { state, track, currentTime })
         this.postPlayStateToDesktopLryic()
     }
 
@@ -591,12 +585,12 @@ class MpvPlayer extends EventWrapper {
     playTrack(track, fallback) {
         this.setSeekPendingMark(0)
         try {
-            this.setCurrent(track, fallback)
-            if(fallback && !this.getMpvInstance()) return this.setState(PlayState.PLAY_ERROR, fallback)
+            this.setCurrent(track)
+            if(fallback && !this.getMpvInstance()) return this.setState(PlayState.PLAY_ERROR)
             this.play()
         } catch(error) {
             if(isDevEnv()) console.log(error)
-            this.setState(PlayState.PLAY_ERROR, fallback)
+            this.setState(PlayState.PLAY_ERROR)
         }
     }
 
@@ -720,7 +714,7 @@ class Player extends EventWrapper {
             'track-seek': value => player.seek(value),
             'volume-set': value => player.volume(value),
             'radio-play': () => player.setCurrent(null),
-            'playbackQueue-empty': () => player.setCurrent(null),
+            'playbackQueue-empty': () => player.onQueueEmpty(),
             'track-setupSoundEffect': value => player.setupSoundEffect(value),
             'track-updateStereoPan': value => player.updateStereoPan(value),
             'track-updateVolumeGain': value => player.updateVolumeGain(value),
@@ -770,6 +764,14 @@ class Player extends EventWrapper {
         if(!this.getActiveDelegate()) return
         if(!this.getActiveDelegate().setCurrent) return
         this.getActiveDelegate().setCurrent(track)
+    }
+
+    onQueueEmpty() {
+        this.setActiveDelegate(null)
+        const delegates = [this.delegate, this.fallbackDelegate]
+        delegates.forEach(delegate => {
+            if(delegate && delegate.setCurrent) delegate.setCurrent(null)
+        })
     }
 
     playTrack(track) {
@@ -880,11 +882,13 @@ class Player extends EventWrapper {
 
     quit() {
         const delegates = [this.delegate, this.fallbackDelegate]
-        delegates.forEach(delegate => {
-            if(delegate && delegate.quit) {
-                delegate.quit()
-            }
-        })
+        try {
+            delegates.forEach(delegate => {
+                if(delegate && delegate.quit) delegate.quit()
+            }) 
+        } catch(error) {
+            console.log(error)
+        }
     }
 
 }

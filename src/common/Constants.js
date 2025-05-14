@@ -18,8 +18,8 @@ export const PlayState = {
     PAUSE: 5,
     END: 6,
     STOP: 7,
-    LOAD_ERROR: -2,
-    PLAY_ERROR: -3,
+    LOAD_ERROR: 10,
+    PLAY_ERROR: 20,
 }
 
 export const PlayMode = {

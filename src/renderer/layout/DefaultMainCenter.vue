@@ -540,7 +540,8 @@ onActivated(() => {
 #default-main-center .autopadding #genre-detail-view,
 #default-main-center .autopadding #emby-view,
 #default-main-center .autopadding #emby-session-edit-view,
-#default-main-center .autopadding #emby-session-detail-view {
+#default-main-center .autopadding #emby-session-detail-view,
+#default-main-center .autopadding #saved-playbackQueue-edit-view {
     padding-top: 3px;
 }
 
@@ -549,7 +550,8 @@ onActivated(() => {
 #default-main-center .autopadding #album-detail-view,
 #default-main-center .autopadding #track-detail-view,
 #default-main-center .autopadding #custom-playlist-detail-view,
-#default-main-center .autopadding #local-playlist-detail-view {
+#default-main-center .autopadding #local-playlist-detail-view,
+#default-main-center .autopadding #saved-playbackQueue-detail-view  {
     padding-top: 8px;
 }
 
@@ -589,10 +591,12 @@ onActivated(() => {
 #default-main-center .newpadding #jellyfin-view,
 #default-main-center .newpadding #jellyfin-session-edit-view,
 #default-main-center .newpadding #jellyfin-session-detail-view,
-#default-main-center .autopadding #genre-detail-view,
+#default-main-center .newpadding #genre-detail-view,
 #default-main-center .newpadding #emby-view,
 #default-main-center .newpadding #emby-session-edit-view,
-#default-main-center .newpadding #emby-session-detail-view {
+#default-main-center .newpadding #emby-session-detail-view,
+#default-main-center .newpadding #saved-playbackQueue-edit-view,
+#default-main-center .newpadding #saved-playbackQueue-detail-view {
     padding-top: 0px;
 }
 </style>
