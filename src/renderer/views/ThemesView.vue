@@ -1,5 +1,5 @@
 <script setup>
-import { onActivated, ref } from 'vue';
+import { onActivated, ref, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useThemeStore } from '../store/themeStore';
 import { useSettingStore } from '../store/settingStore';
@@ -9,11 +9,13 @@ import { emitEvents } from '../../common/EventBusWrapper';
 
 
 
+const { showConfirm } = inject('apiExpose')
+
 const { getPresetThemes, getCustomThemes, removeCustomTheme, isDemoTheme, 
     saveCustomTheme, getExportableThemes } = useThemeStore()
 const { showCustomThemeEditView, hideCustomThemeEditView,
     showToast, hidePlaybackQueueView, showFailToast } = useAppCommonStore()
-const { theme: themeSetting } = storeToRefs(useSettingStore())
+const { theme: themeSetting, isShowDialogBeforeDeleteCustomTheme } = storeToRefs(useSettingStore())
 const { setThemeIndex } = useSettingStore()
 
 const currentTabIndex = ref(0)
@@ -23,7 +25,12 @@ const switchTab = (index) => {
     setCurrnetTabIndex(index)
 }
 
-const removeTheme = (item, index) => {
+const removeTheme = async (item, index) => {
+    if (isShowDialogBeforeDeleteCustomTheme.value) {
+        const ok = await showConfirm('确定要删除主题吗？')
+        if (!ok) return
+    }
+
     const success = removeCustomTheme(item)
     if(!success) return 
     emitEvents('theme-customTheme-removed', index)

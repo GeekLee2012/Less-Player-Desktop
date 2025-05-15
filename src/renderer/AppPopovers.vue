@@ -227,7 +227,7 @@ const setupThemeSelectionViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #theme-selection-view',
     width: 725,
-    height: 528
+    height: 505
   })
 }
 
@@ -766,7 +766,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   bottom: 80px;
   width: 725px;
-  height: 528px;
+  height: 505px;
   z-index: 99;
   box-shadow: var(--box-shadow);
   border-radius: var(--border-popover-border-radius);

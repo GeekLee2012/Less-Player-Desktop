@@ -18,14 +18,25 @@ export const useLocalMusicStore = defineStore('localMusic', {
     state: () => ({
         localDirs: [],
         localTracks: [],
-        //上面状态，后期会全部移除掉
+        //上面状态已废弃，后期会全部移除掉
         localPlaylists: [],
         importTaskCount: 0, //正在进行中的导入任务数
     }),
     getters: {
         getLocalPlaylists() {
-            return this.localPlaylists
-        }
+            //return this.localPlaylists
+            //移除属性data，采用延迟加载，但感觉没减少什么内存占用
+            //因为localPlaylists本身，并没有采用“属性分离”设计，一上来就会加载到内存中.....
+            //另外, 即使采用“属性分离”设计，也不一定实现了延迟加载
+            //因为使用useXxxStore()后，Store的state可能也全部加载到内存中了.....
+            //而数据库，就可以很容易实现延迟加载，但数据读写操作上会复杂很多
+            return this.localPlaylists.map(item => {
+                const total = item.data ? item.data.length : 0
+                const clone = { ...item, total }
+                Reflect.deleteProperty(clone, 'data')
+                return clone
+            })
+        },
     },
     actions: {
         resetAll() {

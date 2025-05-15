@@ -144,6 +144,8 @@ const { setThemeIndex,
     toggleShowDialogBeforeQuitApp,
     toggleShowDialogBeforeBatchDelete,
     toggleShowDialogBeforeCustomPlaylistDelete,
+    toggleShowDialogBeforeCustomThemeDelete,
+    toggleShowDialogBeforeCustomPlayingThemeDelete,
     toggleShowDialogBeforeClearRecents,
     toggleShowDialogBeforeClearPlaybackQueue,
     toggleShowDialogBeforeResetSetting,
@@ -1498,6 +1500,18 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">删除创建的歌单：</span>
                         <ToggleControl @click="toggleShowDialogBeforeCustomPlaylistDelete"
                             :value="dialog.deleteCustomPlaylist">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">删除自定义主题：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeCustomThemeDelete"
+                            :value="dialog.deleteCustomTheme">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">删除自定义播放样式：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeCustomPlayingThemeDelete"
+                            :value="dialog.deleteCustomPlayingTheme">
                         </ToggleControl>
                     </div>
                     <div>

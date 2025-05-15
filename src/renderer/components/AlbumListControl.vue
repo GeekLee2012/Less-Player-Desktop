@@ -22,6 +22,7 @@ const props = defineProps({
     loadingMaskNum: Number,
     needReset: Boolean, //播放前是否清空当前播放
     hideExtra: Boolean,
+    draggable: Boolean
 })
 
 const visitItem = (item) => {
@@ -53,7 +54,7 @@ const playAction = (item) => {
 </script>
 
 <template>
-    <div class="albumlist-ctl">
+    <div class="albumlist-ctl" :draggable="false">
         <div class="pag-content" v-show="!loading">
             <ImageTextTile v-for="item in data" 
                 :cover="item.cover" 

@@ -1,5 +1,6 @@
 <script setup>
-import { onActivated, ref, shallowRef, watch, reactive, inject, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import { onActivated, ref, shallowRef, watch, reactive, 
+    inject, computed, nextTick, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUserProfileStore } from '../store/userProfileStore';
 import { useRecentsStore } from '../store/recentsStore';
@@ -76,7 +77,7 @@ const { removeAllRecents } = useRecentsStore()
 const { isShowDialogBeforeClearRecents, isSingleLineAlbumTitleStyle,
     isShowDialogBeforeClearPlaybackQueues
  } = storeToRefs(useSettingStore())
-const { queueMetas } = storeToRefs(usePlaybackQueueStore())
+const { getQueues } = storeToRefs(usePlaybackQueueStore())
 const { clearQueues } = usePlaybackQueueStore()
 
 
@@ -108,6 +109,7 @@ const userProfileRef = ref(null)
 const back2TopBtnRef = ref(null)
 const singleLineTitleStyle = ref(false)
 const refreshId = ref(0)
+const draggable = ref(false)
 const setRefreshId = (value) => (refreshId.value = value)
 const isTabCodeEquals = (code) => (tabs[activeTab.value].code == code)
 const isFavoritesTab = () => (isTabCodeEquals('favorites'))
@@ -141,12 +143,13 @@ const switchTab = () => {
     tabData.length = 0
     currentTabView.value = null
     singleLineTitleStyle.value = false
+    draggable.value = false
     const platform = currentPlatformCode.value
     if (isCustomPlaylistsTab()) {
         tabData.push(...getCustomPlaylists.value)
         currentTabView.value = CustomPlaylistListControl
     } else if (isPlaybackQueuesTab()) {
-        tabData.push(...queueMetas.value)
+        tabData.push(...getQueues.value)
         currentTabView.value = PlaylistsControl
     } else if (isFollowArtistsTab()) {
         tabData.push(...getFollowArtists.value(platform))
@@ -182,9 +185,11 @@ const switchSubTab = () => {
     currentTabView.value = null
     subTabTipText.value = ""
     singleLineTitleStyle.value = false
+    draggable.value = false
     const platform = currentPlatformCode.value
     const { code: typeCode } = typeTabs[activeSubTab.value]
     if (isAllSongsTab(typeCode)) {
+        draggable.value = true
         if (isFavoritesTab()) tabData.push(...getFavoriteSongs.value(platform))
         if (isRecentsTab()) tabData.push(...getRecentSongs.value(platform))
         currentTabView.value = SongListControl
@@ -443,11 +448,13 @@ onActivated(() => {
                 :dataType="dataType" 
                 :singleLineTitleStyle="singleLineTitleStyle"
                 :playable="true"
+                :draggable="draggable"
                 :needReset="true" >
             </component>
             <div v-show="loading">
                 <div class="loading-mask" v-for="i in 12"
-                    style="width: 100%;  height: 36px; margin-bottom: 5px; display: inline-block;"></div>
+                    style="width: 100%;  height: 36px; margin-bottom: 5px; display: inline-block;">
+                </div>
             </div>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

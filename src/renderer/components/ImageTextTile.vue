@@ -696,6 +696,10 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 
 /* Horizion Card - Simple Icon */
+.image-text-tile-card-horizion.horizion-small-icon .title-wrap .action {
+    bottom: 3px;
+}
+
 .image-text-tile-card-horizion.horizion-small-icon .title-wrap .action .play-btn,
 .image-text-tile-card-horizion.horizion-small-icon  .title-wrap .action .favorite-btn {
     margin-left: 25px;

@@ -316,9 +316,9 @@ const handleUnplayableTrack = (track, msg) => {
 
 //获取并更新歌曲播放信息
 const bootstrapTrack = (track, options) => {
-    const { noToast, keepCover } = (options || {})
+    const { noToast, keepCover, checkCurrent } = (options || {})
     return new Promise(async (resolve, reject) => {
-        if(!isCurrentTrack(track)) return 
+        if(checkCurrent && !isCurrentTrack(track)) return reject('notCurrent')
         if (!track) return reject('none')
         //FM电台
         if (Playlist.isFMRadioType(track) && Track.hasUrl(track)) {
@@ -330,7 +330,7 @@ const bootstrapTrack = (track, options) => {
         if (!vendor || !vendor.playDetail) return reject('noService')
         //播放相关数据
         const result = await vendor.playDetail(id, track)
-        if(!isCurrentTrack(track)) return 
+        if(checkCurrent && !isCurrentTrack(track)) return reject('notCurrent')
         if (!result) return reject('noUrl')
 
         const { lyric, lyricTrans ,cover, artist, url } = result
@@ -363,17 +363,18 @@ const bootstrapTrack = (track, options) => {
     })
 }
 
-const bootstrapTrackWithTransfer = async (track) => {
-    return bootstrapTrack(track, { noToast: true }).catch(async (reason) => {
-        if (reason == 'noUrl' || 'noService') {
-            const { platform } = track
-            if (isLocalMusic(platform) || Playlist.isFMRadioType(track)) return
-            const candidate = await United.transferTrack(track)
-            if (!Track.hasUrl(candidate)) return
-            const { url, isCandidate } = candidate
-            Object.assign(track, { url, isCandidate })
-        }
-    })
+const bootstrapTrackWithTransfer = async (track, options) => {
+    return bootstrapTrack(track, options)
+        .catch(async (reason) => {
+            if (reason == 'noUrl' || 'noService') {
+                const { platform } = track
+                if (isLocalMusic(platform) || Playlist.isFMRadioType(track)) return
+                const candidate = await United.transferTrack(track)
+                if (!Track.hasUrl(candidate)) return
+                const { url, isCandidate } = candidate
+                Object.assign(track, { url, isCandidate })
+            }
+        })
 }
 
 //获取当前平台的音源url
@@ -811,7 +812,7 @@ const followArtist = async (artist) => {
     
     const { id, title, cover } = artist
     addFollowArtist(id, platform, title, cover)
-    showToast('歌手成功')
+    showToast('歌手关注成功')
 }
 
 //播放歌手：播放热门歌曲或全部歌曲（仅第1页）
@@ -1401,9 +1402,11 @@ const dndSaveTrack = async (event, track) => {
     if (isLocalMusic(platform)) return showFailToast('当前为本地歌曲')
     if (Playlist.isFMRadioType(track)) return
 
-    if (!Track.hasUrl(track)) { //TODO 网络请求，操作响应有些滞后
-        await bootstrapTrackWithTransfer(track)
+    //TODO 网络请求，操作响应有些滞后
+    if (!Track.hasUrl(track)) { 
+        await bootstrapTrackWithTransfer(track, { noToast: true })
     }
+    
     if (!Track.hasUrl(track) && !track.exurl) return showFailToast('当前歌曲无法下载')
     const { url, exurl } = track
 
@@ -1722,7 +1725,7 @@ const eventsRegistration = {
     'track-changed': track => {
         setLoading(true)
         markTrackSeekPending(0)
-        bootstrapTrack(track).then(track => {
+        bootstrapTrack(track, { checkCurrent: true }).then(track => {
             if (isCurrentTrack(track)) {
                 playTrackDirectly(track)
             }
@@ -1733,17 +1736,17 @@ const eventsRegistration = {
                 const { platform } = track
                 if (!isVipTransferEnable.value || isLocalMusic(platform)
                     || Playlist.isFMRadioType(track)) {
-                    handleUnplayableTrack(track)
-                    return
+                    return handleUnplayableTrack(track)
                 }
                 showFailToast(TRY_TRANSFRER_MSG)
                 const candidate = await United.transferTrack(track, null, () => !isCurrentTrack(track))
                 if (!Track.hasUrl(candidate) && !Track.hasUrl(track)) {
-                    handleUnplayableTrack(track, TRANSFRER_FAIL_MSG)
-                    return
+                    return handleUnplayableTrack(track, TRANSFRER_FAIL_MSG)
                 }
+
                 if (!isCurrentTrack(track)) return
                 if (isDevEnv()) console.log(candidate)
+                
                 const { url, cover, lyric, lyricTrans, lyricRoma, duration, isCandidate } = candidate
                 Object.assign(track, { url, lyric, lyricTrans, lyricRoma, duration, isCandidate })
                 if (Track.hasCover(candidate)) Object.assign(track, { cover })

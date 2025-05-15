@@ -8,7 +8,8 @@ export const usePlaybackQueueStore = defineStore('playbackQueueStore', {
         queues: [],
     }),
     getters: {
-        queueMetas() {
+        getQueues() {
+            //return this.queues
             return this.queues.map(item => {
                 const total = item.data ? item.data.length : 0
                 const clone = { ...item, total }

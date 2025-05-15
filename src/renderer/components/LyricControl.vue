@@ -198,7 +198,7 @@ const reloadLyricData = (track) => {
 
         setupLyricExtra(track)
         safeRenderAndScrollLyric(currentTimeState.value, track)
-       /*setupLyricTitle(track)
+        /*setupLyricTitle(track)
         setupLyricAral(track)
         setupLyricLines(track)*/
     })

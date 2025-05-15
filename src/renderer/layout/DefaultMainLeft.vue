@@ -43,7 +43,7 @@ const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists, } = storeTo
 const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
 const { toggleMiniNavBarMode } = useSettingStore()
 const { getCustomPlaylist } = useUserProfileStore()
-const { queueMetas } = storeToRefs(usePlaybackQueueStore())
+const { getQueues } = storeToRefs(usePlaybackQueueStore())
 
 
 const activeCustomPlaylistIndex = ref(-1)
@@ -96,10 +96,18 @@ const updatePlatformIndex = (index, isSwitchMode) => {
     })
 }
 
+const expandAll = () => {
+    setPlatformsCollapsed(false)
+    setFavoriteArtistsCollapsed(false)
+    setFavoritePlaylistsCollapsed(false)
+    setSavedPlaybackQueuesCollapsed(false)
+}
+
 const switchExploreMode = (noVisit) => {
     nextExploreMode()
-    if(typeof noVisit == 'boolean' && noVisit) return
+    if(noVisit && typeof noVisit == 'boolean') return
     updatePlatformIndex(0, true)
+    expandAll()
 }
 
 const toggleRadioMode = () => {
@@ -109,11 +117,13 @@ const toggleRadioMode = () => {
         setPlaylistExploreMode()
     }
     updatePlatformIndex(0, true)
+    expandAll()
 }
 
 const visitCloudStorageMode = () => {
     setCloudStorageExploreMode()
     updatePlatformIndex(0, true)
+    expandAll()
 }
 
 const onContextMenu = (event, data, dataType, index) => {
@@ -270,6 +280,7 @@ watch(isUserHomeMode, (nv) => {
     if(centerContentRef.value) {
         centerContentRef.value.scrollTop = 0
     }
+    expandAll()
 })
 
 watch(isCloudStorageModeEnable, (nv) => {
@@ -494,7 +505,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <div class="saved-playbackQueue-list" 
                 :class="{ 
                     'collapsed': isSavedPlaybackQueuesCollapsed,
-                    'none-data': (queueMetas.length < 1) 
+                    'none-data': (getQueues.length < 1) 
                 }"
                 v-show="isPlaylistMode && navigation.savedPlaybackQueuesShow">
                 <div class="secondary-text">
@@ -525,7 +536,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </svg>
                 </div>
                 <ul v-show="!isSavedPlaybackQueuesCollapsed">
-                    <li v-for="(item, index) in queueMetas"
+                    <li v-for="(item, index) in getQueues"
                         :class="{ active: (activeSavedPlaybackQueueIndex == index) }" @click="visitSavedPlaybackQueueItem(item, index)"
                         @contextmenu.stop="(e) => {}">
                         <div class="playlist-item">

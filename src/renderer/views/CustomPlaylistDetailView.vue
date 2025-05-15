@@ -290,6 +290,7 @@ onUpdated(() => resetBack2TopBtn())
                 :data="detail.data" 
                 :artistVisitable="true" 
                 :albumVisitable="true" 
+                :draggable="true"
                 :dataType="4">
             </SongListControl>
         </div>

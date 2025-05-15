@@ -431,6 +431,10 @@ export const useSettingStore = defineStore('setting', {
             batchDelete: true,
             //删除创建的歌单
             deleteCustomPlaylist: true,
+            //删除自定义主题
+            deleteCustomTheme: true,
+            //删除自定义播放样式
+            deleteCustomPlayingTheme: true,
             //清空最近播放
             clearRecents: true,
             //清空当前播放（列表）
@@ -833,6 +837,12 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeDeleteCustomPlaylist() {
             return this.dialog.deleteCustomPlaylist
+        },
+        isShowDialogBeforeDeleteCustomTheme() {
+            return this.dialog.deleteCustomTheme
+        },
+        isShowDialogBeforeDeleteCustomPlayingTheme() {
+            return this.dialog.deleteCustomPlayingTheme
         },
         isShowDialogBeforeClearRecents() {
             return this.dialog.clearRecents
@@ -1780,6 +1790,12 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeCustomPlaylistDelete() {
             this.dialog.deleteCustomPlaylist = !this.dialog.deleteCustomPlaylist
+        },
+        toggleShowDialogBeforeCustomThemeDelete() {
+            this.dialog.deleteCustomTheme = !this.dialog.deleteCustomTheme
+        },
+        toggleShowDialogBeforeCustomPlayingThemeDelete() {
+            this.dialog.deleteCustomPlayingTheme = !this.dialog.deleteCustomPlayingTheme
         },
         toggleShowDialogBeforeClearRecents() {
             this.dialog.clearRecents = !this.dialog.clearRecents

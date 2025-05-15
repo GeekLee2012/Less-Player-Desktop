@@ -61,7 +61,7 @@ const { getRecentSongs, getRecentPlaylilsts,
     getRecentAlbums, getRecentRadios } = storeToRefs(useRecentsStore())
 const { removeRecentSong, removeRecentPlaylist,
     removeRecentAlbum, removeRecentRadio, } = useRecentsStore()
-const { queueMetas } = storeToRefs(usePlaybackQueueStore())
+const { getQueues } = storeToRefs(usePlaybackQueueStore())
 const { removeQueue } = usePlaybackQueueStore()
 
 
@@ -283,7 +283,7 @@ const switchTab = () => {
                 deleteBtn: true,
                 exportBtn: false
             })
-            tabData.push(...filterByTitleWithKeyword(queueMetas.value))
+            tabData.push(...filterByTitleWithKeyword(getQueues.value))
         }
         currentTabView.value = PlaylistsControl
     } else if (isAlbumTab()) { //专辑

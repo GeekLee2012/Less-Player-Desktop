@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
@@ -9,12 +9,13 @@ import ToggleControl from '../components/ToggleControl.vue';
 
 
 
+const { showConfirm } = inject('apiExpose')
 
 const { setPlayingViewThemeIndex, showCustomPlayingThemeEditView,
     removePlayingViewCustomTheme, savePlayingViewCustomTheme, } = useAppCommonStore()
 const { playingViewPresetThemes, playingViewCustomThemes,
     playingViewThemeIndex, playingViewThemeType } = storeToRefs(useAppCommonStore())
-const { track } = storeToRefs(useSettingStore())
+const { track, isShowDialogBeforeDeleteCustomPlayingTheme } = storeToRefs(useSettingStore())
 const { setPlayingViewBgCoverEffectIndex, 
     togglePlayingViewCoverBorderShow,
     toggleUseOnlineCover,
@@ -32,7 +33,12 @@ const editTheme = (item) => {
     showCustomPlayingThemeEditView(item)
 }
 
-const removeTheme = (item, index) => {
+const removeTheme = async (item, index) => {
+    if (isShowDialogBeforeDeleteCustomPlayingTheme.value) {
+        const ok = await showConfirm('确定要删除播放样式吗？')
+        if (!ok) return
+    }
+
     removePlayingViewCustomTheme(item)
     setPlayingViewThemeIndex(0)
 }

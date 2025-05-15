@@ -145,8 +145,10 @@ const setHCardImageTextTileSize = () => {
     const tileHMargin = 14
     const mainMargin = 33
     const scrollBarWidth = 6
+    const { clientWidth: docClientWidth } = document.documentElement
+    const isWidthEnough = docClientWidth >= (minAppWidth + tileMinWidth)
     //TODO 宽屏、超宽屏，需更好兼容性
-    const limits = generateOrderNums(16, (isMiniNavBarMode.value ? 3 : 2), -1)
+    const limits = generateOrderNums(16, ((isMiniNavBarMode.value || isWidthEnough) ? 3 : 2), -1)
     
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
