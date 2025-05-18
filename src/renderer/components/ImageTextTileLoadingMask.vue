@@ -16,7 +16,7 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
     <div class="tiles-loading-mask" :class="{
         'tiles-card-loading-mask': isUseCardStyleImageTextTile,
         'tiles-video-loading-mask': videoStyle,
-        'tiles-card-horizion-loading-mask': isUseHCardStyleImageTextTile,
+        'tiles-card-horiziontal-loading-mask': isUseHCardStyleImageTextTile,
     }">
         <div class="tile" v-for="i in count">
             <div class="cover loading-mask"></div>
@@ -96,11 +96,11 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
     margin-bottom: 25px;
 }
 
-.tiles-card-horizion-loading-mask {
+.tiles-card-horiziontal-loading-mask {
     --others-image-text-tile-cover-size: 168px;
 }
 
-.tiles-card-horizion-loading-mask .tile {
+.tiles-card-horiziontal-loading-mask .tile {
     width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio));
     margin-top: 18px !important;
     margin-bottom: 12px !important;
@@ -109,7 +109,7 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
     height: auto !important;
 }
 
-.tiles-card-horizion-loading-mask .tile .cover {
+.tiles-card-horiziontal-loading-mask .tile .cover {
     height: 151px !important;
 }
 
@@ -131,11 +131,11 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
 }
 
 
-.mini-navbar-mode .tiles-card-horizion-loading-mask {
+.mini-navbar-mode .tiles-card-horiziontal-loading-mask {
     --others-image-text-tile-cover-size: 168px;
 }
 
-.mini-navbar-mode .tiles-card-horizion-loading-mask .tile {
+.mini-navbar-mode .tiles-card-horiziontal-loading-mask .tile {
     width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio));
     margin-top: 18px !important;
     margin-bottom: 12px !important;
@@ -144,7 +144,7 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
     height: auto !important;
 }
 
-.mini-navbar-mode .tiles-card-horizion-loading-mask .tile .cover {
+.mini-navbar-mode .tiles-card-horiziontal-loading-mask .tile .cover {
     height: 151px !important;
 }
 </style>

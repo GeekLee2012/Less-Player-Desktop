@@ -213,7 +213,8 @@ onMounted(() => resetBack2TopBtn())
             </PlaylistsControl>
             <PlaylistsControl 
                 :data="tutorialList" 
-                :playable="false"  
+                :playable="false"
+                :tutorial="true"  
                 v-show="isLocalMusicViewPlaylistTipsShow 
                     && localPlaylists.length < 1
                     && importTaskCount < 1">

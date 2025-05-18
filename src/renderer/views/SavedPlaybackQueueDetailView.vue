@@ -28,17 +28,18 @@ const back2TopBtnRef = ref(null)
 const detail = reactive({})
 let offset = 0, page = 1, limit = 1000, total = 0
 let markScrollTop = 0
-const loading = ref(true)
+const isLoading = ref(true)
 const dataListId = ref(null)
 const searchKeyword = ref(null)
 const timeIndex = ref(1)
-const setSearchKeyword = (value) => searchKeyword.value = value
+const setLoading = (value) => (isLoading.value = value)
+const setSearchKeyword = (value) => (searchKeyword.value = value)
 const setDataListId = (value) => (dataListId.value = value)
 const setTimeIndex = (value) => (timeIndex.value = value)
 
 const { addTracks, resetQueue, playNextTrack } = usePlayStore()
 const { showToast, updateCommonCtxItem } = useAppCommonStore()
-const { getQueue, updateQueue, removeQueue } = usePlaybackQueueStore()
+const { getQueue, getQueueAsync, updateQueue, removeQueue, } = usePlaybackQueueStore()
 const { isShowDialogBeforeBatchDelete, isSearchForCustomPlaylistShow, 
     isMiniNavBarMode, isShowDialogBeforeDeletePlaybackQueue, } = storeToRefs(useSettingStore())
 
@@ -85,8 +86,9 @@ const filterSongsWithKeyword = (list) => {
     return result
 }
 
-const loadContent = () => {
-    const queue = getQueue(props.id)
+const loadContent = async () => {
+    setLoading(true)
+    const queue = await getQueueAsync(props.id)
     if (!queue) {
         const _now = Date.now()
         Object.assign(detail, { 
@@ -103,6 +105,7 @@ const loadContent = () => {
     let { data } = queue
     Object.assign(detail, { data: filterSongsWithKeyword(data) })
     setDataListId(randomTextWithinAlphabetNums(16))
+    setLoading(false)
 }
 
 const loadMoreContent = () => {
@@ -251,7 +254,7 @@ onUpdated(() => resetBack2TopBtn())
                 <img class="cover" v-lazy="coverDefault(detail.cover)" 
                 @dragover="e => e.preventDefault()" @drop="queueCoverOnDrop" />
             </div>
-            <div class="right">
+            <div class="right" v-show="!isLoading">
                 <div class="title" v-html="detail.title" ref="titleRef"></div>
                 <div class="about" v-html="getAbout()" :class="{ 'short-about': isTwoLinesTitle }"></div>
                 <div class="edit-wrap">
@@ -283,19 +286,44 @@ onUpdated(() => resetBack2TopBtn())
                     </DeleteAllBtn>
                 </div>
             </div>
+            <div class="right" v-show="isLoading">
+                <div class="title">
+                    <div class="loading-mask" style="width: 88%; height: 36px; display: inline-block;"></div>
+                </div>
+                <div class="about">
+                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 23px; display: inline-block;">
+                    </div>
+                </div>
+                <div class="edit-wrap">
+                    <div class="loading-mask" style="width: 288px; height: 23px; display: inline-block;">
+                    </div>
+                </div>
+                <div class="action">
+                    <div class="loading-mask btn-spacing" v-for="i in 2"
+                        style="width: 188px; height: 36px; display: inline-block;"></div>
+                </div>
+            </div>
         </div>
         <div class="center">
             <div class="list-title">
-                <span class="size-text content-text-highlight">列表({{ detail.data.length }})</span>
-                <SearchBarExclusiveModeControl class="search-wrap" v-show="isSearchForCustomPlaylistShow"
+                <span class="size-text content-text-highlight" v-show="!isLoading">列表({{ detail.data.length }})</span>
+                <SearchBarExclusiveModeControl class="search-wrap" v-show="!isLoading && isSearchForCustomPlaylistShow"
                     :onKeywordChanged="filterContent">
                 </SearchBarExclusiveModeControl>
+
+                <div class="loading-mask" v-show="isLoading"
+                    style="text-align: left;width: 150px; height: 28px; display: inline-block;">
+                </div>
+                <div class="loading-mask search-wrap" v-show="isLoading && isSearchForCustomPlaylistShow"
+                    style="text-align: left;width: 168px; height: 28px; display: inline-block;margin-right: 10px;">
+                </div>
             </div>
             <SongListControl
                 :id="dataListId"
                 :data="detail.data" 
                 :artistVisitable="true" 
                 :albumVisitable="true" 
+                :loading="isLoading"
                 :dataType="12">
             </SongListControl>
         </div>

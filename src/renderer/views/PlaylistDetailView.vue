@@ -339,9 +339,11 @@ onActivated(() => {
                     :onKeywordChanged="filterContent">
                 </SearchBarExclusiveModeControl>
                 <div class="loading-mask" v-show="isLoading"
-                    style="text-align: left;width: 150px; height: 28px; display: inline-block;"></div>
+                    style="text-align: left;width: 150px; height: 28px; display: inline-block;">
+                </div>
                 <div class="loading-mask search-wrap" v-show="isLoading && isSearchForOnlinePlaylistShow"
-                    style="text-align: left;width: 188px; height: 28px; display: inline-block;margin-right: 10px;"></div>
+                    style="text-align: left;width: 188px; height: 28px; display: inline-block;margin-right: 10px;">
+                </div>
             </div>
             <SongListControl 
                 :id="randomTextWithinAlphabetNums(16)"

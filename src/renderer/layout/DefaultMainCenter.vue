@@ -8,7 +8,7 @@ import DefaultMainContent from './DefaultMainContent.vue';
 import DefaultMainBottom from './DefaultMainBottom.vue';
 import ClassicMainTop from './ClassicMainTop.vue';
 import ClassicMainBottom from './ClassicMainBottom.vue';
-import { isDevEnv, generateOrderNums } from '../../common/Utils';
+import { isDevEnv, genSeqNums } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 
@@ -107,7 +107,7 @@ const setImageTextTileSize = () => {
     const mainMargin = 33
     const scrollBarWidth = 6
     //TODO 宽屏、超宽屏，需更好兼容性
-    const limits = generateOrderNums(20, (isMiniNavBarMode.value ? 5 : 4), -1)
+    const limits = genSeqNums(20, (isMiniNavBarMode.value ? 5 : 4), -1)
     
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
@@ -148,7 +148,7 @@ const setHCardImageTextTileSize = () => {
     const { clientWidth: docClientWidth } = document.documentElement
     const isWidthEnough = docClientWidth >= (minAppWidth + tileMinWidth)
     //TODO 宽屏、超宽屏，需更好兼容性
-    const limits = generateOrderNums(16, ((isMiniNavBarMode.value || isWidthEnough) ? 3 : 2), -1)
+    const limits = genSeqNums(16, ((isMiniNavBarMode.value || isWidthEnough) ? 3 : 2), -1)
     
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return
@@ -365,7 +365,7 @@ const setThemesViewItemsSize = () => {
     const tileHMargin = 25
     const scrollBarWidth = 6
     //TODO 宽屏、超宽屏，需更好兼容性
-    const limits = generateOrderNums(20, (isMiniNavBarMode.value ? 5 : 4), -1)
+    const limits = genSeqNums(20, (isMiniNavBarMode.value ? 5 : 4), -1)
 
     const mainContent = document.querySelector('#themes-view .center')
     if (!mainContent) return

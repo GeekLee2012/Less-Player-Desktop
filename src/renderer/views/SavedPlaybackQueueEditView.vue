@@ -50,7 +50,7 @@ const checkValid = () => {
     invalid.value = (!title || title.trim().length < 1)
 }
 
-const submit = () => {
+const submit = async () => {
     let { title, about, cover } = detail
     if (title.length < 1) {
         invalid.value = true

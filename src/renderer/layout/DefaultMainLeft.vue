@@ -51,11 +51,13 @@ const activeFavoritePlaylistIndex = ref(-1)
 const activeSavedPlaybackQueueIndex = ref(-1)
 const activeArtistIndex = ref(-1)
 const isPlatformsCollapsed = ref(false)
+const isCustomPlaylistsCollapsed = ref(false)
 const isFavoritePlaylistsCollapsed = ref(false)
 const isFavoriteArtistsCollapsed = ref(false)
 const isSavedPlaybackQueuesCollapsed = ref(false)
 const centerContentRef = ref(null)
 const setPlatformsCollapsed = (value) => isPlatformsCollapsed.value = value
+const setCustomPlaylistsCollapsed = (value) => isCustomPlaylistsCollapsed.value = value
 const setFavoritePlaylistsCollapsed = (value) => isFavoritePlaylistsCollapsed.value = value
 const setFavoriteArtistsCollapsed = (value) => isFavoriteArtistsCollapsed.value = value
 const setSavedPlaybackQueuesCollapsed = (value) => isSavedPlaybackQueuesCollapsed.value = value
@@ -96,18 +98,21 @@ const updatePlatformIndex = (index, isSwitchMode) => {
     })
 }
 
+/*
 const expandAll = () => {
     setPlatformsCollapsed(false)
+    setCustomPlaylistsCollapsed(false)
     setFavoriteArtistsCollapsed(false)
     setFavoritePlaylistsCollapsed(false)
     setSavedPlaybackQueuesCollapsed(false)
 }
+*/
 
 const switchExploreMode = (noVisit) => {
     nextExploreMode()
     if(noVisit && typeof noVisit == 'boolean') return
     updatePlatformIndex(0, true)
-    expandAll()
+    setPlatformsCollapsed(false)
 }
 
 const toggleRadioMode = () => {
@@ -117,13 +122,13 @@ const toggleRadioMode = () => {
         setPlaylistExploreMode()
     }
     updatePlatformIndex(0, true)
-    expandAll()
+    setPlatformsCollapsed(false)
 }
 
 const visitCloudStorageMode = () => {
     setCloudStorageExploreMode()
     updatePlatformIndex(0, true)
-    expandAll()
+    setPlatformsCollapsed(false)
 }
 
 const onContextMenu = (event, data, dataType, index) => {
@@ -187,85 +192,6 @@ const playCustomPlaylistItem = (item, index) => {
     playPlaylist(playlist)
 }
 
-/* 拖拽移动重排序 */
-/*
-const dragTargetIndex = ref(-1)
-const dragOverIndex = ref(-1)
-const dragging = ref(false)
-const setDragTargetIndex = (value) => dragTargetIndex.value = value
-const setDragOverIndex = (value) => dragOverIndex.value = value
-const setDragging = (value) => dragging.value = value
-
-//重置状态
-const resetDragState = () => {
-    setDragging(false)
-    setDragOverIndex(-1)
-    setDragTargetIndex(-1)
-}
-
-const markDragStart = (event, item, index) => {
-    setDragging(true)
-    //当前拖拽对象index
-    setDragTargetIndex(index)
-    //仅为改变默认鼠标样式
-    const { dataTransfer } = event
-    if (dataTransfer) dataTransfer.effectAllowed = 'move'
-}
-
-const markDragOver = (event, item, index) => {
-    if (!dragging.value) return
-    //拖拽悬停时所在的Item对象对应的index
-    setDragOverIndex(index)
-}
-
-const moveDragItem = (event) => {
-    if (!dragging.value) return
-    movePlaylistPlatform(dragTargetIndex.value, dragOverIndex.value)
-}
-
-
-const sortedActivePlatforms = ref([])
-const needReposition = () => (sortedActivePlatforms.value && sortedActivePlatforms.value.length > 0)
-
-const setupSortedActivePlatforms = (value) => {
-    //TODO 插件变动时，sortedActivePlatforms会被重置
-    //sortedActivePlatforms.value = (value || [])
-    const oValue = sortedActivePlatforms.value || []
-    const _value = (value || [])
-    const nValue = []
-    //合并数据
-    const part1 = oValue.filter(item => (_value.findIndex(e => e.code == item.code) != -1)) || []
-    const part2 = _value.filter(item => (part1.findIndex(e => e.code == item.code) == -1)) || []
-    nValue.push(...part1)
-    nValue.push(...part2)
-    sortedActivePlatforms.value = nValue
-}
-
-const repositionIndex = (index) => {
-    const platfroms = sortedActivePlaylistPlatforms.value
-    const { code } = platfroms[index]
-    return activePlatforms.value().findIndex(item => item.code == code)
-}
-
-const movePlaylistPlatform = (from, to) => {
-    if(from < 0 || to < 0 || from == to) return
-    const platforms = sortedActivePlatforms.value || []
-    const item = platforms[from]
-    platforms.splice(from, 1)
-    platforms.splice(to, 0, item)
-}
-
-const sortedActivePlaylistPlatforms = computed(() => {
-    const _sPlatforms = sortedActivePlatforms.value
-    if(_sPlatforms && _sPlatforms.length > 0) {
-        return sortedActivePlatforms.value
-    }
-    return activePlatforms.value()
-})
-
-watch(() => activePlatforms.value(), setupSortedActivePlatforms)
-*/
-
 
 /* 生命周期、监听 */
 watch(isArtistModeEnable, (nv) => {
@@ -280,7 +206,7 @@ watch(isUserHomeMode, (nv) => {
     if(centerContentRef.value) {
         centerContentRef.value.scrollTop = 0
     }
-    expandAll()
+    setPlatformsCollapsed(false)
 })
 
 watch(isCloudStorageModeEnable, (nv) => {
@@ -468,10 +394,37 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </ul>
             </div>
             <div class="custom-playlist-list" 
-                :class="{ 'none-data': (getCustomPlaylists.length < 1) }"
+                :class="{ 
+                    'none-data': (getCustomPlaylists.length < 1),
+                    'collapsed': isCustomPlaylistsCollapsed,
+                }"
                 v-show="isPlaylistMode && navigation.customPlaylistsShow">
                 <div class="secondary-text">
-                    <span>创建的歌单</span>
+                    <span>自建歌单</span>
+                    <svg v-show="isCustomPlaylistsCollapsed" class="expand-btn"
+                        @click="setCustomPlaylistsCollapsed(false)" width="11" height="11" viewBox="0 0 455.71 818.08"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <g id="Layer_2-2" data-name="Layer 2">
+                                    <g id="Layer_1-2-2" data-name="Layer 1-2">
+                                        <path
+                                            d="M354.54,413c-2.89-1.94-5-2.89-6.47-4.41Q181.42,241.85,14.81,75.08C1.75,62-3.43,46.91,2.34,29.08,11.92-.46,49.26-9.71,71.91,11.71c7.87,7.44,15.35,15.29,23,23L440.49,380.64c20.22,20.24,20.29,45.1.22,65.21Q262.27,624.5,83.9,803.2c-9.12,9.14-19.48,15.07-32.63,14.88-17.18-.25-30.24-8-37.94-23.27C5.54,779.38,7.14,764.15,17.22,750a61.07,61.07,0,0,1,6.7-7.4q162.34-162.55,324.74-325C349.94,416.3,351.53,415.32,354.54,413Z" />
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                    <svg v-show="!isCustomPlaylistsCollapsed" class="collapse-btn"
+                        @click="setCustomPlaylistsCollapsed(true)" width="11" height="11" viewBox="0 0 763.32 424.57"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path
+                                    d="M380.47,322.11c27.6-27.5,54-53.68,80.23-80Q575,127.75,689.38,13.4C708.7-5.81,735-2.92,750.83,12.91c17,17,16.57,43.39-.9,60.87L414.1,409.61c-19.89,19.89-45,20-64.9.08Q180.9,241.45,12.66,73.15A42.53,42.53,0,1,1,72.85,13Q224.7,164.87,376.48,316.73A46.1,46.1,0,0,1,380.47,322.11Z" />
+                            </g>
+                        </g>
+                    </svg>
                     <svg class="add-custom-btn" @click="() => visitCustomPlaylistCreate()" width="11" height="11"
                         viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
@@ -482,7 +435,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </g>
                     </svg>
                 </div>
-                <ul>
+                <ul v-show="!isCustomPlaylistsCollapsed">
                     <li v-for="(item, index) in getCustomPlaylists"
                         :class="{ active: (activeCustomPlaylistIndex == index) }" @click="visitCustomItem(item, index)"
                         @contextmenu.stop="(e) => onContextMenu(e, item, 3, index)">
@@ -557,7 +510,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
             <div class="favorite-playlist-list" v-show="isPlaylistMode && navigation.favoritePlaylistsShow">
                 <div class="secondary-text">
-                    <span>收藏的歌单</span>
+                    <span>收藏歌单</span>
                     <svg v-show="isFavoritePlaylistsCollapsed" class="expand-btn"
                         @click="setFavoritePlaylistsCollapsed(false)" width="11" height="11" viewBox="0 0 455.71 818.08"
                         xmlns="http://www.w3.org/2000/svg">
@@ -841,6 +794,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #main-left .platform-list.collapsed,
+#main-left .custom-playlist-list.collapsed,
 #main-left .custom-playlist-list.none-data,
 #main-left .saved-playbackQueue-list.collapsed,
 #main-left .saved-playbackQueue-list.none-data {
@@ -853,17 +807,24 @@ onUnmounted(() => offEvents(eventsRegistration))
     fill: var(--content-subtitle-text-color);
     cursor: pointer;
     position: absolute;
-    /* right: 15px; */
+    /* right: 15px; 
     right: calc(var(--spacing-left) + 8px);
+    */
+    right: calc(var(--spacing-left) + 15px);
     top: 6px;
     transform: scale(1.08);
 }
 
+#main-left .center .add-custom-btn {
+    right: calc(var(--spacing-left) + 35px);
+}
+
+/*
 #main-left .center .collapse-btn,
 #main-left .center .expand-btn {
-    /* right: 22px; */
     right: calc(var(--spacing-left) + 15px);
 }
+*/
 
 #main-left .center .add-custom-btn:hover,
 #main-left .center .collapse-btn:hover,

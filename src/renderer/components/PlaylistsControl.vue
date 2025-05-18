@@ -36,6 +36,7 @@ const props = defineProps({
     tileOnDragEndFn: Function,
     playable: Boolean,
     favorable: Boolean,
+    tutorial: Boolean,
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
@@ -180,6 +181,7 @@ const onTileTitleClick = (event, item) => {
                     :favorable="computedFavorable(item)" 
                     :favorAction="() => (favorable && favorPlaylist(item))" 
                     :titleAction="(event) => onTileTitleClick(event, item)"
+                    :tutorial="tutorial"
                     :checkbox="checkbox" 
                     :checked="checkedAll"
                     :ignoreCheckAllEvent="ignoreCheckAllEvent"

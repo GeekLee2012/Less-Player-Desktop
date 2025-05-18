@@ -1069,16 +1069,24 @@ export const grayscale = (r, g, b) => {
 }
 
 export const getPalette = (img, num) => {
-    num = num || 1
-    return new ColorThief().getPalette(img, num)
+    return new ColorThief().getPalette(img, num || 1)
 }
 
-export const generateOrderNums = (from, to, step) => {
+//创建序列数组
+export const genSeqNums = (from, to, step) => {
+    /*
     const nums = []
     if(step > 0) {
         for(let i = from; i <= to; i += step) nums.push(i)
     } else {
         for(let i = from; i >= to; i += step) nums.push(i)
     }
+    return nums
+    */
+    
+    //利用数学上的等价关系，换个写法
+    //换个角度看看世界吧，有点看腻了上面的if...else...
+    const nums = []
+    for(let i = from; (to - i) * step >= 0; i += step) nums.push(i)
     return nums
 }

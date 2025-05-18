@@ -36,7 +36,7 @@ const tabs = [{
 },
 {
     code: 'custom-playlists',
-    name: '创建的歌单',
+    name: '自建歌单',
     text: '0个歌单',
     hasSubTabs: false
 },
@@ -48,7 +48,7 @@ const tabs = [{
 },
 {
     code: 'follow-artists',
-    name: '关注的歌手',
+    name: '我的歌手',
     text: '0个歌手',
     hasSubTabs: false
 },

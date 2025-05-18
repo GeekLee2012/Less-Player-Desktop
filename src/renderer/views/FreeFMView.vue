@@ -327,8 +327,10 @@ onActivated(() => {
                 :tileOnDropFn="radioTileOnDrop" 
                 :singleLineTitleStyle="isSingleLineRadioTitleStyle">
             </PlaylistsControl>
-            <PlaylistsControl :data="tutorialList" 
-                :playable="false"  
+            <PlaylistsControl 
+                :data="tutorialList" 
+                :playable="false"
+                :tutorial="true"
                 v-show="isFreeFMViewRadiosTipsShow && freeRadios.length < 1">
             </PlaylistsControl>
         </div>

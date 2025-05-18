@@ -41,6 +41,8 @@ const videoStyle = ref(false)
 const setVideoStyle = (value) => videoStyle.value = value
 const setLoading = (value) => isLoading.value = value
 const back2TopBtnRef = ref(null)
+const dataListId = ref(null)
+const setDataListId = (value) => (dataListId.value = value)
 
 
 const computedKeyword = computed(() => {
@@ -178,6 +180,7 @@ const loadTab = () => {
     }  else if (isLyricsTab(code)) {
         loadLyrics()
     }
+    //setDataListId(randomTextWithinAlphabetNums(16))
 }
 
 const byPlatform = (index) => {

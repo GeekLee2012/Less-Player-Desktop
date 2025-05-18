@@ -9,7 +9,7 @@ import ArtistCategoryView from './views/ArtistCategoryView.vue';
 import RadioCategoryView from './views/RadioCategoryView.vue';
 import Notification from './components/Notification.vue';
 import CommonContextMenu from './components/CommonContextMenu.vue';
-import AddToListSubmenu from './components/addToListSubmenu.vue';
+import AddToListSubmenu from './components/AddToListSubmenu.vue';
 import ArtistListSubmenu from './components/ArtistListSubmenu.vue';
 import LyricToolbar from './components/LyricToolbar.vue';
 import RandomMusicToolbar from './components/RandomMusicToolbar.vue';

@@ -34,6 +34,7 @@ const props = defineProps({
     singleLineTitleStyle: Boolean,
     centerTitleStyle: Boolean,
     duration: Number,
+    tutorial: Boolean,
 })
 
 const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
@@ -99,10 +100,11 @@ onUnmounted(() => offEvents(eventsRegistration))
             'image-text-tile-color-mode': color,
             'image-text-tile-video': videoStyle,
             'image-text-tile-center-title-mode': centerTitleStyle,
-            'image-text-tile-card-horizion': isUseHCardStyleImageTextTile,
-            'horizion-reverse': isUseReversedForHCardStyleTile,
-            'horizion-small-icon': isUseSmallIconForHCardStyleTile,
+            'image-text-tile-card-horiziontal': isUseHCardStyleImageTextTile,
+            'horiziontal-reverse': isUseReversedForHCardStyleTile,
+            'horiziontal-small-icon': isUseSmallIconForHCardStyleTile,
             'selectable': checkbox,
+            'tutorial': tutorial,
         }" 
         @click.stop="toggleCheck">
         <div class="cover-wrap">
@@ -487,6 +489,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     align-items: center;
     justify-content: center;
     padding: 8px;
+    word-wrap: break-word;
 }
 
 
@@ -530,7 +533,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card.image-text-tile-card-shadow .layer,
-.image-text-tile-card-horizion.image-text-tile-card-shadow .layer {
+.image-text-tile-card-horiziontal.image-text-tile-card-shadow .layer {
     display: block;
     z-index: -2;
     width: 90%;
@@ -544,7 +547,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card.image-text-tile-card-shadow .layer-tiny,
-.image-text-tile-card-horizion.image-text-tile-card-shadow .layer-tiny  {
+.image-text-tile-card-horiziontal.image-text-tile-card-shadow .layer-tiny  {
     z-index: -3;
     width: 80%;
     transform: translate(-50%, calc(var(--card-shadow-height) * 2));
@@ -553,8 +556,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .image-text-tile-card:hover .layer,
 .image-text-tile-card:hover .layer-tiny,
-.image-text-tile-card-horizion:hover .layer,
-.image-text-tile-card-horizion:hover .layer-tiny {
+.image-text-tile-card-horiziontal:hover .layer,
+.image-text-tile-card-horiziontal:hover .layer-tiny {
     background: transparent;
     display: none;
 }
@@ -563,8 +566,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-bottom: 25px;
 }
 
-/* 实验性CSS - Horizion Card */
-.image-text-tile-card-horizion {
+/* 实验性CSS - Horiziontal Card */
+.image-text-tile-card-horiziontal {
     --others-image-text-tile-cover-size: 168px;
     display: flex;
     flex-direction: row;
@@ -583,30 +586,30 @@ onUnmounted(() => offEvents(eventsRegistration))
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
 }
 
-.image-text-tile-card-horizion:hover {
+.image-text-tile-card-horiziontal:hover {
     transform: translateY(-6px);
 }
 
-.image-text-tile-card-horizion .cover-wrap .cover {
+.image-text-tile-card-horiziontal .cover-wrap .cover {
     width: calc(var(--others-image-text-tile-cover-size) * 0.66);
     height: calc(var(--others-image-text-tile-cover-size) * 0.66);
 }
 
-.image-text-tile-card-horizion .cover-wrap .cover-mask,
-.image-text-tile-card-horizion .cover-wrap:hover .cover-mask {
+.image-text-tile-card-horiziontal .cover-wrap .cover-mask,
+.image-text-tile-card-horiziontal .cover-wrap:hover .cover-mask {
     visibility: hidden !important;
 }
 
-.image-text-tile-card-horizion .title-wrap {
+.image-text-tile-card-horiziontal .title-wrap {
     flex: 1;
     padding-left: 10px;
     padding-right: 10px;
     position: relative;
 }
 
-.image-text-tile-card-horizion .title-wrap .title,
-.image-text-tile-card-horizion .title-wrap .subtitle,
-.image-text-tile-card-horizion .title-wrap .extra-text {
+.image-text-tile-card-horiziontal .title-wrap .title,
+.image-text-tile-card-horiziontal .title-wrap .subtitle,
+.image-text-tile-card-horiziontal .title-wrap .extra-text {
     width: 100% !important;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -620,21 +623,35 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-top: 0px;
 }
 
-.image-text-tile-card-horizion .title-wrap .title {
+.image-text-tile-card-horiziontal .title-wrap .title {
     -webkit-line-clamp: 2 !important;
     line-clamp: 2 !important;
     /*font-size: calc(var(--content-text-size) + 1px);*/
 }
 
-.image-text-tile-card-horizion.image-text-tile-color-mode .cover-wrap .big-title {
+.image-text-tile-card-horiziontal .title-wrap .title.singleline-title {
+    -webkit-line-clamp: 1 !important;
+    line-clamp: 1 !important;
+}
+
+.image-text-tile-card-horiziontal.image-text-tile-color-mode .cover-wrap .big-title {
     font-size: calc(var(--content-text-module-subtitle-size) - 5px);
+}
+
+.image-text-tile-card-horiziontal.image-text-tile-color-mode.tutorial .cover-wrap .big-title {
+    display: none;
+}
+
+.image-text-tile-card-horiziontal.tutorial .title-wrap .title {
+    -webkit-line-clamp: 4 !important;
+    line-clamp: 4 !important;
 }
 
 .image-text-tile .title-wrap .action {
     display: none;
 }
 
-.image-text-tile-card-horizion .title-wrap .action {
+.image-text-tile-card-horiziontal .title-wrap .action {
     position: absolute;
     right: 13px;
     bottom: 0px;
@@ -643,8 +660,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding: 0px !important;
 }
 
-.image-text-tile-card-horizion .title-wrap .action .play-btn,
-.image-text-tile-card-horizion .title-wrap .action .favorite-btn {
+.image-text-tile-card-horiziontal .title-wrap .action .play-btn,
+.image-text-tile-card-horiziontal .title-wrap .action .favorite-btn {
     z-index: 1;
     border-radius: 10rem;
     --btn-size: 36px;
@@ -660,81 +677,81 @@ onUnmounted(() => offEvents(eventsRegistration))
     /*box-shadow: 0px 3px 10px #00000088;*/
 }
 
-.image-text-tile-card-horizion .title-wrap .action .play-btn:hover,
-.image-text-tile-card-horizion .title-wrap .action .favorite-btn:hover {
+.image-text-tile-card-horiziontal .title-wrap .action .play-btn:hover,
+.image-text-tile-card-horiziontal .title-wrap .action .favorite-btn:hover {
     background: var(--button-icon-text-btn-hover-bg-color);
     transform: scale(1.08);
 }
 
-.image-text-tile-card-horizion .title-wrap .action .play-btn svg {
+.image-text-tile-card-horiziontal .title-wrap .action .play-btn svg {
     margin-top: 1px;
     margin-left: 2px;
     fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
-.image-text-tile-card-horizion .title-wrap .action .favorite-btn svg {
+.image-text-tile-card-horiziontal .title-wrap .action .favorite-btn svg {
     margin-top: 2px;
     fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
 
-/* Horizion Card - Reversed */
-.image-text-tile-card-horizion.horizion-reverse {
+/* Horiziontal Card - Reversed */
+.image-text-tile-card-horiziontal.horiziontal-reverse {
     flex-flow: row-reverse;
     padding: 20px 20px 20px 10px;
 }
 
-.image-text-tile-card-horizion.horizion-reverse .title-wrap .action {
+.image-text-tile-card-horiziontal.horiziontal-reverse .title-wrap .action {
     left: 10px;
 }
 
-.image-text-tile-card-horizion.horizion-reverse .title-wrap .action .play-btn,
-.image-text-tile-card-horizion.horizion-reverse .title-wrap .action .favorite-btn {
+.image-text-tile-card-horiziontal.horiziontal-reverse .title-wrap .action .play-btn,
+.image-text-tile-card-horiziontal.horiziontal-reverse .title-wrap .action .favorite-btn {
     margin-left: 0px;
     margin-right: 20px;
 }
 
 
-/* Horizion Card - Simple Icon */
-.image-text-tile-card-horizion.horizion-small-icon .title-wrap .action {
+/* Horiziontal Card - Simple Icon */
+.image-text-tile-card-horiziontal.horiziontal-small-icon .title-wrap .action {
     bottom: 3px;
 }
 
-.image-text-tile-card-horizion.horizion-small-icon .title-wrap .action .play-btn,
-.image-text-tile-card-horizion.horizion-small-icon  .title-wrap .action .favorite-btn {
+.image-text-tile-card-horiziontal.horiziontal-small-icon .title-wrap .action .play-btn,
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn {
     margin-left: 25px;
     --btn-size: auto !important;
     border-radius: 0px !important;
     background: transparent !important;
 }
 
-.image-text-tile-card-horizion.horizion-small-icon  .title-wrap .action .play-btn svg,
-.image-text-tile-card-horizion.horizion-small-icon  .title-wrap .action .favorite-btn svg {
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .play-btn svg,
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn svg {
     margin-top: 0px;
     margin-left: 0px;
     transform: scale(1.08);
     fill: var(--button-icon-btn-color) !important;
 }
 
-.image-text-tile-card-horizion.horizion-small-icon  .title-wrap .action .play-btn:hover,
-.image-text-tile-card-horizion.horizion-small-icon  .title-wrap .action .favorite-btn:hover {
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .play-btn:hover,
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn:hover {
     background: transparent !important;
 }
 
-.image-text-tile-card-horizion.horizion-small-icon  .title-wrap .action .play-btn:hover svg,
-.image-text-tile-card-horizion.horizion-small-icon  .title-wrap .action .favorite-btn:hover svg {
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .play-btn:hover svg,
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn:hover svg {
     transform: scale(1.2);
     fill: var(--content-highlight-color) !important;
 }
 
-.image-text-tile-card-horizion.horizion-small-icon.horizion-reverse .title-wrap .action .play-btn,
-.image-text-tile-card-horizion.horizion-small-icon.horizion-reverse .title-wrap .action .favorite-btn {
+.image-text-tile-card-horiziontal.horiziontal-small-icon.horiziontal-reverse .title-wrap .action .play-btn,
+.image-text-tile-card-horiziontal.horiziontal-small-icon.horiziontal-reverse .title-wrap .action .favorite-btn {
     margin-left: 0px;
     margin-right: 25px;
 }
 
-/* Horizion Card - Video  */
-.image-text-tile-card-horizion.image-text-tile-video {
+/* Horiziontal Card - Video  */
+.image-text-tile-card-horiziontal.image-text-tile-video {
     --others-image-text-tile-cover-size: 168px !important;
     margin-top: 18px !important;
     margin-bottom: 12px !important;
@@ -742,14 +759,14 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-right: 13px !important;
 }
 
-.image-text-tile-card-horizion.image-text-tile-video .title-wrap,
-.image-text-tile-card-horizion.image-text-tile-video .title,
-.image-text-tile-card-horizion.image-text-tile-video .subtitle,
-.image-text-tile-card-horizion.image-text-tile-video .extra-text {
+.image-text-tile-card-horiziontal.image-text-tile-video .title-wrap,
+.image-text-tile-card-horiziontal.image-text-tile-video .title,
+.image-text-tile-card-horiziontal.image-text-tile-video .subtitle,
+.image-text-tile-card-horiziontal.image-text-tile-video .extra-text {
     width: 100% !important;
 }
 
-.image-text-tile-card-horizion.image-text-tile-video .cover {
+.image-text-tile-card-horiziontal.image-text-tile-video .cover {
     width: calc(var(--others-image-text-tile-cover-size) * 0.88) !important;
     height: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
 }
@@ -787,8 +804,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     width: calc(var(--others-image-text-tile-cover-size) * 1.25 - 30px);
 }
 
-/* Horizion Card - Video  */
-.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video {
+/* Horiziontal Card - Video  */
+.mini-navbar-mode .image-text-tile-card-horiziontal.image-text-tile-video {
     --others-image-text-tile-cover-size: 168px !important;
     margin-top: 18px !important;
     margin-bottom: 12px !important;
@@ -796,14 +813,14 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-right: 13px !important;
 }
 
-.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .title-wrap,
-.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .title,
-.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .subtitle,
-.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .extra-text {
+.mini-navbar-mode .image-text-tile-card-horiziontal.image-text-tile-video .title-wrap,
+.mini-navbar-mode .image-text-tile-card-horiziontal.image-text-tile-video .title,
+.mini-navbar-mode .image-text-tile-card-horiziontal.image-text-tile-video .subtitle,
+.mini-navbar-mode .image-text-tile-card-horiziontal.image-text-tile-video .extra-text {
     width: 100% !important;
 }
 
-.mini-navbar-mode .image-text-tile-card-horizion.image-text-tile-video .cover {
+.mini-navbar-mode .image-text-tile-card-horiziontal.image-text-tile-video .cover {
     width: calc(var(--others-image-text-tile-cover-size) * 0.88) !important;
     height: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
 }

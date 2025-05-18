@@ -373,6 +373,8 @@ const getExtraTimeKey = (mmssSSS, offset) => {
 
 //歌词翻译、罗马发音
 const setupLyricExtra = (track) => {
+    if(!isExtraTextActived.value) return
+    
     const lines = document.querySelectorAll('.lyric-ctl .center .line') || []
     try {
         lines.forEach((line, index) => {
@@ -393,7 +395,7 @@ const setupLyricExtra = (track) => {
             //一般来说，同一平台下同一首歌曲的所有歌词行的误差值基本是一样的，因此可以利用这点简单优化一下
             //即只要确定第一行的误差值，后面的歌词行全部直接优先使用该误差值进行匹配，不必每次都按固定顺序遍历数组
             //目前来说，即使不优化，对性能方面影响也不算大
-            const timeErrors = [0, 10, -10, 20, -20, 30, -30, 40, -40, 50, -50]
+            const timeErrors = [0, 10, 20, -10, -20, 30, -30, 40, 50, -40, -50]
             for (var i = 0; i < timeErrors.length; i++) {
                 if(!isCurrentTrack(track)) return 
 

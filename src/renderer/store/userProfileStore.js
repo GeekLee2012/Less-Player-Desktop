@@ -292,6 +292,24 @@ export const useUserProfileStore = defineStore("userProfile", {
                 (e1, e2) => e1.id === e2.id)
             return index < 0 ? { id } : this.customPlaylists[index]
         },
+        getCustomPlaylistAsync(id) {
+            return new Promise((resolve, reject) => {
+                if (this.customPlaylists.length < 1) return { id }
+                const index = this.findItemIndex(this.customPlaylists, { id },
+                    (e1, e2) => e1.id === e2.id)
+                const result = this.customPlaylists[index] || { id }
+                const { data } = result
+                let timeout = 1288
+                if(data && data.length > 100) {
+                    const total = data.length
+                    timeout += Math.ceil(total / 100) * 168
+                }
+                setTimeout(() => {
+                    resolve(result)
+                }, timeout)
+            })
+            
+        },
         removeCustomPlaylist(id) {
             this.removeItem(this.customPlaylists, { id }, (e1, e2) => e1.id === e2.id)
         },

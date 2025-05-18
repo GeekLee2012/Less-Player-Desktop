@@ -1180,12 +1180,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </div>
                     <div>
                         <span class="sec-title cate-subtitle">歌词文字颜色：</span>
-                        <ColorInputControl label="文字颜色" :value="desktopLyric.color" :colorMode="true" :onChanged="setDesktopLyricColor">
+                        <ColorInputControl label="歌词文字颜色" :value="desktopLyric.color" :colorMode="true" :onChanged="setDesktopLyricColor">
                         </ColorInputControl>
                     </div>
                     <div>
                         <span class="sec-title cate-subtitle">歌词高亮颜色：</span>
-                        <ColorInputControl label="文字高亮颜色" :value="desktopLyric.hlColor" :onChanged="setDesktopLyricHighlightColor">
+                        <ColorInputControl label="歌词高亮颜色" :value="desktopLyric.hlColor" :onChanged="setDesktopLyricHighlightColor">
                         </ColorInputControl>
                     </div>
                     <div>
@@ -1584,9 +1584,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleKeysGlobal" :value="keys.global">
                         </ToggleControl>
                         <SvgTextButton text="恢复默认" style="display: none"></SvgTextButton>
-                        <div class="tip-text spacing">提示：暂不支持自定义</div>
                     </div>
-                    <div class="tip-text">提示：一般不建议开启全局快捷键，容易与其他应用的快捷键产生冲突</div>
+                    <div class="tip-text">提示：暂不支持自定义，一般不建议开启全局快捷键，容易与其他应用产生冲突</div>
                     <div class="local-keys" v-for="(item, index) in keysDefault.data"
                         :class="{ last: index == (keysDefault.data.length - 1) }">
                         <span class="cate-subtitle">{{ item.name }}：</span>

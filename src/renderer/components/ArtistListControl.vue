@@ -78,17 +78,17 @@ const visitItem = (item) => {
     height: calc(var(--others-image-text-tile-cover-size) * 0.95) !important;
 }
 
-/* Horizion Card */
-.artistlist-ctl .image-text-tile-card-horizion {
+/* Horiziontal Card */
+.artistlist-ctl .image-text-tile-card-horiziontal {
     --others-image-text-tile-cover-size: 168px !important;
 }
 
-.artistlist-ctl .image-text-tile-card-horizion .cover {
+.artistlist-ctl .image-text-tile-card-horiziontal .cover {
     width: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
     height: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
 }
 
-.artistlist-ctl .image-text-tile-card-horizion .title {
+.artistlist-ctl .image-text-tile-card-horiziontal .title {
     text-align: left !important;
 }
 
@@ -136,7 +136,7 @@ const visitItem = (item) => {
     margin-bottom: 0px !important;
 }
 
-.artistlist-ctl .tiles-card-horizion-loading-mask .tile {
+.artistlist-ctl .tiles-card-horiziontal-loading-mask .tile {
     --others-image-text-tile-cover-size: 168px !important;
     /*background: var(--content-list-item-hover-bg-color) !important;*/
     margin-top: 18px !important;
@@ -144,13 +144,13 @@ const visitItem = (item) => {
 }
 
 
-.artistlist-ctl .tiles-card-horizion-loading-mask .tile .cover {
+.artistlist-ctl .tiles-card-horiziontal-loading-mask .tile .cover {
     width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio)) !important;
     border-radius: var(--border-img-text-tile-border-radius) !important;
     height: 151px !important;
 }
 
-.artistlist-ctl .tiles-card-horizion-loading-mask .tile .title {
+.artistlist-ctl .tiles-card-horiziontal-loading-mask .tile .title {
     display: none !important;
 }
 </style>

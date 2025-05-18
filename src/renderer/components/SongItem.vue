@@ -353,7 +353,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: none !important;
 }
 
-.song-item>div {
+.song-item > div {
     line-height: 50px;
     line-height: 59px;
     vertical-align: middle;
