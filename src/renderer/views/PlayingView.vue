@@ -592,7 +592,7 @@ onUnmounted(() => {
 }
 
 .playing-view .spacing3 {
-    margin-left: 23px;
+    margin-left: 26px;
 }
 
 .playing-view .container {
@@ -695,8 +695,14 @@ onUnmounted(() => {
     cursor: pointer;
 }
 
+/*
 .playing-view .container .theme-btn {
     transform: rotate(-90deg);
+}
+*/
+
+.playing-view .container .theme-btn svg {
+    transform: translateY(3px) rotate(-90deg) scale(1.08) !important;
 }
 
 .playing-view .container > .center {
@@ -769,6 +775,7 @@ onUnmounted(() => {
 .playing-view .container > .bottom {
     --others-sliderbar-ctl-height: 3px; 
     --others-sliderbar-thumb-size: 13px;
+    --volume-status-size: 24px;
 
     height: var(--bottom-height);
     min-height: var(--bottom-height);
@@ -788,6 +795,10 @@ onUnmounted(() => {
     align-items: center;
     --others-sliderbar-thumb-size: 12px;
     flex: 1;
+}
+
+.playing-view .container > .bottom .action svg {
+    transform: scale(1.06);
 }
 
 .playing-view .container > .bottom .action > div {
@@ -821,13 +832,17 @@ onUnmounted(() => {
     align-items: center;
     cursor: pointer;
     font-weight: bold;
-    margin-bottom: 3px;
     font-size: 18px;
+    transform: translateY(1px) scale(1.09);
     color: var(--button-icon-btn-color);
 }
 
 .playing-view .container > .bottom .action .lyric-btn:hover {
     color: var(--content-highlight-color);
+}
+
+.playing-view .container > .bottom .action .equalizer-btn svg {
+    transform: translateY(3px) scale(1.08);
 }
 
 /* bottom-new  */
@@ -898,18 +913,6 @@ onUnmounted(() => {
     flex: 1;
     margin-top: 13px;
 }
-
-/*
-.playing-view .container > .bottom.bottom-new .btm-center .play-ctl .play-btn {
-    height: 39px;
-    width: 39px;
-}
-*/
-/*
-.playing-view .container > .bottom.bottom-new .btm-center .play-ctl .play-btn:hover {
-    transform: scale(1.05);
-}
-*/
 
 .playing-view .container > .bottom.bottom-new .btm-center .progressbar-wrap {
     flex: 1;

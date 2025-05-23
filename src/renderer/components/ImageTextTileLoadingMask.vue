@@ -9,7 +9,8 @@ const props = defineProps({
     videoStyle: Boolean,
 })
 
-const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRefs(useSettingStore())
+const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile,
+    isUseCoverNopaddingForHCardStyleTile, } = storeToRefs(useSettingStore())
 </script>
 
 <template>
@@ -17,6 +18,7 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
         'tiles-card-loading-mask': isUseCardStyleImageTextTile,
         'tiles-video-loading-mask': videoStyle,
         'tiles-card-horiziontal-loading-mask': isUseHCardStyleImageTextTile,
+        'horiziontal-cover-nopadding': isUseCoverNopaddingForHCardStyleTile,
     }">
         <div class="tile" v-for="i in count">
             <div class="cover loading-mask"></div>
@@ -98,10 +100,17 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
 
 .tiles-card-horiziontal-loading-mask {
     --others-image-text-tile-cover-size: 168px;
+    --width-offset: 0px;
 }
 
+/*
+.tiles-card-horiziontal-loading-mask.horiziontal-cover-nopadding {
+    --width-offset: 30px;
+}
+*/
+
 .tiles-card-horiziontal-loading-mask .tile {
-    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio));
+    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio) - var(--width-offset));
     margin-top: 18px !important;
     margin-bottom: 12px !important;
     margin-left: 13px !important;
@@ -133,10 +142,17 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile } = storeToRef
 
 .mini-navbar-mode .tiles-card-horiziontal-loading-mask {
     --others-image-text-tile-cover-size: 168px;
+    --width-offset: 0px;
 }
 
+/*
+.mini-navbar-mode .tiles-card-horiziontal-loading-mask.horiziontal-cover-nopadding {
+    --width-offset: 30px;
+}
+*/
+
 .mini-navbar-mode .tiles-card-horiziontal-loading-mask .tile {
-    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio));
+    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio) - var(--width-offset));
     margin-top: 18px !important;
     margin-bottom: 12px !important;
     margin-left: 13px !important;

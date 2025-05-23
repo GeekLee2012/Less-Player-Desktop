@@ -77,6 +77,8 @@ const { setThemeIndex,
     toggleUseShadowForCardStyleTile,
     toggleUseReversedForHCardStyleTile,
     toggleUseSmallIconForHCardStyleTile,
+    toggleUseCoverNopaddingForHCardStyleTile,
+    toggleUseCoverNoshadowForHCardStyleTile,
     toggleStorePlayState,
     toggleStorePlayProgressState,
     toggleStoreLocalMusic,
@@ -192,7 +194,7 @@ const { setThemeIndex,
 
 const { showToast, showImportantToast, 
     toggleCustomAppBorderRadiusViewShow,
-    toggleThemeSelectionView, } = useAppCommonStore()
+    toggleThemeSelectionView, toggleFontSelectionToolbar, } = useAppCommonStore()
 const { isMaxScreen, routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const { audioOutputDevices } = storeToRefs(usePlayStore())
 const { removeAllRecents } = useRecentsStore()
@@ -271,6 +273,18 @@ const updateWinCustomShadowSize = (evnet) => {
 
 const updateFontFamily = (event) => {
     setFontFamily(event.target.value)
+}
+
+const selectFont = () => {
+    toggleFontSelectionToolbar({
+        mounted: () => {
+            const { fontFamily } = common.value
+            return fontFamily
+        },
+        selected: ({ index, item }) => {
+            setFontFamily(item)
+        }
+    })
 }
 
 const updateFontSize = (event) => {
@@ -536,7 +550,7 @@ const toggleLightThemeSelection = () => {
             const { lightIndex: index, lightType: type } = theme.value
             return { subtitle: '浅色', index, type }
         },
-        unmounted: ({ index, type }) => {
+        selected: ({ index, type }) => {
             setThemeLightIndex(index, type)
             emitEvents('theme-nativeMode-updated')
         }
@@ -549,7 +563,7 @@ const toggleDarkThemeSelection = () => {
             const { darkIndex: index, darkType: type } = theme.value
             return { subtitle: '深色', index, type }
         },
-        unmounted: ({ index, type }) => {
+        selected: ({ index, type }) => {
             setThemeDarkIndex(index, type)
             emitEvents('theme-nativeMode-updated')
         }
@@ -767,8 +781,17 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </div>
                     <div class="max-content-mr-36" @keydown.stop="">
                         <span class="cate-subtitle">字体名称：</span>
+                        <!--
                         <input type="text" :value="resolveFont(common.fontFamily, true)" placeholder="请参考CSS - FontFamily"
                             @keydown.enter="updateFontFamily" @focusout="updateFontFamily" />
+                        -->
+                        <div class="font-input-ctl">
+                            <input class="text-input-ctl" v-model="common.fontFamily" 
+                                placeholder="字体名称，请参考CSS - FontFamily"
+                                @keydown.enter="updateFontFamily" 
+                                @focusout="updateFontFamily" />
+                            <div class="select-btn" @click="selectFont">选择</div>
+                        </div>
                     </div>
                     <div class="max-content-mr-36">
                         <span class="cate-subtitle">字体大小：</span>
@@ -830,6 +853,16 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
                         <span class="cate-subtitle">H卡片启用小图标按钮：</span>
                         <ToggleControl @click="toggleUseSmallIconForHCardStyleTile" :value="common.smallIconForHCardStyleTile">
+                        </ToggleControl>
+                    </div>
+                    <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
+                        <span class="cate-subtitle">H卡片启用无边距封面：</span>
+                        <ToggleControl @click="toggleUseCoverNopaddingForHCardStyleTile" :value="common.coverNopaddingForHCardStyleTile">
+                        </ToggleControl>
+                    </div>
+                    <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
+                        <span class="cate-subtitle">H卡片启用无阴影封面：</span>
+                        <ToggleControl @click="toggleUseCoverNoshadowForHCardStyleTile" :value="common.coverNoshadowForHCardStyleTile">
                         </ToggleControl>
                     </div>
                     <div>
@@ -2249,6 +2282,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     border: 1px solid var(--border-inputs-border-color);
     background-color: var(--content-inputs-bg-color);
     margin-right: 15px;
+    margin-left: 15px;
     color: var(--content-inputs-text-color);
 }
 
@@ -2300,6 +2334,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .contrast-mode #setting-view .track .content .active,
 .contrast-mode #setting-view .cache .content .active,
 .contrast-mode #setting-view .desktopLyric .content .active,
+.contrast-mode #setting-view .font-input-ctl .select-btn,
 .contrast-mode #setting-view .dir-input-ctl .select-btn {
     font-weight: bold;
 }
@@ -2580,6 +2615,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     animation: rotate360 1s linear infinite;
 }
 
+#setting-view .center .font-input-ctl,
 #setting-view .center .dir-input-ctl {
     display: flex;
     align-items: center;
@@ -2587,6 +2623,11 @@ onUnmounted(() => offEvents(eventsRegistration))
     justify-content: flex-end;
 }
 
+#setting-view .center .font-input-ctl {
+    margin-left: 10px;
+}
+
+#setting-view .center .font-input-ctl .text-input-ctl,
 #setting-view .center .dir-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
@@ -2594,6 +2635,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     height: 20px;
 }
 
+#setting-view .center .font-input-ctl .select-btn,
 #setting-view .center .dir-input-ctl .select-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
@@ -2619,6 +2661,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 /* 别扭挖坑的方式 */
+#setting-view .container-win-style .font-input-ctl .select-btn,
 #setting-view .container-win-style .dir-input-ctl .select-btn {
     height: 40px;
 }

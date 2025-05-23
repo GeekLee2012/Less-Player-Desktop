@@ -299,11 +299,11 @@ export const useUserProfileStore = defineStore("userProfile", {
                     (e1, e2) => e1.id === e2.id)
                 const result = this.customPlaylists[index] || { id }
                 const { data } = result
-                let timeout = 1288
-                if(data && data.length > 100) {
-                    const total = data.length
-                    timeout += Math.ceil(total / 100) * 168
-                }
+                const total = (data & data.length) || 0
+                const timeout = Math.min(total * 10, 2588)
+                setTimeout(() => {
+                    resolve(result)
+                }, timeout)
                 setTimeout(() => {
                     resolve(result)
                 }, timeout)

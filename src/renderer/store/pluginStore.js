@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { randomTextWithinAlphabetNums, toTrimString } from '../../common/Utils';
+import { randomTextWithinAlphabetNums } from '../../common/Utils';
 
 
 
@@ -9,6 +9,9 @@ export const usePluginStore = defineStore('plugins', {
         isReplaceMode: false,
         plugins: []
     }),
+    getters: {
+        
+    },
     actions: {
         toggleIgnoreErrorPlugins() {
             this.ignoreErrorPlugins = !this.ignoreErrorPlugins
@@ -53,9 +56,11 @@ export const usePluginStore = defineStore('plugins', {
             const index = this.pluginIndex(plugin)
             if(index < 0) return
             if(!changes || typeof changes != 'object') return 
-            const updatableKeys = 'about|repository|state|path|main|mainModule|alias'.split('|')
+            //const updatableKeys = 'about|repository|state|path|main|mainModule|alias'.split('|')
+            const excludeKeys = 'id|name|author|version'.split('|')
             for(const [key, value] of Object.entries(changes)) {
-                if(!updatableKeys.includes(key)) continue
+                //if(!updatableKeys.includes(key)) continue
+                if(excludeKeys.includes(key)) continue
                 this.plugins[index][key] = value
             }
             const updated = Date.now()
@@ -64,6 +69,27 @@ export const usePluginStore = defineStore('plugins', {
         removePlugin(plugin) {
             const index = this.pluginIndex(plugin)
             if(index > -1) return this.plugins.splice(index, 1)
+        },
+        getPluginOptions(plugin) {
+            const fixedKeys = 'id|name|author|version|type|created'.split('|')
+            const updatableKeys = 'about|repository|state|path|main|mainModule|alias|updated'.split('|')
+            const clone = JSON.parse(JSON.stringify(plugin))
+            const excludeKeys = [...fixedKeys, ...updatableKeys]
+            excludeKeys.forEach(key => Reflect.deleteProperty(clone, key))
+            return clone
+        },
+        updatePluginOptions(id, options) {
+            const plugin = this.getPlugin(id)
+            if(!plugin) return 
+            const oldOptions = this.getPluginOptions(plugin)
+            const oldOptionsKeys = Object.keys(oldOptions) || []
+            const newOptionsKeys = Object.keys(options) || []
+            this.updatePlugin(plugin, options)
+            oldOptionsKeys.forEach(key => {
+                if(!newOptionsKeys || !newOptionsKeys.includes(key)) {
+                    Reflect.deleteProperty(plugin, key)
+                }
+            })
         }
     },
     persist: {

@@ -1240,7 +1240,7 @@ onActivated(() => {
                             </g>
                         </svg>
                     </div>
-                    <div class="equalizer spacing" :class="{ active: isUseEffect }">
+                    <div class="equalizer-btn spacing" :class="{ active: isUseEffect }">
                         <svg @click="toggleSoundEffectView" width="17" height="17" viewBox="0 0 1024 1024"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">

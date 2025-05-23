@@ -107,15 +107,22 @@ textarea {
   font-size: var(--content-text-subtitle-size);
   font-family: var(--content-text-font-family);
   color: var(--content-inputs-text-color);
+  background-color: var(--content-inputs-bg-color);
+  outline: none; 
+}
+
+textarea {
+  border-radius: var(--border-inputs-border-radius);
+  border: 1px solid var(--border-inputs-border-color);
 }
 
 .text-input-ctl {
-  border-radius: var(--border-inputs-border-radius);
   padding: 8px;
-  border: 1px solid var(--border-inputs-border-color);
-  background-color: var(--content-inputs-bg-color);
   min-width: 258px;
   /*font-size: var(--content-text-size);*/
+  border-radius: var(--border-inputs-border-radius);
+  border: 1px solid var(--border-inputs-border-color);
+  background-color: var(--content-inputs-bg-color);
   color: var(--content-inputs-text-color);
 }
 

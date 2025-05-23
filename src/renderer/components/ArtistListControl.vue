@@ -92,6 +92,22 @@ const visitItem = (item) => {
     text-align: left !important;
 }
 
+.artistlist-ctl .image-text-tile-card-horiziontal.horiziontal-cover-nopadding .cover {
+    width: calc(var(--others-image-text-tile-cover-size) * 0.66 + 15px) !important;
+    height: calc(var(--others-image-text-tile-cover-size) * 0.66 + 28px) !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    border-top-left-radius: var(--border-img-text-tile-border-radius) !important;
+    border-bottom-left-radius: var(--border-img-text-tile-border-radius) !important;
+}
+
+.artistlist-ctl .image-text-tile-card-horiziontal.horiziontal-reverse.horiziontal-cover-nopadding .cover {
+    border-top-right-radius: var(--border-img-text-tile-border-radius) !important;
+    border-bottom-right-radius: var(--border-img-text-tile-border-radius) !important;
+    border-top-left-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+}
+
 
 
 /* Loading Mask */
@@ -138,14 +154,19 @@ const visitItem = (item) => {
 
 .artistlist-ctl .tiles-card-horiziontal-loading-mask .tile {
     --others-image-text-tile-cover-size: 168px !important;
+    --width-offset: 0px;
     /*background: var(--content-list-item-hover-bg-color) !important;*/
     margin-top: 18px !important;
     margin-bottom: 10px !important;
 }
-
+/*
+.artistlist-ctl .tiles-card-horiziontal-loading-mask.horiziontal-cover-nopadding .tile {
+    --width-offset: 30px;
+}
+*/
 
 .artistlist-ctl .tiles-card-horiziontal-loading-mask .tile .cover {
-    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio)) !important;
+    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio) - var(--width-offset)) !important;
     border-radius: var(--border-img-text-tile-border-radius) !important;
     height: 151px !important;
 }

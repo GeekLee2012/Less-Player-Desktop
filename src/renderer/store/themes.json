@@ -27,7 +27,7 @@
                 "textHighlightColor": "linear-gradient(to top right, #1ca388, #28c83f)",
                 "highlightColor": "#28c83f",
                 "headerNavBgColor": "#48484a",
-                "loadingMaskColor": "linear-gradient(to right, #666666 8%, #515151 18%, #666666 33%)",
+                "loadingMaskColor": "linear-gradient(to right, #666666 8%, #5e5e5e 18%, #666666 33%)",
                 "listItemHoverBgColor": "#666666",
                 "leftNavBgColor": "#48484a",
                 "inputsBgColor": "#595959",

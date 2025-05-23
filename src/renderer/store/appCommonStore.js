@@ -136,6 +136,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         themeSelectionViewShow: false,
         themeSelectionViewContext: null,
         isAutoHideThemeSelectionView: true,
+        //字体选择
+        fontSelectionToolbarShow: false,
+        fontSelectionToolbarContext: null,
     }),
     getters: {
         isPlaylistMode() {
@@ -654,6 +657,16 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         toggleAutoHideThemeSelectionView() {
             this.isAutoHideThemeSelectionView = !this.isAutoHideThemeSelectionView
+        },
+        setFontSelectionToolbarContext(context) {
+            this.fontSelectionToolbarContext = context
+        },
+        hideFontSelectionToolbar() {
+            this.fontSelectionToolbarShow = false
+        },
+        toggleFontSelectionToolbar(context) {
+            this.fontSelectionToolbarShow = !this.fontSelectionToolbarShow
+            this.setFontSelectionToolbarContext(context)
         },
     },
     persist: {

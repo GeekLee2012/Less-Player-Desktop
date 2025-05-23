@@ -1,6 +1,6 @@
 export class Plugin {
 
-    constructor({ id, name, version, about, about, repository, path, main, mainModule }) {
+    constructor({ id, name, version, about, repository, path, main, mainModule }) {
         const _now = Date.now()
         this.id = id
         this.name = name || `Plugin-${_now}`

@@ -10,7 +10,7 @@ import { computed, inject, onActivated, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePluginStore } from '../store/pluginStore';
 import { useSettingStore } from '../store/settingStore';
-import { isBlank, toTrimString, textDefault, coverDefault } from '../../common/Utils';
+import { isBlank, toTrimString, textDefault, coverDefault, readProperties } from '../../common/Utils';
 import { ActivateState } from '../../common/Constants';
 import ToggleControl from '../components/ToggleControl.vue';
 
@@ -21,20 +21,25 @@ const props = defineProps({
 })
 
 const { backward } = inject('appRoute')
-const { visitLink, showConfirm, activatePluginNow, deactivatePluginNow, removePluginNow } = inject('apiExpose')
+const { visitLink, showConfirm, activatePluginNow, 
+    deactivatePluginNow, removePluginNow, onPluginOptionsUpdated } = inject('apiExpose')
 
-const { getPlugin, updatePlugin, removePlugin } = usePluginStore()
+const { getPlugin, updatePlugin, removePlugin, 
+    getPluginOptions, updatePluginOptions } = usePluginStore()
 const { isShowDialogBeforeDeletePlugins } = storeToRefs(useSettingStore())
 
 
 const detail = reactive({ name: '', alias: '', author: '', version: '', repository: '', about: '' })
 const activeTab = ref(0)
-const setActiveTab = (value) => activeTab.value = value
+const setActiveTab = (value) => (activeTab.value = value)
+
+const resetDetail = () => {
+    Object.keys(detail).forEach(key => Reflect.deleteProperty(detail, key))
+}
 
 const loadPlugin = () => {
     const plugin = getPlugin(props.id)
     if (!plugin) return
-    //const { name, alias, author, version, repository, about, state, path, main } = plugin
     Object.assign(detail, { ...plugin })
 }
 
@@ -42,6 +47,25 @@ const updateAlias = () => {
     let { alias } = detail
     alias = toTrimString(alias)
     updatePlugin(detail, { alias })
+}
+
+const computedPluginOptions = computed(() => {
+    const plugin = getPlugin(props.id)
+    const options = getPluginOptions(plugin)
+    let optionsText = ''
+    for(const [key, value] of Object.entries(options)) {
+        optionsText += `${key}=${value}\n`
+    }
+    return optionsText
+})
+
+const updateOptions = (event) => {
+    const options = readProperties(event.target.value)
+    if(options) {
+        const { id } = props
+        updatePluginOptions(id, options)
+        onPluginOptionsUpdated(id, options)
+    }
 }
 
 const togglePluginState = (plugin) => {
@@ -75,9 +99,17 @@ const hasIcon = computed(() => {
     return (data) => (data.icon)
 })
 
+const resetView = () => {
+    setActiveTab(0)
+    resetDetail()
+}
+
 
 /* 生命周期、监听 */
-onActivated(loadPlugin)
+onActivated(() => {
+    resetView()
+    loadPlugin()
+})
 </script>
 
 <template>
@@ -123,8 +155,12 @@ onActivated(loadPlugin)
             <div class="content" v-show="activeTab == 0">
                 <div class="alias info-row">
                     <div class="sec-title">备注：</div>
-                    <input type="text" class="text-input-ctl" v-model="detail.alias"
-                        placeholder="备注，最多支持128个字符，焦点离开输入框后自动保存" maxlength="128" @focusout="updateAlias" />
+                    <input type="text" class="text-input-ctl" 
+                        v-model="detail.alias"
+                        placeholder="备注，最多支持128个字符，焦点离开输入框后自动保存" 
+                        maxlength="128" 
+                        @focusout="updateAlias" 
+                        @contextmenu.stop=""/>
                     <div></div>
                 </div>
                 <div class="author info-row">
@@ -146,6 +182,14 @@ onActivated(loadPlugin)
                     <div class="sec-title">简介：</div>
                     <div class="sec-content" v-html="textDefault(detail.about, '暂无')"></div>
                 </div>
+            </div>
+            <div class="content options" v-show="activeTab == 1">
+                <textarea placeholder="不同配置项以“换行符”分隔；配置项格式：key=value，示例：cookie=xxx[回车换行]hello=world" 
+                    :value="computedPluginOptions"
+                    @contextmenu.stop="" 
+                    @focusout="updateOptions"></textarea>
+            </div>
+            <div class="content" v-show="activeTab == 2">
             </div>
         </div>
     </div>
@@ -175,6 +219,13 @@ onActivated(loadPlugin)
     text-align: left;
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
+}
+
+#plugin-detail-view .center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
 }
 
 #plugin-detail-view .center .title-wrap {
@@ -211,6 +262,7 @@ onActivated(loadPlugin)
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
     word-wrap: break-word;
@@ -258,12 +310,17 @@ onActivated(loadPlugin)
 
 #plugin-detail-view .content {
     margin-left: 2px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 #plugin-detail-view .content .info-row {
     display: flex;
     margin-bottom: 20px;
     text-align: left;
+    width: 100%;
 }
 
 #plugin-detail-view .content .info-row .sec-title {
@@ -282,6 +339,7 @@ onActivated(loadPlugin)
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     line-height: var(--content-text-line-height);
 }
 
@@ -289,6 +347,7 @@ onActivated(loadPlugin)
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
 }
 
 #plugin-detail-view .content .info-row.alias .text-input-ctl {
@@ -300,11 +359,20 @@ onActivated(loadPlugin)
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 6;
+    line-clamp: 6;
 }
 
 #plugin-detail-view .content .info-row.about .sec-content {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 10;
+    line-clamp: 10;
+}
+
+#plugin-detail-view .content.options textarea {
+    flex: 1;
+    width: calc(100% - 30px);
+    padding: 8px;
+    margin: 0px 6px 10px 6px;
 }
 </style>

@@ -31,11 +31,8 @@ export const usePlaybackQueueStore = defineStore('playbackQueueStore', {
                 const index = this.findQueueIndex(id)
                 const result = this.queues[index] || { id }
                 const { data } = result
-                let timeout = 1288
-                if(data && data.length > 100) {
-                    const total = data.length
-                    timeout += Math.ceil(total / 100) * 168
-                }
+                const total = (data & data.length) || 0
+                const timeout = Math.min(total * 10, 2588)
                 setTimeout(() => {
                     resolve(result)
                 }, timeout)

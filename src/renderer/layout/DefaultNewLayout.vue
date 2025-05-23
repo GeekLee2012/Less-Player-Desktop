@@ -95,6 +95,38 @@ const { isFontAutoWeight, isMiniNavBarMode } = storeToRefs(useSettingStore())
     margin-left: 28px !important;
 }
 
+.default-new-layout > .bottom .default-new-main-bottom svg {
+    transform: scale(1.06);
+}
+
+.default-new-layout > .bottom .default-new-main-bottom .love-btn svg {
+    transform: translateY(0.5px);
+}
+
+.default-new-layout > .bottom .default-new-main-bottom .lyric-btn {
+    transform: scale(1.04);
+}
+
+.default-new-layout > .bottom .default-new-main-bottom .equalizer-btn svg {
+    transform: scale(1.01);
+}
+
+/*
+.default-new-layout > .bottom .default-new-main-bottom .equalizer-btn svg {
+    transform: scale(1);
+}
+*/
+
+.default-new-layout > .bottom .default-new-main-bottom .play-ctl svg {
+    transform: scale(1.05);
+}
+
+/*
+.default-new-layout > .bottom .default-new-main-bottom .play-ctl .play-btn {
+    transform: scale(1.06);
+}
+*/
+
 .default-new-layout > .bottom .default-new-main-bottom #play-nav {
     /*padding-left: 18px;*/
     padding-left: 21px;

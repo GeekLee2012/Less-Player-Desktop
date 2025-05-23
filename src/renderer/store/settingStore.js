@@ -142,6 +142,10 @@ export const useSettingStore = defineStore('setting', {
             reversedForHCardStyleTile: true,
             //H卡片Tile - 小图标
             smallIconForHCardStyleTile: true,
+            //H卡片Tile - 无边距封面
+            coverNopaddingForHCardStyleTile: false,
+            //H卡片Tile - 无阴影封面
+            coverNoshadowForHCardStyleTile: false,
             //歌曲控件样式，0 => 经典，1 => 主流
             songItemStyleIndex: 1,
             //窗口自定义阴影
@@ -973,6 +977,12 @@ export const useSettingStore = defineStore('setting', {
         isUseSmallIconForHCardStyleTile() {
             return this.common.smallIconForHCardStyleTile
         },
+        isUseCoverNopaddingForHCardStyleTile() {
+            return this.common.coverNopaddingForHCardStyleTile
+        },
+        isUseCoverNoshadowForHCardStyleTile() {
+            return this.common.coverNoshadowForHCardStyleTile
+        },
         isPlayingViewCoverBorderShow() {
             return this.track.playingViewCoverBorderShow
         },
@@ -1393,6 +1403,12 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleUseSmallIconForHCardStyleTile() {
             this.common.smallIconForHCardStyleTile = !this.common.smallIconForHCardStyleTile
+        },
+        toggleUseCoverNopaddingForHCardStyleTile() {
+            this.common.coverNopaddingForHCardStyleTile = !this.common.coverNopaddingForHCardStyleTile
+        },
+        toggleUseCoverNoshadowForHCardStyleTile() {
+            this.common.coverNoshadowForHCardStyleTile = !this.common.coverNoshadowForHCardStyleTile
         },
         toggleUseOnlineCover() {
             this.track.useOnlineCover = !this.track.useOnlineCover

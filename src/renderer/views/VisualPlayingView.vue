@@ -45,6 +45,7 @@ const { hidePlayingView, minimize, showToast,
 const { getCurrentThemeHighlightColor } = useSettingStore()
 const { currentTrack, playingIndex,
     playing, volume, queueTracksSize } = storeToRefs(usePlayStore())
+const { isCurrentTrack } = usePlayStore()
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos, theme, layout,
     isDndSaveEnable, isPlayingViewUseBgCoverEffect,
@@ -143,11 +144,14 @@ const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
     return autoClass
 }
 
-const postCoverLoadComplete = () => {
+const postCoverLoadComplete = (track) => {
+    if(!isCurrentTrack(track)) return 
     const containerEl = document.querySelector('.visual-playing-view .container')
     const coverEl = containerEl.querySelector('.center .cover')
     const mode = playingViewBgCoverEffectGradientMode.value
     const rgbs = optimizePalette(sortPalette(getPalette(coverEl, 2), mode))
+    if(!isCurrentTrack(track)) return 
+
     const alphaFactor = mode ? 88: 68
     const alpha = (alphaFactor / 255).toFixed(2)
     const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
@@ -172,6 +176,7 @@ const postCoverLoadComplete = () => {
 
     containerEl.classList.add('auto-effect')
     containerEl.classList.add(autoClass)
+    if(!isCurrentTrack(track)) return 
     
     const gradientType = playingViewBgCoverEffectGradientType.value
     if(gradientType == 2 || (gradientType == 0 && (nextInt(100) % 2 == 0))) {
@@ -218,11 +223,11 @@ const setupSimpleBackgroundEffect = async () => {
     applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
 }
 
-const setupGradientBackgroundEffect = async () => {
+const setupGradientBackgroundEffect = async (track) => {
     clearBackgroundEffect()
     const containerEl = document.querySelector('.visual-playing-view .container')
     const coverEl = containerEl.querySelector('.center .cover')
-    if(coverEl.complete) postCoverLoadComplete()
+    if(coverEl.complete) postCoverLoadComplete(track)
     coverEl.addEventListener('load', postCoverLoadComplete)
 }
 
@@ -236,7 +241,7 @@ const setupBackgroudEffect = async () => {
             setupSimpleBackgroundEffect()
             break
         case 2:
-            setupGradientBackgroundEffect()
+            setupGradientBackgroundEffect(currentTrack.value)
             break
         default:
             break

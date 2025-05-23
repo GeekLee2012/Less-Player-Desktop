@@ -64,7 +64,7 @@ onMounted(() => {
                     @click="() => toggleDesktopLyricShow()">
                     词
                 </div>
-                <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
+                <div class="equalizer-btn spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
                     <svg width="18" height="18" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">
@@ -163,6 +163,7 @@ onMounted(() => {
 .classic-main-bottom svg {
     fill: var(--button-icon-btn-color);
     cursor: pointer;
+    transform: scale(1.06);
 }
 
 .classic-main-bottom svg:hover,
@@ -197,8 +198,8 @@ onMounted(() => {
     transition: 0.5s;
 }
 
-.classic-main-bottom .love-btn {
-    transform: scale(1.03);
+.classic-main-bottom .love-btn svg {
+    transform: translateY(0.5px) scale(1.06);
 }
 
 .classic-main-bottom .love-btn-active {
@@ -213,10 +214,15 @@ onMounted(() => {
     font-weight: bold;
     font-size: 18px;
     color: var(--button-icon-btn-color);
+    transform: scale(1.06);
 }
 
 .classic-main-bottom .lyric-btn:hover {
     color: var(--content-highlight-color);
+}
+
+.classic-main-bottom .equalizer-btn svg {
+    transform: translateY(0.5px) scale(1);
 }
 
 .mini-navbar-mode .classic-main-bottom #play-nav #play-meta .title-wrap,

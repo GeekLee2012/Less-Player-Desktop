@@ -808,22 +808,6 @@ onEvents({
 //直接在setup()时初始化，不需要等待其他生命周期
 initialize()
 
-/*
-const logFontData = async () => {
-  try {
-    const availableFonts = await window.queryLocalFonts();
-    for (const fontData of availableFonts) {
-      console.log(fontData.postscriptName);
-      console.log(fontData.fullName);
-      console.log(fontData.family);
-      console.log(fontData.style);
-    }
-  } catch (err) {
-    console.error(err.name, err.message);
-  }
-}
-*/
-
 //通用API
 provide('appCommon', {
   showContextMenu,

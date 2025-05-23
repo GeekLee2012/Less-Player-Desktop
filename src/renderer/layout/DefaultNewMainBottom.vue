@@ -71,7 +71,7 @@ onMounted(() => {
                     @click="() => toggleDesktopLyricShow()">
                     词
                 </div>
-                <div class="equalizer spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
+                <div class="equalizer-btn spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
                     <svg width="18" height="18" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">
                             <g id="Layer_1-2" data-name="Layer 1">

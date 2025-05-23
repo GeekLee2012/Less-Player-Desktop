@@ -33,7 +33,7 @@ const { lyricMetaPos, isDefaultLayout,
     isDefaultClassicLayout, isDefaultNewLayout,
     isAutoLayout, winCustomShadowSize, 
     isMiniNavBarMode, isUseHCardStyleImageTextTile,
-    imageTextTileStyleIndex,
+    imageTextTileStyleIndex, isUseCoverNopaddingForHCardStyleTile,
 } = storeToRefs(useSettingStore())
 const { setupWindowZoom } = useSettingStore()
 
@@ -166,6 +166,8 @@ const setHCardImageTextTileSize = () => {
 
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 1
+    //无边距封面
+    //if(isUseCoverNopaddingForHCardStyleTile.value) tileWidth += 30
     //再次确认，计算补偿值
     const totalWidth = tileNum * (tileWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth
     const offsetWidth = (clientWidth - totalWidth)
@@ -445,6 +447,8 @@ watch(winCustomShadowSize, resizeViewItems)
 watch(isMiniNavBarMode, resizeViewItems)
 watch(playingThemeListViewShow, setPlayingThemeListViewSize, { immediate: true })
 watch(imageTextTileStyleIndex, setImageTextTileSize, { immediate: true })
+//watch(isUseCoverNopaddingForHCardStyleTile, setImageTextTileSize, { immediate: true })
+
 
 const eventsRegistration = {
     //'batchView-show': setBatchViewListSize,

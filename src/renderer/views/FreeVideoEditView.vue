@@ -124,7 +124,7 @@ const computedRecentVideoTitle = computed(() => {
         const _title = title ? `${title} - ` : ''
         const isCollectionType = Video.isCollectionType(video)
         const subtitle = isCollectionType ? data[index].title : ''
-        return isCollectionType ? `${_title}${subtitle}` : title
+        return isCollectionType && (data && data.length > 1) ? `${_title}${subtitle}` : title
     }
 })
 

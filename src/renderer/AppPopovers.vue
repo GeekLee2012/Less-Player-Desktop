@@ -29,6 +29,7 @@ import { onEvents, emitEvents, offEvents } from '../common/EventBusWrapper';
 import CustomAppBorderRadiusView from './views/CustomAppBorderRadiusView.vue';
 import TrackResourceToolView from './views/TrackResourceToolView.vue';
 import ThemeSelectionView from './views/ThemeSelectionView.vue';
+import FontSelectionToolbar from './components/FontSelectionToolbar.vue';
 
 
 
@@ -56,7 +57,8 @@ const { commonNotificationShow, commonNotificationText,
   platformCategoryViewShow, playingThemeListViewShow,
   customPlayingThemeEditViewShow, playingViewThemeType,
   playingViewCustomThemes, customAppBorderRadiusViewShow,
-  trackResourceToolViewShow, themeSelectionViewShow, } = storeToRefs(useAppCommonStore())
+  trackResourceToolViewShow, themeSelectionViewShow,
+  fontSelectionToolbarShow, } = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -216,6 +218,7 @@ const setupGradientColorToolbarPos = () => {
 }
 
 const setupSoundEffectViewPos = () => {
+  if(!soundEffectViewShow.value) return
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #sound-effect-view',
     width: 688,
@@ -224,10 +227,20 @@ const setupSoundEffectViewPos = () => {
 }
 
 const setupThemeSelectionViewPos = () => {
+  if(!themeSelectionViewShow.value) return
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #theme-selection-view',
     width: 725,
     height: 505
+  })
+}
+
+const setupFontSelectionToolbarPos = () => {
+  if(!fontSelectionToolbarShow.value) return
+  emitEvents('app-elementAlignCenter', {
+    selector: '.default-layout #font-selection-toolbar',
+    width: 404,
+    height: 520
   })
 }
 
@@ -309,7 +322,8 @@ const appBackgroundScope = reactive({
   customThemeEditView: false,
   playingThemeListView: false,
   customPlayingThemeEditView: false,
-  TrackResourceToolView: false,
+  trackResourceToolView: false,
+  fontSelectionToolbar: false
 })
 
 //EventBus监听注册，统一管理
@@ -387,6 +401,7 @@ watch(customPlayingThemeEditViewShow, setupCustomPlayingThemeEditViewPos)
 watch(customAppBorderRadiusViewShow, setupCustomAppBorderRadiusViewPos)
 watch(trackResourceToolViewShow, setupTrackResourceToolViewPos)
 watch(themeSelectionViewShow, setupThemeSelectionViewPos)
+watch(fontSelectionToolbarShow, setupFontSelectionToolbarPos)
 
 
 watch(() => getCurrentTheme(), (nv) => {
@@ -666,11 +681,18 @@ onUnmounted(() => offEvents(eventsRegistration))
     </CustomAppBorderRadiusView>
 
     <TrackResourceToolView id="track-resource-tool-view" 
-      :class="{ 'app-custom-theme-bg': appBackgroundScope.TrackResourceToolView }"
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.trackResourceToolView }"
       v-if="trackResourceToolViewShow" 
       @click.stop=""
       @contextmenu.stop="" >
     </TrackResourceToolView>
+
+    <FontSelectionToolbar id="font-selection-toolbar" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.fontSelectionToolbar }"
+      v-if="fontSelectionToolbarShow" 
+      @click.stop=""
+      @contextmenu.stop="" >
+    </FontSelectionToolbar>
   </div>
 </template>
 
@@ -927,4 +949,15 @@ onUnmounted(() => offEvents(eventsRegistration))
   border-radius: var(--border-popover-border-radius);
 }
 
+#font-selection-toolbar {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 404px;
+  height: 520px;
+  z-index: 100;
+  background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-popover-border-radius);
+}
 </style>

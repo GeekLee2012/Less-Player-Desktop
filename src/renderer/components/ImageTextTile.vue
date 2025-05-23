@@ -40,7 +40,8 @@ const props = defineProps({
 const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
 const { isUseCardStyleImageTextTile, isUseShadowForCardStyleTile,
     isUseHCardStyleImageTextTile, isUseReversedForHCardStyleTile,
-    isUseSmallIconForHCardStyleTile,
+    isUseSmallIconForHCardStyleTile, isUseCoverNopaddingForHCardStyleTile,
+    isUseCoverNoshadowForHCardStyleTile,
  } = storeToRefs(useSettingStore())
 
 
@@ -103,6 +104,8 @@ onUnmounted(() => offEvents(eventsRegistration))
             'image-text-tile-card-horiziontal': isUseHCardStyleImageTextTile,
             'horiziontal-reverse': isUseReversedForHCardStyleTile,
             'horiziontal-small-icon': isUseSmallIconForHCardStyleTile,
+            'horiziontal-cover-nopadding': isUseCoverNopaddingForHCardStyleTile,
+            'horiziontal-cover-noshadow': isUseCoverNoshadowForHCardStyleTile,
             'selectable': checkbox,
             'tutorial': tutorial,
         }" 
@@ -569,9 +572,10 @@ onUnmounted(() => offEvents(eventsRegistration))
 /* 实验性CSS - Horiziontal Card */
 .image-text-tile-card-horiziontal {
     --others-image-text-tile-cover-size: 168px;
+    --hpadding: 30px;
     display: flex;
     flex-direction: row;
-    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio) - 30px);
+    width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio) - var(--hpadding));
     border-radius: var(--border-img-text-tile-border-radius);
     padding: 20px 10px 20px 20px;
     /*background: var(--app-bg-color);
@@ -587,7 +591,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card-horiziontal:hover {
-    transform: translateY(-6px);
+    transform: translateY(-8px);
 }
 
 .image-text-tile-card-horiziontal .cover-wrap .cover {
@@ -823,5 +827,50 @@ onUnmounted(() => offEvents(eventsRegistration))
 .mini-navbar-mode .image-text-tile-card-horiziontal.image-text-tile-video .cover {
     width: calc(var(--others-image-text-tile-cover-size) * 0.88) !important;
     height: calc(var(--others-image-text-tile-cover-size) * 0.66) !important;
+}
+
+
+/* Horiziontal Card - Full Cover  */
+.image-text-tile-card-horiziontal.horiziontal-cover-nopadding {
+    padding: 0px;
+    margin-bottom: 13px !important;
+    --hpadding: 0px !important;
+}
+
+.image-text-tile-card-horiziontal.horiziontal-cover-nopadding .cover-wrap .cover {
+    width: calc(var(--others-image-text-tile-cover-size) * 0.66 + 15px);
+    height: calc(var(--others-image-text-tile-cover-size) * 0.66 + 28px);
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.image-text-tile-card-horiziontal.horiziontal-cover-nopadding .title-wrap {
+    padding: 15px 15px 15px 15px;
+}
+
+.image-text-tile-card-horiziontal.horiziontal-cover-nopadding .title-wrap .action {
+    right: 18px;
+    bottom: 15px;
+}
+
+.image-text-tile-card-horiziontal.horiziontal-cover-nopadding.horiziontal-reverse  .cover-wrap .cover {
+    border-top-right-radius: var(--border-img-text-tile-border-radius);
+    border-bottom-right-radius: var(--border-img-text-tile-border-radius);
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+.image-text-tile-card-horiziontal.horiziontal-cover-nopadding.horiziontal-reverse .title-wrap .action {
+    left: 15px;
+}
+
+/* Horiziontal Card - Full Cover - Video  */
+.image-text-tile-card-horiziontal.image-text-tile-video.horiziontal-cover-nopadding .cover-wrap .cover {
+    height: calc(var(--others-image-text-tile-cover-size) * 0.66 + 28px) !important;
+}
+
+/* Horiziontal Card - Cover No Shadow  */
+.image-text-tile-card-horiziontal.horiziontal-cover-noshadow .cover-wrap .cover {
+    box-shadow: none !important;
 }
 </style>

@@ -40,7 +40,7 @@ import { tify, sify } from 'chinese-conv';
 const { addCustomRoute, visitCommonRoute } = inject('appRoute')
 
 const { plugins } = storeToRefs(usePluginStore())
-const { removePlugin, updatePlugin } = usePluginStore()
+const { removePlugin, updatePlugin, getPlugin } = usePluginStore()
 const { addPlatform, removePlatform } = usePlatformStore()
 const { spectrumParams } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
@@ -198,6 +198,23 @@ const removePluginNow = (plugin) => {
     }
 }
 
+const onPluginOptionsUpdated = (id, options) => {
+    const plugin = getPlugin(id)
+    if (!plugin) return
+    const { path, main, mainModule } = plugin
+    if (!path || !main) return 
+    if (!mainModule || !mainModule.optionsUpdated) {
+        import(/* @vite-ignore */ `${FILE_PREFIX}${path}/${main}`).then(mainModule => {
+            Object.assign(plugin, { mainModule })
+            tryCallDefault(mainModule.optionsUpdated, plugin)
+        }).catch(error => {
+            console.log(error)
+        })
+    } else {
+        tryCallDefault(mainModule.optionsUpdated, plugin)
+    }
+}
+
 //异步加载插件
 const loadPluginsOnStartup = async () => {
     if (plugins.value.length < 1) return
@@ -300,18 +317,14 @@ const lessAPI = {
     events: {
         APIEvents,
         register(event, handler) {
-            try {
+            tryCallDefault(() => {
                 EventHandlerRegistrations.register(event, handler)
-            } catch (error) {
-                console.log(error)
-            }
+            })
         },
         unregister(event, handler) {
-            try {
+            tryCallDefault(() => {
                 EventHandlerRegistrations.unregister(event, handler)
-            } catch (error) {
-                console.log(error)
-            }
+            })
         },
     },
     permissions: {
@@ -390,6 +403,7 @@ provide('apiExpose', {
     activatePluginNow,
     deactivatePluginNow,
     removePluginNow,
+    onPluginOptionsUpdated,
     hasExDrawSpectrumHandlers: () => {
         return EventHandlerRegistrations.hasHanlders(APIEvents.TRACK_DRAW_SPECTRUM)
     },

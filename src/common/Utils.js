@@ -38,7 +38,8 @@ export const tryCallOnObject = (fn, obj, params, onSuccess, onError) => {
 }
 
 export const tryCallDefault = (fn, params, defaultValue) => {
-    return tryCall(fn, params, result => (result), (params) => (defaultValue))
+    return tryCall(fn, params, result => (result), (params) => (defaultValue)) 
+        || defaultValue
 }
 
 
@@ -262,6 +263,25 @@ export const trimTextWithinBrackets = (text) => {
     if(isBlank(text)) return text
     const index = text.indexOf('(')
     return text.substring(0, index)
+}
+
+export const readProperties = (text, seperator) => {
+    const lines = readLines(text, seperator)
+    if(lines.length < 1) return 
+    try {
+        const props = {}
+        lines.forEach(line => {
+            if(isBlank(line)) return
+            const index = line.indexOf('=')
+            if(index < 0) return
+            const key = toTrimString(line.substring(0, index))
+            const value = (line.length - 1) >= index ? toTrimString(line.substring(index + 1)) : ''
+            props[key] = value
+        })
+        return props
+    } catch(error) {
+        console.log(error)
+    }
 }
 
 

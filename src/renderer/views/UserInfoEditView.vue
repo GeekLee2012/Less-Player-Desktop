@@ -211,9 +211,9 @@ onMounted(loadUserInfo)
 #user-info-edit-view .center .form-row input,
 #user-info-edit-view .center .form-row textarea {
     flex: 1;
-    border: 1px solid var(--border-inputs-border-color);
     outline: none;
     padding: 5px 8px;
+    border: 1px solid var(--border-inputs-border-color);
     border-radius: var(--border-inputs-border-radius);
     background-color: var(--content-inputs-bg-color);
     color: var(--content-inputs-text-color);

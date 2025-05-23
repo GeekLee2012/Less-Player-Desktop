@@ -1369,7 +1369,7 @@ const initAppMenuTemplate = () => {
     { type: 'separator' },
     //accelerator: 'Alt+Shift+P'
     { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.SETTING, true), 
-      label: i18nText.Settings, accelerator: 'P' },
+      label: i18nText.Settings },
     { click: (menuItem, browserWindow, event) => sendTrayAction(TrayAction.RESET_SETTING, true), 
       label: i18nText.ResetSettings, accelerator: 'CmdOrCtrl+P' },
     { role: 'toggleDevTools', label: i18nText.DevTools },
@@ -1741,7 +1741,7 @@ const getCookie = (url, fetchOnMissing) => {
 //暂时使用内存做缓存
 const cacheCookie = (url, cookie) => { cookiesMap[url] = cookie }
 
-const fetchCookie = async (url, ignoreCache) => {
+const fetchCookie_v0 = async (url, ignoreCache) => {
   if(!url) return
   let cookie = ignoreCache ? null : getCookie(url)
   //缓存命中
@@ -1772,6 +1772,51 @@ const fetchCookie = async (url, ignoreCache) => {
       })
       hasCookie = true
     } while(true)
+    if(hasCookie) cacheCookie(url, cookie)
+  } catch (error) {
+    if (isDevEnv) console.log(error)
+  }
+  Reflect.deleteProperty(cookiesPendingMap, url)
+  return cookie
+}
+
+const fetchCookie = async (url, ignoreCache) => {
+  if(!url) return
+  let cookie = ignoreCache ? null : getCookie(url)
+  //缓存命中
+  if (cookie) return cookie
+  try {
+    //前置状态检查，避免多次重复请求
+    if (cookiesPendingMap[url]) return cookie
+    cookiesPendingMap[url] = true
+
+    //缓存未命中
+    const resp = await fetch(url, {
+      headers: {
+        'User-Agent': appUserAgent
+      }
+    })
+    const { headers } = resp
+    cookie = {}
+    let counter = 0, hasCookie = false
+    const _setCookies = []
+    const setCookies = headers.raw()['set-cookie']
+    if(typeof setCookies == 'string') {
+      _setCookies.push(setCookies)
+    } else if(Array.isArray(setCookies)) {
+      _setCookies.push(...setCookies)
+    }
+    if(_setCookies.length > 0)
+      _setCookies.forEach(cookieText => {
+        const items = cookieText.split(';')
+        items.forEach(item => {
+          const kvPair = item.split('=')
+          const key = kvPair[0].trim()
+          const value = kvPair[1].trim()
+          cookie[key] = value
+        })
+      })
+      hasCookie = true
     if(hasCookie) cacheCookie(url, cookie)
   } catch (error) {
     if (isDevEnv) console.log(error)

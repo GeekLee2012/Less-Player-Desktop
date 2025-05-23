@@ -1046,6 +1046,7 @@ const getVideoDetail = (video) => {
 //TODO 貌似Electron Bug：主窗口刷新后，MediaSession无法重新关联
 const setupCurrentMediaSession = async (track) => {
     try {
+        if(isNoneTrack(track)) return 
         if ("mediaSession" in navigator) {
             const _track = track || { title: '爱你所爱' }
             const { title, cover } = _track
@@ -1952,6 +1953,9 @@ watch(theme, () => {
 
 watch(playingIndex, (nv, ov) => resetTrackRetry(), { immediate: true })
 watch(trackResourceToolViewShow, (nv, ov) => nv && hideAllCtxMenus())
+watch(() => currentTrack.value && currentTrack.value.cover, () => {
+    setupCurrentMediaSession(currentTrack.value)
+}, { immediate: true })
 
 //播放器API
 provide('player', {

@@ -53,6 +53,7 @@ const parseJson = (data) => {
         try {
             return JSON.parse(data)
         } catch(error1) {
+            console.log(error1)
             try {
                 return parseJsonp(data)
             } catch(error2) {

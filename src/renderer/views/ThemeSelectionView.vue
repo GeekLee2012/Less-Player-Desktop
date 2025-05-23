@@ -62,6 +62,7 @@ const computedSubtitle = computed(() => {
 
 const selectItem = (item, index) => {
     setSelectedItem(item, index)
+    invokeContextSelected()
     if(isAutoHideThemeSelectionView.value) hideThemeSelectionView()
 }
 
@@ -70,21 +71,27 @@ const invokeContextMounted = () => {
     if(!context) return 
     const { mounted } = context 
     if(typeof mounted == 'function') {
-        const { subtitle, index, type } = mounted()
+        const { index, type, subtitle } = mounted()
         setActiveTab(type)
         setSelectedItem({ index, type }, index)
         setSubtitle(subtitle)
     }
 }
 
+const invokeContextSelected = () => {
+    const context = themeSelectionViewContext.value
+    if(!context) return 
+    const { selected } = context 
+    if(typeof selected == 'function') selected(selectedItem)
+}
+
 const invokeContextUnmounted = () => {
     const context = themeSelectionViewContext.value
     if(!context) return 
     const { unmounted } = context 
-    if(typeof unmounted == 'function') {
-        unmounted(selectedItem)
-        setThemeSelectionViewContext(null)
-    }
+    if(typeof unmounted == 'function') unmounted(selectedItem)
+
+    setThemeSelectionViewContext(null)
 }
 
 
