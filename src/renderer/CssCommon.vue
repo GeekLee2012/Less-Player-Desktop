@@ -90,6 +90,8 @@
   --content-desktop-lyric-line-spacing: 22px;
   --others-mini-layout-cover-progress-bg: none;
 
+  --nativeTheme: 'light';
+
   font-family: var(--content-text-font-family);
   letter-spacing: var(--content-text-letter-spacing);
 }

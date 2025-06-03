@@ -166,8 +166,12 @@ onUnmounted(() => offEvents(eventsRegistration))
 .playlist-category-bar .active {
     border-color: var(--content-highlight-color);
     border-color: transparent;
+    /*
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+    */
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
 }
 
 .contrast-mode .playlist-category-bar .active {

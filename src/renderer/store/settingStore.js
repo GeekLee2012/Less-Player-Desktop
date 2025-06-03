@@ -267,6 +267,8 @@ export const useSettingStore = defineStore('setting', {
             playingViewBgCoverEffectGradientType: 2, 
             //渐变模式 - 渐变风格 - 渐变亮度
             playingViewBgCoverEffectGradientBrightness: 1, 
+            //渐变模式 - 底部栏背景透明
+            playingViewBgCoverEffectGradientBottomBgTransparent: false,
             //播放页 - 封面图片边框
             playingViewCoverBorderShow: true,
             //播放页 - 播放控件风格
@@ -958,6 +960,9 @@ export const useSettingStore = defineStore('setting', {
         },
         playingViewBgCoverEffectGradientBrightness() {
             return this.track.playingViewBgCoverEffectGradientBrightness
+        },
+        playingViewBgCoverEffectGradientBottomBgTransparent() {
+            return this.track.playingViewBgCoverEffectGradientBottomBgTransparent
         },
         playingViewLyricHighlightMode() {
             return this.track.playingViewLyricHighlightMode
@@ -1963,6 +1968,9 @@ export const useSettingStore = defineStore('setting', {
         },
         setPlayingViewBgCoverEffectGradientBrightness(value) {
             this.track.playingViewBgCoverEffectGradientBrightness = value
+        },
+        togglePlayingViewBgCoverEffectGradientBottomBgTransparent() {
+            this.track.playingViewBgCoverEffectGradientBottomBgTransparent = !this.track.playingViewBgCoverEffectGradientBottomBgTransparent
         },
         setPlayingViewLyricHighlightMode(value) {
             this.track.playingViewLyricHighlightMode = value

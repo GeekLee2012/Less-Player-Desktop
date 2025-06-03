@@ -61,6 +61,7 @@ const handleRightClick = (event) => {
     align-items: center;
     background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
+    /*border: 1px solid transparent;*/
 }
 
 .svg-text-btn .left-btn:hover,
@@ -70,6 +71,7 @@ const handleRightClick = (event) => {
 
 .svg-text-btn .left-btn {
     border-radius: var(--border-btn-border-radius) 0px 0px var(--border-btn-border-radius);
+    border-color: var(--button-icon-text-btn-icon-border-color);
 }
 
 .svg-text-btn .left-btn .img {
@@ -85,6 +87,7 @@ const handleRightClick = (event) => {
     padding-left: 8px;
     padding-right: 10px;
     border-left: var(--svg-text-btn-rbtn-border);
+    border-color: var(--button-icon-text-btn-icon-border-color);
 }
 
 .button-disabled .left-btn:hover,

@@ -26,12 +26,21 @@ export const useSearchStore = defineStore('search', {
             })
         },
         resourcePlatforms() {
-            const { activePlatforms } = usePlatformStore()
-            return activePlatforms('resource-search').sort((p1, p2) => {
-                const w1 = p1.weight || 0
-                const w2 = p2.weight || 0
-                return w2 - w1
-            })
+            return (type) => {
+                type = type || 'all-songs'
+                const { activePlatforms } = usePlatformStore()
+                return activePlatforms('resource-search')
+                    .filter(item => {
+                        const { resourceSearchTabs } = item
+                        if(!resourceSearchTabs) return true
+                        return resourceSearchTabs.includes(type)
+                    })
+                    .sort((p1, p2) => {
+                    const w1 = p1.weight || 0
+                    const w2 = p2.weight || 0
+                    return w2 - w1
+                })
+            }
         },
         activeTabCode(state) {
             if(this._activeTabCode) return this._activeTabCode

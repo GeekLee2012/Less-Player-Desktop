@@ -19,16 +19,21 @@ export class Theme {
         /*应用背景适用场景*/
         this.appBackgroundScope = {
             playingView: true,
+            toast: false,
+            //列表类
+            contextMenu: false,
             playbackQueue: false,
             categoryView: false,
-            contextMenu: false,
-            toast: false,
+            playingThemeListView: false,
+            //工具栏类
             soundEffectView: false,
             lyricToolbar: false,
             randomMusicToolbar: false,
             customThemeEditView: false,
-            playingThemeListView: false,
-            customPlayingThemeEditView: false
+            customPlayingThemeEditView: false,
+            fontSelectionToolbar: false,
+            trackResourceToolView: false,
+            customAppBorderRadiusView: false
         }
 
         /*内容*/
@@ -46,8 +51,15 @@ export class Theme {
             leftNavBgColor: null,
             inputsBgColor: null,
             inputsTextColor: null,
-            regularBgColor: null,
-            lightBgColor: null
+            //regularBgColor: null,
+            //lightBgColor: null,
+            //新增项
+            listItemHlBgColor: null,
+            listItemHlTextColor: null,
+            imageTextTileCardBgColor: null,
+            imageTextTileHCardBgColor: null,
+            imageTextTileCardShadowColor1: null,
+            imageTextTileCardShadowColor2: null,
         }
 
         /*边框*/
@@ -66,6 +78,7 @@ export class Theme {
             iconTextBtnIconColor: null,
             iconTextBtnBgColor: null,
             iconTextBtnHoverBgColor: null,
+            iconTextBtnBorderColor: null,
             toggleBtnBgColor: null,
             toggleBtnThumbColor: null
         }

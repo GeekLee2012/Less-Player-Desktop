@@ -311,8 +311,12 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .radio-category-view .center .current {
     border-radius: var(--border-list-item-border-radius);
+    /*
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+    */
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
 }
 
 .contrast-mode .radio-category-view .center .current {

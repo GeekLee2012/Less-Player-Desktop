@@ -187,7 +187,7 @@ export class United {
                 const ssResult = await United.matchTrack(
                     { ...track, tTitle, tArtistName }, 
                     candidates.slice(0, Math.min(candidates.length, 20)), 
-                    options || _options)
+                    options || _options, interruptFn)
                 
                 if(tryCallDefault(interruptFn, track)) return resolve(result)
 
@@ -392,6 +392,8 @@ export class United {
                 const evaluation = United.sumEvaluation(score, hit)
                 //总评分是否达标
                 if (!United.isEvaluationPass(evaluation)) continue
+                if(tryCallDefault(interruptFn, track)) return resolve(result)
+
                 Object.assign(candidate, { isCandidate: true })
                 if(isDevEnv()) Object.assign(candidate, { score, hit, ...evaluation }) 
                 
@@ -407,7 +409,8 @@ export class United {
                     const { url } = cDetail
                     Object.assign(candidate, { url })
                 }
-
+                if(tryCallDefault(interruptFn, track)) return resolve(result)
+                
                 //歌词
                 //若时长相同，且已有歌词，仍需重新获取，可能缺少翻译
                 if(!ignore.lyric) {
@@ -419,7 +422,8 @@ export class United {
                     if(!Lyric.hasData(lyric) && isGetLyric) continue
                     Object.assign(candidate, { lyric, lyricTrans, lyricRoma })    
                 }
-                
+                if(tryCallDefault(interruptFn, track)) return resolve(result)
+
                 //封面
                 if(!ignore.cover && !Track.hasCover(candidate)) continue
 

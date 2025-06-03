@@ -262,6 +262,7 @@ onMounted(() => {
     flex: 1;
     flex-direction: column;
     background: var(--content-bg-color);
+    background: var(--content-bg-color-no-transparent);
 }
 
 .custom-app-border-radius-preview-mode {
@@ -348,7 +349,7 @@ onMounted(() => {
 .custom-app-border-radius-view .center {
     padding: 0px 36px;
     flex: 1;
-    background: var(--content-bg-color);
+    /*background: var(--content-bg-color);*/
     overflow: hidden;
     align-items: flex-start;
     display: flex;

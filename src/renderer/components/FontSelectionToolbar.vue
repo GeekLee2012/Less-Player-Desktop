@@ -92,15 +92,26 @@ const invokeContextSelected = () => {
 const computedSize = computed(() => {
     const fData = filteredData.value
     const fonts = availableFonts.value
-    return fData ? fData.length : (fonts ? fonts.length : 0)
+    const fDataSize = fData ? fData.length : 0
+    const total = fonts ? fonts.length : 0
+    return (fData && fDataSize < total) ? `${fDataSize} / ${total}` : total
 })
+
+const isPrefixMatchMode = ref(true)
+const setPrefixMatchMode = (value) => (isPrefixMatchMode.value = value)
+const togglePrefixMatchMode = () => setPrefixMatchMode(!isPrefixMatchMode.value)
 
 const filterFonts = (keyword) => {
     let result = availableFonts.value
     if (keyword) {
-        keyword = keyword.toLowerCase()
+        //const keywordRegex = new RegExp(keyword)
+        //keywordRegex.test()
+        const lwKeyword = keyword.toLowerCase()
         result = result.filter(item => {
-            if (item.toLowerCase().includes(keyword)) {
+            const lwItem = item.toLowerCase()
+            if(isPrefixMatchMode.value) {
+                return lwItem.startsWith(lwKeyword)
+            } else if (lwItem.includes(lwKeyword)) {
                 return true
             }
             return false
@@ -148,11 +159,20 @@ onUnmounted(() => {
             </div>
             <div class="center">
                 <div class="search-wrap">
-                    <SearchBar class="search-bar" placeholder="字体名称"
+                    <SearchBar class="search-bar" 
+                        placeholder="字体名称"
                         :submitAction="filterFonts">
                     </SearchBar>
                 </div>
-                <div class="list-title">列表({{ computedSize }})</div>
+                <div class="list-title">
+                    <div class="size-text">列表({{ computedSize }})</div>
+                    <div class="options">
+                        <div class="option-item">
+                            <ToggleControl :value="isPrefixMatchMode" @click="togglePrefixMatchMode"/>
+                            <span @click="togglePrefixMatchMode">开头匹配</span>
+                        </div>
+                    </div>
+                </div>
                 <div class="content" ref="contentRef" >
                     <div v-for="(item, index) in (filteredData || availableFonts)" 
                         class="item"
@@ -240,8 +260,36 @@ onUnmounted(() => {
     font-size: calc(var(--content-text-size) - 1px);
     color: var(--content-subtitle-text-color);
     text-align: left;
-    padding: 0px 16px 6px 16px;
+    padding: 2px 16px 8px 16px;
     font-weight: bold;
+    display: flex;
+    position: relative;
+}
+
+.font-selection-toolbar .center .list-title .options {
+    font-weight: normal;
+    position: absolute;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    font-size: var(--content-text-tip-text-size);
+}
+
+.font-selection-toolbar .center .list-title .options .option-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.font-selection-toolbar .center .list-title .options .option-item span {
+    padding-left: 6px;
+}
+
+.font-selection-toolbar .center .list-title .options .option-item:hover span {
+    background: var(--content-text-highlight-color);
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    color: transparent !important;
 }
 
 
@@ -280,8 +328,12 @@ onUnmounted(() => {
 }
 
 .font-selection-toolbar .center .content .item.active {
+    /*
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
+    */
+    background: var(--content-list-item-hl-bg-color);
+    color: var(--content-list-item-hl-text-color);
 }
 
 .contrast-mode .font-selection-toolbar .center .content .item.active {

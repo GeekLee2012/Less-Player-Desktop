@@ -303,7 +303,7 @@ const updateCover = async () => {
                     </div>
                 </div>
                 <div class="form-row history-row" >
-                    <div>
+                    <div class="title">
                         <svg width="17" height="17" class="history-btn" viewBox="0 0 767.87 750.82" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -488,8 +488,12 @@ const updateCover = async () => {
 }
 
 #free-video-edit-view .center .form-row .active {
+    /*
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+    */
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
 }
 
 #free-video-edit-view .history-row {
@@ -500,8 +504,15 @@ const updateCover = async () => {
     flex-wrap: wrap;
 }
 
+#free-video-edit-view .history-row .title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: calc(100% - 8px);
+}
+
 #free-video-edit-view .history-row .history-btn {
-    margin-left: 10px;
+    margin-left: 5px;
     margin-right: 5px;
     transform: translateY(-4.5px);
 }
@@ -543,13 +554,13 @@ const updateCover = async () => {
     
     /*border-radius: var(--border-inputs-border-radius);*/
     border-radius: var(--border-list-item-vertical-border-radius);
-    border-radius: calc(var(--border-list-item-vertical-border-radius) - 3px);
+    border-radius: var(--border-list-item-vertical-border-radius);
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
 
     margin-left: 10px;
     margin-right: 10px;
-    margin-bottom: 10px;
-    padding: 2px 10px;
+    margin-bottom: 15px;
+    padding: 8px 12px;
 }
 
 #free-video-edit-view .form-row.history-row .link-item:hover {

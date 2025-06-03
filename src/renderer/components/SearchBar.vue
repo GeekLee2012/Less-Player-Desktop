@@ -7,6 +7,7 @@ import { toTrimString } from '../../common/Utils';
 const props = defineProps({
     miniMode: Boolean,
     placeholder: String,
+    beforeSubmitAction: Function,
     submitAction: Function,
 })
 
@@ -21,8 +22,9 @@ const submitSearch = () => {
     keyword = toTrimString(keyword.replace(/[#\\?]/g, ''))
     if (/^[@]+$/.test(keyword)) return
 
-    const { submitAction } = props
-    if (submitAction) submitAction(keyword)
+    const { beforeSubmitAction, submitAction } = props
+    if (typeof beforeSubmitAction == 'function') keyword = beforeSubmitAction(keyword)
+    if (typeof submitAction == 'function') submitAction(keyword)
 }
 
 const toggleClearBtn = () => {
@@ -36,14 +38,19 @@ const clear = () => {
 }
 
 defineExpose({
-    setKeyword: (keyword, submit) => {
+    setKeyword: (keyword, options) => {
         if(!keywordRef.value) return 
         keywordRef.value.value = keyword
         toggleClearBtn()
         
+        const { beforSubmit, submit } = options || {}
+        if(beforSubmit) {
+            const { beforSubmitAction } = props
+            if (typeof beforSubmitAction == 'function') keyword = beforSubmitAction(keyword)
+        }
         if(submit) {
             const { submitAction } = props
-            if (submitAction) submitAction(keyword)
+            if (typeof submitAction == 'function') submitAction(keyword)
         }
     }
 })
@@ -64,6 +71,9 @@ defineExpose({
                     </g>
                 </g>
             </svg>
+        </div>
+        <div class="prefix-wrap">
+            <slot name="prefix"></slot>
         </div>
         <input type="text" class="keyword" 
             ref="keywordRef" 
@@ -90,6 +100,7 @@ defineExpose({
 }
 
 .search-bar .search-btn,
+.search-bar .prefix-wrap,
 .search-bar .keyword,
 .search-bar .clear-btn {
     border: 1px solid var(--searchbar-border-color);
@@ -120,6 +131,14 @@ defineExpose({
 
 .search-bar .search-btn:hover svg {
     fill: var(--searchbar-search-btn-hover-icon-color);
+}
+
+.search-bar .prefix-wrap {
+    border-radius: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    background: var(--searchbar-bg-color);
+    color: var(--searchbar-text-color);
 }
 
 .search-bar .keyword {

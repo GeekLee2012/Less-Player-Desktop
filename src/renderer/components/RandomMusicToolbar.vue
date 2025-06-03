@@ -148,8 +148,12 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 }
 
 .random-music-toolbar .center .nav-wrap .active {
+    /*
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color);
+    */
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
     font-weight: bold;
 }
 

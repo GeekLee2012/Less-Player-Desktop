@@ -404,6 +404,13 @@ export const usePlatformStore = defineStore('platforms', {
             return platform && platform.types 
                 && platform.types.includes('fm-radios')
         },
+        isTrackRemovablePlatform(code) {
+            return !(this.isLocalMusic(code)
+                || this.isFMRadioPlatform(code)
+                || this.isWebDav(code)
+                || this.isCloudStorage(code)
+                || this.isFreeFM(code))
+        },
         isArtistDetailVisitable(code) {
             return this.isPlatformValid(code)
         },

@@ -87,6 +87,8 @@ const applyTheme = (theme) => {
     '--content-left-nav-bg-color': theme.content.leftNavBgColor,
     '--content-inputs-text-color': theme.content.inputsTextColor,
     '--content-inputs-bg-color': theme.content.inputsBgColor,
+    '--content-list-item-hl-bg-color': theme.content.listItemHlBgColor || theme.button.iconTextBtnBgColor,
+    '--content-list-item-hl-text-color': theme.content.listItemHlTextColor || theme.button.iconTextBtnTextColor,
     //--content-inputs-placeholder-color
 
     '--border-color': theme.border.borderColor,
@@ -100,6 +102,7 @@ const applyTheme = (theme) => {
     '--button-icon-text-btn-hover-bg-color': theme.button.iconTextBtnHoverBgColor,
     '--button-icon-text-btn-text-color': theme.button.iconTextBtnTextColor,
     '--button-icon-text-btn-icon-color': theme.button.iconTextBtnIconColor,
+    //'--button-icon-text-btn-icon-border-color': theme.button.iconTextBtnBorderColor || 'transparent',
     '--button-toggle-btn-bg-color': theme.button.toggleBtnBgColor,
     '--button-toggle-btn-thumb-color': theme.button.toggleBtnThumbColor,
 
@@ -122,9 +125,13 @@ const applyTheme = (theme) => {
     //'--others-volumebar-thumb-color': theme.others.volumeBarThumbColor,
     //'--others-checkbox-bg-color': theme.others.checkboxBgColor,
 
-    "--content-border-image": contentBorderImage,
-    "--content-regular-bg-color": theme.content.regularBgColor,
-    "--content-light-bg-color": theme.content.lightBgColor,
+    '--content-border-image': contentBorderImage,
+    //'--content-regular-bg-color': theme.content.regularBgColor,
+    //'--content-light-bg-color': theme.content.lightBgColor,
+    '--content-image-text-tile-card-bg-color': theme.content.imageTextTileCardBgColor || themeBgColor,
+    '--content-image-text-tile-hcard-bg-color': theme.content.imageTextTileHCardBgColor || theme.content.listItemHoverBgColor,
+    '--content-image-text-tile-card-shadow-color1': theme.content.imageTextTileCardShadowColor1,
+    '--content-image-text-tile-card-shadow-color2': theme.content.imageTextTileCardShadowColor2,
   }
 
   applyDocumentStyle(themeProperties)
@@ -309,8 +316,7 @@ const setupAppBorder = () => {
 */
 
 /*
-const setupAutoTheme = () => {
-  const detectedNode = document.getElementById('auto-theme')
+  const rootEl = document.documentElement
   const observer = new MutationObserver((mutationList, observer) => {
     for (const mutation of mutationList) {
       if (mutation.type === "childList") {
@@ -320,12 +326,39 @@ const setupAutoTheme = () => {
       }
     }
   })
-  observer.observe(detectedNode, { attributes: true, childList: true, subtree: true })
-
-  detectedNode.innerHTML = 'Hello World'
-}
+  observer.observe(rootEl, { attributes: true, childList: false, subtree: false })
 */
 
+/*
+const detectNativeThemeByCss = () => {
+  if (isMacOS()) return 
+
+  const nativeThemeName = window.getComputedStyle(document.documentElement).getPropertyValue('--nativeTheme')
+  let mode = themeNativeMode.value
+  if (mode == 0) mode = (toTrimString(nativeThemeName) == 'dark') ? 2 : 1
+  switch(mode) {
+    case 1:
+      switchToLightTheme()
+      break
+    case 2: 
+      switchToDarkTheme()
+      break
+  }
+}
+
+let nativeThemeCssDetector = null
+const setupAutoThemeCssDetector = () => {
+  if(nativeThemeCssDetector) clearInterval(nativeThemeCssDetector)
+  //macOS采用nativeTheme API方式
+  if (isMacOS()) return 
+  //启动时进行一次检测
+  detectNativeThemeByCss()
+  //非macOS采用定时器检测CSS自定义属性
+  nativeThemeCssDetector = setInterval(detectNativeThemeByCss, 3000)
+}
+
+//setupAutoThemeCssDetector()
+*/
 
 
 //EventBus监听注册，统一管理
@@ -342,6 +375,7 @@ onEvents({
     setupAppBorderRadius()
   },
   'theme-applyTheme': setupAppTheme,
+  'theme-applyTheme-preview': setupAppTheme,
   'setting-appBorderRadiusPreview': setupAppBorderRadius,
   'theme-nativeMode-updated': setThemeByNativeMode,
   'theme-customTheme-removed': postCustomThemeRemoved
@@ -376,10 +410,18 @@ provide('appStyle', {
 </template>
 
 <style>
-/*
-@media (prefers-color-scheme: light) {}
-@media (prefers-color-scheme: dark) {}
-*/
+@media (prefers-color-scheme: light) {
+  :root {
+    --nativeTheme: light;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nativeTheme: dark;
+  }
+}
+
 body.app-win-custom-shadow {
   padding: var(--app-win-custom-shadow-size);
   box-sizing: border-box;
@@ -453,6 +495,15 @@ body.app-win-custom-shadow.mini {
 
   100% {
     transform: rotate(360deg)
+  }
+}
+
+@keyframes backdrop-fadein {
+  from {
+    opacity:0
+  }
+  to {
+    opacity:1
   }
 }
 </style>

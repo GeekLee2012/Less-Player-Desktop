@@ -11,13 +11,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#cdcdcd",
@@ -31,7 +37,11 @@
                 "listItemHoverBgColor": "#666666",
                 "leftNavBgColor": "#48484a",
                 "inputsBgColor": "#595959",
-                "inputsTextColor": "#d5d5d5"
+                "inputsTextColor": "#d5d5d5",
+                "listItemHlBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
+                "listItemHlTextColor": "#dddddd",
+                "imageTextTileCardShadowColor1": "#18181836",
+                "imageTextTileCardShadowColor2": "#39393936"
             },
             "border": {
                 "borderColor": "#414141",
@@ -81,13 +91,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#373737",
@@ -102,12 +118,14 @@
                 "leftNavBgColor": "#f8f8f8ff",
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#272727",
-                "regularBgColor": "#d3d5d7",
-                "lightBgColor": "#f1f2f3"
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3",
+                "listItemHlBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
+                "listItemHlTextColor": "#ffffff"
             },
             "border": {
                 "borderColor": "#eeeeee",
-                "leftNavBorderColor": "transparent",
+                "leftNavBorderColor": "#ffffff00",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -153,13 +171,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#313131",
@@ -174,8 +198,10 @@
                 "leftNavBgColor": "#e7e1e3cb",
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#313131",
-                "regularBgColor": "#d3d5d7",
-                "lightBgColor": "#f1f2f3"
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3",
+                "listItemHlBgColor": "#c7c1c3cb",
+                "listItemHlTextColor": "#414141"
             },
             "border": {
                 "borderColor": "#eeeeee",
@@ -225,13 +251,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#212121",
@@ -246,8 +278,10 @@
                 "leftNavBgColor": "#f8f8f8ff",
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#212121",
-                "regularBgColor": "#d3d5d7",
-                "lightBgColor": "#f1f2f3"
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3",
+                "listItemHlBgColor": "linear-gradient(to right, #e6399b, #e667af)",
+                "listItemHlTextColor": "#ffffff"
             },
             "border": {
                 "borderColor": "#f4f4f4",
@@ -297,13 +331,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#999999",
@@ -317,7 +357,11 @@
                 "listItemHoverBgColor": "#353035",
                 "leftNavBgColor": "#21221f",
                 "inputsBgColor": "#cccccc",
-                "inputsTextColor": "#393939"
+                "inputsTextColor": "#393939",
+                "listItemHlBgColor": "linear-gradient(to top right, #e6399b, #fc589c)",
+                "listItemHlTextColor": "#cccccc",
+                "imageTextTileCardShadowColor1": "#15101566",
+                "imageTextTileCardShadowColor2": "#05000525"
             },
             "border": {
                 "borderColor": null,
@@ -367,13 +411,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#ffffff",
@@ -387,7 +437,9 @@
                 "listItemHoverBgColor": "#16161633",
                 "leftNavBgColor": "#ffffff08",
                 "inputsBgColor": "#ffffff",
-                "inputsTextColor": "#666666"
+                "inputsTextColor": "#666666",
+                "listItemHlBgColor": "linear-gradient(to right, #eee, #fff)",
+                "listItemHlTextColor": "#fc7688"
             },
             "border": {
                 "borderColor": null,
@@ -437,13 +489,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#313131",
@@ -458,8 +516,10 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#313131",
-                "regularBgColor": "#d3d5d7",
-                "lightBgColor": "#f1f2f3"
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3",
+                "listItemHlBgColor": "linear-gradient(to right, #f84860, #f7314d)",
+                "listItemHlTextColor": "#ffffff"
             },
             "border": {
                 "borderColor": null,
@@ -509,13 +569,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#cccccc",
@@ -529,7 +595,10 @@
                 "listItemHoverBgColor": "#f9453f33",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#dddddd",
-                "inputsTextColor": "#363636"
+                "inputsTextColor": "#363636",
+                "listItemHlBgColor": "linear-gradient(to right, #f84860, #d53943)",
+                "listItemHlTextColor": "#cccccc",
+                "imageTextTileCardBgColor": "#f9453f33"
             },
             "border": {
                 "borderColor": null,
@@ -579,13 +648,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#282828",
@@ -596,10 +671,15 @@
                 "highlightColor": "#64903f",
                 "headerNavBgColor": "#64903f25",
                 "loadingMaskColor": "linear-gradient(to right, #ababab36 8%, #ababab66 18%, #ababab36 33%)",
-                "listItemHoverBgColor": "#ababab36",
+                "listItemHoverBgColor": "#dbdeda",
                 "leftNavBgColor": "#99999925",
                 "inputsBgColor": "#f1eee7",
-                "inputsTextColor": "#282828"
+                "inputsTextColor": "#282828",
+                "listItemHlBgColor": "#64903fcb",
+                "listItemHlTextColor": "#ffffffcb",
+                "imageTextTileCardBgColor": "#dbdeda",
+                "imageTextTileCardShadowColor1": "#c3c5c7",
+                "imageTextTileCardShadowColor2": "#e1e2e3"
             },
             "border": {
                 "borderColor": null,
@@ -649,13 +729,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#919343",
@@ -666,10 +752,13 @@
                 "highlightColor": "#e1e0a7",
                 "headerNavBgColor": "#357a64cb",
                 "loadingMaskColor": "linear-gradient(to right, #e1e0a736 8%, #91934336 18%, #e1e0a736 33%)",
-                "listItemHoverBgColor": "#91934333",
+                "listItemHoverBgColor": "#265738",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#91934336",
-                "inputsTextColor": "#919343"
+                "inputsTextColor": "#919343",
+                "listItemHlBgColor": "#e1e0a7",
+                "listItemHlTextColor": "#919343",
+                "imageTextTileCardBgColor": "#265738"
             },
             "border": {
                 "borderColor": null,
@@ -719,13 +808,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#161616",
@@ -740,8 +835,11 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffffcb",
                 "inputsTextColor": "#161616",
-                "regularBgColor": "#c3c5c7",
-                "lightBgColor": "#e1e2e3"
+                "imageTextTileCardShadowColor1": "#c3c5c7",
+                "imageTextTileCardShadowColor2": "#e1e2e3",
+                "listItemHlBgColor": "linear-gradient(to right, #2783fb, #2783fb)",
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#e1e7e9"
             },
             "border": {
                 "borderColor": "#dddddd66",
@@ -791,13 +889,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#273b42",
@@ -812,8 +916,10 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffffcb",
                 "inputsTextColor": "#273b42",
-                "regularBgColor": "#d3d5d7",
-                "lightBgColor": "#f1f2f3"
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3",
+                "listItemHlBgColor": "linear-gradient(to right, #395a62, #395a62)",
+                "listItemHlTextColor": "#ffffff"
             },
             "border": {
                 "borderColor": "#dddddd",
@@ -863,13 +969,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#000000",
@@ -884,8 +996,10 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#000000",
-                "regularBgColor": "#d3d5d7",
-                "lightBgColor": "#f1f2f3"
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3",
+                "listItemHlBgColor": "#ffb300",
+                "listItemHlTextColor": "#ffffff"
             },
             "border": {
                 "borderColor": "#eeeeee",
@@ -935,13 +1049,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#000000",
@@ -955,7 +1075,9 @@
                 "listItemHoverBgColor": "#fc9b2925",
                 "leftNavBgColor": null,
                 "inputsBgColor": "#fafafa",
-                "inputsTextColor": "#333333"
+                "inputsTextColor": "#333333",
+                "listItemHlBgColor": "#fc9b29",
+                "listItemHlTextColor": "#ffffff"
             },
             "border": {
                 "borderColor": null,
@@ -1005,13 +1127,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#000000",
@@ -1026,8 +1154,10 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#000000",
-                "regularBgColor": "#d3d5d7",
-                "lightBgColor": "#f1f2f3"
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3",
+                "listItemHlBgColor": "#9c27b0",
+                "listItemHlTextColor": "#ffffff"
             },
             "border": {
                 "borderColor": null,
@@ -1077,13 +1207,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
-                "playbackQueue": true,
-                "categoryView": true,
-                "contextMenu": true,
-                "toast": true,
-                "soundEffectView": true,
-                "lyricToolbar": true,
-                "randomMusicToolbar": true
+                "toast": false,
+                "contextMenu": false,
+                "playbackQueue": false,
+                "categoryView": false,
+                "playingThemeListView": false,
+                "soundEffectView": false,
+                "lyricToolbar": false,
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#edede2",
@@ -1097,7 +1233,9 @@
                 "listItemHoverBgColor": "#fdfdf225",
                 "leftNavBgColor": "#4d3e72",
                 "inputsBgColor": "#edede2",
-                "inputsTextColor": "#272727"
+                "inputsTextColor": "#272727",
+                "listItemHlBgColor": "#e5bc8c",
+                "listItemHlTextColor": "#4d3e72"
             },
             "border": {
                 "borderColor": null,
@@ -1153,13 +1291,19 @@
             },
             "appBackgroundScope": {
                 "playingView": true,
+                "toast": false,
+                "contextMenu": false,
                 "playbackQueue": false,
                 "categoryView": false,
-                "contextMenu": false,
-                "toast": false,
+                "playingThemeListView": false,
                 "soundEffectView": false,
                 "lyricToolbar": false,
-                "randomMusicToolbar": false
+                "randomMusicToolbar": false,
+                "customThemeEditView": false,
+                "customPlayingThemeEditView": false,
+                "fontSelectionToolbar": false,
+                "trackResourceView": false,
+                "customAppBorderRadiusView": false
             },
             "content": {
                 "textColor": "#212121",
@@ -1173,11 +1317,13 @@
                 "listItemHoverBgColor": "#66666625",
                 "leftNavBgColor": "#ffffff99",
                 "inputsBgColor": null,
-                "inputsTextColor": null
+                "inputsTextColor": null,
+                "listItemHlBgColor": "linear-gradient(to right,#1ca388,#28c83f)",
+                "listItemHlTextColor": "#ffffff"
             },
             "border": {
                 "borderColor": "#cccccc",
-                "leftNavBorderColor": "transparent",
+                "leftNavBorderColor": "#ffffff00",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#999999"
             },

@@ -54,6 +54,7 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile,
     height: 43px;
     margin-top: 10px;
     border-radius: 3px;
+    border-radius: var(--border-img-text-tile-border-radius);
 }
 
 
@@ -71,7 +72,7 @@ const { isUseCardStyleImageTextTile, isUseHCardStyleImageTextTile,
 }
 
 .tiles-card-loading-mask .tile .title {
-    margin-top: 0px;
+    margin: 0px !important;
     border-radius: var(--border-img-text-tile-border-radius);
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;

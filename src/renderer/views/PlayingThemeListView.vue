@@ -21,6 +21,7 @@ const { setPlayingViewBgCoverEffectIndex,
     toggleUseOnlineCover,
     togglePlayingViewFocusMode,
     setPlayingViewBgCoverEffectGradientMode,
+    togglePlayingViewBgCoverEffectGradientBottomBgTransparent,
     setPlayingViewBgCoverEffectGradientType,
     setPlayingViewBgCoverEffectGradientBrightness,
     setPlayingViewLyricHighlightMode,
@@ -137,6 +138,12 @@ const onImageDrop = (event, item, index) => {
                         <span class="subtitle">歌词高亮：</span>
                         <SingleSelectionControl class="" :data="['默认', '简色', '方框']" :value="track.playingViewLyricHighlightMode" :onChanged="setPlayingViewLyricHighlightMode">
                         </SingleSelectionControl>
+                    </div>
+                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
+                        <span class="subtitle">底部栏背景透明：</span>
+                        <ToggleControl @click="togglePlayingViewBgCoverEffectGradientBottomBgTransparent"
+                            :value="track.playingViewBgCoverEffectGradientBottomBgTransparent">
+                        </ToggleControl>
                     </div>
                     <div class="opt-item">
                         <span class="subtitle">封面边框：</span>

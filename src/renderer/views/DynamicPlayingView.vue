@@ -337,8 +337,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                 </div>
             </div>
             <div class="center">
-                <div v-show="isLyricShowable" v-for="([key, value], index) in lyricData" class="line" :timeKey="key"
-                    :index="index" :class="{
+                <div v-show="isLyricShowable" 
+                    v-for="([key, value], index) in lyricData" 
+                    :timeKey="key"
+                    :index="index" 
+                    class="line" 
+                    :class="{
                         first: index == 0,
                         last: index == (lyricData.size - 1),
                         'content-text-highlight': (index == currentIndex),

@@ -253,8 +253,12 @@ watch(playlistExportContextItem, (nv, ov) => {
 }
 
 .playlist-export-toolbar .center .row-content .active {
+    /*
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+    */
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
 }
 
 .contrast-mode .playlist-export-toolbar .center .row-content .active {

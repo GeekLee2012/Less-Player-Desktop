@@ -22,7 +22,10 @@ const props = defineProps({
     loadingMaskNum: Number,
     needReset: Boolean, //播放前是否清空当前播放
     hideExtra: Boolean,
-    draggable: Boolean
+    draggable: Boolean,
+    //playable: Boolean,
+    resourceMode: Boolean,
+    coverAction: Function,
 })
 
 const visitItem = (item) => {
@@ -31,6 +34,14 @@ const visitItem = (item) => {
     const { id, platform } = item
     visitAlbum({ platform, id, data: item })
 }
+
+const computedPlayable = computed(() => {
+    return (item) => {
+        const { resourceMode } = props
+        const { type } = item
+        return !resourceMode
+    }
+})
 
 const computedItemSubtitle = computed(() => {
     return (item) => {
@@ -57,16 +68,18 @@ const playAction = (item) => {
     <div class="albumlist-ctl" :draggable="false">
         <div class="pag-content" v-show="!loading">
             <ImageTextTile v-for="item in data" 
+                @click="visitItem(item)" 
                 :cover="item.cover" 
                 :title="item.title"
                 :singleLineTitleStyle="singleLineTitleStyle || isAlbumArtistSutitle" 
                 :subtitle="computedItemSubtitle(item)"
                 :extraText="computedItemExtra(item)" 
-                @click="visitItem(item)" 
                 :checkbox="checkbox" 
-                :playable="true"
+                :resourceMode="resourceMode"
+                :coverAction="coverAction"
+                :playable="computedPlayable(item)"
                 :playAction="() => playAction(item)" 
-                :favorable="true"
+                :favorable="!resourceMode"
                 :favorAction="() => favorAlbum(item)"
                 :checked="checkedAll" 
                 :ignoreCheckAllEvent="ignoreCheckAllEvent"

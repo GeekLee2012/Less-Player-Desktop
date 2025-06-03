@@ -366,7 +366,7 @@ const bootstrapTrack = (track, options) => {
 const bootstrapTrackWithTransfer = async (track, options) => {
     return bootstrapTrack(track, options)
         .catch(async (reason) => {
-            if (reason == 'noUrl' || 'noService') {
+            if (reason == 'noUrl' || reason == 'noService') {
                 const { platform } = track
                 if (isLocalMusic(platform) || Playlist.isFMRadioType(track)) return
                 const candidate = await United.transferTrack(track)

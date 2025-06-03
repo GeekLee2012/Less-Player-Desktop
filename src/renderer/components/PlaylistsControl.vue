@@ -37,6 +37,8 @@ const props = defineProps({
     playable: Boolean,
     favorable: Boolean,
     tutorial: Boolean,
+    resourceMode: Boolean,
+    coverAction: Function,
 })
 
 const { isPlatformValid, isFreeFM } = usePlatformStore()
@@ -123,9 +125,9 @@ const computedCenterTitleStyle = computed(() => {
 
 const computedPlayable = computed(() => {
     return (item) => {
-        const { playable } = props
+        const { playable, resourceMode } = props
         const { type } = item
-        return playable
+        return playable && !resourceMode
     }
 })
 
@@ -170,6 +172,7 @@ const onTileTitleClick = (event, item) => {
                     :coverFit="item.coverFit"
                     :title="item.title" 
                     :subtitle="getSubtitle(item)" 
+                    :resourceMode="resourceMode"
                     :playCount="getPlayCountText(item)"
                     :duration="item.duration"
                     :videoStyle="videoStyle"
@@ -181,6 +184,7 @@ const onTileTitleClick = (event, item) => {
                     :favorable="computedFavorable(item)" 
                     :favorAction="() => (favorable && favorPlaylist(item))" 
                     :titleAction="(event) => onTileTitleClick(event, item)"
+                    :coverAction="coverAction"
                     :tutorial="tutorial"
                     :checkbox="checkbox" 
                     :checked="checkedAll"

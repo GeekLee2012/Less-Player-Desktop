@@ -603,8 +603,12 @@ onDeactivated(() => setCategoriesShow(false))
 }
 
 #navidrome-session-detail-view .categories li:hover {
+    /*
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-text-color);
+    */
+    background: var(--content-list-item-hl-bg-color);
+    color: var(--content-list-item-hl-text-color);
     transform: scale(1.03);
 }
 

@@ -350,8 +350,12 @@ const computedVolumeGainText = computed(() => {
 
 .sound-effect-view .center .presets .active {
     /*border: 2px solid var(--content-highlight-color);*/
+    /*
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color);
+    */
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
 }
 
 .contrast-mode .sound-effect-view .center .presets .active {
@@ -415,8 +419,12 @@ const computedVolumeGainText = computed(() => {
 
 .sound-effect-view .center .impulse-content .active {
     /*border: 2px solid var(--content-highlight-color);*/
+    /*
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color);
+    */
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
 }
 
 .contrast-mode .sound-effect-view .center .impulse-content .active {

@@ -38,7 +38,7 @@ const { hidePlayingView, minimize,
     togglePlayingThemeListView, switchSpectrumIndex,
     toggleTrackResourceToolView 
 } = useAppCommonStore()
-const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
+const { currentTrack, playingIndex, volume, playing, loading } = storeToRefs(usePlayStore())
 const { isCurrentTrack } = usePlayStore()
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { getWindowZoom, lyricMetaPos,
@@ -51,7 +51,9 @@ const { getWindowZoom, lyricMetaPos,
     playingViewPlayCtlStyleIndex,
     playingViewThemeColorIndex,
     playingViewLyricHighlightMode,
-    playingViewFocusMode, } = storeToRefs(useSettingStore())
+    playingViewFocusMode,
+    playingViewBgCoverEffectGradientBottomBgTransparent,
+} = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
 const volumeBarRef = ref(null)
@@ -122,7 +124,7 @@ const getPalette = (img, num) => {
 */
 
 const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
-    const avgGrayscale = getPaletteAvgGrayscale(rgbs)
+    const avgGrayscale = rgbs ? getPaletteAvgGrayscale(rgbs) : 168
     let autoClass = defaultClass || (avgGrayscale > 159 ? 'dark' : 'light')
     switch(playingViewThemeColorIndex.value) {
         case 1:
@@ -138,23 +140,34 @@ const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
 const postCoverLoadComplete = (track) => {
     if(!isCurrentTrack(track)) return 
     const containerEl = document.querySelector('.playing-view .container')
+    //if(!containerEl) return 
     const coverEl = containerEl.querySelector('.center .cover')
-    const mode = playingViewBgCoverEffectGradientMode.value
-    const rgbs = optimizePalette(sortPalette(getPalette(coverEl, 2), mode))
-    if(!isCurrentTrack(track)) return 
+    //if(!coverEl) return 
 
-    const alphaFactor = mode ? 88: 68
-    const alpha = (alphaFactor / 255).toFixed(2)
-    const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
-    const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
-    const _rgbColors = rgbColors.join(',')
-    if(!isCurrentTrack(track)) return 
+    let bgEffect = 'none', bottomBg = 'transparent', rgbs = null
+
+    const mode = playingViewBgCoverEffectGradientMode.value
+    const bottomBgTransparent = playingViewBgCoverEffectGradientBottomBgTransparent.value
+    const gradientType = playingViewBgCoverEffectGradientType.value
+    const isLoading = loading.value
+
+    if(!bottomBgTransparent || gradientType == 1 || (gradientType == 2 && isLoading)) {
+        const alphaFactor = mode ? 88: 68
+        rgbs = optimizePalette(sortPalette(getPalette(coverEl, 2), mode))
+        if(!isCurrentTrack(track)) return 
+        const alpha = (alphaFactor / 255).toFixed(2)
+        const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
+        const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
+        const _rgbColors = rgbColors.join(',')
+        bgEffect = `linear-gradient(${_rgbColors})`
+        bottomBg = bottomBgTransparent ? 'transparent' : rgbaColors[0]
+    }   
     
     applyDocumentStyle({ 
-        '--bg-effect': `linear-gradient(${_rgbColors})`,
-        '--bg-effect-bottom': rgbaColors[0],
+        '--bg-effect': bgEffect,
+        '--bg-effect-bottom': bottomBg,
     })
-    
+
     const backdropClass = 'with-backdrop'
     const brightnessLightClass = 'brightness-light'
     const brightnessMidClass = 'brightness-mid'
@@ -163,13 +176,17 @@ const postCoverLoadComplete = (track) => {
     containerEl.classList.remove(backdropClass)
     containerEl.classList.remove(brightnessLightClass)
     containerEl.classList.remove(brightnessMidClass)
-
+    
     let autoClass = getPlayingViewThemeAutoClass(rgbs)
     containerEl.classList.add('auto-effect')
     containerEl.classList.add(autoClass)
+
+    //backdrop-filter性能消耗非常大
+    //macOS下，当歌曲频繁切换时，容易导致configd进程的CPU占用率飙升
+    //歌曲加载中，暂时切换至简单渐变，加载完成后再切换回去
+    if(isLoading) return 
     if(!isCurrentTrack(track)) return 
 
-    const gradientType = playingViewBgCoverEffectGradientType.value
     if(gradientType == 2 || (gradientType == 0 && (nextInt(100) % 2 == 0))) {
         containerEl.classList.add(backdropClass)
         //文字、按钮控件等元素，大部分在light样式下效果较好
@@ -191,6 +208,7 @@ const postCoverLoadComplete = (track) => {
 
 const clearBackgroundEffect = () => {
     const containerEl = document.querySelector('.playing-view .container')
+    if(!containerEl) return 
     containerEl.classList.remove('auto-effect')
     containerEl.classList.remove('with-backdrop')
     containerEl.classList.remove('brightness-light')
@@ -200,6 +218,7 @@ const clearBackgroundEffect = () => {
     applyDocumentStyle({ '--bg-effect': 'none'})
 
     const coverEl = containerEl.querySelector('.center .cover')
+    if(!coverEl) return
     coverEl.removeEventListener('load', postCoverLoadComplete)
 }
 
@@ -217,7 +236,9 @@ const setupSimpleBackgroundEffect = async () => {
 const setupGradientBackgroundEffect = async (track) => {
     clearBackgroundEffect()
     const containerEl = document.querySelector('.playing-view .container')
+    if(!containerEl) return 
     const coverEl = containerEl.querySelector('.center .cover')
+    if(!coverEl) return 
     if(coverEl.complete) postCoverLoadComplete(track)
     coverEl.addEventListener('load', () => postCoverLoadComplete(track))
 }
@@ -240,10 +261,14 @@ const setupBackgroudEffect = async () => {
 
 
 const computedFormatShow = computed(() => {
+    /*
     const { platform, bitrate, sampleRate } = currentTrack.value
     return false && isLocalMusic(platform) && bitrate && sampleRate
+    */
+   return false
 })
 
+/*
 const trackFormat = computed(() => {
     const { bitrate, sampleRate, codec } = currentTrack.value
     if(!bitrate || !sampleRate) return
@@ -251,6 +276,7 @@ const trackFormat = computed(() => {
     const _codec = isBlank(codec) ? '' : `, ${codec}`
     return `${_bitrate} kbps , ${sampleRate} Hz ${_codec}`
 })
+*/
 
 const computedBottomNewShow = computed(() => {
     const playCtlIndex = playingViewPlayCtlStyleIndex.value
@@ -270,12 +296,14 @@ const setupVolumeBar = () => {
 /* 生命周期、监听 */
 watch(() => (currentTrack.value && currentTrack.value.cover 
     + '-' + playingViewShow.value
+    + '-' + loading.value
     + '-' + playingViewBgCoverEffectIndex.value
     + '-' + playingViewBgCoverEffectGradientMode.value
     + '-' + playingViewBgCoverEffectGradientType.value
     + '-' + playingViewBgCoverEffectGradientBrightness.value
+    + '-' + playingViewBgCoverEffectGradientBottomBgTransparent.value
     + '-' + playingViewThemeColorIndex.value),  
-    setupBackgroudEffect)
+    setupBackgroudEffect, { immediate: true })
 
 onMounted(() => {
     emitEvents('playingView-changed')
@@ -351,16 +379,20 @@ onUnmounted(() => {
                         v-lazy="Track.coverDefault(currentTrack)" 
                         :draggable="isDndSaveEnable" 
                         @dragstart="dndSaveCover" />
-                    <div class="format" v-show="false" v-html="trackFormat"></div>
+                    <!--
+                    <div class="format" v-html="trackFormat"></div>
+                    -->
                 </div>
                 <div class="lyric-wrap" :class="{
                     'lyric-hl-default': playingViewLyricHighlightMode == 0,
                     'lyric-hl-simple-color': playingViewLyricHighlightMode == 1,
                     'lyric-hl-bg-border': playingViewLyricHighlightMode == 2,
                 }">
-                    <LyricControl :track="currentTrack" 
+                    <LyricControl 
+                        :disabled="!playingViewShow" 
+                        :track="currentTrack" 
                         :currentTime="currentTimeState" 
-                        @mousewheel="onUserMouseWheel" 
+                        @mousewheel="onUserMouseWheel"
                         keyName="playingView">
                     </LyricControl>
                 </div>
@@ -470,7 +502,9 @@ onUnmounted(() => {
                     </div>
                 </div>
             </div>
-            <div class="bottom bottom-new" v-show="computedBottomNewShow">
+            <div class="bottom bottom-new" 
+                :class="{ 'bg-transparent': playingViewBgCoverEffectGradientBottomBgTransparent }"
+                v-show="computedBottomNewShow">
                 <div class="action">
                     <div class="btm-left">
                         <div @click="toggleFavoritedState">
@@ -848,7 +882,8 @@ onUnmounted(() => {
 /* bottom-new  */
 .playing-view .container > .bottom.bottom-new {
     --others-sliderbar-ctl-height: 3px; 
-    border-top: 1.1px solid var(--others-progressbar-bg-color);
+    --bottom-new-border-top-color: var(--others-progressbar-bg-color);
+    border-top: 1.1px solid var(--bottom-new-border-top-color);
     --bottom-height: 90px;
     /*
     height: var(--bottom-height);
@@ -999,7 +1034,12 @@ onUnmounted(() => {
 }
 
 .playing-view .container.auto-effect > .bottom.bottom-new {
-    border-top: 0.1px solid #ffffff25;
+    --bottom-new-border-top-color: #ffffff25;
+    border-top: 0.1px solid var(--bottom-new-border-top-color);
+}
+
+.playing-view .container.auto-effect > .bottom.bottom-new.bg-transparent {
+    --bottom-new-border-top-color: transparent;
 }
 
 /* lyric highlight simple-color */
@@ -1214,6 +1254,7 @@ onUnmounted(() => {
     -webkit-backdrop-filter: blur(10vmax) saturate(2.1);
     backdrop-filter: blur(10vmax) saturate(2.1);
     display: block;
+    /*transform: translateZ(0);*/
 }
 
 .playing-view .container.auto-effect.with-backdrop.brightness-light .bg-container {

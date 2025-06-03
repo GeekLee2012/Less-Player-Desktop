@@ -35,6 +35,8 @@ const props = defineProps({
     centerTitleStyle: Boolean,
     duration: Number,
     tutorial: Boolean,
+    resourceMode: Boolean,
+    coverAction: Function,
 })
 
 const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
@@ -63,18 +65,24 @@ const notCardStyleFreeFM = computed(() => {
 
 const computedBigTitle = computed(() => {
     const { title } = props
+    if(isBlank(title)) return
     const _title = toTrimString(title)
-    if(isBlank(_title)) return
     //此处为中文符号
     const delimiter = '｜'
     if(!_title.includes(delimiter)) return _title
     const parts = _title.split(delimiter)
-    return parts && parts.length >= 1 && toTrimString(parts[1])
+    return parts && parts.length >= 1 
+        && toTrimString(parts[1]).replace('&', ' & ')
 })
 
 const onTitleClick = (event) => {
     const { titleAction } = props
     if(typeof titleAction == 'function') titleAction(event)
+}
+
+const getItemCover = () => {
+    const { cover, coverAction } = props
+    if(typeof coverAction == 'function') coverAction(cover)
 }
 
 
@@ -144,6 +152,16 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </g>
                     </svg>
                 </div>
+                <div class="cover-resource-btn" v-show="resourceMode" @click.stop="getItemCover">
+                    <svg width="31" height="31" viewBox="0 0 853.56 853.59" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path d="M853.53,426.66q0,127,0,254c-.1,70.81-40.78,132.35-105.23,159.63a170.56,170.56,0,0,1-67.16,13.26q-254.46,0-508.93-.06C89,853.35,19.52,796.26,3.4,715.11A177.18,177.18,0,0,1,.17,680.86q-.3-254-.11-507.93C.1,100,42.58,37.94,110.39,11.29,130.31,3.47,151.1.05,172.44.05q254.22,0,508.44,0c83.47.07,153.14,57,169.26,138.38a191.21,191.21,0,0,1,3.25,36.24C853.66,258.68,853.53,342.67,853.53,426.66ZM768,428.5V280.77c0-36.16-.09-72.32,0-108.48,0-16.9-3.59-32.8-12.76-47-17.49-27.19-42.86-39.75-75-39.74q-253.46.08-506.92,0-3.5,0-7,.11a77.22,77.22,0,0,0-32.73,8c-32.29,16.31-48.11,43-48.14,78.89q-.15,191,0,381.94c0,1.59.15,3.17.27,5.56,1.89-1.67,3.25-2.8,4.53-4,33.73-32,67.35-64.1,101.23-95.94,40-37.6,97.31-40.84,141.42-8.22q36.17,26.73,72.21,53.62c12.45,9.26,21.74,8.62,32.71-2.35q65.91-65.93,131.83-131.87c39.6-39.57,101-39.59,140.75-.07q26.4,26.26,52.68,52.66C764.43,425.14,765.76,426.34,768,428.5ZM426.93,768q126.22,0,252.44-.07a104.31,104.31,0,0,0,21.35-1.79c40.61-8.62,67-41.61,67.26-83.93q.32-64.23-.1-128.47a12.12,12.12,0,0,0-3.4-7.62q-56.37-56.73-113-113.19c-7.9-7.9-14.78-7.87-22.74.08Q563,498.79,497.21,564.52c-39.27,39.16-97.72,43.18-142.08,10.06q-36.63-27.35-73.46-54.43c-10.88-8-21.84-7.3-31.63,2Q169.51,598.47,89,674.8A9.6,9.6,0,0,0,85.59,683c2.22,45,41.17,85.64,87.9,85.22C258,767.49,342.45,768,426.93,768Z"/>
+                                <path d="M233.64,298.78c-35.64-.12-64.83-29.55-64.61-65.14s29.65-64.83,65.21-64.6a64.87,64.87,0,0,1-.6,129.74Z"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
             </div>
             <div class="cover-bottom" v-show="!checkbox && (videoStyle || songStyle || playCount)">
                 <div class="duration" v-show="duration" v-html="toHhMmss(duration)">
@@ -168,7 +186,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
             <div class="extra-text" @click="onTitleClick" v-show="extraText" v-html="extraText">
             </div>
-            <div class="action">
+            <div class="action" v-show="isUseHCardStyleImageTextTile">
                 <div class="checkbox" v-show="checkbox">
                     <svg v-show="!isChecked" width="25" height="25" viewBox="0 0 731.64 731.66"
                         xmlns="http://www.w3.org/2000/svg">
@@ -214,6 +232,16 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </g>
                     </svg>
                 </div>
+                <div class="cover-resource-btn" v-show="resourceMode" @click.stop="getItemCover">
+                    <svg width="17" height="17" viewBox="0 0 853.56 853.59" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path d="M853.53,426.66q0,127,0,254c-.1,70.81-40.78,132.35-105.23,159.63a170.56,170.56,0,0,1-67.16,13.26q-254.46,0-508.93-.06C89,853.35,19.52,796.26,3.4,715.11A177.18,177.18,0,0,1,.17,680.86q-.3-254-.11-507.93C.1,100,42.58,37.94,110.39,11.29,130.31,3.47,151.1.05,172.44.05q254.22,0,508.44,0c83.47.07,153.14,57,169.26,138.38a191.21,191.21,0,0,1,3.25,36.24C853.66,258.68,853.53,342.67,853.53,426.66ZM768,428.5V280.77c0-36.16-.09-72.32,0-108.48,0-16.9-3.59-32.8-12.76-47-17.49-27.19-42.86-39.75-75-39.74q-253.46.08-506.92,0-3.5,0-7,.11a77.22,77.22,0,0,0-32.73,8c-32.29,16.31-48.11,43-48.14,78.89q-.15,191,0,381.94c0,1.59.15,3.17.27,5.56,1.89-1.67,3.25-2.8,4.53-4,33.73-32,67.35-64.1,101.23-95.94,40-37.6,97.31-40.84,141.42-8.22q36.17,26.73,72.21,53.62c12.45,9.26,21.74,8.62,32.71-2.35q65.91-65.93,131.83-131.87c39.6-39.57,101-39.59,140.75-.07q26.4,26.26,52.68,52.66C764.43,425.14,765.76,426.34,768,428.5ZM426.93,768q126.22,0,252.44-.07a104.31,104.31,0,0,0,21.35-1.79c40.61-8.62,67-41.61,67.26-83.93q.32-64.23-.1-128.47a12.12,12.12,0,0,0-3.4-7.62q-56.37-56.73-113-113.19c-7.9-7.9-14.78-7.87-22.74.08Q563,498.79,497.21,564.52c-39.27,39.16-97.72,43.18-142.08,10.06q-36.63-27.35-73.46-54.43c-10.88-8-21.84-7.3-31.63,2Q169.51,598.47,89,674.8A9.6,9.6,0,0,0,85.59,683c2.22,45,41.17,85.64,87.9,85.22C258,767.49,342.45,768,426.93,768Z"/>
+                                <path d="M233.64,298.78c-35.64-.12-64.83-29.55-64.61-65.14s29.65-64.83,65.21-64.6a64.87,64.87,0,0,1-.6,129.74Z"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
             </div>
         </div>
         <div class="layer"></div>
@@ -225,7 +253,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 .image-text-tile {
     /*margin: 15px 13px;*/
     margin: 15px 13px 11px 13px;
-    position: relative;
+    position: relative !important;
     --card-shadow-height: 6px;
 }
 
@@ -397,9 +425,28 @@ onUnmounted(() => offEvents(eventsRegistration))
     display: none;
 }
 
+.image-text-tile .cover-wrap .cover-mask .cover-resource-btn {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    z-index: 1;
+    padding: 8px 15px;
+    border-radius: var(--border-inputs-border-radius);
+    display: flex;
+    justify-content: flex-start;
+    background: #16161633;
+}
+
+.image-text-tile .cover-wrap .cover-mask .cover-resource-btn svg {
+    cursor: pointer;
+    fill: #ffffff;
+}
+
+
 /* 实验性CSS - Card */
 .image-text-tile-card {
-    background-color: var(--app-bg-color);
+    /*background: var(--app-bg-color);*/
+    background: var(--content-image-text-tile-card-bg-color);
     /*box-shadow: 0px 0px 3px var(--border-popovers-border-color);*/
     box-shadow: 0px 0px 3px #181818;
     border-radius: var(--border-img-text-tile-border-radius);
@@ -541,12 +588,12 @@ onUnmounted(() => offEvents(eventsRegistration))
     z-index: -2;
     width: 90%;
     height: 100%;
-    position: absolute;
+    position: absolute !important;
     top: 0px;
     left: 50%;
     transform: translate(-50%, var(--card-shadow-height));
     border-radius: var(--border-img-text-tile-border-radius);
-    background: var(--content-regular-bg-color);
+    background: var(--content-image-text-tile-card-shadow-color1);
 }
 
 .image-text-tile-card.image-text-tile-card-shadow .layer-tiny,
@@ -554,7 +601,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     z-index: -3;
     width: 80%;
     transform: translate(-50%, calc(var(--card-shadow-height) * 2));
-    background: var(--content-light-bg-color);
+    background: var(--content-image-text-tile-card-shadow-color2);
 }
 
 .image-text-tile-card:hover .layer,
@@ -580,8 +627,9 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding: 20px 10px 20px 20px;
     /*background: var(--app-bg-color);
     background: var(--content-left-nav-bg-color);
-    background: var(--content-loading-mask-color);*/
-    background: var(--content-list-item-hover-bg-color);
+    background: var(--content-loading-mask-color);
+    background: var(--content-list-item-hover-bg-color);*/
+    background: var(--content-image-text-tile-hcard-bg-color);
 
     margin-top: 18px !important;
     margin-bottom: 12px !important;
@@ -591,7 +639,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card-horiziontal:hover {
-    transform: translateY(-8px);
+    transform: translateY(-10px);
 }
 
 .image-text-tile-card-horiziontal .cover-wrap .cover {
@@ -665,7 +713,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card-horiziontal .title-wrap .action .play-btn,
-.image-text-tile-card-horiziontal .title-wrap .action .favorite-btn {
+.image-text-tile-card-horiziontal .title-wrap .action .favorite-btn,
+.image-text-tile-card-horiziontal .title-wrap .action .cover-resource-btn {
     z-index: 1;
     border-radius: 10rem;
     --btn-size: 36px;
@@ -682,20 +731,25 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card-horiziontal .title-wrap .action .play-btn:hover,
-.image-text-tile-card-horiziontal .title-wrap .action .favorite-btn:hover {
+.image-text-tile-card-horiziontal .title-wrap .action .favorite-btn:hover,
+.image-text-tile-card-horiziontal .title-wrap .action .cover-resource-btn:hover {
     background: var(--button-icon-text-btn-hover-bg-color);
     transform: scale(1.08);
+}
+
+.image-text-tile-card-horiziontal .title-wrap .action .play-btn svg,
+.image-text-tile-card-horiziontal .title-wrap .action .favorite-btn svg,
+.image-text-tile-card-horiziontal .title-wrap .action .cover-resource-btn svg {
+    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
 .image-text-tile-card-horiziontal .title-wrap .action .play-btn svg {
     margin-top: 1px;
     margin-left: 2px;
-    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
 .image-text-tile-card-horiziontal .title-wrap .action .favorite-btn svg {
     margin-top: 2px;
-    fill: var(--button-icon-text-btn-icon-color) !important;
 }
 
 
@@ -710,19 +764,21 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card-horiziontal.horiziontal-reverse .title-wrap .action .play-btn,
-.image-text-tile-card-horiziontal.horiziontal-reverse .title-wrap .action .favorite-btn {
+.image-text-tile-card-horiziontal.horiziontal-reverse .title-wrap .action .favorite-btn,
+.image-text-tile-card-horiziontal.horiziontal-reverse .title-wrap .action .cover-resource-btn {
     margin-left: 0px;
     margin-right: 20px;
 }
 
 
-/* Horiziontal Card - Simple Icon */
+/* Horiziontal Card - Small Icon */
 .image-text-tile-card-horiziontal.horiziontal-small-icon .title-wrap .action {
     bottom: 3px;
 }
 
 .image-text-tile-card-horiziontal.horiziontal-small-icon .title-wrap .action .play-btn,
-.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn {
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn,
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .cover-resource-btn {
     margin-left: 25px;
     --btn-size: auto !important;
     border-radius: 0px !important;
@@ -730,7 +786,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .play-btn svg,
-.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn svg {
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn svg,
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .cover-resource-btn svg {
     margin-top: 0px;
     margin-left: 0px;
     transform: scale(1.08);
@@ -738,18 +795,21 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .play-btn:hover,
-.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn:hover {
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn:hover,
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .cover-resource-btn:hover  {
     background: transparent !important;
 }
 
 .image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .play-btn:hover svg,
-.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn:hover svg {
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .favorite-btn:hover svg,
+.image-text-tile-card-horiziontal.horiziontal-small-icon  .title-wrap .action .cover-resource-btn:hover svg {
     transform: scale(1.2);
     fill: var(--content-highlight-color) !important;
 }
 
 .image-text-tile-card-horiziontal.horiziontal-small-icon.horiziontal-reverse .title-wrap .action .play-btn,
-.image-text-tile-card-horiziontal.horiziontal-small-icon.horiziontal-reverse .title-wrap .action .favorite-btn {
+.image-text-tile-card-horiziontal.horiziontal-small-icon.horiziontal-reverse .title-wrap .action .favorite-btn,
+.image-text-tile-card-horiziontal.horiziontal-small-icon.horiziontal-reverse .title-wrap .action .cover-resource-btn {
     margin-left: 0px;
     margin-right: 25px;
 }
@@ -870,7 +930,15 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 /* Horiziontal Card - Cover No Shadow  */
+/*
+.image-text-tile-card-horiziontal.horiziontal-cover-noshadow {
+    box-shadow: 0px 0px 3px #1818187c;
+}
+*/
+
 .image-text-tile-card-horiziontal.horiziontal-cover-noshadow .cover-wrap .cover {
     box-shadow: none !important;
+    background: transparent;
+    transform: translateY(-0.1px) scaleY(1.01);
 }
 </style>

@@ -185,7 +185,7 @@ const setupCustomThemeEditViewPos = () => {
   if (!customThemeEditViewShow.value) return
   emitEvents('app-elementAlignCenter', {
     selector: '#custom-theme-edit-view',
-    width: 768,
+    width: 788,
     height: 520
   })
 }
@@ -247,8 +247,8 @@ const setupFontSelectionToolbarPos = () => {
 const setupTrackResourceToolViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #track-resource-tool-view',
-    width: 688,
-    height: 505
+    width: 788,
+    height: 535
   })
 }
 
@@ -313,17 +313,20 @@ watch(() => `${playingViewThemeType.value}-${playingViewThemeIndex.value}-${play
 
 const appBackgroundScope = reactive({
   playingView: true,
-  playbackQueue: false,
-  contextMenu: false,
   toast: false,
+  //列表类
+  contextMenu: false,
+  playbackQueue: false,
   soundEffectView: false,
+  playingThemeListView: false,
+  //工具栏类
   lyricToolbar: false,
   randomMusicToolbar: false,
   customThemeEditView: false,
-  playingThemeListView: false,
   customPlayingThemeEditView: false,
   trackResourceToolView: false,
-  fontSelectionToolbar: false
+  fontSelectionToolbar: false,
+  customAppBorderRadiusView: false
 })
 
 //EventBus监听注册，统一管理
@@ -391,6 +394,10 @@ const eventsRegistration = {
       const { theme, isPreviewMode } = param || {}
       setupPlayingView(theme, isPreviewMode)
   },
+  'theme-applyTheme-preview': theme => {
+    const { appBackgroundScope: scope } = theme || getCurrentTheme() || {}
+    if(scope) Object.assign(appBackgroundScope, { ...scope })
+  },
 }
 
 watch(customThemeEditViewShow, setupCustomThemeEditViewPos)
@@ -405,8 +412,8 @@ watch(fontSelectionToolbarShow, setupFontSelectionToolbarPos)
 
 
 watch(() => getCurrentTheme(), (nv) => {
-  const { appBackgroundScope: scope } = nv
-  Object.assign(appBackgroundScope, { ...scope })
+  const { appBackgroundScope: scope } = nv || {}
+  if(scope) Object.assign(appBackgroundScope, { ...scope })
 }, { deep: true, immediate: true })
 
 onMounted(() => {
@@ -675,6 +682,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     </PlaylistExportToolbar>
 
     <CustomAppBorderRadiusView id="custom-app-border-radius-view" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.customAppBorderRadiusView }"
       v-if="customAppBorderRadiusViewShow" 
       @click.stop=""
       @contextmenu.stop="" >
@@ -818,7 +826,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   position: fixed;
   right: 30px;
   bottom: 80px;
-  width: 768px;
+  width: 788px;
   height: 520px;
   z-index: 99;
   background-color: var(--app-bg-color);
@@ -942,8 +950,8 @@ onUnmounted(() => offEvents(eventsRegistration))
   position: fixed;
   right: 30px;
   bottom: 80px;
-  width: 688px;
-  height: 505px;
+  width: 788px;
+  height: 535px;
   z-index: 100;
   box-shadow: var(--box-shadow);
   border-radius: var(--border-popover-border-radius);

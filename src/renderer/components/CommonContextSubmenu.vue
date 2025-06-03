@@ -97,8 +97,12 @@ const resetScroll = () => {
 
 .common-ctx-submenu .menuItem:hover {
     background-color: var(--content-subtitle-text-color);
+    /*
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
+    */
+    background: var(--content-list-item-hl-bg-color);
+    color: var(--content-list-item-hl-text-color);
     cursor: pointer;
 }
 

@@ -801,9 +801,14 @@ const registryGlobalListeners = () => {
 
   ipcMain.handle('app-cacheSize', async (event, ...args) => {
     if (!isWindowAccessible(mainWin)) return -1
-    const { session } = mainWin.webContents
-    const cacheSize = await session.getCacheSize()
-    return cacheSize
+    try {
+      const { session } = mainWin.webContents
+      const cacheSize = await session.getCacheSize()
+      return cacheSize
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
+    return -1
   })
 
   ipcMain.handle('app-clearCaches', async (event, ...args) => {

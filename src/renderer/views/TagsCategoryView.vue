@@ -213,7 +213,11 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .tags-category-view .center .active {
     border-radius: 10rem;
+    /*
     background: var(--button-icon-text-btn-bg-color) !important;
     color: var(--button-icon-text-btn-icon-color) !important;
+    */
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
 }
 </style>

@@ -21,6 +21,7 @@ const props = defineProps({
     hiddenMeta: Boolean,
     layoutMode: Number,
     keyName: String,
+    disabled: Boolean
 })
 
 const { playVideoItem, loadLyric, currentTimeState,
@@ -444,8 +445,8 @@ const loadTrackLyric = (track) => {
     if (!isCurrentTrack(track)) return 
     if (!track) return
     if (Track.hasLyric(track)) return reloadLyricData(track)
-    
     if (!isCurrentTrack(track)) return 
+    
     resetLyricState(track)
     loadLyric(track)
 }
@@ -490,12 +491,16 @@ const computedNoneArtistAlbumMeta = computed(() => {
 
 /* 生命周期、监听 */
 watch(() => props.currentTime, (nv, ov) => {
+    if(props.disabled) return
     //TODO 暂时简单处理，非可视状态直接返回
     if (!playingViewShow.value && !isMiniLayout.value && !isSimpleLayout.value) return
     safeRenderAndScrollLyric(nv, props.track)
 }, { immediate: true })
 
-watch(() => props.track, (nv, ov) => loadTrackLyric(nv), { immediate: true })
+watch(() => props.track, (nv, ov) => {
+    if(props.disabled) return
+    loadTrackLyric(nv)
+}, { immediate: true })
 
 const eventsRegistration = {
     'track-lyricLoaded': reloadLyricData,
@@ -517,7 +522,10 @@ onMounted(() => {
     onEvents(eventsRegistration)
     loadTrackLyric(props.track)
 })
-onUnmounted(() => offEvents(eventsRegistration))
+
+onUnmounted(() => {
+    offEvents(eventsRegistration)
+})
 </script>
 
 <template>
