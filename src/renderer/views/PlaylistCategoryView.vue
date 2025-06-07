@@ -142,7 +142,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     padding-bottom: 10px;
     padding-left: 33px;
     padding-right: 33px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-header-nav-border-color);
 }
 
 .playlist-category-view .header .cate-title {

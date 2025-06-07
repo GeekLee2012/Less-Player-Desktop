@@ -129,17 +129,17 @@ const onImageDrop = (event, item, index) => {
                         <SingleSelectionControl :data="['偏亮', '平衡', '偏暗']" :value="track.playingViewBgCoverEffectGradientBrightness" :onChanged="setPlayingViewBgCoverEffectGradientBrightness">
                         </SingleSelectionControl>
                     </div>
-                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
+                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex > 0">
                         <span class="subtitle">控件颜色：</span>
                         <SingleSelectionControl class="" :data="['自动', '白色', '黑色']" :value="track.playingViewThemeColorIndex" :onChanged="setPlayingViewThemeColorIndex">
                         </SingleSelectionControl>
                     </div>
-                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
+                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex > 0">
                         <span class="subtitle">歌词高亮：</span>
                         <SingleSelectionControl class="" :data="['默认', '简色', '方框']" :value="track.playingViewLyricHighlightMode" :onChanged="setPlayingViewLyricHighlightMode">
                         </SingleSelectionControl>
                     </div>
-                    <div class="opt-item" v-show="track.playingViewBgCoverEffectIndex == 2">
+                    <div class="opt-item">
                         <span class="subtitle">底部栏背景透明：</span>
                         <ToggleControl @click="togglePlayingViewBgCoverEffectGradientBottomBgTransparent"
                             :value="track.playingViewBgCoverEffectGradientBottomBgTransparent">
@@ -329,7 +329,7 @@ const onImageDrop = (event, item, index) => {
 
 .playing-theme-list-view .center > .item {
     position: relative;
-    margin: 0px 33px 36px 33px;
+    margin: 0px 30px 36px 30px;
 }
 
 .playing-theme-list-view .center > .item .preview-wrap {
@@ -395,7 +395,7 @@ const onImageDrop = (event, item, index) => {
 .playing-theme-list-view .center .options {
     display: flex;
     flex-direction: column;
-    margin: 0px 33px 20px 33px;
+    margin: 0px 30px 20px 30px;
 }
 
 .playing-theme-list-view .center .options .opt-item {
@@ -412,6 +412,7 @@ const onImageDrop = (event, item, index) => {
 
 .playing-theme-list-view .center .options .single-selection-ctl {
     justify-content: flex-end;
+    min-width: max-content;
 }
 
 .playing-theme-list-view .center .options .single-selection-ctl .item {

@@ -441,6 +441,8 @@ export const useSettingStore = defineStore('setting', {
             deleteCustomTheme: true,
             //删除自定义播放样式
             deleteCustomPlayingTheme: true,
+            //删除自定义均衡器
+            deleteCustomEQ: true,
             //清空最近播放
             clearRecents: true,
             //清空当前播放（列表）
@@ -849,6 +851,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isShowDialogBeforeDeleteCustomPlayingTheme() {
             return this.dialog.deleteCustomPlayingTheme
+        },
+        isShowDialogBeforeDeleteCustomEQ() {
+            return this.dialog.deleteCustomEQ
         },
         isShowDialogBeforeClearRecents() {
             return this.dialog.clearRecents
@@ -1817,6 +1822,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleShowDialogBeforeCustomPlayingThemeDelete() {
             this.dialog.deleteCustomPlayingTheme = !this.dialog.deleteCustomPlayingTheme
+        },
+        toggleShowDialogBeforeCustomEQ() {
+            this.dialog.deleteCustomEQ = !this.dialog.deleteCustomEQ
         },
         toggleShowDialogBeforeClearRecents() {
             this.dialog.clearRecents = !this.dialog.clearRecents

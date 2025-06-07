@@ -148,6 +148,7 @@ const { setThemeIndex,
     toggleShowDialogBeforeCustomPlaylistDelete,
     toggleShowDialogBeforeCustomThemeDelete,
     toggleShowDialogBeforeCustomPlayingThemeDelete,
+    toggleShowDialogBeforeCustomEQ,
     toggleShowDialogBeforeClearRecents,
     toggleShowDialogBeforeClearPlaybackQueue,
     toggleShowDialogBeforeResetSetting,
@@ -1548,6 +1549,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                     </div>
                     <div>
+                        <span class="cate-subtitle">删除自定义均衡器：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeCustomEQ"
+                            :value="dialog.deleteCustomEQ">
+                        </ToggleControl>
+                    </div>
+                    <div>
                         <span class="cate-subtitle">清空当前播放（列表）：</span>
                         <ToggleControl @click="toggleShowDialogBeforeClearPlaybackQueue" :value="dialog.clearPlaybackQueue">
                         </ToggleControl>
@@ -2501,7 +2508,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #setting-view .cache .content .multi-selection-ctl .item {
     font-size: calc(var(--content-text-size) - 1px);
-    padding: 4px 20px;
+    padding: 5px 23px;
 }
 
 
@@ -2639,6 +2646,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #setting-view .center .dir-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
+    border-right: 0px;
     flex: 1;
     height: 20px;
 }
@@ -2648,14 +2656,16 @@ onUnmounted(() => offEvents(eventsRegistration))
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
-    height: 38px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--button-icon-text-btn-bg-color);
+    border: 1px solid var(--border-inputs-border-color);
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     font-size: var(--content-text-tip-text-size);
+    border-left: 0px;
     cursor: pointer;
 }
 
@@ -2671,6 +2681,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 /* 别扭挖坑的方式 */
 #setting-view .container-win-style .font-input-ctl .select-btn,
 #setting-view .container-win-style .dir-input-ctl .select-btn {
-    height: 40px;
+    /*height: 40px;*/
+    height: 38px;
 }
 </style>

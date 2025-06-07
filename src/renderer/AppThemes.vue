@@ -92,6 +92,7 @@ const applyTheme = (theme) => {
     //--content-inputs-placeholder-color
 
     '--border-color': theme.border.borderColor,
+    '--border-header-nav-border-color': theme.border.headerNavBorderColor || theme.border.borderColor,
     '--border-left-nav-border-color': theme.border.leftNavBorderColor,
     '--border-popovers-border-color': theme.border.popoversBorderColor,
     '--border-inputs-border-color': theme.border.inputsBorderColor,

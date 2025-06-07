@@ -3,30 +3,46 @@ import { computed, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useSoundEffectStore } from '../store/soundEffectStore';
+import { useSettingStore } from '../store/settingStore';
 import ToggleControl from '../components/ToggleControl.vue';
 import VerticalSliderBar from '../components/VerticalSliderBar.vue';
 import SideSliderBar from '../components/SideSliderBar.vue';
 import SliderBar from '../components/SliderBar.vue';
+import { isBlank, toTrimString } from '../../common/Utils';
 
 
 
 
 const { useWindowsStyleWinCtl } = inject('appCommon')
+const { showConfirm } = inject('apiExpose')
 
 const { hideSoundEffectView } = useAppCommonStore()
 const { currentEQIndex, currentEffectName,
     currentEQValue, currentEQValueToPercent,
     isUseEffect, currentIRIndex,
     currentStereoPanValueToPercent,
-    volumeGain, currentVolumeGainToPercent, } = storeToRefs(useSoundEffectStore())
+    volumeGain, currentVolumeGainToPercent,
+    isUseCustomEQ, currentEQValues, 
+    availableEQs, currentEQId, 
+} = storeToRefs(useSoundEffectStore())
 const { setUseEffect, toggleSoundEffect,
     getPresetEQs, getEQNames,
     updateCustomEQValue, percentToEQValue,
     getPresetIRs, syncCurrentEQToCustom,
-    setStereoPanValue, setVolumeGain } = useSoundEffectStore()
-const activeTabIndex = ref(0)
+    setStereoPanValue, setVolumeGain, 
+    isRemovableCustomEQ, saveCustomEQ, 
+    removeCustomEQ, resetCustomEQ, 
+    setupSoundEffect,
+} = useSoundEffectStore()
+const { showToast } = useAppCommonStore()
+const { isShowDialogBeforeDeleteCustomEQ } = storeToRefs(useSettingStore())
 
-const setActiveTab = (index) => activeTabIndex.value = index
+
+const activeTabIndex = ref(0)
+const customEqNameRef = ref(null)
+const dragging = ref(false)
+const setActiveTab = (value) => activeTabIndex.value = value
+const setDragging = (value) => dragging.value = value
 
 //均衡器
 const getEQFrequency = (frequency) => frequency.toString().replace('000', 'k')
@@ -36,10 +52,14 @@ const switchEQ = (item, index) => {
 }
 
 const updateEQValue = (percent, item, index) => {
-    if (!syncCurrentEQToCustom()) {
-        updateCustomEQValue(index, percentToEQValue(percent))
-    }
-    setUseEffect(0, 1)
+    const currentIndex = currentEQIndex.value
+    const customMinIndex = getPresetEQs().length
+    const nCurrentIndex = Math.max(currentIndex, customMinIndex)
+    setUseEffect(0, nCurrentIndex)
+
+    syncCurrentEQToCustom(currentIndex)
+    updateCustomEQValue(index, percentToEQValue(percent))
+    setupSoundEffect()
 }
 
 //混响
@@ -72,15 +92,49 @@ const computedVolumeGainText = computed(() => {
     const percent = parseInt(volumeGain.value / 1.0 * 100)
     return `音量${percent}%`
 })
+
+const saveCustomEffect = () => {
+    const { value: name } = customEqNameRef.value
+    if(isBlank(name)) return
+    const id = currentEQId.value
+    const values = currentEQValues.value
+    saveCustomEQ(id, toTrimString(name), values)
+    showToast('自定义均衡器已保存')
+}
+
+const onCustomEQDragStart = (event) => {
+    setDragging(true)
+    /*仅为改变鼠标样式*/
+    const { dataTransfer } = event
+    if(!dataTransfer) return 
+    dataTransfer.effectAllowed = 'move'
+}
+
+const removeCustomEffect = async (item) => {
+    if (isShowDialogBeforeDeleteCustomEQ.value) {
+        const ok = await showConfirm('确定要删除自定义均衡器吗？')
+        if (!ok) return
+    }
+    if (!item) return
+    removeCustomEQ(item)
+    showToast('自定义均衡器已删除')
+    setDragging(false)
+}
+
+const resetCustomEffect = () => {
+    resetCustomEQ()
+    showToast('自定义均衡器已重置')
+}
 </script>
 
 <template>
-    <div class="sound-effect-view" v-gesture-dnm="{ trigger: '.header' }">
+    <div class="sound-effect-view" 
+        v-gesture-dnm="{ trigger: '.header', excludes: ['.header .custom-eq-btn-group'] }">
         <div class="container">
             <div class="header">
                 <div class="action" v-show="!useWindowsStyleWinCtl">
                     <div class="close-btn btn" @click="hideSoundEffectView">
-                        <svg width="12" height="12" viewBox="0 0 593.14 593.11" data-name="Layer 1"
+                        <svg width="13" height="13" viewBox="0 0 593.14 593.11" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z"
@@ -92,14 +146,42 @@ const computedVolumeGainText = computed(() => {
                     <div class="title">音效SOUND</div>
                     <ToggleControl id="toggle-ctl" :value="isUseEffect" @click="toggleSoundEffect">
                     </ToggleControl>
-                    <div>{{ currentEffectName }}</div>
+                    <div class="effect-name" v-show="!isUseCustomEQ">{{ currentEffectName }}</div>
+                    <div class="custom-eq-btn-group" v-show="isUseCustomEQ">
+                        <div class="group-title-input-wrap">
+                            <div class="group-title">{{ currentEffectName }}</div>
+                            <input type="text" ref="customEqNameRef" :value="currentEffectName" maxlength="99" placeholder="自定义均衡器名称"/>
+                        </div>
+                        <div class="group-item btn text-btn first last" @click="saveCustomEffect">
+                            <svg width="15" height="15" viewBox="0 0 853.61 853.59" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path d="M426.39,853.55h-199c-32.66,0-65.33.12-98,0C69.66,853.23,19.5,815.14,4.57,758.06A138.7,138.7,0,0,1,.21,723.51Q-.18,426.78.06,130.05c0-64,42.59-115.66,105-127.71A135.26,135.26,0,0,1,130.43.14q232-.19,464-.14c13.93,0,25.46,4.72,35.34,14.64Q733.72,118.89,838,222.83c10.58,10.53,15.62,22.58,15.61,37.48-.13,154,.12,308-.2,462-.1,53.18-24.09,92.8-71.21,117.81-18.61,9.87-38.86,13.47-59.83,13.47Q574.38,853.52,426.39,853.55Zm-170-640h6.94q143.49,0,287,0c3,0,6,0,9,.23,22.36,1.7,40.48,23.55,38,45.78-2.61,23.46-20.15,39.22-43.88,39.22q-168.49,0-337,0c-27.74,0-45.64-17.9-45.64-45.63q0-80.73,0-161.48V85.85c-16.65,0-32.66-.59-48.59.31-6,.33-12.33,3.23-17.49,6.55-13.7,8.82-19.26,22-19.25,38.28q.18,295.72.08,591.45c0,1.67,0,3.33.06,5,.74,18.92,14,35.43,32.57,39.27,7.24,1.5,14.89,1.14,22.36,1.29,9.94.19,19.88,0,30.26,0v-6.49q0-144.49,0-289c0-28,17.85-45.78,46-45.78h420c28.4,0,46,17.71,46,46.22V768c13.88,0,27,0,40.19,0,27.25,0,45-17.78,45-45q0-222.22.08-444.46a10.66,10.66,0,0,0-3.39-8.3q-90.8-90.57-181.37-181.34A10.63,10.63,0,0,0,575,85.48q-156.49.12-313,.07h-5.71Zm340.86,554.3V512.5H256.41V767.85Z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            <span>保存</span>
+                        </div>
+                        <div class="group-item  btn text-btn last" @click="resetCustomEffect">
+                            <svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z"
+                                    transform="translate(-833 -413)" />
+                                <path d="M950.29,562.2c0-13.47,0-26.94,0-40.41,0-7.94,4.25-12.84,10.82-12.77,6.36.07,10.59,5,10.6,12.52,0,27.28,0,54.55,0,81.83,0,5.13-1.71,9.17-6.5,11.36-7.39,3.36-14.87-2.16-14.94-11.11-.11-13.81,0-27.61,0-41.42Z"
+                                    transform="translate(-833 -413)" />
+                                <path d="M1014.25,562.63c0,13.48,0,27,0,40.42,0,7.88-4.3,12.82-10.87,12.64-6.29-.18-10.35-5.13-10.36-12.75q0-41.16,0-82.33c0-5.91,3-9.91,8-11.26a10.29,10.29,0,0,1,11.85,5.16,16.06,16.06,0,0,1,1.33,6.71c.12,13.8.06,27.61.06,41.41Z"
+                                    transform="translate(-833 -413)" />
+                                <path d="M929,562.53q0,21,0,41.92c0,4.8-2.09,8.39-6.49,10.29-4.21,1.81-8.49,1.25-11.43-2.23a13.57,13.57,0,0,1-3.17-8c-.23-28.1-.19-56.21-.12-84.32,0-6.74,4.63-11.34,10.74-11.19s10.41,4.78,10.44,11.59C929.05,534.59,929,548.56,929,562.53Z"
+                                    transform="translate(-833 -413)" />
+                            </svg>
+                            <span>重置</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="action" v-show="useWindowsStyleWinCtl">
                     <div class="close-btn btn" @click="hideSoundEffectView">
-                        <svg width="12" height="12" viewBox="0 0 593.14 593.11" data-name="Layer 1"
+                        <svg width="13" height="13" viewBox="0 0 593.14 593.11" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z"
+                            <path d="M900.38,540.1c-4.44-4.19-8-7.42-11.45-10.83Q783.57,424,678.2,318.63c-13.72-13.69-18.55-29.58-11.75-47.85,10.7-28.71,47.17-36.54,69.58-14.95,18.13,17.45,35.68,35.49,53.47,53.28Q872.75,392.36,956,475.63a47.69,47.69,0,0,1,3.41,4.38c2.07-2,3.5-3.27,4.86-4.63Q1073,366.69,1181.63,258c12.79-12.8,27.71-17.69,45.11-12.36,28.47,8.73,39,43.63,20.49,67a88.49,88.49,0,0,1-6.77,7.34q-107.62,107.65-215.28,215.28c-1.41,1.41-2.94,2.7-4.94,4.53,1.77,1.82,3.2,3.32,4.66,4.79q108.7,108.71,217.39,217.42c15.1,15.11,18.44,35.26,8.88,52.5a42.4,42.4,0,0,1-66.64,10.22c-16.41-15.63-32.17-31.93-48.2-48L963.82,604.19c-1.16-1.16-2.38-2.24-3.83-3.6-1.59,1.52-3,2.84-4.41,4.23Q846.86,713.51,738.15,822.22c-14.56,14.56-33.07,18.24-50.26,10.12a42.61,42.61,0,0,1-14-66.31c1.74-2,3.65-3.89,5.53-5.78Q787.21,652.43,895,544.63C896.44,543.23,898.06,542.06,900.38,540.1Z"
                                 transform="translate(-663.4 -243.46)" />
                         </svg>
                     </div>
@@ -120,7 +202,7 @@ const computedVolumeGainText = computed(() => {
                                 </g>
                             </g>
                         </svg>
-                        <div class="text" :class="{ 'content-text-highlight': activeTabIndex == 0 }">均衡器</div>
+                        <div class="text">均衡器</div>
                     </div>
                     <div class="nav-item" :class="{ active: activeTabIndex == 1 }" @click="() => setActiveTab(1)">
                         <svg width="38" height="36" viewBox="0 0 1001.44 814.11" xmlns="http://www.w3.org/2000/svg">
@@ -137,7 +219,7 @@ const computedVolumeGainText = computed(() => {
                                 </g>
                             </g>
                         </svg>
-                        <div class="text" :class="{ 'content-text-highlight': activeTabIndex == 1 }">混响</div>
+                        <div class="text">混响</div>
                     </div>
                     <div class="nav-item" :class="{ active: activeTabIndex == 2 }" @click="() => setActiveTab(2)">
                         <svg width="36" height="36" viewBox="0 0 875.14 917" xmlns="http://www.w3.org/2000/svg">
@@ -154,20 +236,30 @@ const computedVolumeGainText = computed(() => {
                                 </g>
                             </g>
                         </svg>
-                        <div class="text" :class="{ 'content-text-highlight': activeTabIndex == 2 }">其他</div>
+                        <div class="text">其他</div>
                     </div>
                 </div>
-                <div class="content" v-show="activeTabIndex == 0">
+                <div class="content equalizer" v-show="activeTabIndex == 0">
+                    <div class="tip-text">提示：自定义均衡器，“轻轻拖拽一下”即可删除</div>
                     <div class="presets">
-                        <div v-for="(item, index) in getPresetEQs()" @click="switchEQ(item, index)"
-                            :class="{ active: currentEQIndex == index }" class="item spacing1">
+                        <div v-for="(item, index) in availableEQs" 
+                            @click="switchEQ(item, index)"
+                            :draggable="isRemovableCustomEQ(item)"
+                            @dragstart.stop="onCustomEQDragStart"
+                            @dragend.stop="removeCustomEffect(item)"
+                            class="item spacing1"
+                            :class="{  
+                                active: currentEQIndex == index,
+                                dragging,
+                            }">
                             <span>{{ item.name }}</span>
                         </div>
                     </div>
                     <div class="bands">
                         <div v-for="(item, index) in getEQNames()" class="item">
                             <div class="value">{{ currentEQValue(index) }}dB</div>
-                            <VerticalSliderBar :value="currentEQValueToPercent(index)" :precision="6"
+                            <VerticalSliderBar :value="currentEQValueToPercent(index)" 
+                                :precision="6"
                                 :onseek="(value) => updateEQValue(value, item, index)"
                                 :onscroll="(value) => updateEQValue(value, item, index)"
                                 :onDragMove="(value) => updateEQValue(value, item, index)">
@@ -223,6 +315,7 @@ const computedVolumeGainText = computed(() => {
     -webkit-app-region: none;
     --others-sliderbar-ctl-height: 5px;
     --others-sliderbar-thumb-size: 15px;
+    --header-height: 60px;
 }
 
 .sound-effect-view .container {
@@ -254,36 +347,130 @@ const computedVolumeGainText = computed(() => {
 }
 
 .sound-effect-view .header {
-    padding: 12px 12px 12px 3px;
-    border-bottom: 1px solid var(--border-color);
+    /*padding: 12px 12px 12px 3px;*/
+    height: var(--header-height);
+    padding-left: 3px;
+    padding-right: 12px;
+    border-bottom: 2px solid var(--border-header-nav-border-color);
     background: transparent;
+    position: relative;
 }
 
-.sound-effect-view .header .action {
+.sound-effect-view .header > .action {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
 }
 
-.sound-effect-view .header .action .close-btn {
+.sound-effect-view .header > .action .close-btn {
     width: 30px;
 }
 
 .sound-effect-view .header .title-wrap {
     margin-left: 10px;
+    margin-right: 10px;
     display: flex;
     align-items: center;
+    flex: 1;
+    position: relative;
 }
 
 .sound-effect-view .header .title {
     margin-right: 30px;
-    font-size: var(--content-text-size);
+    font-size: calc(var(--content-text-size) + 1px);
 }
 
 .sound-effect-view .header #toggle-ctl {
-    margin-left: 66px;
+    margin-left: 18px;
     margin-right: 8px;
 }
+
+
+.sound-effect-view .header .custom-eq-btn-group {
+    display: flex;
+    align-items: center;
+    --input-width: 202px;
+    --input-padding: 5px;
+    --input-margin-left: 6px;
+}
+
+.sound-effect-view .header .custom-eq-btn-group:hover {
+    background: var(--content-list-item-hover-bg-color);
+    border-radius: var(--border-inputs-border-radius);
+}
+
+.sound-effect-view .header .custom-eq-btn-group .group-title {
+    width: calc(var(--input-width) + 2 * var(--input-padding) + var(--input-margin-left));
+    margin-right: 10px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: left;
+    word-wrap: break-word;
+    line-break: anywhere;
+}
+
+.sound-effect-view .header .custom-eq-btn-group:hover .group-title {
+    display: none;
+}
+
+.sound-effect-view .header .custom-eq-btn-group .group-title-input-wrap input {
+    display: none;
+    border: 1px solid var(--border-inputs-border-color);
+    background-color: var(--content-inputs-bg-color);
+    border-radius: var(--border-inputs-border-radius);
+    padding: var(--input-padding);
+    color: var(--content-inputs-text-color);
+    width: var(--input-width);
+    cursor: default;
+    margin-left: var(--input-margin-left);
+}
+
+.sound-effect-view .header .custom-eq-btn-group:hover input {
+    display: block;
+    margin-right: 8px;
+}
+
+.sound-effect-view .header .custom-eq-btn-group .group-item {
+    padding: 8px 15px;
+    margin-left: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.sound-effect-view .header .custom-eq-btn-group .group-item.first {
+    margin-left: 0px;
+}
+
+.sound-effect-view .header .custom-eq-btn-group .group-item.last {
+    border-top-right-radius: var(--border-inputs-border-radius);
+    border-bottom-right-radius: var(--border-inputs-border-radius);
+}
+
+.sound-effect-view .header .custom-eq-btn-group .text-btn  {
+    margin-left: 0px;
+}
+
+.sound-effect-view .header .custom-eq-btn-group .text-btn:hover {
+    font-weight: bold;
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-text-color);
+}
+
+.sound-effect-view .header .custom-eq-btn-group .text-btn:hover svg {
+    fill: var(--button-icon-text-btn-icon-color);
+}
+
+.sound-effect-view .header .custom-eq-btn-group .text-btn.last  {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
 
 .sound-effect-view .center {
     flex: 1;
@@ -295,11 +482,11 @@ const computedVolumeGainText = computed(() => {
     width: 108px;
     min-width: 68px;
     background: var(--content-header-nav-bg-color);
-    border-right: 1px solid var(--border-color);
+    border-right: 2px solid var(--border-header-nav-border-color);
 }
 
 .sound-effect-view .center .left .nav-item {
-    padding: 20px 0px;
+    padding: 30px 0px;
     cursor: pointer;
 }
 
@@ -308,11 +495,17 @@ const computedVolumeGainText = computed(() => {
     color: var(--content-subtitle-text-color);
 }
 
+.sound-effect-view .center .left .nav-item:hover {
+    background: var(--content-list-item-hover-bg-color);
+}
+
+/*
 .sound-effect-view .center .left .nav-item:hover,
 .sound-effect-view .center .left .nav-item:hover svg {
     fill: var(--button-icon-btn-color);
     color: var(--content-text-color);
 }
+*/
 
 .sound-effect-view .center .left .active,
 .sound-effect-view .center .left .active svg {
@@ -321,24 +514,48 @@ const computedVolumeGainText = computed(() => {
     font-weight: bold;
 }
 
+/*
+.sound-effect-view .center .left .active {
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
+    font-weight: bold;
+}
+
+.sound-effect-view .center .left .active svg {
+    fill: var(--content-list-item-hl-text-color) !important;
+}
+*/
+
 .sound-effect-view .center .content {
     flex: 1;
     padding-top: 10px;
+    padding-bottom: 50px;
     margin-left: 0px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.sound-effect-view .center .content.equalizer .tip-text {
+    text-align: left;
+    padding-left: 45px;
 }
 
 .sound-effect-view .center .content .presets {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding-right: 25px;
+    padding-left: 20px;
 }
 
 .sound-effect-view .center .presets .item {
-    width: 99px;
     margin-top: 15px;
-    padding: 5px 0px;
+    width: 87px;
+    height: 33px;
+    line-height: 33px;
+    padding-left: 6px;
+    padding-right: 6px;
     border-radius: var(--border-inputs-border-radius);
     border-radius: var(--border-list-item-vertical-border-radius);
     border-radius: calc(var(--border-list-item-vertical-border-radius) - 1px);
@@ -346,9 +563,23 @@ const computedVolumeGainText = computed(() => {
     background-color: #f3f3f3;
     background: var(--content-list-item-hover-bg-color);
     cursor: pointer;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    text-align: center;
+    word-wrap: break-word;
+    line-break: anywhere;
 }
 
-.sound-effect-view .center .presets .active {
+.sound-effect-view .center .presets .item.dragging {
+    cursor: move;
+}
+
+.sound-effect-view .center .presets .item.active {
     /*border: 2px solid var(--content-highlight-color);*/
     /*
     background: var(--button-icon-text-btn-bg-color) !important;

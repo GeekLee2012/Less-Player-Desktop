@@ -137,7 +137,7 @@ const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
     return autoClass
 }
 
-const postCoverLoadComplete = (track) => {
+const setupGradientBackgroundEffect = (track) => {
     if(!isCurrentTrack(track)) return 
     const containerEl = document.querySelector('.playing-view .container')
     //if(!containerEl) return 
@@ -209,6 +209,7 @@ const postCoverLoadComplete = (track) => {
 const clearBackgroundEffect = () => {
     const containerEl = document.querySelector('.playing-view .container')
     if(!containerEl) return 
+    containerEl.classList.remove('simple-effect')
     containerEl.classList.remove('auto-effect')
     containerEl.classList.remove('with-backdrop')
     containerEl.classList.remove('brightness-light')
@@ -219,29 +220,44 @@ const clearBackgroundEffect = () => {
 
     const coverEl = containerEl.querySelector('.center .cover')
     if(!coverEl) return
-    coverEl.removeEventListener('load', postCoverLoadComplete)
+    coverEl.removeEventListener('load', setupSimpleBackgroundEffect)
+    coverEl.removeEventListener('load', setupGradientBackgroundEffect)
 }
 
-
-const setupSimpleBackgroundEffect = async () => {
+const setupCoverBackgroundEffect = async (track, onLoadCompleted) => {
     clearBackgroundEffect()
+    const containerEl = document.querySelector('.playing-view .container')
+    if(!containerEl) return 
+    const coverEl = containerEl.querySelector('.center .cover')
+    if(!coverEl) return 
+    if(typeof onLoadCompleted != 'function') return 
+    if(coverEl.complete) onLoadCompleted(track)
+    coverEl.addEventListener('load', () => onLoadCompleted(track))
+}
+
+const setupSimpleBackgroundEffect = async (track) => {
+    if(!isCurrentTrack(track)) return 
+    clearBackgroundEffect()
+    const containerEl = document.querySelector('.playing-view .container')
+    if(!containerEl) return
+
     const cover = Track.coverDefault(currentTrack.value)
     //默认封面
     if (stringEquals(DEFAULT_COVER_BASE64, cover)) return 
     //本地歌曲
     //if (cover.startsWith(ImageProtocal.prefix)) return
     applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
+
+    const coverEl = containerEl.querySelector('.center .cover')
+    const rgbs = optimizePalette(getPalette(coverEl, 2))
+    if(!isCurrentTrack(track)) return 
+    const autoClass = getPlayingViewThemeAutoClass(rgbs)
+
+    containerEl.classList.add('auto-effect')
+    containerEl.classList.add('simple-effect')
+    containerEl.classList.add(autoClass)
 }
 
-const setupGradientBackgroundEffect = async (track) => {
-    clearBackgroundEffect()
-    const containerEl = document.querySelector('.playing-view .container')
-    if(!containerEl) return 
-    const coverEl = containerEl.querySelector('.center .cover')
-    if(!coverEl) return 
-    if(coverEl.complete) postCoverLoadComplete(track)
-    coverEl.addEventListener('load', () => postCoverLoadComplete(track))
-}
 
 const setupBackgroudEffect = async () => {
     switch(playingViewBgCoverEffectIndex.value) {
@@ -249,10 +265,10 @@ const setupBackgroudEffect = async () => {
             clearBackgroundEffect()
             break
         case 1:
-            setupSimpleBackgroundEffect()
+            setupCoverBackgroundEffect(currentTrack.value, setupSimpleBackgroundEffect)
             break
         case 2:
-            setupGradientBackgroundEffect(currentTrack.value)
+            setupCoverBackgroundEffect(currentTrack.value, setupGradientBackgroundEffect)
             break
         default:
             break
@@ -281,7 +297,7 @@ const trackFormat = computed(() => {
 const computedBottomNewShow = computed(() => {
     const playCtlIndex = playingViewPlayCtlStyleIndex.value
     const effectIndex = playingViewBgCoverEffectIndex.value
-    return playCtlIndex == 2 || (playCtlIndex == 0 && effectIndex == 2)
+    return playCtlIndex == 2 || (playCtlIndex == 0 && effectIndex > 0)
 })
 
 const onDrop = async (event) => {
@@ -383,11 +399,12 @@ onUnmounted(() => {
                     <div class="format" v-html="trackFormat"></div>
                     -->
                 </div>
-                <div class="lyric-wrap" :class="{
-                    'lyric-hl-default': playingViewLyricHighlightMode == 0,
-                    'lyric-hl-simple-color': playingViewLyricHighlightMode == 1,
-                    'lyric-hl-bg-border': playingViewLyricHighlightMode == 2,
-                }">
+                <div class="lyric-wrap" 
+                    :class="{
+                        'lyric-hl-default': playingViewLyricHighlightMode == 0,
+                        'lyric-hl-simple-color': playingViewLyricHighlightMode == 1,
+                        'lyric-hl-bg-border': playingViewLyricHighlightMode == 2,
+                    }">
                     <LyricControl 
                         :disabled="!playingViewShow" 
                         :track="currentTrack" 
@@ -1038,7 +1055,12 @@ onUnmounted(() => {
     border-top: 0.1px solid var(--bottom-new-border-top-color);
 }
 
+/*
 .playing-view .container.auto-effect > .bottom.bottom-new.bg-transparent {
+    --bottom-new-border-top-color: transparent;
+}
+*/
+.playing-view .container  > .bottom.bottom-new.bg-transparent {
     --bottom-new-border-top-color: transparent;
 }
 
@@ -1286,5 +1308,26 @@ onUnmounted(() => {
 .playing-view.focus-mode:hover .container > .bottom, 
 .playing-view.focus-mode:hover .container .lyric-ctl .extra-btn {
     visibility: visible;
+}
+
+/* background effect simple */
+.playing-view .container.auto-effect.simple-effect {
+    background: none !important;
+    /*background-color: rgba(0, 0, 0, 0.4) !important;
+    background-color: rgba(202, 202, 202, 0.4) !important; */
+    background-color: rgba(98, 98, 98, 0.4) !important;  
+}
+
+.playing-view .container.auto-effect.simple-effect .bg-effect {
+    display: block !important;
+    /*background-color: rgba(0, 0, 0, 0.4) !important;
+    background-color: rgba(202, 202, 202, 0.4) !important;
+    filter: blur(10vmax) saturate(2.1) !important; */
+    filter: blur(168px) !important;
+}
+
+.playing-view .container.auto-effect.simple-effect .backdrop-container,
+.playing-view .container.auto-effect.simple-effect .bg-container {
+    display: none !important;
 }
 </style>

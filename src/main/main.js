@@ -1176,10 +1176,17 @@ const restoreAppBounds = (useCenterStrict) => {
   if(!isWindowAccessible(mainWin)) return 
   if(appLayout != DEFAULT_LAYOUT) return 
 
+  const { size: screenSize } = getPrimaryScreenMetadata()
+  const { width: screenWidth, height: screenHeight} = screenSize
+  
   const { width, height } = getInitialMainWindowBounds(true)
   const zoomFactor = currentZoom / 100
   mainWin.webContents.setZoomFactor(zoomFactor)
-  mainWin.setSize(parseInt(width * zoomFactor), parseInt(height * zoomFactor))
+
+  const _width = Math.min(parseInt(width * zoomFactor), screenWidth)
+  const _height = Math.min(parseInt(height * zoomFactor), screenHeight)
+  
+  mainWin.setSize(_width, _height)
   setupMainWindowCenterScreen(useCenterStrict)
 }
 
@@ -1295,7 +1302,7 @@ const setupAppLayout = (layout, zoom, isInit, useCenterStrict, miniExpand) => {
   appLayout = layout
 
   zoom = Number(zoom) || 85
-  const zoomFactor = parseFloat(zoom / 100)
+  let zoomFactor = parseFloat(zoom / 100)
   if (zoomFactor < 0.5 || zoomFactor > 3) zoomFactor = 0.85
   const { appWidth, appHeight } = appLayoutConfig[appLayout]
   const width = Math.round(appWidth * zoomFactor)

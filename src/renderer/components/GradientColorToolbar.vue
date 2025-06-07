@@ -125,11 +125,11 @@ const updateRelativeUI = () => {
             const colorStopParts = part.split(' ')
             color = colorStopParts[0].trim()
             colorStopParts.splice(0, 1)
-            stop = colorStopParts.length > 0 ? colorStopParts.join(' ') : null
+            stop = colorStopParts.length > 0 ? colorStopParts.join(' ') : ''
         } else if (part.startsWith('rgb')) {
             const colorStopParts = part.split(')')
             color = colorStopParts[0].trim() + ')'
-            stop = colorStopParts.length > 0 ? colorStopParts[1].trim() : null
+            stop = colorStopParts.length > 0 ? colorStopParts[1].trim() : ''
         }
         if (color) {
             colorStops.value.push({
@@ -156,11 +156,12 @@ const updateValue = (value) => {
     let sideOrCorner = '', colors = '', hasDirection = false
     if (vDirection || hDirection) {
         hasDirection = true
-        sideOrCorner = `to ${hDirection} ${vDirection} `.replace('null', '').trim().replace(/\s\s/g, ' ')
+        sideOrCorner = `to ${hDirection} ${vDirection} `.replace('null', '').replace('NULL', '').trim().replace(/\s\s/g, ' ')
     }
     for (var i = 0; i < colorStops.value.length; i++) {
         const { color, stop } = colorStops.value[i]
-        colors += `,${color} ${stop}`.replace('null', '').trim()
+        if(!color) continue
+        colors += `,${color} ${stop}`.replace('null', '').replace('NULL', '').trim()
     }
     if (colors.length > 0) {
         value = `linear-gradient(${sideOrCorner},${colors})`
@@ -171,7 +172,7 @@ const updateValue = (value) => {
 }
 
 const appendColorStop = () => {
-    colorStops.value.push({ color: '#FFFFFF', stop: null })
+    colorStops.value.push({ color: '#FFFFFF', stop: '' })
     updateValue()
 }
 
@@ -385,6 +386,7 @@ defineExpose({
     /*flex-direction: column;*/
     overflow: hidden;
     -webkit-app-region: none;
+    --header-height: var(--content-header-nav-height);;
 }
 
 .gradient-color-toolbar .container {
@@ -410,12 +412,13 @@ defineExpose({
 }
 
 .gradient-color-toolbar .header {
-    padding: 10px 15px 10px 6px;
+    padding: 0px 15px 0px 6px;
+    height: var(--header-height);
     display: flex;
     justify-content: center;
     align-items: center;
     background: var(--content-header-nav-bg-color);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-header-nav-border-color);
 }
 
 .gradient-color-toolbar .header .action {
@@ -433,7 +436,7 @@ defineExpose({
 }
 
 .gradient-color-toolbar .header .title {
-    font-size: var(--content-text-size);
+    font-size: calc(var(--content-text-size) + 1);
 }
 
 .gradient-color-toolbar .header #toggle-ctl {

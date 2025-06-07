@@ -222,7 +222,7 @@ const setupSoundEffectViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #sound-effect-view',
     width: 688,
-    height: 528
+    height: 560
   })
 }
 
@@ -785,7 +785,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   bottom: 80px;
   width: 688px;
-  height: 528px;
+  height: 560px;
   z-index: 99;
   box-shadow: var(--box-shadow);
   border-radius: var(--border-popover-border-radius);

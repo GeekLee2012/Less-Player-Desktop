@@ -54,6 +54,7 @@ const { getWindowZoom, lyricMetaPos, theme, layout,
     playingViewBgCoverEffectGradientBrightness,
     playingViewThemeColorIndex, playingViewFocusMode,
     playingViewBgCoverEffectGradientBottomBgTransparent,
+    playingViewLyricHighlightMode,
 } = storeToRefs(useSettingStore())
 
 
@@ -144,7 +145,7 @@ const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
     return autoClass
 }
 
-const postCoverLoadComplete = (track) => {
+const setupGradientBackgroundEffect = (track) => {
     if(!isCurrentTrack(track)) return 
     const containerEl = document.querySelector('.visual-playing-view .container')
     //if(!containerEl) return 
@@ -216,6 +217,7 @@ const postCoverLoadComplete = (track) => {
 const clearBackgroundEffect = () => {
     const containerEl = document.querySelector('.visual-playing-view .container')
     if(!containerEl) return 
+    containerEl.classList.remove('simple-effect')
     containerEl.classList.remove('auto-effect')
     containerEl.classList.remove('with-backdrop')
     containerEl.classList.remove('brightness-light')
@@ -226,28 +228,40 @@ const clearBackgroundEffect = () => {
 
     const coverEl = containerEl.querySelector('.center .cover')
     if(!coverEl) return 
-    coverEl.removeEventListener('load', postCoverLoadComplete)
+    coverEl.removeEventListener('load', setupSimpleBackgroundEffect)
+    coverEl.removeEventListener('load', setupGradientBackgroundEffect)
+}
+
+const setupCoverBackgroundEffect = async (track, onLoadCompleted) => {
+    clearBackgroundEffect()
+    const containerEl = document.querySelector('.visual-playing-view .container')
+    if(!containerEl) return 
+    const coverEl = containerEl.querySelector('.center .cover')
+    if(!coverEl) return 
+    if(typeof onLoadCompleted != 'function') return 
+    if(coverEl.complete) onLoadCompleted(track)
+    coverEl.addEventListener('load', () => onLoadCompleted(track))
 }
 
 
-const setupSimpleBackgroundEffect = async () => {
+const setupSimpleBackgroundEffect = async (track) => {
     clearBackgroundEffect()
+    const containerEl = document.querySelector('.visual-playing-view .container')
+    if(!containerEl) return
+    
     const cover = Track.coverDefault(currentTrack.value)
     //默认封面
     if (stringEquals(DEFAULT_COVER_BASE64, cover)) return 
     //本地歌曲
     //if (cover.startsWith(ImageProtocal.prefix)) return
     applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
-}
 
-const setupGradientBackgroundEffect = async (track) => {
-    clearBackgroundEffect()
-    const containerEl = document.querySelector('.visual-playing-view .container')
-    if(!containerEl) return 
     const coverEl = containerEl.querySelector('.center .cover')
-    if(!coverEl) return 
-    if(coverEl.complete) postCoverLoadComplete(track)
-    coverEl.addEventListener('load', postCoverLoadComplete)
+    const rgbs = optimizePalette(getPalette(coverEl, 2))
+    const autoClass = getPlayingViewThemeAutoClass(rgbs)
+    containerEl.classList.add('auto-effect')
+    containerEl.classList.add('simple-effect')
+    containerEl.classList.add(autoClass)
 }
 
 //TODO 性能问题
@@ -257,10 +271,10 @@ const setupBackgroudEffect = async () => {
             clearBackgroundEffect()
             break
         case 1:
-            setupSimpleBackgroundEffect()
+            setupCoverBackgroundEffect(currentTrack.value, setupSimpleBackgroundEffect)
             break
         case 2:
-            setupGradientBackgroundEffect(currentTrack.value)
+            setupCoverBackgroundEffect(currentTrack.value, setupGradientBackgroundEffect)
             break
         default:
             break
@@ -479,7 +493,13 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </div>
-                <div class="lyric-wrap" :class="{ 'meta-show': (lyricMetaPos == 0) }">
+                <div class="lyric-wrap" 
+                    :class="{
+                        'meta-show': (lyricMetaPos == 0),
+                        'lyric-hl-default': playingViewLyricHighlightMode == 0,
+                        'lyric-hl-simple-color': playingViewLyricHighlightMode == 1,
+                        'lyric-hl-bg-border': playingViewLyricHighlightMode == 2,
+                    }" >
                     <LyricControl 
                         :disabled="!playingViewShow"
                         :track="currentTrack" 
@@ -1094,5 +1114,21 @@ onUnmounted(() => {
 .visual-playing-view.focus-mode:hover .container > .center .progress-wrap,
 .visual-playing-view.focus-mode:hover .container > .center .audio-time-wrap {
     visibility: visible;
+}
+
+/* background effect simple */
+.visual-playing-view .container.auto-effect.simple-effect {
+    background: none !important;
+    background-color: rgba(98, 98, 98, 0.4) !important; 
+}
+
+.visual-playing-view .container.auto-effect.simple-effect .bg-effect {
+    display: block !important;
+    filter: blur(168px) !important;
+}
+
+.visual-playing-view .container.auto-effect.simple-effect .backdrop-container,
+.visual-playing-view .container.auto-effect.simple-effect .bg-container {
+    display: none !important;
 }
 </style>

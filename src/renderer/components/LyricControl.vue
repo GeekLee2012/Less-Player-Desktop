@@ -237,7 +237,7 @@ const setLyricLineStyle = (line) => {
 }
 
 const setupLyricTitle = (track) => {
-    if (track && !isCurrentTrack(track)) return 
+    if (!isCurrentTrack(track)) return 
 
     const { titleFontSize } = lyric.value
     const titleEls = document.querySelectorAll('.lyric-ctl .header .audio-title') || []
@@ -250,7 +250,7 @@ const setupLyricTitle = (track) => {
 }
 
 const setupLyricAral = (track) => {
-    if (track && !isCurrentTrack(track)) return 
+    if (!isCurrentTrack(track)) return 
 
     const { aralFontSize } = lyric.value
     const arEls = document.querySelectorAll('.lyric-ctl .header .audio-artist .ar-ctl') || []
@@ -314,7 +314,6 @@ const setupLyricAral = (track) => {
 
 const setupLyricLines = (track) => {
     if (!isCurrentTrack(track)) return 
-
     const lines = document.querySelectorAll('.lyric-ctl .center .line') || []
     for (let i = 0; i < lines.length; i++) {
         if (!isCurrentTrack(track)) return 
@@ -506,13 +505,13 @@ const eventsRegistration = {
     'track-lyricLoaded': reloadLyricData,
     'track-noLyric': reloadLyricData,
     'lyric-userMouseWheel': onUserMouseWheel,
-    'lyric-fontSize': setupLyricLines,
-    'lyric-titleFontSize': setupLyricTitle,
-    'lyric-aralFontSize': setupLyricAral,
-    'lyric-hlFontSize': setupLyricLines,
-    'lyric-fontWeight': setupLyricLines,
-    'lyric-lineHeight': setupLyricLines,
-    'lyric-lineSpacing': setupLyricLines,
+    'lyric-fontSize': () => setupLyricLines(props.track),
+    'lyric-titleFontSize': () => setupLyricTitle(props.track),
+    'lyric-aralFontSize': () => setupLyricAral(props.track),
+    'lyric-hlFontSize': () => setupLyricLines(props.track),
+    'lyric-fontWeight': () => setupLyricLines(props.track),
+    'lyric-lineHeight': () => setupLyricLines(props.track),
+    'lyric-lineSpacing': () => setupLyricLines(props.track),
     'lyric-alignment': setupLyricAlignment,
     'playingView-changed': setupLyricAlignment,
     'track-lyricRestore': () => setLyricExistState(-1),

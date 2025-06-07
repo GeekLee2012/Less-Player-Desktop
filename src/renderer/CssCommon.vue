@@ -38,6 +38,7 @@
   --content-new-color: #fc605c;
   
   --content-playing-theme-list-item-height: 190px;
+  --content-header-nav-height: 56px;
 
   /*边框 */
   --border-app-win-border-radius: 12px;
@@ -308,11 +309,20 @@ textarea {
     background-size: cover !important;
     background: var(--bg-effect);
     /*backdrop-filter: blur(20px);
-    filter: brightness(88%) hue-rotate(360deg);*/
-    filter: blur(8px);
+    filter: blur(8px) saturate(2.1) brightness(88%) hue-rotate(360deg);
+    filter: blur(10vmax) saturate(2.1);*/
+    filter: blur(168px) ;
     z-index: -10;
+    contain: strict;
     position: absolute;
-    width: 100%;
-    height: 100%; 
+    /*width: 100%;
+    height: 100%;*/
+    --offset: -88px;
+    top: var(--offset);
+    left: var(--offset);
+    right: var(--offset);
+    bottom: var(--offset);
+    width: calc(100% - var(--offset) * 2);
+    height: calc(100% - var(--offset) * 2); 
 }
 </style>

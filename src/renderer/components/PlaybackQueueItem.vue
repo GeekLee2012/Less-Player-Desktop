@@ -116,7 +116,9 @@ const playingState = computed(() => {
         @dblclick="" 
         @contextmenu.stop="onContextMenu">
         <div class="item-wrap">
-            <div class="left" :draggable="isDraggable" @dragstart.stop="(event) => dndSaveTrack(event, data)">
+            <div class="left" 
+                :draggable="isDraggable" 
+                @dragstart.stop="(event) => dndSaveTrack(event, data)">
                 <img class="cover" v-show="!data.color"
                     :class="{ 'obj-fit-contain': (data.coverFit == 1) }" 
                     v-lazy="coverDefault(data.cover)" />

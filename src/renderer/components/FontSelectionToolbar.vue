@@ -214,10 +214,11 @@ onUnmounted(() => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 8px 10px 8px 3px;
+    padding: 10px 10px 10px 3px;
     border-radius: 5px 5px 0px 0px;
     background: transparent;
-    border-bottom: 1px solid var(--border-color);
+    background: var(--content-header-nav-bg-color);
+    border-bottom: 2px solid var(--border-header-nav-border-color);
 }
 
 .font-selection-toolbar .header .close-btn {
@@ -249,7 +250,7 @@ onUnmounted(() => {
 
 .font-selection-toolbar .center .search-wrap .search-bar {
     flex: 1;
-    margin: 15px 12px 12px 12px;
+    margin: 18px 12px 15px 12px;
 }
 
 .font-selection-toolbar .center .search-wrap .search-bar .keyword {
@@ -260,7 +261,7 @@ onUnmounted(() => {
     font-size: calc(var(--content-text-size) - 1px);
     color: var(--content-subtitle-text-color);
     text-align: left;
-    padding: 2px 16px 8px 16px;
+    padding: 2px 16px 10px 16px;
     font-weight: bold;
     display: flex;
     position: relative;
@@ -306,12 +307,16 @@ onUnmounted(() => {
 
 .font-selection-toolbar .center .content .item {
     cursor: pointer;
-    width: 100%;
-    margin-bottom: 2px;
+    --spacing: 15px;
+    width: calc(100% - var(--spacing) * 2);
+    margin-left: var(--spacing);
+    margin-right: var(--spacing);
+    margin-bottom: 8px;
+    border-radius: var(--border-list-item-vertical-border-radius);
 }
 
 .font-selection-toolbar .center .content .item span {
-    padding: 10px 25px;
+    padding: 10px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;

@@ -3,7 +3,7 @@ import { inject, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import ColorInputControl from '../components/ColorInputControl.vue';
-import { transformUrl, isSupportedVideo, isSupportedImage, ipcRendererInvoke } from '../../common/Utils';
+import { transformUrl, isSupportedVideo, isSupportedImage, ipcRendererInvoke, isWinOS } from '../../common/Utils';
 import { PlayingViewTheme } from '../../common/PlayingViewTheme';
 import { FILE_SCHEME } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
@@ -138,7 +138,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     <div class="custom-playing-theme-edit-view"
         :class="{ 'custom-playing-theme-preview-mode': isPlayingViewCustomThemePreview }"
         v-gesture-dnm="{ trigger: '.header' }" @dragover="(e) => e.preventDefault()" @drop="onDrop">
-        <div class="container">
+        <div class="container" :class="{ 'container-win-style': isWinOS() }">
             <div class="header">
                 <div class="action left-action">
                     <div class="close-btn btn" @click="hideCustomPlayingThemeEditView"
@@ -366,6 +366,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     /*flex-direction: column;*/
     overflow: hidden;
     -webkit-app-region: none;
+    --header-height: var(--content-header-nav-height);;
 }
 
 .custom-playing-theme-edit-view .container {
@@ -376,7 +377,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 }
 
 .custom-playing-theme-preview-mode {
-    height: 50px !important;
+    height: var(--header-height) !important;
 }
 
 .custom-playing-theme-preview-mode .header .no-preview-btn {
@@ -409,12 +410,12 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 
 .custom-playing-theme-edit-view .header {
     padding: 0px 15px 0px 3px;
-    height: 50px;
+    height: var(--header-height);
     display: flex;
     justify-content: center;
     align-items: center;
     background: var(--content-header-nav-bg-color);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-header-nav-border-color);
 }
 
 .custom-playing-theme-edit-view .header .action {
@@ -432,7 +433,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 }
 
 .custom-playing-theme-edit-view .header .title {
-    font-size: var(--content-text-size);
+    font-size: calc(var(--content-text-size) + 1);
 }
 
 .custom-playing-theme-edit-view .header #toggle-ctl {
@@ -579,6 +580,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 .custom-playing-theme-edit-view .center .url-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
+    border-right: 0px;
     width: 325px !important;
 }
 
@@ -586,11 +588,12 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
-    height: 37.5px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--button-icon-text-btn-bg-color);
+    border: 1px solid var(--border-inputs-border-color);
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     font-size: var(--content-text-tip-text-size);
@@ -598,7 +601,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 }
 
 /* 别扭挖坑的方式 */
-.custom-playing-theme-edit-view .center .url-input-ctl .select-btn {
+.custom-playing-theme-edit-view .container-win-style  .center .url-input-ctl .select-btn {
     height: 38px;
 }
 

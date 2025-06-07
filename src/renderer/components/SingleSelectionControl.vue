@@ -44,7 +44,7 @@ const setCurrentIndex = (index) => {
     border-left: var(--item-border);
     border-top: var(--item-border);
     border-bottom: var(--item-border);
-    padding: 4px 6px;
+    padding: 4px 9px;
     cursor: pointer;
     font-size: 14px;
     text-align: center;

@@ -65,6 +65,7 @@ export class Theme {
         /*边框*/
         this.border = {
             borderColor: null,
+            headerNavBorderColor: null,
             leftNavBorderColor: null,
             popoversBorderColor: null,
             inputsBorderColor: null
@@ -73,7 +74,7 @@ export class Theme {
         /*按钮*/
         this.button = {
             iconBtnColor: null,
-            //iconBtnHoverColor: null,
+            iconBtnHoverColor: null,
             iconTextBtnTextColor: null,
             iconTextBtnIconColor: null,
             iconTextBtnBgColor: null,
@@ -111,5 +112,45 @@ export class Theme {
             //checkboxBgColor: null
         }
     }
+    
+    setEntry(entry, key, value) {
+        if(!entry || !key) return 
+        Object.assign(entry, { [key]: value })
+    }
 
+    setAppBackground(key, value) {
+        this.setEntry(this.appBackground, key, value)
+    }
+
+    setAppBackgroundScope(key, value) {
+        this.setEntry(this.appBackgroundScope, key, value)
+    }
+
+    toggleAppBackgroundScope(key) {
+        this.setAppBackgroundScope(key, !this.appBackgroundScope[key])
+    }
+
+    setContent(key, value) {
+        this.setEntry(this.content, key, value)
+    }
+
+    setBorder(key, value) {
+        this.setEntry(this.border, key, value)
+    }
+
+    setButton(key, value) {
+        this.setEntry(this.button, key, value)
+    }
+
+    setSearchBar(key, value) {
+        this.setEntry(this.searchBar, key, value)
+    }
+
+    setAppLogo(key, value) {
+        this.setEntry(this.appLogo, key, value)
+    }
+
+    setOthers(key, value) {
+        this.setEntry(this.others, key, value)
+    }
 }

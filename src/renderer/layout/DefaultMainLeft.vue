@@ -614,7 +614,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     justify-content: center;
     align-items: center;
     /*box-shadow: 0px 0px 3px var(--border-left-nav-border-color);*/
-    border-right: 1px solid var(--border-left-nav-border-color);
+    border-right: 2px solid var(--border-left-nav-border-color);
     background: var(--content-left-nav-bg-color);
     --spacing-left: 25px;
 

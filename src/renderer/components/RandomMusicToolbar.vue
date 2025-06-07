@@ -116,10 +116,10 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 8px 10px 8px 3px;
+    padding: 10px 10px 10px 3px;
     border-radius: 5px 5px 0px 0px;
     background: transparent;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-header-nav-border-color);
 }
 
 .random-music-toolbar .header .close-btn {
@@ -140,11 +140,10 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 }
 
 .random-music-toolbar .center .nav-wrap {
-    background: var(--seview-left-bg);
-    background: var(--content-header-nav-bg-color);
     width: 68px;
     overflow: hidden;
-    border-right: 1px solid var(--border-color);
+    background: var(--content-header-nav-bg-color);
+    border-right: 2px solid var(--border-header-nav-border-color);
 }
 
 .random-music-toolbar .center .nav-wrap .active {
@@ -158,7 +157,7 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 }
 
 .random-music-toolbar .center .nav-item {
-    padding: 30px 1px;
+    padding: 39px 1px;
     cursor: pointer;
     margin-bottom: 0px;
 }

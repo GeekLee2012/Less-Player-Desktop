@@ -1047,7 +1047,7 @@ watch(soundEffectViewShow, () => {
     emitEvents('app-elementAlignCenter', {
         selector: '.simple-layout #sound-effect-view',
         width: 404,
-        height: 386,
+        height: 408,
         offsetTop: -20
     })
 })
@@ -1773,11 +1773,24 @@ onActivated(() => {
 
 .simple-layout #sound-effect-view {
     width: 404px;
-    height: 386px;
+    height: 408px;
+}
+
+.simple-layout #sound-effect-view .header {
+    height: auto !important;
+    padding: 10px 12px 10px 3px;
+}
+
+.simple-layout #sound-effect-view .header .title {
+    font-size: var(--content-text-size);
 }
 
 .simple-layout #sound-effect-view .left {
     width: 88px;
+}
+
+.simple-layout #sound-effect-view .left .nav-item {
+    padding: 28px 0px;
 }
 
 .simple-layout #sound-effect-view .center .content {
@@ -1786,12 +1799,19 @@ onActivated(() => {
     overflow-y: scroll;
 }
 
+.simple-layout #sound-effect-view .header .custom-eq-btn-group,
+.simple-layout #sound-effect-view .center .tip-text,
 .simple-layout #sound-effect-view .center .bands {
     display: none;
 }
 
+.simple-layout #sound-effect-view .header .effect-name {
+    display: block !important;
+}
+
 .simple-layout #sound-effect-view .center .presets .item {
-    width: 108px;
+    width: 205px;
+    height: 36px;
 }
 
 .simple-layout #sound-effect-view .center .impulse-content .item {

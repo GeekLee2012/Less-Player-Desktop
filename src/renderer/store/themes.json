@@ -40,12 +40,15 @@
                 "inputsTextColor": "#d5d5d5",
                 "listItemHlBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
                 "listItemHlTextColor": "#dddddd",
+                "imageTextTileCardBgColor": "#515151",
+                "imageTextTileHCardBgColor": "#666666",
                 "imageTextTileCardShadowColor1": "#18181836",
                 "imageTextTileCardShadowColor2": "#39393936"
             },
             "border": {
-                "borderColor": "#414141",
-                "leftNavBorderColor": "#3c3c3c",
+                "borderColor": "#414141cb",
+                "headerNavBorderColor": "#414141cb",
+                "leftNavBorderColor": "#39393966",
                 "popoversBorderColor": "#222222",
                 "inputsBorderColor": "#636363"
             },
@@ -118,13 +121,16 @@
                 "leftNavBgColor": "#f8f8f8ff",
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#272727",
-                "imageTextTileCardShadowColor1": "#d3d5d7",
-                "imageTextTileCardShadowColor2": "#f1f2f3",
                 "listItemHlBgColor": "linear-gradient(to top right, #28c83f, #1ca388)",
-                "listItemHlTextColor": "#ffffff"
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#ffffff",
+                "imageTextTileHCardBgColor": "#eeeeee",
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3"  
             },
             "border": {
-                "borderColor": "#eeeeee",
+                "borderColor": "#eeeeee66",
+                "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#ffffff00",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
@@ -198,14 +204,17 @@
                 "leftNavBgColor": "#e7e1e3cb",
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#313131",
-                "imageTextTileCardShadowColor1": "#d3d5d7",
-                "imageTextTileCardShadowColor2": "#f1f2f3",
                 "listItemHlBgColor": "#c7c1c3cb",
-                "listItemHlTextColor": "#414141"
+                "listItemHlTextColor": "#414141",
+                "imageTextTileCardBgColor": "#ffffff",
+                "imageTextTileHCardBgColor": "#faf4f6",
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3"
             },
             "border": {
-                "borderColor": "#eeeeee",
-                "leftNavBorderColor": "#dddddd",
+                "borderColor": "#eeeeee66",
+                "headerNavBorderColor": "#eeeeee66",
+                "leftNavBorderColor": "#eeeeeeff",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -278,14 +287,17 @@
                 "leftNavBgColor": "#f8f8f8ff",
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#212121",
-                "imageTextTileCardShadowColor1": "#d3d5d7",
-                "imageTextTileCardShadowColor2": "#f1f2f3",
                 "listItemHlBgColor": "linear-gradient(to right, #e6399b, #e667af)",
-                "listItemHlTextColor": "#ffffff"
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#ffffff",
+                "imageTextTileHCardBgColor": "#eeeeee",
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3"
             },
             "border": {
                 "borderColor": "#f4f4f4",
-                "leftNavBorderColor": "#eeeeee",
+                "headerNavBorderColor": "#f4f4f4",
+                "leftNavBorderColor": "#eeeeee00",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -352,7 +364,7 @@
                 "bgColor": "#21221f",
                 "textHighlightColor": "linear-gradient(to top right, #fc589c, #e6399b)",
                 "highlightColor": "#fc589c",
-                "headerNavBgColor": "#333333",
+                "headerNavBgColor": "#393939cb",
                 "loadingMaskColor": "linear-gradient(to right, #494949 8%, #595959 18%, #494949 33%)",
                 "listItemHoverBgColor": "#353035",
                 "leftNavBgColor": "#21221f",
@@ -360,12 +372,15 @@
                 "inputsTextColor": "#393939",
                 "listItemHlBgColor": "linear-gradient(to top right, #e6399b, #fc589c)",
                 "listItemHlTextColor": "#cccccc",
+                "imageTextTileCardBgColor": "#393939",
+                "imageTextTileHCardBgColor": "#353035",
                 "imageTextTileCardShadowColor1": "#15101566",
                 "imageTextTileCardShadowColor2": "#05000525"
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#000000",
+                "headerNavBorderColor": "#1a1a1a",
+                "leftNavBorderColor": "#1a1a1a",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#454045"
             },
@@ -438,12 +453,17 @@
                 "leftNavBgColor": "#ffffff08",
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#666666",
-                "listItemHlBgColor": "linear-gradient(to right, #eee, #fff)",
-                "listItemHlTextColor": "#fc7688"
+                "listItemHlBgColor": "linear-gradient(to right, #eeeeee, #ffffff)",
+                "listItemHlTextColor": "#fc7688",
+                "imageTextTileCardBgColor": "#ca7d89",
+                "imageTextTileHCardBgColor": "#ca7d89",
+                "imageTextTileCardShadowColor1": null,
+                "imageTextTileCardShadowColor2": null 
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#31313125",
+                "headerNavBorderColor": "#ffffff36",
+                "leftNavBorderColor": "#ffffff25",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#31313159"
             },
@@ -516,14 +536,17 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#313131",
-                "imageTextTileCardShadowColor1": "#d3d5d7",
-                "imageTextTileCardShadowColor2": "#f1f2f3",
                 "listItemHlBgColor": "linear-gradient(to right, #f84860, #f7314d)",
-                "listItemHlTextColor": "#ffffff"
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#ffffff",
+                "imageTextTileHCardBgColor": "#fef3f5",
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3"
             },
             "border": {
-                "borderColor": null,
-                "leftNavBorderColor": "#e8e8e8",
+                "borderColor": "#eeeeee66",
+                "headerNavBorderColor": "#eeeeee66",
+                "leftNavBorderColor": "#eeeeee66",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#cccccc"
             },
@@ -598,11 +621,15 @@
                 "inputsTextColor": "#363636",
                 "listItemHlBgColor": "linear-gradient(to right, #f84860, #d53943)",
                 "listItemHlTextColor": "#cccccc",
-                "imageTextTileCardBgColor": "#f9453f33"
+                "imageTextTileCardBgColor": "#f9453f33",
+                "imageTextTileHCardBgColor": "#f9453f33",
+                "imageTextTileCardShadowColor1": null,
+                "imageTextTileCardShadowColor2": null
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#0b0b0b",
+                "headerNavBorderColor": "#181818",
+                "leftNavBorderColor": "#181818",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#454045"
             },
@@ -678,12 +705,14 @@
                 "listItemHlBgColor": "#64903fcb",
                 "listItemHlTextColor": "#ffffffcb",
                 "imageTextTileCardBgColor": "#dbdeda",
+                "imageTextTileHCardBgColor": "#dbdeda",
                 "imageTextTileCardShadowColor1": "#c3c5c7",
                 "imageTextTileCardShadowColor2": "#e1e2e3"
             },
             "border": {
-                "borderColor": null,
-                "leftNavBorderColor": "#bcbcbc",
+                "borderColor": "#dddddd66",
+                "headerNavBorderColor": "#dddddd66",
+                "leftNavBorderColor": "#dddddd66",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#bcbcbc"
             },
@@ -750,7 +779,7 @@
                 "bgColor": "#054a34ec",
                 "textHighlightColor": "#e1e0a7",
                 "highlightColor": "#e1e0a7",
-                "headerNavBgColor": "#357a64cb",
+                "headerNavBgColor": "#265738",
                 "loadingMaskColor": "linear-gradient(to right, #e1e0a736 8%, #91934336 18%, #e1e0a736 33%)",
                 "listItemHoverBgColor": "#265738",
                 "leftNavBgColor": null,
@@ -758,11 +787,15 @@
                 "inputsTextColor": "#919343",
                 "listItemHlBgColor": "#e1e0a7",
                 "listItemHlTextColor": "#919343",
-                "imageTextTileCardBgColor": "#265738"
+                "imageTextTileCardBgColor": "#265738",
+                "imageTextTileHCardBgColor": "#265738",
+                "imageTextTileCardShadowColor1": null,
+                "imageTextTileCardShadowColor2": null 
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#91934336",
+                "headerNavBorderColor": "#91934325",
+                "leftNavBorderColor": "#91934325",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#91934356"
             },
@@ -773,7 +806,7 @@
                 "iconTextBtnBgColor": "#e1e0a7",
                 "iconTextBtnHoverBgColor": "linear-gradient(to top right, #919343, #e1e0a7) ",
                 "toggleBtnBgColor": "#91934333",
-                "toggleBtnThumbColor": "#ffffff"
+                "toggleBtnThumbColor": "#999999"
             },
             "searchBar": {
                 "borderColor": null,
@@ -835,15 +868,17 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffffcb",
                 "inputsTextColor": "#161616",
-                "imageTextTileCardShadowColor1": "#c3c5c7",
-                "imageTextTileCardShadowColor2": "#e1e2e3",
                 "listItemHlBgColor": "linear-gradient(to right, #2783fb, #2783fb)",
                 "listItemHlTextColor": "#ffffff",
-                "imageTextTileCardBgColor": "#e1e7e9"
+                "imageTextTileCardBgColor": "#e1e7e9",
+                "imageTextTileHCardBgColor": "#e1e7e9", 
+                "imageTextTileCardShadowColor1": "#c3c5c7",
+                "imageTextTileCardShadowColor2": "#e1e2e3"
             },
             "border": {
-                "borderColor": "#dddddd66",
-                "leftNavBorderColor": "#cccccc",
+                "borderColor": "#eeeeee66",
+                "headerNavBorderColor": "#dddddd66",
+                "leftNavBorderColor": "#dddddd00",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#cccccc"
             },
@@ -916,14 +951,17 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffffcb",
                 "inputsTextColor": "#273b42",
-                "imageTextTileCardShadowColor1": "#d3d5d7",
-                "imageTextTileCardShadowColor2": "#f1f2f3",
                 "listItemHlBgColor": "linear-gradient(to right, #395a62, #395a62)",
-                "listItemHlTextColor": "#ffffff"
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#ffffff",
+                "imageTextTileHCardBgColor": "#e2ecef",
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3"
             },
             "border": {
-                "borderColor": "#dddddd",
-                "leftNavBorderColor": "#ababab",
+                "borderColor": "#eeeeee",
+                "headerNavBorderColor": "#dddddd66",
+                "leftNavBorderColor": "#dddddd00",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -996,14 +1034,17 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#000000",
-                "imageTextTileCardShadowColor1": "#d3d5d7",
-                "imageTextTileCardShadowColor2": "#f1f2f3",
                 "listItemHlBgColor": "#ffb300",
-                "listItemHlTextColor": "#ffffff"
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#ffffff",
+                "imageTextTileHCardBgColor": "#eeeeee",
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3"
             },
             "border": {
-                "borderColor": "#eeeeee",
-                "leftNavBorderColor": "#dddddd",
+                "borderColor": "#eeeeee66",
+                "headerNavBorderColor": "#eeeeee66",
+                "leftNavBorderColor": "#eeeeee88",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#dddddd"
             },
@@ -1077,11 +1118,16 @@
                 "inputsBgColor": "#fafafa",
                 "inputsTextColor": "#333333",
                 "listItemHlBgColor": "#fc9b29",
-                "listItemHlTextColor": "#ffffff"
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#f7f1e4",
+                "imageTextTileHCardBgColor": "#fc9b2925",
+                "imageTextTileCardShadowColor1": null,
+                "imageTextTileCardShadowColor2": null
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#cccccc",
+                "headerNavBorderColor": "#dddddd66",
+                "leftNavBorderColor": "#cccccc66",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -1154,14 +1200,17 @@
                 "leftNavBgColor": null,
                 "inputsBgColor": "#ffffff",
                 "inputsTextColor": "#000000",
-                "imageTextTileCardShadowColor1": "#d3d5d7",
-                "imageTextTileCardShadowColor2": "#f1f2f3",
                 "listItemHlBgColor": "#9c27b0",
-                "listItemHlTextColor": "#ffffff"
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#ffffff",
+                "imageTextTileHCardBgColor": "#f0e1f3",
+                "imageTextTileCardShadowColor1": "#d3d5d7",
+                "imageTextTileCardShadowColor2": "#f1f2f3"
             },
             "border": {
                 "borderColor": null,
-                "leftNavBorderColor": "#dddddd",
+                "headerNavBorderColor": "#eeeeee66",
+                "leftNavBorderColor": "#eeeeee",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#dddddd"
             },
@@ -1222,41 +1271,46 @@
                 "customAppBorderRadiusView": false
             },
             "content": {
-                "textColor": "#edede2",
-                "subtitleTextColor": "#dddddd",
+                "textColor": "#edede299",
+                "subtitleTextColor": "#dddddd99",
                 "secondaryTextColor": "#ababab",
                 "bgColor": "#4d3e72e3",
                 "textHighlightColor": "#e5bc8c",
                 "highlightColor": "#e5bc8c",
                 "headerNavBgColor": "#4d3e72cb",
-                "loadingMaskColor": "linear-gradient(to right, #fdfdf2ab 8%, #fdfdf288 18%, #fdfdf2ab 33%)",
+                "loadingMaskColor": "linear-gradient(to right, #fdfdf288 8%, #fdfdf266 18%, #fdfdf288 33%)",
                 "listItemHoverBgColor": "#fdfdf225",
                 "leftNavBgColor": "#4d3e72",
-                "inputsBgColor": "#edede2",
-                "inputsTextColor": "#272727",
+                "inputsBgColor": "#edede299",
+                "inputsTextColor": "#393939",
                 "listItemHlBgColor": "#e5bc8c",
-                "listItemHlTextColor": "#4d3e72"
+                "listItemHlTextColor": "#4d3e72",
+                "imageTextTileCardBgColor": "#4d3e72",
+                "imageTextTileHCardBgColor": "#fdfdf225",
+                "imageTextTileCardShadowColor1": null,
+                "imageTextTileCardShadowColor2": null 
             },
             "border": {
-                "borderColor": null,
-                "leftNavBorderColor": "#333333",
+                "borderColor": "#39393936",
+                "headerNavBorderColor": "#39393936",
+                "leftNavBorderColor": "#39393966",
                 "popoversBorderColor": "#222222",
-                "inputsBorderColor": "#edede2"
+                "inputsBorderColor": "#edede236"
             },
             "button": {
-                "iconBtnColor": "#edede2",
+                "iconBtnColor": "#edede299",
                 "iconTextBtnTextColor": "#4d3e72",
                 "iconTextBtnIconColor": "#4d3e72",
                 "iconTextBtnBgColor": "#e5bc8c",
                 "iconTextBtnHoverBgColor": "#c59c6c",
                 "toggleBtnBgColor": "#fdfdf2ab",
-                "toggleBtnThumbColor": "#ffffff"
+                "toggleBtnThumbColor": "#eeeeee"
             },
             "searchBar": {
                 "borderColor": null,
-                "bgColor": "#edede2",
-                "textColor": "#212121",
-                "searchBtnBgColor": "#edede2",
+                "bgColor": "#edede299",
+                "textColor": "#393939",
+                "searchBtnBgColor": "#edede299",
                 "searchBtnHoverBgColor": "#ffffffbc",
                 "searchBtnIconColor": "#666666",
                 "searchBtnHoverIconColor": "#4d3e72",
@@ -1264,7 +1318,7 @@
             },
             "appLogo": {
                 "bgColor": "#e5bc8c",
-                "innerBgColor": "#ffffff",
+                "innerBgColor": "#ffffff99",
                 "innerTextColor": "#4d3e72",
                 "appNameTextColor": "#e5bc8c"
             },
@@ -1319,10 +1373,15 @@
                 "inputsBgColor": null,
                 "inputsTextColor": null,
                 "listItemHlBgColor": "linear-gradient(to right,#1ca388,#28c83f)",
-                "listItemHlTextColor": "#ffffff"
+                "listItemHlTextColor": "#ffffff",
+                "imageTextTileCardBgColor": "#ababab25",
+                "imageTextTileHCardBgColor": "#66666625",
+                "imageTextTileCardShadowColor1": null,
+                "imageTextTileCardShadowColor2": null
             },
             "border": {
-                "borderColor": "#cccccc",
+                "borderColor": "#eeeeee66",
+                "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#ffffff00",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#999999"

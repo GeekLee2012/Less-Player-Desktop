@@ -306,7 +306,10 @@ const dataListId = computed(() => {
 })
 
 
-const visitRecentsTab = () => visitTab(3)
+const visitRecentsTab = () => {
+    const index = tabs.findIndex(item => item.code == 'recents')
+    visitTab(index)
+}
 
 const visitRouterCtxCacheItem = () => {
     if (!routerCtxCacheItem.value) return

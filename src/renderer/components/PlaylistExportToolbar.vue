@@ -273,6 +273,7 @@ watch(playlistExportContextItem, (nv, ov) => {
 .playlist-export-toolbar .center .dir-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
+    border-right: 0px;
     flex: 1;
     height: 20px;
 }
@@ -281,11 +282,12 @@ watch(playlistExportContextItem, (nv, ov) => {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
-    height: 38px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--button-icon-text-btn-bg-color);
+    border: 1px solid var(--border-inputs-border-color);
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     font-size: var(--content-text-tip-text-size);
@@ -294,7 +296,8 @@ watch(playlistExportContextItem, (nv, ov) => {
 
 /* 别扭挖坑的方式 */
 .playlist-export-toolbar .container-win-style .dir-input-ctl .select-btn {
-    height: 40px;
+    /*height: 40px;*/
+    height: 38px;
 }
 
 .contrast-mode .playlist-export-toolbar .dir-input-ctl .select-btn {

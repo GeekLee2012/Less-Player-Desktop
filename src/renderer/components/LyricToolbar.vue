@@ -191,7 +191,7 @@ const getLyricOffsetText = () => {
 .lyric-toolbar {
     display: flex;
     /*flex-direction: column;*/
-    width: 168px;
+    width: 178px;
     /*padding-bottom: 18px;*/
     /*-webkit-app-region: none;*/
 }
@@ -211,10 +211,10 @@ const getLyricOffsetText = () => {
     display: flex;
     flex-direction: row;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding: 8px 10px 8px 3px;
+    padding: 10px 10px 10px 3px;
     border-radius: 5px 5px 0px 0px;
-    background: var(--seview-left-bg);
+    background: var(--content-header-nav-bg-color);
+    border-bottom: 2px solid var(--border-header-nav-border-color);
 }
 
 .lyric-toolbar .header .close-btn {
@@ -247,11 +247,11 @@ const getLyricOffsetText = () => {
 }
 
 .lyric-toolbar .text {
-    margin-bottom: 3px;
+    margin-left: 38px;
+    margin-bottom: 4px;
     font-size: 15px;
     width: 100%;
     align-items: flex-start;
-    padding-left: 39px;
 }
 
 .lyric-toolbar .v-spacing {
@@ -259,12 +259,12 @@ const getLyricOffsetText = () => {
 }
 
 .lyric-toolbar input {
-    padding: 5px 6px;
+    padding: 6px;
     border-radius: var(--border-inputs-border-radius);
     border: 1px solid var(--border-inputs-border-color);
     font-size: 14px;
     text-align: left;
-    width: 116px;
+    width: 125px;
     background-color: var(--content-inputs-bg-color);
     color: var(--content-inputs-text-color);
 }

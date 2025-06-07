@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { onEvents, emitEvents } from "../../common/EventBusWrapper";
+import { randomTextWithinAlphabetNums, toLowerCaseTrimString, toTrimString, } from "../../common/Utils";
 
 
 
@@ -52,10 +53,6 @@ const PRESET_EQUALIZERS = [
         name: '关闭',
         values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     }, {
-        id: 'custom',
-        name: '自定义',
-        values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    }, {
         id: 'popular',
         name: '流行',
         values: [4, 2, 0, -3, -6, -6, -3, 0, 1, 3]
@@ -95,7 +92,11 @@ const PRESET_EQUALIZERS = [
         id: 'vocals',
         name: '人声',
         values: [-2, -1, -1, 0, 3, 4, 3, 0, 0, 1]
-    }]
+    }/*, {
+        id: 'custom',
+        name: '自定义',
+        values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }*/]
 
 //const MIN_GAIN = -40 / 4, MAX_GAIN = 40 / 4
 const MIN_GAIN = -12, MAX_GAIN = 12
@@ -239,7 +240,12 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         currentEffectType: 0,   // 0 => 均衡器, 1 => 混响
         //均衡器 Equalizer
         currentEQIndex: 0,
-        customEQValues: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        //customEQValues: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        customEQs: [{
+            id: 'custom',
+            name: '自定义',
+            values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        }],
         //混响 Impulse Response
         currentIRIndex: 0,
         //声道（立体声）
@@ -254,14 +260,13 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         },
         //均衡器
         currentEQ() {
-            return PRESET_EQUALIZERS[this.currentEQIndex]
-        },
-        isCustomEQ() {
-            const { id } = this.currentEQ
-            return id === 'custom'
+            return this.availableEQs[this.currentEQIndex] || {}
         },
         currentEQValues() {
-            return this.isCustomEQ ? this.customEQValues : this.currentEQ.values
+           return this.currentEQ.values || []
+        },
+        currentEQId() {
+            return this.currentEQ.id || ''
         },
         currentEQValue() {
             return (index) => this.currentEQValues[index]
@@ -285,6 +290,15 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         },
         currentVolumeGainToPercent() {
             return Number(this.volumeGain) / 3.0  
+        },
+        isUseCustomEQ() {
+            return (this.currentEffectType == 0) && this.isCustomEQ(this.currentEQ)
+        },
+        availableEQs() {
+            const list = []
+            list.push(...PRESET_EQUALIZERS)
+            list.push(...this.customEQs)
+            return list
         },
     },
     actions: {
@@ -314,6 +328,7 @@ export const useSoundEffectStore = defineStore('soundEffect', {
         },
         getPresetEQ(index) {
             return this.getPresetEQs()[index]
+            //return this.availableEQs[index]
         },
         getEQNames() {
             return EQ
@@ -325,7 +340,9 @@ export const useSoundEffectStore = defineStore('soundEffect', {
             return (intValue == flValue) ? intValue : flValue
         },
         updateCustomEQValue(index, value) {
-            this.customEQValues[index] = this._formatEQValue(value)
+            const minIndex = this.getPresetEQs().length
+            if(this.currentEQIndex < minIndex) return 
+            this.currentEQValues[index] = this._formatEQValue(value)
         },
         percentToEQValue(percent) {
             const ZERO_PERCENT = 0.5
@@ -337,17 +354,61 @@ export const useSoundEffectStore = defineStore('soundEffect', {
             }
             return this._formatEQValue(value)
         },
+        isCustomEQ(item) {
+            const { id } = item || {}
+            return toLowerCaseTrimString(id).startsWith('custom')
+        },
+        isPresetCustomEQ(item) {
+            const { id } = item || {}
+            return toLowerCaseTrimString(id) == 'custom'
+        },
+        isRemovableCustomEQ(item) {
+            if(this.isPresetCustomEQ(item)) return false
+            return this.isCustomEQ(item) 
+        },
+        saveCustomEQ(id, name, values) {
+            const index = this.customEQs.findIndex(item => (item.id == id))
+            const _name = toTrimString(name)
+            const _values = [...values]
+            if(index > 0) {
+                Object.assign(this.customEQs[index], { name: _name })
+            } else {
+                const randomNum = randomTextWithinAlphabetNums(9)
+                const _id = `custom-${randomNum}`
+                this.customEQs.push({ id: _id, name: _name, values: _values })
+                this.setUseEffect(0, this.availableEQs.length - 1)
+            }
+        },
+        removeCustomEQ(item) {
+            const { id } = item || {}
+            if(!id || !this.isCustomEQ(item)) return 
+            const index = this.customEQs.findIndex(eq => (eq.id == id))
+            const currentIndex = (this.currentEQIndex - this.getPresetEQs().length)
+            if(index > 0) {
+                this.customEQs.splice(index, 1)
+                if(index == currentIndex) this.setUseEffect(0, 0)
+            }
+        },
+        resetCustomEQ() {
+            const index = (this.currentEQIndex - this.getPresetEQs().length)
+            if(index >= 0) {
+                Object.assign(this.customEQs[index], {
+                    values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                })
+            }
+            this.setupSoundEffect()
+        },
         //混响
         getPresetIRs() {
             return PRESET_IMPULSE_RESPONSES
         },
-        syncCurrentEQToCustom() {
-            if (!this.isUseEffect || this.isCustomEQ) return false
-            const values = this.currentEQValues
+        syncCurrentEQToCustom(fromIndex) {
+            if (!this.isUseEffect || !this.isCustomEQ(this.currentEQ)) return false
+            const { values } = this.getPresetEQ(fromIndex) || { values: [] }
             values.forEach((value, index) => {
                 this.updateCustomEQValue(index, value)
             })
-            return true
+            return values.length > 0
         },
         setStereoPanValue(value) {
             value = Number(value || 0.0)
