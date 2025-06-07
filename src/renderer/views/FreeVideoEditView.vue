@@ -314,7 +314,7 @@ const updateCover = async () => {
                                 </g>
                             </g>
                         </svg>
-                        <span class="sec-title">最近播放：</span>
+                        <span>最近播放：</span>
                     </div>
                     <div class="link-item" v-for="(item, index) in computedRecentVideos" 
                             @click="playRecentLatest(item)" 
@@ -438,13 +438,13 @@ const updateCover = async () => {
     margin-bottom: 15px;
 }
 
-#free-video-edit-view .center .form-row div {
+#free-video-edit-view .center .form-row > div {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#free-video-edit-view .center .form-row span {
+#free-video-edit-view .center .form-row > span {
     font-size: var(--content-text-subtitle-size);
     color: var(--content-text-color);
     margin-bottom: 8px;
@@ -502,30 +502,33 @@ const updateCover = async () => {
     align-items: flex-start;
     margin-bottom: 0px !important;
     flex-wrap: wrap;
+    --item-height: 39px;
 }
 
 #free-video-edit-view .history-row .title {
     display: flex;
-    align-items: center;
+    align-items: center !important;
     justify-content: flex-start;
-    height: calc(100% - 8px);
+    height: var(--item-height);
 }
 
 #free-video-edit-view .history-row .history-btn {
     margin-left: 5px;
     margin-right: 5px;
-    transform: translateY(-4.5px);
+    /*transform: translateY(-4.5px);*/
 }
 
 #free-video-edit-view .form-row.history-row span {
     font-size: calc(var(--content-text-size) + 1px);
 }
 
+/*
 #free-video-edit-view .history-row .history-btn,
 #free-video-edit-view .form-row.history-row span.sec-title {
     display: -webkit-box;
     min-width: fit-content;
 }
+*/
 
 #free-video-edit-view .history-row .history-btn {
     fill: var(--button-icon-btn-color);
@@ -549,6 +552,7 @@ const updateCover = async () => {
     line-clamp: 1;
     -webkit-box-orient: vertical;
     text-align: left;
+    vertical-align: middle;
     word-wrap: break-word;
     line-break: anywhere;
     
@@ -557,10 +561,12 @@ const updateCover = async () => {
     border-radius: var(--border-list-item-vertical-border-radius);
     box-shadow: 0px 0px 3px var(--border-popovers-border-color);
 
-    margin-left: 10px;
+    margin-left: 3px;
     margin-right: 10px;
-    margin-bottom: 15px;
-    padding: 8px 12px;
+    margin-bottom: 13px;
+    padding: 0px 10px;
+    height: var(--item-height);
+    line-height: var(--item-height);
 }
 
 #free-video-edit-view .form-row.history-row .link-item:hover {

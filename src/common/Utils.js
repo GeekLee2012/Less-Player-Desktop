@@ -199,6 +199,12 @@ export const stringEquals = (value1, value2) => {
     return toTrimString(value1) == toTrimString(value2)
 }
 
+export const stringPrefixEquals = (value1, value2, prefixLength) => {
+    if(!value1 || !value2) return false
+    return toTrimString(value1).substring(0, prefixLength) 
+        == toTrimString(value2).substring(0, prefixLength)
+}
+
 export const stringEqualsIgnoreCase = (value1, value2) => {
     if(!value1 || !value2) return false
     return toLowerCaseTrimString(value1) == toLowerCaseTrimString(value2)

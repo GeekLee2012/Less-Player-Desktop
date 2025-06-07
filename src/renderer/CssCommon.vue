@@ -303,6 +303,7 @@ textarea {
   transform: translateX(0);
 }
 
+/* filter: blur数值越大，性能影响越大，可能越卡顿 */
 .bg-effect {
     background-position: center !important;
     background-repeat: no-repeat !important;
@@ -311,18 +312,16 @@ textarea {
     /*backdrop-filter: blur(20px);
     filter: blur(8px) saturate(2.1) brightness(88%) hue-rotate(360deg);
     filter: blur(10vmax) saturate(2.1);*/
-    filter: blur(168px) ;
+    filter: blur(168px);
+    transform: translateZ(0);
     z-index: -10;
-    contain: strict;
     position: absolute;
-    /*width: 100%;
-    height: 100%;*/
     --offset: -88px;
     top: var(--offset);
     left: var(--offset);
     right: var(--offset);
     bottom: var(--offset);
     width: calc(100% - var(--offset) * 2);
-    height: calc(100% - var(--offset) * 2); 
+    height: calc(100% - var(--offset) * 2);  
 }
 </style>

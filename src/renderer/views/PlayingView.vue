@@ -8,7 +8,7 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { stringEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv, nextInt, 
+import { stringPrefixEquals, isBlank, toTrimString, toLowerCaseTrimString, isDevEnv, nextInt, 
     rgbToHsl, hslToRgb, coverDefault, grayscale, getPalette } from '../../common/Utils';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 import { Track } from '../../common/Track';
@@ -123,9 +123,10 @@ const getPalette = (img, num) => {
 }
 */
 
-const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
-    const avgGrayscale = rgbs ? getPaletteAvgGrayscale(rgbs) : 168
-    let autoClass = defaultClass || (avgGrayscale > 159 ? 'dark' : 'light')
+const getPlayingViewThemeAutoClass = (rgbs, defaultClass, grayscaleLimit) => {
+    const limit = (grayscaleLimit >= 0 ? grayscaleLimit : 159)
+    const avgGrayscale = rgbs ? getPaletteAvgGrayscale(rgbs) : (grayscaleLimit + 9)
+    let autoClass = defaultClass || (avgGrayscale > limit ? 'dark' : 'light')
     switch(playingViewThemeColorIndex.value) {
         case 1:
             autoClass = 'light'
@@ -206,6 +207,7 @@ const setupGradientBackgroundEffect = (track) => {
     return true
 }
 
+let coverLoadCompletedListener = null
 const clearBackgroundEffect = () => {
     const containerEl = document.querySelector('.playing-view .container')
     if(!containerEl) return 
@@ -220,30 +222,32 @@ const clearBackgroundEffect = () => {
 
     const coverEl = containerEl.querySelector('.center .cover')
     if(!coverEl) return
-    coverEl.removeEventListener('load', setupSimpleBackgroundEffect)
-    coverEl.removeEventListener('load', setupGradientBackgroundEffect)
+    if(coverLoadCompletedListener) {
+        coverEl.removeEventListener('load', coverLoadCompletedListener)
+    }
 }
 
 const setupCoverBackgroundEffect = async (track, onLoadCompleted) => {
     clearBackgroundEffect()
+    if(!isCurrentTrack(track)) return 
     const containerEl = document.querySelector('.playing-view .container')
     if(!containerEl) return 
     const coverEl = containerEl.querySelector('.center .cover')
     if(!coverEl) return 
     if(typeof onLoadCompleted != 'function') return 
-    if(coverEl.complete) onLoadCompleted(track)
-    coverEl.addEventListener('load', () => onLoadCompleted(track))
+    coverLoadCompletedListener = async () => onLoadCompleted(track)
+    if(coverEl.complete) coverLoadCompletedListener()
+    coverEl.addEventListener('load', coverLoadCompletedListener)
 }
 
 const setupSimpleBackgroundEffect = async (track) => {
     if(!isCurrentTrack(track)) return 
-    clearBackgroundEffect()
     const containerEl = document.querySelector('.playing-view .container')
     if(!containerEl) return
 
     const cover = Track.coverDefault(currentTrack.value)
     //默认封面
-    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return 
+    if (stringPrefixEquals(DEFAULT_COVER_BASE64, cover, 128)) return 
     //本地歌曲
     //if (cover.startsWith(ImageProtocal.prefix)) return
     applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
@@ -251,7 +255,10 @@ const setupSimpleBackgroundEffect = async (track) => {
     const coverEl = containerEl.querySelector('.center .cover')
     const rgbs = optimizePalette(getPalette(coverEl, 2))
     if(!isCurrentTrack(track)) return 
-    const autoClass = getPlayingViewThemeAutoClass(rgbs)
+    const autoClass = getPlayingViewThemeAutoClass(rgbs, null, 202)
+
+    containerEl.classList.remove('light')
+    containerEl.classList.remove('dark')
 
     containerEl.classList.add('auto-effect')
     containerEl.classList.add('simple-effect')
@@ -624,7 +631,7 @@ onUnmounted(() => {
             </div>
             <div class="bg-effect"></div>
             <div class="backdrop-container">
-                <img class="backdrop-img" :src="Track.coverDefault(currentTrack)">
+                <img class="backdrop-img" :src="Track.coverDefault(currentTrack)" />
             </div>
             <div class="bg-container"></div>
         </div>
@@ -1313,16 +1320,14 @@ onUnmounted(() => {
 /* background effect simple */
 .playing-view .container.auto-effect.simple-effect {
     background: none !important;
+    background-color: rgba(98, 98, 98, 0.4) !important; 
     /*background-color: rgba(0, 0, 0, 0.4) !important;
-    background-color: rgba(202, 202, 202, 0.4) !important; */
-    background-color: rgba(98, 98, 98, 0.4) !important;  
+    background-color: rgba(202, 202, 202, 0.4) !important; 
+    background-color: rgba(98, 98, 98, 0.4) !important;*/
 }
 
 .playing-view .container.auto-effect.simple-effect .bg-effect {
     display: block !important;
-    /*background-color: rgba(0, 0, 0, 0.4) !important;
-    background-color: rgba(202, 202, 202, 0.4) !important;
-    filter: blur(10vmax) saturate(2.1) !important; */
     filter: blur(168px) !important;
 }
 

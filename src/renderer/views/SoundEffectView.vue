@@ -152,7 +152,7 @@ const resetCustomEffect = () => {
                             <div class="group-title">{{ currentEffectName }}</div>
                             <input type="text" ref="customEqNameRef" :value="currentEffectName" maxlength="99" placeholder="自定义均衡器名称"/>
                         </div>
-                        <div class="group-item btn text-btn first last" @click="saveCustomEffect">
+                        <div class="group-item btn text-btn first" @click="saveCustomEffect">
                             <svg width="15" height="15" viewBox="0 0 853.61 853.59" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
@@ -454,6 +454,7 @@ const resetCustomEffect = () => {
 
 .sound-effect-view .header .custom-eq-btn-group .text-btn  {
     margin-left: 0px;
+    font-size: var(--content-text-tip-text-size);
 }
 
 .sound-effect-view .header .custom-eq-btn-group .text-btn:hover {

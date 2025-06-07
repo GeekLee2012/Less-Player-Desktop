@@ -8,7 +8,7 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 import LyricControl from '../components/LyricControl.vue';
 import ArtistControl from '../components/ArtistControl.vue';
 import WinTrafficLightBtn from '../components/WinTrafficLightBtn.vue';
-import { stringEquals, useUseCustomTrafficLight, coverDefault, 
+import { stringPrefixEquals, useUseCustomTrafficLight, coverDefault, 
     rgbToHsl, hslToRgb, grayscale, getPalette, nextInt,
 } from '../../common/Utils';
 import { Track } from '../../common/Track';
@@ -131,9 +131,10 @@ const getPalette = (img, num) => {
 }
 */
 
-const getPlayingViewThemeAutoClass = (rgbs, defaultClass) => {
-    const avgGrayscale = rgbs ? getPaletteAvgGrayscale(rgbs) : 168
-    let autoClass = defaultClass || (avgGrayscale > 159 ? 'dark' : 'light')
+const getPlayingViewThemeAutoClass = (rgbs, defaultClass, grayscaleLimit) => {
+    const limit = (grayscaleLimit >= 0 ? grayscaleLimit : 159)
+    const avgGrayscale = rgbs ? getPaletteAvgGrayscale(rgbs) : (grayscaleLimit + 9)
+    let autoClass = defaultClass || (avgGrayscale > limit ? 'dark' : 'light')
     switch(playingViewThemeColorIndex.value) {
         case 1:
             autoClass = 'light'
@@ -214,6 +215,7 @@ const setupGradientBackgroundEffect = (track) => {
     return true
 }
 
+let coverLoadCompletedListener = null
 const clearBackgroundEffect = () => {
     const containerEl = document.querySelector('.visual-playing-view .container')
     if(!containerEl) return 
@@ -228,37 +230,44 @@ const clearBackgroundEffect = () => {
 
     const coverEl = containerEl.querySelector('.center .cover')
     if(!coverEl) return 
-    coverEl.removeEventListener('load', setupSimpleBackgroundEffect)
-    coverEl.removeEventListener('load', setupGradientBackgroundEffect)
+    if(coverLoadCompletedListener) {
+        coverEl.removeEventListener('load', coverLoadCompletedListener)
+    }
 }
 
 const setupCoverBackgroundEffect = async (track, onLoadCompleted) => {
     clearBackgroundEffect()
+    if(!isCurrentTrack(track)) return
     const containerEl = document.querySelector('.visual-playing-view .container')
     if(!containerEl) return 
     const coverEl = containerEl.querySelector('.center .cover')
     if(!coverEl) return 
     if(typeof onLoadCompleted != 'function') return 
-    if(coverEl.complete) onLoadCompleted(track)
-    coverEl.addEventListener('load', () => onLoadCompleted(track))
+    coverLoadCompletedListener = () => onLoadCompleted(track)
+    if(coverEl.complete) coverLoadCompletedListener()
+    coverEl.addEventListener('load', coverLoadCompletedListener)
 }
 
 
 const setupSimpleBackgroundEffect = async (track) => {
-    clearBackgroundEffect()
+    if(!isCurrentTrack(track)) return 
     const containerEl = document.querySelector('.visual-playing-view .container')
     if(!containerEl) return
     
     const cover = Track.coverDefault(currentTrack.value)
     //默认封面
-    if (stringEquals(DEFAULT_COVER_BASE64, cover)) return 
+    if (stringPrefixEquals(DEFAULT_COVER_BASE64, cover, 128)) return 
     //本地歌曲
     //if (cover.startsWith(ImageProtocal.prefix)) return
     applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
 
     const coverEl = containerEl.querySelector('.center .cover')
     const rgbs = optimizePalette(getPalette(coverEl, 2))
-    const autoClass = getPlayingViewThemeAutoClass(rgbs)
+    const autoClass = getPlayingViewThemeAutoClass(rgbs, null, 202)
+
+    containerEl.classList.remove('light')
+    containerEl.classList.remove('dark')
+
     containerEl.classList.add('auto-effect')
     containerEl.classList.add('simple-effect')
     containerEl.classList.add(autoClass)
@@ -515,7 +524,7 @@ onUnmounted(() => {
             </canvas>
             <div class="bg-effect"></div>
             <div class="backdrop-container">
-                <img class="backdrop-img" :src="Track.coverDefault(currentTrack)">
+                <img class="backdrop-img" :src="Track.coverDefault(currentTrack)" />
             </div>
             <div class="bg-container"></div>
         </div>
@@ -1124,7 +1133,7 @@ onUnmounted(() => {
 
 .visual-playing-view .container.auto-effect.simple-effect .bg-effect {
     display: block !important;
-    filter: blur(168px) !important;
+    filter: blur(168px) !important;  
 }
 
 .visual-playing-view .container.auto-effect.simple-effect .backdrop-container,
