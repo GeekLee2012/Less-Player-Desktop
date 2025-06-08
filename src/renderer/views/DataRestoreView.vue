@@ -1,8 +1,6 @@
 <script>
 //定义名称，方便用于<keep-alive>
-export default {
-    name: 'DataRestoreView'
-}
+export default { name: 'DataRestoreView' }
 </script>
 
 <script setup>

@@ -1,8 +1,6 @@
 <script>
 //定义名称，方便用于<keep-alive>
-export default {
-    name: 'EmbyView'
-}
+export default { name: 'EmbyView' }
 </script>
 
 <script setup>

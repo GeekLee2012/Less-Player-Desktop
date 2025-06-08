@@ -168,6 +168,8 @@ export const useSettingStore = defineStore('setting', {
             pluginsViewTipsShow: true,
             //网络存储提示
             cloudStorageViewTipsShow: true,
+            //推荐主题显示编辑按钮
+            presetThemeActionShow: true
         },
         modules: {  //功能模块
             off: {  //关闭列表
@@ -439,6 +441,8 @@ export const useSettingStore = defineStore('setting', {
             deleteCustomPlaylist: true,
             //删除自定义主题
             deleteCustomTheme: true,
+            //从预设主题中创建自定义主题
+            savePresetThemeAsCustom: true,
             //删除自定义播放样式
             deleteCustomPlayingTheme: true,
             //删除自定义均衡器
@@ -849,6 +853,9 @@ export const useSettingStore = defineStore('setting', {
         isShowDialogBeforeDeleteCustomTheme() {
             return this.dialog.deleteCustomTheme
         },
+        isShowDialogBeforeSavePresetThemeAsCustom() {
+            return this.dialog.savePresetThemeAsCustom
+        },
         isShowDialogBeforeDeleteCustomPlayingTheme() {
             return this.dialog.deleteCustomPlayingTheme
         },
@@ -1037,6 +1044,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isCloudStorageViewTipsShow() {
             return this.common.cloudStorageViewTipsShow
+        },
+        isPresetThemeActionShow() {
+            return this.common.presetThemeActionShow
         },
         commonBorderRadius() {
             return this.common.borderRadius
@@ -1820,6 +1830,9 @@ export const useSettingStore = defineStore('setting', {
         toggleShowDialogBeforeCustomThemeDelete() {
             this.dialog.deleteCustomTheme = !this.dialog.deleteCustomTheme
         },
+        toggleShowDialogBeforeSavePresetThemeAsCustom() {
+            this.dialog.savePresetThemeAsCustom = !this.dialog.savePresetThemeAsCustom
+        },
         toggleShowDialogBeforeCustomPlayingThemeDelete() {
             this.dialog.deleteCustomPlayingTheme = !this.dialog.deleteCustomPlayingTheme
         },
@@ -2018,6 +2031,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleCloudStorageViewTipsShow() {
             this.common.cloudStorageViewTipsShow = !this.common.cloudStorageViewTipsShow
+        },
+        togglePresetThemeActionShow() {
+            this.common.presetThemeActionShow = !this.common.presetThemeActionShow
         },
         toggleSongItemIndexShow() {
             this.track.songItemIndexShow = !this.track.songItemIndexShow

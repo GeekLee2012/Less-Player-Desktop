@@ -153,8 +153,12 @@ export const createMpv = (options, mpvArgs) => {
 
 
 /************ 字符串 ************/
-export const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWSYZabcdefghijklmnopqrstuvwsyz'
-export const ALPHABET_NUMS = `${ALPHABETS}01234567890`
+export const ALPHABET_UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWSYZ'
+export const ALPHABET_LOWERCASE = ALPHABET_UPPERCASE.toLowerCase()
+export const ALPHABETS = `${ALPHABET_UPPERCASE}${ALPHABET_LOWERCASE}`
+export const NUMS = '0123456789'
+export const ALPHABET_NUMS = `${ALPHABETS}${NUMS}0`
+export const ALPHABET_FILTER = `#${ALPHABET_UPPERCASE}%`
 
 /** 随机字符串
  * @param src 限定组成元素的字符串，如：ABCDEFGHIJKLMNOPQRSTUVWSYZ
@@ -818,8 +822,9 @@ export const isEnglishChar = (ch) => {
     return /[A-Za-z]/.test(ch)
 }
 
-export const firstCharOfPinyin = (ch) => {
-    return pinyin(ch, { toneType: 'none' }).substring(0, 1)
+export const pinyinOfFirstChar = (ch) => {
+    ch = toTrimString(ch).substring(0, 1)
+    return pinyin(ch, { toneType: 'none' })
 }
 
 export const coverDefault = (cover, defaultCover) => {

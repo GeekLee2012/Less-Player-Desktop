@@ -2,7 +2,7 @@ import { Lyric } from "../common/Lyric";
 import { Track } from "../common/Track";
 import { Album } from "../common/Album";
 import {
-    firstCharOfPinyin, isChineseChar,
+    pinyinOfFirstChar, isChineseChar,
     isEnglishChar, toLowerCaseTrimString,
     toTrimString, ipcRendererInvoke, 
     isDevEnv, isNetOnline,
@@ -343,7 +343,7 @@ export class LocalMusic {
 
         const lwAlphabet = 'abcdefghijklmnopqrstuvwxyz'
         const lwChar = toLowerCaseTrimString(char)
-        const lwPyChar = toLowerCaseTrimString(firstCharOfPinyin(char))
+        const lwPyChar = toLowerCaseTrimString(pinyinOfFirstChar(char))
 
         //全部 + 字母
         if (lang < 0 && isEnglishChar(charInAlphabet)) {

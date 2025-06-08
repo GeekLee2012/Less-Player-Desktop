@@ -245,7 +245,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
         </div>
         <div class="layer"></div>
-        <div class="layer layer-tiny"></div>
+        <div class="layer layer-tiny" @click.stop=""></div>
     </div>
 </template>
 
@@ -605,11 +605,23 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile-card:hover .layer,
-.image-text-tile-card:hover .layer-tiny,
-.image-text-tile-card-horiziontal:hover .layer,
-.image-text-tile-card-horiziontal:hover .layer-tiny {
+.image-text-tile-card:hover .layer-tiny {
     background: transparent;
     display: none;
+}
+
+/* 尝试防抖：卡片transform变换导致鬼畜问题（卡片一直不停上下抖动） */
+.image-text-tile-card-horiziontal:hover .layer,
+.image-text-tile-card-horiziontal:hover .layer-tiny {
+    --card-shadow-height: 8px !important;
+    width: 100% !important;
+    display: block;
+    background: transparent !important;
+    opacity: 0 !important;
+}
+
+.image-text-tile-card-horiziontal:hover .layer-tiny {
+    cursor: default !important;
 }
 
 .default-old-layout .image-text-tile-card {

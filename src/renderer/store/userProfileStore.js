@@ -15,6 +15,7 @@ const filterByPlatform = (state, platform) => {
     return state.filter(item => (item.platform == platform.trim()))
 }
 
+let resultTimer = null
 export const useUserProfileStore = defineStore("userProfile", {
     state: () => ({
         user: {
@@ -301,10 +302,8 @@ export const useUserProfileStore = defineStore("userProfile", {
                 const { data } = result
                 const total = (data & data.length) || 0
                 const timeout = Math.min(total * 10, 2588)
-                setTimeout(() => {
-                    resolve(result)
-                }, timeout)
-                setTimeout(() => {
+                if(resultTimer) clearTimeout(resultTimer)
+                resultTimer = setTimeout(() => {
                     resolve(result)
                 }, timeout)
             })

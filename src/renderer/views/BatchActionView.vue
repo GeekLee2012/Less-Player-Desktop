@@ -1,8 +1,6 @@
 <script>
 //定义名称，方便用于<keep-alive>
-export default {
-    name: 'BatchActionView'
-}
+export default { name: 'BatchActionView' }
 </script>
 
 <script setup>

@@ -1,8 +1,6 @@
 <script>
 //定义名称，方便用于<keep-alive>
-export default {
-    name: 'NavidromeSessionDetailView'
-}
+export default { name: 'NavidromeSessionDetailView' }
 </script>
 
 <script setup>
@@ -589,7 +587,7 @@ onDeactivated(() => setCategoriesShow(false))
 
 #navidrome-session-detail-view .categories li {
     list-style: none;
-    padding: 6px 0px 6px 0px;
+    padding: 8px 0px;
     width: 108px;
     margin-top: 8px;
     text-align: center;

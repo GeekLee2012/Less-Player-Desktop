@@ -1,8 +1,6 @@
 <script>
 //定义名称，方便用于<keep-alive>
-export default {
-    name: 'EmbySessionDetailView'
-}
+export default { name: 'EmbySessionDetailView' }
 </script>
 
 <script setup>
@@ -686,7 +684,7 @@ onUnmounted(() =>offEvents(eventsRegistration))
 
 #emby-session-detail-view .categories li {
     list-style: none;
-    padding: 6px 0px 6px 0px;
+    padding: 8px 0px;
     width: 108px;
     margin-top: 8px;
     text-align: center;
@@ -700,7 +698,7 @@ onUnmounted(() =>offEvents(eventsRegistration))
 }
 
 #emby-session-detail-view .categories.medium li {
-    padding: 6px 0px 6px 0px;
+    /*padding: 6px 0px 6px 0px;*/
     margin-top: 10px;
     width: 108px;
 }   

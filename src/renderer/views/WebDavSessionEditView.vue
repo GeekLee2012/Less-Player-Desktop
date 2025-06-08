@@ -1,8 +1,6 @@
 <script>
 //定义名称，方便用于<keep-alive>
-export default {
-    name: 'WebDavSessionEditView'
-}
+export default { name: 'WebDavSessionEditView' }
 </script>
 
 <script setup>

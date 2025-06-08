@@ -50,6 +50,7 @@ const { setThemeIndex,
     setLayoutIndex,
     toggleSettingViewNavbarShow,
     toggleToggleCtlTitleActionEnable,
+    togglePresetThemeActionShow,
     setWindowZoom,
     toggleUseWinZoomForCreate,
     setWindowCtlStyle,
@@ -145,6 +146,7 @@ const { setThemeIndex,
     toggleSearchForPluginsViewShow,
     toggleShowDialogBeforeQuitApp,
     toggleShowDialogBeforeBatchDelete,
+    toggleShowDialogBeforeSavePresetThemeAsCustom,
     toggleShowDialogBeforeCustomPlaylistDelete,
     toggleShowDialogBeforeCustomThemeDelete,
     toggleShowDialogBeforeCustomPlayingThemeDelete,
@@ -695,6 +697,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleToggleCtlTitleActionEnable" :value="common.toggleCtlTitleActionEnable">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：开启后，试点击一下左边标题</div>
+                    </div>
+                    <div class="titled-w258" v-if="false">
+                        <span class="cate-subtitle">推荐主题显示编辑按钮：</span>
+                        <ToggleControl @click="togglePresetThemeActionShow" :value="common.presetThemeActionShow">
+                        </ToggleControl>
                     </div>
                     <div class="tip-text">提示：建议开启“锁定为初始值”，以解决窗口缩放闪动Bug<br>
                         但开启“锁定”后，每次改变“窗口缩放”时需重启应用；否则会触发窗口缩放闪动Bug<br>
@@ -1534,6 +1541,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <span class="cate-subtitle">删除创建的歌单：</span>
                         <ToggleControl @click="toggleShowDialogBeforeCustomPlaylistDelete"
                             :value="dialog.deleteCustomPlaylist">
+                        </ToggleControl>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">推荐主题创建为自定义主题：</span>
+                        <ToggleControl @click="toggleShowDialogBeforeSavePresetThemeAsCustom"
+                            :value="dialog.savePresetThemeAsCustom">
                         </ToggleControl>
                     </div>
                     <div>

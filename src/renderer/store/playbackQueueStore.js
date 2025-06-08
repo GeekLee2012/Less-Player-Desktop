@@ -3,6 +3,7 @@ import { Playlist } from "../../common/Playlist";
 import { randomTextWithinAlphabetNums } from "../../common/Utils";
 
 
+let resultTimer = null
 export const usePlaybackQueueStore = defineStore('playbackQueueStore', {
     state: () => ({
         queues: [],
@@ -33,7 +34,8 @@ export const usePlaybackQueueStore = defineStore('playbackQueueStore', {
                 const { data } = result
                 const total = (data & data.length) || 0
                 const timeout = Math.min(total * 10, 2588)
-                setTimeout(() => {
+                if(resultTimer) clearTimeout(resultTimer)
+                resultTimer = setTimeout(() => {
                     resolve(result)
                 }, timeout)
             })

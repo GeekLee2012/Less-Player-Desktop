@@ -1,6 +1,6 @@
 <script setup>
 
-const excludes = ['LocalMusicView', 'CustomPlaylistEditView',
+const excludes = ['CustomPlaylistEditView',
     'UserInfoEditView', 'BatchActionView',
     'DataBackupView', 'DataRestoreView',
     'LocalPlaylistEditView', 'FreeFMEditView',
