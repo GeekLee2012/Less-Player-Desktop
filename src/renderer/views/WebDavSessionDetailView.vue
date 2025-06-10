@@ -10,6 +10,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import { useSettingStore } from '../store/settingStore';
 import { useCloudStorageStore } from '../store/cloudStorageStore';
+import LoadingMask from '../components/LoadingMask.vue';
 import { isDevEnv, ipcRendererInvoke, isSupportedAudio, isSupportedVideo,
     md5, guessFilename, toYyyymmdd, extractHhMm, 
     toLowerCaseTrimString, isBlank, } from "../../common/Utils";
@@ -524,10 +525,12 @@ onMounted(visitRoot)
                 </div>
             </div>
             <div class="content list-view" v-if="viewMode == 0 && loading">
-                <div v-for="i in 20" class="loading-mask item"></div>
+                <LoadingMask :loading="viewMode == 0 && loading" :count="20" 
+                    :classList="{ item: true }"/>
             </div>
             <div class="content grid-view" v-if="viewMode == 1 && loading">
-                <div v-for="i in 30" class="loading-mask item"></div>
+                <LoadingMask :loading="viewMode == 1 && loading" :count="30" 
+                    :classList="{ item: true }"/>
             </div>
         </div>
     </div>
@@ -857,5 +860,9 @@ onMounted(visitRoot)
 
 #webdav-session-detail-view .center .content.grid-view .item.loading-mask {
     height: 119px;
+}
+
+.mini-navbar-mode #webdav-session-detail-view .center .content.grid-view .item {
+    width: 120px;
 }
 </style>

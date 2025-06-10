@@ -27,6 +27,7 @@ const props = defineProps({
 const { playVideoItem, loadLyric, currentTimeState,
     seekTrack, playState, progressSeekingState,
     dndSaveLyric } = inject('player')
+const { applyDocumentStyle } = inject('appStyle')
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
@@ -44,7 +45,7 @@ let presetOffset = Track.lyricOffset(props.track)
 const lyricTransData = ref(Track.lyricTransData(props.track))
 const lyricRomaData = ref(Track.lyricRomaData(props.track))
 let hitCount = 0
-const millisAhead = 1000
+const sysOffset = 1000
 
 
 const isUserMouseWheel = ref(false)
@@ -70,7 +71,7 @@ const renderAndScrollLyric = (secs, track) => {
     if (!isCurrentTrack(track)) return 
 
     const { offset: userOffset } = lyric.value
-    const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
+    const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset + sysOffset))
 
     //Highlight 查找当前高亮行index
     const lyricWrap = document.querySelector(".lyric-ctl .center")
@@ -83,24 +84,18 @@ const renderAndScrollLyric = (secs, track) => {
 
         timeKey = lines[i].getAttribute('timeKey')
         const lineTime = toMillis(timeKey)
-        if (trackTime < (lineTime - millisAhead)) break
+        if (trackTime < lineTime) break
         index = i
     }
 
+    /*
     if (currentIndex.value == index && index >= 0 
         && (++hitCount >= 3)) {
         return
     } else if (currentIndex.value != index && index >= 0) {
         hitCount = 0
     }
-    
-    nextTick(() => {
-        if (!isCurrentTrack(track)) return 
-
-        setupLyricTitle(track)
-        setupLyricAral(track)
-        setupLyricLines(track)
-    })
+    */
     
     if (index >= 0) setLyricCurrentIndex(index)
     index = Math.max(index, 0)
@@ -200,9 +195,6 @@ const reloadLyricData = (track) => {
 
         setupLyricExtra(track)
         safeRenderAndScrollLyric(currentTimeState.value, track)
-        /*setupLyricTitle(track)
-        setupLyricAral(track)
-        setupLyricLines(track)*/
     })
 }
 
@@ -212,130 +204,6 @@ const onUserMouseWheel = (event) => {
     if (userMouseWheelTimer) clearTimeout(userMouseWheelTimer)
     userMouseWheelTimer = setTimeout(() => setUserMouseWheel(false), 2888)
     updateScrollLocatorTime()
-}
-
-const setLyricLineStyle = (line) => {
-    if (!line) return
-    const { fontSize, hlFontSize, fontWeight, lineHeight, lineSpacing } = lyric.value
-
-    const textEl = line.querySelector('.text')
-    const extraTextEl = line.querySelector('.extra-text')
-
-    if (!textEl || !textEl.style) return
-
-    textEl.style.lineHeight = `${lineHeight}px`
-    //textEl.style.marginTop = `${lineSpacing}px`
-    if (extraTextEl) extraTextEl.style.lineHeight = `${lineHeight}px`
-
-    //行间距
-    line.style.marginTop = `${lineSpacing}px`
-
-    //是否为当前高亮行
-    const isCurrent = line.classList.contains('current')
-    line.style.fontSize = isCurrent ? `${hlFontSize}px` : `${fontSize}px`
-    line.style.fontWeight = isCurrent ? 'bold' : fontWeight
-}
-
-const setupLyricTitle = (track) => {
-    if (!isCurrentTrack(track)) return 
-
-    const { titleFontSize } = lyric.value
-    const titleEls = document.querySelectorAll('.lyric-ctl .header .audio-title') || []
-    for (let i = 0; i < titleEls.length; i++) {
-        if (!isCurrentTrack(track)) return 
-
-        const el = titleEls[i]
-        if (el) el.style.fontSize = `${titleFontSize}px`
-    }
-}
-
-const setupLyricAral = (track) => {
-    if (!isCurrentTrack(track)) return 
-
-    const { aralFontSize } = lyric.value
-    const arEls = document.querySelectorAll('.lyric-ctl .header .audio-artist .ar-ctl') || []
-    for (let i = 0; i < arEls.length; i++) {
-        if (!isCurrentTrack(track)) return 
-
-        const el = arEls[i]
-       if (el) el.style.fontSize = `${aralFontSize}px`
-    }
-
-    if (!isCurrentTrack(track)) return 
-    const alEls = document.querySelectorAll('.lyric-ctl .header .audio-album .al-ctl') || []
-    for (let i = 0; i < alEls.length; i++) {
-        if (!isCurrentTrack(track)) return 
-
-        const el = alEls[i]
-        if (el) el.style.fontSize = `${aralFontSize}px`
-    }
-
-    let ratio = parseFloat(aralFontSize / 18)
-    ratio = (ratio > 1 ? ratio : 1)
-    const scale = ratio.toFixed(2)
-    const marginRight = Math.ceil(ratio) * 6
-
-    if (!isCurrentTrack(track)) return 
-    const bEls = document.querySelectorAll('.lyric-ctl .header b') || []
-    for (let i = 0; i < bEls.length; i++) {
-        if (!isCurrentTrack(track)) return 
-
-        const el = bEls[i]
-        if (el) {
-            el.style.fontSize = `${aralFontSize}px`
-            el.style.marginRight = `${marginRight}px`
-        }
-    }
-
-    if (!isCurrentTrack(track)) return 
-    const arSvgEls = document.querySelectorAll('.lyric-ctl .audio-artist svg') || []
-    for (let i = 0; i < arSvgEls.length; i++) {
-        if (!isCurrentTrack(track)) return 
-
-        const el = arSvgEls[i]
-        if (el) {
-            el.style.setProperty('--aral-svg-transform', `scale(${scale})`)
-            el.style.marginRight = `${marginRight}px`
-        }
-    }
-
-    if (!isCurrentTrack(track)) return 
-    const alSvgEls = document.querySelectorAll('.lyric-ctl .audio-album svg') || []
-    for (let i = 0; i < arSvgEls.length; i++) {
-        if (!isCurrentTrack(track)) return 
-
-        const el = alSvgEls[i]
-        if (el) {
-            el.style.setProperty('--aral-svg-transform', `scale(${scale})`)
-            el.style.marginRight = `${marginRight}px`
-        }
-    }
-}
-
-const setupLyricLines = (track) => {
-    if (!isCurrentTrack(track)) return 
-    const lines = document.querySelectorAll('.lyric-ctl .center .line') || []
-    for (let i = 0; i < lines.length; i++) {
-        if (!isCurrentTrack(track)) return 
-
-        setLyricLineStyle(lines[i])
-    }
-}
-
-const setupLyricAlignment = () => {
-    const lyricCtlEls = document.querySelectorAll('.lyric-ctl')
-    const artistEls = document.querySelectorAll('.lyric-ctl .audio-artist')
-    const albumEls = document.querySelectorAll('.lyric-ctl .audio-album')
-    const aralWrapEls = document.querySelectorAll('.lyric-ctl .audio-artist-album-wrap')
-    const noLyricEls = document.querySelectorAll('.lyric-ctl .no-lyric')
-    const textAligns = ['left', 'center', 'right']
-    const flexAligns = ['flex-start', 'center', 'flex-end']
-    const { alignment } = lyric.value
-    if (lyricCtlEls) lyricCtlEls.forEach(el => el.style.textAlign = textAligns[alignment])
-    if (artistEls) artistEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
-    if (albumEls) albumEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
-    if (aralWrapEls) aralWrapEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
-    if (noLyricEls) noLyricEls.forEach(el => el.style.justifyContent = flexAligns[alignment])
 }
 
 const isHeaderVisible = () => (lyric.value.metaPos == 0 && !props.hiddenMeta)
@@ -491,7 +359,7 @@ const computedNoneArtistAlbumMeta = computed(() => {
 /* 生命周期、监听 */
 watch(() => props.currentTime, (nv, ov) => {
     if(props.disabled) return
-    //TODO 暂时简单处理，非可视状态直接返回
+    //暂时简单处理，非可视状态直接返回
     if (!playingViewShow.value && !isMiniLayout.value && !isSimpleLayout.value) return
     safeRenderAndScrollLyric(nv, props.track)
 }, { immediate: true })
@@ -501,19 +369,36 @@ watch(() => props.track, (nv, ov) => {
     loadTrackLyric(nv)
 }, { immediate: true })
 
+const setupLyricStyle = (key, suffix) => {
+    suffix = suffix || ''
+    const value = lyric.value[key]
+    if(!value) return 
+
+    const keysMapping = {
+        'titleFontSize': 'title-text-size',
+        'aralFontSize': 'aral-text-size',
+        'fontSize': 'text-size',
+        'hlFontSize': 'hl-text-size',
+        'fontWeight': 'font-weight',
+        'lineHeight': 'line-height',
+        'lineSpacing': 'line-spacing',
+    }
+    const propKey = keysMapping[key]
+    console.log(value, propKey, suffix)
+    if(value) applyDocumentStyle({ [`--lyric-${propKey}`]: `${value}${suffix}` })
+}
+
 const eventsRegistration = {
     'track-lyricLoaded': reloadLyricData,
     'track-noLyric': reloadLyricData,
     'lyric-userMouseWheel': onUserMouseWheel,
-    'lyric-fontSize': () => setupLyricLines(props.track),
-    'lyric-titleFontSize': () => setupLyricTitle(props.track),
-    'lyric-aralFontSize': () => setupLyricAral(props.track),
-    'lyric-hlFontSize': () => setupLyricLines(props.track),
-    'lyric-fontWeight': () => setupLyricLines(props.track),
-    'lyric-lineHeight': () => setupLyricLines(props.track),
-    'lyric-lineSpacing': () => setupLyricLines(props.track),
-    'lyric-alignment': setupLyricAlignment,
-    'playingView-changed': setupLyricAlignment,
+    'lyric-titleFontSize': () => setupLyricStyle('titleFontSize', 'px'),
+    'lyric-aralFontSize': () => setupLyricStyle('aralFontSize', 'px'),
+    'lyric-fontSize': () => setupLyricStyle('fontSize', 'px'),
+    'lyric-hlFontSize': () => setupLyricStyle('hlFontSize', 'px'),
+    'lyric-fontWeight': () => setupLyricStyle('fontWeight'),
+    'lyric-lineHeight': () => setupLyricStyle('lineHeight', 'px'),
+    'lyric-lineSpacing': () => setupLyricStyle('lineSpacing', 'px'),
     'track-lyricRestore': () => setLyricExistState(-1),
 }
 
@@ -530,7 +415,10 @@ onUnmounted(() => {
 <template>
     <div class="lyric-ctl" 
         :class="{
-            'none-aral-meta': computedNoneArtistAlbumMeta
+            'none-aral-meta': computedNoneArtistAlbumMeta,
+            'align-left': lyric.alignment == 0,
+            'align-center': lyric.alignment == 1,
+            'align-right': lyric.alignment == 2,
         }"
         @contextmenu.stop="toggleLyricToolbar">
         <div class="header" v-show="isHeaderVisible()">
@@ -703,8 +591,6 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     text-align: left;
-    --lyric-mask: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
-    --lyric-margin-left: 10px
 }
 
 .lyric-ctl .spacing {
@@ -742,7 +628,7 @@ onUnmounted(() => {
     line-clamp: 2;
     -webkit-box-orient: vertical;
 
-    font-size: var(--content-text-module-title-size);
+    font-size: var(--lyric-title-text-size);
     font-weight: bold;
     margin-bottom: 6px;
 
@@ -772,6 +658,7 @@ onUnmounted(() => {
 .lyric-ctl .audio-album .al-ctl {
     -webkit-line-clamp: 1;
     line-clamp: 1;
+    font-size: var(--lyric-aral-text-size);
 }
 
 .lyric-ctl .audio-artist-album-wrap {
@@ -823,17 +710,18 @@ onUnmounted(() => {
 }
 
 .lyric-ctl .center .line {
-    font-size: 22px;
-    line-height: 28px;
-    margin-top: 28px;
+    font-size: var(--lyric-text-size);
+    line-height: var(--lyric-line-height);
+    margin-top: var(--lyric-line-spacing);
     padding-left: var(--lyric-margin-left);
+    font-weight: var(--lyric-font-weight);
     color: var(--content-subtitle-text-color);
     word-break: break-word;
     /*word-wrap: break-word;*/
 }
 
 .lyric-ctl .center .current {
-    font-size: 22px;
+    font-size: var(--lyric-hl-text-size);
     font-weight: bold !important;
 }
 
@@ -958,5 +846,38 @@ onUnmounted(() => {
     background-clip: text;
     color: transparent;
     border-color: var(--content-highlight-color);
+}
+
+.lyric-ctl.align-left {
+    text-align: left;
+}
+
+.lyric-ctl.align-left .audio-artist,
+.lyric-ctl.align-left .audio-album,
+.lyric-ctl.align-left .audio-artist-album-wrap,
+.lyric-ctl.align-left .no-lyric {
+    justify-content: flex-start;
+}
+
+.lyric-ctl.align-center {
+    text-align: center;
+}
+
+.lyric-ctl.align-center .audio-artist,
+.lyric-ctl.align-center .audio-album,
+.lyric-ctl.align-center .audio-artist-album-wrap,
+.lyric-ctl.align-center .no-lyric {
+    justify-content: center;
+}
+
+.lyric-ctl.align-right {
+    text-align: right;
+}
+
+.lyric-ctl.align-right .audio-artist,
+.lyric-ctl.align-right .audio-album,
+.lyric-ctl.align-right .audio-artist-album-wrap,
+.lyric-ctl.align-right .no-lyric {
+    justify-content: flex-end;
 }
 </style>

@@ -262,9 +262,11 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                         <div class="item img-item">
                             <div class="name">预览图片</div>
                             <div>
-                                <div>
+                                <div class="url-input-ctl">
                                     <input type="text" class="text-input-ctl short-ctl" maxlength="2048"
-                                        placeholder="本地、在线URL，最多支持输入2048个字符" v-model="customTheme.previewCover" />
+                                        placeholder="本地、在线URL，最多支持输入2048个字符" 
+                                        v-model="customTheme.previewCover" />
+                                    <div class="select-btn" @click="uploadImage">选择</div>
                                 </div>
                                 <div>
                                     <div class="preview" v-show="customTheme.previewCover">

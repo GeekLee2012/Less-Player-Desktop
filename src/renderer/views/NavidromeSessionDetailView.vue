@@ -114,7 +114,7 @@ const setupSession = async () => {
 
 const resetTab = () => {
     tabData.length = 0
-    singleLineTitleStyle.value = false
+    setSingleLineTitleStyle(false)
     setCurrentTabView(null)
     resetScrollState()
     //setTitleShow(true)

@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import PaginationTiles from './PaginationTiles.vue';
 import SongItem from './SongItem.vue';
 import SongItemNew from './SongItemNew.vue';
+import LoadingMask from '../components/LoadingMask.vue';
 import { useSettingStore } from '../store/settingStore'; 
 
 
@@ -104,22 +105,6 @@ watch(getSongItemStyleIndex, (nv, ov) => {
 }, { immediate: true })
 </script>
 
-<!--
-<template>
-    <div class="songlist-ctl">
-        <div v-for="(item, index) in data" v-show="!loading">
-            <SongItem :index="index" :data="item" :artistVisitable="artistVisitable" :albumVisitable="albumVisitable"
-                :dataType="dataType" :deleteFn="deleteFn" :checkbox="checkbox" :checked="checkedAll"
-                :ignoreCheckAllEvent="ignoreCheckAllEvent" :checkChangedFn="checkChangedFn">
-            </SongItem>
-        </div>
-        <div v-show="loading">
-            <div class="loading-mask" v-for="i in 12"
-                style="width: 100%;  height: 56px; margin-bottom: 3px; display: inline-block;"></div>
-        </div>
-    </div>
-</template>
--->
 <template>
     <div class="songlist-ctl">
         <PaginationTiles 
@@ -149,11 +134,8 @@ watch(getSongItemStyleIndex, (nv, ov) => {
                 </component>
             </template>
             <template #loading2>
-                <div v-show="loading">
-                    <div class="loading-mask" v-for="i in 20"
-                        style="width: 100%;  height: 56px; margin-bottom: 3px; display: inline-block;">
-                    </div>
-                </div>
+                <LoadingMask :loading="loading" :count="20" 
+                    width="100%" height="56px" marginBottom="3px"/>
             </template>
         </PaginationTiles>
     </div>

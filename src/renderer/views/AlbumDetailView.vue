@@ -15,6 +15,7 @@ import { usePlatformStore } from '../store/platformStore';
 import { usePlayStore } from '../store/playStore';
 import SongListControl from '../components/SongListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
+import LoadingMask from '../components/LoadingMask.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { Album } from '../../common/Album';
@@ -270,7 +271,6 @@ watch(() => [props.platform, props.id], ([nv1, nv2]) => {
 watch([isLoading, isLoadingDetail], () => nextTick(detectTitleHeight))
 watch(isMiniNavBarMode, () => nextTick(detectTitleHeight))
 
-//TODO
 const eventsRegistration = {
     'ctxMenu-removeFromLocal': reloadAll,
     'app-resize': detectTitleHeight,
@@ -287,7 +287,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <img class="cover" v-lazy="coverDefault(albumCover)" :class="{ 'draggable': isDndSaveEnable }"
                     :draggable="isDndSaveEnable" @dragstart="(event) => dndSaveCover(event, detail)" />
             </div>
-            <div class="right" v-show="!isLoading">
+            <div class="right" v-show="!(isLoading || isLoadingDetail)">
                 <div class="title" v-html="albumName || '未知专辑'" ref="titleRef"></div>
                 <div class="info" :class="{ 'short-info': isTwoLinesTitle }">
                     <div class="info-row">
@@ -317,25 +317,24 @@ onUnmounted(() => offEvents(eventsRegistration))
                     </FavoriteShareBtn>
                 </div>
             </div>
-            <div class="right" v-show="isLoading">
+            <div class="right" v-show="isLoading || isLoadingDetail">
                 <div class="title" v-show="isLoadingDetail">
-                    <div class="loading-mask" style="width: 88%; height: 39px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoadingDetail" width="88%" height="39px" />
                 </div>
                 <div class="info" v-show="isLoadingDetail">
-                    <div class="loading-mask" v-for="  i   in   3  "
-                        style="width: 100%; height: 28px; display: inline-block;">
-                    </div>
+                    <LoadingMask :loading="isLoadingDetail" :count="3" width="100%" height="28px" />
                 </div>
                 <div class="action">
-                    <div class="loading-mask spacing" v-for="  i   in   2  "
-                        style="width: 168px; height: 36px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading || isLoadingDetail" 
+                        :classList="{ spacing: true }"
+                        :count="2" width="168px" height="36px" marginRight="20px" />
                 </div>
             </div>
         </div>
         <div class="center">
             <div class="tab-nav">
                 <span class="tab" :class="{ active: activeTab == index, 'content-text-highlight': activeTab == index }"
-                    v-for="(  tab, index  ) in   tabs  " @click="visitTab(index, true)" v-html="computedTabName(tab)">
+                    v-for="(tab, index) in tabs" @click="visitTab(index, true)" v-html="computedTabName(tab)">
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
             </div>

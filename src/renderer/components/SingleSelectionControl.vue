@@ -37,6 +37,7 @@ const setCurrentIndex = (index) => {
     justify-content: center;
     flex: 1;
     --item-border: 1px solid var(--border-inputs-border-color);
+    --item-border-radius: var(--border-inputs-border-radius);
 }
 
 .single-selection-ctl .item {
@@ -59,31 +60,19 @@ const setCurrentIndex = (index) => {
 }
 
 .single-selection-ctl .first {
-    /*
-    border-top-left-radius: 10rem;
-    border-bottom-left-radius: 10rem;
-    */
-    border-top-left-radius: var(--border-btn-border-radius);
-    border-bottom-left-radius: var(--border-btn-border-radius);
-    padding-left: 10px;
+    border-top-left-radius: var(--item-border-radius);
+    border-bottom-left-radius: var(--item-border-radius);
+    /*padding-left: 10px;*/
 }
 
 .single-selection-ctl .last {
-    /*
-    border-top-right-radius: 10rem;
-    border-bottom-right-radius: 10rem;
-    */
-    border-top-right-radius: var(--border-btn-border-radius);
-    border-bottom-right-radius: var(--border-btn-border-radius);
+    border-top-right-radius: var(--item-border-radius);
+    border-bottom-right-radius: var(--item-border-radius);
     border-right: var(--item-border);
-    padding-right: 10px;
+    /*padding-right: 10px;*/
 }
 
 .single-selection-ctl .active {
-    /*
-    background: var(--button-icon-text-btn-bg-color) !important;
-    color: var(--button-icon-text-btn-icon-color) !important;
-    */
     background: var(--content-list-item-hl-bg-color) !important;
     color: var(--content-list-item-hl-text-color) !important;
 }

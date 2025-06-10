@@ -106,12 +106,13 @@ const reloadLyricData = (track) => {
     })
 }
 
+const sysOffset = 1000
 const renderAndScrollLyric = (secs) => {
     if (!isLyricReady()) return
     if (isSeeking.value) return
 
     const userOffset = lyric.value.offset
-    const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
+    const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset + sysOffset))
 
     //Highlight 查找当前高亮行index
     const lyricWrap = document.querySelector(".dynamic-playing-view .center")
@@ -123,20 +124,14 @@ const renderAndScrollLyric = (secs) => {
         timeKey = lines[i].getAttribute('timeKey')
         if(!timeKey) continue
         const lineTime = toMillis(timeKey)
-        if (trackTime >= lineTime) {
-            index = i
-        } else if (trackTime < lineTime) {
-            break
-        }
+        if (trackTime < lineTime) break
+        index = i
     }
 
-    if(currentIndex.value == index && index >= 0) return
-
-    if (index >= 0) {
-        setLyricCurrentIndex(index)
-    } else {
-        index = 0
-    }
+    //if(currentIndex.value == index && index >= 0) return
+    
+    if (index >= 0) setLyricCurrentIndex(index)
+    index = Math.max(index, 0)
 
     const line = lines[index]
     if (!line || !line.offsetTop || !line.clientHeight) return

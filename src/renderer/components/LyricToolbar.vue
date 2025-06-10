@@ -191,7 +191,7 @@ const getLyricOffsetText = () => {
 .lyric-toolbar {
     display: flex;
     /*flex-direction: column;*/
-    width: 178px;
+    width: 188px;
     /*padding-bottom: 18px;*/
     /*-webkit-app-region: none;*/
 }
@@ -264,7 +264,7 @@ const getLyricOffsetText = () => {
     border: 1px solid var(--border-inputs-border-color);
     font-size: 14px;
     text-align: left;
-    width: 125px;
+    width: 131px;
     background-color: var(--content-inputs-bg-color);
     color: var(--content-inputs-text-color);
 }

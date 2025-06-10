@@ -38,7 +38,8 @@ const { isUseDndForCreateLocalPlaylistEnable,
     isShowDialogBeforeClearLocalMusics,
     isLocalMusicViewTipsShow, 
     isLocalMusicViewPlaylistTipsShow,
-    isUseDndForExportLocalPlaylistEnable, } = storeToRefs(useSettingStore())
+    isUseDndForExportLocalPlaylistEnable,
+    isSingleLineAlbumTitleStyle, } = storeToRefs(useSettingStore())
 
 const localMusicRef = ref(null)
 const back2TopBtnRef = ref(null)
@@ -50,16 +51,22 @@ const activeTypeIndex = ref(0)
 const isLoading = ref(false)
 const isAlbumFilterShow = ref(false)
 const albumFilterName = ref('#')
+const singleLineTitleStyle = ref(false)
+const isAlbumArtistSutitle = ref(false)
 const setCurrentTab = (value) => (currentTab.value = value)
 const setActiveTypeIndex = (value) => (activeTypeIndex.value = value)
 const setLoading = (value) => (isLoading.value = value)
-const setTabData = (value) => {
+const setTabData = (value, expertedType) => {
+    if(expertedType !== activeTypeIndex.value) return 
     tabData.length = 0 
     if(Array.isArray(value)) tabData.push(...value)
 }
 const setAlbumFilterShow = (value) => (isAlbumFilterShow.value = value)
 const toggleAlbumFilterShow = () => setAlbumFilterShow(!isAlbumFilterShow.value)
 const setAlbumFilterName = (value) => (albumFilterName.value = value)
+const setSingleLineTitleStyle = (value) => (singleLineTitleStyle.value = value)
+const setAlbumArtistSutitle = (value) => (isAlbumArtistSutitle.value = value)
+
 
 const resetBack2TopBtn = () => {
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(localMusicRef.value)
@@ -88,10 +95,16 @@ const resetView = () => {
     setLoading(true)
     setAlbumFilterShow(false)
     resetScrollState()
+    setSingleLineTitleStyle(false)
+    setAlbumArtistSutitle(false)
 }
 
 const loadContent = () => {
     resetView()
+    //切换视图时，重置Filter，显示全部数据
+    //从性能方面考虑，不重置为好，不必每次都显示全量数据，按需/延迟显示；
+    //从用户体验上考虑，重置虽保守一些，但可避免用户误解当前显示即为全部数据
+    setAlbumFilterName('#')
     switch(activeTypeIndex.value) {
         case 0:
             loadPlaylists()
@@ -100,7 +113,6 @@ const loadContent = () => {
             filterAlbums()
             break
     }
-    
 }
 
 
@@ -108,24 +120,30 @@ const loadPlaylists = async () => {
     setCurrentTab(PlaylistsControl)
     const playlists = localPlaylists.value
     const total = playlists.length
+    if(total < 1) return setLoading(false)
     const timeout = Math.min(total * 10, 2588)
     resultTimer = setTimeout(() => {
-         setTabData(playlists)
+         setTabData(playlists, 0)
          setLoading(false)
     }, timeout)
 }
 
 const loadAlbums = async (filter) => {
     setCurrentTab(AlbumListControl)
+    setSingleLineTitleStyle(isSingleLineAlbumTitleStyle.value)
+    setAlbumArtistSutitle(true)
     const playlists = localPlaylists.value
+    if(playlists.length < 1) return setLoading(false)
     const albums = []
     if(playlists && playlists.length > 0) {
-        const platform = LocalMusic.CODE, type = Playlist.ALBUM_TYPE
+        const platform = LocalMusic.CODE
+        const type = Playlist.ALBUM_TYPE
+
         playlists.forEach(playlist => {
             const  { data } = playlist
             if(!data || data.length < 1) return
             data.forEach(item => {
-                const { album, cover } = item
+                const { artist, album, cover } = item
                 if(!album) return 
                 const { name } = album
                 if(isBlank(name)) return
@@ -133,7 +151,7 @@ const loadAlbums = async (filter) => {
                 const id = title
                 if(typeof filter == 'function' && !filter(title)) return
                 const index = albums.findIndex(album => (stringEquals(album.id, id)))
-                if(index < 0)  albums.push({ id, title, platform, cover, type })
+                if(index < 0)  albums.push({ id, title, platform, cover, artist, type })
             })
         })
         albums.sort((d1, d2) => (pinyinOfFirstChar(d1.id) <= pinyinOfFirstChar(d2.id) ? -1 : 1))
@@ -141,13 +159,13 @@ const loadAlbums = async (filter) => {
     const total = albums.length
     const timeout = Math.min(total * 10, 2588)
     resultTimer = setTimeout(() => {
-        setTabData(albums)
+        setTabData(albums, 1)
         setLoading(false)
     }, timeout)
 }
 
 const filterAlbums = (name) => {
-    name = name || albumFilterName.value
+    name = name || albumFilterName.value || '#'
 
     resetView()
     loadAlbums(title => {
@@ -164,6 +182,7 @@ const filterAlbums = (name) => {
 const onScroll = () => {
     markScrollState()
     hideAllCtxMenus()
+    setAlbumFilterShow(false)
 }
 
 const onDrop = async (event) => {
@@ -295,6 +314,12 @@ const tutorialList = [{
 /* 生命周期、监听 */
 watch(activeTypeIndex, loadContent)
 watch(albumFilterName, filterAlbums)
+watch(isSingleLineAlbumTitleStyle, (nv, ov) => {
+    if(activeTypeIndex.value == 1) {
+        setSingleLineTitleStyle(nv)
+        //setAlbumArtistSutitle(nv)
+    }
+})
 
 onMounted(loadContent)
 onActivated(() => restoreScrollState())
@@ -398,7 +423,10 @@ onActivated(() => restoreScrollState())
             </transition>
             <component 
                 :is="currentTab"
-                :data="tabData" 
+                :data="tabData"
+                :singleLineTitleStyle="singleLineTitleStyle"
+                :isAlbumArtistSutitle="isAlbumArtistSutitle"
+                :singleLineTitleStyleIgnoreArtistSutitle="true"
                 :playable="true" 
                 :loading="isLoading"
                 :customLoadingCount="importTaskCount"
@@ -574,13 +602,20 @@ onActivated(() => restoreScrollState())
 }
 
 #local-music-view .album-filter li.active {
-    background: var(--content-list-item-hl-bg-color);
-    color: var(--content-list-item-hl-text-color);
+    background: var(--content-list-item-hl-bg-color) !important;
+    color: var(--content-list-item-hl-text-color) !important;
     transform: scale(1.03);
 }
 
 #local-music-view .album-filter li:hover {
     background: var(--content-list-item-hover-bg-color);
+}
+
+
+/* 防抖：统一样式 */
+#local-music-view .center .playlists-ctl,
+#local-music-view .center .albumlist-ctl {
+    margin-top: 2px;
 }
 
 .contrast-mode #local-music-view .album-filter li.active {

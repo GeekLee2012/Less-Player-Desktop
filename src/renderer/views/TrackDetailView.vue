@@ -10,6 +10,7 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
 import ArtistControl from '../components/ArtistControl.vue';
 import AlbumControl from '../components/AlbumControl.vue';
+import LoadingMask from '../components/LoadingMask.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import { coverDefault, ipcRendererSend, transformPath } from '../../common/Utils';
 import { usePlatformStore } from '../store/platformStore';
@@ -106,11 +107,12 @@ const showInFolder = () => {
             </div>
             <div class="right" v-show="isLoading">
                 <div class="title" v-show="isLoading">
-                    <div class="loading-mask" style="width: 88%; height: 39px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading" width="88%" height="39px" />
                 </div>
                 <div class="action">
-                    <div class="loading-mask spacing" v-for="i in 2"
-                        style="width: 168px; height: 36px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading" :count="2" 
+                        :classList="{ spacing: true }" 
+                        width="168px" height="36px" />
                 </div>
             </div>
         </div>
@@ -136,7 +138,7 @@ const showInFolder = () => {
     </div>
 </template>
 
-<style scoped>
+<style>
 #track-detail-view {
     display: flex;
     flex-direction: column;
@@ -146,18 +148,18 @@ const showInFolder = () => {
     overflow-x: hidden;
 }
 
-#track-detail-view .header {
+#track-detail-view > .header {
     display: flex;
     flex-direction: row;
     margin-bottom: 16px;
 }
 
-#track-detail-view .header .right {
+#track-detail-view > .header .right {
     flex: 1;
     margin-left: 30px;
 }
 
-#track-detail-view .header .title {
+#track-detail-view > .header .title {
     text-align: left;
     margin-top: 0px;
     /*font-size: 30px;
@@ -178,19 +180,19 @@ const showInFolder = () => {
     line-clamp: 3;
 }
 
-#track-detail-view .header .cover {
+#track-detail-view > .header .cover {
     width: 168px;
     height: 168px;
     border-radius: 6px;
     box-shadow: 0px 0px 1px #161616;
 }
 
-#track-detail-view .action {
+#track-detail-view .right .action {
     display: flex;
     flex-direction: row;
 }
 
-#track-detail-view .action .folder-btn svg {
+#track-detail-view .right .action .folder-btn svg {
     transform: translateY(1px);
 }
 

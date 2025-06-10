@@ -145,7 +145,7 @@
                 "toggleBtnThumbColor": "#ffffff"
             },
             "searchBar": {
-                "borderColor": "#777777",
+                "borderColor": "#ababab",
                 "bgColor": "#ffffff",
                 "textColor": null,
                 "searchBtnBgColor": "#ffffff",
@@ -1367,15 +1367,15 @@
                 "secondaryTextColor": "#777777",
                 "bgColor": "#ffffffbc",
                 "headerNavBgColor": "#f1f1f199",
-                "loadingMaskColor": "linear-gradient(to right,#66666625 8%,#66666636 18%,#66666625 33%)",
-                "listItemHoverBgColor": "#66666625",
+                "loadingMaskColor": "linear-gradient(to right,#33333325 8%,#33333336 18%,#33333325 33%)",
+                "listItemHoverBgColor": "#33333325",
                 "leftNavBgColor": "#ffffff99",
                 "inputsBgColor": null,
                 "inputsTextColor": null,
                 "listItemHlBgColor": "linear-gradient(to right,#1ca388,#28c83f)",
                 "listItemHlTextColor": "#ffffff",
                 "imageTextTileCardBgColor": "#ababab25",
-                "imageTextTileHCardBgColor": "#66666625",
+                "imageTextTileHCardBgColor": "#33333325",
                 "imageTextTileCardShadowColor1": null,
                 "imageTextTileCardShadowColor2": null
             },
@@ -1384,7 +1384,7 @@
                 "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#ffffff00",
                 "popoversBorderColor": "#666666",
-                "inputsBorderColor": "#999999"
+                "inputsBorderColor": "#cccccc"
             },
             "button": {
                 "iconBtnColor": "#393939",

@@ -7,6 +7,7 @@ import { useUserProfileStore } from '../store/userProfileStore';
 import { usePlatformStore } from '../store/platformStore';
 import { useSettingStore } from '../store/settingStore';
 import SongListControl from '../components/SongListControl.vue';
+import LoadingMask from '../components/LoadingMask.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
@@ -286,19 +287,18 @@ onUpdated(() => resetBack2TopBtn())
 
             <div class="right" v-show="isLoading">
                 <div class="title">
-                    <div class="loading-mask" style="width: 88%; height: 36px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading" width="88%" height="36px" />
                 </div>
                 <div class="about">
-                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 23px; display: inline-block;">
-                    </div>
+                    <LoadingMask :loading="isLoading" :count="3" width="100%" height="23px" />
                 </div>
                 <div class="edit-wrap">
-                    <div class="loading-mask" style="width: 288px; height: 23px; display: inline-block;">
-                    </div>
+                    <LoadingMask :loading="isLoading" width="288px" height="23px" />
                 </div>
                 <div class="action">
-                    <div class="loading-mask btn-spacing" v-for="i in 2"
-                        style="width: 188px; height: 36px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading" :count="2" 
+                        :classList="{ 'btn-spacing': true }" 
+                        width="188px" height="36px" />
                 </div>
             </div>
         </div>
@@ -309,12 +309,10 @@ onUpdated(() => resetBack2TopBtn())
                     :onKeywordChanged="filterContent">
                 </SearchBarExclusiveModeControl>
 
-                <div class="loading-mask" v-show="isLoading"
-                    style="text-align: left;width: 150px; height: 28px; display: inline-block;">
-                </div>
-                <div class="loading-mask search-wrap" v-show="isLoading && isSearchForCustomPlaylistShow"
-                    style="text-align: left;width: 168px; height: 28px; display: inline-block;margin-right: 10px;">
-                </div>
+                <LoadingMask :loading="isLoading" width="150px" height="28px" />
+                <LoadingMask :loading="isLoading && isSearchForCustomPlaylistShow"
+                    :classList="{ 'search-wrap': true }" 
+                    width="168px" height="28px" marginRight="10px" />
             </div>
             <SongListControl
                 :id="dataListId"
@@ -330,7 +328,7 @@ onUpdated(() => resetBack2TopBtn())
     </div>
 </template>
 
-<style scoped>
+<style>
 #custom-playlist-detail-view {
     display: flex;
     flex: 1;

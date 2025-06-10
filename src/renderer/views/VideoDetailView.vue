@@ -2,12 +2,13 @@
 import { onActivated, reactive, ref, watch, inject, nextTick, onDeactivated, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
-import { usePlatformStore } from '../store/platformStore'
+import { usePlatformStore } from '../store/platformStore';
+import { useVideoPlayStore } from '../store/videoPlayStore';
+import { useSettingStore } from '../store/settingStore';
+import LoadingMask from '../components/LoadingMask.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { coverDefault, md5, trimExtraChars } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
-import { useVideoPlayStore } from '../store/videoPlayStore';
-import { useSettingStore } from '../store/settingStore';
 
 
 
@@ -230,23 +231,22 @@ onActivated(() => {
             </div>
             <div class="right" v-show="isLoading">
                 <div class="title">
-                    <div class="loading-mask" style="width: 88%; height: 39px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading" width="88%" height="39px" />
                 </div>
                 <div class="about">
-                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 23px; display: inline-block;">
-                    </div>
+                    <LoadingMask :loading="isLoading" :count="3" width="100%" height="23px" />
                 </div>
                 <div class="action">
-                    <div class="loading-mask btn-spacing" v-for="i in 1"
-                        style="width: 188px; height: 36px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading"
+                        :classList="{ 'btn-spacing': true }" 
+                        width="188px" height="36px" />
                 </div>
             </div>
         </div>
         <div class="center">
             <div class="list-title">
                 <div class="size-text content-text-highlight" v-show="!isLoading">{{ listTitle }}({{ listSizeText }})</div>
-                <div class="loading-mask" v-show="isLoading"
-                    style="text-align: left;width: 150px; height: 28px; display: inline-block;"></div>
+                <LoadingMask :loading="isLoading" width="150px" height="28px" />
             </div>
             <div class="video-list" v-show="!isLoading">
                 <div v-for="(item, index) in detail.data" class="item" v-html="item.title" 
@@ -254,8 +254,8 @@ onActivated(() => {
                 </div>
             </div>
             <div class="video-list" v-show="isLoading" >
-                <div class="loading-mask item"  v-for="i in 30">
-                </div>
+                <LoadingMask :loading="isLoading" :count="30" 
+                        :classList="{ item: true }" />
             </div>
             
         </div>

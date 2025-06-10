@@ -312,10 +312,6 @@ export const useSettingStore = defineStore('setting', {
             titleFontSize: 32,
             //歌手、专辑字号
             aralFontSize: 18,
-            //普通行字号
-            fontSize: 24,
-            //高亮行字号
-            hlFontSize: 25,
             //字重，即字体粗细
             fontWeight: 400,
             //行高

@@ -17,6 +17,7 @@ import AlbumListControl from '../components/AlbumListControl.vue';
 import TextListControl from '../components/TextListControl.vue';
 import PlayAddAllBtn from '../components/PlayAddAllBtn.vue';
 import SongListControl from '../components/SongListControl.vue';
+import LoadingMask from '../components/LoadingMask.vue';
 import FavoriteShareBtn from '../components/FavoriteShareBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { coverDefault, randomTextWithinAlphabetNums } from '../../common/Utils';
@@ -472,17 +473,16 @@ onActivated(() => {
             </div>
             <div class="right" v-show="isLoading">
                 <div class="title" v-show="isLoadingDetail">
-                    <div class="loading-mask" style="width: 36%; height: 39px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading" width="36%" height="39px"/>
                 </div>
                 <div class="title" v-html="artistName" v-show="!isLoadingDetail"></div>
                 <div class="about" v-show="isLoadingDetail">
-                    <div class="loading-mask" v-for="i in 3" style="width: 100%; height: 23px; display: inline-block;">
-                    </div>
+                     <LoadingMask :loading="isLoading" :count="3" width="100%" height="23px"/>
                 </div>
                 <div class="about" v-show="!isLoadingDetail">{{ trimExtraHtml(about) }}</div>
                 <div class="action" v-show="isLoadingDetail">
-                    <div class="loading-mask spacing" v-for="i in 2"
-                        style="width: 168px; height: 36px; display: inline-block;"></div>
+                    <LoadingMask :loading="isLoading" :classList="{ spacing: true }"
+                        :count="2" width="168px" height="36px" marginRight="20px" />
                 </div>
                 <div class="action" v-show="!isLoadingDetail">
                     <PlayAddAllBtn :leftAction="playHotSongs" :rightAction="() => addHotSongs()"
@@ -505,6 +505,10 @@ onActivated(() => {
                     v-for="(tab, index) in tabs" @click="visitTab(index, true)" v-html="computedTabName(tab)">
                 </span>
                 <span class="tab-tip content-text-highlight" v-html="tabTipText"></span>
+                <!--
+                <LoadingMask :loading="isLoading" :classList="{ 'tab-tip': true }"
+                    width="88px" height="25px" />
+                -->
             </div>
             <component 
                 :id="randomTextWithinAlphabetNums(16)"
@@ -549,8 +553,6 @@ onActivated(() => {
     text-align: left;
     margin-top: 8px;
     margin-bottom: 10px;
-    /*margin-bottom: 108px;*/
-    /*font-size: 30px;*/
     font-size: var(--content-text-module-title-size);
     font-weight: bold;
     min-height: 39px;
@@ -572,13 +574,12 @@ onActivated(() => {
 }
 
 #artist-detail-view .header .about {
-    height: 114px;
-    margin-bottom: 8px;
+    height: 110px;
+    margin-bottom: 15px;
     /*line-height: 23px;*/
     line-height: var(--content-text-line-height);
     font-size: var(--content-text-subtitle-size) !important;
     color: var(--content-subtitle-text-color);
-    /* font-size: 15px; */
     overflow: hidden;
     word-wrap: break-word;
     /*white-space: pre-wrap;*/
@@ -587,6 +588,7 @@ onActivated(() => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
     text-align: left;
     letter-spacing: calc(var(--content-text-letter-spacing) + 0.5px);
 }

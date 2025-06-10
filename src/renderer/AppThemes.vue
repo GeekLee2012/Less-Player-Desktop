@@ -447,6 +447,10 @@ body.app-win-custom-shadow.mini {
   background: var(--content-bg-color) !important;
 }
 
+.app-custom-theme-bg:has(.simple-effect) {
+  background: var(--app-bg-color) !important;
+}
+
 
 /* 滚动条 */
 ::-webkit-scrollbar-thumb {

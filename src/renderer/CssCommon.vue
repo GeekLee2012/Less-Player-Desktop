@@ -91,6 +91,16 @@
   --content-desktop-lyric-line-spacing: 22px;
   --others-mini-layout-cover-progress-bg: none;
 
+  --lyric-mask: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
+  --lyric-margin-left: 10px;
+  --lyric-text-size: 24px;
+  --lyric-hl-text-size: 25px;
+  --lyric-title-text-size: 33px;
+  --lyric-aral-text-size: 18px;
+  --lyric-font-weight: 400;
+  --lyric-line-height: 33px;
+  --lyric-line-spacing: 28px;
+
   --nativeTheme: 'light';
 
   font-family: var(--content-text-font-family);

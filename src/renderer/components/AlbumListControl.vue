@@ -19,6 +19,7 @@ const props = defineProps({
     loading: Boolean,
     isAlbumArtistSutitle: Boolean,
     singleLineTitleStyle: Boolean,
+    singleLineTitleStyleIgnoreArtistSutitle: Boolean,
     loadingMaskNum: Number,
     needReset: Boolean, //播放前是否清空当前播放
     hideExtra: Boolean,
@@ -26,6 +27,11 @@ const props = defineProps({
     //playable: Boolean,
     resourceMode: Boolean,
     coverAction: Function,
+    //DnD - 只定义属性，暂时无实现
+    tileOnDragStartFn: Function,
+    tileOnDragEnterFn: Function,
+    tileOnDragEndFn: Function,
+    tileOnDropFn: Function,
 })
 
 const visitItem = (item) => {
@@ -41,6 +47,12 @@ const computedPlayable = computed(() => {
         const { type } = item
         return !resourceMode
     }
+})
+
+const computedSingleLineTitleStyle = computed(() => {
+    const { singleLineTitleStyle ,isAlbumArtistSutitle, singleLineTitleStyleIgnoreArtistSutitle } = props
+    return singleLineTitleStyleIgnoreArtistSutitle ? singleLineTitleStyle 
+        : (singleLineTitleStyle || isAlbumArtistSutitle)
 })
 
 const computedItemSubtitle = computed(() => {
@@ -71,7 +83,7 @@ const playAction = (item) => {
                 @click="visitItem(item)" 
                 :cover="item.cover" 
                 :title="item.title"
-                :singleLineTitleStyle="singleLineTitleStyle || isAlbumArtistSutitle" 
+                :singleLineTitleStyle="computedSingleLineTitleStyle" 
                 :subtitle="computedItemSubtitle(item)"
                 :extraText="computedItemExtra(item)" 
                 :checkbox="checkbox" 

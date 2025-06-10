@@ -2521,7 +2521,6 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #setting-view .cache .content .multi-selection-ctl .item {
     font-size: calc(var(--content-text-size) - 1px);
-    padding: 5px 23px;
 }
 
 

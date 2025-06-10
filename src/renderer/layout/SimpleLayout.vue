@@ -159,6 +159,7 @@ const setLine1Text = (value) => line1Text.value = value
 const setLine2Text = (value) => line2Text.value = value
 const setHlLineIndex = (value) => hlLineIndex.value = value
 
+const sysOffset = 1000
 const renderLyric = (secs) => {
     if (!hasLyric.value) {
         setHlLineIndex(-1)
@@ -170,7 +171,7 @@ const renderLyric = (secs) => {
 
     const presetOffset = Track.lyricOffset(currentTrack.value)
     const userOffset = lyric.value.offset
-    const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset))
+    const trackTime = Math.max(0, (secs * 1000 + presetOffset + userOffset + sysOffset))
 
     //TOOD
     const lyricData = Track.lyricData(currentTrack.value)
@@ -182,11 +183,8 @@ const renderLyric = (secs) => {
     for (var i = 0; i < lineNums; i++) {
         const timeKey = lyricKeys[i]
         const lineTime = toMillis(timeKey)
-        if (trackTime >= lineTime) {
-            index = i
-        } else if (trackTime < lineTime) {
-            break
-        }
+        if (trackTime < lineTime) break
+        index = i
     }
 
     //const isOddNum = (lineNums % 2 != 0)

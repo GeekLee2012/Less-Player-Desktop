@@ -129,8 +129,9 @@ const toggleMaximize = () => maximize()
     background-color: #fc605c;
 }
 
+
 .win-traffic-light-btn .close-btn svg {
-    transform: translateX(0.4px);
+    transform: translateX(-0.2px);
 }
 
 .win-traffic-light-btn .ctl-btn svg {

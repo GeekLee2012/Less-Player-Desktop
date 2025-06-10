@@ -185,7 +185,7 @@ const loadLyric = (track) => {
 
 const loadLyricFromUnited = (track) => {
     if (!track || !isCurrentTrack(track)) return
-    return United.transferTrack(track, { isGetLyric: true }, () => !isCurrentTrack(track))
+    return United.transferTrack(track, { isGetLyric: true }, () => (!isCurrentTrack(track)))
             .then(uResult => {
                 //再次确认，可能歌曲已经被切走
                 if (!isCurrentTrack(track)) return
@@ -1694,6 +1694,16 @@ const reloadApp = () => {
     setTimeout(() => ipcRendererSend('app-reload'), 1888)
 }
 
+const isSpectrumShowing = () => {
+    return isSimpleLayout.value 
+        || (playingViewShow.value && playingViewThemeIndex.value == 1)
+        || spectrumIndex.value > 0
+}
+
+const notifySpectrumState = () => {
+    emitEvents('track-spectrumState', isSpectrumShowing())
+}
+
 //EventBus监听注册，统一管理
 const eventsRegistration = {
     //FM广播
@@ -1740,7 +1750,7 @@ const eventsRegistration = {
                     return handleUnplayableTrack(track)
                 }
                 showFailToast(TRY_TRANSFRER_MSG)
-                const candidate = await United.transferTrack(track, null, () => !isCurrentTrack(track))
+                const candidate = await United.transferTrack(track, null, () => (!isCurrentTrack(track)))
                 if (!Track.hasUrl(candidate) && !Track.hasUrl(track)) {
                     return handleUnplayableTrack(track, TRANSFRER_FAIL_MSG)
                 }
@@ -1956,6 +1966,7 @@ watch(trackResourceToolViewShow, (nv, ov) => nv && hideAllCtxMenus())
 watch(() => currentTrack.value && currentTrack.value.cover, () => {
     setupCurrentMediaSession(currentTrack.value)
 }, { immediate: true })
+watch([isSimpleLayout, playingViewShow, playingViewThemeIndex, spectrumIndex], notifySpectrumState)
 
 //播放器API
 provide('player', {

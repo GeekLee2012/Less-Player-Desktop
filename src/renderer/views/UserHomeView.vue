@@ -17,6 +17,7 @@ import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
 import PlaylistsControl from '../components/PlaylistsControl.vue';
 import CustomPlaylistListControl from '../components/CustomPlaylistListControl.vue';
 import ArtistListControl from '../components/ArtistListControl.vue';
+import LoadingMask from '../components/LoadingMask.vue';
 import BatchActionBtn from '../components/BatchActionBtn.vue';
 import { coverDefault, isSupportedImage, randomTextWithinAlphabetNums } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
@@ -455,9 +456,8 @@ onActivated(() => {
                 :needReset="true" >
             </component>
             <div v-show="loading">
-                <div class="loading-mask" v-for="i in 12"
-                    style="width: 100%;  height: 36px; margin-bottom: 5px; display: inline-block;">
-                </div>
+                <LoadingMask :loading="loading" :count="12"
+                    width="100%" height="36px" marginBottom="5px" />
             </div>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>

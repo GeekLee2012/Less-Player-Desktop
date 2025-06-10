@@ -42,6 +42,7 @@ const toggleItem = (item, index) => {
     justify-content: center;
     flex: 1;
     --item-border: 1px solid var(--border-inputs-border-color);
+    --item-border-radius: var(--border-inputs-border-radius);
 }
 
 .multi-selection-ctl .item {
@@ -49,11 +50,16 @@ const toggleItem = (item, index) => {
     border-left: var(--item-border);
     border-top: var(--item-border);
     border-bottom: var(--item-border);
-    padding: 4px 9px;
+    width: 88px;
+    height: 36px;
     cursor: pointer;
     font-size: 14px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     /*
+    text-align: center;
+    vertical-align: middle;
     background-color: var(--content-list-item-hover-bg-color);
     background-color: var(--button-toggle-btn-bg-color);
     */
@@ -64,31 +70,19 @@ const toggleItem = (item, index) => {
 }
 
 .multi-selection-ctl .first {
-    /*
-    border-top-left-radius: 10rem;
-    border-bottom-left-radius: 10rem;
-    */
-    border-top-left-radius: var(--border-btn-border-radius);
-    border-bottom-left-radius: var(--border-btn-border-radius);
-    padding-left: 10px;
+    border-top-left-radius: var(--item-border-radius);
+    border-bottom-left-radius: var(--item-border-radius);
+    /*padding-left: 10px;*/
 }
 
 .multi-selection-ctl .last {
-    /*
-    border-top-right-radius: 10rem;
-    border-bottom-right-radius: 10rem;
-    */
-    border-top-right-radius: var(--border-btn-border-radius);
-    border-bottom-right-radius: var(--border-btn-border-radius);
+    border-top-right-radius: var(--item-border-radius);
+    border-bottom-right-radius: var(--item-border-radius);
     border-right: var(--item-border);
-    padding-right: 10px;
+    /*padding-right: 10px;*/
 }
 
 .multi-selection-ctl .active {
-    /*
-    background: var(--button-icon-text-btn-bg-color) !important;
-    color: var(--button-icon-text-btn-icon-color) !important;
-    */
     background: var(--content-list-item-hl-bg-color) !important;
     color: var(--content-list-item-hl-text-color) !important;
 }

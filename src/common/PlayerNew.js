@@ -57,6 +57,7 @@ class HowlerPlayer extends EventWrapper {
         this.animationFrameCnt = 0 //动画帧数计数器，控制事件触发频率，降低CPU占用
         this.stateRefreshFrequency = 60 //歌曲进度更新频度
         this.spectrumRefreshFrequency = 3 //歌曲频谱更新频度
+        this.spectrumState = false  //是否正在显示频谱
         /*
         this.useStateRefreshAutoDetector = false
         this.lastAnimationFrameUpdateTime = 0   //上一动画帧执行时间
@@ -76,6 +77,10 @@ class HowlerPlayer extends EventWrapper {
 
     updateSpectrumRefreshFrequency(value) {
         this.spectrumRefreshFrequency = value || 3
+    }
+
+    updateSpectrumState(value) {
+        this.spectrumState = value || false
     }
 
     createSound() {
@@ -228,29 +233,27 @@ class HowlerPlayer extends EventWrapper {
         const sound = this.getSound()
         if (!sound) return 
         if (!sound.playing() && this.playState != PlayState.PLAYING) {
-            this._stopAnimationFrame()
-            return 
+            return this._stopAnimationFrame()
         }
-        //当前播放时间
-        this.currentTime = sound.seek() || 0
-        const duration = Number.isFinite(sound.duration()) ? sound.duration() * 1000 : 0
+
         //刷新进度
-        /*
-        const isTimeReset = this._countAnimationFrameTime()
-        const needRefreshState = this.useStateRefreshAutoDetector ? isTimeReset : this.isStateRefreshable()
-        if (needRefreshState) this.notify('track-pos', this.currentTime)
-        */
-        
-        if (this.isStateRefreshable()) this.notify('track-pos', { currentTime: this.currentTime, duration })
-
-        //声音处理
-        try {
-            this._resolveSound()
-        } catch (error) {
-            if (isDevEnv()) console.log(error)
-
-            this.setState(PlayState.PLAY_ERROR)
+        if (this.isStateRefreshable()) {
+            this.currentTime = sound.seek() || 0
+            const duration = Number.isFinite(sound.duration()) ? sound.duration() * 1000 : 0
+            this.notify('track-pos', { currentTime: this.currentTime, duration })
         }
+
+        //音频处理
+        if (this.isSpectrumRefreshable()) {
+            try {
+                this._resolveSound()
+            } catch (error) {
+                if (isDevEnv()) console.log(error)
+
+                this.setState(PlayState.PLAY_ERROR)
+            }
+        }
+
         //循环动画
         this._countAnimationFrame()
         this._rewindAnimationFrame(this._step.bind(this), true)
@@ -259,8 +262,8 @@ class HowlerPlayer extends EventWrapper {
     _resolveSound() {
         if (!this._initWebAudioApi()) return
         this._resolvePendingSoundEffect()
-        if (!this.isSpectrumRefreshable()) return
-        
+        if(!this.spectrumState) return 
+
         const { leftChannelAnalyser, rightChannelAnalyser, analyser, audioCtx } = this.webAudioApi
         if (!analyser || !leftChannelAnalyser || !rightChannelAnalyser) return
         
@@ -720,6 +723,7 @@ class Player extends EventWrapper {
             'track-updateVolumeGain': value => player.updateVolumeGain(value),
             'track-stateRefreshFrequency': value => player.updateStateRefreshFrequency(value),
             'track-spectrumRefreshFrequency': value => player.updateSpectrumRefreshFrequency(value),
+            'track-spectrumState': value => player.updateSpectrumState(value),
             'track-markSeekPending': value => player.setSeekPendingMark(value),
             'desktopLyric-messagePort': value => player.setupDesktopLyricMessagePort(value),
             'track-lyricLoaded': value => player.updateLyric(value, true),
@@ -876,6 +880,15 @@ class Player extends EventWrapper {
         delegates.forEach(delegate => {
             if(delegate && delegate.setMpvBinaryPath) {
                 delegate.setMpvBinaryPath(value)
+            }
+        })
+    }
+
+    updateSpectrumState(value) {
+        const delegates = [this.delegate, this.fallbackDelegate]
+        delegates.forEach(delegate => {
+            if(delegate && delegate.updateSpectrumState) {
+                delegate.updateSpectrumState(value)
             }
         })
     }
