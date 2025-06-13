@@ -383,10 +383,9 @@ defineExpose({
 <style scoped>
 .gradient-color-toolbar {
     display: flex;
-    /*flex-direction: column;*/
     overflow: hidden;
     -webkit-app-region: none;
-    --header-height: var(--content-header-nav-height);;
+    --header-height: var(--content-header-nav-height);
 }
 
 .gradient-color-toolbar .container {

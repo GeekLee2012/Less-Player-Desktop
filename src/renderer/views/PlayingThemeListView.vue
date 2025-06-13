@@ -344,6 +344,7 @@ const onImageDrop = (event, item, index) => {
     object-fit: fill;
     margin-bottom: 3px;
     border-radius: var(--border-inputs-border-radius);
+    border-radius: var(--border-img-text-tile-border-radius);
     border: 3.5px solid transparent;
     cursor: pointer;
 }

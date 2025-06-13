@@ -207,6 +207,7 @@ onUnmounted(invokeContextUnmounted)
     height: var(--header-height);
     border-bottom: 2px solid var(--border-header-nav-border-color);
     background: transparent;
+    align-items: center;
 }
 
 .theme-selection-view .header .action {

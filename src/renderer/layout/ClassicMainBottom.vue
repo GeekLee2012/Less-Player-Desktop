@@ -95,6 +95,7 @@ onMounted(() => {
     -webkit-app-region: none;
     padding-top: 8px;
     justify-content: center;
+    overflow: hidden;
 }
 
 .classic-main-bottom .spacing {

@@ -637,10 +637,6 @@ onUnmounted(() => offEvents(eventsRegistration))
     width: calc(var(--others-image-text-tile-cover-size) * var(--others-image-text-tile-hcard-width-ratio) - var(--hpadding));
     border-radius: var(--border-img-text-tile-border-radius);
     padding: 20px 10px 20px 20px;
-    /*background: var(--app-bg-color);
-    background: var(--content-left-nav-bg-color);
-    background: var(--content-loading-mask-color);
-    background: var(--content-list-item-hover-bg-color);*/
     background: var(--content-image-text-tile-hcard-bg-color);
 
     margin-top: 18px !important;

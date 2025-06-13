@@ -1122,3 +1122,13 @@ export const genSeqNums = (from, to, step) => {
     for(let i = from; (to - i) * step >= 0; i += step) nums.push(i)
     return nums
 }
+
+//TODO 随机打乱数据，感觉算法有问题，不够乱......
+export const shuffle = (arr) => {
+    let i = arr.length
+    while (i) {
+        let j = Math.floor(Math.random() * i--);
+        [arr[j], arr[i]] = [arr[i], arr[j]]
+    }
+    return arr
+}

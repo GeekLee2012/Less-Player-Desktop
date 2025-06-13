@@ -81,14 +81,16 @@ const scrollProgress = (event) => {
 }
 
 const updateProgress = (percent) => {
-    percent = percent * 100
-    percent = percent > 0 ? percent : 0
-    percent = percent < 100 ? percent : 100
+    const _percent = Math.min(Math.max(percent * 100, 0), 100)
 
-    if(progressRef.value) progressRef.value.style.width = `${percent}%`
-    if(thumbRef.value) thumbRef.value.style.left = `calc(${percent}% - 3px)`
+    //边界检查 - 防溢出
+    let thumbOffset = _percent < 0.1 ? '0px' : '3px'
+    thumbOffset = _percent > 99 ? 'var(--others-sliderbar-thumb-size)' : thumbOffset
 
-    value = (percent / 100).toFixed(2)
+    if(progressRef.value) progressRef.value.style.width = `${_percent}%`
+    if(thumbRef.value) thumbRef.value.style.left = `calc(${_percent}% - ${thumbOffset})`
+
+    value = (_percent / 100).toFixed(2)
 }
 
 //快捷操作

@@ -585,6 +585,7 @@ const removeChecked = async () => {
         if (isFreeFM()) deleteFn = removeFreeRadio
     }
     if (deleteFn) {
+        let eventName = ''
         if (isFavorites()) checkedData.forEach(item => deleteFn(item.id, item.platform))
         //else if (isRecents()) checkedData.forEach(item => deleteFn(item))
         else if (isSongTab() && (isCustomPlaylist() || isLocalMusic())) {
@@ -592,10 +593,11 @@ const removeChecked = async () => {
             checkedData.forEach(item => deleteFn(id, item))
         } else if (isPlaylistTab() && isLocalMusic()) {
             checkedData.forEach(item => deleteFn(item.id))
+            eventName = 'batchAction-localPlaylist-removed'
         } else { //默认情况
             checkedData.forEach(item => deleteFn(item))
         }
-        refresh()
+        refresh(eventName)
         showToast("删除操作成功")
     }
 }
@@ -656,9 +658,10 @@ const exportChecked = () => {
 }
 
 //TODO
-const refresh = () => {
+const refresh = (eventName) => {
     emitEvents("checkbox-refresh")
     visitTab(activeTab.value)
+    if(eventName) emitEvents(eventName)
 }
 
 //TODO

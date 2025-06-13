@@ -6,6 +6,7 @@ import { usePlaylistSquareStore } from '../store/playlistSquareStore';
 import { useSettingStore } from '../store/settingStore';
 import CategoryBarLoadingMask from './CategoryBarLoadingMask.vue';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+import { shuffle } from '../../common/Utils';
 
 
 
@@ -46,14 +47,6 @@ const visitCateItem = (item, row, col, forceRefresh) => {
 }
 
 const flatData = reactive([])
-//TODO 随机打乱数据，感觉算法有问题，不够乱......
-const shuffle = (arr) => {
-    let i = arr.length
-    while (i) {
-        let j = Math.floor(Math.random() * i--);
-        [arr[j], arr[i]] = [arr[i], arr[j]]
-    }
-}
 
 const getFlatData = () => {
     if (flatData.length <= 0) {

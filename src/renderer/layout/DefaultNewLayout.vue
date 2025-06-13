@@ -49,7 +49,7 @@ const { isFontAutoWeight, isMiniNavBarMode } = storeToRefs(useSettingStore())
 }
 
 .default-new-layout > .center #main-left .top-logo {
-    margin-top: 41px;
+    margin-top: 39px;
     margin-left: 20px;
 }
 
@@ -144,7 +144,7 @@ const { isFontAutoWeight, isMiniNavBarMode } = storeToRefs(useSettingStore())
 }
 
 .default-new-layout.mini-navbar-mode > .center #main-left .top-logo {
-    margin-top: 41px;
+    /*margin-top: 41px;*/
     margin-left: 0px;
 }
 </style>

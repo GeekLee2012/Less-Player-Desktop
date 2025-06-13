@@ -349,6 +349,10 @@ const getItemCover = (cover) => {
     updateReferenceOriginTrack(workingTrack, { cover })
 }
 
+const computedPlaceholder = computed(() => {
+    return resourceMode.value ? '搜索歌曲资源，音源、封面、歌词' : '现在想搜索什么'
+})
+
 
 watch(currentTypeIndex, visitActiveTab)
 watch(currentKeyword, visitActiveTab)
@@ -390,7 +394,7 @@ onUnmounted(() => {
                 <div class="center">
                     <div class="title"></div>
                     <SearchBar ref="searchBarRef"
-                        placeholder="搜索歌曲资源，音源、封面、歌词" 
+                        :placeholder="computedPlaceholder" 
                         :beforeSubmitAction="beforeSubmitAction"
                         :submitAction="setCurrentKeyword">
                         <template #prefix>

@@ -256,7 +256,7 @@ const setupPlaylistExportToolbarPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #playlist-export-toolbar',
     width: 520,
-    height: 211
+    height: 250
   })
 }
 
@@ -861,8 +861,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   left: 50%;
   top: 50%;
   width: 520px;
-  height: 211px;
-  height: 233px;
+  height: 250px;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);

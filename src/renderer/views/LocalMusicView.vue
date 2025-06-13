@@ -4,7 +4,7 @@ export default {  name: 'LocalMusicView' }
 </script>
 
 <script setup>
-import { computed, inject, onActivated, onMounted, reactive, ref, shallowRef, toRaw, watch } from 'vue';
+import { computed, inject, onActivated, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import CreatePlaylistBtn from '../components/CreatePlaylistBtn.vue';
 import { useLocalMusicStore } from '../store/localMusicStore';
@@ -16,18 +16,19 @@ import BatchActionBtn from '../components/BatchActionBtn.vue';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { isDevEnv, ipcRendererInvoke, isSupportedImage, 
     isBlank, toTrimString, stringEquals, pinyinOfFirstChar, 
-    ALPHABET_FILTER,
-    stringEqualsIgnoreCase,
-    isChineseChar,
-    isEnglishChar,
-    toUpperCaseTrimString} from "../../common/Utils";
+    ALPHABET_FILTER, stringEqualsIgnoreCase,
+    isChineseChar, isEnglishChar, toUpperCaseTrimString, nextInt,
+    shuffle,
+} from "../../common/Utils";
 import { Playlist } from '../../common/Playlist';
 import { LocalMusic } from '../../vendor/localmusic';
+import { offEvents, onEvents } from '../../common/EventBusWrapper';
 
 
 
 const { visitLocalPlaylistCreate, visitBatchLocalMusic } = inject('appRoute')
 const { showConfirm } = inject('apiExpose')
+const { playTracks } = inject('player')
 
 const { localPlaylists, importTaskCount } = storeToRefs(useLocalMusicStore())
 const { addLocalPlaylist, updateLocalPlaylist, resetAll,
@@ -57,7 +58,7 @@ const setCurrentTab = (value) => (currentTab.value = value)
 const setActiveTypeIndex = (value) => (activeTypeIndex.value = value)
 const setLoading = (value) => (isLoading.value = value)
 const setTabData = (value, expertedType) => {
-    if(expertedType !== activeTypeIndex.value) return 
+    if(expertedType != activeTypeIndex.value) return 
     tabData.length = 0 
     if(Array.isArray(value)) tabData.push(...value)
 }
@@ -67,6 +68,7 @@ const setAlbumFilterName = (value) => (albumFilterName.value = value)
 const setSingleLineTitleStyle = (value) => (singleLineTitleStyle.value = value)
 const setAlbumArtistSutitle = (value) => (isAlbumArtistSutitle.value = value)
 
+const getRefreshTimout = (num) => (Math.min(Math.max(num * 10, 168), 2588))
 
 const resetBack2TopBtn = () => {
     if (back2TopBtnRef.value) back2TopBtnRef.value.setScrollTarget(localMusicRef.value)
@@ -115,13 +117,12 @@ const loadContent = () => {
     }
 }
 
-
 const loadPlaylists = async () => {
     setCurrentTab(PlaylistsControl)
     const playlists = localPlaylists.value
     const total = playlists.length
     if(total < 1) return setLoading(false)
-    const timeout = Math.min(total * 10, 2588)
+    const timeout = getRefreshTimout(total)
     resultTimer = setTimeout(() => {
          setTabData(playlists, 0)
          setLoading(false)
@@ -156,8 +157,8 @@ const loadAlbums = async (filter) => {
         })
         albums.sort((d1, d2) => (pinyinOfFirstChar(d1.id) <= pinyinOfFirstChar(d2.id) ? -1 : 1))
     }
-    const total = albums.length
-    const timeout = Math.min(total * 10, 2588)
+ 
+    const timeout = getRefreshTimout(albums.length)
     resultTimer = setTimeout(() => {
         setTabData(albums, 1)
         setLoading(false)
@@ -165,6 +166,7 @@ const loadAlbums = async (filter) => {
 }
 
 const filterAlbums = (name) => {
+    if(activeTypeIndex.value != 1) return 
     name = name || albumFilterName.value || '#'
 
     resetView()
@@ -178,6 +180,7 @@ const filterAlbums = (name) => {
         return toUpperCaseTrimString(pinyinOfFirstChar(ch)).startsWith(name)
     })
 }
+
 
 const onScroll = () => {
     markScrollState()
@@ -216,6 +219,7 @@ const onDrop = async (event) => {
     }
     decreaseImportTaskCount()
     success ? showToast(msg) : showFailToast(msg)
+    if(success) loadContent()
 }
 
 const refreshTime = ref(0)
@@ -239,9 +243,9 @@ const importPlaylist = async () => {
             }
         }
         decreaseImportTaskCount()
-        if (success) showToast(msg)
-        if (!success) showFailToast(msg)
+        success ? showToast(msg) : showFailToast(msg)
         refreshTime.value = Date.now()
+        if(success) loadContent()
     }
 }
 
@@ -257,6 +261,46 @@ const removeAll = async () => {
     resetAll()
     refreshTime.value = Date.now()
 }
+
+const randomPlay = async () => {
+    const playlists = localPlaylists.value
+    if(!playlists || playlists.length < 1) return 
+
+    const plSizes = playlists.map(item => {
+        const { data } = item
+        return data ? data.length : 0
+    })
+    const maxTotal = plSizes.reduce((prev, curr, index, array) => {
+        curr = prev + array[index]
+        return curr
+    }, 0)
+    const total = Math.min(nextInt(23) + 10, maxTotal)
+    const indexes = []
+    let count = 0, prevMaxIndex = 0, plOffset = 0
+    do {
+        const index = nextInt(maxTotal)
+        if(!indexes.includes(index)) {
+            indexes.push(index)
+            ++count
+        }
+    } while(count < total)
+    indexes.sort((e1, e2) => (e1 - e2))
+    const tracks = indexes.map(index => {
+        for(let i = plOffset; i < plSizes.length; i++ ) {
+            const size = plSizes[i]
+            if (index < (prevMaxIndex + size)) {
+                const { data } = playlists[i]
+                return data[index - prevMaxIndex]
+            }
+            prevMaxIndex += size
+            ++plOffset
+        }
+    })
+    shuffle(tracks)
+    playTracks(tracks)
+    showToast('即将为您播放歌曲')
+}
+
 
 const tileOnDrop = (event, item, index) => {
     if(!item) return 
@@ -312,6 +356,11 @@ const tutorialList = [{
 
 
 /* 生命周期、监听 */
+const eventsRegistration = {
+    'batchAction-localPlaylist-removed': loadContent
+}
+
+//watch(localPlaylists, loadContent, { deep: true })
 watch(activeTypeIndex, loadContent)
 watch(albumFilterName, filterAlbums)
 watch(isSingleLineAlbumTitleStyle, (nv, ov) => {
@@ -321,8 +370,12 @@ watch(isSingleLineAlbumTitleStyle, (nv, ov) => {
     }
 })
 
-onMounted(loadContent)
-onActivated(() => restoreScrollState())
+onMounted(() => {
+    onEvents(eventsRegistration)
+    loadContent()
+})
+onActivated(restoreScrollState)
+onUnmounted(offEvents(eventsRegistration))
 </script>
 
 <template>
@@ -353,6 +406,19 @@ onActivated(() => restoreScrollState())
                                         d="M426.89,768q-148.75,0-297.49,0C69.87,767.93,19.57,729.67,4.61,672.5a140.41,140.41,0,0,1-4.31-34c-.44-55.67-.29-111.33-.21-167,0-31.15,27.63-51.88,56.33-42.52,17.88,5.83,29.09,22.14,29.12,42.72q.1,65.51.06,131c0,11.66,0,23.33,0,35,.13,27.13,18,45.07,45.21,45.08q143,.07,286,0,152.49,0,305,0c10.8,0,20.87-2.11,29.52-8.91,11.68-9.19,16.88-21.33,16.83-36.16-.15-43,0-86,0-129,0-12.83-.15-25.66,0-38.49.26-17.27,7.72-30.64,23.12-38.64,14.61-7.57,29.38-6.72,43.18,2.34,12.62,8.29,19,20.52,19,35.47.17,57.83.86,115.67-.21,173.49-1.18,63.32-47.07,114.32-109.5,123.77a141.79,141.79,0,0,1-20.92,1.3Q574.88,768.07,426.89,768Z" />
                                     <path
                                         d="M394.63,450.06v-5.88q0-199.47,0-398.94c0-20.15,9.91-35.63,26.85-42.21,28.37-11,58.2,9.24,58.3,40,.19,62,.06,124,.06,186V451.28c2-1.84,3.34-3,4.57-4.19Q535.69,395.84,587,344.6c18.84-18.76,47.07-18,63.7,1.39a42.31,42.31,0,0,1-1.2,56.56c-8.5,9.16-17.56,17.79-26.4,26.63Q546,506.25,468.93,583.3c-15.5,15.47-36.33,18.46-53.8,7.71a51.86,51.86,0,0,1-9.31-7.48q-89.51-89.35-178.88-178.84c-13.46-13.48-17.06-31.76-9.79-48.24a42.62,42.62,0,0,1,41.2-25.38c11.71.55,21.35,5.62,29.57,13.87q40.38,40.57,80.91,81c8.22,8.23,16.38,16.53,24.57,24.8Z" />
+                                </g>
+                            </g>
+                        </svg>
+                    </template>
+                </SvgTextButton>
+                <SvgTextButton text="随缘听" 
+                    :leftAction="randomPlay"
+                    class="spacing">
+                    <template #left-img>
+                        <svg width="16" height="16" viewBox="0 0 768.11 768.93" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path d="M384.2,509.12c-5.62,8.58-10.61,17-16.38,24.87-42.57,58-99.37,92.91-170.52,104A234.9,234.9,0,0,1,163,640.81c-43.5.32-87,.21-130.5.12C14.67,640.89.6,627.39.06,610.2-.53,591.75,13.72,577,32.51,577q63-.13,126,0c38.3,0,73.92-9.69,105.81-31,51.79-34.55,81.47-83,86.79-145.17A190.91,190.91,0,0,0,200.48,197.4c-14.06-3-28.73-4.05-43.14-4.24-41.65-.55-83.33-.1-125-.24-22.79-.08-38.09-22-30.3-43.11,4.44-12,15.83-20.7,28.59-20.74,46.67-.14,93.44-2,140,.48,92.18,4.86,162.42,48.2,210.63,127l2.76,4.54,3.21-5.28c42.17-69.24,103.1-111,183.24-123.77,15.53-2.49,31.5-2.64,47.29-3,21.65-.48,43.32-.12,66.19-.12-1.76-1.89-2.87-3.14-4-4.32-23.09-23.11-46.27-46.12-69.26-69.33C593.09,37.61,599.81,9,623.12,1.69,634.93-2,645.93.29,654.56,9c30.27,30.54,60.79,60.86,90.07,92.32,32.47,34.89,30.87,88.23-2.4,122.16Q699.53,267,656.63,310.4c-13.11,13.24-32.42,14.13-45.44,2.38-13.84-12.49-14.41-33.17-1-46.71C633,243.13,656,220.4,678.92,197.57c1.24-1.24,2.39-2.56,4.3-4.61h-4.29c-24.49,0-49-.21-73.49.08a192.07,192.07,0,0,0-182.25,139.8c-30.93,109.57,40,221.92,152.33,241.16a198.36,198.36,0,0,0,30.29,2.8c25.65.39,51.31.13,78.16.13-1.85-1.89-3-3.13-4.24-4.32q-34.37-33.51-68.71-67c-10.48-10.27-13.19-24.09-7.54-36.64a31.81,31.81,0,0,1,51.45-9.7c20.42,19.87,40.39,40.22,60.54,60.37,8.72,8.71,17.54,17.34,26.12,26.2,35.35,36.5,35.24,90.32-.31,126.63Q699,715.67,656.37,758.63c-18.25,18.36-48,11.12-54.62-13.24-3.35-12.28,0-23,9-32q34-33.84,68-67.76c1.26-1.25,2.45-2.57,4.48-4.71h-6.22c-24.33,0-48.7.78-73-.17-94.75-3.73-167.09-46.24-217-126.91Z"/>
                                 </g>
                             </g>
                         </svg>

@@ -399,7 +399,7 @@ provide('appStyle', {
   applyDocumentElementStyle,
   removeDocumentElementStyle,
   applyDocumentStyle,
-  applyElementStyle,
+  applyElementStyle
 })
 </script>
 

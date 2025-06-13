@@ -842,6 +842,11 @@ const playArtist = async (artist) => {
     if (!success) return showFailToast('播放歌手歌曲失败')
 }
 
+const playTracks = async (tracks) => {
+    resetQueue()
+    addTracks(tracks)
+    playNextTrack()
+}
 
 
 /* 频谱 */
@@ -1086,10 +1091,12 @@ const setupCurrentMediaSession = async (track) => {
                 navigator.mediaSession.metadata = new MediaMetadata(_metadata)
             }
 
-            //上、下一曲按钮功能绑定，不支持视频
+            //上、下一曲按钮等功能绑定，暂时不支持视频
             if (currentVideo.value) return
             navigator.mediaSession.setActionHandler("previoustrack", playPrevTrack)
             navigator.mediaSession.setActionHandler("nexttrack", playNextTrack)
+            navigator.mediaSession.setActionHandler("pause", togglePlay)
+            navigator.mediaSession.setActionHandler("play", togglePlay)
         }
     } catch(error) {
         if(isDevEnv()) console.log(error)
@@ -1971,6 +1978,7 @@ watch([isSimpleLayout, playingViewShow, playingViewThemeIndex, spectrumIndex], n
 //播放器API
 provide('player', {
     seekTrack,
+    playTracks,
     playPlaylist,
     favorPlaylist,
     addPlaylistToQueue,

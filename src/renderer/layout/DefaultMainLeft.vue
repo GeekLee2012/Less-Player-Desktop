@@ -998,7 +998,8 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #main-left .bottom {
-    height: 60px;
+    --bottom-height: 60px;
+    height: var(--bottom-height);
     display: flex;
     flex-direction: row;
     align-items: flex-end;
@@ -1127,11 +1128,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     justify-content: center;
     padding-left: 0px;
     padding-bottom: 2px;
+    --bottom-height: 66px;
 }
 
 .mini-navbar-mode #main-left .header .app-logo-wrap .app-logo,
 .mini-navbar-mode #main-left .bottom .app-logo-wrap .app-logo {
-    transform: scale(1.1) translateX(-1px);
+    /*transform: scale(1.1) translateX(-1px);*/
+    transform: scale(1.2) translateX(-1px);
 }
 
 .mini-navbar-mode #main-left #explore-mode .mode-item span,

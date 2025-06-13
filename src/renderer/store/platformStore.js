@@ -314,6 +314,7 @@ export const usePlatformStore = defineStore('platforms', {
                     return this.getScopePlatforms('cloudstorage')
                 }
                 return this.getScopePlatforms('playlists')
+                    .sort((p1, p2) => ((p2.weight || 0) -  (p1.weight || 0)))
             }
         },
         activePlatforms() {

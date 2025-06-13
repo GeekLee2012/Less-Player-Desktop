@@ -26,7 +26,7 @@ const { seekTrack, playVideoItem,
     mmssPreseekTime, isTrackSeekable,
     dndSaveCover, setupPlayingViewDnd, 
 } = inject('player')
-const { useWindowsStyleWinCtl } = inject('appCommon')
+const { useWindowsStyleWinCtl, playingViewLoadingBg } = inject('appCommon')
 const { getExVisualCanvasHandlersLength } = inject('apiExpose')
 const { applyDocumentStyle } = inject('appStyle')
 
@@ -152,30 +152,47 @@ const setupGradientBackgroundEffect = (track) => {
     //if(!containerEl) return 
     const coverEl = containerEl.querySelector('.center .cover')
     //if(!coverEl) return 
+    const isLoading = loading.value
+
+    //backdrop-filter性能消耗非常大
+    //macOS下，当歌曲频繁切换时，容易导致configd进程的CPU占用率飙升
+    //加载时，暂时切换至简单渐变
+    if(isLoading) {
+        applyDocumentStyle({ 
+            '--bg-effect': playingViewLoadingBg(),
+            '--bg-effect-bottom': 'transparent',
+        })
+
+        containerEl.classList.remove('light')
+        containerEl.classList.remove('dark')
+        containerEl.classList.remove('with-backdrop')
+        containerEl.classList.remove('brightness-light')
+        containerEl.classList.remove('brightness-mid')
+    
+        containerEl.classList.add('auto-effect')
+        containerEl.classList.add('light')
+        return 
+    }
+
+    //加载成功后，切换到正常封面效果
+    const cover = Track.coverDefault(track)
+    //默认封面
+    if (stringPrefixEquals(DEFAULT_COVER_BASE64, cover, 128)) {
+        containerEl.classList.remove('light')
+        containerEl.classList.remove('dark')
+        
+        containerEl.classList.add('auto-effect')
+        containerEl.classList.add('with-backdrop')
+        containerEl.classList.add('default-cover')
+        containerEl.classList.add('light')
+        return 
+    } 
 
     let bgEffect = 'none', bottomBg = 'transparent', rgbs = null
 
     const mode = playingViewBgCoverEffectGradientMode.value
     const bottomBgTransparent = playingViewBgCoverEffectGradientBottomBgTransparent.value
     const gradientType = playingViewBgCoverEffectGradientType.value
-    const isLoading = loading.value
-
-    if(!bottomBgTransparent || gradientType == 1 || (gradientType == 2 && isLoading)) {
-        const alphaFactor = mode ? 88: 68
-        rgbs = optimizePalette(sortPalette(getPalette(coverEl, 2), mode))
-        if(!isCurrentTrack(track)) return 
-        const alpha = (alphaFactor / 255).toFixed(2)
-        const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
-        const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
-        const _rgbColors = rgbColors.join(',')
-        bgEffect = `linear-gradient(${_rgbColors})`
-        bottomBg = bottomBgTransparent ? 'transparent' : rgbaColors[0]
-    }   
-    
-    applyDocumentStyle({ 
-        '--bg-effect': bgEffect,
-        '--bg-effect-bottom': bottomBg,
-    })
 
     const backdropClass = 'with-backdrop'
     const brightnessLightClass = 'brightness-light'
@@ -190,10 +207,22 @@ const setupGradientBackgroundEffect = (track) => {
     containerEl.classList.add('auto-effect')
     containerEl.classList.add(autoClass)
 
-    //backdrop-filter性能消耗非常大
-    //macOS下，当歌曲频繁切换时，容易导致configd进程的CPU占用率飙升
-    //歌曲加载中，暂时切换至简单渐变，加载完成后再切换回去
-    if(isLoading) return 
+    if(!bottomBgTransparent || gradientType == 1) {
+        const alphaFactor = mode ? 88: 68
+        rgbs = optimizePalette(sortPalette(getPalette(coverEl, 2), mode))
+        if(!isCurrentTrack(track)) return 
+        const alpha = (alphaFactor / 255).toFixed(2)
+        const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
+        const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
+        const _rgbColors = rgbColors.join(',')
+        bgEffect = `linear-gradient(${_rgbColors})`
+        bottomBg = bottomBgTransparent ? 'transparent' : rgbaColors[0]
+    }
+
+    applyDocumentStyle({ 
+        '--bg-effect': bgEffect,
+        '--bg-effect-bottom': bottomBg,
+    })
     if(!isCurrentTrack(track)) return 
 
     if(gradientType == 2 || (gradientType == 0 && (nextInt(100) % 2 == 0))) {
@@ -253,16 +282,40 @@ const setupSimpleBackgroundEffect = async (track) => {
     if(!isCurrentTrack(track)) return 
     const containerEl = document.querySelector('.visual-playing-view .container')
     if(!containerEl) return
-    
-    const cover = Track.coverDefault(currentTrack.value)
-    //默认封面
-    if (stringPrefixEquals(DEFAULT_COVER_BASE64, cover, 128)) return 
-    //本地歌曲
-    //if (cover.startsWith(ImageProtocal.prefix)) return
+
+    //加载时，切换到简单封面效果
+    const isLoading = loading.value
+    if (isLoading) {
+        applyDocumentStyle({ '--bg-effect': playingViewLoadingBg() })
+
+        containerEl.classList.remove('light')
+        containerEl.classList.remove('dark')
+
+        containerEl.classList.add('auto-effect')
+        containerEl.classList.add('simple-effect')
+        containerEl.classList.add('light')
+        return 
+    }
+
+    //加载成功后，切换到正常封面效果
+    const cover = Track.coverDefault(track)
     applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
+
+    //默认封面
+    if (stringPrefixEquals(DEFAULT_COVER_BASE64, cover, 128)) {
+        containerEl.classList.remove('light')
+        containerEl.classList.remove('dark')
+
+        containerEl.classList.add('auto-effect')
+        containerEl.classList.add('simple-effect')
+        containerEl.classList.add('default-cover')
+        containerEl.classList.add('light')
+        return 
+    } 
 
     const coverEl = containerEl.querySelector('.center .cover')
     const rgbs = optimizePalette(getPalette(coverEl, 2))
+    if(!isCurrentTrack(track)) return 
     const autoClass = getPlayingViewThemeAutoClass(rgbs, null, 202)
 
     containerEl.classList.remove('light')
@@ -1139,5 +1192,20 @@ onUnmounted(() => {
 .visual-playing-view .container.auto-effect.simple-effect .backdrop-container,
 .visual-playing-view .container.auto-effect.simple-effect .bg-container {
     display: none !important;
+}
+
+.visual-playing-view .container.default-cover .backdrop-container .backdrop-img {
+    --offset: -1280px;
+    top: var(--offset);
+    left: var(--offset);
+    right: var(--offset);
+    bottom: var(--offset);
+    width: calc(100% - var(--offset) * 2);
+    height: calc(100% - var(--offset) * 2);  
+}
+
+.visual-playing-view .container.auto-effect.default-cover .bg-container,
+.visual-playing-view .container.auto-effect.with-backdrop.default-cover .bg-container {
+    background-color: rgba(98, 98, 98, 0.6) !important; 
 }
 </style>

@@ -62,6 +62,10 @@
   margin-bottom: 3px !important;
 }
 
+.use-winos-win-ctl .default-layout.mini-navbar-mode #main-left .header .top-logo {
+  margin-top: 5px;
+}
+
 .use-winos-win-ctl .default-new-layout #main-left .header .top-logo {
   margin-top: 23px;
   margin-left: 23px;
@@ -70,6 +74,11 @@
 .use-winos-win-ctl .default-new-layout.mini-navbar-mode #main-left .header .top-logo {
   margin-top: 23px;
   margin-left: 0px;
+}
+
+.use-winos-win-ctl .default-layout.mini-navbar-mode #main-left .header .top-logo .app-logo,
+.use-winos-win-ctl .default-new-layout.mini-navbar-mode #main-left .header .top-logo .app-logo {
+  transform: scale(1.2) translateX(0px);
 }
 
 .winos-style #main-left .header .top-logo {
@@ -203,7 +212,8 @@
 .use-winos-win-ctl .custom-theme-edit-view .right-action .close-btn,
 .use-winos-win-ctl .custom-playing-theme-edit-view .right-action .close-btn,
 .use-winos-win-ctl .custom-app-border-radius-view .right-action .close-btn,
-.use-winos-win-ctl .gradient-color-toolbar .right-action .close-btn {
+.use-winos-win-ctl .gradient-color-toolbar .right-action .close-btn,
+.use-winos-win-ctl .playlist-export-toolbar .right-action .close-btn {
   margin-left: 33px;
   margin-right: -8px;
 }
@@ -211,7 +221,8 @@
 .use-winos-win-ctl .custom-theme-edit-view .header .title-wrap,
 .use-winos-win-ctl .custom-playing-theme-edit-view .header .title-wrap,
 .use-winos-win-ctl .custom-app-border-radius-view .header .title-wrap,
-.use-winos-win-ctl .gradient-color-toolbar .header .title-wrap {
+.use-winos-win-ctl .gradient-color-toolbar .header .title-wrap,
+.use-winos-win-ctl .playlist-export-toolbar .header .title-wrap {
   margin-left: 10px !important;
 }
 
@@ -268,7 +279,7 @@
   transform: translateY(-1px);
 }
 
-.use-winos-win-ctl #main-left  .center {
+.use-winos-win-ctl #main-left .center {
   margin-bottom: 10px;
 }
 
