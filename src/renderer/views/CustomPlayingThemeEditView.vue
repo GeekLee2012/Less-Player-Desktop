@@ -111,16 +111,13 @@ const onDrop = (event) => {
     if (files.length > 1) return showFailToast('还不支持多文件拖拽')
 
     const { path } = files[0]
-    let isEventStopped = true
     if (isSupportedVideo(path)) {
         setupBgVideoUrl(path)
+        event.stopPropagation()
     } else if (isSupportedImage(path)) {
         setupPreviewCover(path)
-    } else {
-        //其他文件，直接放行，继续事件冒泡
-        isEventStopped = false
+        event.stopPropagation()
     }
-    if (isEventStopped) event.stopPropagation()
 }
 
 

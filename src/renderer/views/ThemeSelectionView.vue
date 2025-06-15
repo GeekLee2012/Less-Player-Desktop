@@ -244,7 +244,7 @@ onUnmounted(invokeContextUnmounted)
 }
 
 .theme-selection-view .center .left .nav-item {
-    padding: 50px 0px;
+    padding: 59px 0px;
     cursor: pointer;
 }
 

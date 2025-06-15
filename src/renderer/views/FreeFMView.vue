@@ -57,21 +57,17 @@ const onScroll = () => {
 const onDrop = async (event) => {
     if (importTaskCount.value > 0) return
     event.preventDefault()
+    
     const { files } = event.dataTransfer
+    if (files.length > 1) return
 
-    let isEventStopped = true
-    if (files.length == 1) {
-        const { path } = files[0]
-        if (path.endsWith('.json') || path.endsWith('.pls') 
-            || path.endsWith('.m3u') || path.endsWith('.m3u8')) {
-            const result = await ipcRendererInvoke('read-text', path)
-            doImportRadios(result)
-        }
-    } else {
-        //其他文件，直接放行，继续事件冒泡
-        isEventStopped = false
-    }
-    if (isEventStopped) event.stopPropagation()
+    const { path } = files[0]
+    if (!path.endsWith('.json') && !path.endsWith('.pls') 
+        && !path.endsWith('.m3u') && !path.endsWith('.m3u8')) return
+    
+    event.stopPropagation()
+    const result = await ipcRendererInvoke('read-text', path)
+    doImportRadios(result)
 }
 
 const importRadios = async () => {

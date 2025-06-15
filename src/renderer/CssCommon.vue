@@ -79,6 +79,7 @@
   --others-sliderba-ctl-height-exsize: 2px;
   --others-lyric-ctl-extra-btn-right: 56px;
   --others-lyric-ctl-extra-btn-bottom: 99px;
+  --others-webdav-view-grid-tile-width: 100px;
 
   /* 主题相关 */
   --border-popovers-border-color: #666;

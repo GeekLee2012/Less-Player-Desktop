@@ -124,13 +124,35 @@ const removeAllThemes = async () => {
     showToast('自定义主题已清空')
 }
 
+const onDrop = async (event) => {
+    event.preventDefault()
+
+    const { files } = event.dataTransfer
+    if (files.length > 1) return
+
+    const { path } = files[0]
+    if (!path.endsWith('.json')) return 
+    
+    const result = await ipcRendererInvoke('read-text', path)
+    if (!result) return 
+    const { filePath, data } = result
+    if(!data || !filePath) return 
+    const themes = JSON.parse(data) || []
+    themes.forEach(theme => saveCustomTheme(theme, true))
+    setCurrnetTabIndex(1)
+    showToast('主题导入完成')
+    event.stopPropagation()
+}
+
 onActivated(() => {
     emitEvents('themesView-actived')
 })
 </script>
 
 <template>
-    <div id="themes-view">
+    <div id="themes-view" 
+        @dragover="e => e.preventDefault()" 
+        @drop="onDrop">
         <div class="header">
             <div class="title">主题</div>
             <div class="tab-nav">

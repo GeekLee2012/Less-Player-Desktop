@@ -267,7 +267,7 @@ const togglePluginState = (plugin) => {
 const onDrop = async (event) => {
     event.preventDefault()
     const { files } = event.dataTransfer
-    if (!files || files.length < 1) return
+    if (files.length < 1) return
 
     for (var i = 0; i < files.length; i++) {
         const { name, path } = files[i]

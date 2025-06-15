@@ -769,7 +769,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </span>
                     </div>
                     <div class="border-radius-ctl">
-                        <span class="sec-title cate-subtitle">圆角自定义：</span>
+                        <span class="sec-title cate-subtitle">应用圆角自定义：</span>
                         <SvgTextButton text="前往设置" :leftAction="toggleCustomAppBorderRadiusViewShow">
                         </SvgTextButton>
                     </div>
@@ -823,7 +823,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </datalist>
                     </div>
                     <div class="titled-w258">
-                        <span class="cate-subtitle">高亮字体自动加粗：</span>
+                        <span class="cate-subtitle">高亮字体自动加粗显示：</span>
                         <ToggleControl @click="toggleFontAutoWeight" :value="common.fontAutoWeight">
                         </ToggleControl>
                     </div>
@@ -848,7 +848,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </span>
                     </div>
                     <div class="titled-w258" v-show="isUseCardStyleImageTextTile || isUseHCardStyleImageTextTile">
-                        <span class="cate-subtitle">卡片显示底部阴影：</span>
+                        <span class="cate-subtitle">{{ isUseHCardStyleImageTextTile ? 'H' : '' }}卡片显示底部阴影：</span>
                         <ToggleControl @click="toggleUseShadowForCardStyleTile" :value="common.shadowForCardStyleTile">
                         </ToggleControl>
                         <div class="tip-text spacing3">提示：仅支持部分主题</div>

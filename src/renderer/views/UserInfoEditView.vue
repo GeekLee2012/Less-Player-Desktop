@@ -74,14 +74,10 @@ const onDrop = (event) => {
     if (files.length > 1) return showFailToast('还不支持多文件拖拽')
 
     const { path } = files[0]
-    let isEventStopped = true
     if (isSupportedImage(path)) {
         setupCover(path)
-    } else {
-        //其他文件，直接放行，继续事件冒泡
-        isEventStopped = false
+        event.stopPropagation()
     }
-    if (isEventStopped) event.stopPropagation()
 }
 
 /* 生命周期、监听 */

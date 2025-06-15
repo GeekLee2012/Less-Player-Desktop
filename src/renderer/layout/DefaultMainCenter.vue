@@ -403,6 +403,45 @@ const setPaginationSize = () => {
     if (el) el.style.setProperty('--content-min-height', `${minHeight}px`)
 }
 
+
+const setWebDavViewItemsSize = () => {
+    const tileMinWidth = 120
+    const tileHMargin = 15
+    const tileHPadding = 16
+    const mainMargin = 33
+    const scrollBarWidth = 6
+    const limits = genSeqNums(20, 6, -1)
+
+    const mainContent = document.querySelector('#webdav-session-detail-view .center')
+    if (!mainContent) return
+    const { clientWidth } = mainContent
+    if (!clientWidth) return
+    
+    const tileWidths = limits.map(num => ((clientWidth - scrollBarWidth - mainMargin * 2) / num - tileHMargin - tileHPadding))
+    let tileWidth = tileMinWidth, tileNum = limits[limits.length - 1]
+    for (var i = 0; i < tileWidths.length; i++) {
+        if (Math.abs(tileWidths[i] - tileMinWidth) <= 20) {
+            tileWidth = tileWidths[i]
+            tileNum = limits[i]
+            break
+        }
+    }
+
+    //浮点数运算有误差，保险起见，设置一个误差值
+    tileWidth = parseInt(tileWidth)
+
+    //再次确认，计算补偿值
+    const totalWidth = tileNum * (tileWidth + tileHMargin + tileHPadding) + mainMargin * 2 + scrollBarWidth
+    const offsetWidth = (clientWidth - totalWidth)
+    if(offsetWidth >= 10) tileWidth += parseInt(offsetWidth / tileNum)
+
+    //const tileHeight = tileWidth * 100 / tileMinWidth //95
+    applyDocumentStyle({
+        '--others-webdav-view-grid-tile-width': `${tileWidth}px`,
+        //'--others-theme-preview-tile-height': `${tileHeight}px`
+    })
+}
+
 const resizeViewItems = (event) => {
     if (!isDefaultLayout.value) return
 
@@ -418,6 +457,8 @@ const resizeViewItems = (event) => {
     setThemesViewItemsSize()
     //分页组件
     setPaginationSize()
+    //WebDAV
+    setWebDavViewItemsSize()
 
     //隐藏上下文菜单
     hideAllCtxMenus()
@@ -456,6 +497,7 @@ const eventsRegistration = {
     'playingView-changed': setPlayingViewSize,
     'app-layout-default': setupDefaultLayout,
     'themesView-actived': setThemesViewItemsSize,
+    'wedDavView-gridView': setWebDavViewItemsSize,
 }
 
 onMounted(() => {

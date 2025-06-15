@@ -17,6 +17,7 @@ import { isDevEnv, ipcRendererInvoke, isSupportedAudio, isSupportedVideo,
 import { WebDav } from '../../vendor/webdav';
 import { Playlist } from '../../common/Playlist';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
+import { emitEvents } from '../../common/EventBusWrapper';
 
 
 
@@ -308,6 +309,7 @@ const saveItemToLocal = async (event, item) => {
 const switchViewMode = () => {
     const mode = viewMode.value
     setViewMode((mode + 1) % 2)
+    if(viewMode.value == 1) emitEvents('wedDavView-gridView')
 }
 
 const resetFilter = () => {
@@ -811,6 +813,7 @@ onMounted(visitRoot)
 #webdav-session-detail-view .center .content.grid-view .item {
     flex: none;
     width: 100px;
+    width: var(--others-webdav-view-grid-tile-width);
     padding: 15px 8px 15px 8px;
     margin-right: 3px;
     margin-left: 12px;
@@ -862,7 +865,9 @@ onMounted(visitRoot)
     height: 119px;
 }
 
+/*
 .mini-navbar-mode #webdav-session-detail-view .center .content.grid-view .item {
     width: 120px;
 }
+*/
 </style>

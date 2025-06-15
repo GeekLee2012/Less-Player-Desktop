@@ -259,45 +259,53 @@ const removeAll = async () => {
     
     showToast('本地歌曲已全部清空')
     resetAll()
-    refreshTime.value = Date.now()
+    //refreshTime.value = Date.now()
+    loadContent()
 }
 
 const randomPlay = async () => {
     const playlists = localPlaylists.value
     if(!playlists || playlists.length < 1) return 
 
+    let total = 0
     const plSizes = playlists.map(item => {
         const { data } = item
-        return data ? data.length : 0
+        const size = data ? data.length : 0
+        total += size
+        return size
     })
-    const maxTotal = plSizes.reduce((prev, curr, index, array) => {
+    /*
+    const total = plSizes.reduce((prev, curr, index, array) => {
         curr = prev + array[index]
         return curr
-    }, 0)
-    const total = Math.min(nextInt(23) + 10, maxTotal)
+    }, 0)*/
+    const num = Math.min(nextInt(20) + 10, total)
     const indexes = []
-    let count = 0, prevMaxIndex = 0, plOffset = 0
+    let count = 0, accSize = 0, plIndex = 0, miss = 0
+    const maxMiss = 2 * num
     do {
-        const index = nextInt(maxTotal)
+        const index = nextInt(total)
         if(!indexes.includes(index)) {
             indexes.push(index)
             ++count
+        } else if (++miss >= maxMiss){
+            break
         }
-    } while(count < total)
-    indexes.sort((e1, e2) => (e1 - e2))
-    const tracks = indexes.map(index => {
-        for(let i = plOffset; i < plSizes.length; i++ ) {
-            const size = plSizes[i]
-            if (index < (prevMaxIndex + size)) {
-                const { data } = playlists[i]
-                return data[index - prevMaxIndex]
+    } while(count < num)
+    if (miss >= maxMiss) return showFailToast('发生未知错误<br>无法为您播放歌曲')
+    const tracks = indexes.sort((e1, e2) => (e1 - e2))
+        .map(index => {
+            for(let i = plIndex; i < plSizes.length; i++ ) {
+                const size = plSizes[i]
+                if (index < (accSize + size)) {
+                    const { data } = playlists[i]
+                    return data[index - accSize]
+                }
+                accSize += size
+                ++plIndex
             }
-            prevMaxIndex += size
-            ++plOffset
-        }
-    })
-    shuffle(tracks)
-    playTracks(tracks)
+        })
+    playTracks(shuffle(tracks))
     showToast('即将为您播放歌曲')
 }
 
@@ -395,9 +403,14 @@ onUnmounted(offEvents(eventsRegistration))
                 <p>歌曲信息乱码时，建议用第三方音乐标签工具修正后，再重新添加到当前应用</p>
             </div>
             <div class="action" :class="{ 'none-about': !isLocalMusicViewTipsShow }">
+                <!--
                 <CreatePlaylistBtn :leftAction="visitLocalPlaylistCreate">
                 </CreatePlaylistBtn>
-                <SvgTextButton text="导入歌单" :leftAction="importPlaylist" :disabled="importTaskCount > 0" class="spacing">
+                -->
+                <SvgTextButton text="导入歌单" 
+                    :leftAction="importPlaylist" 
+                    :rightAction="visitLocalPlaylistCreate"
+                    :disabled="importTaskCount > 0">
                     <template #left-img>
                         <svg width="17" height="15" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -406,6 +419,22 @@ onUnmounted(offEvents(eventsRegistration))
                                         d="M426.89,768q-148.75,0-297.49,0C69.87,767.93,19.57,729.67,4.61,672.5a140.41,140.41,0,0,1-4.31-34c-.44-55.67-.29-111.33-.21-167,0-31.15,27.63-51.88,56.33-42.52,17.88,5.83,29.09,22.14,29.12,42.72q.1,65.51.06,131c0,11.66,0,23.33,0,35,.13,27.13,18,45.07,45.21,45.08q143,.07,286,0,152.49,0,305,0c10.8,0,20.87-2.11,29.52-8.91,11.68-9.19,16.88-21.33,16.83-36.16-.15-43,0-86,0-129,0-12.83-.15-25.66,0-38.49.26-17.27,7.72-30.64,23.12-38.64,14.61-7.57,29.38-6.72,43.18,2.34,12.62,8.29,19,20.52,19,35.47.17,57.83.86,115.67-.21,173.49-1.18,63.32-47.07,114.32-109.5,123.77a141.79,141.79,0,0,1-20.92,1.3Q574.88,768.07,426.89,768Z" />
                                     <path
                                         d="M394.63,450.06v-5.88q0-199.47,0-398.94c0-20.15,9.91-35.63,26.85-42.21,28.37-11,58.2,9.24,58.3,40,.19,62,.06,124,.06,186V451.28c2-1.84,3.34-3,4.57-4.19Q535.69,395.84,587,344.6c18.84-18.76,47.07-18,63.7,1.39a42.31,42.31,0,0,1-1.2,56.56c-8.5,9.16-17.56,17.79-26.4,26.63Q546,506.25,468.93,583.3c-15.5,15.47-36.33,18.46-53.8,7.71a51.86,51.86,0,0,1-9.31-7.48q-89.51-89.35-178.88-178.84c-13.46-13.48-17.06-31.76-9.79-48.24a42.62,42.62,0,0,1,41.2-25.38c11.71.55,21.35,5.62,29.57,13.87q40.38,40.57,80.91,81c8.22,8.23,16.38,16.53,24.57,24.8Z" />
+                                </g>
+                            </g>
+                        </svg>
+                    </template>
+                    <template #right-img>
+                        <svg width="18" height="18" viewBox="0 -50 768.02 554.57" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z" />
+                                    <path
+                                        d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z" />
+                                    <path
+                                        d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z" />
+                                    <path
+                                        d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z" />
                                 </g>
                             </g>
                         </svg>
@@ -583,7 +612,7 @@ onUnmounted(offEvents(eventsRegistration))
 
 #local-music-view .list-title .action.to-right {
     position: absolute;
-    right: 0px;
+    right: 6px;
 }
 
 #local-music-view .list-title .action .filter-btn {

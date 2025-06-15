@@ -231,10 +231,8 @@ const onDrop = async (event) => {
     event.preventDefault()
 
     const { files } = event.dataTransfer
-    if (files.length > 1) {
-        showFailToast('还不支持多文件拖拽')
-        return
-    }
+    if (files.length > 1) return showFailToast('还不支持多文件拖拽')
+    
     const { name, path } = files[0]
     setLoading(true)
     const result = await ipcRendererInvoke('dnd-open-audios', path, isUseDeeplyScanForDirectoryEnable.value)

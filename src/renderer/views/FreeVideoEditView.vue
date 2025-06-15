@@ -172,17 +172,13 @@ const dragToDeleteDemo = async () => {
 const onDrop = (event) => {
     event.preventDefault()
     const { files } = event.dataTransfer
-    const isSingleFile = (files.length == 1)
+    if (files.length > 1) return
 
-    let isEventStopped = true
-    if (isSingleFile && isSupportedVideo(files[0])) {
+    if (isSupportedVideo(files[0])) {
         const { path } = files[0]
         setupVideoUrl(path)
-    } else {
-        //其他文件，直接放行，继续事件冒泡
-        isEventStopped = false
+        event.stopPropagation()
     }
-    if (isEventStopped) event.stopPropagation()
 }
 
 //TODO
