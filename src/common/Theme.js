@@ -67,6 +67,7 @@ export class Theme {
             borderColor: null,
             headerNavBorderColor: null,
             leftNavBorderColor: null,
+            bottomNavBorderColor: null,
             popoversBorderColor: null,
             inputsBorderColor: null
         }

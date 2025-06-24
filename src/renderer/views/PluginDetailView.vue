@@ -58,12 +58,10 @@ const computedPluginOptions = computed(() => {
 })
 
 const updateOptions = (event) => {
-    const options = readProperties(event.target.value)
-    if(options) {
-        const { id } = props
-        updatePluginOptions(id, options)
-        onPluginOptionsUpdated(id, options)
-    }
+    const options = readProperties(event.target.value) || {}
+    const { id } = props
+    updatePluginOptions(id, options)
+    onPluginOptionsUpdated(id, options)
 }
 
 const togglePluginState = (plugin) => {
@@ -363,8 +361,8 @@ onActivated(() => {
 #plugin-detail-view .content .info-row.about .sec-content {
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 10;
-    line-clamp: 10;
+    -webkit-line-clamp: 18;
+    line-clamp: 18;
 }
 
 #plugin-detail-view .content.options textarea {

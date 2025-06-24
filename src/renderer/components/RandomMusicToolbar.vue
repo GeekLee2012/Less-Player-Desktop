@@ -157,7 +157,7 @@ watch(randomMusicToolbarShow, () => setNavIndex(0))
 }
 
 .random-music-toolbar .center .nav-item {
-    padding: 39px 1px;
+    padding: 44px 0px;
     cursor: pointer;
     margin-bottom: 0px;
 }

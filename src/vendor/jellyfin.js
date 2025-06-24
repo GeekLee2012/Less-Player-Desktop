@@ -422,7 +422,8 @@ export class Jellyfin {
                 const { Primary } = ImageTags
                 const cover = Jellyfin.getCover(Id, ServerId, Primary)
                 const result = { id, platform: Jellyfin.CODE, title: Name, cover, offset, limit, page, data:[] }
-                
+                if(page > 1) return resolve(result)
+                    
                 const reqBody = {
                     parentId: id,
                     recursive: true,

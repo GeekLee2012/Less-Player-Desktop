@@ -551,6 +551,14 @@ watch(workingCustomTheme, (nv, ov) => {
                             </ColorInputControl>
                         </div>
                         <div class="item">
+                            <div class="name">主流布局 - 底部栏 - 边框颜色：</div>
+                            <ColorInputControl label="主流布局 - 底部栏 - 边框颜色" 
+                                :value="customTheme.border.bottomNavBorderColor" 
+                                :colorMode="true"
+                                :onChanged="(value) => customTheme.setBorder('bottomNavBorderColor', value)">
+                            </ColorInputControl>
+                        </div>
+                        <div class="item">
                             <div class="name">弹窗类 - 边框颜色：</div>
                             <ColorInputControl label="弹窗类 - 边框颜色" 
                                 :value="customTheme.border.popoversBorderColor" 

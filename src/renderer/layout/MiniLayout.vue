@@ -32,6 +32,7 @@ const { resetQueue, moveTrack } = usePlayStore()
 const { isHideToTrayOnMinimized, isTrayShow, isShowDialogBeforeQuitApp,
     getWindowZoom, isUseWinCenterStrict, isPlaybackQueueHistoryBtnShow, 
     isPlaybackQueuePositionBtnShow, isPlaybackQueueBatchActionBtnShow,
+    isPlaybackQueueViewTipsShow,
  } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
@@ -212,6 +213,24 @@ const moveDragItem = (event) => {
     moveTrack(dragTargetIndex.value, dragOverIndex.value)
 }
 
+const tutorialList = [{
+    title: '封面区域，拖拽移动窗口',
+    artist: [ { id:'', name: '教程 - 迷你模式 - 窗口' }],
+    color: '#17b978',
+}, {
+    title: '歌词按钮，单击左键切换显示模式',
+    artist: [ { id:'', name: '教程 - 迷你模式 - 歌词' }],
+    color: '#17b978',
+}, {
+    title: '歌词按钮，单击右键可关闭歌词',
+    artist: [ { id:'', name: '教程 - 迷你模式 - 歌词' }],
+    color: '#17b978',
+}, {
+    title: '播放列表按钮，单击展开/收起当前播放',
+    artist: [ { id:'', name: '教程 - 迷你模式 - 当前播放' }],
+    color: '#17b978',
+}]
+
 
 
 watch(progressState, (nv, ov) => {
@@ -221,7 +240,7 @@ watch(progressState, (nv, ov) => {
     applyDocumentStyle({
         '--others-mini-layout-cover-progress-bg': progressEffect,
     })
-})
+}, { immediate: true })
 
 watch(lyricToolbarShow, () => nextTick(setLyricToolbarPos))
 watch(desktopLyricShow, (nv, ov) => {
@@ -237,9 +256,7 @@ onUnmounted(toggleMiniStyle)
         <div class="header">
             <div class="cover-wrap">
                 <img class="cover" 
-                    :class="{
-                        rotation: playing, 
-                    }"
+                    :class="{ rotation: playing }"
                     v-lazy="Track.coverDefault(currentTrack)" />
             </div>
         </div>
@@ -409,6 +426,12 @@ onUnmounted(toggleMiniStyle)
                             @dragend="resetDragState">
                         </PlaybackQueueItem>
                     </template>
+                    <PlaybackQueueItem v-for="(item, index) in tutorialList"
+                        v-show="isPlaybackQueueViewTipsShow && queueTracks.length < 1"
+                        class="item" 
+                        :data="item"
+                        :index="index">
+                    </PlaybackQueueItem>
                 </div>
             </div>
             <div class="lyric-wrap" v-if="isFullLyricShow">

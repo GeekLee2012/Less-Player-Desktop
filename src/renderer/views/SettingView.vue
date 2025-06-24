@@ -43,7 +43,7 @@ const { theme, layout, common, track, desktopLyric,
     isToggleCtlTitleActionEnable, isShowDialogBeforeSuspiciousZoom, 
     isShowDialogBeforeClearRecents, isStoreRecentPlay,
     isAutoClearRecentPlayEnable, autoClearRecentTypes,
-    isUseHCardStyleImageTextTile,
+    isUseHCardStyleImageTextTile, isUseNormalStyleImageTextTile,
 } = storeToRefs(useSettingStore())
 const { setThemeIndex,
     setThemeNativeMode,
@@ -75,7 +75,9 @@ const { setThemeIndex,
     togglePlayingWithoutSleeping,
     togglePlayingViewUseBgCoverEffect,
     togglePlayingViewCoverBorderShow,
+    toggleUseShadowForNormalStyleTile,
     toggleUseShadowForCardStyleTile,
+    toggleUseShadowForHCardStyleTile,
     toggleUseReversedForHCardStyleTile,
     toggleUseSmallIconForHCardStyleTile,
     toggleUseCoverNopaddingForHCardStyleTile,
@@ -551,7 +553,7 @@ const toggleLightThemeSelection = () => {
     toggleThemeSelectionView({
         mounted: () => {
             const { lightIndex: index, lightType: type } = theme.value
-            return { subtitle: '浅色', index, type }
+            return { subtitle: '亮色', index, type }
         },
         selected: ({ index, type }) => {
             setThemeLightIndex(index, type)
@@ -564,7 +566,7 @@ const toggleDarkThemeSelection = () => {
     toggleThemeSelectionView({
         mounted: () => {
             const { darkIndex: index, darkType: type } = theme.value
-            return { subtitle: '深色', index, type }
+            return { subtitle: '暗色', index, type }
         },
         selected: ({ index, type }) => {
             setThemeDarkIndex(index, type)
@@ -645,7 +647,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                     <div class="theme-mode-wrap">
                         <div class="theme-mode max-content-mr-36">
                             <span class="cate-subtitle">显示模式：</span>
-                            <span v-for="(item, index) in ['自动', '浅色', '深色']" class="quality-item"
+                            <span v-for="(item, index) in ['自动', '亮色', '暗色']" class="quality-item"
                                 :class="{ active: index == theme.nativeMode, 'first-item': index == 0 }" 
                                 @click="setThemeNativeMode(index)" >
                                 {{ item }}
@@ -654,12 +656,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <div class="light-item mode-preview-item" 
                             :style="computedLightItemBackground"
                             @click="toggleLightThemeSelection" >
-                            <span class="cate-subtitle">浅色</span>
+                            <span class="cate-subtitle">亮色</span>
                         </div>
                         <div class="dark-item mode-preview-item" 
                             :style="computedDarkItemBackground"
                             @click="toggleDarkThemeSelection" >
-                            <span class="cate-subtitle">深色</span>
+                            <span class="cate-subtitle">暗色</span>
                         </div>
                     </div>
                     <div class="preset-themes last" >
@@ -687,21 +689,16 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <span class="cate-name">通用</span>
                 <div class="content">
                     <div class="tip-text">提示：当前应用的输入框，按下Enter键生效，或光标焦点离开后自动生效</div>
-                    <div class="titled-w258">
+                    <div >
                         <span class="cate-subtitle">设置页启用导航按钮：</span>
                         <ToggleControl @click="toggleSettingViewNavbarShow" :value="common.settingViewNavbarShow">
                         </ToggleControl>
                     </div>
-                    <div class="titled-w258">
+                    <div>
                         <span class="cate-subtitle">设置页开关选项标题联动：</span>
                         <ToggleControl @click="toggleToggleCtlTitleActionEnable" :value="common.toggleCtlTitleActionEnable">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：开启后，试点击一下左边标题</div>
-                    </div>
-                    <div class="titled-w258" v-if="false">
-                        <span class="cate-subtitle">推荐主题显示编辑按钮：</span>
-                        <ToggleControl @click="togglePresetThemeActionShow" :value="common.presetThemeActionShow">
-                        </ToggleControl>
                     </div>
                     <div class="tip-text">提示：建议开启“锁定为初始值”，以解决窗口缩放闪动Bug<br>
                         但开启“锁定”后，每次改变“窗口缩放”时需重启应用；否则会触发窗口缩放闪动Bug<br>
@@ -782,7 +779,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                             step="1" @keydown.enter="updateWinCustomShadowSize" @focusout="updateWinCustomShadowSize" />
                     </div>
                     <div class="tip-text">提示：当在非主屏幕显示当前应用时，请关闭当前选项</div>
-                    <div class="titled-w258">
+                    <div>
                         <span class="cate-subtitle">窗口在主屏幕严格居中显示：</span>
                         <ToggleControl @click="toggleUseWinCenterStrict" :value="common.useWinCenterStrict">
                         </ToggleControl>
@@ -822,7 +819,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                             </option>
                         </datalist>
                     </div>
-                    <div class="titled-w258">
+                    <div>
                         <span class="cate-subtitle">高亮字体自动加粗显示：</span>
                         <ToggleControl @click="toggleFontAutoWeight" :value="common.fontAutoWeight">
                         </ToggleControl>
@@ -847,28 +844,39 @@ onUnmounted(() => offEvents(eventsRegistration))
                             {{ item }}
                         </span>
                     </div>
-                    <div class="titled-w258" v-show="isUseCardStyleImageTextTile || isUseHCardStyleImageTextTile">
-                        <span class="cate-subtitle">{{ isUseHCardStyleImageTextTile ? 'H' : '' }}卡片显示底部阴影：</span>
+                    <div v-show="isUseNormalStyleImageTextTile">
+                        <span class="cate-subtitle">封面显示边框阴影：</span>
+                        <ToggleControl @click="toggleUseShadowForNormalStyleTile" :value="common.shadowForNormalStyleTile">
+                        </ToggleControl>
+                    </div>
+                    <div v-show="isUseCardStyleImageTextTile">
+                        <span class="cate-subtitle">卡片显示底部阴影：</span>
                         <ToggleControl @click="toggleUseShadowForCardStyleTile" :value="common.shadowForCardStyleTile">
                         </ToggleControl>
                         <div class="tip-text spacing3">提示：仅支持部分主题</div>
                     </div>
-                    <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
+                    <div v-show="isUseHCardStyleImageTextTile">
+                        <span class="cate-subtitle">H卡片显示底部阴影：</span>
+                        <ToggleControl @click="toggleUseShadowForHCardStyleTile" :value="common.shadowForHCardStyleTile">
+                        </ToggleControl>
+                        <div class="tip-text spacing3">提示：仅支持部分主题</div>
+                    </div>
+                    <div v-show="isUseHCardStyleImageTextTile">
                         <span class="cate-subtitle">H卡片启用反转布局：</span>
                         <ToggleControl @click="toggleUseReversedForHCardStyleTile" :value="common.reversedForHCardStyleTile">
                         </ToggleControl>
                     </div>
-                    <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
+                    <div v-show="isUseHCardStyleImageTextTile">
                         <span class="cate-subtitle">H卡片启用小图标按钮：</span>
                         <ToggleControl @click="toggleUseSmallIconForHCardStyleTile" :value="common.smallIconForHCardStyleTile">
                         </ToggleControl>
                     </div>
-                    <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
+                    <div v-show="isUseHCardStyleImageTextTile">
                         <span class="cate-subtitle">H卡片启用无边距封面：</span>
                         <ToggleControl @click="toggleUseCoverNopaddingForHCardStyleTile" :value="common.coverNopaddingForHCardStyleTile">
                         </ToggleControl>
                     </div>
-                    <div class="titled-w258" v-show="isUseHCardStyleImageTextTile">
+                    <div v-show="isUseHCardStyleImageTextTile">
                         <span class="cate-subtitle">H卡片启用无阴影封面：</span>
                         <ToggleControl @click="toggleUseCoverNoshadowForHCardStyleTile" :value="common.coverNoshadowForHCardStyleTile">
                         </ToggleControl>

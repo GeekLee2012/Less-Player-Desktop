@@ -13,13 +13,30 @@
 }
 
 /* 桌面歌词（文字）按钮 */
+/*
 .winos-style .classic-main-bottom .lyric-btn,
-.winos-style .default-new-main-bottom .lyric-btn,
+.winos-style .default-new-main-bottom .lyric-btn
 .winos-style .playing-view .bottom .action .lyric-btn,
 .winos-style .visual-playing-view .action .lyric-btn {
   font-weight: normal !important;
-  transform: translateY(-1px) scale(1.05);
+  transform: translateY(-1px) scale(1.05) !important;
 }
+
+.winos-style .playing-view .bottom .action .lyric-btn {
+  font-weight: normal !important;
+  transform: translateY(2px) scale(1.09) !important;
+}
+
+.winos-style .visual-playing-view .action .lyric-btn {
+  font-weight: normal !important;
+  transform: translateY(-1px);
+}
+
+.winos-style .playing-view .bottom .action .equalizer-btn,
+.winos-style .visual-playing-view .action .equalizer-btn {
+  transform: translateY(1px);
+}
+*/
 
 /* 播放页 - 歌词 */
 .winos-style .lyric-ctl .audio-artist,

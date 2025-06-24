@@ -78,7 +78,7 @@ export const useSettingStore = defineStore('setting', {
             index: 1,
             //主题分类，0 => 推荐，1 => 自定义
             type: 0,
-            //nativeTheme模式，0 => system（跟随系统），1 => light（浅色）, 2 => dark（深色）
+            //nativeTheme模式，0 => system（跟随系统），1 => light（亮色）, 2 => dark（暗色）
             nativeMode: 0,
             /* Light Mode */
             lightIndex: 1,
@@ -97,7 +97,7 @@ export const useSettingStore = defineStore('setting', {
             winZoom: 85,
             //锁定为初始值
             //在创建应用窗口时，作为webPreference的配置参数
-            useWinZoomForCreate: false,
+            useWinZoomForCreate: true,
             //窗口控件风格，0 => 自动，1 => macOS, 2 => Windows
             winCtlStyle: 0,
             //元素圆角风格（预设），0 => 自动，1 => macOS, 2 => Windows
@@ -130,14 +130,18 @@ export const useSettingStore = defineStore('setting', {
             fontWeight: 400,
             //字体自动加粗显示
             fontAutoWeight: false,
-            //图片质量，0 => 普通，1 => 中等，2 => 高清
+            //图片质量，0 => 低清，1 => 普通，2 => 中等，3 => 高清，4 => 超清
             imgQualityIndex: 1,
             //分页方式，0 => 普通，1 => 瀑布流
             paginationStyleIndex: 0,
-            //歌单、专辑等Tile样式，0 => 普通，1 => 卡片
+            //歌单、专辑等Tile样式，0 => 普通，1 => 卡片，2 => H卡片
             imageTextTileStyleIndex: 1,
+            //普通Tile - 阴影封面
+            shadowForNormalStyleTile: true,
             //卡片Tile样式阴影效果
             shadowForCardStyleTile: true,
+            //H卡片Tile样式阴影效果
+            shadowForHCardStyleTile: true,
             //H卡片Tile - 反转布局
             reversedForHCardStyleTile: true,
             //H卡片Tile - 小图标
@@ -938,6 +942,9 @@ export const useSettingStore = defineStore('setting', {
         imageTextTileStyleIndex() {
             return this.common.imageTextTileStyleIndex
         },
+        isUseNormalStyleImageTextTile() {
+            return this.common.imageTextTileStyleIndex == 0
+        },
         isUseCardStyleImageTextTile() {
             return this.common.imageTextTileStyleIndex == 1
         },
@@ -983,6 +990,12 @@ export const useSettingStore = defineStore('setting', {
         },
         isUseShadowForCardStyleTile() {
             return this.common.shadowForCardStyleTile
+        },
+        isUseShadowForHCardStyleTile() {
+            return this.common.shadowForHCardStyleTile
+        },
+        isShadowForNormalStyleTile() {
+            return this.common.shadowForNormalStyleTile
         },
         isUseReversedForHCardStyleTile() {
             return this.common.reversedForHCardStyleTile
@@ -1413,6 +1426,12 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleUseShadowForCardStyleTile() {
             this.common.shadowForCardStyleTile = !this.common.shadowForCardStyleTile
+        },
+        toggleUseShadowForHCardStyleTile() {
+            this.common.shadowForHCardStyleTile = !this.common.shadowForHCardStyleTile
+        },
+        toggleUseShadowForNormalStyleTile() {
+            this.common.shadowForNormalStyleTile = !this.common.shadowForNormalStyleTile
         },
         toggleUseReversedForHCardStyleTile() {
             this.common.reversedForHCardStyleTile = !this.common.reversedForHCardStyleTile

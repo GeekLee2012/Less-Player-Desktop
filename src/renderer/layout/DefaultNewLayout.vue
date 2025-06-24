@@ -103,8 +103,8 @@ const { isFontAutoWeight, isMiniNavBarMode } = storeToRefs(useSettingStore())
     transform: translateY(0.5px);
 }
 
-.default-new-layout > .bottom .default-new-main-bottom .lyric-btn {
-    transform: scale(1.04);
+.default-new-layout > .bottom .default-new-main-bottom .lyric-btn svg {
+    transform: scaleY(1.16);
 }
 
 .default-new-layout > .bottom .default-new-main-bottom .equalizer-btn svg {

@@ -5,8 +5,7 @@ import {
     pinyinOfFirstChar, isChineseChar,
     isEnglishChar, toLowerCaseTrimString,
     toTrimString, ipcRendererInvoke, 
-    isDevEnv, isNetOnline,
-    isBlank,
+    isNetOnline, isBlank,
 } from "../common/Utils";
 import { FILE_PREFIX } from "../common/Constants";
 import { United } from "./united";

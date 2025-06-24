@@ -13,7 +13,7 @@ import SimpleLayout from './layout/SimpleLayout.vue';
 import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
   ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, 
   isMacOS, useGitRepository, isDevEnv, readLines, nextInt,
-  tryCallDefault, shuffle, } from '../common/Utils';
+  tryCallDefault, } from '../common/Utils';
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 import packageCfg from '../../package.json';
 import { getDoc, getRaw } from '../common/HttpClient';
@@ -785,11 +785,6 @@ const onDrop = async (event) => {
   ipcRendererSend('app-dnd-parsePlay', urls)
 }
 
-const playingViewLoadingBg = () => {
-  const colors = shuffle(['#ff00007f', '#0000ff7f']).join(',')
-  return `linear-gradient(${colors})`
-}
-
 //EventBus监听注册，统一管理
 onEvents({
   'app-zoom': setupTrafficLightWinCtlBtn,
@@ -820,7 +815,6 @@ provide('appCommon', {
   searchBarPlaceholder,
   useWindowsStyleWinCtl,
   resetSetting,
-  playingViewLoadingBg,
 })
 
 provide('appVersion', {

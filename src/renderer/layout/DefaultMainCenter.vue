@@ -98,9 +98,7 @@ const setImageTextTileSize = () => {
 }
 */
 const setImageTextTileSize = () => {
-    if(isUseHCardStyleImageTextTile.value) {
-        return setHCardImageTextTileSize()
-    }
+    if(isUseHCardStyleImageTextTile.value) return setHCardImageTextTileSize()
 
     const tileMinWidth = 173
     const tileHMargin = 14
@@ -146,9 +144,9 @@ const setHCardImageTextTileSize = () => {
     const mainMargin = 33
     const scrollBarWidth = 6
     const { clientWidth: docClientWidth } = document.documentElement
-    const isWidthEnough = docClientWidth >= (minAppWidth + tileMinWidth)
-    //TODO 宽屏、超宽屏，需更好兼容性
-    const limits = genSeqNums(16, ((isMiniNavBarMode.value || isWidthEnough) ? 3 : 2), -1)
+    const isWidthEnough = isMiniNavBarMode.value || (docClientWidth >= (minAppWidth + tileMinWidth))
+    //宽屏、超宽屏，需更好兼容性
+    const limits = genSeqNums(16, (isWidthEnough ? 3 : 2), -1)
     
     const mainContent = document.getElementById('default-main-content')
     if (!mainContent) return

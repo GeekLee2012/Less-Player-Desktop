@@ -82,7 +82,7 @@ const isTypeOptionsShow = ref(false)
 const currentTypeIndex = ref(0)
 const setTypeOptionsShow = (value) => (isTypeOptionsShow.value = value)
 const setCurrentTypeIndex = (value) => (currentTypeIndex.value = value)
-const toggleTypeOptionsShow = () => setTypeOptionsShow(!isTypeOptionsShow.value)
+const toggleTypeOptionsShow = () => setTypeOptionsShow(!isPreviewMode.value && !isTypeOptionsShow.value)
 const currentType = () => (typeOptions[currentTypeIndex.value].type)
 
 const hideAllPopups = () => {

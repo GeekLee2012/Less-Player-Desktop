@@ -43,7 +43,8 @@ const { isFreeFM, isFMRadioPlatform } = usePlatformStore()
 const { isUseCardStyleImageTextTile, isUseShadowForCardStyleTile,
     isUseHCardStyleImageTextTile, isUseReversedForHCardStyleTile,
     isUseSmallIconForHCardStyleTile, isUseCoverNopaddingForHCardStyleTile,
-    isUseCoverNoshadowForHCardStyleTile,
+    isUseCoverNoshadowForHCardStyleTile, isShadowForNormalStyleTile,
+    isUseShadowForHCardStyleTile,
  } = storeToRefs(useSettingStore())
 
 
@@ -85,6 +86,11 @@ const getItemCover = () => {
     if(typeof coverAction == 'function') coverAction(cover)
 }
 
+const computedUseCardShadow = computed(() => {
+    return (isUseCardStyleImageTextTile.value && isUseShadowForCardStyleTile.value)
+        || (isUseHCardStyleImageTextTile.value && isUseShadowForHCardStyleTile.value)
+})
+
 
 /* 生命周期、监听 */
 watch(() => props.checked, (nv, ov) => {
@@ -103,7 +109,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     <div class="image-text-tile" 
             :class="{
             'image-text-tile-card': isUseCardStyleImageTextTile,
-            'image-text-tile-card-shadow': isUseShadowForCardStyleTile,
+            'image-text-tile-card-shadow': computedUseCardShadow,
             'image-text-tile-radio': isFMRadioPlatform(platform),
             'image-text-tile-non-freefm': !isFreeFM(platform),
             'image-text-tile-color-mode': color,
@@ -114,6 +120,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             'horiziontal-small-icon': isUseSmallIconForHCardStyleTile,
             'horiziontal-cover-nopadding': isUseCoverNopaddingForHCardStyleTile,
             'horiziontal-cover-noshadow': isUseCoverNoshadowForHCardStyleTile,
+            'normal-cover-noshadow': !isShadowForNormalStyleTile,
             'selectable': checkbox,
             'tutorial': tutorial,
         }" 
@@ -263,9 +270,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     line-height: var(--others-image-text-tile-cover-size);
     border-radius: var(--border-img-text-tile-border-radius);
     cursor: pointer;
-    box-shadow: 0px 0px 3px var(--border-popovers-border-color);
-    box-shadow: 0px 0px 3px #181818;
+    /*box-shadow: 0px 0px 3px var(--border-popovers-border-color);*/
+    box-shadow: 0px 0px 1px #181818;
     background-color: var(--app-bg-color);
+}
+
+.image-text-tile.normal-cover-noshadow .cover {
+    box-shadow: none;
 }
 
 .image-text-tile .title {
@@ -380,8 +391,8 @@ onUnmounted(() => offEvents(eventsRegistration))
     position: absolute;
     right: 10px;
     bottom: 10px;
-    right: calc((100% - var(--btn-size))/ 2);
-    bottom: calc((100% - var(--btn-size))/2);
+    right: calc((100% - var(--btn-size)) / 2);
+    bottom: calc((100% - var(--btn-size)) / 2);
     z-index: 1;
     background: var(--button-icon-text-btn-bg-color);
     cursor: pointer;
@@ -577,8 +588,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     object-fit: cover !important;
 }
 
-.image-text-tile .layer,
-.image-text-tile .layer-tiny {
+.image-text-tile .layer {
     display: none;
 }
 
@@ -604,15 +614,13 @@ onUnmounted(() => offEvents(eventsRegistration))
     background: var(--content-image-text-tile-card-shadow-color2);
 }
 
-.image-text-tile-card:hover .layer,
-.image-text-tile-card:hover .layer-tiny {
+.image-text-tile-card:hover .layer {
     background: transparent;
     display: none;
 }
 
 /* 尝试防抖：卡片transform变换导致鬼畜问题（卡片一直不停上下抖动） */
-.image-text-tile-card-horiziontal:hover .layer,
-.image-text-tile-card-horiziontal:hover .layer-tiny {
+.image-text-tile-card-horiziontal.image-text-tile-card-shadow:hover .layer {
     --card-shadow-height: 8px !important;
     width: 100% !important;
     display: block;
@@ -620,7 +628,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     opacity: 0 !important;
 }
 
-.image-text-tile-card-horiziontal:hover .layer-tiny {
+.image-text-tile-card-horiziontal.image-text-tile-card-shadow:hover .layer-tiny {
     cursor: default !important;
 }
 

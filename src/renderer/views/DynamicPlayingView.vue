@@ -349,6 +349,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div v-show="!isLyricShowable" class="no-lyric line current" 
                     v-html="Track.normalName(currentTrack)">
                 </div>
+                <!--
                 <div class="trans-btn extra-btn" 
                     :class="{ 'extra-exist': Track.hasLyricTrans(currentTrack) }"
                     v-show="Track.hasLyricTrans(currentTrack)">
@@ -358,6 +359,22 @@ onUnmounted(() => offEvents(eventsRegistration))
                     :class="{ 'extra-exist': Track.hasLyricRoma(currentTrack) }"
                     v-show="Track.hasLyricRoma(currentTrack)">
                     <span :class="{ active: lyricRomaActived }" @click="toggleLyricRoma">音</span>
+                </div>
+                -->
+                <div class="trans-btn extra-btn" 
+                    :class="{ 'extra-exist': Track.hasLyricTrans(currentTrack) }"
+                    v-show="Track.hasLyricTrans(currentTrack)"
+                    @click="toggleLyricTrans" >
+                    <svg width="17" height="17" viewBox="0 0 22.82 19.41" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path d="M17.07,6l5.75,1.27c-.08,1.12-.65,1.47-1.75,1.16q-2.57-.75-5.15-1.36a2.64,2.64,0,0,0-1.34,0c-1.76.47-3.49,1-5.24,1.5-1.28.34-1.29.29-1.91-1L13.33,6c-1-1.29-1.81-2.52-2.79-3.63C10.24,2,9.55,2,9,1.84V.67h11.9C21.07,3.39,18.87,4.39,17.07,6ZM12.5,2.11l-.22.32c.89.79,1.77,1.59,2.66,2.36a.61.61,0,0,0,.54.12,8.8,8.8,0,0,0,3.34-2.8Z"/>
+                                <path d="M8.61,14.22h5.64V11.9H9.72V10.35h4.51l.2-1.91h1.72l.19,1.91h4.82v1.5H16.33v2.37h6.11l.08,1.49H16.29v3.7H14.36V15.78H8.61Z"/>
+                                <path d="M5.27,6.32v9.09l2.33-2A1.61,1.61,0,0,1,7.16,16C6,16.79,4.85,17.73,3.7,18.63l-.45-.16c0-.65.1-1.31.16-2,0-.12.07-.23.07-.35V7.75H0V6.32Z"/>
+                                <path d="M7.25,3.19,6,4.3,1.79,1c.82-1.25,1-1.31,2.12-.46S6.07,2.26,7.25,3.19Z"/>
+                            </g>
+                        </g>
+                    </svg>
                 </div>
             </div>
             <div class="bottom" v-show="!computedBottomNewShow">
@@ -681,9 +698,29 @@ onUnmounted(() => offEvents(eventsRegistration))
     position: fixed;
     right: var(--others-lyric-ctl-extra-btn-right);
     bottom: var(--others-lyric-ctl-extra-btn-bottom);
-    visibility: hidden;
+    border: 1.25px solid var(--border-color);
+    border-radius: calc(var(--border-flow-btn-border-radius) - 3px);
+    padding: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    visibility: visible;
 }
 
+.dynamic-playing-view .center .extra-btn svg { 
+    transform: scaleY(1.1);
+}
+
+.dynamic-playing-view .center .extra-btn.active {
+    border-color: var(--content-highlight-color);
+}
+
+.dynamic-playing-view .center .extra-btn.active svg { 
+    fill: var(--content-highlight-color) !important;
+}
+
+/*
 .dynamic-playing-view .center .extra-btn span {
     border: 1.25px solid #eee;
     border-radius: 3px;
@@ -693,7 +730,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     color: #eee;
     font-weight: bold;
 }
-
+*/
 /*
 .dynamic-playing-view .center .extra-btn .active,
 .dynamic-playing-view .center .extra-btn span:hover {

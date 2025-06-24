@@ -13,7 +13,6 @@ import { stringPrefixEquals, useUseCustomTrafficLight, coverDefault,
 } from '../../common/Utils';
 import { Track } from '../../common/Track';
 import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
-import { DEFAULT_COVER_BASE64, ImageProtocal } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 import { Playlist } from '../../common/Playlist';
 
@@ -29,6 +28,8 @@ const { seekTrack, playVideoItem,
 const { useWindowsStyleWinCtl, playingViewLoadingBg } = inject('appCommon')
 const { getExVisualCanvasHandlersLength } = inject('apiExpose')
 const { applyDocumentStyle } = inject('appStyle')
+const { setupBackgroudEffect, clearBackgroundEffect } = inject('playingViewBgEffect')
+
 
 //是否使用自定义交通灯控件
 const useCustomTrafficLight = useUseCustomTrafficLight()
@@ -60,290 +61,11 @@ const { getWindowZoom, lyricMetaPos, theme, layout,
 
 const volumeBarRef = ref(null)
 const disactived = ref(true)
-const hasBackgroudCover = ref(false)
-const bgEffectStyle = reactive({})
-const setHasBackgroudCover = (value) => hasBackgroudCover.value = value
 
 const setDisactived = (value) => {
     disactived.value = value
     emitEvents('playingView-changed')
 }
-
-
-const overrideDefaultPalette = (rgbs) => {
-    const [r1, g1, b1] = rgbs[0]
-    const [r2, g2, b2] = rgbs[1]
-    const isHit = (r, g, b) => {
-         //[219, 116, 115], [68, 68, 69]
-        return (r == 219 && g == 116 && b == 115) 
-            || (r == 68 && g == 68 && b == 69)
-    }
-    if(isHit(r1, g1, b1) && isHit(r2, g2, b2)) {
-        //Noon to Dusk: #ff6e7f, #bfe9ff => [255, 110, 127], [191, 233, 255]
-        //Love and Liberty: #200122, #6f0000 => [32, 1, 34], [111, 0, 0]
-        //Poncho: #403a3e, #be5869 => [190, 88, 105], [64, 58, 62]
-        return [[190, 88, 105], [64, 58, 62]]
-    }
-    return rgbs
-}
-
-const sortPalette = (rgbs, mode) => {
-    //简单起见，仅考虑数组长度为2的情况
-    const _rgbs = overrideDefaultPalette(rgbs.slice(0, 2))
-    const [h1, s1, l1] = rgbToHsl(..._rgbs[0])
-    const [h2, s2, l2] = rgbToHsl(..._rgbs[1])
-
-    switch(mode) {
-        case 0: //亮 -> 暗
-            return l1 > l2 ? _rgbs : _rgbs.reverse()
-        case 1: //暗 -> 亮
-            return l1 > l2 ? _rgbs.reverse() : _rgbs
-        default:
-            break
-    }
-    return _rgbs
-}
-
-let isOptimizeEnable = false
-const optimizePalette = (rgbs) => {
-    if(!isOptimizeEnable) return rgbs
-    //简单起见，仅考虑数组长度为2的情况
-    const _rgbs = rgbs.slice(0, 2)
-    //TODO 待学习色彩理论、算法
-    return _rgbs.map(rgb => {
-        return rgb
-    })
-}
-
-const getPaletteAvgGrayscale = (rgbs) => {
-    //简单起见，仅考虑数组长度为2的情况
-    const _rgbs = rgbs.slice(0, 2)
-    const sumGrayscale = _rgbs.reduce((accumulator, current) => {
-        accumulator += grayscale(...current)
-        return accumulator
-    }, 0)
-    return Math.round(sumGrayscale / _rgbs.length)
-}
-
-/*
-const getPalette = (img, num) => {
-    return new ColorThief().getPalette(img, num)
-}
-*/
-
-const getPlayingViewThemeAutoClass = (rgbs, defaultClass, grayscaleLimit) => {
-    const limit = (grayscaleLimit >= 0 ? grayscaleLimit : 159)
-    const avgGrayscale = rgbs ? getPaletteAvgGrayscale(rgbs) : (grayscaleLimit + 9)
-    let autoClass = defaultClass || (avgGrayscale > limit ? 'dark' : 'light')
-    switch(playingViewThemeColorIndex.value) {
-        case 1:
-            autoClass = 'light'
-            break
-        case 2:
-            autoClass = 'dark'
-            break
-    }
-    return autoClass
-}
-
-const setupGradientBackgroundEffect = (track) => {
-    if(!isCurrentTrack(track)) return 
-    const containerEl = document.querySelector('.visual-playing-view .container')
-    //if(!containerEl) return 
-    const coverEl = containerEl.querySelector('.center .cover')
-    //if(!coverEl) return 
-    const isLoading = loading.value
-
-    //backdrop-filter性能消耗非常大
-    //macOS下，当歌曲频繁切换时，容易导致configd进程的CPU占用率飙升
-    //加载时，暂时切换至简单渐变
-    if(isLoading) {
-        applyDocumentStyle({ 
-            '--bg-effect': playingViewLoadingBg(),
-            '--bg-effect-bottom': 'transparent',
-        })
-
-        containerEl.classList.remove('light')
-        containerEl.classList.remove('dark')
-        containerEl.classList.remove('with-backdrop')
-        containerEl.classList.remove('brightness-light')
-        containerEl.classList.remove('brightness-mid')
-    
-        containerEl.classList.add('auto-effect')
-        containerEl.classList.add('light')
-        return 
-    }
-
-    //加载成功后，切换到正常封面效果
-    const cover = Track.coverDefault(track)
-    //默认封面
-    if (stringPrefixEquals(DEFAULT_COVER_BASE64, cover, 128)) {
-        containerEl.classList.remove('light')
-        containerEl.classList.remove('dark')
-        
-        containerEl.classList.add('auto-effect')
-        containerEl.classList.add('with-backdrop')
-        containerEl.classList.add('default-cover')
-        containerEl.classList.add('light')
-        return 
-    } 
-
-    let bgEffect = 'none', bottomBg = 'transparent', rgbs = null
-
-    const mode = playingViewBgCoverEffectGradientMode.value
-    const bottomBgTransparent = playingViewBgCoverEffectGradientBottomBgTransparent.value
-    const gradientType = playingViewBgCoverEffectGradientType.value
-
-    const backdropClass = 'with-backdrop'
-    const brightnessLightClass = 'brightness-light'
-    const brightnessMidClass = 'brightness-mid'
-    containerEl.classList.remove('light')
-    containerEl.classList.remove('dark')
-    containerEl.classList.remove(backdropClass)
-    containerEl.classList.remove(brightnessLightClass)
-    containerEl.classList.remove(brightnessMidClass)
-    
-    let autoClass = getPlayingViewThemeAutoClass(rgbs)
-    containerEl.classList.add('auto-effect')
-    containerEl.classList.add(autoClass)
-
-    if(!bottomBgTransparent || gradientType == 1) {
-        const alphaFactor = mode ? 88: 68
-        rgbs = optimizePalette(sortPalette(getPalette(coverEl, 2), mode))
-        if(!isCurrentTrack(track)) return 
-        const alpha = (alphaFactor / 255).toFixed(2)
-        const rgbColors = rgbs.map(([r, g, b]) =>(`rgb(${r}, ${g}, ${b})`))
-        const rgbaColors = rgbs.map(([r, g, b]) =>(`rgba(${r}, ${g}, ${b}, ${alpha})`))
-        const _rgbColors = rgbColors.join(',')
-        bgEffect = `linear-gradient(${_rgbColors})`
-        bottomBg = bottomBgTransparent ? 'transparent' : rgbaColors[0]
-    }
-
-    applyDocumentStyle({ 
-        '--bg-effect': bgEffect,
-        '--bg-effect-bottom': bottomBg,
-    })
-    if(!isCurrentTrack(track)) return 
-
-    if(gradientType == 2 || (gradientType == 0 && (nextInt(100) % 2 == 0))) {
-        containerEl.classList.add(backdropClass)
-        //文字、按钮控件等元素，大部分在light样式下效果较好
-        containerEl.classList.remove('dark')
-        containerEl.classList.remove('light')
-        autoClass = 'light'
-
-        if(playingViewBgCoverEffectGradientBrightness.value == 0) {
-            containerEl.classList.add(brightnessLightClass)
-            autoClass = 'dark'
-        } else if(playingViewBgCoverEffectGradientBrightness.value == 1) {
-            containerEl.classList.add(brightnessMidClass)
-        }
-
-        containerEl.classList.add(getPlayingViewThemeAutoClass(rgbs, autoClass))
-    }
-    return true
-}
-
-let coverLoadCompletedListener = null
-const clearBackgroundEffect = () => {
-    const containerEl = document.querySelector('.visual-playing-view .container')
-    if(!containerEl) return 
-    containerEl.classList.remove('simple-effect')
-    containerEl.classList.remove('auto-effect')
-    containerEl.classList.remove('with-backdrop')
-    containerEl.classList.remove('brightness-light')
-    containerEl.classList.remove('brightness-mid')
-    containerEl.classList.remove('light')
-    containerEl.classList.remove('dark')
-    applyDocumentStyle({ '--bg-effect': 'none'})
-
-    const coverEl = containerEl.querySelector('.center .cover')
-    if(!coverEl) return 
-    if(coverLoadCompletedListener) {
-        coverEl.removeEventListener('load', coverLoadCompletedListener)
-    }
-}
-
-const setupCoverBackgroundEffect = async (track, onLoadCompleted) => {
-    clearBackgroundEffect()
-    if(!isCurrentTrack(track)) return
-    const containerEl = document.querySelector('.visual-playing-view .container')
-    if(!containerEl) return 
-    const coverEl = containerEl.querySelector('.center .cover')
-    if(!coverEl) return 
-    if(typeof onLoadCompleted != 'function') return 
-    coverLoadCompletedListener = () => onLoadCompleted(track)
-    if(coverEl.complete) coverLoadCompletedListener()
-    coverEl.addEventListener('load', coverLoadCompletedListener)
-}
-
-
-const setupSimpleBackgroundEffect = async (track) => {
-    if(!isCurrentTrack(track)) return 
-    const containerEl = document.querySelector('.visual-playing-view .container')
-    if(!containerEl) return
-
-    //加载时，切换到简单封面效果
-    const isLoading = loading.value
-    if (isLoading) {
-        applyDocumentStyle({ '--bg-effect': playingViewLoadingBg() })
-
-        containerEl.classList.remove('light')
-        containerEl.classList.remove('dark')
-
-        containerEl.classList.add('auto-effect')
-        containerEl.classList.add('simple-effect')
-        containerEl.classList.add('light')
-        return 
-    }
-
-    //加载成功后，切换到正常封面效果
-    const cover = Track.coverDefault(track)
-    applyDocumentStyle({ '--bg-effect': `url('${cover}')`})
-
-    //默认封面
-    if (stringPrefixEquals(DEFAULT_COVER_BASE64, cover, 128)) {
-        containerEl.classList.remove('light')
-        containerEl.classList.remove('dark')
-
-        containerEl.classList.add('auto-effect')
-        containerEl.classList.add('simple-effect')
-        containerEl.classList.add('default-cover')
-        containerEl.classList.add('light')
-        return 
-    } 
-
-    const coverEl = containerEl.querySelector('.center .cover')
-    const rgbs = optimizePalette(getPalette(coverEl, 2))
-    if(!isCurrentTrack(track)) return 
-    const autoClass = getPlayingViewThemeAutoClass(rgbs, null, 202)
-
-    containerEl.classList.remove('light')
-    containerEl.classList.remove('dark')
-
-    containerEl.classList.add('auto-effect')
-    containerEl.classList.add('simple-effect')
-    containerEl.classList.add(autoClass)
-}
-
-//TODO 性能问题
-const setupBackgroudEffect = async () => {
-    switch(playingViewBgCoverEffectIndex.value) {
-        case 0:
-            clearBackgroundEffect()
-            break
-        case 1:
-            setupCoverBackgroundEffect(currentTrack.value, setupSimpleBackgroundEffect)
-            break
-        case 2:
-            setupCoverBackgroundEffect(currentTrack.value, setupGradientBackgroundEffect)
-            break
-        default:
-            break
-    }
-}
-
-
 
 const onUserMouseWheel = (event) => emitEvents('lyric-userMouseWheel', event)
 
@@ -463,7 +185,7 @@ onUnmounted(() => {
                     </div>
                     <div class="action">
                         <div class="btm-left">
-                            <div class="favorite-btn" @click="toggleFavoritedState">
+                            <div class="favorite-btn btn" @click="toggleFavoritedState">
                                 <svg v-show="!favoritedState" width="20" height="20" viewBox="0 0 1024 937.46"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
@@ -533,12 +255,28 @@ onUnmounted(() => {
                                 </svg>
                                 -->
                             </div>
+                            <!--
                             <div class="lyric-btn btn spacing1" :class="{ 'content-text-highlight': desktopLyricShow }"
                                 @click="() => toggleDesktopLyricShow()">
                                 词
                             </div>
+                            -->
+                            <div class="lyric-btn btn spacing1" 
+                                :class="{ active: desktopLyricShow }" 
+                                @click="() => toggleDesktopLyricShow()">
+                                <svg width="18" height="18" viewBox="0 0 22.15 19.47" xmlns="http://www.w3.org/2000/svg">
+                                    <g id="Layer_2" data-name="Layer 2">
+                                        <g id="Layer_1-2" data-name="Layer 1">
+                                            <path d="M19.75,2.37H8.19V.51H22.08c0,.37.06.72.06,1.07,0,5.07,0,10.15,0,15.22,0,1.66-.55,2.3-2.17,2.57a4.57,4.57,0,0,1-.82.09H16.43l-.64-2h2.55c.74,0,1.4-.14,1.4-1.06C19.75,11.77,19.75,7.14,19.75,2.37Z"/>
+                                            <path d="M9.46,15.24V8.37h8.17v6.87Zm5.8-1.79V10.16H11.85v3.29Z"/>
+                                            <path d="M0,6.12H5.65v8.82L7.5,13.42c1.05,1.81,1,2-.5,3.16-1,.78-2.11,1.51-3.26,2.33-.49-.95-1.27-1.64-.46-2.73.24-.32.12-.92.12-1.39,0-2.18,0-4.35,0-6.66H0Z"/>
+                                            <path d="M18.44,4.48V6.35H8.75V4.48Z"/><path d="M5.87,4.44,1.74,1.27c1.39-1.6,1.4-1.62,3-.45C5.64,1.48,6.5,2.21,7.5,3Z"/>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </div>
                             <div class="equalizer-btn btn spacing1" :class="{ active: isUseEffect }">
-                                <svg @click="toggleSoundEffectView" width="17" height="17" viewBox="0 0 1024 1024"
+                                <svg @click="toggleSoundEffectView" width="18" height="18" viewBox="0 0 1024 1024"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <g id="Layer_2" data-name="Layer 2">
                                         <g id="Layer_1-2" data-name="Layer 1">
@@ -698,9 +436,9 @@ onUnmounted(() => {
     /* margin: 0px 60px; */
     padding-left: 60px;
     padding-right: 60px;
+    padding-bottom: 60px;
     overflow: hidden;
     height: 625px;
-    padding-bottom: 56px;
 }
 
 .visual-playing-view .container > .center .left,
@@ -851,7 +589,6 @@ onUnmounted(() => {
     align-items: center;
 }
 
-
 .visual-playing-view .volume-bar {
     width: 70px;
     --others-sliderbar-ctl-height: 3px;
@@ -862,20 +599,23 @@ onUnmounted(() => {
     fill: var(--content-highlight-color) !important;
 }
 
+/*
 .visual-playing-view .action .lyric-btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     cursor: pointer;
     font-weight: bold;
-    margin-bottom: 3px;
-    font-size: 18px;
+    font-size: 19px;
     color: var(--button-icon-btn-color);
 }
 
 .visual-playing-view .action .lyric-btn:hover {
     color: var(--content-highlight-color);
 }
+*/
+
+.visual-playing-view .action .lyric-btn svg {
+    transform: scaleY(1.13);
+}
+
 
 .visual-playing-view .container > .bottom {
     height: 56px;
@@ -885,6 +625,12 @@ onUnmounted(() => {
 .visual-playing-view .fullpage-spectrum-canvas {
     position: absolute;
     z-index: 3 !important;
+}
+
+.visual-playing-view .container > .center .left .action .btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* background effect light*/
@@ -923,11 +669,6 @@ onUnmounted(() => {
     color: #eee !important;
 }
 
-.visual-playing-view .container.auto-effect.light .lyric-ctl .extra-btn span {
-    color: #eee;
-    border-color: #eee;
-}
-
 .visual-playing-view .container.auto-effect.light .lyric-btn {
     color: #fff !important;
 }
@@ -936,6 +677,19 @@ onUnmounted(() => {
 .visual-playing-view .container.auto-effect.light .play-btn svg,
 .visual-playing-view .container.auto-effect.light .play-btn svg:hover {
     fill: #fff !important;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .extra-btn {
+    color: #eee;
+    border-color: #eee;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .extra-btn.active {
+    border-color: var(--content-highlight-color) !important;
+}
+
+.visual-playing-view .container.auto-effect.light .lyric-ctl .extra-btn.active svg {
+    fill: var(--content-highlight-color) !important;
 }
 
 /* lyric highlight simple-color */
@@ -990,11 +744,6 @@ onUnmounted(() => {
     color: #434343 !important;
 }
 
-.visual-playing-view .container.auto-effect.dark .lyric-ctl .extra-btn span {
-    color: #373737;
-    border-color: #373737;
-}
-
 .visual-playing-view .container.auto-effect.dark .lyric-btn {
     color: #373737 !important;
 }
@@ -1006,6 +755,19 @@ onUnmounted(() => {
 .visual-playing-view .container.auto-effect.dark .play-btn svg,
 .visual-playing-view .container.auto-effect.dark .play-btn svg:hover {
     fill: #fff !important;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .extra-btn {
+    color: #373737;
+    border-color: #373737;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .extra-btn.active {
+    border-color: var(--content-highlight-color) !important;
+}
+
+.visual-playing-view .container.auto-effect.dark .lyric-ctl .extra-btn.active svg {
+    fill: var(--content-highlight-color) !important;
 }
 
 .visual-playing-view .container.auto-effect.dark > .bottom.bottom-new .t-current,

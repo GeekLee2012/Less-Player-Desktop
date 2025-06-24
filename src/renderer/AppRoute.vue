@@ -122,7 +122,7 @@ const createCommonRoute = (route, onRouteReady) => {
     if (typeof route === 'string') route = { path: route }
     return {
         ...route,
-        path: (route.path || route.toPath),
+        path: (route.path || route.toPath || '/'),
         onRouteReady: (onRouteReady || route.onRouteReady),
         //不完全等价于 router.beforeResovle()
         beforeRoute: (toPath, fromPath) => {

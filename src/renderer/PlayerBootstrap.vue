@@ -1364,7 +1364,9 @@ const dndSaveCover = async (event, item) => {
     const dndSavePath = getPreferredDndSavePath(item)
     if (!dndSavePath) return showFailToast('当前操作异常')
 
+    //特殊符号处理：<>/|:*?
     const normalName = Track.normalName(item)
+        .replace(/\//g, '-').replace(/\|/g, '--')
     const file = `${dndSavePath}/${normalName}.png`
     startDrag({ file, type: 'image', url: cover })
 }

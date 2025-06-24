@@ -136,6 +136,10 @@ const tutorialList = [{
     artist: [ { id:'', name: '教程 - 当前播放' }],
     color: '#17b978',
 }, {
+    title: '关闭当前播放的教程提示',
+    artist: [ { id:'', name: '教程 - 设置页 - 提示 - 当前播放提示' }],
+    color: '#17b978',
+}, {
     title: '非封面区域，拖拽移动排序',
     artist: [ { id:'', name: '教程 - 当前播放' }],
     color: '#17b978',
@@ -152,16 +156,16 @@ const tutorialList = [{
     artist: [ { id:'', name: '教程  - 歌曲资源搜索' }],
     color: '#dff5f2',
 }, {
-    title: '支持图片格式：png、jpg、jpeg',
-    artist: [ { id:'', name: '教程 - 图片' }],
+    title: '右键关闭：迷你布局 - 歌词按钮',
+    artist: [ { id:'', name: '教程  - 设置页 - 布局 - 迷你 - 关闭歌词' }],
+    color: '#dff5f2',
+}, {
+    title: '格式：png、jpg、jpeg',
+    artist: [ { id:'', name: '教程 - 图片 - 支持格式' }],
     color: '#ff9a3c',
 }, {
-    title: '支持图片格式：bmp、gif',
-    artist: [ { id:'', name: '教程 - 图片' }],
-    color: '#ff9a3c',
-}, {
-    title: '支持图片格式：webp、avif',
-    artist: [ { id:'', name: '教程 - 图片' }],
+    title: '格式：bmp、gif、webp、avif',
+    artist: [ { id:'', name: '教程 - 图片 - 支持格式' }],
     color: '#ff9a3c',
 }, {
     title: '拖拽图片到封面，更新封面',
@@ -173,6 +177,14 @@ const tutorialList = [{
     color: '#7dace4',
 }, {
     title: '拖拽大封面保存本地',
+    artist: [ { id:'', name: '教程 - 拖拽' }],
+    color: '#7dace4',
+}, {
+    title: '拖拽删除：音效 - 均衡器 - 自定义',
+    artist: [ { id:'', name: '教程 - 拖拽' }],
+    color: '#7dace4',
+}, {
+    title: '拖拽删除：视频播放 - 播放历史',
     artist: [ { id:'', name: '教程 - 拖拽' }],
     color: '#7dace4',
 }, {

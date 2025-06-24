@@ -30,11 +30,13 @@ import CustomAppBorderRadiusView from './views/CustomAppBorderRadiusView.vue';
 import TrackResourceToolView from './views/TrackResourceToolView.vue';
 import ThemeSelectionView from './views/ThemeSelectionView.vue';
 import FontSelectionToolbar from './components/FontSelectionToolbar.vue';
+import PlayingViewBgEffect from './views/PlayingViewBgEffect.vue';
 
 
 
 
 const currentPlayingView = shallowRef(null)
+const currentPlayingViewRootClass = ref('')
 const ctxMenuPosStyle = reactive({ left: -999, top: -999 })
 const ctxSubmenuPosStyle = reactive({ left: -999, top: -999 })
 let ctxMenuPos = null, submenuItemNums = 0
@@ -287,13 +289,17 @@ const setupPlayingView = (theme, isPreviewMode) => {
   const index = playingViewThemeIndex.value
   const type = isPreviewMode ? -1 : playingViewThemeType.value
   const views = [PlayingView, VisualPlayingView, DynamicPlayingView]
+  const rootClassList = ['playing-view', 'visual-playing-view', 'dynamic-playing-view']
   switch(type) {
     case 0:
-      currentPlayingView.value = views[Math.min(index, 2)]
+      const _index = Math.min(index, 2)
+      currentPlayingView.value = views[_index]
+      currentPlayingViewRootClass.value = rootClassList[_index]
       break
     case 1:
     default:
       currentPlayingView.value = views[2]
+      currentPlayingViewRootClass.value = rootClassList[2]
       nextTick(() => setupPlayingViewCustomTheme(theme))
       break
   }
@@ -581,12 +587,15 @@ onUnmounted(() => offEvents(eventsRegistration))
     </transition>
 
     <!-- 顶层浮动窗口 -->
-    <transition name="fade-y">
-        <component id="playing-view" 
-            :class="{ 'app-custom-theme-bg': appBackgroundScope.playingView }"
-            v-if="playingViewShow" :is="currentPlayingView">
-        </component>
-    </transition>
+    <PlayingViewBgEffect :rootClass="currentPlayingViewRootClass">
+        <transition name="fade-y">
+          <component id="playing-view" 
+              :class="{ 'app-custom-theme-bg': appBackgroundScope.playingView }"
+              v-if="playingViewShow" 
+              :is="currentPlayingView">
+          </component>
+        </transition>
+    </PlayingViewBgEffect>
 
     <transition name="fade-ex">
       <PlaybackQueueView id="playback-queue-view" 

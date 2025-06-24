@@ -239,7 +239,7 @@ const interruptSearchBarExclusiveModeCtl = () => {
 }
 
 const tutorialList = [{
-    title: '前往设置，可关闭上面的废话文学',
+    title: '前往设置-提示，可关闭上面的废话文学',
     color: '#fb929e'
 }, {
     title: '支持json、pls拖拽导入',

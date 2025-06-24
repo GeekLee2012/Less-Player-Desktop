@@ -1807,13 +1807,25 @@ onActivated(() => {
     display: block !important;
 }
 
+.simple-layout #sound-effect-view .center .presets {
+    padding-left: 2.5px;
+    margin-top: 5px;
+}
+
 .simple-layout #sound-effect-view .center .presets .item {
-    width: 205px;
-    height: 36px;
+    width: 237.5px;
+    height: 38.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .simple-layout #sound-effect-view .center .impulse-content .item {
     width: 250px;
+}
+
+.simple-layout #sound-effect-view .center .others-content {
+    padding: 30px 13px;
 }
 
 .simple-layout .video-playing-view .vjs-theme-city .c-vjs-play-next-btn .vjs-icon-placeholder::before {

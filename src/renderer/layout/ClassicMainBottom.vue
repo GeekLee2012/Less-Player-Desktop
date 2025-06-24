@@ -60,9 +60,25 @@ onMounted(() => {
                         </g>
                     </svg>
                 </div>
+                <!--
                 <div class="lyric-btn spacing" :class="{ 'content-text-highlight': desktopLyricShow }"
                     @click="() => toggleDesktopLyricShow()">
                     词
+                </div>
+                -->
+                <div class="lyric-btn spacing" 
+                    :class="{ active: desktopLyricShow }" 
+                    @click="() => toggleDesktopLyricShow()">
+                    <svg width="18" height="18" viewBox="0 0 22.15 19.47" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Layer_2" data-name="Layer 2">
+                            <g id="Layer_1-2" data-name="Layer 1">
+                                <path d="M19.75,2.37H8.19V.51H22.08c0,.37.06.72.06,1.07,0,5.07,0,10.15,0,15.22,0,1.66-.55,2.3-2.17,2.57a4.57,4.57,0,0,1-.82.09H16.43l-.64-2h2.55c.74,0,1.4-.14,1.4-1.06C19.75,11.77,19.75,7.14,19.75,2.37Z"/>
+                                <path d="M9.46,15.24V8.37h8.17v6.87Zm5.8-1.79V10.16H11.85v3.29Z"/>
+                                <path d="M0,6.12H5.65v8.82L7.5,13.42c1.05,1.81,1,2-.5,3.16-1,.78-2.11,1.51-3.26,2.33-.49-.95-1.27-1.64-.46-2.73.24-.32.12-.92.12-1.39,0-2.18,0-4.35,0-6.66H0Z"/>
+                                <path d="M18.44,4.48V6.35H8.75V4.48Z"/><path d="M5.87,4.44,1.74,1.27c1.39-1.6,1.4-1.62,3-.45C5.64,1.48,6.5,2.21,7.5,3Z"/>
+                            </g>
+                        </g>
+                    </svg>
                 </div>
                 <div class="equalizer-btn spacing" :class="{ active: isUseEffect }" @click="toggleSoundEffectView">
                     <svg width="18" height="18" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
@@ -105,7 +121,7 @@ onMounted(() => {
 .classic-main-bottom #play-nav {
     flex: 1;
     align-items: center;
-    padding: 1px 0px 3px 28px;
+    padding: 1px 0px 1px 28px;
 }
 
 .classic-main-bottom #play-nav #play-meta {
@@ -207,19 +223,25 @@ onMounted(() => {
     fill: var(--content-highlight-color) !important;
 }
 
+/*
 .classic-main-bottom .lyric-btn {
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 18px;
+    font-weight: 500;
+    font-size: 19px;
     color: var(--button-icon-btn-color);
-    transform: scale(1.06);
+    transform: scale(1.05);
 }
 
 .classic-main-bottom .lyric-btn:hover {
     color: var(--content-highlight-color);
+}
+*/
+
+.classic-main-bottom .lyric-btn svg {
+    transform: scaleY(1.15);
 }
 
 .classic-main-bottom .equalizer-btn svg {

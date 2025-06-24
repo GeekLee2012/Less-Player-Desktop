@@ -49,6 +49,7 @@
                 "borderColor": "#414141cb",
                 "headerNavBorderColor": "#414141cb",
                 "leftNavBorderColor": "#39393966",
+                "bottomNavBorderColor": "#39393999",
                 "popoversBorderColor": "#222222",
                 "inputsBorderColor": "#636363"
             },
@@ -132,6 +133,7 @@
                 "borderColor": "#eeeeee66",
                 "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#ffffff00",
+                "bottomNavBorderColor": "#e1e1e1",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -215,6 +217,7 @@
                 "borderColor": "#eeeeee66",
                 "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#eeeeeeff",
+                "bottomNavBorderColor": "#e1e1e1",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -298,6 +301,7 @@
                 "borderColor": "#f4f4f4",
                 "headerNavBorderColor": "#f4f4f4",
                 "leftNavBorderColor": "#eeeeee00",
+                "bottomNavBorderColor": "#e1e1e1",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -381,6 +385,7 @@
                 "borderColor": null,
                 "headerNavBorderColor": "#1a1a1a",
                 "leftNavBorderColor": "#1a1a1a",
+                "bottomNavBorderColor": "#131313",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#454045"
             },
@@ -464,6 +469,7 @@
                 "borderColor": null,
                 "headerNavBorderColor": "#ffffff36",
                 "leftNavBorderColor": "#ffffff25",
+                "bottomNavBorderColor": "#ffffff59",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#31313159"
             },
@@ -547,6 +553,7 @@
                 "borderColor": "#eeeeee66",
                 "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#eeeeee66",
+                "bottomNavBorderColor": "#e1e1e1",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#cccccc"
             },
@@ -630,6 +637,7 @@
                 "borderColor": null,
                 "headerNavBorderColor": "#181818",
                 "leftNavBorderColor": "#181818",
+                "bottomNavBorderColor": "#111111",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#454045"
             },
@@ -713,6 +721,7 @@
                 "borderColor": "#dddddd66",
                 "headerNavBorderColor": "#dddddd66",
                 "leftNavBorderColor": "#dddddd66",
+                "bottomNavBorderColor": "#cacaca",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#bcbcbc"
             },
@@ -796,6 +805,7 @@
                 "borderColor": null,
                 "headerNavBorderColor": "#91934325",
                 "leftNavBorderColor": "#91934325",
+                "bottomNavBorderColor": "#91934355",
                 "popoversBorderColor": "#000000",
                 "inputsBorderColor": "#91934356"
             },
@@ -879,6 +889,7 @@
                 "borderColor": "#eeeeee66",
                 "headerNavBorderColor": "#dddddd66",
                 "leftNavBorderColor": "#dddddd00",
+                "bottomNavBorderColor": "#cfcfcf",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#cccccc"
             },
@@ -962,6 +973,7 @@
                 "borderColor": "#eeeeee",
                 "headerNavBorderColor": "#dddddd66",
                 "leftNavBorderColor": "#dddddd00",
+                "bottomNavBorderColor": "#d6d6d6",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -1045,6 +1057,7 @@
                 "borderColor": "#eeeeee66",
                 "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#eeeeee88",
+                "bottomNavBorderColor": "#e1e1e1",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#dddddd"
             },
@@ -1128,6 +1141,7 @@
                 "borderColor": null,
                 "headerNavBorderColor": "#dddddd66",
                 "leftNavBorderColor": "#cccccc66",
+                "bottomNavBorderColor": "#d8d8d8",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#cccccc"
             },
@@ -1211,6 +1225,7 @@
                 "borderColor": null,
                 "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#eeeeee",
+                "bottomNavBorderColor": "#e1e1e1",
                 "popoversBorderColor": "#999999",
                 "inputsBorderColor": "#dddddd"
             },
@@ -1294,6 +1309,7 @@
                 "borderColor": "#39393936",
                 "headerNavBorderColor": "#39393936",
                 "leftNavBorderColor": "#39393966",
+                "bottomNavBorderColor": "#373737",
                 "popoversBorderColor": "#222222",
                 "inputsBorderColor": "#edede236"
             },
@@ -1383,6 +1399,7 @@
                 "borderColor": "#eeeeee66",
                 "headerNavBorderColor": "#eeeeee66",
                 "leftNavBorderColor": "#ffffff00",
+                "bottomNavBorderColor": "#33333325",
                 "popoversBorderColor": "#666666",
                 "inputsBorderColor": "#cccccc"
             },

@@ -272,8 +272,9 @@ export class Navidrome {
 
     static playlistDetail(id, offset, limit, page) {
         return new Promise((resolve, reject) => {
+            const result = { id, platform: Navidrome.CODE, offset, limit, page, data:[] }
+            if(page > 1) return resolve(result)
             Navidrome.getRestJson('getPlaylist', { id }).then(json => {
-                const result = { id, platform: Navidrome.CODE, offset, limit, page, data:[] }
                 const { name: title, coverArt, entry, comment: about } = json.playlist
                 Object.assign(result, {
                     title,

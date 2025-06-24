@@ -663,7 +663,8 @@ export class Emby {
                 
                 const cover = Emby.getCover(json)
                 const result = { id, platform: Emby.CODE, title: Name, cover, offset, limit, page, data:[] }
-                
+                if(page > 1) return resolve(result)
+                    
                 const reqBody = {
                     parentId: id,
                     recursive: true,
