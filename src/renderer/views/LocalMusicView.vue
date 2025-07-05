@@ -232,6 +232,8 @@ const loadArtists = async (filter) => {
     }, timeout)
 }
 
+const refresh = () => loadContent()
+
 
 const onScroll = () => {
     markScrollState()
@@ -270,7 +272,7 @@ const onDrop = async (event) => {
     }
     decreaseImportTaskCount()
     success ? showToast(msg) : showFailToast(msg)
-    if(success) loadContent()
+    if(success) refresh()
 }
 
 const refreshTime = ref(0)
@@ -296,7 +298,7 @@ const importPlaylist = async () => {
         decreaseImportTaskCount()
         success ? showToast(msg) : showFailToast(msg)
         refreshTime.value = Date.now()
-        if(success) loadContent()
+        if(success) refresh()
     }
 }
 
@@ -311,7 +313,7 @@ const removeAll = async () => {
     showToast('本地歌曲已全部清空')
     resetAll()
     //refreshTime.value = Date.now()
-    loadContent()
+    refresh()
 }
 
 const randomPlay = async () => {
@@ -419,11 +421,12 @@ const tutorialList = [{
 
 /* 生命周期、监听 */
 const eventsRegistration = {
-    'batchAction-localPlaylist-removed': loadContent
+    'batchAction-localPlaylist-removed': refresh,
+    'localPlaylist-updated': refresh,
 }
 
 //watch(localPlaylists, loadContent, { deep: true })
-watch(activeTypeIndex, loadContent)
+watch(activeTypeIndex, refresh)
 watch(aralFilterName, filterByName)
 watch(isSingleLineAlbumTitleStyle, (nv, ov) => {
     if(activeTypeIndex.value == 1) {
@@ -434,7 +437,7 @@ watch(isSingleLineAlbumTitleStyle, (nv, ov) => {
 
 onMounted(() => {
     onEvents(eventsRegistration)
-    loadContent()
+    refresh()
 })
 onActivated(restoreScrollState)
 onUnmounted(offEvents(eventsRegistration))
@@ -607,7 +610,7 @@ onUnmounted(offEvents(eventsRegistration))
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 20px 33px;
+    padding: 20px 25px 20px 33px;
     overflow: scroll;
     overflow-x: hidden;
 }
@@ -672,7 +675,7 @@ onUnmounted(offEvents(eventsRegistration))
 
 #local-music-view .list-title .action.to-right {
     position: absolute;
-    right: 6px;
+    right: 10px;
 }
 
 #local-music-view .list-title .action .filter-btn {
@@ -763,14 +766,6 @@ onUnmounted(offEvents(eventsRegistration))
 
 #local-music-view .aral-filter li:hover {
     background: var(--content-list-item-hover-bg-color);
-}
-
-
-/* 防抖：统一样式 */
-#local-music-view .center .playlists-ctl,
-#local-music-view .center .albumlist-ctl,
-#local-music-view .center .artistlist-ctl {
-    margin-top: 2px;
 }
 
 .contrast-mode #local-music-view .aral-filter li.active {

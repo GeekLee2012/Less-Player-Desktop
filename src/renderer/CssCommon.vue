@@ -58,6 +58,13 @@
   --others-win-ctl-max-btn-size: 8px;
   --others-win-ctl-collapse-btn-size: 18px;
   --others-win-ctl-btn-margin-right: 8px;
+  
+  --others-win-ctl-btn-traffic-light-close-btn-bg: #fc605c;
+  --others-win-ctl-btn-traffic-light-min-btn-bg: #fdbc40;
+  --others-win-ctl-btn-traffic-light-max-btn-bg: #34c648;
+  --others-win-ctl-btn-traffic-light-close-btn-color: #555555;
+  --others-win-ctl-btn-traffic-light-min-btn-color: #555555;
+  --others-win-ctl-btn-traffic-light-max-btn-color: #555555;
 
   --others-playmeta-height: 77px;
   --others-playnav-height: 80px;
@@ -106,6 +113,9 @@
 
   font-family: var(--content-text-font-family);
   letter-spacing: var(--content-text-letter-spacing);
+
+  scrollbar-color: var(--others-scrollbar-color) transparent;
+  scrollbar-width: var(--others-scrollbar-width);
 }
 
 .content-text-highlight {

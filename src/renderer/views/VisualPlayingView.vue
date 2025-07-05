@@ -161,6 +161,7 @@ onUnmounted(() => {
                                     'draggable': isDndSaveEnable, 
                                     'none-border': !isPlayingViewCoverBorderShow 
                                 }"
+                                crossorigin="anonymous"
                                 :draggable="isDndSaveEnable" @dragstart="dndSaveCover"
                                 @contextmenu.stop="toggleExVisualCanvasShow" />
                         </div>
@@ -436,7 +437,7 @@ onUnmounted(() => {
     /* margin: 0px 60px; */
     padding-left: 60px;
     padding-right: 60px;
-    padding-bottom: 60px;
+    padding-bottom: 56px;
     overflow: hidden;
     height: 625px;
 }
@@ -469,6 +470,7 @@ onUnmounted(() => {
     /*padding-top: 33px;*/
     margin-right: 28px;
     margin-top: 23px;
+    margin-bottom: 24px;
 }
 
 .visual-playing-view .cover-spectrum-wrap {
@@ -839,7 +841,7 @@ onUnmounted(() => {
 }
 
 
-/* 渐变风格 - 现代 */
+/* gradient type - modern */
 .visual-playing-view .container .backdrop-container {
     contain: style size;
     position: fixed;

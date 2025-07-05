@@ -1093,9 +1093,21 @@ onActivated(() => {
                     </div>
                     <div class="win-action-left" v-show="useWindowsStyleWinCtl">
                         <span class="lyric-btn btn spacing"
-                            :class="{ 'lyric-show': isLyricShow, 'content-text-highlight': isLyricShow }"
+                            :class="{ 
+                                active: isLyricShow,
+                                'lyric-show': isLyricShow, 
+                            }"
                             @click="toggleLyric">
-                            词
+                            <svg width="18" height="18" viewBox="0 0 22.15 19.47" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_1-2" data-name="Layer 1">
+                                        <path d="M19.75,2.37H8.19V.51H22.08c0,.37.06.72.06,1.07,0,5.07,0,10.15,0,15.22,0,1.66-.55,2.3-2.17,2.57a4.57,4.57,0,0,1-.82.09H16.43l-.64-2h2.55c.74,0,1.4-.14,1.4-1.06C19.75,11.77,19.75,7.14,19.75,2.37Z"/>
+                                        <path d="M9.46,15.24V8.37h8.17v6.87Zm5.8-1.79V10.16H11.85v3.29Z"/>
+                                        <path d="M0,6.12H5.65v8.82L7.5,13.42c1.05,1.81,1,2-.5,3.16-1,.78-2.11,1.51-3.26,2.33-.49-.95-1.27-1.64-.46-2.73.24-.32.12-.92.12-1.39,0-2.18,0-4.35,0-6.66H0Z"/>
+                                        <path d="M18.44,4.48V6.35H8.75V4.48Z"/><path d="M5.87,4.44,1.74,1.27c1.39-1.6,1.4-1.62,3-.45C5.64,1.48,6.5,2.21,7.5,3Z"/>
+                                    </g>
+                                </g>
+                            </svg>
                         </span>
                         <span class="text-color-btn btn spacing" :class="{ 'text-color-black': textColorIndex == 1 }"
                             @click="switchTextColor">
@@ -1142,9 +1154,23 @@ onActivated(() => {
                             </g>
                         </svg>
                     </span>
-                    <span v-show="!useWindowsStyleWinCtl" class="lyric-btn btn spacing"
-                        :class="{ 'lyric-show': isLyricShow, 'content-text-highlight': isLyricShow }" @click="toggleLyric">
-                        词
+                    <span v-show="!useWindowsStyleWinCtl" 
+                        class="lyric-btn btn spacing"
+                        :class="{ 
+                            active: isLyricShow,
+                            'lyric-show': isLyricShow, 
+                        }" 
+                        @click="toggleLyric">
+                        <svg width="18" height="18" viewBox="0 0 22.15 19.47" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path d="M19.75,2.37H8.19V.51H22.08c0,.37.06.72.06,1.07,0,5.07,0,10.15,0,15.22,0,1.66-.55,2.3-2.17,2.57a4.57,4.57,0,0,1-.82.09H16.43l-.64-2h2.55c.74,0,1.4-.14,1.4-1.06C19.75,11.77,19.75,7.14,19.75,2.37Z"/>
+                                    <path d="M9.46,15.24V8.37h8.17v6.87Zm5.8-1.79V10.16H11.85v3.29Z"/>
+                                    <path d="M0,6.12H5.65v8.82L7.5,13.42c1.05,1.81,1,2-.5,3.16-1,.78-2.11,1.51-3.26,2.33-.49-.95-1.27-1.64-.46-2.73.24-.32.12-.92.12-1.39,0-2.18,0-4.35,0-6.66H0Z"/>
+                                    <path d="M18.44,4.48V6.35H8.75V4.48Z"/><path d="M5.87,4.44,1.74,1.27c1.39-1.6,1.4-1.62,3-.45C5.64,1.48,6.5,2.21,7.5,3Z"/>
+                                </g>
+                            </g>
+                        </svg>
                     </span>
                     <span v-show="!useWindowsStyleWinCtl" class="text-color-btn btn spacing"
                         :class="{ 'text-color-black': textColorIndex == 1 }" @click="switchTextColor">
@@ -1195,7 +1221,7 @@ onActivated(() => {
             <div class="action" v-show="!isLyricShow">
                 <div class="btm-left">
                     <div @click="toggleFavoritedState">
-                        <svg v-show="!favoritedState" width="18" height="18" viewBox="0 -50 1024 937.46"
+                        <svg v-show="!favoritedState" width="20" height="20" viewBox="0 -50 1024 937.46"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -1204,7 +1230,7 @@ onActivated(() => {
                                 </g>
                             </g>
                         </svg>
-                        <svg v-show="favoritedState" class="love-btn" width="18" height="19" viewBox="0 0 1024 937.53"
+                        <svg v-show="favoritedState" class="love-btn" width="20" height="21" viewBox="0 0 1024 937.53"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -1214,7 +1240,7 @@ onActivated(() => {
                             </g>
                         </svg>
                     </div>
-                    <VolumeBar class="spacing" ref="volumeBarRef"></VolumeBar>
+                    <VolumeBar class="spacing1" ref="volumeBarRef"></VolumeBar>
                 </div>
                 <div class="btm-center">
                     <PlayControl></PlayControl>
@@ -1238,7 +1264,7 @@ onActivated(() => {
                             </g>
                         </svg>
                     </div>
-                    <div class="equalizer-btn spacing" :class="{ active: isUseEffect }">
+                    <div class="equalizer-btn spacing1" :class="{ active: isUseEffect }">
                         <svg @click="toggleSoundEffectView" width="17" height="17" viewBox="0 0 1024 1024"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -1291,11 +1317,15 @@ onActivated(() => {
     overflow: hidden;
     background: var(--content-bg-color);
     --others-sliderbar-ctl-height: 3px;
-    --others-playctl-spacing: 18px;
+    --others-playctl-spacing: 23px;
 }
 
 .simple-layout .spacing {
     margin-left: 15px;
+}
+
+.simple-layout .spacing1 {
+    margin-left: 23px;
 }
 
 .simple-layout .v-spacing {
@@ -1358,6 +1388,7 @@ onActivated(() => {
     display: flex;
     align-items: center;
     padding-left: 15px;
+    min-width: max-content !important;
     overflow: hidden;
 }
 
@@ -1419,6 +1450,7 @@ onActivated(() => {
 
 .simple-layout .listen-btn .play-btn svg {
     margin: 0px !important;
+    transform: scale(1.1);
 }
 
 .simple-layout .listen-btn .text {
@@ -1456,18 +1488,28 @@ onActivated(() => {
 .simple-layout > .center .top .win-action-left .text-color-btn,
 .simple-layout > .center .top .action .lyric-btn,
 .simple-layout > .center .top .action .text-color-btn {
-    width: 15px;
+    width: 17px;
     height: 13px;
     border-radius: 3px;
-    display: flex;
+    /*display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center;*/
     border: 2px solid var(--button-icon-btn-color);
     font-size: 12px;
     font-weight: bold;
     /*margin-bottom: 3px;*/
 }
 
+.simple-layout > .center .top .lyric-btn {
+    border-color: transparent !important;
+    width: auto !important;
+    height: auto !important;
+    border-width: 0px !important;
+}
+
+.simple-layout > .center .top .lyric-btn svg {
+    transform: scaleX(0.95) scaleY(1.03);
+}
 
 .simple-layout > .center .top .action .lyric-show,
 .simple-layout > .center .top .win-action-left .lyric-show {
@@ -1479,6 +1521,8 @@ onActivated(() => {
 .simple-layout > .center .top .win-action-left .text-color-btn {
     background: var(--button-icon-btn-color);
     color: #fff;
+    font-family: Arial;
+    padding-top: 1px;
 }
 
 .simple-layout > .center .top .action .text-color-black,
@@ -1501,6 +1545,11 @@ onActivated(() => {
     /*padding-top: 3px;*/
 }
 
+.simple-layout > .center .top .action .mv-btn svg,
+.simple-layout > .center .top .action .quit-layout-btn svg {
+    transform: scale(1.05);
+}
+
 .simple-layout > .center .non-macos-top .action,
 .simple-layout > .center .non-macos-top .win-action-left {
     -webkit-app-region: none;
@@ -1519,10 +1568,10 @@ onActivated(() => {
     width: 100%;
     z-index: 2;
     position: absolute;
-    bottom: 10px;
+    bottom: 20px;
     left: 0px;
     text-align: left;
-    padding: 33px;
+    padding: 0px 20px 33px 20px;
 }
 
 .simple-layout > .center .meta-wrap .audio-title {
@@ -1574,18 +1623,19 @@ onActivated(() => {
     bottom: 20px;
     left: 0px;
     text-align: left;
-    font-size: 13px;
+    font-size: calc(var(--content-text-size) - 3px);
     display: flex;
+    padding-bottom: 8px;
 }
 
 .simple-layout .audio-time-wrap .t-current {
     position: absolute;
-    left: 10px;
+    left: 20px;
 }
 
 .simple-layout .audio-time-wrap .t-duration {
     position: absolute;
-    right: 10px;
+    right: 20px;
 }
 
 .simple-layout .canvas-wrap {
@@ -1631,11 +1681,12 @@ onActivated(() => {
     align-items: center;
     justify-content: center;
     flex: 1;
+    padding-bottom: 2px;
 }
 
 .simple-layout > .bottom .action .btm-left,
 .simple-layout > .bottom .action .btm-right {
-    width: 135px;
+    width: 123px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1643,10 +1694,12 @@ onActivated(() => {
 
 .simple-layout > .bottom .action .btm-left {
     justify-content: flex-start;
+    padding-left: 18px;
 }
 
 .simple-layout > .bottom .action .btm-right {
     justify-content: flex-end;
+    padding-right: 18px;
 }
 
 .simple-layout > .bottom .action .btm-center {
@@ -1720,20 +1773,22 @@ onActivated(() => {
 }
 
 .simple-layout > .bottom .lyric-wrap .lyric-ctl .center {
-    margin-top: 5px;
+    margin-top: 8px;
     -webkit-mask-image: none;
     mask-image: none;
 }
 
 .simple-layout > .bottom .lyric-wrap .line {
     margin: 0px !important;
-    font-size: calc(var(--content-text-size) + 4px) !important;
-    line-height: 28px !important;
+    font-size: calc(var(--content-text-size) + 3px) !important;
+    line-height: 31px !important;
     padding-left: 0px !important;
     padding-right: 0px !important;
     
     overflow: hidden;
     text-overflow: ellipsis;
+    word-break: break-all;
+    line-break: anywhere;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     line-clamp: 1;

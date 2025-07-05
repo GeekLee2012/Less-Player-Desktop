@@ -97,7 +97,7 @@ const { visitHome, visitUserHome, visitSetting,
     visitModulesSetting, visitSearch,
     visitThemes, visitPlugins, visitRecents,
 } = inject('appRoute')
-const { hasExDrawSpectrumHandlers,drawExSpectrum, 
+const { hasExDrawSpectrumHandlers, drawExSpectrum, 
     toggleExVisualCanvas, showConfirm, } = inject('apiExpose')
 
 const playState = ref(PlayState.NONE)
@@ -1009,7 +1009,8 @@ const drawCanvasSpectrum = () => {
 
 //TODO 插件加载状态无法感知
 const containerElSelector = '.visual-playing-view .center .ex-visual-canvas-wrap'
-watch(() => exVisualCanvasShow.value && playingViewThemeIndex.value, (nv, ov) => {
+watch(() => playingViewShow.value && exVisualCanvasShow.value && playingViewThemeIndex.value, (nv, ov) => {
+    if(!playingViewShow.value) return
     const index = exVisualCanvasIndex.value
     const tIndex = playingViewThemeIndex.value
     toggleExVisualCanvas(containerElSelector, index, tIndex == 1)
@@ -1500,7 +1501,7 @@ const { RESTORE, PLAY, PAUSE,  PLAY_PREV, PLAY_NEXT,
         DESKTOP_LYRIC_LOCK, DESKTOP_LYRIC_UNLOCK,
         DESKTOP_LYRIC_PIN, DESKTOP_LYRIC_UNPIN,
         PLUGINS, CHECK_FOR_UPDATES, 
-    } = useTrayAction()
+    } = useTrayAction() || {}
     
 onIpcRendererEvents({
     //Tray事件
@@ -1903,6 +1904,19 @@ const eventsRegistration = {
     'video-stop': resumeTrackPendingPlay,
     //'video-playCurrent': playVideo,
     'plugins-accessResult-addPlatform': ({ code }) => {
+        const pendingTrack = pendingBootstrapTrack.value
+        if (!pendingTrack) return
+        if (pendingTrack.platform != code && !isLocalMusic(pendingTrack.platform)) return
+        //pendingTrack已非当前歌曲
+        if (!isCurrentTrack(pendingTrack)) return setPendingBootstrapTrack(null)
+        
+        //延迟加载歌词
+        emitEvents('track-lyricRestore')
+        const _track = { ...pendingTrack }
+        setPendingBootstrapTrack(null)
+        setTimeout(() => loadLyric(_track), 1888)
+    },
+    'plugins-registerPlatform': ({ code }) => {
         const pendingTrack = pendingBootstrapTrack.value
         if (!pendingTrack) return
         if (pendingTrack.platform != code && !isLocalMusic(pendingTrack.platform)) return

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onActivated, onMounted, onDeactivated, onUnmounted, ref, watch, reactive } from 'vue';
+import { computed, inject, onActivated, onMounted, onDeactivated, onUnmounted, ref, watch, reactive, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { usePlayStore } from '../store/playStore';
@@ -10,6 +10,8 @@ import { useThemeStore } from '../store/themeStore';
 import { isWinOS, useGitRepository, toTrimString,
     toLowerCaseTrimString, ipcRendererSend, ipcRendererInvoke, 
     onIpcRendererEvent, isMacOS, transformPath, stringEquals,
+    smoothScroll,
+    tryCallDefault,
 } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
@@ -64,6 +66,7 @@ const { setThemeIndex,
     toggleFreeVideoShortcut,
     setTrackQualityIndex,
     toggleVipTransfer,
+    toggleDoubleClickToPlayTrack,
     toggleVipFlagShow,
     toggleSongItemIndexShow,
     toggleCategoryBarRandom,
@@ -199,7 +202,9 @@ const { setThemeIndex,
 
 const { showToast, showImportantToast, 
     toggleCustomAppBorderRadiusViewShow,
-    toggleThemeSelectionView, toggleFontSelectionToolbar, } = useAppCommonStore()
+    toggleThemeSelectionView, toggleFontSelectionToolbar, 
+    toggleCustomWindowCtlBtnView,
+} = useAppCommonStore()
 const { isMaxScreen, routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const { audioOutputDevices } = storeToRefs(usePlayStore())
 const { removeAllRecents } = useRecentsStore()
@@ -489,30 +494,68 @@ const onScroll = (event) => {
 */
 
 const settingNavItems = reactive([])
+const intersectingEntries = reactive([])
+const activeNavItemIndexByClick = ref(-1)
+const setActiveNavItemIndexByClick = (value) => (activeNavItemIndexByClick.value = value)
+const navObserver = new IntersectionObserver(entries => {
+    for(let i = 0; i < entries.length; i++) {
+        const keyIndex = parseInt(entries[i].target.getAttribute('keyIndex'))
+        if(entries[i].isIntersecting) {
+            intersectingEntries.push(keyIndex)
+        } else {
+            const index = intersectingEntries.findIndex(key => (key == keyIndex))
+            if(index > -1) {
+                intersectingEntries.splice(index, 1)
+                if(keyIndex == activeNavItemIndexByClick.value) {
+                    setActiveNavItemIndexByClick(-1)
+                }
+            }
+        }
+    }
+    intersectingEntries.sort()
+})
+
+const computedActiveNavItemIndex = computed(() => {
+    const clickIndex = activeNavItemIndexByClick.value
+    const firstIntersectingIndex = intersectingEntries[0]
+    return (intersectingEntries.includes(clickIndex) && clickIndex >= 0)
+        ? clickIndex : firstIntersectingIndex
+})
 
 const initSettingNavItems = () => {
     settingNavItems.length = 0
-    const list = document.querySelectorAll("#setting-view > .center > div > .cate-name") || []
-    list.forEach(item => settingNavItems.push(item))
+    //let list = document.querySelectorAll("#setting-view > .center > div > .cate-name") || []
+    //list.forEach(item => settingNavItems.push(item))
+
+    const list = document.querySelectorAll("#setting-view > .center > div.row") || []
+    list.forEach((item, index) => {
+        const navItem = item.querySelector('.cate-name')
+        settingNavItems.push(navItem)
+        item.setAttribute('keyIndex', index)
+
+        navObserver.observe(item)
+    })
 }
 
 const navbarCollapsed = ref(true)
 const setNavbarCollapsed = (value) => (navbarCollapsed.value = value)
-const scrollByNavItem = (event, item) => {
+const scrollByNavItem = (event, item, index) => {
     item.scrollIntoView()
     setNavbarCollapsed(true)
+    setActiveNavItemIndexByClick(index)
 }
 
 const scrollToSettingNavItemByText = (text) => {
-    let targetItem = null
+    let targetItem = null, index  = -1
     for(let i = 0; i < settingNavItems.length; i++) {
         const item = settingNavItems[i]
         if(stringEquals(item.textContent, text)) {
             targetItem = item 
+            index = i
             break
         }
     }
-    if(targetItem) scrollByNavItem(null, targetItem)
+    if(targetItem) scrollByNavItem(null, targetItem, index)
 }
 
 const getThemeItemPreviewBackground = (index, type) => {
@@ -591,6 +634,25 @@ watch(() => common.value.useWinZoomForCreate, (nv) => {
     showToast(`已${action}“锁定为初始值”<br>下次重启后生效`)
 })
 
+watch(() => !navbarCollapsed.value + ':'+ intersectingEntries[0], () => {
+    nextTick(() => {
+        if(navbarCollapsed.value) return
+
+        const navItemsWrap = document.querySelector('#setting-view .navbar')
+        const navItems = navItemsWrap.querySelectorAll('li')
+
+        tryCallDefault(() => {
+            const index = computedActiveNavItemIndex.value || 0
+            const navItem = navItems[index]
+            const { clientHeight } = navItemsWrap
+            const { clientHeight: itemHeight, offsetTop: itemOffsetTop } = navItem
+            const adjustHeight = itemHeight ? itemHeight / 2 : 0
+            const destScrollTop = itemOffsetTop - (clientHeight / 2) + adjustHeight
+            smoothScroll(navItemsWrap, destScrollTop, 314, 8)
+        })
+    })
+})
+
 
 const eventsRegistration = {
     'setting-scrollToNavItem': scrollToSettingNavItemByText,
@@ -631,9 +693,12 @@ onUnmounted(() => offEvents(eventsRegistration))
             </svg>
             <ul>
                 <li class="nav-item" v-for="(item, index) in settingNavItems"
-                    :class="{ first: (index == 0)}"
+                    :class="{ 
+                        first: (index == 0),
+                        active: (index == computedActiveNavItemIndex),
+                    }"
                     v-html="item.textContent" 
-                    @click.stop="(event) => scrollByNavItem(event, item)">
+                    @click.stop="(event) => scrollByNavItem(event, item, index)">
                 </li>
             </ul>
         </div>
@@ -757,6 +822,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                             :class="{ active: index == common.winCtlStyle, 'first-item': index == 0 }" @click="setWindowCtlStyle(index)">
                             {{ item }}
                         </span>
+                    </div>
+                    <div class="window-ctl custom-style" v-show="common.winCtlStyle == 1">
+                        <span class="sec-title cate-subtitle">窗口按钮自定义：</span>
+                        <SvgTextButton text="前往设置" :leftAction="toggleCustomWindowCtlBtnView">
+                        </SvgTextButton>
                     </div>
                     <div class="border-radius-ctl">
                         <span class="sec-title cate-subtitle">预设圆角风格：</span>
@@ -977,6 +1047,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="toggleVipTransfer" :value="track.vipTransfer">
                         </ToggleControl>
                         <div class="tip-text spacing">提示：实验性功能，匹配准确度无法保证</div>
+                    </div>
+                    <div>
+                        <span class="cate-subtitle">歌曲双击时播放：</span>
+                        <ToggleControl @click="toggleDoubleClickToPlayTrack" :value="track.doubleClickToPlayTrack">
+                        </ToggleControl>
                     </div>
                     <div>
                         <span class="cate-subtitle">歌曲显示VIP标识：</span>
@@ -2052,22 +2127,25 @@ onUnmounted(() => offEvents(eventsRegistration))
     margin-top: 0px;
 }
 
-#setting-view .navbar li:hover {
-    /*background: var(--content-list-item-hover-bg-color);
-    font-weight: bold;
-    transform: scale(1.03);*/
-    /*
-    background: var(--button-icon-text-btn-bg-color);
-    color: var(--button-icon-text-btn-text-color);
-    */
+#setting-view .navbar li.active {
     background: var(--content-list-item-hl-bg-color) !important;
     color: var(--content-list-item-hl-text-color) !important;
     transform: scale(1.03);
 }
 
-.contrast-mode #setting-view .navbar li:hover {
+#setting-view .navbar li:hover {
+    background: var(--content-list-item-hover-bg-color);
+    /*font-weight: bold;
+    transform: scale(1.03);
+    background: var(--button-icon-text-btn-bg-color);
+    color: var(--button-icon-text-btn-text-color);
+    */
+}
+
+.contrast-mode #setting-view .navbar li.active {
     font-weight: bold;
 }
+
 
 #setting-view .navbar.collapse {
     top: auto;

@@ -6,6 +6,8 @@ const props = defineProps({
 
 <template>
     <div class="category-bar-loading-mask">
+        <span class="loading-mask first-mask">
+        </span>
         <span v-for="i in count" class="loading-mask">
         </span>
     </div>
@@ -13,15 +15,21 @@ const props = defineProps({
 
 <style scoped>
 .category-bar-loading-mask span {
-    width: 58px; 
+    width: 52px; 
     height: 23px;
     line-height: 36px;
     padding: 6px 15px;
     margin-right: 8px;
     margin-bottom: 6px; 
-    /*border-radius: 10rem; */
     border-radius: var(--border-list-item-border-radius);
-    cursor: default; 
     display: inline-block;
+}
+
+.category-bar-loading-mask span.first-mask {
+    width: 34px; 
+    height: 34px;
+    padding: 0px;
+    border-radius: 5px;
+    display: none;
 }
 </style>

@@ -15,7 +15,9 @@ export const tryCall = (fn, params, onSuccess, onError) => {
     try {
         if(fn && (typeof fn == 'function')) {
             const result = fn(params)
-            if (onSuccess && (typeof onSuccess == 'function')) return onSuccess(result)
+            if (onSuccess && (typeof onSuccess == 'function')) {
+                return onSuccess(result)
+            }
             return result
         }
     } catch (error) {
@@ -42,10 +44,14 @@ export const tryCallDefault = (fn, params, defaultValue) => {
         || defaultValue
 }
 
+export const isAsyncFn = (fn) => {
+    return Object.prototype.toString.call(fn) === '[object AsyncFunction]'
+}
+
 
 /************ 从主进程获取到的数据 ************/
 export const useIpcRenderer = () => {
-    return tryCallDefault(() => (electronAPI.ipcRenderer))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.ipcRenderer))
 }
 
 export const isIpcRendererSupported = () => {
@@ -88,67 +94,73 @@ export const isNetOnline = async () => {
 }
 
 export const useStartDrag = () => {
-    return tryCallDefault(() => (electronAPI.startDrag))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.startDrag))
 }
 
 export const useWebZoom = () => {
-    return tryCallDefault(() => (electronAPI.webZoom))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.webZoom))
 }
 
 export const isMacOS = () => {
-    return tryCallDefault(() => (electronAPI.isMacOS))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.isMacOS))
 }
 
 export const isWinOS = () => {
-    return tryCallDefault(() => (electronAPI.isWinOS))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.isWinOS))
 }
 
 export const useUseCustomTrafficLight = () => {
-    return tryCallDefault(() => (electronAPI.useCustomTrafficLight))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.useCustomTrafficLight))
 }
 
 export const isDevEnv = () => {
-    return tryCallDefault(() => (electronAPI.isDevEnv))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.isDevEnv))
 }
 
 export const useDownloadsPath = () => {
-    return tryCallDefault(() => (electronAPI.DOWNLOADS_PATH))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.DOWNLOADS_PATH))
 }
 
 export const useAudioExts = () => {
-    return tryCallDefault(() => (electronAPI.AUDIO_EXTS))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.AUDIO_EXTS))
 }
 
 export const useExtraAudioExts = () => {
-    return tryCallDefault(() => (electronAPI.EXTRA_AUDIO_EXTS))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.EXTRA_AUDIO_EXTS))
 }
 
 export const useVideoExts = () => {
-    return tryCallDefault(() => (electronAPI.VIDEO_EXTS))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.VIDEO_EXTS))
 }
 
 export const useVideoCollectionExts = () => {
-    return tryCallDefault(() => (electronAPI.VIDEO_COLLECTION_EXTS))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.VIDEO_COLLECTION_EXTS))
 }
 
 export const useImageExts = () => {
-    return tryCallDefault(() => (electronAPI.IMAGE_EXTS))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.IMAGE_EXTS))
 }
 
 export const useMessagePort = () => {
-    return tryCallDefault(() => (electronAPI.messagePort))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.messagePort))
 }
 
 export const useGitRepository = () => {
-    return tryCallDefault(() => (electronAPI.GitRepository))
+    return tryCallDefault(() => {
+        return window.electronAPI ? window.electronAPI.GitRepository 
+            : {
+                GITHUB: 'https://github.com/GeekLee2012/Less-Player-Desktop',
+                GITEE: 'https://gitee.com/rive08/less-player-desktop'
+            }
+    })
 }
 
 export const useTrayAction = () => {
-    return tryCallDefault(() => (electronAPI.TrayAction))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.TrayAction))
 }
 
 export const createMpv = (options, mpvArgs) => {
-    return tryCallDefault(() => (electronAPI.createMpv(options, mpvArgs)))
+    return tryCallDefault(() => (window.electronAPI && window.electronAPI.createMpv(options, mpvArgs)))
 }
 
 
@@ -205,6 +217,10 @@ export const stringEquals = (value1, value2) => {
 
 export const stringPrefixEquals = (value1, value2, prefixLength) => {
     if(!value1 || !value2) return false
+    if(!prefixLength) {
+        return toTrimString(value1)
+            .startsWith(toTrimString(value2))
+    }
     return toTrimString(value1).substring(0, prefixLength) 
         == toTrimString(value2).substring(0, prefixLength)
 }

@@ -420,7 +420,7 @@ onUnmounted(() => {
             'align-center': lyric.alignment == 1,
             'align-right': lyric.alignment == 2,
         }"
-        @contextmenu.stop="toggleLyricToolbar">
+        @contextmenu.prevent.stop="toggleLyricToolbar">
         <div class="header" v-show="isHeaderVisible()">
             <div class="audio-title" 
                 :class="{

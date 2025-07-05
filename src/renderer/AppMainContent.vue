@@ -7,13 +7,14 @@ import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
+import { usePlaybackQueueStore } from './store/playbackQueueStore';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
 import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
   ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, 
   isMacOS, useGitRepository, isDevEnv, readLines, nextInt,
-  tryCallDefault, } from '../common/Utils';
+  tryCallDefault, isIpcRendererSupported, } from '../common/Utils';
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 import packageCfg from '../../package.json';
 import { getDoc, getRaw } from '../common/HttpClient';
@@ -46,7 +47,7 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
   isStoreRecentPlay, isAutoClearRecentPlayEnable,
   liveTimeForRecentPlay, needClearRecentSongs, 
   needClearRecentPlaylists, needClearRecentAlbums, 
-  needClearRecentRadios, mpvBinaryPath,
+  needClearRecentRadios, mpvBinaryPath, 
 } = storeToRefs(useSettingStore())
 const { setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
@@ -192,7 +193,7 @@ const cleanupStore = (store, key) => {
   const cache = localStorage.getItem(key)
   if (cache) {
     const oldStates = JSON.parse(cache)
-    store.$reset() //方法失效，与期望值不符
+    store.$reset()
     localStorage.removeItem(key)
     deepIntoStates(store.$state, oldStates)
   }
@@ -372,6 +373,7 @@ const migrateRecentsData = () => {
   removeAllRecents()
 }
 
+
 //数据迁移
 const migrateData = () => {
   //迁移 - 最近播放记录
@@ -388,6 +390,8 @@ const migrateData = () => {
       cleanupStore(useAppCommonStore(), 'appCommon')
     }
   })
+  //迁移 - 我的主页 - 播放队列
+  tryCallDefault(() => cleanupStore(usePlaybackQueueStore(), 'playbackQueueStore'))
 }
 
 const initialize = () => {
@@ -840,9 +844,10 @@ provide('appVersion', {
       :class="{
         'winos-style': isWinOS(),
         'use-winos-win-ctl': useWindowsStyleWinCtl,
-        'custom-shadow': isAppCustomShadowShow
+        'custom-shadow': isAppCustomShadowShow,
+        'none-electron': !isIpcRendererSupported(),
       }"
-      @contextmenu="toggleTrackResourceTool" >
+      @contextmenu.prevent="toggleTrackResourceTool" >
     <keep-alive :max="1">
       <component :is="currentAppLayout">
       </component>

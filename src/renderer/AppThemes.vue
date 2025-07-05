@@ -5,9 +5,11 @@ import { useSettingStore } from './store/settingStore';
 import { useThemeStore } from './store/themeStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
+import CssAdjust from './CssAdjust.vue';
 import { isMacOS, isWinOS, toTrimString, onIpcRendererEvents, ipcRendererInvoke } from '../common/Utils';
 import { AppThemeSource } from '../common/Constants';
 import CssWinOS from './CssWinOS.vue';
+import CssNoneElectron from './CssNoneElectron.vue';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
@@ -17,13 +19,16 @@ import { onEvents, emitEvents } from '../common/EventBusWrapper';
 const { theme: themeSetting, currentBorderRadiusCtlStyle,
   isUseAutoBorderRadiusCtl, isUseMacOSBorderRadiusCtl,
   isUseWindowsBorderRadiusCtl, winCustomShadowSize, 
-  commonBorderRadius, themeNativeMode, } = storeToRefs(useSettingStore())
+  commonBorderRadius, themeNativeMode,  
+  winCtlCustomStyle, isDarkThemeMode,
+} = storeToRefs(useSettingStore())
 const { getCurrentTheme, setupFontFamily,
   setupFontWeight, allFontSizeLevels,
   currentFontSizeLevel, currentFontSize,
   setPresetBorderRadius, switchToLightTheme, 
   switchToDarkTheme, setThemeLightIndex,
-  setThemeDarkIndex } = useSettingStore()
+  setThemeDarkIndex, getPresetWindowCtlStyle, 
+} = useSettingStore()
 const { getTheme } = useThemeStore()
 
 
@@ -308,14 +313,35 @@ const postCustomThemeRemoved = (index) => {
   }
 }
 
-/*
-const setupAppBorder = () => {
-  //TODO 硬编码
-  const borderRadius = isMacOS() ? 0 : 12
-  applyDocumentStyle({ '--border-app-win-border-radius': `${borderRadius}px` })
-  //TODO 边框阴影效果, 再看看情况
+const transformWinCtlStyle = (winCtlStyle) => {
+  if(!winCtlStyle) return {}
+  const { light, dark } = winCtlStyle 
+  if(!light || !dark) return {}
+  const isDarkMode = isDarkThemeMode.value
+  const style = { ...(isDarkMode ? dark : light) }
+  const { bg, btnColor } = style || {}
+  const  { closeBtn: closeBtnBg, minBtn: minBtnBg, maxBtn: maxBtnBg } = bg || {}
+  const  { closeBtn: closeBtnColor, minBtn: minBtnColor, maxBtn: maxBtnColor } = btnColor || {}
+  return {
+    closeBtnBg, minBtnBg, maxBtnBg,
+    closeBtnColor, minBtnColor, maxBtnColor
+  }
 }
-*/
+
+const setupWinCtlCustomStyle = (previewStyle) => {
+  const preview = transformWinCtlStyle(previewStyle)
+  const custom = transformWinCtlStyle(winCtlCustomStyle.value)
+  const preset = transformWinCtlStyle(getPresetWindowCtlStyle())
+  const changes = {
+    '--others-win-ctl-btn-traffic-light-close-btn-bg': (preview.closeBtnBg || custom.closeBtnBg || preset.closeBtnBg),
+    '--others-win-ctl-btn-traffic-light-min-btn-bg': (preview.minBtnBg || custom.minBtnBg || preset.minBtnBg),
+    '--others-win-ctl-btn-traffic-light-max-btn-bg': (preview.maxBtnBg || custom.maxBtnBg || preset.maxBtnBg),
+    '--others-win-ctl-btn-traffic-light-close-btn-color': (preview.closeBtnColor || custom.closeBtnColor || preset.closeBtnColor),
+    '--others-win-ctl-btn-traffic-light-min-btn-color': (preview.minBtnColor || custom.minBtnColor || preset.minBtnColor),
+    '--others-win-ctl-btn-traffic-light-max-btn-color': (preview.maxBtnColor || custom.maxBtnColor || preset.maxBtnColor),
+  }
+  applyDocumentStyle(changes)
+}
 
 /*
   const rootEl = document.documentElement
@@ -380,7 +406,8 @@ onEvents({
   'theme-applyTheme-preview': setupAppTheme,
   'setting-appBorderRadiusPreview': setupAppBorderRadius,
   'theme-nativeMode-updated': setThemeByNativeMode,
-  'theme-customTheme-removed': postCustomThemeRemoved
+  'theme-customTheme-removed': postCustomThemeRemoved,
+  'setting-windowCtlBtnPreview': setupWinCtlCustomStyle,
 })
 
 onMounted(() => {
@@ -388,6 +415,7 @@ onMounted(() => {
   setupAppBorderRadius()
   setupWinCustomShadow()
   setupAppNativeTheme()
+  setupWinCtlCustomStyle()
 })
 
 watch(themeSetting, () => setupAppTheme(), { deep: true })
@@ -395,6 +423,8 @@ watch(currentBorderRadiusCtlStyle, setupPresetBorderRadius)
 watch(winCustomShadowSize, setupWinCustomShadow)
 watch(commonBorderRadius, setupAppBorderRadius, { deep: true })
 watch(themeNativeMode, setThemeByNativeMode, { immediate: true })
+watch(winCtlCustomStyle, () => setupWinCtlCustomStyle(), { deep: true })
+
 
 provide('appStyle', {
   applyDocumentElementStyle,
@@ -408,7 +438,9 @@ provide('appStyle', {
   <CssReset></CssReset>
   <CssCommon></CssCommon>
   <slot></slot>
+  <CssAdjust></CssAdjust>
   <CssWinOS></CssWinOS>
+  <CssNoneElectron></CssNoneElectron>
 </template>
 
 <style>

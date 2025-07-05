@@ -34,6 +34,7 @@ const { lyricMetaPos, isDefaultLayout,
     isAutoLayout, winCustomShadowSize, 
     isMiniNavBarMode, isUseHCardStyleImageTextTile,
     imageTextTileStyleIndex, isUseCoverNopaddingForHCardStyleTile,
+    layoutIndex,
 } = storeToRefs(useSettingStore())
 const { setupWindowZoom } = useSettingStore()
 
@@ -112,7 +113,8 @@ const setImageTextTileSize = () => {
     const { clientWidth } = mainContent
 
     const tileWidths = limits.map(num => (clientWidth - 2 * mainMargin - scrollBarWidth) / num - tileHMargin * 2)
-    let tileWidth = tileMinWidth, tileNum = limits[limits.length - 1]
+    let tileWidth = tileMinWidth
+    let tileNum = limits[limits.length - 1]
     for (var i = 0; i < tileWidths.length; i++) {
         if (Math.abs(tileWidths[i] - tileMinWidth) <= 20) {
             tileWidth = tileWidths[i]
@@ -153,7 +155,8 @@ const setHCardImageTextTileSize = () => {
     const { clientWidth } = mainContent
 
     const tileWidths = limits.map(num => (clientWidth - 2 * mainMargin - scrollBarWidth) / num - tileHMargin * 2)
-    let tileWidth = tileMinWidth, tileNum = limits[limits.length - 1]
+    let tileWidth = tileMinWidth
+    let tileNum = limits[limits.length - 1]
     for (var i = 0; i < tileWidths.length; i++) {
         if (Math.abs(tileWidths[i] - tileMinWidth) <= 30) {
             tileWidth = tileWidths[i]
@@ -362,6 +365,7 @@ const setupDefaultLayout = () => {
 const setThemesViewItemsSize = () => {
     //const tileMinWidth = isMiniNavBarMode.value ? 160 : 165 //160
     const tileMinWidth = 165
+    const mainMargin = 35
     const tileHMargin = 25
     const scrollBarWidth = 6
     //TODO 宽屏、超宽屏，需更好兼容性
@@ -372,17 +376,23 @@ const setThemesViewItemsSize = () => {
     const { clientWidth } = mainContent
     if (!clientWidth) return
     
-    const tileWidths = limits.map(num => ((clientWidth - scrollBarWidth - 35 * 2) / num - tileHMargin))
+    const tileWidths = limits.map(num => ((clientWidth - scrollBarWidth - mainMargin * 2) / num - tileHMargin))
     let tileWidth = tileMinWidth
+    let tileNum = limits[limits.length - 1]
     for (var i = 0; i < tileWidths.length; i++) {
         if (Math.abs(tileWidths[i] - tileMinWidth) <= 20) {
             tileWidth = tileWidths[i]
+            tileNum = limits[i]
             break
         }
     }
 
     //浮点数运算有误差，保险起见，设置一个误差值
     tileWidth = parseInt(tileWidth) - 3
+    const totalWidth = tileNum * (tileWidth + tileHMargin * 2) + mainMargin * 2 + scrollBarWidth
+    const offsetWidth = (clientWidth - totalWidth)
+    if(offsetWidth >= 10) tileWidth += parseInt(offsetWidth / tileNum)
+    const widthRatio = (tileWidth / 168)
 
     const tileHeight = tileWidth * 100 / tileMinWidth //95
     applyDocumentStyle({
@@ -416,7 +426,8 @@ const setWebDavViewItemsSize = () => {
     if (!clientWidth) return
     
     const tileWidths = limits.map(num => ((clientWidth - scrollBarWidth - mainMargin * 2) / num - tileHMargin - tileHPadding))
-    let tileWidth = tileMinWidth, tileNum = limits[limits.length - 1]
+    let tileWidth = tileMinWidth
+    let tileNum = limits[limits.length - 1]
     for (var i = 0; i < tileWidths.length; i++) {
         if (Math.abs(tileWidths[i] - tileMinWidth) <= 20) {
             tileWidth = tileWidths[i]
@@ -487,6 +498,7 @@ watch(isMiniNavBarMode, resizeViewItems)
 watch(playingThemeListViewShow, setPlayingThemeListViewSize, { immediate: true })
 watch(imageTextTileStyleIndex, setImageTextTileSize, { immediate: true })
 //watch(isUseCoverNopaddingForHCardStyleTile, setImageTextTileSize, { immediate: true })
+watch(layoutIndex, setupDefaultLayout, { immediate: true })
 
 
 const eventsRegistration = {

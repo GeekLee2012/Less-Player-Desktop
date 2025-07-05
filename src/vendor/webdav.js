@@ -3,7 +3,10 @@ import { United } from "./united";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { emitEvents } from "../common/EventBusWrapper";
-import { ipcRendererInvoke, base64Stringify, base64Parse, transformUrl, decodeLess } from "../common/Utils";
+import { 
+    ipcRendererInvoke, base64Stringify, transformUrl, 
+    decodeLess, isIpcRendererSupported,
+ } from "../common/Utils";
 import { useSettingStore } from "../renderer/store/settingStore";
 
 
@@ -75,34 +78,57 @@ export class WebDav {
         return host
     }
 
-    static setupAuthorization(session) {
+    static getAuthorizationMeta(session) {
         const { url, username, password } = session
         const host = WebDav.guessHost(url)
 
         const _password = decodeLess(password)
         const realm = base64Stringify(`${username}:${_password}`)
-        
-        ipcRendererInvoke('app-addRequestHandler', {
-            id: host,
-            hosts: [host],
-            defaultHeaders: {
-                //'WWW-Authenticate': `Basic ${realm}`,
-                Authorization: `Basic ${realm}`,
-                _Referer: url,
-            },
-        })
+        return {
+            url,
+            username,
+            password: _password,
+            requestHandler: {
+                id: host,
+                hosts: [host],
+                defaultHeaders: {
+                    //'WWW-Authenticate': `Basic ${realm}`,
+                    Authorization: `Basic ${realm}`,
+                    _Referer: url,
+                },
+            }
+        }
+    }
+
+    static setupAuthorization(session, handler) {
+        if(!handler) {
+            const { requestHandler } = WebDav.getAuthorizationMeta(session)
+            handler = requestHandler
+        }
+        ipcRendererInvoke('app-addRequestHandler', handler)
     }
 
     static createClient(session) {
-        const { url, username, password } = session
-        const _password = decodeLess(password)
-        const client = createClient(transformUrl(url), {
+        const { url, username, password, requestHandler } = WebDav.getAuthorizationMeta(session)
+        let options = {
             //authType: AuthType.Digest,
             username,
-            password: _password,
-        })
-
-        WebDav.setupAuthorization(session)
+            password,
+        }
+        //非Electron环境
+        if(!isIpcRendererSupported()) {
+            const { defaultHeaders } = requestHandler
+            const { Authorization, _Referer: Referer } = defaultHeaders
+            Object.assign(options, {
+                headers: {  
+                    Authorization, 
+                    Referer,
+                    Origin: Referer, 
+                }
+            })
+        }
+        const client = createClient(transformUrl(url), options)
+        WebDav.setupAuthorization(session, requestHandler)
         return client
     }
 

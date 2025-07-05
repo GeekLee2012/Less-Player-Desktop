@@ -259,9 +259,12 @@ onUnmounted(() => offEvents(eventsRegistration))
 <style scoped>
 .image-text-tile {
     /*margin: 15px 13px;*/
-    margin: 15px 13px 11px 13px;
+    margin: 15px 13px 12px 13px;
     position: relative !important;
     --card-shadow-height: 6px;
+    --box-shadow-color: #181818;
+    --box-shadow: 0px 0px 1px var(--box-shadow-color);
+    --card-box-shadow: 0px 0px 2px var(--box-shadow-color);
 }
 
 .image-text-tile .cover {
@@ -271,7 +274,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     border-radius: var(--border-img-text-tile-border-radius);
     cursor: pointer;
     /*box-shadow: 0px 0px 3px var(--border-popovers-border-color);*/
-    box-shadow: 0px 0px 1px #181818;
+    box-shadow: var(--box-shadow);
     background-color: var(--app-bg-color);
 }
 
@@ -459,7 +462,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     /*background: var(--app-bg-color);*/
     background: var(--content-image-text-tile-card-bg-color);
     /*box-shadow: 0px 0px 3px var(--border-popovers-border-color);*/
-    box-shadow: 0px 0px 3px #181818;
+    box-shadow: var(--card-box-shadow);
     border-radius: var(--border-img-text-tile-border-radius);
     min-height: var(--others-image-text-tile-card-min-height);
     margin-top: 18px;
@@ -589,26 +592,31 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 .image-text-tile .layer {
-    display: none;
-}
-
-.image-text-tile-card.image-text-tile-card-shadow .layer,
-.image-text-tile-card-horiziontal.image-text-tile-card-shadow .layer {
     display: block;
     z-index: -2;
-    width: 90%;
+    width: 100%;
     height: 100%;
     position: absolute !important;
     top: 0px;
     left: 50%;
     transform: translate(-50%, var(--card-shadow-height));
     border-radius: var(--border-img-text-tile-border-radius);
+    background: transparent;
+}
+
+.image-text-tile .layer-tiny {
+    z-index: -3;
+    width: 80%;
+}
+
+.image-text-tile-card.image-text-tile-card-shadow .layer,
+.image-text-tile-card-horiziontal.image-text-tile-card-shadow .layer {
+    width: 90%;
     background: var(--content-image-text-tile-card-shadow-color1);
 }
 
 .image-text-tile-card.image-text-tile-card-shadow .layer-tiny,
 .image-text-tile-card-horiziontal.image-text-tile-card-shadow .layer-tiny  {
-    z-index: -3;
     width: 80%;
     transform: translate(-50%, calc(var(--card-shadow-height) * 2));
     background: var(--content-image-text-tile-card-shadow-color2);
@@ -620,6 +628,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 /* 尝试防抖：卡片transform变换导致鬼畜问题（卡片一直不停上下抖动） */
+.image-text-tile-card-horiziontal:hover .layer,
 .image-text-tile-card-horiziontal.image-text-tile-card-shadow:hover .layer {
     --card-shadow-height: 8px !important;
     width: 100% !important;
@@ -628,6 +637,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     opacity: 0 !important;
 }
 
+.image-text-tile-card-horiziontal:hover .layer-tiny,
 .image-text-tile-card-horiziontal.image-text-tile-card-shadow:hover .layer-tiny {
     cursor: default !important;
 }

@@ -8,6 +8,7 @@ import { onMounted, ref, reactive, inject } from 'vue';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { useLocalMusicStore } from '../store/localMusicStore';
 import { coverDefault, ipcRendererInvoke, isSupportedImage } from '../../common/Utils';
+import { emitEvents } from '../../common/EventBusWrapper';
 
 
 const { backward } = inject('appRoute')
@@ -66,6 +67,7 @@ const submit = () => {
     setActionDisabled(true)
     showToast(text)
     backward()
+    emitEvents('localPlaylist-updated')
 }
 
 const setupCover = (cover) => {

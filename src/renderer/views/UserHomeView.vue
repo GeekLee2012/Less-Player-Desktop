@@ -568,7 +568,6 @@ onActivated(() => {
     display: flex;
     align-items: center;
     height: 36px;
-    margin-bottom: 8px;
     margin-left: 2px;
     border-bottom: 1px solid transparent;
 }
@@ -587,7 +586,7 @@ onActivated(() => {
 
 #user-profile-view .tab-tip {
     position: absolute;
-    right: 10px;
+    right: 0px;
     font-weight: bold;
     padding-bottom: 5px;
 }

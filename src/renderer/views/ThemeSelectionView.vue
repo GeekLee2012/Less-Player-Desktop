@@ -282,7 +282,7 @@ onUnmounted(invokeContextUnmounted)
 }
 
 .theme-selection-view .center .content .preview {
-    width: 115px;
+    width: 114px;
     height: 70px;
     border-radius: var(--border-img-text-tile-border-radius);
     border: 2px solid transparent;

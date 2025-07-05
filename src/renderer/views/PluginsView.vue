@@ -6,8 +6,12 @@ import { useAppCommonStore } from '../store/appCommonStore';
 import { useSettingStore } from '../store/settingStore';
 import PluginItem from '../components/PluginItem.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
-import { isBlank, isDevEnv, toLowerCaseTrimString, toTrimString, tryCall, readLines, ipcRendererInvoke } from '../../common/Utils';
-import { FILE_PREFIX, ActivateState } from '../../common/Constants';
+import { 
+    isBlank, isDevEnv, toLowerCaseTrimString, 
+    toTrimString, tryCall, readLines,
+    ipcRendererInvoke, guessFilename, transformUrl,
+} from '../../common/Utils';
+import { FILE_SCHEME, ActivateState } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
@@ -19,9 +23,11 @@ const { reloadApp } = inject('player')
 const { showConfirm } = inject('apiExpose')
 
 
-const { ignoreErrorPlugins, isReplaceMode, plugins } = storeToRefs(usePluginStore())
-const { toggleIgnoreErrorPlugins, toggleReplaceMode, addPlugin, 
-    updatePlugin, removePlugin } = usePluginStore()
+const { ignoreErrorPlugins, ignoreDeveloperPlugins, isReplaceMode, plugins } = storeToRefs(usePluginStore())
+const { 
+    toggleIgnoreErrorPlugins, toggleIgnoreDeveloperPlugins, toggleReplaceMode, 
+    addPlugin, updatePlugin, removePlugin 
+} = usePluginStore()
 const { showToast, showFailToast } = useAppCommonStore()
 const { isSearchForPluginsViewShow, isShowDialogBeforeDeletePlugins, 
     isPluginsViewTipsShow, } = storeToRefs(useSettingStore())
@@ -115,12 +121,14 @@ const parsePluginMetadata = (text) => {
 }
 
 const FAIL_MSG_PREFIX = '插件导入失败<br>'
-const FailMsg = {
+const PresetMsg = {
     Unreadable: `${FAIL_MSG_PREFIX}无法读取内容`,
-    NoneMeta: `${FAIL_MSG_PREFIX}无法解析元数据`,
+    NoneMeta: `${FAIL_MSG_PREFIX}元数据信息不完整`,
     NonSpec: `${FAIL_MSG_PREFIX}内容不符合规范`,
-    Exists: `${FAIL_MSG_PREFIX}存在相同插件`,
+    Exists: `${FAIL_MSG_PREFIX}已有相同插件`,
+    ExistsNew: `${FAIL_MSG_PREFIX}版本低于已有插件`,
     Unknown: `${FAIL_MSG_PREFIX}发生未知错误`,
+    IgnoreDevs: `已忽略开发者插件`,
     //是否为预设消息类型
     isPreset: (msg) => {
         return toTrimString(msg).startsWith(FAIL_MSG_PREFIX)
@@ -144,9 +152,17 @@ const isValidMetadata = (metadata) => {
 //当基本信息存在时，不管后续是否成功，尝试预先将插件信息写入store
 const tryPreAddPlugin = async (metadata, isReplace) => {
     const plugin = { ...metadata, type: 0 }
-    const { id, index } = addPlugin(plugin) 
-    if(index > -1 && !isReplace) return 
-    return Object.assign(plugin, { id })
+    const { id, index, version } = addPlugin(plugin) 
+    //已存在相同插件
+    if(index > -1) {
+        if(!isReplace) return 
+
+        //版本低于已有插件，则不返回版本信息，以作标识来区分
+        const { version: mVersoin } = metadata
+        if(mVersoin.localeCompare(version) < 0) return { id }
+    }
+    //不存在，或版本不低于已有插件
+    return Object.assign(plugin, { id, version })
 }
 
 const isValidModuleSpec = (mainModule) => {
@@ -166,39 +182,48 @@ const isValidImportResult = (result) => {
 }
 
 const showImportError = (error) => {
-    const defaultError = FailMsg.Unknown
+    const defaultError = PresetMsg.Unknown
     error = (error || defaultError)
-    const isPreset = FailMsg.isPreset(error)
+    const isPreset = PresetMsg.isPreset(error)
     if(!isPreset) console.log(error)
     showFailToast(isPreset ? error : defaultError)
 }
 
 const doImportPlugin = async (fileItem) => {
     //内容可读取性检查
-    if (!isPluginFileReadable(fileItem)) return showImportError(FailMsg.Unreadable)
+    if (!isPluginFileReadable(fileItem)) return showImportError(PresetMsg.Unreadable)
     
     //获取必要信息 - 文件路径、数据内容
     const { filePath, data } = fileItem
 
+    //忽略开发者插件
+    const ignoreDevs = ignoreDeveloperPlugins.value
+    const filename = guessFilename(filePath)
+    const isDevsLikeName = (filename.startsWith('开发者-') || filename.startsWith('开发者 -'))
+    if(ignoreDevs && isDevsLikeName) return 
+
     let plugin = null
     const isReplace = isReplaceMode.value
-
+    const url = transformUrl(filePath, FILE_SCHEME)
+    
     //语法检查
-    import(/* @vite-ignore */ `${FILE_PREFIX}${filePath}`).then(async mainModule => {
+    import(/* @vite-ignore */ url).then(async mainModule => {
         //解析、检查 - 基本信息(元数据)
         const metadata = parsePluginMetadata(data)
-        if(!isValidMetadata(metadata)) return Promise.reject(FailMsg.NoneMeta)
+        if(!isValidMetadata(metadata)) return Promise.reject(PresetMsg.NoneMeta)
 
         //检查 - 模块规范
-        if(!isValidModuleSpec(mainModule)) return Promise.reject(FailMsg.NonSpec)
+        if(!isValidModuleSpec(mainModule)) return Promise.reject(PresetMsg.NonSpec)
 
         //预先写入store
         plugin = await tryPreAddPlugin(metadata, isReplace)
-        if(!plugin) return Promise.reject(FailMsg.Exists)
+        if(!plugin) return Promise.reject(PresetMsg.Exists)
+        //版本缺失
+        if(!plugin.version) return Promise.reject(PresetMsg.ExistsNew)
        
         //导入（文件）到当前应用的数据目录下
         const result = await ipcRendererInvoke('app-importPlugin', { filePath, data })
-        if (!isValidImportResult(result)) return Promise.reject(FailMsg.Unknown)
+        if (!isValidImportResult(result)) return Promise.reject(PresetMsg.Unknown)
 
         //更新store
         const { path, main } = result
@@ -211,7 +236,8 @@ const doImportPlugin = async (fileItem) => {
     }).catch(error => {
         showImportError(error)
         //错误处理 - 预先写入store操作，产生的副作用
-        if(plugin) {
+        const { id, version } = plugin || {}
+        if(id && version) {
             //更新状态为：错误
             updatePlugin(plugin, { state: ActivateState.INVALID })
             //当设置忽略错误插件时，移除错误插件
@@ -227,12 +253,7 @@ const importPlugins = async () => {
     if (result) {
         const { filePaths: files } = result
         if (!files || files.length < 1) return
-        for (var i = 0; i < files.length; i++) {
-            const path = files[i]
-            const result = await ipcRendererInvoke('read-text', path)
-            if (!result) continue
-            doImportPlugin(result)
-        }
+        importMultiFiles(files)
     }
 }
 
@@ -267,15 +288,30 @@ const togglePluginState = (plugin) => {
 const onDrop = async (event) => {
     event.preventDefault()
     const { files } = event.dataTransfer
-    if (files.length < 1) return
+    if(files.length < 1) return
+    let target = []
+    if(files.length == 1) {
+        const { name, path } = files[0]
+        //压缩文件 - zip
+        if(toLowerCaseTrimString(path).endsWith('.zip')) {
+            target = await ipcRendererInvoke('uncompress', path)
+            if(!target) return showFailToast(PresetMsg.Unknown)
+        } else {
+            target = await ipcRendererInvoke('path-listFiles', { path })        
+        }    
+    }
+    if(!target || target.length < 1) target = files
+    importMultiFiles(target)
+}
 
+const importMultiFiles = async (files) => {
+    if(!files || files.length < 1) return 
     for (var i = 0; i < files.length; i++) {
         const { name, path } = files[i]
+        if(!toLowerCaseTrimString(path).endsWith('.js')) continue
         const result = await ipcRendererInvoke('read-text', path)
         if (!result) continue
-        if(toLowerCaseTrimString(path).endsWith('.js')) {
-            doImportPlugin(result)
-        }
+        doImportPlugin(result)
     }
 }
 
@@ -388,17 +424,29 @@ const removeAllPlugins = async () => {
 }
 
 const tutorialList = [{
+    name: '教程：插件 - For普通用户',
+    about: '日常使用时，请关闭（或直接忽略安装）"开发者插件"'
+}, {
+    name: '教程：插件 - 开发者插件',
+    about: '文件名以“开发者”开头的插件，为开发者提供的插件，命名格式为：开发者-xxx'
+}, {
     name: '教程：插件 - 拖拽导入',
     about: '拖拽多个插件文件到当前页面，导入插件；轻松多选，非插件类型文件，应用会自动忽略'
 }, {
-    name: '教程：插件 - 导入按钮',
+    name: '教程：插件 - 拖拽导入（压缩文件）',
+    about: '支持.zip格式压缩文件，导入压缩文件里的全部插件（忽略非插件），支持深度遍历'
+}, {
+    name: '教程：插件 - 拖拽导入（文件夹）',
+    about: '支持扫描并导入，文件夹里的全部插件（忽略非插件），但不支持深度遍历'
+}, {
+    name: '教程：插件 - 导入按钮（仅文件）',
     about: '文件选择对话框，支持选择多个插件文件；根据当前系统，按住Command键或者Ctrl键即可'
 }, {
     name: '教程：插件 - 覆盖模式',
     about: '覆盖模式开启后，在导入插件时，若已经存在相同插件，则覆盖更新'
 }, {
     name: '教程：插件 - 变更未生效',
-    about: '插件变更（导入、删除等操作）后，无法立即生效，请点击"刷新"按钮'
+    about: '插件变更（导入、删除等操作）后，无法立即生效，请点击"刷新"按钮，或重启播放器'
 }]
 
 /* 生命周期、监听 */
@@ -414,7 +462,7 @@ onActivated(() => {
             <div class="title-wrap">
                 <div class="title">插件管理</div>
                 <div class="options-wrap">
-                    <div class="checkbox text-btn" @click="toggleReplaceMode" v-show="true">
+                    <div class="checkbox text-btn" @click="toggleReplaceMode">
                         <svg v-show="!isReplaceMode" width="16" height="16" viewBox="0 0 731.64 731.66"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -435,7 +483,28 @@ onActivated(() => {
                         </svg>
                         <span>覆盖模式</span>
                     </div>
-                    <div class="checkbox text-btn spacing" @click="toggleIgnoreErrorPlugins" v-show="true">
+                    <div class="checkbox text-btn spacing" @click="toggleIgnoreDeveloperPlugins">
+                        <svg v-show="!ignoreDeveloperPlugins" width="16" height="16" viewBox="0 0 731.64 731.66"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M365.63,731.65q-120.24,0-240.47,0c-54.2,0-99.43-30.93-117.6-80.11A124.59,124.59,0,0,1,0,608q0-242.21,0-484.42C.11,60.68,43.7,10.45,105.88,1.23A128.67,128.67,0,0,1,124.81.06q241-.09,481.93,0c61.43,0,110.72,39.85,122.49,99.08a131.72,131.72,0,0,1,2.3,25.32q.19,241.47.07,482.93c0,60.87-40.25,110.36-99.18,121.9a142.56,142.56,0,0,1-26.83,2.29Q485.61,731.81,365.63,731.65ZM48.85,365.45q0,121.76,0,243.5c0,41.57,32.38,73.82,73.95,73.83q243,.06,486,0c41.57,0,73.93-32.24,73.95-73.84q.11-243.24,0-486.49c0-41.3-32.45-73.55-73.7-73.57q-243.24-.06-486.49,0a74.33,74.33,0,0,0-14.89,1.42c-34.77,7.2-58.77,36.58-58.8,72.1Q48.76,244,48.85,365.45Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        <svg v-show="ignoreDeveloperPlugins" class="checked-svg" width="16" height="16"
+                            viewBox="0 0 767.89 767.94" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M384,.06c84.83,0,169.66-.18,254.48.07,45,.14,80.79,18.85,106.8,55.53,15.59,22,22.58,46.88,22.57,73.79q0,103,0,206,0,151.74,0,303.48c-.07,60.47-39.68,111.19-98.1,125.25a134.86,134.86,0,0,1-31.15,3.59q-254.73.32-509.47.12c-65,0-117.87-45.54-127.75-109.7a127.25,127.25,0,0,1-1.3-19.42Q0,384,0,129.28c0-65,45.31-117.82,109.57-127.83A139.26,139.26,0,0,1,131,.12Q257.53,0,384,.06ZM299.08,488.44l-74-74c-10.72-10.72-21.28-21.61-32.23-32.1a31.9,31.9,0,0,0-49.07,5.43c-8.59,13-6.54,29.52,5.35,41.43q62,62.07,124.05,124.08c16.32,16.32,34.52,16.38,50.76.15q146.51-146.52,293-293a69.77,69.77,0,0,0,5.44-5.85c14.55-18.51,5.14-45.75-17.8-51-12.6-2.9-23,1.37-32.1,10.45Q438.29,348.38,303.93,482.65C302.29,484.29,300.93,486.22,299.08,488.44Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        <span>忽略开发者插件</span>
+                    </div>
+                    <div class="checkbox text-btn spacing" @click="toggleIgnoreErrorPlugins">
                         <svg v-show="!ignoreErrorPlugins" width="16" height="16" viewBox="0 0 731.64 731.66"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -454,7 +523,7 @@ onActivated(() => {
                                 </g>
                             </g>
                         </svg>
-                        <span>导入时忽略错误插件</span>
+                        <span>忽略错误插件</span>
                     </div>
                     <SearchBarExclusiveModeControl class="spacing" v-show="isSearchForPluginsViewShow"
                         :onKeywordChanged="(keyword) => filterContent(keyword) ">
@@ -501,7 +570,8 @@ onActivated(() => {
                             </svg>
                         </template>
                     </SvgTextButton>
-                    <SvgTextButton text="导入" class="spacing" v-show="actionShowCtl.importBtn" 
+                    <SvgTextButton text="导入" class="spacing" 
+                        v-show="actionShowCtl.importBtn" 
                         :leftAction="importPlugins"
                         :rightAction="removeAllPlugins" >
                         <template #left-img>
@@ -550,7 +620,8 @@ onActivated(() => {
             </div>
             <div class="content">
                 <PluginItem v-for="(item, index) in computedPlugins" 
-                    :data="item" :index="index"
+                    :data="item"
+                    :index="index"
                     @click="() => visitPluginDetail(item.id)" 
                     :toggleAction="() => togglePluginState(item)"
                     :deleteFn="() => removePluginNew(item)">

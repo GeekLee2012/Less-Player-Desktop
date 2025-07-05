@@ -11,16 +11,19 @@ import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 const { useWindowsStyleWinCtl } = inject('appCommon')
 
 
-const { showToast, showFailToast, hideCustomAppBorderRadiusView, } = useAppCommonStore()
+const { 
+    showToast, showFailToast, hideCustomAppBorderRadiusView, 
+    toggleCustomAppBorderRadiusViewPreviewMode,
+} = useAppCommonStore()
+const { customAppBorderRadiusViewPreviewMode: isPreviewMode } = storeToRefs(useAppCommonStore())
 const { commonBorderRadius } = storeToRefs(useSettingStore())
 const { setCommonBorderRadius, getPresetBorderRadius, } = useSettingStore()
 
 const customData = reactive({})
 
-const isPreviewMode = ref(false)
 //预览
 const togglePreview = () => {
-   isPreviewMode.value = !isPreviewMode.value
+   toggleCustomAppBorderRadiusViewPreviewMode()
    emitEvents('setting-appBorderRadiusPreview', isPreviewMode.value ? customData : null)
 }
 
@@ -139,7 +142,7 @@ onMounted(() => {
                         </svg>
                         <span>重置</span>
                     </div>
-                    <div class="save-btn btn text-btn" @click="saveData">
+                    <div class="save-btn btn text-btn" v-show="!isPreviewMode" @click="saveData">
                         <svg width="15" height="15" viewBox="0 0 853.61 853.59" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -271,7 +274,7 @@ onMounted(() => {
 }
 
 .custom-app-border-radius-preview-mode .header .no-preview-btn {
-    margin-right: 25px;
+    margin-right: 15px;
 }
 
 .custom-app-border-radius-preview-mode .header {

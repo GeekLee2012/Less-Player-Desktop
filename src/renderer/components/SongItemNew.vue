@@ -31,8 +31,10 @@ const props = defineProps({
     resourceMode: Boolean
 })
 
-const { playVideoItem, dndSaveTrack, loadTrackUrl, 
-    loadTrackLyric, notifyLyricLoaded } = inject('player')
+const { 
+    playVideoItem, dndSaveTrack, loadTrackUrl, 
+    loadTrackLyric, notifyLyricLoaded 
+} = inject('player')
 const { showContextMenu } = inject('appCommon')
 
 //技术债：早期很多操作，都直接访问Store，没有统一封装管理
@@ -42,7 +44,10 @@ const { addTrack, playTrack, togglePlay,
 } = usePlayStore()
 const { commonCtxMenuCacheItem, workingTrackForResourceToolView } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, setTrackResourceToolViewPreviewMode } = useAppCommonStore()
-const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable, isSongItemIndexShow } = storeToRefs(useSettingStore())
+const { 
+    track, isHighlightCtxMenuItemEnable, isDndSaveEnable, 
+    isSongItemIndexShow, isDoubleClickToPlayTrack,
+} = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 const { getLocalPlaylistTrack } = useLocalMusicStore()
 const { isFavoriteSong, getFavoriteSong } = useUserProfileStore()
@@ -78,6 +83,12 @@ const deleteItem = () => {
         deleteFn(index)
         showToast("歌曲已删除")
     }
+}
+
+const onDblclick = (event) => {
+    if (props.checkbox || props.resourceMode) return
+    if(!isDoubleClickToPlayTrack.value) return 
+    playItem()
 }
 
 //关联更新：本地歌单歌曲、收藏的歌曲等
@@ -229,6 +240,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             'with-huge-index': index > 9999,
         }"
         @click="toggleCheck" 
+        @dblclick="onDblclick"
         @contextmenu.stop="onContextMenu"
         :draggable="isDraggable" 
         @dragstart="(event) => dndSaveTrack(event, data)">

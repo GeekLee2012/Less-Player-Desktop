@@ -8,7 +8,10 @@ import { computed, inject, onActivated, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePluginStore } from '../store/pluginStore';
 import { useSettingStore } from '../store/settingStore';
-import { isBlank, toTrimString, textDefault, coverDefault, readProperties } from '../../common/Utils';
+import { 
+    isBlank, toTrimString, textDefault, 
+    coverDefault, readProperties 
+} from '../../common/Utils';
 import { ActivateState } from '../../common/Constants';
 import ToggleControl from '../components/ToggleControl.vue';
 
@@ -20,7 +23,9 @@ const props = defineProps({
 
 const { backward } = inject('appRoute')
 const { visitLink, showConfirm, activatePluginNow, 
-    deactivatePluginNow, removePluginNow, onPluginOptionsUpdated } = inject('apiExpose')
+    deactivatePluginNow, removePluginNow, onPluginOptionsUpdated,
+    PermissionsAccessRegistration,
+} = inject('apiExpose')
 
 const { getPlugin, updatePlugin, removePlugin, 
     getPluginOptions, updatePluginOptions } = usePluginStore()
@@ -99,6 +104,11 @@ const resetView = () => {
     setActiveTab(0)
     resetDetail()
 }
+
+const computedPermissions = computed(() => {
+    const { id } = props
+    return PermissionsAccessRegistration[id] || []
+})
 
 
 /* 生命周期、监听 */
@@ -185,7 +195,12 @@ onActivated(() => {
                     @contextmenu.stop="" 
                     @focusout="updateOptions"></textarea>
             </div>
-            <div class="content" v-show="activeTab == 2">
+            <div class="content permissions" v-show="activeTab == 2">
+                <div v-for="(item, index) in computedPermissions"
+                    class="item" >
+                    <svg width="22" height="24" viewBox="0 0 21.9 24" xmlns="http://www.w3.org/2000/svg"><g id="Layer_2" data-name="Layer 2"><g id="Icons"><path class="cls-1" d="M21.77,9.21l-.83-5.36A1,1,0,0,0,20,3C14.48,3,11.68.31,11.66.29a1,1,0,0,0-1.41,0S7.42,3,2,3a1,1,0,0,0-1,.85L.14,9.21A12,12,0,0,0,6.25,21.57l4.22,2.3a1,1,0,0,0,1,0l4.22-2.3A12,12,0,0,0,21.77,9.21Zm-7.08,10.6L11,21.86l-3.74-2a10,10,0,0,1-5.1-10.3L2.81,5A14.76,14.76,0,0,0,11,2.3,14.76,14.76,0,0,0,19.09,5l.7,4.54a10,10,0,0,1-5.1,10.3Z"/><path class="cls-1" d="M14.24,8.29,9,13.58,7.66,12.29a1,1,0,0,0-1.44,1.39l0,0,2,2a1,1,0,0,0,1.42,0l6-6a1,1,0,0,0,0-1.41A1,1,0,0,0,14.24,8.29Z"/></g></g></svg>
+                    <span v-html="item.cname"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -370,5 +385,19 @@ onActivated(() => {
     width: calc(100% - 30px);
     padding: 8px;
     margin: 0px 6px 10px 6px;
+}
+
+#plugin-detail-view .content.permissions .item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0px 3px 15px 3px;
+}
+
+#plugin-detail-view .content.permissions .item svg {
+    fill: var(--button-icon-btn-color) !important;
+    fill: var(--content-subtitle-text-color) !important;
+    transform: scale(0.9);
+    margin-right: 8px;
 }
 </style>

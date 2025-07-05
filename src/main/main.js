@@ -1,41 +1,51 @@
-const { app, BrowserWindow, ipcMain,
-  Menu, dialog, powerMonitor,
-  shell, powerSaveBlocker, Tray,
-  globalShortcut, session, utilityProcess,
-  protocol, nativeTheme, MessageChannelMain,
-  nativeImage,  screen, net,
+const { 
+  app, BrowserWindow, ipcMain,
+  Menu, dialog, shell, 
+  powerSaveBlocker, Tray, globalShortcut, 
+  session, protocol, nativeTheme, 
+  MessageChannelMain, nativeImage,  screen, 
+  net,
 } = require('electron')
 
-const { isMacOS, isWinOS, useCustomTrafficLight, isDevEnv,
-  USER_AGENTS, AUDIO_EXTS, IMAGE_EXTS, APP_ICON,
-  AUDIO_PLAYLIST_EXTS, BACKUP_FILE_EXTS, 
-  TrayAction, GitRepository
+const { 
+  isMacOS, isWinOS, useCustomTrafficLight, 
+  isDevEnv, USER_AGENTS, AUDIO_EXTS, 
+  IMAGE_EXTS, APP_ICON, AUDIO_PLAYLIST_EXTS, 
+  BACKUP_FILE_EXTS, TrayAction, GitRepository,
 } = require('./env')
 
-const { scanDirTracks, parseTracks,
-  readText, writeText, FILE_PREFIX,
-  randomTextWithinAlphabetNums, nextInt,
-  getDownloadDir, removePath, listFiles,
-  parsePlsFile, parseM3uPlaylist,
-  writePlsFile, writeM3uFile,
-  ImageProtocal, parseImageMetaFromFile,
-  statPathSync, MD5, SHA1, transformPath,
-  DEFAULT_COVER_BASE64, getSimpleFileName,
-  getFileExtName, walkSync, isSuppotedVideoType,
-  parseVideos, parseEmbeddedLyricFromFile,
+const { 
+  scanDirTracks, parseTracks, readText, 
+  writeText,  FILE_PREFIX, getDownloadDir, 
+  removePath, listFiles, parsePlsFile, 
+  parseM3uPlaylist, writePlsFile, writeM3uFile,
+  ImageProtocal, parseImageMetaFromFile, statPathSync, 
+  MD5, transformPath, DEFAULT_COVER_BASE64, 
+  getSimpleFileName, getFileExtName, nextInt, 
+  isSuppotedVideoType, parseVideos, parseEmbeddedLyricFromFile,
+  walkSync, randomTextWithinAlphabetNums,
 } = require('./common')
+
 
 const path = require('path')
 const Url = require('url')
-const { writeFile, mkdirSync, writeFileSync, rmSync, readdirSync } = require('fs')
+const { 
+  writeFile, mkdirSync, writeFileSync, 
+  readdirSync,
+} = require('fs')
 const fetch = require('electron-fetch').default
+const compressing = require('compressing');
 
 
-let messagePortPair = null, messagePortChannel = null
-let appUserAgent =  null, exRequestHandlers = []
+let messagePortPair = null
+let messagePortChannel = null
+let appUserAgent =  null
+let exRequestHandlers = []
 let useTemplateImage = false
 
-const DEFAULT_LAYOUT = 'default', SIMPLE_LAYOUT = 'simple', MINI_LAYOUT = 'mini'
+const DEFAULT_LAYOUT = 'default'
+const SIMPLE_LAYOUT = 'simple'
+const MINI_LAYOUT = 'mini'
 const miniExpandSize = 520
 const appLayoutConfig = {
   'default': {
@@ -51,21 +61,27 @@ const appLayoutConfig = {
     appHeight: 139
   },
 }
-let mainWin = null, lyricWin = null, appLayout = DEFAULT_LAYOUT
-let currentZoom = 85, useWinCenterStrict = false
-let markWidth = 0, markHeight = 0
+
+let mainWin = null
+let lyricWin = null
+let appLayout = DEFAULT_LAYOUT
+let currentZoom = 85
+let useWinCenterStrict = false
+let markWidth = 0
+let markHeight = 0
 let appConfig = {}
 let powerSaveBlockerId = -1
-let appTray = null, appTrayMenu = null, appTrayShow = false
-let playState = false, desktopLyricLockState = false
-//let lyricWinMinWidth = 450, lyricWinMinHeight = 168
+let appTray = null
+let appTrayMenu = null
+let appTrayShow = false
+let playState = false
+let desktopLyricLockState = false
+
 const proxyAuthRealms = []
 // 下载队列
 const downloadingQueue = []
 // 待播放任务列表
 let pendigPlayTasks = []
-// 贴边隐藏
-let isHiddenOnEdges = false, prevX = null, prevY = null
 
 
 /* 自定义函数 */
@@ -73,6 +89,7 @@ const startup = () => {
   initialize()
   registryGlobalListeners()
   handleStartupPlay()
+  removePath(getTempRootPath())
 }
 
 //清理缓存
@@ -824,7 +841,7 @@ const registryGlobalListeners = () => {
     const extName = getFileExtName(originFilePath)
     const flags = isDevEnv ? 'dev-' : '' 
     const rootName = `${flags}${hashName}`
-    const rootPath = getPluginsRootPath(rootName)
+    const rootPath = getPluginsRootPath(rootName, true)
     const main = `main.${extName}`
     const destFilePath = `${rootPath}/${main}`
     try {
@@ -875,8 +892,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('app-getCookie', async (event, ...args) => {
-    const url = args[0]
-    const fetchOnMissing = args[1]
+    const { url, fetchOnMissing } = args[0] || {}
     const cookie = getCookie(url, fetchOnMissing)
     if(cookie) return cookie
     return await fetchCookie(url, fetchOnMissing)
@@ -937,6 +953,41 @@ const registryGlobalListeners = () => {
     const { displayFrequency } = getPrimaryScreenMetadata()
     return displayFrequency
   })
+
+  ipcMain.handle('uncompress', async (event, path) => {
+    const files = []
+    const tempDir = randomTextWithinAlphabetNums(16)
+    const dest = getTempRootPath(tempDir, true)
+    try {
+      await compressing.zip.uncompress(path, dest)
+
+      walkSync(dest, (path, dirent) => {
+        const { name } = dirent
+        if(name.startsWith('.')) return
+        files.push({ name, path })
+      }, { deep: true, excludePaths: ['/__MACOSX'] })
+    } catch(error) {
+      console.log(error)
+      removePath(dest)
+    } 
+    return files
+  })
+
+  ipcMain.handle('path-isDirectory', (event, path) => {
+    const stat = statPathSync(path)
+    return stat && stat.isDirectory()
+  })
+
+  ipcMain.handle('path-listFiles', (event, data) => {
+    const { path: dir, options } = data
+    const files = []
+    walkSync(dir, (path, dirent) => {
+        const { name } = dirent
+        if(name.startsWith('.')) return
+        files.push({ name, path })
+      }, options)
+    return files
+  }) 
 
   ipcMain.on('app-desktopLyric-toggle', (event, ...args) => {
     toggleLyricWindow()
@@ -1002,21 +1053,50 @@ const registryGlobalListeners = () => {
 
 }
 
-const getPluginsRootPath = (dirName) => {
-  const _path = app.getPath('userData') 
-      + '/User/Plugins' 
-      + (dirName ? `/${dirName}` : '')
-  try {
-    const result = statPathSync(_path)
-    if(!result) mkdirSync(_path, { recursive: true })
-  } catch(error) {
-    if(isDevEnv) console.log(error)
+const getUserDataRootPath = (ensureExists) => {
+  const _path = app.getPath('userData') + '/User'
+  if(ensureExists) {
+    try {
+      const result = statPathSync(_path)
+      if(!result) mkdirSync(_path, { recursive: true })
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
+  }
+  return _path
+}
+
+const getPluginsRootPath = (dirName, ensureExists) => {
+  const _path = getUserDataRootPath(false)
+      + '/Plugins' + (dirName ? `/${dirName}` : '')
+  if(ensureExists) {
+    try {
+      const result = statPathSync(_path)
+      if(!result) mkdirSync(_path, { recursive: true })
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
+  }
+  return _path
+}
+
+const getTempRootPath = (dirName, ensureExists) => {
+  const _path = getUserDataRootPath(false)
+      + '/Temp' + (dirName ? `/${dirName}` : '')
+  if(ensureExists) {
+    try {
+      const result = statPathSync(_path)
+      if(!result) mkdirSync(_path, { recursive: true })
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
   }
   return _path
 }
 
 const getAppConfigFilePath = () => {
-  return app.getPath('userData') + '/User/config.json'
+  const _path = getUserDataRootPath(true)
+  return `${_path}/config.json`
 }
 
 const initAppConfig = () => {
@@ -1320,6 +1400,7 @@ const setupAppLayout = (layout, zoom, isInit, useCenterStrict, miniExpand) => {
   if(typeof miniExpand == 'undefined') {
     setupMainWindowCenterScreen(useCenterStrict)
   }
+  adjustMainWindowIfOutScreen(miniExpand)
 }
 
 const getAppMenuI18nConfig = () => {
@@ -1552,6 +1633,30 @@ const setupMainWindowCenterScreen = (useCenterStrict) => {
   const x = parseInt((screenWidth - width) / 2)
   const y = parseInt((screenHeight - height) / 2)
   mainWin.setPosition(x, y)
+}
+
+const adjustMainWindowIfOutScreen = (miniExpand) => {
+  if (!isWindowAccessible(mainWin)) return
+  if (!miniExpand) return 
+
+  const { x, y, width, height } = mainWin.getBounds()
+  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size
+  const spacing = 20
+  const offsetX = x + width - screenWidth
+  const offsetY = y + height - screenHeight
+  let nX = x, nY = y
+  if (x < 0) {
+    nX = spacing
+  } else if (offsetX > 0) {
+    nX = x - offsetX - spacing
+  }
+  
+  if (y < 0) {
+    nY = spacing
+  } else if (offsetY > 0) {
+    nY = y - offsetY - spacing
+  }
+  mainWin.setPosition(nX, nY)
 }
 
 const markMainWindowSize = () => {

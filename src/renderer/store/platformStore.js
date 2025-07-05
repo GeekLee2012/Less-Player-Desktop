@@ -460,7 +460,8 @@ export const usePlatformStore = defineStore('platforms', {
             
             this.allPlatforms.push({ ...platform, code: _code })
         },
-        removePlatform(code) {
+        removePlatform(platform) {
+            let code = (typeof platform == 'object') ? platform.code : platform 
             code = toLowerCaseTrimString(code)
             if(!code) return
             const index = this.findPlatformIndex(code)

@@ -31,6 +31,7 @@ import TrackResourceToolView from './views/TrackResourceToolView.vue';
 import ThemeSelectionView from './views/ThemeSelectionView.vue';
 import FontSelectionToolbar from './components/FontSelectionToolbar.vue';
 import PlayingViewBgEffect from './views/PlayingViewBgEffect.vue';
+import CustomWindowCtlBtnView from './views/CustomWindowCtlBtnView.vue';
 
 
 
@@ -60,7 +61,8 @@ const { commonNotificationShow, commonNotificationText,
   customPlayingThemeEditViewShow, playingViewThemeType,
   playingViewCustomThemes, customAppBorderRadiusViewShow,
   trackResourceToolViewShow, themeSelectionViewShow,
-  fontSelectionToolbarShow, } = storeToRefs(useAppCommonStore())
+  fontSelectionToolbarShow, customWindowCtlBtnViewShow,
+} = storeToRefs(useAppCommonStore())
 const { hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
@@ -68,7 +70,8 @@ const { hideCommonCtxMenu, showCommonCtxMenu,
   showColorPickerToolbar, toggleGradientColorToolbar,
   showGradientColorToolbar, showPopoverHint,
   hidePopoverHint, isSamePopoverHintShow,
-  updateCommonCtxMenuCacheItemIndex } = useAppCommonStore()
+  updateCommonCtxMenuCacheItemIndex 
+} = useAppCommonStore()
 //const { customPlaylists } = storeToRefs(useUserProfileStore())
 const { isDefaultClassicLayout, isDefaultNewLayout } = storeToRefs(useSettingStore())
 const { getCurrentTheme } = useSettingStore()
@@ -246,6 +249,15 @@ const setupFontSelectionToolbarPos = () => {
   })
 }
 
+const setupCustomWindowCtlBtnViewPos = () => {
+  if(!customWindowCtlBtnViewShow.value) return
+  emitEvents('app-elementAlignCenter', {
+    selector: '.default-layout #custom-window-ctl-btn-view',
+    width: 618,
+    height: 500
+  })
+}
+
 const setupTrackResourceToolViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #track-resource-tool-view',
@@ -332,7 +344,8 @@ const appBackgroundScope = reactive({
   customPlayingThemeEditView: false,
   trackResourceToolView: false,
   fontSelectionToolbar: false,
-  customAppBorderRadiusView: false
+  customAppBorderRadiusView: false,
+  customWindowCtlBtnView: false,
 })
 
 //EventBus监听注册，统一管理
@@ -415,6 +428,7 @@ watch(customAppBorderRadiusViewShow, setupCustomAppBorderRadiusViewPos)
 watch(trackResourceToolViewShow, setupTrackResourceToolViewPos)
 watch(themeSelectionViewShow, setupThemeSelectionViewPos)
 watch(fontSelectionToolbarShow, setupFontSelectionToolbarPos)
+watch(customWindowCtlBtnViewShow, setupCustomWindowCtlBtnViewPos)
 
 
 watch(() => getCurrentTheme(), (nv) => {
@@ -710,6 +724,13 @@ onUnmounted(() => offEvents(eventsRegistration))
       @click.stop=""
       @contextmenu.stop="" >
     </FontSelectionToolbar>
+
+    <CustomWindowCtlBtnView id="custom-window-ctl-btn-view" 
+      :class="{ 'app-custom-theme-bg': appBackgroundScope.customWindowCtlBtnView }"
+      v-if="customWindowCtlBtnViewShow" 
+      @click.stop=""
+      @contextmenu.stop="" >
+    </CustomWindowCtlBtnView>
   </div>
 </template>
 
@@ -971,6 +992,18 @@ onUnmounted(() => offEvents(eventsRegistration))
   top: 50%;
   width: 404px;
   height: 520px;
+  z-index: 100;
+  background-color: var(--app-bg-color);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-popover-border-radius);
+}
+
+#custom-window-ctl-btn-view {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 618px;
+  height: 500px;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);

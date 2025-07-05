@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
-import { ipcRendererInvoke, ipcRendererSend, isMacOS, useWebZoom } from '../../common/Utils';
+import { ipcRendererInvoke, ipcRendererSend, } from '../../common/Utils';
 import { useThemeStore } from './themeStore';
-import { usePlatformStore } from './platformStore';
 import { useAppCommonStore } from './appCommonStore';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
@@ -80,6 +79,7 @@ export const useSettingStore = defineStore('setting', {
             type: 0,
             //nativeTheme模式，0 => system（跟随系统），1 => light（亮色）, 2 => dark（暗色）
             nativeMode: 0,
+            darkMode: false,
             /* Light Mode */
             lightIndex: 1,
             lightType: 0,
@@ -87,6 +87,7 @@ export const useSettingStore = defineStore('setting', {
             darkIndex: 0,
             darkType: 0,
         },
+        /* 布局 */
         layout: {
             index: 0,
             //回退index，即从简约/迷你模式退出时，返回的普通布局index
@@ -100,6 +101,35 @@ export const useSettingStore = defineStore('setting', {
             useWinZoomForCreate: true,
             //窗口控件风格，0 => 自动，1 => macOS, 2 => Windows
             winCtlStyle: 0,
+            winCtlCustomStyle: { 
+                light: { 
+                    bg: {
+                        closeBtn: null,
+                        minBtn: null,
+                        maxBtn: null,
+                    },
+                    btnColor: {
+                        closeBtn: null,
+                        minBtn: null,
+                        maxBtn: null,
+                    },
+                }, 
+                dark: {
+                    bg: {
+                        closeBtn: null,
+                        minBtn: null,
+                        maxBtn: null,
+                    },
+                    btnColor: {
+                        closeBtn: null,
+                        minBtn: null,
+                        maxBtn: null,
+                    },
+                },
+                extra: {
+                    iconType: 0,
+                }
+            },
             //元素圆角风格（预设），0 => 自动，1 => macOS, 2 => Windows
             borderRadiusCtlStyle: 0,
             //单位：px
@@ -175,8 +205,10 @@ export const useSettingStore = defineStore('setting', {
             //推荐主题显示编辑按钮
             presetThemeActionShow: true
         },
-        modules: {  //功能模块
-            off: {  //关闭列表
+        //功能模块
+        modules: {  
+            //关闭列表
+            off: {  
                 playlists: [],
                 artists: [],
                 radios: [],
@@ -289,6 +321,8 @@ export const useSettingStore = defineStore('setting', {
             songItemIndexShow: true,
             //mpv binary文件路径
             mpvBinaryPath: null,
+            //歌曲双击时播放
+            doubleClickToPlayTrack: true,
         },
         search: {
             //场景化提示
@@ -355,7 +389,7 @@ export const useSettingStore = defineStore('setting', {
             lineSpacing: 23,
             //对齐方式, 0 => 左, 1 => 中, 2 => 右, 3 => 左、右分开（双行模式）
             alignment: 1,
-            // 显示模式（布局），0 => 单行， 1 => 双行, 2 => 全显
+            //显示模式（布局），0 => 单行， 1 => 双行, 2 => 全显
             layoutMode: 0,
             //普通行颜色
             color: null,
@@ -629,6 +663,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isStoreRecentPlay() {
             return this.cache.storeRecentPlay
+        },
+        layoutIndex() {
+            return this.layout.index
         },
         isDefaultLayout() { //默认布局
             const index = this.layout.index
@@ -1095,6 +1132,27 @@ export const useSettingStore = defineStore('setting', {
         },
         isMiniNavBarMode() {
             return this.navigation.miniNavBarMode
+        },
+        winCtlCustomStyle() {
+            return this.common.winCtlCustomStyle || {}
+        },
+        winCtlCustomLightStyle() {
+            const { light } = this.winCtlCustomStyle
+            return light
+        },
+        winCtlCustomDarkStyle() {
+            const { dark } = this.winCtlCustomStyle
+            return dark
+        },
+        winCtlCustomStyleIconType() {
+            const { extra } = this.winCtlCustomStyle
+            return extra ? extra.iconType : 0
+        },
+        isDarkThemeMode() {
+            return this.theme.darkMode
+        },
+        isDoubleClickToPlayTrack() {
+            return this.track.doubleClickToPlayTrack
         }
     },
     actions: {
@@ -1148,10 +1206,12 @@ export const useSettingStore = defineStore('setting', {
         switchToLightTheme(){
             const { lightIndex, lightType } = this.theme
             this.switchToTheme(lightIndex, lightType, 1)
+            this.theme.darkMode = false
         },
         switchToDarkTheme(){
             const { darkIndex, darkType } = this.theme
             this.switchToTheme(darkIndex, darkType)
+            this.theme.darkMode = true
         },
         setLayoutIndex(index) {
             const { isMaxScreen } = useAppCommonStore()
@@ -2076,6 +2136,49 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleMiniNavBarMode() {
             this.navigation.miniNavBarMode = !this.navigation.miniNavBarMode
+        },
+        setWindowCtlCutomStyle(style) {
+            this.common.winCtlCustomStyle = style || {}
+        },
+        setWindowCtlLightStyle(style) {
+            this.common.winCtlCustomStyle.light = style || {}
+        },
+        setWindowCtlDarkStyle(style) {
+            this.common.winCtlCustomStyle.dark = style || {}
+        },
+        getPresetWindowCtlStyle() {
+            return {
+                light: {
+                    bg: {
+                        closeBtn: '#fc605c',
+                        minBtn: '#fdbc40',
+                        maxBtn: '#34c648',
+                    },
+                    btnColor: {
+                        closeBtn: '#555555',
+                        minBtn: '#555555',
+                        maxBtn: '#555555',
+                    }
+                },
+                dark: {
+                    bg: {
+                        closeBtn: '#fc605c',
+                        minBtn: '#fdbc40',
+                        maxBtn: '#34c648',
+                    },
+                    btnColor: {
+                        closeBtn: '#555555',
+                        minBtn: '#555555',
+                        maxBtn: '#555555',
+                    }
+                },
+                extra: {
+                    iconType: 0,
+                }
+            }
+        },
+        toggleDoubleClickToPlayTrack() {
+            this.track.doubleClickToPlayTrack = !this.track.doubleClickToPlayTrack
         },
     },
     persist: {

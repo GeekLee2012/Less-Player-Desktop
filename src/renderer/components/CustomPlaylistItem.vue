@@ -130,7 +130,7 @@ const onContextMenu = (event) => {
 
 <style scoped>
 .custom-playlist-item {
-    width: 100%;
+    /*width: 100%;*/
     height: 73px;
     display: flex;
     flex-direction: row;

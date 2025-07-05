@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
 import { PlayMode } from '../../common/Constants';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { emitEvents } from '../../common/EventBusWrapper';
 import { Video } from '../../common/Video';
 import { toTrimString, trimArrayTail } from '../../common/Utils';
+
 
 
 const isValueEqual = (v1, v2) => {
@@ -29,10 +30,12 @@ export const useVideoPlayStore = defineStore('videoPlayer', {
         currentVideo: null, 
         playingIndex: -1, 
         videoThemeIndex: 1,
-        dataLayoutIndex: 0, // 0 => Grid, 1 => List
+        // 0 => Grid, 1 => List
+        dataLayoutIndex: 0, 
         recentVideos: [],
         recentLimit: 66,
-        savePlayingPos: false, //是否保存播放进度，即是否从头开始看
+        //是否保存播放进度，即是否从头开始看
+        savePlayingPos: false, 
     }),
     getters: {
         currentVideoPlayingItem() {

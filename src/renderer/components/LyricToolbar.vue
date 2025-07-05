@@ -92,18 +92,6 @@ const getLyricOffsetText = () => {
                     <SingleSelectionControl :data="['默认', '隐藏', '顶部']" :value="lyric.metaPos" :onChanged="setLyricMetaPos">
                     </SingleSelectionControl>
                 </div>
-                <div class="row text v-spacing" v-show="lyric.metaPos == 0">歌手、专辑布局：</div>
-                <div class="row" v-show="lyric.metaPos == 0">
-                    <SingleSelectionControl :data="['分行', '隐藏', '同行']" :value="lyric.aralMetaLayout" 
-                        :onChanged="setLyricAralMetaLayout">
-                    </SingleSelectionControl>
-                </div>
-                <div class="row text v-spacing" v-show="lyric.metaPos == 0">歌手、专辑标签：</div>
-                <div class="row" v-show="lyric.metaPos == 0">
-                    <SingleSelectionControl :data="['文字', '隐藏', '图标']" :value="lyric.aralMetaLabelStyle" 
-                        :onChanged="setLyricAralMetaLabelStyle">
-                    </SingleSelectionControl>
-                </div>
                 <div class="row text v-spacing" v-show="lyric.metaPos == 0">标题信息：</div>
                 <div class="row" v-show="lyric.metaPos == 0">
                     <SingleSelectionControl :data="['默认', '单行', '双行']" :value="lyric.titleMetaLines"
@@ -114,6 +102,18 @@ const getLyricOffsetText = () => {
                 <div class="row" v-show="lyric.metaPos == 0">
                     <SingleSelectionControl :data="['默认', '隐藏', '显示']" :value="lyric.albumMetaShow"
                         :onChanged="setLyricAlbumMetaShow">
+                    </SingleSelectionControl>
+                </div>
+                <div class="row text v-spacing" v-show="lyric.metaPos == 0">歌手、专辑布局：</div>
+                <div class="row" v-show="lyric.metaPos == 0">
+                    <SingleSelectionControl :data="['分行', '隐藏', '同行']" :value="lyric.aralMetaLayout" 
+                        :onChanged="setLyricAralMetaLayout">
+                    </SingleSelectionControl>
+                </div>
+                <div class="row text v-spacing" v-show="lyric.metaPos == 0">歌手、专辑标签：</div>
+                <div class="row" v-show="lyric.metaPos == 0">
+                    <SingleSelectionControl :data="['文字', '隐藏', '图标']" :value="lyric.aralMetaLabelStyle" 
+                        :onChanged="setLyricAralMetaLabelStyle">
                     </SingleSelectionControl>
                 </div>
                 <div class="row text v-spacing">对齐方式：</div>

@@ -84,18 +84,18 @@
 }
 
 .use-winos-win-ctl .default-new-layout #main-left .header .top-logo {
-  margin-top: 23px;
+  margin-top: 20px;
   margin-left: 23px;
 }
 
 .use-winos-win-ctl .default-new-layout.mini-navbar-mode #main-left .header .top-logo {
-  margin-top: 23px;
+  margin-top: 21px;
   margin-left: 0px;
 }
 
 .use-winos-win-ctl .default-layout.mini-navbar-mode #main-left .header .top-logo .app-logo,
 .use-winos-win-ctl .default-new-layout.mini-navbar-mode #main-left .header .top-logo .app-logo {
-  transform: scale(1.2) translateX(0px);
+  transform: scale(1.15) translateX(-1px);
 }
 
 .winos-style #main-left .header .top-logo {
@@ -278,7 +278,21 @@
 
 /* 简约布局 */
 .simple-layout-use-winos-win-ctl .win-ctl-wrap {
-  margin-left: 8px !important;
+  margin-left: 5px !important;
+}
+
+.simple-layout-use-winos-win-ctl .win-ctl-wrap .ctl-btn {
+  transform: scale(0.93);
+  margin-left: 0px;
+  margin-right: -5px;
+}
+
+.simple-layout-use-winos-win-ctl > .center .top .action {
+  padding-right: 10px !important;
+}
+
+.simple-layout-use-winos-win-ctl > .center .top .lyric-btn svg {
+    transform: translateY(1px) scaleX(0.95) scaleY(1.04) !important;
 }
 
 /* 迷你布局 */

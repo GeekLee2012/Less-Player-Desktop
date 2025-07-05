@@ -618,7 +618,7 @@ onActivated(() => {
     display: flex;
     align-items: center;
     height: 36px;
-    margin-bottom: 1px;
+    margin-bottom: 3px;
     margin-left: 2px;
     border-bottom: 1px solid transparent;
 }
@@ -636,7 +636,7 @@ onActivated(() => {
 
 #artist-detail-view .tab-tip {
     position: absolute;
-    right: 10px;
+    right: 0px;
     font-weight: bold;
 }
 
@@ -651,6 +651,6 @@ onActivated(() => {
 }
 
 #artist-detail-view .textlist-ctl {
-    padding: 0px 2px 10px 2px;
+    padding: 0px 10px 10px 10px;
 }
 </style>

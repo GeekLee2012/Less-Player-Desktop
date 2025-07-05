@@ -4,7 +4,10 @@ const { homedir } = require('os');
 const path = require('path');
 const CryptoJS = require('crypto-js');
 const MusicMetadata = require('music-metadata');
-const { AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv, VIDEO_EXTS, VIDEO_COLLECTION_EXTS, IMAGE_EXTS } = require('./env');
+const { 
+    AUDIO_EXTS, EXTRA_AUDIO_EXTS, isDevEnv, 
+    VIDEO_EXTS, VIDEO_COLLECTION_EXTS, IMAGE_EXTS 
+} = require('./env');
 
 
 const FILE_SCHEME = 'file'
@@ -616,12 +619,21 @@ const listFiles = async (dir, isFullname) => {
  */
 const walkSync = (dir, callback, options) => {
     try {
-        options = options || { deep: false }
+        const stat = statPathSync(dir)
+        if(!stat || !stat.isDirectory()) return
+        
+        options = options || { deep: false, excludePaths: [] }
         readdirSync(dir, { withFileTypes: true }).forEach(dirent => {
             const pathName = path.join(dir, dirent.name)
             if (dirent.isFile()) {
                 if (callback && (typeof callback == 'function')) callback(pathName, dirent)
             } else if (dirent.isDirectory() && options.deep) {
+                if(options.excludePaths) {
+                    const { excludePaths } = options
+                    for(let i = 0; i < excludePaths.length; i++) {
+                        if(pathName.includes(excludePaths[i])) return
+                    }
+                }
                 walkSync(pathName, callback, options)
             }
         })

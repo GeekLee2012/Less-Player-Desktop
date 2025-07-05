@@ -410,7 +410,6 @@ onUnmounted(() => offEvents(eventsRegistration))
     position: relative;
     height: 36px;
     margin-left: 2px;
-    margin-bottom: 6px;
     border-bottom: 1px solid var(--border-color);
     border-bottom: 1px solid transparent;
 }
@@ -433,7 +432,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 #search-view .tab-nav .tab-tip {
     position: absolute;
-    right: 10px;
+    right: 0px;
     font-weight: bold;
 }
 </style>

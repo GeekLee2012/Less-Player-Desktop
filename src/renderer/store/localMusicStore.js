@@ -3,16 +3,6 @@ import { randomTextWithinAlphabetNums } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 
 
-/*
-const indexedDBStorage = {
-    setItem(key, state) {
-        return
-    },
-    getItem(key) {
-        return
-    }
-}
-*/
 
 export const useLocalMusicStore = defineStore('localMusic', {
     state: () => ({

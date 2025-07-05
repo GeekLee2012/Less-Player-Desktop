@@ -18,8 +18,8 @@
 }
 
 .app-logo-wrap .app-logo {
-    width: 27px;
-    height: 27px;
+    width: 29px;
+    height: 29px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,10 +30,10 @@
 }
 
 .app-logo-wrap .app-logo span {
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    font-size: 14px;
+    width: 17px;
+    height: 17px;
+    line-height: 17px;
+    font-size: 15px;
     text-align: center;
     vertical-align: middle;
     border-radius: 10rem;
@@ -46,7 +46,7 @@
     align-items: center;
     justify-content: center;
     margin-left: 10px;
-    font-size: 20px;
+    font-size: 21px;
     font-weight: bold;
     background: var(--app-logo-app-name-text-color);
     -webkit-background-clip: text;

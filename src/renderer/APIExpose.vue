@@ -19,7 +19,8 @@ import {
     ipcRendererSend, ipcRendererInvoke,  toMmss, 
     toMMssSSS, toMillis, toYmd, toYyyymmdd, toYyyymmddHhMmSs,
     escapeHtml, parseXML, buildXML, guessFilename,
-    isSupportedAudio, encodeLess, decodeLess,
+    isSupportedAudio, encodeLess, decodeLess, 
+    isIpcRendererSupported, isAsyncFn, stringPrefixEquals,
 } from '../common/Utils';
 import {
     FILE_PREFIX, ActivateState,
@@ -56,6 +57,12 @@ const showConfirm = async (msg, title) => {
   if (isConfirmDialogShowing.value) return false
   setConfirmDialogShowing(true)
   hideAllCtxMenus(false)
+  
+  if(!isIpcRendererSupported()) {
+    setConfirmDialogShowing(false)
+    return true
+  }
+
   const ok = await ipcRendererInvoke('show-confirm', {
     title: title || '确认',
     msg
@@ -82,34 +89,144 @@ const onWatches = (arr) => {
 
 /* 开放API */
 const APIEvents = {
-    TRACK_DRAW_SPECTRUM: 'TRACK_DRAW_SPECTRUM',
-    TRACK_VISUAL_CANVAS: 'TRACK_VISUAL_CANVAS',
+    TRACK_DRAW_SPECTRUM: {
+        name: 'track_draw_spectrum',
+        cname: '绘制频谱',
+    },
+    TRACK_VISUAL_CANVAS: {
+        name: 'track_visual_canvas',
+        cname: '绘制可视化Canvas',
+    },
 }
 
 const APIPermissions = {
-    OPEN_DEV_TOOLS: 'OPEN_DEV_TOOLS',
-    CLOSE_DEV_TOOLS: 'CLOSE_DEV_TOOLS',
-    GET_USER_AGENT: 'GET_USER_AGENT',
-    GET_COOKIE: 'GET_COOKIE',
+    OPEN_DEV_TOOLS: {
+        name: 'app-openDevTools',
+        cname: '启用开发者工具',
+    },
+    CLOSE_DEV_TOOLS: {
+        name: 'app-closeDevTools',
+        cname: '关闭开发者工具',
+    },
+    GET_USER_AGENT: {
+        name: 'app-userAgent',
+        cname: '访问UserAgent信息',
+    },
+    GET_COOKIE: {
+        name: 'app-getCookie',
+        cname: '获取Cookie信息',
+    },
     //路由
-    ADD_ROUTE: 'ADD_ROUTE',
-    VISIT_ROUTE: 'VISIT_ROUTE',
+    ADD_ROUTE: {
+        name: 'app-addRoute',
+        cname: '添加路由',
+    },
+    VISIT_ROUTE: {
+        name: 'app-visitRoute',
+        cname: '访问路由'
+    },
     //自定义平台
-    ADD_PLATFORM: 'ADD_PLATFORM',
-    REMOVE_PLATFORM: 'REMOVE_PLATFORM',
+    REGISTER_PLATFORM: {
+        name: 'app-addPlatform',
+        cname: '注册平台信息',
+    },
+    UNREGISTER_PLATFORM: {
+        name: 'app-removePlatform',
+        cname: '移除平台信息',
+    },
     //自定义请求处理器，主要目的为重新设置请求头信息
-    ADD_REQUEST_HANDLER: 'ADD_REQUEST_HANDLER',
-    UPDATE_REQUEST_HANDLER: 'UPDATE_REQUEST_HANDLER',
-    REMOVE_REQUEST_HANDLER: 'REMOVE_REQUEST_HANDLER',
+    ADD_REQUEST_HANDLER: {
+        name: 'app-addRequestHandler',
+        cname: '添加请求头信息',
+    },
+    UPDATE_REQUEST_HANDLER: {
+        name: 'app-updateRequestHandler',
+        cname: '修改请求头信息',
+    },
+    REMOVE_REQUEST_HANDLER: {
+        name: 'app-removeRequestHandler',
+        cname: '删除请求头信息'
+    },
     //播放相关
-    TRACK_CURRENT_PLAYING: 'TRACK_CURRENT_PLAYING',
-    TRACK_SPECTRUM_PARAMS: 'TRACK_SPECTRUM_PARAMS',
+    GET_CURRENT_TRACK: {
+        name: 'app-currentTrack',
+        cname: '获取当前播放Track信息',
+    },
+    GET_SPECTRUM_PARAMS: {
+        name: 'app-sprectrumParams',
+        cname: '获取频谱相关参数',
+    },
+}
+
+const EVENT_REGISTER_PREFIX = 'event-register-'
+const EVENT_UNREGISTER_PREFIX = 'event-unregister-'
+
+const transformEvent = (event, prefix) => {
+    const { name, cname } = event
+    prefix = prefix || EVENT_REGISTER_PREFIX
+    const cnamePrefix = stringEquals(prefix, EVENT_REGISTER_PREFIX) ? '监听事件：' : '取消监听事件：'
+    return {
+        name: `${prefix}${name}`,
+        cname: `${cnamePrefix}${cname}`
+    }
+}
+
+const recoverToEvent = (permission, prefix) => {
+    const { name, cname } = permission
+    prefix = prefix || EVENT_REGISTER_PREFIX
+    return {
+        name: name.replace(prefix, ''),
+        cname,
+    }
+}
+
+const PermissionsAccessRegistration = {}
+const registerAccessPermissions = async (plugin, permission) => {
+    tryCallDefault(() => {
+        const { id } = plugin || {}
+        if(!id) return 
+
+        let permissions = PermissionsAccessRegistration[id] || []
+        const index = permissions.findIndex(e => (e.name == permission.name))
+        if(index < 0) permissions.push(permission)
+        Object.assign(PermissionsAccessRegistration, {
+            [id]: permissions
+        })
+    })
+}
+
+const revokePermissions = async (plugin) => {
+    tryCallDefault(() => {
+        const { id } = plugin || {}
+        if(!id) return 
+
+        const permissions = PermissionsAccessRegistration[id] || []
+        permissions.forEach(permission => {
+            const { name, options } = permission 
+            if(stringEquals(APIPermissions.OPEN_DEV_TOOLS['name'], name)) {
+                lessAPI.permissions.closeDevTools(plugin)
+            } 
+            else if(stringEquals(APIPermissions.ADD_REQUEST_HANDLER['name'], name)) {
+                lessAPI.permissions.removeRequestHandler(plugin, options)
+            } 
+            else if(stringEquals(APIPermissions.REGISTER_PLATFORM['name'], name)) {
+                lessAPI.permissions.unregisterPlatform(plugin, options)
+            } 
+            else if(stringPrefixEquals(name, EVENT_REGISTER_PREFIX)) {
+                lessAPI.events.unregister(plugin, recoverToEvent(permission), options)
+            }
+        })
+        Reflect.deleteProperty(PermissionsAccessRegistration, id)
+    })
 }
 
 //事件处理器注册中心
 const EventHandlerRegistrations = {
     mappings: {},
-    handlers(event) { return this.mappings[event] },
+    handlers(event) { 
+        const { name } = event
+        return this.mappings[name]
+    },
     hasHanlders(event) {
         const handlers = this.handlers(event)
         return handlers && handlers.length > 0
@@ -121,20 +238,23 @@ const EventHandlerRegistrations = {
     },
     register(event, handler) {
         if (!event || !handler) return
-        if (!Object.hasOwn(APIEvents, event)) return
+        //if (!Object.hasOwn(APIEvents, event)) return
         //支持类型：function、object
         if (!'object|function'.includes(typeof handler)) return
         if (Array.isArray(handler)) return
-
-        this.mappings[event] = this.mappings[event] || []
-        const index = this.mappings[event].findIndex(item => (item == handler))
-        if (index > -1) this.mappings[event].splice(index, 1)
-        this.mappings[event].push(handler)
+        
+        const { name } = event
+        this.mappings[name] = this.mappings[name] || []
+        const index = this.mappings[name].findIndex(item => (item == handler))
+        if (index > -1) this.mappings[name].splice(index, 1)
+        this.mappings[name].push(handler)
     },
     unregister(event, handler) {
         if (!event || !handler) return
-        if (!Object.hasOwn(APIEvents, event)) return
-        const handlers = this.mappings[event]
+        //if (!Object.hasOwn(APIEvents, event)) return
+
+        const { name } = event
+        const handlers = this.mappings[name]
         if (handlers && handlers.length > 0) {
             for (let i = 0; i < handlers.length; i++) {
                 if (handlers[i] == handler) {
@@ -146,7 +266,7 @@ const EventHandlerRegistrations = {
                     break
                 }
             }
-            if (handlers.length < 1) Reflect.deleteProperty(this.mappings, event)
+            if (handlers.length < 1) Reflect.deleteProperty(this.mappings, name)
         }
     }
 }
@@ -183,6 +303,8 @@ const deactivatePluginNow = async (plugin, onSuccess, onError) => {
     } else {
         tryCall(mainModule.deactivate, plugin, onSuccess, onError)
     }
+    //取消权限
+    revokePermissions(plugin)
 }
 
 const removePluginNow = (plugin) => {
@@ -229,15 +351,31 @@ const loadPluginsOnStartup = async () => {
     })
 }
 
-const onAccessResult = async (permission, result, options) => {
-    let eventName = null, args = null
-    //平台权限
-    if (permission === APIPermissions.ADD_PLATFORM) {
-        eventName = 'addPlatform'
-        args = options[0]
+const accessPermission = async (plugin, permission, options, action) => {
+    if(!plugin || !plugin.id) return console.log('[Plugin Invalid] ' + plugin)
+
+    registerAccessPermissions(plugin, { ...permission, options })
+    try {
+        if(typeof action != 'function') return
+        return isAsyncFn(action) ? await action() : action()
+    } catch(error) {
+        console.log(error)
     }
-    //事件通知
-    if (eventName) emitEvents(`plugins-accessResult-${eventName}`, args)
+}
+
+const accessIpcRendererSend = async (plugin, permission, options) => {
+    const { name } = permission || {}
+    if(!name) return 
+    return accessPermission(plugin, permission, options,
+        () => ipcRendererSend(name, options))
+}
+
+const accessIpcRendererInvoke = async (plugin, permission, options) => {
+    const { name } = permission || {}
+    if(!name) return 
+    return accessPermission(plugin, permission, options, 
+        async () => (await ipcRendererInvoke(name, options) || '')
+    )
 }
 
 //TODO 暂时仅在Renderer端提供，所以API能力也有限
@@ -316,67 +454,88 @@ const lessAPI = {
     },
     events: {
         APIEvents,
-        register(event, handler) {
-            tryCallDefault(() => {
+        register(plugin, event, handler) {
+            const permission = { ...transformEvent(event) }
+            accessPermission(plugin, permission, handler, () => {
                 EventHandlerRegistrations.register(event, handler)
             })
         },
-        unregister(event, handler) {
-            tryCallDefault(() => {
+        unregister(plugin, event, handler) {
+            const permission = { ...transformEvent(event, EVENT_UNREGISTER_PREFIX) }
+            accessPermission(plugin, permission, handler, () => {
                 EventHandlerRegistrations.unregister(event, handler)
             })
         },
     },
     permissions: {
-        APIPermissions,
-        async access(permission, ...options) { //获取访问权限
-            let result = null
-            try {
-                //开发者工具
-                if (permission == APIPermissions.OPEN_DEV_TOOLS) {
-                    ipcRendererSend('app-openDevTools')
-                } else if (permission == APIPermissions.CLOSE_DEV_TOOLS) {
-                    ipcRendererSend('app-closeDevTools')
+        openDevTools(plugin) {
+            accessIpcRendererSend(plugin, APIPermissions.OPEN_DEV_TOOLS)
+        },
+        closeDevTools(plugin) {
+            accessIpcRendererSend(plugin, APIPermissions.CLOSE_DEV_TOOLS)
+        },
+        //获取相关信息
+        async getUserAgent(plugin) {
+            return await accessIpcRendererInvoke(plugin, APIPermissions.GET_USER_AGENT)
+        },
+        async getCookie(plugin, url, fetchOnMissing) {
+            return await accessIpcRendererInvoke(plugin, APIPermissions.GET_COOKIE, { url, fetchOnMissing })
+        },
+        //请求头信息 - 设置、更新、删除
+        addRequestHandler(plugin, handler) {
+            accessIpcRendererInvoke(plugin, APIPermissions.ADD_REQUEST_HANDLER, handler)
+        },
+        updateRequestHandler(plugin, handler) {
+            accessIpcRendererInvoke(plugin, APIPermissions.UPDATE_REQUEST_HANDLER, handler)
+        },
+        removeRequestHandler(plugin, handler) {
+            accessIpcRendererInvoke(plugin, APIPermissions.REMOVE_REQUEST_HANDLER, handler)
+        },
+        //自定义平台
+        registerPlatform(plugin, platform) {
+            accessPermission(plugin, APIPermissions.REGISTER_PLATFORM, platform, 
+                () => {
+                    addPlatform(platform)
+                    emitEvents(`plugins-registerPlatform`, platform)
                 }
-                //获取相关信息
-                else if (permission == APIPermissions.GET_USER_AGENT) {
-                    result = await ipcRendererInvoke('app-userAgent') || ''
-                } else if (permission == APIPermissions.GET_COOKIE) {
-                    result = await ipcRendererInvoke('app-getCookie', options[0]) || ''
+            )
+        },
+        unregisterPlatform(plugin, platform) {
+            accessPermission(plugin, APIPermissions.UNREGISTER_PLATFORM, platform, 
+                () => removePlatform(platform)
+            )
+        },
+        //路由
+        registerRoute(plugin, route) {
+            accessPermission(plugin, APIPermissions.ADD_ROUTE, route, 
+                () => (addCustomRoute(route))
+            )
+        },
+        visitRoute(plugin, route) {
+            accessPermission(plugin, APIPermissions.VISIT_ROUTE, route, 
+                () => (visitCommonRoute(route))
+            )
+        },
+        //播放相关
+        getCurrentTrack(plugin) {
+            return accessPermission(plugin, APIPermissions.GET_CURRENT_TRACK, null, 
+                () => {
+                    const { 
+                        id, platform, title, cover, artist, album, duration
+                    } = toRaw(currentTrack.value || {})
+                    return { 
+                        id, platform, title, 
+                        cover, artist, album, 
+                        duration 
+                    }
                 }
-                //请求头信息
-                else if (permission == APIPermissions.ADD_REQUEST_HANDLER) {
-                    result = await ipcRendererInvoke('app-addRequestHandler', options[0]) || ''
-                } else if (permission == APIPermissions.UPDATE_REQUEST_HANDLER) {
-                    result = await ipcRendererInvoke('app-updateRequestHandler', options[0]) || ''
-                } else if (permission == APIPermissions.REMOVE_REQUEST_HANDLER) {
-                    result = await ipcRendererInvoke('app-removeRequestHandler', options[0]) || ''
-                }
-                //路由
-                else if (permission == APIPermissions.ADD_ROUTE) {
-                    result = addCustomRoute(options[0])
-                } else if (permission == APIPermissions.VISIT_ROUTE) {
-                    result = visitCommonRoute(options[0])
-                }
-                //自定义平台
-                else if (permission == APIPermissions.ADD_PLATFORM) {
-                    //{ code, vendor, name, shortName, online, types, scopes, artistTabs, searchTabs, weight }
-                    addPlatform(options[0])
-                } else if (permission == APIPermissions.REMOVE_PLATFORM) {
-                    removePlatform(options[0])
-                }
-                //播放相关
-                else if (permission == APIPermissions.TRACK_CURRENT_PLAYING) {
-                    const { id, platform, title, cover, artist, album, duration } = toRaw(currentTrack.value || {})
-                    result = { id, platform, title, cover, artist, album, duration }
-                } else if (permission == APIPermissions.TRACK_SPECTRUM_PARAMS) {
-                    result = toRaw(spectrumParams.value)
-                }
-                onAccessResult(permission, result, options)
-            } catch (error) {
-                console.log(error)
-            }
-            return result
+            )
+        },
+        async getSpectrumParams(plugin) {
+            return await accessPermission(plugin, APIPermissions.GET_SPECTRUM_PARAMS, null, 
+                () => (toRaw(spectrumParams.value))
+            )
+            
         },
     },
     renderers: {
@@ -457,6 +616,8 @@ provide('apiExpose', {
     visitLink,
     onEvents,
     emitEvents,
+    APIPermissions,
+    PermissionsAccessRegistration,
 })
 </script>
 

@@ -3,7 +3,7 @@ import { PlayMode } from '../../common/Constants';
 import { Track } from '../../common/Track';
 import { toMmss } from '../../common/Utils';
 import { Playlist } from '../../common/Playlist';
-import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import { emitEvents } from '../../common/EventBusWrapper';
 
 
 

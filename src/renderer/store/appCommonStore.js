@@ -1,9 +1,8 @@
 import { defineStore } from "pinia";
-import { isDevEnv, randomTextWithinAlphabetNums,
-    ipcRendererSend, ipcRendererInvoke,
- } from "../../common/Utils";
-import { onEvents, emitEvents } from "../../common/EventBusWrapper";
+import { isDevEnv, randomTextWithinAlphabetNums, ipcRendererSend, } from "../../common/Utils";
+import { emitEvents } from "../../common/EventBusWrapper";
 import { usePlatformStore } from "./platformStore";
+
 
 
 const resetCategoryScroll = (prefix) => emitEvents(`${prefix}Category-resetScroll`)
@@ -18,7 +17,8 @@ const playingViewCustomThemePrefix = 'custom_'
 
 export const useAppCommonStore = defineStore('appCommon', {
     state: () => ({
-        isMaxScreen: false, //Electron存在系统兼容性问题，部分OS平台下无法全屏FullScreen显示
+        //Electron存在系统兼容性问题，部分OS平台下无法全屏FullScreen显示
+        isMaxScreen: false, 
         coverMaskShow: false,
         playlistCategoryViewShow: false,
         artistCategoryViewShow: false,
@@ -58,23 +58,23 @@ export const useAppCommonStore = defineStore('appCommon', {
             type: 0,
             dynamic: true,
             light: true,
-        }/*, {
-            id: 'dynamic_sky',
-            name: '浩瀚星空',
-            light: false,
-        }*/],
+        }],
         playingViewCustomThemes: [],
         customPlayingThemeEditViewShow: false,
         playingViewThemeIndex: 0,
-        playingViewThemeType: 0, // 0 => 预设， 1 => 自定义
+        //播放样式类型：0 => 预设， 1 => 自定义
+        playingViewThemeType: 0,
         isPlayingViewCustomThemePreview: false,
         playingViewCustomThemePreviewCache: null,
-        workingCustomPlayingTheme: null, //当前工作区的自定义播放样式，即正在编辑的播放样式
+        //当前工作区的自定义播放样式，即正在编辑的播放样式
+        workingCustomPlayingTheme: null, 
         videoPlayingViewShow: false,
         soundEffectViewShow: false,
         customThemeEditViewShow: false,
-        workingCustomTheme: null, //当前工作区的自定义主题，即正在编辑的主题
+        //当前工作区的自定义主题，即正在编辑的主题
+        workingCustomTheme: null, 
         customAppBorderRadiusViewShow: false,
+        customAppBorderRadiusViewPreviewMode: false,
         //探索模式，歌单、歌手
         exploreModes: ['playlists', 'artists', 'radios', 'userhome', 'cloudstorage'],
         exploreModeIndex: 0,
@@ -83,15 +83,20 @@ export const useAppCommonStore = defineStore('appCommon', {
         //通用通知
         commonNotificationShow: false,
         commonNotificationText: null,
-        commonNotificationType: 0, //类型，0 -> 普通成功消息，1 -> 失败消息
-        commonNotificationImportant: false, //是否可以被新消息覆盖
+        //类型，0 => 普通成功消息，1 => 失败消息
+        commonNotificationType: 0, 
+        //是否可以被新消息覆盖
+        commonNotificationImportant: false, 
         //通用上下文菜单
         commonCtxMenuShow: false,
         commonCtxMenuData: [],
-        commonCtxItem: {},  //菜单的上下文对象，用于公共参数传递
-        commonCtxMenuCacheItem: {}, //菜单缓存对象，与具体点击的菜单项相关
+        //菜单的上下文对象，用于公共参数传递
+        commonCtxItem: {},  
+        //菜单缓存对象，与具体点击的菜单项相关
+        commonCtxMenuCacheItem: {}, 
         commonCtxMenuSeparatorNums: 0,
-        commonCtxMenuCacheItemIndex: -1, //菜单(右键)触发时，触发源对象对应的Index
+        //菜单(右键)触发时，触发源对象对应的Index
+        commonCtxMenuCacheItemIndex: -1,
         addToListSubmenuShow: false,
         artistListSubmenuShow: false,
         exitToHomeBtnShow: false,
@@ -115,8 +120,8 @@ export const useAppCommonStore = defineStore('appCommon', {
         popoverHintShow: false,
         popoverHintText: null,
         popoverHintTarget: null,
-        //搜索框
-        searchBarExclusiveAction: null, //独占模式
+        //搜索框 - 独占模式
+        searchBarExclusiveAction: null, 
         playlistExportToolbarShow: false,
         playlistExportContextItem: null,
         searchPlaceHolderIndex: 0,
@@ -139,6 +144,10 @@ export const useAppCommonStore = defineStore('appCommon', {
         //字体选择
         fontSelectionToolbarShow: false,
         fontSelectionToolbarContext: null,
+        //窗口按钮自定义
+        customWindowCtlBtnViewShow: false,
+        customWindowCtlBtnViewContext: null,
+        customWindowCtlBtnViewPreviewMode: false,
     }),
     getters: {
         isPlaylistMode() {
@@ -625,10 +634,15 @@ export const useAppCommonStore = defineStore('appCommon', {
                 && this.playingViewThemeIndex == index
         },
         toggleCustomAppBorderRadiusViewShow() {
+            if(this.customAppBorderRadiusViewPreviewMode) return 
             this.customAppBorderRadiusViewShow = !this.customAppBorderRadiusViewShow
         },
         hideCustomAppBorderRadiusView() {
+            if(this.customAppBorderRadiusViewPreviewMode) return 
             this.customAppBorderRadiusViewShow = false
+        },
+        toggleCustomAppBorderRadiusViewPreviewMode() {
+            this.customAppBorderRadiusViewPreviewMode = !this.customAppBorderRadiusViewPreviewMode
         },
         hideTrackResourceToolView() {
             this.trackResourceToolViewShow = false
@@ -668,6 +682,22 @@ export const useAppCommonStore = defineStore('appCommon', {
             this.fontSelectionToolbarShow = !this.fontSelectionToolbarShow
             this.setFontSelectionToolbarContext(context)
         },
+        setCustomWindowCtlBtnViewContext(context) {
+            this.customWindowCtlBtnViewContext = context
+        },
+        hideCustomWindowCtlBtnView() {
+            if(this.customWindowCtlBtnViewPreviewMode) return 
+            this.customWindowCtlBtnViewShow = false
+        },
+        toggleCustomWindowCtlBtnView(context) {
+            if(this.customWindowCtlBtnViewPreviewMode) return 
+
+            this.customWindowCtlBtnViewShow = !this.customWindowCtlBtnViewShow
+            this.setCustomWindowCtlBtnViewContext(context)
+        },
+        toggleCustomWindowCtlBtnViewPreviewMode() {
+            this.customWindowCtlBtnViewPreviewMode = !this.customWindowCtlBtnViewPreviewMode
+        }
     },
     persist: {
         enabled: true,

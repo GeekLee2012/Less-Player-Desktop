@@ -37,4 +37,5 @@ const props = defineProps({
     </SvgTextButton>
 </template>
 
-<style></style>
+<style>
+</style>

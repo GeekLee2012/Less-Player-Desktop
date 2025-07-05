@@ -855,6 +855,18 @@ onUnmounted(() => {
     z-index: 3;
 }
 
+/*
+.track-resource-tool-view .songlist-ctl {
+    margin-top: 6px !important;
+}
+*/
+
+.track-resource-tool-view .playlists-ctl,
+.track-resource-tool-view .albumlist-ctl,
+.track-resource-tool-view .artistlist-ctl {
+    margin-top: -9px !important;
+    transform: translateX(2px);
+}
 
 /* ImageTextTile */
 .track-resource-tool-view .container .playlists-ctl .image-text-tile,

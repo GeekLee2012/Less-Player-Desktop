@@ -15,9 +15,9 @@ import { toTrimString, ipcRendererSend, smoothScroll, } from '../../common/Utils
 
 
 
-const { progressState, mmssCurrentTime, currentTimeState,
-    favoritedState, toggleFavoritedState,
-    preseekTrack, mmssPreseekTime, mmssDurationLeft, } = inject('player')
+const { progressState, currentTimeState, favoritedState, 
+    toggleFavoritedState, mmssDurationLeft, seekTrack,
+} = inject('player')
 const { applyDocumentStyle } = inject('appStyle')
 const { showConfirm } = inject('apiExpose')
 const { visitRecents, visitBatchPlaybackQueue } = inject('appRoute')
@@ -178,6 +178,22 @@ const togglePin = () => {
   ipcRendererSend('app-mainWin-alwaysOnTop', pinState.value)
 }
 
+const seekAction = (event) => {
+    if(!playing.value) return 
+
+    const coverWrap = document.querySelector('.mini-layout .cover-wrap')
+    const { clientWidth, clientHeight } = coverWrap
+    const { offsetX, offsetY } = event
+    //const O = { x: clientWidth / 2, y: clientHeight / 2 }
+    const P = { x: clientWidth / 2, y: 0 }
+    const Q = { x: offsetX, y: offsetY }
+    const QP = Math.sqrt(Math.pow((Q.x - P.x), 2) + Math.pow((Q.y - P.y), 2))
+    const angleQOP = 2 * Math.asin(QP / clientWidth) 
+    const percent = angleQOP / (2 * Math.PI)
+    const _percent = Q.x >= P.x ? percent : (1 - percent)
+    seekTrack(_percent)
+}
+
 /* 拖拽移动重排序 */
 const dragTargetIndex = ref(-1)
 const dragOverIndex = ref(-1)
@@ -254,10 +270,11 @@ onUnmounted(toggleMiniStyle)
 <template>
     <div class="mini-layout">
         <div class="header">
-            <div class="cover-wrap">
+            <div class="cover-wrap" @click="seekAction">
                 <img class="cover" 
                     :class="{ rotation: playing }"
-                    v-lazy="Track.coverDefault(currentTrack)" />
+                    v-lazy="Track.coverDefault(currentTrack)" 
+                    @click.stop=""/>
             </div>
         </div>
         <div class="center">
@@ -318,11 +335,28 @@ onUnmounted(toggleMiniStyle)
                     </div>
                     <PlayControl class="spacing" :toggleQueueAction="toggleQueue">
                     </PlayControl>
+                    <!--
                     <div class="lyric-btn spacing" 
                         :class="{ 'content-text-highlight': lyricLayoutMode > 0 }"
                         @click="() => toggleLyric()"
                         @contextmenu.stop="hideLyric">
                         词
+                    </div>
+                    -->
+                    <div class="lyric-btn btn spacing" 
+                        :class="{ active: lyricLayoutMode > 0 }" 
+                        @click="() => toggleLyric()"
+                        @contextmenu.stop="hideLyric">
+                        <svg width="18" height="18" viewBox="0 0 22.15 19.47" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path d="M19.75,2.37H8.19V.51H22.08c0,.37.06.72.06,1.07,0,5.07,0,10.15,0,15.22,0,1.66-.55,2.3-2.17,2.57a4.57,4.57,0,0,1-.82.09H16.43l-.64-2h2.55c.74,0,1.4-.14,1.4-1.06C19.75,11.77,19.75,7.14,19.75,2.37Z"/>
+                                    <path d="M9.46,15.24V8.37h8.17v6.87Zm5.8-1.79V10.16H11.85v3.29Z"/>
+                                    <path d="M0,6.12H5.65v8.82L7.5,13.42c1.05,1.81,1,2-.5,3.16-1,.78-2.11,1.51-3.26,2.33-.49-.95-1.27-1.64-.46-2.73.24-.32.12-.92.12-1.39,0-2.18,0-4.35,0-6.66H0Z"/>
+                                    <path d="M18.44,4.48V6.35H8.75V4.48Z"/><path d="M5.87,4.44,1.74,1.27c1.39-1.6,1.4-1.62,3-.45C5.64,1.48,6.5,2.21,7.5,3Z"/>
+                                </g>
+                            </g>
+                        </svg>
                     </div>
                 </div>
                 <div class="meta-wrap" v-show="lyricLayoutMode != 1 && !isPlayCtlShow"
@@ -464,6 +498,8 @@ onUnmounted(toggleMiniStyle)
     --cover-size: 90px;
     --others-lyric-ctl-extra-btn-bottom: 36px;
     --others-lyric-ctl-extra-btn-right: 20px;
+    --expand-border-top-color: var(--border-header-nav-border-color);
+    --expand-border-top: none;
 }
 
 .mini-layout .spacing {
@@ -505,6 +541,7 @@ onUnmounted(toggleMiniStyle)
     justify-content: center;
     background: var(--others-mini-layout-cover-progress-bg);
     border-radius: 10em;
+    position: relative;
 }
 
 .mini-layout > .header .cover {
@@ -592,6 +629,7 @@ onUnmounted(toggleMiniStyle)
     transform: translateY(1px);
 }
 
+/*
 .mini-layout > .center > .content .play-ctl-wrap .lyric-btn {
     display: flex;
     justify-content: center;
@@ -600,6 +638,11 @@ onUnmounted(toggleMiniStyle)
     font-weight: bold;
     font-size: 20px;
     color: var(--button-icon-btn-color);
+}
+*/
+
+.mini-layout > .center > .content .play-ctl-wrap .lyric-btn svg {
+    transform: translateY(2px) scaleY(1.08);
 }
 
 .mini-layout > .center > .content .meta-wrap {
@@ -698,6 +741,7 @@ onUnmounted(toggleMiniStyle)
     position: relative;
     overflow: hidden;
     background: var(--content-bg-color);
+    border-top: var(--expand-border-top);
 }
 
 .mini-layout > .center .playback-queue .list-header {
@@ -793,6 +837,7 @@ onUnmounted(toggleMiniStyle)
     overflow: scroll;
     overflow-x: hidden;
     background: var(--content-bg-color);
+    border-top: var(--expand-border-top);
 }
 
 .mini-layout > .center .lyric-wrap .lyric-ctl,

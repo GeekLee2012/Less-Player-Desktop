@@ -395,7 +395,7 @@ onActivated(() => {
 }
 
 #themes-view .header .tab-nav .action {
-    margin-right: 25px;
+    margin-right: 18px;
     z-index: 1;
     display: flex;
 }
@@ -406,7 +406,7 @@ onActivated(() => {
 
 #themes-view .header .tab-nav .to-right {
     position: absolute;
-    right: 3px;
+    right: 0px;
 }
 
 #themes-view .center {
@@ -414,7 +414,7 @@ onActivated(() => {
     flex-direction: column;
     flex: 1;
     padding-left: 35px;
-    padding-right: 35px;
+    padding-right: 25px;
     padding-bottom: 20px;
     overflow: scroll;
     overflow-x: hidden;

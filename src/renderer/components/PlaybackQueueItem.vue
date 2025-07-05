@@ -20,7 +20,10 @@ const { queueTracksSize, playing } = storeToRefs(usePlayStore())
 const { playTrack, removeTrack, isCurrentTrack, togglePlay } = usePlayStore()
 const { commonCtxMenuCacheItem, workingTrackForResourceToolView } = storeToRefs(useAppCommonStore())
 const { showToast, setRouterCtxCacheItem } = useAppCommonStore()
-const { isHighlightCtxMenuItemEnable, isPlaybackQueueMvBtnShow, isDndSaveEnable } = storeToRefs(useSettingStore())
+const { 
+    isHighlightCtxMenuItemEnable, isPlaybackQueueMvBtnShow, isDndSaveEnable,
+    isDoubleClickToPlayTrack,
+} = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 
 
@@ -101,6 +104,11 @@ const playingState = computed(() => {
     if (!isCurrentTrack(track)) return false
     return playing.value
 })
+
+const onDblclick = (event) => {
+    if(!isDoubleClickToPlayTrack.value) return 
+    playItem()
+}
 </script>
 
 <template>
@@ -113,7 +121,7 @@ const playingState = computed(() => {
             'ex-action': isMvBtnShow,
             actionable,
         }"
-        @dblclick="" 
+        @dblclick="onDblclick" 
         @contextmenu.stop="onContextMenu">
         <div class="item-wrap">
             <div class="left" 

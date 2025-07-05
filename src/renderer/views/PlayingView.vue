@@ -177,6 +177,7 @@ onUnmounted(() => {
                             'draggable': isDndSaveEnable, 
                             'none-border': !isPlayingViewCoverBorderShow 
                         }"
+                        crossorigin="anonymous"
                         v-lazy="Track.coverDefault(currentTrack)" 
                         :draggable="isDndSaveEnable" 
                         @dragstart="dndSaveCover" />
@@ -1058,7 +1059,7 @@ onUnmounted(() => {
     fill: var(--content-highlight-color) !important;
 }
 
-/* 渐变风格 - 现代 */
+/* gradient type - modern */
 .playing-view .container .backdrop-container {
     contain: style size;
     position: fixed;

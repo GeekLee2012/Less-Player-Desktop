@@ -4,7 +4,7 @@ import { randomTextWithinAlphabetNums } from "../../common/Utils";
 
 
 let resultTimer = null
-export const usePlaybackQueueStore = defineStore('playbackQueueStore', {
+export const usePlaybackQueueStore = defineStore('playbackQueues', {
     state: () => ({
         queues: [],
     }),

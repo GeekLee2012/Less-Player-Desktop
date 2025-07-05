@@ -514,6 +514,6 @@ onUnmounted(() => offEvents(eventsRegistration))
 }
 
 #album-detail-view .textlist-ctl {
-    padding: 0px 2px 10px 2px;
+    padding: 0px 10px 10px 10px;
 }
 </style>

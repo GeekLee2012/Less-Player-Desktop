@@ -31,14 +31,20 @@ const props = defineProps({
     resourceMode: Boolean
 })
 
-const { playVideoItem, dndSaveTrack, loadTrackUrl, loadTrackLyric, notifyLyricLoaded  } = inject('player')
+const { 
+    playVideoItem, dndSaveTrack, loadTrackUrl, 
+    loadTrackLyric, notifyLyricLoaded  
+} = inject('player')
 const { showContextMenu } = inject('appCommon')
 
 const { playing, currentTrack } = storeToRefs(usePlayStore())
 const { addTrack, playTrack, togglePlay, isNoneTrack, isCurrentTrack } = usePlayStore()
 const { commonCtxMenuCacheItem, workingTrackForResourceToolView } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, setTrackResourceToolViewPreviewMode } = useAppCommonStore()
-const { track, isHighlightCtxMenuItemEnable, isDndSaveEnable, isSongItemIndexShow } = storeToRefs(useSettingStore())
+const { 
+    track, isHighlightCtxMenuItemEnable, isDndSaveEnable,
+    isSongItemIndexShow, isDoubleClickToPlayTrack,
+} = storeToRefs(useSettingStore())
 const { isLocalMusic } = usePlatformStore()
 const { getLocalPlaylistTrack } = useLocalMusicStore()
 const { isFavoriteSong, getFavoriteSong } = useUserProfileStore()
@@ -69,6 +75,12 @@ const deleteItem = () => {
         deleteFn(index)
         showToast("歌曲已删除")
     }
+}
+
+const onDblclick = (event) => {
+    if (props.checkbox || props.resourceMode) return
+    if(!isDoubleClickToPlayTrack.value) return 
+    playItem()
 }
 
 const onContextMenu = (event) => {
@@ -218,7 +230,8 @@ onUnmounted(() => offEvents(eventsRegistration))
             'selection-mode': checkbox,
             'resouces-mode': resourceMode,
         }"
-        @click="toggleCheck" 
+        @click="toggleCheck"
+        @dblclick="onDblclick"
         @contextmenu.stop="onContextMenu"
         :draggable="isDraggable" 
         @dragstart="(event) => dndSaveTrack(event, data)">

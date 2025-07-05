@@ -1035,28 +1035,41 @@ onUnmounted(() => offEvents(eventsRegistration))
     align-items: center;
     justify-content: center;
     width: auto;
-    transform: scale(1.2);
-    padding: 10px 5px 10px 10px;
+    /*padding: 10px 5px 10px 10px;*/
+    padding: 0px;
+    padding-left: 6px;
+    width: 44px;
+    height: 49px;
     margin-bottom: 6px;
     background: var(--content-list-item-hover-bg-color);
     cursor: pointer;
     border-radius: var(--border-list-item-vertical-border-radius);
 }
 
+.mini-navbar-mode #main-left #explore-mode .mode-item svg {
+    transform: scale(1.2);
+}
+
 .mini-navbar-mode #main-left .platform-list ul li {
     --spacing-left: 23px;
-    padding: 6px 25px 6px 15px;
+    /*padding: 6px 25px 6px 15px;*/
+    padding: 0px;
+    padding-left: 16px;
+    width: 34px;
+    height: 49px;
     margin-left: calc(var(--spacing-left) - 3px);
     margin-right: calc(var(--spacing-left) - 3px);
     margin-bottom: var(--content-left-nav-line-spacing);
 
     text-align: center;
+    vertical-align: middle;
     overflow: hidden;
     word-wrap: break-all;
     white-space: pre-wrap;
     line-break: anywhere;
     text-overflow: clip;
-    letter-spacing: var(--main-left-width);
+    letter-spacing: calc(var(--main-left-width) * 2);
+    line-height: 49px;
     word-wrap: break-word;
     line-break: anywhere;
 
@@ -1133,8 +1146,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 
 .mini-navbar-mode #main-left .header .app-logo-wrap .app-logo,
 .mini-navbar-mode #main-left .bottom .app-logo-wrap .app-logo {
-    /*transform: scale(1.1) translateX(-1px);*/
-    transform: scale(1.2) translateX(-1px);
+    transform: scale(1.15) translateX(-1px);
 }
 
 .mini-navbar-mode #main-left #explore-mode .mode-item span,

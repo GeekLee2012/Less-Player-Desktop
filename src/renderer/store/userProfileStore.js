@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { toRaw } from "vue";
-import { randomTextWithinAlphabetNums, trimArray } from "../../common/Utils";
+import { randomTextWithinAlphabetNums, } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 import { usePlatformStore } from "./platformStore";
-import { onEvents, emitEvents } from "../../common/EventBusWrapper";
+import { emitEvents } from "../../common/EventBusWrapper";
 
 
 //TODO

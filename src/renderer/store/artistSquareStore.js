@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { usePlatformStore } from "./platformStore";
-import { onEvents, emitEvents } from "../../common/EventBusWrapper";
+import { emitEvents } from "../../common/EventBusWrapper";
 
 
 const notifyRefresh = () =>  emitEvents('artistSquare-refresh')
