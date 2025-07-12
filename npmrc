@@ -8,3 +8,6 @@ ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
 
 #解决npm run dist失败问题
 ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/
+
+#总结：依赖镜像 - 命名规范（规律）
+#XXX_XXX_MIRROR=https://npmmirror.com/mirrors/xxx-xxx/

@@ -22,6 +22,7 @@ const { setPlayingViewBgCoverEffectIndex,
     togglePlayingViewFocusMode,
     setPlayingViewBgCoverEffectGradientMode,
     togglePlayingViewBgCoverEffectGradientBottomBgTransparent,
+    togglePlayingViewLyricTransBtnShow,
     setPlayingViewBgCoverEffectGradientType,
     setPlayingViewBgCoverEffectGradientBrightness,
     setPlayingViewLyricHighlightMode,
@@ -87,12 +88,28 @@ const onImageDrop = (event, item, index) => {
                 </div>
                 <div class="action">
                     <div class="add-btn text-btn" @click="() => showCustomPlayingThemeEditView()" >
+                        <!--
                         <svg width="13" height="13"
                             viewBox="0 0 682.65 682.74" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path
                                         d="M298.59,384.15h-7.06q-123.24,0-246.49,0c-21.63,0-38.69-12.57-43.64-31.94-7-27.56,13.21-53.29,42.33-53.51,25.33-.18,50.66,0,76,0H298.59v-6.44q0-123.49,0-247c0-20.39,10.77-36.44,28.49-42.71C355-7.34,383.55,13,384,43.16c.26,16.33,0,32.67,0,49V298.65h6.82q123.49,0,247,0c21.52,0,38.61,12.77,43.43,32.19,6.75,27.26-13.06,52.7-41.62,53.25-11.16.22-22.33,0-33.49,0H384.09v6.69q0,123.5,0,247c0,21.59-12.66,38.65-32.06,43.53-27.59,6.95-53.24-13.31-53.39-42.46-.17-32.66,0-65.33,0-98V384.15Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        -->
+                        <svg width="18" height="18" viewBox="0 -50 768.02 554.57" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M341.9,0q148,0,296,0C659,0,675,11.28,680.8,30.05c8.34,26.78-11.43,54.43-39.45,55.18-1.17,0-2.33,0-3.5,0q-296.46,0-592.93,0C22.37,85.25,5.32,71.87.87,50.78-4.36,26,14.59,1.39,39.94.12c2.49-.13,5-.11,7.5-.11Z" />
+                                    <path
+                                        d="M554.64,426.5h-6.72c-26.49,0-53,.17-79.47-.1a41.87,41.87,0,0,1-39.06-27.7,42.4,42.4,0,0,1,11.2-46.19,41.85,41.85,0,0,1,29.11-11.25q39.49,0,79,0h6V335c0-26-.12-52,0-78,.15-25.3,19.44-44.3,44.06-43.72,23.23.55,41.24,19.54,41.37,43.92.13,25.82,0,51.65,0,77.48v6.57h5.67c26.65,0,53.31-.11,80,.05,20.38.12,37.94,14.9,41.51,34.49,3.74,20.57-7.15,40.65-26.59,47.73a53.72,53.72,0,0,1-17.56,2.85c-25.66.3-51.32.13-77,.13h-6v6.36c0,26,.1,52,0,78-.11,20.74-13.1,37.68-32.17,42.41-27.42,6.8-53-13.28-53.24-42.11-.22-26-.05-52-.05-78Z" />
+                                    <path
+                                        d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z" />
+                                    <path
+                                        d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z" />
                                 </g>
                             </g>
                         </svg>
@@ -143,6 +160,12 @@ const onImageDrop = (event, item, index) => {
                         <span class="subtitle">底部栏背景透明：</span>
                         <ToggleControl @click="togglePlayingViewBgCoverEffectGradientBottomBgTransparent"
                             :value="track.playingViewBgCoverEffectGradientBottomBgTransparent">
+                        </ToggleControl>
+                    </div>
+                    <div class="opt-item">
+                        <span class="subtitle">歌词翻译按钮：</span>
+                        <ToggleControl @click="togglePlayingViewLyricTransBtnShow"
+                            :value="track.playingViewLyricTransBtnShow">
                         </ToggleControl>
                     </div>
                     <div class="opt-item">
@@ -305,7 +328,7 @@ const onImageDrop = (event, item, index) => {
 }
 
 .playing-theme-list-view .header .action .add-btn svg {
-    transform: translateY(1px);
+    transform: translateY(3px);
 }
 
 

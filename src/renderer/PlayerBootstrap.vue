@@ -1,5 +1,10 @@
 <script setup>
-import { inject, provide, onMounted, watch, ref, computed, toRaw, nextTick, onDeactivated, onActivated, onUnmounted } from 'vue';
+import { 
+    inject, provide, onMounted, 
+    watch, ref, computed, 
+    toRaw, nextTick, onDeactivated, 
+    onActivated, onUnmounted 
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayStore } from './store/playStore';
 import { useAppCommonStore } from './store/appCommonStore';
@@ -8,7 +13,8 @@ import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
 import { useSettingStore } from './store/settingStore';
 import { Track } from '../common/Track';
-import { coverDefault, isBlank, isDevEnv, escapeHtml,
+import { 
+    coverDefault, isBlank, isDevEnv, escapeHtml,
     useStartDrag, useDownloadsPath, 
     tryCall, toTrimString, useTrayAction,
     ipcRendererSend, ipcRendererInvoke, 
@@ -17,7 +23,9 @@ import { coverDefault, isBlank, isDevEnv, escapeHtml,
     toLowerCaseTrimString,
     tryCallDefault,
 } from '../common/Utils';
-import { PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE } from '../common/Constants';
+import { 
+    PlayState, ImageProtocal, FILE_PREFIX, LESS_MAGIC_CODE 
+} from '../common/Constants';
 import { Playlist } from '../common/Playlist';
 import { Lyric } from '../common/Lyric';
 import { United } from '../vendor/united';
@@ -31,10 +39,12 @@ import { Video } from '../common/Video';
 
 const startDrag = useStartDrag()
 
-const { currentTrack, queueTracksSize, playingIndex, playing, 
+const { 
+    currentTrack, queueTracksSize, playingIndex, playing, 
     currentTime: markedCurrentTime, progress: markedProgress,
 } = storeToRefs(usePlayStore())
-const { playTrack, playNextTrack,
+const { 
+    playTrack, playNextTrack,
     setAutoPlaying, playPrevTrack,
     togglePlay, switchPlayMode,
     toggleVolumeMute, updateVolumeByOffset,
@@ -43,17 +53,22 @@ const { playTrack, playNextTrack,
     isCurrentTrack, isPlaying,
     setAudioOutputDevices, playTrackLater,
     setLoading, markPlayState,
-    isNoneTrack, } = usePlayStore()
-const { getVendor, isLocalMusic, isFreeFM, 
-    isCloudStorage, isWebDav, isNavidrome, isJellyfin 
+    isNoneTrack, 
+} = usePlayStore()
+const { 
+    getVendor, isLocalMusic, isFreeFM, 
+    isCloudStorage, isWebDav, isNavidrome, 
+    isJellyfin 
 } = usePlatformStore()
-const { playingViewShow, videoPlayingViewShow,
+const { 
+    playingViewShow, videoPlayingViewShow,
     playingViewThemeIndex, spectrumIndex,
     pendingPlay, pendingPlayPercent,
     exVisualCanvasShow, exVisualCanvasIndex,
     spectrumParams, trackResourceToolViewShow 
 } = storeToRefs(useAppCommonStore())
-const { togglePlaybackQueueView, toggleVideoPlayingView,
+const { 
+    togglePlaybackQueueView, toggleVideoPlayingView,
     showFailToast, toggleLyricToolbar,
     showToast, isCurrentTraceId,
     setDesktopLyricShow, setCurrentTraceId,
@@ -62,13 +77,15 @@ const { togglePlaybackQueueView, toggleVideoPlayingView,
     setExVisualCanvasIndex, togglePlayingThemeListView,
     hideAllCtxMenus, toggleTrackResourceToolView, 
 } = useAppCommonStore()
-const { addFavoriteTrack, removeFavoriteSong,
+const { 
+    addFavoriteTrack, removeFavoriteSong,
     isFavoriteSong, addFavoriteRadio,
     removeFavoriteRadio, isFavoriteRadio,
     addFavoritePlaylist, addFavoriteAlbum,
     addFollowArtist,
 } = useUserProfileStore()
-const { theme, layout, isStoreRecentPlay,
+const { 
+    theme, layout, isStoreRecentPlay,
     isSimpleLayout, isVipTransferEnable,
     isResumePlayAfterVideoEnable, isPauseOnPlayingVideoEnable,
     selectedAudioOutputDeviceId, isDndSaveEnable,
@@ -76,29 +93,37 @@ const { theme, layout, isStoreRecentPlay,
     isUseOnlineCoverEnable, isMiniLayout, 
     isStorePlayProgressStateBeforeQuit, isDownloadLyricForLocalTrack,
 } = storeToRefs(useSettingStore())
-const { getCurrentThemeHighlightColor, setupStateRefreshFrequency,
+const { 
+    getCurrentThemeHighlightColor, setupStateRefreshFrequency,
     setupSpectrumRefreshFrequency, setupTray,
     syncSettingFromDesktopLyric, getCurrentTheme,
     setAudioOutputDeviceId, setupAudioOutputDevice,
     getDndSavePath, setDndSavePath,
     getCurrentThemeContentBgColor, switchToFallbackLayout, 
 } = useSettingStore()
-const { addRecentSong, addRecentRadio,
-    addRecentPlaylist, addRecentAlbum } = useRecentsStore()
+const { 
+    addRecentSong, addRecentRadio,
+    addRecentPlaylist, addRecentAlbum 
+} = useRecentsStore()
 const { playVideoNow } = useVideoPlayStore()
-const { currentVideo, playingIndex: videoPlayingIndex, currentVideoPlayingItem 
+const { 
+    currentVideo, playingIndex: videoPlayingIndex, currentVideoPlayingItem 
 } = storeToRefs(useVideoPlayStore())
 const { setupSoundEffect } = useSoundEffectStore()
 const { getQueue, } = usePlaybackQueueStore()
 
 
 
-const { visitHome, visitUserHome, visitSetting,
+const { 
+    visitHome, visitUserHome, visitSetting,
     visitModulesSetting, visitSearch,
     visitThemes, visitPlugins, visitRecents,
 } = inject('appRoute')
-const { hasExDrawSpectrumHandlers, drawExSpectrum, 
-    toggleExVisualCanvas, showConfirm, } = inject('apiExpose')
+const { 
+    hasExDrawSpectrumHandlers, drawExSpectrum, 
+    toggleExVisualCanvas, showConfirm, 
+} = inject('apiExpose')
+
 
 const playState = ref(PlayState.NONE)
 const setPlayState = (value) => playState.value = value
@@ -1094,10 +1119,11 @@ const setupCurrentMediaSession = async (track) => {
 
             //上、下一曲按钮等功能绑定，暂时不支持视频
             if (currentVideo.value) return
+
+            navigator.mediaSession.setActionHandler("play", togglePlay)
+            navigator.mediaSession.setActionHandler("pause", togglePlay)
             navigator.mediaSession.setActionHandler("previoustrack", playPrevTrack)
             navigator.mediaSession.setActionHandler("nexttrack", playNextTrack)
-            navigator.mediaSession.setActionHandler("pause", togglePlay)
-            navigator.mediaSession.setActionHandler("play", togglePlay)
         }
     } catch(error) {
         if(isDevEnv()) console.log(error)

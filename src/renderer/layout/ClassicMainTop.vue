@@ -10,16 +10,22 @@ import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 
 
 
-const { visitThemes, visitUserHome, visitSetting, 
+const { 
+    visitThemes, visitUserHome, visitSetting, 
     visitModulesSetting, visitPlugins, visitVideoCreate 
 } = inject('appRoute')
-const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
+const { 
+    searchAction, searchBarPlaceholder, useWindowsStyleWinCtl 
+} = inject('appCommon')
 const { hasNewRelease } = inject('appVersion')
 
 
-const { setLayoutIndex, switchToSimpleLayout, 
-    switchToMiniLayout, switchThemeNativeMode } = useSettingStore()
-const { isRadioModeShortcutEnable,
+const { 
+    setLayoutIndex, switchToSimpleLayout, 
+    switchToMiniLayout, switchThemeNativeMode 
+} = useSettingStore()
+const { 
+    isRadioModeShortcutEnable,
     isModulesSettingShortcutEnable,
     isPluginsSettingShortcutEnable,
     isThemesShortcutEnable,
@@ -30,9 +36,12 @@ const { isRadioModeShortcutEnable,
     isUpdatesHintShowEnable,
     isSimpleLayoutShortcutForMiniLayoutEnable,
     isThemeNativeModeShortcutEnable, 
-    themeNativeMode } = storeToRefs(useSettingStore())
-const { isMaxScreen, isRadioMode, isRadioModeEnable, 
-    isCloudStorageModeEnable } = storeToRefs(useAppCommonStore())
+    themeNativeMode 
+} = storeToRefs(useSettingStore())
+const { 
+    isMaxScreen, isRadioMode, isRadioModeEnable, 
+    isCloudStorageModeEnable 
+} = storeToRefs(useAppCommonStore())
 
 
 

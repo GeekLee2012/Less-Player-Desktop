@@ -10,9 +10,11 @@ import { Playlist } from '../../common/Playlist';
 
 
 
-const { seekTrack, preseekTrack, progressState,
+const { 
+    seekTrack, preseekTrack, progressState,
     favoritedState, toggleFavoritedState, isTrackSeekable,
-    mmssCurrentTime, mmssPreseekTime, } = inject('player')
+    mmssCurrentTime, mmssPreseekTime, 
+} = inject('player')
 
 const volumeBarRef = ref(null)
 

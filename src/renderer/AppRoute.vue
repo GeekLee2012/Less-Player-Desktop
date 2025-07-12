@@ -10,16 +10,21 @@ import { usePlatformStore } from './store/platformStore';
 import { Playlist } from '../common/Playlist';
 import { isDevEnv, toTrimString, isBlank } from '../common/Utils';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
-import { currentRoute, currentRoutePath, onBeforeResolve, 
-    backward, forward, addRoute, pushRoute, addHomePath, } from './route/router';
+import { 
+    currentRoute, currentRoutePath, onBeforeResolve, 
+    backward, forward, addRoute, pushRoute, addHomePath, 
+} from './route/router';
 
 
 
-const { isArtistDetailVisitable, isAlbumDetailVisitable,
+const { 
+    isArtistDetailVisitable, isAlbumDetailVisitable,
     updateCurrentPlatformByCode, isLocalMusic,
-    isFMRadioPlatform, isFreeFM, } = usePlatformStore()
+    isFMRadioPlatform, isFreeFM, 
+} = usePlatformStore()
 const { exploreModeCode, isUserHomeMode } = storeToRefs(useAppCommonStore())
-const { setExploreMode, setArtistExploreMode,
+const { 
+    setExploreMode, setArtistExploreMode,
     setRadioExploreMode, setUserHomeExploreMode,
     hideAllCtxMenus, hidePlayingView,
     updateCommonCtxItem, hidePlaybackQueueView,
@@ -27,9 +32,14 @@ const { setExploreMode, setArtistExploreMode,
     hideLyricToolbar, hideRandomMusicToolbar,
     hideSoundEffectView, hidePopoverHint,
     setSearchPlaceHolderIndex, setRouterCtxCacheItem,
-    hidePlayingThemeListView, setCloudStorageExploreMode } = useAppCommonStore()
-const { findCustomPlaylistIndex, findFavouritePlaylistIndex } = useUserProfileStore()
-const { isSimpleLayout, isMiniLayout, isSearchBarAutoPlaceholderEnable } = storeToRefs(useSettingStore())
+    hidePlayingThemeListView, setCloudStorageExploreMode 
+} = useAppCommonStore()
+const { 
+    findCustomPlaylistIndex, findFavouritePlaylistIndex 
+} = useUserProfileStore()
+const { 
+    isSimpleLayout, isMiniLayout, isSearchBarAutoPlaceholderEnable 
+} = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
 

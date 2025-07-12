@@ -7,7 +7,7 @@ const props = defineProps({
 <template>
     <SvgTextButton class="add-folder-file-btn" text="添加文件夹" :disabled="disabled">
         <template #left-img>
-            <svg width="17" height="15" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
+            <svg width="17" height="17" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">
                     <g id="Layer_1-2" data-name="Layer 1">
                         <path

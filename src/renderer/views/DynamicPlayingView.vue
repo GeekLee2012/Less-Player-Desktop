@@ -38,7 +38,7 @@ const { currentTrack, volume, playing } = storeToRefs(usePlayStore())
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { lyricMetaPos, lyric, lyricTransActived, lyricRomaActived,
     playingViewBgCoverEffectIndex, playingViewPlayCtlStyleIndex, 
-    playingViewFocusMode,
+    playingViewFocusMode, isPlayingViewLyricTransBtnShow,
 } = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 
@@ -363,7 +363,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                 -->
                 <div class="trans-btn extra-btn" 
                     :class="{ 'extra-exist': Track.hasLyricTrans(currentTrack) }"
-                    v-show="Track.hasLyricTrans(currentTrack)"
+                    v-show="Track.hasLyricTrans(currentTrack) && isPlayingViewLyricTransBtnShow"
                     @click="toggleLyricTrans" >
                     <svg width="17" height="17" viewBox="0 0 22.82 19.41" xmlns="http://www.w3.org/2000/svg">
                         <g id="Layer_2" data-name="Layer 2">

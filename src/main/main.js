@@ -89,7 +89,7 @@ const startup = () => {
   initialize()
   registryGlobalListeners()
   handleStartupPlay()
-  removePath(getTempRootPath())
+  clearTemps()
 }
 
 //清理缓存
@@ -108,6 +108,11 @@ const clearCaches = async (force) => {
     if (isDevEnv) console.log(error)
   }
   return false
+}
+
+//清理临时文件
+const clearTemps = async () => {
+  removePath(getTempRootPath())
 }
 
 //当data存在时，直接返回data，完全忽略url
@@ -867,7 +872,8 @@ const registryGlobalListeners = () => {
     }
   })
 
-  ipcMain.handle('app-cleanupPlugins', async (event, ...args) => {
+  /*
+  ipcMain.handle('app-cleanUpPlugins', async (event, ...args) => {
     const pluginsRoot = getPluginsRootPath()
     try {
       const devFlags = ['dev-', '-dev']
@@ -879,6 +885,28 @@ const registryGlobalListeners = () => {
           if((isDevEnv && hasDevFlag) 
             || (!isDevEnv && !hasDevFlag)) {
             removePath(pathName)
+          }
+        }
+    })
+    } catch(error) {
+      if(isDevEnv) console.log(error)
+    }
+  })
+  */
+
+  ipcMain.on('app-cleanUpPlugins', async (event, ...args) => {
+    const pluginPaths = args[0] || []
+    const pluginsRoot = getPluginsRootPath()
+    try {
+      const devFlags = ['dev-', '-dev']
+      readdirSync(pluginsRoot, { withFileTypes: true }).forEach(dirent => {
+        if(!dirent) return
+        const pathName = path.join(pluginsRoot, dirent.name)
+        if (dirent.isDirectory() && !pluginPaths.includes(pathName)) {
+          const hasDevFlag = (dirent.name.startsWith(devFlags[0]) || dirent.name.endsWith(devFlags[1]))
+          if((isDevEnv && hasDevFlag) 
+            || (!isDevEnv && !hasDevFlag)) {
+              removePath(pathName)
           }
         }
     })
@@ -1054,49 +1082,50 @@ const registryGlobalListeners = () => {
 }
 
 const getUserDataRootPath = (ensureExists) => {
-  const _path = app.getPath('userData') + '/User'
+  const root = app.getPath('userData') + '/User'
   if(ensureExists) {
     try {
-      const result = statPathSync(_path)
-      if(!result) mkdirSync(_path, { recursive: true })
+      const result = statPathSync(root)
+      if(!result) mkdirSync(root, { recursive: true })
     } catch(error) {
       if(isDevEnv) console.log(error)
     }
   }
-  return _path
+  return root
 }
 
 const getPluginsRootPath = (dirName, ensureExists) => {
-  const _path = getUserDataRootPath(false)
+  const root = getUserDataRootPath(false)
       + '/Plugins' + (dirName ? `/${dirName}` : '')
   if(ensureExists) {
     try {
-      const result = statPathSync(_path)
-      if(!result) mkdirSync(_path, { recursive: true })
+      const result = statPathSync(root)
+      if(!result) mkdirSync(root, { recursive: true })
     } catch(error) {
       if(isDevEnv) console.log(error)
     }
   }
-  return _path
+  return root
 }
 
 const getTempRootPath = (dirName, ensureExists) => {
-  const _path = getUserDataRootPath(false)
+  const root = getUserDataRootPath(false)
       + '/Temp' + (dirName ? `/${dirName}` : '')
   if(ensureExists) {
     try {
-      const result = statPathSync(_path)
-      if(!result) mkdirSync(_path, { recursive: true })
+      const result = statPathSync(root)
+      if(!result) mkdirSync(root, { recursive: true })
     } catch(error) {
       if(isDevEnv) console.log(error)
     }
   }
-  return _path
+  return root
 }
 
 const getAppConfigFilePath = () => {
-  const _path = getUserDataRootPath(true)
-  return `${_path}/config.json`
+  const root = getUserDataRootPath(true)
+  const nameSuffix = isDevEnv ? '-dev' : ''
+  return `${root}/config${nameSuffix}.json`
 }
 
 const initAppConfig = () => {
@@ -1641,7 +1670,7 @@ const adjustMainWindowIfOutScreen = (miniExpand) => {
 
   const { x, y, width, height } = mainWin.getBounds()
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size
-  const spacing = 20
+  const spacing = 88
   const offsetX = x + width - screenWidth
   const offsetY = y + height - screenHeight
   let nX = x, nY = y
@@ -1809,7 +1838,7 @@ const closeDevTools = (win) => {
 }
 
 const cleanupBeforeQuit = () => {
-  
+  clearTemps()
 }
 
 const markAppBoundsState = () => {

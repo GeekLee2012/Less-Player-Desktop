@@ -19,28 +19,43 @@ const props = defineProps({
     hideBottom: Boolean,
 })
 
-const { visitRoute, visitArtist, visitHome,
+const { 
+    visitRoute, visitArtist, visitHome,
     visitFavoritePlaylist, visitCustomPlaylist,
     visitCustomPlaylistCreate, currentRoutePath,
     visitUserHome, visitSetting, 
-    visitPlaybackQueue, } = inject('appRoute')
-const { showContextMenu, useWindowsStyleWinCtl, 
-    searchAction, searchBarPlaceholder, } = inject('appCommon')
+    visitPlaybackQueue, 
+} = inject('appRoute')
+const { 
+    showContextMenu, useWindowsStyleWinCtl, 
+    searchAction, searchBarPlaceholder, 
+} = inject('appCommon')
 const { playPlaylist } = inject('player')
 
 
-const { platforms, currentPlatformIndex,
-    currentPlatformCode, activePlatforms } = storeToRefs(usePlatformStore())
+const { 
+    platforms, currentPlatformIndex,
+    currentPlatformCode, activePlatforms 
+} = storeToRefs(usePlatformStore())
 const { updateCurrentPlatform, isLocalMusic, isFreeFM, } = usePlatformStore()
-const { isMaxScreen, isPlaylistMode, isArtistMode,
+const { 
+    isMaxScreen, isPlaylistMode, isArtistMode,
     isRadioMode, isUserHomeMode, exploreModeCode, 
     isCloudStorageMode, isArtistModeEnable,
-    isRadioModeEnable, isCloudStorageModeEnable } = storeToRefs(useAppCommonStore())
-const { nextExploreMode, setPlaylistExploreMode, 
+    isRadioModeEnable, isCloudStorageModeEnable 
+} = storeToRefs(useAppCommonStore())
+const { 
+    nextExploreMode, setPlaylistExploreMode, 
     setRadioExploreMode, setCloudStorageExploreMode, 
-    showFailToast, hideAllCtxMenus, } = useAppCommonStore()
-const { getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists, } = storeToRefs(useUserProfileStore())
-const { navigation, isDefaultOldLayout, isDefaultNewLayout, isAutoLayout, } = storeToRefs(useSettingStore())
+    showFailToast, hideAllCtxMenus, 
+} = useAppCommonStore()
+const { 
+    getCustomPlaylists, getFavoritePlaylilsts, getFollowArtists, 
+} = storeToRefs(useUserProfileStore())
+const { 
+    navigation, isDefaultOldLayout, isDefaultNewLayout, 
+    isAutoLayout, 
+} = storeToRefs(useSettingStore())
 const { toggleMiniNavBarMode } = useSettingStore()
 const { getCustomPlaylist } = useUserProfileStore()
 const { getQueues } = storeToRefs(usePlaybackQueueStore())

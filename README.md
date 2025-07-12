@@ -22,7 +22,7 @@
 ### 开发/测试环境
 * OS：macOS Monterey（开发 + 测试）、Windows 10（虚拟机，仅测试）  
 * IDE：[Visual Studio Code](https://code.visualstudio.com/)  
-* [Nodejs](https://nodejs.org/)：>= 18.0.0  
+* [Nodejs](https://nodejs.org/)：>= 20.0.0  
 * 其他：详见 [package.json](package.json)    
   
 ### 功能特性

@@ -33,6 +33,7 @@ const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
 const { lyric, lyricTransActived, lyricRomaActived, 
     isDndSaveEnable, isMiniLayout, isSimpleLayout, 
+    isPlayingViewLyricTransBtnShow,
 } = storeToRefs(useSettingStore())
 const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
 const { isCurrentTrack } = usePlayStore()
@@ -587,7 +588,7 @@ onUnmounted(() => {
         -->
         <div class="trans-btn extra-btn" 
             :class="{ active: lyricTransActived }"
-            v-show="Track.hasLyricTrans(track) && isFullLayoutMode"
+            v-show="Track.hasLyricTrans(track) && isFullLayoutMode && isPlayingViewLyricTransBtnShow"
             @click="toggleLyricTrans" >
             <svg width="17" height="17" viewBox="0 0 22.82 19.41" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_2" data-name="Layer 2">

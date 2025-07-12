@@ -44,7 +44,8 @@ let ctxMenuPos = null, submenuItemNums = 0
 const colorPickerToolbarRef = ref(null)
 const gradientColorToolbarRef = ref(null)
 
-const { commonNotificationShow, commonNotificationText,
+const { 
+  commonNotificationShow, commonNotificationText,
   commonNotificationType, commonCtxMenuShow,
   commonCtxMenuData, commonCtxMenuSeparatorNums,
   addToListSubmenuShow, artistListSubmenuShow,
@@ -63,7 +64,8 @@ const { commonNotificationShow, commonNotificationText,
   trackResourceToolViewShow, themeSelectionViewShow,
   fontSelectionToolbarShow, customWindowCtlBtnViewShow,
 } = storeToRefs(useAppCommonStore())
-const { hideCommonCtxMenu, showCommonCtxMenu,
+const { 
+  hideCommonCtxMenu, showCommonCtxMenu,
   showAddToListSubmenu, hideAddToListSubmenu,
   showArtistListSubmenu, hideArtistListSubmenu,
   hideAllCtxMenus, toggleColorPickerToolbar,
@@ -254,7 +256,7 @@ const setupCustomWindowCtlBtnViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '.default-layout #custom-window-ctl-btn-view',
     width: 618,
-    height: 500
+    height: 462
   })
 }
 
@@ -1003,7 +1005,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   left: 50%;
   top: 50%;
   width: 618px;
-  height: 500px;
+  height: 462px;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);

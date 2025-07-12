@@ -165,10 +165,12 @@ const tryPreAddPlugin = async (metadata, isReplace) => {
     return Object.assign(plugin, { id, version })
 }
 
+//插件规范 - 校验
 const isValidModuleSpec = (mainModule) => {
     if(!mainModule) return false
-    const { activate, deactivate } = mainModule
-    for(var fn of [activate, deactivate]) {
+    const { activate, deactivate, optionsUpdated } = mainModule
+    const requiredFnList = [activate]
+    for(var fn of requiredFnList) {
         if (!fn || (typeof fn != 'function')) return false
     }
     return true
@@ -196,11 +198,11 @@ const doImportPlugin = async (fileItem) => {
     //获取必要信息 - 文件路径、数据内容
     const { filePath, data } = fileItem
 
-    //忽略开发者插件
+    //忽略开发者插件 - 文件名
     const ignoreDevs = ignoreDeveloperPlugins.value
     const filename = guessFilename(filePath)
-    const isDevsLikeName = (filename.startsWith('开发者-') || filename.startsWith('开发者 -'))
-    if(ignoreDevs && isDevsLikeName) return 
+    const isDevsLikeFileName = (filename.startsWith('开发者-') || filename.startsWith('开发者 -'))
+    if(ignoreDevs && isDevsLikeFileName) return 
 
     let plugin = null
     const isReplace = isReplaceMode.value
@@ -212,6 +214,11 @@ const doImportPlugin = async (fileItem) => {
         const metadata = parsePluginMetadata(data)
         if(!isValidMetadata(metadata)) return Promise.reject(PresetMsg.NoneMeta)
 
+        //忽略开发者插件 - 插件名
+        const name = toTrimString(metadata.name)
+        const isDevsLikeName = (name.startsWith('开发者-') || name.startsWith('开发者 -'))
+        if(ignoreDevs && isDevsLikeName) return Promise.reject(PresetMsg.IgnoreDevs)
+
         //检查 - 模块规范
         if(!isValidModuleSpec(mainModule)) return Promise.reject(PresetMsg.NonSpec)
 
@@ -220,7 +227,7 @@ const doImportPlugin = async (fileItem) => {
         if(!plugin) return Promise.reject(PresetMsg.Exists)
         //版本缺失
         if(!plugin.version) return Promise.reject(PresetMsg.ExistsNew)
-       
+        
         //导入（文件）到当前应用的数据目录下
         const result = await ipcRendererInvoke('app-importPlugin', { filePath, data })
         if (!isValidImportResult(result)) return Promise.reject(PresetMsg.Unknown)
@@ -550,7 +557,7 @@ onActivated(() => {
                         v-show="(plugins && plugins.length > 0) && (activeTab && activeTab.code >= 0)" 
                         :leftAction="toggleAllPluginsState">
                         <template #left-img>
-                            <svg v-show="isActivedStateTab()" class="deactive-icon" width="16" height="16" viewBox="0 0 853.47 853.5" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-show="isActivedStateTab()" class="deactive-icon" width="17" height="17" viewBox="0 0 853.47 853.5" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -558,7 +565,7 @@ onActivated(() => {
                                     </g>
                                 </g>
                             </svg>
-                            <svg v-show="isInactivedStateTab()" width="16" height="16" viewBox="0 0 770.66 779.07" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-show="isInactivedStateTab()" width="17" height="17" viewBox="0 0 770.66 779.07" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -575,7 +582,7 @@ onActivated(() => {
                         :leftAction="importPlugins"
                         :rightAction="removeAllPlugins" >
                         <template #left-img>
-                            <svg width="16" height="16" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="17" height="17" viewBox="0 0 853.89 768.02" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Layer_2" data-name="Layer 2">
                                     <g id="Layer_1-2" data-name="Layer 1">
                                         <path
@@ -587,7 +594,9 @@ onActivated(() => {
                             </svg>
                         </template>
                         <template #right-img>
-                            <svg v-show="plugins && plugins.length > 0" width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1"
+                            <svg v-show="plugins && plugins.length > 0"
+                                width="17" height="17"
+                                viewBox="0 0 256 256" data-name="Layer 1"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z"

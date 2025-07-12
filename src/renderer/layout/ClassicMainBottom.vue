@@ -8,8 +8,10 @@ import { useSoundEffectStore } from '../store/soundEffectStore';
 
 
 
-const { seekTrack, preseekTrack, progressState,
-    favoritedState, toggleFavoritedState, isTrackSeekable } = inject('player')
+const { 
+    seekTrack, preseekTrack, progressState,
+    favoritedState, toggleFavoritedState, isTrackSeekable 
+} = inject('player')
 
 const volumeBarRef = ref(null)
 

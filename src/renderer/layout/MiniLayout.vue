@@ -15,7 +15,8 @@ import { toTrimString, ipcRendererSend, smoothScroll, } from '../../common/Utils
 
 
 
-const { progressState, currentTimeState, favoritedState, 
+const { 
+    progressState, currentTimeState, favoritedState, 
     toggleFavoritedState, mmssDurationLeft, seekTrack,
 } = inject('player')
 const { applyDocumentStyle } = inject('appStyle')
@@ -24,12 +25,16 @@ const { visitRecents, visitBatchPlaybackQueue } = inject('appRoute')
 
 
 const { desktopLyricShow, lyricToolbarShow } = storeToRefs(useAppCommonStore())
-const { quit, hideAllCtxMenus, hideLyricToolbar, toggleDesktopLyricShow } = useAppCommonStore()
+const { 
+    quit, hideAllCtxMenus, hideLyricToolbar, 
+    toggleDesktopLyricShow 
+} = useAppCommonStore()
 const { currentTrack, playing, loading, 
     queueTracks, playingIndex, queueTracksSize, 
 } = storeToRefs(usePlayStore())
 const { resetQueue, moveTrack } = usePlayStore()
-const { isHideToTrayOnMinimized, isTrayShow, isShowDialogBeforeQuitApp,
+const { 
+    isHideToTrayOnMinimized, isTrayShow, isShowDialogBeforeQuitApp,
     getWindowZoom, isUseWinCenterStrict, isPlaybackQueueHistoryBtnShow, 
     isPlaybackQueuePositionBtnShow, isPlaybackQueueBatchActionBtnShow,
     isPlaybackQueueViewTipsShow,

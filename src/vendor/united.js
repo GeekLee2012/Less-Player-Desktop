@@ -1,6 +1,7 @@
 import { toRaw } from 'vue';
 import { Track } from "../common/Track";
-import { toTrimString, stringIncludesIgnoreCaseEscapeHtml, 
+import { 
+    toTrimString, stringIncludesIgnoreCaseEscapeHtml, 
     stringEqualsIgnoreCaseEscapeHtml, trimTextWithinBrackets, 
     isDevEnv, tryCallDefault,
  } from "../common/Utils";

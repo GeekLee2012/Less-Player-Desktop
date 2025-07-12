@@ -545,7 +545,9 @@ const lessAPI = {
 
 window.lessAPI = {}
 const exposeAPI = (apis) => {
-    if(apis && typeof apis == 'object') {
+    //允许在运行期间动态暴露API
+    //存在明显的安全隐患，但暂时简单实现
+    if(apis && typeof apis == 'object') { 
         Object.assign(window.lessAPI, { ...apis })
     }
     //放在最后执行，保证不被覆盖

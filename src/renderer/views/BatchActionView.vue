@@ -782,13 +782,14 @@ watch([currentPlatformCode], () => refreshContent())
                 <SvgTextButton :disabled="checkedData.length < 1" text="播放" class="spacing" v-show="actionShowCtl.playBtn"
                     :leftAction="playChecked" :rightAction="addToQueue">
                     <template #left-img>
-                        <svg width="16" height="16" viewBox="0 0 139 139" xml:space="preserve"
+                        <svg width="17" height="17" viewBox="0 0 139 139" xml:space="preserve"
                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                             <path
                                 d="M117.037,61.441L36.333,14.846c-2.467-1.424-5.502-1.424-7.972,0c-2.463,1.423-3.982,4.056-3.982,6.903v93.188  c0,2.848,1.522,5.479,3.982,6.9c1.236,0.713,2.61,1.067,3.986,1.067c1.374,0,2.751-0.354,3.983-1.067l80.704-46.594  c2.466-1.422,3.984-4.054,3.984-6.9C121.023,65.497,119.502,62.866,117.037,61.441z" />
                         </svg>
                     </template>
                     <template #right-img>
+                        <!--
                         <svg v-show="actionShowCtl.addToQueueBtn && !isPlaybackQueue()" width="16" height="16" viewBox="0 0 768.02 554.57"
                             xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
@@ -804,11 +805,23 @@ watch([currentPlatformCode], () => refreshContent())
                                 </g>
                             </g>
                         </svg>
+                        -->
+                        <svg v-show="actionShowCtl.addToQueueBtn && !isPlaybackQueue()" 
+                            width="14" height="14" viewBox="0 0 682.65 682.74"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M298.59,384.15h-7.06q-123.24,0-246.49,0c-21.63,0-38.69-12.57-43.64-31.94-7-27.56,13.21-53.29,42.33-53.51,25.33-.18,50.66,0,76,0H298.59v-6.44q0-123.49,0-247c0-20.39,10.77-36.44,28.49-42.71C355-7.34,383.55,13,384,43.16c.26,16.33,0,32.67,0,49V298.65h6.82q123.49,0,247,0c21.52,0,38.61,12.77,43.43,32.19,6.75,27.26-13.06,52.7-41.62,53.25-11.16.22-22.33,0-33.49,0H384.09v6.69q0,123.5,0,247c0,21.59-12.66,38.65-32.06,43.53-27.59,6.95-53.24-13.31-53.39-42.46-.17-32.66,0-65.33,0-98V384.15Z" />
+                                </g>
+                            </g>
+                        </svg>
                     </template>
                 </SvgTextButton>
                 <SvgTextButton :disabled="checkedData.length < 1" text="添加到" class="spacing addToBtn"
                     v-show="actionShowCtl.addToBtn" :leftAction="toggleAddCheckedMenu" :useEvent="true">
                     <template #left-img>
+                        <!--
                         <svg width="16" height="16" viewBox="0 -50 768.02 554.57" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
@@ -820,6 +833,16 @@ watch([currentPlatformCode], () => refreshContent())
                                         d="M234.37,256q-94.73,0-189.44,0c-21.55,0-38.62-12.68-43.5-32.09-6.74-26.8,12.45-52.1,40.47-53.35,1.33-.06,2.67-.05,4-.05H423.78c21.17,0,37.53,11.12,43.49,29.46,9.15,28.13-11.52,55.87-42,56-36.32.15-72.64,0-109,0Z" />
                                     <path
                                         d="M170.91,426.5c-42.48,0-85,.07-127.45,0-20.94-.06-37.61-13.2-42.21-32.85-6.18-26.41,13.5-52,40.6-52.3,23.82-.27,47.65-.07,71.47-.07q92.46,0,184.93,0c24.55,0,43.52,19.37,43.12,43.58-.38,23.41-19.15,41.53-43.51,41.61-40,.12-80,0-120,0Z" />
+                                </g>
+                            </g>
+                        </svg>
+                        -->
+                        <svg width="14" height="14" viewBox="0 0 682.65 682.74"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <g id="Layer_1-2" data-name="Layer 1">
+                                    <path
+                                        d="M298.59,384.15h-7.06q-123.24,0-246.49,0c-21.63,0-38.69-12.57-43.64-31.94-7-27.56,13.21-53.29,42.33-53.51,25.33-.18,50.66,0,76,0H298.59v-6.44q0-123.49,0-247c0-20.39,10.77-36.44,28.49-42.71C355-7.34,383.55,13,384,43.16c.26,16.33,0,32.67,0,49V298.65h6.82q123.49,0,247,0c21.52,0,38.61,12.77,43.43,32.19,6.75,27.26-13.06,52.7-41.62,53.25-11.16.22-22.33,0-33.49,0H384.09v6.69q0,123.5,0,247c0,21.59-12.66,38.65-32.06,43.53-27.59,6.95-53.24-13.31-53.39-42.46-.17-32.66,0-65.33,0-98V384.15Z" />
                                 </g>
                             </g>
                         </svg>
@@ -841,7 +864,7 @@ watch([currentPlatformCode], () => refreshContent())
                 <SvgTextButton :disabled="checkedData.length < 1" text="导出" class="spacing" v-show="actionShowCtl.exportBtn"
                     :leftAction="exportChecked">
                     <template #left-img>
-                        <svg width="16" height="16" viewBox="0 0 853.89 768.12" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="17" height="17" viewBox="0 0 853.89 768.12" xmlns="http://www.w3.org/2000/svg">
                             <g id="Layer_2" data-name="Layer 2">
                                 <g id="Layer_1-2" data-name="Layer 1">
                                     <path
@@ -856,7 +879,7 @@ watch([currentPlatformCode], () => refreshContent())
                 <SvgTextButton :disabled="checkedData.length < 1" text="删除" class="spacing" v-show="actionShowCtl.deleteBtn"
                     :leftAction="removeChecked">
                     <template #left-img>
-                        <svg width="16" height="16" viewBox="0 0 256 256" data-name="Layer 1"
+                        <svg width="17" height="17" viewBox="0 0 256 256" data-name="Layer 1"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M1040,669H882c-12.79-4.93-17.16-14.62-17.1-27.83.26-52.77.11-105.55.11-158.32V477c-6,0-11.42-.32-16.84.09-6.54.48-11.66-1.39-15.17-7.08v-7c3.16-5.7,8-7.48,14.44-7.36,18.29.32,36.58.12,54.88.1,1.75,0,3.5-.16,5.48-.25,0-7.76,0-14.91,0-22.05a18.56,18.56,0,0,1,6.6-14.52c2.85-2.39,6.37-4,9.59-5.92h73c13.83,5.64,17.27,10.84,17.25,26.08,0,5.41,0,10.82,0,16.68h7.53c17.61,0,35.21.2,52.81-.12,6.43-.12,11.27,1.63,14.41,7.36v7c-3.5,5.7-8.63,7.56-15.17,7.08-5.41-.4-10.89-.09-16.84-.09v6.36c0,52.6-.15,105.2.11,157.8C1057.17,654.36,1052.81,664.08,1040,669ZM886.24,477.29V640.4c0,8.44-.49,7.34,7.11,7.35q67.95,0,135.9,0c6.51,0,6.52,0,6.52-6.43v-164Zm106.5-42.78H929.37v21h63.37Z"

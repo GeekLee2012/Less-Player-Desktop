@@ -1,4 +1,7 @@
-const { opendirSync, readFileSync, statSync, writeFileSync, readdirSync } = require('fs');
+const { 
+    opendirSync, readFileSync, statSync, 
+    writeFileSync, readdirSync 
+} = require('fs');
 const { opendir, rmdir, rm } = require('fs/promises');
 const { homedir } = require('os');
 const path = require('path');

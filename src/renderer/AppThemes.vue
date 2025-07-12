@@ -6,7 +6,10 @@ import { useThemeStore } from './store/themeStore';
 import CssReset from './CssReset.vue';
 import CssCommon from './CssCommon.vue';
 import CssAdjust from './CssAdjust.vue';
-import { isMacOS, isWinOS, toTrimString, onIpcRendererEvents, ipcRendererInvoke } from '../common/Utils';
+import { 
+  isMacOS, isWinOS, toTrimString, 
+  onIpcRendererEvents, ipcRendererInvoke 
+} from '../common/Utils';
 import { AppThemeSource } from '../common/Constants';
 import CssWinOS from './CssWinOS.vue';
 import CssNoneElectron from './CssNoneElectron.vue';
@@ -16,13 +19,15 @@ import { onEvents, emitEvents } from '../common/EventBusWrapper';
 
 
 
-const { theme: themeSetting, currentBorderRadiusCtlStyle,
+const { 
+  theme: themeSetting, currentBorderRadiusCtlStyle,
   isUseAutoBorderRadiusCtl, isUseMacOSBorderRadiusCtl,
   isUseWindowsBorderRadiusCtl, winCustomShadowSize, 
   commonBorderRadius, themeNativeMode,  
   winCtlCustomStyle, isDarkThemeMode,
 } = storeToRefs(useSettingStore())
-const { getCurrentTheme, setupFontFamily,
+const { 
+  getCurrentTheme, setupFontFamily,
   setupFontWeight, allFontSizeLevels,
   currentFontSizeLevel, currentFontSize,
   setPresetBorderRadius, switchToLightTheme, 

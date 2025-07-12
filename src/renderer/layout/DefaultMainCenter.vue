@@ -23,13 +23,16 @@ const { applyDocumentStyle } = inject('appStyle')
 const currentMainTop = shallowRef(null)
 const currentMainBottom = shallowRef(null)
 
-const { playlistCategoryViewShow, artistCategoryViewShow,
+const { 
+    playlistCategoryViewShow, artistCategoryViewShow,
     radioCategoryViewShow, playingViewShow,
     soundEffectViewShow, lyricToolbarShow,
-    playingThemeListViewShow, } = storeToRefs(useAppCommonStore())
+    playingThemeListViewShow, 
+} = storeToRefs(useAppCommonStore())
 const { hideAllCtxMenus, hideLyricToolbar } = useAppCommonStore()
 
-const { lyricMetaPos, isDefaultLayout,
+const { 
+    lyricMetaPos, isDefaultLayout,
     isDefaultClassicLayout, isDefaultNewLayout,
     isAutoLayout, winCustomShadowSize, 
     isMiniNavBarMode, isUseHCardStyleImageTextTile,
@@ -37,6 +40,7 @@ const { lyricMetaPos, isDefaultLayout,
     layoutIndex,
 } = storeToRefs(useSettingStore())
 const { setupWindowZoom } = useSettingStore()
+
 
 //TODO 硬编码
 const minAppWidth = 1080, minAppHeight = 720

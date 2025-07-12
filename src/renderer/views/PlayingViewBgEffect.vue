@@ -97,12 +97,6 @@ const getPaletteAvgGrayscale = (rgbs) => {
     return Math.round(sumGrayscale / _rgbs.length)
 }
 
-/*
-const getPalette = (img, num) => {
-    return new ColorThief().getPalette(img, num)
-}
-*/
-
 const getPlayingViewThemeAutoClass = (rgbs, defaultClass, grayscaleLimit) => {
     const limit = (grayscaleLimit >= 0 ? grayscaleLimit : 159)
     const avgGrayscale = rgbs ? getPaletteAvgGrayscale(rgbs) : (grayscaleLimit + 9)

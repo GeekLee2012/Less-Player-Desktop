@@ -8,13 +8,16 @@ import { useAppCommonStore } from './store/appCommonStore';
 import { useUserProfileStore } from './store/userProfileStore';
 import { useRecentsStore } from './store/recentsStore';
 import { usePlaybackQueueStore } from './store/playbackQueueStore';
+import { usePluginStore } from './store/pluginStore';
 import { onEvents, emitEvents } from '../common/EventBusWrapper';
 import DefaultLayout from './layout/DefaultLayout.vue';
 import SimpleLayout from './layout/SimpleLayout.vue';
-import { isWinOS, toLowerCaseTrimString, ipcRendererSend, 
+import { 
+  isWinOS, toLowerCaseTrimString, ipcRendererSend, 
   ipcRendererInvoke, onIpcRendererEvents, isBlank, toTrimString, 
   isMacOS, useGitRepository, isDevEnv, readLines, nextInt,
-  tryCallDefault, isIpcRendererSupported, } from '../common/Utils';
+  tryCallDefault, isIpcRendererSupported, 
+} from '../common/Utils';
 import DefaultNewLayout from './layout/DefaultNewLayout.vue';
 import packageCfg from '../../package.json';
 import { getDoc, getRaw } from '../common/HttpClient';
@@ -25,7 +28,8 @@ import MiniLayout from './layout/MiniLayout.vue';
 
 
 
-const { backward, forward,
+const { 
+  backward, forward,
   visitSetting, visitSearch,
   visitRadio, visitThemes,
   visitModulesSetting, visitDataBackup,
@@ -38,7 +42,8 @@ const { showConfirm } = inject('apiExpose')
 
 const currentAppLayout = shallowRef(null)
 
-const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
+const { 
+  isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
   getWindowZoom, isSimpleLayout, isDefaultNewLayout, 
   isUseAutoWinCtl, isUseWindowsWinCtl,
   isShowDialogBeforeResetSetting, isAutoLayout,
@@ -48,20 +53,28 @@ const { isStorePlayStateBeforeQuit, isStoreLocalMusicBeforeQuit,
   liveTimeForRecentPlay, needClearRecentSongs, 
   needClearRecentPlaylists, needClearRecentAlbums, 
   needClearRecentRadios, mpvBinaryPath, 
+  isCleanUpInvalidPluginsEnable,
 } = storeToRefs(useSettingStore())
-const { setupWindowZoom, setupAppSuspension,
+const { 
+  setupWindowZoom, setupAppSuspension,
   setupTray, setupGlobalShortcut,
   setupAppGlobalProxy, setupMpvBinaryPath,
-  toggleMiniNavBarMode } = useSettingStore()
+  toggleMiniNavBarMode 
+} = useSettingStore()
 
-const { togglePlay, switchPlayMode,
+const { 
+  togglePlay, switchPlayMode,
   playPrevTrack, playNextTrack,
-  toggleVolumeMute, updateVolumeByOffset } = usePlayStore()
-const { playingViewShow, videoPlayingViewShow,
+  toggleVolumeMute, updateVolumeByOffset 
+} = usePlayStore()
+const { 
+  playingViewShow, videoPlayingViewShow,
   playingViewThemeIndex, commonNotificationText,
   commonNotificationShow, searchBarExclusiveAction,
-  searchPlaceHolderIndex } = storeToRefs(useAppCommonStore())
-const { togglePlaybackQueueView, toggleLyricToolbar,
+  searchPlaceHolderIndex 
+} = storeToRefs(useAppCommonStore())
+const { 
+  togglePlaybackQueueView, toggleLyricToolbar,
   hidePlaybackQueueView, hideAllCtxMenus,
   hideAllCategoryViews, showToast, hideLyricToolbar,
   hideSoundEffectView, hideCustomThemeEditView,
@@ -69,13 +82,16 @@ const { togglePlaybackQueueView, toggleLyricToolbar,
   setMaxScreen, showImportantToast, 
   hidePlayingThemeListView, togglePlayingThemeListView,
   togglePlayingView, toggleTrackResourceToolView,
-  hideTrackResourceToolView, } = useAppCommonStore()
+  hideTrackResourceToolView, 
+} = useAppCommonStore()
 
 const { webdavSessions } = storeToRefs(useCloudStorageStore())
-const { getRecentSongs, getRecentPlaylilsts, 
+const { 
+  getRecentSongs, getRecentPlaylilsts, 
   getRecentAlbums, getRecentRadios 
 } = storeToRefs(useRecentsStore())
-const { removeRecentSong, removeRecentPlaylist, 
+const { 
+  removeRecentSong, removeRecentPlaylist, 
   removeRecentAlbum, removeRecentRadio 
 } = useRecentsStore()
 
@@ -398,11 +414,10 @@ const initialize = () => {
   restoreSetting(true)
   migrateData()
   setupWebDav()
-  //setupMpvBinaryPath()
-  //emitEvents('app-init')
   checkAppVersion()
   checkAndClearRecentPlay()
   checkAndcleanFavorites()
+  checkAndCleanPlugins()
 }
 
 const setupWebDav = async () => {
@@ -745,6 +760,20 @@ const checkAndcleanFavorites = async () => {
   const { cleanFavoriteTracks } = useUserProfileStore()
   try {
     cleanFavoriteTracks()
+  } catch(error) {
+    if(isDevEnv()) console.log(error)
+  }
+}
+
+//检查清理无效插件
+const checkAndCleanPlugins = async () => {
+  const needClean = isCleanUpInvalidPluginsEnable.value
+  if(!needClean) return
+  
+  const { plugins } = usePluginStore()
+  try {
+    const paths = plugins.map(plugin => (plugin.path))
+    ipcRendererSend('app-cleanUpPlugins', paths)
   } catch(error) {
     if(isDevEnv()) console.log(error)
   }

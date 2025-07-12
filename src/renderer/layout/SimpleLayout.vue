@@ -23,7 +23,8 @@ import LyricControl from '../components/LyricControl.vue';
 
 
 
-const { seekTrack, playPlaylist,
+const { 
+    seekTrack, playPlaylist,
     playVideoItem, progressState,
     mmssCurrentTime, currentTimeState,
     favoritedState, toggleFavoritedState,
@@ -41,27 +42,33 @@ const hasLyric = ref(false)
 const platformShortName = ref('ALL')
 
 const { currentTrack, playingIndex, volume, playing } = storeToRefs(usePlayStore())
-const { soundEffectViewShow, spectrumIndex,
+const { 
+    soundEffectViewShow, spectrumIndex,
     lyricToolbarShow, randomMusicToolbarShow,
     randomMusicPlatformCodes, randomMusicTypeCodes,
-    currentMusicCategoryName, currentTraceId } = storeToRefs(useAppCommonStore())
-const { showToast, toggleSoundEffectView,
+    currentMusicCategoryName, currentTraceId 
+} = storeToRefs(useAppCommonStore())
+const { 
+    showToast, toggleSoundEffectView,
     setSpectrumIndex, toggleLyricToolbar,
     toggleRandomMusicToolbar, showFailToast,
     setCurrentMusicCategoryName, setCurrentTraceId,
     isCurrentTraceId, hideLyricToolbar,
     hideRandomMusicToolbar, hideSoundEffectView,
-    switchSpectrumIndex } = useAppCommonStore()
+    switchSpectrumIndex 
+} = useAppCommonStore()
 const { isUseEffect } = storeToRefs(useSoundEffectStore())
 const { lyric, isSimpleLayout, isDndSaveEnable } = storeToRefs(useSettingStore())
 const { switchToFallbackLayout } = useSettingStore()
 
 const { randomMusicTypes } = storeToRefs(usePlatformStore())
-const { getVendor, platforms,
+const { 
+    getVendor, platforms,
     isPlaylistType, isAnchorRadioType,
     isFMRadioType, getPlatformName,
     getPlatformShortName, isArtistType,
-    isAlbumType } = usePlatformStore()
+    isAlbumType 
+} = usePlatformStore()
 
 const setTextColorIndex = (value) => {
     textColorIndex.value = value

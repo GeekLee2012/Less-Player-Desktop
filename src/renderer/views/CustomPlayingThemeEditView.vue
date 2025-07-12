@@ -3,7 +3,7 @@ import { inject, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppCommonStore } from '../store/appCommonStore';
 import ColorInputControl from '../components/ColorInputControl.vue';
-import { transformUrl, isSupportedVideo, isSupportedImage, ipcRendererInvoke, isWinOS } from '../../common/Utils';
+import { transformUrl, isSupportedVideo, isSupportedImage, ipcRendererInvoke, isWinOS, toTrimString } from '../../common/Utils';
 import { PlayingViewTheme } from '../../common/PlayingViewTheme';
 import { FILE_SCHEME } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
@@ -17,7 +17,7 @@ const { workingCustomPlayingTheme, isPlayingViewCustomThemePreview } = storeToRe
 const { hideCustomPlayingThemeEditView, showToast,
     savePlayingViewCustomTheme, isCurrentPlayingTheme,
     setPlayingViewCustomThemePreview, setPlayingViewCustomThemePreviewCache,
-    showFailToast,
+    showFailToast, toggleFontSelectionToolbar,
 } = useAppCommonStore()
 
 const blankTheme = new PlayingViewTheme()
@@ -102,6 +102,25 @@ const setupBgVideoUrl = (value) => Object.assign(customTheme, { bgVideoUrl: valu
 const setupPreviewCover = (value) => Object.assign(customTheme, { previewCover: value })
 const setupTextColor = (value) => Object.assign(customTheme, { textColor: value })
 const setupBtnColor = (value) => Object.assign(customTheme, { btnColor: value })
+const setupFontName = (value) => {
+    let _value = toTrimString(value)
+    _value = _value.split(' ').length > 1 ? `"${_value}"` : _value
+    Object.assign(customTheme, { fontName: _value })
+}
+const updateFontName = (event) => setupFontName(event.target.value)
+
+const selectFont = () => {
+    toggleFontSelectionToolbar({
+        mounted: () => {
+            const { fontName } = customTheme
+            return fontName
+        },
+        selected: ({ index, item }) => {
+            setupFontName(item)
+        }
+    })
+}
+
 
 
 const onDrop = (event) => {
@@ -323,8 +342,17 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                     <div class="row-content">
                         <div class="item">
                             <div class="name">字体名称</div>
+                            <!--
                             <input type="text" class="text-input-ctl short-ctl"
                                 placeholder="请参考CSS - FontFamily，必要时请用双引号包裹" v-model="customTheme.fontName" />
+                            -->
+                            <div class="font-input-ctl">
+                                <input class="text-input-ctl short-ctl" v-model="customTheme.fontName" 
+                                    placeholder="字体名称，请参考CSS - FontFamily"
+                                    @keydown.enter="updateFontName" 
+                                    @focusout="updateFontName" />
+                                <div class="select-btn" @click="selectFont">选择</div>
+                            </div>
                         </div>
                         <div class="item">
                             <div class="name">字体大小</div>
@@ -571,19 +599,22 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     border-color: var(--content-error-color) !important;
 }
 
-.custom-playing-theme-edit-view .center .url-input-ctl {
+.custom-playing-theme-edit-view .center .url-input-ctl,
+.custom-playing-theme-edit-view .center .font-input-ctl {
     display: flex;
     align-items: center;
 }
 
-.custom-playing-theme-edit-view .center .url-input-ctl .text-input-ctl {
+.custom-playing-theme-edit-view .center .url-input-ctl .text-input-ctl,
+.custom-playing-theme-edit-view .center .font-input-ctl .text-input-ctl {
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
     border-right: 0px;
     width: 325px !important;
 }
 
-.custom-playing-theme-edit-view .center .url-input-ctl .select-btn {
+.custom-playing-theme-edit-view .center .url-input-ctl .select-btn,
+.custom-playing-theme-edit-view .center .font-input-ctl .select-btn {
     background: var(--button-icon-text-btn-bg-color);
     color: var(--button-icon-text-btn-icon-color);
     width: 68px;
@@ -600,7 +631,8 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
 }
 
 /* 别扭挖坑的方式 */
-.custom-playing-theme-edit-view .container-win-style  .center .url-input-ctl .select-btn {
+.custom-playing-theme-edit-view .container-win-style .center .url-input-ctl .select-btn,
+.custom-playing-theme-edit-view .container-win-style .center .font-input-ctl .select-btn {
     height: 38px;
 }
 
@@ -609,7 +641,8 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     width: 410px;
 }
 
-.contrast-mode .custom-playing-theme-edit-view .center .url-input-ctl .select-btn {
+.contrast-mode .custom-playing-theme-edit-view .center .url-input-ctl .select-btn,
+.contrast-mode .custom-playing-theme-edit-view .center .font-input-ctl .select-btn {
     font-weight: bold;
 }
 </style>

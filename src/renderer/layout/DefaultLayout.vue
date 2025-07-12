@@ -7,7 +7,9 @@ import AppPopovers from '../AppPopovers.vue';
 
 
 
-const { isDefaultOldLayout, isFontAutoWeight, isMiniNavBarMode } = storeToRefs(useSettingStore())
+const { 
+    isDefaultOldLayout, isFontAutoWeight, isMiniNavBarMode 
+} = storeToRefs(useSettingStore())
 </script>
 
 <template>

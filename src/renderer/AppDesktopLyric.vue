@@ -3,7 +3,8 @@ import { computed, inject, nextTick, ref, toRaw, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store/settingStore';
 import Mousetrap from 'mousetrap';
-import { randomTextWithinAlphabetNums, smoothScroll, smoothScrollHorizional,
+import { 
+  randomTextWithinAlphabetNums, smoothScroll, smoothScrollHorizional,
   ipcRendererSend as sendToMain, onIpcRendererEvent,
   toMMssSSS, toMillis, isWinOS } from '../common/Utils';
 import { Track } from '../common/Track';
@@ -13,11 +14,13 @@ import { Track } from '../common/Track';
 const { applyDocumentStyle } = inject('appStyle')
 
 const { desktopLyric } = storeToRefs(useSettingStore())
-const { setDesktopLyricFontSize, setDesktopLyricTextDirection,
+const { 
+  setDesktopLyricFontSize, setDesktopLyricTextDirection,
   setDesktopLyricAlignment, setDesktopLyricLayoutMode,
   setDesktopLyricColor, setDesktopLyricHighlightColor,
   setDesktopLyricLineSpacing, setDesktopLyricAutoSize,
-  setDesktopLyricExtraTextHighlightColor, getStateRefreshFrequency, } = useSettingStore()
+  setDesktopLyricExtraTextHighlightColor, getStateRefreshFrequency, 
+} = useSettingStore()
 
 //TODO 歌词处理逻辑, 几乎与LyricControl组件重复
 const currenTrack = ref(null)

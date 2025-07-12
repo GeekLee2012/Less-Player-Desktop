@@ -203,7 +203,9 @@ export const useSettingStore = defineStore('setting', {
             //网络存储提示
             cloudStorageViewTipsShow: true,
             //推荐主题显示编辑按钮
-            presetThemeActionShow: true
+            presetThemeActionShow: true,
+            //应用启动时，自动清理无效插件
+            cleanUpInvalidPlugins: true,
         },
         //功能模块
         modules: {  
@@ -307,6 +309,8 @@ export const useSettingStore = defineStore('setting', {
             playingViewBgCoverEffectGradientBrightness: 1, 
             //渐变模式 - 底部栏背景透明
             playingViewBgCoverEffectGradientBottomBgTransparent: false,
+            //播放页 - 歌词翻译按钮
+            playingViewLyricTransBtnShow: true,
             //播放页 - 封面图片边框
             playingViewCoverBorderShow: true,
             //播放页 - 播放控件风格
@@ -1046,6 +1050,9 @@ export const useSettingStore = defineStore('setting', {
         isUseCoverNoshadowForHCardStyleTile() {
             return this.common.coverNoshadowForHCardStyleTile
         },
+        isPlayingViewLyricTransBtnShow() {
+            return this.track.playingViewLyricTransBtnShow
+        },
         isPlayingViewCoverBorderShow() {
             return this.track.playingViewCoverBorderShow
         },
@@ -1093,6 +1100,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isPresetThemeActionShow() {
             return this.common.presetThemeActionShow
+        },
+        isCleanUpInvalidPluginsEnable() {
+            return this.common.cleanUpInvalidPlugins
         },
         commonBorderRadius() {
             return this.common.borderRadius
@@ -1470,6 +1480,9 @@ export const useSettingStore = defineStore('setting', {
             if (freq < 1 || freq > 256) return
             this.track.spectrumRefreshFrequency = freq
             this.setupSpectrumRefreshFrequency()
+        },
+        togglePlayingViewLyricTransBtnShow() {
+            this.track.playingViewLyricTransBtnShow = !this.track.playingViewLyricTransBtnShow
         },
         togglePlayingViewCoverBorderShow() {
             this.track.playingViewCoverBorderShow = !this.track.playingViewCoverBorderShow
@@ -2109,6 +2122,9 @@ export const useSettingStore = defineStore('setting', {
         },
         togglePresetThemeActionShow() {
             this.common.presetThemeActionShow = !this.common.presetThemeActionShow
+        },
+        toggleCleanUpInvalidPlugins() {
+            this.common.cleanUpInvalidPlugins = !this.common.cleanUpInvalidPlugins
         },
         toggleSongItemIndexShow() {
             this.track.songItemIndexShow = !this.track.songItemIndexShow

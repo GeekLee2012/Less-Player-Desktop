@@ -9,15 +9,25 @@ import WinNonMacOSControlBtn from '../components/WinNonMacOSControlBtn.vue';
 
 
 
-const { visitThemes, visitUserHome, visitSetting, visitModulesSetting, visitPlugins } = inject('appRoute')
-const { searchAction, searchBarPlaceholder, useWindowsStyleWinCtl } = inject('appCommon')
-const { seekTrack, progressState, preseekTrack, isTrackSeekable } = inject('player')
+const { 
+    visitThemes, visitUserHome, visitSetting, 
+    visitModulesSetting, visitPlugins 
+} = inject('appRoute')
+const { 
+    searchAction, searchBarPlaceholder, useWindowsStyleWinCtl 
+} = inject('appCommon')
+const { 
+    seekTrack, progressState, preseekTrack, 
+    isTrackSeekable 
+} = inject('player')
 
-const { isUserHomeShortcutEnable,
+const { 
+    isUserHomeShortcutEnable,
     isModulesSettingShortcutEnable,
     isPluginsSettingShortcutEnable,
     isThemesShortcutEnable,
-    isSimpleLayoutShortcutEnable, } = storeToRefs(useSettingStore())
+    isSimpleLayoutShortcutEnable, 
+} = storeToRefs(useSettingStore())
 const { setLayoutIndex, switchToSimpleLayout } = useSettingStore()
 const { isMaxScreen, playingViewShow } = storeToRefs(useAppCommonStore())
 </script>

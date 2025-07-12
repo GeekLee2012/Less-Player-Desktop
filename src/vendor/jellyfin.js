@@ -2,7 +2,11 @@ import { United } from "./united";
 import { Track } from "../common/Track";
 import { Lyric } from "../common/Lyric";
 import { emitEvents } from "../common/EventBusWrapper";
-import { base64Parse, decodeLess, isLiveStream, md5, stringEquals, stringEqualsIgnoreCase, toTrimString, transformUrl  } from "../common/Utils";
+import { 
+    base64Parse, decodeLess, isLiveStream, 
+    md5, stringEquals, stringEqualsIgnoreCase, 
+    toTrimString, transformUrl  
+} from "../common/Utils";
 import { getJson, postJson, qsStringifyUrl } from "../common/HttpClient";
 import { version } from '../../package.json';
 import { Album } from "../common/Album";
