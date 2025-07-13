@@ -10,8 +10,7 @@ import { useThemeStore } from '../store/themeStore';
 import { isWinOS, useGitRepository, toTrimString,
     toLowerCaseTrimString, ipcRendererSend, ipcRendererInvoke, 
     onIpcRendererEvent, isMacOS, transformPath, stringEquals,
-    smoothScroll,
-    tryCallDefault,
+    smoothScroll, tryCallDefault,
 } from '../../common/Utils';
 import ToggleControl from '../components/ToggleControl.vue';
 import KeysInputControl from '../components/KeysInputControl.vue';
@@ -24,15 +23,17 @@ import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
 
 const { visitThemes, visitDataBackup,
     visitDataRestore, visitModulesSetting,
-    visitBatchRecents, visitPlugins } = inject('appRoute')
+    visitBatchRecents, visitPlugins 
+} = inject('appRoute')
 const { resetSetting,  } = inject('appCommon')
 const { showConfirm, visitLink } = inject('apiExpose')
-const { version, lastVersion, giteeLastVersion,
-  githubLastVersion, checkingUpdates, checkForUpdates,
-  giteeHasNewRelease,  githubHasNewRelease,
-  isLastRelease, hasNewRelease,
-  giteeReleasesUrl, githubReleasesUrl, 
-  changelogUrl, mpvDocUrl,
+const { 
+    version, lastVersion, giteeLastVersion,
+    githubLastVersion, checkingUpdates, checkForUpdates,
+    giteeHasNewRelease,  githubHasNewRelease,
+    isLastRelease, hasNewRelease,
+    giteeReleasesUrl, githubReleasesUrl, 
+    changelogUrl, mpvDocUrl,
 } = inject('appVersion')
 
 const { GITHUB, GITEE } = useGitRepository()
@@ -207,7 +208,7 @@ const {
     showToast, showImportantToast, 
     toggleCustomAppBorderRadiusViewShow,
     toggleThemeSelectionView, toggleFontSelectionToolbar, 
-    toggleCustomWindowCtlBtnView,
+    toggleCustomWindowCtlBtnView, setSearchInPageMode,
 } = useAppCommonStore()
 const { isMaxScreen, routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const { audioOutputDevices } = storeToRefs(usePlayStore())
@@ -676,7 +677,10 @@ onActivated(() => {
     updateBlackHole(Math.random() * 100000000)
 })
 
-onDeactivated(() => setNavbarCollapsed(true))
+onDeactivated(() => {
+    setNavbarCollapsed(true)
+    setSearchInPageMode(false)
+})
 onUnmounted(() => offEvents(eventsRegistration))
 </script>
 
@@ -1128,7 +1132,7 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </ToggleControl>
                     </div>
                     <div>
-                        <span class="cate-subtitle">当前播放列按钮图标模式：</span>
+                        <span class="cate-subtitle">当前播放列表按钮图标模式：</span>
                         <ToggleControl @click="togglePlaybackQueueBtnIconMode" :value="track.playbackQueueBtnIconMode">
                         </ToggleControl>
                     </div>

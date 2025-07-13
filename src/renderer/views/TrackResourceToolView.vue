@@ -50,6 +50,7 @@ const currentKeyword = ref(null)
 const isLoading = ref(false)
 const singleLineTitleStyle = ref(false)
 const resourceMode = ref(true)
+const videoStyle = ref(false)
 let offset = 0, limit = 50, page = 1
 const setCopiedWorkingTrack = (track) => {
     //JSON.stringify()无法处理 Map
@@ -63,6 +64,7 @@ const setCurrentKeyword = (value) => currentKeyword.value = value
 const setLoading = (value) => isLoading.value = value
 const setSingleLineTitleStyle = (value) => singleLineTitleStyle.value = value
 const setResourceMode = (value) => resourceMode.value = value
+const setVideoStyle= (value) => videoStyle.value = value
 
 
 const typeOptions = [{
@@ -76,7 +78,10 @@ const typeOptions = [{
         type: 'playlists',
     }, {
         name: '专辑',
-        type: 'alubms',
+        type: 'albums',
+    }, {
+        name: '视频',
+        type: 'videos',
     }] 
 const isTypeOptionsShow = ref(false)
 const currentTypeIndex = ref(0)
@@ -84,6 +89,14 @@ const setTypeOptionsShow = (value) => (isTypeOptionsShow.value = value)
 const setCurrentTypeIndex = (value) => (currentTypeIndex.value = value)
 const toggleTypeOptionsShow = () => setTypeOptionsShow(!isPreviewMode.value && !isTypeOptionsShow.value)
 const currentType = () => (typeOptions[currentTypeIndex.value].type)
+
+const computedTypeOptions = computed(() => {
+    const resouceMode = resourceMode.value
+    return typeOptions.filter(opt => {
+        if(!resouceMode) return true
+        return opt.type != 'videos'
+    })
+})
 
 const hideAllPopups = () => {
     hideAllCtxMenus()
@@ -103,6 +116,9 @@ const loadContent = () => {
         case 3:
             loadAlbums()
             break
+        case 4:
+            loadVideos()
+            break
     }
 }
 
@@ -113,6 +129,7 @@ const computedPlatforms = computed(() => {
     if(resPlatforms && resPlatforms.length > 0) {
         result.push(...resPlatforms)
     }
+    /*
     //兼容旧版本 
     platforms.value.forEach(platform => {
         if(result.includes(platform)) return 
@@ -121,6 +138,7 @@ const computedPlatforms = computed(() => {
             result.push(platform)
         }
     })
+    */
     return result
 })
 
@@ -145,7 +163,8 @@ const loadSongs = async () => {
     currentTabView.value = SongListControl
     setLoading(true)
     setSingleLineTitleStyle(false)
-    const { code: platform } = activePlatform.value
+    setVideoStyle(false)
+    const { code: platform } = activePlatform.value || {}
     const vendor = getVendor(platform)
     if (!vendor || !vendor.searchSongs) return
     const keyword = currentKeyword.value
@@ -163,8 +182,9 @@ const loadSongs = async () => {
 const loadAlbums = async () => {
     currentTabView.value = AlbumListControl
     setLoading(true)
+    setVideoStyle(false)
     setSingleLineTitleStyle(resourceMode.value || isSingleLineAlbumTitleStyle.value)
-    const { code: platform } = activePlatform.value
+    const { code: platform } = activePlatform.value || {}
     const vendor = getVendor(platform)
     if (!vendor || !vendor.searchAlbums) return
     const keyword = currentKeyword.value
@@ -183,7 +203,8 @@ const loadPlaylists = async () => {
     currentTabView.value = PlaylistsControl
     setLoading(true)
     setSingleLineTitleStyle(false)
-    const { code: platform } = activePlatform.value
+    setVideoStyle(false)
+    const { code: platform } = activePlatform.value || {}
     const vendor = getVendor(platform)
     if (!vendor || !vendor.searchPlaylists) return
     const keyword = currentKeyword.value
@@ -191,6 +212,26 @@ const loadPlaylists = async () => {
     let result = null, retry = 1
     do {
         result = await vendor.searchPlaylists(keyword, offset, limit, page)
+    } while (!result && retry++ <= 3)
+    if (!result) return
+    if (platform != result.platform) return
+    updateTabData(result.data)
+    setLoading(false)
+}
+
+const loadVideos = async () => {
+    currentTabView.value = PlaylistsControl
+    setLoading(true)
+    setSingleLineTitleStyle(false)
+    setVideoStyle(true)
+    const { code: platform } = activePlatform.value || {}
+    const vendor = getVendor(platform)
+    if (!vendor || !vendor.searchVideos) return
+    const keyword = currentKeyword.value
+    if(isBlank(keyword)) return setLoading(false)
+    let result = null, retry = 1
+    do {
+        result = await vendor.searchVideos(keyword, offset, limit, page)
     } while (!result && retry++ <= 3)
     if (!result) return
     if (platform != result.platform) return
@@ -412,7 +453,7 @@ onUnmounted(() => {
                                     </svg>
                                 </div>
                                 <div class="options" v-show="isTypeOptionsShow">
-                                    <div v-for="(item, index) in typeOptions"
+                                    <div v-for="(item, index) in computedTypeOptions"
                                         class="item"
                                         :class="{ active: currentTypeIndex == index }"
                                         @click="setCurrentTypeIndex(index)"
@@ -561,6 +602,7 @@ onUnmounted(() => {
                         :playable="!resourceMode"
                         :resourceMode="resourceMode"
                         :singleLineTitleStyle="singleLineTitleStyle"
+                        :videoStyle="videoStyle"
                         :coverAction="getItemCover"
                         :loading="isLoading" >
                     </component>
@@ -891,6 +933,29 @@ onUnmounted(() => {
     line-height: var(--tile-cover-size);
 }
 
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-video,
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-video .cover-wrap,
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-video .cover,
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-video .cover-mask,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-video .cover-wrap,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-video .cover,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-video .cover-mask,
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-video .title-wrap,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-video .title-wrap,
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-video .title,
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-video .subtitle,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-video .title,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-video .subtitle {
+    width: calc(var(--tile-cover-size) * 1.36) !important;
+}
+
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-card.image-text-tile-video .title,
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-card.image-text-tile-video .subtitle,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-card.image-text-tile-video .title,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-card.image-text-tile-video .subtitle  {
+    width: calc(100% - 20px) !important;
+}
+
 .track-resource-tool-view .container .playlists-ctl .tiles-loading-mask .tile .cover,
 .track-resource-tool-view .container .albumlist-ctl .tiles-loading-mask .tile .cover {
     width: var(--tile-cover-size);
@@ -901,6 +966,14 @@ onUnmounted(() => {
 .track-resource-tool-view .container .playlists-ctl .tiles-card-loading-mask .tile .cover,
 .track-resource-tool-view .container .albumlist-ctl .tiles-card-loading-mask .tile .cover {
     height: calc(var(--tile-cover-size) * 0.9);
+}
+
+.track-resource-tool-view .container .playlists-ctl .tiles-video-loading-mask .tile,
+.track-resource-tool-view .container .playlists-ctl .tiles-video-loading-mask .tile .cover,
+.track-resource-tool-view .container .playlists-ctl .tiles-video-loading-mask .tile .title,
+.track-resource-tool-view .container .albumlist-ctl .tiles-video-loading-mask .tile .cover,
+.track-resource-tool-view .container .albumlist-ctl .tiles-video-loading-mask .tile .title {
+    width: calc(var(--tile-cover-size) * 1.36) !important;
 }
 
 
@@ -924,6 +997,11 @@ onUnmounted(() => {
     width: var(--tile-cover-size);
     height: var(--tile-cover-size);
     line-height: var(--tile-cover-size);
+}
+
+.track-resource-tool-view .container .playlists-ctl .image-text-tile.image-text-tile-video .cover-wrap,
+.track-resource-tool-view .container .albumlist-ctl .image-text-tile.image-text-tile-video .cover-wrap  {
+    line-height: auto !important;
 }
 
 .track-resource-tool-view .container .playlists-ctl .tiles-card-horiziontal-loading-mask .tile,

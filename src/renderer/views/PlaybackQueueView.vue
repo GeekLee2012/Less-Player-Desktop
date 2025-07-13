@@ -14,10 +14,13 @@ const { visitRecents, visitBatchPlaybackQueue, visitPlaybackQueueSave } = inject
 
 const { queueTracks, playingIndex, queueTracksSize } = storeToRefs(usePlayStore())
 const { resetQueue, moveTrack, } = usePlayStore()
-const { showToast, hidePlaybackQueueView,
+const { 
+    showToast, hidePlaybackQueueView,
     hidePlayingView, hideAllCtxMenus,
-    setRouterCtxCacheItem, } = useAppCommonStore()
-const { isPlaybackQueueAutoPositionOnShow, isPlaybackQueueCloseBtnShow,
+    setRouterCtxCacheItem, 
+} = useAppCommonStore()
+const { 
+    isPlaybackQueueAutoPositionOnShow, isPlaybackQueueCloseBtnShow,
     isPlaybackQueueHistoryBtnShow, isPlaybackQueuePositionBtnShow, 
     isPlaybackQueueBatchActionBtnShow, isPlaybackQueueViewTipsShow,
     isPlaybackQueueBtnIconMode, isPlaybackQueueSaveBtnShow,
@@ -216,7 +219,7 @@ const tutorialList = [{
     artist: [ { id:'', name: '教程 - 设置页 - 通用 - 窗口缩放' }],
     color: '#30e8bf',
 }, {
-    title: '关闭时不退出：请开启菜单栏图标',
+    title: '关闭时不退出：开启菜单栏图标',
     artist: [ { id:'', name: '教程 - 设置页 - 菜单栏' }],
     color: '#30e8bf',
 }, {

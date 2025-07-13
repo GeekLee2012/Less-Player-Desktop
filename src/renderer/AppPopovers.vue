@@ -87,8 +87,8 @@ const getCtxMenuAutoHeight = () => {
   return itemHeight * (total - spNums) + 7.5 * spNums + 2 * padding + 10
 }
 
-const menuWidth = 208 + 10
-const submenuWidth = 208 + 10
+const menuWidth = 218
+const submenuWidth = 218
 
 const adjustMenuPosition = (event) => {
   const { x, y, clientX, clientY } = event
@@ -211,7 +211,7 @@ const setupCustomPlayingThemeEditViewPos = () => {
   emitEvents('app-elementAlignCenter', {
     selector: '#custom-playing-theme-edit-view',
     width: 768,
-    height: 520
+    height: 550
   })
 }
 
@@ -219,7 +219,7 @@ const setupGradientColorToolbarPos = () => {
   if (!gradientColorToolbarShow.value) return
   emitEvents('app-elementAlignCenter', {
     selector: '#gradient-color-toolbar',
-    width: 768,
+    width: 788,
     height: 568
   })
 }
@@ -801,7 +801,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   right: 30px;
   bottom: 80px;
   width: 768px;
-  height: 520px;
+  height: 550px;
   z-index: 100;
   background-color: var(--app-bg-color);
   box-shadow: var(--box-shadow);
@@ -880,7 +880,7 @@ onUnmounted(() => offEvents(eventsRegistration))
   position: fixed;
   left: 50%;
   bottom: 125px;
-  width: 768px;
+  width: 788px;
   height: 568px;
   z-index: 100;
   background-color: var(--app-bg-color);

@@ -9,6 +9,7 @@ const props = defineProps({
     placeholder: String,
     beforeSubmitAction: Function,
     submitAction: Function,
+    onClearAction: Function
 })
 
 
@@ -30,11 +31,19 @@ const submitSearch = () => {
 const toggleClearBtn = () => {
     const data = keywordRef.value.value
     hasText.value = (data && data.length > 0)
+    invokeKeywordClear()
+}
+
+const invokeKeywordClear = () => {
+    if(hasText.value) return 
+    const { onClearAction } = props
+    if(typeof onClearAction == 'function') onClearAction()
 }
 
 const clear = () => {
     keywordRef.value.value = ""
     hasText.value = false
+    invokeKeywordClear()
 }
 
 defineExpose({
@@ -52,6 +61,10 @@ defineExpose({
             const { submitAction } = props
             if (typeof submitAction == 'function') submitAction(keyword)
         }
+    },
+    getKeyword: () => {
+        const { value } = keywordRef.value || {}
+        return value || ''
     }
 })
 </script>
@@ -79,6 +92,9 @@ defineExpose({
             ref="keywordRef" 
             :placeholder="placeholder"
             @input="toggleClearBtn" />
+        <div class="suffix-wrap">
+            <slot name="suffix"></slot>
+        </div>
         <div class="clear-btn">
             <svg v-show="hasText" @click="clear" 
                 width="10"  height="10" 
@@ -97,10 +113,12 @@ defineExpose({
     height: 34px;
     -webkit-app-region: none;
     --border-radius: var(--border-btn-border-radius);
+    --btn-width: 33px;
 }
 
 .search-bar .search-btn,
 .search-bar .prefix-wrap,
+.search-bar .suffix-wrap,
 .search-bar .keyword,
 .search-bar .clear-btn {
     border: 1px solid var(--searchbar-border-color);
@@ -111,7 +129,8 @@ defineExpose({
     /*border-radius: 10rem 0 0 10rem;*/
     border-radius: var(--border-radius) 0px 0px var(--border-radius);
     border-right: 0px;
-    width: 36px;
+    width: var(--btn-width);
+    min-width: var(--btn-width);
     background: var(--searchbar-search-btn-bg-color);
     cursor: pointer;
     display: flex;
@@ -133,7 +152,8 @@ defineExpose({
     fill: var(--searchbar-search-btn-hover-icon-color);
 }
 
-.search-bar .prefix-wrap {
+.search-bar .prefix-wrap,
+.search-bar .suffix-wrap {
     border-radius: 0px;
     border-left: 0px;
     border-right: 0px;
@@ -156,7 +176,8 @@ defineExpose({
 .search-bar .clear-btn {
     /*border-radius: 0 10rem 10rem 0;*/
     border-radius: 0px var(--border-radius) var(--border-radius) 0px;
-    width: 36px;
+    width: var(--btn-width);
+    min-width: var(--btn-width);
     border-left: 0px;
     background: var(--searchbar-bg-color);
     display: flex;

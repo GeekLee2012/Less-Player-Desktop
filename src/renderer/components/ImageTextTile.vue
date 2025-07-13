@@ -406,12 +406,20 @@ onUnmounted(() => offEvents(eventsRegistration))
     box-shadow: 0px 3px 10px #00000088;
 }
 
-.image-text-tile .cover-wrap .cover-bottom .duration,
-.image-text-tile .cover-wrap .cover-bottom .play-count {
+.image-text-tile .cover-wrap .cover-bottom {
     position: absolute;
     bottom: 0px;
     right: 0px;
+    line-height: 20px;
     z-index: 1;
+}
+
+.image-text-tile .cover-wrap .cover-bottom .duration,
+.image-text-tile .cover-wrap .cover-bottom .play-count {
+    /*position: absolute;
+    bottom: 0px;
+    right: 0px;
+    z-index: 1;*/
     color: #fff;
     font-weight: bold;
     padding: 5px 9px;

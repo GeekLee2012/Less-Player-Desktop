@@ -125,6 +125,8 @@ export const useAppCommonStore = defineStore('appCommon', {
         playlistExportToolbarShow: false,
         playlistExportContextItem: null,
         searchPlaceHolderIndex: 0,
+        //搜索框 - 页内查找
+        searchInPageMode: false,
         //路由上下文缓存
         routerCtxCacheItem: null,
         //桌面歌词
@@ -575,6 +577,9 @@ export const useAppCommonStore = defineStore('appCommon', {
         },
         setSearchPlaceHolderIndex(index) {
             this.searchPlaceHolderIndex = index
+        },
+        setSearchInPageMode(value) {
+            this.searchInPageMode = value || false
         },
         setRouterCtxCacheItem(value) {
             this.routerCtxCacheItem = value

@@ -953,7 +953,7 @@ export const toMmss = (millis) => {
     if(!millis && millis !== 0) return 
     let minutes = Math.floor(millis / 60000)
     let seconds = ((millis % 60000) / 1000).toFixed(0)
-    if (seconds >= 60) { //toFixed()是否引起进位
+    if (seconds >= 60) { //是否引起进位
         seconds = seconds - 60
         ++minutes
     }
@@ -1139,7 +1139,7 @@ export const genSeqNums = (from, to, step) => {
     return nums
 }
 
-//TODO 随机打乱数据，感觉算法有问题，不够乱......
+//随机打乱数据，感觉算法有问题，不够乱......
 export const shuffle = (arr) => {
     let i = arr.length
     while (i) {

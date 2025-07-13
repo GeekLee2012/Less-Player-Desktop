@@ -35,7 +35,8 @@ const {
   visitModulesSetting, visitDataBackup,
   visitDataRestore, visitUserHome,
   visitVideoCreate, visitRecents,
-  visitPlugins, } = inject('appRoute')
+  visitPlugins, 
+} = inject('appRoute')
 const { quickSearch } = inject('player')
 const { showConfirm } = inject('apiExpose')
 
@@ -61,7 +62,6 @@ const {
   setupAppGlobalProxy, setupMpvBinaryPath,
   toggleMiniNavBarMode 
 } = useSettingStore()
-
 const { 
   togglePlay, switchPlayMode,
   playPrevTrack, playNextTrack,
@@ -71,7 +71,7 @@ const {
   playingViewShow, videoPlayingViewShow,
   playingViewThemeIndex, commonNotificationText,
   commonNotificationShow, searchBarExclusiveAction,
-  searchPlaceHolderIndex 
+  searchPlaceHolderIndex, searchInPageMode,
 } = storeToRefs(useAppCommonStore())
 const { 
   togglePlaybackQueueView, toggleLyricToolbar,
@@ -82,7 +82,7 @@ const {
   setMaxScreen, showImportantToast, 
   hidePlayingThemeListView, togglePlayingThemeListView,
   togglePlayingView, toggleTrackResourceToolView,
-  hideTrackResourceToolView, 
+  hideTrackResourceToolView, setSearchInPageMode,
 } = useAppCommonStore()
 
 const { webdavSessions } = storeToRefs(useCloudStorageStore())
@@ -185,6 +185,12 @@ const registryDefaultLocalKeys = () => {
     if (videoPlayingViewShow.value) return
     if (playingViewShow.value) togglePlayingThemeListView()
   }, 'keyup')
+
+  // 页内搜索 - 上/下一个
+  Mousetrap.bind(['ctrl+up'], () => emitEvents('app-findInPage', false))
+  Mousetrap.bind(['command+up'], () => emitEvents('app-findInPage', false))
+  Mousetrap.bind(['ctrl+down'], () => emitEvents('app-findInPage', true))
+  Mousetrap.bind(['command+down'], () => emitEvents('app-findInPage', true))
 }
 
 //清理设置，解决不同版本导致的数据不一致问题
@@ -425,14 +431,15 @@ const setupWebDav = async () => {
   sessions.forEach(session => WebDav.setupAuthorization(session))
 }
 
-const searchDefault = async (keyword) => {
+const searchDefault = async (keyword, options) => {
   keyword = toTrimString(keyword)
   if (isBlank(keyword)) return
 
-  let searchType = 0
+  let searchType = 0, isSearchInPage = false
   if (keyword.startsWith('@')) { //格式：@xxx
     keyword = toLowerCaseTrimString(keyword.slice(1))
     searchType = 1
+    isSearchInPage = true
   }
 
   if (searchType == 0) {
@@ -490,16 +497,27 @@ const searchDefault = async (keyword) => {
     return
   } else if (keyword.startsWith(":")) {
     keyword = toLowerCaseTrimString(keyword.slice(1))
+    isCustomSearch = false
   } else {
     visitSetting()
   }
 
+  const excludes = ['检查更新', '快捷键列表']
   //搜索
   switch (searchType) {
     case 1: //页内搜索、定位
-      !isBlank(keyword) && ipcRendererInvoke('find-in-page', keyword)
+      if(!isBlank(keyword)) {
+        const isExcluded = excludes.includes(keyword)
+        if(isExcluded) {
+          options = options || {}
+          Object.assign(options, { clearSelection: true })
+        }
+        setSearchInPageMode(isSearchInPage && !isExcluded)
+        ipcRendererInvoke('app-findInPage', keyword, options)
+      }
       break
     default: //搜索页
+      setSearchInPageMode(false)
       visitSearch(keyword)
   }
 }
@@ -789,6 +807,9 @@ const toggleTrackResourceTool = () => {
 
 
 watch(mpvBinaryPath, setupMpvBinaryPath, { immediate: true })
+watch(searchInPageMode, (nv, ov) => {
+  if(!nv) ipcRendererSend('app-stopFindInPage')
+})
 
 onMounted(() => {
   //窗口大小变化事件监听

@@ -1701,7 +1701,7 @@ const handleMessageFromDesktopLyric = (action, data) => {
     if (action === 'c-setting-visit') {
         ipcRendererSend('app-mainWin-show')
         visitSetting('桌面歌词')
-        //ipcRendererInvoke('find-in-page', '桌面歌词')
+        //ipcRendererInvoke('app-findInPage', '桌面歌词')
     } else if (action === 'c-setting-sync') {
         syncSettingFromDesktopLyric(data)
     } else if (action === 'c-track-seek') {

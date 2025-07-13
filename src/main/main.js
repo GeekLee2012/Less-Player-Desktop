@@ -816,9 +816,19 @@ const registryGlobalListeners = () => {
     return (result && result.length > 0) ? (downloadDir + result[0]) : null
   })
 
-  ipcMain.handle('find-in-page', async (event, ...args) => {
+  ipcMain.handle('app-findInPage', async (event, ...args) => {
     const keyword = args[0]
-    if (isWindowAccessible(mainWin)) mainWin.webContents.findInPage(keyword)
+    const options = args[1] || { forward: true }
+    if (isWindowAccessible(mainWin)) {
+      mainWin.webContents.findInPage(keyword, options)
+    }
+    if (options && options.clearSelection) {
+      mainWin.webContents.stopFindInPage('clearSelection')
+    }
+  })
+
+  ipcMain.on('app-stopFindInPage', async () => {
+    if (isWindowAccessible(mainWin)) mainWin.webContents.stopFindInPage('clearSelection')
   })
 
   ipcMain.handle('app-cacheSize', async (event, ...args) => {
@@ -1379,7 +1389,7 @@ const createMainWindow = ({ show, isInit }) => {
   })
 
   mainWindow.webContents.on('found-in-page', (event, result) => {
-    if (result.finalUpdate) mainWindow.webContents.stopFindInPage('clearSelection')
+    //if (result.finalUpdate) mainWindow.webContents.stopFindInPage('clearSelection')
   })
 
   mainWindow.webContents.on('did-start-navigation', (details) => {
