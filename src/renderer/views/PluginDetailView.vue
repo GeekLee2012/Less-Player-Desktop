@@ -27,8 +27,10 @@ const { visitLink, showConfirm, activatePluginNow,
     PermissionsAccessRegistration,
 } = inject('apiExpose')
 
-const { getPlugin, updatePlugin, removePlugin, 
-    getPluginOptions, updatePluginOptions } = usePluginStore()
+const { 
+    getPlugin, updatePlugin, removePlugin, 
+    getPluginOptions, updatePluginOptions 
+} = usePluginStore()
 const { isShowDialogBeforeDeletePlugins } = storeToRefs(useSettingStore())
 
 

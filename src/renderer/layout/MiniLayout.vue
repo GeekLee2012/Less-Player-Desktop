@@ -11,6 +11,7 @@ import LyricControl from '../components/LyricControl.vue';
 import { Track } from '../../common/Track';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
 import { toTrimString, ipcRendererSend, smoothScroll, } from '../../common/Utils';
+import EmptyControl from '../components/EmptyControl.vue';
 
 
 
@@ -372,7 +373,7 @@ onUnmounted(toggleMiniStyle)
                         :visitable="true" 
                         :platform="currentTrack.platform" 
                         :data="currentTrack.artist"
-                        :trackId="toTrimString(currentTrack.id)">
+                        :track="currentTrack">
                     </ArtistControl>
                 </div>
                 <div class="mini-lyric-wrap" v-if="lyricLayoutMode == 1 && !isPlayCtlShow"
@@ -471,6 +472,9 @@ onUnmounted(toggleMiniStyle)
                         :data="item"
                         :index="index">
                     </PlaybackQueueItem>
+                    <EmptyControl
+                        v-show="!isPlaybackQueueViewTipsShow && queueTracks.length < 1">
+                    </EmptyControl>
                 </div>
             </div>
             <div class="lyric-wrap" v-if="isFullLyricShow">
@@ -599,7 +603,7 @@ onUnmounted(toggleMiniStyle)
 
 .mini-layout > .center > .content .win-ctl-wrap .quit-mini-btn {
     margin-top: 12px;
-    transform: scale(1.03);
+    transform: scale(1.03) translateY(2px);
 }
 
 .mini-layout > .center > .content .win-ctl-wrap .pin-btn {
@@ -702,7 +706,7 @@ onUnmounted(toggleMiniStyle)
 .mini-layout > .center > .content .mini-lyric-wrap .no-lyric,
 .mini-layout > .center > .content .mini-lyric-wrap .line {
     font-size: calc(var(--content-text-size) + 2px) !important;
-    line-height: calc(var(--content-text-size) + 3px) !important;
+    line-height: calc(var(--content-text-size) + 12px) !important;
     font-weight: normal !important;
     color: var(--content-text-color) !important;
     margin: 0px 12px !important;
@@ -854,6 +858,10 @@ onUnmounted(toggleMiniStyle)
     padding-right: 0px;
 } 
 
+.mini-layout > .center .lyric-wrap .no-lyric {
+    transform: translateY(-23px);
+}
+
 .mini-layout > .center .lyric-wrap .line {
     width: calc(100% - 5px);
     padding-left: 5px;
@@ -861,6 +869,7 @@ onUnmounted(toggleMiniStyle)
 
 .mini-layout > .center .lyric-wrap .scroll-locator {
     right: 20px;
+    /*top: calc(50% + 23px);*/
 }
 
 .mini-layout > .center .lyric-wrap .scroll-locator-left {

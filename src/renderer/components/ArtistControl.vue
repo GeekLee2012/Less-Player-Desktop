@@ -1,7 +1,7 @@
 <script setup>
 import { inject, onMounted, onUnmounted } from 'vue';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
-import { escapeHtml } from '../../common/Utils';
+import { escapeHtml, stringEquals, } from '../../common/Utils';
 
 
 
@@ -11,14 +11,15 @@ const props = defineProps({
     visitable: Boolean,
     platform: String,
     data: Array,
-    trackId: String
+    track: Object
 })
 
 let updatedArtist = { trackId: '', artist: [] }
 
 const visitArtistDetail = (platform, item, index, callback) => {
     if (!props.visitable) return
-    visitArtist({ platform, item, index, callback, updatedArtist })
+    const { track } = props
+    visitArtist({ platform, item, index, callback, updatedArtist, track })
 }
 
 
@@ -30,7 +31,7 @@ const visitArtistDetail = (platform, item, index, callback) => {
 const eventsRegistration = {
     'track-artistUpdated': data => {
         if (!data) return
-        if (data.trackId != props.trackId) return
+        if (!stringEquals(data.trackId, props.track.id)) return
         updatedArtist = data
     },
 }

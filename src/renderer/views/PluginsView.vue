@@ -13,6 +13,7 @@ import {
 } from '../../common/Utils';
 import { FILE_SCHEME, ActivateState } from '../../common/Constants';
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import EmptyControl from '../components/EmptyControl.vue';
 
 
 
@@ -639,6 +640,9 @@ onActivated(() => {
                     :data="item" :index="index"
                     v-show="isPluginsViewTipsShow && computedPlugins.length < 1">
                 </PluginItem>
+                <EmptyControl
+                    v-show="!isPluginsViewTipsShow && computedPlugins.length < 1">
+                </EmptyControl>
             </div>
         </div>
     </div>

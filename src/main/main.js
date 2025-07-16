@@ -729,7 +729,7 @@ const registryGlobalListeners = () => {
   })
 
   ipcMain.handle('load-lyric-file', async (event, ...args) => {
-    const url = args[0].trim()
+    const url = (args[0] || '').trim()
     const index = url.lastIndexOf('.')
     const file = url.substring(0, index)
     let transText = null

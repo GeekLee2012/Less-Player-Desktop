@@ -199,6 +199,7 @@ const {
     togglePlaybackQueueViewTipsShow,
     togglePluginsViewTipsShow,
     toggleCloudStorageViewTipsShow,
+    toggleMikuLikeEmptyTipsShow,
     setMpvBinaryPath,
     setThemeLightIndex,
     setThemeDarkIndex,
@@ -482,22 +483,8 @@ const getDisplayFrequency = async () => {
     setDisplayFrequency(displayFrequency)
 }
 
-/*
-const anchorTo = (subSelector) => {
-    const el = document.querySelector(`#setting-view .${subSelector}`)
-    if(el) el.scrollIntoView()
-}
 
-const navbarShow = ref(false)
-const setNavbarShow = (value) => navbarShow.value = value
-
-const settingViewRef = ref(null)
-const onScroll = (event) => {
-    if(!settingViewRef.value) return 
-    setNavbarShow(settingViewRef.value.scrollTop >= 202)
-}
-*/
-
+/* 导航功能 */
 const settingNavItems = reactive([])
 const intersectingEntries = reactive([])
 const activeNavItemIndexByClick = ref(-1)
@@ -1046,10 +1033,16 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <ToggleControl @click="togglePluginsViewTipsShow" :value="common.pluginsViewTipsShow">
                         </ToggleControl>
                     </div>
-                    <div class="last">
+                    <div>
                         <span class="cate-subtitle">网络存储提示：</span>
                         <ToggleControl @click="toggleCloudStorageViewTipsShow" :value="common.cloudStorageViewTipsShow">
                         </ToggleControl>
+                    </div>
+                    <div class="last">
+                        <span class="cate-subtitle">Miku酱统一空白提示：</span>
+                        <ToggleControl @click="toggleMikuLikeEmptyTipsShow" :value="common.mikuLikeEmptyTipsShow">
+                        </ToggleControl>
+                        <div class="tip-text spacing">提示：优先级低于上面的全部提示</div>
                     </div>
                 </div>
             </div>

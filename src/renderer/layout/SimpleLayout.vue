@@ -273,9 +273,9 @@ const nextRandomTypeCode = (types) => {
     const maxNum = 1024, guessmeNum = nextInt(maxNum) //默认最大值1024
     let currentScopeNum = guessmeNum, guessmeIndex = 0
     for (var i = 0; i < sortedTypes.length; i++) {
-        const currentWeight = sortedTypes[i].weight
+        const currentWeight = sortedTypes[i].weight || 1
         //当前区间最大值
-        const scopeMax = maxNum * (currentWeight / totalTypesWeight)
+        const scopeMax = parseInt(maxNum * (currentWeight / totalTypesWeight))
         if (currentScopeNum <= scopeMax) {
             guessmeIndex = i
             break
@@ -293,9 +293,9 @@ const nextRandomPlatformCode = (platforms) => {
     const maxNum = 1024, guessmeNum = nextInt(maxNum) //默认最大值1024
     let currentScopeNum = guessmeNum, guessmeIndex = 0
     for (var i = 0; i < sortedPlatforms.length; i++) {
-        const currentWeight = sortedPlatforms[i].weight
+        const currentWeight = sortedPlatforms[i].weight || 1
         //当前区间最大值
-        const scopeMax = maxNum * (currentWeight / totalPlatformsWeight)
+        const scopeMax = parseInt(maxNum * (currentWeight / totalPlatformsWeight))
         if (currentScopeNum <= scopeMax) {
             guessmeIndex = i
             break
@@ -1205,8 +1205,12 @@ onActivated(() => {
             <div class="meta-wrap" v-show="lyric.metaPos != 1">
                 <div class="audio-title" v-html="Track.title(currentTrack)"></div>
                 <!-- <div class="audio-artist" v-html="Track.artistName(currentTrack)"></div> -->
-                <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
-                    :trackId="currentTrack.id" class="audio-artist">
+                <ArtistControl 
+                    :visitable="true" 
+                    :platform="currentTrack.platform" 
+                    :data="currentTrack.artist"
+                    :track="currentTrack" 
+                    class="audio-artist">
                 </ArtistControl>
             </div>
             <div class="audio-time-wrap" v-show="lyric.metaPos != 1">

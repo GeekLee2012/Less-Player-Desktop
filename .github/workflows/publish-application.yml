@@ -50,6 +50,7 @@ jobs:
               output/*.zip
               output/*.dmg
               output/*.AppImage
+              output/win-unpacked/resources/app.asar
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

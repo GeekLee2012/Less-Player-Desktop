@@ -21,22 +21,29 @@ const props = defineProps({
     hiddenMeta: Boolean,
     layoutMode: Number,
     keyName: String,
-    disabled: Boolean
+    disabled: Boolean,
+    scrollTopOffset: Number,
 })
 
-const { playVideoItem, loadLyric, currentTimeState,
+const { 
+    playVideoItem, loadLyric, currentTimeState,
     seekTrack, playState, progressSeekingState,
-    dndSaveLyric } = inject('player')
+    dndSaveLyric 
+} = inject('player')
 const { applyDocumentStyle } = inject('appStyle')
 
 const { playingViewShow } = storeToRefs(useAppCommonStore())
 const { toggleLyricToolbar } = useAppCommonStore()
-const { lyric, lyricTransActived, lyricRomaActived, 
+const { 
+    lyric, lyricTransActived, lyricRomaActived, 
     isDndSaveEnable, isMiniLayout, isSimpleLayout, 
     isPlayingViewLyricTransBtnShow,
 } = storeToRefs(useSettingStore())
-const { toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency } = useSettingStore()
+const { 
+    toggleLyricTrans, toggleLyricRoma, getStateRefreshFrequency 
+} = useSettingStore()
 const { isCurrentTrack } = usePlayStore()
+const { loading } = storeToRefs(usePlayStore())
 
 
 const currentIndex = ref(-1)
@@ -47,6 +54,7 @@ const lyricTransData = ref(Track.lyricTransData(props.track))
 const lyricRomaData = ref(Track.lyricRomaData(props.track))
 let hitCount = 0
 const sysOffset = 1000
+const pendingTrack = ref(null)
 
 
 const isUserMouseWheel = ref(false)
@@ -64,6 +72,7 @@ const setLyricTransData = (value) => lyricTransData.value = value
 const setLyricRomaData = (value) => lyricRomaData.value = value
 const setLyricExistState = (value) => lyricExistState.value = value
 const isLyricReady = () => lyricExistState.value == 1
+const setPendingTrack = (value) => pendingTrack.value = value
 
 
 const renderAndScrollLyric = (secs, track) => {
@@ -136,8 +145,9 @@ const renderAndScrollLyric = (secs, track) => {
     const { clientHeight } = document.documentElement
     const { offsetTop: lineOffsetTop, clientHeight: lineHeight } = line
     //高度误差修正值
+    const adjustScrollTop = (props.scrollTopOffset || 0)
     const adjustHeight = (lineHeight && lineHeight > 0) ? (lineHeight / 2) : 0
-    const destScrollTop = lineOffsetTop - (clientHeight / 2 - offsetTop) + adjustHeight
+    const destScrollTop = lineOffsetTop - (clientHeight / 2 - offsetTop) + adjustHeight + adjustScrollTop
 
     if (!isCurrentTrack(track)) return 
 
@@ -316,6 +326,8 @@ const loadTrackLyric = (track) => {
     if (!isCurrentTrack(track)) return 
     
     resetLyricState(track)
+    //延迟加载 - 等待歌曲加载成功后再获取歌词
+    if(loading.value) return setPendingTrack(track)
     loadLyric(track)
 }
 
@@ -366,9 +378,18 @@ watch(() => props.currentTime, (nv, ov) => {
 }, { immediate: true })
 
 watch(() => props.track, (nv, ov) => {
-    if(props.disabled) return
+    setPendingTrack(null)
+    if(props.disabled) return 
     loadTrackLyric(nv)
 }, { immediate: true })
+
+//延迟加载 - 等待歌曲加载成功后再获取歌词
+watch(loading, (nv, ov) => {
+    if(nv) return
+    const track = pendingTrack.value
+    if(!track) return 
+    loadTrackLyric(track)
+})
 
 const setupLyricStyle = (key, suffix) => {
     suffix = suffix || ''
@@ -461,7 +482,7 @@ onUnmounted(() => {
                         :visitable="true" 
                         :platform="track.platform" 
                         :data="track.artist" 
-                        :trackId="track.id">
+                        :track="track">
                     </ArtistControl>
                 </span>
             </div>
@@ -510,7 +531,7 @@ onUnmounted(() => {
                             :visitable="true" 
                             :platform="track.platform" 
                             :data="track.artist" 
-                            :trackId="track.id">
+                            :track="track">
                         </ArtistControl>
                     </span>
                 </div>

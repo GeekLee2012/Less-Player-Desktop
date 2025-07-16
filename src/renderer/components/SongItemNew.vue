@@ -294,10 +294,11 @@ onUnmounted(() => offEvents(eventsRegistration))
                 <div class="title" v-html="escapeHtml(data.filename || data.title)" :class="{ limitedWidth: !checkbox }"></div>
             </div>
             <div class="artist" :class="{ limitedWidth: !checkbox }" v-show="!isExtra1Available()">
-                <ArtistControl :visitable="artistVisitable && !checkbox" 
+                <ArtistControl 
+                    :visitable="artistVisitable && !checkbox" 
                     :platform="data.platform" 
                     :data="data.artist"
-                    :trackId="toTrimString(data.id)">
+                    :track="data">
                 </ArtistControl>
                 <div v-show="!data.artist || data.artist.length < 1">&nbsp;</div>
             </div>
@@ -361,7 +362,7 @@ onUnmounted(() => offEvents(eventsRegistration))
             <ArtistControl :visitable="artistVisitable && !checkbox" 
                 :platform="data.platform" 
                 :data="data.artist"
-                :trackId="toTrimString(data.id)">
+                :track="data">
             </ArtistControl>
         </div>
         <div class="album spacing1" v-show="!isExtra2Available()">

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { randomTextWithinAlphabetNums } from '../../common/Utils';
+import { randomTextWithinAlphabetNums, stringEqualsIgnoreCase } from '../../common/Utils';
 
 
 
@@ -96,6 +96,14 @@ export const usePluginStore = defineStore('plugins', {
                 if(!newOptionsKeys || !newOptionsKeys.includes(key)) {
                     Reflect.deleteProperty(plugin, key)
                 }
+            })
+            //兼容Cookie的写法，并统一为小写cookie
+            const cookieKey = 'cookie'
+            Object.entries(plugin).forEach(([key, value]) => {
+                if(!stringEqualsIgnoreCase(key, cookieKey)) return 
+                if(key == cookieKey) return
+                Object.assign(plugin, { [cookieKey]: value })
+                Reflect.deleteProperty(plugin, key)
             })
         }
     },

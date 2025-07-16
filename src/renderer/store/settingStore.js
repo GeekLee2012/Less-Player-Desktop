@@ -202,6 +202,8 @@ export const useSettingStore = defineStore('setting', {
             pluginsViewTipsShow: true,
             //网络存储提示
             cloudStorageViewTipsShow: true,
+            //统一空白提示 - Miku酱风格
+            mikuLikeEmptyTipsShow: false,
             //推荐主题显示编辑按钮
             presetThemeActionShow: true,
             //应用启动时，自动清理无效插件
@@ -1097,6 +1099,9 @@ export const useSettingStore = defineStore('setting', {
         },
         isCloudStorageViewTipsShow() {
             return this.common.cloudStorageViewTipsShow
+        },
+        isMikuLikeEmptyTipsShow() {
+            return this.common.mikuLikeEmptyTipsShow
         },
         isPresetThemeActionShow() {
             return this.common.presetThemeActionShow
@@ -2119,6 +2124,9 @@ export const useSettingStore = defineStore('setting', {
         },
         toggleCloudStorageViewTipsShow() {
             this.common.cloudStorageViewTipsShow = !this.common.cloudStorageViewTipsShow
+        },
+        toggleMikuLikeEmptyTipsShow() {
+            this.common.mikuLikeEmptyTipsShow = !this.common.mikuLikeEmptyTipsShow
         },
         togglePresetThemeActionShow() {
             this.common.presetThemeActionShow = !this.common.presetThemeActionShow

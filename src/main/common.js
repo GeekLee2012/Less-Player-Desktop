@@ -149,7 +149,6 @@ async function parseTracks(audioFiles) {
     const tracks = []
     for (const file of audioFiles) {
         try {
-            if (!isSuppotedAudioType(file)) continue
             const track = await createTrackFromMetadata(file)
             if (track) {
                 const index = tracks.findIndex(item => track.id == item.id)
@@ -368,21 +367,29 @@ async function createTrackFromMetadata(file) {
     const statResult = statSync(file, { throwIfNoEntry: false })
     if (!statResult) return null
 
-    const metadata = await MusicMetadata.parseFile(file, { duration: true })
-    const artist = []
+    if (!isSuppotedAudioType(file)) return null
+
     let filename = getSimpleFileName(file)
+    const artist = []   
     const album = { id: 0, name: '' }
-    //let coverData = 'default_cover.png'
     let title = null, duration = 0, lyricText = null, publishTime = null
     let container = null, codec = null
     let bitrate = null, sampleRate = null, bitDepth = null
+    let metadata = null
     try {
-        if (metadata.common) {
-            const { title: mTitle, artist: mArtist, 
+        metadata = await MusicMetadata.parseFile(file, { duration: true })
+    } catch(error) {
+        console.log(error)
+    }
+    try {
+        const { common, format } = metadata || {}
+        if (common) {
+            const { 
+                title: mTitle, artist: mArtist, 
                 artists, album: mAlbum, picture, 
                 lyrics, year: mYear, 
                 date: mDate, originaldate 
-            } = metadata.common
+            } = common
             //歌曲名称
             if (mTitle) title = mTitle.trim()
             //歌手、艺人
@@ -414,11 +421,12 @@ async function createTrackFromMetadata(file) {
             if (!publishTime && mDate) publishTime = mDate
             if (!publishTime && mYear) publishTime = mYear
         }
-        if (metadata.format) {
-            const { duration: mDuration, bitrate: mBitrate, 
+        if (format) {
+            const { 
+                duration: mDuration, bitrate: mBitrate, 
                 sampleRate: mSampleRate, bitsPerSample: mBitDepth,
                 container: mContainer, codec: mCodec
-            } = metadata.format
+            } = format
             if (mDuration) duration = mDuration * 1000
 
             bitrate = mBitrate
@@ -459,7 +467,6 @@ async function createTrackFromMetadata(file) {
         }
         */
        
-        //TODO
         const hash = MD5(file)
         return {
             id: hash,
@@ -478,7 +485,6 @@ async function createTrackFromMetadata(file) {
             bitDepth,
             codec
         }
-
     } catch (error) {
         console.log(error)
     }
@@ -510,17 +516,18 @@ async function parseEmbeddedLyricFromFile(file) {
     const statResult = statSync(file, { throwIfNoEntry: false })
     if (!statResult) return null
 
-    const metadata = await MusicMetadata.parseFile(file, { duration: true })
     try {
-        if (metadata.common) {
-            const { lyrics } = metadata.common
+        const metadata = await MusicMetadata.parseFile(file, { duration: true })
+        const { common, native } = metadata || {}
+        if (common) {
+            const { lyrics } = common
             //内嵌歌词
             if (lyrics && lyrics.length > 0) return lyrics[0]
         }
         
         //内嵌歌词
-        if (metadata.native) {
-            const ID3v23 = metadata.native['ID3v2.3']
+        if (native) {
+            const ID3v23 = native['ID3v2.3']
             for (var i in ID3v23) {
                 const { id, value } = ID3v23[i]
                 //Unsynchronised Lyrics
@@ -547,8 +554,14 @@ function readBufferSync(file, encoding) {
 
 function readText(file, encoding) {
     if(!file) return null
-    const data = readBufferSync(file, encoding || 'utf8')
-    return data ? data.toString() : null
+    try {
+        file = transformPath(file)
+        const data = readBufferSync(file, encoding || 'utf8')
+        return data ? data.toString() : null
+    } catch(error) {
+        console.log(error)
+    }
+    return null
 }
 
 function writeText(file, text) {

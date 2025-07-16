@@ -102,8 +102,11 @@ onMounted(() => {
                 </div>
             </div>
             <div class="subtitle-artist-wrap" v-show="enableSubtitleArtist">
-                <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
-                    :trackId="toTrimString(currentTrack.id)">
+                <ArtistControl 
+                    :visitable="true" 
+                    :platform="currentTrack.platform" 
+                    :data="currentTrack.artist"
+                    :track="currentTrack">
                 </ArtistControl>
             </div>
         </div>

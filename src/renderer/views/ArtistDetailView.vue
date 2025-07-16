@@ -34,13 +34,15 @@ const props = defineProps({
 
 const { addAndPlayTracks, dndSaveCover } = inject('player')
 
-const { artistId, artistName, artistCover, platform,
+const { 
+    artistId, artistName, artistCover, platform,
     artistAlias, tabTipText, activeTab,
     tabs, hotSongs, allSongs,
     albums, about, activeTabCode,
     hasHotSongsTab, hasAllSongsTab,
 } = storeToRefs(useArtistDetailStore())
-const { setActiveTab, updateArtist,
+const { 
+    setActiveTab, updateArtist,
     updateHotSongs, updateAllSongs, appendAllSongs,
     updateAlbums, updateAbout,
     resetAll, updateTabTipText,
@@ -52,13 +54,17 @@ const { setActiveTab, updateArtist,
     updateArtistDetailKeys
 } = useArtistDetailStore()
 
-const { getVendor, isLocalMusic,
+const { 
+    getVendor, isLocalMusic,
     isHotSongsTab, isAllSongsTab,
     isAlbumsTab, isAboutTab,
-    isWebDav, isNavidrome, isCloudStorage } = usePlatformStore()
+    isWebDav, isNavidrome, isCloudStorage 
+} = usePlatformStore()
 const { addTracks } = usePlayStore()
+const { routerCtxCacheItem } = storeToRefs(useAppCommonStore())
 const { showToast, showFailToast, hideAllCtxMenus } = useAppCommonStore()
 const { isDndSaveEnable, isSingleLineAlbumTitleStyle } = storeToRefs(useSettingStore())
+
 
 const artistDetailRef = ref(null)
 const currentTabView = shallowRef(null)
@@ -152,10 +158,11 @@ const getArtistDetail = async () => {
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetail) return
     setLoadingDetail(true)
+    const track = routerCtxCacheItem.value || {}
     const id = artistId.value
     let result = null, retry = 1
     do {
-        result = await vendor.artistDetail(id)
+        result = await vendor.artistDetail(id, track)
     } while (!result && retry++ <= 3)
     if (!result) return
     updateArtist(result.title, result.cover)
@@ -163,7 +170,7 @@ const getArtistDetail = async () => {
     if(about) {
         updateAbout(about)
     } else if (!about && vendor.artistDetailAbout) {
-        vendor.artistDetailAbout(id).then(about => {
+        vendor.artistDetailAbout(id, track).then(about => {
             if(about) updateAbout(about)
         })
     }
@@ -196,10 +203,11 @@ const loadHotSongs = async () => {
     }
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailHotSongs) return
+    const track = routerCtxCacheItem.value || {}
     const id = artistId.value
     let result = null, retry = 1
     do {
-        result = await vendor.artistDetailHotSongs(id)
+        result = await vendor.artistDetailHotSongs(id, track)
     } while (!result && retry++ <= 3)
     if (!isHotSongsTab(activeTabCode.value) || !result) return
     const { name, cover, data } = result
@@ -215,10 +223,11 @@ const loadMoreSongs = async () => {
     offset = ++page * limit
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailAllSongs) return
+    const track = routerCtxCacheItem.value || {}
     const id = artistId.value
     let result = null, retry = 1
     do {
-        result = await vendor.artistDetailAllSongs(id, offset, limit, page)
+        result = await vendor.artistDetailAllSongs(id, track, offset, limit, page)
     } while (!result && retry++ <= 3)
     if (!isAllSongsTab(activeTabCode.value) || !result) return
     appendAllSongs(result.data)
@@ -237,10 +246,11 @@ const loadAllSongs = async () => {
     }
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailAllSongs) return
+    const track = routerCtxCacheItem.value || {}
     const id = artistId.value
     let result = null, retry = 1
     do {
-        result = await vendor.artistDetailAllSongs(id, offset, limit, page)
+        result = await vendor.artistDetailAllSongs(id, track, offset, limit, page)
     } while (!result && retry++ <= 3)
     if (!isAllSongsTab(activeTabCode.value) || !result) return
     updateAllSongs(result.data)
@@ -263,11 +273,12 @@ const loadAlbums = async () => {
     }
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailAlbums) return
+    const track = routerCtxCacheItem.value || {}
     const id = artistId.value
     //TODO 分页加载全部
     let result = null, retry = 1
     do {
-        result = await vendor.artistDetailAlbums(id, 0, 365, 1)
+        result = await vendor.artistDetailAlbums(id, track, 0, 365, 1)
     } while (!result && retry++ <= 3)
     if (!isAlbumsTab(activeTabCode.value) || !result) return
     updateAlbums(result.data)
@@ -286,8 +297,9 @@ const loadAbout = () => {
     }
     const vendor = getVendor(platform.value)
     if (!vendor || !vendor.artistDetailAbout) return
+    const track = routerCtxCacheItem.value || {}
     const id = artistId.value
-    vendor.artistDetailAbout(id).then(result => {
+    vendor.artistDetailAbout(id, track).then(result => {
         if (!isAboutTab(activeTabCode.value)) return
         updateAbout(result)
         updateTabData(result)

@@ -1083,7 +1083,7 @@ onUnmounted(() => offEvents(eventsRegistration))
     white-space: pre-wrap;
     line-break: anywhere;
     text-overflow: clip;
-    letter-spacing: calc(var(--main-left-width) * 2);
+    letter-spacing: calc(var(--main-left-width) * 6);
     line-height: 49px;
     word-wrap: break-word;
     line-break: anywhere;

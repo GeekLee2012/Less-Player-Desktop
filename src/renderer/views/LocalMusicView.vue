@@ -24,6 +24,7 @@ import { isDevEnv, ipcRendererInvoke, isSupportedImage,
 import { Playlist } from '../../common/Playlist';
 import { LocalMusic } from '../../vendor/localmusic';
 import { offEvents, onEvents } from '../../common/EventBusWrapper';
+import EmptyControl from '../components/EmptyControl.vue';
 
 
 
@@ -600,6 +601,11 @@ onUnmounted(offEvents(eventsRegistration))
                     && localPlaylists.length < 1
                     && importTaskCount < 1">
             </PlaylistsControl>
+            <EmptyControl
+                v-show="!isLocalMusicViewPlaylistTipsShow 
+                    && localPlaylists.length < 1
+                    && importTaskCount < 1">
+            </EmptyControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>

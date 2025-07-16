@@ -152,19 +152,22 @@ export class United {
             
             const _options = { }
             for (var i = 0; i < filteredVendors.length; i++) {
-                if(tryCallDefault(interruptFn, track)) return resolve(result)
+                if(tryCallDefault(interruptFn, track)) break
                 
                 const vendor = filteredVendors[i]
                 if(!vendor) continue
                 
-                //音源扩展点 - 可实现准确匹配，知道歌曲信息
-                if(vendor.transferTrack) {
-                    const ttResult = await vendor.transferTrack(United.simplifyMetadata(track), options || _options)
-                        .catch(e => { if(isDevEnv()) console.log(e) })
-                    Object.assign(result, { ...United.mergeTrackResult(result, ttResult) })
+                try {
+                    //音源扩展点 - 可实现准确匹配，知道歌曲信息
+                    if(vendor.transferTrack) {
+                        const ttResult = await vendor.transferTrack(United.simplifyMetadata(track), options || _options)
+                        Object.assign(result, { ...United.mergeTrackResult(result, ttResult) })
+                    }
+                } catch(error) {
+                    console.log(error)
                 }
 
-                if(tryCallDefault(interruptFn, track)) return resolve(result)
+                if(tryCallDefault(interruptFn, track)) break
 
                 if (United.isMetedataCompleted(result)) break
 
@@ -175,12 +178,17 @@ export class United {
                 }
                 
                 if(!vendor.searchSongs) continue
+                
                 //音源扩展点 - 模糊（范围）匹配，只知道关键字，不知道歌曲信息
-                const searchResult = await vendor.searchSongs(keyword, options || _options)
-                    .catch(e => { if(isDevEnv()) console.log(e) })
+                let searchResult = null
+                try {
+                    searchResult = await vendor.searchSongs(keyword, options || _options)
+                } catch(error) {
+                    console.log(error)
+                }
                 if (!searchResult) continue
                 
-                if(tryCallDefault(interruptFn, track)) return resolve(result)
+                if(tryCallDefault(interruptFn, track)) break
 
                 const { data: candidates } = searchResult
                 if (!candidates || candidates.length < 1) continue
@@ -190,7 +198,7 @@ export class United {
                     candidates.slice(0, Math.min(candidates.length, 20)), 
                     options || _options, interruptFn)
                 
-                if(tryCallDefault(interruptFn, track)) return resolve(result)
+                if(tryCallDefault(interruptFn, track)) break
 
                 Object.assign(result, { ...United.mergeTrackResult(result, ssResult) })
                 if (United.isMetedataCompleted(result)) break
@@ -227,7 +235,7 @@ export class United {
             const albumName = United.tranformAlbum(Track.albumName(track)) || LESS_MAGIC_CODE
             
             for (var i = 0; i < candidates.length; i++) {
-                if(tryCallDefault(interruptFn, track)) return resolve(result)
+                if(tryCallDefault(interruptFn, track)) break
 
                 const candidate = candidates[i]
                 const { id: cId, title: cTitle,
@@ -299,6 +307,7 @@ export class United {
                     }
                 }
                 
+                if(tryCallDefault(interruptFn, track)) break
 
                 //歌手
                 if (artist && artist.length > 0 && cArtistName) {
@@ -344,6 +353,8 @@ export class United {
                     }
                 }
 
+                if(tryCallDefault(interruptFn, track)) break
+                
                  //同歌曲名、同歌手
                 if(hit.title && hit.artist) score.base += 10
 
@@ -390,10 +401,13 @@ export class United {
                     score.duration -= 15
                 }
 
+                if(tryCallDefault(interruptFn, track)) break
+
                 const evaluation = United.sumEvaluation(score, hit)
                 //总评分是否达标
                 if (!United.isEvaluationPass(evaluation)) continue
-                if(tryCallDefault(interruptFn, track)) return resolve(result)
+
+                if(tryCallDefault(interruptFn, track)) break
 
                 Object.assign(candidate, { isCandidate: true })
                 if(isDevEnv()) Object.assign(candidate, { score, hit, ...evaluation }) 
@@ -410,7 +424,8 @@ export class United {
                     const { url } = cDetail
                     Object.assign(candidate, { url })
                 }
-                if(tryCallDefault(interruptFn, track)) return resolve(result)
+
+                if(tryCallDefault(interruptFn, track)) break
                 
                 //歌词
                 //若时长相同，且已有歌词，仍需重新获取，可能缺少翻译
@@ -423,7 +438,8 @@ export class United {
                     if(!Lyric.hasData(lyric) && isGetLyric) continue
                     Object.assign(candidate, { lyric, lyricTrans, lyricRoma })    
                 }
-                if(tryCallDefault(interruptFn, track)) return resolve(result)
+
+                if(tryCallDefault(interruptFn, track)) break
 
                 //封面
                 if(!ignore.cover && !Track.hasCover(candidate)) continue

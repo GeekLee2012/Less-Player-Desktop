@@ -15,6 +15,7 @@ import Back2TopBtn from '../components/Back2TopBtn.vue';
 import SearchBarExclusiveModeControl from '../components/SearchBarExclusiveModeControl.vue';
 import { parseM3uText, parsePlsText, ipcRendererInvoke, isSupportedImage, isLiveStream } from "../../common/Utils";
 import { onEvents, emitEvents } from '../../common/EventBusWrapper';
+import EmptyControl from '../components/EmptyControl.vue';
 
 
 
@@ -355,6 +356,10 @@ onActivated(() => {
                 :tutorial="true"
                 v-show="isFreeFMViewRadiosTipsShow && freeRadios.length < 1">
             </PlaylistsControl>
+            <EmptyControl
+                v-show="!isFreeFMViewRadiosTipsShow 
+                    && freeRadios.length < 1">
+            </EmptyControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>

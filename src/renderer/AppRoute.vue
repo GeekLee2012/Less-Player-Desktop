@@ -248,7 +248,7 @@ const valiadateArtistId = (id) => {
     return (typeof id == 'string') ? !isBlank(id) : (parseInt(id) > 0)
 }
 
-const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onRouteReady }) => {
+const visitArtistDetail = ({ platform, item, index, track, callback, updatedArtist }) => {
     let id = item.id
     if (isLocalMusic(platform)) id = item.name || item.title
     const platformValid = isArtistDetailVisitable(platform)
@@ -272,7 +272,8 @@ const visitArtistDetail = ({ platform, item, index, callback, updatedArtist, onR
         let exploreMode = transformExploreMode()
         exploreMode = exploreMode == 'radios' ? 'playlists' : exploreMode
         const toPath = `/${exploreMode}/artist/${platform}/${id}`
-        visitCommonRouteCatchError(toPath, onRouteReady)
+        
+        visitCommonRouteCatchError(toPath, () => setRouterCtxCacheItem(track))
         hideAllCtxMenus()
     } else if (isFMRadioPlatform(platform)) {
         visitRadio(platform)
@@ -358,8 +359,8 @@ provide('appRoute', {
             path: `/${exploreMode}/playlist/${platform}/${id}`, onRouteReady, rejectOnSame
         })
     },
-    visitArtist: ({ platform, item, index, callback, onRouteReady }) => {
-        visitArtistDetail({ platform, item, index, callback, onRouteReady })
+    visitArtist: ({ platform, item, index, track, callback }) => {
+        visitArtistDetail({ platform, item, index, track, callback })
     },
     visitAlbum: ({ platform, id, callback, data }) => {
         visitAlbumDetail(platform, id, callback, data)

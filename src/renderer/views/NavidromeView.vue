@@ -11,6 +11,7 @@ import { useSettingStore } from '../store/settingStore';
 import Back2TopBtn from '../components/Back2TopBtn.vue';
 import { useCloudStorageStore } from '../store/cloudStorageStore';
 import { Navidrome } from '../../vendor/navidrome';
+import EmptyControl from '../components/EmptyControl.vue';
 
 
 
@@ -190,6 +191,9 @@ onMounted(() => {
                     <span v-html="item.title"></span>
                 </div>
             </div>
+            <EmptyControl
+                v-show="!isCloudStorageViewTipsShow && navidromeSessions.length < 1">
+            </EmptyControl>
         </div>
         <Back2TopBtn ref="back2TopBtnRef"></Back2TopBtn>
     </div>

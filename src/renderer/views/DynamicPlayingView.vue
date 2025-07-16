@@ -319,8 +319,12 @@ onUnmounted(() => offEvents(eventsRegistration))
                         <div class="audio-title" v-html="currentTrack.title"></div>
                         <div v-show="Track.hasArtist(currentTrack)">&nbsp;&nbsp;-&nbsp;&nbsp;</div>
                         <div class="audio-artist">
-                            <ArtistControl :visitable="true" :platform="currentTrack.platform" :data="currentTrack.artist"
-                                :trackId="currentTrack.id" class="ar-ctl">
+                            <ArtistControl 
+                                :visitable="true" 
+                                :platform="currentTrack.platform" 
+                                :data="currentTrack.artist"
+                                :track="currentTrack" 
+                                class="ar-ctl">
                             </ArtistControl>
                         </div>
                     </div>

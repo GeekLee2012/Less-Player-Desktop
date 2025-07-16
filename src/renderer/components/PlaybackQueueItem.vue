@@ -142,8 +142,11 @@ const onDblclick = (event) => {
                     </div>
                     <div class="bottom">
                         <div class="artist" :class="{ 'content-text-highlight': active }">
-                            <ArtistControl :visitable="actionable" :platform="data.platform" :data="data.artist"
-                                :trackId="data.id">
+                            <ArtistControl 
+                                :visitable="actionable" 
+                                :platform="data.platform" 
+                                :data="data.artist"
+                                :track="data">
                             </ArtistControl>
                         </div>
                         <span class="duration" v-show="active && Playlist.isFMRadioType(data)" :class="{ 'content-text-highlight': active }">{{ mmssCurrentTime }}</span>

@@ -1078,6 +1078,7 @@ const getVideoDetail = (video) => {
 const setupCurrentMediaSession = async (track) => {
     try {
         if(isNoneTrack(track)) return 
+
         if ("mediaSession" in navigator) {
             const _track = track || { title: '爱你所爱' }
             const { title, cover } = _track
@@ -1911,7 +1912,10 @@ const eventsRegistration = {
         mmssPreseekTime.value = null
         setProgressSeekingState(false)
     },
-    'track-coverUpdated': setupCurrentMediaSession,
+    'track-coverUpdated': (track) => {
+        if(!isCurrentTrack(track)) return
+        setupCurrentMediaSession(track)
+    },
     //歌单电台 - 下一曲
     'track-nextPlaylistRadioTrack': track => {
         playNextPlaylistRadioTrack(track.platform, track.channel, track, null, track.playlist)

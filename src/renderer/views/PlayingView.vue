@@ -156,7 +156,7 @@ onUnmounted(() => {
                                 :visitable="true" 
                                 :platform="currentTrack.platform" 
                                 :data="currentTrack.artist"
-                                :trackId="currentTrack.id" >
+                                :track="currentTrack" >
                             </ArtistControl>
                         </div>
                     </div>

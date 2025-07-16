@@ -124,7 +124,11 @@ const showInFolder = () => {
                 <div class="info-row">
                     <b class="title">歌手：</b>
                     <div>
-                        <ArtistControl :visitable="true" :platform="platform" :data="JSON.parse(artist)"></ArtistControl>
+                        <ArtistControl 
+                            :visitable="true" 
+                            :platform="platform" 
+                            :data="JSON.parse(artist)">
+                        </ArtistControl>
                     </div>
                 </div>
                 <div class="info-row">

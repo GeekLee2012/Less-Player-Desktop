@@ -323,10 +323,11 @@ onUnmounted(() => offEvents(eventsRegistration))
             </div>
         </div>
         <div class="artist spacing1" v-show="!isExtra1Available()">
-            <ArtistControl :visitable="artistVisitable && !checkbox" 
+            <ArtistControl 
+                :visitable="artistVisitable && !checkbox" 
                 :platform="data.platform" 
                 :data="data.artist"
-                :trackId="toTrimString(data.id)">
+                :track="data">
             </ArtistControl>
         </div>
         <div class="album spacing1" v-show="!isExtra2Available()">

@@ -7,6 +7,7 @@ import { useSettingStore } from '../store/settingStore';
 import { useAppCommonStore } from '../store/appCommonStore';
 import { smoothScroll, stringEqualsIgnoreCase } from '../../common/Utils';
 import { onEvents, emitEvents, offEvents } from '../../common/EventBusWrapper';
+import EmptyControl from '../components/EmptyControl.vue';
 
 
 
@@ -393,6 +394,9 @@ onUnmounted(() => offEvents(eventsRegistration))
                     :data="item"
                     :index="index">
                 </PlaybackQueueItem>
+                <EmptyControl marginTop="168px"
+                    v-show="!isPlaybackQueueViewTipsShow && queueTracks.length < 1">
+                </EmptyControl>
             </div>
         </div>
     </div>
