@@ -266,6 +266,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
                 <div class="row">
                     <div class="cate-name">动态背景</div>
                     <div class="row-content">
+                        <div class="tip-text">提示：支持直接拖拽视频、图片到当前窗口</div>
                         <div class="item">
                             <div class="name">视频URL</div>
                             <div class="url-input-ctl">
@@ -566,7 +567,7 @@ watch(workingCustomPlayingTheme, (nv, ov) => {
     justify-content: center;
     fill: var(--content-subtitle-text-color);
     border-radius: var(--border-inputs-border-radius);
-    margin-top: 15px;
+    margin-top: 20px;
     border: 1px solid var(--border-inputs-border-color);
     cursor: pointer;
 }

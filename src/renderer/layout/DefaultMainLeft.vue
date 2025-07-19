@@ -845,6 +845,7 @@ onUnmounted(() => offEvents(eventsRegistration))
 #main-left .center .collapse-btn:hover,
 #main-left .center .expand-btn:hover {
     fill: var(--content-highlight-color);
+    transform: scale(1.2);
 }
 
 #main-left ul {

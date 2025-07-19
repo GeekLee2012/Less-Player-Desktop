@@ -415,7 +415,7 @@ export const useSettingStore = defineStore('setting', {
             //退出前保存播放状态：包括当前歌曲、播放列表等
             storePlayState: true,
             //退出前保存当前播放进度
-            storePlayProgressState: false,
+            storePlayProgressState: true,
             //退出前记录已经添加的本地歌曲
             storeLocalMusic: true,
             //记录最近播放

@@ -1881,7 +1881,7 @@ const eventsRegistration = {
         if(!vendor || !vendor.seekAction) return
         vendor.seekAction(track, pos)
     },
-    'track-spectrumData': ({leftFreqData, leftFreqBinCount, rightFreqData,
+    'track-spectrumData': ({ leftFreqData, leftFreqBinCount, rightFreqData,
         rightFreqBinCount, freqData, freqBinCount,
         sampleRate, analyser, leftChannelAnalyser, rightChannelAnalyser, }) => {
         const isSimpleLayoutMode = isSimpleLayout.value

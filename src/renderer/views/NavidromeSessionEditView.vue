@@ -57,8 +57,8 @@ const submit = () => {
     if(!success) return showFailToast('会话保存失败')
 
     setActionDisabled(true)
-    showToast('会话保存成功', backward)
-    //backward()
+    showToast('会话保存成功')
+    backward()
 }
 
 const maskedUserName = computed(() => {

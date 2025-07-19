@@ -110,7 +110,7 @@ const APIPermissions = {
     },
     GET_USER_AGENT: {
         name: 'app-userAgent',
-        cname: '访问UserAgent信息',
+        cname: '获取UserAgent信息',
     },
     GET_COOKIE: {
         name: 'app-getCookie',

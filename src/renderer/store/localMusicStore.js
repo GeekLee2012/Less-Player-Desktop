@@ -3,7 +3,6 @@ import { randomTextWithinAlphabetNums } from "../../common/Utils";
 import { Playlist } from "../../common/Playlist";
 
 
-
 export const useLocalMusicStore = defineStore('localMusic', {
     state: () => ({
         localDirs: [],
