@@ -911,7 +911,7 @@ const registryGlobalListeners = () => {
       const devFlags = ['dev-', '-dev']
       readdirSync(pluginsRoot, { withFileTypes: true }).forEach(dirent => {
         if(!dirent) return
-        const pathName = path.join(pluginsRoot, dirent.name)
+        const pathName = transformPath(path.join(pluginsRoot, dirent.name))
         if (dirent.isDirectory() && !pluginPaths.includes(pathName)) {
           const hasDevFlag = (dirent.name.startsWith(devFlags[0]) || dirent.name.endsWith(devFlags[1]))
           if((isDevEnv && hasDevFlag) 
@@ -1092,7 +1092,7 @@ const registryGlobalListeners = () => {
 }
 
 const getUserDataRootPath = (ensureExists) => {
-  const root = app.getPath('userData') + '/User'
+  const root = transformPath(app.getPath('userData')) + '/User'
   if(ensureExists) {
     try {
       const result = statPathSync(root)

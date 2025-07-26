@@ -358,7 +358,6 @@ const restoreSetting = (isInit) => {
   } else { 
     //非初始化，比如重置设置、还原备份数据 
     resetExploreModeActiveStates()
-
   }
 }
 

@@ -82,6 +82,10 @@ const switchToSmallLayout = () => {
     }
 }
 
+const visitSettingUpdates = () => {
+    visitSetting(hasNewRelease.value ? '版本' : null)
+}
+
 const eventsRegistration = {
     'app-findInPage': findNextKeyword,
 }
@@ -216,7 +220,8 @@ onUnmounted(() => offEvents(eventsRegistration))
                         </g>
                     </svg>
                 </div>
-                <div class="setting-btn btn spacing" @click="() => visitSetting()" 
+                <div class="setting-btn btn spacing" @click="() => visitSetting()"
+                    @dblclick="() => visitSettingUpdates()" 
                     :class="{ 
                         last: !isSimpleLayoutShortcutEnable, 
                         newflag: hasNewRelease && isUpdatesHintShowEnable,
